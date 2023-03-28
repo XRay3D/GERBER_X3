@@ -74,37 +74,37 @@ QString Component::toolTip() const {
 }
 
 QDataStream& operator<<(QDataStream& stream, const Component& c) {
-    stream << c.rotation_;
-    stream << c.height_;
-    stream << c.mount_;
-    stream << c.footprintName_;
-    stream << c.refdes_;
-    stream << c.value_;
-    stream << c.referencePoint_;
-    stream << c.footprint_;
-    stream << c.library_;
-    stream << c.manufacturer_;
-    stream << c.package_;
-    stream << c.suppliers_;
-    stream << c.pins_;
-    return stream;
+    return ::Block(stream).write(
+        c.rotation_,
+        c.height_,
+        c.mount_,
+        c.footprintName_,
+        c.refdes_,
+        c.value_,
+        c.referencePoint_,
+        c.footprint_,
+        c.library_,
+        c.manufacturer_,
+        c.package_,
+        c.suppliers_,
+        c.pins_);
 }
 
 QDataStream& operator>>(QDataStream& stream, Component& c) {
-    stream >> c.rotation_;
-    stream >> c.height_;
-    stream >> c.mount_;
-    stream >> c.footprintName_;
-    stream >> c.refdes_;
-    stream >> c.value_;
-    stream >> c.referencePoint_;
-    stream >> c.footprint_;
-    stream >> c.library_;
-    stream >> c.manufacturer_;
-    stream >> c.package_;
-    stream >> c.suppliers_;
-    stream >> c.pins_;
-    return stream;
+    return ::Block(stream).read(
+        c.rotation_,
+        c.height_,
+        c.mount_,
+        c.footprintName_,
+        c.refdes_,
+        c.value_,
+        c.referencePoint_,
+        c.footprint_,
+        c.library_,
+        c.manufacturer_,
+        c.package_,
+        c.suppliers_,
+        c.pins_);
 }
 
 } // namespace Gerber::Comp

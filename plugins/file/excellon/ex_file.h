@@ -22,7 +22,7 @@ class File : public AbstractFile, public QList<Hole> {
     Format format_;
 
 public:
-    using AbstractFile::AbstractFile;
+
     explicit File();
     ~File() override;
 

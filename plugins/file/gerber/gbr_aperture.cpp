@@ -138,18 +138,20 @@ ApertureType ApCircle::type() const { return Circle; }
 bool ApCircle::fit(double toolDiam) const { return diam_ > toolDiam; }
 
 void ApCircle::read(QDataStream& stream) {
-    stream >> diam_;
-    stream >> drillDiam_;
-    stream >> isFlashed_;
-    stream >> size_;
+    ::Block(stream).rw(
+        diam_,
+        drillDiam_,
+        isFlashed_,
+        size_);
     draw();
 }
 
 void ApCircle::write(QDataStream& stream) const {
-    stream << diam_;
-    stream << drillDiam_;
-    stream << isFlashed_;
-    stream << size_;
+    ::Block(stream).rw(
+        diam_,
+        drillDiam_,
+        isFlashed_,
+        size_);
 }
 
 void ApCircle::draw() {
@@ -184,20 +186,22 @@ ApertureType ApRectangle::type() const { return Rectangle; }
 bool ApRectangle::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
 void ApRectangle::read(QDataStream& stream) {
-    stream >> height_;
-    stream >> width_;
-    stream >> drillDiam_;
-    stream >> isFlashed_;
-    stream >> size_;
+    ::Block(stream).rw(
+        height_,
+        width_,
+        drillDiam_,
+        isFlashed_,
+        size_);
     draw();
 }
 
 void ApRectangle::write(QDataStream& stream) const {
-    stream << height_;
-    stream << width_;
-    stream << drillDiam_;
-    stream << isFlashed_;
-    stream << size_;
+    ::Block(stream).rw(
+        height_,
+        width_,
+        drillDiam_,
+        isFlashed_,
+        size_);
 }
 
 void ApRectangle::draw() {
@@ -227,20 +231,22 @@ ApertureType ApObround::type() const { return Obround; }
 bool ApObround::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
 void ApObround::read(QDataStream& stream) {
-    stream >> height_;
-    stream >> width_;
-    stream >> drillDiam_;
-    stream >> isFlashed_;
-    stream >> size_;
+    ::Block(stream).rw(
+        height_,
+        width_,
+        drillDiam_,
+        isFlashed_,
+        size_);
     draw();
 }
 
 void ApObround::write(QDataStream& stream) const {
-    stream << height_;
-    stream << width_;
-    stream << drillDiam_;
-    stream << isFlashed_;
-    stream << size_;
+    ::Block(stream).rw(
+        height_,
+        width_,
+        drillDiam_,
+        isFlashed_,
+        size_);
 }
 
 void ApObround::draw() {
@@ -301,22 +307,24 @@ ApertureType ApPolygon::type() const { return Polygon; }
 bool ApPolygon::fit(double toolDiam) const { return diam_ * cos(pi / verticesCount_) > toolDiam; }
 
 void ApPolygon::read(QDataStream& stream) {
-    stream >> diam_;
-    stream >> rotation_;
-    stream >> verticesCount_;
-    stream >> drillDiam_;
-    stream >> isFlashed_;
-    stream >> size_;
+    ::Block(stream).rw(
+        diam_,
+        rotation_,
+        verticesCount_,
+        drillDiam_,
+        isFlashed_,
+        size_);
     draw();
 }
 
 void ApPolygon::write(QDataStream& stream) const {
-    stream << diam_;
-    stream << rotation_;
-    stream << verticesCount_;
-    stream << drillDiam_;
-    stream << isFlashed_;
-    stream << size_;
+    ::Block(stream).rw(
+        diam_,
+        rotation_,
+        verticesCount_,
+        drillDiam_,
+        isFlashed_,
+        size_);
 }
 
 void ApPolygon::draw() {
@@ -359,20 +367,22 @@ ApertureType ApMacro::type() const { return Macro; }
 bool ApMacro::fit(double) const { return true; }
 
 void ApMacro::read(QDataStream& stream) {
-    stream >> modifiers_;
-    stream >> coefficients_;
-    stream >> macro_;
-    stream >> isFlashed_;
-    stream >> size_;
+    ::Block(stream).rw(
+        modifiers_,
+        coefficients_,
+        macro_,
+        isFlashed_,
+        size_);
     draw();
 }
 
 void ApMacro::write(QDataStream& stream) const {
-    stream << modifiers_;
-    stream << coefficients_;
-    stream << macro_;
-    stream << isFlashed_;
-    stream << size_;
+    ::Block(stream).rw(
+        modifiers_,
+        coefficients_,
+        macro_,
+        isFlashed_,
+        size_);
 }
 
 void ApMacro::draw() {
@@ -724,16 +734,18 @@ ApertureType ApBlock::type() const { return Block; }
 bool ApBlock::fit(double) const { return true; }
 
 void ApBlock::read(QDataStream& stream) {
-    stream >> *this; // list
-    stream >> isFlashed_;
-    stream >> size_;
+    ::Block(stream).rw(
+        *this, // lis,
+        isFlashed_,
+        size_);
     draw();
 }
 
 void ApBlock::write(QDataStream& stream) const {
-    stream << *this; // list
-    stream << isFlashed_;
-    stream << size_;
+    ::Block(stream).rw(
+        *this, // lis,
+        isFlashed_,
+        size_);
 }
 
 void ApBlock::draw() {

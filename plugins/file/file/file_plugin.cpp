@@ -92,7 +92,7 @@ int Plugin::type() const { return int(FileType::Excellon_); }
 
 QString Plugin::folderName() const { return tr("Excellon"); }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream)  { return new File(stream); }
+AbstractFile* Plugin::loadFile(QDataStream& stream)  { return  load<File>(stream); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'E'); }
 

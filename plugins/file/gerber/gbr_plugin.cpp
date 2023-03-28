@@ -204,7 +204,7 @@ int Plugin::type() const { return int(FileType::Gerber_); }
 
 QString Plugin::folderName() const { return tr("Gerber Files"); }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) { return new File(stream); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) { return load<File>(stream); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 

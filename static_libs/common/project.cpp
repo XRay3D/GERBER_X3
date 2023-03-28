@@ -12,8 +12,8 @@
  ********************************************************************************/
 #include <project.h>
 
-#include "abstract_fileplugin.h"
 #include "abstract_file.h"
+#include "abstract_fileplugin.h"
 #include "ft_model.h"
 #include "gc_plugin.h"
 #include "graphicsview.h"
@@ -36,18 +36,18 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
     int type;
     stream >> type;
     qDebug() << __FUNCTION__ << "type" << type;
-    if (App::filePlugins().contains(FileType(type))) {
-        file.reset(App::filePlugin(FileType(type))->loadFile(stream));
-        file->addToScene();
-        if (!App::project()->watcher.files().contains(file->name()))
-            App::project()->watcher.addPath(file->name());
-    }
-    if (App::gCodePlugins().contains(type)) {
+    if (App::gCodePlugins().contains(type))
         file.reset(App::gCodePlugin(type)->loadFile(stream));
-        file->addToScene();
-        if (!App::project()->watcher.files().contains(file->name()))
-            App::project()->watcher.addPath(file->name());
+    else if (App::filePlugins().contains(FileType(type)))
+        file.reset(App::filePlugin(FileType(type))->loadFile(stream));
+    else {
+        QByteArray data;
+        return stream >> data;
     }
+
+    file->addToScene();
+    if (!App::project()->watcher.files().contains(file->name()))
+        App::project()->watcher.addPath(file->name());
     return stream;
 }
 
@@ -59,11 +59,10 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Abstr
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractShape>& shape) {
     int type;
     stream >> type;
-    if (App::shapePlugins().contains(type)) {
+    if (App::shapePlugins().contains(type))
         shape.reset(App::shapePlugin(type)->createShape());
-        stream >> *shape;
-        App::graphicsView()->addItem(shape.get());
-    }
+    stream >> *shape;
+    App::graphicsView()->addItem(shape.get());
     return stream;
 }
 
@@ -99,29 +98,20 @@ bool Project::save(const QString& fileName) {
     QDataStream out(&file);
     try {
         out << (ver_ = CurrentVer);
-        // ProVer_5:
-        out << isPinsPlaced_;
-        // ProVer_4:
-        // ProVer_3:
-        out << spacingX_;
-        out << spacingY_;
-        out << stepsX_;
-        out << stepsY_;
-        // ProVer_2:
-        out << home_;
-        out << zero_;
-        for (auto& pt : pins_)
-            out << pt;
-        for (auto& fl : pinsUsed_)
-            out << fl;
-        out << worckRect_;
-        out << safeZ_;
-        out << boardThickness_;
-        out << copperThickness_;
-        out << clearence_;
-        out << plunge_;
-        out << glue_;
-        // ProVer_1:;
+        Block(out).write(
+            isPinsPlaced_,
+            tailing,
+            home_,
+            zero_,
+            pins_,
+            pinsUsed_,
+            worckRect_,
+            safeZ_,
+            boardThickness_,
+            copperThickness_,
+            clearence_,
+            plunge_,
+            glue_);
         out << files_;
         out << shapes_;
         isModified_ = false;
@@ -146,82 +136,52 @@ bool Project::open(const QString& fileName) {
             auto message = tr("Unable to load project version %1 in\n"
                               "the current version(%3) of the program.\n"
                               "Use version %2.");
-
             if (App::isDebug()) {
                 qWarning() << message.arg(ver_).arg("???", "VERSION_STR");
                 return false;
             }
-
             switch (ver_) {
             case ProVer_1:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
-                break;
             case ProVer_2:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
-                break;
             case ProVer_3:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
-                break;
             case ProVer_4:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
-                break;
             case ProVer_5:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
-                break;
             case ProVer_6:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
-                break;
             case ProVer_7:
                 QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
                 break;
             }
             return false;
         }
-        switch (ver_) {
-        case ProVer_7:
-        case ProVer_6:
-            [[fallthrough]];
-        case ProVer_5:
-            in >> isPinsPlaced_;
-            [[fallthrough]];
-        case ProVer_4:
-            [[fallthrough]];
-        case ProVer_3:
-            in >> spacingX_;
-            in >> spacingY_;
-            in >> stepsX_;
-            in >> stepsY_;
-            [[fallthrough]];
-        case ProVer_2:
-            in >> home_;
-            emit homePosChanged(home_);
-            in >> zero_;
-            emit zeroPosChanged(zero_);
-            for (auto& pt : pins_)
-                in >> pt;
-            for (auto& fl : pinsUsed_)
-                in >> fl;
-            emit pinsPosChanged(pins_);
-            in >> worckRect_;
-            emit worckRectChanged(worckRect_);
-            in >> safeZ_;
-            in >> boardThickness_;
-            in >> copperThickness_;
-            in >> clearence_;
-            in >> plunge_;
-            in >> glue_;
-            [[fallthrough]];
-        case ProVer_1:;
-            in >> files_;
-            for (const auto& [id, filePtr] : files_)
-                App::fileModel()->addFile(filePtr.get());
+        Block(in).read(
+            isPinsPlaced_,
+            tailing,
+            home_,
+            zero_,
+            pins_,
+            pinsUsed_,
+            worckRect_,
+            safeZ_,
+            boardThickness_,
+            copperThickness_,
+            clearence_,
+            plunge_,
+            glue_);
+        in >> files_;
+        in >> shapes_;
 
-            in >> shapes_;
-            for (const auto& [id, shPtr] : shapes_)
-                App::fileModel()->addShape(shPtr.get());
+        for (const auto& [id, filePtr] : files_)
+            App::fileModel()->addFile(filePtr.get());
+        for (const auto& [id, shPtr] : shapes_)
+            App::fileModel()->addShape(shPtr.get());
 
-            isModified_ = false;
-        }
+        emit homePosChanged(home_);
+        emit zeroPosChanged(zero_);
+        emit pinsPosChanged(pins_);
+        emit worckRectChanged(worckRect_);
+
+        isModified_ = false;
+
         return true;
     } catch (const QString& ex) {
         qDebug() << ex;
@@ -248,7 +208,7 @@ void Project::close() {
 }
 
 void Project::deleteFile(int id) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     if (files_.contains(id)) {
         watcher.removePath(files_[id]->name());
         files_.erase(id);
@@ -258,7 +218,7 @@ void Project::deleteFile(int id) {
 }
 
 void Project::deleteShape(int id) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     try {
         if (shapes_.contains(id)) {
             shapes_.erase(id);
@@ -277,7 +237,7 @@ bool Project::isModified() { return isModified_; }
 void Project::setModified(bool fl) { isModified_ = fl; }
 
 QRectF Project::getBoundingRect() {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     Point topLeft(std::numeric_limits<Point::Type>::max(), std::numeric_limits<Point::Type>::max());
     Point botRight(std::numeric_limits<Point::Type>::min(), std::numeric_limits<Point::Type>::min());
     for (const auto& [id, filePtr] : files_) {
@@ -298,7 +258,7 @@ QRectF Project::getBoundingRect() {
 }
 
 QString Project::fileNames() {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     QString fileNames;
     for (const auto& [id, sp] : files_) {
         AbstractFile* item = sp.get();
@@ -309,7 +269,7 @@ QString Project::fileNames() {
 }
 
 int Project::contains(const QString& name) {
-    // QMutexLocker locker(&mutex_);
+    // QMutexLocker locker(&mutex);
     if (reloadFile_)
         return -1;
     for (const auto& [id, sp] : files_) {
@@ -333,7 +293,7 @@ bool Project::reload(int id, AbstractFile* file) {
 }
 
 mvector<AbstractFile*> Project::files(int type) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for (const auto& [id, sp] : files_) {
@@ -345,7 +305,7 @@ mvector<AbstractFile*> Project::files(int type) {
 }
 
 mvector<AbstractFile*> Project::files(const mvector<int> types) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for (auto type : types) {
@@ -359,12 +319,12 @@ mvector<AbstractFile*> Project::files(const mvector<int> types) {
 }
 
 Shapes::AbstractShape* Project::shape(int id) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     return shapes_[id].get();
 }
 
 int Project::addFile(AbstractFile* file) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     if (!file)
         return -1;
     isPinsPlaced_ = false;
@@ -387,7 +347,7 @@ int Project::addFile(AbstractFile* file) {
 }
 
 int Project::addShape(Shapes::AbstractShape* const shape) {
-    QMutexLocker locker(&mutex_);
+    QMutexLocker locker(&mutex);
     if (!shape)
         return -1;
     isPinsPlaced_ = false;
@@ -408,14 +368,14 @@ bool Project::contains(AbstractFile* file) {
     return false;
 }
 
-QString Project::name() { return name_; }
+QString Project::name() { return fileName_; }
 
 void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
     if (isUntitled_)
-        name_ = QObject::tr("Untitled") + ".g2g";
+        fileName_ = QObject::tr("Untitled") + ".g2g";
     else
-        name_ = name;
+        fileName_ = name;
 }
 
 void Project::setChanged() {
@@ -456,30 +416,30 @@ void Project::setUntitled(bool value) {
     setChanged();
 }
 
-double Project::spaceX() const { return spacingX_; }
+double Project::spaceX() const { return tailing.spacingX; }
 void Project::setSpaceX(double value) {
-    spacingX_ = value;
+    tailing.spacingX = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-double Project::spaceY() const { return spacingY_; }
+double Project::spaceY() const { return tailing.spacingY; }
 void Project::setSpaceY(double value) {
-    spacingY_ = value;
+    tailing.spacingY = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-uint Project::stepsX() const { return stepsX_; }
+uint Project::stepsX() const { return tailing.stepsX; }
 void Project::setStepsX(uint value) {
-    stepsX_ = value;
+    tailing.stepsX = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }
 
-uint Project::stepsY() const { return stepsY_; }
+uint Project::stepsY() const { return tailing.stepsY; }
 void Project::setStepsY(uint value) {
-    stepsY_ = value;
+    tailing.stepsY = value;
     emit layoutFrameUpdate(true);
     setChanged();
 }

@@ -17,13 +17,13 @@
 #include <string>
 #include <vector>
 
-#include <QDataStream>
 #include <QDebug>
 #include <QPolygonF>
 #include <mvector.h>
 #include <ranges>
 
 #include "app.h"
+#include "datastream.h"
 #include "settings.h"
 
 static constexpr auto uScale {100'000};
@@ -201,17 +201,15 @@ struct Point {
 #endif
 
     friend QDataStream& operator<<(QDataStream& stream, const Point& pt) {
-        stream.writeRawData(reinterpret_cast<const char*>(&pt), sizeof(Point));
-        return stream;
+        return stream << pt.x << pt.y;
     }
 
     friend QDataStream& operator>>(QDataStream& stream, Point& pt) {
-        stream.readRawData(reinterpret_cast<char*>(&pt), sizeof(Point));
-        return stream;
+        return stream >> pt.x >> pt.y;
     }
 
     friend QDebug operator<<(QDebug d, const Point& p) {
-        d << "IntPt(" << p.x << ", " << p.y << ")";
+        d << "Point(" << p.x << ", " << p.y << ")";
         return d;
     }
 

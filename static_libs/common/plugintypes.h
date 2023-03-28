@@ -91,11 +91,10 @@ struct LayerType {
     QString shortActName() const { return actName; }
 
     friend QDataStream& operator<<(QDataStream& stream, const LayerType& layer) {
-        return stream << layer.id << layer.actName << layer.actToolTip;
+        return Block(stream).write(layer);
     }
-
     friend QDataStream& operator>>(QDataStream& stream, LayerType& layer) {
-        return stream >> layer.id >> layer.actName >> layer.actToolTip;
+        return Block(stream).read(layer);
     }
 };
 

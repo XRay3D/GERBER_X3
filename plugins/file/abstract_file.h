@@ -42,52 +42,55 @@ Q_DECLARE_METATYPE(FileType)
 
 using LayerTypes = std::vector<LayerType>;
 
+template <typename T>
+inline AbstractFile* load(QDataStream& stream) {
+    auto* file = new T;
+    stream >> *file;
+    return file;
+}
+
 class AbstractFile {
-    friend QDataStream& operator<<(QDataStream& stream_, const AbstractFile& file) {
-        QByteArray data; // NOTE if on plugin failed, to read buffer and skip it
+    friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file) {
+        stream << static_cast<int>(file.type());
+        QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-
-        out << file.id_;
-        out << file.colorFlag_;
-        out << file.color_;
-        out << file.date_;
-        out << file.groupedPaths_;
-        out << file.itemsType_;
-        out << file.layerTypes_;
-        out << file.lines_;
-        out << file.mergedPaths_;
-        out << file.name_;
-        out << file.side_;
-        out << file.transform_;
-        out << file.isVisible();
+        Block(out).write(
+            file.id_,
+            file.colorFlag_,
+            file.color_,
+            file.date_,
+            file.groupedPaths_,
+            file.itemsType_,
+            file.layerTypes_,
+            file.lines_,
+            file.mergedPaths_,
+            file.name_,
+            file.side_,
+            file.transform_,
+            file.isVisible());
         file.write(out);
-
-        stream_ << static_cast<int>(file.type());
-        stream_ << data;
-        qDebug() << __FUNCTION__ << data << data.size();
-        return stream_;
+        return stream << data;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream_, AbstractFile& file) {
-        QByteArray data; // NOTE if on plugin failed, to read buffer and skip it
-        stream_ >> data;
+    friend QDataStream& operator>>(QDataStream& stream, AbstractFile& file) {
+        QByteArray data;
+        stream >> data;
         QDataStream in(&data, QIODevice::ReadOnly);
-
-        qDebug() << __FUNCTION__ << data << data.size() << in.status() << in.atEnd();
         bool visible;
-        in >> file.id_;
-        in >> file.colorFlag_;
-        in >> file.color_;
-        in >> file.date_;
-        in >> file.groupedPaths_;
-        in >> file.itemsType_;
-        in >> file.layerTypes_;
-        in >> file.lines_;
-        in >> file.mergedPaths_;
-        in >> file.name_;
-        in >> file.side_;
-        in >> file.transform_;
-        in >> visible;
+        Block(in).read(
+            file.id_,
+            file.colorFlag_,
+            file.color_,
+            file.date_,
+            file.groupedPaths_,
+            file.itemsType_,
+            file.layerTypes_,
+            file.lines_,
+            file.mergedPaths_,
+            file.name_,
+            file.side_,
+            file.transform_,
+            visible);
         file.read(in);
 
         if (App::splashScreen())
@@ -95,7 +98,7 @@ class AbstractFile {
         file.createGi();
         file.setTransform(file.transform_);
         file.setVisible(visible);
-        return stream_;
+        return stream;
     }
 
 public:
@@ -105,11 +108,10 @@ public:
         QPointF scale {1, 1};
 
         friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
-            return stream << tr.angle << tr.translate << tr.scale;
+            return Block(stream).write(tr);
         }
-
         friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
-            return stream >> tr.angle >> tr.translate >> tr.scale;
+            return Block(stream).read(tr);
         }
 
         operator QTransform() const {
@@ -120,8 +122,6 @@ public:
             return t;
         }
     };
-
-    AbstractFile(QDataStream& stream) { stream >> *this; }
 
     AbstractFile()
         : itemGroups_ {new GiGroup} { }
