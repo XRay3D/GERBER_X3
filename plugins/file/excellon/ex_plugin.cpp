@@ -26,6 +26,8 @@
 
 #include <QComboBox>
 #include <QJsonObject>
+
+#include <string_view>
 #include <variant>
 
 namespace Excellon {
@@ -51,13 +53,13 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         auto const exFile = static_cast<File*>(file);
-        QTransform t { exFile->transform() };
+        QTransform t {exFile->transform()};
         for (const Excellon::Hole& hole : *exFile) {
-            auto name { QString("T%1").arg(hole.state.toolId) };
+            auto name {QString("T%1").arg(hole.state.toolId)};
             if (bool slot = hole.state.path.size(); slot)
-                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].posOrPath.emplace_back(t.map(hole.state.path));
+                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
             else
-                retData[{ hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name }].posOrPath.emplace_back(t.map(hole.state.pos));
+                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
         }
         return retData;
     }
@@ -65,27 +67,24 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    if (fileName.endsWith(".dxf", Qt::CaseInsensitive))
+    if (!fileName.endsWith(".drl", Qt::CaseInsensitive))
         return false;
+
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    QTextStream in(&file);
-    QString line;
+    auto data {file.readAll().trimmed()};
 
-    static constexpr ctll::fixed_string regex1(R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)");
-    static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
+    // return data.startsWith("M48") && data.endsWith("M30");
 
-    while (in.readLineInto(&line)) {
-        auto data { toU16StrView(line) };
-        if (ctre::match<regex1>(data))
-            return true;
-        if (ctre::match<regex2>(data))
-            return true;
-    }
+    int toolCount {};
+    for (auto [whole, var] : ctre::multiline_range<R"(^(T\d+).*)">(data))
+        if (var)
+            if (++toolCount >= 2) //++toolCount;
+                break;
 
-    return false;
+    return data.startsWith("M48") && data.endsWith("M30") && toolCount >= 2;
 }
 
 int Plugin::type() const { return int(FileType::Excellon); }

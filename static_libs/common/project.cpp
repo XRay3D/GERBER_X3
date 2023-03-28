@@ -39,7 +39,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
         stream >> *file;
         file->addToScene();
         App::project()->watcher.addPath(file->name());
-        qDebug() << "watcher" << App::project()->watcher.files();
+        //        qDebug() << "watcher" << App::project()->watcher.files();
     }
     return stream;
 }
@@ -339,7 +339,7 @@ int Project::addFile(FileInterface* file) {
         App::fileModel()->addFile(file);
         setChanged();
         watcher.addPath(file->name());
-        qDebug() << "watcher" << watcher.files();
+        //        qDebug() << "watcher" << watcher.files();
     }
     return file->id();
 }

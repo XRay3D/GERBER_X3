@@ -28,7 +28,7 @@
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "tool_database.h"
-//#include "qt.h"
+// #include "qt.h"
 
 #include <QPrintPreviewDialog>
 #include <QPrinter>
@@ -114,18 +114,19 @@ MainWindow::MainWindow(QWidget* parent)
         int i = 100;
         int k = 100;
 
-        if (1) {
-            QDir dir(R"(C:\Users\X-Ray\YandexDisk\G2G\test files\Ucamco\gerber_file_format_examples 20181113)");
+        if (0) {
+            QDir dir(R"(C:\Users\bakiev\Documents\TopoR\Examples\Example_02)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if (dir.exists())
-                for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
+                for (QString str : dir.entryList(/*{"*.gbr"}, QDir::Files*/)) {
                     str = dir.path() + '/' + str;
                     QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                     // break;
                 }
         }
+
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
