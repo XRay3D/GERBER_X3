@@ -149,49 +149,47 @@ struct Format {
     int yDecimal = DecimalDefVal;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& format) {
-        stream.writeRawData(reinterpret_cast<const char*>(&format), sizeof(Format));
-        return stream;
+        return ::Block(stream).write(format);
     }
     friend QDataStream& operator>>(QDataStream& stream, Format& format) {
-        stream.readRawData(reinterpret_cast<char*>(&format), sizeof(Format));
-        return stream;
+        return ::Block(stream).read(format);
     }
 };
 
 class State {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const State& state) {
-        stream << state.dCode_;
-        stream << state.gCode_;
-        stream << state.imgPolarity_;
-        stream << state.interpolation_;
-        stream << state.type_;
-        stream << state.quadrant_;
-        stream << state.region_;
-        stream << state.aperture_;
-        stream << state.lineNum_;
-        stream << state.curPos_;
-        stream << state.mirroring_;
-        stream << state.scaling_;
-        stream << state.rotating_;
-        return stream;
+        return ::Block(stream).write(
+            state.dCode_,
+            state.gCode_,
+            state.imgPolarity_,
+            state.interpolation_,
+            state.type_,
+            state.quadrant_,
+            state.region_,
+            state.aperture_,
+            state.lineNum_,
+            state.curPos_,
+            state.mirroring_,
+            state.scaling_,
+            state.rotating_);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, State& state) {
-        stream >> state.dCode_;
-        stream >> state.gCode_;
-        stream >> state.imgPolarity_;
-        stream >> state.interpolation_;
-        stream >> state.type_;
-        stream >> state.quadrant_;
-        stream >> state.region_;
-        stream >> state.aperture_;
-        stream >> state.lineNum_;
-        stream >> state.curPos_;
-        stream >> state.mirroring_;
-        stream >> state.scaling_;
-        stream >> state.rotating_;
-        return stream;
+        return ::Block(stream).read(
+            state.dCode_,
+            state.gCode_,
+            state.imgPolarity_,
+            state.interpolation_,
+            state.type_,
+            state.quadrant_,
+            state.region_,
+            state.aperture_,
+            state.lineNum_,
+            state.curPos_,
+            state.mirroring_,
+            state.scaling_,
+            state.rotating_);
     }
 
     File* file_ = nullptr;
@@ -257,16 +255,16 @@ class GraphicObject final : public AbstrGraphicObject {
     friend class File;
     friend class Plugin;
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-        stream << go.path_;
-        stream << go.paths_;
-        stream << go.state_;
-        return stream;
+        return ::Block(stream).write(
+            go.path_,
+            go.paths_,
+            go.state_);
     }
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-        stream >> go.path_;
-        stream >> go.paths_;
-        stream >> go.state_;
-        return stream;
+        return ::Block(stream).read(
+            go.path_,
+            go.paths_,
+            go.state_);
     }
 
     File* gFile_;

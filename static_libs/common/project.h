@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "datastream.h"
 #include "mvector.h"
 
 #include <QFileSystemWatcher>
@@ -51,7 +52,7 @@ public:
     // AbstractFile
     template <typename T = AbstractFile>
     T* file(int id) {
-        QMutexLocker locker(&mutex_);
+        QMutexLocker locker(&mutex);
         if (files_.contains(id))
             return static_cast<T*>(files_[id].get());
         return nullptr;
@@ -59,7 +60,7 @@ public:
 
     template <typename T = AbstractFile>
     mvector<T*> files() {
-        QMutexLocker locker(&mutex_);
+        QMutexLocker locker(&mutex);
         mvector<T*> rfiles;
         for (const auto& [id, sp] : files_) {
             T* file = dynamic_cast<T*>(sp.get());
@@ -71,7 +72,7 @@ public:
 
     template <typename T>
     mvector<T*> count() {
-        QMutexLocker locker(&mutex_);
+        QMutexLocker locker(&mutex);
         int count = 0;
         for (const auto& [id, sp] : files_) {
             if (dynamic_cast<T*>(sp.get()))
@@ -185,17 +186,17 @@ private:
 
     FilesMap files_;
     ShapesMap shapes_;
-    QMutex mutex_;
+
+    QMutex mutex;
+
     QString fileName_;
-    QString name_;
     bool isModified_ = false;
     bool isUntitled_ = true;
     bool isPinsPlaced_ = false;
-
+    bool pinsUsed_[4] {true, true, true, true};
+    QPointF pins_[4];
     QPointF home_;
     QPointF zero_;
-    QPointF pins_[4];
-    bool pinsUsed_[4] {true, true, true, true};
     QRectF worckRect_;
 
     double safeZ_ {};
@@ -205,8 +206,11 @@ private:
     double plunge_ {};
     double glue_ {};
 
-    double spacingX_ {};
-    double spacingY_ {};
-    uint stepsX_ {1};
-    uint stepsY_ {1};
+    struct Tailing {
+        double spacingX {};
+        double spacingY {};
+        uint stepsX {1};
+        uint stepsY {1};
+        SERIALIZE_POD(Tailing)
+    } tailing;
 };

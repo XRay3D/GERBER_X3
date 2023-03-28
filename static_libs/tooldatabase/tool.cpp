@@ -27,36 +27,37 @@
 int toolId = qRegisterMetaType<Tool>("Tool");
 
 QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
-    stream << tool.name_;
-    stream << tool.note_;
-    stream << tool.type_;
-    stream << tool.angle_;
-    stream << tool.diameter_;
-    stream << tool.feedRate_;
-    stream << tool.oneTurnCut_;
-    stream << tool.passDepth_;
-    stream << tool.plungeRate_;
-    stream << tool.spindleSpeed_;
-    stream << tool.stepover_;
-    stream << tool.autoName_;
-    stream << tool.id_;
-    return stream;
+    return Block(stream).write(
+        tool.id_,
+        tool.angle_,
+        tool.autoName_,
+        tool.diameter_,
+        tool.feedRate_,
+        tool.name_,
+        tool.note_,
+        tool.oneTurnCut_,
+        tool.passDepth_,
+        tool.plungeRate_,
+        tool.spindleSpeed_,
+        tool.stepover_,
+        tool.type_);
 }
+
 QDataStream& operator>>(QDataStream& stream, Tool& tool) {
-    stream >> tool.name_;
-    stream >> tool.note_;
-    stream >> tool.type_;
-    stream >> tool.angle_;
-    stream >> tool.diameter_;
-    stream >> tool.feedRate_;
-    stream >> tool.oneTurnCut_;
-    stream >> tool.passDepth_;
-    stream >> tool.plungeRate_;
-    stream >> tool.spindleSpeed_;
-    stream >> tool.stepover_;
-    stream >> tool.autoName_;
-    stream >> tool.id_;
-    return stream;
+    return Block(stream).read(
+        tool.id_,
+        tool.angle_,
+        tool.autoName_,
+        tool.diameter_,
+        tool.feedRate_,
+        tool.name_,
+        tool.note_,
+        tool.oneTurnCut_,
+        tool.passDepth_,
+        tool.plungeRate_,
+        tool.spindleSpeed_,
+        tool.stepover_,
+        tool.type_);
 }
 
 QDebug operator<<(QDebug debug, const Tool& t) {

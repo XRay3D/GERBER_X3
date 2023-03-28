@@ -40,7 +40,7 @@ class File : public AbstractFile {
     friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
 
 public:
-    using AbstractFile::AbstractFile;
+
     explicit File();
     ~File();
     Layer* layer(const QString& name);

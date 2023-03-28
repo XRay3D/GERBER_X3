@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "mvector.h"
+#include <pfr.hpp>
 
 #include <QDataStream>
 #include <map>
@@ -48,47 +48,44 @@ inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
 
 #endif
 
-// template <typename T>
-// inline QDataStream& operator>>(QDataStream& stream, mvector<T>& container) {
-//     quint32 n;
-//     stream >> n;
-//     container.resize(n);
-//     for (auto&& var : container) {
-//         stream >> var;
-//         if (stream.status() != QDataStream::Ok)
-//             return container.clear(), stream;
-//     }
-//     return stream;
-// }
+template <class T, size_t N>
+inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
+    uint32_t n;
+    s >> n;
+    for (int i = 0; i < std::min<uint32_t>(n, N); ++i)
+        s >> p[i];
+    return s;
+}
 
-// template <typename T>
-// inline QDataStream& operator<<(QDataStream& stream, const mvector<T>& container) {
-//     using Container = mvector<T>;
-//     stream << quint32(container.size());
-//     for (const auto& var : container)
-//         stream << var;
-//     return stream;
-// }
+template <class T, size_t N>
+inline QDataStream& operator<<(QDataStream& s, const T (&p)[N]) {
+    s << uint32_t(N);
+    for (auto& var : p)
+        s << var;
+    return s;
+}
 
 ////////////////////////////////////////////////////////////////
 /// std::vector<T>
 ///
-template <typename T>
-inline QDataStream& operator>>(QDataStream& stream, std::vector<T>& container) {
-    quint32 n;
+template <typename T, class Alloc>
+inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& container) {
+    uint32_t n;
     stream >> n;
-    container.resize(n);
-    for (auto&& var : container) {
+    container.reserve(n);
+    while (n--) {
+        T var;
         stream >> var;
+        container.emplace_back(std::move(var));
         if (stream.status() != QDataStream::Ok)
             return container.clear(), stream;
     }
     return stream;
 }
 
-template <typename T>
-inline QDataStream& operator<<(QDataStream& stream, const std::vector<T>& container) {
-    stream << quint32(container.size());
+template <typename T, class Alloc>
+inline QDataStream& operator<<(QDataStream& stream, const std::vector<T, Alloc>& container) {
+    stream << uint32_t(container.size());
     for (const auto& var : container)
         stream << var;
     return stream;
@@ -97,11 +94,11 @@ inline QDataStream& operator<<(QDataStream& stream, const std::vector<T>& contai
 ////////////////////////////////////////////////////////////////
 /// std::map<Key, T>
 ///
-template <class Key, class Val, class Comp>
-inline QDataStream& operator>>(QDataStream& stream, std::map<Key, Val, Comp>& map) {
+template <class Key, class Val, class Comp, class Alloc>
+inline QDataStream& operator>>(QDataStream& stream, std::map<Key, Val, Comp, Alloc>& map) {
     // StreamStateSaver stateSaver(&s);
     map.clear();
-    quint32 n;
+    uint32_t n;
     stream >> n;
     while (n--) {
         Key key;
@@ -114,9 +111,9 @@ inline QDataStream& operator>>(QDataStream& stream, std::map<Key, Val, Comp>& ma
     return stream;
 }
 
-template <class Key, class Val, class Comp>
-inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Comp>& map) {
-    stream << quint32(map.size());
+template <class Key, class Val, class Comp, class Alloc>
+inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Comp, Alloc>& map) {
+    stream << uint32_t(map.size());
     // Deserialization should occur in the reverse order.
     // Otherwise, value() will return the least recently inserted
     // value instead of the most recently inserted one.
@@ -129,3 +126,86 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
     }
     return stream;
 }
+
+// порционное сохранение для гибкости.
+class Block {
+    QDataStream& stream;
+    QByteArray data;
+
+public:
+    explicit Block(QDataStream& stream)
+        : stream {stream} { }
+#if 0
+    template <typename T>
+    QDataStream& read(T& val) {
+        stream >> data;
+        QDataStream in(&data, QIODevice::ReadOnly);
+        pfr::for_each_field(val, [&in](auto& field) { !in.atEnd() ? in >> field : in; });
+        return stream;
+    }
+
+    template <typename... Args>
+    QDataStream& read(Args&... args) {
+        stream >> data;
+        QDataStream in(&data, QIODevice::ReadOnly);
+        if constexpr (sizeof...(Args) == 1)
+            pfr::for_each_field(args..., [&in](auto& field) { !in.atEnd() ? in >> field : in; });
+        else
+            ((!in.atEnd() ? in >> args : in), ...);
+        return stream;
+    }
+
+    template <typename T>
+    QDataStream& write(const T& val) {
+        QDataStream out(&data, QIODevice::WriteOnly);
+        pfr::for_each_field(val, [&out](const auto& field) {  out << field ; });
+        return stream << data;
+    }
+
+    template <typename... Args>
+    QDataStream& write(const Args&... args) {
+        QDataStream out(&data, QIODevice::WriteOnly);
+        ((out << args ), ...);
+        return stream << data;
+    }
+#else
+    template <typename... Args>
+    QDataStream& read(Args&... args) {
+        stream >> data;
+        qDebug(__FUNCTION__ "%d", data.size());
+        QDataStream in(&data, QIODevice::ReadOnly);
+        if constexpr (sizeof...(Args) == 1)
+            pfr::for_each_field(args..., [&in](auto& field) { !in.atEnd() ? in >> field : in; });
+        else
+            ((!in.atEnd() ? in >> args : in), ...);
+        return stream;
+    }
+
+    template <typename... Args>
+    QDataStream& write(const Args&... args) {
+        QDataStream out(&data, QIODevice::WriteOnly);
+        if constexpr (sizeof...(Args) == 1)
+            pfr::for_each_field(args..., [&out](const auto& field) { out << field; });
+        else
+            ((out << args), ...);
+        qDebug(__FUNCTION__ "%d", data.size());
+        return stream << data;
+    }
+#endif
+
+    template <typename... Args>
+    QDataStream& rw(Args&... args) {
+        if constexpr ((std::is_const_v<Args> && ... && true))
+            return write(args...);
+        else
+            return read(args...);
+    }
+};
+
+#define SERIALIZE_POD(TYPE)                                              \
+    friend QDataStream& operator<<(QDataStream& stream, const TYPE& p) { \
+        return ::Block(stream).write(p);                                 \
+    }                                                                    \
+    friend QDataStream& operator>>(QDataStream& stream, TYPE& p) {       \
+        return ::Block(stream).read(p);                                  \
+    }

@@ -15,6 +15,7 @@
 
 class QWidget;
 class QIcon;
+class QDataStream;
 
 class Tool {
     friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);

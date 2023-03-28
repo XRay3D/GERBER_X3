@@ -24,10 +24,9 @@ namespace Gerber {
 class File : public AbstractFile {
     friend class Parser;
     friend class Plugin;
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture); // NOTE use private crutch
 
 public:
-    using AbstractFile::AbstractFile;
     explicit File();
     ~File() override;
 

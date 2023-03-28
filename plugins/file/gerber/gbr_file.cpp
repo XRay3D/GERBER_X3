@@ -62,9 +62,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new GiGroup, new GiGroup});
     layerTypes_ = {
-        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
-        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
+        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
+        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
     };
 }
 
@@ -276,26 +276,24 @@ void File::setItemType(int type) {
 int File::itemsType() const { return itemsType_; }
 
 void File::write(QDataStream& stream) const {
-    stream << graphicObjects_; // write  QList<GraphicObject>
-    stream << apertures_;
-    stream << format_;
-    // stream << layer;
-    // stream << miror;
-    stream << rawIndex;
-    stream << itemsType_;
-    stream << components_;
+    ::Block(stream).write(
+        graphicObjects_,
+        apertures_,
+        format_,
+        rawIndex,
+        itemsType_,
+        components_);
 }
 
 void File::read(QDataStream& stream) {
-    crutch = this;             ///////////////////
-    stream >> graphicObjects_; // read  QList<GraphicObject>
-    stream >> apertures_;
-    stream >> format_;
-    // stream >> layer;
-    // stream >> miror;
-    stream >> rawIndex;
-    stream >> itemsType_;
-    stream >> components_;
+    crutch = this; // NOTE
+    ::Block(stream).read(
+        graphicObjects_,
+        apertures_,
+        format_,
+        rawIndex,
+        itemsType_,
+        components_);
 
     for (GraphicObject& go : graphicObjects_) {
         go.gFile_ = this;
