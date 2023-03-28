@@ -23,13 +23,9 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
 void SyntaxHighlighter::highlightBlock(const QString& text) {
     static QTextCharFormat myClassFormat;
 
-    std::u16string_view data(reinterpret_cast<const char16_t*>(text.utf16()), text.size());
-
-    for (auto m : ctre::range<R"(^%.+\*%$)">(data)) {
+    if (text.startsWith("%") && text.endsWith("*%")) {
         myClassFormat.setForeground(QColor(0x80, 0x80, 0x00));
-        int start = std::distance(data.data(), m.data());
-        int count = static_cast<int>(m.size());
-        setFormat(start, count, myClassFormat);
+        setFormat(0, text.size(), myClassFormat);
         return;
     }
 
@@ -43,7 +39,9 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
         {'Y', QColor(0x00, 0xFF, 0x00)},
     };
 
-    for (auto m : ctre::range<R"([DGIJMXY][\+\-]?\d+\.?\d*)">(data)) {
+    std::u16string_view data(reinterpret_cast<const char16_t*>(text.utf16()), text.size());
+
+    for (auto&& m : ctre::range<R"([DGIJMXY][+\-]?\d+\.?\d*)">(data)) {
         myClassFormat.setForeground(color.at(*m.data()));
         int start = std::distance(data.data(), m.data());
         int count = static_cast<int>(m.size());

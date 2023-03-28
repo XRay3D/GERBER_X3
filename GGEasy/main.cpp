@@ -4,9 +4,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -200,9 +200,9 @@ int main(int argc, char** argv) {
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
-                    if (auto* file = qobject_cast<FilePlugin*>(pobj); file) {
+                    if (auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
                         file->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::filePlugins().emplace(file->type(), file);
+                        App::filePlugins().emplace(std::pair {file->type(), file});
                         continue;
                     }
                     if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
@@ -215,12 +215,12 @@ int main(int argc, char** argv) {
                         App::gCodePlugins().emplace(gCode->type(), gCode);
                         continue;
                     }
+                } else
                     qDebug() << str << loader.errorString();
-                }
             }
         }
 
-        if (1) { // add dummy gcode plugin
+        if (1) { // add dummy gcode plugin for gcode files folder
             auto parser = new GCode::Plugin(&app);
             App::filePlugins().emplace(parser->type(), parser);
         }

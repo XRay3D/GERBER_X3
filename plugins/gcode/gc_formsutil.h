@@ -1,9 +1,9 @@
 /********************************************************************************4
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,11 +17,11 @@
 #include <QThread>
 #include <QtWidgets>
 
-namespace GCode {
-class File;
-class file_;
-
-} // namespace GCode
+class GCode::File;
+// namespace GCode {
+// class File;
+// class file_;
+// } // namespace GCode
 
 class GraphicsItem;
 class QProgressDialog;
@@ -47,13 +47,14 @@ protected:
 
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
-    virtual void createFile() = 0;
+    // GcFormBase interface
+    virtual void сomputePaths() = 0;
     virtual void updateName() = 0;
 
     GCode::Creator* const gcCreator;
     GCode::Direction direction = GCode::Climb;
     GCode::SideOfMilling side = GCode::Outer;
-    UsedItems usedItems_;
+    GCode::UsedItems usedItems_;
     Side boardSide = Top;
     void addUsedGi(GraphicsItem* gi);
 

@@ -73,7 +73,7 @@ private:
     void saveLaserHLDI(const QPointF& offset);
     mvector<QSharedPointer<QColor>> debugColor;
 
-    // FileInterface interfaces
+    // AbstractFile interfaces
 protected:
     virtual Paths merge() const override { return {}; }
     void write(QDataStream& stream) const override;
@@ -81,7 +81,7 @@ protected:
 
 public:
     void createGi() override;
-    void initFrom(FileInterface* file) override { }
+    void initFrom(AbstractFile* file) override { }
     FileTree::Node* node() override;
 
     mvector<QString> gCodeText() const;

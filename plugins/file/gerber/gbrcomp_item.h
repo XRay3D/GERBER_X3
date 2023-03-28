@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -25,7 +25,7 @@ class Item final : public GraphicsItem {
     bool selected_ {};
 
 public:
-    Item(const Component& component, FileInterface* file);
+    Item(const Component& component, AbstractFile* file);
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;

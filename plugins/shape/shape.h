@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -21,11 +21,11 @@ namespace Shapes {
 class Handle;
 class Node;
 
-class Shape : public GraphicsItem {
+class AbstractShape : public GraphicsItem {
     friend class Node;
     friend class Handle;
 
-    friend QDataStream& operator<<(QDataStream& stream, const Shape& shape) {
+    friend QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
         stream << shape.type();
         stream << shape.id_;
         stream << shape.isVisible();
@@ -33,7 +33,7 @@ class Shape : public GraphicsItem {
         return stream;
     }
 
-    friend QDataStream& operator>>(QDataStream& stream, Shape& shape) {
+    friend QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
         stream >> shape.id_;
         bool visible;
         stream >> visible;
@@ -45,8 +45,8 @@ class Shape : public GraphicsItem {
     }
 
 public:
-    Shape();
-    ~Shape() override;
+    AbstractShape();
+    ~AbstractShape() override;
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
@@ -54,7 +54,7 @@ public:
     // GraphicsItem interface
     Paths paths(int alternate = {}) const override;
     void changeColor() override;
-    // Shape interface
+    // AbstractShape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
     virtual bool addPt(const QPointF& point) { return currentHandler = nullptr, false; };
@@ -67,7 +67,7 @@ protected:
     mutable mvector<std::unique_ptr<Handle>> handlers;
     Paths paths_;
     Node* node_;
-    std::map<Shape*, mvector<QPointF>> hInitPos; // групповое перемещение
+    std::map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos;                             // групповое перемещение
     bool isFinal {};
 
@@ -79,7 +79,7 @@ protected:
 
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
-    // Shape interface
+    // AbstractShape interface
     virtual void updateOtherHandlers(Handle* handler, int mode = {});
 
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role);

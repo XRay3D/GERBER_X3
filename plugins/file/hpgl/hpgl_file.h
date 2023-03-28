@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     * * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -29,7 +29,7 @@ class LayerModel;
 class NodeLayer;
 struct SectionParser;
 
-class File : public FileInterface, public mvector<GraphicObject> {
+class File : public AbstractFile, public mvector<GraphicObject> {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Plugin;
@@ -50,10 +50,10 @@ private:
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     void grouping(PolyNode* node, Pathss* pathss, Group group);
 
-    // FileInterface interface
+    // AbstractFile interface
 public:
-    void initFrom(FileInterface* file) override;
-    FileTree::Node* node() override;
+    void initFrom(AbstractFile* file) override;
+    FileTree_::Node* node() override;
     FileType type() const override;
     void createGi() override;
     bool isVisible() const override;

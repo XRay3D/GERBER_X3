@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -26,29 +26,30 @@ enum FileVersion {
     ProVer_4,
     ProVer_5,
     ProVer_6,
+    ProVer_7,
+    CurrentVer = ProVer_7,
 };
 
-class FileInterface;
+class AbstractFile;
 namespace Shapes {
-class Shape;
+class AbstractShape;
 }
 class QFile;
 class QFileSystemWatcher;
-enum class FileType;
 
-using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
-using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
+using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
+using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
 
 class Project : public QObject {
     Q_OBJECT
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file);
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file);
 
 public:
     explicit Project(QObject* parent = nullptr);
     ~Project();
 
-    // FileInterface
-    template <typename T = FileInterface>
+    // AbstractFile
+    template <typename T = AbstractFile>
     T* file(int id) {
         QMutexLocker locker(&mutex_);
         if (files_.contains(id))
@@ -56,7 +57,7 @@ public:
         return nullptr;
     }
 
-    template <typename T = FileInterface>
+    template <typename T = AbstractFile>
     mvector<T*> files() {
         QMutexLocker locker(&mutex_);
         mvector<T*> rfiles;
@@ -79,17 +80,17 @@ public:
         return count;
     }
 
-    int addFile(FileInterface* const file);
-    bool contains(FileInterface* file);
-    mvector<FileInterface*> files(FileType type);
-    mvector<FileInterface*> files(const mvector<FileType> types);
+    int addFile(AbstractFile* const file);
+    bool contains(AbstractFile* file);
+    mvector<AbstractFile*> files(int type);
+    mvector<AbstractFile*> files(const mvector<int> types);
     void deleteFile(int id);
     QString fileNames();
     int contains(const QString& name);
 
-    // Shape
-    int addShape(Shapes::Shape* const shape);
-    Shapes::Shape* shape(int id);
+    // AbstractShape
+    int addShape(Shapes::AbstractShape* const shape);
+    Shapes::AbstractShape* shape(int id);
     void deleteShape(int id);
 
     // Project
@@ -169,12 +170,12 @@ signals:
     void worckRectChanged(const QRectF&);
     void layoutFrameUpdate(bool = false);
     // need for debuging
-    void addFileDbg(FileInterface* file);
+    void addFileDbg(AbstractFile* file);
     // File Watcher
     void parseFile(const QString& filename, int type);
 
 private:
-    bool reload(int id, FileInterface* file);
+    bool reload(int id, AbstractFile* file);
 
     // File Watcher
     QFileSystemWatcher watcher;

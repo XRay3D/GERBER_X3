@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -54,7 +54,7 @@ void RadioDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, con
 
 void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QStyledItemDelegate::paint(painter, option, index);
-    if (dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree::Node*>(index.internalPointer()))) {
+    if (dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree_::Node*>(index.internalPointer()))) {
 
         //        StarRating starRating = qvariant_cast<StarRating>(index.data());
 

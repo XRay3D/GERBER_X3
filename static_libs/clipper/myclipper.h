@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -33,6 +33,7 @@ public:
 private:
     std::string m_descr;
 };
+
 // type
 using Clipper = Clipper2Lib::Clipper64;
 using ClipperOffset = Clipper2Lib::ClipperOffset;
@@ -42,10 +43,13 @@ using Pathss = mvector<Paths>;
 using Point = Clipper2Lib::Point64;
 using PolyTree = Clipper2Lib::PolyTree64;
 using Rect = Clipper2Lib::Rect64;
+
 // func
 using Clipper2Lib::Area;
 using Clipper2Lib::Bounds;
+using Clipper2Lib::InflatePaths;
 using Clipper2Lib::PointInPolygon;
+
 // enum
 using Clipper2Lib::ClipType;
 using Clipper2Lib::EndType;
@@ -53,6 +57,15 @@ using Clipper2Lib::FillRule;
 using Clipper2Lib::JoinType;
 using Clipper2Lib::PathType;
 using Clipper2Lib::PointInPolygonResult;
+
+using CT = Clipper2Lib::ClipType;
+using ET = Clipper2Lib::EndType;
+using FR = Clipper2Lib::FillRule;
+using JT = Clipper2Lib::JoinType;
+using PT = Clipper2Lib::PathType;
+using PIPResult = Clipper2Lib::PointInPolygonResult;
+
+namespace C2 = Clipper2Lib;
 
 Q_DECLARE_METATYPE(Point)
 
@@ -146,4 +159,40 @@ inline void SimplifyPolygons(const Paths& in_polys, Paths& out_polys, Clipper2Li
 
 inline void SimplifyPolygons(Paths& polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
     SimplifyPolygons(polys, polys, fillType);
+}
+
+struct LineABC {
+    // ax + by + c = 0
+    double a;
+    double b;
+    double c;
+    LineABC(const QLineF& l)
+        : a {l.p1().y() - l.p2().y()}
+        , b {l.p2().x() - l.p1().x()}
+        , c {l.p1().x() * l.p2().y() - l.p2().x() * l.p1().y()} { }
+    operator bool() const {
+        return !qFuzzyIsNull(a) | !qFuzzyIsNull(b);
+    }
+    double distance(const QPointF& p) const {
+        return abs(a * p.x() + b * p.y() + c) / sqrt(a * a + b * b);
+    }
+    double lenght() const { return sqrt(a * a + b * b); }
+};
+
+inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
+    const size_t cnt = path.size();
+    if (cnt < 2)
+        return false;
+    QPointF p;
+    for (size_t i = 0; i < cnt; ++i) {
+        const Point& pt1 = path[(i + 1) % cnt];
+        const Point& pt2 = path[i];
+        QLineF l1(pt1, pt2);
+        if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
+            if (ret)
+                *ret = (p);
+            return true;
+        }
+    }
+    return false;
 }

@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,14 +17,14 @@
  ********************************************************************************/
 
 #include "gi.h"
-#include "file.h"
+#include "abstract_file.h"
 #include "gi_group.h"
 #include "graphicsview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
 
-GraphicsItem::GraphicsItem(FileInterface* file)
+GraphicsItem::GraphicsItem(AbstractFile* file)
     : //    animation(this, "bodyColor")
       //    , visibleAnim(this, "opacity")     ,
     file_(file)
@@ -78,11 +78,11 @@ void GraphicsItem::setVisible(bool visible) {
     //    if (visible) {
     //        setOpacity(0.0);
     setOpacity(1.0 * visible);
-    QGraphicsItem/*QGraphicsObject*/::setVisible(visible);
+    QGraphicsItem /*QGraphicsObject*/ ::setVisible(visible);
     //    }
 }
 
-const FileInterface* GraphicsItem::file() const { return file_; }
+const AbstractFile* GraphicsItem::file() const { return file_; }
 
 int GraphicsItem::id() const { return id_; }
 

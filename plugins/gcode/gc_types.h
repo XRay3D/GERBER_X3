@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -19,14 +19,12 @@
 #include <QVariant>
 #include <variant>
 
-using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
-using V = std::variant<int, double, UsedItems>;
-
 namespace GCode {
 
-enum GCodeType {
+enum GCodeType : int {
     Null = -1,
-    Profile,
+
+    Profile = 100, // FileType::GCode
     Pocket,
     Raster,
     Hatching,
@@ -34,7 +32,8 @@ enum GCodeType {
     Thermal,
     Drill,
     LaserHLDI,
-    GCodeProperties = 100,
+
+    GCodeProperties = 199,
 };
 
 enum Code {
@@ -61,24 +60,22 @@ enum class Grouping {
     Cutoff,
 };
 
+using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
+using V = std::variant<int, double, UsedItems>;
+
 struct Variant : V {
     using V::V;
 
     friend QDataStream& operator>>(QDataStream& stream, V& v) {
         uint8_t index;
         stream >> index;
-        switch (index) {
-        case 0:
-            v = int {};
-            break;
-        case 1:
-            v = double {};
-            break;
-        case 2:
-            v = UsedItems {};
-            break;
-        }
-        std::visit([&stream](auto&& val) { stream >> val; }, v);
+        using Init = V& (*)(V&);
+        static std::unordered_map<uint8_t, Init> map {
+            {0,       [](V& v) -> V& { return v = int {}; }},
+            {1,    [](V& v) -> V& { return v = double {}; }},
+            {2, [](V& v) -> V& { return v = UsedItems {}; }},
+        };
+        std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
         return stream;
     }
 
@@ -137,71 +134,74 @@ struct Variant : V {
 struct GCodeParams {
     Q_GADGET
 public:
-    enum Param {
-        UseAngle, // need for Raster and LaserHLDI
-        Depth,
-        Pass, // need for Raster and LaserHLDI profile
-        UseRaster,
-        Steps,     // need for Pocket
-        Tolerance, // need for Voronoi
-        Width,     // need for Voronoi
-        VorT,      // need for Voronoi
-        FileId,
-        FrameOffset, // need for Voronoi
-        AccDistance, // need for LaserHLDI
-        Side,
+    enum Param : uint32_t {
+        //        Node,
+        //        AccDistance, // need for LaserHLDI
+        //        BridgeLen, // need for Profile
+        //        Bridges,   // need for Profile
+        //        CornerTrimming, // need for Profile
+        //        Fast,
+        //        FileId,
+        //        FrameOffset, // need for Voronoi
+        //        HathStep      // need for Hatching
+        //        IgnoreCopper, // need for Thermal
+        //        Pass, // need for Raster and LaserHLDI profile
+        //        Steps,     // need for Pocket
+        //        Tolerance, // need for Voronoi
+        //        Trimming,       // need for Profile
+        //        UseAngle, // need for Raster and LaserHLDI
+        //        UseRaster,
+        //        VorT,      // need for Voronoi
+        //        Width,     // need for Voronoi
         Convent,
-        Fast,
-        PocketIndex, // need for Pocket
+        Depth,
         GrItems,
-        Node,
-        Bridges,   // need for Profile
-        BridgeLen, // need for Profile
-        NotTile,
-        Trimming,
-        CornerTrimming,
-        IgnoreCopper, // need for Thermal
-        HathStep      // need for Hatching
+        MultiToolIndex, // need for Pocket
+        NotTile,        // не раскладывать если даже раскладка включена
+        Side,
+
+        UserParam = 100
     };
+
     Q_ENUM(Param)
 
     GCodeParams() {
-        if (!params.contains(PocketIndex))
-            params[PocketIndex] = 0;
+        if (!params.contains(MultiToolIndex))
+            params[MultiToolIndex] = 0;
     }
 
-    GCodeParams(const Tool& tool, double depth, GCodeType type)
+    GCodeParams(const Tool& tool, double depth /*, GCodeType type*/)
         : GCodeParams {} {
         tools.emplace_back(tool);
         params[GCodeParams::Depth] = depth;
-        gcType = type;
+        //        gcType = type;
     }
 
     mvector<Tool> tools;
-    std::map<int, Variant> params;
-    GCodeType gcType = Null;
+    std::map<std::underlying_type_t<Param>, Variant> params;
+    //    GCodeType gcType = Null;
     mutable int fileId = -1;
-    QColor color;
+    //    QColor color;
 
     friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type) {
         stream >> type.tools;
         stream >> type.params;
-        stream >> type.gcType;
+        //        stream >> type.gcType;
         return stream;
     }
 
     friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type) {
         stream << type.tools;
         stream << type.params;
-        stream << type.gcType;
+        //        stream << type.gcType;
         return stream;
     }
 
-    const Tool& getTool() const { return tools[params.at(PocketIndex).toInt()]; }
+    const Tool& getTool() const { return tools[params.at(MultiToolIndex).toInt()]; }
 
     SideOfMilling side() const { return static_cast<SideOfMilling>(params.at(Side).toInt()); }
     bool convent() const { return params.at(Convent).toBool(); }
-    double getToolDiameter() const { return tools.at(params.at(PocketIndex).toInt()).getDiameter(params.at(Depth).toInt()); }
+    double getToolDiameter() const { return tools.at(params.at(MultiToolIndex).toInt()).getDiameter(params.at(Depth).toInt()); }
     double getDepth() const { return params.at(Depth).toDouble(); }
 
     void setSide(SideOfMilling val) { params[Side] = val; }

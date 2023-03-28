@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,16 +11,37 @@
 #pragma once
 
 #include "gc_creator.h"
+#include "gc_file.h"
 
 #include <QIcon>
 #include <QPixmap>
 
 namespace GCode {
 
-class ProfileCreator : public Creator {
+class ProfileFile final : public File {
 public:
-    ProfileCreator();
-    ~ProfileCreator() override = default;
+    explicit ProfileFile();
+    explicit ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss);
+    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+    FileType type() const override { return FileType(Profile); }
+    void createGi() override;
+    void genGcodeAndTile() override;
+}; // ProfileFile
+
+class ProfileCtr : public Creator {
+
+public:
+    ProfileCtr();
+    ~ProfileCtr() override = default;
+
+    enum {
+        BridgeLen = GCodeParams::UserParam,
+        TrimmingCorners,
+        TrimmingOpenPaths,
+        BridgeAlignType,
+        BridgeValue,
+        BridgeValue2,
+    };
 
 private:
     void createProfile(const Tool& tool, const double depth);

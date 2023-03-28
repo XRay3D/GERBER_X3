@@ -3,23 +3,24 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_point.h"
-#include "project.h"
 
-#include "gcode.h"
-
+#include "drill/file.h"
 #include "gc_propertiesform.h"
+#include "gcode.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "settings.h"
+#include "settingsdialog.h"
 #include "tool_pch.h"
+
 #include <QAction>
 #include <QGraphicsSceneContextMenuEvent>
 #include <QInputDialog>
@@ -27,6 +28,7 @@
 #include <QMessageBox>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <array>
 
 bool updateRect() {
     QRectF rect(App::graphicsView()->getSelectedBoundingRect());
@@ -101,44 +103,29 @@ void GiMarker::resetPos(bool flUpdateRect) {
 
     const QRectF rect(App::layoutFrames()->boundingRect());
 
-    if (type_ == Home)
-        switch (App::settings().mkrHomePos()) {
-        case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + App::settings().mkrHomeOffset());
-            break;
-        case Qt::BottomRightCorner:
-            setPos(rect.topRight() + App::settings().mkrHomeOffset());
-            break;
-        case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + App::settings().mkrHomeOffset());
-            break;
-        case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + App::settings().mkrHomeOffset());
-            break;
-        default:
+    static constexpr std::array corner {
+        &QRectF::bottomLeft,
+        &QRectF::bottomRight,
+        &QRectF::topLeft,
+        &QRectF::topRight,
+        &QRectF::center,
+        &QRectF::center,
+    };
+
+    if (type_ == Home) {
+        if (App::settings().mkrHomePos() == corner.size())
             setPos({});
-            break;
-        }
-    else {
-        switch (App::settings().mkrZeroPos()) {
-        case Qt::BottomLeftCorner:
-            setPos(rect.topLeft() + App::settings().mkrZeroOffset());
-            break;
-        case Qt::BottomRightCorner:
-            setPos(rect.topRight() + App::settings().mkrZeroOffset());
-            break;
-        case Qt::TopLeftCorner:
-            setPos(rect.bottomLeft() + App::settings().mkrZeroOffset());
-            break;
-        case Qt::TopRightCorner:
-            setPos(rect.bottomRight() + App::settings().mkrZeroOffset());
-            break;
-        default:
+        else
+            setPos((rect.*corner[App::settings().mkrHomePos()])() + App::settings().mkrHomeOffset());
+    } else {
+        if (App::settings().mkrZeroPos() == corner.size())
             setPos({});
-            break;
-        }
+        else
+            setPos((rect.*corner[App::settings().mkrZeroPos()])() + App::settings().mkrZeroOffset());
     }
+
     updateGCPForm();
+
     if (type_ == Home)
         App::project()->setHomePos(pos());
     else
@@ -204,9 +191,9 @@ void GiMarker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
-    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-    // SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    // });
+    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    });
     menu.exec(event->screenPos());
 }
 
@@ -390,32 +377,29 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             settings.setValue("depth", depth);
             settings.endGroup();
 
-            GCode::GCodeParams gcp_(tool, depth, GCode::Drill);
-
+            GCode::GCodeParams gcp_ {tool, depth};
             gcp_.params[GCode::GCodeParams::NotTile];
 
-            GCode::File* gcode = new GCode::File(Pathss {{dst}}, std::move(gcp_));
-            gcode->setFileName(tr("Pin_") + tool.nameEnc());
-            App::project()->addFile(gcode);
+            //  FIXME           AbstractFile* gcode = new GCode::DrillFile(std::move(gcp_), Pathss {{dst}});
+            //  FIXME          gcode->setFileName(tr("Pin_") + tool.nameEnc());
+            //  FIXME          App::project()->addFile(gcode);
         }
     });
-    {
-        action = menu.addAction(tr("Fixed"), [](bool fl) {
-            for (GiPin* pin : pins_)
-                pin->setFlag(QGraphicsItem::ItemIsMovable, !fl);
-        });
-        action->setCheckable(true);
-        action->setChecked(!(pins_[0]->flags() & QGraphicsItem::ItemIsMovable));
-    }
-    {
-        action = menu.addAction(tr("Used"), [this](bool fl) { App::project()->setPinUsed(fl, index_); update(); });
-        action->setCheckable(true);
-        action->setChecked(App::project()->pinUsed(index_));
-    }
+
+    action = menu.addAction(tr("Fixed"), [](bool fl) {
+        for (GiPin* pin : pins_) pin->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
+    action->setCheckable(true);
+    action->setChecked(!(pins_[0]->flags() & QGraphicsItem::ItemIsMovable));
+
+    action = menu.addAction(tr("Used"), [this](bool fl) {
+        App::project()->setPinUsed(fl, index_); update(); });
+    action->setCheckable(true);
+    action->setChecked(App::project()->pinUsed(index_));
+
     menu.addSeparator();
-    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-    // SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    // });
+    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    });
     menu.exec(event->screenPos());
 }
 

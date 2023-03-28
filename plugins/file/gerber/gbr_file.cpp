@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -58,17 +58,13 @@ QDebug operator<<(QDebug debug, const State& state) {
     return debug;
 }
 
-File::File(const QString& fileName)
-    : FileInterface() {
+File::File()
+    : AbstractFile() {
     itemGroups_.append({new GiGroup, new GiGroup});
-    name_ = fileName;
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),
-         GbrObj::tr("Normal view")                                                               },
-        {   ApPaths, GbrObj::tr("Aperture paths"),
-         GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),
-         GbrObj::tr("Show components")                                                           }
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -241,8 +237,8 @@ mvector<const AbstrGraphicObject*> File::graphicObjects() const {
     return go;
 }
 
-void File::initFrom(FileInterface* file) {
-    FileInterface::initFrom(file);
+void File::initFrom(AbstractFile* file) {
+    AbstractFile::initFrom(file);
     static_cast<Node*>(node_)->file = this;
 
     setColor(file->color());

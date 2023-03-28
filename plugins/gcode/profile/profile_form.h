@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -31,15 +31,12 @@ private slots:
     void onNameTextChanged(const QString& arg1);
 
 private:
-    void updateBridge();
+    void updateBridges();
     void updatePixmap();
     void rb_clicked();
 
-    double size_ = 0.0;
-    double lenght_ = 0.0;
-
     Ui::ProfileForm* ui;
-    GiBridge* brItem = nullptr;
+    //    GiBridge* brItem = nullptr;
 
     const QStringList names {tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps {
@@ -55,6 +52,18 @@ private:
         Line = 1,
         Corner = 2,
     };
+
+    enum BridgeAlign {
+        Manually,
+        Horizontally,
+        Vertically,
+        HorizontallyVertically,
+        ThroughTheDistance,
+        EvenlyDround,
+    };
+
+    void updateBridgePos(QPointF pos);
+
     int trimming_ = 0;
 
 protected:
@@ -62,13 +71,14 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
     // FormsUtil interface
-    void createFile() override;
+    void сomputePaths() override;
     void updateName() override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
+#include "profile.h"
 #include <QToolBar>
 
 class GCPluginImpl final : public GCodePlugin {
@@ -82,4 +92,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
     QWidget* createForm() override { return new ProfileForm(this); };
     int type() const override { return GCode::Profile; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::ProfileFile; }
 };

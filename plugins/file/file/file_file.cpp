@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -43,7 +43,7 @@ QDataStream& operator<<(QDataStream& s, const Tools& c) {
 }
 
 File::File()
-    : FileInterface() { }
+    : AbstractFile() { }
 
 File::~File() { }
 
@@ -63,11 +63,11 @@ void File::createGi() {
     itemGroup()->setVisible(true);
 }
 
-void File::initFrom(FileInterface* file) {
-    FileInterface::initFrom(file);
+void File::initFrom(AbstractFile* file) {
+    AbstractFile::initFrom(file);
 }
 
-FileTree::Node* File::node() {
+FileTree_::Node* File::node() {
     return node_ ? node_ : node_ = new Node(this);
 }
 

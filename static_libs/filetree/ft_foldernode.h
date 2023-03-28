@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,7 +20,7 @@ class FolderNode : public FileTree::Node {
 
 public:
     explicit FolderNode(const QString& name);
-    explicit FolderNode(const QString& name, int& id);
+    explicit FolderNode(const QString& name, int id);
     ~FolderNode() override;
 
     // FileTree::Node interface
@@ -28,6 +28,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     void menu(QMenu& menu, View* tv) const override;
+    int id() const override { return -1; }
 };
 
 } // namespace FileTree

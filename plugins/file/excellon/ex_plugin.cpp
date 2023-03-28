@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,7 +18,7 @@
 
 #include "ctre.hpp"
 
-#include "file.h"
+#include "abstract_file.h"
 
 #include "utils.h"
 
@@ -26,18 +26,16 @@
 
 #include <QComboBox>
 #include <QJsonObject>
-
-#include <string_view>
 #include <variant>
 
 namespace Excellon {
 
 Plugin::Plugin(QObject* parent)
-    : FilePlugin(parent)
+    : AbstractFilePlugin(parent)
     , Parser(this) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
+AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file(fileName);
@@ -49,7 +47,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return Parser::file;
 }
 
-std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
+std::any Plugin::createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         auto const exFile = static_cast<File*>(file);
@@ -67,41 +65,44 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    if (!fileName.endsWith(".drl", Qt::CaseInsensitive))
+    if (fileName.endsWith(".dxf", Qt::CaseInsensitive))
         return false;
-
     QFile file(fileName);
     if (!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    auto data {file.readAll().trimmed()};
+    QTextStream in(&file);
+    QString line;
 
-    // return data.startsWith("M48") && data.endsWith("M30");
+    static constexpr ctll::fixed_string regex1(R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)");
+    static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
 
-    int toolCount {};
-    for (auto [whole, var] : ctre::multiline_range<R"(^(T\d+).*)">(data))
-        if (var)
-            if (++toolCount >= 2) //++toolCount;
-                break;
+    while (in.readLineInto(&line)) {
+        auto data {toU16StrView(line)};
+        if (ctre::match<regex1>(data))
+            return true;
+        if (ctre::match<regex2>(data))
+            return true;
+    }
 
-    return data.startsWith("M48") && data.endsWith("M30") && toolCount >= 2;
+    return false;
 }
 
-int Plugin::type() const { return int(FileType::Excellon); }
+int Plugin::type() const { return int(FileType::Excellon_); }
 
 QString Plugin::folderName() const { return tr("Excellon"); }
 
-FileInterface* Plugin::createFile() { return new File(); }
+AbstractFile* Plugin::loadFile(QDataStream& stream)  { return new File(stream); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'E'); }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
+AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     auto tab = new ExSettingsTab(parent);
     tab->setWindowTitle("Excellon");
     return tab;
 }
 
-void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
+void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
     cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);

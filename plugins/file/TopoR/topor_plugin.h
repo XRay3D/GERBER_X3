@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,17 +12,17 @@
 
 #include "topor_parser.h"
 
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
 
 #include <QObject>
 #include <QStack>
 
 namespace TopoR {
 
-class Plugin : public FilePlugin, Parser {
+class Plugin : public AbstractFilePlugin, Parser {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "topor.json")
-    Q_INTERFACES(FilePlugin)
+    Q_INTERFACES(AbstractFilePlugin)
 
 public:
     Plugin(QObject* parent = nullptr);
@@ -32,17 +32,17 @@ public:
     int type() const override;
     QString folderName() const override;
 
-    FileInterface* createFile() override;
+    AbstractFile* loadFile(QDataStream& stream) override;
     QIcon icon() const override;
-    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
-    void addToGcForm(FileInterface* file, QComboBox* cbx) override;
-    //    DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
+    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    void addToGcForm(AbstractFile* file, QComboBox* cbx) override;
+    //    DrillPreviewGiMap createDrillPreviewGi(AbstractFile* file, mvector<Row>& data) override;
 
     // public slots:
-    FileInterface* parseFile(const QString& fileName, int type) override;
+    AbstractFile* parseFile(const QString& fileName, int type) override;
 
-    // FilePlugin interface
-    std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param = {}) override;
+    // AbstractFilePlugin interface
+    std::any createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param = {}) override;
 };
 
 } // namespace TopoR

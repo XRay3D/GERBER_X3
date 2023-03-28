@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -19,13 +19,15 @@ namespace FileTree {
 constexpr int FolderNodeId {-1};
 
 FolderNode::FolderNode(const QString& name)
-    : FileTree::Node(FolderNodeId, Folder)
+    : FileTree::Node(Folder)
     , name(name) {
+    setId(FolderNodeId);
 }
 
-FolderNode::FolderNode(const QString& name, int& id)
-    : FileTree::Node(id, Folder)
+FolderNode::FolderNode(const QString& name, int id)
+    : FileTree::Node(Folder)
     , name(name) {
+    setId(id);
 }
 
 FolderNode::~FolderNode() { }
@@ -43,7 +45,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const {
     }
     switch (role) {
     case Role::Id:
-        return id_.get();
+        return id();
     case Role::NodeType:
         return Folder;
     case Role::ContentType:

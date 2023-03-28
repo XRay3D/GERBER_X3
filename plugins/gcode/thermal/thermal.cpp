@@ -3,15 +3,15 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal.h"
-#include "gc_file.h"
+#include "file.h"
 #include "project.h"
 
 namespace Thermal {
@@ -25,7 +25,7 @@ void Creator::create() {
         gcp_.params[::GCode::GCodeParams::Depth].toDouble());
 }
 
-void Creator::createThermal(FileInterface* file, const Tool& tool, const double depth) {
+void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
 
@@ -89,7 +89,7 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
         clipper.AddOpenSubject(returnPs);
         clipper.AddClip(framePaths);
         clipper.Execute(ClipType::Difference, FillRule::Positive, framePaths, returnPs);
-        sortBE(returnPs);
+        sortBeginEnd(returnPs);
     }
 
     if (returnPs.size())
@@ -98,8 +98,9 @@ void Creator::createThermal(FileInterface* file, const Tool& tool, const double 
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = ::GCode::Thermal;
-        file_ = new GCode::File(sortB(returnPss), std::move(gcp_));
+
+        sortB(returnPss);
+        file_ = new ::GCode::ThermalFile(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

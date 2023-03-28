@@ -21,8 +21,12 @@
 #include <QDebug>
 #include <QPolygonF>
 #include <mvector.h>
+#include <ranges>
 
-static constexpr auto uScale {100000};
+#include "app.h"
+#include "settings.h"
+
+static constexpr auto uScale {100'000};
 static constexpr auto dScale {1. / uScale};
 extern void ifCancelThenThrow();
 
@@ -151,19 +155,11 @@ struct Point {
     //    constexpr Point& operator=(Point&& p) noexcept = default;
     //    constexpr Point& operator=(const Point& p) noexcept = default;
 
-    constexpr Point(QPointF&& p) noexcept
-        : x(p.x() * uScale)
-        , y(p.y() * uScale) {
-    }
     constexpr Point(const QPointF& p) noexcept
         : x(p.x() * uScale)
         , y(p.y() * uScale) {
     }
-    constexpr Point& operator=(QPointF&& p) noexcept {
-        x = p.x() * uScale;
-        y = p.y() * uScale;
-        return *this;
-    }
+
     constexpr Point& operator=(const QPointF& p) noexcept {
         x = p.x() * uScale;
         y = p.y() * uScale;
@@ -262,6 +258,7 @@ template <typename T>
 struct Path : mvector<Point<T>> {
     using MV = mvector<Point<T>>;
     using MV::MV;
+    using MV::operator=;
 
     Path(const QPolygonF& v) {
         MV::reserve(v.size());
@@ -308,12 +305,19 @@ struct Path : mvector<Point<T>> {
             point += pt;
         return *this;
     }
+
+    T hash() const {
+        return std::accumulate(MV::cbegin(), MV::cend(), T {}, [](T acc, Point<T> p) {
+            return acc ^= p.x, acc ^= p.y;
+        });
+    }
 };
 
 template <typename T>
 struct Paths : mvector<Path<T>> {
     using MV = mvector<Path<T>>;
     using MV::MV;
+    using MV::operator=;
 
     Paths(const MV& v)
         : MV(v) { }

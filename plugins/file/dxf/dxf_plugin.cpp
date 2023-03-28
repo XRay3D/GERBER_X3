@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -30,10 +30,10 @@
 namespace Dxf {
 
 Plugin::Plugin(QObject* parent)
-    : FilePlugin(parent) {
+    : AbstractFilePlugin(parent) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
+AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file(fileName);
@@ -152,7 +152,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return file_;
 }
 
-std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
+std::any Plugin::createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         auto const dxfFile = static_cast<File*>(file);
@@ -168,7 +168,7 @@ std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::
     return {};
 }
 
-void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
+void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
     auto const dxfFile = static_cast<File*>(file);
     for (auto&& layer : dxfFile->layers()) {
         for (auto&& go : layer.second->graphicObjects()) {
@@ -211,21 +211,21 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-int Plugin::type() const { return int(FileType::Dxf); }
+int Plugin::type() const { return int(FileType::Dxf_); }
 
 QString Plugin::folderName() const { return tr("Dxf Files"); }
 
-FileInterface* Plugin::createFile() { return new File(); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) { return new File(stream); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'D'); }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
+AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     auto settingsTab = new SettingsTab(parent);
     settingsTab->setWindowTitle("DXF");
     return settingsTab;
 }
 
-void Plugin::updateFileModel(FileInterface* file) {
+void Plugin::updateFileModel(AbstractFile* file) {
     const auto fm = App::fileModel();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
@@ -240,13 +240,13 @@ void Plugin::updateFileModel(FileInterface* file) {
     }
     Dxf::Layers layers;
     for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
-        //        qDebug() << name << layer;
+
         if (!layer->isEmpty())
             layers[name] = layer;
     }
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for (auto& [name, layer] : layers) {
-        //        qDebug() << name << layer;
+
         fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
     }
     fm->endInsertRows_();
@@ -302,7 +302,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 //    bool fit(double depth) override { return sourceDiameter_ >= App::toolHolder().tool(toolId_).getDiameter(depth); }
 //};
 
-// FIXME DrillPreviewGiMap Plugin::createDrillPreviewGi(FileInterface* file, mvector<Row>& data) {
+// FIXME DrillPreviewGiMap Plugin::createDrillPreviewGi(AbstractFile* file, mvector<Row>& data) {
 //    auto const dxfFile = static_cast<File*>(file);
 //    DrillPreviewGiMap giPeview;
 
@@ -351,7 +351,7 @@ void Plugin::updateFileModel(FileInterface* file) {
 //    return giPeview;
 //}
 
-// FIXME void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
+// FIXME void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
 //    int ctr {};
 //    for (auto& [key, lay] : static_cast<File*>(file)->layers())
 //        if (lay->isVisible()) {

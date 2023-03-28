@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -54,12 +54,12 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
     painter->restore();
 }
 
-Handle::Handle(Shape* shape, Type type)
+Handle::Handle(AbstractShape* shape, Type type)
     : shape(shape)
     , type_(type) {
     setAcceptHoverEvents(true);
     setFlags(ItemIsMovable);
-    App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->addItem(this);
     App::shapeHandlers().emplace_back(this);
     setHType(type);
 }
@@ -155,7 +155,7 @@ void Handle::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 ds->setRange(-1000, +1000);
                 ds->setSuffix(QObject::tr(" mm"));
                 ds->setValue(type == X ? h->x() : h->y());
-                connect(ds, qOverload<double>(&QDoubleSpinBox::valueChanged), [h, type](auto val) {
+                connect(ds, &QDoubleSpinBox::valueChanged, [h, type](auto val) {
                     type == X ? h->setX(val) : h->setY(val);
                     h->shape->updateOtherHandlers(h);
                 });
@@ -210,7 +210,7 @@ void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
             , lastHandlePos {std::move(lastHandlePos)}
             , redoPos {handle->pos(), handle->type_}
             , handle {handle} {
-            setText("Shape Handle Moved");
+            setText("AbstractShape Handle Moved");
         }
 
         ~ShapeMoveCommand() { }

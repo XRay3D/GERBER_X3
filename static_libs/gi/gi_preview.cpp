@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -36,7 +36,7 @@ GiAbstractPreview::GiAbstractPreview()
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
-    App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->addItem(this);
 }
 
 void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {

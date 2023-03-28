@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,7 +17,7 @@
 
 namespace Shapes {
 
-class Circle final : public Shape {
+class Circle final : public AbstractShape {
 public:
     explicit Circle(QPointF center = {}, QPointF pt = {});
     ~Circle() override = default;
@@ -26,7 +26,7 @@ public:
     // QGraphicsItem interface
     int type() const override { return GiType::ShCircle; }
     void redraw() override;
-    // Shape interface
+    // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
     void setPt(const QPointF& pt) override;
@@ -51,7 +51,7 @@ public:
     // Shapes::Plugin interface
     int type() const override;
     QIcon icon() const override;
-    Shape* createShape(const QPointF& point) const override;
+    AbstractShape* createShape(const QPointF& point) const override;
 };
 
 } // namespace Shapes

@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -34,7 +34,7 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
     currentHandler = handlers[Point1].get();
     redraw();
 
-    App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->addItem(this);
 }
 
 void Rectangle::redraw() {
@@ -74,7 +74,7 @@ void Rectangle::redraw() {
         break;
     }
 
-    paths_.front() = {
+    paths_.front() = Path {
         handlers[Point1]->pos(),
         handlers[Point2]->pos(),
         handlers[Point3]->pos(),
@@ -107,7 +107,7 @@ int PluginImpl::type() const { return GiType::ShRectangle; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
-Shape* PluginImpl::createShape(const QPointF& point) const { return new Rectangle(point, point + QPointF {10, 10}); }
+AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Rectangle(point, point + QPointF {10, 10}); }
 
 } // namespace Shapes
 

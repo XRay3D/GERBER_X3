@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -137,7 +137,7 @@ using Tools = std::map<int, Tool, std::greater<int>>;
 
 class ToolHolder {
     friend class ToolItem;
-    friend class FilePlugin;
+    friend class AbstractFilePlugin;
 
     Tools tools_;
     ToolHolder(const ToolHolder&) = delete;

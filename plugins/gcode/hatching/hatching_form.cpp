@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -71,7 +71,7 @@ HatchingForm::~HatchingForm() {
     delete ui;
 }
 
-void HatchingForm::createFile() {
+void HatchingForm::сomputePaths() {
     const auto tool {ui->toolHolder->tool()};
 
     if (!tool.isValid()) {
@@ -81,10 +81,10 @@ void HatchingForm::createFile() {
 
     Paths wPaths;
     Paths wRawPaths;
-    FileInterface const* file = nullptr;
+    AbstractFile const* file = nullptr;
     bool skip {true};
 
-    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->selectedItems()) {
         GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiType::DataSolid:

@@ -3,20 +3,22 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "ft_model.h"
 
-#include "file.h"
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
+#include "abstract_file.h"
 #include "ft_foldernode.h"
+
 #include "shapepluginin.h"
-#include "shheaders.h"
+#include "shnode.h"
+#include "project.h"
 
 #include <QTimer>
 
@@ -36,49 +38,52 @@ Model::~Model() {
     App::setFileModel(nullptr);
 }
 
-void Model::addFile(FileInterface* file) {
+void Model::addFile(AbstractFile* file) {
     if (!file)
         return;
 
-    const int type = int(file->type());
+    FileType type = file->type();
 
-    if (mapNode.find(type) == mapNode.end()) {
+    if (type > FileType(100) || type == FileType(-1)) // NOTE  переписать для ГКода отдельно
+        type = FileType(100);
+
+    if (fileFolders.find(type) == fileFolders.end()) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
-        mapNode.emplace(type, Pair {nullptr, type});
-        rootItem->addChild(mapNode[type].node = new FolderNode(App::filePlugin(type)->folderName(), mapNode[type].type));
+        auto it = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
+        rootItem->addChild(it);
         endInsertRows();
     }
 
-    Node* item(mapNode[type].node);
+    Node* item(fileFolders[type]);
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    mapNode[type].node->addChild(file->node());
+    fileFolders[type]->addChild(file->node());
     endInsertRows();
 
     App::filePlugin(type)->updateFileModel(file);
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
-void Model::addShape(Shapes::Shape* shape) {
+void Model::addShape(Shapes::AbstractShape* shape) {
     if (!shape)
         return;
 
-    const int type = int(FileType::Shapes);
+    FileType type = FileType::Shapes_;
 
-    if (mapNode.find(type) == mapNode.end()) {
+    if (fileFolders.find(type) == fileFolders.end()) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
-        mapNode.emplace(type, Pair {nullptr, type});
         auto si = App::shapePlugins().begin()->second;
-        rootItem->addChild(mapNode[type].node = new FolderNode(si->folderName(), mapNode[type].type));
+        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
+        rootItem->addChild(it);
         endInsertRows();
     }
 
-    Node* item(mapNode[type].node);
+    Node* item(fileFolders[type]);
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
@@ -205,126 +210,6 @@ int Model::rowCount(const QModelIndex& parent) const {
     //        return 0;
     //    return getItem(parent)->childCount();
 }
-
-// QStringList FileModel::mimeTypes() const
-//{
-//     QStringList types;
-//     types << mimeType;
-//     return types;
-// }
-
-// QMimeData* FileModel::mimeData(const QModelIndexList& indexes) const
-//{
-//     //    QMimeData* mimeData = new QMimeData();
-//     //    QByteArray encodedData;
-//     //    int noCopy = -1;
-//     //    for (const QModelIndex& index : indexes) {
-//     //        if (noCopy != index.row()) {
-//     //            noCopy = index.row();
-//     //            ToolItem* item = static_cast<ToolItem*>(index.parent().internalPointer());
-//     //            if (!item)
-//     //                item = rootItem;
-//     //            if (index.isValid()) {
-//     //                encodedData.push_back(tr("%1,%2").arg(index.row()).arg((quint64)item /*index.internalPointer()*/).toUtf8());
-//     //                encodedData.push_back("|");
-//     //            }
-//     //        }
-//     //    }
-//     //    mimeData->setData(myModelMimeType(), encodedData);
-//     //    return mimeData;
-//     QMimeData* mimeData = new QMimeData();
-//     QByteArray encodedData;
-//     int noCopy = -1;
-//     for (const QModelIndex& index : indexes) {
-//         if (noCopy != index.row()) {
-//             noCopy = index.row();
-//             if (index.isValid()) {
-//                 encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toUtf8());
-//                 encodedData.push_back("|");
-//             }
-//         }
-//     }
-//     mimeData->setData(mimeType, encodedData);
-//     return mimeData;
-// }
-
-// bool FileModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent)
-//{
-//     return false;
-//     //    if (action == Qt::IgnoreAction)
-//     //        return true;
-
-//    //    if (!data->hasFormat(mimeType))
-//    //        return false;
-
-//    //    if (column > 0)
-//    //        return false;
-
-//    //    int beginRow;
-
-//    //    if (row != -1)
-//    //        beginRow = row;
-//    //    else if (parent.isValid())
-//    //        beginRow = parent.row();
-//    //    else
-//    //        beginRow = rowCount(QModelIndex());
-
-//    //    QString encodedData = data->data(mimeType);
-//    //    QList<QString> list = encodedData.split('|', QString::SkipEmptyParts);
-
-//    //    //    for (QString& item : list) {
-//    //    //        QList<QString> d = item.split(',', QString::SkipEmptyParts);
-//    //    //        if (d.size() < 2)
-//    //    //            return false;
-//    //    //        int srcRow = d.at(0).toInt();
-//    //    //        ToolItem* ti = reinterpret_cast<ToolItem*>(d.at(1).toLongLong());
-//    //    //        QModelIndex index = createIndex(srcRow, 0, ti);
-//    //    //        moveRows(index, srcRow, 1, parent, parent.row() > -1 ? parent.row() : 0);
-//    //    //    }
-
-//    //    for (QString& item : list) {
-//    //        Node* copyItem = reinterpret_cast<Node*>(item.toLongLong());
-//    //        Node* parentItem = static_cast<Node*>(parent.internalPointer());
-//    //        if (copyItem) {
-//    //            if (!parentItem)
-//    //                parentItem = rootItem;
-//    //            insertRows(beginRow, list.size(), parent);
-//    //            if (parentItem->childCount() > beginRow)
-//    //                parentItem->setChild(beginRow, new Node(*copyItem));
-//    //            else
-//    //                parentItem->setChild(parentItem->childCount() - 1, new Node(*copyItem));
-//    //        }
-//    //        ++beginRow;
-//    //    }
-//    //    return true;
-//}
-
-// Qt::DropActions FileModel::supportedDragActions() const
-//{
-//     return Qt::MoveAction | Qt::TargetMoveAction;
-// }
-
-// Qt::DropActions FileModel::supportedDropActions() const
-//{
-//     return Qt::MoveAction | Qt::TargetMoveAction;
-// }
-
-// bool FileModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild)
-//{
-//     return false;
-//     //    beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-//     //    Node* srcItem = static_cast<Node*>(sourceParent.internalPointer());
-//     //    Node* dstItem = static_cast<Node*>(destinationParent.internalPointer());
-//     //    if (!srcItem)
-//     //        srcItem = rootItem;
-//     //    if (!dstItem)
-//     //        dstItem = rootItem;
-//     //    for (int r = 0; r < count; ++r) {
-//     //        dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
-//     //    }
-//     //    endMoveRows();
-//     //    return true;
-// }
 
 Node* Model::getItem(const QModelIndex& index) const {
     if (index.isValid()) {

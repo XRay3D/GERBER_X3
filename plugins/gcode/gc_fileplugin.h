@@ -1,22 +1,22 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
 
 #include <QObject>
 
 namespace GCode {
 
-class Plugin : public FilePlugin {
+class Plugin : public AbstractFilePlugin {
     Q_OBJECT
 
 public:
@@ -26,14 +26,14 @@ public:
     int type() const override;
     QString folderName() const override;
 
-    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
-    FileInterface* createFile() override;
+    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    AbstractFile* loadFile(QDataStream& stream) override;
 
     QIcon icon() const override;
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;
 
 public slots:
-    FileInterface* parseFile(const QString& fileName, int type) override;
+    AbstractFile* parseFile(const QString& fileName, int type) override;
 };
 
 } // namespace GCode

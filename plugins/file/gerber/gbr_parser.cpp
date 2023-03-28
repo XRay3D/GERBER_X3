@@ -3,16 +3,16 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gbr_parser.h"
 
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
 #include "gbr_aperture.h"
 #include "gbr_attraperfunction.h"
 #include "gbr_attrfilefunction.h"
@@ -56,7 +56,7 @@ QDebug operator<<(QDebug debug, const std::string_view& sw) {
     return debug;
 }
 
-Parser::Parser(FilePlugin* interface)
+Parser::Parser(AbstractFilePlugin* interface)
     : interface(interface) {
 }
 
@@ -65,7 +65,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
     mutex.lock();
     try {
 
-        reset(fileName);
+        file = new File;
+        file->setFileName(fileName);
+        reset(); // clear parser data
 
         file->lines() = cleanAndFormatFile(gerberLines);
         file->graphicObjects_.reserve(file->lines().size());
@@ -88,7 +90,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
                 auto data {toU16StrView(gLine)};
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
                 if (auto [whole, id, par] = ctre::match<ptrnDummy>(data); whole) {    ///*regexp.match(gLine)); match.hasMatch()*/) {
-                    // qDebug() << "dummy" << gLine << id.data() << par.data();
+
                     return true;
                 }
                 return false;
@@ -144,7 +146,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         qDebug() << file->shortName() << t.elapsed() << "ms";
 
         //        for (auto [key, val] : rel)
-        //            qDebug() << key << '\t' << val;
 
         if (file->graphicObjects_.empty()) {
             delete file;
@@ -167,7 +168,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             emit interface->fileReady(file);
             emit interface->fileProgress(file->shortName(), 1, 1);
         }
-        reset(""); // clear parser data
     } catch (const QString& errStr) {
         qWarning() << "exeption Q:" << errStr;
         emit interface->fileError("", file->shortName() + "\n" + errStr);
@@ -185,6 +185,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         //        emit interface->fileProgress(file->shortName(), 1, 1);
         delete file;
     }
+    reset(); // clear parser data
     mutex.unlock();
 }
 
@@ -457,9 +458,7 @@ void Parser::addFlash() {
     resetStep();
 }
 
-void Parser::reset(const QString& fileName) {
-    if (!fileName.isEmpty())
-        file = new File(fileName);
+void Parser::reset() {
     aperFunctionMap.clear();
     attAper = {};
     components.clear();
@@ -1030,7 +1029,7 @@ bool Parser::parseFormat(const QString& gLine) {
     static const QVector<QChar> coordinateValuesNotationList {'A', 'I'};
     static constexpr ctll::fixed_string ptrnFormat(R"(^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$)"); // fixed_string("^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$");
     if (auto [whole, c1, c2, c3, c4, c5, c6] = ctre::match<ptrnFormat>(data); whole) {
-        switch (zeroOmissionModeList.indexOf(CtreCapTo(c1).operator QString()[0])) {
+        switch (zeroOmissionModeList.indexOf(c1.data()[0])) {
         case OmitLeadingZeros:
             file->format().zeroOmisMode = OmitLeadingZeros;
             break;
@@ -1040,7 +1039,7 @@ bool Parser::parseFormat(const QString& gLine) {
             break;
 #endif
         }
-        switch (coordinateValuesNotationList.indexOf(CtreCapTo(c2).operator QString()[0])) {
+        switch (coordinateValuesNotationList.indexOf(c2.data()[0])) {
         case AbsoluteNotation:
             file->format().coordValueNotation = AbsoluteNotation;
             break;
@@ -1204,7 +1203,7 @@ bool Parser::parseLoadName(const QString& gLine) {
     auto data {toU16StrView(gLine)};
     static constexpr ctll::fixed_string ptrnLoadName(R"(^%LN(.+)\*%$)"); // fixed_string("^%LN(.+)\*%$");
     if (ctre::match<ptrnLoadName>(data)) {
-        // qDebug() << gLine << match.capturedTexts();
+
         return true;
     }
     return false;

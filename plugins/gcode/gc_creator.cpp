@@ -3,53 +3,74 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_creator.h"
+// #include "gc_file.h"
 #include "gc_file.h"
 #include "gc_types.h"
 
 #include "app.h"
+#include "gi_datapath.h"
 #include "gi_error.h"
+#include "gi_gcpath.h"
 #include "gi_point.h"
 #include "myclipper.h"
+#include "project.h"
 #include "utils.h"
 
 #include <execution> //std::execution::parallel_policy
 #include <set>
 #include <stdexcept>
 
-static int id = qRegisterMetaType<GCode::File*>("GCode::File*");
+class GCodeGbgFile final : public GCode::File {
+    QColor color;
 
-// struct dbg {
-//     dbg() { }
-//     template <class T>
-//     dbg(const T&) { }
-//     template <class T>
-//     dbg operator<<(const T&) { return *this; }
-// };
-// #define qDebug dbg
+public:
+    explicit GCodeGbgFile(GCode::GCodeParams&& gcp, Paths&& toolPaths, QColor color)
+        : GCode::File(std::move(gcp), {}, std::move(toolPaths))
+        , color {color} {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+    void write(QDataStream& stream) const override { }
+    void read(QDataStream& stream) override { }
+    void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
+    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
+    FileType type() const override { return FileType(-1); }
+    void createGi() override {
+        GraphicsItem* item;
+        item = new GiGcPath(pocketPaths_, this);
+        item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColorPtr(&color);
+        itemGroup()->push_back(item);
+        for (int i {}; i < pocketPaths_.size() - 1; ++i)
+            g0path_.emplace_back(Path {pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
+        item = new GiGcPath(g0path_);
+        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
+        itemGroup()->push_back(item);
+        itemGroup()->setVisible(true);
+    }
+    void genGcodeAndTile() override { } // saveLaserProfile({});
+};
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
     std::erase_if(ps, [](const Path& path) { return path.size() < 2; });
-
     if (ps.empty())
         return;
-
     if (close)
         std::ranges::for_each(ps, [](Path& p) { p.push_back(p.front()); });
-
-    // assert(ps.isEmpty());
-    GCode::GCodeParams gcp {tool, 0.0, GCode::Null};
-    gcp.color = color;
-    auto file = new GCode::File({ps}, std::move(gcp));
-    file->setFileName(fileName + "_" + tool.name());
-    // file->itemGroup()->setPen({ Qt::green, 0.0 });
+    GCode::GCodeParams gcp {tool, 0.0};
+    auto file = new GCodeGbgFile(std::move(gcp), std::move(ps), color);
+    file->setFileName(fileName);
     emit App::project()->addFileDbg(file);
 };
 
@@ -76,58 +97,55 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, Point::Type k, bool fl) {
-    qDebug(__FUNCTION__);
+Pathss& Creator::groupedPaths(Grouping group, Point::Type offset, bool skipFrame) {
     PolyTree polyTree;
-    Clipper clipper;
-    clipper.AddSubject(workingPs);
-    clipper.AddSubject({boundPaths(workingPs, k)});
-    clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
-
-    using F = void (*)(PolyTree&);
-
-    std::function<void(PolyTree&)> grouping = [&grouping, group, this](PolyTree& node) {
-        // qDebug() << __FUNCTION__ << "node" << node.Level() << "Polygon" << node.Polygon().size();
-        if ((group == Grouping::Cutoff) ^ node.IsHole()) {
-            Paths paths;
-            paths.reserve(node.Count() + 1);
-            paths.emplace_back(std::move(node.Polygon()));
-            for (auto&& child : node)
-                paths.emplace_back(std::move(child->Polygon()));
-            groupedPss.emplace_back(std::move(paths));
-        }
-        for (auto&& child : node)
-            grouping(*child);
-    };
-
+    {
+        Timer t("Union EvenOdd");
+        Clipper clipper;
+        clipper.AddSubject(workingPs);
+        clipper.AddSubject({boundOfPaths(workingPs, offset)});
+        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+    }
     groupedPss.clear();
     {
         Timer t("grouping");
-        grouping(polyTree.Count() == 1 ? *polyTree[0] : polyTree);
+        grouping(group, polyTree.Count() == 1 ? *polyTree[0] : polyTree);
     }
-
-    if (fl == false
+    if (skipFrame == false
         && group == Grouping::Cutoff
         && groupedPss.size() > 2
         && groupedPss.front().size() == 2) {
         groupedPss.erase(groupedPss.begin());
     }
-
     return groupedPss;
 }
 
-Path Creator::boundPaths(const Paths& paths, Point::Type k) const {
-    Rect rect(Bounds(workingPs));
+void Creator::grouping(Grouping group, PolyTree& node) {
+
+    if ((group == Grouping::Cutoff) ^ node.IsHole()) {
+        Paths paths;
+        paths.reserve(node.Count() + 1);
+        paths.emplace_back(std::move(node.Polygon()));
+        for (auto&& child : node)
+            paths.emplace_back(std::move(child->Polygon()));
+        groupedPss.emplace_back(std::move(paths));
+    }
+    for (auto&& child : node)
+        grouping(group, *child);
+}
+
+Path Creator::boundOfPaths(const Paths& paths, Point::Type k) const {
+    Rect rect(Bounds(paths));
     rect.bottom += k;
     rect.left -= k;
     rect.right += k;
     rect.top -= k;
+    // dbgPaths({rect.AsPath()}, "boundOfPaths", Qt::magenta);
     return rect.AsPath();
 }
-////////////////////////////////////////////////////////////////
-/// \brief Creator::addRawPaths
-/// \param paths
-///
+
+void Creator::addPaths(Paths&& paths) { workingPs.append(std::move(paths)); }
+
 void Creator::addRawPaths(Paths rawPaths) {
     qDebug(__FUNCTION__);
 
@@ -139,56 +157,54 @@ void Creator::addRawPaths(Paths rawPaths) {
     //        return;
     //    }
 
-    for (size_t i = 0; i < rawPaths.size(); ++i)
-        if (rawPaths[i].size() < 2)
-            rawPaths.erase(rawPaths.begin() + i--);
+    std::erase_if(rawPaths, [](auto&& path) { return path.size() < 2; });
 
-    const double glueLen = App::project()->glue() * uScale;
+    const double mergDist = App::project()->glue() * uScale;
+
     Clipper clipper;
-    for (size_t i = 0; i < rawPaths.size(); ++i) {
+    for (size_t i {}; i < rawPaths.size(); ++i) {
         Point& pf = rawPaths[i].front();
         Point& pl = rawPaths[i].back();
-        if (rawPaths[i].size() > 3 && (pf == pl || pf.distTo(pl) < glueLen)) {
+        if (rawPaths[i].size() > 3 && (pf == pl || pf.distTo(pl) < mergDist)) {
             clipper.AddSubject({rawPaths[i]});
             rawPaths.erase(rawPaths.begin() + i--);
         }
     }
 
-    mergeSegments(rawPaths, App::project()->glue() * uScale);
+    mergeSegments(rawPaths, mergDist);
 
     for (Path& path : rawPaths) {
         Point& pf = path.front();
         Point& pl = path.back();
-        if (path.size() > 3 && (pf == pl || pf.distTo(pl) < glueLen))
+        if (path.size() > 3 && (pf == pl || pf.distTo(pl) < mergDist))
             clipper.AddSubject({path});
         else
             workingRawPs.push_back(path);
     }
 
     Paths paths;
-    clipper.AddClip({boundPaths(rawPaths, uScale)});
+    clipper.AddClip({boundOfPaths(rawPaths, uScale)});
     clipper.Execute(ClipType::Xor, FillRule::EvenOdd, paths);
     workingPs.insert(workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
 }
 
-void Creator::addSupportPaths(Pathss supportPaths) { supportPss.append(supportPaths); }
-
-void Creator::addPaths(const Paths& paths) { workingPs.append(paths); }
+void Creator::addSupportPaths(Pathss supportPaths) { supportPss.append(std::move(supportPaths)); }
 
 void Creator::createGc() {
     qDebug(__FUNCTION__);
 
     try {
         if (type() == Profile || type() == Pocket || type() == Raster) {
-            try {
-                checkMillingFl = true;
-                checkMilling(gcp_.side());
-            } catch (const cancelException& e) {
-                ProgressCancel::reset();
-                qWarning() << "checkMilling canceled:" << e.what();
-            } catch (...) {
-                throw;
-            }
+            if (!App::isDebug())
+                try {
+                    checkMillingFl = true;
+                    checkMilling(gcp_.side());
+                } catch (const cancelException& e) {
+                    ProgressCancel::reset();
+                    qWarning() << "checkMilling canceled:" << e.what();
+                } catch (...) {
+                    throw;
+                }
         }
         if (!isCancel()) {
             checkMillingFl = false;
@@ -206,7 +222,7 @@ void Creator::createGc() {
     }
 }
 
-GCode::File* Creator::file() const { return file_; }
+File* Creator::file() const { return file_; }
 
 std::pair<int, int> Creator::getProgress() {
     return {max(), current()};
@@ -224,45 +240,45 @@ void Creator::stacking(Paths& paths) {
         Timer t("stacking 1");
         Clipper clipper;
         clipper.AddSubject(paths);
-        clipper.AddSubject({boundPaths(paths, uScale)});
+        clipper.AddSubject({boundOfPaths(paths, uScale)});
         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
         paths.clear();
     }
     sortPolyTreeByNesting(polyTree);
     returnPss.clear();
     /**************************************************************************************/
-
-    auto mathBE = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
-        QList<std::iterator_traits<Path::iterator>::difference_type> list;
-        list.push_back(idx.first);
+    // повернуть для уменшения дистанции между путями
+    auto rotateDiest = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
+        std::forward_list<decltype(Path {}.indexOf(Point {}))> list;
+        list.emplace_front(idx.first);
         for (size_t i = paths.size() - 1, index = idx.first; i; --i) {
-            double d = std::numeric_limits<double>::max();
-            Point pt;
-            for (const Point& pts : paths[i - 1]) {
-                double l = pts.distTo(paths[i][index]);
-                if (d >= l) {
-                    d = l;
-                    pt = pts;
+            double minDist = std::numeric_limits<double>::max();
+            Point point;
+            for (Point pt : paths[i - 1]) {
+                double dist = pt.distTo(paths[i][index]);
+                if (minDist >= dist) {
+                    minDist = dist;
+                    point = pt;
                 }
             }
-            if (d <= toolDiameter) {
-                list.prepend(paths[i - 1].indexOf(pt));
+            if (minDist <= toolDiameter) {
+                list.emplace_front(paths[i - 1].indexOf(point));
                 index = list.front();
             } else
                 return false;
         }
-        for (size_t i = 0; i < paths.size(); ++i)
-            std::rotate(paths[i].begin(), paths[i].begin() + list[i], paths[i].end());
+        for (size_t i {}; auto it : list)
+            std::rotate(paths[i].begin(), paths[i].begin() + it, paths[i].end()), ++i;
         std::rotate(path.begin(), path.begin() + idx.second, path.end());
         return true;
     };
 
     using Worck = std::pair<PolyTree*, bool>;
-    std::function<void(Worck)> stacker = [&stacker, &mathBE, this](Worck w) {
+    std::function<void(Worck)> stacker = [&stacker, &rotateDiest, this](Worck w) {
         auto [node, newPaths] = w;
         if (!returnPss.empty() || newPaths) {
             Path path(node->Polygon());
-            if (!(gcp_.convent() ^ !node->IsHole()) ^ !(gcp_.side() == Outer))
+            if (!(gcp_.convent() ^ !node->IsHole()) ^ (gcp_.side() == Outer))
                 ReversePath(path);
             //            if (App::settings().gbrCleanPolygons())
             //                CleanPolygon(path, uScale * 0.0005);
@@ -284,7 +300,7 @@ void Creator::stacking(Paths& paths) {
                         }
                     }
                 }
-                if (d <= toolDiameter && mathBE(returnPss.back(), path, idx))
+                if (d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
                     returnPss.back().push_back(path);
                 else
                     returnPss.push_back({path});
@@ -299,25 +315,30 @@ void Creator::stacking(Paths& paths) {
             // for (size_t i = 0, end = node->Count(); i < end; ++i)
             //     stacker({(*node)[i]->get(), true});
         }
-        // PROG setProgInc();
     };
     /**************************************************************************************/
-    // PROG .3setProgMax(polyTree.Total());
+
     stacker({&polyTree, false});
 
+    if (returnPss.front().size() == 1)
+        returnPss.remove(0); // remove frame (boundPaths + k)
+
     for (Paths& retPaths : returnPss) {
-        std::reverse(retPaths.begin(), retPaths.end());
-        for (size_t i = 0; i < retPaths.size(); ++i) {
+        //        dbgPaths(retPaths, __FUNCTION__, Qt::red);
+
+        for (size_t i = 0; i < retPaths.size(); ++i)
             if (retPaths[i].empty())
                 retPaths.erase(retPaths.begin() + i--);
-        }
+
+        std::ranges::reverse(retPaths);
+
         for (Path& path : retPaths)
             path.push_back(path.front());
     }
     sortB(returnPss);
 }
 
-void Creator::mergeSegments(Paths& paths, double glue) {
+void Creator::mergeSegments(Paths& paths, double maxDist) {
     qDebug(__FUNCTION__);
 
     size_t size;
@@ -354,7 +375,7 @@ void Creator::mergeSegments(Paths& paths, double glue) {
             }
         }
     } while (size != paths.size());
-    if (qFuzzyIsNull(glue))
+    if (qFuzzyIsNull(maxDist))
         return;
     do {
         size = paths.size();
@@ -368,19 +389,19 @@ void Creator::mergeSegments(Paths& paths, double glue) {
                     break;
                 Point pib = paths[i].back();
                 Point pjf = paths[j].front();
-                if (pib.distTo(pjf) < glue) {
+                if (pib.distTo(pjf) < maxDist) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
                 Point pif = paths[i].front();
                 Point pjb = paths[j].back();
-                if (pif.distTo(pjb) < glue) {
+                if (pif.distTo(pjb) < maxDist) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
-                if (pib.distTo(pjb) < glue) {
+                if (pib.distTo(pjb) < maxDist) {
                     ReversePath(paths[j]);
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
@@ -391,7 +412,7 @@ void Creator::mergeSegments(Paths& paths, double glue) {
     } while (size != paths.size());
 }
 
-void Creator::mergePaths(Paths& paths, const double dist) {
+void Creator::mergePaths(Paths& paths, const double maxDist) {
     qDebug(__FUNCTION__);
 
     msg = tr("Merge Paths");
@@ -425,18 +446,18 @@ void Creator::mergePaths(Paths& paths, const double dist) {
                 } else if (paths[j].front() == paths[i].back()) {
                     append(i, j);
                     break;
-                } else if (dist > 0.0) {
-                    if /*  */ (paths[i].back().distTo(paths[j].back()) < dist) {
+                } else if (maxDist > 0.0) {
+                    if /*  */ (paths[i].back().distTo(paths[j].back()) < maxDist) {
                         ReversePath(paths[j]);
                         append(i, j);
                         break; //
-                    } else if (paths[i].back().distTo(paths[j].front()) < dist) {
+                    } else if (paths[i].back().distTo(paths[j].front()) < maxDist) {
                         append(i, j);
                         break; //
-                    } else if (paths[i].front().distTo(paths[j].back()) < dist) {
+                    } else if (paths[i].front().distTo(paths[j].back()) < maxDist) {
                         append(j, i);
                         break;
-                    } else if (paths[i].front().distTo(paths[j].front()) < dist) {
+                    } else if (paths[i].front().distTo(paths[j].front()) < maxDist) {
                         ReversePath(paths[j]);
                         append(j, i);
                         break;
@@ -559,7 +580,6 @@ bool Creator::checkMilling(SideOfMilling side) {
             }
         });
         std::erase_if(checker, [](const auto& p) {
-            // qDebug() << "checker" << p.second.size();
             return p.second.size() < 2; // 5??
         });
         return checker;
@@ -637,7 +657,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             });
         } else {
             Paths srcPaths {workingPs};
-            srcPaths.emplace_back(boundPaths(workingPs, uScale));
+            srcPaths.emplace_back(boundOfPaths(workingPs, uScale));
 
             Paths frPaths = createFrame(srcPaths);
             CleanPaths(frPaths, uScale * 0.0001);
@@ -731,12 +751,12 @@ Paths& Creator::sortB(Paths& src) {
     return src;
 }
 
-Paths& Creator::sortBE(Paths& src) {
+Paths& Creator::sortBeginEnd(Paths& src) {
     qDebug(__FUNCTION__);
 
     Point startPt(App::home()->pos() + App::zero()->pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
-        // PROG //PROG .3setProgMaxAndVal(src.size(), firstIdx);
+
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
@@ -793,7 +813,7 @@ Pathss& Creator::sortB(Pathss& src) {
     return src;
 }
 
-Pathss& Creator::sortBE(Pathss& src) {
+Pathss& Creator::sortBeginEnd(Pathss& src) {
     qDebug(__FUNCTION__);
 
     Point startPt(App::home()->pos() + App::zero()->pos());
@@ -827,27 +847,6 @@ Pathss& Creator::sortBE(Pathss& src) {
         }
     }
     return src;
-}
-
-bool Creator::pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
-    qDebug(__FUNCTION__);
-
-    const size_t cnt = path.size();
-    if (cnt < 2)
-        return false;
-    QPointF p;
-    for (size_t i = 0; i < cnt; ++i) {
-        const Point& pt1 = path[(i + 1) % cnt];
-        const Point& pt2 = path[i];
-        QLineF l1(pt1, pt2);
-        if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
-            if (ret)
-                *ret = (p);
-            return true;
-        }
-    }
-
-    return false;
 }
 
 } // namespace GCode

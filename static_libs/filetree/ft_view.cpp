@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,9 +17,10 @@
 #include "ft_sidedelegate.h"
 #include "ft_textdelegate.h"
 #include "ft_typedelegate.h"
+#include "project.h"
 
-#include "file.h"
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
+#include "abstract_file.h"
 #include "qcheckbox.h"
 #include "shapepluginin.h"
 
@@ -74,7 +75,7 @@ void View::on_doubleClicked(const QModelIndex& index) {
         //            hideOther();
         //            {
         //                const int id = menuIndex_.data(Qt::UserRole).toInt();
-        //                GCode::File* file = static_cast<GCode::File*>(App::project()->file(id));
+        //                AbstractFile* file = static_cast<AbstractFile*>(App::project()->file(id));
         //                App::project()->showFiles(file->gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>().keys());
         //                file->gcp_.fileId = file->id();
         //                App::mainWindow()->editGcFile(file);
@@ -121,6 +122,11 @@ void View::closeFiles() {
     model_->removeRows(0, childCount_, menuIndex_);
 }
 
+void View::closeAllFiles(FileType type) {
+    // WARNING   model_->createIndex(0, 0, &model_->fileFolders[type]);
+    model_->removeRows(0, childCount_, menuIndex_);
+}
+
 void View::setModel(QAbstractItemModel* model) {
     QTreeView::setModel(model_ = static_cast<Model*>(model));
 
@@ -147,26 +153,29 @@ void View::setModel(QAbstractItemModel* model) {
     {
         setIconSize(QSize(24, 24));
         const int w = indentation();
-        const int h = rowHeight(model->index(0, 0, QModelIndex()));
-        QImage i(w, h, QImage::Format_ARGB32);
-        QPainter p(&i);
-        p.setPen(QColor(128, 128, 128));
-        // │
-        i.fill(Qt::transparent);
-        p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
-        i.save("settings/vline.png", "PNG");
-        // ├─
-        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-        i.save("settings/branch-more.png", "PNG");
-        // └─
-        i.fill(Qt::transparent);
-        p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
-        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-        i.save("settings/branch-end.png", "PNG");
-        QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-        file.open(QFile::ReadOnly);
-        setStyleSheet(file.readAll());
-        header()->setMinimumHeight(h);
+        const QModelIndex& row = model->index(0, 0, QModelIndex());
+        if (row.isValid()) {
+            const int h = rowHeight(row);
+            QImage i(w, h, QImage::Format_ARGB32);
+            QPainter p(&i);
+            p.setPen(QColor(128, 128, 128));
+            // │
+            i.fill(Qt::transparent);
+            p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
+            i.save("settings/vline.png", "PNG");
+            // ├─
+            p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+            i.save("settings/branch-more.png", "PNG");
+            // └─
+            i.fill(Qt::transparent);
+            p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
+            p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+            i.save("settings/branch-end.png", "PNG");
+            QFile file(":/qtreeviewstylesheet/QTreeView.qss");
+            file.open(QFile::ReadOnly);
+            setStyleSheet(file.readAll());
+            header()->setMinimumHeight(h);
+        }
     }
 }
 
@@ -180,11 +189,11 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
     QMenu menu(this);
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
     if (menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
-        const int type = menuIndex_.data(Role::Id).toInt();
+        const FileType type = menuIndex_.data(Role::Id).value<FileType>();
         const int cType = menuIndex_.data(Role::ContentType).toInt();
         if (cType == Type::File) {
             App::filePlugin(type)->createMainMenu(menu, this);
-        } else if (cType == Type::Shape) {
+        } else if (cType == Type::AbstractShape) {
             App::shapePlugins().begin()->second->createMainMenu(menu, this);
         }
     } else {
@@ -208,12 +217,12 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                 menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
                     QDialog dialog(this);
                     dialog.setMaximumSize(0, 0);
-                    dialog.setWindowTitle(tr("Transform"));
-                    QLabel la("Angle:", &dialog);
-                    QLabel lx("Translate X:", &dialog);
-                    QLabel ly("Translate Y:", &dialog);
-                    QLabel lsx("Scale X:", &dialog);
-                    QLabel lsy("Scale Y:", &dialog);
+                    dialog.setWindowTitle(tr("Affine Transform"));
+                    QLabel la(tr("Angle:"), &dialog);
+                    QLabel lx(tr("Translate X:"), &dialog);
+                    QLabel ly(tr("Translate Y:"), &dialog);
+                    QLabel lsx(tr("Scale X:"), &dialog);
+                    QLabel lsy(tr("Scale Y:"), &dialog);
                     DoubleSpinBox dsbxAng(&dialog);
                     DoubleSpinBox dsbxTrX(&dialog);
                     DoubleSpinBox dsbxTrY(&dialog);

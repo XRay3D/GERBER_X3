@@ -3,20 +3,20 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "hatching.h"
 
-#include "gc_file.h"
+#include "file.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
-    #include <execution>
+#include <execution>
 #endif
 #include "gi_point.h"
 
@@ -57,12 +57,12 @@ HatchingCreator::HatchingCreator() {
 }
 
 void HatchingCreator::create() {
-    createRaster(
-        gcp_.tools.front(),
-        gcp_.params[GCodeParams::Depth].toDouble(),
-        gcp_.params[GCodeParams::UseAngle].toDouble(),
-        gcp_.params[GCodeParams::HathStep].toDouble(),
-        gcp_.params[GCodeParams::Pass].toInt());
+    //    createRaster(
+    //        gcp_.tools.front(),
+    //        gcp_.params[GCodeParams::Depth].toDouble(),
+    //        gcp_.params[GCodeParams::UseAngle].toDouble(),
+    //        gcp_.params[GCodeParams::HathStep].toDouble(),
+    //        gcp_.params[GCodeParams::Pass].toInt());
 }
 
 void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
@@ -295,8 +295,8 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = Hatching;
-        file_ = new File(returnPss, std::move(gcp_));
+
+        file_ = new CrosshatchFile(std::move(gcp_), std::move(returnPss), {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

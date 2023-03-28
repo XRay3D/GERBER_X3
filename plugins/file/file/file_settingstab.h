@@ -1,12 +1,12 @@
 #pragma once
 
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
 #include "file_types.h"
 #include <QWidget>
 
 namespace TmpFile {
 
-class ExSettingsTab : public SettingsTabInterface, Settings {
+class ExSettingsTab : public AbstractFileSettings, Settings {
     friend class ExcellonDialog;
 
     DoubleSpinBox* dsbxX;

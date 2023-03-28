@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,10 +11,10 @@
 #pragma once
 
 // https://help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
+#include "abstract_file.h"
 #include "dxf_block.h"
 #include "dxf_codedata.h"
 #include "dxf_types.h"
-#include "file.h"
 #include "gi_group.h"
 
 #include <QDebug>
@@ -32,7 +32,7 @@ class LayerModel;
 class NodeLayer;
 struct SectionParser;
 
-class File : public FileInterface {
+class File : public AbstractFile {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Plugin;
@@ -40,6 +40,7 @@ class File : public FileInterface {
     friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
 
 public:
+    using AbstractFile::AbstractFile;
     explicit File();
     ~File();
     Layer* layer(const QString& name);
@@ -69,9 +70,9 @@ private:
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
     void grouping(PolyTree& node, Group group);
 
-    // FileInterface interface
+    // AbstractFile interface
 public:
-    void initFrom(FileInterface* file) override;
+    void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
     FileType type() const override;
     void createGi() override;

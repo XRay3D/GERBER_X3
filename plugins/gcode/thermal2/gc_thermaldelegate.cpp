@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -31,7 +31,7 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
         dsbx->setSingleStep(15);
         dsbx->setDecimals(2);
         dsbx->setAlignment(Qt::AlignCenter);
-        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
+        connect(dsbx, &QDoubleSpinBox::valueChanged, this, &ThermalDelegate::emitCommitData);
         return dsbx;
     }
     case ThermalModel::apThickness: {
@@ -40,7 +40,7 @@ QWidget* ThermalDelegate::createEditor(QWidget* parent, const QStyleOptionViewIt
         dsbx->setSingleStep(0.05);
         dsbx->setDecimals(2);
         dsbx->setAlignment(Qt::AlignCenter);
-        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ThermalDelegate::emitCommitData);
+        connect(dsbx, &QDoubleSpinBox::valueChanged, this, &ThermalDelegate::emitCommitData);
         return dsbx;
     }
     case ThermalModel::GapCount: {

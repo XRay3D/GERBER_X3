@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -21,11 +21,11 @@ Parser::Cmd Parser::toCmd(const QStringRef& key) {
     return static_cast<Cmd>(staticMetaObject.enumerator(0).keyToValue(key.toLocal8Bit().data()));
 }
 
-Parser::Parser(FilePlugin* const interface)
+Parser::Parser(AbstractFilePlugin* const interface)
     : interface(interface) {
 }
 
-FileInterface* Parser::parseFile(const QString& fileName) {
+AbstractFile* Parser::parseFile(const QString& fileName) {
     QFile file_(fileName);
     if (!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;

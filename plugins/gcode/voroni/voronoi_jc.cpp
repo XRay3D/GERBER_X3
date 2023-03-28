@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -42,7 +42,7 @@ void VoronoiJc::jcVoronoi() {
             }
         }
     };
-    // PROG //PROG .3setProgMaxAndVal(7, 1); // progress
+
     for (const Paths& paths : groupedPss) {
         for (const Path& path : paths) {
             Point tmp(path.front());
@@ -55,7 +55,7 @@ void VoronoiJc::jcVoronoi() {
         }
         ++id;
     }
-    // PROG //PROG .3setProgMaxAndVal(7, 2); // progress
+
     for (const Path& path : workingRawPs) {
         Point tmp(path.front());
         for (const Point& point : path) {
@@ -104,7 +104,6 @@ void VoronoiJc::jcVoronoi() {
 
     for (const auto& [key, edge] : edges) {
         returnPs.append(toPath(edge));
-        // PROG //PROG .3setProgMaxAndVal(edges.size(), returnPs_.size()); // progress
     }
     mergePaths(returnPs, 0.005 * uScale);
     returnPs.append(toPath(frame));
@@ -115,7 +114,7 @@ void VoronoiJc::jcVoronoi() {
 }
 
 Paths VoronoiJc::toPath(const Pairs& pairs) {
-    msg = tr("Merge Segments");
+    msg = QObject::tr("Merge Segments");
 
     mvector<Pair> pairsVec;
     pairsVec.reserve(pairs.size());

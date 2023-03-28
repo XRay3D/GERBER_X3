@@ -3,19 +3,20 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_form.h"
+#include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "drill_model.h"
 #include "ui_drillform.h"
 
-#include "drill_gi_preview.h"
+#include "file.h"
 #include "gi_point.h"
 #include "gi_preview.h"
 #include "graphicsview.h"
@@ -114,7 +115,7 @@ void Form::updateFiles() {
     disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
 
     ui->cbxFile->clear();
-    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber, FileType::Dxf}))
+    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber_, FileType::Dxf_}))
         App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
@@ -127,7 +128,7 @@ bool Form::canToShow() {
         return true;
 
     QComboBox cbx;
-    for (auto type : {FileType::Gerber, FileType::Dxf}) {
+    for (auto type : {FileType::Gerber_, FileType::Dxf_}) {
         for (auto file : App::project()->files(type)) {
             App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
             if (cbx.count())
@@ -174,14 +175,14 @@ void Form::initToolTable() {
 }
 
 void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
-    file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
+    file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
     if (!file)
         return;
     switch (file->type()) {
-    case FileType::Gerber:
+    case FileType::Gerber_:
         type_ = "_D";
         break;
-    case FileType::Dxf:
+    case FileType::Dxf_:
         type_ = "_DXF";
         break;
     case FileType::Excellon:
@@ -397,7 +398,7 @@ void Form::zoomToSelected() {
         App::graphicsView()->zoomToSelected();
 }
 
-void Form::createFile() {
+void Form::сomputePaths() {
     auto indexes = [](const auto& range) {
         QString indexes;
         for (int id : range) {
@@ -433,7 +434,7 @@ void Form::createFile() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                GCode::File* gcode = new GCode::File({pathsMap[usedToolId].paths}, {App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCode::Profile});
+                GCode::File* gcode = new GCode::ProfileFile({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCode::Profile}, {pathsMap[usedToolId].paths});
                 gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -521,7 +522,7 @@ void Form::createFile() {
                         point1 = val.drillPath[counter++];
                     }
                 }
-                GCode::File* gcode = new GCode::File({{val.drillPath}}, {App::toolHolder().tool(toolId), dsbxDepth->value(), GCode::Drill});
+                GCode::File* gcode = new GCode::DrillFile({App::toolHolder().tool(toolId), dsbxDepth->value(), GCode::Drill}, {{val.drillPath}}, {});
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + type_ + indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);

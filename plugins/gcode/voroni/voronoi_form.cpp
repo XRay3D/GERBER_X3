@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -44,7 +44,7 @@ VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
     connect(dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
     connect(leName, &QLineEdit::textChanged, this, &VoronoiForm::onNameTextChanged);
     //
-    connect(ui->dsbxWidth, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &VoronoiForm::setWidth);
+    connect(ui->dsbxWidth, &QDoubleSpinBox::valueChanged, this, &VoronoiForm::setWidth);
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
 
     updateName();
@@ -62,7 +62,7 @@ VoronoiForm::~VoronoiForm() {
     delete ui;
 }
 
-void VoronoiForm::createFile() {
+void VoronoiForm::сomputePaths() {
     const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -71,7 +71,7 @@ void VoronoiForm::createFile() {
 
     Paths wPaths;
     Paths wRawPaths;
-    FileInterface const* file = nullptr;
+    AbstractFile const* file = nullptr;
     bool skip {true};
 
     auto testFile = [&file, &skip, this](GraphicsItem* gi) -> bool {
@@ -88,7 +88,7 @@ void VoronoiForm::createFile() {
         return {};
     };
 
-    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
+    for (auto* item : App::graphicsView()->selectedItems()) {
         auto gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiType::DataSolid:

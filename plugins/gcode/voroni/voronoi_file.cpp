@@ -713,7 +713,7 @@ void File::read(QDataStream& stream) {
         [[fallthrough]];
     case ProVer_1:;
     }
-    //    stream >> *static_cast<FileInterface*>(this);
+    //    stream >> *static_cast<AbstractFile*>(this);
     // _read(stream);
 }
 

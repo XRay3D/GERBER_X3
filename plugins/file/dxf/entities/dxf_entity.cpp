@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -81,7 +81,7 @@ std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionPa
     case Entity::SEQEND:
         return std::make_shared<SeqEnd>(sp);
     case Entity::SHAPE:
-        return std::make_shared<Shape>(sp);
+        return std::make_shared<AbstractShape>(sp);
     case Entity::SOLID:
         return std::make_shared<Solid>(sp);
     case Entity::SPLINE:
@@ -171,74 +171,74 @@ void Entity::parse(CodeData& code) {
         //        break;
 
     case EntityName: //  -1
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case EntityType: // 0
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case Handle: // 5
         handle = code.string();
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case SoftPointerID: // 330
         softPointerID = code.string();
-        //        qDebug() << DataEnum(code.code()) << code;
+
         break;
     case HardOwnerID: // 360
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case SubclassMarker: // 100
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case E67: // 67
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case E410: // 410
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LayerName: // 8
         layerName = code.string();
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LineType: // 6
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case E347: // 347
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case ColorNumber: // 62
         colorNumber = code;
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LineWeight: // 370
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LineTypeScale: // 48
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case Visibility: // 60
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case NumberOfBytes: // 92
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case BinaryChunk: // 310
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case A24bitColor: // 420
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case ColorName: // 430
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case TransparencyValue: // 440
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case PlotStyleID: // 390
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case ShadowMode: // 284
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     default:
         qDebug() << __FUNCTION__ << "default" << code;

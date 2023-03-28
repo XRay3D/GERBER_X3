@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,22 +13,25 @@
 #include "voronoi_boost.h"
 
 #if __has_include(<boost/polygon/voronoi.hpp>)
-    #include "mvector.h"
+#include "mvector.h"
 
-    #include <cstdio>
-    #include <vector>
+#include <cstdio>
+#include <vector>
 
-    #pragma warning(push)
-    #pragma warning(disable : 5055)
-    #pragma GCC diagnostic push
-    #pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
-    // Your function
-    #include "voronoi_visual_utils.h"
-    #include <boost/polygon/polygon.hpp>
-    #include <boost/polygon/voronoi.hpp>
+#if defined(__GNUC__) && (__GNUC__ >= 7)
+#pragma warning(push)
+#pragma warning(disable : 5055)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
+// Your function
+#include "voronoi_visual_utils.h"
+#include <boost/polygon/polygon.hpp>
+#include <boost/polygon/voronoi.hpp>
 
-    #pragma GCC diagnostic pop
-    #pragma warning(pop)
+#pragma GCC diagnostic pop
+#pragma warning(pop)
+#endif
 
 using boost::polygon::high;
 using boost::polygon::low;
@@ -83,7 +86,6 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
-    //    qDebug() << "discretize" << sampled_edge.size();
     Path path;
     path.reserve(sampled_edge.size());
     for (const auto& p : sampled_edge)
@@ -102,7 +104,7 @@ void VoronoiBoost::boostVoronoi() {
 
     int id = 0, id2 = 0;
     // add line segments to diagram
-    msg = tr("Calc BOOST Voronoi");
+    msg = QObject::tr("Calc BOOST Voronoi");
 
     size_t max {};
     for (const Paths& paths : groupedPss)

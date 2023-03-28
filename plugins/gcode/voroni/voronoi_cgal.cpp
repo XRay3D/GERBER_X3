@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -73,14 +73,14 @@ namespace GCode {
 
 void VoronoiCgal::cgalVoronoi() {
     Point::Type minX = std::numeric_limits<Point::Type>::max(),
-         minY = std::numeric_limits<Point::Type>::max(),
-         maxX = std::numeric_limits<Point::Type>::min(),
-         maxY = std::numeric_limits<Point::Type>::min();
+                minY = std::numeric_limits<Point::Type>::max(),
+                maxX = std::numeric_limits<Point::Type>::min(),
+                maxY = std::numeric_limits<Point::Type>::min();
     //    progress(4, 0);
     SDG2 sdg;
     int id = 0;
     // add line segments to diagram
-    msg = tr("Calc CGAL Voronoi");
+    msg = QObject::tr("Calc CGAL Voronoi");
 
     size_t max {};
     for (const Paths& paths : groupedPss_)

@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,7 +24,7 @@ Plugin::Plugin(QObject* parent)
     : QObject(parent) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
+AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     QFile file(fileName);
@@ -51,7 +51,7 @@ int Plugin::type() const { return int(FileType::Hpgl); }
 
 QString Plugin::folderName() const { return tr("Dxf Files"); }
 
-FileInterface* Plugin::createFile() { return new File(); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
 
 QJsonObject Plugin::info() const {
     return QJsonObject {
@@ -62,8 +62,8 @@ QJsonObject Plugin::info() const {
     };
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
-    class Tab : public SettingsTabInterface, Settings {
+AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
+    class Tab : public AbstractFileSettings, Settings {
         QCheckBox* chbxBoldFont;
         QCheckBox* chbxItalicFont;
         QCheckBox* chbxOverrideFonts;
@@ -71,7 +71,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
 
     public:
         Tab(QWidget* parent = nullptr)
-            : SettingsTabInterface(parent) {
+            : AbstractFileSettings(parent) {
             setObjectName(QString::fromUtf8("tabDxf"));
             auto verticalLayout = new QVBoxLayout(this);
             verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
@@ -155,7 +155,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     return nullptr;
 }
 
-void Plugin::updateFileModel(FileInterface* file) {
+void Plugin::updateFileModel(AbstractFile* file) {
     const auto fm = App::fileModel();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
@@ -170,13 +170,13 @@ void Plugin::updateFileModel(FileInterface* file) {
     //    }
     //    Hpgl::Layers layers;
     //    for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
-    //        qDebug() << name << layer;
+
     //        if (!layer->isEmpty())
     //            layers[name] = layer;
     //    }
     //    fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     //    for (auto& [name, layer] : layers) {
-    //        qDebug() << name << layer;
+
     //        fm->getItem(index)->addChild(new Hpgl::NodeLayer(name, layer));
     //    }
     //    fm->endInsertRows_();

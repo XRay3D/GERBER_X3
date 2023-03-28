@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -21,8 +21,8 @@
 
 namespace Shapes {
 
-Node::Node(Shape* shape)
-    : FileTree::Node(shape->id_, FileTree::Shape)
+Node::Node(AbstractShape* shape)
+    : FileTree::Node(FileTree::AbstractShape)
     , shape(shape) {
 }
 
@@ -128,5 +128,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     //        });
     //    }
 }
+
+int Node::id() const { return shape->id(); }
 
 } // namespace Shapes

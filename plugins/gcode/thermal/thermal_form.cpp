@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -132,7 +132,7 @@ void Form::updateFiles() {
 
     ui->cbxFile->clear();
 
-    for (auto file : App::project()->files(FileType::Gerber))
+    for (auto file : App::project()->files(FileType::Gerber_))
         App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
@@ -142,7 +142,7 @@ void Form::updateFiles() {
 
 bool Form::canToShow() {
     QComboBox cbx;
-    for (auto file : App::project()->files(FileType::Gerber)) {
+    for (auto file : App::project()->files(FileType::Gerber_)) {
         App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
         if (cbx.count())
             return true;
@@ -154,7 +154,7 @@ bool Form::canToShow() {
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void Form::createFile() {
+void Form::сomputePaths() {
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -175,7 +175,7 @@ void Form::createFile() {
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
     gpc.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
+    gpc.params[GCode::GCodeParams::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     gcCreator->setGcp(gpc);
     gcCreator->addPaths(wPaths);
@@ -191,13 +191,13 @@ void Form::updateName() {
 }
 
 void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
-    FileInterface* file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
+    AbstractFile* file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
     createTPI(file);
 }
 
-void Form::createTPI(FileInterface* file) {
+void Form::createTPI(AbstractFile* file) {
     if (!file)
-        file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
+        file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
     items_.clear();
 
     if (model)
@@ -242,13 +242,13 @@ void Form::createTPI(FileInterface* file) {
     }
 
     for (auto& item : items_) {
-        App::graphicsView()->scene()->addItem(item.get());
+        App::graphicsView()->addItem(item.get());
         connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
     }
 
     ui->treeView->setModel(model);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Form::onSelectionChanged);
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin"))
+    if (0 && App::isDebug())
         ui->treeView->expandAll();
 }
 
