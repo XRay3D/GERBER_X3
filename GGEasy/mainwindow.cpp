@@ -112,18 +112,18 @@ MainWindow::MainWindow(QWidget* parent)
         int k = 100;
 
         if (0) {
-            QDir dir(R"(E:\YandexDisk\G2G\RefUcamco Gerber\pcb_fabrication_data_in_gerber_example_2)");
+            QDir dir(R"(C:\Users\bakiev\Documents\TopoR\Examples\Example_02)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
-            if (!dir.exists())
-                break;
-            for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
-                str = dir.path() + '/' + str;
-                QTimer::singleShot(i += k, [this, str] { loadFile(str); });
-                //                break;
-            }
+            if (dir.exists())
+                for (QString str : dir.entryList(/*{"*.gbr"}, QDir::Files*/)) {
+                    str = dir.path() + '/' + str;
+                    QTimer::singleShot(i += k, [this, str] { loadFile(str); });
+                    // break;
+                }
         }
+
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
