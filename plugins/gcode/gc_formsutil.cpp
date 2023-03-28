@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,28 +13,28 @@
 #include "gc_formsutil.h"
 
 #include "app.h"
+#include "abstract_file.h"
 #include "gi_error.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "qprogressdialog.h"
+
 #include <QAbstractTableModel>
 #include <QHeaderView>
 #include <QIcon>
 #include <QPainter>
+#include <QProgressDialog>
 #include <QPushButton>
 #include <QTableView>
-#include <QtWidgets/QAbstractButton>
-#include <QtWidgets/QApplication>
-#include <QtWidgets/QDialog>
-#include <QtWidgets/QDialogButtonBox>
-#include <QtWidgets/QVBoxLayout>
+#include <QtWidgets>
+
 #include <condition_variable>
 #include <execution>
 #include <mutex>
 #include <ranges>
 #include <sstream>
 
-const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+static const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
+static const int GCodeFileId = qRegisterMetaType<GCode::File*>("GCode::File*");
 
 inline QIcon errorIcon(const QPainterPath& path) {
 
@@ -104,9 +104,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
         if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
             if (section == 0) {
-                return tr("Position");
+                return QObject::tr("Position");
             } else {
-                return tr("Area mm²");
+                return QObject::tr("Area mm²");
             }
         }
         return QAbstractTableModel::headerData(section, orientation, role);
@@ -156,64 +156,6 @@ protected:
     }
 };
 
-class ProgressDialog : public QDialog {
-public:
-    //        QProgressDialog(const QString& labelText, const QString& cancelButtonText, int minimum, int maximum, QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    //        QProgressDialog(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags());
-    ProgressDialog(QWidget* parent = nullptr, Qt::WindowFlags f = Qt::WindowFlags())
-        : QDialog {parent, f} {
-        layout.addWidget(&label);
-        layout.addWidget(&progressBar);
-        layout.addWidget(&buttonBox);
-
-        resize(400, 1);
-        buttonBox.setOrientation(Qt::Horizontal);
-        buttonBox.setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Discard);
-
-        retranslateUi(this);
-        QObject::connect(&buttonBox, &QDialogButtonBox::accepted, this, qOverload<>(&QDialog::accept));
-        QObject::connect(&buttonBox, &QDialogButtonBox::rejected, this, qOverload<>(&QDialog::reject));
-        QMetaObject::connectSlotsByName(this);
-    }
-
-    virtual ~ProgressDialog() = default;
-
-    void retranslateUi(QDialog* Dialog) {
-        Dialog->setWindowTitle(QCoreApplication::translate("Dialog", "Dialog", nullptr));
-    }
-
-    bool autoClose() const;
-    bool autoReset() const;
-    QString labelText() const;
-    int maximum() const;
-    int minimum() const;
-    int minimumDuration() const { qDebug(__FUNCTION__); }
-    void open(QObject* receiver, const char* member);
-    void setAutoClose(bool close) { qDebug(__FUNCTION__); }
-    void setAutoReset(bool reset) { qDebug(__FUNCTION__); }
-    void setBar(QProgressBar* bar);
-    void setCancelButton(QPushButton* cancelButton);
-    void setLabel(QLabel* label);
-    int value() const;
-    bool wasCanceled() const;
-
-    public /*slots*/:
-    void cancel();
-    void reset() { qDebug(__FUNCTION__); }
-    void setCancelButtonText(const QString& cancelButtonText);
-    void setLabelText(const QString& text) { label.setText(text); }
-    void setMaximum(int maximum) { progressBar.setMaximum(maximum); }
-    void setMinimum(int minimum);
-    void setMinimumDuration(int ms) { qDebug(__FUNCTION__); };
-    void setRange(int minimum, int maximum);
-    void setValue(int progress) { show(), progressBar.setValue(progress); }
-
-    QVBoxLayout layout {this};
-    QLabel label {this};
-    QProgressBar progressBar {this};
-    QDialogButtonBox buttonBox {this};
-};
-
 GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
     : QWidget(parent)
     , plugin {plugin}
@@ -241,7 +183,7 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
         pbCreate = new QPushButton(tr("Create"), ctrWidget);
         pbCreate->setIcon(QIcon::fromTheme("document-export"));
         pbCreate->setObjectName("pbCreate");
-        connect(pbCreate, &QPushButton::clicked, this, &GcFormBase::createFile);
+        connect(pbCreate, &QPushButton::clicked, this, &GcFormBase::сomputePaths);
 
         auto line = [this] {
             auto line = new QFrame(ctrWidget);
@@ -256,15 +198,17 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
 
         int row {};
         constexpr int rowSpan {1}, columnSpan {2};
-        grid->addWidget(dsbxDepth, row, 0, rowSpan, columnSpan);           // row 0
-        grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 1
-        grid->addWidget(content, ++row, 0, rowSpan, columnSpan);           // row 2
-        grid->addWidget(line(), ++row, 0, rowSpan, columnSpan);            // row 3
-        grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);          // row 4
-        grid->addWidget(leName, row, 1);                                   // row 4
-        grid->addWidget(pbCreate, ++row, 0, rowSpan, columnSpan);          // row 5
-        grid->addWidget(pbClose, ++row, 0, rowSpan, columnSpan);           // row 6
-        grid->addWidget(new QWidget(this), ++row, 0, rowSpan, columnSpan); // row 7
+        // clang-format off
+        grid->addWidget(dsbxDepth,                       row, 0, rowSpan, columnSpan); // row 0
+        grid->addWidget(line(),                        ++row, 0, rowSpan, columnSpan); // row 1
+        grid->addWidget(content,                       ++row, 0, rowSpan, columnSpan); // row 2
+        grid->addWidget(line(),                        ++row, 0, rowSpan, columnSpan); // row 3
+        grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);                      // row 4
+        grid->addWidget(leName,                          row, 1);                      // row 4
+        grid->addWidget(pbCreate,                      ++row, 0, rowSpan, columnSpan); // row 5
+        grid->addWidget(pbClose,                       ++row, 0, rowSpan, columnSpan); // row 6
+        grid->addWidget(new QWidget(this),             ++row, 0, rowSpan, columnSpan); // row 7
+        // clang-format on
         grid->setRowStretch(row, 1);
     }
     { // On Error
@@ -322,7 +266,11 @@ void GcFormBase::fileHandler(GCode::File* file) {
         cancel();
 
     if (file == nullptr) {
-        QMessageBox::information(this, tr("Warning"), tr("The tool doesn`t fit in the Working items!"));
+        auto message = tr("The tool doesn`t fit in the Working items!");
+        if (App::isDebug())
+            qDebug() << __FUNCTION__ << message;
+        else
+            QMessageBox::information(this, tr("Warning"), message);
         return;
     }
 
@@ -349,8 +297,8 @@ void GcFormBase::timerEvent(QTimerEvent* event) {
 
 void GcFormBase::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
-        FileInterface const* file = gi->file();
-        //        if (file->type() == FileType::Gerber) {
+        //        GCode::File const* file = gi->file();
+        //        if (file->type() == FileType::Gerber_) {
         // #ifdef GBR_
         //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
         // #endif
@@ -377,7 +325,7 @@ void GcFormBase::errorHandler(int) {
     ctrWidget->setVisible(false);
     errWidget->setVisible(true);
 
-    std::ranges::for_each(gcCreator->items, [](auto i) { App::graphicsView()->scene()->addItem(i); });
+    std::ranges::for_each(gcCreator->items, [](auto i) { App::graphicsView()->addItem(i); });
 
     errTable->setModel(new ErrorModel(std::move(gcCreator->items), errTable));
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);

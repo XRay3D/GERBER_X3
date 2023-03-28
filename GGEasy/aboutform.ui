@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>Dialog</string>
+   <string>About</string>
   </property>
   <layout class="QVBoxLayout" name="verticalLayout">
    <property name="leftMargin">
@@ -29,7 +29,7 @@
    <item>
     <widget class="QLabel" name="label_2">
      <property name="text">
-      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;This is a &amp;quot;Beta version&amp;quot; and does not reflect the final quality of the software.&lt;br/&gt;The program is provided AS IS without any guarantees or warranty.&lt;br/&gt;Use at your own risk.&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;Это &amp;quot;бета-версия&amp;quot; и не отображает финального качества программы.&lt;br/&gt;Программа поставляется &amp;quot;Как Есть&amp;quot;, автор не несёт никакой ответственности за возможный принесённый ущерб.&lt;br/&gt;Используйте на свой страх и риск.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
+      <string>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600; color:#ff0000;&quot;&gt;This is a &amp;quot;Beta version&amp;quot; and does not reflect the final quality of the software.&lt;br/&gt;The program is provided AS IS without any guarantees or warranty.&lt;br/&gt;Use at your own risk.&lt;/span&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</string>
      </property>
      <property name="wordWrap">
       <bool>true</bool>

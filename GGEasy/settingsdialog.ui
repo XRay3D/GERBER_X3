@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>392</width>
+    <width>436</width>
     <height>517</height>
    </rect>
   </property>
@@ -415,6 +415,11 @@
             </item>
             <item>
              <property name="text">
+              <string>Center</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
               <string>Always Zero</string>
              </property>
             </item>
@@ -506,6 +511,11 @@
             <item>
              <property name="text">
               <string>Bottom Right</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Center</string>
              </property>
             </item>
             <item>

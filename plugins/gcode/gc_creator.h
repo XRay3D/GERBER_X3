@@ -1,47 +1,47 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "abstract_file.h"
 #include "gc_types.h"
-#include <condition_variable>
-#include <myclipper.h>
+#include "myclipper.h"
+#include "utils.h"
 
 #include <QObject>
 
-// #include "app.h"
-// #include "gi_error.h"
-// #include "graphicsview.h"
-// #include <QAbstractTableModel>
-// #include <QHeaderView>
-// #include <QIcon>
-// #include <QPainter>
-// #include <QPushButton>
-// #include <QTableView>
-// #include <QtWidgets/QAbstractButton>
-// #include <QtWidgets/QApplication>
-// #include <QtWidgets/QDialog>
-// #include <QtWidgets/QDialogButtonBox>
-// #include <QtWidgets/QVBoxLayout>
-// #include <condition_variable>
+#include <condition_variable>
 #include <mutex>
 #include <sstream>
 
-#if __has_include(<source_location>)
-    #include <source_location>
-using sl = std::source_location;
-#else
-    #include <experimental/source_location>
-using sl = std::experimental::source_location;
-#endif
+#include <ranges>
+namespace ranges = std::ranges;
+namespace rviews = std::ranges::views;
+
+// #if __has_include(<source_location>)
+//     #include <source_location>
+// using sl = std::source_location;
+// #else
+//     #include <experimental/source_location>
+// using sl = std::experimental::source_location;
+// #endif
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
+
+inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
+    if (pss.empty())
+        return;
+    for (auto&& paths : pss.midRef(1))
+        pss.front().append(std::move(paths));
+    dbgPaths(pss.front(), fileName, color, closed, tool);
+}
 
 class GiError;
 
@@ -83,7 +83,7 @@ public:
     ///
     static void incCurrent() { ++current_; }
     static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(const sl location = sl::current()) {
+    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
         ++current_;
         if (cancel_) [[unlikely]] {
             //            static std::stringstream ss;
@@ -119,19 +119,20 @@ public:
 
     std::pair<int, int> getProgress();
 
-    void addRawPaths(Paths rawPaths);
+    void addPaths(Paths&& paths);
+    void addRawPaths(Paths paths);
     void addSupportPaths(Pathss supportPaths);
-    void addPaths(const Paths& paths);
 
-    Pathss& groupedPaths(Grouping group, Point::Type k = uScale, bool fl = {});
+    Pathss& groupedPaths(Grouping group, Point::Type offset = uScale, bool skipFrame = {});
+    void grouping(Grouping group, PolyTree& node);
 
-    Path boundPaths(const Paths& paths, Point::Type k) const;
+    Path boundOfPaths(const Paths& paths, Point::Type k) const;
 
     /*static*/ Paths& sortB(Paths& src);
-    /*static*/ Paths& sortBE(Paths& src);
+    /*static*/ Paths& sortBeginEnd(Paths& src);
 
     /*static*/ Pathss& sortB(Pathss& src);
-    /*static*/ Pathss& sortBE(Pathss& src);
+    /*static*/ Pathss& sortBeginEnd(Pathss& src);
 
     void createGc();
 
@@ -151,18 +152,22 @@ public:
     bool checkMillingFl {};
 
 signals:
-    void fileReady(GCode::File* file);
+    void fileReady(File* file);
     void canceled();
     void errorOccurred(int = 0);
 
 protected:
     bool checkMilling(SideOfMilling side);
 
-    bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret = nullptr);
     void stacking(Paths& paths);
-    void mergeSegments(Paths& paths, double glue = 0.0);
 
-    void mergePaths(Paths& paths, const double dist = 0.0);
+    /////////////////////////////////////////////////
+    /// \brief склеивает пути при совпадении конечных точек
+    /// \param paths - пути
+    /// \param maxDist - максимальное расстояние между конечными точками
+    void mergeSegments(Paths& paths, double maxDist = 0.0);
+
+    void mergePaths(Paths& paths, const double maxDist = 0.0);
 
     void markPolyTreeDByNesting(PolyTree& polynode);
     void sortPolyTreeByNesting(PolyTree& polynode);

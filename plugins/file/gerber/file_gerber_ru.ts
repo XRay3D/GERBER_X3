@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ru_RU">
+<TS version="2.1" language="ru_RU" sourcelanguage="en_US">
 <context>
     <name>Dialog</name>
     <message>
         <location filename="gbrcomp_dialog.cpp" line="81"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Диалог</translation>
     </message>
 </context>
 <context>
@@ -15,154 +15,165 @@
         <location filename="gbrcomp_onent.cpp" line="70"/>
         <source>Rotation: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Вращение: %1
+</translation>
     </message>
     <message>
         <location filename="gbrcomp_onent.cpp" line="71"/>
         <source>Value: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Значение: %1
+</translation>
     </message>
     <message>
         <location filename="gbrcomp_onent.cpp" line="72"/>
         <source>Footprint: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Пос. место: %1
+</translation>
     </message>
     <message>
         <location filename="gbrcomp_node.cpp" line="119"/>
         <source>TH|SMD|BGA|Other</source>
-        <translation type="unfinished"></translation>
+        <translation>Отверстрие|SMD|BGA|Другое</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="39"/>
         <source>unsorted</source>
-        <translation type="unfinished"></translation>
+        <translation>несортированные</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="119"/>
         <source>Ref Des</source>
-        <translation type="unfinished"></translation>
+        <translation>Условное
+обозначение</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="121"/>
         <source>Manufacturer
 part
 number</source>
-        <translation type="unfinished"></translation>
+        <translation>Номер
+детали
+производителя</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="125"/>
         <source>Value</source>
-        <translation type="unfinished"></translation>
+        <translation>Значение</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="127"/>
         <source>Mount
 type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип
+монтажа</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="130"/>
         <source>Footprint
 name</source>
-        <translation type="unfinished"></translation>
+        <translation>Название
+пос. места</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="133"/>
         <location filename="gbrcomp_model.cpp" line="136"/>
         <source>Package
 name</source>
-        <translation type="unfinished"></translation>
+        <translation>Название
+корпуса</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="139"/>
         <source>Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Высота</translation>
     </message>
     <message>
         <location filename="gbr_parser.cpp" line="423"/>
         <location filename="gbr_parser.cpp" line="542"/>
         <source>Aperture %1 not found! Available %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Апертура %1 не найдена! Доступно %2</translation>
     </message>
     <message>
         <location filename="gbr_parser.cpp" line="496"/>
         <location filename="gbr_parser.cpp" line="498"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
-        <translation type="unfinished"></translation>
+        <translation>номер строки %1: «%2»,  ошибочное значение.</translation>
     </message>
     <message>
         <location filename="gbr_parser.cpp" line="551"/>
         <source>Aperture D%1 (%2) not supported!
 Only square Aperture or use Minkowski Sum</source>
-        <translation type="unfinished"></translation>
+        <translation>Апертура D%1 (%2) не поддерживается!
+Доступны только квадратная и сумма Минковского</translation>
     </message>
     <message>
         <location filename="gbr_node.cpp" line="157"/>
         <source>&amp;Hide other</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Скрыть другие</translation>
     </message>
     <message>
         <location filename="gbr_node.cpp" line="160"/>
         <source>&amp;Show source</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Показать источник</translation>
     </message>
     <message>
         <location filename="gbr_node.cpp" line="183"/>
         <source>Show &amp;Components</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать &amp;РЭК</translation>
     </message>
     <message>
         <location filename="gbr_node.cpp" line="190"/>
         <source>Change color</source>
-        <translation type="unfinished"></translation>
+        <translation>Сменить цвет</translation>
     </message>
     <message>
         <location filename="gbr_node.cpp" line="202"/>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Закрыть</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="66"/>
         <source>Normal</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормальный</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="67"/>
         <source>Normal view</source>
-        <translation type="unfinished"></translation>
+        <translation>Нормальный вид</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="68"/>
         <source>Aperture paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Пути апертуры</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="69"/>
         <source>Displays only aperture paths of copper
 without width and without contacts</source>
-        <translation type="unfinished"></translation>
+        <translation>Отображает только апертурные траектории меди
+без ширины и без контактов</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="70"/>
         <source>Components</source>
-        <translation type="unfinished"></translation>
+        <translation>Компоненты (РЭК)</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="71"/>
         <source>Show components</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать компоненты</translation>
     </message>
     <message>
         <location filename="gbr_aperture.cpp" line="614"/>
         <source>Bad outline (regular polygon) macro!</source>
-        <translation type="unfinished"></translation>
+        <translation>Плохой макрос контура (правильного многоугольника)!</translation>
     </message>
     <message>
         <location filename="gbr_aperture.cpp" line="648"/>
         <source>Bad thermal macro!</source>
-        <translation type="unfinished"></translation>
+        <translation>Плохой тепловой макрос!</translation>
     </message>
 </context>
 <context>
@@ -170,22 +181,22 @@ without width and without contacts</source>
     <message>
         <location filename="gbr_plugin.cpp" line="78"/>
         <source>, drill Ø%1mm</source>
-        <translation type="unfinished"></translation>
+        <translation>, отверстие Ø%1мм</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="130"/>
         <source>Lines</source>
-        <translation type="unfinished"></translation>
+        <translation>Линия</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="142"/>
         <source>Regions</source>
-        <translation type="unfinished"></translation>
+        <translation>Полигон</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="205"/>
         <source>Gerber Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлы Gerber</translation>
     </message>
 </context>
 <context>
@@ -193,47 +204,47 @@ without width and without contacts</source>
     <message>
         <location filename="gbr_plugin.cpp" line="233"/>
         <source>Gerber</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerber</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="262"/>
         <source>Wire Creation Method</source>
-        <translation type="unfinished"></translation>
+        <translation>Способ создания проводников</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="277"/>
         <source>Cleaning Polygons</source>
-        <translation type="unfinished"></translation>
+        <translation>Очистка полигонов</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="278"/>
         <source>Skip duplicates</source>
-        <translation type="unfinished"></translation>
+        <translation>Пропустить дубликаты</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="279"/>
         <source>Simplify Regions</source>
-        <translation type="unfinished"></translation>
+        <translation>Упростить контур заливки меди / маски</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="281"/>
         <source>Clipper Offset</source>
-        <translation type="unfinished"></translation>
+        <translation>Отступ от контура</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="282"/>
         <source>Faster</source>
-        <translation type="unfinished"></translation>
+        <translation>Быстрый надёжный способ</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="283"/>
         <source>Minkowski Sum</source>
-        <translation type="unfinished"></translation>
+        <translation>Сумма Минковского</translation>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="284"/>
         <source>Better, can cause glitches</source>
-        <translation type="unfinished"></translation>
+        <translation>Сложнее, но возможны ошибки</translation>
     </message>
 </context>
 </TS>

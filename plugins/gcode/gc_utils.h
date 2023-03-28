@@ -11,6 +11,7 @@
 #pragma once
 
 #include "file.h"
+#include "abstract_file.h"
 #include "gc_types.h"
 #include <QList>
 #include <QString>
@@ -19,7 +20,7 @@ class Project;
 
 namespace GCode {
 
-class GCFile : public FileInterface {
+class GCFile : public AbstractFile {
     friend class ::Project;
 
 public:

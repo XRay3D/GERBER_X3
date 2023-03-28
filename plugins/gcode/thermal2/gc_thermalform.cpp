@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -64,7 +64,7 @@ ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
         button->setIconSize({16, 16});
 
     connect(ui->pbClose, &QPushButton::clicked, dynamic_cast<QWidget*>(parent), &QWidget::close);
-    connect(ui->pbCreate, &QPushButton::clicked, this, &ThermalForm::createFile);
+    connect(ui->pbCreate, &QPushButton::clicked, this, &ThermalForm::loadFile);
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &ThermalForm::updateName);
 
     ui->treeView->setIconSize(QSize(Size, Size));
@@ -149,7 +149,7 @@ void ThermalForm::updateFiles() {
 #endif
     ui->cbxFile->clear();
 
-    for (auto file : App::project()->files(FileType::Gerber))
+    for (auto file : App::project()->files(FileType::Gerber_))
         App::filePlugin(int(file->type()))->addToDrillForm(file, ui->cbxFile);
     qDebug() << ui->cbxFile->count();
     on_cbxFileCurrentIndexChanged(0);
@@ -162,7 +162,7 @@ void ThermalForm::updateFiles() {
 
 bool ThermalForm::canToShow() {
     QComboBox cbx;
-    for (auto file : App::project()->files(FileType::Gerber)) {
+    for (auto file : App::project()->files(FileType::Gerber_)) {
         App::filePlugin(int(file->type()))->addToDrillForm(file, &cbx);
         if (cbx.count())
             return true;
@@ -174,7 +174,7 @@ bool ThermalForm::canToShow() {
 
 void ThermalForm::on_leName_textChanged(const QString& arg1) { fileName_ = arg1; }
 
-void ThermalForm::createFile() {
+void ThermalForm::сomputePaths() {
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
@@ -195,7 +195,7 @@ void ThermalForm::createFile() {
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
     gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    gpc.params[GCode::GCodeParams::FileId] = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>())->id();
+    gpc.params[GCode::GCodeParams::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
     gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     tpc_->setGcp(gpc);
     tpc_->addPaths(wPaths);
@@ -211,13 +211,13 @@ void ThermalForm::updateName() {
 }
 
 void ThermalForm::on_cbxFileCurrentIndexChanged(int /*index*/) {
-    FileInterface* file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
+    AbstractFile* file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
     createTPI(file);
 }
 
-void ThermalForm::createTPI(FileInterface* file) {
+void ThermalForm::createTPI(AbstractFile* file) {
     if (!file)
-        file = static_cast<FileInterface*>(ui->cbxFile->currentData().value<void*>());
+        file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
     items_.clear();
 
     if (model)
@@ -266,7 +266,7 @@ void ThermalForm::createTPI(FileInterface* file) {
 
     ui->treeView->setModel(model);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &ThermalForm::onSelectionChanged);
-    if (0 && qApp->applicationDirPath().contains("GERBER_X3/bin"))
+    if (0 && App::isDebug())
         ui->treeView->expandAll();
 }
 

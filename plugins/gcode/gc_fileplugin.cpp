@@ -3,19 +3,20 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 
 #include "gc_fileplugin.h"
-#include "file.h"
+#include "abstract_file.h"
 #include "ft_view.h"
-#include "gc_file.h"
-// #include "gc_node.h"
+#include "gc_types.h"
+// #include "gc_file.h"
+//  #include "gc_node.h"
 
 #include <QMessageBox>
 #include <QtWidgets>
@@ -23,22 +24,22 @@
 namespace GCode {
 
 Plugin::Plugin(QObject* parent)
-    : FilePlugin(parent) {
+    : AbstractFilePlugin(parent) {
     info_ = {
-        {        "Name",                                                 "GCode"},
-        {     "Version",                                                   "1.1"},
-        {"VendorAuthor",                                "X-Ray aka Bakiev Damir"},
-        {        "Info", "GCode is a static plugin always included with GGEasy."}
+        {"Name",         "GCode"                                                },
+        {"Version",      "1.1"                                                  },
+        {"VendorAuthor", "X-Ray aka Bakiev Damir"                               },
+        {"Info",         "GCode is a static plugin always included with GGEasy."}
     };
 }
 
 bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
 
-int Plugin::type() const { return int(FileType::GCode); }
+int Plugin::type() const { return -1 /*int(FileType::GCode_)*/; }
 
 QString Plugin::folderName() const { return tr("Tool Paths"); }
 
-FileInterface* Plugin::createFile() { return new File(); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) { return nullptr /*new File()*/; }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 
@@ -51,9 +52,9 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
         tv, &FileTree::View::saveSelectedGCodeFiles);
 }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
+AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
-    class Tab : public SettingsTabInterface, Settings {
+    class Tab : public AbstractFileSettings, Settings {
         QCheckBox* chbxInfo;
         QCheckBox* chbxSameGFolder;
         QCheckBox* chbxSimplifyHldi;
@@ -72,7 +73,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
 
     public:
         Tab(QWidget* parent = nullptr)
-            : SettingsTabInterface(parent) {
+            : AbstractFileSettings(parent) {
             setObjectName(QString::fromUtf8("tabGCode"));
             auto /**/ verticalLayout1 = new QVBoxLayout(this);
             /**/ verticalLayout1->setObjectName(QString::fromUtf8("/**/verticalLayout1"));
@@ -316,7 +317,7 @@ SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
     return tab;
 }
 
-FileInterface* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
+AbstractFile* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
 
 } // namespace GCode
 

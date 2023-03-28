@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,7 +12,7 @@
 
 #include "gc_creator.h"
 
-class FileInterface;
+class AbstractFile;
 
 namespace GCode {
 class ThermalCreator : public Creator {
@@ -21,7 +21,7 @@ public:
     ~ThermalCreator() override = default;
 
 private:
-    void createThermal(FileInterface* file, const Tool& tool, const double depth);
+    void createThermal(AbstractFile* file, const Tool& tool, const double depth);
 
 protected:
     void create() override; // Creator interface

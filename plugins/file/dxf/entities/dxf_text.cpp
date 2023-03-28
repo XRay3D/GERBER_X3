@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -111,9 +111,8 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
 }
 
 GraphicObject Text::toGo() const {
-    //    qDebug() << data.size();
+
     //    for (auto& code : data)
-    //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
     double ascent = 0.0;
     double scaleX = 0.0;

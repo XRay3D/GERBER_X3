@@ -1,12 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <!DOCTYPE TS>
-<TS version="2.1" language="ru_RU">
+<TS version="2.1" language="ru_RU" sourcelanguage="en_US">
 <context>
     <name>DepthForm</name>
     <message>
         <location filename="tool_selectorform.cpp" line="114"/>
         <source>Depth:</source>
-        <translation type="unfinished"></translation>
+        <translation>Глубина:</translation>
     </message>
 </context>
 <context>
@@ -14,12 +14,12 @@
     <message>
         <location filename="tool.cpp" line="228"/>
         <source>No valid tool...!!!</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка в инструменте...!!!</translation>
     </message>
     <message>
         <location filename="tool.h" line="111"/>
         <source>Default</source>
-        <translation type="unfinished"></translation>
+        <translation>По умолчанию</translation>
     </message>
 </context>
 <context>
@@ -27,32 +27,32 @@
     <message>
         <location filename="tooldatabase.ui" line="14"/>
         <source>Tool Database[*]</source>
-        <translation type="unfinished"></translation>
+        <translation>База инструментов[*]</translation>
     </message>
     <message>
         <location filename="tooldatabase.ui" line="35"/>
         <source>New Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Новый инструмент</translation>
     </message>
     <message>
         <location filename="tooldatabase.ui" line="42"/>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Новая группа</translation>
     </message>
     <message>
         <location filename="tooldatabase.ui" line="49"/>
         <source>Copy</source>
-        <translation type="unfinished"></translation>
+        <translation>Копировать</translation>
     </message>
     <message>
         <location filename="tooldatabase.ui" line="56"/>
         <source>Delete</source>
-        <translation type="unfinished"></translation>
+        <translation>Удалить</translation>
     </message>
     <message>
         <location filename="tool_database.cpp" line="53"/>
         <source>Invalid tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Ошибка в инструменте</translation>
     </message>
 </context>
 <context>
@@ -60,7 +60,7 @@
     <message>
         <location filename="tooleditdialog.ui" line="20"/>
         <source>Local Tool Edit[*]</source>
-        <translation type="unfinished"></translation>
+        <translation>Локальная правка инструмента[*]</translation>
     </message>
 </context>
 <context>
@@ -68,92 +68,92 @@
     <message>
         <location filename="tooleditform.ui" line="20"/>
         <source>Tool</source>
-        <translation type="unfinished"></translation>
+        <translation>Инструмент</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="41"/>
         <source>Tool Info</source>
-        <translation type="unfinished"></translation>
+        <translation>Информация об инструменте</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="60"/>
         <source>Drill</source>
-        <translation type="unfinished"></translation>
+        <translation>Сверло</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="65"/>
         <source>End Mill</source>
-        <translation type="unfinished"></translation>
+        <translation>Фреза</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="70"/>
         <source>Engraver</source>
-        <translation type="unfinished"></translation>
+        <translation>Гравёр</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="75"/>
         <source>Laser</source>
-        <translation type="unfinished"></translation>
+        <translation>Лазер</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="91"/>
         <source>Name</source>
-        <translation type="unfinished"></translation>
+        <translation>Название</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="113"/>
         <source>Tool Type</source>
-        <translation type="unfinished"></translation>
+        <translation>Тип</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="133"/>
         <source>Note</source>
-        <translation type="unfinished"></translation>
+        <translation>Примечание</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="167"/>
         <source>Geometry</source>
-        <translation type="unfinished"></translation>
+        <translation>Геометрия</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="188"/>
         <source>Units</source>
-        <translation type="unfinished"></translation>
+        <translation>Единицы</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="204"/>
         <source>mm</source>
-        <translation type="unfinished"></translation>
+        <translation>Миллиметры</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="209"/>
         <source>inches</source>
-        <translation type="unfinished"></translation>
+        <translation>Дюймы</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="221"/>
         <source>mm/sec</source>
-        <translation type="unfinished"></translation>
+        <translation>мм/сек</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="226"/>
         <source>mm/min</source>
-        <translation type="unfinished"></translation>
+        <translation>мм/мин</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="231"/>
         <source>cm/min</source>
-        <translation type="unfinished"></translation>
+        <translation>см/мин</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="236"/>
         <source>m/min</source>
-        <translation type="unfinished"></translation>
+        <translation>м/мин</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="246"/>
         <source>Diameter</source>
-        <translation type="unfinished"></translation>
+        <translation>Диаметр</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="253"/>
@@ -161,123 +161,124 @@
         <location filename="tooleditform.ui" line="371"/>
         <location filename="tooleditform.ui" line="426"/>
         <source> mm</source>
-        <translation type="unfinished"></translation>
+        <translation> мм</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="269"/>
         <source>Side Angle</source>
-        <translation type="unfinished"></translation>
+        <translation>Боковой угол</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="276"/>
         <source> °</source>
-        <translation type="unfinished"></translation>
+        <translation> °</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="295"/>
         <source>Cutting Parameters</source>
-        <translation type="unfinished"></translation>
+        <translation>Параметры резания</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="316"/>
         <source>Pass or Depth</source>
-        <translation type="unfinished"></translation>
+        <translation>Проход / Глубина</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="348"/>
         <source>Stepover</source>
-        <translation type="unfinished"></translation>
+        <translation>Отступ</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="387"/>
         <location filename="tooleditform.ui" line="442"/>
         <source> %</source>
-        <translation type="unfinished"></translation>
+        <translation> %</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="405"/>
         <source>One-turn Cut</source>
-        <translation type="unfinished"></translation>
+        <translation>Подача на оборот</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="466"/>
         <source>Feed Speeds</source>
-        <translation type="unfinished"></translation>
+        <translation>Скорости подач</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="490"/>
         <source>Spindle Speed</source>
-        <translation type="unfinished"></translation>
+        <translation>Скорость вращения шпинделя</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="497"/>
         <source> r.p.m.</source>
-        <translation type="unfinished"></translation>
+        <translation> об/мин</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="513"/>
         <location filename="tooleditform.ui" line="545"/>
         <source>If checked then automatic calculate!</source>
-        <translation type="unfinished"></translation>
+        <translation>Если установлено - автоматический расчёт!</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="522"/>
         <source>Feed Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Скорость подачи</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="529"/>
         <location filename="tooleditform.ui" line="558"/>
         <source> mm/sec</source>
-        <translation type="unfinished"></translation>
+        <translation> мм/сек</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="551"/>
         <source>Plunge Rate</source>
-        <translation type="unfinished"></translation>
+        <translation>Скорость погружения</translation>
     </message>
     <message>
         <location filename="tooleditform.ui" line="580"/>
         <source>Apply</source>
-        <translation type="unfinished"></translation>
+        <translation>Применить</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="81"/>
         <source>If the offset value is more than 50%, unmilled areas are possible.
 These errors do not appear in the visualization.</source>
         <comment>При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации.</comment>
-        <translation type="unfinished"></translation>
+        <translation>При значении отступа более 50% возможны не отфрезерованные участки.
+Эти ошибки не отображаются в визуализации.</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="181"/>
         <source>Pass</source>
-        <translation type="unfinished"></translation>
+        <translation>Проход</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="192"/>
         <location filename="tool_editform.cpp" line="203"/>
         <source>Depth</source>
-        <translation type="unfinished"></translation>
+        <translation>Глубина</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="333"/>
         <source>End Mill (Ø%1 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Фреза (Ø%1 мм)</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="336"/>
         <source>Engrave (%2° %1 mm tip)</source>
-        <translation type="unfinished"></translation>
+        <translation>Гравёр (наконечник %1 мм, %2°)</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="339"/>
         <source>Drill (Ø%1 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Сверло (Ø%1 мм)</translation>
     </message>
     <message>
         <location filename="tool_editform.cpp" line="342"/>
         <source>Laser (Ø%1 mm)</source>
-        <translation type="unfinished"></translation>
+        <translation>Лазер (Ø%1 mm)</translation>
     </message>
 </context>
 <context>
@@ -285,7 +286,7 @@ These errors do not appear in the visualization.</source>
     <message>
         <location filename="tool_model.cpp" line="149"/>
         <source>Name|Note|Id</source>
-        <translation type="unfinished"></translation>
+        <translation>Имя|Примечание|Id</translation>
     </message>
 </context>
 <context>
@@ -294,50 +295,50 @@ These errors do not appear in the visualization.</source>
         <location filename="tool_selectorform.cpp" line="113"/>
         <location filename="tool_selectorform.cpp" line="158"/>
         <source>Tool:</source>
-        <translation type="unfinished"></translation>
+        <translation>Инстр.:</translation>
     </message>
     <message>
         <location filename="tool_selectorform.cpp" line="154"/>
         <source>Form</source>
-        <translation type="unfinished"></translation>
+        <translation>Форма</translation>
     </message>
     <message>
         <location filename="tool_selectorform.cpp" line="156"/>
         <source>Tool %1:</source>
-        <translation type="unfinished"></translation>
+        <translation>Инстр. %1:</translation>
     </message>
     <message>
         <location filename="tool_selectorform.cpp" line="159"/>
         <source>Edit</source>
-        <translation type="unfinished"></translation>
+        <translation>Правка</translation>
     </message>
     <message>
         <location filename="tool_selectorform.cpp" line="160"/>
         <source>Select</source>
-        <translation type="unfinished"></translation>
+        <translation>Выбрать</translation>
     </message>
 </context>
 <context>
     <name>ToolTreeView</name>
     <message>
-        <location filename="tool_treeview.cpp" line="68"/>
+        <location filename="tool_treeview.cpp" line="71"/>
         <source>New Group</source>
-        <translation type="unfinished"></translation>
+        <translation>Новая группа</translation>
     </message>
     <message>
-        <location filename="tool_treeview.cpp" line="89"/>
+        <location filename="tool_treeview.cpp" line="92"/>
         <source>New Tool </source>
-        <translation type="unfinished"></translation>
+        <translation>Новый инструмент </translation>
     </message>
     <message>
-        <location filename="tool_treeview.cpp" line="97"/>
+        <location filename="tool_treeview.cpp" line="100"/>
         <source>Warning</source>
-        <translation type="unfinished"></translation>
+        <translation>Предупреждение</translation>
     </message>
     <message>
-        <location filename="tool_treeview.cpp" line="97"/>
+        <location filename="tool_treeview.cpp" line="100"/>
         <source>Are you sure you want to delete the item and all content?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы уверены, что хотите удалить элемент и все данные?</translation>
     </message>
 </context>
 </TS>

@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -29,7 +29,7 @@
 namespace Hpgl {
 
 File::File()
-    : FileInterface() {
+    : AbstractFile() {
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")},
@@ -102,12 +102,12 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     }
 }
 
-void File::initFrom(FileInterface* file) {
-    //    FileInterface::initFrom(file);
+void File::initFrom(AbstractFile* file) {
+    //    AbstractFile::initFrom(file);
     //    static_cast<Node*>(m_node)->file = this;
 }
 
-FileTree::Node* File::node() {
+FileTree_::Node* File::node() {
     return m_node ? m_node : m_node = new Node(this, &m_id);
 }
 

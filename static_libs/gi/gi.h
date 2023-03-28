@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -47,10 +47,10 @@ enum /*class*/ GiType : int {
     ShapeEnd
 };
 
-class FileInterface;
+class AbstractFile;
 class GiGroup;
 namespace Shapes {
-class Shape;
+class AbstractShape;
 }
 
 class GraphicsItem : public /*QGraphicsObject*/ QGraphicsItem {
@@ -70,7 +70,7 @@ public:
     void colorChanged() { update(); };
 
 public:
-    explicit GraphicsItem(FileInterface* file = nullptr);
+    explicit GraphicsItem(AbstractFile* file = nullptr);
     ~GraphicsItem() override = default;
 
     QColor color() const { return color_; }
@@ -102,7 +102,7 @@ public:
     QPainterPath shape() const override;
     void setVisible(bool visible);
 
-    const FileInterface* file() const;
+    const AbstractFile* file() const;
     template <typename T>
     const T* typedFile() const { return dynamic_cast<const T* const>(file_); }
 
@@ -116,7 +116,7 @@ protected:
 
     mutable QRectF boundingRect_;
 
-    const FileInterface* file_;
+    const AbstractFile* file_;
     GiGroup* itemGroup = nullptr;
     QPainterPath shape_;
 

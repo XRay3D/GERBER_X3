@@ -3,9 +3,9 @@
 ///********************************************************************************
 // * Author    :  Damir Bakiev                                                    *
 // * Version   :  na                                                              *
-// * Date      :  03 October 2022                                                 *
+// * Date      :  March 25, 2023                                                  *
 // * Website   :  na                                                              *
-// * Copyright :  Damir Bakiev 2016-2022                                          *
+// * Copyright :  Damir Bakiev 2016-2023                                          *
 // * License   :                                                                  *
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -26,7 +26,7 @@
 // }
 
 // double MathParser::getVariable(const QString& varName) {
-//     qDebug() << __FUNCTION__ << varName;
+
 //     if (!variables || !variables->contains(varName)) {
 //         qWarning() << "Error: Try get unexists variable '" + varName + "'";
 //         return 0.0;
@@ -35,7 +35,7 @@
 // }
 
 // double MathParser::parse(const QString& s) {
-//     qDebug() << __FUNCTION__ << s;
+
 //     Result result;
 //     try {
 //         result = plusMinus(sv {reinterpret_cast<const char16_t*>(s.data()), size_t(s.size())});
@@ -52,7 +52,6 @@
 // }
 
 // Result MathParser::plusMinus(sv s) { // throws Exception
-//     qDebug() << __FUNCTION__ << toString(s);
 
 //    Result current = mulDiv(s);
 //    double acc = current.acc;
@@ -75,7 +74,7 @@
 
 // Result MathParser::bracket(sv s) // throws Exception
 //{
-//     qDebug() << __FUNCTION__ << toString(s);
+
 //     QChar zeroChar = s.at(0);
 //     if (zeroChar == '(') {
 //         Result r = plusMinus(s.substr(1));
@@ -90,7 +89,6 @@
 
 // Result MathParser::functionVariable(sv s) // throws Exception
 //{
-//     qDebug() << __FUNCTION__ << toString(s);
 
 //    int sign {+1};
 //    if (s.starts_with('-')) {
@@ -121,7 +119,6 @@
 
 // Result MathParser::mulDiv(sv s) // throws Exception
 //{
-//     qDebug() << __FUNCTION__ << toString(s);
 
 //    Result current = bracket(s);
 
@@ -148,7 +145,6 @@
 
 // Result MathParser::num(sv s) // throws Exception
 //{
-//     qDebug() << __FUNCTION__ << toString(s);
 
 //    int i = 0;
 //    int dot_cnt = 0;
@@ -179,7 +175,6 @@
 //}
 
 // Result MathParser::processFunction(sv func, const Result& r) {
-//     qDebug() << __FUNCTION__ << toString(func);
 
 //    //    if (func.starts_with("sin"))
 //    //        return Result(sin(r.acc), r.rest);
@@ -214,9 +209,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *

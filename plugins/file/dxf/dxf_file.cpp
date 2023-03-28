@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -34,12 +34,12 @@
 namespace Dxf {
 
 File::File()
-    : FileInterface() {
+    : AbstractFile() {
     itemsType_ = int(ItemsType::Normal);
     layerTypes_ = {
-        {int(ItemsType::Normal), DxfObj::tr("Normal"),    DxfObj::tr("Displays paths with pen width and fill.")},
-        { int(ItemsType::Paths),  DxfObj::tr("Paths"),          DxfObj::tr("Displays paths without pen width.")},
-        {  int(ItemsType::Both),   DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.")},
+        {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")   },
+        {int(ItemsType::Paths),  DxfObj::tr("Paths"),  DxfObj::tr("Displays paths without pen width.")         },
+        {int(ItemsType::Both),   DxfObj::tr("Both"),   DxfObj::tr("Displays paths without and with pen width.")},
     };
 }
 
@@ -114,8 +114,8 @@ void File::grouping(PolyTree& node, File::Group group) {
     }
 }
 
-void File::initFrom(FileInterface* file) {
-    FileInterface::initFrom(file);
+void File::initFrom(AbstractFile* file) {
+    AbstractFile::initFrom(file);
     static_cast<Node*>(node_)->file = this;
 }
 
@@ -132,7 +132,7 @@ Layer* File::layer(const QString& name) {
     return nullptr;
 }
 
-FileType File::type() const { return FileType::Dxf; }
+FileType File::type() const { return FileType::Dxf_; }
 
 void File::createGi() {
     Timer t {__FUNCTION__};

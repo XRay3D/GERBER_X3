@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,30 +13,18 @@
 #include "recent.h"
 
 #include <QActionGroup>
-#include <QDockWidget>
 #include <QMainWindow>
 #include <QMessageBox>
-#include <QStack>
 #include <QThread>
-#include <QTimer>
-#include <QTranslator>
 #include <QUndoStack>
-
-namespace GCode {
-class File;
-}
 
 namespace FileTree {
 class View;
 }
 
-class FileInterface;
-class GraphicsView;
-class Project;
-class QHBoxLayout;
-class QProgressDialog;
-class QToolBar;
-class QVBoxLayout;
+namespace GCode {
+class File;
+}
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
@@ -65,7 +53,7 @@ signals:
 private slots:
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
-    void addFileToPro(FileInterface* file);
+    void addFileToPro(class AbstractFile* file);
     void setDockWidget(QWidget* dwContent);
 
 private:
@@ -95,7 +83,7 @@ private:
     std::map<int, QAction*> toolpathActions;
     QActionGroup actionGroup;
 
-    QMap<QString, QProgressDialog*> progressDialogs_;
+    QMap<QString, class QProgressDialog*> progressDialogs_;
     QMessageBox reloadQuestion;
 
     void open();
@@ -156,14 +144,14 @@ public:
 
 private:
     struct Ui {
-        QWidget* centralwidget;
-        QHBoxLayout* horizontalLayout;
-        GraphicsView* graphicsView;
-        QMenuBar* menubar;
-        QStatusBar* statusbar;
-        QDockWidget* treeDockWidget;
-        QWidget* widget;
-        QVBoxLayout* verticalLayout;
+        class QWidget* centralwidget;
+        class QHBoxLayout* horizontalLayout;
+        class GraphicsView* graphicsView;
+        class QMenuBar* menubar;
+        class QStatusBar* statusbar;
+        class QDockWidget* treeDockWidget;
+        class QWidget* widget;
+        class QVBoxLayout* verticalLayout;
         FileTree::View* treeView;
         void setupUi(QMainWindow* MainWindow);       // setupUi
         void retranslateUi(QMainWindow* MainWindow); // retranslateUi

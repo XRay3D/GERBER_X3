@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -118,7 +118,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     case Entity::SEQEND:
         return std::make_shared<SeqEnd>(sp);
     case Entity::SHAPE:
-        return std::make_shared<Shape>(sp);
+        return std::make_shared<AbstractShape>(sp);
     case Entity::SOLID:
         return std::make_shared<Solid>(sp);
     case Entity::SPLINE:

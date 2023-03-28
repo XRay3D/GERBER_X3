@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -25,7 +25,7 @@ void ThermalCreator::create() {
         m_gcp.params[GCodeParams::Depth].toDouble());
 }
 
-void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const double depth) {
+void ThermalCreator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
     m_toolDiameter = tool.getDiameter(depth);
     const double dOffset = m_toolDiameter * uScale * 0.5;
 
@@ -89,7 +89,7 @@ void ThermalCreator::createThermal(FileInterface* file, const Tool& tool, const 
         clipper.AddPaths(m_returnPs, ptSubject, false);
         clipper.AddPaths(framePaths, ptClip, true);
         clipper.Execute(ctDifference, m_returnPs, pftPositive);
-        sortBE(m_returnPs);
+        sortBeginEnd(m_returnPs);
     }
 
     if (m_returnPs.size())

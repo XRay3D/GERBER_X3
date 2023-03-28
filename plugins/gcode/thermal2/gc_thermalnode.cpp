@@ -5,7 +5,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -204,7 +204,7 @@ IntPoint ThermalNode::pos() const { return m_pos; }
 
 AbstractThermPrGi* ThermalNode::item() const { return m_item; }
 
-bool ThermalNode::createFile() const { return m_checked && m_item; }
+bool ThermalNode::loadFile(QDataStream& stream) const { return m_checked && m_item; }
 
 void ThermalNode::disable() {
     m_checked = false;

@@ -3,20 +3,20 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketraster.h"
 
-#include "gc_file.h"
+#include "file.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
-    #include <execution>
+#include <execution>
 #endif
 #include "gi_point.h"
 
@@ -25,10 +25,10 @@ RasterCreator::RasterCreator() {
 }
 
 void RasterCreator::create() {
-    if (gcp_.params[GCodeParams::Fast].toBool())
-        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
-    else
-        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+    //    if (gcp_.params[GCodeParams::Fast].toBool())
+    //        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+    //    else
+    //        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
 }
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
@@ -231,8 +231,8 @@ void RasterCreator::createRaster(const Tool& tool, const double depth, const dou
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = Raster;
-        file_ = new File(returnPss, std::move(gcp_), fillPaths);
+
+        file_ = new PocketRasterFile(std::move(gcp_), std::move(returnPss), std::move(fillPaths));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
@@ -302,8 +302,6 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         }
     }
 
-    // PROG //PROG .3setProgMaxAndVal(0, 0);
-
     { //  calculate
         Clipper c;
         c.AddOpenSubject({zPath});
@@ -328,8 +326,8 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = LaserHLDI;
-        file_ = new File(returnPss, std::move(gcp_));
+
+        file_ = new PocketRasterFile(std::move(gcp_), std::move(returnPss), {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
@@ -408,7 +406,7 @@ void RasterCreator::addAcc(Paths& src, const Point::Type accDistance) {
         Paths paths;
 
         for (size_t i = 0; i < src.size(); ++i) {
-            // PROG //PROG .3setProgMaxAndVal(src.size(), i);
+
             if (yLast != src[i].front().y) {
                 adder(paths);
                 reverse = !reverse;

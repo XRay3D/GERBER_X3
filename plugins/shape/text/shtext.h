@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,9 +20,9 @@ class ShTextDialog;
 
 namespace Shapes {
 
-class Text final : public Shape {
+class Text final : public AbstractShape {
     friend ShTextDialog;
-    friend Shape;
+    friend AbstractShape;
 
 public:
     explicit Text(QPointF pt1 = {});
@@ -60,9 +60,9 @@ public:
     // QGraphicsItem interface
     int type() const override { return GiType::ShText; }
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    QPainterPath shape() const override; // Shape interface
+    QPainterPath shape() const override; // AbstractShape interface
 
-    // Shape interface
+    // AbstractShape interface
     void redraw() override;
     QString name() const override;
     QIcon icon() const override;
@@ -73,14 +73,14 @@ public:
 
     Side side() const;
     void setSide(const Side& side);
-    // Shape interface
+    // AbstractShape interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) const override;
 
 protected:
-    // Shape interface
+    // AbstractShape interface
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
@@ -104,7 +104,7 @@ public:
     // ShapePluginTextInterface interface
     int type() const override;
     QIcon icon() const override;
-    Shape* createShape(const QPointF& point) const override;
+    AbstractShape* createShape(const QPointF& point) const override;
 };
 
 } // namespace Shapes

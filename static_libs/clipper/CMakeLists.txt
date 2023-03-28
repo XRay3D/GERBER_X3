@@ -1,14 +1,15 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
+#* Date      :  March 25, 2023                                                  *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
+#* Copyright :  Damir Bakiev 2016-2023                                          *
 #* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
+
 
 project(clipper LANGUAGES CXX)
 
@@ -19,8 +20,8 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
 
-file(GLOB_RECURSE HEADERS *.h) #[[${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/]]
-file(GLOB_RECURSE SOURCES *.cpp) #[[${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/]]
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include)
 

@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,6 +16,7 @@
 #include "ex_formatdialog.h"
 #include "ex_highlighter.h"
 #include "ft_view.h"
+#include "project.h"
 
 #include <QBoxLayout>
 #include <QIcon>
@@ -25,9 +26,11 @@
 namespace Excellon {
 
 Node::Node(File* file)
-    : FileTree::Node(file->id(), FileTree::File)
+    : FileTree::Node(FileTree::File)
     , file(file) {
 }
+
+Node::~Node() { App::project()->deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
@@ -75,7 +78,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case Qt::DecorationRole:
                 return QIcon::fromTheme("drill-path");
             case FileTree::Id:
-                return id_.get();
+                return id();
             default:
                 return QVariant();
             }
@@ -87,7 +90,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case Qt::EditRole:
                 return static_cast<bool>(file->side());
             case FileTree::Id:
-                return id_.get();
+                return id();
             default:
                 return QVariant();
             }
@@ -125,5 +128,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }
+
+int Node::id() const { return file->id(); }
 
 } // namespace Excellon

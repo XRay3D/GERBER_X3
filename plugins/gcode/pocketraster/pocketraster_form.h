@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -43,13 +43,14 @@ protected:
 
     // FormsUtil interface
 protected:
-    void createFile() override;
+    void сomputePaths() override;
     void updateName() override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
+#include "file.h"
 #include "gc_plugin.h"
 #include <QToolBar>
 
@@ -64,4 +65,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
     QWidget* createForm() override { return new PocketRasterForm(this); };
     int type() const override { return GCode::Raster; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::PocketRasterFile; }
 };

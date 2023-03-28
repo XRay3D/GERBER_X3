@@ -3,7 +3,7 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "dxf_shape.h"
 namespace Dxf {
-Shape::Shape(SectionParser* sp)
+AbstractShape::AbstractShape(SectionParser* sp)
     : Entity(sp) {
 }
 } // namespace Dxf

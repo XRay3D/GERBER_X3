@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "shtext.h"
 
-#include "file.h"
+#include "abstract_file.h"
 #include "graphicsview.h"
 #include "shhandler.h"
 #include "shnode.h"
@@ -32,7 +32,7 @@ Text::Text(QPointF pt1) {
     handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
     handlers.front()->setPos(pt1);
     redraw();
-    App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->addItem(this);
 }
 
 void Text::redraw() {
@@ -151,8 +151,8 @@ void Text::setPt(const QPointF& point) {
 }
 
 bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::CheckStateRole:
             setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -162,7 +162,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         }
         break;
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         if (role == Qt::EditRole) {
             setSide(static_cast<Side>(value.toBool()));
             return true;
@@ -171,23 +171,23 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
     default:
         break;
     }
-    return Shape::setData(index, value, role);
+    return AbstractShape::setData(index, value, role);
 }
 
 Qt::ItemFlags Text::flags(const QModelIndex& index) const {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return Shape::flags(index) | Qt::ItemIsEditable;
-    case FileTree::Column::Side:
-        return Shape::flags(index) | Qt::ItemIsEditable;
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
+        return AbstractShape::flags(index) | Qt::ItemIsEditable;
+    case FileTree_::Column::Side:
+        return AbstractShape::flags(index) | Qt::ItemIsEditable;
     default:
-        return Shape::flags(index);
+        return AbstractShape::flags(index);
     }
 }
 
 QVariant Text::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
+    switch (FileTree_::Column(index.column())) {
+    case FileTree_::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
@@ -197,9 +197,9 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         case Qt::EditRole:
             return text();
         default:
-            return Shape::data(index, role);
+            return AbstractShape::data(index, role);
         }
-    case FileTree::Column::Side:
+    case FileTree_::Column::Side:
         switch (role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
@@ -207,15 +207,15 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         case Qt::EditRole:
             return static_cast<bool>(side());
         default:
-            return Shape::data(index, role);
+            return AbstractShape::data(index, role);
         }
     default:
-        return Shape::data(index, role);
+        return AbstractShape::data(index, role);
     }
 }
 
-void Text::menu(QMenu& menu, FileTree::View* tv) const {
-    Shape::menu(menu, tv);
+void Text::menu(QMenu& menu, FileTree_::View* tv) const {
+    AbstractShape::menu(menu, tv);
     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
         ShTextDialog dlg({const_cast<Text*>(this)}, tv);
         dlg.exec();
@@ -303,7 +303,7 @@ int PluginImpl::type() const { return GiType::ShText; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-text"); }
 
-Shape* PluginImpl::createShape(const QPointF& point) const { return new Text(point); }
+AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Text(point); }
 
 } // namespace Shapes
 

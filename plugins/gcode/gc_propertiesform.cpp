@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,30 +23,30 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     , ui(new Ui::GCodePropertiesForm) {
     ui->setupUi(this);
 
-    connect(ui->dsbxClearence, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui->dsbxClearence, &QDoubleSpinBox::valueChanged, [this](double value) {
         if (value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
         if (value < ui->dsbxPlunge->value())
             ui->dsbxPlunge->setValue(value);
     });
 
-    connect(ui->dsbxPlunge, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui->dsbxPlunge, &QDoubleSpinBox::valueChanged, [this](double value) {
         if (value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
         if (value > ui->dsbxClearence->value())
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxGlue, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setGlue);
+    connect(ui->dsbxGlue, &QDoubleSpinBox::valueChanged, App::project(), &Project::setGlue);
 
-    connect(ui->dsbxHomeX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &GiMarker::setPosX);
-    connect(ui->dsbxHomeY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::home(), &GiMarker::setPosY);
-    connect(ui->dsbxZeroX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &GiMarker::setPosX);
-    connect(ui->dsbxZeroY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::zero(), &GiMarker::setPosY);
+    connect(ui->dsbxHomeX, &QDoubleSpinBox::valueChanged, App::home(), &GiMarker::setPosX);
+    connect(ui->dsbxHomeY, &QDoubleSpinBox::valueChanged, App::home(), &GiMarker::setPosY);
+    connect(ui->dsbxZeroX, &QDoubleSpinBox::valueChanged, App::zero(), &GiMarker::setPosX);
+    connect(ui->dsbxZeroY, &QDoubleSpinBox::valueChanged, App::zero(), &GiMarker::setPosY);
 
     if (App::project()) {
-        connect(ui->dsbxSpaceX, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceX);
-        connect(ui->dsbxSpaceY, qOverload<double>(&QDoubleSpinBox::valueChanged), App::project(), &Project::setSpaceY);
+        connect(ui->dsbxSpaceX, &QDoubleSpinBox::valueChanged, App::project(), &Project::setSpaceX);
+        connect(ui->dsbxSpaceY, &QDoubleSpinBox::valueChanged, App::project(), &Project::setSpaceY);
         connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::project(), &Project::setStepsX);
         connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::project(), &Project::setStepsY);
         ui->dsbxSpaceX->setValue(App::project()->spaceX());
@@ -55,7 +55,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
         ui->sbxStepsY->setValue(App::project()->stepsY());
     }
 
-    connect(ui->dsbxSafeZ, qOverload<double>(&QDoubleSpinBox::valueChanged), [this](double value) {
+    connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, [this](double value) {
         ui->dsbxSafeZ->setValue(value);
         ui->dsbxSafeZ->setValue(value);
         if (value < ui->dsbxClearence->value())

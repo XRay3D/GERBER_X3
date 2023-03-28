@@ -4,16 +4,16 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "settingsdialog.h"
 #include "colorselector.h"
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
 #include "graphicsview.h"
 
 #include <QDesktopServices>
@@ -351,15 +351,9 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout = new QGridLayout(groupBox);
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
     gridLayout->setContentsMargins(6, 9, 6, 6);
+
     cbxFontSize = new QComboBox(groupBox);
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
-    cbxFontSize->addItem(QString());
+    cbxFontSize->addItems({"7", "8", "9", "10", "11", "12", "13", "14"});
     cbxFontSize->setObjectName(QString::fromUtf8("cbxFontSize"));
     QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
@@ -387,11 +381,6 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout->addWidget(fontSizeLabel, 0, 0, 1, 1);
 
     cbxTheme = new QComboBox(groupBox);
-    cbxTheme->addItem(QString());
-    cbxTheme->addItem(QString());
-    cbxTheme->addItem(QString());
-    cbxTheme->addItem(QString());
-    cbxTheme->addItem(QString());
     cbxTheme->setObjectName(QString::fromUtf8("cbxTheme"));
 
     gridLayout->addWidget(cbxTheme, 2, 1, 1, 1);
@@ -498,11 +487,6 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxZeroY, 1, 2, 1, 1);
 
     cbxZeroPos = new QComboBox(groupBox_5);
-    cbxZeroPos->addItem(QString());
-    cbxZeroPos->addItem(QString());
-    cbxZeroPos->addItem(QString());
-    cbxZeroPos->addItem(QString());
-    cbxZeroPos->addItem(QString());
     cbxZeroPos->setObjectName(QString::fromUtf8("cbxZeroPos"));
     sizePolicy.setHeightForWidth(cbxZeroPos->sizePolicy().hasHeightForWidth());
     cbxZeroPos->setSizePolicy(sizePolicy);
@@ -534,11 +518,6 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxHomeY, 2, 2, 1, 1);
 
     cbxHomePos = new QComboBox(groupBox_5);
-    cbxHomePos->addItem(QString());
-    cbxHomePos->addItem(QString());
-    cbxHomePos->addItem(QString());
-    cbxHomePos->addItem(QString());
-    cbxHomePos->addItem(QString());
     cbxHomePos->setObjectName(QString::fromUtf8("cbxHomePos"));
     sizePolicy.setHeightForWidth(cbxHomePos->sizePolicy().hasHeightForWidth());
     cbxHomePos->setSizePolicy(sizePolicy);
@@ -639,23 +618,16 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
 void SettingsDialog::Ui::retranslateUi(QDialog* SettingsDialog) {
     SettingsDialog->setWindowTitle(QCoreApplication::translate("SettingsDialog", "Settings[*]", nullptr));
     groupBox->setTitle(QCoreApplication::translate("SettingsDialog", "UI", nullptr));
-    cbxFontSize->setItemText(0, QCoreApplication::translate("SettingsDialog", "7", nullptr));
-    cbxFontSize->setItemText(1, QCoreApplication::translate("SettingsDialog", "8", nullptr));
-    cbxFontSize->setItemText(2, QCoreApplication::translate("SettingsDialog", "9", nullptr));
-    cbxFontSize->setItemText(3, QCoreApplication::translate("SettingsDialog", "10", nullptr));
-    cbxFontSize->setItemText(4, QCoreApplication::translate("SettingsDialog", "11", nullptr));
-    cbxFontSize->setItemText(5, QCoreApplication::translate("SettingsDialog", "12", nullptr));
-    cbxFontSize->setItemText(6, QCoreApplication::translate("SettingsDialog", "13", nullptr));
-    cbxFontSize->setItemText(7, QCoreApplication::translate("SettingsDialog", "14", nullptr));
-
     label_17->setText(QCoreApplication::translate("SettingsDialog", "Language:", nullptr));
     fontSizeLabel->setText(QCoreApplication::translate("SettingsDialog", "Font Size:", nullptr));
-    cbxTheme->setItemText(0, QCoreApplication::translate("SettingsDialog", "System", nullptr));
-    cbxTheme->setItemText(1, QCoreApplication::translate("SettingsDialog", "Light Blue", nullptr));
-    cbxTheme->setItemText(2, QCoreApplication::translate("SettingsDialog", "Light Red", nullptr));
-    cbxTheme->setItemText(3, QCoreApplication::translate("SettingsDialog", "Dark Blue", nullptr));
-    cbxTheme->setItemText(4, QCoreApplication::translate("SettingsDialog", "Dark Red", nullptr));
-
+    cbxTheme->clear();
+    cbxTheme->addItems({
+        QCoreApplication::translate("SettingsDialog", "System", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Light Blue", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Light Red", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Dark Blue", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Dark Red", nullptr),
+    });
     label->setText(QCoreApplication::translate("SettingsDialog", "Theme:", nullptr));
     gbViewer->setTitle(QCoreApplication::translate("SettingsDialog", "Viewer", nullptr));
     chbxOpenGl->setText(QCoreApplication::translate("SettingsDialog", "Open GL", nullptr));
@@ -673,23 +645,25 @@ void SettingsDialog::Ui::retranslateUi(QDialog* SettingsDialog) {
     dsbxZeroX->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));
     dsbxZeroY->setPrefix(QString());
     dsbxZeroY->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));
-    cbxZeroPos->setItemText(0, QCoreApplication::translate("SettingsDialog", "Top Left", nullptr));
-    cbxZeroPos->setItemText(1, QCoreApplication::translate("SettingsDialog", "Top Right", nullptr));
-    cbxZeroPos->setItemText(2, QCoreApplication::translate("SettingsDialog", "Bottom Left", nullptr));
-    cbxZeroPos->setItemText(3, QCoreApplication::translate("SettingsDialog", "Bottom Right", nullptr));
-    cbxZeroPos->setItemText(4, QCoreApplication::translate("SettingsDialog", "Always Zero", nullptr));
 
+    QStringList list {
+        QCoreApplication::translate("SettingsDialog", "Top Left", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Top Right", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Bottom Left", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Bottom Right", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Center", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Always Zero", nullptr),
+    };
+
+    cbxZeroPos->clear();
+    cbxZeroPos->addItems(list);
     label_4->setText(QCoreApplication::translate("SettingsDialog", "Home:", nullptr));
     dsbxHomeX->setPrefix(QString());
     dsbxHomeX->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));
     dsbxHomeY->setPrefix(QString());
     dsbxHomeY->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));
-    cbxHomePos->setItemText(0, QCoreApplication::translate("SettingsDialog", "Top Left", nullptr));
-    cbxHomePos->setItemText(1, QCoreApplication::translate("SettingsDialog", "Top Right", nullptr));
-    cbxHomePos->setItemText(2, QCoreApplication::translate("SettingsDialog", "Bottom Left", nullptr));
-    cbxHomePos->setItemText(3, QCoreApplication::translate("SettingsDialog", "Bottom Right", nullptr));
-    cbxHomePos->setItemText(4, QCoreApplication::translate("SettingsDialog", "Always Zero", nullptr));
-
+    cbxHomePos->clear();
+    cbxHomePos->addItems(list);
     label_5->setText(QCoreApplication::translate("SettingsDialog", "Pins:", nullptr));
     dsbxPinX->setPrefix(QString());
     dsbxPinX->setSuffix(QCoreApplication::translate("SettingsDialog", " mm", nullptr));

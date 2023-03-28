@@ -3,9 +3,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -33,7 +33,7 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
         dsbx->setSingleStep(15);
         dsbx->setDecimals(2);
         dsbx->setAlignment(Qt::AlignCenter);
-        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Delegate::emitCommitData);
+        connect(dsbx, &QDoubleSpinBox::valueChanged, this, &Delegate::emitCommitData);
         return dsbx;
     }
     case Model::apThickness: {
@@ -42,7 +42,7 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
         dsbx->setSingleStep(0.05);
         dsbx->setDecimals(2);
         dsbx->setAlignment(Qt::AlignCenter);
-        connect(dsbx, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &Delegate::emitCommitData);
+        connect(dsbx, &QDoubleSpinBox::valueChanged, this, &Delegate::emitCommitData);
         return dsbx;
     }
     case Model::GapCount: {

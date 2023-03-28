@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,6 +16,7 @@
 #include "dxf_sourcedialog.h"
 #include "tables/dxf_layer.h"
 #include "tables/dxf_layermodel.h"
+#include "project.h"
 
 #include "ft_view.h"
 #include "graphicsview.h"
@@ -145,26 +146,29 @@ public:
         {
             setIconSize(QSize(24, 24));
             const int w = indentation();
-            const int h = rowHeight(model()->index(0, 0, QModelIndex()));
-            QImage i(w, h, QImage::Format_ARGB32);
-            QPainter p(&i);
-            p.setPen(QColor(128, 128, 128));
-            // │
-            i.fill(Qt::transparent);
-            p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
-            i.save("settings/vline.png", "PNG");
-            // ├─
-            p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-            i.save("settings/branch-more.png", "PNG");
-            // └─
-            i.fill(Qt::transparent);
-            p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
-            p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-            i.save("settings/branch-end.png", "PNG");
-            QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-            file.open(QFile::ReadOnly);
-            setStyleSheet(file.readAll());
-            header()->setMinimumHeight(h);
+            const QModelIndex& row = model()->index(0, 0, QModelIndex());
+            if (row.isValid()) {
+                const int h = rowHeight(row);
+                QImage i(w, h, QImage::Format_ARGB32);
+                QPainter p(&i);
+                p.setPen(QColor(128, 128, 128));
+                // │
+                i.fill(Qt::transparent);
+                p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
+                i.save("settings/vline.png", "PNG");
+                // ├─
+                p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+                i.save("settings/branch-more.png", "PNG");
+                // └─
+                i.fill(Qt::transparent);
+                p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
+                p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+                i.save("settings/branch-end.png", "PNG");
+                QFile file(":/qtreeviewstylesheet/QTreeView.qss");
+                file.open(QFile::ReadOnly);
+                setStyleSheet(file.readAll());
+                header()->setMinimumHeight(h);
+            }
         }
     }
     // QWidget interface
@@ -176,9 +180,11 @@ protected:
 };
 
 Node::Node(File* file)
-    : FileTree::Node(file->id(), FileTree::File)
+    : FileTree::Node(FileTree::File)
     , file(file) {
 }
+
+Node::~Node() { App::project()->deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
@@ -264,7 +270,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     }
     switch (role) {
     case FileTree::Id:
-        return id_.get();
+        return id();
     default:
         return QVariant();
     }
@@ -274,7 +280,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
-        auto dialog = new SourceDialog(id_, tv);
+        auto dialog = new SourceDialog(id(), tv);
         dialog->exec();
         delete dialog;
     });
@@ -306,11 +312,13 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
+int Node::id() const { return file->id(); }
+
 ///////////////////////////////////
 ///// \brief Node::NodeLayer
 ///// \param id
 NodeLayer::NodeLayer(const QString& name, Layer* layer)
-    : FileTree::Node(layer->file()->id(), FileTree::SubFile)
+    : FileTree::Node(FileTree::SubFile)
     , name(name)
     , layer(layer) {
 }
@@ -361,7 +369,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
         case Qt::DecorationRole:
             return decoration(layer->color());
         case FileTree::Id:
-            return id_.get();
+            return id();
         default:
             return QVariant();
         }
@@ -398,5 +406,7 @@ void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const {
         }
     });
 }
+
+int NodeLayer::id() const { return layer->file()->id(); }
 
 } // namespace Dxf

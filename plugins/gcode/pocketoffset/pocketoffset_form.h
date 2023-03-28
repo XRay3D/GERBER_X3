@@ -1,15 +1,17 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "gc_formsutil.h"
+#include "ui_pocketoffsetform.h"
 
 namespace Ui {
 class PocketOffsetForm;
@@ -44,14 +46,14 @@ protected:
 
     // FormsUtil interface
 protected:
-    void createFile() override;
+    void сomputePaths() override;
     void updateName() override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
-#include "gc_plugin.h"
+#include "pocketoffset.h"
 #include <QToolBar>
 
 class GCPluginImpl final : public GCodePlugin {
@@ -65,4 +67,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
     QWidget* createForm() override { return new PocketOffsetForm(this); };
     int type() const override { return GCode::Pocket; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::PocketOffsetFile; }
 };

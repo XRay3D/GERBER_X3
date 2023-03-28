@@ -53,7 +53,7 @@ Paths Parser::parseLines(const QString& gerberLines) {
         //        //emit fileReady(m_file);
         //        //emit fileProgress(m_file->shortName(), 1, 1);
         //        mutex.unlock();
-        //        qDebug() << m_file->shortName() << "read" << t.elapsed();
+
         //        return;
         //    }
 

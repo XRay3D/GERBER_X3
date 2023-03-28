@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,7 +13,7 @@
 #include "gbr_types.h"
 #include "gbrcomp_onent.h"
 
-#include "file.h"
+#include "abstract_file.h"
 #include "gi_group.h"
 
 #include <QDebug>
@@ -21,13 +21,14 @@
 
 namespace Gerber {
 
-class File : public FileInterface {
+class File : public AbstractFile {
     friend class Parser;
     friend class Plugin;
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
 
 public:
-    explicit File(const QString& name = "");
+    using AbstractFile::AbstractFile;
+    explicit File();
     ~File() override;
 
     enum Group {
@@ -47,13 +48,13 @@ public:
         ApPaths,
         Components,
     };
-    // FileInterface interface
+    // AbstractFile interface
     void setItemType(int type) override;
     int itemsType() const override;
-    void initFrom(FileInterface* file) override;
+    void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
 
-    FileType type() const override { return FileType::Gerber; }
+    FileType type() const override { return FileType::Gerber_; }
 
     void setColor(const QColor& color) override;
 

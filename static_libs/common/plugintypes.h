@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -78,16 +78,6 @@ struct AbstrGraphicObject {
     virtual Paths& rPaths() = 0;
 };
 
-enum class FileType {
-    Gerber,
-    Excellon,
-    GCode,
-    Dxf,
-    Hpgl,
-    TopoR,
-    Shapes = 100
-};
-
 enum Side {
     NullSide = -1,
     Top,
@@ -99,6 +89,14 @@ struct LayerType {
     QString actName;
     QString actToolTip;
     QString shortActName() const { return actName; }
+
+    friend QDataStream& operator<<(QDataStream& stream, const LayerType& layer) {
+        return stream << layer.id << layer.actName << layer.actToolTip;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, LayerType& layer) {
+        return stream >> layer.id >> layer.actName >> layer.actToolTip;
+    }
 };
 
 Q_DECLARE_METATYPE(LayerType)

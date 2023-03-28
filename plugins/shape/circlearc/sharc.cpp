@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -36,7 +36,7 @@ Arc::Arc(QPointF center, QPointF pt1, QPointF pt2)
 
     redraw();
 
-    App::graphicsView()->scene()->addItem(this);
+    App::graphicsView()->addItem(this);
 }
 
 constexpr auto dot(auto u, auto v) { return u.x() * v.x() + u.y() * v.y(); }
@@ -64,7 +64,7 @@ void Arc::redraw() {
     shape_ = QPainterPath();
 
     if (currentHandler) {
-        Timer t {"redraw", us_ {}};
+        Timer t {"redraw", uS {}};
         auto updateCenter = [this](bool isCenter = {}) {
             QLineF line {handlers[Point1]->pos(), handlers[Point2]->pos()};
             const auto angle {line.angle()};
@@ -181,7 +181,7 @@ int PluginImpl::type() const { return GiType::ShCirArc; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-Shape* PluginImpl::createShape(const QPointF& point) const { return new Arc(point + QPointF {0, 5}, point, point + QPointF {0, 10}); }
+AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Arc(point + QPointF {0, 5}, point, point + QPointF {0, 10}); }
 
 } // namespace Shapes
 

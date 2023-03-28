@@ -6,7 +6,7 @@
 
 namespace TopoR {
 
-class ExSettingsTab : public SettingsTabInterface, Settings {
+class ExSettingsTab : public AbstractFileSettings, Settings {
     friend class ExcellonDialog;
 
     DoubleSpinBox* dsbxX;

@@ -3,15 +3,15 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi.h"
-#include "gc_file.h"
+#include "file.h"
 #include "jc_voronoi.h"
 
 namespace ClipperLib {
@@ -42,21 +42,21 @@ void VoronoiCreator::create() {
 
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-        gcp_.gcType = Voronoi;
-        file_ = new File({sortBE(returnPs)}, std::move(gcp_));
+
+        file_ = new VoronoiFile(std::move(gcp_), {sortBeginEnd(returnPs)}, {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
         Paths copy {returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
-        gcp_.gcType = Voronoi;
+
         { // создание пермычек.
             Clipper clipper;
             clipper.AddClip(workingRawPs);
             clipper.AddOpenSubject(copy);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
-            sortBE(copy);
+            sortBeginEnd(copy);
             for (auto&& p : copy)
                 returnPss.push_back({p});
         }
@@ -76,7 +76,7 @@ void VoronoiCreator::create() {
                 ++begin;
         }
 
-        file_ = new File(returnPss, std::move(gcp_), workingRawPs);
+        file_ = new VoronoiFile(std::move(gcp_), std::move(returnPss), std::move(workingRawPs));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

@@ -3,19 +3,20 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include <project.h>
 
-#include "file.h"
+#include "abstract_fileplugin.h"
+#include "abstract_file.h"
 #include "ft_model.h"
+#include "gc_plugin.h"
 #include "graphicsview.h"
-
 #include "shapepluginin.h"
 
 #include <QElapsedTimer>
@@ -24,39 +25,44 @@
 #include <QLabel>
 #include <QMessageBox>
 
-const int isadfsdfg = qRegisterMetaType<FileInterface*>("FileInterface*");
+const int isadfsdfg = qRegisterMetaType<AbstractFile*>("AbstractFile*");
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<FileInterface>& file) {
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>& file) {
     stream << *file;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file) {
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file) {
     int type;
     stream >> type;
-    if (App::filePlugins().contains(type)) {
-        file.reset(App::filePlugin(type)->createFile());
-        stream >> *file;
+    qDebug() << __FUNCTION__ << "type" << type;
+    if (App::filePlugins().contains(FileType(type))) {
+        file.reset(App::filePlugin(FileType(type))->loadFile(stream));
         file->addToScene();
         if (!App::project()->watcher.files().contains(file->name()))
             App::project()->watcher.addPath(file->name());
-        //        qDebug() << "watcher" << App::project()->watcher.files();
+    }
+    if (App::gCodePlugins().contains(type)) {
+        file.reset(App::gCodePlugin(type)->loadFile(stream));
+        file->addToScene();
+        if (!App::project()->watcher.files().contains(file->name()))
+            App::project()->watcher.addPath(file->name());
     }
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Shape>& shape) {
+QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::AbstractShape>& shape) {
     stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& shape) {
+QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractShape>& shape) {
     int type;
     stream >> type;
     if (App::shapePlugins().contains(type)) {
         shape.reset(App::shapePlugin(type)->createShape());
         stream >> *shape;
-        App::graphicsView()->scene()->addItem(shape.get());
+        App::graphicsView()->addItem(shape.get());
     }
     return stream;
 }
@@ -64,10 +70,10 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::Shape>& sha
 Project::Project(QObject* parent)
     : QObject(parent)
     , watcher(this) {
-    connect(&watcher, &QFileSystemWatcher::fileChanged, [this](const QString& path) {
+    connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
         const int id = files_[contains(path)]->id();
         if (id > -1
-            && QFileInfo(path).exists()
+            && QFileInfo::exists(path)
             && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
                    QMessageBox::Ok, QMessageBox::Cancel)
                 == QMessageBox::Ok) {
@@ -92,7 +98,7 @@ bool Project::save(const QString& fileName) {
     }
     QDataStream out(&file);
     try {
-        out << (ver_ = ProVer_6);
+        out << (ver_ = CurrentVer);
         // ProVer_5:
         out << isPinsPlaced_;
         // ProVer_4:
@@ -136,7 +142,43 @@ bool Project::open(const QString& fileName) {
     QDataStream in(&file);
     try {
         in >> ver_;
+        if (ver_ < CurrentVer) {
+            auto message = tr("Unable to load project version %1 in\n"
+                              "the current version(%3) of the program.\n"
+                              "Use version %2.");
+
+            if (App::isDebug()) {
+                qWarning() << message.arg(ver_).arg("???", "VERSION_STR");
+                return false;
+            }
+
+            switch (ver_) {
+            case ProVer_1:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            case ProVer_2:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            case ProVer_3:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            case ProVer_4:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            case ProVer_5:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            case ProVer_6:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            case ProVer_7:
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                break;
+            }
+            return false;
+        }
         switch (ver_) {
+        case ProVer_7:
         case ProVer_6:
             [[fallthrough]];
         case ProVer_5:
@@ -222,7 +264,7 @@ void Project::deleteShape(int id) {
             shapes_.erase(id);
             setChanged();
         } else
-            qWarning() << "Error id" << id << "Shape not found";
+            qWarning() << "Error id" << id << "AbstractShape not found";
     } catch (const std::exception& ex) {
         qWarning() << ex.what();
     }
@@ -259,8 +301,8 @@ QString Project::fileNames() {
     QMutexLocker locker(&mutex_);
     QString fileNames;
     for (const auto& [id, sp] : files_) {
-        FileInterface* item = sp.get();
-        if (sp && (item && (item->type() == FileType::Gerber || item->type() == FileType::Excellon)))
+        AbstractFile* item = sp.get();
+        if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
             fileNames.append(item->name()).push_back('|');
     }
     return fileNames;
@@ -271,44 +313,44 @@ int Project::contains(const QString& name) {
     if (reloadFile_)
         return -1;
     for (const auto& [id, sp] : files_) {
-        FileInterface* item = sp.get();
-        if (sp && (item->type() == FileType::Gerber || item->type() == FileType::Excellon || item->type() == FileType::Dxf))
+        AbstractFile* item = sp.get();
+        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
             if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
                 return item->id();
     }
     return -1;
 }
 
-bool Project::reload(int id, FileInterface* file) {
+bool Project::reload(int id, AbstractFile* file) {
     if (files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
-        App::filePlugin(int(file->type()))->updateFileModel(file);
+        App::filePlugin(file->type())->updateFileModel(file);
         setChanged();
         return true;
     }
     return false;
 }
 
-mvector<FileInterface*> Project::files(FileType type) {
+mvector<AbstractFile*> Project::files(int type) {
     QMutexLocker locker(&mutex_);
-    mvector<FileInterface*> rfiles;
+    mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for (const auto& [id, sp] : files_) {
-        if (sp && sp.get()->type() == type)
+        if (sp && sp->type() == type)
             rfiles.push_back(sp.get());
     }
     rfiles.shrink_to_fit();
     return rfiles;
 }
 
-mvector<FileInterface*> Project::files(const mvector<FileType> types) {
+mvector<AbstractFile*> Project::files(const mvector<int> types) {
     QMutexLocker locker(&mutex_);
-    mvector<FileInterface*> rfiles;
+    mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for (auto type : types) {
         for (const auto& [id, sp] : files_) {
-            if (sp && sp.get()->type() == type)
+            if (sp && sp->type() == type)
                 rfiles.push_back(sp.get());
         }
     }
@@ -316,12 +358,12 @@ mvector<FileInterface*> Project::files(const mvector<FileType> types) {
     return rfiles;
 }
 
-Shapes::Shape* Project::shape(int id) {
+Shapes::AbstractShape* Project::shape(int id) {
     QMutexLocker locker(&mutex_);
     return shapes_[id].get();
 }
 
-int Project::addFile(FileInterface* file) {
+int Project::addFile(AbstractFile* file) {
     QMutexLocker locker(&mutex_);
     if (!file)
         return -1;
@@ -340,12 +382,11 @@ int Project::addFile(FileInterface* file) {
         App::fileModel()->addFile(file);
         setChanged();
         watcher.addPath(file->name());
-        //        qDebug() << "watcher" << watcher.files();
     }
     return file->id();
 }
 
-int Project::addShape(Shapes::Shape* const shape) {
+int Project::addShape(Shapes::AbstractShape* const shape) {
     QMutexLocker locker(&mutex_);
     if (!shape)
         return -1;
@@ -360,7 +401,7 @@ int Project::addShape(Shapes::Shape* const shape) {
     return newId;
 }
 
-bool Project::contains(FileInterface* file) {
+bool Project::contains(AbstractFile* file) {
     for (const auto& [id, sp] : files_)
         if (sp.get() == file)
             return true;
@@ -372,7 +413,7 @@ QString Project::name() { return name_; }
 void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
     if (isUntitled_)
-        name_ = QObject::tr("Untitled.g2g");
+        name_ = QObject::tr("Untitled") + ".g2g";
     else
         name_ = name;
 }

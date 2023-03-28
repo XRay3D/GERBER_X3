@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -47,7 +47,7 @@ private slots:
 private:
     Ui::ThermalForm* ui;
 
-    void createTPI(FileInterface* file);
+    void createTPI(AbstractFile* file);
 
     mvector<std::shared_ptr<AbstractThermPrGi>> items_;
 
@@ -66,7 +66,7 @@ private:
 
     // FormsUtil interface
 protected:
-    void createFile() override;
+    void сomputePaths() override;
     void updateName() override;
 
 public:

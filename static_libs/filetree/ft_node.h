@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -22,7 +22,7 @@
 class QMenu;
 
 inline QPixmap decoration(QColor color, QChar chr = {}) {
-    //    qDebug() << QApplication::style()->pixelMetric(QStyle::PM_SmallIconSize);
+
     QPixmap pixmap(22, 22);
     pixmap.fill(Qt::transparent);
     QPainter p(&pixmap);
@@ -63,7 +63,7 @@ enum Type : int {
     Folder,
     File,
     SubFile,
-    Shape,
+    AbstractShape,
 };
 
 class Node {
@@ -73,7 +73,7 @@ class Node {
     Node(const Node&) = delete;
 
 public:
-    explicit Node(std::reference_wrapper<const int> id, Type type);
+    explicit Node(Type type);
     virtual ~Node();
 
     Node* child(int row) const;
@@ -92,15 +92,16 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual void menu(QMenu& menu, View* tv) const = 0;
 
+    virtual int id() const { return id__; }
+    virtual void setId(int id) { id__ = id; }
+
     QModelIndex index(int column = 0) const;
 
     const QStringList sideStrList {QObject::tr("Top|Bottom").split('|')};
     const Type type;
 
-    void setId(const int& id) { id_ = id; }
-
 protected:
-    std::reference_wrapper<const int> id_;
+    int id__ {-1};
     Node* parent_ = nullptr;
     mvector<std::unique_ptr<Node>> childs;
 };

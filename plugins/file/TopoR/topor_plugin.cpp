@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,11 +27,11 @@
 namespace TopoR {
 
 Plugin::Plugin(QObject* parent)
-    : FilePlugin(parent)
+    : AbstractFilePlugin(parent)
     , Parser(this) {
 }
 
-FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
+AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if (type_ != type())
         return nullptr;
     if (!QFile(fileName).exists())
@@ -42,7 +42,7 @@ FileInterface* Plugin::parseFile(const QString& fileName, int type_) {
     return Parser::file;
 }
 
-std::any Plugin::createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param) {
+std::any Plugin::createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         //        auto const exFile = static_cast<File*>(file);
@@ -84,17 +84,17 @@ int Plugin::type() const { return int(FileType::TopoR); }
 
 QString Plugin::folderName() const { return tr("TopoR"); }
 
-FileInterface* Plugin::createFile() { return new File(); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'T'); }
 
-SettingsTabInterface* Plugin::createSettingsTab(QWidget* parent) {
+AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     auto tab = new ExSettingsTab(parent);
     tab->setWindowTitle("Excellon");
     return tab;
 }
 
-void Plugin::addToGcForm(FileInterface* file, QComboBox* cbx) {
+void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
     cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);

@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,17 +23,17 @@ DoubleSpinBox::DoubleSpinBox(QWidget* parent)
 
 void DoubleSpinBox::setRange(double min, double max) {
     QDoubleSpinBox::setRange(min, max);
-    setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
+    setToolTip(QString(QObject::tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
 
 void DoubleSpinBox::setMaximum(double max) {
     QDoubleSpinBox::setMaximum(max);
-    setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
+    setToolTip(QString(QObject::tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
 
 void DoubleSpinBox::setMinimum(double min) {
     QDoubleSpinBox::setMinimum(min);
-    setToolTip(QString(tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
+    setToolTip(QString(QObject::tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
 }
 
 void DoubleSpinBox::flicker() {

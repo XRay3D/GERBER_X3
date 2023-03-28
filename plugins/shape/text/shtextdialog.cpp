@@ -3,7 +3,7 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
  * License   :                                                                  *
@@ -80,9 +80,9 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     }
 
     connect(ui->plainTextEdit, &QPlainTextEdit::textChanged, this, &ShTextDialog::updateText);
-    connect(ui->dsbxAngle, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ShTextDialog::updateAngle);
-    connect(ui->dsbxHeight, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ShTextDialog::updateHeight);
-    connect(ui->dsbxXY, qOverload<double>(&QDoubleSpinBox::valueChanged), this, &ShTextDialog::updateXY);
+    connect(ui->dsbxAngle, &QDoubleSpinBox::valueChanged, this, &ShTextDialog::updateAngle);
+    connect(ui->dsbxHeight, &QDoubleSpinBox::valueChanged, this, &ShTextDialog::updateHeight);
+    connect(ui->dsbxXY, &QDoubleSpinBox::valueChanged, this, &ShTextDialog::updateXY);
     connect(ui->cbxFont, qOverload<const QFont&>(&QFontComboBox::currentFontChanged), [this](const QFont&) { updateFont(); });
     connect(ui->cbxSide, qOverload<int>(&QComboBox::currentIndexChanged), this, &ShTextDialog::updateSide);
 

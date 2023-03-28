@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  03 October 2022                                                 *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,24 +23,22 @@
 
 namespace FileTree {
 
-Node::Node(std::reference_wrapper<const int> id, Type type)
-    : type(type)
-    , id_(id) {
-}
+Node::Node(Type type)
+    : type(type) { }
 
 Node::~Node() {
-    if (id_ > -1) {
-        switch (type) {
-        case File:
-            App::project()->deleteFile(id_);
-            break;
-        case Shape:
-            App::project()->deleteShape(id_);
-            break;
-        default:
-            break;
-        }
-    }
+    //    if (id__ > -1) {
+    //        switch (type) {
+    //        case File:
+    //            App::project()->deleteFile(id__);
+    //            break;
+    //        case AbstractShape:
+    //            App::project()->deleteShape(id__);
+    //            break;
+    //        default:
+    //            break;
+    //        }
+    //    }
     childs.clear();
 }
 
