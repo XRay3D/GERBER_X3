@@ -40,6 +40,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& fil
         file->addToScene();
         if (!App::project()->watcher.files().contains(file->name()))
             App::project()->watcher.addPath(file->name());
+        //        qDebug() << "watcher" << App::project()->watcher.files();
     }
     return stream;
 }
