@@ -130,66 +130,67 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
 // порционное сохранение для гибкости.
 class Block {
     QDataStream& stream;
-    QByteArray data;
+    //    QByteArray data;
+    uint32_t count {};
 
 public:
     explicit Block(QDataStream& stream)
         : stream {stream} { }
-#if 0
+#if 1
     template <typename T>
+        requires(pfr::detail::fields_count<T>() > 1)
     QDataStream& read(T& val) {
-        stream >> data;
-        QDataStream in(&data, QIODevice::ReadOnly);
-        pfr::for_each_field(val, [&in](auto& field) { !in.atEnd() ? in >> field : in; });
+        stream >> count;
+        count = std::min<uint32_t>(count, pfr::detail::fields_count<T>());
+        pfr::for_each_field(val, [this](auto& field) { count-- ? stream >> field : stream; });
+        return stream;
+    }
+
+    template <typename T>
+        requires(pfr::detail::fields_count<T>() > 1)
+    QDataStream& write(const T& val) {
+        stream << (count = pfr::detail::fields_count<T>());
+        pfr::for_each_field(val, [this](const auto& field) { stream << field; });
         return stream;
     }
 
     template <typename... Args>
     QDataStream& read(Args&... args) {
-        stream >> data;
-        QDataStream in(&data, QIODevice::ReadOnly);
-        if constexpr (sizeof...(Args) == 1)
-            pfr::for_each_field(args..., [&in](auto& field) { !in.atEnd() ? in >> field : in; });
-        else
-            ((!in.atEnd() ? in >> args : in), ...);
+        stream >> count;
+        count = std::min<uint32_t>(count, sizeof...(Args));
+        ((count-- ? stream >> args : stream), ...);
         return stream;
-    }
-
-    template <typename T>
-    QDataStream& write(const T& val) {
-        QDataStream out(&data, QIODevice::WriteOnly);
-        pfr::for_each_field(val, [&out](const auto& field) {  out << field ; });
-        return stream << data;
     }
 
     template <typename... Args>
     QDataStream& write(const Args&... args) {
-        QDataStream out(&data, QIODevice::WriteOnly);
-        ((out << args ), ...);
-        return stream << data;
+        stream << (count = sizeof...(Args));
+        ((stream << args), ...);
+        return stream;
     }
+
 #else
     template <typename... Args>
     QDataStream& read(Args&... args) {
-        stream >> data;
-        qDebug(__FUNCTION__ "%d", data.size());
-        QDataStream in(&data, QIODevice::ReadOnly);
-        if constexpr (sizeof...(Args) == 1)
-            pfr::for_each_field(args..., [&in](auto& field) { !in.atEnd() ? in >> field : in; });
+        uint32_t count;
+        stream >> count;
+        if constexpr (requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); })
+            pfr::for_each_field(args..., [this, &count](auto& field) { count-- ? stream >> field : stream; });
         else
-            ((!in.atEnd() ? in >> args : in), ...);
+            ((count-- ? stream >> args : stream), ...);
         return stream;
     }
 
     template <typename... Args>
     QDataStream& write(const Args&... args) {
-        QDataStream out(&data, QIODevice::WriteOnly);
-        if constexpr (sizeof...(Args) == 1)
-            pfr::for_each_field(args..., [&out](const auto& field) { out << field; });
-        else
-            ((out << args), ...);
-        qDebug(__FUNCTION__ "%d", data.size());
-        return stream << data;
+        if constexpr (requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); }) {
+            ((stream << uint32_t(pfr::tuple_size_v<Args>)), ...);
+            pfr::for_each_field(args..., [this](const auto& field) { stream << field; });
+        } else {
+            stream << uint32_t(sizeof...(Args));
+            ((stream << args), ...);
+        }
+        return stream;
     }
 #endif
 
