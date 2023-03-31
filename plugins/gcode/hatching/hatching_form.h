@@ -61,6 +61,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+C"}; }
     QWidget* createForm() override { return new HatchingForm(this); };
-    int type() const override { return GCode::Hatching; }
+    uint32_t type() const override { return GCode::Hatching; }
     AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::CrosshatchFile; }
 };

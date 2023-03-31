@@ -25,6 +25,6 @@ private:
 
 protected:
     void create() override; // Creator interface
-    GCodeType type() override { return Thermal; }
+    uint32_t type() override { return Thermal; }
 };
 } // namespace GCode

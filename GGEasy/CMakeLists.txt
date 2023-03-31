@@ -10,14 +10,12 @@
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-project(GGEasy VERSION 0.8.6.4 LANGUAGES CXX)
+project(GGEasy VERSION 0.9.0.0 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 #if(ANDROID)
@@ -36,12 +34,12 @@ set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(
     -DBUILD_DATE="${DT}"
-    -DVERSION_MAJOR=${PROJECT_VERSION_MAJOR}
-    -DVERSION_MINOR=${PROJECT_VERSION_MINOR}
-    -DVERSION_PATCH=${PROJECT_VERSION_PATCH}
-    -DVERSION_TWEAK=${PROJECT_VERSION_TWEAK}
-    -DVERSION_STR="${PROJECT_VERSION}"
 )
+
+include_directories(${CMAKE_CURRENT_BINARY_DIR})
+#set (CMAKE_EXTRA_INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
+#set (CMAKE_EXTRA_INCLUDE_FILES)
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
@@ -80,6 +78,7 @@ set(PROJECT_SOURCES
     ${SOURCES}
     ${UIS}
 )
+
 
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
@@ -131,7 +130,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(WIN32)
+if(WIN32__)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
     # windeployqt
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)

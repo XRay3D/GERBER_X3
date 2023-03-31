@@ -12,13 +12,15 @@
  ********************************************************************************/
 #include "ft_model.h"
 
-#include "abstract_fileplugin.h"
 #include "abstract_file.h"
+#include "abstract_fileplugin.h"
 #include "ft_foldernode.h"
 
+#include "gc_file.h"
+#include "gc_plugin.h"
+#include "project.h"
 #include "shapepluginin.h"
 #include "shnode.h"
-#include "project.h"
 
 #include <QTimer>
 
@@ -38,14 +40,21 @@ Model::~Model() {
     App::setFileModel(nullptr);
 }
 
+int Model::addFile(uint32_t type, AbstractFile* file) {
+    Node* item(fileFolders[type]);
+    QModelIndex index = createIndex(0, 0, item);
+    int rowCount = item->childCount();
+    beginInsertRows(index, rowCount, rowCount);
+    fileFolders[type]->addChild(file->node());
+    endInsertRows();
+    return rowCount;
+}
+
 void Model::addFile(AbstractFile* file) {
     if (!file)
         return;
 
-    FileType type = file->type();
-
-    if (type > FileType(100) || type == FileType(-1)) // NOTE  переписать для ГКода отдельно
-        type = FileType(100);
+    uint32_t type = file->type();
 
     if (fileFolders.find(type) == fileFolders.end()) {
         QModelIndex index = createIndex(0, 0, rootItem);
@@ -56,14 +65,28 @@ void Model::addFile(AbstractFile* file) {
         endInsertRows();
     }
 
-    Node* item(fileFolders[type]);
-    QModelIndex index = createIndex(0, 0, item);
-    int rowCount = item->childCount();
-    beginInsertRows(index, rowCount, rowCount);
-    fileFolders[type]->addChild(file->node());
-    endInsertRows();
-
+    int rowCount = addFile(type, file);
     App::filePlugin(type)->updateFileModel(file);
+    emit select(createIndex(rowCount, 0, file->node()));
+}
+
+void Model::addFile(GCode::File* file) {
+    if (!file)
+        return;
+
+    uint32_t type = md5::hash32("GCode"); // file->type();
+
+    if (fileFolders.find(type) == fileFolders.end()) {
+        QModelIndex index = createIndex(0, 0, rootItem);
+        int rowCount = rootItem->childCount();
+        beginInsertRows(index, rowCount, rowCount);
+        auto it = fileFolders[type] = new FolderNode(tr("GCode"), type);
+        rootItem->addChild(it);
+        endInsertRows();
+    }
+
+    int rowCount = addFile(type, file);
+    //    App::gCodePlugin(type)->updateFileModel(file);
     emit select(createIndex(rowCount, 0, file->node()));
 }
 
@@ -71,26 +94,26 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     if (!shape)
         return;
 
-    FileType type = FileType::Shapes_;
+    //    uint32_t type = FileType::Shapes_;
 
-    if (fileFolders.find(type) == fileFolders.end()) {
-        QModelIndex index = createIndex(0, 0, rootItem);
-        int rowCount = rootItem->childCount();
-        beginInsertRows(index, rowCount, rowCount);
-        auto si = App::shapePlugins().begin()->second;
-        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
-        rootItem->addChild(it);
-        endInsertRows();
-    }
+    //    if (fileFolders.find(type) == fileFolders.end()) {
+    //        QModelIndex index = createIndex(0, 0, rootItem);
+    //        int rowCount = rootItem->childCount();
+    //        beginInsertRows(index, rowCount, rowCount);
+    //        auto si = App::shapePlugins().begin()->second;
+    //        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
+    //        rootItem->addChild(it);
+    //        endInsertRows();
+    //    }
 
-    Node* item(fileFolders[type]);
-    QModelIndex index = createIndex(0, 0, item);
-    int rowCount = item->childCount();
-    beginInsertRows(index, rowCount, rowCount);
-    item->addChild(shape->node());
-    endInsertRows();
+    //    Node* item(fileFolders[type]);
+    //    QModelIndex index = createIndex(0, 0, item);
+    //    int rowCount = item->childCount();
+    //    beginInsertRows(index, rowCount, rowCount);
+    //    item->addChild(shape->node());
+    //    endInsertRows();
 
-    emit select(createIndex(rowCount, 0, shape->node()));
+    //    emit select(createIndex(rowCount, 0, shape->node()));
 }
 
 void Model::closeProject() {

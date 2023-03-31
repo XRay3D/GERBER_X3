@@ -53,7 +53,7 @@ public:
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
 
-    FileType type() const override { return FileType::Gerber_; }
+    uint32_t type() const override { return md5::hash32("Gerber"); }
 
     void setColor(const QColor& color) override;
 

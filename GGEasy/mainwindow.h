@@ -80,7 +80,7 @@ private:
     Project* project_;
     bool openFlag;
 
-    std::map<int, QAction*> toolpathActions;
+    std::map<uint32_t, QAction*> toolpathActions;
     QActionGroup actionGroup;
 
     QMap<QString, class QProgressDialog*> progressDialogs_;
@@ -131,6 +131,7 @@ private:
 private:
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
+    bool debug();
 
     // QWidget interface
 protected:

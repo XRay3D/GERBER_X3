@@ -20,6 +20,7 @@
 #include "gi_error.h"
 #include "gi_gcpath.h"
 #include "gi_point.h"
+#include "md5.h"
 #include "myclipper.h"
 #include "project.h"
 #include "utils.h"
@@ -45,7 +46,7 @@ public:
     void read(QDataStream& stream) override { }
     void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
-    FileType type() const override { return FileType(-1); }
+    uint32_t type() const override { return md5::hash32("GCodeGbgFile"); }
     void createGi() override {
         GraphicsItem* item;
         item = new GiGcPath(pocketPaths_, this);
@@ -194,7 +195,7 @@ void Creator::createGc() {
     qDebug(__FUNCTION__);
 
     try {
-        if (type() == Profile || type() == Pocket || type() == Raster) {
+        if (type() == md5::hash32("Profile") || type() == md5::hash32("Pocket") || type() == md5::hash32("Raster")) {
             if (!App::isDebug())
                 try {
                     checkMillingFl = true;

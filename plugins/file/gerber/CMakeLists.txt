@@ -10,7 +10,6 @@
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-
 project(file_gerber LANGUAGES CXX)
 
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
@@ -40,12 +39,11 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
     common
+    file_plugins
     filetree
     gi
     graphicsview
-    #    thermal
     tooldatabase
-    file_plugins
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

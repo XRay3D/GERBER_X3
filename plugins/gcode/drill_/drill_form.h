@@ -96,7 +96,7 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
     QWidget* createForm() override { return new Form(this); };
     bool canToShow() const override { return Form::canToShow(); }
-    int type() const override { return GCode::Drill; }
+    uint32_t type() const override { return GCode::Drill; }
     AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::DrillFile; }
 };
 

@@ -64,6 +64,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
     QWidget* createForm() override { return new PocketRasterForm(this); };
-    int type() const override { return GCode::Raster; }
+    uint32_t type() const override { return GCode::Raster; }
     AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::PocketRasterFile; }
 };

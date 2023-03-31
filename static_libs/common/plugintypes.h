@@ -44,6 +44,27 @@
 //     double angle;
 // };
 
+struct Transform {
+    double angle {};
+    QPointF translate {};
+    QPointF scale {1, 1};
+
+    friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
+        return Block(stream).write(tr);
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
+        return Block(stream).read(tr);
+    }
+
+    operator QTransform() const {
+        QTransform t;
+        t.translate(translate.x(), translate.y());
+        t.rotate(angle);
+        t.scale(scale.x(), scale.y());
+        return t;
+    }
+};
+
 struct AbstrGraphicObject {
     Paths paths_;
     AbstrGraphicObject(const Paths& paths_)

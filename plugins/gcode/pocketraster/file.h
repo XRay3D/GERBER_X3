@@ -20,7 +20,7 @@ public:
     explicit PocketRasterFile();
     explicit PocketRasterFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
-    FileType type() const override { return FileType(Raster); }
+    uint32_t type() const override { return md5::hash32("Raster"); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

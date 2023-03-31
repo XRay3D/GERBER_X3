@@ -19,8 +19,8 @@
 #include "ft_typedelegate.h"
 #include "project.h"
 
-#include "abstract_fileplugin.h"
 #include "abstract_file.h"
+#include "abstract_fileplugin.h"
 #include "qcheckbox.h"
 #include "shapepluginin.h"
 
@@ -122,7 +122,7 @@ void View::closeFiles() {
     model_->removeRows(0, childCount_, menuIndex_);
 }
 
-void View::closeAllFiles(FileType type) {
+void View::closeAllFiles(uint32_t type) {
     // WARNING   model_->createIndex(0, 0, &model_->fileFolders[type]);
     model_->removeRows(0, childCount_, menuIndex_);
 }
@@ -189,7 +189,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
     QMenu menu(this);
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
     if (menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
-        const FileType type = menuIndex_.data(Role::Id).value<FileType>();
+        const uint32_t type = menuIndex_.data(Role::Id).value<uint32_t>(); // File Type
         const int cType = menuIndex_.data(Role::ContentType).toInt();
         if (cType == Type::File) {
             App::filePlugin(type)->createMainMenu(menu, this);

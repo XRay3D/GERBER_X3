@@ -24,7 +24,7 @@ public:
     int toolId() const override;
 
     // QGraphicsItem interface
-    int type() const override;
+    uint32_t type() const override;
     bool isSlot() const;
 
     Paths offset() const;

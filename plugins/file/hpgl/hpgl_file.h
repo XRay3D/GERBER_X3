@@ -54,7 +54,7 @@ private:
 public:
     void initFrom(AbstractFile* file) override;
     FileTree_::Node* node() override;
-    FileType type() const override;
+    uint32_t type() const override;
     void createGi() override;
     bool isVisible() const override;
     void setVisible(bool visible) override;

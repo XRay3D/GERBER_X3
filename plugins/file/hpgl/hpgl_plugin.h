@@ -31,7 +31,7 @@ public:
     // AbstractFilePlugin interface
     bool thisIsIt(const QString& fileName) override;
 
-    int type() const override;
+    uint32_t type() const override;
     QString folderName() const override;
 
     AbstractFile* loadFile(QDataStream& stream) override;

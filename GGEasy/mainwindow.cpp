@@ -14,8 +14,8 @@
 #include "mainwindow.h"
 
 #include "aboutform.h"
-#include "abstract_fileplugin.h"
 #include "abstract_file.h"
+#include "abstract_fileplugin.h"
 #include "gc_plugin.h"
 #include "gc_propertiesform.h"
 #include "gcode.h"
@@ -37,6 +37,8 @@
 // #include <forward_list>
 
 static auto PointConverter = QMetaType::registerConverter(&Point::toString);
+
+inline constexpr auto G_CODE_PROPERTIES = md5::hash32("GCodeProperties");
 
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
@@ -75,8 +77,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     // connect plugins
     for (auto& [type, ptr] : App::filePlugins()) {
-        if (ptr->type() == int(FileType::GCode_))
-            continue;
+        //        if (ptr->type() == int(FileType::GCode_))
+        //            continue;
         ptr->moveToThread(&parserThread);
         connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
@@ -106,50 +108,9 @@ MainWindow::MainWindow(QWidget* parent)
     setCurrentFile(QString());
 
     readSettings();
-    toolpathActions[GCode::GCodeProperties]->triggered();
+    toolpathActions[G_CODE_PROPERTIES]->triggered();
 
-    while (App::isDebug()) { // NOTE need for debug
-        int i = 100;
-        int k = 100;
-
-        if (0) {
-            QDir dir(R"(E:\YandexDisk\G2G\test files\Ucamco\Gerber_File_Format_Examples 20210409)");
-            // QDir dir("D:/Gerber Test Files/CopperCAM/");
-            // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
-            // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
-            if (!dir.exists())
-                break;
-            for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
-                str = dir.path() + '/' + str;
-                QTimer::singleShot(i += k, [this, str] { loadFile(str); });
-                //                break;
-            }
-        }
-        // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
-        // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
-
-        if (0)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
-
-        if (0) {
-            QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
-        }
-
-        if (0) {
-            i = 1000;
-            QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
-        }
-        if (0)
-            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
-        break;
-    }
+    debug();
 }
 
 MainWindow::~MainWindow() {
@@ -341,7 +302,7 @@ void MainWindow::createActionsService() {
     connect(action, &QAction::toggled, [=, this](bool checked) { if (checked) setDockWidget(new GCodePropertiesForm); });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     action->setCheckable(true);
-    toolpathActions.emplace(GCode::GCodeProperties, action);
+    toolpathActions.emplace(G_CODE_PROPERTIES, action);
     actionGroup.addAction(action);
     // Tool Base
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
@@ -695,17 +656,17 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::selectAll() {
-    if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
-        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
+    // FIXME   if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
+    //        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
+    //            item->setSelected(true);
+    // FIXME   } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
+    //        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
+    //            item->setSelected(true);
+    //    } else {
+    for (QGraphicsItem* item : App::graphicsView()->items())
+        if (item->isVisible() && item->opacity() > 0)
             item->setSelected(true);
-    } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
-        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
-            item->setSelected(true);
-    } else {
-        for (QGraphicsItem* item : App::graphicsView()->items())
-            if (item->isVisible() && item->opacity() > 0)
-                item->setSelected(true);
-    }
+    //    }
 }
 
 void MainWindow::deSelectAll() {
@@ -828,15 +789,15 @@ void MainWindow::editGcFile(GCode::File* file) {
     qWarning(__FUNCTION__);
     //    switch (file->gtype()) {
     //    case GCode::Null:
-    //    case GCode::Profile:
-    //        // FIXME toolpathActions[GCode::Profile]->triggered();
+    //    case md5::hash32("Profile"):
+    //        // FIXME toolpathActions[md5::hash32("Profile")]->triggered();
     //        // FIXME reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
     //        break;
     //    case GCode::Pocket:
     //    case GCode::Voronoi:
     //    case GCode::Thermal:
     //    case GCode::Drill:
-    //    case GCode::GCodeProperties:
+    //    case G_CODE_PROPERTIES:
     //    case GCode::Raster:
     //    case GCode::LaserHLDI:
     //    default:
@@ -1227,7 +1188,7 @@ bool MainWindow::saveAs() {
 }
 
 void MainWindow::showEvent(QShowEvent* event) {
-    // toolpathActionList[GCode::GCodeProperties]->trigger();//////////////////////////////////////////////////////
+    // toolpathActionList[G_CODE_PROPERTIES]->trigger();//////////////////////////////////////////////////////
     QMainWindow::showEvent(event);
 }
 

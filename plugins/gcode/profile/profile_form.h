@@ -91,6 +91,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
     QWidget* createForm() override { return new ProfileForm(this); };
-    int type() const override { return GCode::Profile; }
+    uint32_t type() const override { return md5::hash32("Profile"); }
     AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::ProfileFile; }
 };

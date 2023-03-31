@@ -67,7 +67,7 @@ endif()
 #add_subdirectory(thermal2)
 
 #add_subdirectory(pocketoffset)
-#add_subdirectory(profile)
+add_subdirectory(profile)
 
 #add_subdirectory(drill)
 #add_subdirectory(hatching)

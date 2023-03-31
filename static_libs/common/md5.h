@@ -26,6 +26,7 @@
 #include <cstring>
 
 namespace md5 {
+
 using Digest = std::array<unsigned char, 16>;
 
 namespace details {
@@ -67,32 +68,32 @@ namespace details {
     constexpr Fn F[4] = {f, g, h, i};
 
     constexpr uint32_t G[CBLOCK] = {
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
-        1, 6, 11, 0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12,
-        5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12, 15, 2,
-        0, 7, 14, 5, 12, 3, 10, 1, 8, 15, 6, 13, 4, 11, 2, 9};
+        0, 1,  2,  3,  4,  5,  6,  7,  8,  9, 10, 11, 12, 13, 14, 15,
+        1, 6, 11,  0,  5, 10, 15,  4,  9, 14,  3,  8, 13,  2,  7, 12,
+        5, 8, 11, 14,  1,  4,  7, 10, 13,  0,  3,  6,  9, 12, 15,  2,
+        0, 7, 14,  5, 12,  3, 10,  1,  8, 15,  6, 13,  4, 11,  2,  9};
 
     constexpr uint32_t K[CBLOCK] = {
-        0xd76aa478, 0xe8c7b756, 0x242070db, 0xc1bdceee,
-        0xf57c0faf, 0x4787c62a, 0xa8304613, 0xfd469501,
-        0x698098d8, 0x8b44f7af, 0xffff5bb1, 0x895cd7be,
-        0x6b901122, 0xfd987193, 0xa679438e, 0x49b40821,
-        0xf61e2562, 0xc040b340, 0x265e5a51, 0xe9b6c7aa,
-        0xd62f105d, 0x02441453, 0xd8a1e681, 0xe7d3fbc8,
-        0x21e1cde6, 0xc33707d6, 0xf4d50d87, 0x455a14ed,
-        0xa9e3e905, 0xfcefa3f8, 0x676f02d9, 0x8d2a4c8a,
-        0xfffa3942, 0x8771f681, 0x6d9d6122, 0xfde5380c,
-        0xa4beea44, 0x4bdecfa9, 0xf6bb4b60, 0xbebfbc70,
-        0x289b7ec6, 0xeaa127fa, 0xd4ef3085, 0x04881d05,
-        0xd9d4d039, 0xe6db99e5, 0x1fa27cf8, 0xc4ac5665,
-        0xf4292244, 0x432aff97, 0xab9423a7, 0xfc93a039,
-        0x655b59c3, 0x8f0ccc92, 0xffeff47d, 0x85845dd1,
-        0x6fa87e4f, 0xfe2ce6e0, 0xa3014314, 0x4e0811a1,
-        0xf7537e82, 0xbd3af235, 0x2ad7d2bb, 0xeb86d391};
+        0xD76AA478, 0xE8C7B756, 0x242070DB, 0xC1BDCEEE,
+        0xF57C0FAF, 0x4787C62A, 0xA8304613, 0xFD469501,
+        0x698098D8, 0x8B44F7AF, 0xFFFF5BB1, 0x895CD7BE,
+        0x6B901122, 0xFD987193, 0xA679438E, 0x49B40821,
+        0xF61E2562, 0xC040B340, 0x265E5A51, 0xE9B6C7AA,
+        0xD62F105D, 0x02441453, 0xD8A1E681, 0xE7D3FBC8,
+        0x21E1CDE6, 0xC33707D6, 0xF4D50D87, 0x455A14ED,
+        0xA9E3E905, 0xFCEFA3F8, 0x676F02D9, 0x8D2A4C8A,
+        0xFFFA3942, 0x8771F681, 0x6D9D6122, 0xFDE5380C,
+        0xA4BEEA44, 0x4BDECFA9, 0xF6BB4B60, 0xBEBFBC70,
+        0x289B7EC6, 0xEAA127FA, 0xD4EF3085, 0x04881D05,
+        0xD9D4D039, 0xE6DB99E5, 0x1FA27CF8, 0xC4AC5665,
+        0xF4292244, 0x432AFF97, 0xAB9423A7, 0xFC93A039,
+        0x655B59C3, 0x8F0CCC92, 0xFFEFF47D, 0x85845DD1,
+        0x6FA87E4F, 0xFE2CE6E0, 0xA3014314, 0x4E0811A1,
+        0xF7537E82, 0xBD3AF235, 0x2AD7D2BB, 0xEB86D391};
 
     constexpr uint32_t S[LBLOCK] = {
         7, 12, 17, 22,
-        5, 9, 14, 20,
+        5,  9, 14, 20,
         4, 11, 16, 23,
         6, 10, 15, 21};
 
@@ -195,11 +196,16 @@ namespace details {
 } // namespace details
 
 template <size_t N>
-constexpr Digest compute(const char (&data)[N]) noexcept {
+consteval Digest compute(const char (&data)[N]) noexcept {
     details::Context c;
     // Don't hash the null-terminator
     c.append(data, N - 1);
     return c.final();
+}
+
+template <size_t N>
+consteval uint32_t hash32(const char (&data)[N]) noexcept {
+    return details::to_uint32(compute(data).data());
 }
 
 constexpr Digest compute(const char* s) noexcept {

@@ -20,7 +20,7 @@ public:
     explicit PocketOffsetFile();
     explicit PocketOffsetFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
-    FileType type() const override { return FileType(Pocket); }
+    uint32_t type() const override { return md5::hash32("Pocket"); }
     void createGi() override;
     void genGcodeAndTile() override;
 };
@@ -40,7 +40,7 @@ private:
 
 protected:
     void create() override; // Creator interface
-    GCodeType type() override { return Pocket; }
+    uint32_t type() override { return Pocket; }
 };
 
 } // namespace GCode

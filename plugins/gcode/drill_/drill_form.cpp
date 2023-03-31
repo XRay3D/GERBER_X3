@@ -236,7 +236,7 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
 void Form::on_doubleClicked(const QModelIndex& current) {
     if (current.column() == 1) {
         mvector<Tool::Type> tools;
-        tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == GCode::Profile || worckType == GCode::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
+        tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == md5::hash32("Profile") || worckType == GCode::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -380,9 +380,9 @@ void Form::pickUpTool() {
 }
 
 void Form::updateState() {
-    worckType = ui->rb_drilling->isChecked() ? GCode::Drill : (ui->rb_profile->isChecked() ? GCode::Profile : GCode::Pocket);
-    ui->grbxSide->setEnabled(worckType == GCode::Profile);
-    ui->grbxDirection->setEnabled(worckType == GCode::Profile || worckType == GCode::Pocket);
+    worckType = ui->rb_drilling->isChecked() ? GCode::Drill : (ui->rb_profile->isChecked() ? md5::hash32("Profile") : GCode::Pocket);
+    ui->grbxSide->setEnabled(worckType == md5::hash32("Profile"));
+    ui->grbxDirection->setEnabled(worckType == md5::hash32("Profile") || worckType == GCode::Pocket);
     side = ui->rb_on->isChecked() ? GCode::On : (ui->rb_out->isChecked() ? GCode::Outer : GCode::Inner);
 }
 
@@ -434,7 +434,7 @@ void Form::сomputePaths() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                GCode::File* gcode = new GCode::ProfileFile({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCode::Profile}, {pathsMap[usedToolId].paths});
+                GCode::File* gcode = new GCode::ProfileFile({App::toolHolder().tool(usedToolId), dsbxDepth->value(), md5::hash32("Profile")}, {pathsMap[usedToolId].paths});
                 gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -463,7 +463,7 @@ void Form::сomputePaths() {
                     //                    if (item->isSlot())
                     //                        continue;
                     switch (worckType) {
-                    case GCode::Profile:
+                    case md5::hash32("Profile"):
                         if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             switch (side) {
                             case GCode::On:
@@ -532,7 +532,7 @@ void Form::сomputePaths() {
 
                 QThread thread;
                 switch (worckType) {
-                case GCode::Profile: {
+                case md5::hash32("Profile"): {
                     GCode::GCodeParams gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(side);

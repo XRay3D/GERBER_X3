@@ -23,7 +23,7 @@ public:
 
 protected:
     void create() override; // Creator interface
-    GCodeType type() override { return Voronoi; }
+    uint32_t type() override { return Voronoi; }
 
 private:
     void createOffset(const Tool& tool, double depth, const double width);
