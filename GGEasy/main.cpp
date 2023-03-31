@@ -14,7 +14,6 @@
 
 #include "gc_fileplugin.h"
 #include "gc_plugin.h"
-#include "splashscreen.h"
 
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -157,9 +156,12 @@ int main(int argc, char** argv) {
         }
     }
 
-    SplashScreen* splash = new SplashScreen(QPixmap(QStringLiteral(":/256.png")));
+    // QSplashScreen
+    auto splash = new QSplashScreen(QPixmap(QStringLiteral(":/256.png")));
     splash->setAttribute(Qt::WA_DeleteOnClose);
     splash->show();
+    splash->connect(splash, &QObject::destroyed, splash, [] { App::setSplashScreen(nullptr); });
+    App::setSplashScreen(splash);
 
     { // TRANSLATE
         QSettings settings;
@@ -182,11 +184,11 @@ int main(int argc, char** argv) {
         macOS and iOS	.dylib, .bundle, .so
         */
 #ifdef __unix__
-#ifdef QT_DEBUG
+    #ifdef QT_DEBUG
         const QString suffix("*.so");
-#else
+    #else
         const QString suffix("*.so");
-#endif
+    #endif
 #elif _WIN32
         const auto suffix = QStringLiteral("*.dll");
 #else
@@ -220,10 +222,10 @@ int main(int argc, char** argv) {
             }
         }
 
-        if (1) { // add dummy gcode plugin for gcode files folder
-            auto parser = new GCode::Plugin(&app);
-            App::filePlugins().emplace(parser->type(), parser);
-        }
+        //        if (1) { // add dummy gcode plugin for gcode files folder
+        //            auto parser = new GCode::Plugin(&app);
+        //            App::filePlugins().emplace(parser->type(), parser);
+        //        }
     }
 
     SettingsDialog().accept();

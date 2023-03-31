@@ -15,7 +15,7 @@ set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
 #git submodule update --init --recursive
 
-project(GERBER_X3)
+project(GERBER_X3 VERSION 9.0.0)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
