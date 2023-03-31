@@ -23,7 +23,7 @@ public:
     explicit File();
     ~File() override;
 
-    FileType type() const override { return FileType::Excellon; }
+    uint32_t type() const override { return FileType::Excellon; }
 
     // AbstractFile interface
 public:

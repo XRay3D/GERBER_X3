@@ -26,7 +26,7 @@ public:
     explicit File();
     ~File() override;
 
-    FileType type() const override { return FileType::Excellon_; }
+    uint32_t type() const override { return FileType::Excellon_; }
 
     double tool(int t) const;
     Tools tools() const;

@@ -41,9 +41,9 @@ class Form;
 
 using Handlers = mvector<Shapes::Handle*>;
 
-using FileInterfacesMap = std::map<int, AbstractFilePlugin*, std::less<>>;
-using ShapeInterfacesMap = std::map<int, Shapes::Plugin*>;
-using GCodeInterfaceMap = std::map<int, GCodePlugin*>;
+using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
+using GCodePluginMap = std::map<uint32_t, GCodePlugin*>;
+using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
 #define HOLDER(TYPE, SET, NAME, EXIT_CODE)                                          \
 private:                                                                            \
@@ -51,7 +51,7 @@ private:                                                                        
                                                                                     \
 public:                                                                             \
     static auto* NAME() { return app_->NAME##_; }                                   \
-    static void set##SET(TYPE* NAME) {                                              \
+    static void SET(TYPE* NAME) {                                                   \
         (app_->NAME##_ && NAME) ? exit(EXIT_CODE) : (app_->NAME##_ = NAME, void()); \
     }
 
@@ -59,24 +59,24 @@ class App {
     inline static App* app_ = nullptr;
 
     // clang-format off
-    HOLDER(DrillPlugin::Form,   DrillForm,           drillForm,           -10)
-    HOLDER(FileTree::Model,     FileModel,           fileModel,           -11)
-    HOLDER(FileTree::View,      FileTreeView,        fileTreeView,        -12)
-    HOLDER(GCodePropertiesForm, GCodePropertiesForm, gCodePropertiesForm, -13)
-    HOLDER(QUndoStack,          UndoStack,           undoStack,           -17)
-    HOLDER(GraphicsView,        GraphicsView,        graphicsView,        -14)
-    HOLDER(LayoutFrames,        LayoutFrames,        layoutFrames,        -15)
-    HOLDER(MainWindow,          MainWindow,          mainWindow,          -16)
-    HOLDER(Project,             Project,             project,             -18)
-    HOLDER(SplashScreen,        SplashScreen,        splashScreen,        -19)
+    HOLDER(DrillPlugin::Form,   setDrillForm,           drillForm,           -10)
+    HOLDER(FileTree::Model,     setFileModel,           fileModel,           -11)
+    HOLDER(FileTree::View,      setFileTreeView,        fileTreeView,        -12)
+    HOLDER(GCodePropertiesForm, setGCodePropertiesForm, gCodePropertiesForm, -13)
+    HOLDER(QUndoStack,          setUndoStack,           undoStack,           -17)
+    HOLDER(GraphicsView,        setGraphicsView,        graphicsView,        -14)
+    HOLDER(LayoutFrames,        setLayoutFrames,        layoutFrames,        -15)
+    HOLDER(MainWindow,          setMainWindow,          mainWindow,          -16)
+    HOLDER(Project,             setProject,             project,             -18)
+    HOLDER(QSplashScreen,       setSplashScreen,        splashScreen,        -19)
     // clang-format on
 
     //    class GiPin* pins[2];
     class GiMarker* markers[2];
 
-    FileInterfacesMap filePlugins_;
-    GCodeInterfaceMap gCodePlugin_;
-    ShapeInterfacesMap shapePlugin_;
+    FilePluginMap filePlugins_;
+    GCodePluginMap gCodePlugin_;
+    ShapePluginMap shapePlugin_;
 
     AppSettings appSettings_;
     Handlers handlers_;
@@ -114,14 +114,14 @@ public:
 
     static auto& settingsPath() { return app_->settingsPath_; }
 
-    static AbstractFilePlugin* filePlugin(int type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
+    static AbstractFilePlugin* filePlugin(uint32_t type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
     static auto& filePlugins() { return app_->filePlugins_; }
+
+    static GCodePlugin* gCodePlugin(uint32_t type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }
+    static auto& gCodePlugins() { return app_->gCodePlugin_; }
 
     static Shapes::Plugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app_->shapePlugin_; }
-
-    static GCodePlugin* gCodePlugin(int type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }
-    static auto& gCodePlugins() { return app_->gCodePlugin_; }
 
     static auto& shapeHandlers() { return app_->handlers_; }
 

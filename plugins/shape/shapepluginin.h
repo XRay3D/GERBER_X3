@@ -39,7 +39,7 @@ public:
 
     virtual QIcon icon() const = 0;
     [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) const = 0;
-    virtual int type() const = 0;
+    virtual uint32_t type() const = 0;
 
     void createMainMenu(QMenu& menu, FileTree::View* tv);
 

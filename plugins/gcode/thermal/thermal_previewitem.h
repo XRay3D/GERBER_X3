@@ -56,7 +56,7 @@ public:
     QPainterPath shape() const override;
 
     //////////////////////////////////////////
-    int type() const override;
+    uint32_t type() const override;
 
     Paths bridge() const { return bridge_; }
     virtual bool isValid() const;

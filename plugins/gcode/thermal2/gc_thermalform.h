@@ -87,5 +87,5 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
     QWidget* createForm() override { return new ThermalForm(this); };
     bool canToShow() const { return ThermalForm::canToShow(); }
-    int type() const override { return GCode::Thermal; }
+    uint32_t type() const override { return GCode::Thermal; }
 };

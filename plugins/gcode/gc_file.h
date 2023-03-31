@@ -54,6 +54,12 @@ public:
     virtual void genGcodeAndTile() = 0;
     void endFile();
 
+    // AbstractFile interfaces
+    //    void write(QDataStream& stream) const override;
+    //    void read(QDataStream& stream) override;
+    //    void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
+    FileTree::Node* node() override;
+
 private:
     double feedRate_ {};
     double plungeRate_ {};
@@ -125,7 +131,7 @@ protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
     void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
-    FileTree::Node* node() override;
+    //    FileTree::Node* node() override;
 
     /////////////////////////////////////////////////////////////
 

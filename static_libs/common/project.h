@@ -31,10 +31,15 @@ enum FileVersion {
     CurrentVer = ProVer_7,
 };
 
-class AbstractFile;
+namespace GCode {
+class File;
+}
+
 namespace Shapes {
 class AbstractShape;
 }
+
+class AbstractFile;
 class QFile;
 class QFileSystemWatcher;
 
@@ -82,11 +87,12 @@ public:
     }
 
     int addFile(AbstractFile* const file);
+    int addFile(GCode::File* const file);
     bool contains(AbstractFile* file);
     mvector<AbstractFile*> files(int type);
     mvector<AbstractFile*> files(const mvector<int> types);
     void deleteFile(int id);
-    QString fileNames();
+    //    QString fileNames();
     int contains(const QString& name);
 
     // AbstractShape
@@ -171,7 +177,7 @@ signals:
     void worckRectChanged(const QRectF&);
     void layoutFrameUpdate(bool = false);
     // need for debuging
-    void addFileDbg(AbstractFile* file);
+    void addFileDbg(GCode::File* file);
     // File Watcher
     void parseFile(const QString& filename, int type);
 

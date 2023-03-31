@@ -21,25 +21,6 @@
 
 class QMenu;
 
-inline QPixmap decoration(QColor color, QChar chr = {}) {
-
-    QPixmap pixmap(22, 22);
-    pixmap.fill(Qt::transparent);
-    QPainter p(&pixmap);
-    color.setAlpha(255);
-    p.setBrush(color);
-    p.drawRect(2, 2, 18, 18);
-    if (!chr.isNull()) {
-        QFont f;
-        f.setBold(true);
-        f.setPixelSize(18);
-        p.setFont(f);
-        // p.setPen(Qt::white);
-        p.drawText(QRect(2, 2, 18, 18), Qt::AlignCenter, {chr});
-    }
-    return pixmap;
-}
-
 namespace FileTree {
 
 class View;

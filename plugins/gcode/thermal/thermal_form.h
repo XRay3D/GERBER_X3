@@ -95,7 +95,7 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
     QWidget* createForm() override { return new Form(this); };
     bool canToShow() const override { return Form::canToShow(); }
-    int type() const override { return GCode::Thermal; }
+    uint32_t type() const override { return GCode::Thermal; }
     AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::ThermalFile; }
 };
 

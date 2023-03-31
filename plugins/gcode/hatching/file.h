@@ -19,7 +19,7 @@ public:
     explicit CrosshatchFile();
     explicit CrosshatchFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
-    FileType type() const override { return FileType(Hatching); }
+    uint32_t type() const override { return md5::hash32("Hatching"); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

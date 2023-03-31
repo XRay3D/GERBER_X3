@@ -26,7 +26,7 @@ void ProfileCtr::create() {
     createProfile(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble());
 }
 
-GCodeType ProfileCtr::type() { return Profile; }
+
 
 void ProfileCtr::createProfile(const Tool& tool, const double depth) {
     do {

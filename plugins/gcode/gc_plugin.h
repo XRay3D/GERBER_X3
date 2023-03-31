@@ -19,7 +19,7 @@ public:
     [[nodiscard]] virtual QKeySequence keySequence() const = 0;
     [[nodiscard]] virtual QWidget* createForm() = 0;
     [[nodiscard]] virtual bool canToShow() const;
-    [[nodiscard]] virtual int type() const = 0;
+    [[nodiscard]] virtual uint32_t type() const = 0;
     [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) const = 0;
 
     [[nodiscard]] QAction* addAction(QMenu* menu, QToolBar* toolbar);

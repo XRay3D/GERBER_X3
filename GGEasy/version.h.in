@@ -10,30 +10,19 @@
  ********************************************************************************/
 #pragma once
 
-#include "abstract_fileplugin.h"
+#define VER_FILEVERSION     ${PROJECT_VERSION_MAJOR}, ${PROJECT_VERSION_MINOR}, ${PROJECT_VERSION_PATCH}, ${PROJECT_VERSION_TWEAK}
+#define VER_FILEVERSION_STR "${PROJECT_VERSION}"
 
-#include <QObject>
+#define VER_PRODUCTVERSION     VER_FILEVERSION
+#define VER_PRODUCTVERSION_STR VER_FILEVERSION_STR
 
-namespace GCode {
+#define VER_COMPANYNAME_STR      "XrSoft"
+#define VER_FILEDESCRIPTION_STR  "GGEasy"
+#define VER_INTERNALNAME_STR     "GGEasy"
+#define VER_LEGALCOPYRIGHT_STR   "" // Copyright © 2021 XrSoft"
+#define VER_LEGALTRADEMARKS1_STR "" // All Rights Reserved"
+#define VER_LEGALTRADEMARKS2_STR VER_LEGALTRADEMARKS1_STR
+#define VER_ORIGINALFILENAME_STR "GGEasy.exe"
+#define VER_PRODUCTNAME_STR      "GGEasy"
 
-class Plugin : public AbstractFilePlugin {
-    Q_OBJECT
-
-public:
-    explicit Plugin(QObject* parent = nullptr);
-
-    bool thisIsIt(const QString& fileName) override;
-    uint32_t type() const override;
-    QString folderName() const override;
-
-    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
-    AbstractFile* loadFile(QDataStream& stream) override;
-
-    QIcon icon() const override;
-    void createMainMenu(QMenu& menu, FileTree::View* tv) override;
-
-public slots:
-    AbstractFile* parseFile(const QString& fileName, int type) override;
-};
-
-} // namespace GCode
+#define VER_COMPANYDOMAIN_STR "" //"example.org"

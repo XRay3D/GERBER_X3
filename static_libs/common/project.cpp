@@ -15,6 +15,7 @@
 #include "abstract_file.h"
 #include "abstract_fileplugin.h"
 #include "ft_model.h"
+#include "gc_file.h"
 #include "gc_plugin.h"
 #include "graphicsview.h"
 #include "shapepluginin.h"
@@ -33,13 +34,13 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>
 }
 
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file) {
-    int type;
+    uint32_t type;
     stream >> type;
     qDebug() << __FUNCTION__ << "type" << type;
     if (App::gCodePlugins().contains(type))
         file.reset(App::gCodePlugin(type)->loadFile(stream));
-    else if (App::filePlugins().contains(FileType(type)))
-        file.reset(App::filePlugin(FileType(type))->loadFile(stream));
+    else if (App::filePlugins().contains(type))
+        file.reset(App::filePlugin(type)->loadFile(stream));
     else {
         QByteArray data;
         return stream >> data;
@@ -57,7 +58,7 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::Abstr
 }
 
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractShape>& shape) {
-    int type;
+    uint32_t type;
     stream >> type;
     if (App::shapePlugins().contains(type))
         shape.reset(App::shapePlugin(type)->createShape());
@@ -81,7 +82,8 @@ Project::Project(QObject* parent)
         }
     });
 
-    connect(this, &Project::addFileDbg, this, &Project::addFile, Qt::QueuedConnection);
+    connect(this, &Project::addFileDbg, this, qOverload<GCode::File*>(&Project::addFile), Qt::QueuedConnection);
+
     App::setProject(this);
 }
 
@@ -257,16 +259,16 @@ QRectF Project::getBoundingRect() {
     return QRectF(topLeft, botRight);
 }
 
-QString Project::fileNames() {
-    QMutexLocker locker(&mutex);
-    QString fileNames;
-    for (const auto& [id, sp] : files_) {
-        AbstractFile* item = sp.get();
-        if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
-            fileNames.append(item->name()).push_back('|');
-    }
-    return fileNames;
-}
+// QString Project::fileNames() {
+//     QMutexLocker locker(&mutex);
+//     QString fileNames;
+//     for (const auto& [id, sp] : files_) {
+//         AbstractFile* item = sp.get();
+//         if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
+//             fileNames.append(item->name()).push_back('|');
+//     }
+//     return fileNames;
+// }
 
 int Project::contains(const QString& name) {
     // QMutexLocker locker(&mutex);
@@ -274,9 +276,9 @@ int Project::contains(const QString& name) {
         return -1;
     for (const auto& [id, sp] : files_) {
         AbstractFile* item = sp.get();
-        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
-            if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
-                return item->id();
+        //        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
+        if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
+            return item->id();
     }
     return -1;
 }
@@ -333,6 +335,29 @@ int Project::addFile(AbstractFile* file) {
     file->addToScene();
     file->setVisible(true);
     const int id = contains(file->name());
+    if (id > -1 && files_[id]->type() == file->type()) {
+        reload(id, file);
+    } else if (file->id() == -1) {
+        const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
+        file->setId(newId);
+        files_.emplace(newId, file);
+        App::fileModel()->addFile(file);
+        setChanged();
+        watcher.addPath(file->name());
+    }
+    return file->id();
+}
+
+int Project::addFile(GCode::File* file) {
+    QMutexLocker locker(&mutex);
+    if (!file)
+        return -1;
+    isPinsPlaced_ = false;
+    reloadFile_ = false;
+    file->createGi();
+    file->addToScene();
+    file->setVisible(true);
+    const int id = -1; // contains(file->name());
     if (id > -1 && files_[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {

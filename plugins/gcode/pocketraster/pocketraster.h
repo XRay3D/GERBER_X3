@@ -22,7 +22,7 @@ public:
     // Creator interface
 protected:
     void create() override; // Creator interface
-    GCodeType type() override { return Raster; }
+    uint32_t type() override { return Raster; }
 
 private:
     enum {

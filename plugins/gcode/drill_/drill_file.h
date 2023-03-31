@@ -34,7 +34,7 @@
 //     explicit File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths = {});
 //     bool save(const QString& name);
 //     GCodeType gtype() const;
-//     FileType type() const override { return FileType::GCode; }
+//     uint32_t type() const override { return FileType::GCode; }
 //     QIcon icon() const { return icon_; }
 
 // private:

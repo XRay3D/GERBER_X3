@@ -27,7 +27,7 @@ public:
     void closeFile();
     void closeFiles();
 
-    void closeAllFiles(FileType type);
+    void closeAllFiles(uint32_t type);
 
     void setModel(QAbstractItemModel* model) override;
 

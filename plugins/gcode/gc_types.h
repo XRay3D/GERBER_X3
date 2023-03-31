@@ -21,20 +21,20 @@
 
 namespace GCode {
 
-enum GCodeType : int {
-    Null = -1,
+//enum GCodeType : int {
+//    Null = -1,
 
-    Profile = 100, // FileType::GCode
-    Pocket,
-    Raster,
-    Hatching,
-    Voronoi,
-    Thermal,
-    Drill,
-    LaserHLDI,
+//    Profile = 100, // FileType::GCode
+//    Pocket,
+//    Raster,
+//    Hatching,
+//    Voronoi,
+//    Thermal,
+//    Drill,
+//    LaserHLDI,
 
-    GCodeProperties = 199,
-};
+//    GCodeProperties = 199,
+//};
 
 enum Code {
     GNull = -1,
@@ -170,7 +170,7 @@ public:
             params[MultiToolIndex] = 0;
     }
 
-    GCodeParams(const Tool& tool, double depth /*, GCodeType type*/)
+    GCodeParams(const Tool& tool, double depth /*, uint32_t type*/)
         : GCodeParams {} {
         tools.emplace_back(tool);
         params[GCodeParams::Depth] = depth;

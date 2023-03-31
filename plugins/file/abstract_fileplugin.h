@@ -45,7 +45,7 @@ public:
     virtual ~AbstractFilePlugin() = default;
 
     virtual bool thisIsIt(const QString& fileName) = 0;
-    virtual int type() const = 0;
+    virtual uint32_t type() const = 0;
     virtual QString folderName() const = 0;
 
     [[nodiscard]] virtual std::any createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param = {}) { return {}; };

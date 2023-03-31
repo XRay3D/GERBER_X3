@@ -720,7 +720,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     switch (gcp_.gcType) {
-    case GCode::Profile:
+    case md5::hash32("Profile"):
     case GCode::Thermal:
         createGiProfile();
         break;
@@ -757,7 +757,7 @@ void File::createGi() {
             calcArcs(path);
 
     switch (gcp_.gcType) {
-    case GCode::Profile:
+    case md5::hash32("Profile"):
         icon_ = QIcon::fromTheme("profile-path");
         break;
     case GCode::Pocket:

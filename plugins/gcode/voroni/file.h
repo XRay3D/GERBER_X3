@@ -20,7 +20,7 @@ public:
     explicit VoronoiFile();
     explicit VoronoiFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
-    FileType type() const override { return FileType(Voronoi); }
+    uint32_t type() const override { return md5::hash32("Voronoi"); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

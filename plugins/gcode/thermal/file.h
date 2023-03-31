@@ -20,7 +20,7 @@ public:
     explicit ThermalFile();
     explicit ThermalFile(GCodeParams&& gcp, Pathss&& toolPathss);
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
-    FileType type() const override { return FileType(Thermal); }
+    uint32_t type() const override { return md5::hash32("Thermal"); }
     void createGi() override;
     void genGcodeAndTile() override;
 };

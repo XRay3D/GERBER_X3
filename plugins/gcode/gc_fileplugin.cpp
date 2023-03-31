@@ -18,6 +18,7 @@
 // #include "gc_file.h"
 //  #include "gc_node.h"
 
+#include "md5.h"
 #include <QMessageBox>
 #include <QtWidgets>
 
@@ -26,16 +27,16 @@ namespace GCode {
 Plugin::Plugin(QObject* parent)
     : AbstractFilePlugin(parent) {
     info_ = {
-        {"Name",         "GCode"                                                },
-        {"Version",      "1.1"                                                  },
-        {"VendorAuthor", "X-Ray aka Bakiev Damir"                               },
-        {"Info",         "GCode is a static plugin always included with GGEasy."}
+        {        "Name",                                                 "GCode"},
+        {     "Version",                                                   "1.1"},
+        {"VendorAuthor",                                "X-Ray aka Bakiev Damir"},
+        {        "Info", "GCode is a static plugin always included with GGEasy."}
     };
 }
 
 bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
 
-int Plugin::type() const { return -1 /*int(FileType::GCode_)*/; }
+uint32_t Plugin::type() const { return md5::hash32("GCode"); }
 
 QString Plugin::folderName() const { return tr("Tool Paths"); }
 

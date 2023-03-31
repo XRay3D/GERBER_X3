@@ -18,12 +18,14 @@
 
 namespace GCode {
 
+inline constexpr auto PROFILE = md5::hash32("Profile");
+
 class ProfileFile final : public File {
 public:
     explicit ProfileFile();
     explicit ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss);
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
-    FileType type() const override { return FileType(Profile); }
+    uint32_t type() const override { return PROFILE; }
     void createGi() override;
     void genGcodeAndTile() override;
 }; // ProfileFile
@@ -66,7 +68,7 @@ private:
 
 protected:
     void create() override; // Creator interface
-    GCodeType type() override;
+    uint32_t type() override { return PROFILE; }
 };
 
 } // namespace GCode

@@ -175,7 +175,7 @@ protected:
     std::unordered_map<void*, int> nesting;
 
     virtual void create() = 0;
-    virtual GCodeType type() = 0;
+    virtual uint32_t type() = 0;
 
     //    inline static ClipperBase* clipperPtr_;
     //    inline static bool cancel_;
