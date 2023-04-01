@@ -11,16 +11,16 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "ft_model.h"
+#include "ft_foldernode.h"
 
 #include "abstract_file.h"
 #include "abstract_fileplugin.h"
-#include "ft_foldernode.h"
-
-#include "gc_file.h"
-#include "gc_plugin.h"
+// #include "gc_file.h"
+// #include "gc_plugin.h"
+#include "md5.h"
 #include "project.h"
-#include "shapepluginin.h"
-#include "shnode.h"
+// #include "shapepluginin.h"
+// #include "shnode.h"
 
 #include <QTimer>
 
@@ -56,45 +56,54 @@ void Model::addFile(AbstractFile* file) {
 
     uint32_t type = file->type();
 
-    if (fileFolders.find(type) == fileFolders.end()) {
-        QModelIndex index = createIndex(0, 0, rootItem);
-        int rowCount = rootItem->childCount();
-        beginInsertRows(index, rowCount, rowCount);
-        auto it = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
-        rootItem->addChild(it);
-        endInsertRows();
+    if (App::filePlugins().contains(type)) {
+
+        if (fileFolders.find(type) == fileFolders.end()) {
+            QModelIndex index = createIndex(0, 0, rootItem);
+            int rowCount = rootItem->childCount();
+            beginInsertRows(index, rowCount, rowCount);
+            auto it = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
+            rootItem->addChild(it);
+            endInsertRows();
+        }
+
+        int rowCount = addFile(type, file);
+        App::filePlugin(type)->updateFileModel(file);
+        emit select(createIndex(rowCount, 0, file->node()));
+    } else if (App::gCodePlugins().contains(type)) {
+        type = G_CODE;
+        if (fileFolders.find(type) == fileFolders.end()) {
+            QModelIndex index = createIndex(0, 0, rootItem);
+            int rowCount = rootItem->childCount();
+            beginInsertRows(index, rowCount, rowCount);
+            auto it = fileFolders[type] = new FolderNode(tr("GCode"), type);
+            rootItem->addChild(it);
+            endInsertRows();
+        }
+
+        int rowCount = addFile(type, file);
+        //    App::gCodePlugin(type)->updateFileModel(file);
+        emit select(createIndex(rowCount, 0, file->node()));
+    } else if (type == G_CODE) {
+        type = G_CODE + 1;
+        if (fileFolders.find(type) == fileFolders.end()) {
+            QModelIndex index = createIndex(0, 0, rootItem);
+            int rowCount = rootItem->childCount();
+            beginInsertRows(index, rowCount, rowCount);
+            auto it = fileFolders[type] = new FolderNode("GCode Debug", type);
+            rootItem->addChild(it);
+            endInsertRows();
+        }
+        int rowCount = addFile(type, file);
+        emit select(createIndex(rowCount, 0, file->node()));
     }
-
-    int rowCount = addFile(type, file);
-    App::filePlugin(type)->updateFileModel(file);
-    emit select(createIndex(rowCount, 0, file->node()));
-}
-
-void Model::addFile(GCode::File* file) {
-    if (!file)
-        return;
-
-    uint32_t type = md5::hash32("GCode"); // file->type();
-
-    if (fileFolders.find(type) == fileFolders.end()) {
-        QModelIndex index = createIndex(0, 0, rootItem);
-        int rowCount = rootItem->childCount();
-        beginInsertRows(index, rowCount, rowCount);
-        auto it = fileFolders[type] = new FolderNode(tr("GCode"), type);
-        rootItem->addChild(it);
-        endInsertRows();
-    }
-
-    int rowCount = addFile(type, file);
-    //    App::gCodePlugin(type)->updateFileModel(file);
-    emit select(createIndex(rowCount, 0, file->node()));
 }
 
 void Model::addShape(Shapes::AbstractShape* shape) {
     if (!shape)
         return;
 
-    //    uint32_t type = FileType::Shapes_;
+    // FIXME   uint32_t type = FileType::Shapes_;
 
     //    if (fileFolders.find(type) == fileFolders.end()) {
     //        QModelIndex index = createIndex(0, 0, rootItem);

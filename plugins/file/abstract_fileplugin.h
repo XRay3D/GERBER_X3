@@ -43,15 +43,13 @@ public:
         : QObject {parent} { }
     virtual ~AbstractFilePlugin() = default;
 
-    virtual bool thisIsIt(const QString& fileName) = 0;
-    virtual uint32_t type() const = 0;
-    virtual QString folderName() const = 0;
-
     [[nodiscard]] virtual std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) { return {}; };
-
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
-    [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) = 0;
+    [[nodiscard]] virtual QString folderName() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
+    [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) const = 0;
+    [[nodiscard]] virtual bool thisIsIt(const QString& fileName) = 0;
+    [[nodiscard]] virtual uint32_t type() const = 0;
 
     virtual void addToGcForm([[maybe_unused]] AbstractFile* file, [[maybe_unused]] QComboBox* cbx) {};
 

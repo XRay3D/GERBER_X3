@@ -20,7 +20,7 @@
 #include <QMessageBox>
 
 HatchingForm::HatchingForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::FormBase(plugin, new GCode::HatchingCreator, parent)
+    : GCode::BaseForm(plugin, new GCode::HatchingCreator, parent)
     , ui(new Ui::HatchingForm)
     , names {tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps {
@@ -138,9 +138,9 @@ void HatchingForm::сomputePaths() {
     //        gcp_.params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    gcCreator->setGcp(gcp_);
-    gcCreator->addPaths(wPaths);
-    gcCreator->addRawPaths(wRawPaths);
+    creator->setGcp(gcp_);
+    creator->addPaths(wPaths);
+    creator->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }

@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 #include "gc_plugin.h"
 #include <array>
 
@@ -21,12 +21,12 @@ class GiBridge;
 
 namespace Profile {
 
-class ProfileForm : public GCode::FormBase {
+class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit ProfileForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
-    ~ProfileForm() override;
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    ~Form() override;
 
 private slots:
     void onAddBridgeClicked();
@@ -88,13 +88,13 @@ class GCPluginImpl final : public GCode::Plugin {
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
     Q_INTERFACES(GCode::Plugin)
 
-    // GCode::Plugin interface
 public:
+    // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
-    QWidget* createForm() override { return new ProfileForm(this); };
+    QWidget* createForm() override { return new Form(this); };
     uint32_t type() const override { return md5::hash32("Profile"); }
-    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::File; }
+    AbstractFile*/*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 
 } // namespace Profile

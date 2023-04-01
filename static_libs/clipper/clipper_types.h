@@ -25,11 +25,13 @@
 
 #include "app.h"
 #include "datastream.h"
-#include "settings.h"
+// #include "settings.h"
+#include "gc_types.h" // ifCancelThenThrow
 
 static constexpr auto uScale {100'000};
 static constexpr auto dScale {1. / uScale};
-extern void ifCancelThenThrow();
+
+// extern void ifCancelThenThrow();
 
 namespace Clipper2Lib {
 

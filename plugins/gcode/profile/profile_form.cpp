@@ -22,8 +22,8 @@
 
 namespace Profile {
 
-ProfileForm::ProfileForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::FormBase(plugin, new GCode::Creator, parent)
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::ProfileForm) {
     ui->setupUi(content);
     setWindowTitle(tr("Profile Toolpath"));
@@ -41,7 +41,7 @@ ProfileForm::ProfileForm(GCode::Plugin* plugin, QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup("ProfileForm");
+    settings.beginGroup("Form");
     settings.getValue(ui->dsbxBridgeLenght, 1.0);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
@@ -57,17 +57,17 @@ ProfileForm::ProfileForm(GCode::Plugin* plugin, QWidget* parent)
     rb_clicked();
 
     // clang-format off
-    connect(App::graphicsView(),  &GraphicsView::mouseMove,      this, &ProfileForm::updateBridgePos);
-    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &ProfileForm::updateBridges);
-    connect(leName,               &QLineEdit::textChanged,       this, &ProfileForm::onNameTextChanged);
-    connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &ProfileForm::updateBridges);
-    connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &ProfileForm::onAddBridgeClicked);
-    connect(ui->rbClimb,          &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
-    connect(ui->rbConventional,   &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
-    connect(ui->rbInside,         &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
-    connect(ui->rbOn,             &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
-    connect(ui->rbOutside,        &QRadioButton::clicked,        this, &ProfileForm::rb_clicked);
-    connect(ui->toolHolder,       &ToolSelectorForm::updateName, this, &ProfileForm::updateName);
+    connect(App::graphicsView(),  &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
+    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &Form::updateBridges);
+    connect(leName,               &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
+    connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);
+    connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &Form::onAddBridgeClicked);
+    connect(ui->rbClimb,          &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbConventional,   &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbInside,         &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbOn,             &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbOutside,        &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->toolHolder,       &ToolSelectorForm::updateName, this, &Form::updateName);
     // clang-format on
 
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
@@ -78,9 +78,9 @@ ProfileForm::ProfileForm(GCode::Plugin* plugin, QWidget* parent)
     });
 }
 
-ProfileForm::~ProfileForm() {
+Form::~Form() {
     MySettings settings;
-    settings.beginGroup("ProfileForm");
+    settings.beginGroup("Form");
     settings.setValue(ui->dsbxBridgeLenght);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
@@ -100,7 +100,7 @@ ProfileForm::~ProfileForm() {
     delete ui;
 }
 
-void ProfileForm::сomputePaths() {
+void Form::сomputePaths() {
     usedItems_.clear();
     const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
@@ -166,14 +166,14 @@ void ProfileForm::сomputePaths() {
     gcp_.tools.push_back(tool);
     gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
 
-    gcp_.params[GCode::Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
-    gcp_.params[GCode::Creator::BridgeValue] = ui->dsbxBridgeValue->value();
-    // NOTE reserve   gcp_.params[GCode::Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
+    gcp_.params[Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
+    gcp_.params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
+    // NOTE reserve   gcp_.params[Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
 
     if (side == GCode::On)
-        gcp_.params[GCode::Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
+        gcp_.params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
     else
-        gcp_.params[GCode::Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
+        gcp_.params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
 
     gcp_.params[GCode::Params::GrItems].setValue(usedItems_);
 
@@ -184,32 +184,32 @@ void ProfileForm::сomputePaths() {
     }
     if (!brv.isEmpty()) {
         // gcp_.params[GCode::Params::Bridges].fromValue(brv);
-        gcp_.params[GCode::Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
+        gcp_.params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
-    gcCreator->setGcp(gcp_);
-    gcCreator->addPaths(std::move(wPaths));
-    gcCreator->addRawPaths(std::move(wRawPaths));
+    creator->setGcp(gcp_);
+    creator->addPaths(std::move(wPaths));
+    creator->addRawPaths(std::move(wRawPaths));
     fileCount = 1;
     emit createToolpath();
 }
 
-void ProfileForm::updateName() {
+void Form::updateName() {
     leName->setText(names[side]);
     updateBridges();
 }
 
-void ProfileForm::resizeEvent(QResizeEvent* event) {
+void Form::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void ProfileForm::showEvent(QShowEvent* event) {
+void Form::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void ProfileForm::onAddBridgeClicked() {
+void Form::onAddBridgeClicked() {
     const double value = ui->dsbxBridgeValue->value();
 
     auto addHorizontallyVertically = [this, value](BridgeAlign align) {
@@ -278,7 +278,7 @@ void ProfileForm::onAddBridgeClicked() {
     }
 }
 
-void ProfileForm::updateBridges() {
+void Form::updateBridges() {
     GiBridge::lenght = ui->dsbxBridgeLenght->value();
     GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
     GiBridge::side = side;
@@ -286,12 +286,12 @@ void ProfileForm::updateBridges() {
         item->update();
 }
 
-void ProfileForm::updatePixmap() {
+void Form::updatePixmap() {
     int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
 }
 
-void ProfileForm::rb_clicked() {
+void Form::rb_clicked() {
     if (ui->rbOn->isChecked()) {
         side = GCode::On;
         ui->cbxTrimming->setText(tr("Trimming"));
@@ -317,14 +317,14 @@ void ProfileForm::rb_clicked() {
     updatePixmap();
 }
 
-void ProfileForm::updateBridgePos(QPointF pos) {
+void Form::updateBridgePos(QPointF pos) {
     if (GiBridge::moveBrPtr)
         GiBridge::moveBrPtr->setPos(pos);
 }
 
-void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void ProfileForm::editFile(GCode::File* file) {
+void Form::editFile(GCode::File* file) {
 
     //    GCode::Params gcp_ {file->gcp()};
 

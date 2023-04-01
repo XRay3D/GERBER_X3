@@ -87,9 +87,7 @@ private:
     const QString mimeType;
 
     int addFile(uint32_t type, AbstractFile* file);
-
     void addFile(AbstractFile* file);
-    void addFile(GCode::File* file);
     void addShape(Shapes::AbstractShape* shape);
 };
 

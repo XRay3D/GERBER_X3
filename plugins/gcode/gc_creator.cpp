@@ -26,14 +26,15 @@
 #include "utils.h"
 
 #include <execution> //std::execution::parallel_policy
+#include <forward_list>
 #include <set>
 #include <stdexcept>
 
-class GCodeGbgFile final : public GCode::File {
+class GCDbgFile final : public GCode::File {
     QColor color;
 
 public:
-    explicit GCodeGbgFile(GCode::GCodeParams&& gcp, Paths&& toolPaths, QColor color)
+    explicit GCDbgFile(GCode::Params&& gcp, Paths&& toolPaths, QColor color)
         : GCode::File(std::move(gcp), {}, std::move(toolPaths))
         , color {color} {
         initSave();
@@ -46,7 +47,7 @@ public:
     void read(QDataStream& stream) override { }
     void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
-    uint32_t type() const override { return md5::hash32("GCodeGbgFile"); }
+    uint32_t type() const override { return G_CODE; }
     void createGi() override {
         GraphicsItem* item;
         item = new GiGcPath(pocketPaths_, this);
@@ -61,6 +62,7 @@ public:
         itemGroup()->setVisible(true);
     }
     void genGcodeAndTile() override { } // saveLaserProfile({});
+    // AbstractFile interface
 };
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
@@ -69,8 +71,8 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const
         return;
     if (close)
         std::ranges::for_each(ps, [](Path& p) { p.push_back(p.front()); });
-    GCode::GCodeParams gcp {tool, 0.0};
-    auto file = new GCodeGbgFile(std::move(gcp), std::move(ps), color);
+    GCode::Params gcp {tool, 0.0};
+    auto file = new GCDbgFile(std::move(gcp), std::move(ps), color);
     file->setFileName(fileName);
     emit App::project()->addFileDbg(file);
 };
@@ -724,9 +726,9 @@ bool Creator::checkMilling(SideOfMilling side) {
     return true;
 }
 
-GCodeParams Creator::getGcp() const { return gcp_; }
+Params Creator::getGcp() const { return gcp_; }
 
-void Creator::setGcp(const GCodeParams& gcp) {
+void Creator::setGcp(const Params& gcp) {
     gcp_ = gcp;
     reset();
 }

@@ -30,7 +30,7 @@ namespace GCode {
 
 void calcArcs(Path path);
 
-File::File(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : gcp_(std::move(gcp))
     , pocketPaths_(std::move(pocketPaths))
     , toolPathss_(std::move(toolPathss)) {
@@ -47,7 +47,7 @@ mvector<QString> File::gCodeText() const { return lines_; }
 
 Tool File::getTool() const { return gcp_.getTool(); }
 
-const GCodeParams& File::gcp() const { return gcp_; }
+const Params& File::gcp() const { return gcp_; }
 
 double File::feedRate() { return feedRate_; }
 
@@ -153,7 +153,7 @@ void File::endFile() {
 }
 
 void File::addInfo() {
-    const static auto side_ {GCObj::tr("Top|Bottom").split('|')};
+    const static auto side_ {QObject::tr("Top|Bottom").split('|')};
     if (Settings::info()) {
         lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
         lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
@@ -339,7 +339,7 @@ void File::write(QDataStream& stream) const {
 }
 
 void File::read(QDataStream& stream) {
-    auto& gcp = *const_cast<GCodeParams*>(&gcp_);
+    auto& gcp = *const_cast<Params*>(&gcp_);
     switch (App::project()->ver()) {
     case ProVer_7:
     case ProVer_6:
@@ -357,7 +357,7 @@ void File::read(QDataStream& stream) {
         //        stream >> gcp.tools.front();
         //        double depth;
         //        stream >> depth;
-        //        gcp.params[GCodeParams::Depth] = depth;
+        //        gcp.params[Params::Depth] = depth;
     }
         [[fallthrough]];
     case ProVer_2:

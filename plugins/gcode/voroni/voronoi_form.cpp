@@ -20,7 +20,7 @@
 #include <QMessageBox>
 
 VoronoiForm::VoronoiForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::FormBase(plugin, new GCode::VoronoiCreator, parent)
+    : GCode::BaseForm(plugin, new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(content);
 
@@ -124,9 +124,9 @@ void VoronoiForm::сomputePaths() {
     gpc.params[GCode::Params::VorT] = ui->cbxSolver->currentIndex();
     gpc.params[GCode::Params::FrameOffset] = ui->dsbxOffset->value();
 
-    gcCreator->setGcp(gpc);
-    gcCreator->addPaths(wPaths);
-    gcCreator->addRawPaths(wRawPaths);
+    creator->setGcp(gpc);
+    creator->addPaths(wPaths);
+    creator->addRawPaths(wRawPaths);
     createToolpath();
 }
 

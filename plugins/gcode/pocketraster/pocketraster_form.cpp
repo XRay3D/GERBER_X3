@@ -20,7 +20,7 @@
 #include <QMessageBox>
 
 PocketRasterForm::PocketRasterForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::FormBase(plugin, new GCode::RasterCreator, parent)
+    : GCode::BaseForm(plugin, new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
     , names {tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
@@ -137,9 +137,9 @@ void PocketRasterForm::сomputePaths() {
         gcp_.params[GCode::Params::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
     }
 
-    gcCreator->setGcp(gcp_);
-    gcCreator->addPaths(wPaths);
-    gcCreator->addRawPaths(wRawPaths);
+    creator->setGcp(gcp_);
+    creator->addPaths(wPaths);
+    creator->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }

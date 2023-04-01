@@ -13,8 +13,9 @@
 #include "gi_bridge.h"
 
 #include "graphicsview.h"
-#include <QPainter>
+#include "gcode.h"
 
+#include <QPainter>
 #include <algorithm>
 #include <cmath>
 #include <iostream>

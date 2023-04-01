@@ -46,13 +46,13 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     return file;
 }
 
-//std::any Plugin::createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
-//    QTransform t {file->transform()};
-//    auto mapPaths = [t](Paths paths) {
-//        for (auto&& path : paths)
-//            path = t.map(path);
-//        return paths;
-//    };
+// std::any Plugin::createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
+//     QTransform t {file->transform()};
+//     auto mapPaths = [t](Paths paths) {
+//         for (auto&& path : paths)
+//             path = t.map(path);
+//         return paths;
+//     };
 
 //    auto mapPos = [t](auto pos) {
 //        pos = t.map(pos);
@@ -191,19 +191,18 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
 bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
     if (file.open(QFile::ReadOnly | QFile::Text)) {
-        static constexpr ctll::fixed_string pattern(R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)"); // fixed_string("%FS[LTD]?[AI]X\d{2}Y\d{2}\*");
         QTextStream in(&file);
         QString line;
         while (in.readLineInto(&line)) {
             auto data {toU16StrView(line)};
-            if (*ctre::range<pattern>(data).begin())
+            if (*ctre::range<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(data).begin())
                 return true;
         }
     }
     return false;
 }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) { return File::load<File>(stream); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 

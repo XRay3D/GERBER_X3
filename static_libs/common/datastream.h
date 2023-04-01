@@ -52,7 +52,8 @@ template <class T, size_t N>
 inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
     uint32_t n;
     s >> n;
-    for (int i = 0; i < std::min<uint32_t>(n, N); ++i)
+    n = std::min<uint32_t>(n, N);
+    for (int i {}; i < n; ++i)
         s >> p[i];
     return s;
 }
@@ -72,11 +73,9 @@ template <typename T, class Alloc>
 inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& container) {
     uint32_t n;
     stream >> n;
-    container.reserve(n);
-    while (n--) {
-        T var;
+    container.resize(n);
+    for (auto& var : container) {
         stream >> var;
-        container.emplace_back(std::move(var));
         if (stream.status() != QDataStream::Ok)
             return container.clear(), stream;
     }

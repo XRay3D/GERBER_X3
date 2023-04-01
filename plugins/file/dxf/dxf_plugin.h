@@ -33,7 +33,7 @@ public:
     uint32_t type() const override;
     QString folderName() const override;
 
-    AbstractFile* loadFile(QDataStream& stream) override;
+    AbstractFile* loadFile(QDataStream& stream) constoverride;
     QIcon icon() const override;
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     void updateFileModel(AbstractFile* file) override;

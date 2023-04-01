@@ -10,13 +10,13 @@
  *******************************************************************************/
 #pragma once
 #include "file.h"
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 
 namespace Ui {
 class HatchingForm;
 }
 
-class HatchingForm : public GCode::FormBase {
+class HatchingForm : public GCode::BaseForm {
     Q_OBJECT
 
 public:

@@ -17,29 +17,23 @@
 #include <QThread>
 #include <QtWidgets>
 
-class GCode::File;
-// namespace GCode {
-// class File;
-// class file_;
-// } // namespace GCode
+namespace GCode {
 
-class GraphicsItem;
-class QProgressDialog;
+class File;
 
-class GcFormBase : public QWidget {
+class BaseForm : public QWidget {
     Q_OBJECT
-    friend class MainWindow;
 
 public:
-    explicit GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent = nullptr);
-    ~GcFormBase() override;
-    virtual void editFile(GCode::File* file) = 0;
+    explicit BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent = nullptr);
+    ~BaseForm() override;
+    virtual void editFile(File* file) = 0;
 
 signals:
     void createToolpath();
 
 protected:
-    void fileHandler(GCode::File* file);
+    void fileHandler(File* file);
     void updateButtonIconSize() {
         for (auto* button : findChildren<QPushButton*>())
             button->setIconSize({16, 16});
@@ -47,16 +41,16 @@ protected:
 
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
-    // GcFormBase interface
+    // BaseForm interface
     virtual void сomputePaths() = 0;
     virtual void updateName() = 0;
 
-    GCode::Creator* const gcCreator;
-    GCode::Direction direction = GCode::Climb;
-    GCode::SideOfMilling side = GCode::Outer;
-    GCode::UsedItems usedItems_;
+    Creator* const creator;
+    Direction direction = Climb;
+    SideOfMilling side = Outer;
+    UsedItems usedItems_;
     Side boardSide = Top;
-    void addUsedGi(GraphicsItem* gi);
+    void addUsedGi(class ::GraphicsItem* gi);
 
     QString fileName_;
 
@@ -64,19 +58,11 @@ protected:
     QString trDepth {tr("Depth:")};
     QString trTool {tr("Tool:")};
 
-    //    QString trOutside {tr("Outside")};
-    //    QString trOutside {tr("Outside")};
-    //    QString trOutside {tr("Outside")};
-    //    QString trOutside {tr("Outside")};
-    //    QString trOutside {tr("Outside")};
-    //    QString trOutside {tr("Outside")};
-    //    QString trOutside {tr("Outside")};
-
     bool editMode_ = false;
     int fileId {-1};
 
     int fileCount {1};
-    GCodePlugin* const plugin;
+    Plugin* const plugin;
 
     DepthForm* dsbxDepth;
     //    QLabel* label;
@@ -103,7 +89,9 @@ private:
     void stopProgress();
 
     QThread thread;
-    GCode::File* file_;
-    QProgressDialog* progressDialog;
+    File* file_;
+    class ::QProgressDialog* progressDialog;
     int progressTimerId = 0;
 };
+
+} // namespace GCode

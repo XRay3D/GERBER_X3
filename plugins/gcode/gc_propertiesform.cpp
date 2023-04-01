@@ -18,7 +18,9 @@
 #include "settings.h"
 #include <QMessageBox>
 
-GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
+namespace GCode {
+
+PropertiesForm::PropertiesForm(QWidget* parent)
     : QWidget(parent)
     , ui(new Ui::GCodePropertiesForm) {
     ui->setupUi(this);
@@ -65,7 +67,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup("GCodePropertiesForm");
+    settings.beginGroup("PropertiesForm");
     settings.getValue(ui->dsbxSafeZ, 20);
     settings.getValue(ui->dsbxClearence, 10);
     settings.getValue(ui->dsbxPlunge, 2);
@@ -115,7 +117,7 @@ GCodePropertiesForm::GCodePropertiesForm(QWidget* parent)
     App::setGCodePropertiesForm(this);
 }
 
-GCodePropertiesForm::~GCodePropertiesForm() {
+PropertiesForm::~PropertiesForm() {
     App::setGCodePropertiesForm(nullptr);
 
     if (App::home())
@@ -124,7 +126,7 @@ GCodePropertiesForm::~GCodePropertiesForm() {
         App::zero()->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     MySettings settings;
-    settings.beginGroup("GCodePropertiesForm");
+    settings.beginGroup("PropertiesForm");
     settings.setValue(ui->dsbxSafeZ);
     settings.setValue(ui->dsbxClearence);
     settings.setValue(ui->dsbxPlunge);
@@ -142,28 +144,30 @@ GCodePropertiesForm::~GCodePropertiesForm() {
     delete ui;
 }
 
-void GCodePropertiesForm::updatePosDsbxs() {
+void PropertiesForm::updatePosDsbxs() {
     ui->dsbxHomeX->setValue(App::home()->pos().x());
     ui->dsbxHomeY->setValue(App::home()->pos().y());
     ui->dsbxZeroX->setValue(App::zero()->pos().x());
     ui->dsbxZeroY->setValue(App::zero()->pos().y());
 }
 
-void GCodePropertiesForm::updateAll() {
+void PropertiesForm::updateAll() {
     // ui->dsbxSpaceX;
     // ui->dsbxSpaceY;
     // ui->sbxStepsX;
     // ui->sbxStepsY;
 }
 
-void GCodePropertiesForm::on_pbResetHome_clicked() {
+void PropertiesForm::on_pbResetHome_clicked() {
     ui->dsbxHomeX->setValue(0);
     ui->dsbxHomeY->setValue(0);
 }
 
-void GCodePropertiesForm::on_pbResetZero_clicked() {
+void PropertiesForm::on_pbResetZero_clicked() {
     ui->dsbxZeroX->setValue(0);
     ui->dsbxZeroY->setValue(0);
 }
+
+} // namespace GCode
 
 #include "moc_gc_propertiesform.cpp"

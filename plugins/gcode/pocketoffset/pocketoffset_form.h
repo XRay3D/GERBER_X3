@@ -10,14 +10,14 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 #include "ui_pocketoffsetform.h"
 
 namespace Ui {
 class PocketOffsetForm;
 }
 
-class PocketOffsetForm : public GCode::FormBase {
+class PocketOffsetForm : public GCode::BaseForm {
     Q_OBJECT
 
 public:

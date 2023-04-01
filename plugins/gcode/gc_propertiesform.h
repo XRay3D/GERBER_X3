@@ -15,12 +15,14 @@ namespace Ui {
 class GCodePropertiesForm;
 }
 
-class GCodePropertiesForm : public QWidget {
+namespace GCode {
+
+class PropertiesForm : public QWidget {
     Q_OBJECT
 
 public:
-    explicit GCodePropertiesForm(QWidget* parent = nullptr);
-    ~GCodePropertiesForm() override;
+    explicit PropertiesForm(QWidget* parent = nullptr);
+    ~PropertiesForm() override;
 
     void updatePosDsbxs();
     void updateAll();
@@ -32,3 +34,5 @@ private slots:
 private:
     Ui::GCodePropertiesForm* ui;
 };
+
+} // namespace GCode

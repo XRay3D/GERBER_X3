@@ -22,18 +22,6 @@ constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
 constexpr auto two_pi = std::numbers::pi * 2;
 using std::numbers::pi;
 
-class cancelException : public std::exception {
-public:
-    cancelException(const char* description)
-        : m_descr(description) {
-    }
-    ~cancelException() noexcept override = default;
-    const char* what() const noexcept override { return m_descr.c_str(); }
-
-private:
-    std::string m_descr;
-};
-
 // type
 using Clipper = Clipper2Lib::Clipper64;
 using ClipperOffset = Clipper2Lib::ClipperOffset;
