@@ -103,10 +103,10 @@ void calcArcs(Path path) {
 namespace GCode {
 
 File::File()
-    : GCFile() { }
+    : File() { }
 
 File::File(const Pathss& toolPathss, GCode::Params&& gcp, const Paths& pocketPaths)
-    : GCFile(std::move(gcp))
+    : File(std::move(gcp))
     , pocketPaths_(pocketPaths)
     , toolPathss_(toolPathss) {
     if (gcp_.tools.front().diameter()) {

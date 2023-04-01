@@ -18,11 +18,9 @@ namespace Gerber {
 
 class File;
 
-class Node : public QObject, public FileTree::Node {
+class Node : public FileTree::Node {
     friend class File;
-    Q_OBJECT
 
-    static QTimer decorationTimer_;
     void repaint() const;
     Qt::CheckState current_ = Qt::Unchecked;
     File* file;
@@ -37,8 +35,6 @@ public:
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu& menu, FileTree::View* tv) const override;
     int id() const override;
-
-    static QTimer* decorationTimer();
 };
 
 } // namespace Gerber

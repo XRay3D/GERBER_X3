@@ -34,7 +34,6 @@ add_library(clipper STATIC
 target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(clipper PRIVATE
-    gcode
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
 )

@@ -48,7 +48,7 @@ Paths offset(const Path& path, double offset, bool fl = false) {
 /// \param parent
 ///
 Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::FormBase(plugin, nullptr, parent)
+    : GCode::BaseForm(plugin, nullptr, parent)
     , ui(new Ui::DrillForm)
     , plugin {plugin} {
     ui->setupUi(content);

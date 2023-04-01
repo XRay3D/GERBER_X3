@@ -11,18 +11,21 @@
 #pragma once
 
 #include "datastream.h"
-#include <tool.h>
-
+#include "md5.h"
 #include "mvector.h"
-#include "qcolor.h"
+#include "tool.h"
+
+#include <QColor>
 #include <QDebug>
 #include <QVariant>
 #include <variant>
 
+constexpr auto G_CODE = md5::hash32("GCode");
+
 namespace GCode {
 
-//enum GCodeType : int {
-//    Null = -1,
+// enum GCodeType : int {
+//     Null = -1,
 
 //    Profile = 100, // FileType::GCode
 //    Pocket,
@@ -131,7 +134,7 @@ struct Variant : V {
     decltype(auto) value() const { return std::get<std::decay_t<T>>(*this); }
 };
 
-struct GCodeParams {
+struct Params {
     Q_GADGET
 public:
     enum Param : uint32_t {
@@ -165,15 +168,15 @@ public:
 
     Q_ENUM(Param)
 
-    GCodeParams() {
+    Params() {
         if (!params.contains(MultiToolIndex))
             params[MultiToolIndex] = 0;
     }
 
-    GCodeParams(const Tool& tool, double depth /*, uint32_t type*/)
-        : GCodeParams {} {
+    Params(const Tool& tool, double depth /*, uint32_t type*/)
+        : Params {} {
         tools.emplace_back(tool);
-        params[GCodeParams::Depth] = depth;
+        params[Params::Depth] = depth;
         //        gcType = type;
     }
 
@@ -183,14 +186,14 @@ public:
     mutable int fileId = -1;
     //    QColor color;
 
-    friend QDataStream& operator>>(QDataStream& stream, GCodeParams& type) {
+    friend QDataStream& operator>>(QDataStream& stream, Params& type) {
         stream >> type.tools;
         stream >> type.params;
         //        stream >> type.gcType;
         return stream;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const GCodeParams& type) {
+    friend QDataStream& operator<<(QDataStream& stream, const Params& type) {
         stream << type.tools;
         stream << type.params;
         //        stream << type.gcType;
@@ -255,4 +258,73 @@ public:
     static int profileSort() { return profileSort_; }
 };
 
+class cancelException : public std::exception {
+public:
+    cancelException(const char* description)
+        : m_descr(description) {
+    }
+    ~cancelException() noexcept override = default;
+    const char* what() const noexcept override { return m_descr.c_str(); }
+
+private:
+    std::string m_descr;
+};
+
+class ProgressCancel {
+    static inline int max_;
+    static inline int current_;
+    static inline bool cancel_;
+
+public:
+    static void reset() {
+        current_ = 0;
+        max_ = 0;
+        cancel_ = 0;
+    }
+
+    /////////////////
+    /// \brief Progress max
+    /// \return
+    ///
+    static int max() { return max_; }
+    /////////////////
+    /// \brief Progress setMax
+    /// \param max
+    ///
+    static void setMax(int max) { max_ = max; }
+
+    /////////////////
+    /// \brief Progress current
+    /// \return
+    ///
+    static int current() { return current_; }
+    /////////////////
+    /// \brief Progress setCurrent
+    /// \param current
+    ///
+    static void setCurrent(int current = 0) { current_ = current; }
+    /////////////////
+    /// \brief Progress incCurrent
+    ///
+    static void incCurrent() { ++current_; }
+    static bool isCancel() { return cancel_; }
+    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
+        ++current_;
+        if (cancel_) [[unlikely]] {
+            //            static std::stringstream ss;
+            //            ss.clear();
+            //            ss << "file: "
+            //               << location.file_name() << "("
+            //               << location.line() << ":"
+            //               << location.column() << ") `"
+            //               << location.function_name();
+            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
+            throw cancelException(__FUNCTION__);
+        }
+    }
+    static void setCancel(bool cancel) { cancel_ = cancel; }
+};
+
 } // namespace GCode
+
+inline void ifCancelThenThrow() { GCode::ProgressCancel::ifCancelThenThrow(); }

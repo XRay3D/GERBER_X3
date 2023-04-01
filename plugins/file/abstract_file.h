@@ -10,14 +10,19 @@
  ********************************************************************************/
 #pragma once
 
+#include "app.h"
 #include "datastream.h"
+#include "ft_node.h"
 #include "gi_group.h"
 #include "md5.h"
 #include "plugintypes.h"
 
+#include "doublespinbox.h"
+
 #include <QDateTime>
 #include <QPainter>
 #include <QSplashScreen>
+#include <QtWidgets>
 
 inline QPixmap decoration(QColor color, QChar chr = {}) {
 
@@ -54,7 +59,7 @@ class AbstractFile {
             file.date_,
             file.groupedPaths_,
             file.itemsType_,
-            file.layerTypes_,
+            //            file.layerTypes_,
             file.lines_,
             file.mergedPaths_,
             file.name_,
@@ -77,7 +82,7 @@ class AbstractFile {
             file.date_,
             file.groupedPaths_,
             file.itemsType_,
-            file.layerTypes_,
+            //            file.layerTypes_,
             file.lines_,
             file.mergedPaths_,
             file.name_,
@@ -97,7 +102,7 @@ class AbstractFile {
 
 public:
     template <typename T>
-    static inline AbstractFile* load(QDataStream& stream) {
+    static inline T* load(QDataStream& stream) {
         auto* file = new T;
         stream >> *file;
         return file;
@@ -136,7 +141,6 @@ public:
 
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
-    virtual QString loadErrorMessage() const = 0;
     virtual void createGi() = 0;
     virtual void setItemType([[maybe_unused]] int type);
     virtual int itemsType() const;
@@ -277,6 +281,95 @@ inline QIcon AbstractFile::icon() const { return {}; }
 inline bool AbstractFile::userColor() const { return colorFlag_; }
 
 inline void AbstractFile::setUserColor(bool userColor) { colorFlag_ = userColor; }
+
+class TransformDialog : public QDialog {
+    Q_OBJECT
+    enum { Ang,
+        TrX,
+        TrY,
+        ScX,
+        ScY };
+    DoubleSpinBox* dsbx[5];
+    std::vector<AbstractFile*> files_;
+    std::unordered_map<AbstractFile*, Transform> backup;
+
+public:
+    TransformDialog(std::vector<AbstractFile*>&& files, QWidget* parent = nullptr)
+        : QDialog {parent}
+        , files_ {std::move(files)} {
+
+        setMaximumSize(0, 0);
+        setWindowTitle(tr("Affine Transform"));
+
+        for (auto& dsbx : dsbx)
+            dsbx = new DoubleSpinBox(this);
+
+        dsbx[Ang]->setRange(-360, +360);
+        dsbx[Ang]->setSuffix(tr(" °"));
+        dsbx[ScX]->setRange(-10, +10);
+        dsbx[ScY]->setRange(-10, +10);
+        dsbx[TrX]->setRange(-1000, +1000);
+        dsbx[TrX]->setSuffix(tr(" mm"));
+        dsbx[TrY]->setRange(-1000, +1000);
+        dsbx[TrY]->setSuffix(tr(" mm"));
+
+        // QPushButton button(tr("Apply"), &d);
+        // layout.addRow(new QWidget(&d), &button);
+        resize({0, 0});
+
+        auto transform = files_.front()->transform();
+
+        dsbx[Ang]->setValue(transform.angle);
+        dsbx[TrX]->setValue(transform.translate.x());
+        dsbx[TrY]->setValue(transform.translate.y());
+        dsbx[ScX]->setValue(transform.scale.x());
+        dsbx[ScY]->setValue(transform.scale.y());
+
+        for (auto* file : files_)
+            backup.emplace(file, file->transform());
+
+        for (auto& dsbx : dsbx)
+            connect(dsbx, &QDoubleSpinBox::valueChanged, this, &TransformDialog::setTransform);
+
+        auto buttonBox = new QDialogButtonBox(this);
+        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+        buttonBox->setGeometry(QRect(30, 240, 341, 32));
+        buttonBox->setOrientation(Qt::Horizontal);
+        buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+
+        connect(buttonBox, &QDialogButtonBox::accepted, this, &TransformDialog::accept);
+        connect(buttonBox, &QDialogButtonBox::rejected, this, &TransformDialog::reject);
+
+        auto layout = new QFormLayout(this);
+        layout->addRow(new QLabel(tr("Angle:"), this), dsbx[Ang]);
+        layout->addRow(new QLabel(tr("Translate X:"), this), dsbx[TrX]);
+        layout->addRow(new QLabel(tr("Translate Y:"), this), dsbx[TrY]);
+        layout->addRow(new QLabel(tr("Scale X:"), this), dsbx[ScX]);
+        layout->addRow(new QLabel(tr("Scale Y:"), this), dsbx[ScY]);
+        layout->setLabelAlignment(Qt::AlignRight);
+        layout->addRow(buttonBox);
+
+        QMetaObject::connectSlotsByName(this);
+    }
+
+    ~TransformDialog() override = default;
+
+    void setTransform() {
+        Transform transform {
+            .angle = dsbx[Ang]->value(),
+            .translate {dsbx[TrX]->value(), dsbx[TrY]->value()},
+            .scale {dsbx[ScX]->value(), dsbx[ScY]->value()},
+        };
+        for (auto* file : files_)
+            file->setTransform(transform);
+    };
+
+    void reject() override {
+        for (auto&& [file, transform] : backup)
+            file->setTransform(transform);
+        QDialog::reject();
+    }
+};
 
 #define FileInterface_iid "ru.xray3d.XrSoft.GGEasy.AbstractFile"
 

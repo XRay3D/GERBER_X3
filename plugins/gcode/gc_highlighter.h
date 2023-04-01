@@ -10,26 +10,29 @@
  ********************************************************************************/
 #pragma once
 
-#include "utils.h"
 #include <QDialog>
 #include <QSyntaxHighlighter>
 
 class QTextDocument;
 
+namespace GCode {
+
 class Dialog : public QDialog {
     Q_OBJECT
 public:
     Dialog(const QString& text, const QString& windowTitle, QWidget* parent = nullptr);
-    virtual ~Dialog();
+    ~Dialog() override = default;
 };
 
-class GCHighlighter final : public QSyntaxHighlighter {
+class Highlighter final : public QSyntaxHighlighter {
     Q_OBJECT
 
 public:
-    explicit GCHighlighter(QTextDocument* parent);
+    explicit Highlighter(QTextDocument* parent);
 
 protected:
     // QSyntaxHighlighter interface
     void highlightBlock(const QString& text) override final;
 };
+
+} // namespace GCode

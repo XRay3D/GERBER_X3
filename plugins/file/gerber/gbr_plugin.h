@@ -27,22 +27,18 @@ class Plugin : public AbstractFilePlugin, Parser {
 public:
     Plugin(QObject* parent = nullptr);
 
-    bool thisIsIt(const QString& fileName) override;
-
-    uint32_t type() const override { return GERBER; }
-    QString folderName() const override { return tr("Gerber Files"); }
-
-    AbstractFile* loadFile(QDataStream& stream) override;
-
-    QIcon icon() const override;
-    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    // AbstractFilePlugin interface
+    //    std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
+    [[nodiscard]] AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    [[nodiscard]] QString folderName() const override { return tr("Gerber Files"); }
+    [[nodiscard]] QIcon icon() const override;
+    [[nodiscard]] AbstractFile* loadFile(QDataStream& stream) const override;
+    [[nodiscard]] bool thisIsIt(const QString& fileName) override;
+    [[nodiscard]] uint32_t type() const override { return GERBER; }
     void addToGcForm(AbstractFile* file, QComboBox* cbx) override;
 
     // public slots:
-    AbstractFile* parseFile(const QString& fileName, int type) override;
-
-    // AbstractFilePlugin interface
-    //    std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
+    [[nodiscard]] AbstractFile* parseFile(const QString& fileName, int type) override;
 };
 
 } // namespace Gerber

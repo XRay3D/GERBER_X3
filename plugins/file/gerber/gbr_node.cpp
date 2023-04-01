@@ -31,19 +31,19 @@
 
 namespace Gerber {
 
-QTimer Node::decorationTimer_;
-
 Node::Node(File* file)
     : FileTree::Node(FileTree::File)
     , file(file) {
-    if (!file->userColor()) {
-        connect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
-        decorationTimer_.start(500);
-    }
+
+    QTimer::singleShot(500, [this] { repaint(); });
+    //    if (!file->userColor()) {
+    //        connect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
+    //        decorationTimer_.start(500);
+    //    }
 }
 Node::~Node() {
     App::project()->deleteFile(file->id());
-    decorationTimer_.start(100);
+    //    decorationTimer_.start(100);
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
@@ -146,8 +146,6 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 
 int Node::id() const { return file->id(); }
 
-QTimer* Node::decorationTimer() { return &decorationTimer_; }
-
 void Node::repaint() const {
     if (!parent_)
         return;
@@ -199,7 +197,6 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
             color.setAlpha(150);
             file->setColor(color);
             file->setUserColor(true);
-            disconnect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
         }
     });
     menu.addSeparator();

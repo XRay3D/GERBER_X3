@@ -11,17 +11,22 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_highlighter.h"
+
 #include "mvector.h"
+#include "utils.h"
+
 #include <QBoxLayout>
 #include <QTextBrowser>
 #include <ctre.hpp>
 
-GCHighlighter::GCHighlighter(QTextDocument* parent)
+namespace GCode {
+
+Highlighter::Highlighter(QTextDocument* parent)
     : QSyntaxHighlighter(parent) {
     // myClassFormat.setFontWeight(QFont::Bold);
 }
 
-void GCHighlighter::highlightBlock(const QString& text) {
+void Highlighter::highlightBlock(const QString& text) {
     //
 
     static const mvector<char16_t> key {'F', 'G', 'M', 'S', 'X', 'Y', 'Z'};
@@ -100,7 +105,7 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     auto textBrowser = new QTextBrowser(this);
     textBrowser->setFontFamily("JetBrains Mono");
     textBrowser->setFontPointSize(16);
-    new GCHighlighter(textBrowser->document());
+    new Highlighter(textBrowser->document());
     textBrowser->setPlainText(text);
 
     auto verticalLayout = new QVBoxLayout(this);
@@ -108,6 +113,6 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     verticalLayout->addWidget(textBrowser);
 }
 
-Dialog::~Dialog() { }
+} // namespace GCode
 
 #include "moc_gc_highlighter.cpp"

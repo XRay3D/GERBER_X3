@@ -78,7 +78,7 @@ private:
     QToolBar* zoomToolBar = nullptr;
     QUndoStack undoStack_;
 
-    Project* project_;
+    class Project* project_;
     bool openFlag;
 
     std::map<uint32_t, QAction*> toolpathActions;

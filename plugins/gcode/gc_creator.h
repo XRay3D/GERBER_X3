@@ -10,10 +10,10 @@
  ********************************************************************************/
 #pragma once
 
-#include "abstract_file.h"
+// #include "abstract_file.h"
 #include "gc_types.h"
 #include "myclipper.h"
-#include "utils.h"
+// #include "utils.h"
 
 #include <QObject>
 
@@ -44,63 +44,6 @@ inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red
 }
 
 class GiError;
-
-class ProgressCancel {
-    static inline int max_;
-    static inline int current_;
-    static inline bool cancel_;
-
-public:
-    static void reset() {
-        current_ = 0;
-        max_ = 0;
-        cancel_ = 0;
-    }
-
-    /////////////////
-    /// \brief Progress max
-    /// \return
-    ///
-    static int max() { return max_; }
-    /////////////////
-    /// \brief Progress setMax
-    /// \param max
-    ///
-    static void setMax(int max) { max_ = max; }
-
-    /////////////////
-    /// \brief Progress current
-    /// \return
-    ///
-    static int current() { return current_; }
-    /////////////////
-    /// \brief Progress setCurrent
-    /// \param current
-    ///
-    static void setCurrent(int current = 0) { current_ = current; }
-    /////////////////
-    /// \brief Progress incCurrent
-    ///
-    static void incCurrent() { ++current_; }
-    static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
-        ++current_;
-        if (cancel_) [[unlikely]] {
-            //            static std::stringstream ss;
-            //            ss.clear();
-            //            ss << "file: "
-            //               << location.file_name() << "("
-            //               << location.line() << ":"
-            //               << location.column() << ") `"
-            //               << location.function_name();
-            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
-            throw cancelException(__FUNCTION__);
-        }
-    }
-    static void setCancel(bool cancel) { cancel_ = cancel; }
-};
-
-inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
 
 namespace GCode {
 
@@ -138,8 +81,8 @@ public:
 
     void continueCalc(bool fl = true);
 
-    GCodeParams getGcp() const;
-    void setGcp(const GCodeParams& gcp_);
+    Params getGcp() const;
+    void setGcp(const Params& gcp_);
 
     //    static void //PROG .3setProgMax(int progressMax);
     //    static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
@@ -193,7 +136,7 @@ protected:
     double toolDiameter {};
     double dOffset {};
     Point::Type stepOver {};
-    GCodeParams gcp_;
+    Params gcp_;
 
     void isContinueCalc();
 

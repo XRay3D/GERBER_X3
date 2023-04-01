@@ -234,7 +234,7 @@ void Creator::reorder() {
 
     std::reverse(returnPs.begin(), returnPs.end());
 
-    if ((gcp_.side() == Inner) ^ gcp_.convent())
+    if ((gcp_.side() == GCode::Inner) ^ gcp_.convent())
         ReversePaths(returnPs);
 
     returnPss.reserve(returnPs.size());
@@ -269,7 +269,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 
     std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths;
 
-    if (!Settings::profileSort()) { // Grouping by nesting
+    if (!GCode::Settings::profileSort()) { // Grouping by nesting
 
         markPolyTreeDByNesting(polytree);
 

@@ -10,10 +10,10 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 
-#include "app.h"
 #include "abstract_file.h"
+#include "app.h"
 #include "gi_error.h"
 #include "graphicsview.h"
 #include "project.h"
@@ -33,8 +33,10 @@
 #include <ranges>
 #include <sstream>
 
-static const int gcpId = qRegisterMetaType<GCode::GCodeParams>("GCode::GCodeParams");
-static const int GCodeFileId = qRegisterMetaType<GCode::File*>("GCode::File*");
+static const int id1 = qRegisterMetaType<GCode::Params>("GCode::Params");
+static const int id2 = qRegisterMetaType<GCode::File*>("GCode::File*");
+
+namespace GCode {
 
 inline QIcon errorIcon(const QPainterPath& path) {
 
@@ -156,10 +158,10 @@ protected:
     }
 };
 
-GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent)
+BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     : QWidget(parent)
     , plugin {plugin}
-    , gcCreator {tpc}
+    , creator {tpc}
     , progressDialog(new QProgressDialog(this)) {
 
     auto vLayout = new QVBoxLayout(this);
@@ -183,7 +185,7 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
         pbCreate = new QPushButton(tr("Create"), ctrWidget);
         pbCreate->setIcon(QIcon::fromTheme("document-export"));
         pbCreate->setObjectName("pbCreate");
-        connect(pbCreate, &QPushButton::clicked, this, &GcFormBase::сomputePaths);
+        connect(pbCreate, &QPushButton::clicked, this, &BaseForm::сomputePaths);
 
         auto line = [this] {
             auto line = new QFrame(ctrWidget);
@@ -224,9 +226,9 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
         errBtnBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
 
         connect(errBtnBox->button(QDialogButtonBox::Ok),
-            &QAbstractButton::clicked, this, &GcFormBase::errContinue);
+            &QAbstractButton::clicked, this, &BaseForm::errContinue);
         connect(errBtnBox->button(QDialogButtonBox::Cancel),
-            &QAbstractButton::clicked, this, &GcFormBase::errBreak);
+            &QAbstractButton::clicked, this, &BaseForm::errBreak);
         errWidget->setVisible({});
     }
 
@@ -236,31 +238,31 @@ GcFormBase::GcFormBase(GCodePlugin* plugin, GCode::Creator* tpc, QWidget* parent
     progressDialog->setAutoClose(false);
     progressDialog->setAutoReset(false);
     progressDialog->reset();
-    connect(progressDialog, &QProgressDialog::canceled, this, &GcFormBase::cancel);
+    connect(progressDialog, &QProgressDialog::canceled, this, &BaseForm::cancel);
 
-    if (!gcCreator)
+    if (!creator)
         return;
 
-    connect(this, &GcFormBase::createToolpath, this, &GcFormBase::startProgress);
-    connect(this, &GcFormBase::createToolpath, gcCreator, &GCode::Creator::createGc);
+    connect(this, &BaseForm::createToolpath, this, &BaseForm::startProgress);
+    connect(this, &BaseForm::createToolpath, creator, &Creator::createGc);
 
-    connect(gcCreator, &GCode::Creator::canceled, this, &GcFormBase::stopProgress);
-    connect(gcCreator, &GCode::Creator::errorOccurred, this, &GcFormBase::errorHandler);
-    connect(gcCreator, &GCode::Creator::fileReady, this, &GcFormBase::fileHandler);
+    connect(creator, &Creator::canceled, this, &BaseForm::stopProgress);
+    connect(creator, &Creator::errorOccurred, this, &BaseForm::errorHandler);
+    connect(creator, &Creator::fileReady, this, &BaseForm::fileHandler);
 
-    gcCreator->moveToThread(&thread);
-    connect(&thread, &QThread::finished, gcCreator, &QObject::deleteLater);
+    creator->moveToThread(&thread);
+    connect(&thread, &QThread::finished, creator, &QObject::deleteLater);
     thread.start(QThread::LowPriority /*HighestPriority*/);
 }
 
-GcFormBase::~GcFormBase() {
+BaseForm::~BaseForm() {
     if (errWidget->isVisible())
         errBreak();
     thread.quit();
     thread.wait();
 }
 
-void GcFormBase::fileHandler(GCode::File* file) {
+void BaseForm::fileHandler(File* file) {
     qDebug() << __FUNCTION__ << file;
     if (--fileCount == 0)
         cancel();
@@ -286,18 +288,18 @@ void GcFormBase::fileHandler(GCode::File* file) {
     }
 }
 
-void GcFormBase::timerEvent(QTimerEvent* event) {
-    if (event->timerId() == progressTimerId && progressDialog && gcCreator) {
-        const auto [max, val] = gcCreator->getProgress();
+void BaseForm::timerEvent(QTimerEvent* event) {
+    if (event->timerId() == progressTimerId && progressDialog && creator) {
+        const auto [max, val] = creator->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
-        progressDialog->setLabelText(gcCreator->msg);
+        progressDialog->setLabelText(creator->msg);
     }
 }
 
-void GcFormBase::addUsedGi(GraphicsItem* gi) {
+void BaseForm::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
-        //        GCode::File const* file = gi->file();
+        //        File const* file = gi->file();
         //        if (file->type() == FileType::Gerber_) {
         // #ifdef GBR_
         //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
@@ -308,33 +310,33 @@ void GcFormBase::addUsedGi(GraphicsItem* gi) {
     }
 }
 
-void GcFormBase::cancel() {
-    gcCreator->continueCalc({});
+void BaseForm::cancel() {
+    creator->continueCalc({});
     stopProgress();
 }
 
-void GcFormBase::errorHandler(int) {
+void BaseForm::errorHandler(int) {
     qDebug(__FUNCTION__);
 
-    if (gcCreator->items.empty())
+    if (creator->items.empty())
         return;
 
-    gcCreator->checkMillingFl = false;
+    creator->checkMillingFl = false;
     stopProgress();
 
     ctrWidget->setVisible(false);
     errWidget->setVisible(true);
 
-    std::ranges::for_each(gcCreator->items, [](auto i) { App::graphicsView()->addItem(i); });
+    std::ranges::for_each(creator->items, [](auto i) { App::graphicsView()->addItem(i); });
 
-    errTable->setModel(new ErrorModel(std::move(gcCreator->items), errTable));
+    errTable->setModel(new ErrorModel(std::move(creator->items), errTable));
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
     App::graphicsView()->startUpdateTimer(32);
 }
 
-void GcFormBase::errContinue() {
+void BaseForm::errContinue() {
     qDebug(__FUNCTION__);
     App::graphicsView()->stopUpdateTimer();
 
@@ -344,10 +346,10 @@ void GcFormBase::errContinue() {
     errWidget->setVisible({});
 
     startProgress();
-    gcCreator->continueCalc(true);
+    creator->continueCalc(true);
 }
 
-void GcFormBase::errBreak() {
+void BaseForm::errBreak() {
     qDebug(__FUNCTION__);
     App::graphicsView()->stopUpdateTimer();
 
@@ -356,21 +358,21 @@ void GcFormBase::errBreak() {
     ctrWidget->setVisible(true);
     errWidget->setVisible({});
 
-    gcCreator->continueCalc(false);
+    creator->continueCalc(false);
 }
 
-void GcFormBase::startProgress() {
+void BaseForm::startProgress() {
     qDebug(__FUNCTION__);
     if (!fileCount)
         fileCount = 1;
-    gcCreator->msg = fileName_;
-    progressDialog->setLabelText(gcCreator->msg);
+    creator->msg = fileName_;
+    progressDialog->setLabelText(creator->msg);
     progressTimerId = startTimer(100);
 }
 
-void GcFormBase::stopProgress() {
-    qDebug() << __FUNCTION__ << gcCreator->checkMillingFl;
-    if (gcCreator->checkMillingFl)
+void BaseForm::stopProgress() {
+    qDebug() << __FUNCTION__ << creator->checkMillingFl;
+    if (creator->checkMillingFl)
         return;
     killTimer(progressTimerId);
     progressTimerId = 0;
@@ -378,4 +380,6 @@ void GcFormBase::stopProgress() {
     progressDialog->hide();
 }
 
-#include "moc_gc_formsutil.cpp"
+} // namespace GCode
+
+#include "moc_gc_baseform.cpp"

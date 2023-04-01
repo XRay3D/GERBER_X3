@@ -11,10 +11,10 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-//#include "a_pch.h"
+// #include "a_pch.h"
 
-//#include "gc_fileplugin.h"
-//#include "gc_plugin.h"
+// #include "gc_fileplugin.h"
+// #include "gc_plugin.h"
 #include "abstract_fileplugin.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
@@ -33,10 +33,10 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-//void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-//    QByteArray localMsg = msg.toUtf8();
-//    const char* file = context.file ? context.file : "";
-//    //    const char* function = context.function ? context.function : "";
+// void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+//     QByteArray localMsg = msg.toUtf8();
+//     const char* file = context.file ? context.file : "";
+//     //    const char* function = context.function ? context.function : "";
 
 //    const char* file_ {file};
 //    while (*file > 0) {
@@ -128,14 +128,14 @@ int main(int argc, char** argv) {
         MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running = false;     // переменную для проверки ууже запущенного приложения
-        if (sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
-            is_running = true;       // Если успешно, то определяем, что уже есть запущенный экземпляр
+        bool is_running = false;                    // переменную для проверки ууже запущенного приложения
+        if (sharedMemory.attach()) {                // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
+            is_running = true;                      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
-            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
-            is_running = false;                   // И определяем, что других экземпляров не запущено
+            sharedMemory.create(sizeof(mainWin));   // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
+            is_running = false;                     // И определяем, что других экземпляров не запущено
         }
-        semaphore.release(); // Опускаем семафор
+        semaphore.release();                        // Опускаем семафор
         QCommandLineParser parser;
         parser.addPositionalArgument("url", "Url of file to open");
         parser.process(app);
@@ -189,25 +189,23 @@ int main(int argc, char** argv) {
 #endif
         // load plugins
         QDir dir(QApplication::applicationDirPath() + "/plugins");
-        if (dir.exists()) { // Поиск всех файлов в папке "plugins"
+        if (dir.exists()) {                     // Поиск всех файлов в папке "plugins"
             QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
             for (const auto& str : listFiles) { // Проход по всем файлам
                 splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
                 QPluginLoader loader(dir.absolutePath() + "/" + str);
                 if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
-                    if (auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
-                        file->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::filePlugins().emplace(std::pair {file->type(), file});
-                        continue;
-                    }
-                    if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
-                        shape->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::shapePlugins().emplace(shape->type(), shape);
-                        continue;
-                    }
                     if (auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
                         gCode->setInfo(loader.metaData().value("MetaData").toObject());
                         App::gCodePlugins().emplace(gCode->type(), gCode);
+                        continue;
+                    } else if (auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
+                        file->setInfo(loader.metaData().value("MetaData").toObject());
+                        App::filePlugins().emplace(std::pair {file->type(), file});
+                        continue;
+                    } else if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
+                        shape->setInfo(loader.metaData().value("MetaData").toObject());
+                        App::shapePlugins().emplace(shape->type(), shape);
                         continue;
                     }
                 } else

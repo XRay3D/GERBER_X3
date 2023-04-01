@@ -19,19 +19,17 @@ class Project;
 
 namespace GCode {
 
-struct GCObj : QObject { };
-
 class File : public AbstractFile {
     //    friend class ::Project;
 
 public:
-    File(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths = {});
+    File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths = {});
     File();
     //    GCodeType gtype() const;
 
     mvector<QString> gCodeText() const;
     Tool getTool() const;
-    const GCodeParams& gcp() const;
+    const Params& gcp() const;
 
     double feedRate();
     double plungeRate();
@@ -79,7 +77,7 @@ protected:
     Pathss toolPathss_; /////
     mvector<QSharedPointer<QColor>> debugColor;
 
-    GCodeParams gcp_; ////
+    Params gcp_; ////
     enum {
         AlwaysG,
         AlwaysX,

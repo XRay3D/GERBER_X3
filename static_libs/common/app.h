@@ -29,7 +29,8 @@ class Handle;
 
 namespace GCode {
 class Plugin;
-}
+class PropertiesForm;
+} // namespace GCode
 
 class AbstractFilePlugin;
 namespace GCodeShapes {
@@ -52,30 +53,36 @@ using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
 using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
-#define HOLDER(TYPE, SET, NAME, EXIT_CODE)                                          \
-private:                                                                            \
-    class TYPE* NAME##_ = nullptr;                                                  \
-                                                                                    \
-public:                                                                             \
-    static auto* NAME() { return app_->NAME##_; }                                   \
-    static void SET(TYPE* NAME) {                                                   \
-        (app_->NAME##_ && NAME) ? exit(EXIT_CODE) : (app_->NAME##_ = NAME, void()); \
+#define HOLDER(TYPE, SET, NAME)                   \
+private:                                          \
+    class TYPE* NAME##_ = nullptr;                \
+                                                  \
+public:                                           \
+    static auto* NAME() {                         \
+        /* assert(app_->NAME##_); */              \
+        return app_->NAME##_;                     \
+    }                                             \
+    static void SET(TYPE* NAME) {                 \
+        if (app_->NAME##_ && NAME)                \
+            throw std::logic_error(__FUNCTION__); \
+        else                                      \
+            app_->NAME##_ = NAME;                 \
     }
 
 class App {
     inline static App* app_ = nullptr;
 
     // clang-format off
-    HOLDER(DrillPlugin::Form,   setDrillForm,           drillForm,           -10)
-    HOLDER(FileTree::Model,     setFileModel,           fileModel,           -11)
-    HOLDER(FileTree::View,      setFileTreeView,        fileTreeView,        -12)
-    HOLDER(GCodePropertiesForm, setGCodePropertiesForm, gCodePropertiesForm, -13)
-    HOLDER(QUndoStack,          setUndoStack,           undoStack,           -17)
-    HOLDER(GraphicsView,        setGraphicsView,        graphicsView,        -14)
-    HOLDER(LayoutFrames,        setLayoutFrames,        layoutFrames,        -15)
-    HOLDER(MainWindow,          setMainWindow,          mainWindow,          -16)
-    HOLDER(Project,             setProject,             project,             -18)
-    HOLDER(QSplashScreen,       setSplashScreen,        splashScreen,        -19)
+    HOLDER(DrillPlugin::Form,     setDrillForm,           drillForm          )
+    HOLDER(FileTree::Model,       setFileModel,           fileModel          )
+    HOLDER(FileTree::View,        setFileTreeView,        fileTreeView       )
+    HOLDER(GCode::PropertiesForm, setGCodePropertiesForm, gCodePropertiesForm)
+    HOLDER(QUndoStack,            setUndoStack,           undoStack          )
+    HOLDER(GraphicsView,          setGraphicsView,        graphicsView       )
+    HOLDER(LayoutFrames,          setLayoutFrames,        layoutFrames       )
+    HOLDER(MainWindow,            setMainWindow,          mainWindow         )
+    HOLDER(Project,               setProject,             project            )
+    HOLDER(QSplashScreen,         setSplashScreen,        splashScreen       )
     // clang-format on
 
     //    class GiPin* pins[2];

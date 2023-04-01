@@ -9,13 +9,13 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 
 namespace Ui {
 class PocketRasterForm;
 }
 
-class PocketRasterForm : public GCode::FormBase {
+class PocketRasterForm : public GCode::BaseForm {
     Q_OBJECT
 
 public:

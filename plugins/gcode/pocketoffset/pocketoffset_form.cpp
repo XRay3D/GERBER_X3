@@ -25,7 +25,7 @@ enum {
 
 PocketOffsetForm::
     PocketOffsetForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::FormBase(plugin, new GCode::PocketCtr, parent)
+    : GCode::BaseForm(plugin, new GCode::PocketCtr, parent)
     , ui(new Ui::PocketOffsetForm)
     , names {tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
@@ -213,9 +213,9 @@ void PocketOffsetForm::сomputePaths() {
     if (ui->sbxSteps->isVisible())
         gcp_.params[GCode::PocketCtr::OffsetSteps] = ui->sbxSteps->value();
 
-    gcCreator->setGcp(gcp_);
-    gcCreator->addPaths(std::move(wPaths));
-    gcCreator->addRawPaths(wRawPaths);
+    creator->setGcp(gcp_);
+    creator->addPaths(std::move(wPaths));
+    creator->addRawPaths(wRawPaths);
     fileCount = static_cast<int>(gcp_.tools.size());
     createToolpath();
 }

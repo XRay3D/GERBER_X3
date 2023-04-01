@@ -13,15 +13,14 @@
 #include "ft_view.h"
 
 #include "ft_node.h"
-#include "ft_radiodelegate.h"
 #include "ft_sidedelegate.h"
 #include "ft_textdelegate.h"
 #include "ft_typedelegate.h"
-#include "project.h"
 
 #include "abstract_file.h"
-#include "abstract_fileplugin.h"
-#include "qcheckbox.h"
+#include "gc_plugin.h"
+#include "gc_types.h"
+#include "project.h"
 #include "shapepluginin.h"
 
 #include <QFileDialog>
@@ -34,7 +33,8 @@
 #include <QPainter>
 #include <QPushButton>
 #include <QTimer>
-#include <doublespinbox.h>
+
+#include <ranges>
 
 namespace FileTree {
 
@@ -161,15 +161,15 @@ void View::setModel(QAbstractItemModel* model) {
             p.setPen(QColor(128, 128, 128));
             // │
             i.fill(Qt::transparent);
-            p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
+            p.drawLine(w / 2, 0, w / 2, h);
             i.save("settings/vline.png", "PNG");
             // ├─
-            p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+            p.drawLine(w / 2, h / 2, w, h / 2);
             i.save("settings/branch-more.png", "PNG");
             // └─
             i.fill(Qt::transparent);
-            p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
-            p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
+            p.drawLine(w / 2, 0, w / 2, h / 2);
+            p.drawLine(w / 2, h / 2, w, h / 2);
             i.save("settings/branch-end.png", "PNG");
             QFile file(":/qtreeviewstylesheet/QTreeView.qss");
             file.open(QFile::ReadOnly);
@@ -190,11 +190,15 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
     if (menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
         const uint32_t type = menuIndex_.data(Role::Id).value<uint32_t>(); // File Type
-        const int cType = menuIndex_.data(Role::ContentType).toInt();
-        if (cType == Type::File) {
+        const int nodeType = menuIndex_.data(Role::ContentType).toInt();
+        if (App::filePlugins().contains(type)) {
             App::filePlugin(type)->createMainMenu(menu, this);
-        } else if (cType == Type::AbstractShape) {
+        } else if (App::gCodePlugins().contains(type)) {
+            App::gCodePlugin(type)->createMainMenu(menu, this);
+        } else if (nodeType == Type::AbstractShape) {
             App::shapePlugins().begin()->second->createMainMenu(menu, this);
+        } else if (type == G_CODE) {
+            App::gCodePlugins().begin()->second->createMainMenu(menu, this);
         }
     } else {
         reinterpret_cast<Node*>(menuIndex_.internalId())->menu(menu, this);
@@ -215,73 +219,13 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             if (file) {
                 menu.addSeparator();
                 menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
-                    QDialog dialog(this);
-                    dialog.setMaximumSize(0, 0);
-                    dialog.setWindowTitle(tr("Affine Transform"));
-                    QLabel la(tr("Angle:"), &dialog);
-                    QLabel lx(tr("Translate X:"), &dialog);
-                    QLabel ly(tr("Translate Y:"), &dialog);
-                    QLabel lsx(tr("Scale X:"), &dialog);
-                    QLabel lsy(tr("Scale Y:"), &dialog);
-                    DoubleSpinBox dsbxAng(&dialog);
-                    DoubleSpinBox dsbxTrX(&dialog);
-                    DoubleSpinBox dsbxTrY(&dialog);
-                    DoubleSpinBox dsbxScX(&dialog);
-                    DoubleSpinBox dsbxScY(&dialog);
-                    dsbxAng.setRange(-360, +360);
-                    dsbxAng.setSuffix(tr(" °"));
-                    dsbxScX.setRange(-10, +10);
-                    dsbxScY.setRange(-10, +10);
-                    dsbxTrX.setRange(-1000, +1000);
-                    dsbxTrX.setSuffix(tr(" mm"));
-                    dsbxTrY.setRange(-1000, +1000);
-                    dsbxTrY.setSuffix(tr(" mm"));
-                    QFormLayout layout(&dialog);
-                    layout.addRow(&la, &dsbxAng);
-                    layout.addRow(&lx, &dsbxTrX);
-                    layout.addRow(&ly, &dsbxTrY);
-                    layout.addRow(&lsx, &dsbxScX);
-                    layout.addRow(&lsy, &dsbxScY);
-                    layout.setLabelAlignment(Qt::AlignRight);
-
-                    // QPushButton button(tr("Apply"), &d);
-                    // layout.addRow(new QWidget(&d), &button);
-                    dialog.resize({0, 0});
-
-                    auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
-
-                    auto transform = file->transform();
-
-                    dsbxAng.setValue(transform.angle);
-                    dsbxTrX.setValue(transform.translate.x());
-                    dsbxTrY.setValue(transform.translate.y());
-                    dsbxScX.setValue(transform.scale.x());
-                    dsbxScY.setValue(transform.scale.y());
-
-                    auto setTransform = [&] {
-                        transform = {
-                            .angle = dsbxAng.value(),
-                            .translate {dsbxTrX.value(), dsbxTrY.value()},
-                            .scale {dsbxScX.value(), dsbxScY.value()},
-                        };
-
-                        for (auto&& index : selectedRows) {
-                            auto file = App::project()->file(index.data(FileTree::Id).toInt());
-                            if (file)
-                                file->setTransform(transform);
-                        }
-                    };
-
-                    connect(&dsbxAng, &QDoubleSpinBox::valueChanged, setTransform);
-                    connect(&dsbxTrX, &QDoubleSpinBox::valueChanged, setTransform);
-                    connect(&dsbxTrY, &QDoubleSpinBox::valueChanged, setTransform);
-                    connect(&dsbxScX, &QDoubleSpinBox::valueChanged, setTransform);
-                    connect(&dsbxScY, &QDoubleSpinBox::valueChanged, setTransform);
-
-                    // connect(&button, &QPushButton::clicked, &d, &QDialog::accept);
-                    // connect(&d, &QDialog::rejected, [&] { dsbxA.setValue(0), dsbxX.setValue(0), dsbxY.setValue(0); });
-
-                    dialog.exec();
+                    auto files = selectedRows
+                        | std::views::transform(
+                            [](auto&& index) { return App::project()->file(index.data(FileTree::Id).toInt()); })
+                        | std::views::filter(
+                            [](auto&& file) { return file != nullptr; });
+                    if (!std::ranges::empty(files))
+                        TransformDialog({files.begin(), files.end()}, this).exec();
                 });
             }
         }

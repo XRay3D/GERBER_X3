@@ -11,7 +11,7 @@
 #pragma once
 #include <QToolBar>
 
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 #include "gc_plugin.h"
 #include "thermal_vars.h"
 
@@ -31,7 +31,7 @@ namespace Thermal {
 
 class AbstractThermPrGi;
 
-class Form : public GCode::FormBase {
+class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:

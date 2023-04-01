@@ -11,7 +11,7 @@
 #pragma once
 
 #include "file.h"
-#include "gc_formsutil.h"
+#include "gc_baseform.h"
 #include "gc_plugin.h"
 
 #include <QHeaderView>
@@ -38,7 +38,7 @@ using Preview = std::map<Key, Val>;
 class Model;
 class Header;
 
-class Form final : public GCode::FormBase {
+class Form final : public GCode::BaseForm {
     Q_OBJECT
 
 public:

@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui.graphicsView->scene()->addItem(new GiPin());
     ui.graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
-    GCodePropertiesForm(); // init default vars;
+    GCode::PropertiesForm(); // init default vars;
 
     connect(project_, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&GiMarker::setPos));
     connect(project_, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&GiMarker::setPos));
@@ -300,7 +300,7 @@ void MainWindow::createActionsService() {
     serviceMenu->addSeparator();
     // G-Code Properties
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
-    connect(action, &QAction::toggled, [=, this](bool checked) { if (checked) setDockWidget(new GCodePropertiesForm); });
+    connect(action, &QAction::toggled, [=, this](bool checked) { if (checked) setDockWidget(new GCode::PropertiesForm); });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     action->setCheckable(true);
     toolpathActions.emplace(G_CODE_PROPERTIES, action);

@@ -16,6 +16,7 @@
 #include "abstract_fileplugin.h"
 #include "ft_model.h"
 #include "gc_file.h"
+#include "gc_fileplugin.h"
 #include "gc_plugin.h"
 #include "graphicsview.h"
 #include "shapepluginin.h"
@@ -29,9 +30,19 @@
 const int isadfsdfg = qRegisterMetaType<AbstractFile*>("AbstractFile*");
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>& file) {
-    stream << file->type();
-    stream << file->loadErrorMessage();
-    stream << *file;
+    if (file->type() == G_CODE)
+        return stream;
+    if (file->type()) {
+        uint32_t type = file->type();
+        stream << type;
+        if (App::gCodePlugins().contains(type))
+            stream << App::gCodePlugin(type)->info()["Name"].toString();
+        else if (App::filePlugins().contains(type))
+            stream << App::filePlugin(type)->info()["Name"].toString();
+        else
+            stream << QString("QString");
+        stream << *file;
+    }
     return stream;
 }
 
@@ -43,16 +54,16 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
     qDebug() << __FUNCTION__ << "type" << type << loadErrorMessage;
     if (App::gCodePlugins().contains(type))
         file.reset(App::gCodePlugin(type)->loadFile(stream));
-    else if (App::filePlugins().contains(type))
+    else if (App::filePlugins().contains(type)) {
         file.reset(App::filePlugin(type)->loadFile(stream));
-    else {
+        if (!App::project()->watcher.files().contains(file->name()))
+            App::project()->watcher.addPath(file->name());
+    } else {
         QByteArray data;
         return stream >> data;
     }
 
     file->addToScene();
-    if (!App::project()->watcher.files().contains(file->name()))
-        App::project()->watcher.addPath(file->name());
     return stream;
 }
 

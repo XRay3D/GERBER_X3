@@ -10,17 +10,13 @@
  ********************************************************************************/
 #pragma once
 
-#include "gcode.h"
-
+#include "gc_types.h"
 #include "gi.h"
-#include <QObject>
-
-class GraphicsView;
 
 class GiBridge final : public GraphicsItem {
     //    Q_OBJECT
     Q_GADGET
-    friend class ProfileForm;
+    friend class Form;
 
 public:
     explicit GiBridge();
@@ -38,6 +34,7 @@ public:
     bool ok() const;
     void update();
     bool test(const Path& path);
+    QPointF snapedPos(const QPointF& pos);
 
     static inline GiBridge* moveBrPtr;          // NOTE приватизировать в будущем??
     static inline double lenght {};             //
@@ -58,7 +55,6 @@ private:
     QPainterPath pPath;
     QPainterPath cutoff;
 
-    QPointF snapedPos(const QPointF& pos);
     QPointF lastPos;
 
     bool ok_ = false;
