@@ -105,7 +105,7 @@ namespace GCode {
 File::File()
     : GCFile() { }
 
-File::File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths)
+File::File(const Pathss& toolPathss, GCode::Params&& gcp, const Paths& pocketPaths)
     : GCFile(std::move(gcp))
     , pocketPaths_(pocketPaths)
     , toolPathss_(toolPathss) {
@@ -297,7 +297,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
     }
 }
 
-const GCodeParams& File::gcp() const { return gcp_; }
+const GCode::Params& File::gcp() const { return gcp_; }
 
 mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     mvector<mvector<QPolygonF>> pathss;
@@ -429,7 +429,7 @@ void File::genGcodeAndTile() {
             default:
                 break;
             }
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
@@ -689,7 +689,7 @@ void File::write(QDataStream& stream) const {
 }
 
 void File::read(QDataStream& stream) {
-    auto& gcp = *const_cast<GCodeParams*>(&gcp_);
+    auto& gcp = *const_cast<GCode::Params*>(&gcp_);
     switch (App::project()->ver()) {
     case ProVer_6:
     case ProVer_5:
@@ -706,7 +706,7 @@ void File::read(QDataStream& stream) {
         stream >> gcp.tools.front();
         double depth;
         stream >> depth;
-        gcp.params[GCodeParams::Depth] = depth;
+        gcp.params[GCode::Params::Depth] = depth;
     }
         [[fallthrough]];
     case ProVer_2:

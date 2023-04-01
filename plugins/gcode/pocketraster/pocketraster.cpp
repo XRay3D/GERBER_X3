@@ -25,10 +25,10 @@ RasterCreator::RasterCreator() {
 }
 
 void RasterCreator::create() {
-    //    if (gcp_.params[GCodeParams::Fast].toBool())
-    //        createRaster2(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+    //    if (gcp_.params[GCode::Params::Fast].toBool())
+    //        createRaster2(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble(), gcp_.params[GCode::Params::UseAngle].toDouble(), gcp_.params[GCode::Params::Pass].toInt());
     //    else
-    //        createRaster(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[GCodeParams::UseAngle].toDouble(), gcp_.params[GCodeParams::Pass].toInt());
+    //        createRaster(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble(), gcp_.params[GCode::Params::UseAngle].toDouble(), gcp_.params[GCode::Params::Pass].toInt());
 }
 
 void RasterCreator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
@@ -307,7 +307,7 @@ void RasterCreator::createRaster2(const Tool& tool, const double depth, const do
         c.AddOpenSubject({zPath});
         c.AddClip(laserPath);
         c.Execute(ClipType::Intersection, FillRule::NonZero, laserPath, laserPath);   // laser on
-        addAcc(laserPath, gcp_.params[GCodeParams::AccDistance].toDouble() * uScale); // add laser off paths
+        addAcc(laserPath, gcp_.params[GCode::Params::AccDistance].toDouble() * uScale); // add laser off paths
     }
 
     if (!qFuzzyIsNull(angle)) { // Rotate Paths

@@ -15,11 +15,11 @@ namespace Ui {
 class VoronoiForm;
 }
 
-class VoronoiForm : public GcFormBase {
+class VoronoiForm : public GCode::FormBase {
     Q_OBJECT
 
 public:
-    explicit VoronoiForm(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit VoronoiForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~VoronoiForm() override;
 
 private slots:
@@ -46,12 +46,12 @@ public:
 #include "gc_plugin.h"
 #include <QToolBar>
 
-class GCPluginImpl final : public GCodePlugin {
+class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "voronoi.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     uint32_t type() const override { return GCode::Voronoi; }
     QWidget* createForm() override { return new VoronoiForm(this); };

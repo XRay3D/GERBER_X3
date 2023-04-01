@@ -19,11 +19,13 @@ class ProfileForm;
 }
 class GiBridge;
 
-class ProfileForm : public GcFormBase {
+namespace Profile {
+
+class ProfileForm : public GCode::FormBase {
     Q_OBJECT
 
 public:
-    explicit ProfileForm(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit ProfileForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~ProfileForm() override;
 
 private slots:
@@ -81,16 +83,18 @@ public:
 #include "profile.h"
 #include <QToolBar>
 
-class GCPluginImpl final : public GCodePlugin {
+class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
     QWidget* createForm() override { return new ProfileForm(this); };
     uint32_t type() const override { return md5::hash32("Profile"); }
-    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::ProfileFile; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::File; }
 };
+
+} // namespace Profile

@@ -1,5 +1,5 @@
 #include <2geom/orphan-code/redblacktree.h>
-//#include <algorithm>
+#include <algorithm>
 
 
 #define _REDBLACK_PRINT(x) std::cout << x << std::endl;

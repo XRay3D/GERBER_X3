@@ -146,7 +146,7 @@ void VoronoiCgal::cgalVoronoi() {
             segments.append(edge);
         }
     }
-    const Point::Type fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
+    const Point::Type fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
     Path frame {
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},

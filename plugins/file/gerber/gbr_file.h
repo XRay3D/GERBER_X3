@@ -53,8 +53,8 @@ public:
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
 
-    uint32_t type() const override { return md5::hash32("Gerber"); }
-
+    uint32_t type() const override { return GERBER; }
+    QString loadErrorMessage() const override { return QObject::tr("To load requires 'Gerber' plugin"); }
     void setColor(const QColor& color) override;
 
     mvector<const AbstrGraphicObject*> graphicObjects() const override;

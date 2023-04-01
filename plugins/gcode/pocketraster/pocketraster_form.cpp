@@ -19,8 +19,8 @@
 #include "settings.h"
 #include <QMessageBox>
 
-PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::RasterCreator, parent)
+PocketRasterForm::PocketRasterForm(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::FormBase(plugin, new GCode::RasterCreator, parent)
     , ui(new Ui::PocketRasterForm)
     , names {tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
@@ -124,17 +124,17 @@ void PocketRasterForm::сomputePaths() {
         return;
     }
 
-    GCode::GCodeParams gcp_;
+    GCode::Params gcp_;
     gcp_.setConvent(ui->rbConventional->isChecked());
     gcp_.setSide(side);
     gcp_.tools.push_back(tool);
 
-    gcp_.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
-    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
+    gcp_.params[GCode::Params::UseAngle] = ui->dsbxAngle->value();
+    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp_.params[GCode::Params::Pass] = ui->cbxPass->currentIndex();
     if (ui->rbFast->isChecked()) {
-        gcp_.params[GCode::GCodeParams::Fast] = true;
-        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
+        gcp_.params[GCode::Params::Fast] = true;
+        gcp_.params[GCode::Params::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
     }
 
     gcCreator->setGcp(gcp_);

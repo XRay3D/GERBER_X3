@@ -24,8 +24,8 @@ enum {
 };
 
 PocketOffsetForm::
-    PocketOffsetForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::PocketCtr, parent)
+    PocketOffsetForm(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::FormBase(plugin, new GCode::PocketCtr, parent)
     , ui(new Ui::PocketOffsetForm)
     , names {tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
@@ -188,7 +188,7 @@ void PocketOffsetForm::сomputePaths() {
         return;
     }
 
-    GCode::GCodeParams gcp_;
+    GCode::Params gcp_;
     for (const Tool& t : tool) {
         gcp_.tools.push_back(t);
         if (gcp_.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
@@ -209,7 +209,7 @@ void PocketOffsetForm::сomputePaths() {
 
     gcp_.setConvent(ui->rbConventional->isChecked());
     gcp_.setSide(side);
-    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
+    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
     if (ui->sbxSteps->isVisible())
         gcp_.params[GCode::PocketCtr::OffsetSteps] = ui->sbxSteps->value();
 

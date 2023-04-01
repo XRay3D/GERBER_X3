@@ -10,6 +10,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
+// #include "a_pch.h"
 #include "aboutform.h"
 #include "ui_aboutform.h"
 #include <QDesktopServices>

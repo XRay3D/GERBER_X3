@@ -22,13 +22,20 @@
 #include <assert.h>
 #include <map>
 
-class GCodePlugin;
-
-class AbstractFilePlugin;
 namespace Shapes {
 class Plugin;
 class Handle;
 } // namespace Shapes
+
+namespace GCode {
+class Plugin;
+}
+
+class AbstractFilePlugin;
+namespace GCodeShapes {
+class Plugin;
+class Handle;
+} // namespace GCodeShapes
 
 namespace FileTree {
 class View;
@@ -42,7 +49,7 @@ class Form;
 using Handlers = mvector<Shapes::Handle*>;
 
 using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
-using GCodePluginMap = std::map<uint32_t, GCodePlugin*>;
+using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
 using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
 #define HOLDER(TYPE, SET, NAME, EXIT_CODE)                                          \
@@ -117,7 +124,7 @@ public:
     static AbstractFilePlugin* filePlugin(uint32_t type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
     static auto& filePlugins() { return app_->filePlugins_; }
 
-    static GCodePlugin* gCodePlugin(uint32_t type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }
+    static GCode::Plugin* gCodePlugin(uint32_t type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }
     static auto& gCodePlugins() { return app_->gCodePlugin_; }
 
     static Shapes::Plugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }

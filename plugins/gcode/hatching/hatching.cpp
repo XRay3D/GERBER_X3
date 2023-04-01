@@ -59,10 +59,10 @@ HatchingCreator::HatchingCreator() {
 void HatchingCreator::create() {
     //    createRaster(
     //        gcp_.tools.front(),
-    //        gcp_.params[GCodeParams::Depth].toDouble(),
-    //        gcp_.params[GCodeParams::UseAngle].toDouble(),
-    //        gcp_.params[GCodeParams::HathStep].toDouble(),
-    //        gcp_.params[GCodeParams::Pass].toInt());
+    //        gcp_.params[GCode::Params::Depth].toDouble(),
+    //        gcp_.params[GCode::Params::UseAngle].toDouble(),
+    //        gcp_.params[GCode::Params::HathStep].toDouble(),
+    //        gcp_.params[GCode::Params::Pass].toInt());
 }
 
 void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {

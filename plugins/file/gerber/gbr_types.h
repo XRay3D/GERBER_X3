@@ -9,8 +9,11 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "datastream.h"
 #include "plugintypes.h"
+#include "md5.h"
+
 #include <QDebug>
 #include <QObject>
 #include <myclipper.h>
@@ -18,6 +21,8 @@
 #define DEPRECATED
 
 namespace Gerber {
+
+constexpr auto GERBER = md5::hash32("Gerber");
 
 class GbrObj : public QObject {
     Q_OBJECT
@@ -302,10 +307,10 @@ public:
     Path polyLine() const override { return closed() ? Path() : path_; }
     Paths polyLineW() const override { return closed() ? Paths() : paths_; } // closed
 
-    Path elipse() const override;   // { return gFile_.; } // circle
-    Paths elipseW() const override; // { return {}; }
+    Path elipse() const override;                                            // { return gFile_.; } // circle
+    Paths elipseW() const override;                                          // { return {}; }
 
-    Path arc() const override { return {}; } // part of elipse
+    Path arc() const override { return {}; }                                 // part of elipse
     Path arcW() const override { return {}; }
 
     Path polygon() const override { return state_.type() == Region ? path_ : Path(); }

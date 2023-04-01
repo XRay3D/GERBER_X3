@@ -42,7 +42,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     return Parser::file;
 }
 
-std::any Plugin::createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param) {
+std::any Plugin::createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         //        auto const exFile = static_cast<File*>(file);

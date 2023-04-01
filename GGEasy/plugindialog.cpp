@@ -24,6 +24,7 @@
 #include <QHeaderView>
 #include <QJsonObject>
 #include <QTreeWidget>
+//#include "a_pch.h"
 
 DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     : QDialog(parent) {

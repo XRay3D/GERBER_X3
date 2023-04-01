@@ -377,8 +377,8 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             settings.setValue("depth", depth);
             settings.endGroup();
 
-            GCode::GCodeParams gcp_ {tool, depth};
-            gcp_.params[GCode::GCodeParams::NotTile];
+            GCode::Params gcp_ {tool, depth};
+            gcp_.params[GCode::Params::NotTile];
 
             //  FIXME           AbstractFile* gcode = new GCode::DrillFile(std::move(gcp_), Pathss {{dst}});
             //  FIXME          gcode->setFileName(tr("Pin_") + tool.nameEnc());

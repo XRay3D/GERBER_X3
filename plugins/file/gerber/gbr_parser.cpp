@@ -47,17 +47,14 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 */
 namespace Gerber {
 
-struct QRegularExpression {
-};
-
 QDebug operator<<(QDebug debug, const std::string_view& sw) {
     QDebugStateSaver saver(debug);
     debug.nospace() << QByteArray(sw.data(), sw.size());
     return debug;
 }
 
-Parser::Parser(AbstractFilePlugin* interface)
-    : interface(interface) {
+Parser::Parser(AbstractFilePlugin* afp)
+    : afp {afp} {
 }
 
 void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
@@ -72,9 +69,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         file->lines() = cleanAndFormatFile(gerberLines);
         file->graphicObjects_.reserve(file->lines().size());
         if (file->lines().empty())
-            emit interface->fileError("", file->shortName() + "\n" + "Incorrect File!");
+            emit afp->fileError("", file->shortName() + "\n" + "Incorrect File!");
 
-        emit interface->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
+        emit afp->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
 
         lineNum_ = 0;
 
@@ -85,7 +82,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             currentGerbLine_ = gerberLine;
             ++lineNum_;
             if (!(lineNum_ % 1000))
-                emit interface->fileProgress(file->shortName(), 0, lineNum_);
+                emit afp->fileProgress(file->shortName(), 0, lineNum_);
             auto dummy = [](const QString& gLine) -> bool {
                 auto data {toU16StrView(gLine)};
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
@@ -165,24 +162,24 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             file->components_ = components.values();
             file->groupedPaths();
             file->graphicObjects_.shrink_to_fit();
-            emit interface->fileReady(file);
-            emit interface->fileProgress(file->shortName(), 1, 1);
+            emit afp->fileReady(file);
+            emit afp->fileProgress(file->shortName(), 1, 1);
         }
     } catch (const QString& errStr) {
         qWarning() << "exeption Q:" << errStr;
-        emit interface->fileError("", file->shortName() + "\n" + errStr);
-        emit interface->fileProgress(file->shortName(), 1, 1);
+        emit afp->fileError("", file->shortName() + "\n" + errStr);
+        emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch (const char* errStr) {
         qWarning() << "exeption Q:" << errStr;
-        emit interface->fileError("", file->shortName() + "\n" + errStr);
-        emit interface->fileProgress(file->shortName(), 1, 1);
+        emit afp->fileError("", file->shortName() + "\n" + errStr);
+        emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch (...) {
         //        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
         //        qWarning() << "exeption S:" << errStr;
-        //        emit interface->fileError("", file->shortName() + "\n" + errStr);
-        //        emit interface->fileProgress(file->shortName(), 1, 1);
+        //        emit afp->fileError("", file->shortName() + "\n" + errStr);
+        //        emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     }
     reset(); // clear parser data
@@ -815,9 +812,9 @@ bool Parser::parseAttributes(const QString& gLine) {
                 cap[3].remove(i, 1);
             auto sl(cap[3].split(',')); // remove symbol "
             switch (int index = Comp::Component::value1(sl.first()); index) {
-            case Comp::Component::N: // The CAD net name of a conducting object, e.g. Clk13.
+            case Comp::Component::N:    // The CAD net name of a conducting object, e.g. Clk13.
                 break;
-            case Comp::Component::P: // Pins
+            case Comp::Component::P:    // Pins
                 components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}});
                 break;
             case Comp::Component::C:

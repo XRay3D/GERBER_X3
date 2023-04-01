@@ -17,7 +17,7 @@ namespace GCode {
 CrosshatchFile::CrosshatchFile()
     : File() { }
 
-CrosshatchFile::CrosshatchFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+CrosshatchFile::CrosshatchFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : File(std::move(gcp), std::move(pocketPaths), std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
@@ -39,7 +39,7 @@ void CrosshatchFile::genGcodeAndTile() {
             else
                 saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

@@ -38,11 +38,11 @@ using Preview = std::map<Key, Val>;
 class Model;
 class Header;
 
-class Form final : public GcFormBase {
+class Form final : public GCode::FormBase {
     Q_OBJECT
 
 public:
-    explicit Form(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~Form() override;
 
     void updateFiles();
@@ -54,8 +54,8 @@ private:
     AbstractFile* file = nullptr;
     Header* header;
     QCheckBox* checkBox;
-    GCodePlugin* plugin;
-    GCode::GCodeType worckType = GCode::Drill;
+    GCode::Plugin* plugin;
+    GCodeType worckType = GCode::Drill;
     GCode::SideOfMilling side = GCode::Inner;
     QString type_;
 
@@ -85,12 +85,12 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-class Plugin final : public GCodePlugin {
+class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "drill.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }

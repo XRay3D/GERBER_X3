@@ -23,11 +23,11 @@ void PocketCtr::create() {
     assert(gcp_.side() != On);
 
     if (gcp_.tools.size() > 1) {
-        createMultiTool(gcp_.tools, gcp_.params[GCodeParams::Depth].toDouble());
+        createMultiTool(gcp_.tools, gcp_.params[GCode::Params::Depth].toDouble());
     } else if (gcp_.params.contains(OffsetSteps) && gcp_.params[OffsetSteps].toInt() > 0) {
-        createFixedSteps(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble(), gcp_.params[OffsetSteps].toInt());
+        createFixedSteps(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble(), gcp_.params[OffsetSteps].toInt());
     } else {
-        createStdFull(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble());
+        createStdFull(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble());
     }
 }
 
@@ -208,9 +208,9 @@ void PocketCtr::createMultiTool(const mvector<Tool>& tools, double depth) {
         stacking(returnPs);
         assert(returnPss.size());
 
-        gcp_.params[GCodeParams::MultiToolIndex] = tIdx;
+        gcp_.params[GCode::Params::MultiToolIndex] = tIdx;
 
-        file_ = new PocketOffsetFile(GCodeParams {gcp_}, std::move(returnPss), std::move(cutAreaPaths));
+        file_ = new PocketOffsetFile(GCode::Params {gcp_}, std::move(returnPss), std::move(cutAreaPaths));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
 

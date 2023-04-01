@@ -29,14 +29,18 @@
 const int isadfsdfg = qRegisterMetaType<AbstractFile*>("AbstractFile*");
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>& file) {
+    stream << file->type();
+    stream << file->loadErrorMessage();
     stream << *file;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file) {
     uint32_t type;
+    QString loadErrorMessage;
     stream >> type;
-    qDebug() << __FUNCTION__ << "type" << type;
+    stream >> loadErrorMessage;
+    qDebug() << __FUNCTION__ << "type" << type << loadErrorMessage;
     if (App::gCodePlugins().contains(type))
         file.reset(App::gCodePlugin(type)->loadFile(stream));
     else if (App::filePlugins().contains(type))
@@ -53,13 +57,17 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
 }
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::AbstractShape>& shape) {
+    stream << shape->type();
+    //    stream << shape->loadErrorMessage();
     stream << *shape;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractShape>& shape) {
     uint32_t type;
+    QString loadErrorMessage;
     stream >> type;
+    stream >> loadErrorMessage;
     if (App::shapePlugins().contains(type))
         shape.reset(App::shapePlugin(type)->createShape());
     stream >> *shape;

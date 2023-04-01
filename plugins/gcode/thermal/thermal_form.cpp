@@ -25,8 +25,8 @@ namespace Thermal {
 
 enum { Size = 24 };
 
-Form::Form(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::FormBase(plugin, new Creator, parent)
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
 
@@ -170,13 +170,13 @@ void Form::сomputePaths() {
         }
     }
 
-    GCode::GCodeParams gpc;
+    GCode::Params gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
-    gpc.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    gpc.params[GCode::GCodeParams::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
-    gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
+    gpc.params[GCode::Params::Depth] = dsbxDepth->value();
+    gpc.params[GCode::Params::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
+    gpc.params[GCode::Params::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     gcCreator->setGcp(gpc);
     gcCreator->addPaths(wPaths);
     gcCreator->addSupportPaths(wBridgePaths);

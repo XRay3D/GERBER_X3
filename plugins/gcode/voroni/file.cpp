@@ -33,7 +33,7 @@ namespace GCode {
 VoronoiFile::VoronoiFile()
     : File() { }
 
-VoronoiFile::VoronoiFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+VoronoiFile::VoronoiFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : File(std::move(gcp), std::move(pocketPaths), std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
@@ -62,7 +62,7 @@ void VoronoiFile::genGcodeAndTile() {
                     saveMillingProfile(offset);
             }
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

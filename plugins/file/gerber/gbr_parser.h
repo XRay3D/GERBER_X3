@@ -21,10 +21,10 @@ namespace Gerber {
 class ApBlock;
 
 class Parser {
-    AbstractFilePlugin* const interface;
+    AbstractFilePlugin* const afp;
 
 public:
-    Parser(AbstractFilePlugin* interface);
+    Parser(AbstractFilePlugin* afp);
 
 protected:
     void parseLines(const QString& gerberLines, const QString& fileName);

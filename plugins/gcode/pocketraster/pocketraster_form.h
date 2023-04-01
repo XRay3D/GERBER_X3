@@ -15,11 +15,11 @@ namespace Ui {
 class PocketRasterForm;
 }
 
-class PocketRasterForm : public GcFormBase {
+class PocketRasterForm : public GCode::FormBase {
     Q_OBJECT
 
 public:
-    explicit PocketRasterForm(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit PocketRasterForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~PocketRasterForm();
 
 private slots:
@@ -54,12 +54,12 @@ public:
 #include "gc_plugin.h"
 #include <QToolBar>
 
-class GCPluginImpl final : public GCodePlugin {
+class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketraster.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
