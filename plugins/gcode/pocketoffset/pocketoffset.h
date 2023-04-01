@@ -15,12 +15,14 @@
 
 namespace GCode {
 
+constexpr auto POCKET = md5::hash32("Pocket");
+
 class PocketOffsetFile final : public File {
 public:
     explicit PocketOffsetFile();
-    explicit PocketOffsetFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    explicit PocketOffsetFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
-    uint32_t type() const override { return md5::hash32("Pocket"); }
+    uint32_t type() const override { return POCKET; }
     void createGi() override;
     void genGcodeAndTile() override;
 };
@@ -30,7 +32,7 @@ public:
     using Creator::Creator;
 
     enum {
-        OffsetSteps = GCodeParams::UserParam,
+        OffsetSteps = GCode::Params::UserParam,
     };
 
 private:
@@ -40,7 +42,7 @@ private:
 
 protected:
     void create() override; // Creator interface
-    uint32_t type() override { return Pocket; }
+    uint32_t type() override { return POCKET; }
 };
 
 } // namespace GCode

@@ -47,8 +47,8 @@ Paths offset(const Path& path, double offset, bool fl = false) {
 /// \brief DrillForm::DrillForm
 /// \param parent
 ///
-Form::Form(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, nullptr, parent)
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::FormBase(plugin, nullptr, parent)
     , ui(new Ui::DrillForm)
     , plugin {plugin} {
     ui->setupUi(content);
@@ -434,7 +434,7 @@ void Form::сomputePaths() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                GCode::File* gcode = new GCode::ProfileFile({App::toolHolder().tool(usedToolId), dsbxDepth->value(), md5::hash32("Profile")}, {pathsMap[usedToolId].paths});
+                GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), md5::hash32("Profile")}, {pathsMap[usedToolId].paths});
                 gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 gcode->setSide(file->side());
                 App::project()->addFile(gcode);
@@ -533,11 +533,11 @@ void Form::сomputePaths() {
                 QThread thread;
                 switch (worckType) {
                 case md5::hash32("Profile"): {
-                    GCode::GCodeParams gcp;
+                    GCode::Params gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(side);
                     gcp.tools = {App::toolHolder().tool(toolId)};
-                    gcp.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
+                    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
 
                     GCode::ProfileCreator tpc;
                     tpc.moveToThread(&thread);
@@ -550,14 +550,14 @@ void Form::сomputePaths() {
                     gcode = tpc.file();
                 } break;
                 case GCode::Pocket: {
-                    GCode::GCodeParams gcp;
+                    GCode::Params gcp;
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
                     gcp.tools = {App::toolHolder().tool(toolId)};
-                    gcp.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-                    gcp.params[GCode::GCodeParams::Pass] = 0;
-                    gcp.params[GCode::GCodeParams::UseRaster] = 0;
-                    gcp.params[GCode::GCodeParams::Steps] = 0;
+                    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+                    gcp.params[GCode::Params::Pass] = 0;
+                    gcp.params[GCode::Params::UseRaster] = 0;
+                    gcp.params[GCode::Params::Steps] = 0;
 
                     GCode::PocketCreator tpc;
                     tpc.moveToThread(&thread);

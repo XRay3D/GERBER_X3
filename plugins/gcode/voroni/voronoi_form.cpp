@@ -19,8 +19,8 @@
 #include "settings.h"
 #include <QMessageBox>
 
-VoronoiForm::VoronoiForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::VoronoiCreator, parent)
+VoronoiForm::VoronoiForm(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::FormBase(plugin, new GCode::VoronoiCreator, parent)
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(content);
 
@@ -114,15 +114,15 @@ void VoronoiForm::сomputePaths() {
         return;
     }
 
-    GCode::GCodeParams gpc;
+    GCode::Params gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
-    gpc.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    gpc.params[GCode::GCodeParams::Tolerance] = ui->dsbxPrecision->value();
-    gpc.params[GCode::GCodeParams::Width] = ui->dsbxWidth->value() + 0.001;
-    gpc.params[GCode::GCodeParams::VorT] = ui->cbxSolver->currentIndex();
-    gpc.params[GCode::GCodeParams::FrameOffset] = ui->dsbxOffset->value();
+    gpc.params[GCode::Params::Depth] = dsbxDepth->value();
+    gpc.params[GCode::Params::Tolerance] = ui->dsbxPrecision->value();
+    gpc.params[GCode::Params::Width] = ui->dsbxWidth->value() + 0.001;
+    gpc.params[GCode::Params::VorT] = ui->cbxSolver->currentIndex();
+    gpc.params[GCode::Params::FrameOffset] = ui->dsbxOffset->value();
 
     gcCreator->setGcp(gpc);
     gcCreator->addPaths(wPaths);

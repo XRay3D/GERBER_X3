@@ -37,7 +37,7 @@ enum { Size = 24 };
 
 extern QIcon drawApertureIcon(Gerber::AbstractAperture* aperture);
 
-ThermalForm::ThermalForm(GCodePlugin* plugin, QWidget* parent)
+ThermalForm::ThermalForm(GCode::Plugin* plugin, QWidget* parent)
     : FormsUtil(plugin, new GCode::ThermalCreator, parent)
     , ui(new Ui::ThermalForm) {
     ui->setupUi(this);
@@ -190,13 +190,13 @@ void ThermalForm::сomputePaths() {
         }
     }
 
-    GCode::GCodeParams gpc;
+    GCode::Params gpc;
     gpc.setConvent(true);
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
-    gpc.params[GCode::GCodeParams::Depth] = ui->dsbxDepth->value();
-    gpc.params[GCode::GCodeParams::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
-    gpc.params[GCode::GCodeParams::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
+    gpc.params[GCode::Params::Depth] = ui->dsbxDepth->value();
+    gpc.params[GCode::Params::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
+    gpc.params[GCode::Params::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     tpc_->setGcp(gpc);
     tpc_->addPaths(wPaths);
     tpc_->addSupportPaths(wBridgePaths);

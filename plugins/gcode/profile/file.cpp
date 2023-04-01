@@ -22,13 +22,13 @@
 #include <QRegularExpression>
 #include <QTextStream>
 
-namespace GCode {
+namespace Profile {
 
-ProfileFile::ProfileFile()
-    : File() { }
+File::File()
+    : GCode::File() { }
 
-ProfileFile::ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss)
-    : File(std::move(gcp), std::move(toolPathss)) {
+File::File(GCode::Params&& gcp, Pathss&& toolPathss)
+    : GCode::File(std::move(gcp), std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
@@ -38,7 +38,7 @@ ProfileFile::ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss)
     }
 }
 
-void ProfileFile::genGcodeAndTile() {
+void File::genGcodeAndTile() {
     const QRectF rect = App::project()->worckRect();
     for (size_t x = 0; x < App::project()->stepsX(); ++x) {
         for (size_t y = 0; y < App::project()->stepsY(); ++y) {
@@ -49,13 +49,13 @@ void ProfileFile::genGcodeAndTile() {
             else
                 saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
-void ProfileFile::createGi() {
+void File::createGi() {
 
     GraphicsItem* item;
     for (const Paths& paths : toolPathss_) {
@@ -84,4 +84,4 @@ void ProfileFile::createGi() {
     itemGroup()->setVisible(true);
 }
 
-} // namespace GCode
+} // namespace Profile

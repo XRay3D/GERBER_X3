@@ -31,7 +31,7 @@ class File : public GCFile {
 
 public:
     explicit File();
-    explicit File(const Pathss& toolPathss, GCodeParams&& gcp, const Paths& pocketPaths = {});
+    explicit File(const Pathss& toolPathss, GCode::Params&& gcp, const Paths& pocketPaths = {});
     bool save(const QString& name);
     GCodeType gtype() const;
     uint32_t type() const override { return FileType::GCode; }
@@ -86,7 +86,7 @@ public:
 
     mvector<QString> gCodeText() const;
     Tool getTool() const;
-    const GCodeParams& gcp() const;
+    const GCode::Params& gcp() const;
 };
 
 } // namespace GCode

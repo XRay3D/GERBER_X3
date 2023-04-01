@@ -17,7 +17,7 @@
 <context>
     <name>QObject</name>
     <message>
-        <location filename="fileifce.h" line="84"/>
+        <location filename="file.h" line="70"/>
         <source>Preparing: </source>
         <translation type="unfinished"></translation>
     </message>

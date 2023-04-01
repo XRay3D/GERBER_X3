@@ -20,9 +20,9 @@ Creator::Creator() { }
 
 void Creator::create() {
     createThermal(
-        App::project()->file(gcp_.params[::GCode::GCodeParams::FileId].toInt()),
+        App::project()->file(gcp_.params[::GCode::Params::FileId].toInt()),
         gcp_.tools.front(),
-        gcp_.params[::GCode::GCodeParams::Depth].toDouble());
+        gcp_.params[::GCode::Params::Depth].toDouble());
 }
 
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
@@ -63,7 +63,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             framePaths = offset.Execute(dOffset - 0.005 * uScale);
             clipper.AddSubject(framePaths);
         }
-        if (!gcp_.params[::GCode::GCodeParams::IgnoreCopper].toInt()) {
+        if (!gcp_.params[::GCode::Params::IgnoreCopper].toInt()) {
             ClipperOffset offset;
             for (auto go : graphicObjects) {
                 //                if (go->closed()) {

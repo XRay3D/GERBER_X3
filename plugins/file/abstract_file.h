@@ -47,10 +47,8 @@ class Node;
 class AbstractFile {
 
     friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file) {
-        stream << static_cast<int>(file.type());
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-
         Block(out).write(
             file.id_,
             file.date_,
@@ -65,7 +63,6 @@ class AbstractFile {
             file.isVisible(),
             file.color_,
             file.colorFlag_);
-
         file.write(out);
         return stream << data;
     }
@@ -75,7 +72,6 @@ class AbstractFile {
         stream >> data;
         QDataStream in(&data, QIODevice::ReadOnly);
         bool visible;
-
         Block(in).read(
             file.id_,
             file.date_,
@@ -90,7 +86,6 @@ class AbstractFile {
             visible,
             file.color_,
             file.colorFlag_);
-
         file.read(in);
         if (App::splashScreen())
             App::splashScreen()->showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
@@ -141,6 +136,7 @@ public:
 
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
+    virtual QString loadErrorMessage() const = 0;
     virtual void createGi() = 0;
     virtual void setItemType([[maybe_unused]] int type);
     virtual int itemsType() const;

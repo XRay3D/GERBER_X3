@@ -25,7 +25,7 @@ namespace GCode {
 inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y); }
 
 void VoronoiJc::jcVoronoi() {
-    const auto tolerance = gcp_.params[GCodeParams::Tolerance].toDouble();
+    const auto tolerance = gcp_.params[GCode::Params::Tolerance].toDouble();
 
     mvector<jcv_point> points;
     points.reserve(100000);
@@ -76,7 +76,7 @@ void VoronoiJc::jcVoronoi() {
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const Point::Type fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
+        const Point::Type fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
@@ -168,7 +168,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     auto clean = [this, kAngle = 2.0](Path& path) {
         for (size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line(path[i], path[i + 1]);
-            if (line.length() < gcp_.params[GCodeParams::Tolerance].toDouble()) {
+            if (line.length() < gcp_.params[GCode::Params::Tolerance].toDouble()) {
                 path[i] = (line.center());
                 path.remove(i + 1);
                 --i;

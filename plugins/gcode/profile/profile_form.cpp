@@ -20,8 +20,10 @@
 #include <QMessageBox>
 #include <ranges>
 
-ProfileForm::ProfileForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::ProfileCtr, parent)
+namespace Profile {
+
+ProfileForm::ProfileForm(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::FormBase(plugin, new GCode::Creator, parent)
     , ui(new Ui::ProfileForm) {
     ui->setupUi(content);
     setWindowTitle(tr("Profile Toolpath"));
@@ -158,22 +160,22 @@ void ProfileForm::сomputePaths() {
         return;
     }
 
-    GCode::GCodeParams gcp_;
+    GCode::Params gcp_;
     gcp_.setConvent(ui->rbConventional->isChecked());
     gcp_.setSide(side);
     gcp_.tools.push_back(tool);
-    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
+    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
 
-    gcp_.params[GCode::ProfileCtr::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
-    gcp_.params[GCode::ProfileCtr::BridgeValue] = ui->dsbxBridgeValue->value();
-    // NOTE reserve   gcp_.params[GCode::ProfileCtr::BridgeValue2] = ui->dsbxBridgeValue->value();
+    gcp_.params[GCode::Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
+    gcp_.params[GCode::Creator::BridgeValue] = ui->dsbxBridgeValue->value();
+    // NOTE reserve   gcp_.params[GCode::Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
 
     if (side == GCode::On)
-        gcp_.params[GCode::ProfileCtr::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
+        gcp_.params[GCode::Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
     else
-        gcp_.params[GCode::ProfileCtr::TrimmingCorners] = ui->cbxTrimming->isChecked();
+        gcp_.params[GCode::Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
 
-    gcp_.params[GCode::GCodeParams::GrItems].setValue(usedItems_);
+    gcp_.params[GCode::Params::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
     for (QGraphicsItem* item : App::graphicsView()->items()) {
@@ -181,8 +183,8 @@ void ProfileForm::сomputePaths() {
             brv.push_back(item->pos());
     }
     if (!brv.isEmpty()) {
-        // gcp_.params[GCode::GCodeParams::Bridges].fromValue(brv);
-        gcp_.params[GCode::ProfileCtr::BridgeLen] = ui->dsbxBridgeLenght->value();
+        // gcp_.params[GCode::Params::Bridges].fromValue(brv);
+        gcp_.params[GCode::Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
     gcCreator->setGcp(gcp_);
@@ -324,7 +326,7 @@ void ProfileForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void ProfileForm::editFile(GCode::File* file) {
 
-    //    GCode::GCodeParams gcp_ {file->gcp()};
+    //    GCode::Params gcp_ {file->gcp()};
 
     //    fileId = gcp_.fileId;
     //    editMode_ = true;
@@ -333,7 +335,7 @@ void ProfileForm::editFile(GCode::File* file) {
     //        side = gcp_.side();
     //        direction = static_cast<GCode::Direction>(gcp_.convent());
     //        ui->toolHolder->setTool(gcp_.tools.front());
-    //        dsbxDepth->setValue(gcp_.params[GCode::GCodeParams::Depth].toDouble());
+    //        dsbxDepth->setValue(gcp_.params[GCode::Params::Depth].toDouble());
 
     //        switch (side) {
     //        case GCode::On:
@@ -359,7 +361,7 @@ void ProfileForm::editFile(GCode::File* file) {
 
     //    { // GrItems
     //        usedItems_.clear();
-    //        auto items {gcp_.params[GCode::GCodeParams::GrItems].value<UsedItems>()};
+    //        auto items {gcp_.params[GCode::Params::GrItems].value<UsedItems>()};
 
     //        auto i = items.cbegin();
     //        while (i != items.cend()) {
@@ -372,9 +374,9 @@ void ProfileForm::editFile(GCode::File* file) {
     //    }
 
     //    { // Bridges
-    //        if (gcp_.params.contains(GCode::GCodeParams::Bridges)) {
-    //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::GCodeParams::BridgeLen].toDouble());
-    //            //            for (auto& pos : gcp_.params[GCode::GCodeParams::Bridges].value<QPolygonF>()) {
+    //        if (gcp_.params.contains(GCode::Params::Bridges)) {
+    //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
+    //            //            for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
     //            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
     //            //                 App::graphicsView()->addItem(brItem);
     //            //                brItem->setPos(pos);
@@ -386,5 +388,7 @@ void ProfileForm::editFile(GCode::File* file) {
     //        }
     //    }
 }
+
+} // namespace Profile
 
 #include "moc_profile_form.cpp"

@@ -11,10 +11,11 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
+//#include "a_pch.h"
 
-#include "gc_fileplugin.h"
-#include "gc_plugin.h"
-
+//#include "gc_fileplugin.h"
+//#include "gc_plugin.h"
+#include "abstract_fileplugin.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
@@ -32,37 +33,37 @@
 #include <stdio.h>
 #include <stdlib.h>
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-    QByteArray localMsg = msg.toUtf8();
-    const char* file = context.file ? context.file : "";
-    //    const char* function = context.function ? context.function : "";
+//void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+//    QByteArray localMsg = msg.toUtf8();
+//    const char* file = context.file ? context.file : "";
+//    //    const char* function = context.function ? context.function : "";
 
-    const char* file_ {file};
-    while (*file > 0) {
-        if (*file == '\\')
-            file_ = file + 1;
-        ++file;
-    }
-    file = file_;
+//    const char* file_ {file};
+//    while (*file > 0) {
+//        if (*file == '\\')
+//            file_ = file + 1;
+//        ++file;
+//    }
+//    file = file_;
 
-    switch (type) {
-    case QtDebugMsg:
-        fprintf(stdout, "Debug: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-        break;
-    case QtInfoMsg:
-        fprintf(stdout, "Info: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-        break;
-    case QtWarningMsg:
-        fprintf(stderr, "Warning:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-        break;
-    case QtCriticalMsg:
-        fprintf(stderr, "Critical:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-        break;
-    case QtFatalMsg:
-        fprintf(stderr, "Fatal:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-        break;
-    }
-}
+//    switch (type) {
+//    case QtDebugMsg:
+//        fprintf(stdout, "Debug: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+//        break;
+//    case QtInfoMsg:
+//        fprintf(stdout, "Info: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+//        break;
+//    case QtWarningMsg:
+//        fprintf(stderr, "Warning:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+//        break;
+//    case QtCriticalMsg:
+//        fprintf(stderr, "Critical:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+//        break;
+//    case QtFatalMsg:
+//        fprintf(stderr, "Fatal:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
+//        break;
+//    }
+//}
 
 int main(int argc, char** argv) {
     //    qInstallMessageHandler(myMessageOutput);
@@ -204,7 +205,7 @@ int main(int argc, char** argv) {
                         App::shapePlugins().emplace(shape->type(), shape);
                         continue;
                     }
-                    if (auto* gCode = qobject_cast<GCodePlugin*>(pobj); gCode) {
+                    if (auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
                         gCode->setInfo(loader.metaData().value("MetaData").toObject());
                         App::gCodePlugins().emplace(gCode->type(), gCode);
                         continue;

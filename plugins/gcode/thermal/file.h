@@ -18,7 +18,7 @@ class ThermalFile final : public File {
 
 public:
     explicit ThermalFile();
-    explicit ThermalFile(GCodeParams&& gcp, Pathss&& toolPathss);
+    explicit ThermalFile(GCode::Params&& gcp, Pathss&& toolPathss);
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     uint32_t type() const override { return md5::hash32("Thermal"); }
     void createGi() override;

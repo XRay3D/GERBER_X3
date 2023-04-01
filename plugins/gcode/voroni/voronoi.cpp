@@ -27,11 +27,11 @@ inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0) {
 
 void VoronoiCreator::create() {
     const auto& tool = gcp_.tools.front();
-    const auto depth = gcp_.params[GCodeParams::Depth].toDouble();
-    const auto width = gcp_.params[GCodeParams::Width].toDouble();
+    const auto depth = gcp_.params[GCode::Params::Depth].toDouble();
+    const auto width = gcp_.params[GCode::Params::Width].toDouble();
 
     groupedPaths(Grouping::Copper);
-    switch (gcp_.params[GCodeParams::VorT].toInt()) {
+    switch (gcp_.params[GCode::Params::VorT].toInt()) {
     case 0:
         boostVoronoi();
         break;

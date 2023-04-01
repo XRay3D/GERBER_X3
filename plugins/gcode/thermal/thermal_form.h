@@ -31,11 +31,11 @@ namespace Thermal {
 
 class AbstractThermPrGi;
 
-class Form : public GcFormBase {
+class Form : public GCode::FormBase {
     Q_OBJECT
 
 public:
-    explicit Form(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~Form() override;
 
     void updateFiles();
@@ -84,12 +84,12 @@ public:
 #include "gc_plugin.h"
 #include <QToolBar>
 
-class GCPluginImpl final : public GCodePlugin {
+class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thermal.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }

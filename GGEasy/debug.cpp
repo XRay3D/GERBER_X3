@@ -1,10 +1,12 @@
+// #include "a_pch.h"
+
 #include "app.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
 #include "md5.h"
 
-// #include <QAction>
-// #include <QDockWidget>
+//// #include <QAction>
+//// #include <QDockWidget>
 #include <QDir>
 #include <QTimer>
 #include <QtWidgets>
@@ -35,6 +37,8 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
         if (1) {
+            if (!toolpathActions.contains(md5::hash32("Profile")))
+                break;
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this] { toolpathActions[md5::hash32("Profile")]->toggle(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });

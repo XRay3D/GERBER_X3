@@ -16,28 +16,28 @@
 #include <QIcon>
 #include <QPixmap>
 
-namespace GCode {
+namespace Profile {
 
 inline constexpr auto PROFILE = md5::hash32("Profile");
 
-class ProfileFile final : public File {
+class File final : public GCode::File {
 public:
-    explicit ProfileFile();
-    explicit ProfileFile(GCodeParams&& gcp, Pathss&& toolPathss);
+    explicit File();
+    explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
     uint32_t type() const override { return PROFILE; }
     void createGi() override;
     void genGcodeAndTile() override;
-}; // ProfileFile
+}; // File
 
-class ProfileCtr : public Creator {
+class Creator : public GCode::Creator {
 
 public:
-    ProfileCtr();
-    ~ProfileCtr() override = default;
+    Creator() = default;
+    ~Creator() override = default;
 
     enum {
-        BridgeLen = GCodeParams::UserParam,
+        BridgeLen = GCode::Params::UserParam,
         TrimmingCorners,
         TrimmingOpenPaths,
         BridgeAlignType,
@@ -71,4 +71,4 @@ protected:
     uint32_t type() override { return PROFILE; }
 };
 
-} // namespace GCode
+} // namespace Profile

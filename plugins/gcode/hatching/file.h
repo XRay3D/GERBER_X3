@@ -17,7 +17,7 @@ namespace GCode {
 class CrosshatchFile final : public File {
 public:
     explicit CrosshatchFile();
-    explicit CrosshatchFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    explicit CrosshatchFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
     uint32_t type() const override { return md5::hash32("Hatching"); }
     void createGi() override;

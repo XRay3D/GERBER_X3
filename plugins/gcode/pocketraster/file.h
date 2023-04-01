@@ -18,7 +18,7 @@ class PocketRasterFile final : public File {
 
 public:
     explicit PocketRasterFile();
-    explicit PocketRasterFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    explicit PocketRasterFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
     uint32_t type() const override { return md5::hash32("Raster"); }
     void createGi() override;

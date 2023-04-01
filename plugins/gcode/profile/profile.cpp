@@ -17,32 +17,28 @@
 
 #include <execution>
 
-namespace GCode {
-ProfileCtr::ProfileCtr() {
-}
+namespace Profile {
 
-void ProfileCtr::create() {
+void Creator::create() {
     // WARNING App::fileTreeView()->closeFiles();
-    createProfile(gcp_.tools.front(), gcp_.params[GCodeParams::Depth].toDouble());
+    createProfile(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble());
 }
 
-
-
-void ProfileCtr::createProfile(const Tool& tool, const double depth) {
+void Creator::createProfile(const Tool& tool, const double depth) {
     do {
 
         toolDiameter = tool.getDiameter(depth);
 
-        const double dOffset = ((gcp_.side() == Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
+        const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
 
-        if (gcp_.side() == On) {
+        if (gcp_.side() == GCode::On) {
             if (gcp_.params[TrimmingOpenPaths].toBool())
                 trimmingOpenPaths(workingRawPs);
             returnPs = std::move(workingPs);
         } else {
             if (workingPs.size()) {
                 ClipperOffset offset;
-                for (Paths& paths : groupedPaths(Grouping::Copper))
+                for (Paths& paths : groupedPaths(GCode::Grouping::Copper))
                     offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
                 returnPs = offset.Execute(dOffset);
             }
@@ -60,7 +56,7 @@ void ProfileCtr::createProfile(const Tool& tool, const double depth) {
 
         reorder();
 
-        if (gcp_.side() == On && workingRawPs.size()) {
+        if (gcp_.side() == GCode::On && workingRawPs.size()) {
             returnPss.reserve(returnPss.size() + workingRawPs.size());
             mergePaths(workingRawPs);
             sortBeginEnd(workingRawPs);
@@ -76,7 +72,7 @@ void ProfileCtr::createProfile(const Tool& tool, const double depth) {
         if (returnPss.empty())
             break;
 
-        file_ = new ProfileFile(std::move(gcp_), std::move(returnPss));
+        file_ = new File(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
         return;
@@ -84,7 +80,7 @@ void ProfileCtr::createProfile(const Tool& tool, const double depth) {
     emit fileReady(nullptr);
 }
 
-void ProfileCtr::trimmingOpenPaths(Paths& paths) {
+void Creator::trimmingOpenPaths(Paths& paths) {
     const double dOffset = toolDiameter * uScale * 0.5;
     for (size_t i = 0; i < paths.size(); ++i) {
         auto& p = paths[i];
@@ -130,7 +126,7 @@ void ProfileCtr::trimmingOpenPaths(Paths& paths) {
     }
 }
 
-void ProfileCtr::cornerTrimming() {
+void Creator::cornerTrimming() {
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;
@@ -168,7 +164,7 @@ void ProfileCtr::cornerTrimming() {
     }
 }
 
-void ProfileCtr::makeBridges() {
+void Creator::makeBridges() {
     auto bridgeItems {App::graphicsView()->items<GiBridge>(GiType::Bridge)};
     if (bridgeItems.empty())
         return;
@@ -214,7 +210,7 @@ void ProfileCtr::makeBridges() {
     std::erase_if(returnPss, [](auto&& paths) { return paths.empty(); });
 }
 
-void ProfileCtr::reorder() {
+void Creator::reorder() {
     //    returnPss = {returnPs};
     //    return;
     PolyTree polyTree;
@@ -249,7 +245,7 @@ void ProfileCtr::reorder() {
     }
 }
 
-void ProfileCtr::reduceDistance(Point& from, Path& to) {
+void Creator::reduceDistance(Point& from, Path& to) {
     double d = std::numeric_limits<double>::max();
     int ctr2 = 0, idx = 0;
     for (auto pt2 : to) {
@@ -263,7 +259,7 @@ void ProfileCtr::reduceDistance(Point& from, Path& to) {
     from = to.back();
 }
 
-void ProfileCtr::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
+void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     rpaths.clear();
 
     //    auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
@@ -271,14 +267,14 @@ void ProfileCtr::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     //    };
     //    rpaths.reserve(Total(polytree));
 
-    std::function<void(PolyTree&, ProfileCtr::NodeType)> addPolyNodeToPaths;
+    std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths;
 
     if (!Settings::profileSort()) { // Grouping by nesting
 
         markPolyTreeDByNesting(polytree);
 
         std::map<int, Paths> pathsMap;
-        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, ProfileCtr::NodeType nodetype) {
+        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, Creator::NodeType nodetype) {
             bool match = true;
             if (nodetype == ntClosed)
                 match = true; //! polynode.IsOpen();// FIXME
@@ -304,8 +300,8 @@ void ProfileCtr::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     } else { // Grouping by nesting depth
         sortPolyTreeByNesting(polytree);
         Point from = App::settings().mkrZeroOffset();
-        std::function<void(PolyTree&, ProfileCtr::NodeType)> addPolyNodeToPaths =
-            [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, ProfileCtr::NodeType nodetype) {
+        std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths =
+            [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, Creator::NodeType nodetype) {
                 bool match = true;
                 if (nodetype == ntClosed)
                     match = true; //! polynode.IsOpen(); FIXME
@@ -368,4 +364,4 @@ void ProfileCtr::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 //             paths.push_back(polytree.Childs[i]->Polygon());
 // }
 
-} // namespace GCode
+} // namespace Profile

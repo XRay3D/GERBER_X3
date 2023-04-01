@@ -33,7 +33,7 @@ namespace GCode {
 PocketRasterFile::PocketRasterFile()
     : File() { }
 
-PocketRasterFile::PocketRasterFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+PocketRasterFile::PocketRasterFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : File(std::move(gcp), std::move(pocketPaths), std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
@@ -55,7 +55,7 @@ void PocketRasterFile::genGcodeAndTile() {
             else
                 saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

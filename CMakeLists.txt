@@ -13,9 +13,7 @@ cmake_minimum_required(VERSION 3.20)
 set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-#git submodule update --init --recursive
-
-project(GERBER_X3 VERSION 9.0.0)
+project(GERBER_X3)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -30,20 +28,10 @@ set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
-#string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
 add_definitions(
-#    -DBUILD_DATE="${DT}"
-#    -DVERSION_MAJOR=${PROJECT_VERSION_MAJOR}
-#    -DVERSION_MINOR=${PROJECT_VERSION_MINOR}
-#    -DVERSION_PATCH=${PROJECT_VERSION_PATCH}
-#    -DVERSION_TWEAK=${PROJECT_VERSION_TWEAK}
-#    -DVERSION_STR="${PROJECT_VERSION}"
-
     -DQT_MESSAGELOGCONTEXT# qDebug()
-    -DCTRE
     -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
 )
-
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
@@ -60,7 +48,7 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 # -ltbbD
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-    add_definitions(-D_USE_MATH_DEFINES=1)
+#    add_definitions(-D_USE_MATH_DEFINES=1)
 endif()
 
 # FIND BOOST
@@ -74,10 +62,10 @@ else()
 endif()
 
 set(INCLUDE_DIRECTORIES
-    GGEasy
-
     external_dependencies/compile-time-regular-expressions/single-header
     external_dependencies/pfr_non_boost/include
+
+    ggeasy
 
     plugins/file
     plugins/gcode
@@ -101,21 +89,4 @@ add_subdirectory(plugins)
 
 # MAIN APP
 add_subdirectory(GGEasy)
-
-
-#target_precompile_headers(GGEasy
-#    #    PUBLIC
-#    #    qt.h
-#    PRIVATE
-#    #    [["other_header.h"]]
-#    <QtWidgets>
-#    <QtCore>
-#    <forward_list>
-#    <list>
-#    <map>
-#    <ranges>
-#    <span>
-#    <unordered_map>
-#    <vector>
-#)
 

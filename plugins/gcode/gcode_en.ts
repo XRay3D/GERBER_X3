@@ -25,17 +25,17 @@
 <context>
     <name>GCode::Creator</name>
     <message>
-        <location filename="gc_creator.cpp" line="246"/>
+        <location filename="gc_creator.cpp" line="195"/>
         <source>createGc</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_creator.cpp" line="456"/>
+        <location filename="gc_creator.cpp" line="397"/>
         <source>Merge Paths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_creator.cpp" line="577"/>
+        <location filename="gc_creator.cpp" line="518"/>
         <source>Check milling for errors</source>
         <translation type="unfinished"></translation>
     </message>
@@ -43,42 +43,42 @@
 <context>
     <name>GCode::GCObj</name>
     <message>
-        <location filename="gc_file.cpp" line="156"/>
+        <location filename="gc_file.cpp" line="442"/>
         <source>Top|Bottom</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="158"/>
+        <location filename="gc_file.cpp" line="444"/>
         <source>;	           Name: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="159"/>
+        <location filename="gc_file.cpp" line="445"/>
         <source>;	           Tool: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="160"/>
+        <location filename="gc_file.cpp" line="446"/>
         <source>;	  Tool Stepover: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="161"/>
+        <location filename="gc_file.cpp" line="447"/>
         <source>;	 Feed Rate mm/s: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="162"/>
+        <location filename="gc_file.cpp" line="448"/>
         <source>;	Tool Pass Depth: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="163"/>
+        <location filename="gc_file.cpp" line="449"/>
         <source>;	          Depth: %1</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_file.cpp" line="164"/>
+        <location filename="gc_file.cpp" line="450"/>
         <source>;	           Side: %1</source>
         <translation type="unfinished"></translation>
     </message>
@@ -86,23 +86,23 @@
 <context>
     <name>GCode::Plugin</name>
     <message>
-        <location filename="gc_fileplugin.cpp" line="40"/>
+        <location filename="gc_fileplugin.cpp" line="39"/>
         <source>Tool Paths</source>
         <oldsource>Tool PathsD</oldsource>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="47"/>
+        <location filename="gc_fileplugin.cpp" line="46"/>
         <source>&amp;Delete All Toolpaths</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="48"/>
+        <location filename="gc_fileplugin.cpp" line="47"/>
         <source>Really?</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="51"/>
+        <location filename="gc_fileplugin.cpp" line="50"/>
         <source>&amp;Save Selected Tool Paths...</source>
         <oldsource>&amp;Save Selected Tool PathsD...</oldsource>
         <translation type="unfinished"></translation>
@@ -313,96 +313,96 @@
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="gc_fileplugin.cpp" line="84"/>
+        <location filename="gc_fileplugin.cpp" line="83"/>
         <source>Save the G-Code to the project folder.</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="90"/>
+        <location filename="gc_fileplugin.cpp" line="89"/>
         <source>Add a comment with the parameters G-Сode</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="96"/>
+        <location filename="gc_fileplugin.cpp" line="95"/>
         <source>File Extension:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="114"/>
-        <location filename="gc_fileplugin.cpp" line="148"/>
+        <location filename="gc_fileplugin.cpp" line="113"/>
+        <location filename="gc_fileplugin.cpp" line="147"/>
         <source>Start with:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="122"/>
-        <location filename="gc_fileplugin.cpp" line="156"/>
+        <location filename="gc_fileplugin.cpp" line="121"/>
+        <location filename="gc_fileplugin.cpp" line="155"/>
         <source>Finish with:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="130"/>
-        <location filename="gc_fileplugin.cpp" line="164"/>
+        <location filename="gc_fileplugin.cpp" line="129"/>
+        <location filename="gc_fileplugin.cpp" line="163"/>
         <source>The format of the line with the coordinates:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="134"/>
-        <location filename="gc_fileplugin.cpp" line="168"/>
+        <location filename="gc_fileplugin.cpp" line="133"/>
+        <location filename="gc_fileplugin.cpp" line="167"/>
         <source>&lt;html&gt;&lt;head/&gt;&lt;body&gt;&lt;p&gt;Default &lt;span style=&quot; font-weight:600;&quot;&gt;G?X?Y?Z?F?S?&lt;/span&gt;&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;?&lt;/span&gt; - only if the value has changed.&lt;/p&gt;&lt;p&gt;&lt;span style=&quot; font-weight:600;&quot;&gt;+&lt;/span&gt; - always.&lt;/p&gt;&lt;p&gt;If one of the commands &lt;span style=&quot; font-weight:600;&quot;&gt;G, X, Y, Z, F&lt;/span&gt; and&lt;span style=&quot; font-weight:600;&quot;&gt; S&lt;/span&gt; is missing, it will not be inserted into the G-code.&lt;/p&gt;&lt;p&gt;If there is a space between the teams, then it will also be inserted into the G-code.&lt;/p&gt;&lt;p&gt;&lt;br/&gt;&lt;/p&gt;&lt;/body&gt;&lt;/html&gt;</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="137"/>
+        <location filename="gc_fileplugin.cpp" line="136"/>
         <source>Milling</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="171"/>
+        <location filename="gc_fileplugin.cpp" line="170"/>
         <source>Laser</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="182"/>
+        <location filename="gc_fileplugin.cpp" line="181"/>
         <source>Milling sequence:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="192"/>
+        <location filename="gc_fileplugin.cpp" line="191"/>
         <source>Profile</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="198"/>
+        <location filename="gc_fileplugin.cpp" line="197"/>
         <source>Simplify Hldi</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="218"/>
+        <location filename="gc_fileplugin.cpp" line="217"/>
         <source>HLDI</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="224"/>
+        <location filename="gc_fileplugin.cpp" line="223"/>
         <source>Spindle / Laser Control Code</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="233"/>
+        <location filename="gc_fileplugin.cpp" line="232"/>
         <source>Spindle On:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="242"/>
+        <location filename="gc_fileplugin.cpp" line="241"/>
         <source>Constant Laser Power Mode On:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="251"/>
+        <location filename="gc_fileplugin.cpp" line="250"/>
         <source>Dynamic Laser Power Mode On:</source>
         <translation type="unfinished"></translation>
     </message>
     <message>
-        <location filename="gc_fileplugin.cpp" line="259"/>
+        <location filename="gc_fileplugin.cpp" line="258"/>
         <source>Spindle/Laser Off:</source>
         <translation type="unfinished"></translation>
     </message>

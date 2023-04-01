@@ -6,7 +6,7 @@
 
 #include <cmath>
 #include <algorithm>
-//#include <valarray>
+#include <valarray>
 
 /*** Find the zeros of the bernstein function.  The code subdivides until it is happy with the
  * linearity of the function.  This requires an O(degree^2) subdivision for each step, even when

@@ -18,7 +18,7 @@ class VoronoiFile final : public File {
 
 public:
     explicit VoronoiFile();
-    explicit VoronoiFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    explicit VoronoiFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
     uint32_t type() const override { return md5::hash32("Voronoi"); }
     void createGi() override;

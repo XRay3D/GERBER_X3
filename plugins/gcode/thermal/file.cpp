@@ -18,7 +18,7 @@ namespace GCode {
 ThermalFile::ThermalFile()
     : File() { }
 
-ThermalFile::ThermalFile(GCodeParams&& gcp, Pathss&& toolPathss)
+ThermalFile::ThermalFile(GCode::Params&& gcp, Pathss&& toolPathss)
     : File(std::move(gcp), {}, std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
@@ -40,7 +40,7 @@ void ThermalFile::genGcodeAndTile() {
             else
                 saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

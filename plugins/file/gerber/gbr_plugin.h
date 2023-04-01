@@ -29,8 +29,8 @@ public:
 
     bool thisIsIt(const QString& fileName) override;
 
-    uint32_t type() const override;
-    QString folderName() const override;
+    uint32_t type() const override { return GERBER; }
+    QString folderName() const override { return tr("Gerber Files"); }
 
     AbstractFile* loadFile(QDataStream& stream) override;
 
@@ -42,7 +42,7 @@ public:
     AbstractFile* parseFile(const QString& fileName, int type) override;
 
     // AbstractFilePlugin interface
-    std::any createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param = {}) override;
+    //    std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
 };
 
 } // namespace Gerber

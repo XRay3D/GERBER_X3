@@ -24,7 +24,6 @@
 #include <memory>
 
 class AbstractFile;
-class GCodePlugin;
 
 class AbstractFileSettings : public QWidget {
 public:
@@ -48,7 +47,7 @@ public:
     virtual uint32_t type() const = 0;
     virtual QString folderName() const = 0;
 
-    [[nodiscard]] virtual std::any createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param = {}) { return {}; };
+    [[nodiscard]] virtual std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) { return {}; };
 
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) = 0;

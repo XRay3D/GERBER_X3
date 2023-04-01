@@ -42,7 +42,7 @@ public:
     AbstractFile* parseFile(const QString& fileName, int type) override;
 
     // AbstractFilePlugin interface
-    std::any createPreviewGi(AbstractFile* file, GCodePlugin* plugin, std::any param = {}) override;
+    std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
 };
 
 } // namespace TopoR

@@ -14,13 +14,14 @@
 #include <cmath>
 #include <cstdlib>
 #include <iostream>
+#include <numbers>
+#include <ranges>
 #include <string>
 #include <vector>
 
 #include <QDebug>
 #include <QPolygonF>
 #include <mvector.h>
-#include <ranges>
 
 #include "app.h"
 #include "datastream.h"
@@ -31,6 +32,8 @@ static constexpr auto dScale {1. / uScale};
 extern void ifCancelThenThrow();
 
 namespace Clipper2Lib {
+
+using namespace ::std::numbers;
 
 using int_t = int32_t;
 
@@ -216,7 +219,7 @@ struct Point {
     /*constexpr*/ double angleTo(const Point& pt2) const noexcept {
         const double dx = pt2.x - x;
         const double dy = pt2.y - y;
-        const double theta = atan2(-dy, dx) * 360.0 / (M_PI * 2);
+        const double theta = atan2(-dy, dx) * 360.0 / (pi * 2);
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
         if (qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;
@@ -229,8 +232,8 @@ struct Point {
         const double dy = pt2.y - y;
         const double theta = atan2(-dy, dx);
         return theta;
-        const double theta_normalized = theta < 0 ? theta + (M_PI * 2) : theta; // NOTE theta_normalized
-        if (qFuzzyCompare(theta_normalized, (M_PI * 2)))
+        const double theta_normalized = theta < 0 ? theta + (pi * 2) : theta; // NOTE theta_normalized
+        if (qFuzzyCompare(theta_normalized, (pi * 2)))
             return 0.0;
         else
             return theta_normalized;

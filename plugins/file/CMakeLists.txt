@@ -1,9 +1,9 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  March 25, 2023                                                  *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2023                                          *
+#* Copyright :  Damir Bakiev 2016-2022                                          *
 #* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -34,6 +34,8 @@ set(PROJECT_SOURCES
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
+target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+
 link_directories(
     ${CMAKE_SOURCE_DIR}/libs${PATHS}
 )
@@ -46,13 +48,15 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 
 set(TS_FILES
     ${PROJECT_NAME}_ru.ts
+    ${PROJECT_NAME}_en.ts
 )
 
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES} OPTIONS -silent OPTIONS -source-language en_US)
-    qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES OPTIONS -silent)
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
+    qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+    qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
+    qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 else()
     qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
     qt5_add_translation(${QM_FILES} ${TS_FILES})

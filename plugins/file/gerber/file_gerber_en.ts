@@ -189,6 +189,14 @@ without width and without contacts</source>
     </message>
 </context>
 <context>
+    <name>QObject</name>
+    <message>
+        <location filename="../../../static_libs/tooldatabase/tool.h" line="111"/>
+        <source>Default</source>
+        <translation type="unfinished"></translation>
+    </message>
+</context>
+<context>
     <name>SettingsDialog</name>
     <message>
         <location filename="gbr_plugin.cpp" line="233"/>

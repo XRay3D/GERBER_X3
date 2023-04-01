@@ -17,7 +17,7 @@ namespace GCode {
 PocketOffsetFile::PocketOffsetFile()
     : File() { }
 
-PocketOffsetFile::PocketOffsetFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+PocketOffsetFile::PocketOffsetFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
@@ -38,7 +38,7 @@ void PocketOffsetFile::genGcodeAndTile() {
             else
                 saveMillingPocket(offset);
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

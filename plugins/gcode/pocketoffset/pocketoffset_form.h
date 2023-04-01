@@ -17,11 +17,11 @@ namespace Ui {
 class PocketOffsetForm;
 }
 
-class PocketOffsetForm : public GcFormBase {
+class PocketOffsetForm : public GCode::FormBase {
     Q_OBJECT
 
 public:
-    explicit PocketOffsetForm(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit PocketOffsetForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~PocketOffsetForm() override;
 
 private slots:
@@ -56,12 +56,12 @@ public:
 #include "pocketoffset.h"
 #include <QToolBar>
 
-class GCPluginImpl final : public GCodePlugin {
+class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketoffset.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }

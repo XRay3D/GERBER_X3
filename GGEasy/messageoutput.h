@@ -9,7 +9,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-
+//#include "a_pch.h"
 #include <QMessageLogContext>
 
 #define ATTRIBUTES_OFF() "\033[m"
@@ -59,7 +59,7 @@
 #define FG_BRIGHT_WHITE()   "\033[97m"
 #define FG_BRIGHT_YELLOW()  "\033[93m"
 
-void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
+inline void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
     //    ANSI escape color codes :
     //    Name            FG  BG
     //    Black           30  40

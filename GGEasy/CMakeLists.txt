@@ -1,21 +1,23 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  March 25, 2023                                                  *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2023                                          *
+#* Copyright :  Damir Bakiev 2016-2022                                          *
 #* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.20)
 
-project(GGEasy VERSION 0.9.0.0 LANGUAGES CXX)
+project(GGEasy VERSION 0.8.6.4 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 #if(ANDROID)
@@ -32,14 +34,7 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
-add_definitions(
-    -DBUILD_DATE="${DT}"
-)
-
-include_directories(${CMAKE_CURRENT_BINARY_DIR})
-#set (CMAKE_EXTRA_INCLUDE_FILES ${CMAKE_CURRENT_SOURCE_DIR}/version.h)
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
-#set (CMAKE_EXTRA_INCLUDE_FILES)
+add_definitions(-DBUILD_DATE="${DT}")
 
 find_package(QT NAMES Qt6 Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
@@ -54,11 +49,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
 # WINDOWS APP ICON
 set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/myapp.rc")
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE HEADERS   ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES   ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB_RECURSE QRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qrc)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE TS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.ts)
-file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+file(GLOB_RECURSE TS_FILES  ${CMAKE_CURRENT_SOURCE_DIR}/*.ts)
+file(GLOB_RECURSE UIS       ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
@@ -79,7 +74,6 @@ set(PROJECT_SOURCES
     ${UIS}
 )
 
-
 set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
@@ -92,6 +86,8 @@ else()
     qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
     qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
+
+target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
@@ -130,7 +126,7 @@ if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(WIN32__)
+if(WIN32)
     target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
     # windeployqt
     set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)

@@ -95,7 +95,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 namespace GCode {
 
 void VoronoiBoost::boostVoronoi() {
-    const double tolerance = gcp_.params[GCodeParams::Tolerance].toDouble() * uScale;
+    const double tolerance = gcp_.params[GCode::Params::Tolerance].toDouble() * uScale;
 
     Point::Type minX = std::numeric_limits<Point::Type>::max(),
                 minY = std::numeric_limits<Point::Type>::max(),
@@ -212,7 +212,7 @@ void VoronoiBoost::boostVoronoi() {
     }
     mergeSegments(segments, 0.005 * uScale);
 
-    const Point::Type fo = gcp_.params[GCodeParams::FrameOffset].toDouble() * uScale;
+    const Point::Type fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
     Path frame {
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},

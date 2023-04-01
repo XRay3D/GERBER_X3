@@ -17,7 +17,7 @@ namespace GCode {
 DrillFile::DrillFile()
     : File() { }
 
-DrillFile::DrillFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+DrillFile::DrillFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : File(std::move(gcp), std::move(pocketPaths), std::move(toolPathss)) {
     if (gcp_.tools.front().diameter()) {
         initSave();
@@ -36,7 +36,7 @@ void DrillFile::genGcodeAndTile() {
 
             saveDrill(offset);
 
-            if (gcp_.params.contains(GCodeParams::NotTile))
+            if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

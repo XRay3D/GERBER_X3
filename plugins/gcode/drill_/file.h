@@ -17,7 +17,7 @@ namespace GCode {
 class DrillFile final : public File {
 public:
     explicit DrillFile();
-    explicit DrillFile(GCodeParams&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    explicit DrillFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
     uint32_t type() const override { return md5::hash32("Drill"); }
     void createGi() override;

@@ -29,7 +29,7 @@ class ThermalForm : public FormsUtil {
     Q_OBJECT
 
 public:
-    explicit ThermalForm(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit ThermalForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~ThermalForm() override;
 
     void updateFiles();
@@ -76,12 +76,12 @@ public:
 #include "gc_plugin.h"
 #include <QToolBar>
 
-class GCPluginImpl : public GCodePlugin {
+class GCPluginImpl : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thermal.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
