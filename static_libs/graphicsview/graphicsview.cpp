@@ -24,11 +24,11 @@
 #include "utils.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QGLWidget>
-#include <QPropertyAnimation>
-#include <QUndoCommand>
+    #include <QGLWidget>
+    #include <QPropertyAnimation>
+    #include <QUndoCommand>
 #else
-#include <QtOpenGLWidgets/QOpenGLWidget>
+    #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
 
 #include <QDragEnterEvent>
@@ -81,6 +81,7 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     ////////////////////////////////////
     setScene(new QGraphicsScene(this));
+    App::setGraphicsView(this);
 
     scene()->setSceneRect(-1000, -1000, +2000, +2000);
 
@@ -123,7 +124,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::updateRuler);
 
     scale(1.0, -1.0); // flip vertical
-    zoom100();
 
     {
         QSettings settings;
@@ -139,7 +139,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     //    connect(this, &GraphicsView::mouseMove, scene_, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
-    App::setGraphicsView(this);
 
     startUpdateTimer(20);
 }
