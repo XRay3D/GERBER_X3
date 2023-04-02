@@ -49,7 +49,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 
 std::any Plugin::createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
-        DrillPlugin::Preview retData;
+        Drilling::Preview retData;
         //        auto const exFile = static_cast<File*>(file);
         //        QTransform t {exFile->transform()};
         //        for (const Excellon::Hole& hole : *exFile) {

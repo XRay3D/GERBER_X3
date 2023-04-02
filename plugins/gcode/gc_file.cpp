@@ -258,19 +258,14 @@ mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& pat
 
     if (side_ == Bottom) {
         const double k = GiPin::minX() + GiPin::maxX();
-        for (auto& path : paths) {
-            if (toolType() != Tool::Laser)
-                std::reverse(path.begin(), path.end());
-            for (QPointF& point : path) {
-                point.rx() = -point.x() + k;
-            }
-        }
+        if (toolType() != Tool::Laser)
+            std::ranges::for_each(paths, [](auto& path) { std::reverse(path.begin(), path.end()); });
+        for (QPointF& point : std::views::join(paths))
+            point.rx() = -point.x() + k;
     }
-    for (auto& path : paths) {
-        for (QPointF& point : path) {
-            point -= App::zero()->pos();
-        }
-    }
+
+    for (QPointF& point : std::views::join(paths))
+        point -= App::zero()->pos();
 
     return paths;
 }

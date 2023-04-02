@@ -18,7 +18,7 @@ constexpr auto POCKET_RASTER = md5::hash32("PocketRaster");
 
 class Creator : public GCode::Creator {
 public:
-    Creator();;
+    Creator() { }
     ~Creator() override = default;
 
     enum {
@@ -43,12 +43,12 @@ private:
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
     void addAcc(Paths& src, const Point::Type accDistance);
 
-    Paths calcScanLines(const Paths& src, const Path& frame);;
-    Paths calcFrames(const Paths& src, const Path& frame);;
+    Paths calcScanLines(const Paths& src, const Path& frame);
+    Paths calcFrames(const Paths& src, const Path& frame);
+    Path calcZigzag(const Paths& src);
 
-    Path calcZigzag(const Paths& src);;
+    Paths merge(const Paths& scanLines, const Paths& frames);
 
-    Paths merge(const Paths& scanLines, const Paths& frames);;
     Rect rect;
 };
 

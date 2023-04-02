@@ -3,22 +3,22 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  03 October 2022                                                 *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2022                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "file.h"
+#include "drill_file.h"
 
-namespace GCode {
+namespace Drilling {
 
-DrillFile::DrillFile()
-    : File() { }
+File::File()
+    : GCode::File() { }
 
-DrillFile::DrillFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : File(std::move(gcp), std::move(pocketPaths), std::move(toolPathss)) {
+File::File(GCode::Params&& gcp, Pathss&& toolPathss)
+    : GCode::File(std::move(gcp), std::move(toolPathss), {}) {
     if (gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
@@ -28,25 +28,21 @@ DrillFile::DrillFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPat
     }
 }
 
-void DrillFile::genGcodeAndTile() {
+void File::genGcodeAndTile() {
     const QRectF rect = App::project()->worckRect();
     for (size_t x = 0; x < App::project()->stepsX(); ++x) {
         for (size_t y = 0; y < App::project()->stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project()->spaceX()) * x, (rect.height() + App::project()->spaceY()) * y);
-
             saveDrill(offset);
-
             if (gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
-void DrillFile::createGi() {
-
+void File::createGi() {
     createGiDrill();
-
     itemGroup()->setVisible(true);
 }
 
-} // namespace GCode
+} // namespace Drilling

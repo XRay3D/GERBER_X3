@@ -3,9 +3,8 @@
 #include "drill_form.h"
 #include "drill_model.h"
 #include "gi_preview.h"
-#include "qpainterpath.h"
 
-namespace DrillPlugin {
+namespace Drilling {
 
 class GiPreview final : public GiAbstractPreview {
     PosOrPath hv;
@@ -24,7 +23,7 @@ public:
     int toolId() const override;
 
     // QGraphicsItem interface
-    uint32_t type() const override;
+    int type() const override;
     bool isSlot() const;
 
     Paths offset() const;
@@ -33,4 +32,4 @@ private:
     static Paths offset(const Path& path, double offset);
 };
 
-} // namespace DrillPlugin
+} // namespace Drilling

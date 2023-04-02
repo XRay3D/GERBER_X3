@@ -111,7 +111,7 @@ void Form::сomputePaths() {
         case GiType::ShText:
             wRawPaths.append(gi->paths());
             break;
-        case GiType::Drill:
+        case GiType::DrillGi:
             wPaths.append(gi->paths());
             break;
         default:
