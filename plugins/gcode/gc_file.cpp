@@ -37,6 +37,11 @@ File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     for (auto&& paths : toolPathss_)
         for (auto&& path : paths)
             calcArcs(path);
+
+    feedRate_ = gcp_.getTool().feedRate();
+    plungeRate_ = gcp_.getTool().plungeRate();
+    spindleSpeed_ = gcp_.getTool().spindleSpeed();
+    toolType_ = gcp_.getTool().type();
 }
 
 File::File() { }
@@ -45,7 +50,7 @@ File::File() { }
 
 mvector<QString> File::gCodeText() const { return lines_; }
 
-Tool File::getTool() const { return gcp_.getTool(); }
+const Tool& File::getTool() const { return gcp_.getTool(); }
 
 const Params& File::gcp() const { return gcp_; }
 
@@ -123,11 +128,11 @@ bool File::save(const QString& name) {
 
 void File::statFile() {
     if (toolType() == Tool::Laser) {
-        QString str(Settings::laserStart()); //"G21 G17 G90"); //G17 XY plane
+        QString str(Settings::laserStart());         //"G21 G17 G90"); //G17 XY plane
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
-        QString str(Settings::start()); //"G21 G17 G90"); //G17 XY plane
+        QString str(Settings::start());              //"G21 G17 G90"); //G17 XY plane
         str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(App::project()->safeZ())})); // HomeZ
@@ -143,7 +148,7 @@ void File::endFile() {
     } else {
         lines_.emplace_back(formated({g0(), z(App::project()->safeZ())})); // HomeZ
         QPointF home(App::home()->pos() - App::zero()->pos());
-        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
+        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())}));   // HomeXY
         lines_.emplace_back(Settings::end());
     }
     for (size_t i = 0; i < lines_.size(); ++i) { // remove epty lines
@@ -638,6 +643,9 @@ void File::createGiRaster() {
         }
     }
     size_t i = 0;
+
+    //    for (int i {}; auto& path : std::views::join(toolPathss_)) { }
+
     for (const Paths& paths : toolPathss_) {
         item = new GiGcPath(paths, this);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
@@ -648,6 +656,7 @@ void File::createGiRaster() {
             g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
         }
     }
+
     item = new GiGcPath(g0path_);
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);

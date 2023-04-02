@@ -132,7 +132,8 @@ bool Project::save(const QString& fileName) {
             copperThickness_,
             clearence_,
             plunge_,
-            glue_);
+            glue_,
+            App::graphicsView()->getViewRect());
         out << files_;
         out << shapes_;
         isModified_ = false;
@@ -174,6 +175,7 @@ bool Project::open(const QString& fileName) {
             }
             return false;
         }
+        QRectF sceneRect;
         Block(in).read(
             isPinsPlaced_,
             tailing,
@@ -187,7 +189,9 @@ bool Project::open(const QString& fileName) {
             copperThickness_,
             clearence_,
             plunge_,
-            glue_);
+            glue_,
+            sceneRect);
+        App::graphicsView()->fitInView(sceneRect, false);
         in >> files_;
         in >> shapes_;
 
@@ -225,6 +229,7 @@ void Project::close() {
     isModified_ = false;
     for (auto& fl : pinsUsed_)
         fl = true;
+    App::graphicsView()->zoom100();
     emit changed();
 }
 

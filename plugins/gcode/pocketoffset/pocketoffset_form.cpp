@@ -18,15 +18,17 @@
 #include "settings.h"
 #include <QMessageBox>
 
+namespace PocketOffset {
+
 enum {
     Offset,
     Raster,
 };
 
-PocketOffsetForm::
-    PocketOffsetForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new GCode::PocketCtr, parent)
-    , ui(new Ui::PocketOffsetForm)
+Form::
+    Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::BaseForm(plugin, new Creator, parent)
+    , ui(new ::Ui::PocketOffsetForm)
     , names {tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
     ui->toolHolder1->label()->setText("Tool 1:");
@@ -37,7 +39,7 @@ PocketOffsetForm::
     setWindowTitle(tr("Pocket Offset Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("PocketOffsetForm");
+    settings.beginGroup("Form");
     settings.getValue(ui->sbxToolQty);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
@@ -48,30 +50,30 @@ PocketOffsetForm::
 
     rb_clicked();
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketOffsetForm::rb_clicked);
-    connect(ui->sbxToolQty, qOverload<int>(&QSpinBox::valueChanged), this, &PocketOffsetForm::rb_clicked);
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->sbxToolQty, qOverload<int>(&QSpinBox::valueChanged), this, &Form::rb_clicked);
 
-    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
-    connect(ui->toolHolder2, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
-    connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
-    connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &PocketOffsetForm::updateName);
+    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(ui->toolHolder2, &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &Form::updateName);
 
-    connect(leName, &QLineEdit::textChanged, this, &PocketOffsetForm::onNameTextChanged);
+    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
 
-    connect(ui->sbxSteps, &QSpinBox::valueChanged, this, &PocketOffsetForm::onSbxStepsValueChanged);
+    connect(ui->sbxSteps, &QSpinBox::valueChanged, this, &Form::onSbxStepsValueChanged);
 
     //
     if (ui->sbxSteps->value() == 0)
         ui->sbxSteps->setSuffix(tr(" - Infinity"));
 }
 
-PocketOffsetForm::~PocketOffsetForm() {
+Form::~Form() {
 
     MySettings settings;
-    settings.beginGroup("PocketOffsetForm");
+    settings.beginGroup("Form");
     settings.setValue(ui->sbxToolQty);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
@@ -82,7 +84,7 @@ PocketOffsetForm::~PocketOffsetForm() {
     delete ui;
 }
 
-void PocketOffsetForm::сomputePaths() {
+void Form::сomputePaths() {
     const Tool tool[] {
         ui->toolHolder1->tool(),
         ui->toolHolder2->tool(),
@@ -211,7 +213,7 @@ void PocketOffsetForm::сomputePaths() {
     gcp_.setSide(side);
     gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
     if (ui->sbxSteps->isVisible())
-        gcp_.params[GCode::PocketCtr::OffsetSteps] = ui->sbxSteps->value();
+        gcp_.params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
     creator->setGcp(gcp_);
     creator->addPaths(std::move(wPaths));
@@ -220,19 +222,19 @@ void PocketOffsetForm::сomputePaths() {
     createToolpath();
 }
 
-void PocketOffsetForm::onSbxStepsValueChanged(int arg1) {
+void Form::onSbxStepsValueChanged(int arg1) {
     ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
 }
 
-void PocketOffsetForm::updateName() {
+void Form::updateName() {
     leName->setText(names[side]);
 }
 
-void PocketOffsetForm::updatePixmap() {
+void Form::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void PocketOffsetForm::rb_clicked() {
+void Form::rb_clicked() {
     const auto tool {ui->toolHolder1->tool()};
 
     if (ui->rbOutside->isChecked())
@@ -265,19 +267,20 @@ void PocketOffsetForm::rb_clicked() {
     updatePixmap();
 }
 
-void PocketOffsetForm::resizeEvent(QResizeEvent* event) {
+void Form::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void PocketOffsetForm::showEvent(QShowEvent* event) {
+void Form::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void PocketOffsetForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void PocketOffsetForm::editFile(GCode::File* /*file*/) {
-}
+void Form::editFile(GCode::File* /*file*/) { }
+
+} // namespace PocketOffset
 
 #include "moc_pocketoffset_form.cpp"

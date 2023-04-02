@@ -11,18 +11,22 @@
 #pragma once
 
 #include "gc_baseform.h"
+#include "pocketoffset.h"
 #include "ui_pocketoffsetform.h"
+#include <QToolBar>
 
 namespace Ui {
 class PocketOffsetForm;
 }
 
-class PocketOffsetForm : public GCode::BaseForm {
+namespace PocketOffset {
+
+class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit PocketOffsetForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
-    ~PocketOffsetForm() override;
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    ~Form() override;
 
 private slots:
     void onSbxStepsValueChanged(int arg1);
@@ -53,19 +57,18 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-#include "pocketoffset.h"
-#include <QToolBar>
-
-class GCPluginImpl final : public GCode::Plugin {
+class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketoffset.json")
     Q_INTERFACES(GCode::Plugin)
 
-    // GCode::Plugin interface
 public:
+    // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
-    QWidget* createForm() override { return new PocketOffsetForm(this); };
-    uint32_t type() const override { return GCode::Pocket; }
-    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::PocketOffsetFile; }
+    QWidget* createForm() override { return new Form(this); };
+    uint32_t type() const override { return POCKET_OFFSET; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
+
+} // namespace PocketOffset

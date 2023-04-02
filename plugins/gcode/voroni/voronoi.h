@@ -10,23 +10,33 @@
  *******************************************************************************/
 #pragma once
 
+#include "types.h"
 #include "voronoi_boost.h"
 #include "voronoi_cgal.h"
 #include "voronoi_jc.h"
 
-namespace GCode {
-class VoronoiCreator : /*public VoronoiCgal,*/ public VoronoiJc, public VoronoiBoost {
+namespace Voronoi {
+
+class Creator :
+#if __has_include(<CGAL/Algebraic_structure_traits_.h>)
+    public VoronoiCgal,
+#endif
+    public VoronoiJc,
+#if __has_include(<boost/polygon/voronoi.hpp>)
+    public VoronoiBoost
+#endif
+{
 
 public:
-    VoronoiCreator() { }
-    ~VoronoiCreator() override = default;
+    Creator() { }
+    ~Creator() override = default;
 
 protected:
     void create() override; // Creator interface
-    uint32_t type() override { return Voronoi; }
+    uint32_t type() override { return VORONOI; }
 
 private:
     void createOffset(const Tool& tool, double depth, const double width);
 };
 
-} // namespace GCode
+} // namespace Voronoi

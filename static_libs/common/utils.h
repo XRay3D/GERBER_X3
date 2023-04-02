@@ -6,6 +6,7 @@
 #include <chrono>
 #include <concepts>
 #include <map>
+#include <source_location>
 #include <string_view>
 
 using nS = std::nano;
@@ -34,6 +35,9 @@ struct Timer {
         : t1 {std::chrono::high_resolution_clock::now()}
         , stringView {name} {
     }
+
+    constexpr Timer(T = {}, std::source_location sl = std::source_location::current())
+        : Timer {sl.function_name()} { }
 
     ~Timer() {
         using std::chrono::duration;
@@ -64,6 +68,9 @@ struct Timer {
 };
 template <class T>
 Timer(std::string_view, T) -> Timer<T>;
+
+template <class T>
+Timer(T) -> Timer<T>;
 
 inline auto toU16StrView(const QString& str) {
     return std::u16string_view(reinterpret_cast<const char16_t*>(str.utf16()), str.size());
@@ -118,10 +125,10 @@ Overload(Ts...) -> Overload<Ts...>;
 
 template <typename Cap>
 concept CapContent = requires(Cap a) {
-                         std::is_pointer_v<decltype(a.data())>;
-                         { a.size() } -> std::convertible_to<size_t>;
-                         { a.operator bool() } -> std::convertible_to<bool>;
-                     };
+    std::is_pointer_v<decltype(a.data())>;
+    { a.size() } -> std::convertible_to<size_t>;
+    { a.operator bool() } -> std::convertible_to<bool>;
+};
 
 template <CapContent Cap>
 QDebug operator<<(QDebug debug, Cap& cap) {

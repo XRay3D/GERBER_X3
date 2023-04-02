@@ -11,27 +11,32 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi_boost.h"
+#include "types.h"
 
 #if __has_include(<boost/polygon/voronoi.hpp>)
-#include "mvector.h"
+    #include "mvector.h"
 
-#include <cstdio>
-#include <vector>
+    #include <cstdio>
+    #include <vector>
 
-#if defined(__GNUC__) && (__GNUC__ >= 7)
-#pragma warning(push)
-#pragma warning(disable : 5055)
-#pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
-// Your function
-#include "voronoi_visual_utils.h"
-#include <boost/polygon/polygon.hpp>
-#include <boost/polygon/voronoi.hpp>
+    #if defined(_MSC_VER)
+        #pragma warning(push)
+        #pragma warning(disable : 5055)
+    #elif defined(__GNUC__) && (__GNUC__ >= 7)
+        #pragma GCC diagnostic push
+        #pragma GCC diagnostic ignored "-Wpragmas"
+        #pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
+    #endif /* _MSC_VER, __GNUC__ */
 
-#pragma GCC diagnostic pop
-#pragma warning(pop)
-#endif
+    #include "voronoi_visual_utils.h"
+    #include <boost/polygon/polygon.hpp>
+    #include <boost/polygon/voronoi.hpp>
+
+    #if defined(_MSC_VER)
+        #pragma warning(pop)
+    #elif defined(__GNUC__) && (__GNUC__ >= 7)
+        #pragma GCC diagnostic pop
+    #endif /* _MSC_VER, __GNUC__ */
 
 using boost::polygon::high;
 using boost::polygon::low;
@@ -43,19 +48,19 @@ using boost::polygon::y;
 using coordinate_type = double;
 using point_type = boost::polygon::point_data<coordinate_type>;
 using segment_type = boost::polygon::segment_data<coordinate_type>;
-typedef boost::polygon::rectangle_data<coordinate_type> rect_type;
-typedef voronoi_builder<int> VB;
-typedef voronoi_diagram<coordinate_type> VD;
-typedef VD::cell_type cell_type;
-typedef VD::cell_type::source_index_type source_index_type;
-typedef VD::cell_type::source_category_type source_category_type;
-typedef VD::edge_type edge_type;
-typedef VD::cell_container_type cell_container_type;
-typedef VD::cell_container_type vertex_container_type;
-typedef VD::edge_container_type edge_container_type;
-typedef VD::const_cell_iterator const_cell_iterator;
-typedef VD::const_vertex_iterator const_vertex_iterator;
-typedef VD::const_edge_iterator const_edge_iterator;
+using rect_type = boost::polygon::rectangle_data<coordinate_type>;
+using VB = voronoi_builder<int>;
+using VD = voronoi_diagram<coordinate_type>;
+using cell_type = VD::cell_type;
+using source_index_type = VD::cell_type::source_index_type;
+using source_category_type = VD::cell_type::source_category_type;
+using edge_type = VD::edge_type;
+using cell_container_type = VD::cell_container_type;
+using vertex_container_type = VD::cell_container_type;
+using edge_container_type = VD::edge_container_type;
+using const_cell_iterator = VD::const_cell_iterator;
+using const_vertex_iterator = VD::const_vertex_iterator;
+using const_edge_iterator = VD::const_edge_iterator;
 
 segment_type retrieve_segment(std::vector<segment_type>& segment_data_, const cell_type& cell) {
     source_index_type index = cell.source_index(); // - point_data_.size();
@@ -73,17 +78,18 @@ point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_t
 }
 
 Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
-
-    std::vector<point_type> sampled_edge {
+    std::vector sampled_edge {
         point_type {edge.vertex0()->x(), edge.vertex0()->y()},
         point_type {edge.vertex1()->x(), edge.vertex1()->y()}
     };
+
     coordinate_type max_dist = uScale * 0.00001; //* 1E-3* (xh(brect_) - xl(brect_));
-
-    point_type point = edge.cell()->contains_point() ? retrieve_point(segment_data_, *edge.cell()) : retrieve_point(segment_data_, *edge.twin()->cell());
-
-    segment_type segment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
-
+    point_type point = edge.cell()->contains_point() ?
+        retrieve_point(segment_data_, *edge.cell()) :
+        retrieve_point(segment_data_, *edge.twin()->cell());
+    segment_type segment = edge.cell()->contains_point() ?
+        retrieve_segment(segment_data_, *edge.twin()->cell()) :
+        retrieve_segment(segment_data_, *edge.cell());
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
     Path path;
@@ -92,10 +98,10 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
         path.emplace_back(static_cast<Point::Type>(p.x()), static_cast<Point::Type>(p.y()));
     return path;
 }
-namespace GCode {
+namespace Voronoi {
 
 void VoronoiBoost::boostVoronoi() {
-    const double tolerance = gcp_.params[GCode::Params::Tolerance].toDouble() * uScale;
+    const double tolerance = gcp_.params[Tolerance].toDouble() * uScale;
 
     Point::Type minX = std::numeric_limits<Point::Type>::max(),
                 minY = std::numeric_limits<Point::Type>::max(),
@@ -107,9 +113,10 @@ void VoronoiBoost::boostVoronoi() {
     msg = QObject::tr("Calc BOOST Voronoi");
 
     size_t max {};
-    for (const Paths& paths : groupedPss)
-        for (const Path& path : paths)
-            max += path.size();
+
+    for (const Path& path : std::views::join(groupedPss))
+        max += path.size();
+
     max *= 1.5;
     setMax(max);
     setCurrent();
@@ -212,7 +219,7 @@ void VoronoiBoost::boostVoronoi() {
     }
     mergeSegments(segments, 0.005 * uScale);
 
-    const Point::Type fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
+    const Point::Type fo = gcp_.params[FrameOffset].toDouble() * uScale;
     Path frame {
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
@@ -232,11 +239,11 @@ void VoronoiBoost::boostVoronoi() {
         for (size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = path[i - 1].angleTo(path[i + 0]);
             const double a2 = path[i + 0].angleTo(path[i + 1]);
-            if (abs(a1 - a2) < kAngle) {
+            if (abs(a1 - a2) < kAngle)
                 path.remove(i--);
-            }
         }
     };
+
     std::ranges::for_each(segments, clean);
     std::ranges::for_each(segments, clean);
 
@@ -244,8 +251,9 @@ void VoronoiBoost::boostVoronoi() {
     returnPs.push_back(frame);
 }
 
-} // namespace GCode
+} // namespace Voronoi
 #else
-void GCode::VoronoiBoost::boostVoronoi() {
-}
+namespace Voronoi {
+void VoronoiBoost::boostVoronoi() { }
+} // namespace Voronoi
 #endif

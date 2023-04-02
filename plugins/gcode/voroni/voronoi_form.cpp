@@ -19,8 +19,10 @@
 #include "settings.h"
 #include <QMessageBox>
 
-VoronoiForm::VoronoiForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new GCode::VoronoiCreator, parent)
+namespace Voronoi {
+
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(content);
 
@@ -41,17 +43,17 @@ VoronoiForm::VoronoiForm(GCode::Plugin* plugin, QWidget* parent)
 #endif
     settings.endGroup();
 
-    connect(dsbxDepth, &DepthForm::valueChanged, this, &VoronoiForm::setWidth);
-    connect(leName, &QLineEdit::textChanged, this, &VoronoiForm::onNameTextChanged);
+    connect(dsbxDepth, &DepthForm::valueChanged, this, &Form::setWidth);
+    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
     //
-    connect(ui->dsbxWidth, &QDoubleSpinBox::valueChanged, this, &VoronoiForm::setWidth);
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &VoronoiForm::updateName);
+    connect(ui->dsbxWidth, &QDoubleSpinBox::valueChanged, this, &Form::setWidth);
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &Form::updateName);
 
     updateName();
     updateButtonIconSize();
 }
 
-VoronoiForm::~VoronoiForm() {
+Form::~Form() {
     MySettings settings;
     settings.beginGroup("VoronoiForm");
     settings.setValue(ui->dsbxPrecision);
@@ -62,7 +64,7 @@ VoronoiForm::~VoronoiForm() {
     delete ui;
 }
 
-void VoronoiForm::сomputePaths() {
+void Form::сomputePaths() {
     const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -119,27 +121,27 @@ void VoronoiForm::сomputePaths() {
     gpc.setSide(GCode::Outer);
     gpc.tools.push_back(tool);
     gpc.params[GCode::Params::Depth] = dsbxDepth->value();
-    gpc.params[GCode::Params::Tolerance] = ui->dsbxPrecision->value();
-    gpc.params[GCode::Params::Width] = ui->dsbxWidth->value() + 0.001;
-    gpc.params[GCode::Params::VorT] = ui->cbxSolver->currentIndex();
-    gpc.params[GCode::Params::FrameOffset] = ui->dsbxOffset->value();
+    gpc.params[FrameOffset] = ui->dsbxOffset->value();
+    gpc.params[Tolerance] = ui->dsbxPrecision->value();
+    gpc.params[VoronoiType] = ui->cbxSolver->currentIndex();
+    gpc.params[Width] = ui->dsbxWidth->value() + 0.001;
 
     creator->setGcp(gpc);
-    creator->addPaths(wPaths);
+    creator->addPaths(std::move(wPaths));
     creator->addRawPaths(wRawPaths);
     createToolpath();
 }
 
-void VoronoiForm::updateName() {
+void Form::updateName() {
     leName->setText(tr("Voronoi"));
     setWidth(0.0);
 }
 
-void VoronoiForm::onNameTextChanged(const QString& arg1) {
+void Form::onNameTextChanged(const QString& arg1) {
     fileName_ = arg1;
 }
 
-void VoronoiForm::setWidth(double) {
+void Form::setWidth(double) {
     const auto tool {ui->toolHolder->tool()};
     const double d = tool.getDiameter(dsbxDepth->value());
     if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
@@ -148,12 +150,14 @@ void VoronoiForm::setWidth(double) {
     }
 }
 
-void VoronoiForm::editFile(GCode::File* /*file*/) {
+void Form::editFile(GCode::File* /*file*/) {
 }
 
-void VoronoiForm::on_cbxSolver_currentIndexChanged(int index) {
+void Form::on_cbxSolver_currentIndexChanged(int index) {
     ui->label_4->setVisible(index);
     ui->dsbxPrecision->setVisible(index);
 }
+
+} // namespace Voronoi
 
 #include "moc_voronoi_form.cpp"

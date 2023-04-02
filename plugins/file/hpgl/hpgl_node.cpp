@@ -259,9 +259,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case FileTree_::Id:
         return *m_id;
     default:
-        return QVariant();
+        return {};
     }
-    return QVariant();
+    return {};
 }
 
 void Node::menu(QMenu& menu, FileTree_::View* tv) const {
@@ -363,7 +363,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
     //        case FileTree_::Id:
     //            return *m_id;
     //        default:
-    //            return QVariant();
+    //            return {};
     //        }
     //    case FileTree_::Column::ItemsType: {
     //        auto file(layer->file());
@@ -378,11 +378,11 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
     //        case FileTree_::Id:
     //            return file->id();
     //        default:
-    //            return QVariant();
+    //            return {};
     //        }
     //    }
     //    default:
-    //        return QVariant();
+    //        return {};
     //    }
     return {};
 }

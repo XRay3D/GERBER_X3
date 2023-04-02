@@ -14,9 +14,6 @@
 #include "gi.h"
 
 class GiBridge final : public GraphicsItem {
-    //    Q_OBJECT
-    Q_GADGET
-    friend class Form;
 
 public:
     explicit GiBridge();

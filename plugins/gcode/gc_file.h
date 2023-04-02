@@ -28,7 +28,7 @@ public:
     //    GCodeType gtype() const;
 
     mvector<QString> gCodeText() const;
-    Tool getTool() const;
+    const Tool& getTool() const;
     const Params& gcp() const;
 
     double feedRate();

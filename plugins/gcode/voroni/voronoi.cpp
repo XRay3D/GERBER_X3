@@ -11,7 +11,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi.h"
-#include "file.h"
 #include "jc_voronoi.h"
 
 namespace ClipperLib {
@@ -19,19 +18,19 @@ inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArr
 
 } // namespace ClipperLib
 
-namespace GCode {
+namespace Voronoi {
 
-inline size_t qHash(const GCode::VoronoiCreator::Pair& tag, uint = 0) {
+inline size_t qHash(const Creator::Pair& tag, uint = 0) {
     return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
 }
 
-void VoronoiCreator::create() {
+void Creator::create() {
     const auto& tool = gcp_.tools.front();
     const auto depth = gcp_.params[GCode::Params::Depth].toDouble();
-    const auto width = gcp_.params[GCode::Params::Width].toDouble();
+    const auto width = gcp_.params[Width].toDouble();
 
-    groupedPaths(Grouping::Copper);
-    switch (gcp_.params[GCode::Params::VorT].toInt()) {
+    groupedPaths(GCode::Grouping::Copper);
+    switch (gcp_.params[VoronoiType].toInt()) {
     case 0:
         boostVoronoi();
         break;
@@ -43,7 +42,7 @@ void VoronoiCreator::create() {
     if (width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
 
-        file_ = new VoronoiFile(std::move(gcp_), {sortBeginEnd(returnPs)}, {});
+        file_ = new File(std::move(gcp_), {sortBeginEnd(returnPs)}, {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
@@ -76,13 +75,13 @@ void VoronoiCreator::create() {
                 ++begin;
         }
 
-        file_ = new VoronoiFile(std::move(gcp_), std::move(returnPss), std::move(workingRawPs));
+        file_ = new File(std::move(gcp_), std::move(returnPss), std::move(workingRawPs));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
 }
 
-void VoronoiCreator::createOffset(const Tool& tool, double depth, const double width) {
+void Creator::createOffset(const Tool& tool, double depth, const double width) {
     msg = tr("Create Offset");
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
@@ -131,4 +130,57 @@ void VoronoiCreator::createOffset(const Tool& tool, double depth, const double w
     // returnPss_.push_back({frame});
 }
 
-} // namespace GCode
+/////////////////////////////////////////////////////////////
+
+File::File()
+    : GCode::File() { }
+
+File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
+    if (gcp_.tools.front().diameter()) {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+}
+
+void File::genGcodeAndTile() {
+    const QRectF rect = App::project()->worckRect();
+    for (size_t x = 0; x < App::project()->stepsX(); ++x) {
+        for (size_t y = 0; y < App::project()->stepsY(); ++y) {
+            const QPointF offset((rect.width() + App::project()->spaceX()) * x, (rect.height() + App::project()->spaceY()) * y);
+
+            if (toolType() == Tool::Laser) {
+                if (toolPathss_.size() > 1)
+                    saveLaserPocket(offset);
+                else
+                    saveLaserProfile(offset);
+            } else {
+                if (toolPathss_.size() > 1)
+                    saveMillingPocket(offset);
+                else
+                    saveMillingProfile(offset);
+            }
+
+            if (gcp_.params.contains(GCode::Params::NotTile))
+                return;
+        }
+    }
+}
+
+void File::createGi() {
+    if (toolPathss_.size() > 1) {
+        GraphicsItem* item;
+        item = new GiGcPath(toolPathss_.back().back(), this);
+        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
+        itemGroup()->push_back(item);
+        createGiPocket();
+    } else
+        createGiProfile();
+
+    itemGroup()->setVisible(true);
+}
+} // namespace Voronoi

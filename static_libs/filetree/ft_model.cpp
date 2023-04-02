@@ -15,12 +15,9 @@
 
 #include "abstract_file.h"
 #include "abstract_fileplugin.h"
-// #include "gc_file.h"
-// #include "gc_plugin.h"
 #include "md5.h"
 #include "project.h"
-// #include "shapepluginin.h"
-// #include "shnode.h"
+#include "shape.h"
 
 #include <QTimer>
 
@@ -80,12 +77,9 @@ void Model::addFile(AbstractFile* file) {
             rootItem->addChild(it);
             endInsertRows();
         }
-
         int rowCount = addFile(type, file);
-        //    App::gCodePlugin(type)->updateFileModel(file);
         emit select(createIndex(rowCount, 0, file->node()));
-    } else if (type == G_CODE) {
-        type = G_CODE + 1;
+    } else if (type == GC_DBG_FILE) {
         if (fileFolders.find(type) == fileFolders.end()) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
@@ -103,26 +97,23 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     if (!shape)
         return;
 
-    // FIXME   uint32_t type = FileType::Shapes_;
-
-    //    if (fileFolders.find(type) == fileFolders.end()) {
-    //        QModelIndex index = createIndex(0, 0, rootItem);
-    //        int rowCount = rootItem->childCount();
-    //        beginInsertRows(index, rowCount, rowCount);
-    //        auto si = App::shapePlugins().begin()->second;
-    //        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
-    //        rootItem->addChild(it);
-    //        endInsertRows();
-    //    }
-
-    //    Node* item(fileFolders[type]);
-    //    QModelIndex index = createIndex(0, 0, item);
-    //    int rowCount = item->childCount();
-    //    beginInsertRows(index, rowCount, rowCount);
-    //    item->addChild(shape->node());
-    //    endInsertRows();
-
-    //    emit select(createIndex(rowCount, 0, shape->node()));
+    uint32_t type = md5::hash32("Shapes");
+    if (fileFolders.find(type) == fileFolders.end()) {
+        QModelIndex index = createIndex(0, 0, rootItem);
+        int rowCount = rootItem->childCount();
+        beginInsertRows(index, rowCount, rowCount);
+        auto si = App::shapePlugins().begin()->second;
+        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
+        rootItem->addChild(it);
+        endInsertRows();
+    }
+// FIXME   Node* item(fileFolders[type]);
+//    QModelIndex index = createIndex(0, 0, item);
+//    int rowCount = item->childCount();
+//    beginInsertRows(index, rowCount, rowCount);
+//    item->addChild(shape->node());
+//    endInsertRows();
+//    emit select(createIndex(rowCount, 0, shape->node()));
 }
 
 void Model::closeProject() {
@@ -177,7 +168,7 @@ QModelIndex Model::parent(const QModelIndex& index) const {
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
-        return QVariant();
+        return {};
     return getItem(index)->data(index, role);
 }
 
@@ -200,7 +191,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         default:
             return QString("");
         }
-    return QVariant();
+    return {};
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const {

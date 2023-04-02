@@ -12,30 +12,55 @@
 
 #include "gc_creator.h"
 
-namespace GCode {
+namespace PocketRaster {
 
-class RasterCreator : public Creator {
+constexpr auto POCKET_RASTER = md5::hash32("PocketRaster");
+
+class Creator : public GCode::Creator {
 public:
-    RasterCreator();
-    ~RasterCreator() override = default;
+    Creator();;
+    ~Creator() override = default;
 
-    // Creator interface
-protected:
-    void create() override; // Creator interface
-    uint32_t type() override { return Raster; }
+    enum {
+        AccDistance = GCode::Params::UserParam,
+        Fast,
+        Pass,
+        UseAngle,
+    };
 
-private:
     enum {
         NoProfilePass,
         First,
         Last
     };
+    // Creator interface
+protected:
+    void create() override; // Creator interface
+    uint32_t type() override;
 
+private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
-    void createRaster2(const Tool& tool, const double depth, const double angle, const int prPass);
+    void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
     void addAcc(Paths& src, const Point::Type accDistance);
 
+    Paths calcScanLines(const Paths& src, const Path& frame);;
+    Paths calcFrames(const Paths& src, const Path& frame);;
+
+    Path calcZigzag(const Paths& src);;
+
+    Paths merge(const Paths& scanLines, const Paths& frames);;
     Rect rect;
 };
 
-} // namespace GCode
+class File final : public GCode::File {
+
+public:
+    explicit File();
+    explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
+    uint32_t type() const override { return POCKET_RASTER; }
+    void createGi() override;
+    void genGcodeAndTile() override;
+};
+
+} // namespace PocketRaster

@@ -11,7 +11,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1.  *
  * http://www.boost.org/LICENSE_1_0.txt                                          *
  ********************************************************************************/
-//#include "a_pch.h"
+// #include "a_pch.h"
 #include "mainwindow.h"
 
 #include "aboutform.h"
@@ -843,7 +843,7 @@ void MainWindow::addFileToPro(AbstractFile* file) {
     }
     project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    ui.graphicsView->zoomFit();
+    //    ui.graphicsView->zoomFit();
 }
 
 QString MainWindow::strippedName(const QString& fullFileName) {
@@ -888,7 +888,6 @@ void MainWindow::loadFile(const QString& fileName) {
         if (closeProject()) {
             project_->open(fileName);
             setCurrentFile(fileName);
-            QTimer::singleShot(100, Qt::CoarseTimer, ui.graphicsView, &GraphicsView::zoomFit);
             return;
         }
     } else {

@@ -70,7 +70,7 @@ QModelIndex Model::parent(const QModelIndex& index) const {
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
-        return QVariant();
+        return {};
     Node* item = getItem(index);
     return item->data(index, role);
 }
@@ -91,7 +91,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         else
             return section + 1;
     default:
-        return QVariant();
+        return {};
     }
 }
 

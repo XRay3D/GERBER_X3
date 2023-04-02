@@ -21,6 +21,7 @@
 #include <variant>
 
 constexpr auto G_CODE = md5::hash32("GCode");
+constexpr auto GC_DBG_FILE = md5::hash32("GCDbgFile");
 
 namespace GCode {
 

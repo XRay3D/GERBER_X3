@@ -37,14 +37,13 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
         if (1) {
-            auto Profile = md5::hash32("Profile");
-            if (!toolpathActions.contains(Profile))
+            constexpr auto TYPE = md5::hash32("PocketRaster");
+            if (!toolpathActions.contains(TYPE))
                 break;
             QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this, Profile] { toolpathActions[Profile]->toggle(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+            QTimer::singleShot(i += k, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(i += k, [] { App::graphicsView()->zoomToSelected(); });
         }
 
         //        if (0) {

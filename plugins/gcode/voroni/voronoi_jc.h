@@ -12,9 +12,9 @@
 
 #include "gc_creator.h"
 
-namespace GCode {
+namespace Voronoi {
 
-class VoronoiJc : public virtual Creator {
+class VoronoiJc : public virtual GCode::Creator {
 
 protected:
     struct Pair {
@@ -57,4 +57,4 @@ protected:
     Paths toPath(const Pairs& pairs);
 };
 
-} // namespace GCode
+} // namespace Voronoi

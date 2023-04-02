@@ -103,7 +103,7 @@ QModelIndex sModel::parent(const QModelIndex& index) const {
 
 QVariant sModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
-        return QVariant();
+        return {};
     sNode* item = getItem(index);
     return item->data(index, role);
 }
@@ -140,7 +140,7 @@ QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) 
         default:
             return QString("");
         }
-    return QVariant();
+    return {};
 }
 
 Qt::ItemFlags sModel::flags(const QModelIndex& index) const {

@@ -9,18 +9,22 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "gc_baseform.h"
+#include "voronoi.h"
+#include <QToolBar>
 
 namespace Ui {
 class VoronoiForm;
 }
+namespace Voronoi {
 
-class VoronoiForm : public GCode::BaseForm {
+class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit VoronoiForm(GCode::Plugin* plugin, QWidget* parent = nullptr);
-    ~VoronoiForm() override;
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    ~Form() override;
 
 private slots:
     void onNameTextChanged(const QString& arg1);
@@ -42,20 +46,18 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-#include "file.h"
-#include "gc_plugin.h"
-#include <QToolBar>
-
-class GCPluginImpl final : public GCode::Plugin {
+class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "voronoi.json")
     Q_INTERFACES(GCode::Plugin)
 
     // GCode::Plugin interface
 public:
-    uint32_t type() const override { return GCode::Voronoi; }
-    QWidget* createForm() override { return new VoronoiForm(this); };
+    uint32_t type() const override { return VORONOI; }
+    QWidget* createForm() override { return new Form(this); };
     QKeySequence keySequence() const override { return {"Ctrl+Shift+V"}; }
     QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
-    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::VoronoiFile; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
+
+} // namespace Voronoi

@@ -13,23 +13,23 @@
 #include "gc_creator.h"
 #include "gc_file.h"
 
-namespace GCode {
+namespace PocketOffset {
 
-constexpr auto POCKET = md5::hash32("Pocket");
+constexpr auto POCKET_OFFSET = md5::hash32("PocketOffset");
 
-class PocketOffsetFile final : public File {
+class File final : public GCode::File {
 public:
-    explicit PocketOffsetFile();
-    explicit PocketOffsetFile(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    explicit File();
+    explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
-    uint32_t type() const override { return POCKET; }
+    uint32_t type() const override { return POCKET_OFFSET; }
     void createGi() override;
     void genGcodeAndTile() override;
 };
 
-class PocketCtr : public Creator {
+class Creator : public GCode::Creator {
 public:
-    using Creator::Creator;
+    using GCode::Creator::Creator;
 
     enum {
         OffsetSteps = GCode::Params::UserParam,
@@ -42,7 +42,7 @@ private:
 
 protected:
     void create() override; // Creator interface
-    uint32_t type() override { return POCKET; }
+    uint32_t type() override { return POCKET_OFFSET; }
 };
 
-} // namespace GCode
+} // namespace PocketOffset
