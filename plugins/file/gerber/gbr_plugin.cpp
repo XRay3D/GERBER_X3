@@ -62,7 +62,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 //    // TODO возвращает лишь пути с именем по критериям и центральными точками. non intrusive
 
 //    // FIXME   if (plugin->type() == ::GCode::Drill) {
-//    //        DrillPlugin::Preview retData;
+//    //        Drilling::Preview retData;
 //    //        double drillDiameter {};
 
 //    //        auto const gbrFile = static_cast<File*>(file);

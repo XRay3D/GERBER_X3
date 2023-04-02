@@ -14,7 +14,7 @@
 #include <QAbstractTableModel>
 #include <QIcon>
 
-namespace DrillPlugin {
+namespace Drilling {
 
 class GiPreview;
 
@@ -83,4 +83,4 @@ public:
     auto end() { return data_.end(); }
 };
 
-} // namespace DrillPlugin
+} // namespace Drilling

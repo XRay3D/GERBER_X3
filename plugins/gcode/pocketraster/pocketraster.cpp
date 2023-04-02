@@ -16,8 +16,6 @@
 
 namespace PocketRaster {
 
-Creator::Creator() { }
-
 void Creator::create() {
     if (gcp_.params[Fast].toBool())
         createRasterAccLaser(gcp_.tools.front(),
@@ -36,7 +34,7 @@ uint32_t Creator::type() { return POCKET_RASTER; }
 void Creator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
     switch (gcp_.side()) {
     case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, static_cast<Point::Type>(toolDiameter + 5));
+        groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale);
         break;
     case GCode::Inner:
         groupedPaths(GCode::Grouping::Copper);

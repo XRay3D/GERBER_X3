@@ -43,9 +43,9 @@ class View;
 class Model;
 } // namespace FileTree
 
-namespace DrillPlugin {
+namespace Drilling {
 class Form;
-} // namespace DrillPlugin
+} // namespace Drilling
 
 using Handlers = mvector<Shapes::Handle*>;
 
@@ -73,7 +73,7 @@ class App {
     inline static App* app_ = nullptr;
 
     // clang-format off
-    HOLDER(DrillPlugin::Form,     setDrillForm,           drillForm          )
+    HOLDER(Drilling::Form,     setDrillForm,           drillForm          )
     HOLDER(FileTree::Model,       setFileModel,           fileModel          )
     HOLDER(FileTree::View,        setFileTreeView,        fileTreeView       )
     HOLDER(GCode::PropertiesForm, setGCodePropertiesForm, gCodePropertiesForm)

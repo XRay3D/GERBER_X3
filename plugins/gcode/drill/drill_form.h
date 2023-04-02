@@ -10,14 +10,9 @@
  *******************************************************************************/
 #pragma once
 
-#include "file.h"
+#include "drill_file.h"
 #include "gc_baseform.h"
 #include "gc_plugin.h"
-
-#include <QHeaderView>
-#include <QMenu>
-#include <QToolBar>
-#include <QWidget>
 
 namespace Ui {
 class DrillForm;
@@ -25,7 +20,7 @@ class DrillForm;
 
 class QCheckBox;
 
-namespace DrillPlugin {
+namespace Drilling {
 
 using PosOrPath = std::variant<const QPointF, const QPolygonF>;
 using Key = std::tuple<int, double, bool, QString>;
@@ -49,13 +44,18 @@ public:
     static bool canToShow();
 
 private:
+    enum {
+        Drill,
+        Pocket,
+        Profile,
+    };
+
     Ui::DrillForm* ui;
-    Model* model = nullptr;
-    AbstractFile* file = nullptr;
-    Header* header;
-    QCheckBox* checkBox;
-    GCode::Plugin* plugin;
-    GCodeType worckType = GCode::Drill;
+    class Model* model = nullptr;
+    class AbstractFile* file = nullptr;
+    class Header* header;
+    class QCheckBox* checkBox;
+    int worckType = Drill;
     GCode::SideOfMilling side = GCode::Inner;
     QString type_;
 
@@ -96,10 +96,10 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
     QWidget* createForm() override { return new Form(this); };
     bool canToShow() const override { return Form::canToShow(); }
-    uint32_t type() const override { return GCode::Drill; }
-    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::DrillFile; }
+    uint32_t type() const override { return DRILLING; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 
-} // namespace DrillPlugin
+} // namespace Drilling
 
 #include "app.h"
