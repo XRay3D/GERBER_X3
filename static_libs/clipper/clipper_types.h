@@ -322,6 +322,17 @@ struct Paths : mvector<Path<T>> {
     using MV::MV;
     using MV::operator=;
 
+    //    template <typename It, typename SIt>
+    //        requires requires(It b) {
+    //            { b++ } -> std::convertible_to<It>;
+    //            { b-- } -> std::convertible_to<It>;
+    //            { --b } -> std::convertible_to<It>;
+    //            { ++b } -> std::convertible_to<It>;
+    //            { *b } -> std::convertible_to<T>;
+    //        }
+    //    Paths(It&& b, SIt&& e)
+    //        : MV(b, e) { }
+
     Paths(const MV& v)
         : MV(v) { }
 

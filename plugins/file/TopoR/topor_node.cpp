@@ -76,7 +76,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case FileTree_::Id:
                 return id();
             default:
-                return QVariant();
+                return {};
             }
         case FileTree_::Column::Side:
             switch (role) {
@@ -88,12 +88,12 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case FileTree_::Id:
                 return id();
             default:
-                return QVariant();
+                return {};
             }
         default:
-            return QVariant();
+            return {};
         }
-    return QVariant();
+    return {};
 }
 
 void Node::menu(QMenu& menu, FileTree_::View* tv) const {

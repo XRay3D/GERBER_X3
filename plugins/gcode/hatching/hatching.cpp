@@ -12,13 +12,10 @@
  *******************************************************************************/
 #include "hatching.h"
 
-#include "file.h"
-
 #include <QElapsedTimer>
 #ifndef __GNUC__
-#include <execution>
+    #include <execution>
 #endif
-#include "gi_point.h"
 
 #include <algorithm>
 #include <forward_list>
@@ -52,31 +49,29 @@
 //};
 // inline constexpr sort_fn sort {};
 
-namespace GCode {
-HatchingCreator::HatchingCreator() {
+namespace CrossHatch {
+
+void Creator::create() {
+    createRaster(
+        gcp_.tools.front(),
+        gcp_.params[GCode::Params::Depth].toDouble(),
+        gcp_.params[UseAngle].toDouble(),
+        gcp_.params[HathStep].toDouble(),
+        gcp_.params[Pass].toInt());
 }
 
-void HatchingCreator::create() {
-    //    createRaster(
-    //        gcp_.tools.front(),
-    //        gcp_.params[GCode::Params::Depth].toDouble(),
-    //        gcp_.params[GCode::Params::UseAngle].toDouble(),
-    //        gcp_.params[GCode::Params::HathStep].toDouble(),
-    //        gcp_.params[GCode::Params::Pass].toInt());
-}
-
-void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
+void Creator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
     QElapsedTimer t;
     t.start();
 
     switch (gcp_.side()) {
-    case Outer:
-        groupedPaths(Grouping::Cutoff, uScale /*static_cast<Point::Type>(toolDiameter_ + 5)*/);
+    case GCode::Outer:
+        groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast<Point::Type>(toolDiameter_ + 5)*/);
         break;
-    case Inner:
-        groupedPaths(Grouping::Copper);
+    case GCode::Inner:
+        groupedPaths(GCode::Grouping::Copper);
         break;
-    case On:
+    case GCode::On:
         emit fileReady(nullptr);
         return;
     }
@@ -107,7 +102,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
                 fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
                      std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
 
-                for (size_t k = last; k < i; ++k) { // fix direction
+                for (size_t k = last; k < i; ++k) {                                                                                  // fix direction
                     if (fl ^ (sl[k].front().x < sl[k].back().x))
                         std::swap(sl[k].front().x, sl[k].back().x);
                 }
@@ -133,7 +128,7 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
             // dbgPaths(tmp, "ClipType::Difference");
             frames.append(tmp);
 
-            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
+            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; });                                        // vertical sort
 
             std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
             for (auto& path : frames) {
@@ -296,10 +291,47 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         emit fileReady(nullptr);
     } else {
 
-        file_ = new CrosshatchFile(std::move(gcp_), std::move(returnPss), {});
+        file_ = new File(std::move(gcp_), std::move(returnPss), {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
 }
 
-} // namespace GCode
+/////////////////////////////////////////
+File::File()
+    : GCode::File() { }
+
+File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
+    if (gcp_.tools.front().diameter()) {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+}
+
+void File::genGcodeAndTile() {
+    const QRectF rect = App::project()->worckRect();
+    for (size_t x = 0; x < App::project()->stepsX(); ++x) {
+        for (size_t y = 0; y < App::project()->stepsY(); ++y) {
+            const QPointF offset((rect.width() + App::project()->spaceX()) * x, (rect.height() + App::project()->spaceY()) * y);
+
+            if (toolType() == Tool::Laser)
+                saveLaserProfile(offset);
+            else
+                saveMillingProfile(offset);
+
+            if (gcp_.params.contains(GCode::Params::NotTile))
+                return;
+        }
+    }
+}
+
+void File::createGi() {
+    createGiRaster();
+    itemGroup()->setVisible(true);
+}
+
+} // namespace CrossHatch

@@ -79,7 +79,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case FileTree::Id:
             return id();
         default:
-            return QVariant();
+            return {};
         }
     case FileTree::Column::Side:
         switch (role) {
@@ -89,10 +89,10 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::EditRole:
             return static_cast<bool>(file->side());
         default:
-            return QVariant();
+            return {};
         }
     default:
-        return QVariant();
+        return {};
     }
 }
 

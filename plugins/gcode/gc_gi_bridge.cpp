@@ -10,10 +10,10 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "gi_bridge.h"
+#include "gc_gi_bridge.h"
 
-#include "graphicsview.h"
 #include "gcode.h"
+#include "graphicsview.h"
 
 #include <QPainter>
 #include <algorithm>
@@ -186,5 +186,3 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 int GiBridge::type() const { return GiType::Bridge; }
 
 Paths GiBridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
-
-#include "moc_gi_bridge.cpp"

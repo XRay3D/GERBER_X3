@@ -124,7 +124,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
                 break;
             }
     }
-    return QVariant();
+    return {};
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -142,13 +142,13 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     case Qt::SizeHintRole:
         if (orientation == Qt::Vertical)
             return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);
-        return QVariant();
+        return {};
     case Qt::TextAlignmentRole:
         if (orientation == Qt::Vertical)
             return static_cast<int>(Qt::AlignRight) | static_cast<int>(Qt::AlignVCenter);
         return Qt::AlignCenter;
     default:
-        return QVariant();
+        return {};
     }
 }
 

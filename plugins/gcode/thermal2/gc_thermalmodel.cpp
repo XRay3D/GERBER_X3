@@ -68,7 +68,7 @@ QModelIndex ThermalModel::parent(const QModelIndex& index) const {
 
 QVariant ThermalModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
-        return QVariant();
+        return {};
     ThermalNode* item = getItem(index);
     return item->data(index, role);
 }
@@ -89,7 +89,7 @@ QVariant ThermalModel::headerData(int section, Qt::Orientation orientation, int 
         else
             return section + 1;
     default:
-        return QVariant();
+        return {};
     }
 }
 

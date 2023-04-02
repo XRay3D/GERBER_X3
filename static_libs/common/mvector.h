@@ -12,8 +12,21 @@ struct mvector : std::vector<T> {
     using M = mvector<T>;
     using V::V;
 
-    inline void append(const V& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
-    inline void append(const std::span<T>& vec) { V::insert(V::end(), vec.begin(), vec.end()); }
+
+    inline void append(const V& vec) {
+        V::insert(V::end(), vec.begin(), vec.end());
+    }
+    inline void append(const std::span<T>& vec) {
+        V::insert(V::end(), vec.begin(), vec.end());
+    }
+
+    using V::insert;
+    inline void insert(V::const_iterator pos, const V& vec) {
+        V::insert(pos, vec.begin(), vec.end());
+    }
+    inline void insert(V::const_iterator pos, const std::span<T>& vec) {
+        V::insert(pos, vec.begin(), vec.end());
+    }
 
     inline void append(V&& vec) {
         if (vec.empty())

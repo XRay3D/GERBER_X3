@@ -140,7 +140,7 @@ bool ToolModel::setData(const QModelIndex& index, const QVariant& value, int rol
 
 QVariant ToolModel::data(const QModelIndex& index, int role) const {
     if (!index.isValid())
-        return QVariant();
+        return {};
     return getItem(index)->data(index, role);
 }
 
@@ -149,7 +149,7 @@ QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int rol
         return tr("Name|Note|Id").split('|')[section];
     if (role == Qt::TextAlignmentRole && orientation == Qt::Horizontal)
         return Qt::AlignHCenter;
-    return QVariant();
+    return {};
 }
 
 QStringList ToolModel::mimeTypes() const {

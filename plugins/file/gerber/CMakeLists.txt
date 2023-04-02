@@ -48,6 +48,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     #    thermal
     tooldatabase
     file_plugins
+#    tbb12
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

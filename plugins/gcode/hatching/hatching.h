@@ -12,28 +12,45 @@
 
 #include "gc_creator.h"
 
-namespace GCode {
+namespace CrossHatch {
 
-class HatchingCreator : public Creator {
+constexpr auto CROSS_HATCH = md5::hash32("CrossHatch");
+
+class File final : public GCode::File {
 public:
-    HatchingCreator();
-    ~HatchingCreator() override = default;
+    explicit File();
+    explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
+    QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
+    uint32_t type() const override { return CROSS_HATCH; }
+    void createGi() override;
+    void genGcodeAndTile() override;
+};
 
-    // Creator interface
-protected:
-    void create() override; // Creator interface
-    uint32_t type() override { return Raster; }
+class Creator : public GCode::Creator {
+public:
+    Creator() { }
+    ~Creator() override = default;
 
-private:
     enum {
+        UseAngle = GCode::Params::UserParam,
+        HathStep,
+        Pass
+    };
+
+    enum PassE {
         NoProfilePass,
         First,
         Last
     };
 
-    void createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass);
+protected:
+    // Creator interface
+    void create() override; // Creator interface
+    uint32_t type() override { return CROSS_HATCH; }
 
+private:
+    void createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass);
     Rect rect;
 };
 
-} // namespace GCode
+} // namespace CrossHatch

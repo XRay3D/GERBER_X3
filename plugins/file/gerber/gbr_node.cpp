@@ -35,7 +35,8 @@ Node::Node(File* file)
     : FileTree::Node(FileTree::File)
     , file(file) {
 
-    QTimer::singleShot(500, [this] { repaint(); });
+    if (!file->userColor())
+        QTimer::singleShot(500, [this] { repaint(); });
     //    if (!file->userColor()) {
     //        connect(&decorationTimer_, &QTimer::timeout, this, &Node::repaint);
     //        decorationTimer_.start(500);
@@ -111,7 +112,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case FileTree::Id:
             return id();
         default:
-            return QVariant();
+            return {};
         }
     case FileTree::Column::Side:
         switch (role) {
@@ -123,7 +124,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case FileTree::Id:
             return id();
         default:
-            return QVariant();
+            return {};
         }
     case FileTree::Column::ItemsType:
         switch (role) {
@@ -136,12 +137,12 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case FileTree::Id:
             return id();
         default:
-            return QVariant();
+            return {};
         }
     default:
         break;
     }
-    return QVariant();
+    return {};
 }
 
 int Node::id() const { return file->id(); }

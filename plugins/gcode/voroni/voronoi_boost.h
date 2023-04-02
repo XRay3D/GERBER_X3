@@ -12,12 +12,12 @@
 
 #include "gc_creator.h"
 
-namespace GCode {
+namespace Voronoi {
 
-class VoronoiBoost : public virtual Creator {
+class VoronoiBoost : public virtual GCode::Creator {
 
 protected:
     void boostVoronoi();
 };
 
-} // namespace GCode
+} // namespace Voronoi

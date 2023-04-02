@@ -12,15 +12,15 @@
  *******************************************************************************/
 
 #include "hatching_form.h"
-#include "hatching.h"
 #include "ui_hatchingform.h"
-
 #include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
-HatchingForm::HatchingForm(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new GCode::HatchingCreator, parent)
+namespace CrossHatch {
+
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::HatchingForm)
     , names {tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps {
@@ -29,7 +29,7 @@ HatchingForm::HatchingForm(GCode::Plugin* plugin, QWidget* parent)
       } {
     ui->setupUi(content);
 
-    setWindowTitle(tr("Crosshatch Toolpath"));
+    setWindowTitle(tr("CrossHatch Toolpath"));
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -44,19 +44,19 @@ HatchingForm::HatchingForm(GCode::Plugin* plugin, QWidget* parent)
 
     rb_clicked();
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &Form::rb_clicked);
 
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &HatchingForm::updateName);
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &Form::updateName);
 
-    connect(leName, &QLineEdit::textChanged, this, &HatchingForm::onNameTextChanged);
+    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
 
     //
 }
 
-HatchingForm::~HatchingForm() {
+Form::~Form() {
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -71,7 +71,7 @@ HatchingForm::~HatchingForm() {
     delete ui;
 }
 
-void HatchingForm::сomputePaths() {
+void Form::сomputePaths() {
     const auto tool {ui->toolHolder->tool()};
 
     if (!tool.isValid()) {
@@ -130,22 +130,22 @@ void HatchingForm::сomputePaths() {
     gcp_.tools.push_back(tool);
 
     gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp_.params[GCode::Params::HathStep] = ui->dsbxHathStep->value();
-    gcp_.params[GCode::Params::Pass] = ui->cbxPass->currentIndex();
-    gcp_.params[GCode::Params::UseAngle] = ui->dsbxAngle->value();
+    gcp_.params[Creator::HathStep] = ui->dsbxHathStep->value();
+    gcp_.params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp_.params[Creator::UseAngle] = ui->dsbxAngle->value();
     //    if (ui->rbFast->isChecked()) {
     //        gcp_.params[GCode::Params::Fast] = true;
     //        gcp_.params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
     creator->setGcp(gcp_);
-    creator->addPaths(wPaths);
+    creator->addPaths(std::move(wPaths));
     creator->addRawPaths(wRawPaths);
     fileCount = 1;
     createToolpath();
 }
 
-void HatchingForm::updateName() {
+void Form::updateName() {
     //    const auto& tool { ui->toolHolder->tool() };
     //    if (tool.type() != Tool::Laser)
     //        ui->rbNormal->setChecked(true);
@@ -154,11 +154,11 @@ void HatchingForm::updateName() {
     leName->setText(names[side]);
 }
 
-void HatchingForm::updatePixmap() {
+void Form::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void HatchingForm::rb_clicked() {
+void Form::rb_clicked() {
 
     if (ui->rbOutside->isChecked())
         side = GCode::Outer;
@@ -175,19 +175,20 @@ void HatchingForm::rb_clicked() {
     updateButtonIconSize();
 }
 
-void HatchingForm::resizeEvent(QResizeEvent* event) {
+void Form::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void HatchingForm::showEvent(QShowEvent* event) {
+void Form::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void HatchingForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void HatchingForm::editFile(GCode::File* /*file*/) {
-}
+void Form::editFile(GCode::File* /*file*/) { }
+
+} // namespace CrossHatch
 
 #include "moc_hatching_form.cpp"

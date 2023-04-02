@@ -13,10 +13,10 @@
 #include <stack>
 #include <vector>
 #if __has_include(<boost/polygon/isotropy.hpp>)
-#include <boost/polygon/isotropy.hpp>
-#include <boost/polygon/point_concept.hpp>
-#include <boost/polygon/rectangle_concept.hpp>
-#include <boost/polygon/segment_concept.hpp>
+    #include <boost/polygon/isotropy.hpp>
+    #include <boost/polygon/point_concept.hpp>
+    #include <boost/polygon/rectangle_concept.hpp>
+    #include <boost/polygon/segment_concept.hpp>
 
 namespace boost {
 namespace polygon {
@@ -54,9 +54,7 @@ namespace polygon {
                         typename is_segment_concept<
                             typename geometry_concept<Segment<InCT2>>::type>::type>::type>::type,
                 void>::type
-            discretize(
-                const Point<InCT1>& point,
-                const Segment<InCT2>& segment,
+            discretize(const Point<InCT1>& point, const Segment<InCT2>& segment,
                 const CT max_dist,
                 std::vector<Point<CT>>* discretization) {
             // Apply the linear transformation to move start point of the segment to
@@ -147,8 +145,7 @@ namespace polygon {
                         typename is_segment_concept<
                             typename geometry_concept<Segment<long>>::type>::type>::type>::type,
                 CT>::type
-            get_point_projection(
-                const Point<CT>& point, const Segment<InCT>& segment) {
+            get_point_projection(const Point<CT>& point, const Segment<InCT>& segment) {
             CT segment_vec_x = cast(x(high(segment))) - cast(x(low(segment)));
             CT segment_vec_y = cast(y(high(segment))) - cast(y(low(segment)));
             CT point_vec_x = x(point) - cast(x(low(segment)));

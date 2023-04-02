@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "profile.h"
 #include "app.h"
-#include "gi_bridge.h"
+#include "gc_gi_bridge.h"
 #include "graphicsview.h"
 
 #include <execution>
@@ -64,10 +64,10 @@ void Creator::createProfile(const Tool& tool, const double depth) {
                 returnPss.push_back({std::move(path)});
         }
 
+        makeBridges();
+
         if (gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
             cornerTrimming();
-
-        makeBridges();
 
         if (returnPss.empty())
             break;
@@ -127,41 +127,33 @@ void Creator::trimmingOpenPaths(Paths& paths) {
 }
 
 void Creator::cornerTrimming() {
+    Timer<mS> t {};
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;
     const double trimAngle = gcp_.convent() ? -45.0 : +45;
 
-    auto test = [&](QLineF l1, QLineF l2) {
-        const bool fl = abs(l1.angleTo(l2) - testAngle) < 1.e-4;
-        return fl && sqareSide <= l1.length() && sqareSide <= l2.length();
+    auto insert = [=](auto& path, auto corner1, auto&& corner0, auto corner2) {
+        QLineF l1(*corner1, *corner0);
+        QLineF l2(*corner0, *corner2);
+        if (abs(l1.angleTo(l2) - testAngle) < 1.e-3                    // Angle is 90
+            && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
+            l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
+            path.insert(corner0, {l2.p1(), l2.p2()});
+            corner0 += 2;
+        }
     };
 
-    for (auto& paths : returnPss) {
-        for (auto& path : paths) {
-            path.reserve(path.size() * 3);
-            for (size_t i = 1, size = path.size() - 1; i < size; size = path.size() - 1, ++i) {
-                const auto curCorner = path[i];
-                const QLineF l1(path[i - 1], curCorner);
-                const QLineF l2(curCorner, path[i + 1]);
-                if (test(l1, l2)) {
-                    path.insert(path.begin() + i, QLineF::fromPolar(trimDepth, l1.angle() + trimAngle).translated(curCorner).p2());
-                    path.insert(path.begin() + i, curCorner);
-                    i += 2;
-                }
-            }
-            if (path.front() == path.back()) { // for trimming between the beginning and the end of the path
-                const auto curCorner = path.front();
-                const QLineF l1(*(path.end() - 2), curCorner);
-                const QLineF l2(curCorner, path[1]);
-                if (test(l1, l2)) {
-                    path.insert(path.end(), QLineF::fromPolar(trimDepth, l1.angle() + trimAngle).translated(curCorner).p2());
-                    path.insert(path.end(), curCorner);
-                }
-            }
-            path.shrink_to_fit();
-        }
-    }
+    auto paths = std::views::join(returnPss);
+
+    std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path& path) {
+        path.reserve(path.size() * 3);
+        for (auto corner = path.begin() + 1; corner < path.end() - 1; ++corner)
+            insert(path, corner - 1, corner, corner + 1);
+        if (path.front() == path.back()) // for trimming between the beginning and the end of the path
+            insert(path, path.end() - 2, path.begin(), path.begin() + 1);
+        path.shrink_to_fit();
+    });
 }
 
 void Creator::makeBridges() {

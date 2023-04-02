@@ -47,7 +47,7 @@ public:
     void read(QDataStream& stream) override { }
     void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
-    uint32_t type() const override { return G_CODE; }
+    uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
         GraphicsItem* item;
         item = new GiGcPath(pocketPaths_, this);

@@ -76,9 +76,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     //        case Qt::EditRole:
     //            if (shape()->type() == GiType::ShText)
     //                return static_cast<Text*>(shape())->text();
-    //            return QVariant();
+    //            return {};
     //        default:
-    //            return QVariant();
+    //            return {};
     //        }
     //    case FileTree::Column::SideType:
     //        if (auto text = dynamic_cast<Text*>(shape()); text) {
@@ -89,11 +89,11 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     //            case Qt::EditRole:
     //                return static_cast<bool>(text->side());
     //            default:
-    //                return QVariant();
+    //                return {};
     //            }
     //        }
     //    default:
-    //        return QVariant();
+    //        return {};
     //    }
 }
 

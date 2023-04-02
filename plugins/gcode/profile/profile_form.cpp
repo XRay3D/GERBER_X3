@@ -14,7 +14,7 @@
 #include "profile.h"
 #include "ui_profileform.h"
 
-#include "gi_bridge.h"
+#include "gc_gi_bridge.h"
 #include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>

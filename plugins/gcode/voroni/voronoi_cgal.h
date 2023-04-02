@@ -12,9 +12,9 @@
 
 #include "gc_creator.h"
 
-namespace GCode {
+namespace Voronoi {
 
-class VoronoiCgal : public virtual Creator {
+class VoronoiCgal : public virtual GCode::Creator {
 protected:
     void cgalVoronoi();
 };

@@ -178,10 +178,10 @@ QVariant AbstractShape::data(const QModelIndex& index, int role) const {
         case FileTree::Select:
             return isSelected();
         default:
-            return QVariant();
+            return {};
         }
     default:
-        return QVariant();
+        return {};
     }
 }
 

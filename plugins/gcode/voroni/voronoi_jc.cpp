@@ -11,26 +11,22 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi_jc.h"
-
-#undef _USE_CGAL_
 #include "jc_voronoi.h"
+#include "types.h"
 
-namespace ClipperLib {
 inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
 
-} // namespace ClipperLib
-
-namespace GCode {
+namespace Voronoi {
 
 inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y); }
 
 void VoronoiJc::jcVoronoi() {
-    const auto tolerance = gcp_.params[GCode::Params::Tolerance].toDouble();
+    const auto tolerance = gcp_.params[Tolerance].toDouble();
 
     mvector<jcv_point> points;
     points.reserve(100000);
     CleanPaths(workingPs, tolerance * 0.1 * uScale);
-    groupedPaths(Grouping::Copper);
+    groupedPaths(GCode::Grouping::Copper);
     int id = 0;
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
         QLineF line(tmp, point);
@@ -76,7 +72,7 @@ void VoronoiJc::jcVoronoi() {
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const Point::Type fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
+        const Point::Type fo = gcp_.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
@@ -93,7 +89,7 @@ void VoronoiJc::jcVoronoi() {
                 const jcv_edge* edge = graph_edge->edge;
                 const Pair pair {toPoint(edge, 0), toPoint(edge, 1), sites[i].p.id};
                 if (edge->sites[0] == nullptr || edge->sites[1] == nullptr)
-                    frame.insert(pair); // frame
+                    frame.insert(pair);                                              // frame
                 else if (edge->sites[0]->p.id != edge->sites[1]->p.id)
                     edges[edge->sites[0]->p.id ^ edge->sites[1]->p.id].insert(pair); // other
                 graph_edge = graph_edge->next;
@@ -168,7 +164,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     auto clean = [this, kAngle = 2.0](Path& path) {
         for (size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line(path[i], path[i + 1]);
-            if (line.length() < gcp_.params[GCode::Params::Tolerance].toDouble()) {
+            if (line.length() < gcp_.params[Tolerance].toDouble()) {
                 path[i] = (line.center());
                 path.remove(i + 1);
                 --i;
@@ -187,4 +183,4 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     return paths;
 }
 
-} // namespace GCode
+} // namespace Voronoi

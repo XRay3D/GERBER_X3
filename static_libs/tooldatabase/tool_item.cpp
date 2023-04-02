@@ -100,7 +100,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
         case 2:
             return toolId_ ? QVariant(toolId_) : QVariant();
         default:
-            return QVariant();
+            return {};
         }
     case Qt::DecorationRole:
         if (index.column() == 0) {
@@ -109,7 +109,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
             else
                 return QIcon::fromTheme("folder-sync");
         }
-        return QVariant();
+        return {};
     case Qt::UserRole:
         return toolId_;
     case Qt::UserRole + 1:
@@ -117,9 +117,9 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
     case Qt::TextAlignmentRole:
         if (index.column() == 2)
             return Qt::AlignCenter;
-        return QVariant();
+        return {};
     default:
-        return QVariant();
+        return {};
     }
 }
 
