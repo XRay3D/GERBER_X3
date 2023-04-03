@@ -187,9 +187,9 @@ void Form::сomputePaths() {
         gcp_.params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
-    creator->setGcp(gcp_);
-    creator->addPaths(std::move(wPaths));
-    creator->addRawPaths(std::move(wRawPaths));
+    creator()->setGcp(gcp_);
+    creator()->addPaths(std::move(wPaths));
+    creator()->addRawPaths(std::move(wRawPaths));
     fileCount = 1;
     emit createToolpath();
 }

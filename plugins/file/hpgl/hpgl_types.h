@@ -47,10 +47,10 @@ struct Block;
 struct SectionParser;
 struct Style;
 
-class GraphicObject final : public AbstrGraphicObject {
+class GraphicObject final : public GraphicObject {
     Path m_path;
     Paths m_paths;
-    // AbstrGraphicObject interface
+    // GraphicObject interface
 public:
     Path line() const override {
         return {};

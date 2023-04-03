@@ -21,7 +21,7 @@ class GiPreview;
 struct Row {
     //    Row(QString&& name = {},
     //        QIcon&& icon = {},
-    //        int id = {},
+    //        int32_t id = {},
     //        double diameter = {})
     //        : icon(icon)
     //        , name(name)
@@ -67,7 +67,7 @@ public:
 
     void setCreate(bool create);
     void setCreate(int row, bool create);
-    void setToolId(int row, int id);
+    void setToolId(int row, int32_t id);
     //    void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface

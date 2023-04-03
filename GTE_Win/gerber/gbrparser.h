@@ -84,7 +84,7 @@ private:
     void closeStepRepeat();
 
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
-    ApBlock* apBlock(int id) { return static_cast<ApBlock*>(m_apertures[id].data()); }
+    ApBlock* apBlock(int32_t id) { return static_cast<ApBlock*>(m_apertures[id].data()); }
     QList<QString> m_lines;
     Paths m_mergedPaths;
     QList<GraphicObject> m_file;

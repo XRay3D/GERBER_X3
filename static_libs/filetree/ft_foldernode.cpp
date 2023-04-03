@@ -24,7 +24,7 @@ FolderNode::FolderNode(const QString& name)
     setId(FolderNodeId);
 }
 
-FolderNode::FolderNode(const QString& name, int id)
+FolderNode::FolderNode(const QString& name, int32_t id)
     : FileTree::Node(Folder)
     , name(name) {
     setId(id);

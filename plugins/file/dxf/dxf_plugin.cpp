@@ -152,7 +152,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     return file_;
 }
 
-std::any Plugin::createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
+std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
     if (plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         auto const dxfFile = static_cast<File*>(file);
@@ -340,7 +340,7 @@ void Plugin::updateFileModel(AbstractFile* file) {
 
 //        for (auto [diameter, gos] : cacheHoles) {
 //            QString name(tr("Ø%1mm").arg(diameter));
-//            int id = static_cast<int>(data.size());
+//            int32_t id = static_cast<int>(data.size());
 //            data.emplace_back(std::move(name), drawDrillIcon(lay->color()), id, diameter);
 //            for (const auto go : gos) {
 //                giPeview[id].emplace_back(std::make_shared<DrillPrGI>(*go, data.back()));

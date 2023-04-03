@@ -43,7 +43,6 @@ public:
         : QObject {parent} { }
     virtual ~AbstractFilePlugin() = default;
 
-    [[nodiscard]] virtual std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) { return {}; };
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual QString folderName() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;

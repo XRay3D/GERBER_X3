@@ -87,8 +87,8 @@ public:
     bool autoName() const;
     void setAutoName(bool autoName);
     // id
-    int id() const;
-    void setId(int id);
+    int32_t id() const;
+    void setId(int32_t id);
     // depth_
     static double depth() { return depth_; }
     static void setDepth(double depth) { depth_ = depth; }
@@ -122,7 +122,7 @@ private:
     double stepover_ {0.5};
     static inline double depth_;
 
-    int id_ {-1};
+    int32_t id_ {-1};
 
     mutable size_t hash_ = 0;
     mutable size_t hash2_ = 0;
@@ -149,7 +149,7 @@ class ToolHolder {
 public:
     ToolHolder();
 
-    const Tool& tool(int id) { return tools_.at(id); }
+    const Tool& tool(int32_t id) { return tools_.at(id); }
     const Tools& tools() { return tools_; }
     void readTools();
     void readTools(const QJsonObject& json);

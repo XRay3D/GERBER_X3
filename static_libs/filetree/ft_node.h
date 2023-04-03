@@ -73,8 +73,8 @@ public:
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual void menu(QMenu& menu, View* tv) const = 0;
 
-    virtual int id() const { return id__; }
-    virtual void setId(int id) { id__ = id; }
+    virtual int32_t id() const { return id__; }
+    virtual void setId(int32_t id) { id__ = id; }
 
     QModelIndex index(int column = 0) const;
 
@@ -82,7 +82,7 @@ public:
     const Type type;
 
 protected:
-    int id__ {-1};
+    int32_t id__ {-1};
     Node* parent_ = nullptr;
     mvector<std::unique_ptr<Node>> childs;
 };

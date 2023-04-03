@@ -20,7 +20,7 @@ namespace Dxf {
 class File;
 struct Entity;
 
-class GraphicObject final : public AbstrGraphicObject {
+class GraphicObject final : public GraphicObject {
     friend class File;
     friend class Plugin;
 
@@ -53,7 +53,7 @@ public:
     const Entity* entity() const;
     size_t entityId() const;
 
-    // AbstrGraphicObject interface
+    // GraphicObject interface
 
     const Path& path() const override;
     const Paths& paths() const override;

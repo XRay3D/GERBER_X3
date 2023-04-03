@@ -11,8 +11,8 @@
 #pragma once
 
 #include "datastream.h"
-#include "plugintypes.h"
 #include "md5.h"
+#include "plugintypes.h"
 
 #include <QDebug>
 #include <QObject>
@@ -256,71 +256,29 @@ public:
     inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 
-class GraphicObject final : public AbstrGraphicObject {
-    friend class File;
-    friend class Plugin;
-    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-        return ::Block(stream).write(
-            go.path_,
-            go.paths_,
-            go.state_);
-    }
-    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-        return ::Block(stream).read(
-            go.path_,
-            go.paths_,
-            go.state_);
+struct GrObject : public GraphicObject {
+
+    friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
+        return ::Block(stream).write(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
-    File* gFile_;
-    Path path_;
-    State state_;
-
-public:
-    GraphicObject()
-        : AbstrGraphicObject {{}}
-        , gFile_(nullptr) {
+    friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
+        return ::Block(stream).read(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
-    GraphicObject(
-        int /*id*/,
-        const State& state,
-        const Paths& paths,
-        File* gFile,
-        const Path& path = Path())
-        : AbstrGraphicObject {paths}
-        , gFile_(gFile)
-        , path_(path)
-        , state_(state) {
+
+    File* gFile {nullptr};
+    State state;
+
+    // public:
+    GrObject() { }
+    GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
+        : gFile {gFile}
+        , state {state} {
+        GraphicObject::id = id;
+        GraphicObject::fill = std::move(paths);
+        GraphicObject::path = std::move(path);
+        GraphicObject::type = type;
     }
-    inline File* gFile() const { return gFile_; }
-    inline State state() const { return state_; }
-
-    inline Path& rPath() override { return path_; }
-    inline Paths& rPaths() override { return paths_; }
-
-    const Path& path() const override { return path_; }
-    const Paths& paths() const override { return paths_; }
-
-    Path line() const override { return path_.size() == 2 ? path_ : Path(); }
-    Path lineW() const override { return path_.size() == 2 ? paths_.front() : Path(); } // polygon
-
-    Path polyLine() const override { return closed() ? Path() : path_; }
-    Paths polyLineW() const override { return closed() ? Paths() : paths_; } // closed
-
-    Path elipse() const override;                                            // { return gFile_.; } // circle
-    Paths elipseW() const override;                                          // { return {}; }
-
-    Path arc() const override { return {}; }                                 // part of elipse
-    Path arcW() const override { return {}; }
-
-    Path polygon() const override { return state_.type() == Region ? path_ : Path(); }
-    Paths polygonWholes() const override { return paths_; }
-
-    Path hole() const override { return !positive() ? path_ : Path(); }
-    Paths holes() const override { return !positive() ? Paths {paths_.front()} : paths_.mid(1); }
-
-    bool positive() const override { return state_.imgPolarity() == Gerber::Positive; }                                                     // not hole
-    bool closed() const override { return path_.size() ? path_.front() == path_.back() : paths_.front().front() == paths_.front().back(); } // front == back
 };
 
 struct StepRepeatStr {
@@ -331,11 +289,11 @@ struct StepRepeatStr {
         j = 0.0;
         storage.clear();
     }
-    int x = 0;
-    int y = 0;
-    double i = 0.0;
-    double j = 0.0;
-    QList<GraphicObject> storage;
+    int x {};
+    int y {};
+    double i {};
+    double j {};
+    QList<GrObject> storage;
 };
 
 class Settings {

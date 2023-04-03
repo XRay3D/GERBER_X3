@@ -189,7 +189,7 @@ public:
     //    AppSettings* ptr();
 
     /*GUI*/
-    QColor& guiColor(int id);
+    QColor& guiColor(int32_t id);
     bool animSelection();
     bool guiSmoothScSh();
     bool scaleHZMarkers();

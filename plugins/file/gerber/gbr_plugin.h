@@ -28,7 +28,6 @@ public:
     Plugin(QObject* parent = nullptr);
 
     // AbstractFilePlugin interface
-    //    std::any createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
     [[nodiscard]] AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     [[nodiscard]] QString folderName() const override { return tr("Gerber Files"); }
     [[nodiscard]] QIcon icon() const override;

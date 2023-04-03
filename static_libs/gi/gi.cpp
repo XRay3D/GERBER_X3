@@ -32,9 +32,7 @@ GraphicsItem::GraphicsItem(AbstractFile* file)
     , colorPtr_(file ? &file->color() : nullptr)
     , color_(Qt::white)
     , bodyColor_(colorPtr_ ? *colorPtr_ : color_)
-    , pathColor_(Qt::transparent)
-
-{
+    , pathColor_(Qt::transparent) {
     //    animation.setDuration(100);
     //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    connect(this, &GraphicsItem::colorChanged, [this] { update(); });
@@ -86,7 +84,7 @@ const AbstractFile* GraphicsItem::file() const { return file_; }
 
 int GraphicsItem::id() const { return id_; }
 
-void GraphicsItem::setId(int id) { id_ = id; }
+void GraphicsItem::setId(int32_t id) { id_ = id; }
 
 void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
@@ -111,9 +109,13 @@ QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, cons
 }
 
 double GraphicsItem::scaleFactor() const {
-    if (scene() && scene()->views().size())
-        return 1.0 / scene()->views().first()->transform().m11();
-    return 1.0;
+    double scale = 1.0;
+    if (scene() && scene()->views().size()) {
+        scale /= scene()->views().first()->transform().m11();
+        if (file_)
+            scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
+    }
+    return scale;
 };
 
 QRectF GraphicsItem::boundingRect() const {

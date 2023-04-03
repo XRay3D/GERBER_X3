@@ -46,13 +46,13 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     return file;
 }
 
-// std::any Plugin::createPreviewGi(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
-//     QTransform t {file->transform()};
-//     auto mapPaths = [t](Paths paths) {
-//         for (auto&& path : paths)
-//             path = t.map(path);
-//         return paths;
-//     };
+// std::any Plugin::getDataForGC(AbstractFile* file, std::any param) {
+//      QTransform t {file->transform()};
+//      auto mapPaths = [t](Paths paths) {
+//          for (auto&& path : paths)
+//              path = t.map(path);
+//          return paths;
+//      };
 
 //    auto mapPos = [t](auto pos) {
 //        pos = t.map(pos);

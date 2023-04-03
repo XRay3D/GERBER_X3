@@ -36,7 +36,7 @@ bool MainWindow::debug() {
         if (0)
             QTimer::singleShot(i += k, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
-        if (1) {
+        if (0) {
             constexpr auto TYPE = md5::hash32("PocketRaster");
             if (!toolpathActions.contains(TYPE))
                 break;

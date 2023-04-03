@@ -108,7 +108,7 @@ void VoronoiBoost::boostVoronoi() {
                 maxX = std::numeric_limits<Point::Type>::min(),
                 maxY = std::numeric_limits<Point::Type>::min();
 
-    int id = 0, id2 = 0;
+    int32_t id = 0, id2 = 0;
     // add line segments to diagram
     msg = QObject::tr("Calc BOOST Voronoi");
 

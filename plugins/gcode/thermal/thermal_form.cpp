@@ -215,7 +215,7 @@ void Form::createTPI(AbstractFile* file) {
         ui->dsbxAreaMax->value() * uScale * uScale,
         ui->dsbxAreaMin->value() * uScale * uScale};
 
-    thPaths = std::any_cast<PreviewGiMap>(App::filePlugin(int(file->type()))->createPreviewGi(file, App::gCodePlugin(GCode::Thermal), tp2));
+    thPaths = std::any_cast<PreviewGiMap>(App::filePlugin(int(file->type()))->getDataForGC(file, App::gCodePlugin(GCode::Thermal), tp2));
 
     int count {};
     int ctr {};

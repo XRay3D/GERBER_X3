@@ -294,7 +294,7 @@ struct Path : mvector<Point<T>> {
             poly << pt;
         return poly;
     }
-    //    int id {};
+    //    int32_t id {};
 
     auto friend operator+(const Path& path, QPointF pt) noexcept {
         Path ret(path);
@@ -384,7 +384,7 @@ struct Paths : mvector<Path<T>> {
         return *this;
     }
 
-    //    int id {};
+    //    int32_t id {};
 };
 
 using Point64 = Point<int_t>;

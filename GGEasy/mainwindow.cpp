@@ -507,7 +507,7 @@ void MainWindow::customContextMenuForToolBar(const QPoint& pos) {
     menu.exec(toolBar->mapToGlobal(pos));
 }
 
-void MainWindow::saveGCodeFile(int id) {
+void MainWindow::saveGCodeFile(int32_t id) {
     if (project_->pinsPlacedMessage())
         return;
     auto* file = project_->file<GCode::File>(id);

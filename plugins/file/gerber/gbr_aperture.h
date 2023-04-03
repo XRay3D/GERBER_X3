@@ -225,7 +225,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The ApBlock class
 ///
-class ApBlock final : public AbstractAperture, public QList<GraphicObject> {
+class ApBlock final : public AbstractAperture, public QVector<GrObject> {
 public:
     ApBlock(const File* file);
     ApBlock(QDataStream& stream, const File* file)

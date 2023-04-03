@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include <any>
 #include <myclipper.h>
 
 // struct Circle {
@@ -65,38 +66,40 @@ struct Transform {
     }
 };
 
-struct AbstrGraphicObject {
-    Paths paths_;
-    AbstrGraphicObject(const Paths& paths_)
-        : paths_ {paths_} { }
-    virtual ~AbstrGraphicObject() { }
+struct GraphicObject {
+    // clang-format off
+    enum Type {
+        Null,
+        Arc       = 0b0'0000'0000'0000'0001, // 1
+        Circle    = 0b0'0000'0000'0000'0010, // 2
+        Elipse    = 0b0'0000'0000'0000'0100, // 3
+        Line      = 0b0'0000'0000'0000'1000, // 4
+        PolyLine  = 0b0'0000'0000'0001'0000, // 5
+        Polygon   = 0b0'0000'0000'0010'0000, // 6
+        Rect      = 0b0'0000'0000'0100'0000, // 7
+        Square    = 0b0'0000'0000'1000'0000, // 8
+        Text      = 0b0'0000'0001'0000'0000, // 9
+        Composite = 0b0'0000'0010'0000'0000, // 10
+        Dummy2    = 0b0'0000'0100'0000'0000, // 11
+        Dummy3    = 0b0'0000'1000'0000'0000, // 12
+        Dummy4    = 0b0'0001'0000'0000'0000, // 13
+        Dummy6    = 0b0'0010'0000'0000'0000, // 14
+        Dummy7    = 0b0'0100'0000'0000'0000, // 15
+        Stamp     = 0b0'1000'0000'0000'0000,
+        Drawn     = 0b1'0000'0000'0000'0000,
+    };
+    // clang-format on
 
-    virtual Path line() const = 0;           //{ return {}; }
-    virtual Path lineW() const = 0;          //{ return {}; } // closed
+    Paths fill;
+    Path path;
+    Point pos {std::numeric_limits<Point::Type>::lowest(), std::numeric_limits<Point::Type>::lowest()};
+    QByteArray name;
+    Type type {Null};
+    int32_t id {-1};
+    std::any raw;
 
-    virtual Path polyLine() const = 0;       //{ return {}; }
-    virtual Paths polyLineW() const = 0;     //{ return {}; } // closed
-
-    virtual Path elipse() const = 0;         //{ return {}; } // circle
-    virtual Paths elipseW() const = 0;       //{ return {}; }
-
-    virtual Path arc() const = 0;            //{ return {}; } // part of elipse
-    virtual Path arcW() const = 0;           //{ return {}; }
-
-    virtual Path polygon() const = 0;        //{ return {}; }
-    virtual Paths polygonWholes() const = 0; //{ return {}; }
-
-    virtual Path hole() const = 0;           //{ return {}; }
-    virtual Paths holes() const = 0;         //{ return {}; }
-
-    virtual bool positive() const = 0;       //{ return {}; } // not hole
-    virtual bool closed() const = 0;         //{ return {}; } // front == back
-
-    virtual const Path& path() const = 0;    //{ return {}; }
-    virtual const Paths& paths() const = 0;  //{ return {}; }
-
-    virtual Path& rPath() = 0;
-    virtual Paths& rPaths() = 0;
+    bool closed() const { return path.size() > 2 && path.front() == path.back(); }
+    bool positive() const { return Clipper2Lib::IsPositive(path); }
 };
 
 enum Side {
@@ -106,7 +109,7 @@ enum Side {
 };
 
 struct LayerType {
-    int id = -1;
+    int32_t id = -1;
     QString actName;
     QString actToolTip;
     QString shortActName() const { return actName; }

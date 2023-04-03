@@ -27,7 +27,7 @@ void VoronoiJc::jcVoronoi() {
     points.reserve(100000);
     CleanPaths(workingPs, tolerance * 0.1 * uScale);
     groupedPaths(GCode::Grouping::Copper);
-    int id = 0;
+    int32_t id = 0;
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
         QLineF line(tmp, point);
         if (line.length() > tolerance) {

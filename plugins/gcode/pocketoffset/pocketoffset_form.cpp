@@ -215,9 +215,9 @@ void Form::сomputePaths() {
     if (ui->sbxSteps->isVisible())
         gcp_.params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
-    creator->setGcp(gcp_);
-    creator->addPaths(std::move(wPaths));
-    creator->addRawPaths(wRawPaths);
+    creator()->setGcp(gcp_);
+    creator()->addPaths(std::move(wPaths));
+    creator()->addRawPaths(wRawPaths);
     fileCount = static_cast<int>(gcp_.tools.size());
     createToolpath();
 }
