@@ -20,7 +20,7 @@ protected:
     struct Pair {
         Point first;
         Point second;
-        int id;
+        int32_t id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
 

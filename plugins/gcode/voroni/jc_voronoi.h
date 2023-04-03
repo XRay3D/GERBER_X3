@@ -194,7 +194,7 @@ typedef JCV_REAL_TYPE jcv_real;
 typedef struct _jcv_point {
     jcv_real x;
     jcv_real y;
-    int id = -1;
+    int32_t id = -1;
     int id2 = -1;
 } jcv_point;
 
@@ -363,7 +363,7 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 // struct _jcv_point {
 //     jcv_real x;
 //     jcv_real y;
-//      int id = 0;
+//      int32_t id = 0;
 // };
 
 // struct _jcv_graphedge {

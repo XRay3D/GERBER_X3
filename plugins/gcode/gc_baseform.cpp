@@ -161,7 +161,7 @@ protected:
 BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     : QWidget(parent)
     , plugin {plugin}
-    , creator {tpc}
+    , creator_ {tpc}
     , progressDialog(new QProgressDialog(this)) {
 
     auto vLayout = new QVBoxLayout(this);
@@ -240,19 +240,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     progressDialog->reset();
     connect(progressDialog, &QProgressDialog::canceled, this, &BaseForm::cancel);
 
-    if (!creator)
-        return;
-
-    connect(this, &BaseForm::createToolpath, this, &BaseForm::startProgress);
-    connect(this, &BaseForm::createToolpath, creator, &Creator::createGc);
-
-    connect(creator, &Creator::canceled, this, &BaseForm::stopProgress);
-    connect(creator, &Creator::errorOccurred, this, &BaseForm::errorHandler);
-    connect(creator, &Creator::fileReady, this, &BaseForm::fileHandler);
-
-    creator->moveToThread(&thread);
-    connect(&thread, &QThread::finished, creator, &QObject::deleteLater);
-    thread.start(QThread::LowPriority /*HighestPriority*/);
+    setCreator(creator_);
 }
 
 BaseForm::~BaseForm() {
@@ -289,11 +277,11 @@ void BaseForm::fileHandler(File* file) {
 }
 
 void BaseForm::timerEvent(QTimerEvent* event) {
-    if (event->timerId() == progressTimerId && progressDialog && creator) {
-        const auto [max, val] = creator->getProgress();
+    if (event->timerId() == progressTimerId && progressDialog && creator_) {
+        const auto [max, val] = creator_->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
-        progressDialog->setLabelText(creator->msg);
+        progressDialog->setLabelText(creator_->msg);
     }
 }
 
@@ -311,25 +299,28 @@ void BaseForm::addUsedGi(GraphicsItem* gi) {
 }
 
 void BaseForm::cancel() {
-    creator->continueCalc({});
+    if (creator_ == nullptr)
+        return;
+    creator_->continueCalc({});
     stopProgress();
 }
 
 void BaseForm::errorHandler(int) {
-    qDebug(__FUNCTION__);
-
-    if (creator->items.empty())
+    if (creator_ == nullptr)
         return;
 
-    creator->checkMillingFl = false;
+    if (creator_->items.empty())
+        return;
+
+    creator_->checkMillingFl = false;
     stopProgress();
 
     ctrWidget->setVisible(false);
     errWidget->setVisible(true);
 
-    std::ranges::for_each(creator->items, [](auto i) { App::graphicsView()->addItem(i); });
+    std::ranges::for_each(creator_->items, [](auto i) { App::graphicsView()->addItem(i); });
 
-    errTable->setModel(new ErrorModel(std::move(creator->items), errTable));
+    errTable->setModel(new ErrorModel(std::move(creator_->items), errTable));
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
@@ -337,6 +328,8 @@ void BaseForm::errorHandler(int) {
 }
 
 void BaseForm::errContinue() {
+    if (creator_ == nullptr)
+        return;
     qDebug(__FUNCTION__);
     App::graphicsView()->stopUpdateTimer();
 
@@ -346,10 +339,12 @@ void BaseForm::errContinue() {
     errWidget->setVisible({});
 
     startProgress();
-    creator->continueCalc(true);
+    creator_->continueCalc(true);
 }
 
 void BaseForm::errBreak() {
+    if (creator_ == nullptr)
+        return;
     qDebug(__FUNCTION__);
     App::graphicsView()->stopUpdateTimer();
 
@@ -358,21 +353,25 @@ void BaseForm::errBreak() {
     ctrWidget->setVisible(true);
     errWidget->setVisible({});
 
-    creator->continueCalc(false);
+    creator_->continueCalc(false);
 }
 
 void BaseForm::startProgress() {
+    if (creator_ == nullptr)
+        return;
     qDebug(__FUNCTION__);
     if (!fileCount)
         fileCount = 1;
-    creator->msg = fileName_;
-    progressDialog->setLabelText(creator->msg);
+    creator_->msg = fileName_;
+    progressDialog->setLabelText(creator_->msg);
     progressTimerId = startTimer(100);
 }
 
 void BaseForm::stopProgress() {
-    qDebug() << __FUNCTION__ << creator->checkMillingFl;
-    if (creator->checkMillingFl)
+    if (creator_ == nullptr)
+        return;
+    qDebug() << __FUNCTION__ << creator_->checkMillingFl;
+    if (creator_->checkMillingFl)
         return;
     killTimer(progressTimerId);
     progressTimerId = 0;

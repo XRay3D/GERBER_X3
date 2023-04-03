@@ -32,7 +32,7 @@ public:
     void setModel(QAbstractItemModel* model) override;
 
 signals:
-    void saveGCodeFile(int id);
+    void saveGCodeFile(int32_t id);
     void saveGCodeFiles(); // NOTE unused
     void saveSelectedGCodeFiles();
 

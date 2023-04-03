@@ -41,8 +41,10 @@ void GiGroup::setSelected(const mvector<int>& ids) {
 }
 
 void GiGroup::addToScene(QGraphicsScene* scene) {
-    for (auto item : *this)
-        (scene ? scene : App::graphicsView()->scene())->addItem(item);
+    if (!scene)
+        scene = App::graphicsView()->scene();
+    for (auto* item : *this)
+        scene->addItem(item);
 }
 
 void GiGroup::setBrushColor(const QColor& color) {

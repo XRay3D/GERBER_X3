@@ -99,16 +99,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::CheckStateRole:
             return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            //            if (file->color() == QColor())
-            //                decorationTimer_.start(500);
-            switch (file->itemsType()) {
-            case File::ApPaths:
-                return decoration(file->color(), 'A');
-            case File::Components:
-                return decoration(file->color(), 'C');
-            default:
-                return decoration(file->color());
-            }
+            return file->icon();
         case FileTree::Id:
             return id();
         default:

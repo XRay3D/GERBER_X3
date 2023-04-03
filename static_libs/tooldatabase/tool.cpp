@@ -121,7 +121,7 @@ bool Tool::autoName() const { return autoName_; }
 void Tool::setAutoName(bool autoName) { hash_ = {}, autoName_ = autoName; }
 int Tool::id() const { return id_; }
 
-void Tool::setId(int id) { hash_ = {}, id_ = id; }
+void Tool::setId(int32_t id) { hash_ = {}, id_ = id; }
 double Tool::getDiameter(double depth) const {
     if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);

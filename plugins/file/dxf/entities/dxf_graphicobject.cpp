@@ -45,10 +45,10 @@ QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
 size_t GraphicObject::entityId() const { return entityId_; }
 
 GraphicObject::GraphicObject()
-    : AbstrGraphicObject {{}} { }
+    : GraphicObject {{}} { }
 
 GraphicObject::GraphicObject(int entityId, const Path& path, const Paths& paths)
-    : AbstrGraphicObject(paths)
+    : GraphicObject(paths)
     , entityId_(entityId)
     , path_(path) {
 }

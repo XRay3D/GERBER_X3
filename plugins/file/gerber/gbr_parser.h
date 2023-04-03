@@ -96,7 +96,7 @@ protected:
     bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
-    ApBlock* apBlock(int id);
+    ApBlock* apBlock(int32_t id);
 
     File* file = nullptr;
 };

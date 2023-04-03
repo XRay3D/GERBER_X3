@@ -44,7 +44,7 @@ public:
     static bool canToShow();
 
 private:
-    enum {
+    enum WworckType {
         Drill,
         Pocket,
         Profile,
@@ -55,7 +55,7 @@ private:
     class AbstractFile* file = nullptr;
     class Header* header;
     class QCheckBox* checkBox;
-    int worckType = Drill;
+    WworckType worckType = Drill;
     GCode::SideOfMilling side = GCode::Inner;
     QString type_;
 

@@ -78,7 +78,7 @@ void VoronoiCgal::cgalVoronoi() {
                 maxY = std::numeric_limits<Point::Type>::min();
     //    progress(4, 0);
     SDG2 sdg;
-    int id = 0;
+    int32_t id = 0;
     // add line segments to diagram
     msg = QObject::tr("Calc CGAL Voronoi");
 

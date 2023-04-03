@@ -28,7 +28,7 @@ Model::Model(QString type, int rowCount, QObject* parent)
     data_.reserve(rowCount);
 }
 
-void Model::setToolId(int row, int id) {
+void Model::setToolId(int row, int32_t id) {
     if (data_[row].toolId != id)
         data_[row].useForCalc = id > -1;
     data_[row].toolId = id;

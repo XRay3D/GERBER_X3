@@ -74,7 +74,7 @@ void View::on_doubleClicked(const QModelIndex& index) {
         //        } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
         //            hideOther();
         //            {
-        //                const int id = menuIndex_.data(Qt::UserRole).toInt();
+        //                const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
         //                AbstractFile* file = static_cast<AbstractFile*>(App::project()->file(id));
         //                App::project()->showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
         //                file->gcp_.fileId = file->id();

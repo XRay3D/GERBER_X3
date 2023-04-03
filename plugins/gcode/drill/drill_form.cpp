@@ -114,15 +114,22 @@ Form::~Form() {
 
 void Form::updateFiles() {
 
-    disconnect(ui->cbxFile, qOverload<int /*, const QString&*/>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
+    disconnect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
 
     ui->cbxFile->clear();
+
+    for (auto file : App::project()->files()) {
+        auto gos = file->getDataForGC(GraphicObject::Stamp, 0, 0);
+        if (gos.size())
+            ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(gos));
+    }
+
     //    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber_, FileType::Dxf_}))
     //        App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
 
     on_cbxFileCurrentIndexChanged(0);
 
-    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
+    connect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
 }
 
 bool Form::canToShow() {
@@ -180,6 +187,7 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
     file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
     if (!file)
         return;
+
     //    switch (file->type()) {
     //    case FileType::Gerber_:
     //        type_ = "_D";
@@ -193,25 +201,23 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
     //    }
 
     try {
-        auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->createPreviewGi(file, plugin));
 
-        model = new Model(type_, peview.size(), ui->toolTable);
-
-        auto& data = model->data();
-        data.reserve(peview.size());
-        for (auto& [key, val] : peview) {
-            auto [id, diametr, isSlot, name] = key;
-            data.emplace_back(
-                val.draw.size() ? drawIcon(val.draw) : drawDrillIcon(isSlot ? Qt::red : Qt::black),
-                name + ": Ø" + QString::number(diametr),
-                diametr,
-                id,
-                isSlot);
-            for (auto&& posOrPath : val.posOrPath)
-                auto gi = new GiPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
-        }
-
-        App::graphicsView()->scene()->update();
+        //        auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->getDataForGC(file, plugin));
+        //        model = new Model(type_, peview.size(), ui->toolTable);
+        //        auto& data = model->data();
+        //        data.reserve(peview.size());
+        //        for (auto& [key, val] : peview) {
+        //            auto [id, diametr, isSlot, name] = key;
+        //            data.emplace_back(
+        //                val.draw.size() ? drawIcon(val.draw) : drawDrillIcon(isSlot ? Qt::red : Qt::black),
+        //                name + ": Ø" + QString::number(diametr),
+        //                diametr,
+        //                id,
+        //                isSlot);
+        //            for (auto&& posOrPath : val.posOrPath)
+        //                auto gi = new GiPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
+        //        }
+        //        App::graphicsView()->scene()->update();
     } catch (const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;
@@ -238,7 +244,7 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
 void Form::on_doubleClicked(const QModelIndex& current) {
     if (current.column() == 1) {
         mvector<Tool::Type> tools;
-        // FIXME       tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == md5::hash32("Profile") || worckType == GCode::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
+        // FIXME       tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == Profile || worckType == Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
             int apertureId = model->apertureId(current.row());
@@ -382,15 +388,15 @@ void Form::pickUpTool() {
 }
 
 void Form::updateState() {
-    // FIXME    worckType = ui->rb_drilling->isChecked() ? GCode::Drill : (ui->rb_profile->isChecked() ? md5::hash32("Profile") : GCode::Pocket);
-    // FIXME    ui->grbxSide->setEnabled(worckType == md5::hash32("Profile"));
-    // FIXME    ui->grbxDirection->setEnabled(worckType == md5::hash32("Profile") || worckType == GCode::Pocket);
-    // FIXME   side = ui->rb_on->isChecked() ? GCode::On : (ui->rb_out->isChecked() ? GCode::Outer : GCode::Inner);
+    worckType = ui->rb_drilling->isChecked() ? Drill : (ui->rb_profile->isChecked() ? Profile : Pocket);
+    ui->grbxSide->setEnabled(worckType == Profile);
+    ui->grbxDirection->setEnabled(worckType == Profile || worckType == Pocket);
+    side = ui->rb_on->isChecked() ? GCode::On : (ui->rb_out->isChecked() ? GCode::Outer : GCode::Inner);
 }
 
 void Form::errorOccurred() {
-    // FIXME   auto tpc = (GCode::Creator*)sender();
-    // FIXME   tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
+    auto tpc = (GCode::Creator*)sender();
+    //    tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }
 
 QModelIndexList Form::selectedIndexes() const { return ui->toolTable->selectionModel()->selectedIndexes(); }
@@ -403,7 +409,7 @@ void Form::zoomToSelected() {
 void Form::сomputePaths() {
     auto indexes = [](const auto& range) {
         QString indexes;
-        for (int id : range) {
+        for (int32_t id : range) {
             if (indexes.size())
                 indexes += ",";
             indexes += QString::number(id);
@@ -436,7 +442,7 @@ void Form::сomputePaths() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                //                GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), md5::hash32("Profile")}, {pathsMap[usedToolId].paths});
+                //                GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), Profile}, {pathsMap[usedToolId].paths});
                 //                gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 //                gcode->setSide(file->side());
                 //                App::project()->addFile(gcode);
@@ -561,7 +567,7 @@ void Form::сomputePaths() {
                     //                    gcp.params[GCode::Params::UseRaster] = 0;
                     //                    gcp.params[GCode::Params::Steps] = 0;
 
-                    //                    GCode::PocketCreator tpc;
+                    //                    PocketCreator tpc;
                     //                    tpc.moveToThread(&thread);
                     //                    connect(&tpc, &GCode::Creator::errorOccurred, this, &Form::errorOccurred);
                     //                    thread.start();

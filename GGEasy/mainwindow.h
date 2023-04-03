@@ -117,7 +117,7 @@ private:
     void customContextMenuForToolBar(const QPoint& pos);
 
     // save GCode
-    void saveGCodeFile(int id);
+    void saveGCodeFile(int32_t id);
     void saveGCodeFiles();
     void saveSelectedGCodeFiles();
 

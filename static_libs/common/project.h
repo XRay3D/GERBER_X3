@@ -56,7 +56,7 @@ public:
 
     // AbstractFile
     template <typename T = AbstractFile>
-    T* file(int id) {
+    T* file(int32_t id) {
         QMutexLocker locker(&mutex);
         if (files_.contains(id))
             return static_cast<T*>(files_[id].get());
@@ -91,14 +91,14 @@ public:
     bool contains(AbstractFile* file);
     mvector<AbstractFile*> files(int type);
     mvector<AbstractFile*> files(const mvector<int> types);
-    void deleteFile(int id);
+    void deleteFile(int32_t id);
     //    QString fileNames();
     int contains(const QString& name);
 
     // AbstractShape
     int addShape(Shapes::AbstractShape* const shape);
-    Shapes::AbstractShape* shape(int id);
-    void deleteShape(int id);
+    Shapes::AbstractShape* shape(int32_t id);
+    void deleteShape(int32_t id);
 
     // Project
     bool save(const QString& fileName);
@@ -182,7 +182,7 @@ signals:
     void parseFile(const QString& filename, int type);
 
 private:
-    bool reload(int id, AbstractFile* file);
+    bool reload(int32_t id, AbstractFile* file);
 
     // File Watcher
     QFileSystemWatcher watcher;

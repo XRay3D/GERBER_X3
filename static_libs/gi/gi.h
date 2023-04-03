@@ -106,8 +106,8 @@ public:
     template <typename T>
     const T* typedFile() const { return dynamic_cast<const T* const>(file_); }
 
-    int id() const;
-    void setId(int id);
+    int32_t id() const;
+    void setId(int32_t id);
     virtual void changeColor() = 0;
 
 protected:
@@ -129,7 +129,7 @@ protected:
     QColor bodyColor_;
     QColor pathColor_;
 
-    int id_ = -1;
+    int32_t id_ = -1;
     double scaleFactor() const;
     enum ColorState {
         Default,

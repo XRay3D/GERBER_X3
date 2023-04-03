@@ -734,18 +734,12 @@ ApertureType ApBlock::type() const { return Block; }
 bool ApBlock::fit(double) const { return true; }
 
 void ApBlock::read(QDataStream& stream) {
-    ::Block(stream).rw(
-        *this, // lis,
-        isFlashed_,
-        size_);
+    ::Block(stream).rw(*this, isFlashed_, size_);
     draw();
 }
 
 void ApBlock::write(QDataStream& stream) const {
-    ::Block(stream).rw(
-        *this, // lis,
-        isFlashed_,
-        size_);
+    ::Block(stream).rw(*this, isFlashed_, size_);
 }
 
 void ApBlock::draw() {
@@ -754,12 +748,12 @@ void ApBlock::draw() {
     while (i < size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddSubject(paths_);
-        const int exp = at(i).state().imgPolarity();
+        const int exp = at(i).state.imgPolarity();
         do {
-            paths_.append(at(i).paths());
-            clipper.AddClip(at(i++).paths());
-        } while (i < size() && exp == at(i).state().imgPolarity());
-        if (at(i - 1).state().imgPolarity() == Positive)
+            paths_.append(at(i).fill);
+            clipper.AddClip(at(i++).fill);
+        } while (i < size() && exp == at(i).state.imgPolarity());
+        if (at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
         else
             clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);

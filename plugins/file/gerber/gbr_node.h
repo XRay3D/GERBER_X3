@@ -34,7 +34,7 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu& menu, FileTree::View* tv) const override;
-    int id() const override;
+    int32_t id() const override;
 };
 
 } // namespace Gerber

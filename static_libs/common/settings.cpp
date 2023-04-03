@@ -27,7 +27,7 @@ using std::numbers::pi;
 // AppSettings* AppSettings::ptr() { return settings_; }
 
 /*GUI*/
-QColor& AppSettings::guiColor(int id) { return guiColor_[id]; }
+QColor& AppSettings::guiColor(int32_t id) { return guiColor_[id]; }
 bool AppSettings::animSelection() { return animSelection_; }
 bool AppSettings::guiSmoothScSh() { return guiSmoothScSh_; }
 bool AppSettings::scaleHZMarkers() { return scaleHZMarkers_; }

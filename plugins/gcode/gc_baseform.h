@@ -29,6 +29,25 @@ public:
     ~BaseForm() override;
     virtual void editFile(File* file) = 0;
 
+    Creator* creator() const { return creator_; }
+
+    void setCreator(Creator* newCreator) {
+        if (newCreator) {
+            creator_ = newCreator;
+            connect(this, &BaseForm::createToolpath, this, &BaseForm::startProgress);
+            connect(this, &BaseForm::createToolpath, creator_, &Creator::createGc);
+            connect(creator_, &Creator::canceled, this, &BaseForm::stopProgress);
+            connect(creator_, &Creator::errorOccurred, this, &BaseForm::errorHandler);
+            connect(creator_, &Creator::fileReady, this, &BaseForm::fileHandler);
+            creator_->moveToThread(&thread);
+            connect(&thread, &QThread::finished, creator_, &QObject::deleteLater);
+            thread.start(QThread::LowPriority /*HighestPriority*/);
+        } else if (creator_) {
+            thread.quit();
+            thread.wait();
+        }
+    }
+
 signals:
     void createToolpath();
 
@@ -45,7 +64,6 @@ protected:
     virtual void сomputePaths() = 0;
     virtual void updateName() = 0;
 
-    Creator* const creator;
     Direction direction = Climb;
     SideOfMilling side = Outer;
     UsedItems usedItems_;
@@ -73,6 +91,8 @@ protected:
     QGridLayout* grid;
 
 private:
+    Creator* creator_;
+
     QDialogButtonBox* errBtnBox;
     class TableView* errTable;
 

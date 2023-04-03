@@ -29,15 +29,15 @@
 
 namespace Gerber {
 
-Path GraphicObject::elipse() const { return (state_.dCode() == D03
-                                                && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle) ?
-        path_ :
-        Path(); } // circle
-Paths GraphicObject::elipseW() const { return (state_.dCode() == D03
-                                                  && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle
-                                                  && gFile_->apertures()->at(state_.aperture())->withHole()) ?
-        paths_ :
-        Paths(); }
+// Path GraphicObject::elipse() const { return (state_.dCode() == D03
+//                                                 && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle) ?
+//         path_ :
+//         Path(); } // circle
+// Paths GraphicObject::elipseW() const { return (state_.dCode() == D03
+//                                                   && gFile_->apertures()->at(state_.aperture())->type() == ApertureType::Circle
+//                                                   && gFile_->apertures()->at(state_.aperture())->withHole()) ?
+//         paths_ :
+//         Paths(); }
 
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
@@ -72,6 +72,13 @@ File::~File() { }
 
 const ApertureMap* File::apertures() const { return &apertures_; }
 
+mvector<const GraphicObject*> File::getDataForGC(GraphicObject::Type type, double area, double length) const {
+    auto gos = graphicObjects_
+        | std::views::filter([=](auto& go) { return go.type & type; })
+        | std::views::transform([=](auto& go) { return std::addressof(go); });
+    return {gos.begin(), gos.end()};
+}
+
 Paths File::merge() const {
     QElapsedTimer t;
     t.start();
@@ -84,13 +91,13 @@ Paths File::merge() const {
             std::list<std::map<int, Paths>> pathListMap; // FIXME V826. Consider replacing standard container with a different one. to vector
             int exp = -1;
             for (auto& go : graphicObjects_) {
-                if (exp != go.state().imgPolarity()) {
-                    exp = go.state().imgPolarity();
+                if (exp != go.state.imgPolarity()) {
+                    exp = go.state.imgPolarity();
                     pathListMap.resize(pathListMap.size() + 1);
                 }
-                if (go.state().type() == Line) {
+                if (go.state.type() == Line) {
                     auto& paths = pathListMap.back();
-                    paths[go.state().aperture()].push_back(go.path());
+                    paths[go.state.aperture()].push_back(go.path);
                 }
             }
             for (auto& map : pathListMap) {
@@ -116,22 +123,22 @@ Paths File::merge() const {
         while (i < graphicObjects_.size()) {
             Clipper clipper;
             clipper.AddSubject(mergedPaths_);
-            const auto exp = graphicObjects_.at(i).state().imgPolarity(); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
+            const auto exp = graphicObjects_.at(i).state.imgPolarity(); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
             do {
-                if (graphicObjects_[i].state().type() == Line) {
+                if (graphicObjects_[i].state.type() == Line) {
                     ++i;
                 } else {
-                    const GraphicObject& go = graphicObjects_.at(i++);
-                    clipper.AddClip(go.paths());
+                    const GrObject& go = graphicObjects_.at(i++);
+                    clipper.AddClip(go.fill);
                 }
-            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
+            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state.imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
 
             if (exp)
                 ReversePaths(pathList.front());
             clipper.AddClip(pathList.front());
             pathList.pop_front();
 
-            if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
+            if (graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
                 clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
             else
                 clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
@@ -140,12 +147,12 @@ Paths File::merge() const {
         while (i < graphicObjects_.size()) {
             Clipper clipper;
             clipper.AddSubject(mergedPaths_);
-            const auto exp = graphicObjects_.at(i).state().imgPolarity();
+            const auto exp = graphicObjects_.at(i).state.imgPolarity();
             do {
-                const GraphicObject& go = graphicObjects_.at(i++);
-                clipper.AddClip(go.paths());
-            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state().imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
-            if (graphicObjects_.at(i - 1).state().imgPolarity() == Positive)
+                const GrObject& go = graphicObjects_.at(i++);
+                clipper.AddClip(go.fill);
+            } while (i < graphicObjects_.size() && exp == graphicObjects_.at(i).state.imgPolarity()); // FIXME V831 Decreased performance. Consider replacing the call to the 'at()' method with the 'operator[]'. gbr_file.cpp 122
+            if (graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
                 clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
             else
                 clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
@@ -225,39 +232,36 @@ bool File::flashedApertures() const {
 
 void File::setColor(const QColor& color) {
     color_ = color;
-    itemGroups_[Normal]->setBrushColor(color);
-    itemGroups_[ApPaths]->setPen(QPen(color, 0.0));
+    itemGroups_[Normal]->setBrushColor(color_);
+    itemGroups_[ApPaths]->setPen(QPen(color_, 0.0));
 }
 
-mvector<const AbstrGraphicObject*> File::graphicObjects() const {
-    mvector<const AbstrGraphicObject*> go(graphicObjects_.size());
+mvector<const ::GraphicObject*> File::graphicObjects() const {
+    mvector<const ::GraphicObject*> go(graphicObjects_.size());
     size_t i = 0;
     for (auto& refGo : graphicObjects_)
         go[i++] = &refGo;
     return go;
 }
 
-void File::initFrom(AbstractFile* file) {
-    AbstractFile::initFrom(file);
+void File::initFrom(AbstractFile* file_) {
+    AbstractFile::initFrom(file_);
     static_cast<Node*>(node_)->file = this;
-
-    setColor(file->color());
-    // Normal
-    itemGroup(Gerber::File::Normal)->setBrushColor(file->itemGroup(Gerber::File::Normal)->brushColor());
-    itemGroup(Gerber::File::Normal)->addToScene();
-    itemGroup(Gerber::File::Normal)->setZValue(-id());
-    // ApPaths
-    itemGroup(Gerber::File::ApPaths)->setPen(file->itemGroup(Gerber::File::ApPaths)->pen());
-    itemGroup(Gerber::File::ApPaths)->addToScene();
-    itemGroup(Gerber::File::ApPaths)->setZValue(-id());
-    // Components
-    itemGroup(Gerber::File::Components)->addToScene();
-    itemGroup(Gerber::File::Components)->setZValue(-id());
-    setItemType(file->itemsType());
 }
 
 FileTree::Node* File::node() {
     return node_ ? node_ : node_ = new Node(this);
+}
+
+QIcon File::icon() const {
+    switch (itemsType_) {
+    case File::ApPaths:
+        return decoration(color_, 'A');
+    case File::Components:
+        return decoration(color_, 'C');
+    default:
+        return decoration(color_);
+    }
 }
 
 void File::setItemType(int type) {
@@ -295,9 +299,9 @@ void File::read(QDataStream& stream) {
         itemsType_,
         components_);
 
-    for (GraphicObject& go : graphicObjects_) {
-        go.gFile_ = this;
-        go.state_.file_ = this;
+    for (GrObject& go : graphicObjects_) {
+        go.gFile = this;
+        go.state.file_ = this;
     }
 }
 
@@ -337,11 +341,11 @@ void File::createGi() {
             return false;
         };
 
-        for (const GraphicObject& go : graphicObjects_) {
-            if (!go.path().empty()) {
-                if (Settings::simplifyRegions() && go.path().front() == go.path().back()) {
+        for (const GrObject& go : graphicObjects_) {
+            if (!go.path.empty()) {
+                if (Settings::simplifyRegions() && go.path.front() == go.path.back()) {
                     Paths paths;
-                    SimplifyPolygon(go.path(), paths);
+                    SimplifyPolygon(go.path, paths);
                     for (Path& path : paths) {
                         path.push_back(path.front());
                         if (!Settings::skipDuplicates()) {
@@ -354,10 +358,10 @@ void File::createGi() {
                     }
                 } else {
                     if (!Settings::skipDuplicates()) {
-                        itemGroups_[ApPaths]->push_back(new GiDataPath(go.path(), this));
-                    } else if (!contains(go.path())) {
-                        itemGroups_[ApPaths]->push_back(new GiDataPath(go.path(), this));
-                        checkList.push_front(go.path());
+                        itemGroups_[ApPaths]->push_back(new GiDataPath(go.path, this));
+                    } else if (!contains(go.path)) {
+                        itemGroups_[ApPaths]->push_back(new GiDataPath(go.path, this));
+                        checkList.push_front(go.path);
                     }
                 }
             }
@@ -378,6 +382,8 @@ void File::createGi() {
         else
             itemsType_ = ApPaths;
     }
+
+    setColor(color_);
 
     layerTypes_[Normal].id = itemGroups_[Normal]->size() ? Normal : NullType;
     layerTypes_[ApPaths].id = itemGroups_[ApPaths]->size() ? ApPaths : NullType;

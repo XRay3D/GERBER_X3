@@ -20,7 +20,7 @@ class FolderNode : public FileTree::Node {
 
 public:
     explicit FolderNode(const QString& name);
-    explicit FolderNode(const QString& name, int id);
+    explicit FolderNode(const QString& name, int32_t id);
     ~FolderNode() override;
 
     // FileTree::Node interface

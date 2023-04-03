@@ -90,7 +90,7 @@ Project::Project(QObject* parent)
     : QObject(parent)
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
-        const int id = files_[contains(path)]->id();
+        const int32_t id = files_[contains(path)]->id();
         if (id > -1
             && QFileInfo::exists(path)
             && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
@@ -233,7 +233,7 @@ void Project::close() {
     emit changed();
 }
 
-void Project::deleteFile(int id) {
+void Project::deleteFile(int32_t id) {
     QMutexLocker locker(&mutex);
     if (files_.contains(id)) {
         watcher.removePath(files_[id]->name());
@@ -243,7 +243,7 @@ void Project::deleteFile(int id) {
         qWarning() << "Error id" << id << "File not found";
 }
 
-void Project::deleteShape(int id) {
+void Project::deleteShape(int32_t id) {
     QMutexLocker locker(&mutex);
     try {
         if (shapes_.contains(id)) {
@@ -307,7 +307,7 @@ int Project::contains(const QString& name) {
     return -1;
 }
 
-bool Project::reload(int id, AbstractFile* file) {
+bool Project::reload(int32_t id, AbstractFile* file) {
     if (files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
@@ -344,7 +344,7 @@ mvector<AbstractFile*> Project::files(const mvector<int> types) {
     return rfiles;
 }
 
-Shapes::AbstractShape* Project::shape(int id) {
+Shapes::AbstractShape* Project::shape(int32_t id) {
     QMutexLocker locker(&mutex);
     return shapes_[id].get();
 }
@@ -358,7 +358,7 @@ int Project::addFile(AbstractFile* file) {
     file->createGi();
     file->addToScene();
     file->setVisible(true);
-    const int id = contains(file->name());
+    const int32_t id = contains(file->name());
     if (id > -1 && files_[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {
@@ -381,7 +381,7 @@ int Project::addFile(GCode::File* file) {
     file->createGi();
     file->addToScene();
     file->setVisible(true);
-    const int id = -1; // contains(file->name());
+    const int32_t id = -1; // contains(file->name());
     if (id > -1 && files_[id]->type() == file->type()) {
         reload(id, file);
     } else if (file->id() == -1) {

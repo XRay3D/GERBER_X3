@@ -14,7 +14,6 @@
 #include "datastream.h"
 #include "ft_node.h"
 #include "gi_group.h"
-#include "md5.h"
 #include "plugintypes.h"
 
 #include "doublespinbox.h"
@@ -23,6 +22,9 @@
 #include <QPainter>
 #include <QSplashScreen>
 #include <QtWidgets>
+// #include <QApplication>
+#include <QFileInfo>
+// #include <QModelIndex>
 
 inline QPixmap decoration(QColor color, QChar chr = {}) {
 
@@ -59,7 +61,6 @@ class AbstractFile {
             file.date_,
             file.groupedPaths_,
             file.itemsType_,
-            //            file.layerTypes_,
             file.lines_,
             file.mergedPaths_,
             file.name_,
@@ -82,7 +83,6 @@ class AbstractFile {
             file.date_,
             file.groupedPaths_,
             file.itemsType_,
-            //            file.layerTypes_,
             file.lines_,
             file.mergedPaths_,
             file.name_,
@@ -128,7 +128,7 @@ public:
     mvector<QString>& lines();
     const mvector<QString>& lines() const;
     const QString lines2() const;
-    virtual mvector<const AbstrGraphicObject*> graphicObjects() const;
+    virtual mvector<const GraphicObject*> graphicObjects() const;
 
     enum Group {
         CopperGroup,
@@ -139,6 +139,7 @@ public:
     Side side() const;
     void setSide(Side side);
 
+    virtual mvector<const GraphicObject*> getDataForGC(GraphicObject::Type, double area, double length) const { return {}; };
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
     virtual void createGi() = 0;
@@ -151,13 +152,13 @@ public:
     virtual void setColor(const QColor& color);
 
     virtual FileTree::Node* node() = 0;
-    virtual QIcon icon() const;
+    virtual QIcon icon() const = 0;
 
     void setTransform([[maybe_unused]] const Transform& transform);
     const Transform& transform() const;
 
-    int id() const;
-    void setId(int id);
+    int32_t id() const;
+    void setId(int32_t id);
 
     bool userColor() const;
     void setUserColor(bool userColor);
@@ -175,7 +176,7 @@ protected:
     QDateTime date_;
     QString name_;
     Side side_ = Top;
-    int id_ = -1;
+    int32_t id_ = -1;
     int itemsType_ = -1;
     mutable Paths mergedPaths_;
     mutable bool visible_ = false;
@@ -184,10 +185,6 @@ protected:
     //    QTransform transform_;
     Transform transform_;
 };
-
-// #include <QApplication>
-#include <QFileInfo>
-// #include <QModelIndex>
 
 inline AbstractFile::AbstractFile()
     : itemGroups_ {new GiGroup} {
@@ -236,12 +233,19 @@ inline const QString AbstractFile::lines2() const {
     return rstr;
 }
 
-inline mvector<const AbstrGraphicObject*> AbstractFile::graphicObjects() const { return {}; }
+inline mvector<const GraphicObject*> AbstractFile::graphicObjects() const { return {}; }
 
 inline void AbstractFile::initFrom(AbstractFile* file) {
-    id_ = file->id();
-    node_ = file->node();
-    // node_->setId(&id_);
+    id_ = file->id_;
+    node_ = file->node_;
+    side_ = file->side_;
+    colorFlag_ = file->colorFlag_;
+    setColor(file->color_);
+    setItemType(file->itemsType_);
+    setTransform(file->transform_);
+    for (auto* ig : itemGroups_)
+        for (auto* gi : *ig)
+            gi->setZValue(-id_);
 }
 
 inline const LayerTypes& AbstractFile::displayedTypes() const { return layerTypes_; }
@@ -274,9 +278,7 @@ inline const Transform& AbstractFile::transform() const { return transform_; }
 
 inline int AbstractFile::id() const { return id_; }
 
-inline void AbstractFile::setId(int id) { id_ = id; }
-
-inline QIcon AbstractFile::icon() const { return {}; }
+inline void AbstractFile::setId(int32_t id) { id_ = id; }
 
 inline bool AbstractFile::userColor() const { return colorFlag_; }
 
@@ -374,3 +376,5 @@ public:
 #define FileInterface_iid "ru.xray3d.XrSoft.GGEasy.AbstractFile"
 
 Q_DECLARE_INTERFACE(AbstractFile, FileInterface_iid)
+
+Q_DECLARE_METATYPE(mvector<const GraphicObject*>)

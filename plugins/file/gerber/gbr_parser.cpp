@@ -376,39 +376,46 @@ void Parser::addPath() {
         resetStep();
         return;
     }
+
+    int type = GrObject::Drawn;
+
+    if (aperFunctionMap.contains(state_.aperture())
+        && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline)
+        components[refDes].addFootprint(path_);
+
     switch (state_.region()) {
     case On:
+        type |= GrObject::Polygon;
         state_.setType(Region);
         switch (abSrIdStack_.top().workingType) {
         case WorkingType::Normal:
-            file->graphicObjects_.emplace_back(GraphicObject(goId_++, state_, createPolygon(), file, path_));
+            file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
             break;
         case WorkingType::StepRepeat:
-            stepRepeat_.storage.append(GraphicObject(goId_++, state_, createPolygon(), file, path_));
+            stepRepeat_.storage.append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GraphicObject(goId_++, state_, createPolygon(), file, path_));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
             break;
         }
         break;
     case Off:
+        type |= GrObject::PolyLine;
         state_.setType(Line);
         switch (abSrIdStack_.top().workingType) {
         case WorkingType::Normal:
-            file->graphicObjects_.emplace_back(GraphicObject(goId_++, state_, createLine(), file, path_));
+            file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             break;
         case WorkingType::StepRepeat:
-            stepRepeat_.storage.append(GraphicObject(stepRepeat_.storage.size(), state_, createLine(), file, path_));
+            stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GraphicObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, createLine(), file, path_));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             break;
         }
         break;
     }
-    if (aperFunctionMap.contains(state_.aperture()) && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline) {
-        components[refDes].addFootprint(path_);
-    }
+
     resetStep();
 }
 
@@ -428,15 +435,45 @@ void Parser::addFlash() {
     if (ap->withHole())
         paths.emplace_back(ap->drawDrill(state_));
 
-    switch (abSrIdStack_.top().workingType) {
-    case WorkingType::Normal:
-        file->graphicObjects_.emplace_back(GraphicObject(goId_++, state_, paths, file));
+    int type = GrObject::Stamp;
+
+    switch (ap->type()) {
+    case Circle:
+        type |= GrObject::Circle;
         break;
+    case Rectangle:
+        type |= GrObject::Rect;
+        break;
+    case Obround:
+        type |= GrObject::Elipse;
+        break;
+    case Polygon:
+        type |= GrObject::Polygon;
+        break;
+    case Macro:
+        type |= GrObject::Composite;
+        break;
+    case Block:
+        type |= GrObject::Composite;
+        break;
+    default:
+        break;
+    }
+
+    switch (abSrIdStack_.top().workingType) {
+    case WorkingType::Normal: {
+        auto go = file->graphicObjects_.emplace_back(GrObject(goId_++,
+            state_, std::move(paths), file, GrObject::Type(type)));
+        go.name = QString("D%1|%2").arg(state_.aperture()).arg(ap->name()).toUtf8();
+        go.pos = state_.curPos();
+    } break;
     case WorkingType::StepRepeat:
-        stepRepeat_.storage.append(GraphicObject(stepRepeat_.storage.size(), state_, paths, file));
+        stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(),
+            state_, std::move(paths), file, GrObject::Type(type)));
         break;
     case WorkingType::ApertureBlock:
-        apBlock(abSrIdStack_.top().apertureBlockId)->append(GraphicObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, paths, file));
+        apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), //
+            state_, std::move(paths), file, GrObject::Type(type)));
         break;
     }
     if (aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
@@ -739,15 +776,15 @@ void Parser::closeStepRepeat() {
     for (int y = 0; y < stepRepeat_.y; ++y) {
         for (int x = 0; x < stepRepeat_.x; ++x) {
             const Point pt(static_cast<Point::Type>(stepRepeat_.i * x), static_cast<Point::Type>(stepRepeat_.j * y));
-            for (GraphicObject& go : stepRepeat_.storage) {
-                Paths paths(go.paths());
+            for (GrObject& go : stepRepeat_.storage) {
+                Paths paths(go.fill);
                 for (Path& path : paths)
                     TranslatePath(path, pt);
-                Path path(go.path());
+                Path path(go.path);
                 TranslatePath(path, pt);
-                auto state = go.state();
+                auto state = go.state;
                 state.setCurPos({state.curPos().x + pt.x, state.curPos().y + pt.y});
-                file->graphicObjects_.emplace_back(GraphicObject(goId_++, state, paths, go.gFile(), path));
+                file->graphicObjects_.emplace_back(GrObject(goId_++, state, std::move(paths), go.gFile, go.type, std::move(path)));
             }
         }
     }
@@ -755,7 +792,7 @@ void Parser::closeStepRepeat() {
     abSrIdStack_.pop();
 }
 
-ApBlock* Parser::apBlock(int id) { return static_cast<ApBlock*>(file->apertures_[id].get()); }
+ApBlock* Parser::apBlock(int32_t id) { return static_cast<ApBlock*>(file->apertures_[id].get()); }
 
 bool Parser::parseApertureMacros(const QString& gLine) {
     // Start macro if(match, else not an AM, carry on.
