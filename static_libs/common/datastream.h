@@ -141,7 +141,7 @@ public:
     QDataStream& read(T& val) {
         stream >> count;
         count = std::min<uint32_t>(count, pfr::detail::fields_count<T>());
-        pfr::for_each_field(val, [this](auto& field) { count-- ? stream >> field : stream; });
+        pfr::for_each_field(val, [this](auto& field) { if(count) --count, stream >> field; });
         return stream;
     }
 
@@ -157,7 +157,7 @@ public:
     QDataStream& read(Args&... args) {
         stream >> count;
         count = std::min<uint32_t>(count, sizeof...(Args));
-        ((count-- ? stream >> args : stream), ...);
+        ((count ? --count, stream >> args : stream), ...);
         return stream;
     }
 
