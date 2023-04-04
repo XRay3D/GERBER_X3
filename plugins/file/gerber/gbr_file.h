@@ -48,12 +48,13 @@ public:
         Components,
     };
     // AbstractFile interface
-    mvector<const GraphicObject*> getDataForGC(GraphicObject::Type, double area, double length) const override;
+    mvector<const GraphicObject*> getDataForGC(std::span<int>, Range area = {}, Range length = {}) const override;
     void setItemType(int type) override;
     int itemsType() const override;
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
-    QIcon icon() const override;;
+    QIcon icon() const override;
+    ;
     uint32_t type() const override { return GERBER; }
     void setColor(const QColor& color) override;
 

@@ -66,27 +66,33 @@ struct Transform {
     }
 };
 
+struct Range {
+    double min {-std::numeric_limits<double>::max()};
+    double max {+std::numeric_limits<double>::max()};
+    bool operator()(double val) const { return min <= val && val <= max; }
+};
+
 struct GraphicObject {
     // clang-format off
     enum Type {
         Null,
-        Arc       = 0b0'0000'0000'0000'0001, // 1
-        Circle    = 0b0'0000'0000'0000'0010, // 2
-        Elipse    = 0b0'0000'0000'0000'0100, // 3
-        Line      = 0b0'0000'0000'0000'1000, // 4
-        PolyLine  = 0b0'0000'0000'0001'0000, // 5
-        Polygon   = 0b0'0000'0000'0010'0000, // 6
-        Rect      = 0b0'0000'0000'0100'0000, // 7
-        Square    = 0b0'0000'0000'1000'0000, // 8
-        Text      = 0b0'0000'0001'0000'0000, // 9
-        Composite = 0b0'0000'0010'0000'0000, // 10
-        Dummy2    = 0b0'0000'0100'0000'0000, // 11
-        Dummy3    = 0b0'0000'1000'0000'0000, // 12
-        Dummy4    = 0b0'0001'0000'0000'0000, // 13
-        Dummy6    = 0b0'0010'0000'0000'0000, // 14
-        Dummy7    = 0b0'0100'0000'0000'0000, // 15
-        Stamp     = 0b0'1000'0000'0000'0000,
-        Drawn     = 0b1'0000'0000'0000'0000,
+        Arc       , // 1
+        Circle    , // 2
+        Elipse    , // 3
+        Line      , // 4
+        PolyLine  , // 5
+        Polygon   , // 6
+        Rect      , // 7
+        Square    , // 8
+        Text      , // 9
+        Composite , // 10
+        Dummy2    , // 11
+        Dummy3    , // 12
+        Dummy4    , // 13
+        Dummy6    , // 14
+        Dummy7    , // 15
+        Stamp     = 0b01'0000'0000,
+        Drawn     = 0b10'0000'0000,
     };
     // clang-format on
 
