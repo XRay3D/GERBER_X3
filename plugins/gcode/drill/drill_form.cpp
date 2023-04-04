@@ -118,10 +118,21 @@ void Form::updateFiles() {
 
     ui->cbxFile->clear();
 
+    int types[] {
+        int(GraphicObject::Circle + GraphicObject::Stamp),
+        int(GraphicObject::Composite + GraphicObject::Stamp),
+        int(GraphicObject::Rect + GraphicObject::Stamp),
+        int(GraphicObject::Square + GraphicObject::Stamp),
+    };
+
     for (auto file : App::project()->files()) {
-        auto gos = file->getDataForGC(GraphicObject::Stamp, 0, 0);
-        if (gos.size())
+        auto gos = file->getDataForGC(types);
+        if (gos.size()) {
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(gos));
+            for (auto* go : gos) {
+                App::graphicsView()->addItem(new GiDataSolid(const_cast<GraphicObject*>(go)->fill, file))->setVisible(true);
+            }
+        }
     }
 
     //    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber_, FileType::Dxf_}))

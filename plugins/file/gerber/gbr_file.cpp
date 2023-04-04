@@ -62,9 +62,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new GiGroup, new GiGroup});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -72,11 +72,30 @@ File::~File() { }
 
 const ApertureMap* File::apertures() const { return &apertures_; }
 
-mvector<const GraphicObject*> File::getDataForGC(GraphicObject::Type type, double area, double length) const {
-    auto gos = graphicObjects_
-        | std::views::filter([=](auto& go) { return go.type & type; })
-        | std::views::transform([=](auto& go) { return std::addressof(go); });
-    return {gos.begin(), gos.end()};
+mvector<const GraphicObject*> File::getDataForGC(std::span<int> types, Range area, Range length) const {
+    mvector<const GraphicObject*> ret;
+    qDebug() << __FUNCTION__ << types.size();
+    for (auto type : types) {
+        qDebug() << __FUNCTION__ << type;
+        auto gos = graphicObjects_
+            | std::views::filter([=](auto& go) {
+                  bool drawOrFlash = go.type & (type & ~0xFF);
+                  bool goType = (go.type & 0xFF) == (type & 0xFF);
+                  // qDebug() << "\tfilter1" << drawOrFlash << goType;
+                  return drawOrFlash && goType;
+              })
+            | std::views::filter([=](auto& go) {
+                  bool isDrawn = go.type & GraphicObject::Drawn;
+                  auto area_ = C2::Area(go.fill);
+                  bool areaFl = area(C2::Area(go.fill));
+                  qDebug() << "\tfilter2" << area_ << area.min << area.max << isDrawn << areaFl;
+                  return areaFl && (isDrawn ? length(C2::Length(go.path)) : true);
+              })
+            | std::views::transform([=](auto& go) { return std::addressof(go); });
+        ret.insert(ret.end(), gos.begin(), gos.end());
+    }
+
+    return ret;
 }
 
 Paths File::merge() const {

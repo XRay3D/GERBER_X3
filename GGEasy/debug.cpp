@@ -46,6 +46,10 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
+        if (1) {
+            constexpr auto DRILLING = md5::hash32("Drilling");
+            QTimer::singleShot(i += k, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
+        }
         //        if (0) {
         //            i = 1000;
         //            QTimer::singleShot(i += k, [this] { selectAll(); });

@@ -139,7 +139,7 @@ public:
     Side side() const;
     void setSide(Side side);
 
-    virtual mvector<const GraphicObject*> getDataForGC(GraphicObject::Type, double area, double length) const { return {}; };
+    virtual mvector<const GraphicObject*> getDataForGC(std::span</*GraphicObject::Type*/ int>, Range area = {}, Range length = {}) const { return {}; };
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
     virtual void createGi() = 0;
