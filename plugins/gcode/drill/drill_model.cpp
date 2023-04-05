@@ -22,11 +22,9 @@
 
 namespace Drilling {
 
-Model::Model(QString type, int rowCount, QObject* parent)
+Model::Model(size_t rowCount, QObject* parent)
     : QAbstractTableModel(parent)
-    , type(type) {
-    data_.reserve(rowCount);
-}
+    , data_(rowCount) { }
 
 void Model::setToolId(int row, int32_t id) {
     if (data_[row].toolId != id)

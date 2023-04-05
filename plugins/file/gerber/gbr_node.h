@@ -21,7 +21,7 @@ class File;
 class Node : public FileTree::Node {
     friend class File;
 
-    void repaint() const;
+    Q_INVOKABLE void repaint();
     Qt::CheckState current_ = Qt::Unchecked;
     File* file;
 

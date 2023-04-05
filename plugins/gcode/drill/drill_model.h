@@ -30,11 +30,11 @@ struct Row {
     //        , toolId(-1) {
     //    }
     ~Row() { qDeleteAll(items); }
-    const QIcon icon;
-    const QString name;
-    const double diameter;
-    const int apertureId;
-    const bool isSlot;
+    /*const*/ QIcon icon;
+    /*const*/ QString name;
+    /*const*/ double diameter;
+    /*const*/ int apertureId;
+    /*const*/ bool isSlot;
     bool useForCalc {};
     int toolId {-1};
     mvector<GiPreview*> items;
@@ -44,7 +44,6 @@ class Model : public QAbstractTableModel {
     Q_OBJECT
 
     mvector<Row> data_;
-    QString type;
 
     enum {
         Name,
@@ -56,7 +55,7 @@ signals:
     void set(int, bool);
 
 public:
-    explicit Model(QString type, int rowCount, QObject* parent = nullptr);
+    explicit Model(size_t rowCount, QObject* parent = nullptr);
     ~Model() override { qDebug(__FUNCTION__); }
 
     bool isSlot(int row) const { return data_[row].isSlot; }
