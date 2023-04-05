@@ -88,15 +88,12 @@ public:
     /////////////////////////////////
     template <typename T = QGraphicsItem, typename... Ts>
     auto items(Ts... ts) const {
-        return getItemImpl<
-            qOverload<Qt::SortOrder>(&QGraphicsScene::items),
-            T>(EnumHelper {ts...}, Qt::DescendingOrder);
+        return getItemImpl<qOverload<Qt::SortOrder>(&QGraphicsScene::items), T>(EnumHelper {ts...}, Qt::DescendingOrder);
     }
 
     template <typename T = QGraphicsItem, typename... Ts>
     auto selectedItems(Ts... ts) const {
-        return getItemImpl<&QGraphicsScene::selectedItems,
-            T>(EnumHelper {ts...});
+        return getItemImpl<&QGraphicsScene::selectedItems, T>(EnumHelper {ts...});
     }
 
     template <typename T>
@@ -119,7 +116,7 @@ private:
     std::vector<T*> getItemImpl(FilterInt&& et, Args&&... args) const {
         const auto items = (scene()->*Ptr)(std::forward<Args>(args)...); // get all items
         constexpr bool isQGraphicsItem = std::is_same_v<T, QGraphicsItem>;
-        if constexpr (isQGraphicsItem && !FilterInt::value) { //  вернуть все QGraphicsItem*
+        if constexpr (isQGraphicsItem && !FilterInt::value) {            //  вернуть все QGraphicsItem*
             return {items.begin(), items.end()};
         } else {
             // WARNING FilterInt faster than dynamic_cast
@@ -130,7 +127,7 @@ private:
                 auto rview = items | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
                 return {rview.begin(), rview.end()};
             } else if constexpr (!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
-                auto rview = items | rviews::filter(et) /* WARNING | rviews::filter(FilterDyn {}) */ | rviews::transform(Transform {});
+                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
                 return {rview.begin(), rview.end()};
             } else if constexpr (isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
                 auto rview = items | rviews::filter(et);

@@ -62,9 +62,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new GiGroup, new GiGroup});
     layerTypes_ = {
-        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
-        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
+        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
+        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
     };
 }
 
@@ -72,30 +72,150 @@ File::~File() { }
 
 const ApertureMap* File::apertures() const { return &apertures_; }
 
-mvector<const GraphicObject*> File::getDataForGC(std::span<int> types, Range area, Range length) const {
-    mvector<const GraphicObject*> ret;
-    qDebug() << __FUNCTION__ << types.size();
-    for (auto type : types) {
-        qDebug() << __FUNCTION__ << type;
-        auto gos = graphicObjects_
-            | std::views::filter([=](auto& go) {
-                  bool drawOrFlash = go.type & (type & ~0xFF);
-                  bool goType = (go.type & 0xFF) == (type & 0xFF);
-                  // qDebug() << "\tfilter1" << drawOrFlash << goType;
-                  return drawOrFlash && goType;
-              })
-            | std::views::filter([=](auto& go) {
-                  bool isDrawn = go.type & GraphicObject::Drawn;
-                  auto area_ = C2::Area(go.fill);
-                  bool areaFl = area(C2::Area(go.fill));
-                  qDebug() << "\tfilter2" << area_ << area.min << area.max << isDrawn << areaFl;
-                  return areaFl && (isDrawn ? length(C2::Length(go.path)) : true);
-              })
-            | std::views::transform([=](auto& go) { return std::addressof(go); });
-        ret.insert(ret.end(), gos.begin(), gos.end());
-    }
+mvector<const GraphicObject*> File::getDataForGC(std::span<int> types, GCType gcType, Range area, Range length) const {
+    //    mvector<const GraphicObject*> ret;
+    //    qDebug() << __FUNCTION__ << types.size();
+    //    for (auto type : types) {
+    //        qDebug() << __FUNCTION__ << type;
+    //        auto gos = graphicObjects_
+    //            | std::views::filter([=](auto& go) {
+    //                  bool drawOrFlash = go.type & (type & ~0xFF);
+    //                  bool goType = (go.type & 0xFF) == (type & 0xFF);
+    //                  // qDebug() << "\tfilter1" << drawOrFlash << goType;
+    //                  return drawOrFlash && goType;
+    //              })
+    //            | std::views::filter([=](auto& go) {
+    //                  bool isDrawn = go.type & GraphicObject::Drawn;
+    //                  auto area_ = C2::Area(go.fill);
+    //                  bool areaFl = area(C2::Area(go.fill));
+    //                  qDebug() << "\tfilter2" << area_ << area.min << area.max << isDrawn << areaFl;
+    //                  return areaFl && (isDrawn ? length(C2::Length(go.path)) : true);
+    //              })
+    //            | std::views::transform([=](auto& go) { return std::addressof(go); });
+    //        ret.insert(ret.end(), gos.begin(), gos.end());
+    //    }
+    //    return ret;
 
-    return ret;
+    QTransform t {transform()};
+    auto mapPaths = [t](Paths paths) {
+        for (auto&& path : paths)
+            path = t.map(path);
+        return paths;
+    };
+
+    auto mapPos = [t](auto pos) {
+        pos = t.map(pos);
+        return pos;
+    };
+
+    if (gcType == GCType::Drill) {
+        mvector<const GraphicObject*> retData;
+        double drillDiameter {};
+
+        for (auto gbrObj : graphicObjects_) {
+            if (!apertures_.contains(gbrObj.state.aperture()) || gbrObj.state.dCode() != D03)
+                continue;
+
+            auto& ap = *apertures_.at(gbrObj.state.aperture());
+
+            if (!ap.flashed())
+                continue;
+
+            auto name {ap.name()};
+            if (ap.withHole()) {
+                drillDiameter = ap.drillDiameter();
+                name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
+            } else if (ap.type() == Circle) {
+                drillDiameter = ap.apSize();
+            } else {
+                drillDiameter = ap.minSize();
+            }
+            qDebug() << ap.type() << "ap.apSize()" << ap.apSize();
+
+            auto key = std::tuple {gbrObj.state.aperture(), drillDiameter, false, name};
+
+            //            retData[key].posOrPath.emplace_back(mapPos(gbrObj.state.curPos()));
+
+            auto go = new GraphicObject;
+            go->pos = mapPos(gbrObj.state.curPos());
+            go->name = QString("D%1|%2").arg(gbrObj.state.aperture()).arg(name).toUtf8();
+            go->raw = drillDiameter;
+
+            // draw aperture
+            if (!go->fill.size()) {
+                auto state = gbrObj.state;
+                state.setCurPos({});
+                go->fill = ap.draw(state);
+                //                QTransform transform {};
+                //                transform.rotate(transform_.angle);
+                //                for (auto&& path : go->fill)
+                //                    path = transform.map(path);
+            }
+
+            retData.emplace_back(go);
+        }
+
+        return retData;
+    }
+    if (gcType == GCType::Profile) {
+        //        auto param_ = std::any_cast<Thermal::ThParam2>(param);
+        //        Thermal::PreviewGiMap sourcePreview;
+        //        auto gbrFile = static_cast<File*>(file);
+
+        //        auto testArea = [&param_](const Paths& paths) {
+        //            const double areaMax = param_.areaMax;
+        //            const double areaMin = param_.areaMin;
+        //            const double area = Area(paths);
+        //            return areaMin <= area && area <= areaMax;
+        //        };
+
+        //        const ApertureMap& apertures_ = *gbrFile->apertures();
+
+        //        if (param_.aperture) {
+        //            std::unordered_map<int, Thermal::PreviewGiMapValVec*> thermalNodes;
+
+        //            for (const auto [dCode, aperture] : apertures_)
+        //                if (aperture->flashed() && !thermalNodes.contains(dCode) && testArea(aperture->draw({})))
+        //                    thermalNodes.emplace(dCode, &sourcePreview[0][aperture->name()]);
+
+        //            for (const auto& [dCode, aperture] : apertures_)
+        //                if (aperture->flashed() && testArea(aperture->draw({})))
+        //                    for (GraphicObject& go : gbrFile->graphicObjects_)
+        //                        if (thermalNodes.contains(dCode) && go.state().dCode() == D03 && go.state().aperture() == dCode)
+        //                            thermalNodes[dCode]->emplace_back(mapPaths(go.paths()), mapPos(go.state().curPos()));
+        //        }
+
+        //        if (param_.path) {
+        //            auto& mv = sourcePreview[1][tr("Lines")];
+
+        //            for (/*const*/ GraphicObject& go : gbrFile->graphicObjects_)
+        //                if (go.state().type() == PrimitiveType::Line
+        //                    && go.state().imgPolarity() == Positive
+        //                    && (go.path().size() == 2 || (go.path().size() == 5 && go.path().front() == go.path().back()))
+        //                    && go.path().front().distTo(go.path().back()) * dScale * 0.3 < apertures_.at(go.state().aperture())->minSize()
+        //                    && testArea(go.paths()))
+        //                    mv.emplace_back(mapPaths(go.paths()), Point {});
+        //        }
+
+        //        if (param_.pour) {
+        //            auto& mv = sourcePreview[2][tr("Regions")];
+        //            mvector<const GraphicObject*> gos;
+        //            for (const GraphicObject& go : gbrFile->graphicObjects_)
+        //                if (go.state().type() == PrimitiveType::Region
+        //                    && go.state().imgPolarity() == Positive
+        //                    && testArea(go.paths()))
+        //                    gos.push_back(&go);
+
+        //            std::ranges::sort(gos, {}, [](const GraphicObject* go1) {
+        //                return go1->state().curPos();
+        //            });
+        //            for (auto& go : gos)
+        //                mv.emplace_back(mapPaths(go->paths()), Point {});
+        //        }
+
+        //        return sourcePreview;
+    }
+    return {};
 }
 
 Paths File::merge() const {

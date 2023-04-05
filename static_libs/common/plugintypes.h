@@ -56,14 +56,21 @@ struct Transform {
     friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
         return Block(stream).read(tr);
     }
-
-    operator QTransform() const {
+    QTransform toQTransform() const {
         QTransform t;
         t.translate(translate.x(), translate.y());
         t.rotate(angle);
         t.scale(scale.x(), scale.y());
         return t;
     }
+    operator QTransform() const { return toQTransform(); }
+};
+
+enum class GCType {
+    Null,
+    Drill,
+    Pocket,
+    Profile,
 };
 
 struct Range {

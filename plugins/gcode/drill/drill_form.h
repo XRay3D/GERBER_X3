@@ -22,13 +22,13 @@ class QCheckBox;
 
 namespace Drilling {
 
-using PosOrPath = std::variant<const QPointF, const QPolygonF>;
-using Key = std::tuple<int, double, bool, QString>;
-struct Val {
-    mvector<PosOrPath> posOrPath;
-    Paths draw;
-};
-using Preview = std::map<Key, Val>;
+// using PosOrPath = std::variant<const QPointF, const QPolygonF>;
+// using Key = std::tuple<int, double, bool, QString>;
+// struct Val {
+//     mvector<PosOrPath> posOrPath;
+//     Paths draw;
+// };
+// using Preview = std::map<Key, Val>;
 
 class Model;
 class Header;
@@ -44,20 +44,13 @@ public:
     static bool canToShow();
 
 private:
-    enum WworckType {
-        Drill,
-        Pocket,
-        Profile,
-    };
-
     Ui::DrillForm* ui;
     class Model* model = nullptr;
     class AbstractFile* file = nullptr;
     class Header* header;
     class QCheckBox* checkBox;
-    WworckType worckType = Drill;
+    GCType worckType = GCType::Drill;
     GCode::SideOfMilling side = GCode::Inner;
-    QString type_;
 
     void initToolTable();
 
