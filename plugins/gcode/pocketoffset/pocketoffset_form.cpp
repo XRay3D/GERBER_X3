@@ -189,11 +189,10 @@ void Form::сomputePaths() {
         QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
         return;
     }
-
-    GCode::Params gcp_;
+    auto gcp = new GCode::Params;
     for (const Tool& t : tool) {
-        gcp_.tools.push_back(t);
-        if (gcp_.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
+        gcp->tools.push_back(t);
+        if (gcp->tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
             break;
     }
 
@@ -204,22 +203,21 @@ void Form::сomputePaths() {
         auto cmp2 = [this](const Tool& t1, const Tool& t2) -> bool {
             return qFuzzyCompare(t1.getDiameter(dsbxDepth->value()), t2.getDiameter(dsbxDepth->value()));
         };
-        std::sort(gcp_.tools.begin(), gcp_.tools.end(), cmp);
-        auto last = std::unique(gcp_.tools.begin(), gcp_.tools.end(), cmp2);
-        gcp_.tools.erase(last, gcp_.tools.end());
+        std::sort(gcp->tools.begin(), gcp->tools.end(), cmp);
+        auto last = std::unique(gcp->tools.begin(), gcp->tools.end(), cmp2);
+        gcp->tools.erase(last, gcp->tools.end());
     }
 
-    gcp_.setConvent(ui->rbConventional->isChecked());
-    gcp_.setSide(side);
-    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp->setConvent(ui->rbConventional->isChecked());
+    gcp->setSide(side);
+    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
     if (ui->sbxSteps->isVisible())
-        gcp_.params[Creator::OffsetSteps] = ui->sbxSteps->value();
+        gcp->params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
-    creator()->setGcp(gcp_);
-    creator()->addPaths(std::move(wPaths));
-    creator()->addRawPaths(wRawPaths);
-    fileCount = static_cast<int>(gcp_.tools.size());
-    createToolpath();
+    gcp->addPaths(std::move(wPaths));
+    gcp->addRawPaths(wRawPaths);
+    fileCount = static_cast<int>(gcp->tools.size());
+    createToolpath(gcp);
 }
 
 void Form::onSbxStepsValueChanged(int arg1) {

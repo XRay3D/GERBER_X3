@@ -62,13 +62,19 @@ void RotatePath(Path& poligon, double angle, const Point& center) {
         ReversePath(poligon);
 }
 
-void TranslatePath(Path& path, const Point& pos) {
-    if (pos.x == 0 && pos.y == 0)
-        return;
-    for (auto& pt : path) {
-        pt.x += pos.x;
-        pt.y += pos.y;
-    }
+Path& TranslatePath(Path& path, const Point& pos) {
+    if (pos.x != 0 || pos.y != 0)
+        for (auto& pt : path) {
+            pt.x += pos.x;
+            pt.y += pos.y;
+        }
+    return path;
+}
+
+Paths& TranslatePaths(Paths& paths, const Point& pos) {
+    for (auto&& path : paths)
+        TranslatePath(path, pos);
+    return paths;
 }
 
 double Perimeter(const Path& path) {

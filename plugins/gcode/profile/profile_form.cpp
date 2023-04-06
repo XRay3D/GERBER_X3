@@ -160,22 +160,22 @@ void Form::сomputePaths() {
         return;
     }
 
-    GCode::Params gcp_;
-    gcp_.setConvent(ui->rbConventional->isChecked());
-    gcp_.setSide(side);
-    gcp_.tools.push_back(tool);
-    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
+    auto gcp = new GCode::Params;
+    gcp->setConvent(ui->rbConventional->isChecked());
+    gcp->setSide(side);
+    gcp->tools.push_back(tool);
+    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
 
-    gcp_.params[Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
-    gcp_.params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
+    gcp->params[Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
+    gcp->params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
     // NOTE reserve   gcp_.params[Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
 
     if (side == GCode::On)
-        gcp_.params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
+        gcp->params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
     else
-        gcp_.params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
+        gcp->params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
 
-    gcp_.params[GCode::Params::GrItems].setValue(usedItems_);
+    gcp->params[GCode::Params::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
     for (QGraphicsItem* item : App::graphicsView()->items()) {
@@ -184,14 +184,13 @@ void Form::сomputePaths() {
     }
     if (!brv.isEmpty()) {
         // gcp_.params[GCode::Params::Bridges].fromValue(brv);
-        gcp_.params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
+        gcp->params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
-    creator()->setGcp(gcp_);
-    creator()->addPaths(std::move(wPaths));
-    creator()->addRawPaths(std::move(wRawPaths));
+    gcp->addPaths(std::move(wPaths));
+    gcp->addRawPaths(std::move(wRawPaths));
     fileCount = 1;
-    emit createToolpath();
+    emit createToolpath(gcp);
 }
 
 void Form::updateName() {

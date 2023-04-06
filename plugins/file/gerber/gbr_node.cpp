@@ -138,10 +138,14 @@ void Node::repaint() {
         return;
     if (!parent_)
         return;
+
     const int count = parent_->childCount();
     for (int i {}; i < count; ++i) {
+        auto n = static_cast<Node*>(parent_->child(i));
+        if (n->file->userColor())
+            continue;
         const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
-        file->setColor(QColor::fromHsv(k, 255, 255, 150));
+        n->file->setColor(QColor::fromHsv(k, 255, 255, 150));
         emit App::fileModel()->dataChanged(index(0), index(0), {Qt::DecorationRole});
     }
 }

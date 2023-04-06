@@ -62,10 +62,6 @@ public:
 
     std::pair<int, int> getProgress();
 
-    void addPaths(Paths&& paths);
-    void addRawPaths(Paths paths);
-    void addSupportPaths(Pathss supportPaths);
-
     Pathss& groupedPaths(Grouping group, Point::Type offset = uScale, bool skipFrame = {});
     void grouping(Grouping group, PolyTree& node);
 
@@ -77,12 +73,9 @@ public:
     /*static*/ Pathss& sortB(Pathss& src);
     /*static*/ Pathss& sortBeginEnd(Pathss& src);
 
-    void createGc();
+    void createGc(Params* gcp);
 
     void continueCalc(bool fl = true);
-
-    Params getGcp() const;
-    void setGcp(const Params& gcp_);
 
     //    static void //PROG .3setProgMax(int progressMax);
     //    static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
@@ -93,6 +86,12 @@ public:
     mvector<GiError*> items;
 
     bool checkMillingFl {};
+
+private:
+    void addRawPaths(Paths&& paths);
+
+    Params getGcp() const;
+    void setGcp(const Params& gcp_);
 
 signals:
     void fileReady(File* file);

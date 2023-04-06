@@ -23,8 +23,9 @@
 namespace Drilling {
 
 Model::Model(size_t rowCount, QObject* parent)
-    : QAbstractTableModel(parent)
-    , data_(rowCount) { }
+    : QAbstractTableModel(parent) {
+    data_.resize(rowCount);
+}
 
 void Model::setToolId(int row, int32_t id) {
     if (data_[row].toolId != id)
@@ -67,9 +68,9 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         switch (role) {
         case Qt::DisplayRole:
             if (data_[row].isSlot)
-                return QString(data_[row].name).replace(tr("Tool"), tr("Slot"));
+                return data_[row].name.back(); // FIXME QString(data_[row].name.back()).replace(tr("Tool"), tr("Slot"));
             else
-                return data_[row].name;
+                return data_[row].name.back();
         case Qt::DecorationRole: {
             if (data_[index.row()].toolId > -1 && data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
@@ -94,7 +95,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
             }
         }
         case Qt::UserRole:
-            return data_[row].apertureId;
+            return row;
         default:
             break;
         }
@@ -136,7 +137,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
                 return tr("Tool");
             }
         } else
-            return QString(/*type_ == tAperture ? "D%1" : "T%1"*/ "%1 ").arg(data_[section].apertureId);
+            return data_[section].name.value(0);
     case Qt::SizeHintRole:
         if (orientation == Qt::Vertical)
             return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);

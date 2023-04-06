@@ -15,6 +15,7 @@
 
 #include "abstract_file.h"
 #include "abstract_fileplugin.h"
+#include "gc_types.h"
 #include "md5.h"
 #include "project.h"
 #include "shape.h"
@@ -107,13 +108,13 @@ void Model::addShape(Shapes::AbstractShape* shape) {
         rootItem->addChild(it);
         endInsertRows();
     }
-// FIXME   Node* item(fileFolders[type]);
-//    QModelIndex index = createIndex(0, 0, item);
-//    int rowCount = item->childCount();
-//    beginInsertRows(index, rowCount, rowCount);
-//    item->addChild(shape->node());
-//    endInsertRows();
-//    emit select(createIndex(rowCount, 0, shape->node()));
+    // FIXME   Node* item(fileFolders[type]);
+    //    QModelIndex index = createIndex(0, 0, item);
+    //    int rowCount = item->childCount();
+    //    beginInsertRows(index, rowCount, rowCount);
+    //    item->addChild(shape->node());
+    //    endInsertRows();
+    //    emit select(createIndex(rowCount, 0, shape->node()));
 }
 
 void Model::closeProject() {
