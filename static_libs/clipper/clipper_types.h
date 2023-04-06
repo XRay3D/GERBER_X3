@@ -26,12 +26,78 @@
 #include "app.h"
 #include "datastream.h"
 // #include "settings.h"
-#include "gc_types.h" // ifCancelThenThrow
 
 static constexpr auto uScale {100'000};
 static constexpr auto dScale {1. / uScale};
 
-// extern void ifCancelThenThrow();
+class cancelException : public std::exception {
+public:
+    cancelException(const char* description)
+        : m_descr(description) {
+    }
+    ~cancelException() noexcept override = default;
+    const char* what() const noexcept override { return m_descr.c_str(); }
+
+private:
+    std::string m_descr;
+};
+
+class ProgressCancel {
+    static inline int max_;
+    static inline int current_;
+    static inline bool cancel_;
+
+public:
+    static void reset() {
+        current_ = 0;
+        max_ = 0;
+        cancel_ = 0;
+    }
+
+    /////////////////
+    /// \brief Progress max
+    /// \return
+    ///
+    static int max() { return max_; }
+    /////////////////
+    /// \brief Progress setMax
+    /// \param max
+    ///
+    static void setMax(int max) { max_ = max; }
+
+    /////////////////
+    /// \brief Progress current
+    /// \return
+    ///
+    static int current() { return current_; }
+    /////////////////
+    /// \brief Progress setCurrent
+    /// \param current
+    ///
+    static void setCurrent(int current = 0) { current_ = current; }
+    /////////////////
+    /// \brief Progress incCurrent
+    ///
+    static void incCurrent() { ++current_; }
+    static bool isCancel() { return cancel_; }
+    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
+        ++current_;
+        if (cancel_) [[unlikely]] {
+            //            static std::stringstream ss;
+            //            ss.clear();
+            //            ss << "file: "
+            //               << location.file_name() << "("
+            //               << location.line() << ":"
+            //               << location.column() << ") `"
+            //               << location.function_name();
+            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
+            throw cancelException(__FUNCTION__);
+        }
+    }
+    static void setCancel(bool cancel) { cancel_ = cancel; }
+};
+
+inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
 
 namespace Clipper2Lib {
 

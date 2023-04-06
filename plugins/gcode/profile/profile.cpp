@@ -13,6 +13,7 @@
 #include "profile.h"
 #include "app.h"
 #include "gc_gi_bridge.h"
+#include "gi_gcpath.h"
 #include "graphicsview.h"
 
 #include <execution>
@@ -322,38 +323,66 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
     }
 }
+////////////////////////////////////////////////////////
 
-// void ProfileCreator::addPolyNodeToPaths(PolyTree& polynode, ProfileCreator::NodeType nodetype, Paths& paths)
-//{
-//     bool match = true;
-//     if (nodetype == ntClosed)
-//         match = !polynode.IsOpen();
-//     else if (nodetype == ntOpen)
-//         return;
-//     if (!polynode.Polygon().empty() && match) {
-//         reduceDistance(from, polynode.Polygon());
-//         polynode.Polygon().push_back(polynode.Polygon().front());
-//         paths.push_back(std::move(polynode.Polygon()));
-//     }
-//     for (size_t i = 0; i < polynode.Count(); ++i)
-//         addPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
-// }
+File::File()
+    : GCode::File() { }
 
-// void ProfileCreator::closedPathsFromPolyTree(PolyTree& polytree, Paths& paths)
-//{
-//     paths.resize(0);
-//     paths.reserve(polytree.Total());
-//     addPolyNodeToPaths(polytree, ntClosed, paths);
-// }
+File::File(GCode::Params&& gcp, Pathss&& toolPathss)
+    : GCode::File(std::move(gcp), std::move(toolPathss)) {
+    if (gcp_.tools.front().diameter()) {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+}
 
-// void ProfileCreator::openPathsFromPolyTree(const PolyTree& polytree, Paths& paths)
-//{
-//     paths.resize(0);
-//     paths.reserve(polytree.Total());
-//     //Open paths are top level only, so ...
-//     for (size_t i = 0; i < polytree.Count(); ++i)
-//         if (polytree.Childs[i]->IsOpen())
-//             paths.push_back(polytree.Childs[i]->Polygon());
-// }
+void File::genGcodeAndTile() {
+    const QRectF rect = App::project()->worckRect();
+    for (size_t x = 0; x < App::project()->stepsX(); ++x) {
+        for (size_t y = 0; y < App::project()->stepsY(); ++y) {
+            const QPointF offset((rect.width() + App::project()->spaceX()) * x, (rect.height() + App::project()->spaceY()) * y);
+
+            if (toolType() == Tool::Laser)
+                saveLaserProfile(offset);
+            else
+                saveMillingProfile(offset);
+
+            if (gcp_.params.contains(GCode::Params::NotTile))
+                return;
+        }
+    }
+}
+
+void File::createGi() {
+
+    GraphicsItem* item;
+    for (const Paths& paths : toolPathss_) {
+        item = new GiGcPath(paths, this);
+        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
+        itemGroup()->push_back(item);
+    }
+
+    for (size_t i {}; const Paths& paths : toolPathss_) {
+        item = new GiGcPath(toolPathss_[i], this);
+        item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+        itemGroup()->push_back(item);
+        for (size_t j = 0; j < paths.size() - 1; ++j)
+            g0path_.push_back({paths[j].back(), paths[j + 1].front()});
+        if (i < toolPathss_.size() - 1) {
+            g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
+        }
+    }
+
+    item = new GiGcPath(g0path_);
+    //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
+    item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
+    itemGroup()->push_back(item);
+
+    itemGroup()->setVisible(true);
+}
 
 } // namespace Profile

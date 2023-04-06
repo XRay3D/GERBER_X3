@@ -25,8 +25,8 @@
 // #include "settings.h"
 // #include "tool_pch.h"
 
-// #include "pocketoffset/pocketoffset.h"
-// #include "profile/profile.h"
+#include "pocketoffset/pocketoffset.h"
+#include "profile/profile.h"
 
 #include <QHeaderView>
 #include <QMenu>
@@ -198,50 +198,40 @@ void Form::initToolTable() {
 }
 
 void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
-    //    file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
-    //    if (!file)
-    //        return;
+    file = ui->cbxFile->currentData(Qt::UserRole + 1).value<AbstractFile*>();
+    qDebug() << file << file->id();
+    if (!App::project()->contains(file))
+        return;
 
     try {
         //        auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->getDataForGC(file, plugin));
-        auto peview = ui->cbxFile->currentData().value<mvector<const GraphicObject*>>();
-        for (auto* var : peview)
-            qDebug() << var->name << var->pos;
+        //        auto peview = ui->cbxFile->currentData().value<mvector<const GraphicObject*>>();
+        //        for (auto* var : peview)
+        //            qDebug() << var->name << var->pos;
 
-        return;
+        if (1) {
+            using Key = std::pair<QByteArray, bool>;
+            using Val = mvector<const GraphicObject*>;
+            std::map<Key, Val> map;
+            for (auto* var : ui->cbxFile->currentData().value<Val>())
+                map[Key {var->name, var->path.size() > 1}].emplace_back(var);
 
-        if (0) {
-            std::map<std::pair<QByteArray, bool>, std::vector<const GraphicObject*>> set;
-            for (auto* var : ui->cbxFile->currentData().value<mvector<const GraphicObject*>>())
-                set[{var->name.split('|').front(), var->path.size()}].emplace_back(var);
-
-            model = new Model(set.size(), ui->toolTable);
+            model = new Model(map.size(), ui->toolTable);
             auto& data = model->data();
-            data.reserve(peview.size());
-            for (int i {}; auto& [key, val] : set) {
-                auto row = data[i];
-                row.icon = key.second ? drawIcon(val.front()->fill) : drawDrillIcon(key.second ? Qt::red : Qt::black);
-                row.name = key.first + ": Ø" + QString::number(std::any_cast<double>(val.front()->raw));
+            for (int i {}; auto& [key, val] : map) {
+                auto& row = data[i++];
+                row.icon = !key.second ? drawIcon(val.front()->fill) : drawDrillIcon(key.second ? Qt::red : Qt::black);
+                row.name = QString(key.first).split('|');
+                row.name.back() += ": Ø" + QString::number(std::any_cast<double>(val.front()->raw));
                 row.diameter = std::any_cast<double>(val.front()->raw);
-                //            row.apertureId;
                 row.isSlot = key.second;
                 for (auto* go : val)
                     new GiPreview(
-                        std::move(go->pos),
+                        Path {go->pos},
                         row.diameter,
                         data.back().toolId,
                         row,
                         go->fill);
-
-                //            auto [id, diametr, isSlot, name] = key;
-                //            data.emplace_back(
-                //                val.draw.size() ? drawIcon(val.draw) : drawDrillIcon(isSlot ? Qt::red : Qt::black),
-                //                name + ": Ø" + QString::number(diametr),
-                //                diametr,
-                //                id,
-                //                isSlot);
-                //            for (auto&& posOrPath : val.posOrPath)
-                //                auto gi = new GiPreview(std::move(posOrPath), diametr, data.back().toolId, data.back(), val.draw);
             }
         }
         App::graphicsView()->scene()->update();
@@ -274,7 +264,6 @@ void Form::on_doubleClicked(const QModelIndex& current) {
         // FIXME       tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == GCType::Profile || worckType == GCType::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
         if (tdb.exec()) {
-            int apertureId = model->apertureId(current.row());
             const Tool tool(tdb.tool());
             model->setToolId(current.row(), tool.id());
         }
@@ -454,7 +443,7 @@ void Form::сomputePaths() {
 
         for (int i {}; auto&& row : *model) {
             if (row.toolId > -1 && row.useForCalc && row.isSlot) {
-                pathsMap[row.toolId].toolsApertures.push_back(row.apertureId);
+                pathsMap[row.toolId].toolsApertures.push_back(i);
                 for (auto& item : row.items) {
                     if (item->fit(dsbxDepth->value()))
                         for (Path& path : offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
@@ -493,7 +482,7 @@ void Form::сomputePaths() {
         for (int i {}; auto&& row : *model) {
             bool created {};
             if (row.toolId > -1 && row.useForCalc) {
-                pathsMap[row.toolId].toolsApertures.push_back(row.apertureId);
+                pathsMap[row.toolId].toolsApertures.push_back(i);
                 for (auto& item : row.items) {
                     //                    if (item->isSlot())
                     //                        continue;
@@ -563,58 +552,32 @@ void Form::сomputePaths() {
                 App::project()->addFile(gcode);
             }
             if (val.paths.size()) {
-                GCode::File* gcode = nullptr;
-
-                QThread thread;
                 switch (worckType) {
                 case GCType::Profile: {
-                    //                    GCode::Params gcp;
-                    //                    gcp.setConvent(ui->rbConventional->isChecked());
-                    //                    gcp.setSide(side);
-                    //                    gcp.tools = {App::toolHolder().tool(toolId)};
-                    //                    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
-
-                    //                    GCode::ProfileCreator tpc;
-                    //                    tpc.moveToThread(&thread);
-                    //                    connect(&tpc, &GCode::Creator::errorOccurred, this, &Form::errorOccurred);
-                    //                    thread.start();
-                    //                    tpc.setGcp(gcp);
-                    //                    tpc.addPaths(val.paths);
-                    //                    tpc.createGc();
-
-                    //                    gcode = tpc.file();
+                    auto gcp = new GCode::Params;
+                    gcp->setConvent(ui->rbConventional->isChecked());
+                    gcp->setSide(side);
+                    gcp->tools = {App::toolHolder().tool(toolId)};
+                    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+                    gcp->addPaths(std::move(val.paths));
+                    setCreator(new Profile::Creator);
+                    fileCount = 1;
+                    emit createToolpath(gcp);
                 } break;
                 case GCType::Pocket: {
-                    //                    GCode::Params gcp;
-                    //                    gcp.setConvent(ui->rbConventional->isChecked());
-                    //                    gcp.setSide(GCode::Inner);
-                    //                    gcp.tools = {App::toolHolder().tool(toolId)};
-                    //                    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
-                    //                    gcp.params[GCode::Params::Pass] = 0;
-                    //                    gcp.params[GCode::Params::UseRaster] = 0;
-                    //                    gcp.params[GCode::Params::Steps] = 0;
-
-                    //                    PocketCreator tpc;
-                    //                    tpc.moveToThread(&thread);
-                    //                    connect(&tpc, &GCode::Creator::errorOccurred, this, &Form::errorOccurred);
-                    //                    thread.start();
-                    //                    tpc.setGcp(gcp);
-                    //                    tpc.addPaths(val.paths);
-                    //                    tpc.createGc();
-                    //                    gcode = tpc.file();
+                    auto gcp = new GCode::Params;
+                    gcp->setConvent(ui->rbConventional->isChecked());
+                    gcp->setSide(GCode::Inner);
+                    gcp->tools = {App::toolHolder().tool(toolId)};
+                    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+                    gcp->addPaths(std::move(val.paths));
+                    setCreator(new PocketOffset::Creator);
+                    fileCount = 1;
+                    emit createToolpath(gcp);
                 } break;
                 default:
                     continue;
                 }
-
-                thread.quit();
-                thread.wait();
-
-                if (!gcode)
-                    continue;
-                gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + "_T" + indexes(val.toolsApertures));
-                gcode->setSide(file->side());
-                App::project()->addFile(gcode);
             }
         }
     }

@@ -26,14 +26,13 @@ struct Row {
     //        : icon(icon)
     //        , name(name)
     //        , diameter(diameter)
-    //        , apertureId(id)
+    //        , rowId(id)
     //        , toolId(-1) {
     //    }
     ~Row() { qDeleteAll(items); }
     /*const*/ QIcon icon;
-    /*const*/ QString name;
+    /*const*/ QStringList name;
     /*const*/ double diameter;
-    /*const*/ int apertureId;
     /*const*/ bool isSlot;
     bool useForCalc {};
     int toolId {-1};
@@ -61,7 +60,6 @@ public:
     bool isSlot(int row) const { return data_[row].isSlot; }
     bool useForCalc(int row) const { return data_[row].useForCalc; }
 
-    int apertureId(int row) const { return data_[row].apertureId; }
     int toolId(int row) const { return data_[row].toolId; }
 
     void setCreate(bool create);

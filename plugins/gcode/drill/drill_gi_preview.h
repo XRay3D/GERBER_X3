@@ -7,13 +7,12 @@
 namespace Drilling {
 
 class GiPreview final : public GiAbstractPreview {
-    Path hv;
+    Path hv_;
     Row& row;
     int toolId_ {-1};
 
 public:
     explicit GiPreview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
-    explicit GiPreview(Point&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
 
     // GiAbstractPreview interface
     void updateTool() override;

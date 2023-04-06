@@ -65,7 +65,8 @@ Path RectanglePath(double width, double height, const Point& center = {});
 
 void RotatePath(Path& poligon, double angle, const Point& center = {});
 
-void TranslatePath(Path& path, const Point& pos);
+Path& TranslatePath(Path& path, const Point& pos);
+Paths& TranslatePaths(Paths& path, const Point& pos);
 
 void mergeSegments(Paths& paths, double glue = 0.0);
 

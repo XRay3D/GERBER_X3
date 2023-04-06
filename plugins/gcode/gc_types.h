@@ -18,10 +18,15 @@
 #include <QColor>
 #include <QDebug>
 #include <QVariant>
+#include <clipper_types.h>
 #include <variant>
 
 constexpr auto G_CODE = md5::hash32("GCode");
 constexpr auto GC_DBG_FILE = md5::hash32("GCDbgFile");
+
+using Path = Clipper2Lib::Path64;
+using Paths = Clipper2Lib::Paths64;
+using Pathss = mvector<Paths>;
 
 namespace GCode {
 
@@ -183,6 +188,7 @@ public:
 
     mvector<Tool> tools;
     std::map<std::underlying_type_t<Param>, Variant> params;
+
     //    GCodeType gcType = Null;
     mutable int fileId = -1;
     //    QColor color;
@@ -210,6 +216,16 @@ public:
 
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }
+
+    Paths paths;
+    Paths rawPaths;
+    Pathss supportPaths;
+
+    void addPaths(Paths& val) { paths.append(val); }
+    void addPaths(Paths&& val) { paths.append(std::move(val)); }
+    void addRawPaths(Paths& val) { rawPaths.append(val); }
+    void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
+    void addSupportPaths(Pathss val) { supportPaths = val; }
 };
 
 class Settings {
@@ -259,73 +275,6 @@ public:
     static int profileSort() { return profileSort_; }
 };
 
-class cancelException : public std::exception {
-public:
-    cancelException(const char* description)
-        : m_descr(description) {
-    }
-    ~cancelException() noexcept override = default;
-    const char* what() const noexcept override { return m_descr.c_str(); }
-
-private:
-    std::string m_descr;
-};
-
-class ProgressCancel {
-    static inline int max_;
-    static inline int current_;
-    static inline bool cancel_;
-
-public:
-    static void reset() {
-        current_ = 0;
-        max_ = 0;
-        cancel_ = 0;
-    }
-
-    /////////////////
-    /// \brief Progress max
-    /// \return
-    ///
-    static int max() { return max_; }
-    /////////////////
-    /// \brief Progress setMax
-    /// \param max
-    ///
-    static void setMax(int max) { max_ = max; }
-
-    /////////////////
-    /// \brief Progress current
-    /// \return
-    ///
-    static int current() { return current_; }
-    /////////////////
-    /// \brief Progress setCurrent
-    /// \param current
-    ///
-    static void setCurrent(int current = 0) { current_ = current; }
-    /////////////////
-    /// \brief Progress incCurrent
-    ///
-    static void incCurrent() { ++current_; }
-    static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
-        ++current_;
-        if (cancel_) [[unlikely]] {
-            //            static std::stringstream ss;
-            //            ss.clear();
-            //            ss << "file: "
-            //               << location.file_name() << "("
-            //               << location.line() << ":"
-            //               << location.column() << ") `"
-            //               << location.function_name();
-            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
-            throw cancelException(__FUNCTION__);
-        }
-    }
-    static void setCancel(bool cancel) { cancel_ = cancel; }
-};
-
 } // namespace GCode
 
-inline void ifCancelThenThrow() { GCode::ProgressCancel::ifCancelThenThrow(); }
+Q_DECLARE_METATYPE(GCode::Params*)

@@ -49,7 +49,7 @@ public:
     }
 
 signals:
-    void createToolpath();
+    void createToolpath(Params* gcp);
 
 protected:
     void fileHandler(File* file);

@@ -33,8 +33,9 @@
 #include <ranges>
 #include <sstream>
 
-static const int id1 = qRegisterMetaType<GCode::Params>("GCode::Params");
-static const int id2 = qRegisterMetaType<GCode::File*>("GCode::File*");
+// static const int id1 = qRegisterMetaType<GCode::Params>("GCode::Params");
+// static const int id2 = qRegisterMetaType<GCode::Params&>("GCode::Params&");
+static const int id3 = qRegisterMetaType<GCode::File*>("GCode::File*");
 
 namespace GCode {
 

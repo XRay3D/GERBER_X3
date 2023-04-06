@@ -147,9 +147,7 @@ Path Creator::boundOfPaths(const Paths& paths, Point::Type k) const {
     return rect.AsPath();
 }
 
-void Creator::addPaths(Paths&& paths) { workingPs.append(std::move(paths)); }
-
-void Creator::addRawPaths(Paths rawPaths) {
+void Creator::addRawPaths(Paths&& rawPaths) {
     qDebug(__FUNCTION__);
 
     if (rawPaths.empty())
@@ -159,7 +157,6 @@ void Creator::addRawPaths(Paths rawPaths) {
     //        workingRawPs_.push_back(rawPaths);
     //        return;
     //    }
-
     std::erase_if(rawPaths, [](auto&& path) { return path.size() < 2; });
 
     const double mergDist = App::project()->glue() * uScale;
@@ -191,11 +188,22 @@ void Creator::addRawPaths(Paths rawPaths) {
     workingPs.insert(workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
 }
 
-void Creator::addSupportPaths(Pathss supportPaths) { supportPss.append(std::move(supportPaths)); }
-
-void Creator::createGc() {
+void Creator::createGc(Params* gcp) {
     qDebug(__FUNCTION__);
 
+    if (gcp->paths.size())
+        workingPs.append(std::move(gcp->paths));
+    if (gcp->rawPaths.size())
+        addRawPaths(std::move(gcp->rawPaths));
+    if (gcp->supportPaths.size())
+        supportPss.append(std::move(gcp->supportPaths));
+
+    dbgPaths(workingPs, "createGc");
+
+    gcp_ = std::move(*gcp);
+    delete gcp;
+
+    reset();
     try {
         if (type() == md5::hash32("Profile") || type() == md5::hash32("Pocket") || type() == md5::hash32("Raster")) {
             if (!App::isDebug())

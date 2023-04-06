@@ -16,142 +16,80 @@
 namespace Drilling {
 
 GiPreview::GiPreview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
-    : hv {std::move(hv)}
+    : hv_ {std::move(hv)}
     , row {row}
     , toolId_ {toolId} {
     sourceDiameter_ = diameter;
-    //    auto draw = Overload {
-    //        [this](const QPolygonF& val) {
-    //            QPainterPath painterPath;
-    //            for (auto&& path : offset(val, sourceDiameter_))
-    //                painterPath.addPolygon(path);
-    //            return painterPath;
-    //        },
-    //        [this](const QPointF& val) {
-    //            QPainterPath painterPath;
-    //            painterPath.addPolygon(CirclePath(sourceDiameter_ * uScale));
-    //            return painterPath;
-    //        },
-    //    };
-
-    //    auto setPos_ = Overload {
-    //        [this](const QPolygonF& val) {},
-    //        [this](const QPointF& val) { setPos(val); },
-    //    };
-
-    //    if (draw_.size()) {
-    //        for (auto&& path : draw_)
-    //            sourcePath_.addPolygon(path);
-    //    } else {
-    //        sourcePath_ = std::visit(draw, hv);
-    //    }
-
-    row.items.emplace_back(this);
-    update();
-}
-
-GiPreview::GiPreview(Point&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
-    : hv {hv}
-    , row {row}
-    , toolId_ {toolId} {
-    sourceDiameter_ = diameter;
-    //    auto draw = Overload {
-    //        [this](const QPolygonF& val) {
-    //            QPainterPath painterPath;
-    //            for (auto&& path : offset(val, sourceDiameter_))
-    //                painterPath.addPolygon(path);
-    //            return painterPath;
-    //        },
-    //        [this](const QPointF& val) {
-    //            QPainterPath painterPath;
-    //            painterPath.addPolygon(CirclePath(sourceDiameter_ * uScale));
-    //            return painterPath;
-    //        },
-    //    };
-
-    //    auto setPos_ = Overload {
-    //        [this](const QPolygonF& val) {},
-    //        [this](const QPointF& val) { setPos(val); },
-    //    };
-
-    //    if (draw_.size()) {
-    //        for (auto&& path : draw_)
-    //            sourcePath_.addPolygon(path);
-    //    } else {
-    //        sourcePath_ = std::visit(draw, hv);
-    //    }
-
-    //    std::visit(setPos_, hv);
-
+    if (hv_.size() > 1) {
+        for (auto&& path : offset(hv, sourceDiameter_))
+            sourcePath_.addPolygon(path);
+    } else {
+        for (auto&& path : draw_)
+            sourcePath_.addPolygon(path);
+        setPos(hv_.front());
+    }
     row.items.emplace_back(this);
     update();
 }
 
 void GiPreview::updateTool() {
-    //    if (toolId() > -1) {
-    //        colorState |= Tool;
+    if (toolId() > -1) {
+        colorState |= Tool;
+        if (hv_.size() > 1)
+            toolPath_ = [this](const QPolygonF& val) {
+                QPainterPath painterPath;
+                auto& tool(App::toolHolder().tool(toolId()));
+                const double diameter = tool.getDiameter(tool.getDepth());
+                const double lineKoeff = diameter * 0.7;
+                Paths tmpPpath;
+                ClipperOffset offset;
+                offset.AddPath(Path {val}, JoinType::Round, EndType::Round);
+                tmpPpath = offset.Execute(diameter * 0.5 * uScale);
+                for (Path& path : tmpPpath) {
+                    path.push_back(path.front());
+                    painterPath.addPolygon(path);
+                }
+                Path path(val);
 
-    //        auto draw = Overload {
-    //            [this](const QPolygonF& val) {
-    //                QPainterPath painterPath;
-    //                auto& tool(App::toolHolder().tool(toolId()));
-    //                const double diameter = tool.getDiameter(tool.getDepth());
-    //                const double lineKoeff = diameter * 0.7;
-    //                Paths tmpPpath;
-    //                ClipperOffset offset;
-    //                offset.AddPath(Path {val}, JoinType::Round, EndType::Round);
-    //                tmpPpath = offset.Execute(diameter * 0.5 * uScale);
-    //                for (Path& path : tmpPpath) {
-    //                    path.push_back(path.front());
-    //                    painterPath.addPolygon(path);
-    //                }
-    //                Path path(val);
-
-    //                if (path.size()) {
-    //                    for (QPointF point : path) {
-    //                        painterPath.moveTo(point - QPointF(0.0, lineKoeff));
-    //                        painterPath.lineTo(point + QPointF(0.0, lineKoeff));
-    //                        painterPath.moveTo(point - QPointF(lineKoeff, 0.0));
-    //                        painterPath.lineTo(point + QPointF(lineKoeff, 0.0));
-    //                    }
-    //                    painterPath.addPolygon(path);
-    //                }
-    //                return painterPath;
-    //            },
-    //            [this](const QPointF& val) {
-    //                QPainterPath painterPath;
-    //                auto& tool(App::toolHolder().tool(toolId()));
-    //                const double diameter = tool.getDiameter(tool.getDepth());
-    //                const double lineKoeff = diameter * 0.7;
-    //                painterPath.moveTo(-QPointF(0.0, lineKoeff));
-    //                painterPath.lineTo(+QPointF(0.0, lineKoeff));
-    //                painterPath.moveTo(-QPointF(lineKoeff, 0.0));
-    //                painterPath.lineTo(+QPointF(lineKoeff, 0.0));
-    //                painterPath.addEllipse({}, diameter * .5, diameter * .5);
-    //                return painterPath;
-    //            },
-    //        };
-    //        toolPath_ = std::visit(draw, hv);
-    //    } else {
-    //        colorState &= ~Tool;
-    //        toolPath_ = {};
-    //    }
+                if (path.size()) {
+                    for (QPointF point : path) {
+                        painterPath.moveTo(point - QPointF(0.0, lineKoeff));
+                        painterPath.lineTo(point + QPointF(0.0, lineKoeff));
+                        painterPath.moveTo(point - QPointF(lineKoeff, 0.0));
+                        painterPath.lineTo(point + QPointF(lineKoeff, 0.0));
+                    }
+                    painterPath.addPolygon(path);
+                }
+                return painterPath;
+            }(hv_);
+        else
+            toolPath_ = [this](const QPointF& val) {
+                QPainterPath painterPath;
+                auto& tool(App::toolHolder().tool(toolId()));
+                const double diameter = tool.getDiameter(tool.getDepth());
+                const double lineKoeff = diameter * 0.7;
+                painterPath.moveTo(-QPointF(0.0, lineKoeff));
+                painterPath.lineTo(+QPointF(0.0, lineKoeff));
+                painterPath.moveTo(-QPointF(lineKoeff, 0.0));
+                painterPath.lineTo(+QPointF(lineKoeff, 0.0));
+                painterPath.addEllipse({}, diameter * .5, diameter * .5);
+                return painterPath;
+            }(hv_.front());
+    } else {
+        colorState &= ~Tool;
+        toolPath_ = {};
+    }
     changeColor();
 }
 
 Paths GiPreview::paths() const {
-    //    auto getPath = Overload {
-    //        [this](const QPointF& val) {
-    //            //            auto path { CirclePath(sourceDiameter_ * uScale, val) };
-    //            //            return ReversePath(path);
-
-    //            Paths paths {sourcePath_.translated(val).toSubpathPolygons()};
-    //            return ReversePaths(paths);
-    //        },
-    //        [](const QPolygonF& val) { return Paths {val}; },
-    //    };
-    //    return std::visit(getPath, hv);
-    return {};
+    if (hv_.size() > 1)
+        return [this](const QPointF& val) {
+            Paths paths {sourcePath_.translated(val).toSubpathPolygons()};
+            return ReversePaths(paths);
+        }(hv_.front());
+    else
+        return [](const QPolygonF& val) { return Paths {val}; }(hv_);
 }
 
 bool GiPreview::fit(double depth) const {
@@ -175,9 +113,9 @@ Paths GiPreview::offset(const Path& path, double offset) {
     return retPaths;
 }
 
-int GiPreview::type() const { return int(GiType::Preview) + (hv.size() > 1); }
+int GiPreview::type() const { return int(GiType::Preview) + (hv_.size() > 1); }
 
-bool GiPreview::isSlot() const { return hv.size() > 1; }
+bool GiPreview::isSlot() const { return hv_.size() > 1; }
 
 Paths GiPreview::offset() const {
     return offset(paths().front(), sourceDiameter_);
