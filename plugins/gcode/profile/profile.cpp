@@ -134,14 +134,15 @@ void Creator::cornerTrimming() {
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;
     const double trimAngle = gcp_.convent() ? -45.0 : +45;
 
-    auto insert = [=](auto& path, auto corner1, auto&& corner0, auto corner2) {
-        QLineF l1(*corner1, *corner0);
-        QLineF l2(*corner0, *corner2);
+#if _ITERATOR_DEBUG_LEVEL == 0
+    auto insert = [=](auto& path, auto cornerPrev, auto&& corner, auto cornerNext) {
+        QLineF l1(*cornerPrev, *corner);
+        QLineF l2(*corner, *cornerNext);
         if (abs(l1.angleTo(l2) - testAngle) < 1.e-3                    // Angle is 90
             && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
             l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
-            path.insert(corner0, {l2.p1(), l2.p2()});
-            corner0 += 2;
+            path.insert(corner, {l2.p1(), l2.p2()});
+            std::advance(corner, 2);
         }
     };
 
@@ -149,12 +150,35 @@ void Creator::cornerTrimming() {
 
     std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path& path) {
         path.reserve(path.size() * 3);
-        for (auto corner = path.begin() + 1; corner < path.end() - 1; ++corner)
-            insert(path, corner - 1, corner, corner + 1);
+        for (auto corner = std::next(path.begin()); corner < std::prev(path.end()); ++corner)
+            insert(path, std::prev(corner), corner, std::next(corner));
         if (path.front() == path.back()) // for trimming between the beginning and the end of the path
-            insert(path, path.end() - 2, path.begin(), path.begin() + 1);
+            insert(path, std::prev(path.end(), 2), std::prev(path.end()), std::next(path.begin()));
         path.shrink_to_fit();
     });
+#else
+    auto insert = [=](auto& path, auto cornerPrev, auto&& corner, auto cornerNext) {
+        QLineF l1(*cornerPrev, *corner);
+        QLineF l2(*corner, *cornerNext);
+        if (abs(l1.angleTo(l2) - testAngle) < 1.e-3                    // Angle is 90
+            && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
+            l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
+            path.insert(path.begin() + std::distance(path.data(), corner), {l2.p1(), l2.p2()});
+            std::advance(corner, 2);
+        }
+    };
+
+    auto paths = std::views::join(returnPss);
+
+    std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path& path) {
+        path.reserve(path.size() * 3);
+        for (auto corner = std::next(path.data()); corner < std::prev(path.data() + path.size()); ++corner)
+            insert(path, std::prev(corner), corner, std::next(corner));
+        if (path.front() == path.back()) // for trimming between the beginning and the end of the path
+            insert(path, &path.back() - 1, &path.back(), &path.front() + 1);
+        path.shrink_to_fit();
+    });
+#endif
 }
 
 void Creator::makeBridges() {

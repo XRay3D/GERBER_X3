@@ -134,7 +134,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 int Node::id() const { return file->id(); }
 
 void Node::repaint() {
-    if (!file->userColor())
+    if (file && !file->userColor())
         return;
     if (!parent_)
         return;

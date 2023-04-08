@@ -217,15 +217,15 @@ public:
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }
 
-    Paths paths;
-    Paths rawPaths;
-    Pathss supportPaths;
+    Paths closedPaths;
+    Paths openPaths;
+    Pathss supportPathss;
 
-    void addPaths(Paths& val) { paths.append(val); }
-    void addPaths(Paths&& val) { paths.append(std::move(val)); }
-    void addRawPaths(Paths& val) { rawPaths.append(val); }
-    void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
-    void addSupportPaths(Pathss val) { supportPaths = val; }
+    //    void addPaths(Paths& val) { paths.append(val); }
+    //    void addPaths(Paths&& val) { paths.append(std::move(val)); }
+    //    void addRawPaths(Paths& val) { rawPaths.append(val); }
+    //    void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
+    //    void addSupportPaths(Pathss val) { supportPaths = val; }
 };
 
 class Settings {

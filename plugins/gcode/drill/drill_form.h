@@ -54,7 +54,7 @@ private:
 
     void initToolTable();
 
-    void on_cbxFileCurrentIndexChanged(int index);
+    void on_cbxFileCurrentIndexChanged();
     void on_doubleClicked(const QModelIndex& current);
     void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void on_customContextMenuRequested(const QPoint& pos);
@@ -71,7 +71,7 @@ private:
 
     // FormsUtil interface
 protected:
-    void сomputePaths() override;
+    void computePaths() override;
     void updateName() override;
 
 public:

@@ -64,7 +64,7 @@ Form::~Form() {
     delete ui;
 }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
     const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
@@ -116,20 +116,19 @@ void Form::сomputePaths() {
         return;
     }
 
-    GCode::Params gpc;
-    gpc.setConvent(true);
-    gpc.setSide(GCode::Outer);
-    gpc.tools.push_back(tool);
-    gpc.params[GCode::Params::Depth] = dsbxDepth->value();
-    gpc.params[FrameOffset] = ui->dsbxOffset->value();
-    gpc.params[Tolerance] = ui->dsbxPrecision->value();
-    gpc.params[VoronoiType] = ui->cbxSolver->currentIndex();
-    gpc.params[Width] = ui->dsbxWidth->value() + 0.001;
+    auto gpc = new GCode::Params;
+    gpc->setConvent(true);
+    gpc->setSide(GCode::Outer);
+    gpc->tools.push_back(tool);
+    gpc->params[GCode::Params::Depth] = dsbxDepth->value();
+    gpc->params[FrameOffset] = ui->dsbxOffset->value();
+    gpc->params[Tolerance] = ui->dsbxPrecision->value();
+    gpc->params[VoronoiType] = ui->cbxSolver->currentIndex();
+    gpc->params[Width] = ui->dsbxWidth->value() + 0.001;
 
-    creator->setGcp(gpc);
-    creator->addPaths(std::move(wPaths));
-    creator->addRawPaths(wRawPaths);
-    createToolpath();
+    gpc->closedPaths = std::move(wPaths);
+    gpc->openPaths = wRawPaths;
+    createToolpath(gpc);
 }
 
 void Form::updateName() {

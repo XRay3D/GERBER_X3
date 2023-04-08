@@ -27,6 +27,7 @@ public:
     bool isSlot() const;
 
     Paths offset() const;
+    QPointF pos() const { return hv_.front(); }; // NOTE shadow base class pos func
 
 private:
     static Paths offset(const Path& path, double offset);

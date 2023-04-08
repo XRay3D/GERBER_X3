@@ -31,22 +31,7 @@ public:
 
     Creator* creator() const { return creator_; }
 
-    void setCreator(Creator* newCreator) {
-        if (newCreator) {
-            creator_ = newCreator;
-            connect(this, &BaseForm::createToolpath, this, &BaseForm::startProgress);
-            connect(this, &BaseForm::createToolpath, creator_, &Creator::createGc);
-            connect(creator_, &Creator::canceled, this, &BaseForm::stopProgress);
-            connect(creator_, &Creator::errorOccurred, this, &BaseForm::errorHandler);
-            connect(creator_, &Creator::fileReady, this, &BaseForm::fileHandler);
-            creator_->moveToThread(&thread);
-            connect(&thread, &QThread::finished, creator_, &QObject::deleteLater);
-            thread.start(QThread::LowPriority /*HighestPriority*/);
-        } else if (creator_) {
-            thread.quit();
-            thread.wait();
-        }
-    }
+    void setCreator(Creator* newCreator);
 
 signals:
     void createToolpath(Params* gcp);
@@ -61,7 +46,7 @@ protected:
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
     // BaseForm interface
-    virtual void сomputePaths() = 0;
+    virtual void computePaths() = 0;
     virtual void updateName() = 0;
 
     Direction direction = Climb;
@@ -80,7 +65,7 @@ protected:
     int fileId {-1};
 
     int fileCount {1};
-    Plugin* const plugin;
+    //Plugin* const plugin;
 
     DepthForm* dsbxDepth;
     //    QLabel* label;
@@ -89,9 +74,10 @@ protected:
     QPushButton* pbCreate;
     QWidget* content;
     QGridLayout* grid;
+    QWidget* widget() const { return ctrWidget; }
 
 private:
-    Creator* creator_;
+    Creator* creator_{};
 
     QDialogButtonBox* errBtnBox;
     class TableView* errTable;

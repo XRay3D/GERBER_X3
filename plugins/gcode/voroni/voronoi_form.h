@@ -39,7 +39,7 @@ private:
 
     // FormsUtil interface
 protected:
-    void сomputePaths() override;
+    void computePaths() override;
     void updateName() override;
 
 public:

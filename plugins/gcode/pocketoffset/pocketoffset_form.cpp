@@ -84,7 +84,7 @@ Form::~Form() {
     delete ui;
 }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
     const Tool tool[] {
         ui->toolHolder1->tool(),
         ui->toolHolder2->tool(),
@@ -214,8 +214,8 @@ void Form::сomputePaths() {
     if (ui->sbxSteps->isVisible())
         gcp->params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
-    gcp->addPaths(std::move(wPaths));
-    gcp->addRawPaths(wRawPaths);
+    gcp->closedPaths = std::move(wPaths);
+    gcp->openPaths = std::move(wRawPaths);
     fileCount = static_cast<int>(gcp->tools.size());
     createToolpath(gcp);
 }

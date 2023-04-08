@@ -13,7 +13,9 @@
 
 #include "gc_baseform.h"
 #include "gc_plugin.h"
+#include "thermal.h"
 #include "thermal_vars.h"
+#include <QToolBar>
 
 class Model;
 class QCheckBox;
@@ -21,10 +23,6 @@ class QItemSelection;
 
 namespace Ui {
 class ThermalForm;
-}
-
-namespace Gerber {
-class AbstractAperture;
 }
 
 namespace Thermal {
@@ -37,23 +35,18 @@ class Form : public GCode::BaseForm {
 public:
     explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~Form() override;
-
     void updateFiles();
-    static bool canToShow();
-
-private slots:
-    void onNameTextChanged(const QString& arg1);
-
-    void on_cbxFileCurrentIndexChanged(int index);
-    void on_dsbxDepth_valueChanged(double arg1);
-
-    void on_dsbxAreaMax_editingFinished();
-    void on_dsbxAreaMin_editingFinished();
 
 private:
+    // slots
+    void onDsbxAreaMinEditingFinished();
+    void onDsbxAreaMaxEditingFinished();
+    void onDsbxDepthValueChanged(double arg1);
+    void onNameTextChanged(const QString& arg1);
+
     Ui::ThermalForm* ui;
 
-    void createTPI(AbstractFile* file);
+    void updateThermalGi();
 
     mvector<std::shared_ptr<AbstractThermPrGi>> items_;
     PreviewGiMap thPaths;
@@ -61,6 +54,9 @@ private:
     Model* model = nullptr;
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void setSelection(const QModelIndex& selected, const QModelIndex& deselected);
+
+    void updateCriterias();
+    std::vector<Criteria> criterias;
 
     ThParam par;
     double lastMax;
@@ -73,18 +69,14 @@ private:
 
     // FormsUtil interface
 protected:
-    void сomputePaths() override;
+    void computePaths() override;
     void updateName() override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
-#include "file.h"
-#include "gc_plugin.h"
-#include <QToolBar>
-
-class GCPluginImpl final : public GCode::Plugin {
+class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thermal.json")
     Q_INTERFACES(GCode::Plugin)
@@ -94,9 +86,9 @@ public:
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
     QWidget* createForm() override { return new Form(this); };
-    bool canToShow() const override { return Form::canToShow(); }
-    uint32_t type() const override { return GCode::Thermal; }
-    AbstractFile* loadFile(QDataStream& stream) const override { return new GCode::ThermalFile; }
+    //    bool canToShow() const override { return /*Form::canToShow()*/; }
+    uint32_t type() const override { return THERMAL; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 
 } // namespace Thermal

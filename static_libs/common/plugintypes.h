@@ -71,17 +71,12 @@ enum class GCType {
     Drill,
     Pocket,
     Profile,
-};
-
-struct Range {
-    double min {-std::numeric_limits<double>::max()};
-    double max {+std::numeric_limits<double>::max()};
-    bool operator()(double val) const { return min <= val && val <= max; }
+    Thermal
 };
 
 struct GraphicObject {
     // clang-format off
-    enum Type {
+    enum Type:uint32_t {
         Null,
         Arc       , // 1
         Circle    , // 2
@@ -98,8 +93,9 @@ struct GraphicObject {
         Dummy4    , // 13
         Dummy6    , // 14
         Dummy7    , // 15
-        Stamp     = 0b01'0000'0000,
-        Drawn     = 0b10'0000'0000,
+        FlStamp   = 0b01'0000'0000, // штамп по xy
+        FlDrawn   = 0b10'0000'0000, // рисование по xy ... xNyN
+
     };
     // clang-format on
 
@@ -111,8 +107,48 @@ struct GraphicObject {
     int32_t id {-1};
     std::any raw;
 
-    bool closed() const { return path.size() > 2 && path.front() == path.back(); }
+    inline bool isType(uint32_t t) const { return (t & 0xFF) ? (type & 0xFF) == (t & 0xFF) : true; }
+    inline bool isFlags(uint32_t f) const { return (f & ~0xFF) ? (type & ~0xFF) & f : true; }
+    inline bool test(uint32_t t) const { return isType(t) && isFlags(t); }
+    inline bool closed() const { return path.size() > 2 && path.front() == path.back(); }
     bool positive() const { return Clipper2Lib::IsPositive(path); }
+};
+
+inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
+    for (auto& path : go.fill)
+        path = t.map(path);
+    go.path = t.map(go.path);
+    go.pos = t.map(go.pos);
+    return go;
+}
+
+struct Range {
+    double min {-std::numeric_limits<double>::max()};
+    double max {+std::numeric_limits<double>::max()};
+    bool operator()(double val) const { return min <= val && val <= max; }
+    inline bool isNull() const {
+        return min == -std::numeric_limits<double>::max()
+            && max == +std::numeric_limits<double>::max();
+    }
+};
+
+struct Criteria {
+    std::vector<GraphicObject::Type> types;
+    Range area {};
+    Range length {};
+    bool positiveOnly {}; /// NOTE
+    bool test(const GraphicObject& go) const {
+        bool fl {};
+        for (auto type : types) {
+            if ((fl = go.test(type)))
+                break;
+        }
+        if (fl && !length.isNull())
+            fl &= length(Clipper2Lib::Length(go.path));
+        if (fl && !area.isNull())
+            fl &= area(Clipper2Lib::Area(go.fill));
+        return fl;
+    }
 };
 
 enum Side {

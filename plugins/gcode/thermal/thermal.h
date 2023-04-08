@@ -16,17 +16,34 @@ class AbstractFile;
 
 namespace Thermal {
 
+constexpr auto THERMAL = md5::hash32("Thermal");
+
 class Creator : public ::GCode::Creator {
 public:
     Creator();
     ~Creator() override = default;
+    enum {
+        FileId = GCode::Params::UserParam,
+        IgnoreCopper,
+    };
 
 private:
     void createThermal(AbstractFile* file, const Tool& tool, const double depth);
 
 protected:
     void create() override; // Creator interface
-    GCode::uint32_t type() override { return ::GCode::Thermal; }
+    uint32_t type() override { return THERMAL; }
+};
+
+class File final : public GCode::File {
+
+public:
+    explicit File();
+    explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
+    QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
+    uint32_t type() const override { return THERMAL; }
+    void createGi() override;
+    void genGcodeAndTile() override;
 };
 
 } // namespace Thermal

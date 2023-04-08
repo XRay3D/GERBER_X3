@@ -29,6 +29,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
+    ui->treeView->setIconSize(QSize(Size, Size));
 
     grid->setRowStretch(2, 1);
     grid->setRowStretch(7, 0);
@@ -48,16 +49,14 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     setWindowTitle(tr("Thermal Insulation Toolpath"));
 
     connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
-
-    //
+    connect(ui->chbxAperture, &QCheckBox::toggled, this, &Form::updateThermalGi);
+    connect(ui->chbxPath, &QCheckBox::toggled, this, &Form::updateThermalGi);
+    connect(ui->chbxPour, &QCheckBox::toggled, this, &Form::updateThermalGi);
     connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &Form::updateName);
-
-    ui->treeView->setIconSize(QSize(Size, Size));
     connect(ui->treeView, &QTreeView::clicked, ui->treeView, qOverload<const QModelIndex&>(&QTreeView::edit));
 
-    connect(ui->chbxAperture, &QCheckBox::toggled, [this] { createTPI(nullptr); });
-    connect(ui->chbxPath, &QCheckBox::toggled, [this] { createTPI(nullptr); });
-    connect(ui->chbxPour, &QCheckBox::toggled, [this] { createTPI(nullptr); });
+    connect(ui->dsbxAreaMin, &QDoubleSpinBox::editingFinished, this, &Form::onDsbxAreaMinEditingFinished);
+    connect(ui->dsbxAreaMax, &QDoubleSpinBox::editingFinished, this, &Form::onDsbxAreaMaxEditingFinished);
 
     updateName();
     updateButtonIconSize();
@@ -128,60 +127,51 @@ Form::~Form() {
 }
 
 void Form::updateFiles() {
-    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
-
+    disconnect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &Form::updateThermalGi);
     ui->cbxFile->clear();
 
-    for (auto file : App::project()->files(FileType::Gerber_))
-        App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
-    qDebug() << ui->cbxFile->count();
-    on_cbxFileCurrentIndexChanged(0);
-
-    connect(ui->cbxFile, qOverload<int>(&QComboBox::currentIndexChanged), this, &Form::on_cbxFileCurrentIndexChanged);
-}
-
-bool Form::canToShow() {
-    QComboBox cbx;
-    for (auto file : App::project()->files(FileType::Gerber_)) {
-        App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
-        if (cbx.count())
-            return true;
+    updateCriterias();
+    for (auto file : App::project()->files()) {
+        auto gos = file->getDataForGC(criterias, GCType::Profile, true);
+        if (gos.size())
+            ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
     }
 
-    QMessageBox::information(nullptr, "", tr("No data to process."));
-    return false;
+    if (ui->cbxFile->count())
+        updateThermalGi();
+
+    widget()->setEnabled(ui->cbxFile->count());
+
+    connect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::updateThermalGi);
 }
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
+    qDebug(__FUNCTION__);
     if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
-    Paths wPaths;
-    Pathss wBridgePaths;
+    auto gpc = new GCode::Params;
 
     for (auto& item : items_) {
         if (item->isValid()) {
-            wPaths.append(item->paths());
-            wBridgePaths.emplace_back(item->bridge());
+            gpc->closedPaths.append(item->paths());
+            if (Paths bridge = item->bridge(); bridge.size())
+                gpc->supportPathss.emplace_back(item->bridge());
         }
     }
 
-    GCode::Params gpc;
-    gpc.setConvent(true);
-    gpc.setSide(GCode::Outer);
-    gpc.tools.push_back(tool);
-    gpc.params[GCode::Params::Depth] = dsbxDepth->value();
-    gpc.params[GCode::Params::FileId] = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>())->id();
-    gpc.params[GCode::Params::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    creator->setGcp(gpc);
-    creator->addPaths(wPaths);
-    creator->addSupportPaths(wBridgePaths);
+    gpc->setConvent(true);
+    gpc->setSide(GCode::Outer);
+    gpc->tools.push_back(tool);
+    gpc->params[GCode::Params::Depth] = dsbxDepth->value();
+    gpc->params[Creator::FileId] = ui->cbxFile->currentData().value<AbstractFile*>()->id();
+    gpc->params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     fileCount = 1;
-    emit createToolpath();
+    emit createToolpath(gpc);
 }
 
 void Form::updateName() {
@@ -190,44 +180,33 @@ void Form::updateName() {
     redraw();
 }
 
-void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
-    AbstractFile* file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
-    createTPI(file);
-}
-
-void Form::createTPI(AbstractFile* file) {
+void Form::updateThermalGi() {
+    auto file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
     if (!file)
-        file = static_cast<AbstractFile*>(ui->cbxFile->currentData().value<void*>());
-    items_.clear();
+        return;
 
     if (model)
         delete ui->treeView->model();
 
     model = new Model(ui->treeView);
     model->appendRow(QIcon(), tr("All"), par);
-
     boardSide = file->side();
 
-    ThParam2 tp2 {
-        ui->chbxAperture->isChecked(),
-        ui->chbxPath->isChecked(),
-        ui->chbxPour->isChecked(),
-        ui->dsbxAreaMax->value() * uScale * uScale,
-        ui->dsbxAreaMin->value() * uScale * uScale};
+    updateCriterias();
+    thPaths.clear();
+    for (auto&& var : file->getDataForGC(criterias, GCType::Profile))
+        thPaths[var.name].emplace_back(var.fill, var.pos);
 
-    thPaths = std::any_cast<PreviewGiMap>(App::filePlugin(int(file->type()))->getDataForGC(file, App::gCodePlugin(GCode::Thermal), tp2));
-
-    int count {};
-    int ctr {};
-    for (const auto& [key, val] : thPaths)
-        count += val.size();
+    int count = std::accumulate(thPaths.begin(), thPaths.end(),
+        0, [](int i, auto& val) { return i + val.second.size(); });
 
     QProgressDialog pd("create th", "", 0, count, this);
     pd.setCancelButton(nullptr);
-
-    for (const auto& [keyType, valMap] : thPaths) {
-        for (const auto& [keyId, valVec] : valMap) {
-            if (!valVec.size())
+    count = 0;
+    { // create Preview Items
+        items_.clear();
+        for (const auto& [keyId, valVec] : thPaths) {
+            if (valVec.empty())
                 continue;
             auto node = model->appendRow(drawIcon(valVec.front().first), keyId, par);
             for (const auto& [paths, pos] : valVec) {
@@ -237,13 +216,13 @@ void Form::createTPI(AbstractFile* file) {
                 node->append(new Node(drawIcon(paths), "", par, pos, tprItem.get(), model));
             }
             qApp->processEvents();
-            pd.setValue(++ctr);
+            pd.setValue(++count);
         }
-    }
 
-    for (auto& item : items_) {
-        App::graphicsView()->addItem(item.get());
-        connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
+        for (auto& item : items_) {
+            App::graphicsView()->addItem(item.get());
+            connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
+        }
     }
 
     ui->treeView->setModel(model);
@@ -284,30 +263,47 @@ void Form::setSelection(const QModelIndex& selected, const QModelIndex& deselect
         ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
+void Form::updateCriterias() {
+    criterias.clear();
+    if (ui->chbxAperture->isChecked()) {
+        criterias.emplace_back(
+            std::vector {GraphicObject::FlStamp} //
+        );
+    }
+    if (ui->chbxPath->isChecked()) {
+        criterias.emplace_back(
+            std::vector {GraphicObject::Line, GraphicObject::PolyLine},
+            Range {ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
+        );
+    }
+    if (ui->chbxPour->isChecked()) {
+        criterias.emplace_back(
+            std::vector {GraphicObject::Polygon, GraphicObject::Composite},
+            Range {ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
+        );
+    }
+}
+
 void Form::redraw() {
     for (auto item : items_)
         item->redraw();
 }
 
-void Form::on_dsbxDepth_valueChanged(double arg1) {
+void Form::onDsbxDepthValueChanged(double arg1) {
     depth_ = arg1;
     redraw();
 }
 
 void Form::editFile(GCode::File* /*file*/) { }
 
-void Form::on_dsbxAreaMin_editingFinished() {
-    if (lastMin != ui->dsbxAreaMin->value()) { // skip if dsbxAreaMin hasn't changed
-        lastMin = ui->dsbxAreaMin->value();
-        createTPI(nullptr);
-    }
+void Form::onDsbxAreaMinEditingFinished() {
+    if (lastMin != ui->dsbxAreaMin->value()) // skip if dsbxAreaMin hasn't changed
+        lastMin = ui->dsbxAreaMin->value(), updateThermalGi();
 }
 
-void Form::on_dsbxAreaMax_editingFinished() {
-    if (lastMax != ui->dsbxAreaMax->value()) { // skip if dsbAreaMax hasn't changed
-        lastMax = ui->dsbxAreaMax->value();
-        createTPI(nullptr);
-    }
+void Form::onDsbxAreaMaxEditingFinished() {
+    if (lastMax != ui->dsbxAreaMax->value()) // skip if dsbAreaMax hasn't changed
+        lastMax = ui->dsbxAreaMax->value(), updateThermalGi();
 }
 
 } // namespace Thermal

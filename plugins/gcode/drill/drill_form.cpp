@@ -117,31 +117,24 @@ Form::~Form() {
     delete ui;
 }
 
+using GrTy = GraphicObject::Type;
+Criteria criterias[] {
+    {
+        std::vector {GraphicObject::FlStamp} //
+    },
+};
+
 void Form::updateFiles() {
-
     disconnect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
-
     ui->cbxFile->clear();
 
-    int types[] {
-        int(GraphicObject::Circle + GraphicObject::Stamp),
-        int(GraphicObject::Composite + GraphicObject::Stamp),
-        int(GraphicObject::Rect + GraphicObject::Stamp),
-        int(GraphicObject::Square + GraphicObject::Stamp),
-    };
-
     for (auto file : App::project()->files()) {
-        auto gos = file->getDataForGC(types, GCType::Drill);
-        if (gos.size()) {
-            ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(gos));
-            ui->cbxFile->setItemData(ui->cbxFile->count() - 1, QVariant::fromValue(file), Qt::UserRole + 1);
-        }
+        auto gos = file->getDataForGC(criterias, GCType::Drill, true);
+        if (gos.size())
+            ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
     }
 
-    //    for (auto file : App::project()->files({FileType::Excellon, FileType::Gerber_, FileType::Dxf_}))
-    //        App::filePlugin(int(file->type()))->addToGcForm(file, ui->cbxFile);
-
-    on_cbxFileCurrentIndexChanged(0);
+    on_cbxFileCurrentIndexChanged();
 
     connect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
 }
@@ -158,7 +151,6 @@ bool Form::canToShow() {
     //                return true;
     //        }
     //    }
-
     //    QMessageBox::information(nullptr, "", tr("No data to process."));
     //    return false;
 }
@@ -197,8 +189,8 @@ void Form::initToolTable() {
     });
 }
 
-void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
-    file = ui->cbxFile->currentData(Qt::UserRole + 1).value<AbstractFile*>();
+void Form::on_cbxFileCurrentIndexChanged() {
+    file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
     qDebug() << file << file->id();
     if (!App::project()->contains(file))
         return;
@@ -213,8 +205,12 @@ void Form::on_cbxFileCurrentIndexChanged(int /*index*/) {
             using Key = std::pair<QByteArray, bool>;
             using Val = mvector<const GraphicObject*>;
             std::map<Key, Val> map;
-            for (auto* var : ui->cbxFile->currentData().value<Val>())
-                map[Key {var->name, var->path.size() > 1}].emplace_back(var);
+
+            static mvector<GraphicObject> gos;
+            gos = file->getDataForGC(criterias, GCType::Drill);
+
+            for (auto& var : gos)
+                map[Key {var.name, var.path.size() > 1}].emplace_back(&var);
 
             model = new Model(map.size(), ui->toolTable);
             auto& data = model->data();
@@ -422,7 +418,7 @@ void Form::zoomToSelected() {
         App::graphicsView()->zoomToSelected();
 }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
     auto indexes = [](const auto& range) {
         QString indexes;
         for (int32_t id : range) {
@@ -475,7 +471,7 @@ void Form::сomputePaths() {
 
         std::map<int, Data> pathsMap;
 
-        auto itemToPaths = [](auto* item) {
+        auto itemToPaths = [](GiPreview* item) {
             return item->isSlot() ? item->offset() : item->paths();
         };
 
@@ -527,7 +523,7 @@ void Form::сomputePaths() {
             ++i;
         }
 
-        for (auto [toolId, val] : pathsMap) {
+        for (auto& [toolId, val] : pathsMap) {
             if (val.drillPath.size()) {
                 Point point1((App::home()->pos()));
                 { // sort by distance
@@ -559,7 +555,7 @@ void Form::сomputePaths() {
                     gcp->setSide(side);
                     gcp->tools = {App::toolHolder().tool(toolId)};
                     gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-                    gcp->addPaths(std::move(val.paths));
+                    gcp->closedPaths = std::move(val.paths);
                     setCreator(new Profile::Creator);
                     fileCount = 1;
                     emit createToolpath(gcp);
@@ -570,7 +566,7 @@ void Form::сomputePaths() {
                     gcp->setSide(GCode::Inner);
                     gcp->tools = {App::toolHolder().tool(toolId)};
                     gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-                    gcp->addPaths(std::move(val.paths));
+                    gcp->closedPaths = std::move(val.paths);
                     setCreator(new PocketOffset::Creator);
                     fileCount = 1;
                     emit createToolpath(gcp);
