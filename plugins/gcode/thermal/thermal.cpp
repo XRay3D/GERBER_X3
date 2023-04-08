@@ -11,7 +11,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal.h"
-#include "file.h"
 #include "project.h"
 
 namespace Thermal {
@@ -19,15 +18,18 @@ namespace Thermal {
 Creator::Creator() { }
 
 void Creator::create() {
+    qDebug(__FUNCTION__);
     createThermal(
-        App::project()->file(gcp_.params[::GCode::Params::FileId].toInt()),
+        App::project()->file(gcp_.params[FileId].toInt()),
         gcp_.tools.front(),
-        gcp_.params[::GCode::Params::Depth].toDouble());
+        gcp_.params[GCode::Params::Depth].toDouble());
 }
 
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
+
+    dbgPaths(workingPs, "workingPs");
 
     {     // create tool path
         { // execute offset
@@ -35,10 +37,12 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             offset.AddPaths(workingPs, JoinType::Round, EndType::Polygon);
             returnPs = offset.Execute(dOffset);
         }
+        dbgPaths(returnPs, "returnPs");
+
         // fix direction
-        if (gcp_.side() == ::GCode::Outer && !gcp_.convent())
+        if (gcp_.side() == GCode::Outer && !gcp_.convent())
             ReversePaths(returnPs);
-        else if (gcp_.side() == ::GCode::Inner && gcp_.convent())
+        else if (gcp_.side() == GCode::Inner && gcp_.convent())
             ReversePaths(returnPs);
 
         for (Path& path : returnPs)
@@ -58,17 +62,17 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             ClipperOffset offset;
             for (auto go : graphicObjects) {
                 if (go->positive())
-                    offset.AddPaths(go->polyLineW(), JoinType::Round, EndType::Polygon);
+                    offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
             }
             framePaths = offset.Execute(dOffset - 0.005 * uScale);
             clipper.AddSubject(framePaths);
         }
-        if (!gcp_.params[::GCode::Params::IgnoreCopper].toInt()) {
+        if (!gcp_.params[IgnoreCopper].toInt()) {
             ClipperOffset offset;
             for (auto go : graphicObjects) {
                 //                if (go->closed()) {
                 //                    if (go->positive())
-                offset.AddPaths(go->polygonWholes(), JoinType::Round, EndType::Polygon);
+                offset.AddPaths(go->fill /*polygonWholes()*/, JoinType::Round, EndType::Polygon);
                 //                    else {
                 //                        Paths paths(go->polygonWholes());
                 //                        ReversePaths(paths);
@@ -98,12 +102,48 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
     if (returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-
         sortB(returnPss);
-        file_ = new ::GCode::ThermalFile(std::move(gcp_), std::move(returnPss));
+        file_ = new File(std::move(gcp_), std::move(returnPss));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
 }
 
+//////////////////////////////////////////////////////
+
+File::File()
+    : GCode::File() { }
+
+File::File(GCode::Params&& gcp, Pathss&& toolPathss)
+    : GCode::File(std::move(gcp), std::move(toolPathss)) {
+    if (gcp_.tools.front().diameter()) {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+}
+
+void File::genGcodeAndTile() {
+    const QRectF rect = App::project()->worckRect();
+    for (size_t x = 0; x < App::project()->stepsX(); ++x) {
+        for (size_t y = 0; y < App::project()->stepsY(); ++y) {
+            const QPointF offset((rect.width() + App::project()->spaceX()) * x, (rect.height() + App::project()->spaceY()) * y);
+
+            if (toolType() == Tool::Laser)
+                saveLaserProfile(offset);
+            else
+                saveMillingProfile(offset);
+
+            if (gcp_.params.contains(GCode::Params::NotTile))
+                return;
+        }
+    }
+}
+
+void File::createGi() {
+    createGiProfile();
+    itemGroup()->setVisible(true);
+}
 } // namespace Thermal

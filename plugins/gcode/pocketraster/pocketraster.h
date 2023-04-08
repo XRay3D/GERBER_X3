@@ -37,6 +37,7 @@ public:
 protected:
     void create() override; // Creator interface
     uint32_t type() override;
+    bool possibleTest() const override { return true; }
 
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);

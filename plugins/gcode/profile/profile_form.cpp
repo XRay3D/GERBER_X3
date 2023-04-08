@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "profile_form.h"
+#include "gcprofile_autogen/include/ui_profileform.h"
 #include "profile.h"
 #include "ui_profileform.h"
 
@@ -100,7 +101,7 @@ Form::~Form() {
     delete ui;
 }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
     usedItems_.clear();
     const auto tool {ui->toolHolder->tool()};
     if (!tool.isValid()) {
@@ -187,8 +188,8 @@ void Form::сomputePaths() {
         gcp->params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
-    gcp->addPaths(std::move(wPaths));
-    gcp->addRawPaths(std::move(wRawPaths));
+    gcp->closedPaths = std::move(wPaths);
+    gcp->openPaths = std::move(wRawPaths);
     fileCount = 1;
     emit createToolpath(gcp);
 }

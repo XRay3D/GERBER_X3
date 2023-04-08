@@ -118,6 +118,7 @@ protected:
 
     virtual void create() = 0;
     virtual uint32_t type() = 0;
+    virtual bool possibleTest() const { return false; }
 
     //    inline static ClipperBase* clipperPtr_;
     //    inline static bool cancel_;

@@ -26,16 +26,7 @@ struct ThParam {
 
 class Model;
 
-struct ThParam2 {
-    bool aperture = false;
-    bool path = false;
-    bool pour = false;
-    double areaMax = 0.0;
-    double areaMin = 0.0;
-};
-
 using PreviewGiMapValVec = mvector<std::pair<Paths, Point>>;
-using PreviewGiMapVal = std::map<QString, PreviewGiMapValVec>;
-using PreviewGiMap = std::map<int, PreviewGiMapVal>;
+using PreviewGiMap = std::map<QString, PreviewGiMapValVec>;
 
 } // namespace Thermal

@@ -101,8 +101,6 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
-    dbgPaths(groupedPss, "groupedPss", Qt::red);
-
     setCurrent(0);
 
     for (Paths paths : groupedPss) {

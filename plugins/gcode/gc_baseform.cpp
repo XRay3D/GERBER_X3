@@ -161,8 +161,7 @@ protected:
 
 BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     : QWidget(parent)
-    , plugin {plugin}
-    , creator_ {tpc}
+    //, plugin {plugin}
     , progressDialog(new QProgressDialog(this)) {
 
     auto vLayout = new QVBoxLayout(this);
@@ -186,7 +185,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
         pbCreate = new QPushButton(tr("Create"), ctrWidget);
         pbCreate->setIcon(QIcon::fromTheme("document-export"));
         pbCreate->setObjectName("pbCreate");
-        connect(pbCreate, &QPushButton::clicked, this, &BaseForm::сomputePaths);
+        connect(pbCreate, &QPushButton::clicked, this, &BaseForm::computePaths);
 
         auto line = [this] {
             auto line = new QFrame(ctrWidget);
@@ -240,8 +239,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     progressDialog->setAutoReset(false);
     progressDialog->reset();
     connect(progressDialog, &QProgressDialog::canceled, this, &BaseForm::cancel);
-
-    setCreator(creator_);
+    setCreator(tpc);
 }
 
 BaseForm::~BaseForm() {
@@ -249,6 +247,31 @@ BaseForm::~BaseForm() {
         errBreak();
     thread.quit();
     thread.wait();
+}
+
+void BaseForm::setCreator(Creator* newCreator) {
+    qDebug() << __FUNCTION__ << creator_ << newCreator;
+
+    if (creator_ != newCreator && newCreator) {
+        qDebug(__FUNCTION__);
+        if (thread.isRunning()) {
+            thread.quit();
+            thread.wait();
+        }
+        creator_ = newCreator;
+        connect(this, &BaseForm::createToolpath, this, &BaseForm::startProgress);
+        connect(this, &BaseForm::createToolpath, creator_, &Creator::createGc, Qt::QueuedConnection);
+        connect(creator_, &Creator::canceled, this, &BaseForm::stopProgress);
+        connect(creator_, &Creator::errorOccurred, this, &BaseForm::errorHandler);
+        connect(creator_, &Creator::fileReady, this, &BaseForm::fileHandler);
+        creator_->moveToThread(&thread);
+        connect(&thread, &QThread::finished, creator_, &QObject::deleteLater);
+        thread.start(QThread::LowPriority /*HighestPriority*/);
+    } else if (creator_ && !newCreator) {
+        thread.quit();
+        thread.wait();
+        creator_ = nullptr;
+    }
 }
 
 void BaseForm::fileHandler(File* file) {

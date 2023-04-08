@@ -12,9 +12,9 @@
  *******************************************************************************/
 
 #include "hatching_form.h"
-#include "ui_hatchingform.h"
 #include "graphicsview.h"
 #include "settings.h"
+#include "ui_hatchingform.h"
 #include <QMessageBox>
 
 namespace CrossHatch {
@@ -71,7 +71,7 @@ Form::~Form() {
     delete ui;
 }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
     const auto tool {ui->toolHolder->tool()};
 
     if (!tool.isValid()) {
@@ -124,25 +124,24 @@ void Form::сomputePaths() {
         return;
     }
 
-    GCode::Params gcp_;
-    gcp_.setConvent(ui->rbConventional->isChecked());
-    gcp_.setSide(side);
-    gcp_.tools.push_back(tool);
+    auto gcp = new GCode::Params;
+    gcp->setConvent(ui->rbConventional->isChecked());
+    gcp->setSide(side);
+    gcp->tools.push_back(tool);
 
-    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp_.params[Creator::HathStep] = ui->dsbxHathStep->value();
-    gcp_.params[Creator::Pass] = ui->cbxPass->currentIndex();
-    gcp_.params[Creator::UseAngle] = ui->dsbxAngle->value();
+    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp->params[Creator::HathStep] = ui->dsbxHathStep->value();
+    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
     //    if (ui->rbFast->isChecked()) {
-    //        gcp_.params[GCode::Params::Fast] = true;
-    //        gcp_.params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    //        gcp_->params[GCode::Params::Fast] = true;
+    //        gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    creator->setGcp(gcp_);
-    creator->addPaths(std::move(wPaths));
-    creator->addRawPaths(wRawPaths);
+    gcp->closedPaths = std::move(wPaths);
+    gcp->openPaths = wRawPaths;
     fileCount = 1;
-    createToolpath();
+    createToolpath(gcp);
 }
 
 void Form::updateName() {

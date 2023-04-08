@@ -377,7 +377,7 @@ void Parser::addPath() {
         return;
     }
 
-    int type = GrObject::Drawn;
+    int type = GrObject::FlDrawn;
 
     if (aperFunctionMap.contains(state_.aperture())
         && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline)
@@ -388,9 +388,10 @@ void Parser::addPath() {
         type |= GrObject::Polygon;
         state_.setType(Region);
         switch (abSrIdStack_.top().workingType) {
-        case WorkingType::Normal:
-            file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
-            break;
+        case WorkingType::Normal: {
+            auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
+            go.name = QString("D%1|Polygon").arg(state_.aperture()).toUtf8();
+        } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
             break;
@@ -403,9 +404,10 @@ void Parser::addPath() {
         type |= GrObject::PolyLine;
         state_.setType(Line);
         switch (abSrIdStack_.top().workingType) {
-        case WorkingType::Normal:
-            file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(path_)));
-            break;
+        case WorkingType::Normal: {
+            auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(path_)));
+            go.name = QString("D%1|PolyLine").arg(state_.aperture()).toUtf8();
+        } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             break;
@@ -435,7 +437,7 @@ void Parser::addFlash() {
     if (ap->withHole())
         paths.emplace_back(ap->drawDrill(state_));
 
-    int type = GrObject::Stamp;
+    int type = GrObject::FlStamp;
 
     switch (ap->type()) {
     case Circle:
@@ -462,7 +464,7 @@ void Parser::addFlash() {
 
     switch (abSrIdStack_.top().workingType) {
     case WorkingType::Normal: {
-        auto go = file->graphicObjects_.emplace_back(GrObject(goId_++,
+        auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++,
             state_, std::move(paths), file, GrObject::Type(type)));
         go.name = QString("D%1|%2").arg(state_.aperture()).arg(ap->name()).toUtf8();
         go.pos = state_.curPos();

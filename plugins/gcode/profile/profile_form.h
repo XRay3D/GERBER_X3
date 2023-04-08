@@ -73,7 +73,7 @@ protected:
     void resizeEvent(QResizeEvent* event) override;
     void showEvent(QShowEvent* event) override;
     // FormsUtil interface
-    void сomputePaths() override;
+    void computePaths() override;
     void updateName() override;
 
 public:

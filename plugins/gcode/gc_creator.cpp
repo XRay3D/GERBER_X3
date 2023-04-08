@@ -191,31 +191,31 @@ void Creator::addRawPaths(Paths&& rawPaths) {
 void Creator::createGc(Params* gcp) {
     qDebug(__FUNCTION__);
 
-    if (gcp->paths.size())
-        workingPs.append(std::move(gcp->paths));
-    if (gcp->rawPaths.size())
-        addRawPaths(std::move(gcp->rawPaths));
-    if (gcp->supportPaths.size())
-        supportPss.append(std::move(gcp->supportPaths));
+    reset();
 
-    dbgPaths(workingPs, "createGc");
+    if (gcp->closedPaths.size())
+        workingPs.append(std::move(gcp->closedPaths));
+    if (gcp->openPaths.size())
+        addRawPaths(std::move(gcp->openPaths));
+    if (gcp->supportPathss.size())
+        supportPss.append(std::move(gcp->supportPathss));
+
+    // dbgPaths(workingPs, "createGc");
 
     gcp_ = std::move(*gcp);
-    delete gcp;
+    //    gcp_ = *gcp;
 
-    reset();
     try {
-        if (type() == md5::hash32("Profile") || type() == md5::hash32("Pocket") || type() == md5::hash32("Raster")) {
-            if (!App::isDebug())
-                try {
-                    checkMillingFl = true;
-                    checkMilling(gcp_.side());
-                } catch (const cancelException& e) {
-                    ProgressCancel::reset();
-                    qWarning() << "checkMilling canceled:" << e.what();
-                } catch (...) {
-                    throw;
-                }
+        if (possibleTest() && !App::isDebug()) {
+            try {
+                checkMillingFl = true;
+                checkMilling(gcp_.side());
+            } catch (const cancelException& e) {
+                ProgressCancel::reset();
+                qWarning() << "checkMilling canceled:" << e.what();
+            } catch (...) {
+                throw;
+            }
         }
         if (!isCancel()) {
             checkMillingFl = false;
@@ -231,6 +231,7 @@ void Creator::createGc(Params* gcp) {
     } catch (...) {
         qWarning() << "Creator::createGc() exeption:" << errno;
     }
+    delete gcp;
 }
 
 File* Creator::file() const { return file_; }

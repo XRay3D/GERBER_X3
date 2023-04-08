@@ -26,7 +26,7 @@ GiPreview::GiPreview(Path&& hv, double diameter, int toolId, Row& row, const Pat
     } else {
         for (auto&& path : draw_)
             sourcePath_.addPolygon(path);
-        setPos(hv_.front());
+        //        setPos(hv_.front());
     }
     row.items.emplace_back(this);
     update();
@@ -73,7 +73,7 @@ void GiPreview::updateTool() {
                 painterPath.moveTo(-QPointF(lineKoeff, 0.0));
                 painterPath.lineTo(+QPointF(lineKoeff, 0.0));
                 painterPath.addEllipse({}, diameter * .5, diameter * .5);
-                return painterPath;
+                return painterPath.translated(val);
             }(hv_.front());
     } else {
         colorState &= ~Tool;
@@ -89,7 +89,7 @@ Paths GiPreview::paths() const {
             return ReversePaths(paths);
         }(hv_.front());
     else
-        return [](const QPolygonF& val) { return Paths {val}; }(hv_);
+        return sourcePath_.toSubpathPolygons(QTransform::fromTranslate(x(), y()));
 }
 
 bool GiPreview::fit(double depth) const {

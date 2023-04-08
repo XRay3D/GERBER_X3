@@ -69,6 +69,7 @@ private:
 protected:
     void create() override; // Creator interface
     uint32_t type() override { return PROFILE; }
+    bool possibleTest() const override { return true; }
 };
 
 } // namespace Profile

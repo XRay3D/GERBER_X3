@@ -9,15 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "gbr_aperture.h"
-#include "gbr_types.h"
-#include "gbrcomp_onent.h"
 
 #include "abstract_file.h"
-#include "gi_group.h"
-
-#include <QDebug>
-#include <forward_list>
+#include "gbrcomp_onent.h"
 
 namespace Gerber {
 
@@ -48,7 +42,7 @@ public:
         Components,
     };
     // AbstractFile interface
-    mvector<const GraphicObject*> getDataForGC(std::span<int>, GCType gcType, Range area = {}, Range length = {}) const override;
+    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
     void setItemType(int type) override;
     int itemsType() const override;
     void initFrom(AbstractFile* file) override;
@@ -71,8 +65,6 @@ private:
     Format format_;
     Group group_ {};
     // Layer layer = Copper;
-    // Miror miror = Vertical;
-    // QPointf offset;
 
     QVector<int> rawIndex;
     std::forward_list<Path> checkList;

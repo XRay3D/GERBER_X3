@@ -50,6 +50,22 @@ bool MainWindow::debug() {
             constexpr auto DRILLING = md5::hash32("Drilling");
             QTimer::singleShot(i += k, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
         }
+
+        if (0) {
+            constexpr auto THERMAL = md5::hash32("Thermal");
+            QTimer::singleShot(i += k, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
+        }
+
+        if (0) {
+            constexpr auto PROFILE = md5::hash32("Profile");
+
+            QTimer::singleShot(i += k, [this] { selectAll(); });
+            QTimer::singleShot(i += k, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
+        }
+
         //        if (0) {
         //            i = 1000;
         //            QTimer::singleShot(i += k, [this] { selectAll(); });

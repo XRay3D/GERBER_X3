@@ -72,7 +72,7 @@ Form::~Form() {
     delete ui;
 }
 
-void Form::сomputePaths() {
+void Form::computePaths() {
     const auto tool {ui->toolHolder1->tool()};
 
     if (!tool.isValid()) {
@@ -111,7 +111,7 @@ void Form::сomputePaths() {
         case GiType::ShText:
             wRawPaths.append(gi->paths());
             break;
-        case GiType::DrillGi:
+        case GiType::Drill:
             wPaths.append(gi->paths());
             break;
         default:
@@ -125,24 +125,23 @@ void Form::сomputePaths() {
         return;
     }
 
-    GCode::Params gcp_;
-    gcp_.setConvent(ui->rbConventional->isChecked());
-    gcp_.setSide(side);
-    gcp_.tools.push_back(tool);
+    auto gcp_ = new GCode::Params;
+    gcp_->setConvent(ui->rbConventional->isChecked());
+    gcp_->setSide(side);
+    gcp_->tools.push_back(tool);
 
-    gcp_.params[Creator::UseAngle] = ui->dsbxAngle->value();
-    gcp_.params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp_.params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp_->params[Creator::UseAngle] = ui->dsbxAngle->value();
+    gcp_->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp_->params[Creator::Pass] = ui->cbxPass->currentIndex();
     if (ui->rbFast->isChecked()) {
-        gcp_.params[Creator::Fast] = true;
-        gcp_.params[Creator::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
+        gcp_->params[Creator::Fast] = true;
+        gcp_->params[Creator::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
     }
 
-    creator->setGcp(gcp_);
-    creator->addPaths(std::move(wPaths));
-    creator->addRawPaths(wRawPaths);
+    gcp_->closedPaths = std::move(wPaths);
+    gcp_->openPaths = wRawPaths;
     fileCount = 1;
-    createToolpath();
+    createToolpath(gcp_);
 }
 
 void Form::updateName() {
