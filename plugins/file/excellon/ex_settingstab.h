@@ -1,7 +1,7 @@
 #pragma once
 
-#include "ex_types.h"
 #include "abstract_fileplugin.h"
+#include "ex_types.h"
 #include <QWidget>
 
 namespace Excellon {

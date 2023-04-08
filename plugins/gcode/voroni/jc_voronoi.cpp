@@ -1190,7 +1190,7 @@
 // INTERNAL FUNCTIONS
 
 #if defined(_MSC_VER) && !defined(__cplusplus)
-    #define inline __inline
+#define inline __inline
 #endif
 
 // jcv_point

@@ -12,7 +12,6 @@ struct mvector : std::vector<T> {
     using M = mvector<T>;
     using V::V;
 
-
     inline void append(const V& vec) {
         V::insert(V::end(), vec.begin(), vec.end());
     }

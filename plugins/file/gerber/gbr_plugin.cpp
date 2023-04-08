@@ -193,18 +193,6 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     return tab;
 }
 
-void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
-    if (static_cast<File*>(file)->flashedApertures() && cbx) {
-        cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
-        QPixmap pixmap(IconSize, IconSize);
-        QColor color(file->color());
-        color.setAlpha(255);
-        pixmap.fill(color);
-        cbx->setItemData(cbx->count() - 1, QIcon(pixmap), Qt::DecorationRole);
-        cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
-    }
-}
-
 } // namespace Gerber
 
 #include "moc_gbr_plugin.cpp"

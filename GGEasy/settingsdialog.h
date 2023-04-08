@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
-//#include "a_pch.h"
+// #include "a_pch.h"
 
 #include "doublespinbox.h"
 #include "mvector.h"
@@ -107,7 +107,7 @@ private:
         DoubleSpinBox* dsbxMinCircleSegmentLength;
         QSpacerItem* verticalSpacer_2;
 
-        void setupUi(QDialog* SettingsDialog); // setupUi
+        void setupUi(QDialog* SettingsDialog);       // setupUi
 
         void retranslateUi(QDialog* SettingsDialog); // retranslateUi
 

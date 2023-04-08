@@ -37,9 +37,9 @@ File::File()
     : AbstractFile() {
     itemsType_ = int(ItemsType::Normal);
     layerTypes_ = {
-        {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")   },
-        {int(ItemsType::Paths),  DxfObj::tr("Paths"),  DxfObj::tr("Displays paths without pen width.")         },
-        {int(ItemsType::Both),   DxfObj::tr("Both"),   DxfObj::tr("Displays paths without and with pen width.")},
+        {int(ItemsType::Normal), DxfObj::tr("Normal"),    DxfObj::tr("Displays paths with pen width and fill.")},
+        { int(ItemsType::Paths),  DxfObj::tr("Paths"),          DxfObj::tr("Displays paths without pen width.")},
+        {  int(ItemsType::Both),   DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.")},
     };
 }
 
@@ -132,7 +132,7 @@ Layer* File::layer(const QString& name) {
     return nullptr;
 }
 
-FileType File::type() const { return FileType::Dxf_; }
+uint32_t File::type() const { return DXF; }
 
 void File::createGi() {
     Timer t {__FUNCTION__};
@@ -157,11 +157,11 @@ void File::createGi() {
             Clipper clipper; // Clipper
             const bool empty {layer->groupedPaths_.empty()};
             for (auto& go : layer->graphicObjects_) {
-                if (empty && go.paths().size())
-                    clipper.AddSubject(go.paths());
+                if (empty && go.fill.size())
+                    clipper.AddSubject(go.fill);
 
-                if (go.path().size() > 1) {
-                    auto gItem = new GiDataPath(go.path(), this);
+                if (go.path.size() > 1) {
+                    auto gItem = new GiDataPath(go.path, this);
                     if (go.entity()) {
                         //                        gItem->setToolTip(QString("Line %1\n%2")
                         //                                              .arg(go.entity()->data[0].line())
@@ -220,6 +220,60 @@ void File::setVisible(bool visible) {
             }
         }
     }
+}
+
+mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
+
+    mvector<GraphicObject> retData;
+    auto t = transform_.toQTransform(); // cached  QTransform
+    for (auto&& criterion : criterias) {
+        for (int ctr {}; auto&& [name, layer] : layers())
+            for (const auto& go : layer->graphicObjects()) {
+                auto transformedGo = go * t; // return copy
+                if (criterion.test(transformedGo)) {
+                    auto& g = retData.emplace_back(transformedGo);
+                    if (test)
+                        return retData;
+
+                    switch (gcType) {
+                    case GCType::Drill: {
+                        double drillDiameter {};
+                        auto rect = C2::Bounds(g.fill);
+                        //                        auto& ap = *apertures_.at(go.state.aperture());
+
+                        //                        auto name {ap.name()};
+                        //                        if (ap.withHole())
+                        //                            drillDiameter = ap.drillDiameter();
+                        //                        else
+                        //                            drillDiameter = ap.minSize();
+                        drillDiameter = std::min(rect.bottom - rect.top, rect.right - rect.left);
+                        //                        name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
+                        g.raw = drillDiameter;
+                    } break;
+                    default:
+                        break;
+                    }
+                }
+            }
+    }
+
+    return retData;
+
+    // std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
+    //     if (plugin->type() == ::GCode::Drill) {
+    //         DrillPlugin::Preview retData;
+    //         auto const dxfFile = static_cast<File*>(file);
+    //         QTransform t {dxfFile->transform()};
+    //         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
+    //             for (auto&& go : layer->graphicObjects())
+    //                 if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
+    //                     retData[{ctr, circle->radius * 2, false, name + ": CIRCLE"}].posOrPath.emplace_back(t.map(circle->centerPoint));
+    //             ctr++;
+    //         }
+    //         return retData;
+    //     }
+    //     return {};
+    // }
 }
 
 void File::write(QDataStream& stream) const {

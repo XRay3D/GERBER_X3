@@ -13,7 +13,7 @@ namespace Dxf {
 struct Image final : Entity {
     Image(SectionParser* sp);
     Type type() const override { return Type::IMAGE; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

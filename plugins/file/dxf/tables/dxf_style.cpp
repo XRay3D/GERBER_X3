@@ -27,7 +27,7 @@ void Style::parse(CodeData& code) {
         switch (code.code()) {
         case SubclassMarker: // 100
             break;
-        case StyleName: // 2
+        case StyleName:      // 2
             styleName = code.string();
             sp->file->styles()[styleName] = this;
             break;
@@ -37,18 +37,18 @@ void Style::parse(CodeData& code) {
         case FixedTextHeight: // 40
             fixedTextHeight = code;
             break;
-        case WidthFactor: // 41
+        case WidthFactor:        // 41
             break;
-        case ObliqueAngle: // 50
+        case ObliqueAngle:       // 50
             break;
         case TextGenerationFlag: // 71
             textGenerationFlag = code;
             break;
-        case LastHeightUsed: // 42
+        case LastHeightUsed:                                                                         // 42
             break;
-        case PrimaryFontFileName: // 3
+        case PrimaryFontFileName:                                                                    // 3
             break;
-        case BigfontFileName: // 4
+        case BigfontFileName:                                                                        // 4
             break;
         case ALongValueWhichContainsATruetypeFontsPitchAndFamily_CharacterSet_AndItalicAndBoldFlags: // 1071
             if ((int32_t(code) & 0xA) == 0xA) {

@@ -25,7 +25,7 @@ public:
     void draw(const InsertEntity* const) const override;
     void parse(CodeData& code) override;
     Type type() const override { return NULL_ENT; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

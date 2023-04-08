@@ -108,7 +108,7 @@ void InsertEntity::parse(CodeData& code) {
     } while (code.code() != 0);
 }
 
-void InsertEntity::transform(GraphicObject& item, QPointF tr) const {
+void InsertEntity::transform(DxfGo& item, QPointF tr) const {
     item.setPos(-basePoint);
     item.setScale(scaleX, scaleY);
     item.setRotation(rotationAngle);

@@ -68,7 +68,7 @@ public:
     int colorNumber() const;
 
     const GraphicObjects& graphicObjects() const;
-    void addGraphicObject(GraphicObject&& go);
+    void addGraphicObject(DxfGo&& go);
 
     GiGroup* itemGroup() const;
     bool isEmpty() const;

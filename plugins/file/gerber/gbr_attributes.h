@@ -74,7 +74,7 @@ namespace Attr { // Attributes
             ProjectId,          // Определяет проект и редакции. 5.6.8
             MD5,                // Устанавливает подпись или контрольную сумму файла MD5. 5.6.9
         };
-        Q_ENUM(StdAttr) // 0
+        Q_ENUM(StdAttr)         // 0
         static StdAttr toStdAttr(const QString& key);
 
         enum class ePart {
@@ -87,12 +87,12 @@ namespace Attr { // Attributes
             Coupon,           // Тестовый купон
             Other             // Other,<mandatory field>         Ни один из вышеперечисленных. Обязательное поле неформально указывает на деталь
         };
-        Q_ENUM(ePart) // 1
+        Q_ENUM(ePart)         // 1
         static ePart toPart(const QString& key);
 
         enum eFilePolarity {
-            Positive, // Изображение представляет наличие материала (рекомендуется)
-            Negative, // Изображение представляет собой отсутствие материала
+            Positive,         // Изображение представляет наличие материала (рекомендуется)
+            Negative,         // Изображение представляет собой отсутствие материала
         };
         Q_ENUM(eFilePolarity) // 2
         static eFilePolarity toFilePolarityValue(const QString& key);

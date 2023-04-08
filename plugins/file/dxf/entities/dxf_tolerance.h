@@ -13,7 +13,7 @@ namespace Dxf {
 struct Tolerance final : Entity {
     Tolerance(SectionParser* sp);
     Type type() const override { return Type::TOLERANCE; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

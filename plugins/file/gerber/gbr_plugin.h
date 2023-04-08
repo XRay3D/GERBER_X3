@@ -34,7 +34,6 @@ public:
     [[nodiscard]] AbstractFile* loadFile(QDataStream& stream) const override;
     [[nodiscard]] bool thisIsIt(const QString& fileName) override;
     [[nodiscard]] uint32_t type() const override { return GERBER; }
-    void addToGcForm(AbstractFile* file, QComboBox* cbx) override;
 
     // public slots:
     [[nodiscard]] AbstractFile* parseFile(const QString& fileName, int type) override;

@@ -191,9 +191,9 @@ void GiMarker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
-// FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-//        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-//    });
+    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    //    });
     menu.exec(event->screenPos());
 }
 
@@ -397,9 +397,9 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(App::project()->pinUsed(index_));
 
     menu.addSeparator();
-// FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-//        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-//    });
+    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    //    });
     menu.exec(event->screenPos());
 }
 

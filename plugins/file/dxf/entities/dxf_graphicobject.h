@@ -20,24 +20,24 @@ namespace Dxf {
 class File;
 struct Entity;
 
-class GraphicObject final : public GraphicObject {
+class DxfGo final : public ::GraphicObject {
     friend class File;
     friend class Plugin;
 
-    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go);
-    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go);
+    friend QDataStream& operator<<(QDataStream& stream, const DxfGo& go);
+    friend QDataStream& operator>>(QDataStream& stream, DxfGo& go);
 
     int entityId_ {};
-    Path path_;
+    //    Path path_;
     File* file_ = nullptr;
     double rotationAngle_ {};
     double scaleX_ {};
     double scaleY_ {};
-    QPointF pos_;
+    //    QPointF pos_;
 
 public:
-    GraphicObject();
-    GraphicObject(int entityId, const Path& path, const Paths& paths);
+    DxfGo();
+    DxfGo(int entityId, const Path& path, const Paths& paths);
 
     void setRotation(double rotationAngle);
     double rotationAngle() const;
@@ -55,25 +55,25 @@ public:
 
     // GraphicObject interface
 
-    const Path& path() const override;
-    const Paths& paths() const override;
+    //    const Path& path() const /*override*/;
+    //    const Paths& paths() const /*override*/;
 
-    Path line() const override;
-    Path lineW() const override;
-    Path polyLine() const override;
-    Paths polyLineW() const override;
-    Path elipse() const override;
-    Paths elipseW() const override;
-    Path arc() const override;
-    Path arcW() const override;
-    Path polygon() const override;
-    Paths polygonWholes() const override;
-    Path hole() const override;
-    Paths holes() const override;
-    bool positive() const override;
-    bool closed() const override;
-    Path& rPath() override;
-    Paths& rPaths() override;
+    //    Path line() const /*override*/;
+    //    Path lineW() const /*override*/;
+    //    Path polyLine() const /*override*/;
+    //    Paths polyLineW() const /*override*/;
+    //    Path elipse() const /*override*/;
+    //    Paths elipseW() const /*override*/;
+    //    Path arc() const /*override*/;
+    //    Path arcW() const /*override*/;
+    //    Path polygon() const /*override*/;
+    //    Paths polygonWholes() const /*override*/;
+    //    Path hole() const /*override*/;
+    //    Paths holes() const /*override*/;
+    //    bool positive() const /*override*/;
+    //    bool closed() const /*override*/;
+    //    Path& rPath() /*override*/;
+    //    Paths& rPaths() /*override*/;
 };
 
 } // namespace Dxf

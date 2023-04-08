@@ -27,7 +27,7 @@ void Attrib::parse(CodeData& code) {
     } while (code.code() != 0);
 }
 
-GraphicObject Attrib::toGo() const {
+DxfGo Attrib::toGo() const {
     return {};
 }
 

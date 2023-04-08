@@ -13,7 +13,7 @@ namespace Dxf {
 struct Region final : Entity {
     Region(SectionParser* sp);
     Type type() const override { return Type::REGION; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

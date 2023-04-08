@@ -13,10 +13,10 @@
 #include <stack>
 #include <vector>
 #if __has_include(<boost/polygon/isotropy.hpp>)
-    #include <boost/polygon/isotropy.hpp>
-    #include <boost/polygon/point_concept.hpp>
-    #include <boost/polygon/rectangle_concept.hpp>
-    #include <boost/polygon/segment_concept.hpp>
+#include <boost/polygon/isotropy.hpp>
+#include <boost/polygon/point_concept.hpp>
+#include <boost/polygon/rectangle_concept.hpp>
+#include <boost/polygon/segment_concept.hpp>
 
 namespace boost {
 namespace polygon {

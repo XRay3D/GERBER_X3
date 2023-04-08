@@ -40,12 +40,14 @@ class File : public AbstractFile {
     friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
 
 public:
-
     explicit File();
     ~File();
     Layer* layer(const QString& name);
     HeaderData& header() { return header_; }
+
+    const Layers& layers() const { return layers_; }
     Layers& layers() { return layers_; }
+
     Blocks& blocks() { return blocks_; }
     Styles& styles() { return styles_; }
     EntitiesUP& entities() { return entities_; }
@@ -78,6 +80,8 @@ public:
     void createGi() override;
     bool isVisible() const override;
     void setVisible(bool visible) override;
+    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
+    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
 
 protected:
     void write(QDataStream& stream) const override;

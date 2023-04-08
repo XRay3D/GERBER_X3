@@ -13,7 +13,7 @@ namespace Dxf {
 struct Leader final : Entity {
     Leader(SectionParser* sp);
     Type type() const override { return Type::LEADER; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

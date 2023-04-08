@@ -10,12 +10,12 @@
  ********************************************************************************/
 #pragma once
 
+#include "myclipper.h"
 #include <QAnimationGroup>
 #include <QGraphicsItem>
 #include <QPen>
 #include <QPropertyAnimation>
 #include <qmath.h>
-#include "myclipper.h"
 
 enum /*class*/ GiType : int {
     DataPath = QGraphicsItem::UserType,

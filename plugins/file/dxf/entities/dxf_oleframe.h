@@ -13,7 +13,7 @@ namespace Dxf {
 struct OleFrame final : Entity {
     OleFrame(SectionParser* sp);
     Type type() const override { return Type::OLEFRAME; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

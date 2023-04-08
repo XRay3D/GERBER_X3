@@ -19,4 +19,4 @@ protected:
     void cgalVoronoi();
 };
 
-} // namespace GCode
+} // namespace Voronoi

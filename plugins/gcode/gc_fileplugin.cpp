@@ -11,49 +11,49 @@
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
 // ********************************************************************************/
 
-//#include "gc_fileplugin.h"
-//#include "abstract_file.h"
-//#include "ft_view.h"
-//#include "gc_types.h"
+// #include "gc_fileplugin.h"
+// #include "abstract_file.h"
+// #include "ft_view.h"
+// #include "gc_types.h"
 //// #include "gc_file.h"
 ////  #include "gc_node.h"
 
-//#include "md5.h"
-//#include <QMessageBox>
-//#include <QtWidgets>
+// #include "md5.h"
+// #include <QMessageBox>
+// #include <QtWidgets>
 
-//namespace GCode {
+// namespace GCode {
 
-//Plugin::Plugin(QObject* parent)
-//    : AbstractFilePlugin(parent) {
-//    info_ = {
-//        {        "Name",                                                 "GCode"},
-//        {     "Version",                                                   "1.1"},
-//        {"VendorAuthor",                                "X-Ray aka Bakiev Damir"},
-//        {        "Info", "GCode is a static plugin always included with GGEasy."}
-//    };
-//}
+// Plugin::Plugin(QObject* parent)
+//     : AbstractFilePlugin(parent) {
+//     info_ = {
+//         {        "Name",                                                 "GCode"},
+//         {     "Version",                                                   "1.1"},
+//         {"VendorAuthor",                                "X-Ray aka Bakiev Damir"},
+//         {        "Info", "GCode is a static plugin always included with GGEasy."}
+//     };
+// }
 
-//bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
+// bool Plugin::thisIsIt(const QString& /*fileName*/) { return false; }
 
-//uint32_t Plugin::type() const { return md5::hash32("GCode"); }
+// uint32_t Plugin::type() const { return md5::hash32("GCode"); }
 
-//QString Plugin::folderName() const { return tr("Tool Paths"); }
+// QString Plugin::folderName() const { return tr("Tool Paths"); }
 
-//AbstractFile* Plugin::loadFile(QDataStream& stream) { return nullptr /*new File()*/; }
+// AbstractFile* Plugin::loadFile(QDataStream& stream) { return nullptr /*new File()*/; }
 
-//QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
+// QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
 
-//void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
-//    menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {
-//        if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
-//            tv->closeFiles();
-//    });
-//    menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
-//        tv, &FileTree::View::saveSelectedGCodeFiles);
-//}
+// void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
+//     menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {
+//         if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+//             tv->closeFiles();
+//     });
+//     menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),
+//         tv, &FileTree::View::saveSelectedGCodeFiles);
+// }
 
-//AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
+// AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
 //    class Tab : public AbstractFileSettings, Settings {
 //        QCheckBox* chbxInfo;
@@ -318,8 +318,8 @@
 //    return tab;
 //}
 
-//AbstractFile* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
+// AbstractFile* Plugin::parseFile(const QString& /*fileName*/, int /*type*/) { return nullptr; }
 
 //} // namespace GCode
 
-//#include "moc_gc_fileplugin.cpp"
+// #include "moc_gc_fileplugin.cpp"

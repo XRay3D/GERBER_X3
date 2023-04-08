@@ -26,7 +26,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QTextCodec>
+#include <QTextCodec>
 #endif
 
 #include <algorithm>
@@ -177,11 +177,11 @@ int main(int argc, char** argv) {
         macOS and iOS	.dylib, .bundle, .so
         */
 #ifdef __unix__
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
         const QString suffix("*.so");
-    #else
+#else
         const QString suffix("*.so");
-    #endif
+#endif
 #elif _WIN32
         const auto suffix = QStringLiteral("*.dll");
 #else

@@ -13,7 +13,7 @@ namespace Dxf {
 struct Helix final : Entity {
     Helix(SectionParser* sp);
     Type type() const override { return Type::HELIX; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

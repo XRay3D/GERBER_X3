@@ -18,7 +18,7 @@ struct Attrib final : Entity {
 public:
     void parse(CodeData& code) override;
     Type type() const override { return ATTRIB; };
-    GraphicObject toGo() const override;
+    DxfGo toGo() const override;
 
     /*
 Attrib group codes

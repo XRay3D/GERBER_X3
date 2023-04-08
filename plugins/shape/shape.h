@@ -68,7 +68,7 @@ protected:
     Paths paths_;
     Node* node_;
     std::map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
-    QPointF initPos;                             // групповое перемещение
+    QPointF initPos;                                     // групповое перемещение
     bool isFinal {};
 
     // QGraphicsItem interface

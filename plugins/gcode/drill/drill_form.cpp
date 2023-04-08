@@ -111,8 +111,8 @@ Form::~Form() {
     settings.setValue(ui->chbxZoomToSelected);
     settings.endGroup();
 
-    //    for (auto* var : App::graphicsView()->items<GiDataSolid>())
-    //        delete var;
+    // for (auto* var : App::graphicsView()->items<GiDataSolid>())
+    // delete var;
 
     delete ui;
 }
@@ -134,25 +134,26 @@ void Form::updateFiles() {
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
     }
 
-    on_cbxFileCurrentIndexChanged();
+    if (ui->cbxFile->count())
+        on_cbxFileCurrentIndexChanged();
 
     connect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
 }
 
 bool Form::canToShow() {
-    //    if (App::project()->files(FileType::Excellon).size() > 0)
+    // if (App::project()->files(FileType::Excellon).size() > 0)
     return true;
 
-    //    QComboBox cbx;
-    //    for (auto type : {FileType::Gerber_, FileType::Dxf_}) {
-    //        for (auto file : App::project()->files(type)) {
-    //            App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
-    //            if (cbx.count())
-    //                return true;
-    //        }
-    //    }
-    //    QMessageBox::information(nullptr, "", tr("No data to process."));
-    //    return false;
+    // QComboBox cbx;
+    // for (auto type : {FileType::Gerber_, FileType::Dxf_}) {
+    // for (auto file : App::project()->files(type)) {
+    // App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
+    // if (cbx.count())
+    // return true;
+    // }
+    // }
+    // QMessageBox::information(nullptr, "", tr("No data to process."));
+    // return false;
 }
 
 void Form::initToolTable() {
@@ -196,10 +197,10 @@ void Form::on_cbxFileCurrentIndexChanged() {
         return;
 
     try {
-        //        auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->getDataForGC(file, plugin));
-        //        auto peview = ui->cbxFile->currentData().value<mvector<const GraphicObject*>>();
-        //        for (auto* var : peview)
-        //            qDebug() << var->name << var->pos;
+        // auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->getDataForGC(file, plugin));
+        // auto peview = ui->cbxFile->currentData().value<mvector<const GraphicObject*>>();
+        // for (auto* var : peview)
+        // qDebug() << var->name << var->pos;
 
         if (1) {
             using Key = std::pair<QByteArray, bool>;
@@ -223,7 +224,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
                 row.isSlot = key.second;
                 for (auto* go : val)
                     new GiPreview(
-                        Path {go->pos},
+                        (go->path.size() > 1 ? Path {go->path} : Path {go->pos}),
                         row.diameter,
                         data.back().toolId,
                         row,
@@ -375,8 +376,8 @@ void Form::pickUpTool() {
     const double k = 0.05; // 5%
     int ctr = 0;
     for (const auto& row : model->data()) {
-        //        model->setToolId(ctr++, 3);
-        //        continue;
+        // model->setToolId(ctr++, 3);
+        // continue;
         const double drillDiameterMin = row.diameter * (1.0 - k);
         const double drillDiameterMax = row.diameter * (1.0 + k);
 
@@ -408,7 +409,7 @@ void Form::updateState() {
 
 void Form::errorOccurred() {
     auto tpc = (GCode::Creator*)sender();
-    //    tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
+    // tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }
 
 QModelIndexList Form::selectedIndexes() const { return ui->toolTable->selectionModel()->selectedIndexes(); }
@@ -429,7 +430,7 @@ void Form::computePaths() {
         return indexes;
     };
 
-    if (worckType == GCType::Drill) { //   slots only
+    if (worckType == GCType::Drill) { // slots only
         struct Data {
             Paths paths;
             mvector<int> toolsApertures;
@@ -454,15 +455,15 @@ void Form::computePaths() {
         for (auto [usedToolId, _] : pathsMap) {
             (void)_;
             if (pathsMap[usedToolId].paths.size()) {
-                //                GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
-                //                gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
-                //                gcode->setSide(file->side());
-                //                App::project()->addFile(gcode);
+                // GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
+                // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
+                // gcode->setSide(file->side());
+                // App::project()->addFile(gcode);
             }
         }
     }
 
-    { //   other
+    { // other
         struct Data {
             Path drillPath;
             Paths paths;
@@ -471,41 +472,40 @@ void Form::computePaths() {
 
         std::map<int, Data> pathsMap;
 
-        auto itemToPaths = [](GiPreview* item) {
-            return item->isSlot() ? item->offset() : item->paths();
-        };
-
         for (int i {}; auto&& row : *model) {
             bool created {};
             if (row.toolId > -1 && row.useForCalc) {
                 pathsMap[row.toolId].toolsApertures.push_back(i);
                 for (auto& item : row.items) {
-                    //                    if (item->isSlot())
-                    //                        continue;
+                    // if (item->isSlot())
+                    // continue;
                     switch (worckType) {
                     case GCType::Profile:
                         if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             switch (side) {
                             case GCode::On:
+                                pathsMap[row.toolId].paths.append(item->paths());
+                                created = true;
+                                break;
                             case GCode::Outer:
-                                pathsMap[row.toolId].paths.append(itemToPaths(item));
+                                pathsMap[row.toolId].paths.append(item->offset());
                                 created = true;
                                 break;
                             case GCode::Inner:
-                                //                                if (item->fit(dsbxDepth->value())) {
-                                pathsMap[row.toolId].paths.append(itemToPaths(item));
+                                // if (item->fit(dsbxDepth->value())) {
+                                pathsMap[row.toolId].paths.append(item->offset());
                                 created = true;
-                                //                                }
+                                // }
                                 break;
                             }
                         }
                         break;
                     case GCType::Pocket:
                         if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
-                            //                        if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(dsbxDepth->value())) {
-                            pathsMap[row.toolId].paths.append(itemToPaths(item));
+                            // if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(dsbxDepth->value())) {
+                            pathsMap[row.toolId].paths.append(item->offset());
                             created = true;
-                            //   }
+                            // }
                         }
                         break;
                     case GCType::Drill:

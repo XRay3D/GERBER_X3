@@ -8,21 +8,21 @@
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
 // ********************************************************************************/
-//#pragma once
+// #pragma once
 
-//#include "abstract_file.h"
-//#include "gc_types.h"
-//#include <QList>
-//#include <QString>
+// #include "abstract_file.h"
+// #include "gc_types.h"
+// #include <QList>
+// #include <QString>
 
-//class Project;
+// class Project;
 
-//namespace GCode {
+// namespace GCode {
 
-//class File : public AbstractFile {
-//public:
-//    File(Params&& gcp);
-//    File() {};
+// class File : public AbstractFile {
+// public:
+//     File(Params&& gcp);
+//     File() {};
 
 //    inline double feedRate() { return feedRate_; }
 //    inline double plungeRate() { return plungeRate_; }
@@ -37,21 +37,21 @@
 //    static QString getLastDir();
 //    static void setLastDir(QString dirPath);
 
-//private:
-//    double feedRate_ = 0.0;
-//    double plungeRate_ = 0.0;
-//    int spindleSpeed_ = 0;
-//    int toolType_ = 0;
+// private:
+//     double feedRate_ = 0.0;
+//     double plungeRate_ = 0.0;
+//     int spindleSpeed_ = 0;
+//     int toolType_ = 0;
 
-//protected:
-//    /*const*/ Params gcp_; ////
-//    enum {
-//        AlwaysG,
-//        AlwaysX,
-//        AlwaysY,
-//        AlwaysZ,
-//        AlwaysF,
-//        AlwaysS,
+// protected:
+//     /*const*/ Params gcp_; ////
+//     enum {
+//         AlwaysG,
+//         AlwaysX,
+//         AlwaysY,
+//         AlwaysZ,
+//         AlwaysF,
+//         AlwaysS,
 
 //        SpaceG,
 //        SpaceX,

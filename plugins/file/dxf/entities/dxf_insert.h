@@ -22,14 +22,14 @@ public:
     void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
     void write(QDataStream& stream) const override { }
     void read(QDataStream& stream) override { }
 
-    void transform(GraphicObject& item, QPointF tr) const;
+    void transform(DxfGo& item, QPointF tr) const;
 
     enum DataEnum {
         SubclassMrker = 100,       // Subclass marker (AcDbBlockReference)
@@ -54,11 +54,11 @@ public:
     };
 
     Blocks& blocks;
-    QString blockName; // Block name
-    QPointF insPos;    // Точка вставки (в ОСК). Файл DXF: значение X; приложение: 3D-точка
+    QString blockName;     // Block name
+    QPointF insPos;        // Точка вставки (в ОСК). Файл DXF: значение X; приложение: 3D-точка
     mutable QPointF basePoint;
-    double scaleX = 1; // Масштабный коэффициент по оси X(необязательно; значение по умолчанию = 1)
-    double scaleY = 1; // Масштабный коэффициент по оси Y (необязательно; значение по умолчанию = 1)
+    double scaleX = 1;     // Масштабный коэффициент по оси X(необязательно; значение по умолчанию = 1)
+    double scaleY = 1;     // Масштабный коэффициент по оси Y (необязательно; значение по умолчанию = 1)
     double rotationAngle = 0;
     int colCount = 1;      // Column count (optional; default = 1)
     int rowCount = 1;      // Row count (optional; default = 1)

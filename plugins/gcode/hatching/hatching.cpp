@@ -14,7 +14,7 @@
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
-    #include <execution>
+#include <execution>
 #endif
 
 #include <algorithm>

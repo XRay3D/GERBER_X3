@@ -110,7 +110,7 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     return debug;
 }
 
-GraphicObject Text::toGo() const {
+DxfGo Text::toGo() const {
 
     //    for (auto& code : data)
 
@@ -162,16 +162,16 @@ GraphicObject Text::toGo() const {
         break;
     case MiddleH: // 4
         break;
-    case Fit: // 5
+    case Fit:     // 5
         break;
     }
 
     switch (verticalJustType) {
     case Baseline: // 0
         break;
-    case Bottom: // 1
+    case Bottom:   // 1
         break;
-    case MiddleV: // 2
+    case MiddleV:  // 2
         offset.ry() += ascent / 2;
         break;
     case Top: // 3
@@ -197,7 +197,8 @@ GraphicObject Text::toGo() const {
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m2.scale(d, d);
 
-    return {id, {}, path2.toSubpathPolygons(m2)};
+    DxfGo go {id, {}, path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
+    return go;
 }
 
 void Text::write(QDataStream& stream) const {

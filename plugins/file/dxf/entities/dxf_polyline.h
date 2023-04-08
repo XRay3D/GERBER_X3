@@ -79,7 +79,7 @@ public:
 
     QVector<struct Vertex> vertex;
 
-    GraphicObject toGo() const override;
+    DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 

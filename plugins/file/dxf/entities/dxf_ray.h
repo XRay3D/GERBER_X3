@@ -13,7 +13,7 @@ namespace Dxf {
 struct Ray final : Entity {
     Ray(SectionParser* sp);
     Type type() const override { return Type::RAY; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

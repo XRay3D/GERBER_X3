@@ -56,6 +56,7 @@ struct Transform {
     friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
         return Block(stream).read(tr);
     }
+
     QTransform toQTransform() const {
         QTransform t;
         t.translate(translate.x(), translate.y());
@@ -75,6 +76,15 @@ enum class GCType {
 };
 
 struct GraphicObject {
+
+    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
+        return Block(stream).write(go.id, go.type, go.pos, go.path, go.fill, go.name);
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
+        return Block(stream).read(go.id, go.type, go.pos, go.path, go.fill, go.name);
+    }
+
     // clang-format off
     enum Type:uint32_t {
         Null,

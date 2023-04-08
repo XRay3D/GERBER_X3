@@ -13,7 +13,7 @@ namespace Dxf {
 struct MLine final : Entity {
     MLine(SectionParser* sp);
     Type type() const override { return Type::MLINE; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

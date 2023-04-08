@@ -63,13 +63,12 @@ else()
 endif()
 
 
-#add_subdirectory(dxf)
-#add_subdirectory(excellon)
+add_subdirectory(dxf)
+add_subdirectory(excellon)
 add_subdirectory(gerber)
 
 #add_subdirectory(file)
 #add_subdirectory(TopoR)
-
 #add_subdirectory(hpgl)
 
 

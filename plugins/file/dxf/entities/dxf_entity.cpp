@@ -143,7 +143,7 @@ void Entity::draw(const InsertEntity* const i) const {
         for (int r {}; r < i->rowCount; ++r) {
             for (int c {}; c < i->colCount; ++c) {
                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-                GraphicObject go(toGo());
+                DxfGo go(toGo());
                 i->transform(go, tr);
                 i->attachToLayer(std::move(go));
             }
@@ -284,7 +284,7 @@ QColor Entity::color() const {
     return QColor(255, 0, 255, 100);
 }
 
-void Entity::attachToLayer(GraphicObject&& go) const {
+void Entity::attachToLayer(DxfGo&& go) const {
     if (sp == nullptr)
         throw DxfObj::tr("SectionParser is null!");
     else if (sp->file == nullptr)

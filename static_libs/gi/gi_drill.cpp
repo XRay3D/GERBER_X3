@@ -121,10 +121,7 @@ void GiDrill::create() {
         //        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
-        ClipperOffset offset;
-        offset.AddPath(path_, JoinType::Round, EndType::Round);
-        auto paths {offset.Execute(diameter_ * 0.5 * uScale)};
-        for (auto&& path : paths) {
+        for (auto&& path : C2::InflatePaths(Paths {path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
             path.push_back(path.front());
             shape_.addPolygon(path);
         }

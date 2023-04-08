@@ -66,11 +66,12 @@ void Point::parse(Dxf::CodeData& code) {
 
 Entity::Type Point::type() const { return POINT; }
 
-GraphicObject Point::toGo() const {
+DxfGo Point::toGo() const {
     QPolygonF p;
     p.append(point);
 
-    return {id, p, {}};
+    DxfGo go {id, p, {}}; // return {id, p, {}};
+    return go;
 }
 
 void Point::write(QDataStream& stream) const {

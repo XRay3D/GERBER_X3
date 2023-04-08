@@ -20,18 +20,18 @@ struct Spline final : Entity {
 public:
     void parse(CodeData& code) override;
     Type type() const override;
-    GraphicObject toGo() const override;
+    DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
     enum DataEnum {
-        SubclassMarker = 100, //	100	Маркер подкласса (AcDbSpline)
+        SubclassMarker = 100,      //	100	Маркер подкласса (AcDbSpline)
 
         ExtrusionDirectionX = 210, //	210	Вектор нормали (отсутствует, если сплайн неплоский)
         ExtrusionDirectionY = 220, //        Dxf: x value; App: 3dVector		=		,//		Файл DXF: значение X; приложение: 3D-вектор
         ExtrusionDirectionZ = 230, //        Dxf: y and z valuesOfNormalVector (optional)		=	220, 230	,//	220, 230	Файл DXF: значение Y и Z вектора нормали (необязательно)
 
-        SplineFlag = 70, //	70	Флаг сплайна (кодовый бит):
+        SplineFlag = 70,           //	70	Флаг сплайна (кодовый бит):
         //        1 = ClosedSpline		=		,//		1 = замкнутый сплайн
         //        2 = PeriodicSpline		=		,//		2 = периодический сплайн
         //        4 = RationalSpline		=		,//		4 = рациональный сплайн
@@ -43,28 +43,28 @@ public:
         NumberOfControlPoints = 73,  //	73	Число управляющих точек
         NumberOfFitPoints = 74,      //	74	Число определяющих точек (если есть)
 
-        KnotTolerance = 42,         //	42	Допуск узлов (по умолчанию = 0,0000001)
-        ControlPointTolerance = 43, //	43	Допуск управляющих точек (по умолчанию = 0,0000001)
-        FitTolerance = 44,          //	44	Допуск определяющих точек (по умолчанию = 0.0000000001)
+        KnotTolerance = 42,          //	42	Допуск узлов (по умолчанию = 0,0000001)
+        ControlPointTolerance = 43,  //	43	Допуск управляющих точек (по умолчанию = 0,0000001)
+        FitTolerance = 44,           //	44	Допуск определяющих точек (по умолчанию = 0.0000000001)
 
-        StartTangentX = 12, //	12	Касательная в начальной точке, может быть опущено (в МСК)
-        StartTangentY = 22, //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
-        StartTangentZ = 32, //        Dxf: y and z valuesOfStartTangent—mayBeOmitted (inWcs)		=	22, 32	,//	22, 32	Файл DXF: значения Y и Z касательной в начальной точке, может быть опущена (в МСК)
+        StartTangentX = 12,          //	12	Касательная в начальной точке, может быть опущено (в МСК)
+        StartTangentY = 22,          //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
+        StartTangentZ = 32,          //        Dxf: y and z valuesOfStartTangent—mayBeOmitted (inWcs)		=	22, 32	,//	22, 32	Файл DXF: значения Y и Z касательной в начальной точке, может быть опущена (в МСК)
 
-        EndTangentX = 13, //	13	Касательная в конечной точке, может быть опущено (в МСК)
-        EndTangentY = 23, //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
-        EndTangentZ = 33, //        Dxf: y and z valuesOfEndTangent—mayBeOmitted (inWcs)		=	23, 33	,//	23, 33	Файл DXF: значения Y и Z касательной в конечной точке, может быть опущена (в МСК)
+        EndTangentX = 13,            //	13	Касательная в конечной точке, может быть опущено (в МСК)
+        EndTangentY = 23,            //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
+        EndTangentZ = 33,            //        Dxf: y and z valuesOfEndTangent—mayBeOmitted (inWcs)		=	23, 33	,//	23, 33	Файл DXF: значения Y и Z касательной в конечной точке, может быть опущена (в МСК)
 
-        KnotValue = 40, //	40	Значение узла (одна запись на узел)
-        Weight = 41,    //	41	Вес (если значение не равно 1); с несколькими парами групп, которые присутствуют, если всем не присвоено значение 1
+        KnotValue = 40,              //	40	Значение узла (одна запись на узел)
+        Weight = 41,                 //	41	Вес (если значение не равно 1); с несколькими парами групп, которые присутствуют, если всем не присвоено значение 1
 
-        ControlPointsX = 10, //	10	Управляющие точки (в МСК); одна запись на управляющую точку
-        ControlPointsY = 20, //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
-        ControlPointsZ = 30, //        Dxf: y and z valuesOfControlPoints (inWcs); OneEntryPerControlPoint		=	20, 30	,//	20, 30	Файл DXF: значения Y и Z управляющих точек (в МСК); одна запись в управляющей точке
+        ControlPointsX = 10,         //	10	Управляющие точки (в МСК); одна запись на управляющую точку
+        ControlPointsY = 20,         //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
+        ControlPointsZ = 30,         //        Dxf: y and z valuesOfControlPoints (inWcs); OneEntryPerControlPoint		=	20, 30	,//	20, 30	Файл DXF: значения Y и Z управляющих точек (в МСК); одна запись в управляющей точке
 
-        FitPointsX = 11, //	11	Определяющие точки (в МСК); одна запись на определяющую точку
-        FitPointsY = 21, //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
-        FitPointsZ = 31, //        Dxf: y and z valuesOfFitPoints (inWcs); OneEntryPerFitPoint		=	21, 31	,//	21, 31	Файл DXF: значения Y и Z определяющих точек (в МСК); одна запись на определяющую точку
+        FitPointsX = 11,             //	11	Определяющие точки (в МСК); одна запись на определяющую точку
+        FitPointsY = 21,             //        Dxf: x value; App: 3dPoint		=		,//		Файл DXF: значение X; приложение: 3D-точка
+        FitPointsZ = 31,             //        Dxf: y and z valuesOfFitPoints (inWcs); OneEntryPerFitPoint		=	21, 31	,//	21, 31	Файл DXF: значения Y и Z определяющих точек (в МСК); одна запись на определяющую точку
     };
 
     QPolygonF FitPoints;
