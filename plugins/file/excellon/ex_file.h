@@ -22,11 +22,10 @@ class File : public AbstractFile, public QList<Hole> {
     Format format_;
 
 public:
-
     explicit File();
     ~File() override;
 
-    uint32_t type() const override { return FileType::Excellon_; }
+    uint32_t type() const override { return EXCELLON; }
 
     double tool(int t) const;
     Tools tools() const;
@@ -38,6 +37,9 @@ public:
     void createGi() override;
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
+    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;;
+
+    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
 
 protected:
     void write(QDataStream& stream) const override;

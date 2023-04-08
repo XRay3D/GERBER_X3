@@ -13,7 +13,7 @@ namespace Dxf {
 struct Trace final : Entity {
     Trace(SectionParser* sp);
     Type type() const override { return Type::TRACE; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

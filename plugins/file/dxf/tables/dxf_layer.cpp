@@ -71,7 +71,7 @@ int Layer::colorNumber() const { return colorNumber_; }
 
 const GraphicObjects& Layer::graphicObjects() const { return graphicObjects_; }
 
-void Layer::addGraphicObject(GraphicObject&& go) { graphicObjects_.emplace_back(go); }
+void Layer::addGraphicObject(DxfGo&& go) { graphicObjects_.emplace_back(go); }
 
 QColor Layer::color() const {
     return itemsType_ == ItemsType::Normal ? colorNorm_ : colorPath_;

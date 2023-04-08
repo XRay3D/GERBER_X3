@@ -82,7 +82,7 @@ void Arc::parse(CodeData& code) {
 
 Entity::Type Arc::type() const { return Type::ARC; }
 
-GraphicObject Arc::toGo() const {
+DxfGo Arc::toGo() const {
     if (qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
         return {};
 
@@ -113,7 +113,8 @@ GraphicObject Arc::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2).first());
 
-    return {id, p, {}};
+    DxfGo go {id, p, {}}; // return {id, p, {}};
+    return go;
 }
 
 void Arc::write(QDataStream& stream) const {

@@ -65,7 +65,7 @@ protected:
     int fileId {-1};
 
     int fileCount {1};
-    //Plugin* const plugin;
+    // Plugin* const plugin;
 
     DepthForm* dsbxDepth;
     //    QLabel* label;
@@ -77,7 +77,7 @@ protected:
     QWidget* widget() const { return ctrWidget; }
 
 private:
-    Creator* creator_{};
+    Creator* creator_ {};
 
     QDialogButtonBox* errBtnBox;
     class TableView* errTable;

@@ -11,6 +11,7 @@
 #pragma once
 
 #include "abstract_fileplugin.h"
+#include "dxf_types.h"
 
 #include <QObject>
 #include <QStack>
@@ -29,22 +30,14 @@ public:
 
     // AbstractFilePlugin interface
     bool thisIsIt(const QString& fileName) override;
-
     uint32_t type() const override;
-    QString folderName() const override;
-
-    AbstractFile* loadFile(QDataStream& stream) constoverride;
+    QString folderName() const override { return tr("Dxf Files"); }
+    AbstractFile* loadFile(QDataStream& stream) const override;
     QIcon icon() const override;
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     void updateFileModel(AbstractFile* file) override;
-    // FIXME   DrillPreviewGiMap createDrillPreviewGi(AbstractFile* file, mvector<Row>& data) override;
-    // FIXME   void addToGcForm(AbstractFile* file, QComboBox* cbx);
-
     // public slots:
     AbstractFile* parseFile(const QString& fileName, int type) override;
-    // AbstractFilePlugin interface
-    std::any getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
-    void addToGcForm(AbstractFile* file, QComboBox* cbx) override;
 
 private:
     File* file_ = nullptr;

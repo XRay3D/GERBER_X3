@@ -23,8 +23,8 @@
 
 namespace Excellon {
 
-Parser::Parser(AbstractFilePlugin* const interface)
-    : interface(interface) {
+Parser::Parser(AbstractFilePlugin* const afp)
+    : afp(afp) {
 }
 
 AbstractFile* Parser::parseFile(const QString& fileName) {
@@ -73,12 +73,12 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
             qWarning() << "Excellon unparsed:" << line;
         } catch (const QString& errStr) {
             qWarning() << "exeption Q:" << errStr;
-            emit interface->fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
+            emit afp->fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
             delete file;
             return nullptr;
         } catch (...) {
             qWarning() << "exeption S:" << errno;
-            emit interface->fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
+            emit afp->fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
             delete file;
             return nullptr;
         }
@@ -87,7 +87,7 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
         delete file;
         file = nullptr;
     } else {
-        emit interface->fileReady(this->file);
+        emit afp->fileReady(this->file);
     }
     return file;
 }
@@ -95,7 +95,7 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
 bool Parser::parseComment(QString line) {
     if (line.startsWith(';')) {
         line = line.toUpper();
-        if (auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) { // regexComment
+        if (auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) {                                               // regexComment
 
             if (auto [matchTool, tool, diam] = ctre::match<R"(\s*(?:HOLESIZE)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)">(comment); matchTool) { // tool
                 qDebug() << __FUNCTION__ << tool << diam;

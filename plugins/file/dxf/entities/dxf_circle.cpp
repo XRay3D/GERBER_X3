@@ -73,7 +73,7 @@ void Circle::parse(CodeData& code) {
 
 Entity::Type Circle::type() const { return Type::CIRCLE; }
 
-GraphicObject Circle::toGo() const {
+DxfGo Circle::toGo() const {
     QPainterPath path;
     QPointF r(radius, radius);
     path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
@@ -87,7 +87,8 @@ GraphicObject Circle::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    return {id, p.value(0), {}};
+    DxfGo go {id, p.value(0), {}}; // return {id, p.value(0), {}};
+    return go;
 }
 
 void Circle::write(QDataStream& stream) const {

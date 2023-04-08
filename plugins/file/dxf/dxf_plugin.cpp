@@ -152,36 +152,6 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     return file_;
 }
 
-std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
-    if (plugin->type() == ::GCode::Drill) {
-        DrillPlugin::Preview retData;
-        auto const dxfFile = static_cast<File*>(file);
-        QTransform t {dxfFile->transform()};
-        for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
-            for (auto&& go : layer->graphicObjects())
-                if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
-                    retData[{ctr, circle->radius * 2, false, name + ": CIRCLE"}].posOrPath.emplace_back(t.map(circle->centerPoint));
-            ctr++;
-        }
-        return retData;
-    }
-    return {};
-}
-
-void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
-    auto const dxfFile = static_cast<File*>(file);
-    for (auto&& layer : dxfFile->layers()) {
-        for (auto&& go : layer.second->graphicObjects()) {
-            if (go.entity()->type() == Entity::CIRCLE) {
-                cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
-                cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
-                cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
-                return;
-            }
-        }
-    }
-}
-
 bool Plugin::thisIsIt(const QString& fileName) {
 
     if (fileName.endsWith(".dxf", Qt::CaseInsensitive))
@@ -211,11 +181,9 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-int Plugin::type() const { return int(FileType::Dxf_); }
+uint32_t Plugin::type() const { return DXF; }
 
-QString Plugin::folderName() const { return tr("Dxf Files"); }
-
-AbstractFile* Plugin::loadFile(QDataStream& stream) { return  load<File>(stream); }
+AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'D'); }
 

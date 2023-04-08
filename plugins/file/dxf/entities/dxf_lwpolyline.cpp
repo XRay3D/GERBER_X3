@@ -168,7 +168,7 @@ void LwPolyline::parse(CodeData& code) {
 
 Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
-GraphicObject LwPolyline::toGo() const {
+DxfGo LwPolyline::toGo() const {
     QPainterPath path;
     const bool dbg = false; // data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
@@ -244,7 +244,16 @@ GraphicObject LwPolyline::toGo() const {
     offset.AddPath(Path {p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
     Paths paths {offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
 
-    return {id, p.value(0), paths};
+    DxfGo go {id, p.value(0), paths}; // return {id, p.value(0), paths};
+
+    if (polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
+        go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
+        go.GraphicObject::pos = QLineF {poly.front(), poly.back()}.center();
+    } else {
+        go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
+    }
+    go.name = "id|LwPolyline";
+    return go;
 }
 
 void LwPolyline::write(QDataStream& stream) const {

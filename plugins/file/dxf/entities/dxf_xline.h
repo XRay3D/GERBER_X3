@@ -13,7 +13,7 @@ namespace Dxf {
 struct XLine final : Entity {
     XLine(SectionParser* sp);
     Type type() const override { return Type::XLINE; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }

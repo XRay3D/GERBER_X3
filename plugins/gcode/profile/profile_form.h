@@ -94,7 +94,7 @@ public:
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
     QWidget* createForm() override { return new Form(this); };
     uint32_t type() const override { return md5::hash32("Profile"); }
-    AbstractFile*/*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+    AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 
 } // namespace Profile

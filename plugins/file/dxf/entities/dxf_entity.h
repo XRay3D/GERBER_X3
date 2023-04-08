@@ -97,7 +97,7 @@ public:
 
     virtual void parse(CodeData& code);
     virtual Type type() const = 0;
-    virtual GraphicObject toGo() const = 0;
+    virtual DxfGo toGo() const = 0;
 
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);
@@ -105,7 +105,7 @@ public:
     static QString typeName(int key);
     QString name() const;
     QColor color() const;
-    void attachToLayer(GraphicObject&& go) const;
+    void attachToLayer(DxfGo&& go) const;
 
     QString layerName;
     QString handle;

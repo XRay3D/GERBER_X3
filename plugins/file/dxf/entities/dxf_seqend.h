@@ -11,7 +11,7 @@ public:
 public:
     void parse(CodeData& code) override;
     Type type() const override { return SEQEND; };
-    GraphicObject toGo() const override;
+    DxfGo toGo() const override;
 };
 
 } // namespace Dxf

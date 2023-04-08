@@ -38,8 +38,8 @@ Node::Node(File* file)
 }
 Node::~Node() {
     App::project()->deleteFile(file->id());
-    file = nullptr;
-    QTimer::singleShot(500, [this] { repaint(); });
+    //  FIXME  file = nullptr;
+    // FIXME   QTimer::singleShot(500, [this] { repaint(); });
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
@@ -134,6 +134,8 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 int Node::id() const { return file->id(); }
 
 void Node::repaint() {
+    if (!this)
+        return;
     if (file && !file->userColor())
         return;
     if (!parent_)

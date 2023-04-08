@@ -18,10 +18,10 @@ class AbstractFilePlugin;
 namespace Excellon {
 
 class Parser {
-    AbstractFilePlugin* const interface;
+    class AbstractFilePlugin* const afp;
 
 public:
-    explicit Parser(AbstractFilePlugin* const interface);
+    explicit Parser(class AbstractFilePlugin* const afp);
     AbstractFile* parseFile(const QString& fileName);
     static double parseNumber(QString Str, const State& state);
 

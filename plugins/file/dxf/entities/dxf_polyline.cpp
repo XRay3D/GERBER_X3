@@ -67,7 +67,7 @@ void PolyLine::parse(CodeData& code) {
 
 Entity::Type PolyLine::type() const { return Type::POLYLINE; }
 
-GraphicObject PolyLine::toGo() const {
+DxfGo PolyLine::toGo() const {
     QPainterPath path;
     auto addSeg = [&path](const Vertex& source, const Vertex& target) {
         if (path.isEmpty())
@@ -110,7 +110,8 @@ GraphicObject PolyLine::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    return {id, p.value(0), {}};
+    DxfGo go {id, p.value(0), {}}; // return {id, p.value(0), {}};
+    return go;
 }
 
 void PolyLine::write(QDataStream& stream) const {

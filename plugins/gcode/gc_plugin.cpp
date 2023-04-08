@@ -323,8 +323,6 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     return tab;
 }
 
-
-
 } // namespace GCode
 
 #include "moc_gc_plugin.cpp"

@@ -15,17 +15,17 @@
 
 namespace Drilling {
 
-GiPreview::GiPreview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_)
-    : hv_ {std::move(hv)}
+GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const Paths& draw_)
+    : path_ {std::move(path)}
     , row {row}
     , toolId_ {toolId} {
     sourceDiameter_ = diameter;
-    if (hv_.size() > 1) {
-        for (auto&& path : offset(hv, sourceDiameter_))
-            sourcePath_.addPolygon(path);
+    if (path_.size() > 1) {
+        for (auto&& path_ : offset(path_, sourceDiameter_))
+            sourcePath_.addPolygon(path_);
     } else {
-        for (auto&& path : draw_)
-            sourcePath_.addPolygon(path);
+        for (auto&& path_ : draw_)
+            sourcePath_.addPolygon(path_);
         //        setPos(hv_.front());
     }
     row.items.emplace_back(this);
@@ -35,33 +35,28 @@ GiPreview::GiPreview(Path&& hv, double diameter, int toolId, Row& row, const Pat
 void GiPreview::updateTool() {
     if (toolId() > -1) {
         colorState |= Tool;
-        if (hv_.size() > 1)
+        if (path_.size() > 1)
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
                 const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                Paths tmpPpath;
-                ClipperOffset offset;
-                offset.AddPath(Path {val}, JoinType::Round, EndType::Round);
-                tmpPpath = offset.Execute(diameter * 0.5 * uScale);
-                for (Path& path : tmpPpath) {
-                    path.push_back(path.front());
-                    painterPath.addPolygon(path);
+                for (Path& path_ : C2::InflatePaths(Paths {path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
+                    path_.push_back(path_.front());
+                    painterPath.addPolygon(path_);
                 }
-                Path path(val);
-
-                if (path.size()) {
-                    for (QPointF point : path) {
+                Path path_(val);
+                if (path_.size()) {
+                    for (QPointF point : path_) {
                         painterPath.moveTo(point - QPointF(0.0, lineKoeff));
                         painterPath.lineTo(point + QPointF(0.0, lineKoeff));
                         painterPath.moveTo(point - QPointF(lineKoeff, 0.0));
                         painterPath.lineTo(point + QPointF(lineKoeff, 0.0));
                     }
-                    painterPath.addPolygon(path);
+                    painterPath.addPolygon(path_);
                 }
                 return painterPath;
-            }(hv_);
+            }(path_);
         else
             toolPath_ = [this](const QPointF& val) {
                 QPainterPath painterPath;
@@ -74,7 +69,7 @@ void GiPreview::updateTool() {
                 painterPath.lineTo(+QPointF(lineKoeff, 0.0));
                 painterPath.addEllipse({}, diameter * .5, diameter * .5);
                 return painterPath.translated(val);
-            }(hv_.front());
+            }(path_.front());
     } else {
         colorState &= ~Tool;
         toolPath_ = {};
@@ -83,13 +78,10 @@ void GiPreview::updateTool() {
 }
 
 Paths GiPreview::paths() const {
-    if (hv_.size() > 1)
-        return [this](const QPointF& val) {
-            Paths paths {sourcePath_.translated(val).toSubpathPolygons()};
-            return ReversePaths(paths);
-        }(hv_.front());
+    if (path_.size() > 1)
+        return {path_};
     else
-        return sourcePath_.toSubpathPolygons(QTransform::fromTranslate(x(), y()));
+        return sourcePath_.toSubpathPolygons();
 }
 
 bool GiPreview::fit(double depth) const {
@@ -101,24 +93,24 @@ int GiPreview::toolId() const {
     return toolId_ < 0 ? row.toolId : toolId_;
 }
 
-Paths GiPreview::offset(const Path& path, double offset) {
+Paths GiPreview::offset(const Path& path_, double offset) {
     ClipperOffset cOffset;
-    // cpOffset.AddPath(path, JoinType::Round, EndType::Round);
-    cOffset.AddPath(path, JoinType::Round, EndType::Round);
+    // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
+    cOffset.AddPath(path_, JoinType::Round, EndType::Round);
     Paths retPaths = cOffset.Execute(offset * uScale);
-    for (Path& path : retPaths)
-        path.push_back(path.front());
+    for (Path& path_ : retPaths)
+        path_.push_back(path_.front());
     qDebug() << __FUNCTION__ << retPaths.size();
     ReversePaths(retPaths);
     return retPaths;
 }
 
-int GiPreview::type() const { return int(GiType::Preview) + (hv_.size() > 1); }
+int GiPreview::type() const { return int(GiType::Preview) + (path_.size() > 1); }
 
-bool GiPreview::isSlot() const { return hv_.size() > 1; }
+bool GiPreview::isSlot() const { return path_.size() > 1; }
 
 Paths GiPreview::offset() const {
-    return offset(paths().front(), sourceDiameter_);
+    return sourcePath_.toSubpathPolygons(); /*C2::InflatePaths(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
 }
 
 } // namespace Drilling

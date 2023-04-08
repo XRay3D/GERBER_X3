@@ -119,4 +119,34 @@ FileTree::Node* File::node() {
     return node_ ? node_ : node_ = new Excellon::Node(this);
 }
 
+mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
+    mvector<GraphicObject> retData;
+    QTransform t = transform_;
+    for (const Excellon::Hole& hole : *this) {
+        double diam = tools_.at(hole.state.toolId);
+        GraphicObject go;
+        //        go.fill;
+        if (bool slot = hole.state.path.size(); !slot) {
+            go.pos = hole.state.pos;
+            go.path.emplace_back(go.pos = hole.state.pos);
+            go.fill.emplace_back(CirclePath(diam * uScale, go.pos));
+        } else {
+            go.path = hole.state.path;
+            // go.pos = go.path.front();
+            go.fill = C2::InflatePaths(Paths {hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
+        }
+        go.name = QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
+        go.type = GraphicObject::FlStamp;                                                               // type{},//{Null};
+                                                                                                        // go.id = int32_t {};                                                                             // id {-1};
+        go.raw = tools_.at(hole.state.toolId);                                                          // raw;
+        retData.emplace_back(go * transform_);
+
+        //        if (bool slot = hole.state.path.size(); slot)
+        //            retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
+        //        else
+        //            retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+    }
+    return retData;
+}
+
 } //  namespace Excellon

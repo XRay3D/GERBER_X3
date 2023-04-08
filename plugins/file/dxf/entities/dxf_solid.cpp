@@ -98,7 +98,7 @@ void Solid::parse(CodeData& code) {
 
 Entity::Type Solid::type() const { return Type::SOLID; }
 
-GraphicObject Solid::toGo() const {
+DxfGo Solid::toGo() const {
     QPolygonF poly;
     if (corners == 15) {
         poly.reserve(5);
@@ -112,7 +112,8 @@ GraphicObject Solid::toGo() const {
     }
     Path path(poly);
     ReversePath(path);
-    return {id, path, {path}};
+    DxfGo go {id, path, {path}}; // return {id, path, {path}};
+    return go;
 }
 
 void Solid::write(QDataStream& stream) const {

@@ -76,7 +76,7 @@ void Line::parse(CodeData& code) {
 
 Entity::Type Line::type() const { return Type::LINE; }
 
-GraphicObject Line::toGo() const {
+DxfGo Line::toGo() const {
     QPolygonF p;
     if (p.isEmpty()) {
         p.append(startPoint);
@@ -88,7 +88,8 @@ GraphicObject Line::toGo() const {
     //    offset.AddPath(p, JoinType::Round, EndType::Round);
     //    paths = offset.Execute(thickness * uScale);
 
-    return {id, p, paths};
+    DxfGo go {id, p, paths}; // return {id, p, paths};
+    return go;
 }
 
 void Line::write(QDataStream& stream) const {

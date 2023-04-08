@@ -44,7 +44,6 @@ protected:
     void create() override; // Creator interface
     uint32_t type() override { return POCKET_OFFSET; }
     bool possibleTest() const override { return true; }
-
 };
 
 } // namespace PocketOffset

@@ -18,6 +18,8 @@ class GiDrill;
 
 namespace Excellon {
 
+constexpr auto EXCELLON = md5::hash32("Excellon");
+
 using Tools = std::map<int, double>;
 
 enum UnitMode {

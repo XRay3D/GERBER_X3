@@ -24,11 +24,11 @@
 #include "utils.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QGLWidget>
-    #include <QPropertyAnimation>
-    #include <QUndoCommand>
+#include <QGLWidget>
+#include <QPropertyAnimation>
+#include <QUndoCommand>
 #else
-    #include <QtOpenGLWidgets/QOpenGLWidget>
+#include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
 
 #include <QDragEnterEvent>

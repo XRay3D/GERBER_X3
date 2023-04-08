@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
-//#include "a_pch.h"
+// #include "a_pch.h"
 
 #include <QDialog>
 
@@ -27,7 +27,7 @@ class DialogAboutPlugins : public QDialog {
     QPushButton* pbClose;
     QPushButton* pbInfo;
 
-    void setupUi(QDialog* Dialog); // setupUi
+    void setupUi(QDialog* Dialog);       // setupUi
 
     void retranslateUi(QDialog* Dialog); // retranslateUi
 

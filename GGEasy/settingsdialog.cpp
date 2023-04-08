@@ -11,10 +11,10 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-//#include "a_pch.h "
+// #include "a_pch.h "
 #include "settingsdialog.h"
-#include "colorselector.h"
 #include "abstract_fileplugin.h"
+#include "colorselector.h"
 #include "graphicsview.h"
 
 #include <QDesktopServices>

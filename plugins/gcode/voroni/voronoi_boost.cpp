@@ -14,29 +14,29 @@
 #include "types.h"
 
 #if __has_include(<boost/polygon/voronoi.hpp>)
-    #include "mvector.h"
+#include "mvector.h"
 
-    #include <cstdio>
-    #include <vector>
+#include <cstdio>
+#include <vector>
 
-    #if defined(_MSC_VER)
-        #pragma warning(push)
-        #pragma warning(disable : 5055)
-    #elif defined(__GNUC__) && (__GNUC__ >= 7)
-        #pragma GCC diagnostic push
-        #pragma GCC diagnostic ignored "-Wpragmas"
-        #pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
-    #endif /* _MSC_VER, __GNUC__ */
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 5055)
+#elif defined(__GNUC__) && (__GNUC__ >= 7)
+#pragma GCC diagnostic push
+#pragma GCC diagnostic ignored "-Wpragmas"
+#pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
+#endif /* _MSC_VER, __GNUC__ */
 
-    #include "voronoi_visual_utils.h"
-    #include <boost/polygon/polygon.hpp>
-    #include <boost/polygon/voronoi.hpp>
+#include "voronoi_visual_utils.h"
+#include <boost/polygon/polygon.hpp>
+#include <boost/polygon/voronoi.hpp>
 
-    #if defined(_MSC_VER)
-        #pragma warning(pop)
-    #elif defined(__GNUC__) && (__GNUC__ >= 7)
-        #pragma GCC diagnostic pop
-    #endif /* _MSC_VER, __GNUC__ */
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#elif defined(__GNUC__) && (__GNUC__ >= 7)
+#pragma GCC diagnostic pop
+#endif /* _MSC_VER, __GNUC__ */
 
 using boost::polygon::high;
 using boost::polygon::low;

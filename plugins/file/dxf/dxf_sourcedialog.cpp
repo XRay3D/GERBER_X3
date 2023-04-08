@@ -12,8 +12,8 @@
  *******************************************************************************/
 #include "dxf_sourcedialog.h"
 
-#include "app.h"
 #include "abstract_file.h"
+#include "app.h"
 #include "project.h"
 
 namespace Dxf {

@@ -71,12 +71,11 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case Qt::DisplayRole:
                 return file->shortName();
             case Qt::ToolTipRole:
-                return file->shortName() + "\n"
-                    + file->name();
+                return file->shortName() + "\n" + file->name();
             case Qt::CheckStateRole:
                 return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
-                return QIcon::fromTheme("drill-path");
+                return file->icon();
             case FileTree::Id:
                 return id();
             default:

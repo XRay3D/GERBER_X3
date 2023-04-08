@@ -12,8 +12,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "plugindialog.h"
-#include "app.h"
 #include "abstract_fileplugin.h"
+#include "app.h"
 #include "ft_node.h"
 #include "gc_plugin.h"
 #include "shapepluginin.h"
@@ -24,7 +24,7 @@
 #include <QHeaderView>
 #include <QJsonObject>
 #include <QTreeWidget>
-//#include "a_pch.h"
+// #include "a_pch.h"
 
 DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     : QDialog(parent) {

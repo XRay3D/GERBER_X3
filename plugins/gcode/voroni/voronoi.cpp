@@ -13,9 +13,9 @@
 #include "voronoi.h"
 #include "jc_voronoi.h"
 
-//namespace ClipperLib {
-//inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
-//} // namespace ClipperLib
+// namespace ClipperLib {
+// inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
+// } // namespace ClipperLib
 
 namespace Voronoi {
 

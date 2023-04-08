@@ -16,7 +16,7 @@ void SeqEnd::parse(CodeData& code) {
     } while (code.code() != 0);
 }
 
-GraphicObject SeqEnd::toGo() const {
+DxfGo SeqEnd::toGo() const {
     return {};
 }
 

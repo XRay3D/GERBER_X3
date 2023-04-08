@@ -21,6 +21,8 @@
 
 namespace Dxf {
 
+constexpr auto DXF = md5::hash32("Dxf");
+
 class DxfObj : public QObject {
     Q_OBJECT
 public:
@@ -50,7 +52,7 @@ struct Block;
 struct SectionParser;
 struct Style;
 
-using GraphicObjects = std::vector<GraphicObject>;
+using GraphicObjects = std::vector<DxfGo>;
 using EntitiesUP = std::vector<std::shared_ptr<Entity>>;
 using Entities = std::vector<Entity*>;
 

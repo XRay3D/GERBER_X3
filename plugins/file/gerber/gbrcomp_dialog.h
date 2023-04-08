@@ -39,7 +39,7 @@ private:
     QSplitter* splitter;
     static inline QGraphicsScene* scene_;
 
-    void setupUi(QDialog* dialog); // setupUi
+    void setupUi(QDialog* dialog);       // setupUi
 
     void retranslateUi(QDialog* dialog); // retranslateUi
     // QWidget interface

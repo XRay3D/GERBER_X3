@@ -95,7 +95,7 @@ private:
     mvector<std::shared_ptr<Node>> childs;
     bool checked_ = false;
 
-    Model* const model; // static wrong from anotherr dll
+    Model* const model;      // static wrong from anotherr dll
     static inline const Qt::CheckState chState[] {
         Qt::Unchecked,       // index 0
         Qt::Unchecked,       // index 1

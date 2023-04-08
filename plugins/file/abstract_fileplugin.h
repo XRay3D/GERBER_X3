@@ -50,8 +50,6 @@ public:
     [[nodiscard]] virtual bool thisIsIt(const QString& fileName) = 0;
     [[nodiscard]] virtual uint32_t type() const = 0;
 
-    virtual void addToGcForm([[maybe_unused]] AbstractFile* file, [[maybe_unused]] QComboBox* cbx) {};
-
     virtual void createMainMenu(
         [[maybe_unused]] QMenu& menu,
         [[maybe_unused]] FileTree::View* tv) {

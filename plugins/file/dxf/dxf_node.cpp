@@ -14,9 +14,9 @@
 
 #include "dxf_file.h"
 #include "dxf_sourcedialog.h"
+#include "project.h"
 #include "tables/dxf_layer.h"
 #include "tables/dxf_layermodel.h"
-#include "project.h"
 
 #include "ft_view.h"
 #include "graphicsview.h"
@@ -243,7 +243,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::CheckStateRole:
             return file->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            return QIcon::fromTheme("crosshairs");
+            return file->icon();
         }
         break;
     case FileTree::Column::Side:
