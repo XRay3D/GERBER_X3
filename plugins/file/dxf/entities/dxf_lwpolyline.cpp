@@ -249,6 +249,7 @@ DxfGo LwPolyline::toGo() const {
     if (polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
         go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
         go.GraphicObject::pos = QLineF {poly.front(), poly.back()}.center();
+        go.path.clear();
     } else {
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
     }

@@ -83,6 +83,11 @@ class Plugin final : public GCode::Plugin {
 
     // GCode::Plugin interface
 public:
+    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
+        auto action = GCode::Plugin ::addAction(menu, toolbar);
+        action->setData(true);
+        return action;
+    }
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
     QWidget* createForm() override { return new Form(this); };

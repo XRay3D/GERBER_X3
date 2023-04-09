@@ -204,7 +204,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         reinterpret_cast<Node*>(menuIndex_.internalId())->menu(menu, this);
         if (auto selectedRows {selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
             menu.addSeparator();
-            // FIXME rename Action in future.
+            // TODO rename Action in future.
             menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
                 std::ranges::sort(selectedRows, std::greater {}, &QModelIndex::row);
                 for (auto&& index : selectedRows)

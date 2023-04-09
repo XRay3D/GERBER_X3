@@ -68,7 +68,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         switch (role) {
         case Qt::DisplayRole:
             if (data_[row].isSlot)
-                return data_[row].name.back(); // FIXME QString(data_[row].name.back()).replace(tr("Tool"), tr("Slot"));
+                return data_[row].name.back();
             else
                 return data_[row].name.back();
         case Qt::DecorationRole: {

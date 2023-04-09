@@ -65,6 +65,15 @@
 //    }
 //}
 
+#if __has_include("phantomstyle.h")
+#include "phantomstyle.h"
+#endif
+
+#if __has_include("xrstyle.h")
+#include "xrstyle.h"
+#endif
+
+
 int main(int argc, char** argv) {
     //    qInstallMessageHandler(myMessageOutput);
 
@@ -79,6 +88,11 @@ int main(int argc, char** argv) {
     Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
+
+#if __has_include("phantomstyle.h")
+        QApplication::setStyle(new PhantomStyle);
+#endif
+
 
     // #ifdef Q_OS_WIN
     //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
@@ -110,7 +124,7 @@ int main(int argc, char** argv) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 
-    //  FIXME ??? QGLFormat glf = QGLFormat::defaultFormat();
+    //  WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
     //    glf.setSampleBuffers(true);
     //    glf.setSamples(16);
     //    QGLFormat::setDefaultFormat(glf);

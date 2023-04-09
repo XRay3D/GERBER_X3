@@ -119,8 +119,7 @@ void Creator::trimmingOpenPaths(Paths& paths) {
                 Clipper clipper;
                 clipper.AddOpenSubject({p});
                 clipper.AddClip(ps);
-                clipper.Execute(ClipType::Intersection, FillRule::Positive, ps); // FIXME open paths ???
-
+                clipper.Execute(ClipType::Intersection, FillRule::Positive, ps, ps); // FIXME open paths ???
                 p = ps.front();
             }
         }
@@ -294,7 +293,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, Creator::NodeType nodetype) {
             bool match = true;
             if (nodetype == ntClosed)
-                match = true; //! polynode.IsOpen();// FIXME
+                match = true; // NOTE ! polynode.IsOpen();
             else if (nodetype == ntOpen)
                 return;
 
@@ -321,7 +320,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
             [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, Creator::NodeType nodetype) {
                 bool match = true;
                 if (nodetype == ntClosed)
-                    match = true; //! polynode.IsOpen(); FIXME
+                    match = true; // NOTE ! polynode.IsOpen();
                 else if (nodetype == ntOpen)
                     return;
 

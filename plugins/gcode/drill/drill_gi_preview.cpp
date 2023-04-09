@@ -21,7 +21,9 @@ GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const P
     , toolId_ {toolId} {
     sourceDiameter_ = diameter;
     if (path_.size() > 1) {
-        for (auto&& path_ : offset(path_, sourceDiameter_))
+        Timer<mS> t {__FUNCTION__};
+        for (auto&& path_ : C2::InflatePaths(Paths {path_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale)
+            /*offset(path_, sourceDiameter_)*/)
             sourcePath_.addPolygon(path_);
     } else {
         for (auto&& path_ : draw_)
@@ -93,17 +95,17 @@ int GiPreview::toolId() const {
     return toolId_ < 0 ? row.toolId : toolId_;
 }
 
-Paths GiPreview::offset(const Path& path_, double offset) {
-    ClipperOffset cOffset;
-    // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
-    cOffset.AddPath(path_, JoinType::Round, EndType::Round);
-    Paths retPaths = cOffset.Execute(offset * uScale);
-    for (Path& path_ : retPaths)
-        path_.push_back(path_.front());
-    qDebug() << __FUNCTION__ << retPaths.size();
-    ReversePaths(retPaths);
-    return retPaths;
-}
+// Paths GiPreview::offset(const Path& path_, double offset) {
+////    ClipperOffset cOffset;
+////    // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
+////    cOffset.AddPath(path_, JoinType::Round, EndType::Round);
+////    Paths retPaths = cOffset.Execute(offset * uScale);
+////    for (Path& path_ : retPaths)
+////        path_.push_back(path_.front());
+////    qDebug() << __FUNCTION__ << retPaths.size();
+////    ReversePaths(retPaths);
+//    return {}/*retPaths*/;
+//}
 
 int GiPreview::type() const { return int(GiType::Preview) + (path_.size() > 1); }
 

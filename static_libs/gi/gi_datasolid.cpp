@@ -35,7 +35,7 @@ GiDataSolid::GiDataSolid(Paths& paths, AbstractFile* file)
 GiDataSolid::~GiDataSolid() { }
 
 void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
@@ -93,7 +93,6 @@ void GiDataSolid::changeColor() {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);
-
     //    animation.setStartValue(bodyColor_);
 
     bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
@@ -101,9 +100,7 @@ void GiDataSolid::changeColor() {
     switch (colorState) {
     case Default:
         break;
-    case Hovered: // FIXME V1037. Two or more case-branches perform the same actions.
-        bodyColor_.setAlpha(255);
-        break;
+    case Hovered:
     case Selected:
         bodyColor_.setAlpha(255);
         break;

@@ -73,7 +73,7 @@ class App {
     inline static App* app_ = nullptr;
 
     // clang-format off
-    HOLDER(Drilling::Form,     setDrillForm,           drillForm          )
+    HOLDER(Drilling::Form,        setDrillForm,           drillForm          )
     HOLDER(FileTree::Model,       setFileModel,           fileModel          )
     HOLDER(FileTree::View,        setFileTreeView,        fileTreeView       )
     HOLDER(GCode::PropertiesForm, setGCodePropertiesForm, gCodePropertiesForm)
@@ -107,6 +107,8 @@ class App {
     QSharedMemory sharedMemory {"AppSettings"};
 
     const bool isDebug_ {QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
+
+    bool drawPdf_ {};
 
 public:
     explicit App() {
@@ -142,4 +144,7 @@ public:
     static auto& settings() { return app_->appSettings_; }
     static auto& toolHolder() { return app_->toolHolder_; }
     static auto* qSettings() { return &app_->settings_; }
+
+    static bool drawPdf() { return app_->drawPdf_; }
+    static void setDrawPdf(bool newDrawPdf) { app_->drawPdf_ = newDrawPdf; }
 };

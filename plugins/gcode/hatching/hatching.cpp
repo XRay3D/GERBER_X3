@@ -121,10 +121,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             Clipper clipper;
             clipper.AddOpenSubject(src);
             clipper.AddClip({frame});
-            clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FIXME FillRule::NonZero
+            clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, "ClipType::Intersection");
             frames.append(tmp);
-            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FIXME FillRule::NonZero
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, "ClipType::Difference");
             frames.append(tmp);
 
