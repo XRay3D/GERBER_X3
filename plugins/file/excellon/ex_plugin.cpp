@@ -87,4 +87,4 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
 } // namespace Excellon
 
-#include "moc_ex_plugin.cpp"
+//#include "moc_ex_plugin.cpp"

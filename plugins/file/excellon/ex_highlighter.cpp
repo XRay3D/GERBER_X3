@@ -44,4 +44,4 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
 } // namespace Excellon
 
-#include "moc_ex_highlighter.cpp"
+//#include "moc_ex_highlighter.cpp"
