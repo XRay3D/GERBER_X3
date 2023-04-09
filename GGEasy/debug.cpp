@@ -17,8 +17,8 @@ bool MainWindow::debug() {
         int i = 100;
         int k = 100;
 
-        if (0) {
-            QDir dir(R"(E:\YandexDisk\G2G\test files\Ucamco\Gerber_File_Format_Examples 20210409)");
+        if (1) {
+            QDir dir(R"(C:\Users\X-Ray\Documents\TopoR\Examples\Example_01)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
@@ -46,7 +46,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if (1) {
+        if (0) {
             constexpr auto DRILLING = md5::hash32("Drilling");
             QTimer::singleShot(i += k, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
         }
@@ -62,7 +62,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, [this] { selectAll(); });
             QTimer::singleShot(i += k, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
             //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
         }
 

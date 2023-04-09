@@ -29,13 +29,11 @@
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "tool_database.h"
-// #include "qt.h"
 
+#include <QPdfWriter>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 #include <QtWidgets>
-
-// #include <forward_list>
 
 static auto PointConverter = QMetaType::registerConverter(&Point::toString);
 
@@ -233,9 +231,9 @@ void MainWindow::createActionsFile() {
     fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
 
     // Export PDF
-    // FIXME       action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
-    //        action->setStatusTip(tr("Export to PDF file"));
-    //        fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), App::graphicsView()->scene(), &Scene::renderPdf);
+    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), this, &MainWindow::renderPdf);
+    action->setStatusTip(tr("Export to PDF file"));
+    fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), this, &MainWindow::renderPdf);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -300,7 +298,7 @@ void MainWindow::createActionsService() {
     serviceMenu->addSeparator();
     // G-Code Properties
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
-    connect(action, &QAction::toggled, [=, this](bool checked) { if (checked) setDockWidget(new GCode::PropertiesForm); });
+    connect(action, &QAction::toggled, this, [=, this](bool checked) { if (checked) setDockWidget(new GCode::PropertiesForm); });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     action->setCheckable(true);
     toolpathActions.emplace(G_CODE_PROPERTIES, action);
@@ -657,17 +655,15 @@ void MainWindow::writeSettings() {
 }
 
 void MainWindow::selectAll() {
-    // FIXME   if /* */ (toolpathActions.contains(GCode::Thermal) && toolpathActions[GCode::Thermal]->isChecked()) {
-    //        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
-    //            item->setSelected(true);
-    // FIXME   } else if (toolpathActions.contains(GCode::Drill) && toolpathActions[GCode::Drill]->isChecked()) {
-    //        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
-    //            item->setSelected(true);
-    //    } else {
-    for (QGraphicsItem* item : App::graphicsView()->items())
-        if (item->isVisible() && item->opacity() > 0)
+    auto data {actionGroup.checkedAction() ? actionGroup.checkedAction()->data() : QVariant {}};
+    if (!data.isNull() && data.toBool()) {
+        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
             item->setSelected(true);
-    //    }
+    } else {
+        for (QGraphicsItem* item : App::graphicsView()->items())
+            if (item->isVisible() && item->opacity() > 0)
+                item->setSelected(true);
+    }
 }
 
 void MainWindow::deSelectAll() {
@@ -680,7 +676,8 @@ void MainWindow::printDialog() {
     QPrinter printer(QPrinter::HighResolution);
     QPrintPreviewDialog preview(&printer, this);
     connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
-        // FIXME       ScopedTrue sTrue(App::graphicsView()->scene()->drawPdf_);
+        // ScopedTrue sTrue(App::app_->drawPdf_);
+        // NOTE App::setDrawPdf(true);
         QRectF rect;
         for (QGraphicsItem* item : App::graphicsView()->items())
             if (item->isVisible() && !item->boundingRect().isNull())
@@ -688,21 +685,58 @@ void MainWindow::printDialog() {
         QSizeF size(rect.size());
 
         QMarginsF margins(10, 10, 10, 10);
+        QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
         pPrinter->setPageMargins(margins);
-        pPrinter->setPageSize(QPageSize(size + QSizeF(margins.left() + margins.right(), margins.top() + margins.bottom()), QPageSize::Millimeter));
-
+        pPrinter->setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
         pPrinter->setResolution(4800);
-
         QPainter painter(pPrinter);
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
         App::graphicsView()->scene()->render(&painter,
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
-            rect,
-            Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
+            rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
+        // NOTE App::setDrawPdf(false);
     });
     preview.exec();
+}
+
+void MainWindow::renderPdf() {
+    QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), lastPath, tr("File(*.pdf)"));
+    if (curFile.isEmpty())
+        return;
+
+    App::setDrawPdf(true);
+
+    QRectF rect;
+    for (QGraphicsItem* item : ui.graphicsView->scene()->items())
+        if (item->isVisible() && !item->boundingRect().isNull())
+            rect |= item->boundingRect();
+
+    //    QRectF rect(ui.graphicsView->scene()->itemsBoundingRect());
+
+    //    QRectF rect {App::layoutFrames()->boundingRect()};
+
+    QSizeF size(rect.size());
+
+    QPdfWriter pdfWriter(curFile);
+    //    pdfWriter.setPageSizeMM(size);
+    //    pdfWriter.setMargins({0, 0, 0, 0});
+    //    pdfWriter.setResolution(1000000);
+    QMarginsF margins(10, 10, 10, 10);
+    QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
+    pdfWriter.setPageMargins(margins);
+    pdfWriter.setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
+    pdfWriter.setResolution(4800);
+
+    QPainter painter(&pdfWriter);
+    painter.setTransform(QTransform().scale(1.0, -1.0));
+    painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
+    ui.graphicsView->scene()->render(&painter,
+        QRectF(0, 0, pdfWriter.width(), pdfWriter.height()),
+        rect, Qt::IgnoreAspectRatio);
+
+    App::setDrawPdf(false);
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value) {
@@ -786,13 +820,13 @@ bool MainWindow::maybeSave() {
     return true;
 }
 
-void MainWindow::editGcFile(GCode::File* file) {
+void MainWindow::editGcFile(GCode::File* file) { // TODO editGcFile
     qWarning(__FUNCTION__);
-    //    switch (file->gtype()) {
+    // TODO   switch (file->gtype()) {
     //    case GCode::Null:
     //    case md5::hash32("Profile"):
-    //        // FIXME toolpathActions[md5::hash32("Profile")]->triggered();
-    //        // FIXME reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
+    //        // toolpathActions[md5::hash32("Profile")]->triggered();
+    //        // reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
     //        break;
     //    case GCode::Pocket:
     //    case GCode::Voronoi:
@@ -905,8 +939,11 @@ void MainWindow::loadFile(const QString& fileName) {
     qDebug() << fileName;
 }
 
-void MainWindow::updateTheme() {
+#if __has_include("xrstyle.h")
+    #include "xrstyle.h"
+#endif
 
+void MainWindow::updateTheme() {
     if (App::settings().theme()) {
         qApp->setStyle(QStyleFactory::create("Fusion"));
 
@@ -936,7 +973,7 @@ void MainWindow::updateTheme() {
             break;
         case DarkBlue:
             baseColor = QColor(40, 40, 40);
-            disabledColor = QColor(60, 60, 60);
+            disabledColor = QColor(100, 100, 100);
             highlightColor = QColor(61, 174, 233);
             linkColor = QColor(61, 174, 233);
             windowColor = QColor(60, 60, 60);
@@ -944,7 +981,7 @@ void MainWindow::updateTheme() {
             break;
         case DarkRed:
             baseColor = QColor(40, 40, 40);
-            disabledColor = QColor(60, 60, 60);
+            disabledColor = QColor(100, 100, 100);
             highlightColor = QColor(218, 68, 83);
             linkColor = QColor(61, 174, 233);
             windowColor = QColor(60, 60, 60);
@@ -985,8 +1022,13 @@ void MainWindow::updateTheme() {
 
         qApp->setPalette(palette);
     } else {
+#if __has_include("xrstyle.h")
+        QApplication::setStyle(new XrStyle);
+#else
         qApp->setStyle(QStyleFactory::create("Fusion"));
         qApp->setPalette(QApplication::style()->standardPalette());
+#endif
+
         //        QPalette palette;
 
         //        palette.setCurrentColorGroup(QPalette::Active);

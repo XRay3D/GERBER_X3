@@ -10,41 +10,36 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-
-// import std;
-
 #include "graphicsview.h"
-#include "edid.h"
-#include "gi.h"
-#include "mainwindow.h"
-#include "myclipper.h"
-#include "project.h"
-#include "ruler.h"
-#include "settings.h"
-#include "utils.h"
+// #include "edid.h"
+// #include "gi.h"
+// #include "gi_datapath.h"
+#include "gi_point.h"
+// #include "mainwindow.h"
+// #include "myclipper.h"
+// #include "project.h"
+// #include "ruler.h"
+// #include "settings.h"
+// #include "utils.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QGLWidget>
-#include <QPropertyAnimation>
-#include <QUndoCommand>
+    #include <QGLWidget>
+    #include <QPropertyAnimation>
+    #include <QUndoCommand>
 #else
-#include <QtOpenGLWidgets/QOpenGLWidget>
+    #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
 
-#include <QDragEnterEvent>
-#include <QGridLayout>
-#include <QGuiApplication>
-#include <QMimeData>
-#include <QMouseEvent>
-#include <QPropertyAnimation>
-#include <QPushButton>
-#include <QScrollBar>
-#include <cmath>
-
-#include <QDrag>
-#include <QDragEnterEvent>
-#include <QMimeData>
-#include <gi_datapath.h>
+// #include <QDrag>
+// #include <QDragEnterEvent>
+// #include <QGridLayout>
+// #include <QGuiApplication>
+// #include <QMimeData>
+// #include <QMouseEvent>
+// #include <QPropertyAnimation>
+// #include <QPushButton>
+// #include <QScrollBar>
+// #include <cmath>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -152,7 +147,7 @@ GraphicsView::~GraphicsView() {
 //     updateRuler();
 // }
 
-void GraphicsView::zoomFit() { fitInView(scene()->itemsBoundingRect(), false); }
+void GraphicsView::zoomFit() { fitInView(App::layoutFrames()->boundingRect() /*scene()->itemsBoundingRect()*/, false); }
 
 void GraphicsView::zoomToSelected() {
     QRectF rect;
@@ -543,10 +538,10 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         // Ruler
 
         if (ruler_) {
-            // FIXME           scene_->setDrawRuller(true);
             const QPointF point(mappedPos(event));
-            // FIXME           scene_->setCross2(point);
             emit mouseClickR(point);
+            // scene_->setDrawRuller(true);
+            // scene_->setCross2(point);
         }
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
@@ -591,7 +586,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         setInteractive(true);
-        // FIXME scene_->setDrawRuller(false);
+        // WTF scene_->setDrawRuller(false);
         emit mouseClickR(mappedPos(event));
         latPos = event->pos();
     } else {

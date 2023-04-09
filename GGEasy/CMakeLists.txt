@@ -98,6 +98,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     graphicsview
     shape
     tooldatabase
+    XrStyle #PhantomStyle # style
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::OpenGL

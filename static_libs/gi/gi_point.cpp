@@ -12,23 +12,23 @@
  ********************************************************************************/
 #include "gi_point.h"
 
-// #include "drill/file.h"
-#include "gc_propertiesform.h"
-#include "gcode.h"
-#include "graphicsview.h"
-#include "project.h"
-#include "settings.h"
+#include "../plugins/gcode/drill/drill_file.h"
+// #include "gc_propertiesform.h"
+// #include "gcode.h"
+// #include "graphicsview.h"
+// #include "project.h"
+// #include "settings.h"
 #include "settingsdialog.h"
 #include "tool_pch.h"
 
-#include <QAction>
-#include <QGraphicsSceneContextMenuEvent>
-#include <QInputDialog>
-#include <QMenu>
-#include <QMessageBox>
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
-#include <array>
+// #include <QAction>
+// #include <QGraphicsSceneContextMenuEvent>
+// #include <QInputDialog>
+// #include <QMenu>
+// #include <QMessageBox>
+// #include <QPainter>
+// #include <QStyleOptionGraphicsItem>
+// #include <array>
 
 bool updateRect() {
     QRectF rect(App::graphicsView()->getSelectedBoundingRect());
@@ -67,14 +67,14 @@ GiMarker::~GiMarker() {
 }
 
 QRectF GiMarker::boundingRect() const {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf())
-    //        return QRectF();
+    if (App::drawPdf())
+        return {};
     return rect_;
 }
 
 void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf())
-    //        return;
+    if (App::drawPdf())
+        return;
 
     QColor c(type_ == Home ? App::settings().guiColor(GuiColors::Home) : App::settings().guiColor(GuiColors::Zero));
     if (option->state & QStyle::State_MouseOver)
@@ -93,7 +93,7 @@ void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath GiMarker::shape() const { return /*  FIXME App::graphicsView()->scene()->drawPdf() ? QPainterPath() :*/ path_; }
+QPainterPath GiMarker::shape() const { return App::drawPdf() ? QPainterPath() : path_; }
 
 int GiMarker::type() const { return static_cast<int>(type_ ? GiType::MarkHome : GiType::MarkZero); }
 
@@ -185,15 +185,15 @@ void GiMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 }
 void GiMarker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
-    auto action = menu.addAction(QObject::tr("Fixed"), [this](bool fl) {
+    auto action = menu.addAction(QObject::tr("Fixed"), this, [this](bool fl) {
         setFlag(QGraphicsItem::ItemIsMovable, !fl);
     });
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
-    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    //    });
+    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    });
     menu.exec(event->screenPos());
 }
 
@@ -224,14 +224,14 @@ GiPin::GiPin()
 GiPin::~GiPin() { }
 
 QRectF GiPin::boundingRect() const {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf())
-    //        return QRectF();
+    if (App::drawPdf())
+        return {};
     return rect_;
 }
 
 void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf())
-    //        return;
+    if (App::drawPdf())
+        return;
 
     QColor c(App::project()->pinUsed(index_) ? App::settings().guiColor(GuiColors::Pin) : QColor(127, 127, 127, 127));
     if (option->state & QStyle::State_MouseOver)
@@ -252,8 +252,8 @@ void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
 }
 
 QPainterPath GiPin::shape() const {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf())
-    //        return QPainterPath();
+    if (App::drawPdf())
+        return {};
     return shape_;
 }
 
@@ -380,9 +380,9 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             GCode::Params gcp_ {tool, depth};
             gcp_.params[GCode::Params::NotTile];
 
-            //  FIXME           AbstractFile* gcode = new GCode::DrillFile(std::move(gcp_), Pathss {{dst}});
-            //  FIXME          gcode->setFileName(tr("Pin_") + tool.nameEnc());
-            //  FIXME          App::project()->addFile(gcode);
+            auto drillls = new Drilling::File(std::move(gcp_), Pathss {{dst}});
+            drillls->setFileName(tr("Pin_") + tool.nameEnc());
+            App::project()->addFile(drillls);
         }
     });
 
@@ -397,7 +397,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(App::project()->pinUsed(index_));
 
     menu.addSeparator();
-    // FIXME   action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    //    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
     //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
     //    });
     menu.exec(event->screenPos());
@@ -485,8 +485,8 @@ int LayoutFrames::type() const {
 }
 
 QRectF LayoutFrames::boundingRect() const {
-    //  FIXME  if (App::graphicsView()->scene()->drawPdf())
-    //        return QRectF();
+    if (App::drawPdf())
+        return {};
     return rect_;
 }
 

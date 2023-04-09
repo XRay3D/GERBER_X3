@@ -20,8 +20,7 @@ class File;
 
 class Node : public FileTree::Node {
     friend class File;
-
-    Q_INVOKABLE void repaint();
+    static void repaint(FileTree::Node* parent);
     Qt::CheckState current_ = Qt::Unchecked;
     File* file;
 

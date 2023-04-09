@@ -31,15 +31,28 @@
 
 namespace Gerber {
 
+void Node::repaint(FileTree::Node* parent) {
+    const int count = parent->childCount();
+    for (int i {}; i < count; ++i) {
+        auto n = static_cast<Node*>(parent->child(i));
+        if (n->file->userColor())
+            continue;
+        const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
+        n->file->setColor(QColor::fromHsv(k, 255, 255, 150));
+        emit App::fileModel()->dataChanged(n->index(0), n->index(0), {Qt::DecorationRole});
+    }
+}
+
 Node::Node(File* file)
     : FileTree::Node(FileTree::File)
     , file(file) {
-    QTimer::singleShot(500, [this] { repaint(); });
+    QTimer::singleShot(500, [this] { repaint(parent_); });
 }
+
 Node::~Node() {
     App::project()->deleteFile(file->id());
-    //  FIXME  file = nullptr;
-    // FIXME   QTimer::singleShot(500, [this] { repaint(); });
+    file = nullptr;
+    QTimer::singleShot(500, [parent = parent(), this] { repaint(parent); });
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
@@ -132,25 +145,6 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 }
 
 int Node::id() const { return file->id(); }
-
-void Node::repaint() {
-    if (!this)
-        return;
-    if (file && !file->userColor())
-        return;
-    if (!parent_)
-        return;
-
-    const int count = parent_->childCount();
-    for (int i {}; i < count; ++i) {
-        auto n = static_cast<Node*>(parent_->child(i));
-        if (n->file->userColor())
-            continue;
-        const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
-        n->file->setColor(QColor::fromHsv(k, 255, 255, 150));
-        emit App::fileModel()->dataChanged(index(0), index(0), {Qt::DecorationRole});
-    }
-}
 
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);

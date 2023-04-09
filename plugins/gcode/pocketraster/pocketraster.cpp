@@ -326,7 +326,7 @@ Paths Creator::calcScanLines(const Paths& src, const Path& frame) {
     Clipper clipper;
     clipper.AddClip(src);
     clipper.AddOpenSubject({frame});
-    clipper.Execute(ClipType::Intersection, FillRule::Positive, scanLines, scanLines); // FIXME  FillRule::Positive
+    clipper.Execute(ClipType::Intersection, FillRule::Positive, scanLines, scanLines); // FillRule::Positive
     if (!scanLines.size())
         return scanLines;
     std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
@@ -356,10 +356,10 @@ Paths Creator::calcFrames(const Paths& src, const Path& frame) {
         Clipper clipper;
         clipper.AddOpenSubject(src);
         clipper.AddClip({frame});
-        clipper.Execute(ClipType::Intersection, FillRule::Positive, tmp, tmp); // FIXME  FillRule::Positive
+        clipper.Execute(ClipType::Intersection, FillRule::Positive, tmp, tmp); // FillRule::Positive
         // dbgPaths(tmp, "ClipType::Intersection");
         frames.append(tmp);
-        clipper.Execute(ClipType::Difference, FillRule::Positive, tmp, tmp); // FIXME  FillRule::Positive
+        clipper.Execute(ClipType::Difference, FillRule::Positive, tmp, tmp); // FillRule::Positive
         // dbgPaths(tmp, "ClipType::Difference");
         frames.append(tmp);
         std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort

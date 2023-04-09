@@ -36,7 +36,7 @@ AbstractShape::AbstractShape()
 AbstractShape::~AbstractShape() { }
 
 void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf()) [[unlikely]] {
+    // FIXME   if (App::drawPdf()) [[unlikely]] {
     //        pathColor_ = Qt::black;
     //        pathColor_.setAlpha(255);
     //        pen_.setColor(pathColor_);

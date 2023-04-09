@@ -25,7 +25,7 @@ public:
     [[nodiscard]] virtual QWidget* createForm() = 0;
     [[nodiscard]] virtual bool canToShow() const { return true; }
 
-    [[nodiscard]] QAction* addAction(QMenu* menu, QToolBar* toolbar);
+    [[nodiscard]] virtual QAction* addAction(QMenu* menu, QToolBar* toolbar);
 
     //////////////////////
 

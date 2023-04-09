@@ -82,9 +82,16 @@ set(INCLUDE_DIRECTORIES
     static_libs/gi
     static_libs/graphicsview
     static_libs/tooldatabase
+
+    #style/phantomstyle/src/phantom
+    style/XrStyle
 )
 
 include_directories(${INCLUDE_DIRECTORIES})
+
+# STYLE
+#add_subdirectory(style/phantomstyle/src)
+add_subdirectory(style/XrStyle)
 
 # STATIC LIBS
 add_subdirectory(static_libs)
@@ -94,4 +101,5 @@ add_subdirectory(plugins)
 
 # MAIN APP
 add_subdirectory(GGEasy)
+
 

@@ -32,7 +32,7 @@ GiDrill::GiDrill(const Path& path, double diameter, AbstractFile* file, int tool
 
 void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
-    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
@@ -127,6 +127,6 @@ void GiDrill::create() {
         }
     }
 
-    boundingRect_ = shape_.boundingRect(); // FIXME V519 The 'boundingRect_' variable is assigned values twice successively. Perhaps this is a mistake. Check lines: 121, 132. gi_drill.cpp 132
+    boundingRect_ = shape_.boundingRect();
     fillPolygon = shape_.toFillPolygon();
 }

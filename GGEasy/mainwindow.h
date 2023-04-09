@@ -97,6 +97,8 @@ private:
     void initWidgets();
 
     void printDialog();
+    void renderPdf();
+
     void readSettings();
     void resetToolPathsActions();
     void selectAll();
