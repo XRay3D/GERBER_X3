@@ -90,7 +90,7 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
 
 void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu_;
-    menu(menu_, App::fileTreeView());
+    menu(menu_, App::fileTreeViewPtr());
     menu_.exec(event->screenPos());
 }
 
@@ -100,12 +100,12 @@ QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, con
         for (auto& item : handlers)
             item->setVisible(selected);
         if (node_->index().isValid()) {
-            App::fileTreeView()->selectionModel()->select(node_->index(),
+            App::fileTreeView().selectionModel()->select(node_->index(),
                 (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
                     | QItemSelectionModel::Rows);
         }
     } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
+        emit App::fileModel().dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
     }
     return GraphicsItem::itemChange(change, value);
 }
@@ -199,7 +199,7 @@ Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
 
 void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
     auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
-        App::fileModel()->removeRow(node_->row(), node_->index().parent());
+        App::fileModel().removeRow(node_->row(), node_->index().parent());
     });
     // FIXME   action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { AbstractShape::setVisible(fl); } /*this, &GraphicsItem::setVisible*/);
     //    action->setCheckable(true);

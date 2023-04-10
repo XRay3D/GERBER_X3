@@ -182,21 +182,21 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     case FileTree_::Column::NameColorVisible:
         if (role == Qt::CheckStateRole) {
             file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-            emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+            emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
             return true;
         }
         return false;
     case FileTree_::Column::Side:
         if (role == Qt::EditRole) {
             file->setSide(static_cast<Side>(value.toBool()));
-            // emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+            // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
         }
         return false;
     case FileTree_::Column::ItemsType:
         if (role == Qt::EditRole) {
             file->setItemType(value.toInt());
-            emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+            emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
             return true;
         }
         return false;
@@ -317,7 +317,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
     //            layer->file()->m_layersVisible[name] = visible;
     //            if (visible) {
     //                layer->file()->m_visible = visible;
-    //                emit App::fileModel()->dataChanged(m_parent->index(index.column()), m_parent->index(index.column()), { role });
+    //                emit App::fileModel().dataChanged(m_parent->index(index.column()), m_parent->index(index.column()), { role });
     //            }
     //        }
     //        return true;

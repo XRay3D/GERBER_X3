@@ -90,7 +90,7 @@ void Form::computePaths() {
         return {};
     };
 
-    for (auto* item : App::graphicsView()->selectedItems()) {
+    for (auto* item : App::graphicsView().selectedItems()) {
         auto gi = dynamic_cast<GraphicsItem*>(item);
         switch (item->type()) {
         case GiType::DataSolid:

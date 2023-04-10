@@ -131,7 +131,7 @@ void Form::updateFiles() {
     ui->cbxFile->clear();
 
     updateCriterias();
-    for (auto file : App::project()->files()) {
+    for (auto file : App::project().files()) {
         auto gos = file->getDataForGC(criterias, GCType::Profile, true);
         if (gos.size())
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
@@ -204,11 +204,13 @@ void Form::updateThermalGi() {
     pd.setCancelButton(nullptr);
     count = 0;
     { // create Preview Items
+        QColor color {App::settings().theme() > LightRed ? Qt::white : Qt::black};
+
         items_.clear();
         for (const auto& [keyId, valVec] : thPaths) {
             if (valVec.empty())
                 continue;
-            auto node = model->appendRow(drawIcon(valVec.front().first), keyId, par);
+            auto node = model->appendRow(drawIcon(valVec.front().first, color), keyId, par);
             for (const auto& [paths, pos] : valVec) {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
@@ -220,7 +222,7 @@ void Form::updateThermalGi() {
         }
 
         for (auto& item : items_) {
-            App::graphicsView()->addItem(item.get());
+            App::graphicsView().addItem(item.get());
             connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
         }
     }

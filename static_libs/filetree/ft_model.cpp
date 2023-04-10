@@ -176,7 +176,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     bool ok = getItem(index)->setData(index, value, role);
     if (ok)
-        App::project()->setChanged();
+        App::project().setChanged();
     return ok;
 }
 

@@ -119,7 +119,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 void Node::menu(QMenu& menu, FileTree::View* tv) const {
     shape->menu(menu, tv);
     //    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(shape()->name()), [this] {
-    //        App::fileModel()->removeRow(row(), index().parent());
+    //        App::fileModel().removeRow(row(), index().parent());
     //    });
     //    if (shape()->type() == GiType::ShText) {
     //        menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {

@@ -108,7 +108,7 @@ void Form::computePaths() {
     AbstractFile const* file = nullptr;
     bool skip {true};
 
-    for (auto* gi : App::graphicsView()->selectedItems<GraphicsItem>()) {
+    for (auto* gi : App::graphicsView().selectedItems<GraphicsItem>()) {
         switch (gi->type()) {
         case GiType::DataSolid:
             wPaths.append(gi->paths());
@@ -150,7 +150,7 @@ void Form::computePaths() {
         addUsedGi(gi);
     }
 
-    //    for (auto* item : App::graphicsView()->selectedItems()) {
+    //    for (auto* item : App::graphicsView().selectedItems()) {
     //        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
     //        switch (item->type()) {
     //        case GiType::DataSolid:

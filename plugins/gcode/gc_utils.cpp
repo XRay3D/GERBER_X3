@@ -23,13 +23,13 @@
 // }
 
 // QString File::getLastDir() {
-//     if (Settings::sameFolder() && !redirected)
-//         lastDir = QFileInfo(App::project()->name()).absolutePath();
+//     if (App::gcSettings().sameFolder() && !redirected)
+//         lastDir = QFileInfo(App::project().name()).absolutePath();
 //     else if (lastDir.isEmpty()) {
 //         QSettings settings;
 //         lastDir = settings.value("LastGCodeDir").toString();
 //         if (lastDir.isEmpty())
-//             lastDir = QFileInfo(App::project()->name()).absolutePath();
+//             lastDir = QFileInfo(App::project().name()).absolutePath();
 //         settings.setValue("LastGCodeDir", lastDir);
 //     }
 //     return lastDir += '/';
@@ -37,8 +37,8 @@
 
 // void File::setLastDir(QString dirPath) {
 //     dirPath = QFileInfo(dirPath).absolutePath();
-//     if (Settings::sameFolder() && !redirected) {
-//         redirected = QFileInfo(App::project()->name()).absolutePath() != dirPath;
+//     if (App::gcSettings().sameFolder() && !redirected) {
+//         redirected = QFileInfo(App::project().name()).absolutePath() != dirPath;
 //         if (!redirected)
 //             return;
 //     }

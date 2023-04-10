@@ -30,10 +30,10 @@ Node::~Node() {
     //    if (id__ > -1) {
     //        switch (type) {
     //        case File:
-    //            App::project()->deleteFile(id__);
+    //            App::project().deleteFile(id__);
     //            break;
     //        case AbstractShape:
-    //            App::project()->deleteShape(id__);
+    //            App::project().deleteShape(id__);
     //            break;
     //        default:
     //            break;
@@ -80,7 +80,7 @@ void Node::addChild(Node* item) {
 void Node::remove(int row) { childs.takeAt(row); }
 
 QModelIndex Node::index(int column) const {
-    return App::fileModel()->createIndex(row(), column, reinterpret_cast<quintptr>(this));
+    return App::fileModel().createIndex(row(), column, reinterpret_cast<quintptr>(this));
 }
 
 } // namespace FileTree

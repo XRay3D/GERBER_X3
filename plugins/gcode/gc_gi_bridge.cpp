@@ -37,7 +37,7 @@ void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
         return;
 
     painter->setBrush(Qt::NoBrush);
-    painter->setPen(QPen(Qt::gray, 2 * App::graphicsView()->scaleFactor()));
+    painter->setPen(QPen(Qt::gray, 2 * App::graphicsView().scaleFactor()));
     painter->drawPath(cutoff);
 }
 

@@ -36,7 +36,7 @@ Arc::Arc(QPointF center, QPointF pt1, QPointF pt2)
 
     redraw();
 
-    App::graphicsView()->addItem(this);
+    App::graphicsView().addItem(this);
 }
 
 constexpr auto dot(auto u, auto v) { return u.x() * v.x() + u.y() * v.y(); }

@@ -32,7 +32,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //    tableView->setFont(f);
     //    tableView->setObjectName(QString::fromUtf8("tableView"));
 
-    //    tableView->setModel(new Model(App::project()->file(fileId)->lines()));
+    //    tableView->setModel(new Model(App::project().file(fileId)->lines()));
     //    // horizontal Header
     //    tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     //    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());

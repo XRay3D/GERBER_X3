@@ -71,13 +71,13 @@ void File::setSpindleSpeed(int val) { spindleSpeed_ = val; }
 void File::setToolType(int val) { toolType_ = val; }
 
 QString File::getLastDir() {
-    if (Settings::sameFolder() && !redirected)
-        lastDir = QFileInfo(App::project()->name()).absolutePath();
+    if (App::gcSettings().sameFolder() && !redirected)
+        lastDir = QFileInfo(App::project().name()).absolutePath();
     else if (lastDir.isEmpty()) {
         QSettings settings;
         lastDir = settings.value("LastGCodeDir").toString();
         if (lastDir.isEmpty())
-            lastDir = QFileInfo(App::project()->name()).absolutePath();
+            lastDir = QFileInfo(App::project().name()).absolutePath();
         settings.setValue("LastGCodeDir", lastDir);
     }
     return lastDir += '/';
@@ -85,8 +85,8 @@ QString File::getLastDir() {
 
 void File::setLastDir(QString dirPath) {
     dirPath = QFileInfo(dirPath).absolutePath();
-    if (Settings::sameFolder() && !redirected) {
-        redirected = QFileInfo(App::project()->name()).absolutePath() != dirPath;
+    if (App::gcSettings().sameFolder() && !redirected) {
+        redirected = QFileInfo(App::project().name()).absolutePath() != dirPath;
         if (!redirected)
             return;
     }
@@ -128,28 +128,28 @@ bool File::save(const QString& name) {
 
 void File::statFile() {
     if (toolType() == Tool::Laser) {
-        QString str(Settings::laserStart());         //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().laserStart());         //"G21 G17 G90"); //G17 XY plane
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
-        QString str(Settings::start());              //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().start());              //"G21 G17 G90"); //G17 XY plane
         str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
         lines_.emplace_back(str);
-        lines_.emplace_back(formated({g0(), z(App::project()->safeZ())})); // HomeZ
+        lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
     }
 }
 
 void File::endFile() {
     if (toolType() == Tool::Laser) {
-        lines_.emplace_back(Settings::spindleLaserOff());
-        QPointF home(App::home()->pos() - App::zero()->pos());
+        lines_.emplace_back(App::gcSettings().spindleLaserOff());
+        QPointF home(App::home().pos() - App::zero().pos());
         lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
-        lines_.emplace_back(Settings::laserEnd());
+        lines_.emplace_back(App::gcSettings().laserEnd());
     } else {
-        lines_.emplace_back(formated({g0(), z(App::project()->safeZ())})); // HomeZ
-        QPointF home(App::home()->pos() - App::zero()->pos());
+        lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
+        QPointF home(App::home().pos() - App::zero().pos());
         lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())}));   // HomeXY
-        lines_.emplace_back(Settings::end());
+        lines_.emplace_back(App::gcSettings().end());
     }
     for (size_t i = 0; i < lines_.size(); ++i) { // remove epty lines
         if (lines_[i].isEmpty())
@@ -159,7 +159,7 @@ void File::endFile() {
 
 void File::addInfo() {
     const static auto side_ {QObject::tr("Top|Bottom").split('|')};
-    if (Settings::info()) {
+    if (App::gcSettings().info()) {
         lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
         lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
         lines_.emplace_back(QObject::tr(";\t  Tool Stepover: %1").arg(gcp_.getTool().stepover()));
@@ -176,7 +176,7 @@ void File::initSave() {
     for (bool& fl : formatFlags)
         fl = false;
 
-    const QString format(gcp_.getTool().type() == Tool::Laser ? Settings::formatLaser() : Settings::formatMilling());
+    const QString format(gcp_.getTool().type() == Tool::Laser ? App::gcSettings().formatLaser() : App::gcSettings().formatMilling());
     for (size_t i = 0; i < cmdList.size(); ++i) {
         const int index = format.indexOf(cmdList[i], 0, Qt::CaseInsensitive);
         if (index != -1) {
@@ -201,7 +201,7 @@ void File::startPath(const QPointF& point) {
         //        gCodeText_.push_back(formated({ g1(), speed(spindleSpeed) }));
     } else {
         lines_.emplace_back(formated({g0(), x(point.x()), y(point.y()), speed(spindleSpeed())})); // start xy
-        lines_.emplace_back(formated({g0(), z(App::project()->plunge())}));                       // start z
+        lines_.emplace_back(formated({g0(), z(App::project().plunge())}));                       // start z
         //        lastValues[AlwaysF].clear();
     }
 }
@@ -210,7 +210,7 @@ void File::endPath() {
     if (toolType() == Tool::Laser) {
         //
     } else {
-        lines_.emplace_back(formated({g0(), z(App::project()->clearence())}));
+        lines_.emplace_back(formated({g0(), z(App::project().clearence())}));
     }
 }
 
@@ -242,7 +242,7 @@ mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     //    for (auto& paths : pathss) {
     //        for (auto& path : paths) {
     //            for (QPointF& point : path) {
-    //                point -= App::zero()->pos();
+    //                point -= App::zero().pos();
     //            }
     //        }
     //    }
@@ -265,7 +265,7 @@ mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& pat
     }
 
     for (QPointF& point : std::views::join(paths))
-        point -= App::zero()->pos();
+        point -= App::zero().pos();
 
     return paths;
 }
@@ -340,7 +340,7 @@ void File::write(QDataStream& stream) const {
 
 void File::read(QDataStream& stream) {
     auto& gcp = *const_cast<Params*>(&gcp_);
-    switch (App::project()->ver()) {
+    switch (App::project().ver()) {
     case ProVer_7:
     case ProVer_6:
     case ProVer_5:
@@ -394,7 +394,7 @@ void File::saveLaserPocket(const QPointF& offset) {
 }
 
 void File::saveMillingPocket(const QPointF& offset) {
-    lines_.emplace_back(Settings::spindleOn());
+    lines_.emplace_back(App::gcSettings().spindleOn());
 
     mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
 
@@ -459,7 +459,7 @@ void File::saveMillingProfile(const QPointF& offset) {
 }
 
 void File::saveLaserProfile(const QPointF& offset) {
-    lines_.emplace_back(Settings::laserDynamOn());
+    lines_.emplace_back(App::gcSettings().laserDynamOn());
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
 
@@ -474,7 +474,7 @@ void File::saveLaserProfile(const QPointF& offset) {
 }
 
 void File::saveMillingRaster(const QPointF& offset) {
-    lines_.emplace_back(Settings::spindleOn());
+    lines_.emplace_back(App::gcSettings().spindleOn());
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());
@@ -493,7 +493,7 @@ void File::saveMillingRaster(const QPointF& offset) {
 }
 
 void File::saveLaserHLDI(const QPointF& offset) {
-    lines_.emplace_back(Settings::laserConstOn());
+    lines_.emplace_back(App::gcSettings().laserConstOn());
 
     mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
 
@@ -511,7 +511,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
         }
     }
     if (pathss.size() > 1) {
-        lines_.emplace_back(Settings::laserDynamOn());
+        lines_.emplace_back(App::gcSettings().laserDynamOn());
         for (QPolygonF& path : pathss.back()) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed()));
@@ -679,7 +679,7 @@ void File::createGiLaser() {
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
     itemGroup()->push_back(item);
 
-    if (Settings::simplifyHldi()) {
+    if (App::gcSettings().simplifyHldi()) {
         auto item = new GiGcPath(g0path_, this);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         auto color = new QColor(App::settings().guiColor(GuiColors::G0));
@@ -711,9 +711,9 @@ void calcArcs(Path path) {
     //        return;
     //    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
     //        QGraphicsLineItem* item;
-    //        item = App::graphicsView()->scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
+    //        item = App::graphicsView().scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
     //        item->setPos(pos);
-    //        item = App::graphicsView()->scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
+    //        item = App::graphicsView().scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
     //        item->setPos(pos);
     //    };
 
@@ -741,7 +741,7 @@ void calcArcs(Path path) {
     //        line = line.normalVector();
     //        if (beg.isNull())
     //            beg = poly[i];
-    //        //                App::graphicsView()->scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
+    //        //                App::graphicsView().scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
     //        if (normals.size()) {
     //            QPointF intersectionPoint;
     // #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -760,7 +760,7 @@ void calcArcs(Path path) {
     //                double r = QLineF(center, beg).length();
     //                QRectF rect(-r, -r, +r * 2, +r * 2);
 
-    //                App::graphicsView()->scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
+    //                App::graphicsView().scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
     //                ctr = {};
     //                center = {};
     //                beg = {};

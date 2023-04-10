@@ -120,8 +120,8 @@ public:
         for (auto item : items)
             if (item->isSelected())
                 rect = rect.united(item->boundingRect());
-        App::graphicsView()->fitInView(rect);
-        //        App::graphicsView()->zoomOut();
+        App::graphicsView().fitInView(rect);
+        //        App::graphicsView().zoomOut();
     }
 };
 
@@ -292,11 +292,11 @@ void BaseForm::fileHandler(File* file) {
     file->setSide(boardSide);
     if (fileId > -1) {
         exit(-123456);
-        //        App::project()->reload(fileId, file);
+        //        App::project().reload(fileId, file);
         //        editMode_ = false;
         //        fileId = -1;
     } else {
-        App::project()->addFile(file);
+        App::project().addFile(file);
     }
 }
 
@@ -342,20 +342,20 @@ void BaseForm::errorHandler(int) {
     ctrWidget->setVisible(false);
     errWidget->setVisible(true);
 
-    std::ranges::for_each(creator_->items, [](auto i) { App::graphicsView()->addItem(i); });
+    std::ranges::for_each(creator_->items, [](auto i) { App::graphicsView().addItem(i); });
 
     errTable->setModel(new ErrorModel(std::move(creator_->items), errTable));
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    App::graphicsView()->startUpdateTimer(32);
+    App::graphicsView().startUpdateTimer(32);
 }
 
 void BaseForm::errContinue() {
     if (creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::graphicsView()->stopUpdateTimer();
+    App::graphicsView().stopUpdateTimer();
 
     delete errTable->model();
 
@@ -370,7 +370,7 @@ void BaseForm::errBreak() {
     if (creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::graphicsView()->stopUpdateTimer();
+    App::graphicsView().stopUpdateTimer();
 
     delete errTable->model();
 

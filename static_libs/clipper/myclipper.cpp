@@ -231,7 +231,7 @@ void mergePaths(Paths& paths, const double dist) {
 #include <QPainterPath>
 #include <QPixmap>
 
-QIcon drawIcon(const Paths& paths) {
+QIcon drawIcon(const Paths& paths, QColor color) {
     static QMutex m;
     QMutexLocker l(&m);
 
@@ -257,7 +257,7 @@ QIcon drawIcon(const Paths& paths) {
     painter.begin(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
-    painter.setBrush(Qt::black);
+    painter.setBrush(color);
     //    painter.translate(tr);
     painter.translate(-kx, ky);
     painter.scale(scale, -scale);

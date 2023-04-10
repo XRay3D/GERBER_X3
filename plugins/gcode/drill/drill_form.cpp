@@ -111,7 +111,7 @@ Form::~Form() {
     settings.setValue(ui->chbxZoomToSelected);
     settings.endGroup();
 
-    // for (auto* var : App::graphicsView()->items<GiDataSolid>())
+    // for (auto* var : App::graphicsView().items<GiDataSolid>())
     // delete var;
 
     delete ui;
@@ -128,7 +128,7 @@ void Form::updateFiles() {
     disconnect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
     ui->cbxFile->clear();
 
-    for (auto file : App::project()->files()) {
+    for (auto file : App::project().files()) {
         auto gos = file->getDataForGC(criterias, GCType::Drill, true);
         if (gos.size())
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
@@ -141,12 +141,12 @@ void Form::updateFiles() {
 }
 
 bool Form::canToShow() {
-    // if (App::project()->files(FileType::Excellon).size() > 0)
+    // if (App::project().files(FileType::Excellon).size() > 0)
     return true;
 
     // QComboBox cbx;
     // for (auto type : {FileType::Gerber_, FileType::Dxf_}) {
-    // for (auto file : App::project()->files(type)) {
+    // for (auto file : App::project().files(type)) {
     // App::filePlugin(int(file->type()))->addToGcForm(file, &cbx);
     // if (cbx.count())
     // return true;
@@ -193,7 +193,7 @@ void Form::initToolTable() {
 void Form::on_cbxFileCurrentIndexChanged() {
     file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
     qDebug() << file << file->id();
-    if (!App::project()->contains(file))
+    if (!App::project().contains(file))
         return;
 
     try {
@@ -202,36 +202,38 @@ void Form::on_cbxFileCurrentIndexChanged() {
         // for (auto* var : peview)
         // qDebug() << var->name << var->pos;
 
-        if (1) {
-            using Key = std::pair<QByteArray, bool>;
-            using Val = mvector<const GraphicObject*>;
-            std::map<Key, Val> map;
+        using Key = std::pair<QByteArray, bool>;
+        using Val = mvector<const GraphicObject*>;
+        std::map<Key, Val> map;
 
-            static mvector<GraphicObject> gos;
-            gos = file->getDataForGC(criterias, GCType::Drill);
+        static mvector<GraphicObject> gos;
+        gos = file->getDataForGC(criterias, GCType::Drill);
 
-            for (auto& var : gos)
-                map[Key {var.name, var.path.size() > 1}].emplace_back(&var);
+        for (auto& var : gos)
+            map[Key {var.name, var.path.size() > 1}].emplace_back(&var);
 
-            model = new Model(map.size(), ui->toolTable);
-            auto& data = model->data();
-            for (int i {}; auto& [key, val] : map) {
-                auto& row = data[i++];
-                row.icon = !key.second ? drawIcon(val.front()->fill) : drawDrillIcon(key.second ? Qt::red : Qt::black);
-                row.name = QString(key.first).split('|');
-                row.name.back() += ": Ø" + QString::number(std::any_cast<double>(val.front()->raw));
-                row.diameter = std::any_cast<double>(val.front()->raw);
-                row.isSlot = key.second;
-                for (auto* go : val)
-                    new GiPreview(
-                        (go->path.size() > 1 ? Path {go->path} : Path {go->pos}),
-                        row.diameter,
-                        data.back().toolId,
-                        row,
-                        go->fill);
-            }
+        model = new Model(map.size(), ui->toolTable);
+        auto& data = model->data();
+
+        QColor color {App::settings().theme() > LightRed ? Qt::white : Qt::black};
+
+        for (int i {}; auto& [key, val] : map) {
+            auto& row = data[i++];
+            row.icon = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
+            row.name = QString(key.first).split('|');
+            row.name.back() += ": Ø" + QString::number(std::any_cast<double>(val.front()->raw));
+            row.diameter = std::any_cast<double>(val.front()->raw);
+            row.isSlot = key.second;
+            for (auto* go : val)
+                new GiPreview(
+                    (go->path.size() > 1 ? Path {go->path} : Path {go->pos}),
+                    row.diameter,
+                    data.back().toolId,
+                    row,
+                    go->fill);
         }
-        App::graphicsView()->scene()->update();
+
+        App::graphicsView().scene()->update();
     } catch (const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;
@@ -416,7 +418,7 @@ QModelIndexList Form::selectedIndexes() const { return ui->toolTable->selectionM
 
 void Form::zoomToSelected() {
     if (ui->chbxZoomToSelected->isChecked())
-        App::graphicsView()->zoomToSelected();
+        App::graphicsView().zoomToSelected();
 }
 
 void Form::computePaths() {
@@ -458,7 +460,7 @@ void Form::computePaths() {
                 // GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
                 // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 // gcode->setSide(file->side());
-                // App::project()->addFile(gcode);
+                // App::project().addFile(gcode);
             }
         }
     }
@@ -525,7 +527,7 @@ void Form::computePaths() {
 
         for (auto& [toolId, val] : pathsMap) {
             if (val.drillPath.size()) {
-                Point point1((App::home()->pos()));
+                Point point1((App::home().pos()));
                 { // sort by distance
                     size_t counter = 0;
                     while (counter < val.drillPath.size()) {
@@ -545,7 +547,7 @@ void Form::computePaths() {
                 GCode::File* gcode = new File({App::toolHolder().tool(toolId), dsbxDepth->value()}, {{val.drillPath}});
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + /*type_ +*/ indexes(val.toolsApertures));
                 gcode->setSide(file->side());
-                App::project()->addFile(gcode);
+                App::project().addFile(gcode);
             }
             if (val.paths.size()) {
                 switch (worckType) {

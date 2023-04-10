@@ -147,7 +147,7 @@ GraphicsView::~GraphicsView() {
 //     updateRuler();
 // }
 
-void GraphicsView::zoomFit() { fitInView(App::layoutFrames()->boundingRect() /*scene()->itemsBoundingRect()*/, false); }
+void GraphicsView::zoomFit() { fitInView(App::layoutFrames().boundingRect() /*scene()->itemsBoundingRect()*/, false); }
 
 void GraphicsView::zoomToSelected() {
     QRectF rect;
@@ -288,7 +288,7 @@ QRectF GraphicsView::getSelectedBoundingRect() {
     }
 
     if (!rect.isEmpty())
-        App::project()->setWorckRect(rect);
+        App::project().setWorckRect(rect);
 
     return rect;
 }
@@ -391,7 +391,7 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
 
     };
 
-    const double scaleFactor = App::graphicsView()->scaleFactor();
+    const double scaleFactor = App::graphicsView().scaleFactor();
     const double crossLength = 20.0 * scaleFactor;
 
     painter->setPen(QPen(Qt::green, 0.0));
@@ -739,7 +739,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 // }
 
 // QRectF Scene::getSelectedBoundingRect() {
-//     auto selectedItems(App::graphicsView()->selectedItems());
+//     auto selectedItems(App::graphicsView().selectedItems());
 
 //    if (selectedItems.isEmpty())
 //        return {};
@@ -754,7 +754,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    }
 
 //    if (!rect.isEmpty())
-//        App::project()->setWorckRect(rect);
+//        App::project().setWorckRect(rect);
 
 //    return rect;
 //}
@@ -808,7 +808,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    if (qFuzzyIsNull(line.length()))
 //        return;
 
-//    const double scaleFactor = App::graphicsView()->scaleFactor();
+//    const double scaleFactor = App::graphicsView().scaleFactor();
 //    painter->save();
 //    painter->setBrush(QColor(127, 127, 127, 100));
 //    painter->setPen(QPen(Qt::green, 0.0));
@@ -1007,7 +1007,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    //            painter->setRenderHint(QPainter::Antialiasing, true);
 //    //            QString str(QString("FPS %1").arg(frameCount2_));
 //    //            painter->translate(rect_.center());
-//    //            const double scaleFactor = App::graphicsView()->scaleFactor();
+//    //            const double scaleFactor = App::graphicsView().scaleFactor();
 //    //            painter->scale(scaleFactor, -scaleFactor);
 //    //            QFont f;
 //    //            f.setPixelSize(100);
@@ -1026,7 +1026,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    { // NOTE FPS counter
 //        painter->setRenderHint(QPainter::Antialiasing, true);
 
-//        const double scaleFactor = App::graphicsView()->scaleFactor();
+//        const double scaleFactor = App::graphicsView().scaleFactor();
 //        painter->translate(rect.bottomLeft());
 //        painter->scale(scaleFactor, -scaleFactor);
 

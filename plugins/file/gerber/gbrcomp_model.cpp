@@ -27,11 +27,11 @@ namespace Gerber::Comp {
 sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new sNode("")) {
-    //    auto file = App::project()->file<File>(fileId);
+    //    auto file = App::project().file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))
     //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
 
-    auto file = App::project()->file<Gerber::File>(fileId);
+    auto file = App::project().file<Gerber::File>(fileId);
 
     using pair = std::pair<int, sNode*>;
     std::map<QString, mvector<pair>> map;

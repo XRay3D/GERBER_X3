@@ -5,7 +5,7 @@
 namespace Shapes {
 void Plugin::addPoint(const QPointF& point) {
     if (item == nullptr)
-        item = createShape(point), App::project()->addShape(item);
+        item = createShape(point), App::project().addShape(item);
     else if (!item->addPt(point))
         item->setSelected(true), item = nullptr;
 }

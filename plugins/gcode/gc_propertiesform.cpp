@@ -39,23 +39,20 @@ PropertiesForm::PropertiesForm(QWidget* parent)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxGlue, &QDoubleSpinBox::valueChanged, App::project(), &Project::setGlue);
+    connect(ui->dsbxHomeX, &QDoubleSpinBox::valueChanged, App::homePtr(), &GiMarker::setPosX);
+    connect(ui->dsbxHomeY, &QDoubleSpinBox::valueChanged, App::homePtr(), &GiMarker::setPosY);
+    connect(ui->dsbxZeroX, &QDoubleSpinBox::valueChanged, App::zeroPtr(), &GiMarker::setPosX);
+    connect(ui->dsbxZeroY, &QDoubleSpinBox::valueChanged, App::zeroPtr(), &GiMarker::setPosY);
 
-    connect(ui->dsbxHomeX, &QDoubleSpinBox::valueChanged, App::home(), &GiMarker::setPosX);
-    connect(ui->dsbxHomeY, &QDoubleSpinBox::valueChanged, App::home(), &GiMarker::setPosY);
-    connect(ui->dsbxZeroX, &QDoubleSpinBox::valueChanged, App::zero(), &GiMarker::setPosX);
-    connect(ui->dsbxZeroY, &QDoubleSpinBox::valueChanged, App::zero(), &GiMarker::setPosY);
-
-    if (App::project()) {
-        connect(ui->dsbxSpaceX, &QDoubleSpinBox::valueChanged, App::project(), &Project::setSpaceX);
-        connect(ui->dsbxSpaceY, &QDoubleSpinBox::valueChanged, App::project(), &Project::setSpaceY);
-        connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::project(), &Project::setStepsX);
-        connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::project(), &Project::setStepsY);
-        ui->dsbxSpaceX->setValue(App::project()->spaceX());
-        ui->dsbxSpaceY->setValue(App::project()->spaceY());
-        ui->sbxStepsX->setValue(App::project()->stepsX());
-        ui->sbxStepsY->setValue(App::project()->stepsY());
-    }
+    connect(ui->dsbxGlue, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setGlue);
+    connect(ui->dsbxSpaceX, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSpaceX);
+    connect(ui->dsbxSpaceY, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSpaceY);
+    connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsX);
+    connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsY);
+    ui->dsbxSpaceX->setValue(App::project().spaceX());
+    ui->dsbxSpaceY->setValue(App::project().spaceY());
+    ui->sbxStepsX->setValue(App::project().stepsX());
+    ui->sbxStepsY->setValue(App::project().stepsY());
 
     connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, [this](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -76,17 +73,17 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     settings.getValue(ui->dsbxGlue, 0.05);
     settings.endGroup();
 
-    ui->dsbxHomeX->setValue(App::home()->pos().x());
-    ui->dsbxHomeY->setValue(App::home()->pos().y());
+    ui->dsbxHomeX->setValue(App::home().pos().x());
+    ui->dsbxHomeY->setValue(App::home().pos().y());
 
-    ui->dsbxZeroX->setValue(App::zero()->pos().x());
-    ui->dsbxZeroY->setValue(App::zero()->pos().y());
+    ui->dsbxZeroX->setValue(App::zero().pos().x());
+    ui->dsbxZeroY->setValue(App::zero().pos().y());
 
-    App::project()->setSafeZ(ui->dsbxSafeZ->value());
-    App::project()->setBoardThickness(ui->dsbxThickness->value());
-    App::project()->setCopperThickness(ui->dsbxCopperThickness->value());
-    App::project()->setClearence(ui->dsbxClearence->value());
-    App::project()->setPlunge(ui->dsbxPlunge->value());
+    App::project().setSafeZ(ui->dsbxSafeZ->value());
+    App::project().setBoardThickness(ui->dsbxThickness->value());
+    App::project().setCopperThickness(ui->dsbxCopperThickness->value());
+    App::project().setClearence(ui->dsbxClearence->value());
+    App::project().setPlunge(ui->dsbxPlunge->value());
 
     connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
         if (parent
@@ -120,10 +117,10 @@ PropertiesForm::PropertiesForm(QWidget* parent)
 PropertiesForm::~PropertiesForm() {
     App::setGCodePropertiesForm(nullptr);
 
-    if (App::home())
-        App::home()->setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
-    if (App::zero())
-        App::zero()->setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
+    if (App::homePtr())
+        App::home().setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
+    if (App::zeroPtr())
+        App::zero().setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     MySettings settings;
     settings.beginGroup("PropertiesForm");
@@ -135,20 +132,20 @@ PropertiesForm::~PropertiesForm() {
     settings.setValue(ui->dsbxGlue);
     settings.endGroup();
 
-    App::project()->setSafeZ(ui->dsbxSafeZ->value());
-    App::project()->setBoardThickness(ui->dsbxThickness->value());
-    App::project()->setCopperThickness(ui->dsbxCopperThickness->value());
-    App::project()->setClearence(ui->dsbxClearence->value());
-    App::project()->setPlunge(ui->dsbxPlunge->value());
+    App::project().setSafeZ(ui->dsbxSafeZ->value());
+    App::project().setBoardThickness(ui->dsbxThickness->value());
+    App::project().setCopperThickness(ui->dsbxCopperThickness->value());
+    App::project().setClearence(ui->dsbxClearence->value());
+    App::project().setPlunge(ui->dsbxPlunge->value());
 
     delete ui;
 }
 
 void PropertiesForm::updatePosDsbxs() {
-    ui->dsbxHomeX->setValue(App::home()->pos().x());
-    ui->dsbxHomeY->setValue(App::home()->pos().y());
-    ui->dsbxZeroX->setValue(App::zero()->pos().x());
-    ui->dsbxZeroY->setValue(App::zero()->pos().y());
+    ui->dsbxHomeX->setValue(App::home().pos().x());
+    ui->dsbxHomeY->setValue(App::home().pos().y());
+    ui->dsbxZeroX->setValue(App::zero().pos().x());
+    ui->dsbxZeroY->setValue(App::zero().pos().y());
 }
 
 void PropertiesForm::updateAll() {

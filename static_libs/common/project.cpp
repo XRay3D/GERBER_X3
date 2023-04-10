@@ -56,8 +56,8 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
         file.reset(App::gCodePlugin(type)->loadFile(stream));
     else if (App::filePlugins().contains(type)) {
         file.reset(App::filePlugin(type)->loadFile(stream));
-        if (!App::project()->watcher.files().contains(file->name()))
-            App::project()->watcher.addPath(file->name());
+        if (!App::project().watcher.files().contains(file->name()))
+            App::project().watcher.addPath(file->name());
     } else {
         QByteArray data;
         return stream >> data;
@@ -82,7 +82,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractSha
     if (App::shapePlugins().contains(type))
         shape.reset(App::shapePlugin(type)->createShape());
     stream >> *shape;
-    App::graphicsView()->addItem(shape.get());
+    App::graphicsView().addItem(shape.get());
     return stream;
 }
 
@@ -133,7 +133,7 @@ bool Project::save(const QString& fileName) {
             clearence_,
             plunge_,
             glue_,
-            App::graphicsView()->getViewRect());
+            App::graphicsView().getViewRect());
         out << files_;
         out << shapes_;
         isModified_ = false;
@@ -191,14 +191,14 @@ bool Project::open(const QString& fileName) {
             plunge_,
             glue_,
             sceneRect);
-        App::graphicsView()->fitInView(sceneRect, false);
+        App::graphicsView().fitInView(sceneRect, false);
         in >> files_;
         in >> shapes_;
 
         for (const auto& [id, filePtr] : files_)
-            App::fileModel()->addFile(filePtr.get());
+            App::fileModel().addFile(filePtr.get());
         for (const auto& [id, shPtr] : shapes_)
-            App::fileModel()->addShape(shPtr.get());
+            App::fileModel().addShape(shPtr.get());
 
         emit homePosChanged(home_);
         emit zeroPosChanged(zero_);
@@ -229,7 +229,7 @@ void Project::close() {
     isModified_ = false;
     for (auto& fl : pinsUsed_)
         fl = true;
-    App::graphicsView()->zoom100();
+    App::graphicsView().zoom100();
     emit changed();
 }
 
@@ -365,7 +365,7 @@ int Project::addFile(AbstractFile* file) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
         files_.emplace(newId, file);
-        App::fileModel()->addFile(file);
+        App::fileModel().addFile(file);
         setChanged();
         watcher.addPath(file->name());
     }
@@ -388,7 +388,7 @@ int Project::addFile(GCode::File* file) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
         files_.emplace(newId, file);
-        App::fileModel()->addFile(file);
+        App::fileModel().addFile(file);
         setChanged();
         watcher.addPath(file->name());
     }
@@ -405,7 +405,7 @@ int Project::addShape(Shapes::AbstractShape* const shape) {
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
     shapes_.emplace(newId, shape);
-    App::fileModel()->addShape(shape);
+    App::fileModel().addShape(shape);
     setChanged();
     return newId;
 }

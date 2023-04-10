@@ -67,8 +67,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     GCode::PropertiesForm(); // init default vars;
 
-    connect(project_, &Project::homePosChanged, App::home(), qOverload<const QPointF&>(&GiMarker::setPos));
-    connect(project_, &Project::zeroPosChanged, App::zero(), qOverload<const QPointF&>(&GiMarker::setPos));
+    connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&GiMarker::setPos));
+    connect(project_, &Project::zeroPosChanged, App::zeroPtr(), qOverload<const QPointF&>(&GiMarker::setPos));
     connect(project_, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&GiPin::setPos));
     connect(project_, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
@@ -122,7 +122,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
     if (App::isDebug() || maybeSave()) {
         delete dockWidget_;
         writeSettings();
-        App::fileModel()->closeProject();
+        App::fileModel().closeProject();
         event->accept();
     } else {
         event->ignore();
@@ -132,7 +132,7 @@ void MainWindow::closeEvent(QCloseEvent* event) {
 bool MainWindow::closeProject() {
     if (maybeSave()) {
         dockWidget_->close();
-        App::fileModel()->closeProject();
+        App::fileModel().closeProject();
         setCurrentFile(QString());
         project_->close();
         // ui.graphicsView->scene()->clear();
@@ -311,8 +311,8 @@ void MainWindow::createActionsService() {
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if (updateRect()) {
             GiPin::resetPos(false);
-            App::home()->resetPos(false);
-            App::zero()->resetPos(false);
+            App::home().resetPos(false);
+            App::zero().resetPos(false);
         }
         ui.graphicsView->zoomFit();
     }));
@@ -455,7 +455,7 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        auto selectedItems(App::graphicsView()->selectedItems());
+        auto selectedItems(App::graphicsView().selectedItems());
         Paths clipPaths;
         for (QGraphicsItem* clipItem : selectedItems) {
             if (clipItem->type() >= GiType::ShCircle)
@@ -511,7 +511,7 @@ void MainWindow::saveGCodeFile(int32_t id) {
     auto* file = project_->file<GCode::File>(id);
     QString name(QFileDialog::getSaveFileName(this, tr("Save GCode file"),
         GCode::File::getLastDir().append(file->shortName()),
-        tr("GCode (*.%1)").arg(GCode::Settings::fileExtension())));
+        tr("GCode (*.%1)").arg(App::gcSettings().fileExtension())));
 
     if (name.isEmpty())
         return;
@@ -544,13 +544,13 @@ void MainWindow::saveSelectedGCodeFiles() {
         if (files.size() < 2) {
             for (GCode::File* file : files) {
                 QString name(GCode::File::getLastDir().append(file->shortName()));
-                if (!name.endsWith(GCode::Settings::fileExtension()))
+                if (!name.endsWith(App::gcSettings().fileExtension()))
                     name += QStringList({"_TS", "_BS"})[file->side()];
 
                 name = QFileDialog::getSaveFileName(nullptr,
                     QObject::tr("Save GCode file"),
                     name,
-                    QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
+                    QObject::tr("GCode (*.%1)").arg(App::gcSettings().fileExtension()));
 
                 if (name.isEmpty())
                     return;
@@ -559,13 +559,13 @@ void MainWindow::saveSelectedGCodeFiles() {
             }
         } else {
             QString name(GCode::File::getLastDir().append(files.first()->getTool().nameEnc()));
-            if (!name.endsWith(GCode::Settings::fileExtension()))
+            if (!name.endsWith(App::gcSettings().fileExtension()))
                 name += QStringList({"_TS", "_BS"})[files.first()->side()];
 
             name = QFileDialog::getSaveFileName(nullptr,
                 QObject::tr("Save GCode file"),
                 name,
-                QObject::tr("GCode (*.%1)").arg(GCode::Settings::fileExtension()));
+                QObject::tr("GCode (*.%1)").arg(App::gcSettings().fileExtension()));
 
             if (name.isEmpty())
                 return;
@@ -657,17 +657,17 @@ void MainWindow::writeSettings() {
 void MainWindow::selectAll() {
     auto data {actionGroup.checkedAction() ? actionGroup.checkedAction()->data() : QVariant {}};
     if (!data.isNull() && data.toBool()) {
-        for (QGraphicsItem* item : App::graphicsView()->items(GiType::Preview))
+        for (QGraphicsItem* item : App::graphicsView().items(GiType::Preview))
             item->setSelected(true);
     } else {
-        for (QGraphicsItem* item : App::graphicsView()->items())
+        for (QGraphicsItem* item : App::graphicsView().items())
             if (item->isVisible() && item->opacity() > 0)
                 item->setSelected(true);
     }
 }
 
 void MainWindow::deSelectAll() {
-    for (QGraphicsItem* item : App::graphicsView()->items())
+    for (QGraphicsItem* item : App::graphicsView().items())
         if (item->isVisible())
             item->setSelected(false);
 }
@@ -679,7 +679,7 @@ void MainWindow::printDialog() {
         // ScopedTrue sTrue(App::app_->drawPdf_);
         // NOTE App::setDrawPdf(true);
         QRectF rect;
-        for (QGraphicsItem* item : App::graphicsView()->items())
+        for (QGraphicsItem* item : App::graphicsView().items())
             if (item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
@@ -693,7 +693,7 @@ void MainWindow::printDialog() {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
-        App::graphicsView()->scene()->render(&painter,
+        App::graphicsView().scene()->render(&painter,
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
         // NOTE App::setDrawPdf(false);
@@ -715,7 +715,7 @@ void MainWindow::renderPdf() {
 
     //    QRectF rect(ui.graphicsView->scene()->itemsBoundingRect());
 
-    //    QRectF rect {App::layoutFrames()->boundingRect()};
+    //    QRectF rect {App::layoutFrames().boundingRect()};
 
     QSizeF size(rect.size());
 
@@ -945,7 +945,115 @@ void MainWindow::loadFile(const QString& fileName) {
 
 void MainWindow::updateTheme() {
     if (App::settings().theme()) {
-        qApp->setStyle(QStyleFactory::create("Fusion"));
+
+        static const char* const dwCloseXpm[] = {
+            "11 13 3 1",
+            "  c None",
+            "@ c #6C6A67",
+            "$ c #B5B0AC",
+            "           ",
+            "           ",
+            "           ",
+            "  $@   @$  ",
+            "  @@@ @@@  ",
+            "   @@@@@   ",
+            "    @@@    ",
+            "   @@@@@   ",
+            "  @@@ @@@  ",
+            "  $@   @$  ",
+            "           ",
+            "           ",
+            "           ",
+        };
+
+        static const char* const dwRestoreXpm[] = {
+            "11 13 3 1",
+            "  c None",
+            "@ c #6C6A67",
+            "# c #ABA6A3",
+            "           ",
+            "           ",
+            "           ",
+            "    #@@@#  ",
+            "    @   @  ",
+            "  #@@@# @  ",
+            "  @   @ @  ",
+            "  @   @@@  ",
+            "  @   @    ",
+            "  #@@@#    ",
+            "           ",
+            "           ",
+            "           ",
+        };
+
+        static const char* const dwMinimizeXpm[] = {
+            "11 13 2 1",
+            "  c None",
+            "@ c #6C6A67",
+            "           ",
+            "           ",
+            "           ",
+            "           ",
+            "           ",
+            "           ",
+            "  @@@@@@@  ",
+            "  @@@@@@@  ",
+            "           ",
+            "           ",
+            "           ",
+            "           ",
+            "           ",
+        };
+
+        static const char* const qtTitlebarContextHelp[] = {
+            "10 10 3 1",
+            "  c None",
+            "# c #000000",
+            "+ c #444444",
+            "  +####+  ",
+            " ###  ### ",
+            " ##    ## ",
+            "     +##+ ",
+            "    +##   ",
+            "    ##    ",
+            "    ##    ",
+            "          ",
+            "    ##    ",
+            "    ##    ",
+        };
+
+        class Style : public QProxyStyle {
+        public:
+            Style()
+                : QProxyStyle("Fusion") { }
+
+            QPixmap getPixmap(StandardPixmap standardPixmap) const {
+                switch (standardPixmap) {
+                case SP_TitleBarNormalButton:
+                    return QPixmap(dwRestoreXpm);
+                case SP_TitleBarMinButton:
+                    return QPixmap(dwMinimizeXpm);
+                case SP_TitleBarCloseButton:
+                case SP_DockWidgetCloseButton:
+                    return QPixmap(dwCloseXpm);
+                default:
+                    return {};
+                }
+            }
+
+            QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption* option, const QWidget* widget) const override {
+                if (QPixmap pix = getPixmap(standardIcon); !pix.isNull())
+                    return QIcon(pix);
+                return QProxyStyle::standardIcon(standardIcon, option, widget);
+            }
+            QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
+                if (QPixmap pix = getPixmap(standardPixmap); !pix.isNull())
+                    return pix;
+                return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+            }
+        };
+
+        qApp->setStyle(new Style);
 
         QColor baseColor;
         QColor disabledColor;
@@ -972,19 +1080,19 @@ void MainWindow::updateTheme() {
             windowTextColor = QColor(0, 0, 0);
             break;
         case DarkBlue:
-            baseColor = QColor(40, 40, 40);
+            baseColor = QColor(20, 20, 20);
             disabledColor = QColor(100, 100, 100);
             highlightColor = QColor(61, 174, 233);
             linkColor = QColor(61, 174, 233);
-            windowColor = QColor(60, 60, 60);
+            windowColor = QColor(30, 30, 30);
             windowTextColor = QColor(220, 220, 220);
             break;
         case DarkRed:
-            baseColor = QColor(40, 40, 40);
+            baseColor = QColor(20, 20, 20);
             disabledColor = QColor(100, 100, 100);
             highlightColor = QColor(218, 68, 83);
             linkColor = QColor(61, 174, 233);
-            windowColor = QColor(60, 60, 60);
+            windowColor = QColor(30, 30, 30);
             windowTextColor = QColor(220, 220, 220);
             break;
         }
@@ -1028,135 +1136,10 @@ void MainWindow::updateTheme() {
         qApp->setStyle(QStyleFactory::create("Fusion"));
         qApp->setPalette(QApplication::style()->standardPalette());
 #endif
-
-        //        QPalette palette;
-
-        //        palette.setCurrentColorGroup(QPalette::Active);
-
-        //        palette.setBrush(QPalette::AlternateBase, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Base, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::BrightText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Button, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ButtonText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Dark, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Highlight, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::HighlightedText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Light, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Link, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::LinkVisited, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Mid, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Midlight, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::NoRole, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::PlaceholderText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Shadow, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Text, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ToolTipBase, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ToolTipText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Window, QColor(0, 0, 0, 255));
-
-        //        palette.setCurrentColorGroup(QPalette::Disabled);
-        //        palette.setBrush(QPalette::AlternateBase, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Base, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::BrightText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Button, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ButtonText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Dark, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Highlight, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::HighlightedText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Light, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Link, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::LinkVisited, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Mid, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Midlight, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::NoRole, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::PlaceholderText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Shadow, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Text, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ToolTipBase, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ToolTipText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Window, QColor(0, 0, 0, 255));
-
-        //        palette.setCurrentColorGroup(QPalette::Inactive);
-        //        palette.setBrush(QPalette::AlternateBase, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Base, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::BrightText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Button, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ButtonText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Dark, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Highlight, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::HighlightedText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Light, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Link, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::LinkVisited, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Mid, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Midlight, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::NoRole, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::PlaceholderText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Shadow, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Text, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ToolTipBase, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::ToolTipText, QColor(0, 0, 0, 255));
-        //        palette.setBrush(QPalette::Window, QColor(0, 0, 0, 255));
-
-        //        enum ColorRole { WindowText,
-        //            Button,
-        //            Light,
-        //            Midlight,
-        //            Dark,
-        //            Mid,
-        //            Text,
-        //            BrightText,
-        //            ButtonText,
-        //            Base,
-        //            Window,
-        //            Shadow,
-        //            Highlight,
-        //            HighlightedText,
-        //            Link,
-        //            LinkVisited,
-        //            AlternateBase,
-        //            NoRole,
-        //            ToolTipBase,
-        //            ToolTipText,
-        //            PlaceholderText,
-        //        };
-
-        //        palette.setBrush(QPalette::Disabled, QPalette::AlternateBase, brush13);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Base, brush01);
-        //        palette.setBrush(QPalette::Disabled, QPalette::BrightText, brush00);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Button, brush01);
-        //        palette.setBrush(QPalette::Disabled, QPalette::ButtonText, brush00);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Dark, brush04);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Light, brush02);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Mid, brush05);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Midlight, brush03);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Shadow, brush07);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Text, brush00);
-        //        palette.setBrush(QPalette::Disabled, QPalette::ToolTipBase, brush08);
-        //        palette.setBrush(QPalette::Disabled, QPalette::ToolTipText, brush07);
-        //        palette.setBrush(QPalette::Disabled, QPalette::Window, brush01);
-        //        palette.setBrush(QPalette::Disabled, QPalette::WindowText, brush07);
-
-        //        palette.setBrush(QPalette::Inactive, QPalette::AlternateBase, brush13);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Base, brush00);
-        //        palette.setBrush(QPalette::Inactive, QPalette::BrightText, brush00);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Button, brush09);
-        //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText, brush07);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Dark, brush11);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Light, brush00);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Mid, brush11);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Midlight, brush10);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Shadow, brush12);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Text, brush07);
-        //        palette.setBrush(QPalette::Inactive, QPalette::ToolTipBase, brush08);
-        //        palette.setBrush(QPalette::Inactive, QPalette::ToolTipText, brush07);
-        //        palette.setBrush(QPalette::Inactive, QPalette::Window, brush09);
-        //        palette.setBrush(QPalette::Inactive, QPalette::WindowText, brush07);
-        //        qApp->setPalette(palette);
     }
 
     // if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
-    // App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
+    // App::mainWindow().setStyleSheet("QGroupBox, .QFrame {"
     // //"background-color: white;"
     // "border: 1px solid gray; }"
     // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
@@ -1165,7 +1148,7 @@ void MainWindow::updateTheme() {
     // "subcontrol-position: top center; }" /* position at the top center */
     // );
     // } else {
-    // App::mainWindow()->setStyleSheet("QGroupBox, .QFrame {"
+    // App::mainWindow().setStyleSheet("QGroupBox, .QFrame {"
     // //"background-color: white;"
     // "border: 1px solid gray;"
     // "border-radius: 3px; }" // Win 7 or other
@@ -1177,7 +1160,7 @@ void MainWindow::updateTheme() {
     // }
 
     QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
-    if (App::mainWindow() && App::mainWindow()->isVisible())
+    if (App::mainWindowPtr() && App::mainWindow().isVisible())
         SettingsDialog().show();
 }
 
