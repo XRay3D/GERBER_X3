@@ -37,7 +37,7 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
                              .arg(pt1.y() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0');
 
     const QRectF textRect = QFontMetricsF(font).boundingRect(QRectF(), Qt::AlignLeft, text);
-    const double k = App::graphicsView()->scaleFactor();
+    const double k = App::graphicsView().scaleFactor();
     painter->save();
     painter->scale(k, -k);
     int i = 0;
@@ -59,7 +59,7 @@ Handle::Handle(AbstractShape* shape, Type type)
     , type_(type) {
     setAcceptHoverEvents(true);
     setFlags(ItemIsMovable);
-    App::graphicsView()->addItem(this);
+    App::graphicsView().addItem(this);
     App::shapeHandlers().emplace_back(this);
     setHType(type);
 }
@@ -88,8 +88,8 @@ void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     painter->setPen(QPen(Qt::black, 0.0));
 
     static double scale;
-    if (scale != App::graphicsView()->scaleFactor()) {
-        double scale = App::graphicsView()->scaleFactor();
+    if (scale != App::graphicsView().scaleFactor()) {
+        double scale = App::graphicsView().scaleFactor();
         const double k = Size * scale;
         const double s = k * 2;
         rect = {QPointF(-k, -k), QSizeF(s, s)};
@@ -105,7 +105,7 @@ void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 //         for (size_t i = 1, end = shape->handlers.size(); i < end && i < pt.size(); ++i)
 //             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
 //     } else if (shape->isFinal) { // прилипание
-//         const double k = App::graphicsView()->scaleFactor() * StickingDistance;
+//         const double k = App::graphicsView().scaleFactor() * StickingDistance;
 //         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
 //         for (Handler* h : App::shapeHandlers()) {
 //             if (h != this &&                                          //
@@ -245,7 +245,7 @@ void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         const Data redoPos;
         Handle* const handle;
     };
-    App::undoStack()->push(new ShapeMoveCommand(std::move(lastHandlePos), this, scene()));
+    App::undoStack().push(new ShapeMoveCommand(std::move(lastHandlePos), this, scene()));
 }
 
 } // namespace Shapes

@@ -120,9 +120,14 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     ui.labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(ui.labelAPIcon->size()));
 
-    tabs.reserve(App::filePlugins().size());
+    tabs.reserve(App::filePlugins().size() + 1); // NOTE +1 for GCode
 
     //    auto model = new ModelSettings(listView);
+    {
+        auto tab = new GCode::Tab(this);
+        tabs.push_back(tab);
+        ui.tabwMain->addTab(tab, tab->windowTitle());
+    }
 
     for (auto& [type, ptr] : App::filePlugins()) {
         auto tab = ptr->createSettingsTab(this);
@@ -215,13 +220,13 @@ void SettingsDialog::saveSettings() {
     /*GUI*/
     settings.beginGroup("Viewer");
     if (settings.value("chbxOpenGl").toBool() != ui.chbxOpenGl->isChecked()) {
-        App::graphicsView()->setOpenGL(ui.chbxOpenGl->isChecked());
-        App::graphicsView()->viewport()->setObjectName("viewport");
-        App::graphicsView()->setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
+        App::graphicsView().setOpenGL(ui.chbxOpenGl->isChecked());
+        App::graphicsView().viewport()->setObjectName("viewport");
+        App::graphicsView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
         settings.setValue(ui.chbxOpenGl);
     }
     if (settings.value("chbxAntialiasing").toBool() != ui.chbxAntialiasing->isChecked()) {
-        App::graphicsView()->setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
+        App::graphicsView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
         settings.setValue(ui.chbxAntialiasing);
     }
     App::settings().animSelection_ = settings.setValue(ui.chbxAnimSelection);

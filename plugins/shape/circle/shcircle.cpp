@@ -32,7 +32,7 @@ Circle::Circle(QPointF center, QPointF pt)
 
     redraw();
 
-    App::graphicsView()->addItem(this);
+    App::graphicsView().addItem(this);
 }
 
 void Circle::redraw() {

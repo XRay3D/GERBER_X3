@@ -31,7 +31,7 @@
 // #include <array>
 
 bool updateRect() {
-    QRectF rect(App::graphicsView()->getSelectedBoundingRect());
+    QRectF rect(App::graphicsView().getSelectedBoundingRect());
     if (rect.isEmpty()) {
         if (QMessageBox::question(nullptr, "",
                 QObject::tr("There are no selected items to define the border.\n"
@@ -40,20 +40,21 @@ bool updateRect() {
             == QMessageBox::No)
             return false;
     }
-    App::layoutFrames()->updateRect();
+    App::layoutFrames().updateRect();
     return true;
 }
 
 GiMarker::GiMarker(Type type)
     : QGraphicsObject {nullptr}
     , type_ {type} {
-    App::setMarkers(type, this);
     setAcceptHoverEvents(true);
     if (type_ == Home) {
+        App::setHome(this);
         path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
         setToolTip(QObject::tr("G-Code Home Point"));
     } else {
+        App::setZero(this);
         path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
         path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
         setToolTip(QObject::tr("G-Code Zero Point"));
@@ -63,7 +64,7 @@ GiMarker::GiMarker(Type type)
 }
 
 GiMarker::~GiMarker() {
-    App::setMarkers(type_, nullptr);
+    (type_ == Home) ? App::setHome(nullptr) : App::setZero(nullptr);
 }
 
 QRectF GiMarker::boundingRect() const {
@@ -82,7 +83,7 @@ void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
     if (App::settings().scaleHZMarkers()) {
-        auto sf = App::graphicsView()->scaleFactor() * 10;
+        auto sf = App::graphicsView().scaleFactor() * 10;
         painter->scale(sf, sf);
     }
     painter->setPen(Qt::NoPen);
@@ -101,7 +102,7 @@ void GiMarker::resetPos(bool flUpdateRect) {
     if (flUpdateRect && !updateRect())
         return;
 
-    const QRectF rect(App::layoutFrames()->boundingRect());
+    const QRectF rect(App::layoutFrames().boundingRect());
 
     static constexpr std::array corner {
         &QRectF::bottomLeft,
@@ -127,9 +128,9 @@ void GiMarker::resetPos(bool flUpdateRect) {
     updateGCPForm();
 
     if (type_ == Home)
-        App::project()->setHomePos(pos());
+        App::project().setHomePos(pos());
     else
-        App::project()->setZeroPos(pos());
+        App::project().setZeroPos(pos());
 }
 
 void GiMarker::setPosX(double x) {
@@ -147,22 +148,22 @@ void GiMarker::setPosY(double y) {
     point.setY(y);
     setPos(point);
     if (type_ == Home)
-        App::project()->setHomePos(pos());
+        App::project().setHomePos(pos());
     else
-        App::project()->setZeroPos(pos());
+        App::project().setZeroPos(pos());
 }
 
 void GiMarker::updateGCPForm() {
-    if (App::gCodePropertiesForm())
-        App::gCodePropertiesForm()->updatePosDsbxs();
+    if (App::gCodePropertiesFormPtr())
+        App::gCodePropertiesForm().updatePosDsbxs();
 
     if (type_ == Zero) {
-        App::project()->setZeroPos(pos());
+        App::project().setZeroPos(pos());
         for (auto pin : GiPin::pins())
             pin->updateToolTip();
 
     } else {
-        App::project()->setHomePos(pos());
+        App::project().setHomePos(pos());
     }
 }
 
@@ -233,14 +234,14 @@ void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     if (App::drawPdf())
         return;
 
-    QColor c(App::project()->pinUsed(index_) ? App::settings().guiColor(GuiColors::Pin) : QColor(127, 127, 127, 127));
+    QColor c(App::project().pinUsed(index_) ? App::settings().guiColor(GuiColors::Pin) : QColor(127, 127, 127, 127));
     if (option->state & QStyle::State_MouseOver)
         c.setAlpha(200);
     if (!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
     // c.setAlpha(50);
     if (App::settings().scalePinMarkers()) {
-        auto sf = App::graphicsView()->scaleFactor() * 10;
+        auto sf = App::graphicsView().scaleFactor() * 10;
         painter->scale(sf, sf);
     }
     painter->setPen(Qt::NoPen);
@@ -267,8 +268,8 @@ void GiPin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         pins_[2]->pos(),
         pins_[3]->pos()};
 
-    const QPointF center(App::layoutFrames()->boundingRect().center());
-    // const QPointF center(App::project()->worckRect().center());
+    const QPointF center(App::layoutFrames().boundingRect().center());
+    // const QPointF center(App::project().worckRect().center());
 
     switch (index_) {
     case 0:
@@ -319,7 +320,7 @@ void GiPin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
 
     for (int i = 0; i < 4; ++i)
         pins_[i]->setPos(pt[i]);
-    App::project()->setPinsPos(pt);
+    App::project().setPinsPos(pt);
 }
 
 void GiPin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
@@ -338,7 +339,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
-        ToolDatabase tdb(App::graphicsView(), {Tool::Drill, Tool::EndMill});
+        ToolDatabase tdb(App::graphicsViewPtr(), {Tool::Drill, Tool::EndMill});
         if (tdb.exec()) {
             Tool tool(tdb.tool());
 
@@ -349,7 +350,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 QPointF point(pin->pos());
                 if (dst.contains(point))
                     continue;
-                if (App::project()->pinUsed(pin->index_))
+                if (App::project().pinUsed(pin->index_))
                     dst.push_back(point);
             }
 
@@ -382,7 +383,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
             auto drillls = new Drilling::File(std::move(gcp_), Pathss {{dst}});
             drillls->setFileName(tr("Pin_") + tool.nameEnc());
-            App::project()->addFile(drillls);
+            App::project().addFile(drillls);
         }
     });
 
@@ -392,9 +393,9 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(!(pins_[0]->flags() & QGraphicsItem::ItemIsMovable));
 
     action = menu.addAction(tr("Used"), [this](bool fl) {
-        App::project()->setPinUsed(fl, index_); update(); });
+        App::project().setPinUsed(fl, index_); update(); });
     action->setCheckable(true);
-    action->setChecked(App::project()->pinUsed(index_));
+    action->setChecked(App::project().pinUsed(index_));
 
     menu.addSeparator();
     //    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
@@ -416,7 +417,7 @@ void GiPin::resetPos(bool fl) {
             return;
 
     const QPointF offset(App::settings().mkrPinOffset());
-    const QRectF rect(App::layoutFrames()->boundingRect()); // App::project()->worckRect()
+    const QRectF rect(App::layoutFrames().boundingRect()); // App::project().worckRect()
 
     QPointF pt[] {
         QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),
@@ -447,7 +448,7 @@ void GiPin::resetPos(bool fl) {
     for (int i = 0; i < 4; ++i)
         pins_[i]->setPos(pt[i]);
 
-    App::project()->setPinsPos(pt);
+    App::project().setPinsPos(pt);
 }
 
 void GiPin::setPos(const QPointF pos[]) {
@@ -456,7 +457,7 @@ void GiPin::setPos(const QPointF pos[]) {
 }
 
 void GiPin::updateToolTip() {
-    const QPointF p(pos() - App::zero()->pos());
+    const QPointF p(pos() - App::zero().pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3")
                    .arg(index_ + 1)
                    .arg(p.x())
@@ -495,7 +496,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
 
-    QPen pen(QColor(255, 0, 255), 2.0 * App::graphicsView()->scaleFactor());
+    QPen pen(QColor(255, 0, 255), 2.0 * App::graphicsView().scaleFactor());
     pen.setJoinStyle(Qt::MiterJoin);
     painter->setPen(pen);
 
@@ -505,11 +506,11 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
 
 void LayoutFrames::updateRect(bool fl) {
     QPainterPath path;
-    QRectF rect(App::project()->worckRect());
+    QRectF rect(App::project().worckRect());
     rect_ = rect;
 
-    const int stepsY(App::project()->stepsY()), stepsX(App::project()->stepsX());
-    const double spaceY_(App::project()->spaceY()), spaceX_(App::project()->spaceX());
+    const int stepsY(App::project().stepsY()), stepsX(App::project().stepsX());
+    const double spaceY_(App::project().spaceY()), spaceX_(App::project().spaceX());
 
     rect_.setHeight(rect_.height() * stepsY + spaceY_ * (stepsY - 1));
     rect_.setWidth(rect_.width() * stepsX + spaceX_ * (stepsX - 1));
@@ -579,8 +580,8 @@ void LayoutFrames::updateRect(bool fl) {
     path_ = std::move(path);
     QGraphicsItem::update();
     if (fl) {
-        App::home()->resetPos(false);
-        App::zero()->resetPos(false);
+        App::home().resetPos(false);
+        App::zero().resetPos(false);
         GiPin::resetPos(false);
     }
 }

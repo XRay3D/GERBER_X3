@@ -21,7 +21,7 @@
 namespace Profile {
 
 void Creator::create() {
-    // WARNING App::fileTreeView()->closeFiles();
+    // WARNING App::fileTreeView().closeFiles();
     createProfile(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble());
 }
 
@@ -181,7 +181,7 @@ void Creator::cornerTrimming() {
 }
 
 void Creator::makeBridges() {
-    auto bridgeItems {App::graphicsView()->items<GiBridge>(GiType::Bridge)};
+    auto bridgeItems {App::graphicsView().items<GiBridge>(GiType::Bridge)};
     if (bridgeItems.empty())
         return;
 
@@ -285,7 +285,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 
     std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths;
 
-    if (!GCode::Settings::profileSort()) { // Grouping by nesting
+    if (!App::gcSettings().profileSort()) { // Grouping by nesting
 
         markPolyTreeDByNesting(polytree);
 
@@ -363,10 +363,10 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss)
 }
 
 void File::genGcodeAndTile() {
-    const QRectF rect = App::project()->worckRect();
-    for (size_t x = 0; x < App::project()->stepsX(); ++x) {
-        for (size_t y = 0; y < App::project()->stepsY(); ++y) {
-            const QPointF offset((rect.width() + App::project()->spaceX()) * x, (rect.height() + App::project()->spaceY()) * y);
+    const QRectF rect = App::project().worckRect();
+    for (size_t x = 0; x < App::project().stepsX(); ++x) {
+        for (size_t y = 0; y < App::project().stepsY(); ++y) {
+            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
             if (toolType() == Tool::Laser)
                 saveLaserProfile(offset);

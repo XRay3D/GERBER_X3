@@ -34,7 +34,7 @@ Rectangle::Rectangle(QPointF pt1, QPointF pt2) {
     currentHandler = handlers[Point1].get();
     redraw();
 
-    App::graphicsView()->addItem(this);
+    App::graphicsView().addItem(this);
 }
 
 void Rectangle::redraw() {

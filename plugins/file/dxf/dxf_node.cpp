@@ -184,26 +184,26 @@ Node::Node(File* file)
     , file(file) {
 }
 
-Node::~Node() { App::project()->deleteFile(file->id()); }
+Node::~Node() { App::project().deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-        emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+        emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
         return true;
     case Qt::EditRole:
         switch (FileTree::Column(index.column())) {
         case FileTree::Column::Side:
             if (role == Qt::EditRole) {
                 file->setSide(static_cast<Side>(value.toBool()));
-                // emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+                // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
                 return true;
             }
         case FileTree::Column::ItemsType:
             if (role == Qt::EditRole) {
                 file->setItemType(value.toInt());
-                emit App::fileModel()->dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+                emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
                 return true;
             }
         default:
@@ -332,7 +332,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->file()->layersVisible_[name] = visible;
             if (visible) {
                 layer->file()->visible_ = visible;
-                emit App::fileModel()->dataChanged(parent_->index(index.column()), parent_->index(index.column()), {role});
+                emit App::fileModel().dataChanged(parent_->index(index.column()), parent_->index(index.column()), {role});
             }
         }
         return true;

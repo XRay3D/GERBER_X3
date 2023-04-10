@@ -28,7 +28,7 @@ Node::Node(AbstractFile* file)
     , file(file) {
 }
 
-Node::~Node() { App::project()->deleteFile(file->id()); }
+Node::~Node() { App::project().deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
@@ -64,7 +64,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case FileTree::Column::NameColorVisible:
         switch (role) {
         case Qt::DisplayRole:
-            //            if (file->shortName().endsWith(Settings::fileExtension()))
+            //            if (file->shortName().endsWith(App::gcSettings().fileExtension()))
             //                return file->shortName();
             //            else
             return file->shortName() + QStringList({"_TS", "_BS"})[file->side()];
@@ -100,11 +100,11 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch (index.column()) {
     case FileTree::Column::NameColorVisible:
-        //        if (file->shortName().endsWith(Settings::fileExtension()))
+        //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
         //            return itemFlag | Qt::ItemIsUserCheckable;
         return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
     case FileTree::Column::Side: {
-        //        if (file->shortName().endsWith(Settings::fileExtension()))
+        //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
         //            return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
     }

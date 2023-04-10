@@ -14,7 +14,7 @@
 #include "graphicsview.h"
 
 GiGroup::~GiGroup() {
-    auto scene {App::graphicsView()->scene()};
+    auto scene {App::graphicsView().scene()};
     if (scene && scene->items().size())
         qDeleteAll(*this);
 }
@@ -42,7 +42,7 @@ void GiGroup::setSelected(const mvector<int>& ids) {
 
 void GiGroup::addToScene(QGraphicsScene* scene) {
     if (!scene)
-        scene = App::graphicsView()->scene();
+        scene = App::graphicsView().scene();
     for (auto* item : *this)
         scene->addItem(item);
 }

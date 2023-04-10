@@ -30,7 +30,7 @@ Node::Node(File* file)
     , file(file) {
 }
 
-Node::~Node() { App::project()->deleteFile(file->id()); }
+Node::~Node() { App::project().deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch (role) {

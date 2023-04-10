@@ -74,7 +74,7 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const
     GCode::Params gcp {tool, 0.0};
     auto file = new GCDbgFile(std::move(gcp), std::move(ps), color);
     file->setFileName(fileName);
-    emit App::project()->addFileDbg(file);
+    emit App::project().addFileDbg(file);
 };
 
 namespace GCode {
@@ -159,7 +159,7 @@ void Creator::addRawPaths(Paths&& rawPaths) {
     //    }
     std::erase_if(rawPaths, [](auto&& path) { return path.size() < 2; });
 
-    const double mergDist = App::project()->glue() * uScale;
+    const double mergDist = App::project().glue() * uScale;
 
     Clipper clipper;
     for (size_t i {}; i < rawPaths.size(); ++i) {
@@ -745,7 +745,7 @@ void Creator::setGcp(const Params& gcp) {
 Paths& Creator::sortB(Paths& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home()->pos() + App::zero()->pos());
+    Point startPt(App::home().pos() + App::zero().pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -766,7 +766,7 @@ Paths& Creator::sortB(Paths& src) {
 Paths& Creator::sortBeginEnd(Paths& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home()->pos() + App::zero()->pos());
+    Point startPt(App::home().pos() + App::zero().pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
 
         size_t swapIdx = firstIdx;
@@ -803,7 +803,7 @@ Paths& Creator::sortBeginEnd(Paths& src) {
 Pathss& Creator::sortB(Pathss& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home()->pos() + App::zero()->pos());
+    Point startPt(App::home().pos() + App::zero().pos());
     for (size_t i = 0; i < src.size(); ++i) {
         if (src[i].empty())
             src.erase(src.begin() + i--);
@@ -828,7 +828,7 @@ Pathss& Creator::sortB(Pathss& src) {
 Pathss& Creator::sortBeginEnd(Pathss& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home()->pos() + App::zero()->pos());
+    Point startPt(App::home().pos() + App::zero().pos());
     for (size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();

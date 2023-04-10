@@ -194,7 +194,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 }
 
 void Plugin::updateFileModel(AbstractFile* file) {
-    const auto fm = App::fileModel();
+    const auto fm = App::fileModelPtr();
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
     // clean before insert new layers

@@ -32,7 +32,7 @@ Text::Text(QPointF pt1) {
     handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
     handlers.front()->setPos(pt1);
     redraw();
-    App::graphicsView()->addItem(this);
+    App::graphicsView().addItem(this);
 }
 
 void Text::redraw() {

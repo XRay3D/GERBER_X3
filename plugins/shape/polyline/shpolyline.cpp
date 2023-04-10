@@ -32,7 +32,7 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
 
     redraw();
 
-    App::graphicsView()->addItem(this);
+    App::graphicsView().addItem(this);
 }
 
 void PolyLine::redraw() {

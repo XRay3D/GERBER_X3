@@ -63,7 +63,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
             //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
             //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
+            QTimer::singleShot(i += k, [this] { App::graphicsView().zoomFit(); });
         }
 
         //        if (0) {
@@ -72,7 +72,7 @@ bool MainWindow::debug() {
         //            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
         //            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
         //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-        //            QTimer::singleShot(i += k, [this] { App::graphicsView()->zoomFit(); });
+        //            QTimer::singleShot(i += k, [this] { App::graphicsView().zoomFit(); });
         //        }
         //        if (0)
         //            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });

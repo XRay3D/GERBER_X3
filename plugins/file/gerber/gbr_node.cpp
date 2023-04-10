@@ -34,12 +34,12 @@ namespace Gerber {
 void Node::repaint(FileTree::Node* parent) {
     const int count = parent->childCount();
     for (int i {}; i < count; ++i) {
-        auto n = static_cast<Node*>(parent->child(i));
-        if (n->file->userColor())
+        auto node = static_cast<Node*>(parent->child(i));
+        if (node->file->userColor())
             continue;
         const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
-        n->file->setColor(QColor::fromHsv(k, 255, 255, 150));
-        emit App::fileModel()->dataChanged(n->index(0), n->index(0), {Qt::DecorationRole});
+        node->file->setColor(QColor::fromHsv(k, 255, 255, 150));
+        emit App::fileModel().dataChanged(node->index(0), node->index(0), {Qt::DecorationRole});
     }
 }
 
@@ -50,8 +50,7 @@ Node::Node(File* file)
 }
 
 Node::~Node() {
-    App::project()->deleteFile(file->id());
-    file = nullptr;
+    App::project().deleteFile(file->id());
     QTimer::singleShot(500, [parent = parent(), this] { repaint(parent); });
 }
 
@@ -68,7 +67,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case FileTree::Column::ItemsType:
             qDebug() << role << value;
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
-            emit App::fileModel()->dataChanged(this->index(), this->index(), {Qt::DecorationRole});
+            emit App::fileModel().dataChanged(this->index(), this->index(), {Qt::DecorationRole});
             return true;
         default:
             break;

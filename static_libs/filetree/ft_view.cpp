@@ -75,10 +75,10 @@ void View::on_doubleClicked(const QModelIndex& index) {
         //            hideOther();
         //            {
         //                const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
-        //                AbstractFile* file = static_cast<AbstractFile*>(App::project()->file(id));
-        //                App::project()->showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
+        //                AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
+        //                App::project().showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
         //                file->gcp_.fileId = file->id();
-        //                App::mainWindow()->editGcFile(file);
+        //                App::mainWindow().editGcFile(file);
         //                updateTree();
         //            }
         //    }
@@ -215,13 +215,13 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             auto selectedRows {selectionModel()->selectedRows().toVector()};
             if (selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
-            auto file = App::project()->file(selectedRows.front().data(FileTree::Id).toInt());
+            auto file = App::project().file(selectedRows.front().data(FileTree::Id).toInt());
             if (file) {
                 menu.addSeparator();
                 menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
                     auto files = selectedRows
                         | std::views::transform(
-                            [](auto&& index) { return App::project()->file(index.data(FileTree::Id).toInt()); })
+                            [](auto&& index) { return App::project().file(index.data(FileTree::Id).toInt()); })
                         | std::views::filter(
                             [](auto&& file) { return file != nullptr; });
                     if (!std::ranges::empty(files))

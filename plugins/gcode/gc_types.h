@@ -229,50 +229,51 @@ public:
 };
 
 class Settings {
-protected:
-    static inline QString fileExtension_ {"tap"};
-    static inline QString formatMilling_ {"G?X?Y?Z?F?S?"};
-    static inline QString formatLaser_ {"G?X?Y?Z?F?S?"};
-    static inline QString laserConstOn_ {"M3"};
-    static inline QString laserDynamOn_ {"M4"};
-    static inline QString spindleLaserOff_ {"M5"};
-    static inline QString spindleOn_ {"M3"};
+    // protected:
+public:
+    /*static inline*/ QString fileExtension_ {"tap"};
+    /*static inline*/ QString formatMilling_ {"G?X?Y?Z?F?S?"};
+    /*static inline*/ QString formatLaser_ {"G?X?Y?Z?F?S?"};
+    /*static inline*/ QString laserConstOn_ {"M3"};
+    /*static inline*/ QString laserDynamOn_ {"M4"};
+    /*static inline*/ QString spindleLaserOff_ {"M5"};
+    /*static inline*/ QString spindleOn_ {"M3"};
 
-    static inline QString start_ {"G21 G17 G90\nM3 S?"};
-    static inline QString end_ {"M5\nM30"};
+    /*static inline*/ QString start_ {"G21 G17 G90\nM3 S?"};
+    /*static inline*/ QString end_ {"M5\nM30"};
 
-    static inline QString laserStart_ {"G21 G17 G90"};
-    static inline QString laserEnd_ {"M30"};
+    /*static inline*/ QString laserStart_ {"G21 G17 G90"};
+    /*static inline*/ QString laserEnd_ {"M30"};
 
-    static inline bool info_ {true};
-    static inline bool sameFolder_ {true};
+    /*static inline*/ bool info_ {true};
+    /*static inline*/ bool sameFolder_ {true};
 
-    static inline bool simplifyHldi_ {false};
+    /*static inline*/ bool simplifyHldi_ {false};
 
-    static inline int profileSort_ = 0;
+    /*static inline*/ int profileSort_ = 0;
 
 public:
-    static QString fileExtension() { return fileExtension_; }
-    static QString formatMilling() { return formatMilling_; }
-    static QString formatLaser() { return formatLaser_; }
-    static QString laserConstOn() { return laserConstOn_; }
-    static QString laserDynamOn() { return laserDynamOn_; }
+    /*static*/ QString fileExtension() { return fileExtension_; }
+    /*static*/ QString formatMilling() { return formatMilling_; }
+    /*static*/ QString formatLaser() { return formatLaser_; }
+    /*static*/ QString laserConstOn() { return laserConstOn_; }
+    /*static*/ QString laserDynamOn() { return laserDynamOn_; }
 
-    static QString spindleLaserOff() { return spindleLaserOff_; }
-    static QString spindleOn() { return spindleOn_; }
+    /*static*/ QString spindleLaserOff() { return spindleLaserOff_; }
+    /*static*/ QString spindleOn() { return spindleOn_; }
 
-    static QString laserStart() { return laserStart_; }
-    static QString laserEnd() { return laserEnd_; }
+    /*static*/ QString laserStart() { return laserStart_; }
+    /*static*/ QString laserEnd() { return laserEnd_; }
 
-    static QString start() { return start_; }
-    static QString end() { return end_; }
+    /*static*/ QString start() { return start_; }
+    /*static*/ QString end() { return end_; }
 
-    static bool info() { return info_; }
-    static bool sameFolder() { return sameFolder_; }
+    /*static*/ bool info() { return info_; }
+    /*static*/ bool sameFolder() { return sameFolder_; }
 
-    static bool simplifyHldi() { return simplifyHldi_; }
+    /*static*/ bool simplifyHldi() { return simplifyHldi_; }
 
-    static int profileSort() { return profileSort_; }
+    /*static*/ int profileSort() { return profileSort_; }
 };
 
 } // namespace GCode

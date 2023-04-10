@@ -92,8 +92,8 @@ class AbstractFile {
             file.color_,
             file.colorFlag_);
         file.read(in);
-        if (App::splashScreen())
-            App::splashScreen()->showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+        if (App::splashScreenPtr())
+            App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         file.createGi();
         file.setTransform(file.transform_);
         file.setVisible(visible);

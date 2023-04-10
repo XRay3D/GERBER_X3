@@ -72,7 +72,7 @@ void mergeSegments(Paths& paths, double glue = 0.0);
 
 void mergePaths(Paths& paths, const double dist = 0.0);
 
-QIcon drawIcon(const Paths& paths);
+QIcon drawIcon(const Paths& paths, QColor color = Qt::black);
 
 QIcon drawDrillIcon(QColor color = Qt::black);
 

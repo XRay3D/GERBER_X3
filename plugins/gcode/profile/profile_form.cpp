@@ -58,17 +58,17 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     rb_clicked();
 
     // clang-format off
-    connect(App::graphicsView(),  &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
-    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &Form::updateBridges);
-    connect(leName,               &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
-    connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);
-    connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &Form::onAddBridgeClicked);
-    connect(ui->rbClimb,          &QRadioButton::clicked,        this, &Form::rb_clicked);
-    connect(ui->rbConventional,   &QRadioButton::clicked,        this, &Form::rb_clicked);
-    connect(ui->rbInside,         &QRadioButton::clicked,        this, &Form::rb_clicked);
-    connect(ui->rbOn,             &QRadioButton::clicked,        this, &Form::rb_clicked);
-    connect(ui->rbOutside,        &QRadioButton::clicked,        this, &Form::rb_clicked);
-    connect(ui->toolHolder,       &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(App::graphicsViewPtr(), &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
+    connect(dsbxDepth,              &DepthForm::valueChanged,      this, &Form::updateBridges);
+    connect(leName,                 &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
+    connect(ui->dsbxBridgeLenght,   &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);
+    connect(ui->pbAddBridge,        &QPushButton::clicked,         this, &Form::onAddBridgeClicked);
+    connect(ui->rbClimb,            &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbConventional,     &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbInside,           &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbOn,               &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbOutside,          &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->toolHolder,         &ToolSelectorForm::updateName, this, &Form::updateName);
     // clang-format on
 
     connect(ui->cbxTrimming, &QCheckBox::toggled, [this](bool checked) {
@@ -94,7 +94,7 @@ Form::~Form() {
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
-    for (QGraphicsItem* giItem : App::graphicsView()->items()) {
+    for (QGraphicsItem* giItem : App::graphicsView().items()) {
         if (giItem->type() == GiType::Bridge)
             delete giItem;
     }
@@ -114,7 +114,7 @@ void Form::computePaths() {
     AbstractFile const* file = nullptr;
     bool skip {true};
 
-    for (auto* gi : App::graphicsView()->selectedItems<GraphicsItem>()) {
+    for (auto* gi : App::graphicsView().selectedItems<GraphicsItem>()) {
         switch (gi->type()) {
         case GiType::DataSolid:
             wPaths.append(gi->paths());
@@ -179,7 +179,7 @@ void Form::computePaths() {
     gcp->params[GCode::Params::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
-    for (QGraphicsItem* item : App::graphicsView()->items()) {
+    for (QGraphicsItem* item : App::graphicsView().items()) {
         if (item->type() == GiType::Bridge)
             brv.push_back(item->pos());
     }
@@ -217,7 +217,7 @@ void Form::onAddBridgeClicked() {
             QPointF intersects;
             if (auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
                 qDebug() << "intersects1" << is << intersects;
-                auto brItem = App::graphicsView()->addItem<GiBridge>();
+                auto brItem = App::graphicsView().addItem<GiBridge>();
                 //                brItem->pathHash = pathHash;
                 brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos
                 brItem->setPos(brItem->snapedPos(intersects));
@@ -228,7 +228,7 @@ void Form::onAddBridgeClicked() {
             }
         };
 
-        for (GraphicsItem* gi : App::graphicsView()->selectedItems<GraphicsItem>()) {
+        for (GraphicsItem* gi : App::graphicsView().selectedItems<GraphicsItem>()) {
             auto bounds = Bounds(gi->paths());
             int step = bounds.Width() / (value + 1);
             for (int var : std::views::iota(1, lround(value) + 1)) {
@@ -258,7 +258,7 @@ void Form::onAddBridgeClicked() {
         //        GiBridge::lenght = ui->dsbxBridgeLenght->value();
         //        GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
         auto brItem = new GiBridge;
-        App::graphicsView()->addItem(brItem);
+        App::graphicsView().addItem(brItem);
         brItem->setVisible(true);
         brItem->setOpacity(1.0);
         GiBridge::moveBrPtr = brItem;
@@ -266,7 +266,7 @@ void Form::onAddBridgeClicked() {
     case Horizontally:
     case Vertically:
     case HorizontallyVertically:
-        qDeleteAll(App::graphicsView()->items<GiBridge>());
+        qDeleteAll(App::graphicsView().items<GiBridge>());
         addHorizontallyVertically(at);
         break;
     case ThroughTheDistance: {
@@ -282,7 +282,7 @@ void Form::updateBridges() {
     GiBridge::lenght = ui->dsbxBridgeLenght->value();
     GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
     GiBridge::side = side;
-    for (GiBridge* item : App::graphicsView()->items<GiBridge>())
+    for (GiBridge* item : App::graphicsView().items<GiBridge>())
         item->update();
 }
 
@@ -368,7 +368,7 @@ void Form::editFile(GCode::File* file) {
 
     //            //            auto [_fileId, _] = i.key();
     //            //            Q_UNUSED(_)
-    //            //            App::project()->file(_fileId)->itemGroup()->setSelected(i.value());
+    //            //            App::project().file(_fileId)->itemGroup()->setSelected(i.value());
     //            //            ++i;
     //        }
     //    }
@@ -378,7 +378,7 @@ void Form::editFile(GCode::File* file) {
     //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
     //            //            for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
     //            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
-    //            //                 App::graphicsView()->addItem(brItem);
+    //            //                 App::graphicsView().addItem(brItem);
     //            //                brItem->setPos(pos);
     //            //                brItem->lastPos_ = pos;
     //            //            }

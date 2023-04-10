@@ -52,12 +52,9 @@ File::File()
 
 File::~File() { }
 
-Format File::format() const {
-    return format_;
-}
+Format File::format() const { return format_; }
 
 void File::setFormat(const Format& value) {
-
     (format_ = value).file = this;
     for (Hole& hole : *this) {
         hole.state.updatePos();

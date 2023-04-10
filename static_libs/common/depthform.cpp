@@ -37,13 +37,13 @@ DepthForm::DepthForm(QWidget* parent)
     connect(rbCopper, &QRadioButton::toggled, [this](bool checked) {
         if (checked) {
             dsbx->setEnabled(false);
-            dsbx->setValue(App::project()->copperThickness());
+            dsbx->setValue(App::project().copperThickness());
         }
     });
     connect(rbBoard, &QRadioButton::toggled, [this](bool checked) {
         if (checked) {
             dsbx->setEnabled(false);
-            dsbx->setValue(App::project()->boardThickness());
+            dsbx->setValue(App::project().boardThickness());
         }
     });
 

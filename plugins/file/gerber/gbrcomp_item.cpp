@@ -38,8 +38,8 @@ QRectF Item::boundingRect() const {
 }
 
 QPainterPath Item::shape() const {
-    if (!qFuzzyCompare(scale_, App::graphicsView()->scaleFactor()))
-        scale_ = App::graphicsView()->scaleFactor();
+    if (!qFuzzyCompare(scale_, App::graphicsView().scaleFactor()))
+        scale_ = App::graphicsView().scaleFactor();
     return shape_;
 }
 

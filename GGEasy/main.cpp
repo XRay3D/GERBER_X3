@@ -26,7 +26,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QTextCodec>
+    #include <QTextCodec>
 #endif
 
 #include <algorithm>
@@ -65,15 +65,6 @@
 //    }
 //}
 
-#if __has_include("phantomstyle.h")
-#include "phantomstyle.h"
-#endif
-
-#if __has_include("xrstyle.h")
-#include "xrstyle.h"
-#endif
-
-
 int main(int argc, char** argv) {
     //    qInstallMessageHandler(myMessageOutput);
 
@@ -81,18 +72,14 @@ int main(int argc, char** argv) {
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    // qInstallMessageHandler(myMessageOutput);
+    qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
+    //    qInstallMessageHandler(myMessageOutput);
     QApplication::setAttribute(Qt::AA_Use96Dpi);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
 
     Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
-
-#if __has_include("phantomstyle.h")
-        QApplication::setStyle(new PhantomStyle);
-#endif
-
 
     // #ifdef Q_OS_WIN
     //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
@@ -117,6 +104,8 @@ int main(int argc, char** argv) {
 #endif
 
     [[maybe_unused]] App appSingleton;
+    [[maybe_unused]] GCode::Settings gcSingleton;
+    App::setGcSettings(&gcSingleton);
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
 
     if (QDir dir(App::settingsPath()); !dir.exists())
@@ -191,11 +180,11 @@ int main(int argc, char** argv) {
         macOS and iOS	.dylib, .bundle, .so
         */
 #ifdef __unix__
-#ifdef QT_DEBUG
+    #ifdef QT_DEBUG
         const QString suffix("*.so");
-#else
+    #else
         const QString suffix("*.so");
-#endif
+    #endif
 #elif _WIN32
         const auto suffix = QStringLiteral("*.dll");
 #else
@@ -233,11 +222,11 @@ int main(int argc, char** argv) {
         //        }
     }
 
-    SettingsDialog().accept();
-
     MainWindow mainWin;
     mainWin.setObjectName("MainWindow");
     mainWin.setIconSize({24, 24});
+
+    SettingsDialog().accept();
 
     QCommandLineParser parser;
     parser.addPositionalArgument("url", "Url of file to open");

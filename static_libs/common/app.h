@@ -30,6 +30,7 @@ class Handle;
 namespace GCode {
 class Plugin;
 class PropertiesForm;
+class Settings;
 } // namespace GCode
 
 class AbstractFilePlugin;
@@ -58,7 +59,11 @@ private:                                          \
     class TYPE* NAME##_ = nullptr;                \
                                                   \
 public:                                           \
-    static auto* NAME() {                         \
+    static auto& NAME() {                         \
+        /* assert(app_->NAME##_); */              \
+        return *app_->NAME##_;                    \
+    }                                             \
+    static auto NAME##Ptr() {                     \
         /* assert(app_->NAME##_); */              \
         return app_->NAME##_;                     \
     }                                             \
@@ -83,18 +88,20 @@ class App {
     HOLDER(MainWindow,            setMainWindow,          mainWindow         )
     HOLDER(Project,               setProject,             project            )
     HOLDER(QSplashScreen,         setSplashScreen,        splashScreen       )
-    // clang-format on
+    HOLDER(GCode::Settings,       setGcSettings,          gcSettings         )
 
-    //    class GiPin* pins[2];
-    class GiMarker* markers[2];
+    HOLDER(GiMarker,              setHome,                home               )
+    HOLDER(GiMarker,              setZero,                zero               )
+    // clang-format on
 
     FilePluginMap filePlugins_;
     GCodePluginMap gCodePlugin_;
     ShapePluginMap shapePlugin_;
 
     AppSettings appSettings_;
+
     Handlers handlers_;
-    QSettings settings_;
+    //    QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
     int dashOffset_ {};
@@ -124,10 +131,6 @@ public:
 
     static bool isDebug() { return app_->isDebug_; }
 
-    static void setMarkers(int i, GiMarker* marker) { app_->markers[i] = marker; }
-    static auto* zero() { return app_->markers[0]; }
-    static auto* home() { return app_->markers[1]; }
-
     static auto& settingsPath() { return app_->settingsPath_; }
 
     static AbstractFilePlugin* filePlugin(uint32_t type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
@@ -142,8 +145,9 @@ public:
     static auto& shapeHandlers() { return app_->handlers_; }
 
     static auto& settings() { return app_->appSettings_; }
+
     static auto& toolHolder() { return app_->toolHolder_; }
-    static auto* qSettings() { return &app_->settings_; }
+    //    static auto* qSettings() { return &app_->settings_; }
 
     static bool drawPdf() { return app_->drawPdf_; }
     static void setDrawPdf(bool newDrawPdf) { app_->drawPdf_ = newDrawPdf; }
