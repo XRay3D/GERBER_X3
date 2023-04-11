@@ -23,11 +23,11 @@
 // #include "utils.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QGLWidget>
-    #include <QPropertyAnimation>
-    #include <QUndoCommand>
+#include <QGLWidget>
+#include <QPropertyAnimation>
+#include <QUndoCommand>
 #else
-    #include <QtOpenGLWidgets/QOpenGLWidget>
+#include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
 
 // #include <QDrag>
@@ -147,7 +147,12 @@ GraphicsView::~GraphicsView() {
 //     updateRuler();
 // }
 
-void GraphicsView::zoomFit() { fitInView(App::layoutFrames().boundingRect() /*scene()->itemsBoundingRect()*/, false); }
+void GraphicsView::zoomFit() {
+    auto rect {App::layoutFrames().boundingRect()};
+    auto size {rect.size() * 0.1};
+    rect += QMarginsF(size.width(), size.height(), size.width(), size.height());
+    fitInView(rect /*scene()->itemsBoundingRect()*/, false);
+}
 
 void GraphicsView::zoomToSelected() {
     QRectF rect;

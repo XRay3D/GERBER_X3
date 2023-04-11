@@ -236,10 +236,10 @@ void Creator::reorder() {
         Rect r(Bounds(returnPs));
         int k = uScale;
         Path outer = {
-            { r.left - k, r.bottom + k},
+            {r.left - k,  r.bottom + k},
             {r.right + k, r.bottom + k},
-            {r.right + k,    r.top - k},
-            { r.left - k,    r.top - k}
+            {r.right + k, r.top - k   },
+            {r.left - k,  r.top - k   }
         };
         clipper.AddSubject({outer});
         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
@@ -285,7 +285,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 
     std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths;
 
-    if (!App::gcSettings().profileSort()) { // Grouping by nesting
+    if (!settings.sort) { // Grouping by nesting
 
         markPolyTreeDByNesting(polytree);
 

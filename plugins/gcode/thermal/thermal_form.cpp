@@ -198,7 +198,7 @@ void Form::updateThermalGi() {
         thPaths[var.name].emplace_back(var.fill, var.pos);
 
     int count = std::accumulate(thPaths.begin(), thPaths.end(),
-        0, [](int i, auto& val) { return i + val.second.size(); });
+        0, [](int i, auto& val) { return i + int(val.second.size()); });
 
     QProgressDialog pd("create th", "", 0, count, this);
     pd.setCancelButton(nullptr);

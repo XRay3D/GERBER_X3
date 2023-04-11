@@ -18,6 +18,12 @@
 
 namespace Profile {
 
+struct Settings {
+    int sort {};
+};
+
+inline Settings settings;
+
 inline constexpr auto PROFILE = md5::hash32("Profile");
 
 class File final : public GCode::File {
