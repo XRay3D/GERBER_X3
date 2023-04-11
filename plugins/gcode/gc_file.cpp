@@ -128,11 +128,11 @@ bool File::save(const QString& name) {
 
 void File::statFile() {
     if (toolType() == Tool::Laser) {
-        QString str(App::gcSettings().laserStart());         //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().laserStart()); //"G21 G17 G90"); //G17 XY plane
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
-        QString str(App::gcSettings().start());              //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().start()); //"G21 G17 G90"); //G17 XY plane
         str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
@@ -148,7 +148,7 @@ void File::endFile() {
     } else {
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
         QPointF home(App::home().pos() - App::zero().pos());
-        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())}));   // HomeXY
+        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
         lines_.emplace_back(App::gcSettings().end());
     }
     for (size_t i = 0; i < lines_.size(); ++i) { // remove epty lines
@@ -201,7 +201,7 @@ void File::startPath(const QPointF& point) {
         //        gCodeText_.push_back(formated({ g1(), speed(spindleSpeed) }));
     } else {
         lines_.emplace_back(formated({g0(), x(point.x()), y(point.y()), speed(spindleSpeed())})); // start xy
-        lines_.emplace_back(formated({g0(), z(App::project().plunge())}));                       // start z
+        lines_.emplace_back(formated({g0(), z(App::project().plunge())}));                        // start z
         //        lastValues[AlwaysF].clear();
     }
 }
@@ -679,28 +679,28 @@ void File::createGiLaser() {
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
     itemGroup()->push_back(item);
 
-    if (App::gcSettings().simplifyHldi()) {
-        auto item = new GiGcPath(g0path_, this);
-        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        auto color = new QColor(App::settings().guiColor(GuiColors::G0));
-        color->setAlpha(127);
-        item->setPenColorPtr(color);
-        itemGroup()->push_back(item);
-        //        ClipperOffset offset;
-        //        offset.AddPaths(g0path_, JoinType::Round, EndType::Round);
-        //        offset.Execute(g0path_,uScale*gcp_.getToolDiameter());
-        //        item = new GcPathItem(g0path_, this);
-        //        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
-        //        itemGroup()->push_back(item);
-    } else {
-        item = new GiGcPath(paths, this);
-        item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
-        itemGroup()->push_back(item);
+    //    if (App::gcSettings().simplifyHldi()) {
+    //        auto item = new GiGcPath(g0path_, this);
+    //        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+    //        auto color = new QColor(App::settings().guiColor(GuiColors::G0));
+    //        color->setAlpha(127);
+    //        item->setPenColorPtr(color);
+    //        itemGroup()->push_back(item);
+    //        //        ClipperOffset offset;
+    //        //        offset.AddPaths(g0path_, JoinType::Round, EndType::Round);
+    //        //        offset.Execute(g0path_,uScale*gcp_.getToolDiameter());
+    //        //        item = new GcPathItem(g0path_, this);
+    //        //        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
+    //        itemGroup()->push_back(item);
+    //    } else {
+    item = new GiGcPath(paths, this);
+    item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+    itemGroup()->push_back(item);
 
-        item = new GiGcPath(g0path_, this);
-        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
-        itemGroup()->push_back(item);
-    }
+    item = new GiGcPath(g0path_, this);
+    item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
+    itemGroup()->push_back(item);
+    //    }
 }
 
 /////////////////////////////////////////////////////////////

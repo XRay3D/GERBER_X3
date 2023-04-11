@@ -95,6 +95,39 @@ public:
     QWidget* createForm() override { return new Form(this); };
     uint32_t type() const override { return md5::hash32("Profile"); }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+
+    // AbstractFilePlugin interface
+    AbstractFileSettings* createSettingsTab(QWidget* parent) override {
+        class Tab : public AbstractFileSettings {
+            QComboBox* cbxProfileSort;
+
+        public:
+            Tab(QWidget* parent)
+                : AbstractFileSettings {parent} {
+                setWindowTitle(tr("Profile"));
+                auto lbl = new QLabel(QApplication::translate("Profile", "Milling sequence:", nullptr), this);
+
+                cbxProfileSort = new QComboBox(this);
+                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
+                cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting"));
+                cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting depth"));
+
+                auto layout = new QVBoxLayout(this);
+                layout->setContentsMargins(6, 6, 6, 6);
+                layout->addWidget(lbl);
+                layout->addWidget(cbxProfileSort);
+                layout->addStretch();
+            }
+            ~Tab() override = default;
+            void readSettings(MySettings& settings) override {
+                Profile::settings.sort = settings.getValue(cbxProfileSort, Profile::settings.sort);
+            }
+            void writeSettings(MySettings& settings) override {
+                Profile::settings.sort = settings.setValue(cbxProfileSort);
+            }
+        };
+        return new Tab(parent);
+    }
 };
 
 } // namespace Profile

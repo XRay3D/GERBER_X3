@@ -98,13 +98,16 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     graphicsview
     shape
     tooldatabase
-    XrStyle #PhantomStyle # style
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::OpenGL
     Qt${QT_VERSION_MAJOR}::PrintSupport
     Qt${QT_VERSION_MAJOR}::Widgets
 )
+
+if(EXISTS XrStyle)
+    target_link_libraries(${PROJECT_NAME} PRIVATE XrStyle)
+endif()
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     target_link_libraries(${PROJECT_NAME} PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)

@@ -80,8 +80,8 @@ struct Variant : V {
         stream >> index;
         using Init = V& (*)(V&);
         static std::unordered_map<uint8_t, Init> map {
-            {0,       [](V& v) -> V& { return v = int {}; }},
-            {1,    [](V& v) -> V& { return v = double {}; }},
+            {0, [](V& v) -> V& { return v = int {}; }      },
+            {1, [](V& v) -> V& { return v = double {}; }   },
             {2, [](V& v) -> V& { return v = UsedItems {}; }},
         };
         std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
@@ -248,10 +248,6 @@ public:
     /*static inline*/ bool info_ {true};
     /*static inline*/ bool sameFolder_ {true};
 
-    /*static inline*/ bool simplifyHldi_ {false};
-
-    /*static inline*/ int profileSort_ = 0;
-
 public:
     /*static*/ QString fileExtension() { return fileExtension_; }
     /*static*/ QString formatMilling() { return formatMilling_; }
@@ -270,10 +266,6 @@ public:
 
     /*static*/ bool info() { return info_; }
     /*static*/ bool sameFolder() { return sameFolder_; }
-
-    /*static*/ bool simplifyHldi() { return simplifyHldi_; }
-
-    /*static*/ int profileSort() { return profileSort_; }
 };
 
 } // namespace GCode

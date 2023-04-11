@@ -127,6 +127,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         auto tab = new GCode::Tab(this);
         tabs.push_back(tab);
         ui.tabwMain->addTab(tab, tab->windowTitle());
+        tab->readSettings(settings);
     }
 
     for (auto& [type, ptr] : App::filePlugins()) {

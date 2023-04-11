@@ -58,12 +58,11 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
         tv, &FileTree::View::saveSelectedGCodeFiles);
 }
 
-AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
-
-    auto tab = new Tab(parent);
-    tab->setWindowTitle("G-Code");
-    return tab;
-}
+// AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
+//    auto tab = new Tab(parent);
+//    tab->setWindowTitle("G-Code");
+//    return tab;
+//}
 
 } // namespace GCode
 

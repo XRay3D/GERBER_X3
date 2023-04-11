@@ -398,9 +398,9 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(App::project().pinUsed(index_));
 
     menu.addSeparator();
-    //    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
-    //        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
-    //    });
+    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+        SettingsDialog(nullptr, SettingsDialog::Utils).exec();
+    });
     menu.exec(event->screenPos());
 }
 
@@ -429,21 +429,21 @@ void GiPin::resetPos(bool fl) {
     const QPointF center(rect.center());
 
     if (pt[0].x() > center.x())
-        pt[0].rx() = center.x();
+        pt[0].setX(center.x());
     if (pt[0].y() > center.y())
-        pt[0].ry() = center.y();
+        pt[0].setY(center.y());
     if (pt[1].x() < center.x())
-        pt[1].rx() = center.x();
+        pt[1].setX(center.x());
     if (pt[1].y() > center.y())
-        pt[1].ry() = center.y();
+        pt[1].setY(center.y());
     if (pt[2].x() < center.x())
-        pt[2].rx() = center.x();
+        pt[2].setX(center.x());
     if (pt[2].y() < center.y())
-        pt[2].ry() = center.y();
+        pt[2].setY(center.y());
     if (pt[3].x() > center.x())
-        pt[3].rx() = center.x();
+        pt[3].setX(center.x());
     if (pt[3].y() < center.y())
-        pt[3].ry() = center.y();
+        pt[3].setY(center.y());
 
     for (int i = 0; i < 4; ++i)
         pins_[i]->setPos(pt[i]);
