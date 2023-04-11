@@ -71,64 +71,20 @@ void Form::computePaths() {
         return;
     }
 
-    Paths wPaths;
-    Paths wRawPaths;
-    AbstractFile const* file = nullptr;
-    bool skip {true};
-
-    auto testFile = [&file, &skip, this](GraphicsItem* gi) -> bool {
-        if (!file) {
-            file = gi->file();
-            boardSide = gi->file()->side();
-        }
-        if (file != gi->file()) {
-            if (skip) {
-                if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                    return true;
-            }
-        }
-        return {};
-    };
-
-    for (auto* item : App::graphicsView().selectedItems()) {
-        auto gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
-        case GiType::DataSolid:
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
-            break;
-        case GiType::DataPath:
-            if (testFile(gi))
-                return;
-            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
-            break;
-        case GiType::Drill:
-            if (testFile(gi))
-                return;
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths(1));
-        default:
-            break;
-        }
-        addUsedGi(gi);
-    }
-
-    if (wPaths.empty() && wRawPaths.empty()) {
-        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
+    auto gcp = getNewGcp();
+    if (!gcp)
         return;
-    }
 
-    auto gpc = new GCode::Params;
-    gpc->setConvent(true);
-    gpc->setSide(GCode::Outer);
-    gpc->tools.push_back(tool);
-    gpc->params[GCode::Params::Depth] = dsbxDepth->value();
-    gpc->params[FrameOffset] = ui->dsbxOffset->value();
-    gpc->params[Tolerance] = ui->dsbxPrecision->value();
-    gpc->params[VoronoiType] = ui->cbxSolver->currentIndex();
-    gpc->params[Width] = ui->dsbxWidth->value() + 0.001;
+    gcp->setConvent(true);
+    gcp->setSide(GCode::Outer);
+    gcp->tools.push_back(tool);
+    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp->params[FrameOffset] = ui->dsbxOffset->value();
+    gcp->params[Tolerance] = ui->dsbxPrecision->value();
+    gcp->params[VoronoiType] = ui->cbxSolver->currentIndex();
+    gcp->params[Width] = ui->dsbxWidth->value() + 0.001;
 
-    gpc->closedPaths = std::move(wPaths);
-    gpc->openPaths = wRawPaths;
-    createToolpath(gpc);
+    createToolpath(gcp);
 }
 
 void Form::updateName() {

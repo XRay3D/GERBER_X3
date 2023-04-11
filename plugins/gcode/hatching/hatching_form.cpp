@@ -79,52 +79,10 @@ void Form::computePaths() {
         return;
     }
 
-    Paths wPaths;
-    Paths wRawPaths;
-    AbstractFile const* file = nullptr;
-    bool skip {true};
-
-    for (auto* item : App::graphicsView().selectedItems()) {
-        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
-        case GiType::DataSolid:
-        case GiType::DataPath:
-            if (!file) {
-                file = gi->file();
-                boardSide = file->side();
-            } else if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
-            if (item->type() == GiType::DataSolid)
-                wPaths.append(gi->paths());
-            else
-                wRawPaths.append(gi->paths());
-            break;
-        case GiType::ShCircle:
-        case GiType::ShRectangle:
-        case GiType::ShPolyLine:
-        case GiType::ShCirArc:
-        case GiType::ShText:
-            wRawPaths.append(gi->paths());
-            break;
-        case GiType::Drill:
-            wPaths.append(gi->paths());
-            break;
-        default:
-            break;
-        }
-        addUsedGi(gi);
-    }
-
-    if (wRawPaths.empty() && wPaths.empty()) {
-        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
+    auto gcp = getNewGcp();
+    if (!gcp)
         return;
-    }
 
-    auto gcp = new GCode::Params;
     gcp->setConvent(ui->rbConventional->isChecked());
     gcp->setSide(side);
     gcp->tools.push_back(tool);
@@ -138,8 +96,6 @@ void Form::computePaths() {
     //        gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    gcp->closedPaths = std::move(wPaths);
-    gcp->openPaths = wRawPaths;
     fileCount = 1;
     createToolpath(gcp);
 }

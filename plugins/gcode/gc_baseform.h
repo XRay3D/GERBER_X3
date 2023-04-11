@@ -42,6 +42,8 @@ protected:
         for (auto* button : findChildren<QPushButton*>())
             button->setIconSize({16, 16});
     }
+    void addUsedGi(class ::GraphicsItem* gi);
+    QWidget* widget() const { return ctrWidget; }
 
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
@@ -49,11 +51,12 @@ protected:
     virtual void computePaths() = 0;
     virtual void updateName() = 0;
 
+    GCode::Params* getNewGcp();
+
     Direction direction = Climb;
     SideOfMilling side = Outer;
     UsedItems usedItems_;
     Side boardSide = Top;
-    void addUsedGi(class ::GraphicsItem* gi);
 
     QString fileName_;
 
@@ -74,7 +77,6 @@ protected:
     QPushButton* pbCreate;
     QWidget* content;
     QGridLayout* grid;
-    QWidget* widget() const { return ctrWidget; }
 
 private:
     Creator* creator_ {};

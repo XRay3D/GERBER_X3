@@ -309,6 +309,99 @@ void BaseForm::timerEvent(QTimerEvent* event) {
     }
 }
 
+Params* BaseForm::getNewGcp() {
+    auto gcp = new GCode::Params;
+
+    /*
+    auto testFile = [&file, &skip, this](GraphicsItem* gi) -> bool {
+        if (!file) {
+            file = gi->file();
+            boardSide = gi->file()->side();
+        }
+        if (file != gi->file()) {
+            if (skip) {
+                if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+                    return true;
+            }
+        }
+        return {};
+    };
+
+    for (auto* item : App::graphicsView().selectedItems()) {
+        auto gi = dynamic_cast<GraphicsItem*>(item);
+        switch (item->type()) {
+        case GiType::DataSolid:
+            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            break;
+        case GiType::DataPath:
+            if (testFile(gi))
+                return;
+            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            break;
+        case GiType::Drill:
+            if (testFile(gi))
+                return;
+            wPaths.append(static_cast<GraphicsItem*>(item)->paths(1));
+        default:
+            break;
+        }
+        addUsedGi(gi);
+    }
+    */
+
+    AbstractFile const* file = nullptr;
+    bool skip {true};
+    for (auto* gi : App::graphicsView().selectedItems<GraphicsItem>()) {
+        switch (gi->type()) {
+        case GiType::DataSolid:
+            gcp->closedPaths.append(gi->paths());
+            break;
+        case GiType::DataPath: {
+            auto paths = gi->paths();
+            if (paths.front() == paths.back())
+                gcp->closedPaths.append(paths);
+            else
+                gcp->openPaths.append(paths);
+        } break;
+            //            if (!file) {
+            //                file = gi->file();
+            //                boardSide = file->side();
+            //            } else if (file != gi->file()) {
+            //                if (skip) {
+            //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+            //                        return;
+            //                }
+            //            }
+            //            if (gi->type() == GiType::DataSolid)
+            //                gcp->closedPaths.append(gi->paths());
+            //            else
+            //                gcp->openPaths.append(gi->paths());
+            //            break;
+        case GiType::ShCircle:
+        case GiType::ShRectangle:
+        case GiType::ShText:
+        case GiType::Drill:
+            gcp->closedPaths.append(gi->paths());
+            break;
+        case GiType::ShPolyLine:
+        case GiType::ShCirArc:
+            gcp->openPaths.append(gi->paths());
+            break;
+        default:
+            break;
+        }
+        addUsedGi(gi);
+    }
+
+    if (gcp->openPaths.empty() && gcp->closedPaths.empty()) {
+        delete gcp;
+        QMessageBox::warning(this, tr("Warning"), tr("No data for working..."));
+        return nullptr;
+    }
+
+    return gcp;
+}
+
 void BaseForm::addUsedGi(GraphicsItem* gi) {
     if (gi->file()) {
         //        File const* file = gi->file();
