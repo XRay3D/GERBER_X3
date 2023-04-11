@@ -269,12 +269,12 @@ void GraphicsView::setViewRect(const QRectF& r) {
 }
 
 QRectF GraphicsView::getViewRect() {
-    QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
-    QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
+    return mapToScene(rect()).boundingRect();
 
-    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
-
-    return visible_scene_rect;
+    //    QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
+    //    QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
+    //    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
+    //    return visible_scene_rect;
 }
 
 QRectF GraphicsView::getSelectedBoundingRect() {
