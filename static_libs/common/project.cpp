@@ -191,7 +191,6 @@ bool Project::open(const QString& fileName) {
             plunge_,
             glue_,
             sceneRect);
-        App::graphicsView().fitInView(sceneRect, false);
         in >> files_;
         in >> shapes_;
 
@@ -206,6 +205,8 @@ bool Project::open(const QString& fileName) {
         emit worckRectChanged(worckRect_);
 
         isModified_ = false;
+
+        App::graphicsView().fitInView(sceneRect, false);
 
         return true;
     } catch (const QString& ex) {
