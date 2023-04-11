@@ -200,7 +200,9 @@ void Creator::createGc(Params* gcp) {
     if (gcp->supportPathss.size())
         supportPss.append(std::move(gcp->supportPathss));
 
-    // dbgPaths(workingPs, "createGc");
+    //    dbgPaths(workingPs, "workingPs");
+    //    dbgPaths(supportPss, "supportPathss");
+    //    dbgPaths(workingRawPs, "openPaths");
 
     gcp_ = std::move(*gcp);
     //    gcp_ = *gcp;

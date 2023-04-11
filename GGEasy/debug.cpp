@@ -17,7 +17,7 @@ bool MainWindow::debug() {
         int i = 100;
         int k = 100;
 
-        if (1) {
+        if (0) {
             QDir dir(R"(C:\Users\X-Ray\Documents\TopoR\Examples\Example_01)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
@@ -34,48 +34,47 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
         if (0)
-            QTimer::singleShot(i += k, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
+            QTimer::singleShot(i += k, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
-        if (0) {
+        if (1) {
             constexpr auto TYPE = md5::hash32("PocketRaster");
             if (!toolpathActions.contains(TYPE))
                 break;
-            QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, this, [this] { selectAll(); });
+            QTimer::singleShot(i += k, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
+            QTimer::singleShot(i += k, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
         if (0) {
             constexpr auto DRILLING = md5::hash32("Drilling");
-            QTimer::singleShot(i += k, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
+            QTimer::singleShot(i += k, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
         }
 
         if (0) {
             constexpr auto THERMAL = md5::hash32("Thermal");
-            QTimer::singleShot(i += k, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
+            QTimer::singleShot(i += k, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
         }
 
         if (0) {
             constexpr auto PROFILE = md5::hash32("Profile");
 
-            QTimer::singleShot(i += k, [this] { selectAll(); });
-            QTimer::singleShot(i += k, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(i += k, [this] { App::graphicsView().zoomFit(); });
+            QTimer::singleShot(i += k, this, [this] { selectAll(); });
+            QTimer::singleShot(i += k, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
+            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            QTimer::singleShot(i += k, this, [this] { App::graphicsView().zoomFit(); });
         }
 
         //        if (0) {
         //            i = 1000;
-        //            QTimer::singleShot(i += k, [this] { selectAll(); });
-        //            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Pocket]->toggle(); });
-        //            //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-        //            QTimer::singleShot(i += k, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-        //            QTimer::singleShot(i += k, [this] { App::graphicsView().zoomFit(); });
+        //            QTimer::singleShot(i += k, this,[this] { selectAll(); });
+        //            QTimer::singleShot(i += k, this,[this] { toolpathActions[GCode::Pocket]->toggle(); });
+        //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+        //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+        //            QTimer::singleShot(i += k, this,[this] { App::graphicsView().zoomFit(); });
         //        }
         //        if (0)
-        //            QTimer::singleShot(i += k, [this] { toolpathActions[GCode::Drill]->toggle(); });
+        //            QTimer::singleShot(i += k, this,[this] { toolpathActions[GCode::Drill]->toggle(); });
         break;
     }
     return {};

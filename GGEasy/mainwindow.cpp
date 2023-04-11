@@ -922,6 +922,7 @@ void MainWindow::loadFile(const QString& fileName) {
         if (closeProject()) {
             project_->open(fileName);
             setCurrentFile(fileName);
+            ui.treeView->selectionModel()->select(ui.treeView->model()->index(0, 0), QItemSelectionModel::Select);
             return;
         }
     } else {
@@ -939,7 +940,7 @@ void MainWindow::loadFile(const QString& fileName) {
     qDebug() << fileName;
 }
 
-#if __has_include("xrstyle.h")
+#if __has_include("xrstyle.h") && 0
     #include "xrstyle.h"
 #endif
 
@@ -950,7 +951,7 @@ void MainWindow::updateTheme() {
             "11 13 3 1",
             "  c None",
             "@ c #6C6A67",
-            "$ c #B5B0AC",
+            "$ c #6C6A67",// B5B0AC
             "           ",
             "           ",
             "           ",
@@ -970,7 +971,7 @@ void MainWindow::updateTheme() {
             "11 13 3 1",
             "  c None",
             "@ c #6C6A67",
-            "# c #ABA6A3",
+            "# c #6C6A67", // ABA6A3
             "           ",
             "           ",
             "           ",
@@ -1042,12 +1043,12 @@ void MainWindow::updateTheme() {
             }
 
             QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption* option, const QWidget* widget) const override {
-                if (QPixmap pix = getPixmap(standardIcon); !pix.isNull())
-                    return QIcon(pix);
+                if (auto pix = getPixmap(standardIcon); !pix.isNull())
+                    return pix;
                 return QProxyStyle::standardIcon(standardIcon, option, widget);
             }
             QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
-                if (QPixmap pix = getPixmap(standardPixmap); !pix.isNull())
+                if (auto pix = getPixmap(standardPixmap); !pix.isNull())
                     return pix;
                 return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
             }
@@ -1130,7 +1131,7 @@ void MainWindow::updateTheme() {
 
         qApp->setPalette(palette);
     } else {
-#if __has_include("xrstyle.h")
+#if __has_include("xrstyle.h") && 0
         QApplication::setStyle(new XrStyle);
 #else
         qApp->setStyle(QStyleFactory::create("Fusion"));
