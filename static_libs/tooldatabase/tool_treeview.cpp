@@ -70,7 +70,6 @@ void ToolTreeView::newGroup() {
     index = model_->index(0, 0, index);
     model_->setData(index, tr("New Group"), Qt::EditRole);
     selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-    updateActions();
 }
 
 void ToolTreeView::newTool() {
@@ -93,7 +92,6 @@ void ToolTreeView::newTool() {
         index = model_->createIndex(item->row(), 0, item);
         selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }
-    updateActions();
 }
 
 void ToolTreeView::deleteItem() {
@@ -116,8 +114,6 @@ void ToolTreeView::copyTool() {
     itemDst->setIsTool();
     itemDst->tool() = itemSrc->tool();
     selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
-
-    updateActions();
 }
 
 void ToolTreeView::updateActions() {
@@ -138,7 +134,6 @@ void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons) {
     connect(buttons_[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
     connect(buttons_[New], &QPushButton::clicked, this, &ToolTreeView::newTool);
     connect(buttons_[NewGroup], &QPushButton::clicked, this, &ToolTreeView::newGroup);
-    updateActions();
 }
 
 void ToolTreeView::updateItem() {
