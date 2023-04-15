@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>327</width>
-    <height>567</height>
+    <width>336</width>
+    <height>652</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -53,28 +53,8 @@
       <item row="0" column="1">
        <widget class="QComboBox" name="cbxToolType">
         <property name="currentIndex">
-         <number>0</number>
+         <number>-1</number>
         </property>
-        <item>
-         <property name="text">
-          <string>Drill</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>End Mill</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Engraver</string>
-         </property>
-        </item>
-        <item>
-         <property name="text">
-          <string>Laser</string>
-         </property>
-        </item>
        </widget>
       </item>
       <item row="1" column="0">
@@ -266,7 +246,7 @@
          <item row="2" column="0">
           <widget class="QLabel" name="sideAngleLabel">
            <property name="text">
-            <string>Side Angle</string>
+            <string>Angle</string>
            </property>
           </widget>
          </item>
@@ -280,6 +260,29 @@
            </property>
            <property name="maximum">
             <double>180.000000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label">
+           <property name="text">
+            <string>Lenght:</string>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="1">
+          <widget class="DoubleSpinBox" name="dsbxLenght">
+           <property name="suffix">
+            <string> mm</string>
+           </property>
+           <property name="decimals">
+            <number>1</number>
+           </property>
+           <property name="maximum">
+            <double>100.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.500000000000000</double>
            </property>
           </widget>
          </item>

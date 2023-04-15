@@ -29,6 +29,7 @@ int toolId = qRegisterMetaType<Tool>("Tool");
 QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
     return Block(stream).write(
         tool.id_,
+        tool.type_,
         tool.angle_,
         tool.autoName_,
         tool.diameter_,
@@ -40,12 +41,13 @@ QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
         tool.plungeRate_,
         tool.spindleSpeed_,
         tool.stepover_,
-        tool.type_);
+        tool.lenght_);
 }
 
 QDataStream& operator>>(QDataStream& stream, Tool& tool) {
     return Block(stream).read(
         tool.id_,
+        tool.type_,
         tool.angle_,
         tool.autoName_,
         tool.diameter_,
@@ -57,12 +59,12 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool) {
         tool.plungeRate_,
         tool.spindleSpeed_,
         tool.stepover_,
-        tool.type_);
+        tool.lenght_);
 }
 
 QDebug operator<<(QDebug debug, const Tool& t) {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "T(D " << t.diameter_ << ", ID " << t.id_ << ')';
+    debug.nospace() << "Tool(D " << t.diameter_ << ", ID " << t.id_ << ')';
     return debug;
 }
 
@@ -78,6 +80,8 @@ QString Tool::nameEnc() const {
         return QString("V-D%1MMA%2DEG").arg(diameter_).arg(angle_);
     case Tool::Laser:
         return QString("L-D%1MM").arg(diameter_);
+    case Tool::ThreadMill:
+        return QString("T-D%1MM").arg(diameter_);
     default:
         return {};
     }
@@ -97,28 +101,31 @@ void Tool::setAngle(double angle) { hash_ = {}, angle_ = angle; }
 double Tool::diameter() const { return diameter_; }
 void Tool::setDiameter(double diameter) { hash_ = {}, diameter_ = diameter, updatePath(); }
 
-double Tool::feedRate_mm_s() const { return feedRate_ / 60.0; }
+double Tool::feedRate_mmPerSec() const { return feedRate_ / 60.0; }
 double Tool::feedRate() const { return feedRate_; }
-
 void Tool::setFeedRate(double feedRate) { hash_ = {}, feedRate_ = feedRate; }
+
 double Tool::oneTurnCut() const { return oneTurnCut_; }
-
 void Tool::setOneTurnCut(double oneTurnCut) { hash_ = {}, oneTurnCut_ = oneTurnCut; }
+
 double Tool::passDepth() const { return passDepth_; }
-
 void Tool::setPassDepth(double passDepth) { hash_ = {}, passDepth_ = passDepth; }
+
 double Tool::plungeRate() const { return plungeRate_; }
-
 void Tool::setPlungeRate(double plungeRate) { hash_ = {}, plungeRate_ = plungeRate; }
+
 double Tool::spindleSpeed() const { return spindleSpeed_; }
-
 void Tool::setSpindleSpeed(double spindleSpeed) { hash_ = {}, spindleSpeed_ = spindleSpeed; }
+
 double Tool::stepover() const { return stepover_; }
-
 void Tool::setStepover(double stepover) { hash_ = {}, stepover_ = stepover; }
-bool Tool::autoName() const { return autoName_; }
 
+bool Tool::autoName() const { return autoName_; }
 void Tool::setAutoName(bool autoName) { hash_ = {}, autoName_ = autoName; }
+
+double Tool::lenght() const { return lenght_; }
+void Tool::setLenght(double lenght) { hash_ = {}, lenght_ = lenght; }
+
 int Tool::id() const { return id_; }
 
 void Tool::setId(int32_t id) { hash_ = {}, id_ = id; }
@@ -155,6 +162,8 @@ void Tool::read(const QJsonObject& json) {
     plungeRate_ = json["plungeRate"].toDouble();
     spindleSpeed_ = json["spindleSpeed"].toInt();
     stepover_ = json["stepover"].toDouble();
+    lenght_ = json["lenght"].toDouble(10);
+
     type_ = static_cast<Type>(json["type"].toInt());
 }
 
@@ -172,6 +181,7 @@ void Tool::write(QJsonObject& json) const {
     json["spindleSpeed"] = spindleSpeed_;
     json["stepover"] = stepover_;
     json["type"] = type_;
+    json["lenght"] = lenght_;
 }
 
 bool Tool::isValid() const {
@@ -201,6 +211,8 @@ QIcon Tool::icon() const {
         return QIcon::fromTheme("engraving");
     case Tool::Laser:
         return QIcon::fromTheme("laser");
+    case Tool::ThreadMill:
+        return QIcon::fromTheme("thread_mill");
     default:
         return QIcon();
     }

@@ -32,20 +32,8 @@ public:
         EndMill,
         Engraver,
         Laser,
+        ThreadMill,
         Group = 100
-    };
-
-    enum {
-        Angle,
-        Diameter,
-        FeedRate,
-        OneTurnCut,
-        PassDepth,
-        PlungeRate,
-        SpindleSpeed,
-        Stepover,
-        OneTurnCutPercent,
-        StepoverPercent
     };
 
     // name
@@ -65,7 +53,7 @@ public:
     double diameter() const;
     void setDiameter(double diameter);
     // feedRate
-    double feedRate_mm_s() const;
+    double feedRate_mmPerSec() const;
     double feedRate() const;
     void setFeedRate(double feedRate);
     // oneTurnCut
@@ -86,6 +74,9 @@ public:
     // autoName
     bool autoName() const;
     void setAutoName(bool autoName);
+    // lenght
+    double lenght() const;
+    void setLenght(double autoName);
     // id
     int32_t id() const;
     void setId(int32_t id);
@@ -112,14 +103,16 @@ private:
     QString name_ {QObject::tr("Default")};
     QString note_;
 
-    double angle_ {};
-    double diameter_ {1};
-    double feedRate_ {100};
+    double angle_ {.0};
+    double diameter_ {1.};
+    double feedRate_ {100.};
     double oneTurnCut_ {0.1};
-    double passDepth_ {2};
-    double plungeRate_ {600};
-    double spindleSpeed_ {12000};
+    double passDepth_ {2.}; // max thread pitch
+    double plungeRate_ {600.};
+    double spindleSpeed_ {12000.};
     double stepover_ {0.5};
+    double lenght_ {1.}; //
+
     static inline double depth_;
 
     int32_t id_ {-1};
@@ -157,3 +150,4 @@ public:
 };
 
 Q_DECLARE_METATYPE(Tool)
+Q_DECLARE_METATYPE(Tool::Type)
