@@ -44,7 +44,7 @@ Paths offset(const Path& path, double offset, bool fl = false) {
     ClipperOffset cpOffset;
     cpOffset.AddPath(path, JoinType::Round, fl ? EndType::Round : EndType::Round);
     Paths tmpPpaths = cpOffset.Execute(offset * uScale);
-    for (Path& tmpPath : tmpPpaths)
+    for(Path& tmpPath: tmpPpaths)
         tmpPath.push_back(tmpPath.front());
     return tmpPpaths;
 }
@@ -118,9 +118,9 @@ Form::~Form() {
 }
 
 using GrTy = GraphicObject::Type;
-Criteria criterias[] {
+Criteria criterias[]{
     {
-        std::vector {GraphicObject::FlStamp} //
+        std::vector{GraphicObject::FlStamp} //
     },
 };
 
@@ -128,13 +128,13 @@ void Form::updateFiles() {
     disconnect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
     ui->cbxFile->clear();
 
-    for (auto file : App::project().files()) {
+    for(auto file: App::project().files()) {
         auto gos = file->getDataForGC(criterias, GCType::Drill, true);
-        if (gos.size())
+        if(gos.size())
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
     }
 
-    if (ui->cbxFile->count())
+    if(ui->cbxFile->count())
         on_cbxFileCurrentIndexChanged();
 
     connect(ui->cbxFile, &QComboBox::currentIndexChanged, this, &Form::on_cbxFileCurrentIndexChanged);
@@ -169,7 +169,7 @@ void Form::initToolTable() {
     connect(ui->toolTable, &QTableView::doubleClicked, this, &Form::on_doubleClicked);
 
     auto cornerButton = ui->toolTable->findChild<QAbstractButton*>();
-    if (!cornerButton)
+    if(!cornerButton)
         exit(-67);
     header = new Header(Qt::Vertical, ui->toolTable);
     ui->toolTable->setVerticalHeader(header);
@@ -178,10 +178,10 @@ void Form::initToolTable() {
     checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
     connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
     connect(header, &Header::onChecked, [this](int idx) {
-        if (model) {
-            int fl {};
-            for (int i {}; i < model->rowCount(); ++i)
-                if (model->useForCalc(i))
+        if(model) {
+            int fl{};
+            for(int i{}; i < model->rowCount(); ++i)
+                if(model->useForCalc(i))
                     ++fl;
 
             checkBox->setCheckState(!fl ? Qt::Unchecked : (fl == model->rowCount() ? Qt::Checked : Qt::PartiallyChecked));
@@ -193,7 +193,7 @@ void Form::initToolTable() {
 void Form::on_cbxFileCurrentIndexChanged() {
     file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
     qDebug() << file << file->id();
-    if (!App::project().contains(file))
+    if(!App::project().contains(file))
         return;
 
     try {
@@ -209,24 +209,24 @@ void Form::on_cbxFileCurrentIndexChanged() {
         static mvector<GraphicObject> gos;
         gos = file->getDataForGC(criterias, GCType::Drill);
 
-        for (auto& var : gos)
-            map[Key {var.name, var.path.size() > 1}].emplace_back(&var);
+        for(auto& var: gos)
+            map[Key{var.name, var.path.size() > 1}].emplace_back(&var);
 
         model = new Model(map.size(), ui->toolTable);
         auto& data = model->data();
 
-        QColor color {App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
-        for (int i {}; auto& [key, val] : map) {
+        for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
             row.icon = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
             row.name = QString(key.first).split('|');
             row.name.back() += ": Ø" + QString::number(std::any_cast<double>(val.front()->raw));
             row.diameter = std::any_cast<double>(val.front()->raw);
             row.isSlot = key.second;
-            for (auto* go : val)
+            for(auto* go: val)
                 new GiPreview(
-                    (go->path.size() > 1 ? Path {go->path} : Path {go->pos}),
+                    (go->path.size() > 1 ? Path{go->path} : Path{go->pos}),
                     row.diameter,
                     data.back().toolId,
                     row,
@@ -234,10 +234,10 @@ void Form::on_cbxFileCurrentIndexChanged() {
         }
 
         App::graphicsView().scene()->update();
-    } catch (const std::exception& exc) {
+    } catch(const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;
-    } catch (...) {
+    } catch(...) {
         exit(-99);
         // delete ui->toolTable->model();
         return;
@@ -258,11 +258,11 @@ void Form::on_cbxFileCurrentIndexChanged() {
 }
 
 void Form::on_doubleClicked(const QModelIndex& current) {
-    if (current.column() == 1) {
+    if(current.column() == 1) {
         mvector<Tool::Type> tools;
         // FIXME       tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == GCType::Profile || worckType == GCType::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
-        if (tdb.exec()) {
+        if(tdb.exec()) {
             const Tool tool(tdb.tool());
             model->setToolId(current.row(), tool.id());
         }
@@ -270,44 +270,44 @@ void Form::on_doubleClicked(const QModelIndex& current) {
 }
 
 void Form::on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-    for (auto&& index : selected.indexes())
-        for (auto&& item : model->data()[index.row()].items)
+    for(auto&& index: selected.indexes())
+        for(auto&& item: model->data()[index.row()].items)
             item->setSelected(true);
-    for (auto&& index : deselected.indexes())
-        for (auto&& item : model->data()[index.row()].items)
+    for(auto&& index: deselected.indexes())
+        for(auto&& item: model->data()[index.row()].items)
             item->setSelected(false);
     zoomToSelected();
 }
 
 void Form::on_customContextMenuRequested(const QPoint& pos) {
 
-    if (selectedIndexes().isEmpty())
+    if(selectedIndexes().isEmpty())
         return;
     QMenu menu;
     menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [this] {
         bool flag = true;
-        for (QModelIndex current : selectedIndexes()) {
+        for(QModelIndex current: selectedIndexes()) {
             flag = model->isSlot(current.row());
-            if (!flag)
+            if(!flag)
                 break;
         }
 
         mvector<Tool::Type> tools;
-        if (flag)
-            tools = mvector<Tool::Type> {Tool::EndMill};
+        if(flag)
+            tools = mvector<Tool::Type>{Tool::EndMill};
         else
-            tools = (worckType == GCType::Drill) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
+            tools = (worckType == GCType::Drill) ? mvector<Tool::Type>{Tool::Drill, Tool::EndMill} : mvector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
 
         ToolDatabase tdb(this, tools);
-        if (tdb.exec()) {
+        if(tdb.exec()) {
             const Tool tool(tdb.tool());
-            for (QModelIndex current : selectedIndexes()) {
-                if (model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
+            for(QModelIndex current: selectedIndexes()) {
+                if(model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
                     model->setToolId(current.row(), tool.id());
-                } else if (model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
+                } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
-                } else if (!model->isSlot(current.row())) {
-                    if (model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
+                } else if(!model->isSlot(current.row())) {
+                    if(model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
                         continue;
                     model->setToolId(current.row(), tool.id());
                 }
@@ -315,10 +315,10 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
         }
     });
 
-    for (QModelIndex current : selectedIndexes()) {
-        if (model->toolId(current.row()) != -1) {
+    for(QModelIndex current: selectedIndexes()) {
+        if(model->toolId(current.row()) != -1) {
             menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool"), [this] {
-                for (QModelIndex current : selectedIndexes())
+                for(QModelIndex current: selectedIndexes())
                     model->setToolId(current.row(), -1);
             });
             break;
@@ -333,26 +333,26 @@ void Form::customContextMenuRequested(const QPoint& pos) {
     menu.addAction(QIcon::fromTheme("view-form"), tr("&Choose a Tool for everyone"), [this] {
         ui->toolTable->selectAll();
         bool fl = true;
-        for (QModelIndex current : selectedIndexes()) {
+        for(QModelIndex current: selectedIndexes()) {
             fl = model->isSlot(current.row());
-            if (!fl)
+            if(!fl)
                 break;
         }
         mvector<Tool::Type> tools;
-        if (fl)
-            tools = mvector<Tool::Type> {Tool::EndMill};
+        if(fl)
+            tools = mvector<Tool::Type>{Tool::EndMill};
         else
-            tools = (worckType == GCType::Drill) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
+            tools = (worckType == GCType::Drill) ? mvector<Tool::Type>{Tool::Drill, Tool::EndMill} : mvector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
         ToolDatabase tdb(this, tools);
-        if (tdb.exec()) {
+        if(tdb.exec()) {
             const Tool tool(tdb.tool());
-            for (QModelIndex current : selectedIndexes()) {
-                if (model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
+            for(QModelIndex current: selectedIndexes()) {
+                if(model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
                     model->setToolId(current.row(), tool.id());
-                } else if (model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
+                } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
-                } else if (!model->isSlot(current.row())) {
-                    if (model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
+                } else if(!model->isSlot(current.row())) {
+                    if(model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
                         continue;
                     model->setToolId(current.row(), tool.id());
                 }
@@ -361,23 +361,21 @@ void Form::customContextMenuRequested(const QPoint& pos) {
     });
     menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool for everyone"), [this] {
         ui->toolTable->selectAll();
-        for (QModelIndex current : selectedIndexes()) {
+        for(QModelIndex current: selectedIndexes())
             model->setToolId(current.row(), -1);
-        }
-        for (int i = 0; i < model->rowCount(); ++i) {
-            if (model->toolId(i) != -1)
+        for(int i = 0; i < model->rowCount(); ++i)
+            if(model->toolId(i) != -1)
                 return;
-        }
     });
     menu.exec(ui->toolTable->horizontalHeader()->mapToGlobal(pos));
 }
 
 void Form::pickUpTool() {
-    if (!model)
+    if(!model)
         return;
     const double k = 0.05; // 5%
     int ctr = 0;
-    for (const auto& row : model->data()) {
+    for(const auto& row: model->data()) {
         // model->setToolId(ctr++, 3);
         // continue;
         const double drillDiameterMin = row.diameter * (1.0 - k);
@@ -388,12 +386,12 @@ void Form::pickUpTool() {
             return drillDiameterMin <= diameter && drillDiameterMax >= diameter;
         };
 
-        for (auto& [id, tool] : App::toolHolder().tools()) {
-            if (!row.isSlot && (tool.type() == Tool::Drill || tool.type() == Tool::EndMill) && isFit(tool)) {
+        for(auto& [id, tool]: App::toolHolder().tools()) {
+            if(!row.isSlot && (tool.type() == Tool::Drill || tool.type() == Tool::EndMill) && isFit(tool)) {
                 model->setToolId(ctr, id);
                 break;
             }
-            if (row.isSlot && tool.type() == Tool::EndMill && isFit(tool)) {
+            if(row.isSlot && tool.type() == Tool::EndMill && isFit(tool)) {
                 model->setToolId(ctr, id);
                 break;
             }
@@ -417,22 +415,22 @@ void Form::errorOccurred() {
 QModelIndexList Form::selectedIndexes() const { return ui->toolTable->selectionModel()->selectedIndexes(); }
 
 void Form::zoomToSelected() {
-    if (ui->chbxZoomToSelected->isChecked())
+    if(ui->chbxZoomToSelected->isChecked())
         App::graphicsView().zoomToSelected();
 }
 
 void Form::computePaths() {
     auto indexes = [](const auto& range) {
         QString indexes;
-        for (int32_t id : range) {
-            if (indexes.size())
+        for(int32_t id: range) {
+            if(indexes.size())
                 indexes += ",";
             indexes += QString::number(id);
         }
         return indexes;
     };
 
-    if (worckType == GCType::Drill) { // slots only
+    if(worckType == GCType::Drill) { // slots only
         struct Data {
             Paths paths;
             mvector<int> toolsApertures;
@@ -440,12 +438,12 @@ void Form::computePaths() {
 
         std::map<int, Data> pathsMap;
 
-        for (int i {}; auto&& row : *model) {
-            if (row.toolId > -1 && row.useForCalc && row.isSlot) {
+        for(int i{}; auto&& row: *model) {
+            if(row.toolId > -1 && row.useForCalc && row.isSlot) {
                 pathsMap[row.toolId].toolsApertures.push_back(i);
-                for (auto& item : row.items) {
-                    if (item->fit(dsbxDepth->value()))
-                        for (Path& path : offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
+                for(auto& item: row.items) {
+                    if(item->fit(dsbxDepth->value()))
+                        for(Path& path: offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
                             pathsMap[row.toolId].paths.push_back(path);
                     else
                         pathsMap[row.toolId].paths.push_back(item->paths().front());
@@ -454,9 +452,9 @@ void Form::computePaths() {
             model->setCreate(i++, !pathsMap.contains(row.toolId));
         }
 
-        for (auto [usedToolId, _] : pathsMap) {
+        for(auto [usedToolId, _]: pathsMap) {
             (void)_;
-            if (pathsMap[usedToolId].paths.size()) {
+            if(pathsMap[usedToolId].paths.size()) {
                 // GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
                 // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 // gcode->setSide(file->side());
@@ -474,17 +472,17 @@ void Form::computePaths() {
 
         std::map<int, Data> pathsMap;
 
-        for (int i {}; auto&& row : *model) {
-            bool created {};
-            if (row.toolId > -1 && row.useForCalc) {
+        for(int i{}; auto&& row: *model) {
+            bool created{};
+            if(row.toolId > -1 && row.useForCalc) {
                 pathsMap[row.toolId].toolsApertures.push_back(i);
-                for (auto& item : row.items) {
+                for(auto& item: row.items) {
                     // if (item->isSlot())
                     // continue;
-                    switch (worckType) {
+                    switch(worckType) {
                     case GCType::Profile:
-                        if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
-                            switch (side) {
+                        if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
+                            switch(side) {
                             case GCode::On:
                                 pathsMap[row.toolId].paths.append(item->paths());
                                 created = true;
@@ -503,7 +501,7 @@ void Form::computePaths() {
                         }
                         break;
                     case GCType::Pocket:
-                        if (App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
+                        if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             // if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(dsbxDepth->value())) {
                             pathsMap[row.toolId].paths.append(item->offset());
                             created = true;
@@ -511,7 +509,7 @@ void Form::computePaths() {
                         }
                         break;
                     case GCType::Drill:
-                        if (App::toolHolder().tool(row.toolId).type() != Tool::Engraver || App::toolHolder().tool(row.toolId).type() != Tool::Laser) {
+                        if(App::toolHolder().tool(row.toolId).type() != Tool::Engraver || App::toolHolder().tool(row.toolId).type() != Tool::Laser) {
                             pathsMap[row.toolId].drillPath.push_back(item->pos());
                             created = true;
                         }
@@ -520,22 +518,22 @@ void Form::computePaths() {
                     }
                 }
             }
-            if (created)
+            if(created)
                 model->setCreate(i, false);
             ++i;
         }
 
-        for (auto& [toolId, val] : pathsMap) {
-            if (val.drillPath.size()) {
+        for(auto& [toolId, val]: pathsMap) {
+            if(val.drillPath.size()) {
                 Point point1((App::home().pos()));
                 { // sort by distance
                     size_t counter = 0;
-                    while (counter < val.drillPath.size()) {
+                    while(counter < val.drillPath.size()) {
                         size_t selector = 0;
                         double length = std::numeric_limits<double>::max();
-                        for (size_t i = counter, end = val.drillPath.size(); i < end; ++i) {
+                        for(size_t i = counter, end = val.drillPath.size(); i < end; ++i) {
                             double length2 = point1.distTo(val.drillPath[i]);
-                            if (length > length2) {
+                            if(length > length2) {
                                 length = length2;
                                 selector = i;
                             }
@@ -549,8 +547,8 @@ void Form::computePaths() {
                 gcode->setSide(file->side());
                 App::project().addFile(gcode);
             }
-            if (val.paths.size()) {
-                switch (worckType) {
+            if(val.paths.size()) {
+                switch(worckType) {
                 case GCType::Profile: {
                     auto gcp = new GCode::Params;
                     gcp->setConvent(ui->rbConventional->isChecked());

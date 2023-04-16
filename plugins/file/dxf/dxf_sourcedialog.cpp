@@ -82,12 +82,11 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     auto leFind = new QLineEdit(this);
     leFind->setObjectName(QString::fromUtf8("lineEdit"));
     connect(leFind, &QLineEdit::textChanged, [tableView](const QString& text) {
-        for (int row = 0; row < tableView->model()->rowCount(); ++row) {
-            if (tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(text, Qt::CaseInsensitive)) {
+        for(int row = 0; row < tableView->model()->rowCount(); ++row)
+            if(tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(text, Qt::CaseInsensitive)) {
                 tableView->selectRow(row);
                 break;
             };
-        }
     });
     verticalLayout->addWidget(leFind);
     // pbNext
@@ -95,12 +94,11 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     pbNext->setObjectName(QString::fromUtf8("pbNext"));
     pbNext->setText(DxfObj::tr("Next"));
     connect(pbNext, &QPushButton::clicked, [tableView, leFind] {
-        for (int row = tableView->currentIndex().row() + 1; row < tableView->model()->rowCount(); ++row) {
-            if (tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(leFind->text(), Qt::CaseInsensitive)) {
+        for(int row = tableView->currentIndex().row() + 1; row < tableView->model()->rowCount(); ++row)
+            if(tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(leFind->text(), Qt::CaseInsensitive)) {
                 tableView->selectRow(row);
                 break;
             };
-        }
     });
     verticalLayout->addWidget(pbNext);
     // pbPrev
@@ -108,12 +106,11 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     pbPrev->setObjectName(QString::fromUtf8("pbPrev"));
     pbPrev->setText(DxfObj::tr("Prev"));
     connect(pbPrev, &QPushButton::clicked, [tableView, leFind] {
-        for (int row = tableView->currentIndex().row() - 1; row >= 0; --row) {
-            if (tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(leFind->text(), Qt::CaseInsensitive)) {
+        for(int row = tableView->currentIndex().row() - 1; row >= 0; --row)
+            if(tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(leFind->text(), Qt::CaseInsensitive)) {
                 tableView->selectRow(row);
                 break;
             };
-        }
     });
     verticalLayout->addWidget(pbPrev);
 

@@ -31,14 +31,18 @@ struct OutRec;
 struct Joiner;
 
 // Note: all clipping operations except for Difference are commutative.
-enum class ClipType { None,
+enum class ClipType {
+    None,
     Intersection,
     Union,
     Difference,
-    Xor };
+    Xor
+};
 
-enum class PathType { Subject,
-    Clip };
+enum class PathType {
+    Subject,
+    Clip
+};
 
 enum class VertexFlags : uint32_t {
     None = 0,
@@ -101,7 +105,7 @@ struct OutRec {
     Path64 path;
     bool is_open = false;
     ~OutRec() {
-        if (splits)
+        if(splits)
             delete splits;
     };
 };
@@ -114,9 +118,9 @@ struct OutRec {
 struct Active {
     Point64 bot;
     Point64 top;
-    int_t curr_x = 0;  // current (updated at every new scanline)
+    int_t curr_x = 0; // current (updated at every new scanline)
     double dx = 0.0;
-    int wind_dx = 1;   // 1 or -1 depending on winding direction
+    int wind_dx = 1; // 1 or -1 depending on winding direction
     int wind_cnt = 0;
     int wind_cnt2 = 0; // winding count of the opposite polytype
     OutRec* outrec = nullptr;
@@ -290,7 +294,7 @@ public:
     unsigned Level() const {
         unsigned result = 0;
         const PolyPath* p = parent_;
-        while (p) {
+        while(p) {
             ++result;
             p = p->parent_;
         }
@@ -299,7 +303,7 @@ public:
 
     virtual PolyPath* AddChild(const Path64& path) = 0;
 
-    virtual void Clear() {};
+    virtual void Clear(){};
     virtual size_t Count() const { return 0; }
 
     const PolyPath* Parent() const { return parent_; }
@@ -307,7 +311,7 @@ public:
     bool IsHole() const {
         const PolyPath* pp = parent_;
         bool is_hole = pp;
-        while (pp) {
+        while(pp) {
             is_hole = !is_hole;
             pp = pp->parent_;
         }
@@ -329,7 +333,7 @@ public:
     pp64_itor end() const { return childs_.cend(); }
 
     auto begin() { return childs_.begin(); } // x-ray
-    auto end() { return childs_.end(); }     // x-ray
+    auto end() { return childs_.end(); } // x-ray
 
     PolyPath64* AddChild(const Path64& path) override {
         auto p = std::make_unique<PolyPath64>(this);
@@ -350,7 +354,7 @@ public:
 
     double Area() const {
         double result = Clipper2Lib::Area<int_t>(polygon_);
-        for (const auto& child : childs_)
+        for(const auto& child: childs_)
             result += child->Area();
         return result;
     }
@@ -360,7 +364,7 @@ public:
         const size_t coords_per_line = 4;
         const size_t last_on_line = coords_per_line - 1;
         unsigned level = polypath.Level();
-        if (level > 0) {
+        if(level > 0) {
             std::string level_padding;
             level_padding.insert(0, (level - 1) * level_indent, ' ');
             std::string caption = polypath.IsHole() ? "Hole " : "Outer Polygon ";
@@ -368,17 +372,17 @@ public:
             outstream << level_padding.c_str() << caption << "with " << polypath.Count() << childs << std::endl;
             outstream << level_padding;
             size_t i = 0, highI = polypath.Polygon().size() - 1;
-            for (; i < highI; ++i) {
+            for(; i < highI; ++i) {
                 outstream << polypath.Polygon()[i] << ' ';
-                if ((i % coords_per_line) == last_on_line)
+                if((i % coords_per_line) == last_on_line)
                     outstream << std::endl
                               << level_padding;
             }
-            if (highI > 0)
+            if(highI > 0)
                 outstream << polypath.Polygon()[i];
             outstream << std::endl;
         }
-        for (auto& child : polypath)
+        for(auto& child: polypath)
             outstream << *child;
         return outstream;
     }
@@ -423,7 +427,7 @@ public:
 
     double Area() const {
         double result = Clipper2Lib::Area<double>(polygon_);
-        for (const auto& child : childs_)
+        for(const auto& child: childs_)
             result += child->Area();
         return result;
     }
@@ -459,7 +463,7 @@ public:
         Paths64& closed_paths, Paths64& open_paths) {
         closed_paths.clear();
         open_paths.clear();
-        if (ExecuteInternal(clip_type, fill_rule, false))
+        if(ExecuteInternal(clip_type, fill_rule, false))
             BuildPaths64(closed_paths, &open_paths);
         CleanUp();
         return succeeded_;
@@ -472,7 +476,7 @@ public:
 
     bool Execute(ClipType clip_type,
         FillRule fill_rule, PolyTree64& polytree, Paths64& open_paths) {
-        if (ExecuteInternal(clip_type, fill_rule, true)) {
+        if(ExecuteInternal(clip_type, fill_rule, true)) {
             open_paths.clear();
             polytree.Clear();
             BuildTree64(polytree, open_paths);
@@ -521,7 +525,7 @@ public:
     };
 
     void CheckCallback() {
-        if (zCallback_)
+        if(zCallback_)
             // if the user defined float point callback has been assigned
             // then assign the proxy callback function
             ClipperBase::zCallback_ = std::bind(&ClipperD::ZCB, this, std::placeholders::_1,
@@ -555,9 +559,8 @@ public:
 #ifdef USINGZ
         CheckCallback();
 #endif
-        if (ExecuteInternal(clip_type, fill_rule, false)) {
+        if(ExecuteInternal(clip_type, fill_rule, false))
             BuildPathsD(closed_paths, &open_paths);
-        }
         CleanUp();
         return succeeded_;
     }
@@ -572,7 +575,7 @@ public:
 #ifdef USINGZ
         CheckCallback();
 #endif
-        if (ExecuteInternal(clip_type, fill_rule, true)) {
+        if(ExecuteInternal(clip_type, fill_rule, true)) {
             polytree.Clear();
             polytree.SetInvScale(invScale_);
             open_paths.clear();

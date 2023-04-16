@@ -30,7 +30,7 @@ add_library(${PROJECT_NAME} STATIC
     ${SOURCES}
 )
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     gcode

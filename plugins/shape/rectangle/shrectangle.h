@@ -42,13 +42,13 @@ public:
         Point4,
         PtCount
     };
-    class Model* model {};
+    class Model* model{};
 };
 
 class Model : public QAbstractTableModel {
     Q_OBJECT
     friend class Shape;
-    QStringList headerData_ {
+    QStringList headerData_{
         tr("  Width  "),
         tr("  Height  "),
         tr("  Center  "),
@@ -57,7 +57,7 @@ class Model : public QAbstractTableModel {
         tr("  Point 3  "),
         tr("  Point 4  "),
     };
-    Shape* shape {};
+    Shape* shape{};
 
 public:
     Model(QObject* parent);
@@ -98,14 +98,14 @@ class Plugin : public Shapes::Plugin {
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "rectangle.json")
     Q_INTERFACES(Shapes::Plugin)
 
-    mutable Editor editor_ {this};
+    mutable Editor editor_{this};
 
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return GiType::ShRectangle; }
     QIcon icon() const override { return QIcon::fromTheme("draw-rectangle"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape(point, point + QPointF {10, 10});
+        auto shape = new Shape(point, point + QPointF{10, 10});
         editor_.setShape(shape);
         return shape;
     }

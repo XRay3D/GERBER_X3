@@ -36,9 +36,9 @@ namespace rviews = std::ranges::views;
 void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
 
 inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
-    if (pss.empty())
+    if(pss.empty())
         return;
-    for (auto&& paths : pss.midRef(1))
+    for(auto&& paths: pss.midRef(1))
         pss.front().append(std::move(paths));
     dbgPaths(pss.front(), fileName, color, closed, tool);
 }
@@ -85,7 +85,7 @@ public:
 
     mvector<GiError*> items;
 
-    bool checkMillingFl {};
+    bool checkMillingFl{};
 
 private:
     void addRawPaths(Paths&& paths);
@@ -133,9 +133,9 @@ protected:
     Pathss supportPss;
     Pathss groupedPss;
 
-    double toolDiameter {};
-    double dOffset {};
-    Point::Type stepOver {};
+    double toolDiameter{};
+    double dOffset{};
+    Point::Type stepOver{};
     Params gcp_;
 
     void isContinueCalc();

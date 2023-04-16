@@ -27,8 +27,8 @@
 #include "datastream.h"
 // #include "settings.h"
 
-static constexpr auto uScale {100'000};
-static constexpr auto dScale {1. / uScale};
+static constexpr auto uScale{100'000};
+static constexpr auto dScale{1. / uScale};
 
 class cancelException : public std::exception {
 public:
@@ -82,7 +82,7 @@ public:
     static bool isCancel() { return cancel_; }
     static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
         ++current_;
-        if (cancel_) [[unlikely]] {
+        if(cancel_) [[unlikely]] {
             //            static std::stringstream ss;
             //            ss.clear();
             //            ss << "file: "
@@ -115,7 +115,7 @@ struct Point {
 
     template <typename T2>
     inline void Init(const T2 x_ = 0, const T2 y_ = 0, const IntType z_ = 0) {
-        if constexpr (std::numeric_limits<T>::is_integer && !std::numeric_limits<T2>::is_integer) {
+        if constexpr(std::numeric_limits<T>::is_integer && !std::numeric_limits<T2>::is_integer) {
             x = static_cast<T>(std::round(x_));
             y = static_cast<T>(std::round(y_));
             z = z_;
@@ -129,7 +129,7 @@ struct Point {
     explicit Point()
         : x(0)
         , y(0)
-        , z(0) {};
+        , z(0){};
 
     template <typename T2>
     Point(const T2 x_, const T2 y_, const IntType z_ = 0) {
@@ -153,7 +153,7 @@ struct Point {
 #else
     template <typename T2>
     inline void Init(const T2 x_ = 0, const T2 y_ = 0) {
-        if constexpr (std::numeric_limits<T>::is_integer && !std::numeric_limits<T2>::is_integer) {
+        if constexpr(std::numeric_limits<T>::is_integer && !std::numeric_limits<T2>::is_integer) {
             x = static_cast<T>(std::round(x_));
             y = static_cast<T>(std::round(y_));
         } else {
@@ -164,7 +164,7 @@ struct Point {
 
     /*explicit*/ Point()
         : x(0)
-        , y(0) {};
+        , y(0){};
 
     template <typename T2>
     Point(const T2 x_, const T2 y_) { Init(x_, y_); }
@@ -265,7 +265,7 @@ struct Point {
         return !(*this == L);
     }
     bool operator<(const Point& L) const noexcept {
-        return std::tuple {X, Y} < std::tuple {L.x, L.y};
+        return std::tuple{X, Y} < std::tuple{L.x, L.y};
     }
 #else
     constexpr auto operator<=>(const Point&) const noexcept = default;
@@ -289,7 +289,7 @@ struct Point {
         const double dy = pt2.y - y;
         const double theta = atan2(-dy, dx) * 360.0 / (pi * 2);
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
-        if (qFuzzyCompare(theta_normalized, double(360)))
+        if(qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;
         else
             return theta_normalized;
@@ -301,7 +301,7 @@ struct Point {
         const double theta = atan2(-dy, dx);
         return theta;
         const double theta_normalized = theta < 0 ? theta + (pi * 2) : theta; // NOTE theta_normalized
-        if (qFuzzyCompare(theta_normalized, (pi * 2)))
+        if(qFuzzyCompare(theta_normalized, (pi * 2)))
             return 0.0;
         else
             return theta_normalized;
@@ -331,7 +331,7 @@ struct Path : mvector<Point<T>> {
 
     Path(const QPolygonF& v) {
         MV::reserve(v.size());
-        for (auto& pt : v)
+        for(auto& pt: v)
             MV::emplace_back(pt);
     }
 
@@ -356,7 +356,7 @@ struct Path : mvector<Point<T>> {
     operator QPolygonF() const {
         QPolygonF poly;
         poly.reserve(int(MV::size() + 1)); // +1 if need closed polygons
-        for (const auto pt : *this)
+        for(const auto pt: *this)
             poly << pt;
         return poly;
     }
@@ -364,19 +364,19 @@ struct Path : mvector<Point<T>> {
 
     auto friend operator+(const Path& path, QPointF pt) noexcept {
         Path ret(path);
-        for (auto&& point : ret)
+        for(auto&& point: ret)
             point += pt;
         return ret;
     }
 
     auto& operator+=(QPointF pt) noexcept {
-        for (auto&& point : *this)
+        for(auto&& point: *this)
             point += pt;
         return *this;
     }
 
     T hash() const {
-        return std::accumulate(MV::cbegin(), MV::cend(), T {}, [](T acc, Point<T> p) {
+        return std::accumulate(MV::cbegin(), MV::cend(), T{}, [](T acc, Point<T> p) {
             return acc ^= p.x, acc ^= p.y;
         });
     }
@@ -407,7 +407,7 @@ struct Paths : mvector<Path<T>> {
 
     Paths(const QList<QPolygonF>& v) {
         MV::reserve(v.size());
-        for (auto&& qpolygonf : v)
+        for(auto&& qpolygonf: v)
             MV::emplace_back(qpolygonf);
     }
 
@@ -432,20 +432,20 @@ struct Paths : mvector<Path<T>> {
     operator mvector<QPolygonF>() const {
         mvector<QPolygonF> polys;
         polys.reserve(MV::size());
-        for (const auto& poly : *this)
+        for(const auto& poly: *this)
             polys.emplace_back(poly);
         return polys;
     }
 
     auto friend operator+(const Paths& paths, QPointF pt) noexcept {
         Paths ret(paths);
-        for (auto&& point : ret)
+        for(auto&& point: ret)
             point += pt;
         return ret;
     }
 
     auto& operator+=(QPointF pt) noexcept {
-        for (auto&& path : *this)
+        for(auto&& path: *this)
             path += pt;
         return *this;
     }

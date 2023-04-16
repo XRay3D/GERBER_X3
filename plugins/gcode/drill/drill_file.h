@@ -21,7 +21,7 @@ public:
     using GCode::File::File;
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss)
         : GCode::File(std::move(gcp), std::move(toolPathss), {}) {
-        if (gcp_.tools.front().diameter()) {
+        if(gcp_.tools.front().diameter()) {
             initSave();
             addInfo();
             statFile();
@@ -34,11 +34,11 @@ public:
     void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
     void genGcodeAndTile() override {
         const QRectF rect = App::project().worckRect();
-        for (size_t x = 0; x < App::project().stepsX(); ++x) {
-            for (size_t y = 0; y < App::project().stepsY(); ++y) {
+        for(size_t x = 0; x < App::project().stepsX(); ++x) {
+            for(size_t y = 0; y < App::project().stepsY(); ++y) {
                 const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
                 saveDrill(offset);
-                if (gcp_.params.contains(GCode::Params::NotTile))
+                if(gcp_.params.contains(GCode::Params::NotTile))
                     return;
             }
         }

@@ -29,14 +29,14 @@
 const int isadfsdfg = qRegisterMetaType<AbstractFile*>("AbstractFile*");
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>& file) {
-    if (file->type() == G_CODE)
+    if(file->type() == G_CODE)
         return stream;
-    if (file->type()) {
+    if(file->type()) {
         uint32_t type = file->type();
         stream << type;
-        if (App::gCodePlugins().contains(type))
+        if(App::gCodePlugins().contains(type))
             stream << App::gCodePlugin(type)->info()["Name"].toString();
-        else if (App::filePlugins().contains(type))
+        else if(App::filePlugins().contains(type))
             stream << App::filePlugin(type)->info()["Name"].toString();
         else
             stream << QString("QString");
@@ -51,11 +51,11 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
     stream >> type;
     stream >> loadErrorMessage;
     qDebug() << __FUNCTION__ << "type" << type << loadErrorMessage;
-    if (App::gCodePlugins().contains(type))
+    if(App::gCodePlugins().contains(type))
         file.reset(App::gCodePlugin(type)->loadFile(stream));
-    else if (App::filePlugins().contains(type)) {
+    else if(App::filePlugins().contains(type)) {
         file.reset(App::filePlugin(type)->loadFile(stream));
-        if (!App::project().watcher.files().contains(file->name()))
+        if(!App::project().watcher.files().contains(file->name()))
             App::project().watcher.addPath(file->name());
     } else {
         QByteArray data;
@@ -78,7 +78,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractSha
     QString loadErrorMessage;
     stream >> type;
     stream >> loadErrorMessage;
-    if (App::shapePlugins().contains(type))
+    if(App::shapePlugins().contains(type))
         shape.reset(App::shapePlugin(type)->createShape());
     stream >> *shape;
     App::graphicsView().addItem(shape.get());
@@ -90,7 +90,7 @@ Project::Project(QObject* parent)
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
         const int32_t id = files_[contains(path)]->id();
-        if (id > -1
+        if(id > -1
             && QFileInfo::exists(path)
             && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
                    QMessageBox::Ok, QMessageBox::Cancel)
@@ -111,7 +111,7 @@ Project::~Project() {
 
 bool Project::save(const QString& fileName) {
     QFile file(fileName);
-    if (!file.open(QFile::WriteOnly)) {
+    if(!file.open(QFile::WriteOnly)) {
         qDebug() << file.errorString();
         return false;
     }
@@ -138,7 +138,7 @@ bool Project::save(const QString& fileName) {
         isModified_ = false;
         emit changed();
         return true;
-    } catch (...) {
+    } catch(...) {
         qDebug() << out.status();
     }
     return false;
@@ -146,22 +146,22 @@ bool Project::save(const QString& fileName) {
 
 bool Project::open(const QString& fileName) {
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly)) {
+    if(!file.open(QFile::ReadOnly)) {
         qDebug() << file.errorString();
         return false;
     }
     QDataStream in(&file);
     try {
         in >> ver_;
-        if (ver_ < CurrentVer) {
+        if(ver_ < CurrentVer) {
             auto message = tr("Unable to load project version %1 in\n"
                               "the current version(%3) of the program.\n"
                               "Use version %2.");
-            if (App::isDebug()) {
+            if(App::isDebug()) {
                 qWarning() << message.arg(ver_).arg("???", "VERSION_STR");
                 return false;
             }
-            switch (ver_) {
+            switch(ver_) {
             case ProVer_1:
             case ProVer_2:
             case ProVer_3:
@@ -193,9 +193,9 @@ bool Project::open(const QString& fileName) {
         in >> files_;
         in >> shapes_;
 
-        for (const auto& [id, filePtr] : files_)
+        for(const auto& [id, filePtr]: files_)
             App::fileModel().addFile(filePtr.get());
-        for (const auto& [id, shPtr] : shapes_)
+        for(const auto& [id, shPtr]: shapes_)
             App::fileModel().addShape(shPtr.get());
 
         emit homePosChanged(home_);
@@ -208,11 +208,11 @@ bool Project::open(const QString& fileName) {
         App::graphicsView().fitInView(sceneRect, false);
 
         return true;
-    } catch (const QString& ex) {
+    } catch(const QString& ex) {
         qDebug() << ex;
-    } catch (const std::exception& ex) {
+    } catch(const std::exception& ex) {
         qDebug() << ex.what();
-    } catch (...) {
+    } catch(...) {
         qDebug() << in.status();
         qDebug() << errno;
     }
@@ -227,7 +227,7 @@ void Project::close() {
     setSpaceY(0.0);
     isPinsPlaced_ = false;
     isModified_ = false;
-    for (auto& fl : pinsUsed_)
+    for(auto& fl: pinsUsed_)
         fl = true;
     App::graphicsView().zoom100();
     emit changed();
@@ -235,7 +235,7 @@ void Project::close() {
 
 void Project::deleteFile(int32_t id) {
     QMutexLocker locker(&mutex);
-    if (files_.contains(id)) {
+    if(files_.contains(id)) {
         watcher.removePath(files_[id]->name());
         files_.erase(id);
         setChanged();
@@ -246,12 +246,12 @@ void Project::deleteFile(int32_t id) {
 void Project::deleteShape(int32_t id) {
     QMutexLocker locker(&mutex);
     try {
-        if (shapes_.contains(id)) {
+        if(shapes_.contains(id)) {
             shapes_.erase(id);
             setChanged();
         } else
             qWarning() << "Error id" << id << "AbstractShape not found";
-    } catch (const std::exception& ex) {
+    } catch(const std::exception& ex) {
         qWarning() << ex.what();
     }
 }
@@ -266,11 +266,11 @@ QRectF Project::getBoundingRect() {
     QMutexLocker locker(&mutex);
     Point topLeft(std::numeric_limits<Point::Type>::max(), std::numeric_limits<Point::Type>::max());
     Point botRight(std::numeric_limits<Point::Type>::min(), std::numeric_limits<Point::Type>::min());
-    for (const auto& [id, filePtr] : files_) {
-        if (filePtr && filePtr->itemGroup()->isVisible()) {
-            for (const GraphicsItem* const item : *filePtr->itemGroup()) {
-                for (const Path& path : item->paths()) {
-                    for (const Point& pt : path) {
+    for(const auto& [id, filePtr]: files_) {
+        if(filePtr && filePtr->itemGroup()->isVisible()) {
+            for(const GraphicsItem* const item: *filePtr->itemGroup()) {
+                for(const Path& path: item->paths()) {
+                    for(const Point& pt: path) {
                         topLeft.x = std::min(pt.x, topLeft.x);
                         topLeft.y = std::min(pt.y, topLeft.y);
                         botRight.x = std::max(pt.x, botRight.x);
@@ -296,19 +296,19 @@ QRectF Project::getBoundingRect() {
 
 int Project::contains(const QString& name) {
     // QMutexLocker locker(&mutex);
-    if (reloadFile_)
+    if(reloadFile_)
         return -1;
-    for (const auto& [id, sp] : files_) {
+    for(const auto& [id, sp]: files_) {
         AbstractFile* item = sp.get();
         //        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
-        if (QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
+        if(QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
             return item->id();
     }
     return -1;
 }
 
 bool Project::reload(int32_t id, AbstractFile* file) {
-    if (files_.contains(id)) {
+    if(files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
         App::filePlugin(file->type())->updateFileModel(file);
@@ -322,10 +322,9 @@ mvector<AbstractFile*> Project::files(int type) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
-    for (const auto& [id, sp] : files_) {
-        if (sp && sp->type() == type)
+    for(const auto& [id, sp]: files_)
+        if(sp && sp->type() == type)
             rfiles.push_back(sp.get());
-    }
     rfiles.shrink_to_fit();
     return rfiles;
 }
@@ -334,11 +333,10 @@ mvector<AbstractFile*> Project::files(const mvector<int> types) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
-    for (auto type : types) {
-        for (const auto& [id, sp] : files_) {
-            if (sp && sp->type() == type)
+    for(auto type: types) {
+        for(const auto& [id, sp]: files_)
+            if(sp && sp->type() == type)
                 rfiles.push_back(sp.get());
-        }
     }
     rfiles.shrink_to_fit();
     return rfiles;
@@ -351,7 +349,7 @@ Shapes::AbstractShape* Project::shape(int32_t id) {
 
 int Project::addFile(AbstractFile* file) {
     QMutexLocker locker(&mutex);
-    if (!file)
+    if(!file)
         return -1;
     isPinsPlaced_ = false;
     reloadFile_ = false;
@@ -359,9 +357,9 @@ int Project::addFile(AbstractFile* file) {
     file->addToScene();
     file->setVisible(true);
     const int32_t id = contains(file->name());
-    if (id > -1 && files_[id]->type() == file->type()) {
+    if(id > -1 && files_[id]->type() == file->type()) {
         reload(id, file);
-    } else if (file->id() == -1) {
+    } else if(file->id() == -1) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
         files_.emplace(newId, file);
@@ -374,7 +372,7 @@ int Project::addFile(AbstractFile* file) {
 
 int Project::addFile(GCode::File* file) {
     QMutexLocker locker(&mutex);
-    if (!file)
+    if(!file)
         return -1;
     isPinsPlaced_ = false;
     reloadFile_ = false;
@@ -382,9 +380,9 @@ int Project::addFile(GCode::File* file) {
     file->addToScene();
     file->setVisible(true);
     const int32_t id = -1; // contains(file->name());
-    if (id > -1 && files_[id]->type() == file->type()) {
+    if(id > -1 && files_[id]->type() == file->type()) {
         reload(id, file);
-    } else if (file->id() == -1) {
+    } else if(file->id() == -1) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
         files_.emplace(newId, file);
@@ -397,7 +395,7 @@ int Project::addFile(GCode::File* file) {
 
 int Project::addShape(Shapes::AbstractShape* const shape) {
     QMutexLocker locker(&mutex);
-    if (!shape)
+    if(!shape)
         return -1;
     isPinsPlaced_ = false;
     const int newId = shapes_.size() ? (--shapes_.end())->first + 1 : 0;
@@ -411,8 +409,8 @@ int Project::addShape(Shapes::AbstractShape* const shape) {
 }
 
 bool Project::contains(AbstractFile* file) {
-    for (const auto& [id, sp] : files_)
-        if (sp.get() == file)
+    for(const auto& [id, sp]: files_)
+        if(sp.get() == file)
             return true;
     return false;
 }
@@ -421,7 +419,7 @@ QString Project::name() { return fileName_; }
 
 void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
-    if (isUntitled_)
+    if(isUntitled_)
         fileName_ = QObject::tr("Untitled") + ".g2g";
     else
         fileName_ = name;
@@ -434,7 +432,7 @@ void Project::setChanged() {
 
 bool Project::pinsPlacedMessage() {
 
-    if (isPinsPlaced_ == false) {
+    if(isPinsPlaced_ == false) {
         QMessageBox msgbx(QMessageBox::Information,
             "",
             QObject::tr("Board dimensions may have changed.\n"

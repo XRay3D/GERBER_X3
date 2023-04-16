@@ -24,7 +24,9 @@ class Recent : public QObject {
 public:
     explicit Recent(MainWindow* mainWindow, QString&& recentFilesKey);
 
-    enum { MaxRecentFiles = 20 };
+    enum {
+        MaxRecentFiles = 20
+    };
     void createMenu(QMenu* fileMenu, const QString& menuName);
 
     QStringList readRecentFiles(QSettings& settings);

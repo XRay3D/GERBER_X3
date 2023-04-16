@@ -18,7 +18,7 @@
 
 GiError::GiError(const Paths& paths, double area)
     : area_(area) {
-    for (auto& path : paths)
+    for(auto& path: paths)
         shape_.addPolygon(path);
     setFlag(ItemIsSelectable);
     setZValue(std::numeric_limits<double>::max());
@@ -30,7 +30,7 @@ QRectF GiError::boundingRect() const { return shape_.boundingRect(); }
 
 void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
-    if (isSelected()) {
+    if(isSelected()) {
         static QTime t(QTime::currentTime());
         painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * pi * 8)) * 30 + 30, 255, 255, 255));
     } else {

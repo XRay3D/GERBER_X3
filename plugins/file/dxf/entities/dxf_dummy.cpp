@@ -23,14 +23,14 @@ void Dummy::draw(const Dxf::InsertEntity* const) const {
 }
 
 void Dummy::parse(Dxf::CodeData& code) {
-    switch (type_) {
+    switch(type_) {
     case Type::POLYLINE:
         do {
             code = sp->nextCode();
-        } while (code != "SEQEND");
+        } while(code != "SEQEND");
         do {
             code = sp->nextCode();
-        } while (code.code() != 0);
+        } while(code.code() != 0);
         break;
     default:
         do {
@@ -40,7 +40,7 @@ void Dummy::parse(Dxf::CodeData& code) {
             //            Entity::parse(code);
             //        }
             code = sp->nextCode();
-        } while (code.code() != 0);
+        } while(code.code() != 0);
     }
 }
 

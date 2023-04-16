@@ -28,10 +28,10 @@ Model::Model(size_t rowCount, QObject* parent)
 }
 
 void Model::setToolId(int row, int32_t id) {
-    if (data_[row].toolId != id)
+    if(data_[row].toolId != id)
         data_[row].useForCalc = id > -1;
     data_[row].toolId = id;
-    for (auto item : data_[row].items) {
+    for(auto item: data_[row].items) {
         item->updateTool();
         item->setFlag(QGraphicsItem::ItemIsSelectable, id > -1);
     }
@@ -40,10 +40,10 @@ void Model::setToolId(int row, int32_t id) {
 }
 
 void Model::setCreate(int row, bool create) {
-    if (data_[row].toolId == -1)
+    if(data_[row].toolId == -1)
         return;
     data_[row].useForCalc = create;
-    for (auto item : data_[row].items) {
+    for(auto item: data_[row].items) {
         item->setFlag(QGraphicsItem::ItemIsSelectable, create);
         item->changeColor();
     }
@@ -52,9 +52,8 @@ void Model::setCreate(int row, bool create) {
 }
 
 void Model::setCreate(bool create) {
-    for (int row = 0; row < rowCount(); ++row) {
+    for(int row = 0; row < rowCount(); ++row)
         data_[row].useForCalc = create && data_[row].toolId != -1;
-    }
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
 
@@ -64,32 +63,32 @@ int Model::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     int row = index.row();
-    if (index.column() == Name) {
-        switch (role) {
+    if(index.column() == Name) {
+        switch(role) {
         case Qt::DisplayRole:
-            if (data_[row].isSlot)
+            if(data_[row].isSlot)
                 return data_[row].name.back();
             else
                 return data_[row].name.back();
         case Qt::DecorationRole: {
-            if (data_[index.row()].toolId > -1 && data_[row].isSlot) {
+            if(data_[index.row()].toolId > -1 && data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
-                for (int x = 0; x < 24; ++x)
-                    for (int y = 0; y < 24; ++y)
+                for(int x = 0; x < 24; ++x)
+                    for(int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 0, 0, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
-            } else if (data_[index.row()].toolId > -1) {
+            } else if(data_[index.row()].toolId > -1) {
                 return data_[row].icon;
-            } else if (data_[row].isSlot) {
+            } else if(data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
-                for (int x = 0; x < 24; ++x)
-                    for (int y = 0; y < 24; ++y)
+                for(int x = 0; x < 24; ++x)
+                    for(int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 100, 100, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             } else {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
-                for (int x = 0; x < 24; ++x)
-                    for (int y = 0; y < 24; ++y)
+                for(int x = 0; x < 24; ++x)
+                    for(int y = 0; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             }
@@ -100,8 +99,8 @@ QVariant Model::data(const QModelIndex& index, int role) const {
             break;
         }
     } else {
-        if (data_[row].toolId == -1)
-            switch (role) {
+        if(data_[row].toolId == -1)
+            switch(role) {
             case Qt::DisplayRole:
                 return tr("Select Tool");
             case Qt::TextAlignmentRole:
@@ -112,7 +111,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
                 break;
             }
         else
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
                 return App::toolHolder().tool(data_[row].toolId).name();
             case Qt::DecorationRole:
@@ -127,10 +126,10 @@ QVariant Model::data(const QModelIndex& index, int role) const {
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    switch (role) {
+    switch(role) {
     case Qt::DisplayRole:
-        if (orientation == Qt::Horizontal) {
-            switch (section) {
+        if(orientation == Qt::Horizontal) {
+            switch(section) {
             case Name:
                 return tr("Aperture") + " / " + tr("Tool");
             case Tool:;
@@ -139,11 +138,11 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         } else
             return data_[section].name.value(0);
     case Qt::SizeHintRole:
-        if (orientation == Qt::Vertical)
+        if(orientation == Qt::Vertical)
             return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);
         return {};
     case Qt::TextAlignmentRole:
-        if (orientation == Qt::Vertical)
+        if(orientation == Qt::Vertical)
             return static_cast<int>(Qt::AlignRight) | static_cast<int>(Qt::AlignVCenter);
         return Qt::AlignCenter;
     default:
@@ -152,7 +151,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const {
-    if (index.column() == Name)
+    if(index.column() == Name)
         return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }

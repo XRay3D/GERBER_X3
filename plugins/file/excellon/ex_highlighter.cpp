@@ -22,7 +22,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
 
 void SyntaxHighlighter::highlightBlock(const QString& text) {
     static QTextCharFormat myClassFormat;
-    static const std::map<char, QColor> color {
+    static const std::map<char, QColor> color{
         {'A', QColor(0x00, 0x00, 0xFF)},
         {'C', QColor(0xFF, 0xFF, 0x00)},
         {'G', QColor(0xFF, 0xFF, 0xFF)},
@@ -34,7 +34,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     std::u16string_view data(reinterpret_cast<const char16_t*>(text.utf16()), text.size());
     static constexpr ctll::fixed_string pattern(R"(([ACGMTXY])([\+\-]?\d+\.?\d*))");
-    for (auto m : ctre::range<pattern>(data)) {
+    for(auto m: ctre::range<pattern>(data)) {
         myClassFormat.setForeground(color.at(*m.data()));
         int start = std::distance(data.data(), m.data());
         int count = static_cast<int>(m.size());
@@ -44,4 +44,4 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
 } // namespace Excellon
 
-//#include "moc_ex_highlighter.cpp"
+// #include "moc_ex_highlighter.cpp"

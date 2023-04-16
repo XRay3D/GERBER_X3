@@ -12,4 +12,3 @@
 
 #include "shape.h"
 #include "shhandler.h"
-#include "shnode.h"

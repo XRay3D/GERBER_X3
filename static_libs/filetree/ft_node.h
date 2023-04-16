@@ -83,14 +83,14 @@ public:
 
     QModelIndex index(int column = 0) const;
 
-    const QStringList sideStrList {QObject::tr("Top|Bottom").split('|')};
+    const QStringList sideStrList{QObject::tr("Top|Bottom").split('|')};
     const Type type;
 
 protected:
-    int32_t id__ {-1};
+    int32_t id__{-1};
     Node* parent_ = nullptr;
     struct Deleter {
-        DelPolycy del {Delete};
+        DelPolycy del{Delete};
         void operator()(Node* node) const { (del == Delete) ? delete node, void() : void(); }
     };
     mvector<std::unique_ptr<Node, Deleter>> childs;

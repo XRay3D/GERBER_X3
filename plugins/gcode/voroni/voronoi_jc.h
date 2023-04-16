@@ -45,7 +45,7 @@ protected:
             rp.reserve(count);
             rp.push_back(Pt);
             OrdPath* next = Next;
-            while (next) {
+            while(next) {
                 rp.push_back(next->Pt);
                 next = next->Next;
             }

@@ -82,7 +82,7 @@ inline void myMessageOutput(QtMsgType type, const QMessageLogContext& context, c
     QByteArray localMsg = msg.toUtf8();
     const char* file = context.file ? context.file : "";
     const char* function = context.function ? context.function : "";
-    switch (type) {
+    switch(type) {
     case QtDebugMsg:
         fprintf(stderr, SET_BACKGROUND_COLOR(127, 255, 255) FG_BLACK() "Debug" ATTRIBUTES_OFF() ": %s" //
             SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),

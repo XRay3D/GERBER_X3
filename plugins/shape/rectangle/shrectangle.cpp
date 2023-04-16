@@ -45,11 +45,11 @@ void Shape::redraw() {
         handlers[p2]->setPos(currentHandler->x(), handlers[src]->y());
     };
 
-    switch (handlers.indexOf(currentHandler)) {
+    switch(handlers.indexOf(currentHandler)) {
     case Center: {
         QRectF rect(handlers[Point1]->pos(), handlers[Point3]->pos());
         rect.moveCenter(handlers[Center]->pos());
-        auto center {handlers[Center]->pos()};
+        auto center{handlers[Center]->pos()};
         handlers[Point1]->setPos(rect.topLeft());
         handlers[Point2]->setPos(rect.topRight());
         handlers[Point3]->setPos(rect.bottomRight());
@@ -69,7 +69,7 @@ void Shape::redraw() {
         break;
     }
 
-    paths_.front() = Path {
+    paths_.front() = Path{
         handlers[Point1]->pos(),
         handlers[Point2]->pos(),
         handlers[Point3]->pos(),
@@ -77,14 +77,14 @@ void Shape::redraw() {
         handlers[Point1]->pos(),
     };
 
-    if (Area(paths_.front()) < 0)
+    if(Area(paths_.front()) < 0)
         ReversePath(paths_.front());
     shape_ = QPainterPath();
     shape_.addPolygon(paths_.front());
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
 
-    if (model)
+    if(model)
         emit model->dataChanged(model->index(0, 0), model->index(1, 6));
 }
 
@@ -101,13 +101,13 @@ void Shape::setPt(const QPointF& pt) {
 /// \param parent
 ///
 Model::Model(QObject* parent)
-    : QAbstractTableModel {parent} { }
+    : QAbstractTableModel{parent} { }
 
 Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    if (shape && (role == Qt::DisplayRole || role == Qt::EditRole)) {
-        switch (index.row()) {
+    if(shape && (role == Qt::DisplayRole || role == Qt::EditRole)) {
+        switch(index.row()) {
         case 0:
             return abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
         case 1:
@@ -124,15 +124,15 @@ QVariant Model::data(const QModelIndex& index, int role) const {
             return index.column() ? shape->handlers[Shape::Point4]->y() : shape->handlers[Shape::Point4]->x();
         }
     }
-    if (role == Qt::TextAlignmentRole)
+    if(role == Qt::TextAlignmentRole)
         return Qt::AlignCenter;
 
     return {};
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    if (role == Qt::DisplayRole) {
-        if (orientation == Qt::Vertical)
+    if(role == Qt::DisplayRole) {
+        if(orientation == Qt::Vertical)
             return headerData_[section];
         else
             return section ? "Y" : "X";
@@ -145,18 +145,14 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    if (shape && role == Qt::EditRole) {
+    if(shape && role == Qt::EditRole) {
         double val = value.toDouble();
-        switch (index.row()) {
+        switch(index.row()) {
         case 0:
-            ((shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()) < 0 ?
-                    shape->handlers[Shape::Point3]->setX(shape->handlers[Shape::Point1]->x() + val) :
-                    shape->handlers[Shape::Point3]->setX(shape->handlers[Shape::Point1]->x() - val));
+            ((shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()) < 0 ? shape->handlers[Shape::Point3]->setX(shape->handlers[Shape::Point1]->x() + val) : shape->handlers[Shape::Point3]->setX(shape->handlers[Shape::Point1]->x() - val));
             break;
         case 1:
-            ((shape->handlers[Shape::Point1]->y() - shape->handlers[Shape::Point3]->y()) < 0 ?
-                    shape->handlers[Shape::Point3]->setY(shape->handlers[Shape::Point1]->y() + val) :
-                    shape->handlers[Shape::Point3]->setY(shape->handlers[Shape::Point1]->y() - val));
+            ((shape->handlers[Shape::Point1]->y() - shape->handlers[Shape::Point3]->y()) < 0 ? shape->handlers[Shape::Point3]->setY(shape->handlers[Shape::Point1]->y() + val) : shape->handlers[Shape::Point3]->setY(shape->handlers[Shape::Point1]->y() - val));
             break;
         case 2:
             (index.column() ? shape->handlers[Shape::Center]->setY(val) : shape->handlers[Shape::Center]->setX(val));
@@ -181,23 +177,23 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 Editor::Editor(Plugin* plugin)
-    : /* QWidget {parent}*/ view {new QTableView {this}}
-    , model {new Model {view}}
-    , plugin {plugin} {
+    : /* QWidget {parent}*/ view{new QTableView{this}}
+    , model{new Model{view}}
+    , plugin{plugin} {
     setWindowTitle("Rectangle");
 
-    auto vLayout = new QVBoxLayout {this};
+    auto vLayout = new QVBoxLayout{this};
     vLayout->setContentsMargins(6, 6, 6, 6);
     vLayout->setSpacing(6);
     {
         auto hLayout = new QHBoxLayout;
         hLayout->setContentsMargins(0, 0, 0, 0);
         hLayout->setSpacing(6);
-        for (int i = 0; i < 6; ++i) {
-            auto action = new QAction {this};
+        for(int i = 0; i < 6; ++i) {
+            auto action = new QAction{this};
             action->setIcon(QIcon::fromTheme("draw-rectangle"));
             action->setCheckable(true);
-            auto toolButton = new QToolButton {this};
+            auto toolButton = new QToolButton{this};
             toolButton->setIconSize({24, 24});
             toolButton->setDefaultAction(action);
             actionGroup.addAction(action);
@@ -209,12 +205,12 @@ Editor::Editor(Plugin* plugin)
     }
     vLayout->addWidget(view);
 
-    auto pushButton = new QPushButton {tr("Apply"), this};
+    auto pushButton = new QPushButton{tr("Apply"), this};
     pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
 
-    pushButton = new QPushButton {tr("Add New"), this};
+    pushButton = new QPushButton{tr("Add New"), this};
     pushButton->setObjectName("pbAddNew");
     pushButton->setIcon(QIcon::fromTheme("list-add"));
     vLayout->addWidget(pushButton);
@@ -223,7 +219,7 @@ Editor::Editor(Plugin* plugin)
         App::project().addShape(plugin->createShape());
     });
 
-    pushButton = new QPushButton {"Close", this};
+    pushButton = new QPushButton{"Close", this};
     pushButton->setObjectName("pbClose");
     pushButton->setIcon(QIcon::fromTheme("window-close"));
     vLayout->addWidget(pushButton);

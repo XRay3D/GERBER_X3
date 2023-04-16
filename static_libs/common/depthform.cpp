@@ -25,23 +25,23 @@ DepthForm::DepthForm(QWidget* parent)
 
     connect(dsbx, &QDoubleSpinBox::valueChanged, this, &DepthForm::valueChanged);
     connect(dsbx, &QDoubleSpinBox::valueChanged, [this](double value) {
-        if (dsbx->isEnabled())
+        if(dsbx->isEnabled())
             value_ = value;
     });
     connect(rbCustom, &QRadioButton::toggled, [this](bool checked) {
-        if (checked) {
+        if(checked) {
             dsbx->setEnabled(true);
             dsbx->setValue(value_);
         }
     });
     connect(rbCopper, &QRadioButton::toggled, [this](bool checked) {
-        if (checked) {
+        if(checked) {
             dsbx->setEnabled(false);
             dsbx->setValue(App::project().copperThickness());
         }
     });
     connect(rbBoard, &QRadioButton::toggled, [this](bool checked) {
-        if (checked) {
+        if(checked) {
             dsbx->setEnabled(false);
             dsbx->setValue(App::project().boardThickness());
         }
@@ -74,7 +74,7 @@ void DepthForm::setValue(double value) {
 }
 
 void DepthForm::setupUi(QWidget* Form) {
-    if (Form->objectName().isEmpty())
+    if(Form->objectName().isEmpty())
         Form->setObjectName(QString::fromUtf8("DepthForm"));
 
     QHBoxLayout* horizontalLayout = new QHBoxLayout(Form);

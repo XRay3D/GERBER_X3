@@ -24,8 +24,8 @@
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget(parent)
-    , counter {static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
-    , toolFileName_ {App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
+    , counter{static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
+    , toolFileName_{App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
     setupUi(this);
     readTool();
     label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");
@@ -45,14 +45,14 @@ const Tool& ToolSelectorForm::tool() const { return tool_; }
 
 void ToolSelectorForm::on_pbSelect_clicked() {
     ToolDatabase tdb(this, {Tool::EndMill, Tool::Engraver, Tool::Laser});
-    if (tdb.exec())
+    if(tdb.exec())
         setTool(tdb.tool());
 }
 
 void ToolSelectorForm::on_pbEdit_clicked() {
     ToolEditDialog d;
     d.setTool(tool_);
-    if (d.exec())
+    if(d.exec())
         setTool(d.tool());
 }
 
@@ -65,7 +65,7 @@ void ToolSelectorForm::updateForm() {
 
 void ToolSelectorForm::readTool() {
     QFile file(toolFileName_);
-    if (file.open(QIODevice::ReadOnly))
+    if(file.open(QIODevice::ReadOnly))
         tool_.read(QJsonDocument::fromJson(file.readAll()).object());
     else
         qWarning("Couldn't open tools file.");
@@ -74,7 +74,7 @@ void ToolSelectorForm::readTool() {
 
 void ToolSelectorForm::writeTool() const {
     QFile file(toolFileName_);
-    if (file.open(QIODevice::WriteOnly)) {
+    if(file.open(QIODevice::WriteOnly)) {
         QJsonObject json;
         tool_.write(json);
         file.write(QJsonDocument(json).toJson());
@@ -88,7 +88,7 @@ QLabel* ToolSelectorForm::label() const {
 }
 
 void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
-    if (ToolSelectorForm->objectName().isEmpty())
+    if(ToolSelectorForm->objectName().isEmpty())
         ToolSelectorForm->setObjectName(QString::fromUtf8("ToolSelectorForm"));
     ToolSelectorForm->resize(236, 180);
 
@@ -152,7 +152,7 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
 
 void ToolSelectorForm::retranslateUi(QWidget* ToolSelectorForm) {
     ToolSelectorForm->setWindowTitle(QCoreApplication::translate("ToolSelectorForm", "Form", nullptr));
-    if (counter > 1)
+    if(counter > 1)
         label_->setText(QCoreApplication::translate("ToolSelectorForm", "Tool %1:", nullptr).arg(counter));
     else
         label_->setText(QCoreApplication::translate("ToolSelectorForm", "Tool:", nullptr));

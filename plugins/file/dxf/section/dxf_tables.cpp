@@ -22,7 +22,7 @@ SectionTABLES::SectionTABLES(File* file, Codes::iterator from, Codes::iterator t
 }
 
 SectionTABLES::~SectionTABLES() {
-    for (const auto& [k, v] : tables) {
+    for(const auto& [k, v]: tables) {
         (void)k;
         qDeleteAll(v);
     }
@@ -31,11 +31,11 @@ SectionTABLES::~SectionTABLES() {
 void SectionTABLES::parse() {
     do {
         CodeData code(nextCode());
-        if (code == "TABLE") {
+        if(code == "TABLE") {
             code = nextCode();
             do {
                 auto type = AbstractTable::toType(code);
-                switch (type) {
+                switch(type) {
                 case AbstractTable::APPID:
                     // tables[type].append(new AppId(this));
                     break;
@@ -64,9 +64,9 @@ void SectionTABLES::parse() {
                     // tables[type].append(new VPort(this));
                     break;
                 }
-                if (tables.contains(type)) {
+                if(tables.contains(type)) {
                     tables[type].last()->parse(code);
-                    if (type == AbstractTable::LAYER) {
+                    if(type == AbstractTable::LAYER) {
                         auto layer = static_cast<Layer*>(tables[type].last());
                         layers[layer->name()] = layer;
                     }
@@ -74,11 +74,11 @@ void SectionTABLES::parse() {
                     // skip unimplemented tables
                     do {
                         code = nextCode();
-                    } while (code.code() != 0);
+                    } while(code.code() != 0);
                 }
-            } while (code != "ENDTAB");
+            } while(code != "ENDTAB");
         }
-    } while (hasNext());
+    } while(hasNext());
 }
 
 } // namespace Dxf

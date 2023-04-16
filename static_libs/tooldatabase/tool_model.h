@@ -52,8 +52,8 @@ private:
     void saveTools();
     void loadTools();
     auto* getItem(const QModelIndex& index) const {
-        if (index.isValid()) {
-            if (auto* item = static_cast<ToolItem*>(index.internalPointer()); item)
+        if(index.isValid()) {
+            if(auto* item = static_cast<ToolItem*>(index.internalPointer()); item)
                 return item;
         }
         return rootItem;

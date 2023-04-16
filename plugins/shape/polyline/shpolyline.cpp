@@ -36,8 +36,8 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
 }
 
 void PolyLine::redraw() {
-    if (currentHandler) {
-        if (currentHandler->hType() == Handle::Adder) {
+    if(currentHandler) {
+        if(currentHandler->hType() == Handle::Adder) {
             int idx = handlers.indexOf(currentHandler);
             Handle* h;
             {
@@ -53,10 +53,10 @@ void PolyLine::redraw() {
                 h->QGraphicsItem::setPos(QLineF(currentHandler->pos(), h1->pos()).center());
             }
             currentHandler->setHType(Handle::Corner);
-        } else if (currentHandler->hType() == Handle::Corner /*&& !Constructor::item*/) {
+        } else if(currentHandler->hType() == Handle::Corner /*&& !Constructor::item*/) {
             int idx = handlers.indexOf(currentHandler);
-            if (currentHandler != handlers[1].get()) {
-                if (handlers.size() > 4
+            if(currentHandler != handlers[1].get()) {
+                if(handlers.size() > 4
                     && currentHandler->pos() == handlers[idx - 2]->pos() /*QLineF(handler->pos(), handlers[idx - 2]->pos()).length() < handler->rect().width() * 0.5*/) {
                     handlers.takeAt(idx - 1);
                     handlers.takeAt(idx - 2);
@@ -65,8 +65,8 @@ void PolyLine::redraw() {
                     handlers[idx - 1]->QGraphicsItem::setPos(QLineF(currentHandler->pos(), handlers[idx - 2]->pos()).center());
                 }
             }
-            if (currentHandler != handlers.back().get()) {
-                if (handlers.size() > 4
+            if(currentHandler != handlers.back().get()) {
+                if(handlers.size() > 4
                     && currentHandler->pos() == handlers[idx + 2]->pos() /*QLineF(handler->pos(), handlers[idx + 2]->pos()).length() < handler->rect().width() * 0.5*/) {
                     handlers.takeAt(idx + 1);
                     handlers.takeAt(idx + 1);
@@ -79,16 +79,15 @@ void PolyLine::redraw() {
 
     Path& path = paths_.front();
     path.clear();
-    for (size_t i {1}, e = handlers.size(); i < e; ++i) {
-        if (handlers[i]->hType() == Handle::Corner)
+    for(size_t i{1}, e = handlers.size(); i < e; ++i)
+        if(handlers[i]->hType() == Handle::Corner)
             path.emplace_back((handlers[i]->pos()));
-    }
     shape_ = QPainterPath();
     shape_.addPolygon(path);
     //    rect_ = shape_.boundingRect();
-    if (handlers.size() > 4) {
+    if(handlers.size() > 4) {
         QPointF c(centroidFast());
-        if (qIsNaN(c.x()) || qIsNaN(c.y()))
+        if(qIsNaN(c.x()) || qIsNaN(c.y()))
             c = {};
         handlers[0]->QGraphicsItem::setPos(shape_.boundingRect().contains(c) && !c.isNull() ? c : shape_.boundingRect().center());
         handlers[0]->setVisible(true);
@@ -126,12 +125,11 @@ QPointF PolyLine::centroid() {
     double a = 0.0; // Partial signed area
     mvector<QPointF> vertices;
     vertices.reserve(handlers.size() / 2);
-    for (auto& h : handlers) {
-        if (h->hType() == Handle::Corner)
+    for(auto& h: handlers)
+        if(h->hType() == Handle::Corner)
             vertices.emplace_back(h->pos());
-    }
     // For all vertices
-    for (size_t i = 0; i < vertices.size(); ++i) {
+    for(size_t i = 0; i < vertices.size(); ++i) {
         QPointF p0(vertices[i]);
         QPointF p1(vertices[(i + 1) % vertices.size()]);
         a = p0.x() * p1.y() - p1.x() * p0.y();
@@ -151,13 +149,12 @@ QPointF PolyLine::centroidFast() {
     double a = 0.0; // Partial signed area
     mvector<QPointF> vertices;
     vertices.reserve(handlers.size() / 2);
-    for (auto& h : handlers) {
-        if (h->hType() == Handle::Corner)
+    for(auto& h: handlers)
+        if(h->hType() == Handle::Corner)
             vertices.emplace_back(h->pos());
-    }
     // For all vertices except last
     size_t i = 0;
-    for (; i < vertices.size() - 1; ++i) {
+    for(; i < vertices.size() - 1; ++i) {
         QPointF p0(vertices[i]);
         QPointF p1(vertices[i + 1]);
         a = p0.x() * p1.y() - p1.x() * p0.y();

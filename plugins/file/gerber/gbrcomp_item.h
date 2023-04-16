@@ -22,7 +22,7 @@ class Item final : public GraphicsItem {
     mutable mvector<QPair<QPainterPath, QPointF>> pathPins;
     mutable double scale_ = std::numeric_limits<double>::max();
     mutable QPointF pt;
-    bool selected_ {};
+    bool selected_{};
 
 public:
     Item(const Component& component, AbstractFile* file);

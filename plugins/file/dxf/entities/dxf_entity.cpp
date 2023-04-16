@@ -20,7 +20,7 @@
 namespace Dxf {
 
 std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionParser* sp) {
-    switch (key) {
+    switch(key) {
     case Entity::ACAD_PROXY_ENTITY:
         return std::make_shared<Dummy /*Dimension*/>(sp);
         break; // return std::make_shared<ACADProxyEntity>(sp);
@@ -139,9 +139,9 @@ Entity::Entity(SectionParser* sp)
 Entity::~Entity() { }
 
 void Entity::draw(const InsertEntity* const i) const {
-    if (i) {
-        for (int r {}; r < i->rowCount; ++r) {
-            for (int c {}; c < i->colCount; ++c) {
+    if(i) {
+        for(int r{}; r < i->rowCount; ++r) {
+            for(int c{}; c < i->colCount; ++c) {
                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
                 DxfGo go(toGo());
                 i->transform(go, tr);
@@ -154,7 +154,7 @@ void Entity::draw(const InsertEntity* const i) const {
 }
 
 void Entity::parse(CodeData& code) {
-    switch (code.code()) {
+    switch(code.code()) {
         //    case LayerName:
         //        layerName = code.string();
         //        break;
@@ -275,7 +275,7 @@ QString Entity::name() const {
 }
 
 QColor Entity::color() const {
-    if (auto layer = sp->file->layer(layerName); layer != nullptr) {
+    if(auto layer = sp->file->layer(layerName); layer != nullptr) {
         QColor c(dxfColors[layer->colorNumber()]);
         c.setAlpha(200);
         return c;
@@ -285,11 +285,11 @@ QColor Entity::color() const {
 }
 
 void Entity::attachToLayer(DxfGo&& go) const {
-    if (sp == nullptr)
+    if(sp == nullptr)
         throw DxfObj::tr("SectionParser is null!");
-    else if (sp->file == nullptr)
+    else if(sp->file == nullptr)
         throw DxfObj::tr("File in SectionParser is null!");
-    else if (sp->file->layer(layerName) == nullptr)
+    else if(sp->file->layer(layerName) == nullptr)
         throw DxfObj::tr("Layer '%1' not found in file!").arg(layerName);
 
     sp->file->layer(layerName)->addGraphicObject(std::move(go));
@@ -328,7 +328,7 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPoi
     double r = signedBulgeRadius(start_point, end_point, bulge);
     double a = angle(start_point, end_point) + (pi / 2.0 - atan(bulge) * 2.0);
     QPointF c = polar(start_point, a, r);
-    if (bulge < 0.0)
+    if(bulge < 0.0)
         return {c, angle(c, end_point), angle(c, start_point), abs(r)};
     else
         return {c, angle(c, start_point), angle(c, end_point), abs(r)};

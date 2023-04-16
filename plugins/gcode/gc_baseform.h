@@ -39,7 +39,7 @@ signals:
 protected:
     void fileHandler(File* file);
     void updateButtonIconSize() {
-        for (auto* button : findChildren<QPushButton*>())
+        for(auto* button: findChildren<QPushButton*>())
             button->setIconSize({16, 16});
     }
     void addUsedGi(class ::GraphicsItem* gi);
@@ -60,14 +60,14 @@ protected:
 
     QString fileName_;
 
-    QString trOutside {tr("Outside")};
-    QString trDepth {tr("Depth:")};
-    QString trTool {tr("Tool:")};
+    QString trOutside{tr("Outside")};
+    QString trDepth{tr("Depth:")};
+    QString trTool{tr("Tool:")};
 
     bool editMode_ = false;
-    int fileId {-1};
+    int fileId{-1};
 
-    int fileCount {1};
+    int fileCount{1};
     // Plugin* const plugin;
 
     DepthForm* dsbxDepth;
@@ -79,7 +79,7 @@ protected:
     QGridLayout* grid;
 
 private:
-    Creator* creator_ {};
+    Creator* creator_{};
 
     QDialogButtonBox* errBtnBox;
     class TableView* errTable;

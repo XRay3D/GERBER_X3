@@ -28,11 +28,11 @@ Parser::Parser(AbstractFilePlugin* const interface)
 AbstractFile* Parser::parseFile(const QString& fileName) {
     qDebug(__FUNCTION__);
     QFile file_(fileName);
-    if (!file_.open(QFile::ReadOnly | QFile::Text))
+    if(!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
     TopoR_PCB_File u;
-    auto data {file_.readAll()};
+    auto data{file_.readAll()};
     u.fromXml(data);
 
     data = u.toRawXml();

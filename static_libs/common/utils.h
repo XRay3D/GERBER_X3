@@ -32,18 +32,18 @@ struct Timer {
     static inline std::map<std::string_view, std::pair<size_t, double>> avgMap;
 
     constexpr Timer(std::string_view name, T = {})
-        : t1 {std::chrono::high_resolution_clock::now()}
-        , stringView {name} {
+        : t1{std::chrono::high_resolution_clock::now()}
+        , stringView{name} {
     }
 
     constexpr Timer(T = {}, std::source_location sl = std::source_location::current())
-        : Timer {sl.function_name()} { }
+        : Timer{sl.function_name()} { }
 
     ~Timer() {
         using std::chrono::duration;
         using std::chrono::high_resolution_clock;
 
-        duration<double, T> timeout {high_resolution_clock::now() - t1};
+        duration<double, T> timeout{high_resolution_clock::now() - t1};
 
         auto& [ctr, avg] = avgMap[stringView];
         avg += timeout.count();
@@ -52,17 +52,17 @@ struct Timer {
     }
 
     constexpr auto format() const noexcept {
-        /**/ if constexpr (std::is_same_v<T, nS>)
+        /**/ if constexpr(std::is_same_v<T, nS>)
             return "\t%20s -> %1.3f (avg %1.3f) nS";
-        else if constexpr (std::is_same_v<T, uS>)
+        else if constexpr(std::is_same_v<T, uS>)
             return "\t%20s -> %1.3f (avg %1.3f) uS";
-        else if constexpr (std::is_same_v<T, mS>)
+        else if constexpr(std::is_same_v<T, mS>)
             return "\t%20s -> %1.3f (avg %1.3f) mS";
-        else if constexpr (std::is_same_v<T, Sec>)
+        else if constexpr(std::is_same_v<T, Sec>)
             return "\t%20s -> %1.3f (avg %1.3f) S";
-        else if constexpr (std::is_same_v<T, Mins>)
+        else if constexpr(std::is_same_v<T, Mins>)
             return "\t%20s -> %1.3f (avg %1.3f) M";
-        else if constexpr (std::is_same_v<T, Hours>)
+        else if constexpr(std::is_same_v<T, Hours>)
             return "\t%20s -> %1.3f (avg %1.3f) H";
     }
 };
@@ -80,7 +80,7 @@ template <class T>
 struct CtreCapTo {
     T& cap;
     constexpr CtreCapTo(T& cap) /*requires class ctre::captured_content<0,void>::storage<class std::_String_view_iterator<struct std::char_traits<char16_t>>>*/
-        : cap {cap} {
+        : cap{cap} {
     }
 
     auto toDouble() const { return toString().toDouble(); }
@@ -111,7 +111,7 @@ CtreCapTo(T) -> CtreCapTo<T>;
 struct ScopedTrue {
     bool& fl;
     ScopedTrue(bool& fl)
-        : fl {fl} { fl = true; }
+        : fl{fl} { fl = true; }
     ~ScopedTrue() { fl = false; }
 };
 
@@ -123,8 +123,7 @@ struct Overload : Ts... {
 template <typename... Ts>
 Overload(Ts...) -> Overload<Ts...>;
 
-template <typename Cap>
-concept CapContent = requires(Cap a) {
+template <typename Cap> concept CapContent = requires(Cap a) {
     std::is_pointer_v<decltype(a.data())>;
     { a.size() } -> std::convertible_to<size_t>;
     { a.operator bool() } -> std::convertible_to<bool>;
@@ -143,7 +142,7 @@ template <typename E>
 E fromString(const QString& text) {
     bool ok;
     auto result = static_cast<E>(QMetaEnum::fromType<E>().keyToValue(text.toUtf8(), &ok));
-    if (!ok) {
+    if(!ok) {
         qDebug() << "Failed to convert enum" << text;
         return {};
     }
@@ -156,7 +155,7 @@ struct fromString {
     operator E() {
         bool ok;
         auto result = static_cast<E>(QMetaEnum::fromType<E>().keyToValue(text.toUtf8(), &ok));
-        if (ok) [[likely]]
+        if(ok) [[likely]]
             return result;
         qDebug() << "Failed to convert enum" << text;
         return {};

@@ -34,10 +34,10 @@ Plugin::Plugin(QObject* parent)
 }
 
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if (type_ != type())
+    if(type_ != type())
         return nullptr;
     QFile file_(fileName);
-    if (!file_.open(QFile::ReadOnly | QFile::Text))
+    if(!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
     QTextStream in(&file_);
@@ -48,14 +48,14 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 
 QIcon drawApertureIcon(AbstractAperture* aperture) {
     QPainterPath painterPath;
-    for (const auto& polygon : aperture->draw(State()))
+    for(const auto& polygon: aperture->draw(State()))
         painterPath.addPolygon(polygon);
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
     const QRectF rect = painterPath.boundingRect();
     double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
     double ky = -rect.top() * scale;
     double kx = rect.left() * scale;
-    if (rect.width() > rect.height())
+    if(rect.width() > rect.height())
         ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
@@ -74,12 +74,12 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
 
 bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
-    if (file.open(QFile::ReadOnly | QFile::Text)) {
+    if(file.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream in(&file);
         QString line;
-        while (in.readLineInto(&line)) {
-            auto data {toU16StrView(line)};
-            if (*ctre::range<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(data).begin())
+        while(in.readLineInto(&line)) {
+            auto data{toU16StrView(line)};
+            if(*ctre::range<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(data).begin())
                 return true;
         }
     }

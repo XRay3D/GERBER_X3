@@ -86,7 +86,7 @@ public:
 private:
     const QString mimeType;
 
-    int addFile(Node *item, AbstractFile* file);
+    int addFile(Node* item, AbstractFile* file);
     void addFile(AbstractFile* file);
     void addShape(Shapes::AbstractShape* shape);
 };

@@ -32,9 +32,9 @@ Plugin::Plugin(QObject* parent)
 }
 
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if (type_ != type())
+    if(type_ != type())
         return nullptr;
-    if (!QFile(fileName).exists())
+    if(!QFile(fileName).exists())
         return nullptr;
 
     Parser::parseFile(fileName);
@@ -43,7 +43,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 }
 
 std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
-    if (plugin->type() == ::GCode::Drill) {
+    if(plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
         //        auto const exFile = static_cast<File*>(file);
         //        QTransform t {exFile->transform()};
@@ -60,18 +60,18 @@ std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::an
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    if (!fileName.endsWith(".fst", Qt::CaseInsensitive))
+    if(!fileName.endsWith(".fst", Qt::CaseInsensitive))
         return false;
 
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
     QTextStream in(&file);
     QString line;
 
-    while (in.readLineInto(&line)) {
-        if (line.contains("<TopoR_PCB_File>")) {
+    while(in.readLineInto(&line)) {
+        if(line.contains("<TopoR_PCB_File>")) {
             qDebug(__FUNCTION__);
             return true;
         }

@@ -30,8 +30,8 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
     QFont font;
     font.setPixelSize(16);
     const QString text = QString(App::settings().inch() ? "  X = %1 in\n"
-                                                          "  Y = %2 in\n" :
-                                                          "  X = %1 mm\n"
+                                                          "  Y = %2 in\n"
+                                                        : "  X = %1 mm\n"
                                                           "  Y = %2 mm\n")
                              .arg(pt1.x() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0')
                              .arg(pt1.y() / (App::settings().inch() ? 25.4 : 1.0), 4, 'f', 3, '0');
@@ -41,7 +41,7 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
     painter->save();
     painter->scale(k, -k);
     int i = 0;
-    for (const QString& txt : text.split('\n')) {
+    for(const QString& txt: text.split('\n')) {
         QPainterPath path;
         path.addText(textRect.topLeft() + QPointF(textRect.left(), textRect.height() * 0.25 * ++i), font, txt);
         painter->setPen(QPen(Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
@@ -71,7 +71,7 @@ Handle::~Handle() {
 QRectF Handle::boundingRect() const { return rect; }
 
 void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    static const QColor cc[] {
+    static const QColor cc[]{
         Qt::yellow,
         Qt::red,
         Qt::green,
@@ -79,7 +79,7 @@ void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     auto c = cc[type_];
 
-    if (option->state & QStyle::State_MouseOver)
+    if(option->state & QStyle::State_MouseOver)
         drawPos(painter, pos());
     else
         c.setAlpha(100);
@@ -88,14 +88,14 @@ void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     painter->setPen(QPen(Qt::black, 0.0));
 
     static double scale;
-    if (scale != App::graphicsView().scaleFactor()) {
+    if(scale != App::graphicsView().scaleFactor()) {
         double scale = App::graphicsView().scaleFactor();
         const double k = Size * scale;
         const double s = k * 2;
         rect = {QPointF(-k, -k), QSizeF(s, s)};
     }
 
-    if (!pressed)
+    if(!pressed)
         painter->drawEllipse(rect);
 }
 
@@ -126,7 +126,7 @@ Handle::Type Handle::hType() const { return type_; }
 
 void Handle::setHType(Type value) {
     type_ = value;
-    switch (type_) {
+    switch(type_) {
     case Adder:
         setZValue(std::numeric_limits<double>::max() - 2);
         break;
@@ -192,8 +192,8 @@ static HandlePosN lastHandlePos;
 
 void Handle::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     lastPos = pos();
-    for (auto&& handle : shape->handlers)
-        lastHandlePos.emplace(handle.get(), Data {handle->pos(), handle->type_});
+    for(auto&& handle: shape->handlers)
+        lastHandlePos.emplace(handle.get(), Data{handle->pos(), handle->type_});
     QGraphicsItem::mousePressEvent(event);
     pressed = true;
 }
@@ -205,28 +205,27 @@ void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     class ShapeMoveCommand : public QUndoCommand {
     public:
         ShapeMoveCommand(HandlePosN&& lastHandlePos, Handle* handle, QGraphicsScene* graphicsScene, QUndoCommand* parent = nullptr)
-            : QUndoCommand {parent}
-            , graphicsScene {graphicsScene}
-            , lastHandlePos {std::move(lastHandlePos)}
-            , redoPos {handle->pos(), handle->type_}
-            , handle {handle} {
+            : QUndoCommand{parent}
+            , graphicsScene{graphicsScene}
+            , lastHandlePos{std::move(lastHandlePos)}
+            , redoPos{handle->pos(), handle->type_}
+            , handle{handle} {
             setText("AbstractShape Handle Moved");
         }
 
         ~ShapeMoveCommand() { }
 
         void undo() override {
-            auto shape {lastHandlePos.begin()->first->shape};
+            auto shape{lastHandlePos.begin()->first->shape};
 
             mvector<int> toDelete;
-            for (auto&& handle : shape->handlers) {
-                if (lastHandlePos.contains(handle.get())) {
+            for(auto&& handle: shape->handlers)
+                if(lastHandlePos.contains(handle.get())) {
                     auto [pos, type] = lastHandlePos.at(handle.get());
                     handle->setPos(pos), handle->type_ = type;
                 } else
                     toDelete.emplace_back(shape->handlers.indexOf(handle));
-            }
-            for (auto index : toDelete)
+            for(auto index: toDelete)
                 shape->handlers.takeAt(index);
 
             shape->currentHandler = nullptr;

@@ -25,7 +25,7 @@ Text::Text(SectionParser* sp)
 
 void Text::parse(CodeData& code) {
     do {
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -82,7 +82,7 @@ void Text::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Text::type() const { return Type::TEXT; }
@@ -121,10 +121,10 @@ DxfGo Text::toGo() const {
     QFont font;
     QPointF offset;
     QSizeF size;
-    if (sp->file->styles().contains(textStyleName)) {
+    if(sp->file->styles().contains(textStyleName)) {
         Style* style = sp->file->styles()[textStyleName];
         font = style->font;
-        if (Settings::overrideFonts()) {
+        if(Settings::overrideFonts()) {
             font.setFamily(Settings::defaultFont());
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
@@ -137,7 +137,7 @@ DxfGo Text::toGo() const {
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
-        if (Settings::overrideFonts()) {
+        if(Settings::overrideFonts()) {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
@@ -148,7 +148,7 @@ DxfGo Text::toGo() const {
         size = fmf.size(0, text);
     }
     // qDebug("scale X %f Y %f", scaleX, scaleY);
-    switch (horizontalJustType) {
+    switch(horizontalJustType) {
     case Left: // 0
         offset.rx();
         break;
@@ -162,16 +162,16 @@ DxfGo Text::toGo() const {
         break;
     case MiddleH: // 4
         break;
-    case Fit:     // 5
+    case Fit: // 5
         break;
     }
 
-    switch (verticalJustType) {
+    switch(verticalJustType) {
     case Baseline: // 0
         break;
-    case Bottom:   // 1
+    case Bottom: // 1
         break;
-    case MiddleV:  // 2
+    case MiddleV: // 2
         offset.ry() += ascent / 2;
         break;
     case Top: // 3
@@ -179,9 +179,9 @@ DxfGo Text::toGo() const {
         break;
     }
 
-    if (textGenerationFlag & MirroredInX)
+    if(textGenerationFlag & MirroredInX)
         scaleX = -scaleX;
-    if (textGenerationFlag & MirroredInY)
+    if(textGenerationFlag & MirroredInY)
         scaleY = -scaleY;
 
     QPainterPath path;
@@ -190,14 +190,14 @@ DxfGo Text::toGo() const {
     QTransform m;
     m.scale(u * scaleX, -u * scaleY);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.translate(pt2.x(), pt2.y());
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m2.scale(d, d);
 
-    DxfGo go {id, {}, path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
+    DxfGo go{id, {}, path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
     return go;
 }
 

@@ -41,7 +41,7 @@ private:
     AbstractShape* const shape;
     Type type_;
     QPointF lastPos;
-    bool pressed {};
+    bool pressed{};
 
 protected:
     // QGraphicsItem interface

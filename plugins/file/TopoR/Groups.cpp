@@ -32,11 +32,10 @@ bool Groups::ShouldSerialize_CompGroups() {
 }
 
 void Groups::Rename_compName(const QString& oldname, const QString& newname) {
-    for (auto&& a : _CompGroups | std::views::filter([&](CompGroup* g) { return g->_CompRefs.size() > 0; })) {
-        for (auto&& b : a->_CompRefs) { //::OfType<CompInstanceRef*>().Where([&](std::any bb) { return bb->_ReferenceName == oldname; })) {
-            if (b.index() == 0 && std::get<CompInstanceRef>(b)._ReferenceName == oldname)
+    for(auto&& a: _CompGroups | std::views::filter([&](CompGroup* g) { return g->_CompRefs.size() > 0; })) {
+        for(auto&& b: a->_CompRefs) //::OfType<CompInstanceRef*>().Where([&](std::any bb) { return bb->_ReferenceName == oldname; })) {
+            if(b.index() == 0 && std::get<CompInstanceRef>(b)._ReferenceName == oldname)
                 std::get<CompInstanceRef>(b)._ReferenceName = newname;
-        }
     }
 }
 // } // namespace TopoR_PCB_Classes

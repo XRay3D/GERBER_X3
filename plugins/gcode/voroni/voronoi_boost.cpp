@@ -78,23 +78,19 @@ point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_t
 }
 
 Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
-    std::vector sampled_edge {
-        point_type {edge.vertex0()->x(), edge.vertex0()->y()},
-        point_type {edge.vertex1()->x(), edge.vertex1()->y()}
+    std::vector sampled_edge{
+        point_type{edge.vertex0()->x(), edge.vertex0()->y()},
+        point_type{edge.vertex1()->x(), edge.vertex1()->y()}
     };
 
     coordinate_type max_dist = uScale * 0.00001; //* 1E-3* (xh(brect_) - xl(brect_));
-    point_type point = edge.cell()->contains_point() ?
-        retrieve_point(segment_data_, *edge.cell()) :
-        retrieve_point(segment_data_, *edge.twin()->cell());
-    segment_type segment = edge.cell()->contains_point() ?
-        retrieve_segment(segment_data_, *edge.twin()->cell()) :
-        retrieve_segment(segment_data_, *edge.cell());
+    point_type point = edge.cell()->contains_point() ? retrieve_point(segment_data_, *edge.cell()) : retrieve_point(segment_data_, *edge.twin()->cell());
+    segment_type segment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
     Path path;
     path.reserve(sampled_edge.size());
-    for (const auto& p : sampled_edge)
+    for(const auto& p: sampled_edge)
         path.emplace_back(static_cast<Point::Type>(p.x()), static_cast<Point::Type>(p.y()));
     return path;
 }
@@ -112,9 +108,9 @@ void VoronoiBoost::boostVoronoi() {
     // add line segments to diagram
     msg = QObject::tr("Calc BOOST Voronoi");
 
-    size_t max {};
+    size_t max{};
 
-    for (const Path& path : std::views::join(groupedPss))
+    for(const Path& path: std::views::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -125,10 +121,10 @@ void VoronoiBoost::boostVoronoi() {
     std::vector<int> vecId;
     srcSegments.reserve(max);
 
-    for (const Paths& paths : groupedPss) {
+    for(const Paths& paths: groupedPss) {
         ++id;
-        for (const Path& path : paths) {
-            for (size_t i = 0; i < path.size(); ++i) {
+        for(const Path& path: paths) {
+            for(size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
                 ifCancelThenThrow();
                 const Point& point = path[i];
@@ -136,11 +132,11 @@ void VoronoiBoost::boostVoronoi() {
                 //                !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
                 //                   : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
                 !i ? srcSegments.emplace_back(
-                    point_type {static_cast<coordinate_type>(path.back().x), static_cast<coordinate_type>(path.back().y)},
-                    point_type {static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)}) :
-                     srcSegments.emplace_back(
-                         point_type {static_cast<coordinate_type>(path[i - 1].x), static_cast<coordinate_type>(path[i - 1].y)},
-                         point_type {static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)});
+                    point_type{static_cast<coordinate_type>(path.back().x), static_cast<coordinate_type>(path.back().y)},
+                    point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)})
+                   : srcSegments.emplace_back(
+                       point_type{static_cast<coordinate_type>(path[i - 1].x), static_cast<coordinate_type>(path[i - 1].y)},
+                       point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)});
                 maxX = std::max(maxX, point.x);
                 maxY = std::max(maxY, point.y);
                 minX = std::min(minX, point.x);
@@ -156,20 +152,20 @@ void VoronoiBoost::boostVoronoi() {
     //    srcSegments.emplace_back(minX - kx, minY - ky, minX - kx, maxY + ky, id);
     vecId.emplace_back(++id);
     srcSegments.emplace_back(
-        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
-        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky)});
+        point_type{static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
+        point_type{static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky)});
     vecId.emplace_back(id);
     srcSegments.emplace_back(
-        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
-        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)});
+        point_type{static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
+        point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)});
     vecId.emplace_back(id);
     srcSegments.emplace_back(
-        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)},
-        point_type {static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky)});
+        point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)},
+        point_type{static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(maxY + ky)});
     vecId.emplace_back(id);
     srcSegments.emplace_back(
-        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)},
-        point_type {static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
+        point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)},
+        point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
     qDebug() << "max id:" << id;
     //    const Point::Type kx = (maxX - minX) * 2;
@@ -191,7 +187,7 @@ void VoronoiBoost::boostVoronoi() {
 
         std::set<Path> set;
 
-        for (auto& edge : vd.edges()) {
+        for(auto& edge: vd.edges()) {
             auto v0 = edge.vertex0();
             auto v1 = edge.vertex1();
 
@@ -201,16 +197,16 @@ void VoronoiBoost::boostVoronoi() {
             auto color1 = id0(edge);
             auto color2 = id1(edge);
 
-            if (v0 && v1) {
-                Point p0 {static_cast<Point::Type>(v0->x()), static_cast<Point::Type>(v0->y())};
-                Point p1 {static_cast<Point::Type>(v1->x()), static_cast<Point::Type>(v1->y())};
-                if (color1 != color2 && color1 && color2) {
-                    if (set.emplace(Path {p0, p1}).second && set.emplace(Path {p1, p0}).second) {
-                        if (edge.is_curved() && p0.distTo(p1) < tolerance) {
+            if(v0 && v1) {
+                Point p0{static_cast<Point::Type>(v0->x()), static_cast<Point::Type>(v0->y())};
+                Point p1{static_cast<Point::Type>(v1->x()), static_cast<Point::Type>(v1->y())};
+                if(color1 != color2 && color1 && color2) {
+                    if(set.emplace(Path{p0, p1}).second && set.emplace(Path{p1, p0}).second) {
+                        if(edge.is_curved() && p0.distTo(p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
                             // segments.emplace_back(Path { p0, p1 });
                         } else {
-                            segments.emplace_back(Path {p0, p1});
+                            segments.emplace_back(Path{p0, p1});
                         }
                     }
                 }
@@ -220,7 +216,7 @@ void VoronoiBoost::boostVoronoi() {
     mergeSegments(segments, 0.005 * uScale);
 
     const Point::Type fo = gcp_.params[FrameOffset].toDouble() * uScale;
-    Path frame {
+    Path frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
         {maxX + fo, maxY + fo},
@@ -236,10 +232,10 @@ void VoronoiBoost::boostVoronoi() {
 
     //    dbgPaths(segments, "segments");
     auto clean = [kAngle = 2.0](Path& path) {
-        for (size_t i = 1; i < path.size() - 1; ++i) {
+        for(size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = path[i - 1].angleTo(path[i + 0]);
             const double a2 = path[i + 0].angleTo(path[i + 1]);
-            if (abs(a1 - a2) < kAngle)
+            if(abs(a1 - a2) < kAngle)
                 path.remove(i--);
         }
     };

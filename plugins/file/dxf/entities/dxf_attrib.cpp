@@ -19,12 +19,12 @@ Attrib::Attrib(SectionParser* sp)
 void Attrib::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         default:
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 DxfGo Attrib::toGo() const {

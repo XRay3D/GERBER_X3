@@ -19,7 +19,9 @@ class Ruler final : public QWidget {
     //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
     //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
-    enum { Breadth = 24 };
+    enum {
+        Breadth = 24
+    };
 
     explicit Ruler(Qt::Orientation rulerType, QWidget* parent);
 
@@ -56,11 +58,11 @@ private:
     void DrawFromOriginTo(QPainter* painter, QRectF rulerRect, double startMark, double endMark, int startTickNo, double step, double startPosition);
     void DrawMousePosTick(QPainter* painter);
 
-    double gridStep {1.0};
-    double origin_ {};
-    double rulerUnit_ {1.0};
-    double rulerZoom_ {1.0};
-    double tickKoef {1.0};
+    double gridStep{1.0};
+    double origin_{};
+    double rulerUnit_{1.0};
+    double rulerZoom_{1.0};
+    double tickKoef{1.0};
 
     QPoint cursorPos;
 
@@ -68,6 +70,6 @@ private:
 
     const Qt::Orientation orientation_;
 
-    bool drawText {};
-    bool mouseTracking {};
+    bool drawText{};
+    bool mouseTracking{};
 };

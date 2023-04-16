@@ -22,8 +22,8 @@ namespace CrossHatch {
 Form::Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::HatchingForm)
-    , names {tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
-    , pixmaps {
+    , names{tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
+    , pixmaps{
           QStringLiteral("pock_rast_climb"),
           QStringLiteral("pock_rast_conv"),
       } {
@@ -72,15 +72,15 @@ Form::~Form() {
 }
 
 void Form::computePaths() {
-    const auto tool {ui->toolHolder->tool()};
+    const auto tool{ui->toolHolder->tool()};
 
-    if (!tool.isValid()) {
+    if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
     auto gcp = getNewGcp();
-    if (!gcp)
+    if(!gcp)
         return;
 
     gcp->setConvent(ui->rbConventional->isChecked());
@@ -115,14 +115,14 @@ void Form::updatePixmap() {
 
 void Form::rb_clicked() {
 
-    if (ui->rbOutside->isChecked())
+    if(ui->rbOutside->isChecked())
         side = GCode::Outer;
-    else if (ui->rbInside->isChecked())
+    else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    if (ui->rbClimb->isChecked())
+    if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
-    else if (ui->rbConventional->isChecked())
+    else if(ui->rbConventional->isChecked())
         direction = GCode::Conventional;
 
     updateName();

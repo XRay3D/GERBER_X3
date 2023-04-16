@@ -26,7 +26,7 @@ Item::Item(const Component& component, AbstractFile* file)
     , component_(component) {
     component.setitem(this);
     pathPins.resize(component_.pins().size());
-    for (auto&& poly : component_.footprint())
+    for(auto&& poly: component_.footprint())
         shape_.addPolygon(poly);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -38,7 +38,7 @@ QRectF Item::boundingRect() const {
 }
 
 QPainterPath Item::shape() const {
-    if (!qFuzzyCompare(scale_, App::graphicsView().scaleFactor()))
+    if(!qFuzzyCompare(scale_, App::graphicsView().scaleFactor()))
         scale_ = App::graphicsView().scaleFactor();
     return shape_;
 }
@@ -60,13 +60,13 @@ void drawText(QPainter* painter, const QString& str, const QColor& color, QPoint
 }
 
 void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    auto color {file_->color()};
+    auto color{file_->color()};
     painter->setBrush(color);
     color.setAlpha(255);
     painter->setPen({selected_ ? Qt::red : color, 2 * scale_});
-    auto fillPolygons {shape_.toFillPolygons()};
-    if (fillPolygons.size()) {
-        for (auto&& poly : fillPolygons)
+    auto fillPolygons{shape_.toFillPolygons()};
+    if(fillPolygons.size()) {
+        for(auto&& poly: fillPolygons)
             painter->drawPolygon(poly);
     } else {
         painter->setBrush(Qt::NoBrush);
@@ -79,28 +79,28 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
     double min = std::min(shape_.boundingRect().width(), shape_.boundingRect().height());
     double k = std::min(min, scale_ * s);
     painter->drawLine(
-        component_.referencePoint() + QPointF {k, k},
-        component_.referencePoint() - QPointF {k, k});
+        component_.referencePoint() + QPointF{k, k},
+        component_.referencePoint() - QPointF{k, k});
     painter->drawLine(
-        component_.referencePoint() + QPointF {-k, k},
-        component_.referencePoint() - QPointF {-k, k});
+        component_.referencePoint() + QPointF{-k, k},
+        component_.referencePoint() - QPointF{-k, k});
     painter->setBrush(Qt::NoBrush);
     painter->drawRect(
         {
-            component_.referencePoint() + QPointF {k, k},
-            component_.referencePoint() - QPointF {k, k}
+            component_.referencePoint() + QPointF{k, k},
+            component_.referencePoint() - QPointF{k, k}
     });
-    if (scale_ < 0.05) {
+    if(scale_ < 0.05) {
         double size = std::min(min, scale_ * s);
-        for (const auto& [number, description, pos] : component_.pins()) {
+        for(const auto& [number, description, pos]: component_.pins()) {
             Q_UNUSED(number)
             Q_UNUSED(description)
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(color, 2 * scale_, Qt::SolidLine, Qt::SquareCap, Qt::MiterJoin));
-            painter->drawLine(pos + QPointF {+size, +size}, pos - QPointF {+size, +size});
-            painter->drawLine(pos + QPointF {-size, +size}, pos - QPointF {-size, +size});
+            painter->drawLine(pos + QPointF{+size, +size}, pos - QPointF{+size, +size});
+            painter->drawLine(pos + QPointF{-size, +size}, pos - QPointF{-size, +size});
         }
-        for (const auto& [path, pos] : pathPins) {
+        for(const auto& [path, pos]: pathPins) {
             painter->save();
             painter->translate(pos);
             painter->scale(scale_, -scale_);
@@ -120,14 +120,13 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
         shape_.boundingRect().center(),
         scale_);
 
-    if (scale_ < 0.05)
-        for (const auto& [number, description, pos] : component_.pins()) {
+    if(scale_ < 0.05)
+        for(const auto& [number, description, pos]: component_.pins())
             drawText(painter,
                 QString(description + '(' + number + ')'),
                 App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF,
                 pos + QPointF(0, scale_ * 60),
                 scale_);
-        }
 }
 
 Paths Item::paths(int) const { return {}; }

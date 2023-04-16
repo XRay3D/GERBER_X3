@@ -42,8 +42,8 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         twItem->setIcon(0, decoration(Qt::lightGray, c));
         twItem->setFont(0, boldFont);
         twItem->setExpanded(true);
-        for (const auto& [type, ptr] : map) {
-            auto json {ptr->info()};
+        for(const auto& [type, ptr]: map) {
+            auto json{ptr->info()};
             auto featureItem = new QTreeWidgetItem(twItem);
             featureItem->setExpanded(true);
             featureItem->setIcon(0, ptr->icon());
@@ -56,17 +56,17 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         }
     };
 
-    if (App::filePlugins().size()) {
+    if(App::filePlugins().size()) {
         auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("File Plugins"), "", ""});
         addRows(interfaceItem, 'F', App::filePlugins());
     }
 
-    if (App::shapePlugins().size()) {
+    if(App::shapePlugins().size()) {
         auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("Shape Plugins"), "", ""});
         addRows(interfaceItem, 'S', App::shapePlugins());
     }
 
-    if (App::gCodePlugins().size()) {
+    if(App::gCodePlugins().size()) {
         auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("GCode Plugins"), "", ""});
         addRows(interfaceItem, 'G', App::gCodePlugins());
     }
@@ -77,7 +77,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
 DialogAboutPlugins::~DialogAboutPlugins() { }
 
 void DialogAboutPlugins::setupUi(QDialog* Dialog) {
-    if (Dialog->objectName().isEmpty())
+    if(Dialog->objectName().isEmpty())
         Dialog->setObjectName(QString::fromUtf8("Dialog"));
     Dialog->resize(400, 300);
     verticalLayout = new QVBoxLayout(Dialog);

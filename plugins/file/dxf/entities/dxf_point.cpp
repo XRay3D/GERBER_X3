@@ -37,7 +37,7 @@ Point::Point(SectionParser* sp)
 void Point::parse(Dxf::CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -61,7 +61,7 @@ void Point::parse(Dxf::CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Point::type() const { return POINT; }
@@ -70,7 +70,7 @@ DxfGo Point::toGo() const {
     QPolygonF p;
     p.append(point);
 
-    DxfGo go {id, p, {}}; // return {id, p, {}};
+    DxfGo go{id, p, {}}; // return {id, p, {}};
     return go;
 }
 

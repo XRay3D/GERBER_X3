@@ -100,31 +100,31 @@ public:
     void updatePath(double depth = 0.0);
 
 private:
-    QString name_ {QObject::tr("Default")};
+    QString name_{QObject::tr("Default")};
     QString note_;
 
-    double angle_ {.0};
-    double diameter_ {1.};
-    double feedRate_ {100.};
-    double oneTurnCut_ {0.1};
-    double passDepth_ {2.}; // max thread pitch
-    double plungeRate_ {600.};
-    double spindleSpeed_ {12000.};
-    double stepover_ {0.5};
-    double lenght_ {1.}; //
+    double angle_{.0};
+    double diameter_{1.};
+    double feedRate_{100.};
+    double oneTurnCut_{0.1};
+    double passDepth_{2.}; // max thread pitch
+    double plungeRate_{600.};
+    double spindleSpeed_{12000.};
+    double stepover_{0.5};
+    double lenght_{1.}; //
 
     static inline double depth_;
 
-    int32_t id_ {-1};
+    int32_t id_{-1};
 
     mutable size_t hash_ = 0;
     mutable size_t hash2_ = 0;
 
-    Type type_ {EndMill};
+    Type type_{EndMill};
 
     QPainterPath path_;
 
-    bool autoName_ {true};
+    bool autoName_{true};
 };
 
 using Tools = std::map<int, Tool, std::greater<int>>;

@@ -17,11 +17,13 @@
 
 namespace Clipper2Lib {
 
-enum class Location { Left,
+enum class Location {
+    Left,
     Top,
     Right,
     Bottom,
-    Inside };
+    Inside
+};
 
 class RectClip {
 protected:
@@ -47,7 +49,7 @@ public:
 class RectClipLines : public RectClip {
 public:
     RectClipLines(const Rect64& rect)
-        : RectClip(rect) {};
+        : RectClip(rect){};
     Paths64 Execute(const Path64& path);
 };
 

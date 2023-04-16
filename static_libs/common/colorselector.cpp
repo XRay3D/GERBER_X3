@@ -27,7 +27,7 @@ class PushButton : public QPushButton {
         dialog.setOption(QColorDialog::ShowAlphaChannel, true);
         QColor color(color_);
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
-        if (dialog.exec() && color_ != color)
+        if(dialog.exec() && color_ != color)
             color_ = color;
         //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
     }
@@ -71,7 +71,7 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
     : QWidget(parent)
     , color_(color)
     , defaultColor_(defaultColor) {
-    if (objectName().isEmpty())
+    if(objectName().isEmpty())
         setObjectName(QString::fromUtf8("ColorSelector"));
     auto horizontalLayout = new QHBoxLayout(this);
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));

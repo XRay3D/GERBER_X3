@@ -1,12 +1,49 @@
+#BasedOnStyle: WebKit
+##BreakBeforeBraces: Attach
+##NamespaceIndentation: All
+#AlignArrayOfStructures: Left
+#AlignConsecutiveMacros: 'true'
+#AllowShortLambdasOnASingleLine: All
+#BreakBeforeBraces: Custom
+#BreakBeforeTernaryOperators: 'false'
+#Cpp11BracedListStyle: 'true'
+#FixNamespaceComments: 'true'
 BasedOnStyle: WebKit
-AllowShortLambdasOnASingleLine: All
-#BreakBeforeBraces: Attach
-BreakBeforeTernaryOperators: 'false'
-Standard: Cpp11
-BreakBeforeBraces: Custom
-FixNamespaceComments: 'true'
-#NamespaceIndentation: All
-AlignConsecutiveMacros: 'true'
 AlignTrailingComments: 'true'
-Cpp11BracedListStyle: 'true'
-AlignArrayOfStructures: Right 
+Standard: Cpp11
+AlignArrayOfStructures: Right
+AlignConsecutiveMacros:
+  Enabled: true
+  AlignCompound: true
+  PadOperators: true
+AllowAllArgumentsOnNextLine: false
+AllowShortEnumsOnASingleLine: false
+AllowShortIfStatementsOnASingleLine: AllIfsAndElse
+AllowShortLoopsOnASingleLine: true
+AlwaysBreakTemplateDeclarations: No
+BraceWrapping:
+  AfterFunction: false
+  SplitEmptyFunction: false
+  SplitEmptyRecord: false
+  SplitEmptyNamespace: false
+BreakBeforeBraces: Attach
+BreakBeforeConceptDeclarations: Never
+CompactNamespaces: true
+Cpp11BracedListStyle: true
+FixNamespaceComments: true
+#IntegerLiteralSeparator:
+#  Binary: 4
+#  BinaryMinDigits: 8
+#  Decimal: 3
+#  DecimalMinDigits: 5
+#  Hex: 4
+#  HexMinDigits: 5
+NamespaceIndentation: None
+PackConstructorInitializers: CurrentLine
+RemoveBracesLLVM: true
+SpaceBeforeCpp11BracedList: false
+SpaceBeforeCtorInitializerColon: false
+SpaceBeforeParens: Never
+SpaceBeforeRangeBasedForLoopColon: false
+TabWidth: 4
+AllowShortCaseLabelsOnASingleLine: true

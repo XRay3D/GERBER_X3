@@ -43,7 +43,7 @@ Node::~Node() {
 }
 
 Node* Node::child(int row) const {
-    if (row < 0 || row >= static_cast<int>(childs.size()))
+    if(row < 0 || row >= static_cast<int>(childs.size()))
         return nullptr;
     return childs[row].get();
 }
@@ -51,9 +51,9 @@ Node* Node::child(int row) const {
 Node* Node::parent() const { return parent_; }
 
 void Node::setChild(int row, Node* item) {
-    if (item) {
+    if(item) {
         item->parent_ = this;
-        if (row < static_cast<int>(childs.size()))
+        if(row < static_cast<int>(childs.size()))
             childs[row].reset(item);
     }
 }
@@ -63,7 +63,7 @@ int Node::childCount() const {
 }
 
 int Node::row() const {
-    if (parent_)
+    if(parent_)
         return parent_->childs.indexOf(this);
     //    for (int i = 0, size = parent_->childs.size(); i < size; ++i)
     //        if (parent_->childs[i].get() == this)

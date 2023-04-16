@@ -92,7 +92,7 @@ public:
     }
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
-    QWidget* createForm() override { return /*new Form(this);*/ };
+    QWidget* createForm() override{return /*new Form(this);*/};
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return DRILLING; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

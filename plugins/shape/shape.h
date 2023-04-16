@@ -70,13 +70,13 @@ public:
     int32_t id() const override { return id_; };
 
 protected:
-    Handle* currentHandler {};
+    Handle* currentHandler{};
     mutable mvector<std::unique_ptr<Handle>> handlers;
     Paths paths_;
     //    Node* node_;
     std::map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
-    QPointF initPos;                                     // групповое перемещение
-    bool isFinal {};
+    QPointF initPos; // групповое перемещение
+    bool isFinal{};
 
     // QGraphicsItem interface
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;

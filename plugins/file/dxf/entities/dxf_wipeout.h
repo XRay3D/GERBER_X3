@@ -23,7 +23,7 @@ public:
         do {
             data.push_back(code);
             code = sp->nextCode();
-        } while (code.code() != 0);
+        } while(code.code() != 0);
     }
 };
 } // namespace Dxf

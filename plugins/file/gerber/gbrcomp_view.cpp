@@ -28,7 +28,7 @@ sView::sView(QWidget* parent)
 }
 
 sView::~sView() {
-    if (item)
+    if(item)
         item->setSelected(false);
 }
 
@@ -39,9 +39,9 @@ void sView::setFile(int fileId) {
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         qDebug() << selected.size() << deselected.size();
         static QColor color;
-        if (!selected.indexes().empty()) {
+        if(!selected.indexes().empty()) {
             auto node = reinterpret_cast<sNode*>(selected.indexes().front().internalPointer());
-            if (node->item) {
+            if(node->item) {
                 color = node->item->brush().color();
                 node->item->setBrush(Qt::white);
                 item = node->component.componentitem();
@@ -50,9 +50,9 @@ void sView::setFile(int fileId) {
             }
         }
 
-        if (!deselected.indexes().empty()) {
+        if(!deselected.indexes().empty()) {
             auto node = reinterpret_cast<sNode*>(deselected.indexes().front().internalPointer());
-            if (node->item) {
+            if(node->item) {
                 node->item->setBrush(color);
                 node->component.componentitem()->setSelected(false);
             }

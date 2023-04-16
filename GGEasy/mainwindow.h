@@ -159,7 +159,7 @@ private:
         class QWidget* widget;
         class QVBoxLayout* verticalLayout;
         FileTree::View* treeView;
-        void setupUi(QMainWindow* MainWindow);       // setupUi
+        void setupUi(QMainWindow* MainWindow); // setupUi
         void retranslateUi(QMainWindow* MainWindow); // retranslateUi
     } ui;
 };

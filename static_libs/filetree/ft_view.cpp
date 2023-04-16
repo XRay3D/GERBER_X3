@@ -58,14 +58,14 @@ void View::updateTree() {
 void View::updateIcons() {
     QModelIndex index = model_->index(0, 0, QModelIndex());
     int rowCount = static_cast<Node*>(index.internalPointer())->childCount();
-    for (int r = 0; r < rowCount; ++r)
+    for(int r = 0; r < rowCount; ++r)
         update(model_->index(r, 0, index));
 }
 
 void View::on_doubleClicked(const QModelIndex& index) {
-    if (!index.column()) {
+    if(!index.column()) {
         menuIndex_ = index;
-        if (index.data(Role::NodeType).toInt() != Type::Folder)
+        if(index.data(Role::NodeType).toInt() != Type::Folder)
             hideOther();
         //        if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
         //            hideOther();
@@ -86,22 +86,20 @@ void View::on_doubleClicked(const QModelIndex& index) {
 }
 
 void View::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-    if (!selected.indexes().isEmpty()) {
-        for (auto& index : selected.indexes())
+    if(!selected.indexes().isEmpty())
+        for(auto& index: selected.indexes())
             model_->setData(index, true, Role::Select);
-    }
-    if (!deselected.indexes().isEmpty()) {
-        for (auto& index : deselected.indexes())
+    if(!deselected.indexes().isEmpty())
+        for(auto& index: deselected.indexes())
             model_->setData(index, false, Role::Select);
-    }
 }
 
 void View::hideOther() {
     const int rowCount = static_cast<Node*>(menuIndex_.parent().internalPointer())->childCount();
-    for (int row = 0; row < rowCount; ++row) {
+    for(int row = 0; row < rowCount; ++row) {
         QModelIndex index2 = menuIndex_.sibling(row, 0);
         auto* item = static_cast<Node*>(index2.internalPointer());
-        if (row == menuIndex_.row())
+        if(row == menuIndex_.row())
             item->setData(index2, Qt::Checked, Qt::CheckStateRole);
         else
             item->setData(index2, Qt::Unchecked, Qt::CheckStateRole);
@@ -154,7 +152,7 @@ void View::setModel(QAbstractItemModel* model) {
         setIconSize(QSize(24, 24));
         const int w = indentation();
         const QModelIndex& row = model->index(0, 0, QModelIndex());
-        if (row.isValid()) {
+        if(row.isValid()) {
             const int h = rowHeight(row);
             QImage i(w, h, QImage::Format_ARGB32);
             QPainter p(&i);
@@ -184,39 +182,38 @@ void View::showExcellonDialog() { }
 void View::contextMenuEvent(QContextMenuEvent* event) {
     menuIndex_ = indexAt(event->pos());
     qDebug() << menuIndex_;
-    if (!menuIndex_.isValid())
+    if(!menuIndex_.isValid())
         return;
     QMenu menu(this);
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
-    if (menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
+    if(menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
         const uint32_t type = menuIndex_.data(Role::Id).value<uint32_t>(); // File Type
         const int nodeType = menuIndex_.data(Role::ContentType).toInt();
-        if (App::filePlugins().contains(type)) {
+        if(App::filePlugins().contains(type))
             App::filePlugin(type)->createMainMenu(menu, this);
-        } else if (App::gCodePlugins().contains(type)) {
+        else if(App::gCodePlugins().contains(type))
             App::gCodePlugin(type)->createMainMenu(menu, this);
-        } else if (nodeType == Type::AbstractShape) {
+        else if(nodeType == Type::AbstractShape)
             App::shapePlugins().begin()->second->createMainMenu(menu, this);
-        } else if (type == G_CODE) {
+        else if(type == G_CODE)
             App::gCodePlugins().begin()->second->createMainMenu(menu, this);
-        }
     } else {
         reinterpret_cast<Node*>(menuIndex_.internalId())->menu(menu, this);
-        if (auto selectedRows {selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
+        if(auto selectedRows{selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
             menu.addSeparator();
             // TODO rename Action in future.
             menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
-                std::ranges::sort(selectedRows, std::greater {}, &QModelIndex::row);
-                for (auto&& index : selectedRows)
+                std::ranges::sort(selectedRows, std::greater{}, &QModelIndex::row);
+                for(auto&& index: selectedRows)
                     model_->removeRow(index.row(), index.parent());
             });
         }
         {
-            auto selectedRows {selectionModel()->selectedRows().toVector()};
-            if (selectedRows.empty())
+            auto selectedRows{selectionModel()->selectedRows().toVector()};
+            if(selectedRows.empty())
                 selectedRows.push_back(menuIndex_);
             auto file = App::project().file(selectedRows.front().data(FileTree::Id).toInt());
-            if (file) {
+            if(file) {
                 menu.addSeparator();
                 menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
                     auto files = selectedRows
@@ -224,24 +221,24 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                             [](auto&& index) { return App::project().file(index.data(FileTree::Id).toInt()); })
                         | std::views::filter(
                             [](auto&& file) { return file != nullptr; });
-                    if (!std::ranges::empty(files))
+                    if(!std::ranges::empty(files))
                         TransformDialog({files.begin(), files.end()}, this).exec();
                 });
             }
         }
     }
 
-    if (!menu.isEmpty())
+    if(!menu.isEmpty())
         menu.exec(viewport()->mapToGlobal(event->pos()));
 }
 
 void View::mousePressEvent(QMouseEvent* event) {
     QTreeView::mousePressEvent(event);
-    if (event->button() == Qt::LeftButton) {
+    if(event->button() == Qt::LeftButton) {
         QModelIndex index = indexAt(event->pos());
-        if (index.isValid()) {
-            if (index.column() == 0) {
-                if (event->pos().x() > visualRect(index).left() + 44)
+        if(index.isValid()) {
+            if(index.column() == 0) {
+                if(event->pos().x() > visualRect(index).left() + 44)
                     edit(index);
             } else
                 edit(index);
@@ -251,7 +248,7 @@ void View::mousePressEvent(QMouseEvent* event) {
 
 void View::mouseDoubleClickEvent(QMouseEvent* event) {
     menuIndex_ = indexAt(event->pos());
-    if (menuIndex_.isValid() && menuIndex_.parent().row() > -1)
+    if(menuIndex_.isValid() && menuIndex_.parent().row() > -1)
         hideOther();
     else
         QTreeView::mouseDoubleClickEvent(event);

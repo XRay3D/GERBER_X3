@@ -16,17 +16,17 @@
 namespace Drilling {
 
 GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const Paths& draw_)
-    : path_ {std::move(path)}
-    , row {row}
-    , toolId_ {toolId} {
+    : path_{std::move(path)}
+    , row{row}
+    , toolId_{toolId} {
     sourceDiameter_ = diameter;
-    if (path_.size() > 1) {
-        Timer<mS> t {__FUNCTION__};
-        for (auto&& path_ : C2::InflatePaths(Paths {path_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale)
+    if(path_.size() > 1) {
+        Timer<mS> t{__FUNCTION__};
+        for(auto&& path_: C2::InflatePaths(Paths{path_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale)
             /*offset(path_, sourceDiameter_)*/)
             sourcePath_.addPolygon(path_);
     } else {
-        for (auto&& path_ : draw_)
+        for(auto&& path_: draw_)
             sourcePath_.addPolygon(path_);
         //        setPos(hv_.front());
     }
@@ -35,21 +35,21 @@ GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const P
 }
 
 void GiPreview::updateTool() {
-    if (toolId() > -1) {
+    if(toolId() > -1) {
         colorState |= Tool;
-        if (path_.size() > 1)
+        if(path_.size() > 1)
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
                 const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                for (Path& path_ : C2::InflatePaths(Paths {path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
+                for(Path& path_: C2::InflatePaths(Paths{path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(path_);
                 }
                 Path path_(val);
-                if (path_.size()) {
-                    for (QPointF point : path_) {
+                if(path_.size()) {
+                    for(QPointF point: path_) {
                         painterPath.moveTo(point - QPointF(0.0, lineKoeff));
                         painterPath.lineTo(point + QPointF(0.0, lineKoeff));
                         painterPath.moveTo(point - QPointF(lineKoeff, 0.0));
@@ -80,7 +80,7 @@ void GiPreview::updateTool() {
 }
 
 Paths GiPreview::paths() const {
-    if (path_.size() > 1)
+    if(path_.size() > 1)
         return {path_};
     else
         return sourcePath_.toSubpathPolygons();

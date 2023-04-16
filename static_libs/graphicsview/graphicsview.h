@@ -33,14 +33,14 @@ class GraphicsView : public QGraphicsView {
         template <typename... Es>
             requires(std::is_enum_v<Es> && ...) || (sizeof...(Es) == 0)
         constexpr EnumHelper(Es... es)
-            : array {es...} { }
+            : array{es...} { }
         int array[N];
         template <size_t... Is>
         constexpr bool impl(auto* item, std::index_sequence<Is...>) const {
             return ((item->type() == array[Is]) || ...);
         }
         constexpr bool operator()(auto* item) const {
-            return impl(item, std::make_index_sequence<N> {});
+            return impl(item, std::make_index_sequence<N>{});
         }
     };
 
@@ -74,13 +74,13 @@ public:
     bool boundingRectFl() const { return boundingRect_; }
 
     void startUpdateTimer(int timeMs) {
-        if (timerId)
+        if(timerId)
             killTimer(timerId);
         timerId = startTimer(timeMs);
     }
 
     void stopUpdateTimer() {
-        if (timerId)
+        if(timerId)
             killTimer(timerId);
         timerId = 0;
     }
@@ -88,12 +88,12 @@ public:
     /////////////////////////////////
     template <typename T = QGraphicsItem, typename... Ts>
     auto items(Ts... ts) const {
-        return getItemImpl<qOverload<Qt::SortOrder>(&QGraphicsScene::items), T>(EnumHelper {ts...}, Qt::DescendingOrder);
+        return getItemImpl<qOverload<Qt::SortOrder>(&QGraphicsScene::items), T>(EnumHelper{ts...}, Qt::DescendingOrder);
     }
 
     template <typename T = QGraphicsItem, typename... Ts>
     auto selectedItems(Ts... ts) const {
-        return getItemImpl<&QGraphicsScene::selectedItems, T>(EnumHelper {ts...});
+        return getItemImpl<&QGraphicsScene::selectedItems, T>(EnumHelper{ts...});
     }
 
     template <typename T>
@@ -101,7 +101,7 @@ public:
 
     template <typename T, typename... Args>
     auto addItem(Args... args) const {
-        auto item = new T {std::forward<Args>(args)...};
+        auto item = new T{std::forward<Args>(args)...};
         return addItem(item);
     }
 
@@ -116,20 +116,20 @@ private:
     std::vector<T*> getItemImpl(FilterInt&& et, Args&&... args) const {
         const auto items = (scene()->*Ptr)(std::forward<Args>(args)...); // get all items
         constexpr bool isQGraphicsItem = std::is_same_v<T, QGraphicsItem>;
-        if constexpr (isQGraphicsItem && !FilterInt::value) {            //  вернуть все QGraphicsItem*
+        if constexpr(isQGraphicsItem && !FilterInt::value) { //  вернуть все QGraphicsItem*
             return {items.begin(), items.end()};
         } else {
             // WARNING FilterInt faster than dynamic_cast
             // to improve speed dont use FilterDyn
             using FilterDyn = decltype([](auto* item) { return bool(dynamic_cast<T*>(item)); });
             using Transform = decltype([](auto* item) { return static_cast<T*>(item); });
-            if constexpr (!isQGraphicsItem && !FilterInt::value) { // вернуть все T*
-                auto rview = items | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
+            if constexpr(!isQGraphicsItem && !FilterInt::value) { // вернуть все T*
+                auto rview = items | rviews::filter(FilterDyn{}) | rviews::transform(Transform{});
                 return {rview.begin(), rview.end()};
-            } else if constexpr (!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
-                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn {}) | rviews::transform(Transform {});
+            } else if constexpr(!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
+                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn{}) | rviews::transform(Transform{});
                 return {rview.begin(), rview.end()};
-            } else if constexpr (isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
+            } else if constexpr(isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
                 auto rview = items | rviews::filter(et);
                 return {rview.begin(), rview.end()};
             }
@@ -140,9 +140,9 @@ private:
     Ruler* const vRuler;
     QGridLayout* const gridLayout;
     //    Scene* scene_;
-    bool ruler_ {};
-    int rulerCtr {};
-    bool boundingRect_ {};
+    bool ruler_{};
+    int rulerCtr{};
+    bool boundingRect_{};
     void updateRuler();
     template <class T>
     void animate(QObject* target, const QByteArray& propertyName, T begin, T end);
@@ -151,7 +151,7 @@ private:
 
     void drawRuller(QPainter* painter, const QRectF& rect) const;
 
-    int timerId {};
+    int timerId{};
     // QWidget interface
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;

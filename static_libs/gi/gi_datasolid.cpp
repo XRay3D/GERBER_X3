@@ -21,9 +21,9 @@
 
 GiDataSolid::GiDataSolid(Paths& paths, AbstractFile* file)
     : GraphicsItem(file)
-    , paths_ {paths} {
-    for (Path path : paths) {
-        if (path.size() && path.back() != path.front())
+    , paths_{paths} {
+    for(Path path: paths) {
+        if(path.size() && path.back() != path.front())
             path.push_back(path.front());
         shape_.addPolygon(path);
     }
@@ -70,18 +70,18 @@ void GiDataSolid::redraw() {
 }
 
 void GiDataSolid::setPaths(Paths paths, int alternate) {
-    auto t {transform()};
-    auto a {qRadiansToDegrees(asin(t.m12()))};
+    auto t{transform()};
+    auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
-    auto x {t.dx()};
-    auto y {t.dy()};
+    auto x{t.dx()};
+    auto y{t.dy()};
     shape_ = {};
 
     // reverse transform
     t = {};
     t.rotate(-a);
     t.translate(-x, -y);
-    for (auto&& path : paths) {
+    for(auto&& path: paths) {
         path = t.map(path);
         shape_.addPolygon(path);
     }
@@ -97,7 +97,7 @@ void GiDataSolid::changeColor() {
 
     bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         break;
     case Hovered:
@@ -112,7 +112,7 @@ void GiDataSolid::changeColor() {
 
     pathColor_ = colorPtr_ ? *colorPtr_ : color_;
     pathColor_.setAlpha(100);
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         //        pathColor_.setAlpha(100);
         break;

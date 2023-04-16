@@ -23,7 +23,7 @@ namespace PocketRaster {
 Form::Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::PocketRasterForm)
-    , names {tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
+    , names{tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
 
     setWindowTitle(tr("Pocket Raster Toolpath"));
@@ -73,15 +73,15 @@ Form::~Form() {
 }
 
 void Form::computePaths() {
-    const auto tool {ui->toolHolder1->tool()};
+    const auto tool{ui->toolHolder1->tool()};
 
-    if (!tool.isValid()) {
+    if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
     auto gcp = getNewGcp();
-    if (!gcp)
+    if(!gcp)
         return;
 
     gcp->setConvent(ui->rbConventional->isChecked());
@@ -91,7 +91,7 @@ void Form::computePaths() {
     gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
     gcp->params[GCode::Params::Depth] = dsbxDepth->value();
     gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
-    if (ui->rbFast->isChecked()) {
+    if(ui->rbFast->isChecked()) {
         gcp->params[Creator::Fast] = true;
         gcp->params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
     }
@@ -101,8 +101,8 @@ void Form::computePaths() {
 }
 
 void Form::updateName() {
-    const auto& tool {ui->toolHolder1->tool()};
-    if (tool.type() != Tool::Laser)
+    const auto& tool{ui->toolHolder1->tool()};
+    if(tool.type() != Tool::Laser)
         ui->rbNormal->setChecked(true);
     ui->rbFast->setEnabled(tool.type() == Tool::Laser);
 
@@ -115,14 +115,14 @@ void Form::updatePixmap() {
 
 void Form::rb_clicked() {
 
-    if (ui->rbOutside->isChecked())
+    if(ui->rbOutside->isChecked())
         side = GCode::Outer;
-    else if (ui->rbInside->isChecked())
+    else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    if (ui->rbClimb->isChecked())
+    if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
-    else if (ui->rbConventional->isChecked())
+    else if(ui->rbConventional->isChecked())
         direction = GCode::Conventional;
 
     updateName();

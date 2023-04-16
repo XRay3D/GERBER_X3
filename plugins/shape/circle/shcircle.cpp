@@ -43,7 +43,7 @@ void Circle::redraw() {
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
-    for (int i = 0; i <= intSteps; i++) {
+    for(int i = 0; i <= intSteps; i++) {
         const double theta = delta_angle * i;
         path.emplace_back(Point(
             static_cast<Point::Type>(radius * cos(theta)) + center.x,
@@ -67,7 +67,7 @@ void Circle::setPt(const QPointF& pt) {
 double Circle::radius() const { return radius_; }
 
 void Circle::setRadius(double radius) {
-    if (!qFuzzyCompare(radius_, radius))
+    if(!qFuzzyCompare(radius_, radius))
         return;
     radius_ = radius;
     redraw();
@@ -81,7 +81,7 @@ int PluginImpl::type() const { return GiType::ShCircle; }
 
 QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
-AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point + QPointF {5, 0}); }
+AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point + QPointF{5, 0}); }
 
 } // namespace Shapes
 

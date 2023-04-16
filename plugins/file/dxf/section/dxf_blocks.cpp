@@ -24,16 +24,16 @@ void SectionBLOCKS::parse() {
     CodeData code;
     do {
         code = nextCode();
-        if (code == "BLOCK") {
+        if(code == "BLOCK") {
             auto block = new Block(blocks, this);
-            if (!block->blockName.isEmpty()) {
+            if(!block->blockName.isEmpty()) {
                 blocks[block->blockName] = block;
             } else {
                 delete block;
                 throw DxfObj::tr("blockName ERR!");
             }
         }
-    } while (code != "ENDSEC");
+    } while(code != "ENDSEC");
 }
 
 } // namespace Dxf

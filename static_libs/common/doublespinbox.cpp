@@ -37,15 +37,15 @@ void DoubleSpinBox::setMinimum(double min) {
 }
 
 void DoubleSpinBox::flicker() {
-    if (qFuzzyIsNull(value()))
-        for (int i = 0, t = 0; i < 3; ++i) {
+    if(qFuzzyIsNull(value()))
+        for(int i = 0, t = 0; i < 3; ++i) {
             QTimer::singleShot(++t * 150, Qt::CoarseTimer, this, &DoubleSpinBox::red);
             QTimer::singleShot(++t * 150, Qt::CoarseTimer, this, &DoubleSpinBox::normal);
         }
 }
 
 bool DoubleSpinBox::eventFilter(QObject* watched, QEvent* event) {
-    if (event->type() == QEvent::MouseButtonRelease)
+    if(event->type() == QEvent::MouseButtonRelease)
         lineEdit()->setSelection(0, lineEdit()->text().length() - suffix().length()); //->selectAll();
     return QDoubleSpinBox::eventFilter(watched, event);
 }
@@ -63,7 +63,7 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
     //        lineEdit()->setSelection(start, 100);
     //        return;
     //    }
-    if (event->text() == '.' || event->text() == ',') {
+    if(event->text() == '.' || event->text() == ',') {
         QKeyEvent ke(event->type(), Qt::Key_Comma, event->modifiers(), QLocale().decimalPoint());
         QDoubleSpinBox::keyPressEvent(&ke);
     } else
@@ -76,9 +76,9 @@ double DoubleSpinBox::valueFromText(const QString& text) const {
     qDebug() << __FUNCTION__ << text;
     str = text.mid(0, text.size() - suffix().size());
     try {
-        if (str.size())
-            return MathParser(nullptr).parse(str);
-    } catch (...) { }
+        if(str.size())                             //
+            return MathParser(nullptr).parse(str); //
+    } catch(...) { }                               //
     return 0;
 }
 

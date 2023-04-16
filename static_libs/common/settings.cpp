@@ -39,7 +39,7 @@ int AppSettings::clpCircleSegments(double radius) {
     const double length = clpMinCircleSegmentLength_; // mm
     const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (radius)));
     int intSteps = clpMinCircleSegments_;
-    while (intSteps < destSteps)
+    while(intSteps < destSteps)
         intSteps <<= 1;
     return intSteps;
 }
@@ -57,7 +57,7 @@ bool AppSettings::inch() { return inch_; }
 void AppSettings::setInch(bool val) { inch_ = val; }
 
 QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod) {
-    if ((mod & Qt::ALT) || snap_) {
+    if((mod & Qt::ALT) || snap_) {
         const double gs = AppSettings::gridStep(App::graphicsView().getScale());
         QPointF px(pt / gs);
         px.setX(gs * round(px.x()));

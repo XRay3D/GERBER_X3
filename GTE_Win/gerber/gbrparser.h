@@ -94,15 +94,15 @@ private:
     Paths merge() {
         m_mergedPaths.clear();
         int i = 0;
-        while (i < m_file.size()) {
+        while(i < m_file.size()) {
             Clipper clipper;
             clipper.AddPaths(m_mergedPaths, ptSubject, true);
             const auto exp = m_file.at(i).state().imgPolarity();
             do {
                 const GraphicObject& go = m_file.at(i++);
                 clipper.AddPaths(go.paths(), ptClip, true);
-            } while (i < m_file.size() && exp == m_file.at(i).state().imgPolarity());
-            if (m_file.at(i - 1).state().imgPolarity() == Positive)
+            } while(i < m_file.size() && exp == m_file.at(i).state().imgPolarity());
+            if(m_file.at(i - 1).state().imgPolarity() == Positive)
                 clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
             else
                 clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);

@@ -79,10 +79,10 @@ struct Variant : V {
         uint8_t index;
         stream >> index;
         using Init = V& (*)(V&);
-        static std::unordered_map<uint8_t, Init> map {
-            {0, [](V& v) -> V& { return v = int {}; }      },
-            {1, [](V& v) -> V& { return v = double {}; }   },
-            {2, [](V& v) -> V& { return v = UsedItems {}; }},
+        static std::unordered_map<uint8_t, Init> map{
+            {0,       [](V& v) -> V& { return v = int{}; }},
+            {1,    [](V& v) -> V& { return v = double{}; }},
+            {2, [](V& v) -> V& { return v = UsedItems{}; }},
         };
         std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
         return stream;
@@ -103,31 +103,28 @@ struct Variant : V {
     int toInt() const {
         return std::visit([](auto&& val) -> int {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>) {
+            if constexpr (std::is_same_v<T, UsedItems>)
                 return int{};
-            } else {
-                return int(val);
-            } }, (V&)*this);
+             else
+                return int(val); }, (V&)*this);
     }
 
     bool toBool() const {
         return std::visit([](auto&& val) -> bool {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>) {
+            if constexpr (std::is_same_v<T, UsedItems>)
                 return bool{};
-            } else {
-                return bool(val);
-            } }, (V&)*this);
+             else
+                return bool(val); }, (V&)*this);
     }
 
     double toDouble() const {
         return std::visit([](auto&& val) -> double {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>) {
+            if constexpr (std::is_same_v<T, UsedItems>)
                 return {};
-            } else {
-                return double(val);
-            } }, (V&)*this);
+             else
+                return double(val); }, (V&)*this);
     }
 
     template <class T>
@@ -166,7 +163,7 @@ public:
         Depth,
         GrItems,
         MultiToolIndex, // need for Pocket
-        NotTile,        // не раскладывать если даже раскладка включена
+        NotTile, // не раскладывать если даже раскладка включена
         Side,
 
         UserParam = 100
@@ -175,12 +172,12 @@ public:
     Q_ENUM(Param)
 
     Params() {
-        if (!params.contains(MultiToolIndex))
+        if(!params.contains(MultiToolIndex))
             params[MultiToolIndex] = 0;
     }
 
     Params(const Tool& tool, double depth /*, uint32_t type*/)
-        : Params {} {
+        : Params{} {
         tools.emplace_back(tool);
         params[Params::Depth] = depth;
         //        gcType = type;
@@ -231,22 +228,22 @@ public:
 class Settings {
     // protected:
 public:
-    /*static inline*/ QString fileExtension_ {"tap"};
-    /*static inline*/ QString formatMilling_ {"G?X?Y?Z?F?S?"};
-    /*static inline*/ QString formatLaser_ {"G?X?Y?Z?F?S?"};
-    /*static inline*/ QString laserConstOn_ {"M3"};
-    /*static inline*/ QString laserDynamOn_ {"M4"};
-    /*static inline*/ QString spindleLaserOff_ {"M5"};
-    /*static inline*/ QString spindleOn_ {"M3"};
+    /*static inline*/ QString fileExtension_{"tap"};
+    /*static inline*/ QString formatMilling_{"G?X?Y?Z?F?S?"};
+    /*static inline*/ QString formatLaser_{"G?X?Y?Z?F?S?"};
+    /*static inline*/ QString laserConstOn_{"M3"};
+    /*static inline*/ QString laserDynamOn_{"M4"};
+    /*static inline*/ QString spindleLaserOff_{"M5"};
+    /*static inline*/ QString spindleOn_{"M3"};
 
-    /*static inline*/ QString start_ {"G21 G17 G90\nM3 S?"};
-    /*static inline*/ QString end_ {"M5\nM30"};
+    /*static inline*/ QString start_{"G21 G17 G90\nM3 S?"};
+    /*static inline*/ QString end_{"M5\nM30"};
 
-    /*static inline*/ QString laserStart_ {"G21 G17 G90"};
-    /*static inline*/ QString laserEnd_ {"M30"};
+    /*static inline*/ QString laserStart_{"G21 G17 G90"};
+    /*static inline*/ QString laserEnd_{"M30"};
 
-    /*static inline*/ bool info_ {true};
-    /*static inline*/ bool sameFolder_ {true};
+    /*static inline*/ bool info_{true};
+    /*static inline*/ bool sameFolder_{true};
 
 public:
     /*static*/ QString fileExtension() { return fileExtension_; }

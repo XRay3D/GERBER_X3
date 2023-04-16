@@ -39,7 +39,7 @@ Line::Line(SectionParser* sp)
 void Line::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -71,14 +71,14 @@ void Line::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Line::type() const { return Type::LINE; }
 
 DxfGo Line::toGo() const {
     QPolygonF p;
-    if (p.isEmpty()) {
+    if(p.isEmpty()) {
         p.append(startPoint);
         p.append(endPoint);
     }
@@ -88,7 +88,7 @@ DxfGo Line::toGo() const {
     //    offset.AddPath(p, JoinType::Round, EndType::Round);
     //    paths = offset.Execute(thickness * uScale);
 
-    DxfGo go {id, p, paths}; // return {id, p, paths};
+    DxfGo go{id, p, paths}; // return {id, p, paths};
     return go;
 }
 

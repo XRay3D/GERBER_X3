@@ -18,13 +18,13 @@
 #include <numbers>
 
 Path CirclePath(double diametr, const Point& center) {
-    if (diametr == 0.0)
+    if(diametr == 0.0)
         return Path();
 
     const double radius = diametr * 0.5;
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
     Path poligon(intSteps);
-    for (int i {}; auto&& pt : poligon) {
+    for(int i{}; auto&& pt: poligon) {
         pt = Point(static_cast<Point::Type>(cos(i * 2 * pi / intSteps) * radius),
                  static_cast<Point::Type>(sin(i * 2 * pi / intSteps) * radius))
             + center;
@@ -37,13 +37,13 @@ Path RectanglePath(double width, double height, const Point& center) {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    Path poligon {
+    Path poligon{
         Point(static_cast<Point::Type>(-halfWidth + center.x), static_cast<Point::Type>(+halfHeight + center.y)),
         Point(static_cast<Point::Type>(-halfWidth + center.x), static_cast<Point::Type>(-halfHeight + center.y)),
         Point(static_cast<Point::Type>(+halfWidth + center.x), static_cast<Point::Type>(-halfHeight + center.y)),
         Point(static_cast<Point::Type>(+halfWidth + center.x), static_cast<Point::Type>(+halfHeight + center.y)),
     };
-    if (Area(poligon) < 0.0)
+    if(Area(poligon) < 0.0)
         ReversePath(poligon);
 
     return poligon;
@@ -51,20 +51,20 @@ Path RectanglePath(double width, double height, const Point& center) {
 
 void RotatePath(Path& poligon, double angle, const Point& center) {
     const bool fl = Area(poligon) < 0;
-    for (Point& pt : poligon) {
+    for(Point& pt: poligon) {
         const double dAangle = qDegreesToRadians(angle - center.angleTo(pt));
         const double length = center.distTo(pt);
         pt = Point(static_cast<Point::Type>(cos(dAangle) * length), static_cast<Point::Type>(sin(dAangle) * length));
         pt.x += center.x;
         pt.y += center.y;
     }
-    if (fl != (Area(poligon) < 0))
+    if(fl != (Area(poligon) < 0))
         ReversePath(poligon);
 }
 
 Path& TranslatePath(Path& path, const Point& pos) {
-    if (pos.x != 0 || pos.y != 0)
-        for (auto& pt : path) {
+    if(pos.x != 0 || pos.y != 0)
+        for(auto& pt: path) {
             pt.x += pos.x;
             pt.y += pos.y;
         }
@@ -72,14 +72,14 @@ Path& TranslatePath(Path& path, const Point& pos) {
 }
 
 Paths& TranslatePaths(Paths& paths, const Point& pos) {
-    for (auto&& path : paths)
+    for(auto&& path: paths)
         TranslatePath(path, pos);
     return paths;
 }
 
 double Perimeter(const Path& path) {
     double p = 0.0;
-    for (size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
+    for(size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
         double x = path[j].x - path[i].x;
         double y = path[j].y - path[i].y;
         p += x * x + y * y;
@@ -92,29 +92,29 @@ void mergeSegments(Paths& paths, double glue) {
     size_t size;
     do {
         size = paths.size();
-        for (size_t i = 0; i < paths.size(); ++i) {
-            if (i >= paths.size())
+        for(size_t i = 0; i < paths.size(); ++i) {
+            if(i >= paths.size())
                 break;
-            for (size_t j = 0; j < paths.size(); ++j) {
-                if (i == j)
+            for(size_t j = 0; j < paths.size(); ++j) {
+                if(i == j)
                     continue;
-                if (i >= paths.size())
+                if(i >= paths.size())
                     break;
                 Point pib = paths[i].back();
                 Point pjf = paths[j].front();
-                if (pib == pjf) {
+                if(pib == pjf) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
                 Point pif = paths[i].front();
                 Point pjb = paths[j].back();
-                if (pif == pjb) {
+                if(pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
-                if (pib == pjb) {
+                if(pib == pjb) {
                     ReversePath(paths[j]);
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
@@ -122,34 +122,34 @@ void mergeSegments(Paths& paths, double glue) {
                 }
             }
         }
-    } while (size != paths.size());
-    if (qFuzzyIsNull(glue))
+    } while(size != paths.size());
+    if(qFuzzyIsNull(glue))
         return;
     do {
         size = paths.size();
-        for (size_t i = 0; i < paths.size(); ++i) {
-            if (i >= paths.size())
+        for(size_t i = 0; i < paths.size(); ++i) {
+            if(i >= paths.size())
                 break;
-            for (size_t j = 0; j < paths.size(); ++j) {
-                if (i == j)
+            for(size_t j = 0; j < paths.size(); ++j) {
+                if(i == j)
                     continue;
-                if (i >= paths.size())
+                if(i >= paths.size())
                     break;
                 Point pib = paths[i].back();
                 Point pjf = paths[j].front();
-                if (pib.distTo(pjf) < glue) {
+                if(pib.distTo(pjf) < glue) {
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
                 Point pif = paths[i].front();
                 Point pjb = paths[j].back();
-                if (pif.distTo(pjb) < glue) {
+                if(pif.distTo(pjb) < glue) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
-                if (pib.distTo(pjb) < glue) {
+                if(pib.distTo(pjb) < glue) {
                     ReversePath(paths[j]);
                     paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
                     paths.erase(paths.begin() + j--);
@@ -157,7 +157,7 @@ void mergeSegments(Paths& paths, double glue) {
                 }
             }
         }
-    } while (size != paths.size());
+    } while(size != paths.size());
 }
 
 void mergePaths(Paths& paths, const double dist) {
@@ -165,56 +165,56 @@ void mergePaths(Paths& paths, const double dist) {
     size_t max;
     do {
         max = paths.size();
-        for (size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i = 0; i < paths.size(); ++i) {
             //            setMax(max);
             //            setCurrent(max - paths.size());
             //            ifCancelThenThrow();
-            for (size_t j = 0; j < paths.size(); ++j) {
-                if (i == j)
+            for(size_t j = 0; j < paths.size(); ++j) {
+                if(i == j)
                     continue;
-                else if (paths[i].front() == paths[j].front()) {
+                else if(paths[i].front() == paths[j].front()) {
                     ReversePath(paths[j]);
                     paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
-                } else if (paths[i].back() == paths[j].back()) {
+                } else if(paths[i].back() == paths[j].back()) {
                     ReversePath(paths[j]);
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     break;
-                } else if (paths[i].front() == paths[j].back()) {
+                } else if(paths[i].front() == paths[j].back()) {
                     paths[j].append(paths[i].mid(1));
                     paths.remove(i--);
                     break;
-                } else if (paths[j].front() == paths[i].back()) {
+                } else if(paths[j].front() == paths[i].back()) {
                     paths[i].append(paths[j].mid(1));
                     paths.remove(j--);
                     break;
                 }
             }
         }
-    } while (max != paths.size());
-    if (dist != 0.0) {
+    } while(max != paths.size());
+    if(dist != 0.0) {
         do {
             max = paths.size();
-            for (size_t i = 0; i < paths.size(); ++i) {
-                for (size_t j = 0; j < paths.size(); ++j) {
-                    if (i == j)
+            for(size_t i = 0; i < paths.size(); ++i) {
+                for(size_t j = 0; j < paths.size(); ++j) {
+                    if(i == j)
                         continue;
-                    /*  */ if (paths[i].back().distTo(paths[j].back()) < dist) {
+                    /*  */ if(paths[i].back().distTo(paths[j].back()) < dist) {
                         ReversePath(paths[j]);
                         paths[i].append(paths[j].mid(1));
                         paths.remove(j--);
                         break; //
-                    } else if (paths[i].back().distTo(paths[j].front()) < dist) {
+                    } else if(paths[i].back().distTo(paths[j].front()) < dist) {
                         paths[i].append(paths[j].mid(1));
                         paths.remove(j--);
                         break; //
-                    } else if (paths[i].front().distTo(paths[j].back()) < dist) {
+                    } else if(paths[i].front().distTo(paths[j].back()) < dist) {
                         paths[j].append(paths[i].mid(1));
                         paths.remove(i--);
                         break;
-                    } else if (paths[i].front().distTo(paths[j].front()) < dist) {
+                    } else if(paths[i].front().distTo(paths[j].front()) < dist) {
                         ReversePath(paths[j]);
                         paths[j].append(paths[i].mid(1));
                         paths.remove(i--);
@@ -222,7 +222,7 @@ void mergePaths(Paths& paths, const double dist) {
                     }
                 }
             }
-        } while (max != paths.size());
+        } while(max != paths.size());
     }
 }
 
@@ -237,7 +237,7 @@ QIcon drawIcon(const Paths& paths, QColor color) {
 
     QPainterPath painterPath;
 
-    for (auto&& polygon : paths)
+    for(auto&& polygon: paths)
         painterPath.addPolygon(polygon);
 
     const QRectF rect = painterPath.boundingRect();
@@ -246,7 +246,7 @@ QIcon drawIcon(const Paths& paths, QColor color) {
 
     double ky = rect.bottom() * scale;
     double kx = rect.left() * scale;
-    if (rect.width() > rect.height())
+    if(rect.width() > rect.height())
         ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;

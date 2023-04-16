@@ -33,8 +33,8 @@ void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
     auto comboBox = qobject_cast<QComboBox*>(editor);
     comboBox->clear();
     int ctr = 0;
-    for (auto& [id, name, toolTip] : App::project().file(index.data(Qt::UserRole).toInt())->displayedTypes()) {
-        if (id < 0)
+    for(auto& [id, name, toolTip]: App::project().file(index.data(Qt::UserRole).toInt())->displayedTypes()) {
+        if(id < 0)
             continue;
         comboBox->addItem(name, id);
         comboBox->setItemData(ctr, comboBox->size(), Qt::SizeHintRole);

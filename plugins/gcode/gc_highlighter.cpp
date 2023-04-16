@@ -29,24 +29,24 @@ Highlighter::Highlighter(QTextDocument* parent)
 void Highlighter::highlightBlock(const QString& text) {
     //
 
-    static const mvector<char16_t> key {'F', 'G', 'M', 'S', 'X', 'Y', 'Z'};
-    static const mvector<Qt::GlobalColor> color {
+    static const mvector<char16_t> key{'F', 'G', 'M', 'S', 'X', 'Y', 'Z'};
+    static const mvector<Qt::GlobalColor> color{
         Qt::darkMagenta, // 'F',
-        Qt::black,       // 'G',
-        Qt::darkYellow,  // 'M',
-        Qt::gray,        // 'S',
-        Qt::red,         // 'X',
-        Qt::darkGreen,   // 'Y',
-        Qt::blue,        // 'Z',
+        Qt::black, // 'G',
+        Qt::darkYellow, // 'M',
+        Qt::gray, // 'S',
+        Qt::red, // 'X',
+        Qt::darkGreen, // 'Y',
+        Qt::blue, // 'Z',
     };
 
     using namespace std::string_view_literals;
     static constexpr ctll::fixed_string pattern(R"(([GXYZFSM])([\+\-]?\d+\.?\d*))");
-    auto data {toU16StrView(text)};
-    for (auto [whole, code, number] : ctre::range<pattern>(data)) {
+    auto data{toU16StrView(text)};
+    for(auto [whole, code, number]: ctre::range<pattern>(data)) {
         { // code
             QTextCharFormat myClassFormat;
-            switch (*code.data()) {
+            switch(*code.data()) {
             case 'F':
                 myClassFormat.setFontWeight(QFont::Normal);
                 myClassFormat.setForeground(QColor(0xFF, 0xFF, 0xFF));
@@ -98,7 +98,7 @@ void Highlighter::highlightBlock(const QString& text) {
 }
 
 Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
-    : QDialog {parent} {
+    : QDialog{parent} {
     resize(600, 600);
     setWindowTitle(windowTitle);
 

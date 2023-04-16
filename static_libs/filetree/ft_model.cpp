@@ -48,40 +48,42 @@ int Model::addFile(Node* item, AbstractFile* file) {
 }
 
 void Model::addFile(AbstractFile* file) {
-    if (!file)
+    if(!file)
         return;
-    Node* itemFolder;
     uint32_t type = file->type();
-    if (App::filePlugins().contains(type)) {
-        if (fileFolders.find(type) == fileFolders.end()) {
+    if(App::filePlugins().contains(type)) {
+        auto& itemFolder = fileFolders[type];
+        if(!itemFolder) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
+            itemFolder = new FolderNode(App::filePlugin(type)->folderName(), type);
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
         int rowCount = addFile(itemFolder, file);
         App::filePlugin(type)->updateFileModel(file);
         emit select(createIndex(rowCount, 0, file->node()));
-    } else if (App::gCodePlugins().contains(type)) {
+    } else if(App::gCodePlugins().contains(type)) {
         type = G_CODE;
-        if (fileFolders.find(type) == fileFolders.end()) {
+        auto& itemFolder = fileFolders[type];
+        if(!itemFolder) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = fileFolders[type] = new FolderNode(tr("GCode"), type);
+            itemFolder = new FolderNode(tr("GCode"), type);
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
         int rowCount = addFile(itemFolder, file);
         emit select(createIndex(rowCount, 0, file->node()));
-    } else if (type == GC_DBG_FILE) {
-        if (fileFolders.find(type) == fileFolders.end()) {
+    } else if(type == GC_DBG_FILE) {
+        auto& itemFolder = fileFolders[type];
+        if(!itemFolder) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = fileFolders[type] = new FolderNode("GCode Debug", type);
+            itemFolder = new FolderNode("GCode Debug", type);
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
@@ -91,12 +93,12 @@ void Model::addFile(AbstractFile* file) {
 }
 
 void Model::addShape(Shapes::AbstractShape* shape) {
-    if (!shape)
+    if(!shape)
         return;
 
     static constexpr uint32_t type = md5::hash32("Shapes");
     auto& itemFolder = fileFolders[type];
-    if (!itemFolder) {
+    if(!itemFolder) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
@@ -116,13 +118,13 @@ void Model::addShape(Shapes::AbstractShape* shape) {
 
 void Model::closeProject() {
     Node* item;
-    for (int i = 0; i < rootItem->childCount(); ++i) {
+    for(int i = 0; i < rootItem->childCount(); ++i) {
         item = rootItem->child(i);
         QModelIndex index = createIndex(i, 0, item);
         int rowCount = item->childCount();
-        if (rowCount) {
+        if(rowCount) {
             beginRemoveRows(index, 0, rowCount - 1);
-            for (int j = 0; j < rowCount; ++j)
+            for(int j = 0; j < rowCount; ++j)
                 item->remove(0);
             endRemoveRows();
         }
@@ -130,7 +132,7 @@ void Model::closeProject() {
 }
 
 QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
-    if (!hasIndex(row, column, parent))
+    if(!hasIndex(row, column, parent))
         return QModelIndex();
 
     TreeItem* parentItem;
@@ -138,7 +140,7 @@ QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
     parentItem = !parent.isValid() ? rootItem : static_cast<TreeItem*>(parent.internalPointer());
 
     TreeItem* childItem = parentItem->child(row);
-    if (childItem)
+    if(childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
     //    Node* childItem = getItem(parent)->child(row);
@@ -156,30 +158,30 @@ QModelIndex Model::parent(const QModelIndex& index) const {
     //        return QModelIndex();
     //    return createIndex(parentItem->row(), 0, parentItem);
 
-    if (!index.isValid())
+    if(!index.isValid())
         return QModelIndex();
     Node* parentItem = getItem(index)->parent();
-    if (parentItem == rootItem)
+    if(parentItem == rootItem)
         return QModelIndex();
     return createIndex(parentItem->row(), /*index.column()*/ 0, parentItem);
 }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    if (!index.isValid())
+    if(!index.isValid())
         return {};
     return getItem(index)->data(index, role);
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     bool ok = getItem(index)->setData(index, value, role);
-    if (ok)
+    if(ok)
         App::project().setChanged();
     return ok;
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    if ((role == Qt::DisplayRole || role == Qt::ToolTipRole) && orientation == Qt::Horizontal)
-        switch (section) {
+    if((role == Qt::DisplayRole || role == Qt::ToolTipRole) && orientation == Qt::Horizontal)
+        switch(section) {
         case 0:
             return tr("Name");
         case 1:
@@ -193,7 +195,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 }
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const {
-    if (!index.isValid()) {
+    if(!index.isValid()) {
         qDebug() << index;
         return Qt::NoItemFlags;
     }
@@ -202,13 +204,13 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 
 bool Model::removeRows(int row, int count, const QModelIndex& parent) {
     Node* item = nullptr;
-    if (parent.isValid())
+    if(parent.isValid())
         item = static_cast<Node*>(parent.internalPointer());
     else
         return false;
 
     beginRemoveRows(parent, row, row + count - 1);
-    while (count--)
+    while(count--)
         item->remove(row);
     endRemoveRows();
     resetInternalData();
@@ -221,7 +223,7 @@ int Model::columnCount(const QModelIndex& /*parent*/) const {
 
 int Model::rowCount(const QModelIndex& parent) const {
     TreeItem* parentItem;
-    if (parent.column() > 0)
+    if(parent.column() > 0)
         return 0;
 
     parentItem = !parent.isValid() ? rootItem : static_cast<TreeItem*>(parent.internalPointer());
@@ -233,9 +235,9 @@ int Model::rowCount(const QModelIndex& parent) const {
 }
 
 Node* Model::getItem(const QModelIndex& index) const {
-    if (index.isValid()) {
+    if(index.isValid()) {
         auto* item = static_cast<Node*>(index.internalPointer());
-        if (item)
+        if(item)
             return item;
     }
     return rootItem;

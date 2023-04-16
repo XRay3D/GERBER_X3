@@ -115,7 +115,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         vlay->addWidget(grbxOffset);
         vlayTab->addWidget(gboxDefaulValues);
     }
-    if (0) {
+    if(0) {
         auto grbxParse = new QGroupBox(this);
 
         grbxParse->setTitle(QApplication::translate("ExcellonDialog", "Parse Reg.Expr.", nullptr));
@@ -137,12 +137,11 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         auto testParseZero = [leTestOutput, leTestParseZero, this](const QString&) {
             QRegularExpression re(leParseZero->text());
             QString text;
-            if (re.isValid()) {
+            if(re.isValid()) {
                 auto match = re.match(leTestParseZero->text());
-                for (int ctr {}; QString & string : match.capturedTexts()) {
+                for(int ctr{}; QString & string: match.capturedTexts())
                     text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
-                }
-                if (!match.hasMatch())
+                if(!match.hasMatch())
                     text = "No captured texts";
             } else {
                 text = re.errorString();
@@ -155,12 +154,11 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         auto testParseUnit = [leTestOutput, leTestParseUnit, this](const QString&) {
             QRegularExpression re(leParseUnit->text());
             QString text;
-            if (re.isValid()) {
+            if(re.isValid()) {
                 auto match = re.match(leTestParseUnit->text());
-                for (int ctr {}; QString & string : match.capturedTexts()) {
+                for(int ctr{}; QString & string: match.capturedTexts())
                     text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
-                }
-                if (!match.hasMatch())
+                if(!match.hasMatch())
                     text = "No captured texts";
             } else {
                 text = re.errorString();
@@ -173,12 +171,11 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         auto testlParseDecimalAndInteger = [leTestOutput, leTestParseDecimalAndInteger, this](const QString&) {
             QRegularExpression re(leParseDecimalAndInteger->text());
             QString text;
-            if (re.isValid()) {
+            if(re.isValid()) {
                 auto match = re.match(leTestParseDecimalAndInteger->text());
-                for (int ctr {}; QString & string : match.capturedTexts()) {
+                for(int ctr{}; QString & string: match.capturedTexts())
                     text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
-                }
-                if (!match.hasMatch())
+                if(!match.hasMatch())
                     text = "No captured texts";
             } else {
                 text = re.errorString();

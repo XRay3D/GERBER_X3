@@ -40,7 +40,7 @@ private:
 
     QPolygonF arc(QPointF p1, QPointF p2, QPointF center);
 
-    Tools::iterator toolIt {};
+    Tools::iterator toolIt{};
 
 protected:
     File* file = nullptr;

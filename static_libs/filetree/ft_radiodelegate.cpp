@@ -38,7 +38,7 @@ QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 
 void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
-    if (!radioButton)
+    if(!radioButton)
         return;
     //        int pos = comboBox->findText(index.model()->data(index).toString(),
     //            Qt::MatchExactly);
@@ -47,14 +47,14 @@ void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) con
 
 void RadioDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
-    if (!radioButton)
+    if(!radioButton)
         return;
     model->setData(index, bool(radioButton->isChecked()));
 }
 
 void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QStyledItemDelegate::paint(painter, option, index);
-    if (dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree_::Node*>(index.internalPointer()))) {
+    if(dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree_::Node*>(index.internalPointer()))) {
 
         //        StarRating starRating = qvariant_cast<StarRating>(index.data());
 

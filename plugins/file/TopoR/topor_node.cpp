@@ -29,18 +29,18 @@ Node::Node(File* file)
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (role) {
+    switch(role) {
     case Qt::CheckStateRole:
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
     case Qt::EditRole:
-        if (index.column() == FileTree_::Column::Side) {
+        if(index.column() == FileTree_::Column::Side) {
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
         }
         break;
     case FileTree_::Select:
-        for (auto ig : file->itemGroups())
+        for(auto ig: file->itemGroups())
             ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
         return true;
     }
@@ -49,7 +49,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree_::Column::Side:
@@ -60,10 +60,10 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    if (file)
-        switch (FileTree_::Column(index.column())) {
+    if(file)
+        switch(FileTree_::Column(index.column())) {
         case FileTree_::Column::NameColorVisible:
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
                 return file->shortName();
             case Qt::ToolTipRole:
@@ -79,7 +79,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
                 return {};
             }
         case FileTree_::Column::Side:
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
                 return sideStrList[file->side()];

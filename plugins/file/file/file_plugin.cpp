@@ -36,10 +36,10 @@ Plugin::Plugin(QObject* parent)
 }
 
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if (type_ != type())
+    if(type_ != type())
         return nullptr;
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    if(!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
     QTextStream in(&file);
@@ -48,7 +48,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 }
 
 std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
-    if (plugin->type() == ::GCode::Drill) {
+    if(plugin->type() == ::GCode::Drill) {
         Drilling::Preview retData;
         //        auto const exFile = static_cast<File*>(file);
         //        QTransform t {exFile->transform()};
@@ -65,10 +65,10 @@ std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::an
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    if (fileName.endsWith(".dxf", Qt::CaseInsensitive))
+    if(fileName.endsWith(".dxf", Qt::CaseInsensitive))
         return false;
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
     QTextStream in(&file);
@@ -77,11 +77,11 @@ bool Plugin::thisIsIt(const QString& fileName) {
     static constexpr ctll::fixed_string regex1(R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)");
     static constexpr ctll::fixed_string regex2(R"(.*Holesize.*)"); // fixed_string(".*Holesize.*");
 
-    while (in.readLineInto(&line)) {
-        auto data {toU16StrView(line)};
-        if (ctre::match<regex1>(data))
+    while(in.readLineInto(&line)) {
+        auto data{toU16StrView(line)};
+        if(ctre::match<regex1>(data))
             return true;
-        if (ctre::match<regex2>(data))
+        if(ctre::match<regex2>(data))
             return true;
     }
 

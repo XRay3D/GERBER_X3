@@ -88,23 +88,18 @@ bool HiSpeedRules::ShouldSerialize_SignalGroups() {
 }
 
 void HiSpeedRules::Rename_compName(const QString& oldname, const QString& newname) {
-    for (auto a : _SignalClusters) {
-        if (a->_SourcePinRef->_compName == oldname) {
+    for(auto a: _SignalClusters) {
+        if(a->_SourcePinRef->_compName == oldname)
             a->_SourcePinRef->_compName = newname;
-        }
-        for (auto b : a->_Signals) {
-            if (b->_ReceiverPinRef->_compName == oldname) {
+        for(auto b: a->_Signals) {
+            if(b->_ReceiverPinRef->_compName == oldname)
                 b->_ReceiverPinRef->_compName = newname;
-            }
-            for (auto c : b->_Components | std::views::filter([&](CompInstanceRef* r) { return r->_ReferenceName == oldname; })) {
+            for(auto c: b->_Components | std::views::filter([&](CompInstanceRef* r) { return r->_ReferenceName == oldname; }))
                 c->_ReferenceName = newname;
-            }
         }
-        for (auto b : a->_PinPairs) {
-            for (auto c : b->_PinRefs | std::views::filter([&](PinRef* r) { return r->_compName == oldname; })) {
+        for(auto b: a->_PinPairs)
+            for(auto c: b->_PinRefs | std::views::filter([&](PinRef* r) { return r->_compName == oldname; }))
                 c->_compName = newname;
-            }
-        }
     }
 }
 // } // namespace TopoR_PCB_Classes

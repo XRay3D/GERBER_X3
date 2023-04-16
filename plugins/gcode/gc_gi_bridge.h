@@ -33,10 +33,10 @@ public:
     bool test(const Path& path);
     QPointF snapedPos(const QPointF& pos);
 
-    static inline GiBridge* moveBrPtr;          // NOTE приватизировать в будущем??
-    static inline double lenght {};             //
-    static inline double toolDiam {};           //
-    static inline GCode::SideOfMilling side {}; //
+    static inline GiBridge* moveBrPtr; // NOTE приватизировать в будущем??
+    static inline double lenght{}; //
+    static inline double toolDiam{}; //
+    static inline GCode::SideOfMilling side{}; //
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -47,7 +47,7 @@ private:
     QLineF testLine() const;
     Point intersectPoint;
 
-    double angle_ {};
+    double angle_{};
 
     QPainterPath pPath;
     QPainterPath cutoff;

@@ -22,7 +22,7 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     , shapeText(text) {
     ui->setupUi(this);
 
-    for (auto text : shapeText)
+    for(auto text: shapeText)
         text->save();
 
     ui->plainTextEdit->setStyleSheet("QPlainTextEdit { font-size: 32pt }");
@@ -49,7 +49,7 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     ui->dsbxHeight->setValue(shapeText.first()->iData.height);
     ui->dsbxXY->setValue(shapeText.first()->iData.xy);
 
-    switch (shapeText.first()->iData.handleAlign) {
+    switch(shapeText.first()->iData.handleAlign) {
     case Text::BotCenter:
         ui->rb_bc->setChecked(true);
         break;
@@ -104,7 +104,7 @@ ShTextDialog::~ShTextDialog() { delete ui; }
 
 void ShTextDialog::updateText() {
     QString text_(ui->plainTextEdit->toPlainText());
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.text = text_;
         text->redraw();
     }
@@ -116,28 +116,28 @@ void ShTextDialog::updateFont() {
     font.setItalic(ui->chbxItalic->isChecked());
     ui->plainTextEdit->setFont(font);
     QString strFont(font.toString());
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.font = strFont;
         text->redraw();
     }
 }
 
 void ShTextDialog::updateAngle() {
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.angle = ui->dsbxAngle->value();
         text->redraw();
     }
 }
 
 void ShTextDialog::updateHeight() {
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.height = ui->dsbxHeight->value();
         text->redraw();
     }
 }
 
 void ShTextDialog::updateXY() {
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.xy = ui->dsbxXY->value();
         text->redraw();
     }
@@ -145,33 +145,32 @@ void ShTextDialog::updateXY() {
 
 void ShTextDialog::updateCenterAlign() {
     int handleAlign;
-    if (ui->rb_bc->isChecked()) {
+    if(ui->rb_bc->isChecked())
         handleAlign = Text::BotCenter;
-    } else if (ui->rb_bl->isChecked()) {
+    else if(ui->rb_bl->isChecked())
         handleAlign = Text::BotLeft;
-    } else if (ui->rb_br->isChecked()) {
+    else if(ui->rb_br->isChecked())
         handleAlign = Text::BotRight;
-    } else if (ui->rb_c->isChecked()) {
+    else if(ui->rb_c->isChecked())
         handleAlign = Text::Center;
-    } else if (ui->rb_lc->isChecked()) {
+    else if(ui->rb_lc->isChecked())
         handleAlign = Text::CenterLeft;
-    } else if (ui->rb_rc->isChecked()) {
+    else if(ui->rb_rc->isChecked())
         handleAlign = Text::CenterRight;
-    } else if (ui->rb_tc->isChecked()) {
+    else if(ui->rb_tc->isChecked())
         handleAlign = Text::TopCenter;
-    } else if (ui->rb_tl->isChecked()) {
+    else if(ui->rb_tl->isChecked())
         handleAlign = Text::TopLeft;
-    } else if (ui->rb_tr->isChecked()) {
+    else if(ui->rb_tr->isChecked())
         handleAlign = Text::TopRight;
-    }
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.handleAlign = handleAlign;
         text->redraw();
     }
 }
 
 void ShTextDialog::updateSide() {
-    for (auto text : shapeText) {
+    for(auto text: shapeText) {
         text->iData.side = static_cast<Side>(ui->cbxSide->currentIndex());
         text->redraw();
     }
@@ -183,7 +182,7 @@ void ShTextDialog::accept() {
 }
 
 void ShTextDialog::reject() {
-    for (auto text : shapeText)
+    for(auto text: shapeText)
         text->restore();
     QDialog::reject();
 }

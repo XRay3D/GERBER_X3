@@ -17,7 +17,7 @@
 namespace PocketRaster {
 
 void Creator::create() {
-    if (gcp_.params[Fast].toBool())
+    if(gcp_.params[Fast].toBool())
         createRasterAccLaser(gcp_.tools.front(),
             gcp_.params[GCode::Params::Depth].toDouble(),
             gcp_.params[UseAngle].toDouble(),
@@ -32,7 +32,7 @@ void Creator::create() {
 uint32_t Creator::type() { return POCKET_RASTER; }
 
 void Creator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
-    switch (gcp_.side()) {
+    switch(gcp_.side()) {
     case GCode::Outer:
         groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale);
         break;
@@ -51,27 +51,27 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     Paths profilePaths;
     Paths fillPaths;
 
-    for (Paths src : groupedPss) {
+    for(Paths src: groupedPss) {
         //        ClipperOffset offset(uScale);
         //        offset.AddPaths(src, JoinType::Round, EndType::Polygon);
         //        src = offset.Execute(-dOffset);
 
         src = C2::InflatePaths(src, -dOffset, JoinType::Round, EndType::Polygon, uScale);
 
-        for (auto& path : src)
+        for(auto& path: src)
             path.push_back(path.front());
-        if (prPass)
+        if(prPass)
             profilePaths.append(src);
 
-        if (src.size()) {
-            for (auto& path : src)
+        if(src.size()) {
+            for(auto& path: src)
                 RotatePath(path, angle);
-            auto zigzag {calcZigzag(src)};
-            auto scanLines {calcScanLines(src, zigzag)};
-            auto frames {calcFrames(src, zigzag)};
-            if (scanLines.size() && frames.size()) {
-                auto merged {merge(scanLines, frames)};
-                for (auto& path : merged)
+            auto zigzag{calcZigzag(src)};
+            auto scanLines{calcScanLines(src, zigzag)};
+            auto frames{calcFrames(src, zigzag)};
+            if(scanLines.size() && frames.size()) {
+                auto merged{merge(scanLines, frames)};
+                for(auto& path: merged)
                     RotatePath(path, -angle);
                 returnPs.append(merged);
             }
@@ -81,33 +81,33 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     mergeSegments(returnPs);
 
     sortB(returnPs);
-    if (!profilePaths.empty() && prPass) {
+    if(!profilePaths.empty() && prPass) {
         sortB(profilePaths);
-        if (gcp_.convent())
+        if(gcp_.convent())
             ReversePaths(profilePaths);
-        for (Path& path : profilePaths)
+        for(Path& path: profilePaths)
             path.push_back(path.front());
     }
 
-    switch (prPass) {
+    switch(prPass) {
     case NoProfilePass:
         returnPss.prepend(returnPs);
         break;
     case First:
-        if (!profilePaths.empty())
+        if(!profilePaths.empty())
             returnPss.prepend(profilePaths);
         returnPss.prepend(returnPs);
         break;
     case Last:
         returnPss.prepend(returnPs);
-        if (!profilePaths.empty())
+        if(!profilePaths.empty())
             returnPss.push_back(profilePaths);
         break;
     default:
         break;
     }
 
-    if (returnPss.empty()) {
+    if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
         file_ = new File(std::move(gcp_), std::move(returnPss), std::move(fillPaths));
@@ -125,7 +125,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     dOffset = toolDiameter / 2;
     stepOver = static_cast<Point::Type>(tool.stepover() * uScale);
 
-    switch (gcp_.side()) {
+    switch(gcp_.side()) {
     case GCode::Outer:
         groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale);
         break;
@@ -141,22 +141,22 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
 
     { // create exposure frames
         ClipperOffset o;
-        for (auto& p : groupedPss)
+        for(auto& p: groupedPss)
             o.AddPaths(p, JoinType::Round, EndType::Polygon);
         profilePaths = o.Execute(-tool.diameter() * uScale);
     }
     auto pss = std::views::join(groupedPss);
-    profilePaths = C2::InflatePaths(Paths {pss.begin(), pss.end()}, -dOffset, JoinType::Round, EndType::Polygon, uScale);
+    profilePaths = C2::InflatePaths(Paths{pss.begin(), pss.end()}, -dOffset, JoinType::Round, EndType::Polygon, uScale);
 
     // get bounds of frames
     rect = Bounds(profilePaths);
 
-    const Point center {rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2};
+    const Point center{rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2};
 
     Paths laserPath(profilePaths);
 
-    if (!qFuzzyIsNull(angle)) { // Rotate Paths
-        for (Path& path : laserPath)
+    if(!qFuzzyIsNull(angle)) { // Rotate Paths
+        for(Path& path: laserPath)
             RotatePath(path, angle, center);
         // get bounds of frames if angle > 0.0
         rect = Bounds(laserPath);
@@ -168,15 +168,15 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     Path zPath;
     { // create "snake"
         Point::Type y = rect.top;
-        while (y < rect.bottom) {
+        while(y < rect.bottom) {
             zPath.append({
-                Point { rect.left, y},
-                Point {rect.right, y}
+                Point{ rect.left, y},
+                Point{rect.right, y}
             });
             y += stepOver;
             zPath.append({
-                Point {rect.right, y},
-                Point { rect.left, y}
+                Point{rect.right, y},
+                Point{ rect.left, y}
             });
             y += stepOver;
         }
@@ -187,28 +187,27 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         c.AddOpenSubject({zPath});
         c.AddClip(laserPath);
         c.Execute(ClipType::Intersection, FillRule::NonZero, laserPath, laserPath); // laser on
-        addAcc(laserPath, gcp_.params[AccDistance].toDouble() * uScale);            // add laser off paths
+        addAcc(laserPath, gcp_.params[AccDistance].toDouble() * uScale); // add laser off paths
     }
 
-    if (!qFuzzyIsNull(angle)) { // Rotate Paths
-        for (Path& path : laserPath)
+    if(!qFuzzyIsNull(angle)) // Rotate Paths
+        for(Path& path: laserPath)
             RotatePath(path, -angle, center);
-    }
 
     returnPss.push_back(laserPath);
 
-    if (!profilePaths.empty() && prPass != NoProfilePass) {
-        for (auto& p : profilePaths)
+    if(!profilePaths.empty() && prPass != NoProfilePass) {
+        for(auto& p: profilePaths)
             p.push_back(p.front());
         returnPss.push_back(sortB(profilePaths));
     }
 
-    if (returnPss.empty()) {
+    if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
 
         std::erase_if(returnPss, [](auto& paths) { return paths.empty(); });
-        for (auto& paths : returnPss)
+        for(auto& paths: returnPss)
             std::erase_if(paths, [](auto& path) { return path.empty(); });
 
         file_ = new File(std::move(gcp_), std::move(returnPss), {});
@@ -226,10 +225,10 @@ void Creator::addAcc(Paths& src, const Point::Type accDistance) {
 #else
     std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.front().y > p2.front().y; });
 #endif
-    bool reverse {};
+    bool reverse{};
 
     auto format = [&reverse](Path& src) -> Path& {
-        if (reverse)
+        if(reverse)
             std::sort(src.begin(), src.end(), [](const Point& p1, const Point& p2) -> bool { return p1.x > p2.x; });
         else
             std::sort(src.begin(), src.end(), [](const Point& p1, const Point& p2) -> bool { return p1.x < p2.x; });
@@ -238,49 +237,47 @@ void Creator::addAcc(Paths& src, const Point::Type accDistance) {
 
     auto adder = [&reverse, &pPath, accDistance](Paths& paths) {
         std::sort(paths.begin(), paths.end(), [reverse](const Path& p1, const Path& p2) -> bool {
-            if (reverse)
+            if(reverse)
                 return p1.front().x > p2.front().x;
             else
                 return p1.front().x < p2.front().x;
         });
-        if (pPath.size()) { // acc
+        if(pPath.size()) { // acc
             Path acc;
             {
                 const Path& path = pPath.back();
-                if (path.front().x < path.back().x) { // acc
-                    acc.append(Path {
+                if(path.front().x < path.back().x) // acc
+                    acc.append(Path{
                         path.back(), {path.back().x + accDistance, path.front().y}
                     });
-                } else {
-                    acc.append(Path {
+                else
+                    acc.append(Path{
                         path.back(), {path.back().x - accDistance, path.front().y}
                     });
-                }
             }
             {
                 const Path& path = paths.front();
-                if (path.front().x > path.back().x) { // acc
-                    acc.append(Path {
+                if(path.front().x > path.back().x) // acc
+                    acc.append(Path{
                         {path.front().x + accDistance, path.front().y},
                         path.front()
                     });
-                } else {
-                    acc.append(Path {
+                else
+                    acc.append(Path{
                         {path.front().x - accDistance, path.front().y},
                         path.front()
                     });
-                }
             }
             pPath.push_back(acc);
         } else { // acc first
-            pPath.emplace_back(Path {
+            pPath.emplace_back(Path{
                 {paths.front().front().x - accDistance, paths.front().front().y},
                 paths.front().front()
             });
         }
-        for (size_t j = 0; j < paths.size(); ++j) {
-            if (j) // acc
-                pPath.emplace_back(Path {paths[j - 1].back(), paths[j].front()});
+        for(size_t j = 0; j < paths.size(); ++j) {
+            if(j) // acc
+                pPath.emplace_back(Path{paths[j - 1].back(), paths[j].front()});
             pPath.push_back(paths[j]);
         }
     };
@@ -289,13 +286,13 @@ void Creator::addAcc(Paths& src, const Point::Type accDistance) {
         Point::Type yLast = src.front().front().y;
         Paths paths;
 
-        for (size_t i = 0; i < src.size(); ++i) {
+        for(size_t i = 0; i < src.size(); ++i) {
 
-            if (yLast != src[i].front().y) {
+            if(yLast != src[i].front().y) {
                 adder(paths);
                 reverse = !reverse;
                 yLast = src[i].front().y;
-                paths = Paths {format(src[i])};
+                paths = Paths{format(src[i])};
             } else {
                 paths.push_back(format(src[i]));
             }
@@ -306,15 +303,14 @@ void Creator::addAcc(Paths& src, const Point::Type accDistance) {
 
     { // acc last
         Path& path = pPath.back();
-        if (path.front().x < path.back().x) {
-            pPath.emplace_back(Path {
+        if(path.front().x < path.back().x)
+            pPath.emplace_back(Path{
                 path.back(), {path.back().x + accDistance, path.front().y}
             });
-        } else {
-            pPath.emplace_back(Path {
+        else
+            pPath.emplace_back(Path{
                 path.back(), {path.back().x - accDistance, path.front().y}
             });
-        }
     }
 
     src = std::move(pPath);
@@ -327,20 +323,19 @@ Paths Creator::calcScanLines(const Paths& src, const Path& frame) {
     clipper.AddClip(src);
     clipper.AddOpenSubject({frame});
     clipper.Execute(ClipType::Intersection, FillRule::Positive, scanLines, scanLines); // FillRule::Positive
-    if (!scanLines.size())
+    if(!scanLines.size())
         return scanLines;
     std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
     Point::Type start = scanLines.front().front().y;
     bool fl = {};
-    for (size_t i {}, last {}; i < scanLines.size(); ++i) {
-        if (auto y = scanLines[i].front().y; y != start || i - 1 == scanLines.size()) {
+    for(size_t i{}, last{}; i < scanLines.size(); ++i) {
+        if(auto y = scanLines[i].front().y; y != start || i - 1 == scanLines.size()) {
             std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Path& l, const Path& r) { // horizontal sort
                 return fl ? l.front().x < r.front().x : l.front().x > r.front().x;
             });
-            for (size_t k = last; k < i; ++k) { // fix direction
-                if (fl ^ (scanLines[k].front().x < scanLines[k].back().x))
+            for(size_t k = last; k < i; ++k) // fix direction
+                if(fl ^ (scanLines[k].front().x < scanLines[k].back().x))
                     std::swap(scanLines[k].front().x, scanLines[k].back().x);
-            }
             start = y;
             fl = !fl;
             last = i;
@@ -363,10 +358,9 @@ Paths Creator::calcFrames(const Paths& src, const Path& frame) {
         // dbgPaths(tmp, "ClipType::Difference");
         frames.append(tmp);
         std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
-        for (auto& path : frames) {
-            if (path.front().y > path.back().y)
+        for(auto& path: frames)
+            if(path.front().y > path.back().y)
                 ReversePath(path); // fix vertical direction
-        }
     }
     return frames;
 }
@@ -382,10 +376,10 @@ Path Creator::calcZigzag(const Paths& src) {
     rect.right += uScale;
     Path zigzag;
     Point::Type start = rect.top;
-    bool fl {};
+    bool fl{};
 
-    for (; start <= rect.bottom || fl; fl = !fl, start += stepOver) {
-        if (!fl) {
+    for(; start <= rect.bottom || fl; fl = !fl, start += stepOver) {
+        if(!fl) {
             zigzag.emplace_back(rect.left, start);
             zigzag.emplace_back(rect.right, start);
         } else {
@@ -403,26 +397,26 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
     Paths merged;
     merged.reserve(scanLines.size() / 10);
     std::list<Path> bList;
-    for (auto&& path : scanLines)
+    for(auto&& path: scanLines)
         bList.emplace_back(std::move(path));
 
     std::list<Path> fList;
-    for (auto&& path : frames)
+    for(auto&& path: frames)
         fList.emplace_back(std::move(path));
 
     setMax(bList.size());
-    while (bList.begin() != bList.end()) {
+    while(bList.begin() != bList.end()) {
         setCurrent(bList.size());
 
         merged.resize(merged.size() + 1);
         auto& path = merged.back();
-        for (auto bit = bList.begin(); bit != bList.end(); ++bit) {
+        for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
             ifCancelThenThrow();
-            if (path.empty() || path.back() == bit->front()) {
+            if(path.empty() || path.back() == bit->front()) {
                 path.append(path.empty() ? *bit : bit->mid(1));
                 bList.erase(bit);
-                for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                    if (path.back() == fit->front() && fit->front().y < fit->at(1).y) {
+                for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                    if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
                         path.append(fit->mid(1));
                         fList.erase(fit);
                         bit = bList.begin();
@@ -431,11 +425,11 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
                 }
                 bit = bList.begin();
             }
-            if (bList.begin() == bList.end())
+            if(bList.begin() == bList.end())
                 break;
         }
-        for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
-            if (path.front() == fit->back() && fit->front().y > fit->at(1).y) {
+        for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+            if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
                 fit->append(path.mid(1));
                 std::swap(*fit, path);
                 fList.erase(fit);
@@ -453,7 +447,7 @@ File::File()
 
 File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if (gcp_.tools.front().diameter()) {
+    if(gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -464,21 +458,21 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 
 void File::genGcodeAndTile() {
     const QRectF rect = App::project().worckRect();
-    for (size_t x = 0; x < App::project().stepsX(); ++x) {
-        for (size_t y = 0; y < App::project().stepsY(); ++y) {
+    for(size_t x = 0; x < App::project().stepsX(); ++x) {
+        for(size_t y = 0; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
-            if (toolType() == Tool::Laser)
+            if(toolType() == Tool::Laser)
                 saveLaserProfile(offset);
             else
                 saveMillingProfile(offset);
-            if (gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
 void File::createGi() {
-    if (toolType() == Tool::Laser)
+    if(toolType() == Tool::Laser)
         createGiLaser();
     else
         createGiRaster();

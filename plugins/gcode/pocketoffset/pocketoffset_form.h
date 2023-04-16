@@ -39,7 +39,7 @@ private:
     void updatePixmap();
     void rb_clicked();
     const QStringList names;
-    static inline const QString pixmaps[] {
+    static inline const QString pixmaps[]{
         QStringLiteral("pock_offs_climb"),
         QStringLiteral("pock_offs_conv"),
     };
@@ -66,7 +66,7 @@ public:
     // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
-    QWidget* createForm() override { return /*new Form(this);*/ };
+    QWidget* createForm() override{return /*new Form(this);*/};
     uint32_t type() const override { return POCKET_OFFSET; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
