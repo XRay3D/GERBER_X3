@@ -16,7 +16,6 @@
 #include "abstract_fileplugin.h"
 #include "ft_model.h"
 #include "gc_file.h"
-#include "gc_fileplugin.h"
 #include "gc_plugin.h"
 #include "graphicsview.h"
 #include "shapepluginin.h"
@@ -68,7 +67,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
 }
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::AbstractShape>& shape) {
-    stream << shape->type();
+    stream << shape->GraphicsItem::type();
     //    stream << shape->loadErrorMessage();
     stream << *shape;
     return stream;
@@ -97,7 +96,7 @@ Project::Project(QObject* parent)
                    QMessageBox::Ok, QMessageBox::Cancel)
                 == QMessageBox::Ok) {
             reloadFile_ = true;
-            emit parseFile(path, static_cast<int>(files_[id]->type()));
+            emit reloadFile(path, static_cast<int>(files_[id]->type()));
         }
     });
 

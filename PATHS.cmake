@@ -1,6 +1,10 @@
 cmake_minimum_required(VERSION 3.20)
 
-find_package(QT NAMES Qt6 Qt5)
+if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+set (CMAKE_PREFIX_PATH "C:/Qt/5.15.2/mingw81_64")# why???
+endif()
+
+find_package(QT NAMES Qt6 Qt5 Core)
 set(DIR_NAME "Qt${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}")
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -25,10 +29,8 @@ endif()
 
 if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
     set(DIR_NAME "${DIR_NAME}_x64")
-    #    set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/x64")
 else()
     set(DIR_NAME "${DIR_NAME}_x32")
-    #    set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/x32")
 endif()
 
 set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${DIR_NAME}")
@@ -38,9 +40,9 @@ set(PLUGINS_DIR "${OUTPUT_DIRECTORY}/plugins")
 set(STATIC_LIBS_DIR "${CMAKE_SOURCE_DIR}/bin/libs${DIR_NAME}")
 
 message(${PROJECT_NAME})
-message("    ${CMAKE_SOURCE_DIR}")
-message("    ${STATIC_LIBS_DIR}")
-message("    ${PLUGINS_DIR}")
-message("    ${DIR_NAME}")
+message("1    ${CMAKE_SOURCE_DIR}")
+message("2    ${STATIC_LIBS_DIR}")
+message("3    ${PLUGINS_DIR}")
+message("4    ${DIR_NAME}")
 
 link_directories(STATIC_LIBS_DIR)

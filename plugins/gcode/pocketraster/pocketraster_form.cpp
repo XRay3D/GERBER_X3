@@ -93,7 +93,7 @@ void Form::computePaths() {
     gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
     if (ui->rbFast->isChecked()) {
         gcp->params[Creator::Fast] = true;
-        gcp->params[Creator::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
+        gcp->params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
     }
 
     fileCount = 1;

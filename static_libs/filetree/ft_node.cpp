@@ -71,10 +71,11 @@ int Node::row() const {
     return -1;
 }
 
-void Node::addChild(Node* item) {
+void Node::addChild(Node* item, DelPolycy delPolycy) {
     item->parent_ = this;
     childs.resize(childs.size() + 1);
     childs.back().reset(item);
+    childs.back().get_deleter().del = delPolycy; // swap(std::unique_ptr<Node, Deleter>(item, Deleter {!dontDelete}));
 }
 
 void Node::remove(int row) { childs.takeAt(row); }

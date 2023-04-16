@@ -72,6 +72,8 @@ int main(int argc, char** argv) {
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
+    int retCode {};
+
     qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
     //    qInstallMessageHandler(myMessageOutput);
     QApplication::setAttribute(Qt::AA_Use96Dpi);
@@ -107,6 +109,7 @@ int main(int argc, char** argv) {
     [[maybe_unused]] GCode::Settings gcSingleton;
     App::setGcSettings(&gcSingleton);
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+    App::toolHolder().readTools();
 
     if (QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
@@ -170,61 +173,60 @@ int main(int argc, char** argv) {
         MainWindow::translate(locale);
     }
 
-    {
-        /*
-        Platform        Valid suffixes
-        Windows         .dll, .DLL
-        Unix/Linux      .so
-        AIX             .a
-        HP-UX           .sl, .so (HP-UXi)
-        macOS and iOS	.dylib, .bundle, .so
-        */
+    MainWindow mainWin;
+
+    /*
+    Platform        Valid suffixes
+    Windows         .dll, .DLL
+    Unix/Linux      .so
+    AIX             .a
+    HP-UX           .sl, .so (HP-UXi)
+    macOS and iOS	.dylib, .bundle, .so
+    */
 #ifdef __unix__
     #ifdef QT_DEBUG
-        const QString suffix("*.so");
+    const QString suffix("*.so");
     #else
-        const QString suffix("*.so");
+    const QString suffix("*.so");
     #endif
 #elif _WIN32
-        const auto suffix = QStringLiteral("*.dll");
+    const auto suffix = QStringLiteral("*.dll");
 #else
-        static_assert(false, "Select OS");
+    static_assert(false, "Select OS");
 #endif
-        // load plugins
-        QDir dir(QApplication::applicationDirPath() + "/plugins");
-        if (dir.exists()) {                     // Поиск всех файлов в папке "plugins"
-            QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
-            for (const auto& str : listFiles) { // Проход по всем файлам
-                splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
-                QPluginLoader loader(dir.absolutePath() + "/" + str);
-                if (auto* pobj = loader.instance(); pobj) { // Загрузка плагина
-                    if (auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
-                        gCode->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::gCodePlugins().emplace(gCode->type(), gCode);
-                        continue;
-                    } else if (auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
-                        file->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::filePlugins().emplace(std::pair {file->type(), file});
-                        continue;
-                    } else if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
-                        shape->setInfo(loader.metaData().value("MetaData").toObject());
-                        App::shapePlugins().emplace(shape->type(), shape);
-                        continue;
-                    }
-                } else
-                    qDebug() << str << loader.errorString();
+
+    std::vector<std::unique_ptr<QPluginLoader>> loaders;
+
+    // load plugins
+    QDir dir(QApplication::applicationDirPath() + "/plugins");
+    if (dir.exists()) {                     // Поиск всех файлов в папке "plugins"
+        QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
+        for (const auto& str : listFiles) { // Проход по всем файлам
+            splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+            loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + "/" + str));
+            if (auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
+                if (auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
+                    gCode->setInfo(loaders.back()->metaData().value("MetaData").toObject());
+                    App::gCodePlugins().emplace(gCode->type(), gCode);
+                    continue;
+                } else if (auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
+                    file->setInfo(loaders.back()->metaData().value("MetaData").toObject());
+                    App::filePlugins().emplace(std::pair {file->type(), file});
+                    continue;
+                } else if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
+                    shape->setInfo(loaders.back()->metaData().value("MetaData").toObject());
+                    App::shapePlugins().emplace(shape->type(), shape);
+                    continue;
+                }
+            } else {
+                qDebug() << str << loaders.back()->errorString();
+                loaders.pop_back();
             }
         }
-
-        //        if (1) { // add dummy gcode plugin for gcode files folder
-        //            auto parser = new GCode::Plugin(&app);
-        //            App::filePlugins().emplace(parser->type(), parser);
-        //        }
     }
 
-    MainWindow mainWin;
+    mainWin.init();
     mainWin.setObjectName("MainWindow");
-    mainWin.setIconSize({24, 24});
 
     SettingsDialog().accept();
 
@@ -238,5 +240,10 @@ int main(int argc, char** argv) {
     mainWin.show();
     splash->finish(&mainWin);
 
-    return app.exec();
+    retCode = app.exec();
+
+    for (auto&& loader : loaders)
+        loader->unload();
+
+    return retCode;
 }

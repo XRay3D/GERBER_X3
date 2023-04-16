@@ -87,12 +87,13 @@ class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
     Q_INTERFACES(GCode::Plugin)
+    Form form {this};
 
 public:
     // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
-    QWidget* createForm() override { return new Form(this); };
+    QWidget* createForm() override { return &form; }
     uint32_t type() const override { return md5::hash32("Profile"); }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 

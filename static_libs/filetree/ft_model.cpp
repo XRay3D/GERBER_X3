@@ -38,12 +38,11 @@ Model::~Model() {
     App::setFileModel(nullptr);
 }
 
-int Model::addFile(uint32_t type, AbstractFile* file) {
-    Node* item(fileFolders[type]);
+int Model::addFile(Node* item, AbstractFile* file) {
     QModelIndex index = createIndex(0, 0, item);
     int rowCount = item->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    fileFolders[type]->addChild(file->node());
+    item->addChild(file->node());
     endInsertRows();
     return rowCount;
 }
@@ -51,21 +50,18 @@ int Model::addFile(uint32_t type, AbstractFile* file) {
 void Model::addFile(AbstractFile* file) {
     if (!file)
         return;
-
+    Node* itemFolder;
     uint32_t type = file->type();
-
     if (App::filePlugins().contains(type)) {
-
         if (fileFolders.find(type) == fileFolders.end()) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            auto it = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
-            rootItem->addChild(it);
+            itemFolder = fileFolders[type] = new FolderNode(App::filePlugin(type)->folderName(), type);
+            rootItem->addChild(itemFolder);
             endInsertRows();
         }
-
-        int rowCount = addFile(type, file);
+        int rowCount = addFile(itemFolder, file);
         App::filePlugin(type)->updateFileModel(file);
         emit select(createIndex(rowCount, 0, file->node()));
     } else if (App::gCodePlugins().contains(type)) {
@@ -74,22 +70,22 @@ void Model::addFile(AbstractFile* file) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            auto it = fileFolders[type] = new FolderNode(tr("GCode"), type);
-            rootItem->addChild(it);
+            itemFolder = fileFolders[type] = new FolderNode(tr("GCode"), type);
+            rootItem->addChild(itemFolder);
             endInsertRows();
         }
-        int rowCount = addFile(type, file);
+        int rowCount = addFile(itemFolder, file);
         emit select(createIndex(rowCount, 0, file->node()));
     } else if (type == GC_DBG_FILE) {
         if (fileFolders.find(type) == fileFolders.end()) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            auto it = fileFolders[type] = new FolderNode("GCode Debug", type);
-            rootItem->addChild(it);
+            itemFolder = fileFolders[type] = new FolderNode("GCode Debug", type);
+            rootItem->addChild(itemFolder);
             endInsertRows();
         }
-        int rowCount = addFile(type, file);
+        int rowCount = addFile(itemFolder, file);
         emit select(createIndex(rowCount, 0, file->node()));
     }
 }
@@ -98,23 +94,24 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     if (!shape)
         return;
 
-    uint32_t type = md5::hash32("Shapes");
-    if (fileFolders.find(type) == fileFolders.end()) {
+    static constexpr uint32_t type = md5::hash32("Shapes");
+    auto& itemFolder = fileFolders[type];
+    if (!itemFolder) {
         QModelIndex index = createIndex(0, 0, rootItem);
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         auto si = App::shapePlugins().begin()->second;
-        auto it = fileFolders[type] = new FolderNode(si->folderName(), type);
-        rootItem->addChild(it);
+        itemFolder = new FolderNode(si->folderName(), type);
+        rootItem->addChild(itemFolder);
         endInsertRows();
     }
-    // FIXME   Node* item(fileFolders[type]);
-    //    QModelIndex index = createIndex(0, 0, item);
-    //    int rowCount = item->childCount();
-    //    beginInsertRows(index, rowCount, rowCount);
-    //    item->addChild(shape->node());
-    //    endInsertRows();
-    //    emit select(createIndex(rowCount, 0, shape->node()));
+
+    QModelIndex index = createIndex(0, 0, itemFolder);
+    int rowCount = itemFolder->childCount();
+    beginInsertRows(index, rowCount, rowCount);
+    itemFolder->addChild(shape, Node::DontDelete);
+    endInsertRows();
+    // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }
 
 void Model::closeProject() {

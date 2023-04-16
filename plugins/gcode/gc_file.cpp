@@ -163,7 +163,7 @@ void File::addInfo() {
         lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
         lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
         lines_.emplace_back(QObject::tr(";\t  Tool Stepover: %1").arg(gcp_.getTool().stepover()));
-        lines_.emplace_back(QObject::tr(";\t Feed Rate mm/s: %1").arg(gcp_.getTool().feedRate_mm_s()));
+        lines_.emplace_back(QObject::tr(";\t Feed Rate mm/s: %1").arg(gcp_.getTool().feedRate_mmPerSec()));
         lines_.emplace_back(QObject::tr(";\tTool Pass Depth: %1").arg(gcp_.getTool().passDepth()));
         lines_.emplace_back(QObject::tr(";\t          Depth: %1").arg(gcp_.getDepth()));
         lines_.emplace_back(QObject::tr(";\t           Side: %1").arg(side_[side()]));

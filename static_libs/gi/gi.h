@@ -38,12 +38,12 @@ enum /*class*/ GiType : int {
     Error = QGraphicsItem::UserType + 400, // Form
 
     ShapeBegin = QGraphicsItem::UserType + 500,
-    ShCircle = ShapeBegin,
-    ShRectangle,
-    ShPolyLine,
-    ShCirArc,
-    ShText,
-    ShHandler,
+        ShCircle = ShapeBegin,
+        ShRectangle,
+        ShPolyLine,
+        ShCirArc,
+        ShText,
+        ShHandler,
     ShapeEnd
 };
 

@@ -14,8 +14,10 @@
 #include "mvector.h"
 #include "tool.h"
 #include <QWidget>
+#include <array>
 #include <optional>
 #include <set>
+#include <variant>
 
 namespace Ui {
 class ToolEditForm;
