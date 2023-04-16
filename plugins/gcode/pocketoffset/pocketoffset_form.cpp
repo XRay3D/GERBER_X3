@@ -29,7 +29,7 @@ Form::
     Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new ::Ui::PocketOffsetForm)
-    , names {tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
+    , names{tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
     ui->toolHolder1->label()->setText("Tool 1:");
     ui->toolHolder2->label()->setText("Tool 2:");
@@ -66,7 +66,7 @@ Form::
     connect(ui->sbxSteps, &QSpinBox::valueChanged, this, &Form::onSbxStepsValueChanged);
 
     //
-    if (ui->sbxSteps->value() == 0)
+    if(ui->sbxSteps->value() == 0)
         ui->sbxSteps->setSuffix(tr(" - Infinity"));
 }
 
@@ -85,25 +85,25 @@ Form::~Form() {
 }
 
 void Form::computePaths() {
-    const Tool tool[] {
+    const Tool tool[]{
         ui->toolHolder1->tool(),
         ui->toolHolder2->tool(),
         ui->toolHolder3->tool(),
         ui->toolHolder4->tool()};
 
-    for (const Tool& t : tool) {
-        if (!t.isValid()) {
+    for(const Tool& t: tool) {
+        if(!t.isValid()) {
             t.errorMessageBox(this);
             return;
         }
     }
     auto gcp = getNewGcp();
-    if (!gcp)
+    if(!gcp)
         return;
 
-    for (const Tool& t : tool) {
+    for(const Tool& t: tool) {
         gcp->tools.push_back(t);
-        if (gcp->tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
+        if(gcp->tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
             break;
     }
 
@@ -122,7 +122,7 @@ void Form::computePaths() {
     gcp->setConvent(ui->rbConventional->isChecked());
     gcp->setSide(side);
     gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    if (ui->sbxSteps->isVisible())
+    if(ui->sbxSteps->isVisible())
         gcp->params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
     fileCount = static_cast<int>(gcp->tools.size());
@@ -142,19 +142,19 @@ void Form::updatePixmap() {
 }
 
 void Form::rb_clicked() {
-    const auto tool {ui->toolHolder1->tool()};
+    const auto tool{ui->toolHolder1->tool()};
 
-    if (ui->rbOutside->isChecked())
+    if(ui->rbOutside->isChecked())
         side = GCode::Outer;
-    else if (ui->rbInside->isChecked())
+    else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
     //    if (tool.type() == Tool::Laser)
     //        ui->chbxUseTwoTools->setChecked(false);
 
-    if (ui->rbClimb->isChecked())
+    if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
-    else if (ui->rbConventional->isChecked())
+    else if(ui->rbConventional->isChecked())
         direction = GCode::Conventional;
 
     {

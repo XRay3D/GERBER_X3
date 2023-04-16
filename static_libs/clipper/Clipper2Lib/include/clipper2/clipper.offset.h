@@ -14,15 +14,19 @@
 
 namespace Clipper2Lib {
 
-enum class JoinType { Square,
+enum class JoinType {
+    Square,
     Round,
-    Miter };
+    Miter
+};
 
-enum class EndType { Polygon,
+enum class EndType {
+    Polygon,
     Joined,
     Butt,
     Square,
-    Round };
+    Round
+};
 // Butt   : offsets both sides of a path, with square blunt ends
 // Square : offsets both sides of a path, with square extended ends
 // Round  : offsets both sides of a path, with round extended ends
@@ -78,7 +82,7 @@ public:
         : miter_limit_(miter_limit)
         , arc_tolerance_(arc_tolerance)
         , preserve_collinear_(preserve_collinear)
-        , reverse_solution_(reverse_solution) {};
+        , reverse_solution_(reverse_solution){};
 
     ~ClipperOffset() { Clear(); };
 

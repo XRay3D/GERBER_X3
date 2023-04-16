@@ -27,12 +27,12 @@ class DxfGo final : public ::GraphicObject {
     friend QDataStream& operator<<(QDataStream& stream, const DxfGo& go);
     friend QDataStream& operator>>(QDataStream& stream, DxfGo& go);
 
-    int entityId_ {};
+    int entityId_{};
     //    Path path_;
     File* file_ = nullptr;
-    double rotationAngle_ {};
-    double scaleX_ {};
-    double scaleY_ {};
+    double rotationAngle_{};
+    double scaleX_{};
+    double scaleY_{};
     //    QPointF pos_;
 
 public:

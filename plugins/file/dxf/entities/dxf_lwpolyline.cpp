@@ -117,7 +117,7 @@ void LwPolyline::parse(CodeData& code) {
     Segment pt;
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMrker:
             break;
         case NumberOfVertices:
@@ -163,7 +163,7 @@ void LwPolyline::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
@@ -173,10 +173,10 @@ DxfGo LwPolyline::toGo() const {
     const bool dbg = false; // data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
     auto addSeg = [&path, dbg](const Segment& source, const Segment& target) {
-        if (path.isEmpty())
+        if(path.isEmpty())
             path.moveTo(source);
 
-        if (qFuzzyIsNull(source.bulge)) {
+        if(qFuzzyIsNull(source.bulge)) {
             path.lineTo(target);
             return;
         }
@@ -203,10 +203,10 @@ DxfGo LwPolyline::toGo() const {
             double cy2 = c.y() * c.y();
             double d = source.x() * target.y() + source.y() * c.x() - target.y() * c.x() - source.x() * c.y() - target.x() * source.y() + target.x() * c.y();
             center = QPointF(
-                +0.5 / d * (                                                                                                //
+                +0.5 / d * ( //
                     source.y() * cx2 + source.y() * cy2 + target.y() * ax2 + target.y() * ay2 + c.y() * bx2 + c.y() * by2 - //
                     source.y() * bx2 - source.y() * by2 - target.y() * cx2 - target.y() * cy2 - c.y() * ax2 - c.y() * ay2),
-                -0.5 / d * (                                                                                                //
+                -0.5 / d * ( //
                     source.x() * cx2 + source.x() * cy2 + target.x() * ax2 + target.x() * ay2 + c.x() * bx2 + c.x() * by2 - //
                     source.x() * bx2 - source.x() * by2 - target.x() * cx2 - target.x() * cy2 - c.x() * ax2 - c.x() * ay2));
         }
@@ -216,7 +216,7 @@ DxfGo LwPolyline::toGo() const {
         double start_angle = qRadiansToDegrees(atan2(center.y() - source.y(), center.x() - source.x()));
         double end_angle = qRadiansToDegrees(atan2(center.y() - target.y(), center.x() - target.x()));
 
-        if (end_angle <= start_angle)
+        if(end_angle <= start_angle)
             end_angle += 360;
 
         double span = end_angle - start_angle;
@@ -226,29 +226,29 @@ DxfGo LwPolyline::toGo() const {
         path.arcTo(br, -start_angle, -span);
     };
 
-    for (size_t i = 0, size = poly.size() - 1; i < size; ++i)
+    for(size_t i = 0, size = poly.size() - 1; i < size; ++i)
         addSeg(poly[i], poly[i + 1]);
-    if (polylineFlag == Closed)
+    if(polylineFlag == Closed)
         addSeg(poly.back(), poly.front());
 
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
     ClipperOffset offset;
-    offset.AddPath(Path {p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
-    Paths paths {offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
+    offset.AddPath(Path{p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
+    Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
 
-    DxfGo go {id, p.value(0), paths}; // return {id, p.value(0), paths};
+    DxfGo go{id, p.value(0), paths}; // return {id, p.value(0), paths};
 
-    if (polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
+    if(polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
         go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
-        go.GraphicObject::pos = QLineF {poly.front(), poly.back()}.center();
+        go.GraphicObject::pos = QLineF{poly.front(), poly.back()}.center();
         go.path.clear();
     } else {
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);

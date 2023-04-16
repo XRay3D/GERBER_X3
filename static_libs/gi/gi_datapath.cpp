@@ -32,9 +32,9 @@ GiDataPath::GiDataPath(const Path& path, AbstractFile* file)
 }
 
 void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if (pnColorPrt_)
+    if(pnColorPrt_)
         pen_.setColor(*pnColorPrt_);
-    if (colorPtr_)
+    if(colorPtr_)
         color_ = *colorPtr_;
 
     updateSelection();
@@ -43,8 +43,8 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     QPen pen(pen_);
     constexpr double dl = 3;
 
-    if (option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
-        if (option->state & QStyle::State_Selected) {
+    if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
+        if(option->state & QStyle::State_Selected) {
             color.setAlpha(255);
             pen.setColor(color);
             pen.setDashOffset(App::dashOffset());
@@ -65,13 +65,13 @@ int GiDataPath::type() const { return GiType::DataPath; }
 QPainterPath GiDataPath::shape() const { return selectionShape_; }
 
 void GiDataPath::updateSelection() const {
-    if (const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
+    if(const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
         scale_ = scale;
         selectionShape_ = QPainterPath();
         ClipperOffset offset;
-        offset.AddPath(Path {shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
-        auto tmpPpath {offset.Execute(5 * uScale * scale_)};
-        for (auto&& path : tmpPpath)
+        offset.AddPath(Path{shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
+        auto tmpPpath{offset.Execute(5 * uScale * scale_)};
+        for(auto&& path: tmpPpath)
             selectionShape_.addPolygon(path);
         boundingRect_ = selectionShape_.boundingRect();
     }
@@ -82,23 +82,23 @@ void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     std::set<void*> set;
     std::function<void(QGraphicsItem*)> selector = [&](QGraphicsItem* item) {
         auto collidingItems = scene()->collidingItems(item, Qt::IntersectsItemShape);
-        for (auto* item : collidingItems) {
-            if (item->type() == int(GiType::DataPath) && itemGroup->contains((GraphicsItem*)item) && set.emplace(item).second) {
+        for(auto* item: collidingItems) {
+            if(item->type() == int(GiType::DataPath) && itemGroup->contains((GraphicsItem*)item) && set.emplace(item).second) {
                 item->setSelected(true);
                 selector(item);
             }
         }
     };
 
-    if (event->modifiers() & Qt::ShiftModifier && itemGroup)
+    if(event->modifiers() & Qt::ShiftModifier && itemGroup)
         selector(this);
 }
 
 QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if (change == ItemVisibleChange && value.toBool()) {
+    if(change == ItemVisibleChange && value.toBool()) {
         updateSelection();
-    } else if (change == ItemSelectedChange && App::settings().animSelection()) {
-        if (value.toBool()) {
+    } else if(change == ItemSelectedChange && App::settings().animSelection()) {
+        if(value.toBool()) {
             updateSelection();
             //  FIXME          timer.connect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
         } else {

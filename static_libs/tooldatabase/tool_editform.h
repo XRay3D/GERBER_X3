@@ -65,10 +65,10 @@ private:
 
     std::array<Data, 7> dsbxMapdsbxMap;
 
-    ToolItem* item_ {nullptr};
+    ToolItem* item_{nullptr};
     Tool tool_;
-    double feed {1.0};
-    bool dialog_ {true};
+    double feed{1.0};
+    bool dialog_{true};
 
     void updateName();
     void setChanged(bool fl = true);

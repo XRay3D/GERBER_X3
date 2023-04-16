@@ -41,7 +41,7 @@ Solid::Solid(SectionParser* sp)
 void Solid::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -93,14 +93,14 @@ void Solid::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Solid::type() const { return Type::SOLID; }
 
 DxfGo Solid::toGo() const {
     QPolygonF poly;
-    if (corners == 15) {
+    if(corners == 15) {
         poly.reserve(5);
         poly << firstCorner;
         poly << secondCorner;
@@ -112,7 +112,7 @@ DxfGo Solid::toGo() const {
     }
     Path path(poly);
     ReversePath(path);
-    DxfGo go {id, path, {path}}; // return {id, path, {path}};
+    DxfGo go{id, path, {path}}; // return {id, path, {path}};
     return go;
 }
 

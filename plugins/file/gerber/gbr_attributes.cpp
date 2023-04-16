@@ -37,12 +37,12 @@ File::Function File::toFunction(const QString& key) {
 }
 
 void File::parse(const QStringList& list) {
-    switch (toStdAttr(list.first())) {
+    switch(toStdAttr(list.first())) {
     case StdAttr::Part:
         part = list.mid(1);
         break;
     case StdAttr::FileFunction:
-        switch (const auto function = toFunction(list[1]); function) {
+        switch(const auto function = toFunction(list[1]); function) {
         case Function::Legend:
             function_ = std::make_shared<struct Legend>(function, list.mid(2));
             break;
@@ -163,12 +163,12 @@ Aperture::Function Aperture::toFunction(const QString& key) {
 }
 
 void Aperture::parse(const QStringList& list) {
-    switch (toStdAttr(list.first())) {
+    switch(toStdAttr(list.first())) {
     case StdAttr::AperFunction:
 
-        if (function_)
+        if(function_)
             function_.reset();
-        switch (const auto function = toFunction(list[1]); function) {
+        switch(const auto function = toFunction(list[1]); function) {
         case ViaDrill:
             function_ = std::make_shared<struct ViaDrill>(function, list.mid(2));
             break;

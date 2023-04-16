@@ -47,7 +47,7 @@ void File::setItemType(int type) {
 int File::itemsType() const { return m_itemsType; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl) {
-    if (m_groupedPaths.empty()) {
+    if(m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
@@ -58,7 +58,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             IntPoint(r.right + k, r.bottom + k),
             IntPoint(r.right + k, r.top - k),
             IntPoint(r.left - k, r.top - k)};
-        if (fl)
+        if(fl)
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftNonZero);
@@ -70,34 +70,32 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
 void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;
     Paths paths;
-    switch (group) {
+    switch(group) {
     case CutoffGroup:
-        if (!node->IsHole()) {
+        if(!node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (size_t i = 0; i < node->ChildCount(); ++i) {
+            for(size_t i = 0; i < node->ChildCount(); ++i) {
                 path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (size_t i = 0; i < node->ChildCount(); ++i) {
+        for(size_t i = 0; i < node->ChildCount(); ++i)
             grouping(node->Childs[i], pathss, group);
-        }
         break;
     case CopperGroup:
-        if (node->IsHole()) {
+        if(node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (size_t i = 0; i < node->ChildCount(); ++i) {
+            for(size_t i = 0; i < node->ChildCount(); ++i) {
                 path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (size_t i = 0; i < node->ChildCount(); ++i) {
+        for(size_t i = 0; i < node->ChildCount(); ++i)
             grouping(node->Childs[i], pathss, group);
-        }
         break;
     }
 }
@@ -177,7 +175,7 @@ void File::createGi() {
 bool File::isVisible() const { return m_visible; }
 
 void File::setVisible(bool visible) {
-    if (visible == m_visible)
+    if(visible == m_visible)
         return;
     m_visible = visible;
     //    if (m_visible) {

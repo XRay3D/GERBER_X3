@@ -59,9 +59,9 @@ enum MCode {
     //    M02 = 2, //  Swap Axes ((M02)XYM70)
     //    M02 = 2, //  Mirror Image X Axis ((M02)XYM80)
     //    M02 = 2, //  Mirror Image Y Axis ((M02)XYM90)
-    M06 = 6,  //  Optional Stop (X#Y#)
-    M08 = 8,  //  End of Step and Repeat
-    M09 = 9,  //  Stop for Inspection (X#Y#)
+    M06 = 6, //  Optional Stop (X#Y#)
+    M08 = 8, //  End of Step and Repeat
+    M09 = 9, //  Stop for Inspection (X#Y#)
     M14 = 14, // Z Axis Route Position With Depth Controlled Contouring
     M15 = 15, // Z Axis Route Position
     M16 = 16, // Retract With Clamping - вытянуть с фиксацией.
@@ -89,13 +89,13 @@ enum MCode {
 
 enum GCode {
     G_NULL = -1,
-    G00 = 0,  //  Route Mode (X#Y#) перемещение.
-    G01 = 1,  //  Linear (Straight Line) Mode
-    G02 = 2,  //  Circular CW Mode
-    G03 = 3,  //  Circular CCW Mode
-    G04 = 4,  //  X# Variable Dwell
-    G05 = 5,  //  Drill Mode
-    G07 = 7,  //  Override current tool feed or speed
+    G00 = 0, //  Route Mode (X#Y#) перемещение.
+    G01 = 1, //  Linear (Straight Line) Mode
+    G02 = 2, //  Circular CW Mode
+    G03 = 3, //  Circular CCW Mode
+    G04 = 4, //  X# Variable Dwell
+    G05 = 5, //  Drill Mode
+    G07 = 7, //  Override current tool feed or speed
     G32 = 32, // Routed Circle Canned Cycle (X#Y#A#)
     // CCW G34,#(,#)	Select Vision Tool
     // CW G33X#Y#A#	Routed Circle Canned Cycle
@@ -169,7 +169,7 @@ class File;
 
 struct Format {
     Format(File* file = nullptr)
-        : file {file} { }
+        : file{file} { }
     ZeroMode zeroMode = LeadingZeros;
     UnitMode unitMode = Millimeters;
     int decimal = 0;

@@ -34,7 +34,7 @@ WARRANTIES OF MERCHANTABILITY AND/OR FITNESS FOR A PARTICULAR PURPOSE.
 #include <QByteArray>
 #include <qt_windows.h>
 #include <thumbcache.h> // For IThumbnailProvider
-#include <wincodec.h>   // Windows Imaging Codecs
+#include <wincodec.h> // Windows Imaging Codecs
 
 #pragma comment(lib, "windowscodecs.lib")
 

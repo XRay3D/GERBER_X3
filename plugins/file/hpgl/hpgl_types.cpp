@@ -14,7 +14,7 @@
 
 namespace Hpgl {
 
-const Color dxfColors[] {
+const Color dxfColors[]{
     {0.0000, 0.0000, 0.0000}, // unused
     {1.0000, 0.0000, 0.0000}, // 1
     {1.0000, 1.0000, 0.0000},

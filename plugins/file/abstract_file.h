@@ -34,7 +34,7 @@ inline QPixmap decoration(QColor color, QChar chr = {}) {
     color.setAlpha(255);
     p.setBrush(color);
     p.drawRect(2, 2, 18, 18);
-    if (!chr.isNull()) {
+    if(!chr.isNull()) {
         QFont f;
         f.setBold(true);
         f.setPixelSize(18);
@@ -92,7 +92,7 @@ class AbstractFile {
             file.color_,
             file.colorFlag_);
         file.read(in);
-        if (App::splashScreenPtr())
+        if(App::splashScreenPtr())
             App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         file.createGi();
         file.setTransform(file.transform_);
@@ -173,7 +173,7 @@ protected:
     FileTree::Node* node_ = nullptr;
     Pathss groupedPaths_;
     QColor color_;
-    bool colorFlag_ {};
+    bool colorFlag_{};
     QDateTime date_;
     QString name_;
     Side side_ = Top;
@@ -188,7 +188,7 @@ protected:
 };
 
 inline AbstractFile::AbstractFile()
-    : itemGroups_ {new GiGroup} {
+    : itemGroups_{new GiGroup} {
 }
 
 inline AbstractFile::~AbstractFile() { qDeleteAll(itemGroups_); }
@@ -200,8 +200,8 @@ inline QString AbstractFile::name() const { return name_; }
 inline void AbstractFile::setFileName(const QString& fileName) { name_ = fileName; }
 
 inline void AbstractFile::addToScene() const {
-    for (const auto var : itemGroups_) {
-        if (var && var->size()) {
+    for(const auto var: itemGroups_) {
+        if(var && var->size()) {
             var->addToScene();
             var->setZValue(-id_);
         }
@@ -210,9 +210,9 @@ inline void AbstractFile::addToScene() const {
 
 inline GiGroup* AbstractFile::itemGroup(int type) const {
     const int size(static_cast<int>(itemGroups_.size()));
-    if (type == -1 && 0 <= itemsType_ && itemsType_ < size)
+    if(type == -1 && 0 <= itemsType_ && itemsType_ < size)
         return itemGroups_[itemsType_];
-    else if (0 <= type && type < size)
+    else if(0 <= type && type < size)
         return itemGroups_[type];
     return itemGroups_.front();
 }
@@ -229,7 +229,7 @@ inline const mvector<QString>& AbstractFile::lines() const { return lines_; }
 
 inline const QString AbstractFile::lines2() const {
     QString rstr;
-    for (auto&& str : lines_)
+    for(auto&& str: lines_)
         rstr.append(str).append('\n');
     return rstr;
 }
@@ -244,8 +244,8 @@ inline void AbstractFile::initFrom(AbstractFile* file) {
     setColor(file->color_);
     setItemType(file->itemsType_);
     setTransform(file->transform_);
-    for (auto* ig : itemGroups_)
-        for (auto* gi : *ig)
+    for(auto* ig: itemGroups_)
+        for(auto* gi: *ig)
             gi->setZValue(-id_);
 }
 
@@ -269,9 +269,9 @@ inline void AbstractFile::setColor(const QColor& color) { color_ = color; }
 
 inline void AbstractFile::setTransform(const Transform& transform) {
     transform_ = transform;
-    QTransform t {transform};
-    for (auto* ig : itemGroups_)
-        for (auto* gi : *ig)
+    QTransform t{transform};
+    for(auto* ig: itemGroups_)
+        for(auto* gi: *ig)
             gi->setTransform(t);
 }
 
@@ -287,24 +287,26 @@ inline void AbstractFile::setUserColor(bool userColor) { colorFlag_ = userColor;
 
 class TransformDialog : public QDialog {
     Q_OBJECT
-    enum { Ang,
+    enum {
+        Ang,
         TrX,
         TrY,
         ScX,
-        ScY };
+        ScY
+    };
     DoubleSpinBox* dsbx[5];
     std::vector<AbstractFile*> files_;
     std::unordered_map<AbstractFile*, Transform> backup;
 
 public:
     TransformDialog(std::vector<AbstractFile*>&& files, QWidget* parent = nullptr)
-        : QDialog {parent}
-        , files_ {std::move(files)} {
+        : QDialog{parent}
+        , files_{std::move(files)} {
 
         setMaximumSize(0, 0);
         setWindowTitle(tr("Affine Transform"));
 
-        for (auto& dsbx : dsbx)
+        for(auto& dsbx: dsbx)
             dsbx = new DoubleSpinBox(this);
 
         dsbx[Ang]->setRange(-360, +360);
@@ -328,10 +330,10 @@ public:
         dsbx[ScX]->setValue(transform.scale.x());
         dsbx[ScY]->setValue(transform.scale.y());
 
-        for (auto* file : files_)
+        for(auto* file: files_)
             backup.emplace(file, file->transform());
 
-        for (auto& dsbx : dsbx)
+        for(auto& dsbx: dsbx)
             connect(dsbx, &QDoubleSpinBox::valueChanged, this, &TransformDialog::setTransform);
 
         auto buttonBox = new QDialogButtonBox(this);
@@ -358,17 +360,17 @@ public:
     ~TransformDialog() override = default;
 
     void setTransform() {
-        Transform transform {
+        Transform transform{
             .angle = dsbx[Ang]->value(),
-            .translate {dsbx[TrX]->value(), dsbx[TrY]->value()},
-            .scale {dsbx[ScX]->value(), dsbx[ScY]->value()},
+            .translate{dsbx[TrX]->value(), dsbx[TrY]->value()},
+            .scale{dsbx[ScX]->value(), dsbx[ScY]->value()},
         };
-        for (auto* file : files_)
+        for(auto* file: files_)
             file->setTransform(transform);
     };
 
     void reject() override {
-        for (auto&& [file, transform] : backup)
+        for(auto&& [file, transform]: backup)
             file->setTransform(transform);
         QDialog::reject();
     }

@@ -29,7 +29,7 @@ void Creator::create() {
     const auto width = gcp_.params[Width].toDouble();
 
     groupedPaths(GCode::Grouping::Copper);
-    switch (gcp_.params[VoronoiType].toInt()) {
+    switch(gcp_.params[VoronoiType].toInt()) {
     case 0:
         boostVoronoi();
         break;
@@ -38,14 +38,14 @@ void Creator::create() {
         break;
     }
 
-    if (width < tool.getDiameter(depth)) {
+    if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
 
         file_ = new File(std::move(gcp_), {sortBeginEnd(returnPs)}, {});
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
-        Paths copy {returnPs};
+        Paths copy{returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
 
@@ -55,7 +55,7 @@ void Creator::create() {
             clipper.AddOpenSubject(copy);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
             sortBeginEnd(copy);
-            for (auto&& p : copy)
+            for(auto&& p: copy)
                 returnPss.push_back({p});
         }
         dbgPaths(returnPs, "создание пермычек");
@@ -67,12 +67,11 @@ void Creator::create() {
         }
         // erase empty paths
         auto begin = returnPss.begin();
-        while (begin != returnPss.end()) {
-            if (begin->empty())
+        while(begin != returnPss.end())
+            if(begin->empty())
                 returnPss.erase(begin);
             else
                 ++begin;
-        }
 
         file_ = new File(std::move(gcp_), std::move(returnPss), std::move(workingRawPs));
         file_->setFileName(tool.nameEnc());
@@ -94,12 +93,12 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
     { // fit offset to copper
         Clipper clipper;
         clipper.AddSubject(returnPs);
-        for (const Paths& paths : groupedPss)
+        for(const Paths& paths: groupedPss)
             clipper.AddClip(paths);
         // clipper.Execute(ClipType::Difference, returnPs, FillRule::Positive, FillRule::Negative);
         clipper.Execute(ClipType::Difference, FillRule::Positive, returnPs);
     }
-    if (0) { // cut to copper rect
+    if(0) { // cut to copper rect
         Clipper clipper;
         clipper.AddSubject(returnPs);
         clipper.AddClip({frame});
@@ -118,10 +117,10 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
             offset.Clear();
             offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
             tmpPaths1 = offset.Execute(-stepOver);
-        } while (tmpPaths1.size());
+        } while(tmpPaths1.size());
         returnPs = tmpPaths;
     }
-    if (returnPs.empty()) {
+    if(returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }
@@ -136,7 +135,7 @@ File::File()
 
 File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if (gcp_.tools.front().diameter()) {
+    if(gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -147,30 +146,28 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 
 void File::genGcodeAndTile() {
     const QRectF rect = App::project().worckRect();
-    for (size_t x = 0; x < App::project().stepsX(); ++x) {
-        for (size_t y = 0; y < App::project().stepsY(); ++y) {
+    for(size_t x = 0; x < App::project().stepsX(); ++x) {
+        for(size_t y = 0; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if (toolType() == Tool::Laser) {
-                if (toolPathss_.size() > 1)
+            if(toolType() == Tool::Laser)
+                if(toolPathss_.size() > 1)
                     saveLaserPocket(offset);
                 else
                     saveLaserProfile(offset);
-            } else {
-                if (toolPathss_.size() > 1)
-                    saveMillingPocket(offset);
-                else
-                    saveMillingProfile(offset);
-            }
+            else if(toolPathss_.size() > 1)
+                saveMillingPocket(offset);
+            else
+                saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
 void File::createGi() {
-    if (toolPathss_.size() > 1) {
+    if(toolPathss_.size() > 1) {
         GraphicsItem* item;
         item = new GiGcPath(toolPathss_.back().back(), this);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));

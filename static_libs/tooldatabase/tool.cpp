@@ -71,7 +71,7 @@ QDebug operator<<(QDebug debug, const Tool& t) {
 Tool::Tool() { }
 
 QString Tool::nameEnc() const {
-    switch (type_) {
+    switch(type_) {
     case Tool::Drill:
         return QString("D-D%1MM").arg(diameter_);
     case Tool::EndMill:
@@ -130,7 +130,7 @@ int Tool::id() const { return id_; }
 
 void Tool::setId(int32_t id) { hash_ = {}, id_ = id; }
 double Tool::getDiameter(double depth) const {
-    if (type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
+    if(type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
         double d = depth * cos(a) / sin(a);
         return d * 2 + diameter();
@@ -139,7 +139,7 @@ double Tool::getDiameter(double depth) const {
 }
 
 double Tool::getDepth() const {
-    switch (type_) {
+    switch(type_) {
     case Tool::Drill:
         return diameter_ * 0.5 * tan(qDegreesToRadians((180.0 - angle_) * 0.5));
     case Tool::EndMill:
@@ -186,23 +186,23 @@ void Tool::write(QJsonObject& json) const {
 
 bool Tool::isValid() const {
     do {
-        if (qFuzzyIsNull(diameter_))
+        if(qFuzzyIsNull(diameter_))
             break;
-        if (type_ != Laser && qFuzzyIsNull(passDepth_))
+        if(type_ != Laser && qFuzzyIsNull(passDepth_))
             break;
-        if (type_ != Drill && qFuzzyIsNull(feedRate_))
+        if(type_ != Drill && qFuzzyIsNull(feedRate_))
             break;
-        if (type_ != Drill && qFuzzyIsNull(stepover_))
+        if(type_ != Drill && qFuzzyIsNull(stepover_))
             break;
-        if (type_ != Laser && qFuzzyIsNull(plungeRate_))
+        if(type_ != Laser && qFuzzyIsNull(plungeRate_))
             break;
         return true;
-    } while (0);
+    } while(0);
     return false;
 }
 
 QIcon Tool::icon() const {
-    switch (type_) {
+    switch(type_) {
     case Tool::Drill:
         return QIcon::fromTheme("drill");
     case Tool::EndMill:
@@ -220,19 +220,19 @@ QIcon Tool::icon() const {
 
 QString Tool::errorStr() const {
     QString errorString;
-    if (qFuzzyIsNull(diameter_))
+    if(qFuzzyIsNull(diameter_))
         errorString += "Tool diameter = 0!\n";
-    if (qFuzzyIsNull(passDepth_)) {
-        if (type() == Drill)
+    if(qFuzzyIsNull(passDepth_)) {
+        if(type() == Drill)
             errorString += "Pass = 0!\n";
         else
             errorString += "Depth = 0!\n";
     }
-    if (qFuzzyIsNull(feedRate_))
+    if(qFuzzyIsNull(feedRate_))
         errorString += "Feed rate = 0\n";
-    if (qFuzzyIsNull(stepover_))
+    if(qFuzzyIsNull(stepover_))
         errorString += "Stepover = 0\n";
-    if (qFuzzyIsNull(plungeRate_))
+    if(qFuzzyIsNull(plungeRate_))
         errorString += "Plunge rate = 0!\n";
     return errorString;
 }
@@ -242,7 +242,7 @@ void Tool::errorMessageBox(QWidget* parent) const {
 }
 
 size_t Tool::hash() const {
-    if (hash_)
+    if(hash_)
         return hash_;
 
     QByteArray hashData;
@@ -269,9 +269,9 @@ size_t Tool::hash() const {
 }
 
 size_t Tool::hash2() const {
-    if (!hash_) {
+    if(!hash_)
         hash();
-    } else
+    else
         return hash2_;
 
     QByteArray hashData;
@@ -310,9 +310,9 @@ void ToolHolder::readTools() {
 
     QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
 
-    if (!file.exists())
+    if(!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json"); // fallback path
-    if (file.exists() && file.open(QIODevice::ReadOnly))
+    if(file.exists() && file.open(QIODevice::ReadOnly))
         loadDoc = QJsonDocument::fromJson(file.readAll());
     else {
         qDebug() << file.errorString();
@@ -323,7 +323,7 @@ void ToolHolder::readTools() {
 
 void ToolHolder::readTools(const QJsonObject& json) {
     QJsonArray toolArray = json["tools"].toArray();
-    for (int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+    for(int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
@@ -335,7 +335,7 @@ void ToolHolder::readTools(const QJsonObject& json) {
 
 void ToolHolder::writeTools(QJsonObject& json) {
     QJsonArray toolArray;
-    for (auto& [id, tool] : tools_) {
+    for(auto& [id, tool]: tools_) {
         QJsonObject toolObject;
         tool.write(toolObject);
         toolObject["id"] = id;

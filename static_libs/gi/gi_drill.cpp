@@ -19,10 +19,10 @@
 #include <QStyleOptionGraphicsItem>
 
 GiDrill::GiDrill(const Path& path, double diameter, AbstractFile* file, int toolId)
-    : GraphicsItem {file}
-    , diameter_ {diameter}
-    , path_ {path}
-    , toolId_ {toolId} {
+    : GraphicsItem{file}
+    , diameter_{diameter}
+    , path_{path}
+    , toolId_{toolId} {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolId(toolId_);
@@ -50,7 +50,7 @@ void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
 bool GiDrill::isSlot() { return path_.size() > 1; }
 
 void GiDrill::setDiameter(double diameter) {
-    if (diameter_ == diameter)
+    if(diameter_ == diameter)
         return;
     diameter_ = diameter;
 
@@ -66,7 +66,7 @@ void GiDrill::update(const Path& path, double diameter) {
 }
 
 Paths GiDrill::paths(int alternate) const {
-    Path path {shape_.toFillPolygon(QTransform::fromScale(100, 100))};
+    Path path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
     path = QTransform::fromScale(0.01, 0.01).map(path);
     return {transform().map(path)};
 }
@@ -74,7 +74,7 @@ Paths GiDrill::paths(int alternate) const {
 void GiDrill::changeColor() {
     //    animation.setStartValue(bodyColor_);
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         bodyColor_ = QColor(100, 100, 100);
         break;
@@ -90,7 +90,7 @@ void GiDrill::changeColor() {
     }
 
     pathColor_ = bodyColor_;
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         break;
     case Hovered:
@@ -110,9 +110,9 @@ void GiDrill::changeColor() {
 void GiDrill::create() {
     shape_ = QPainterPath();
 
-    if (!path_.size()) {
+    if(!path_.size()) {
         return;
-    } else if (path_.size() == 1) {
+    } else if(path_.size() == 1) {
         //        path_ = CirclePath(double(diameter_ ? diameter_ * uScale : uScale), path_.front());
         //        ReversePath(path_);
         //        path_.push_back(path_.front());
@@ -121,7 +121,7 @@ void GiDrill::create() {
         //        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
-        for (auto&& path : C2::InflatePaths(Paths {path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
+        for(auto&& path: C2::InflatePaths(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
             path.push_back(path.front());
             shape_.addPolygon(path);
         }

@@ -27,7 +27,7 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractApert
 QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture) {
     int type;
     stream >> type;
-    switch (type) {
+    switch(type) {
     case Circle:
         aperture = std::make_shared<ApCircle>(stream, File::crutch);
         break;
@@ -54,26 +54,25 @@ AbstractAperture::AbstractAperture(const File* file)
     : file_(file) { }
 
 Paths AbstractAperture::draw(const State& state, bool notApBlock) {
-    if (state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
+    if(state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
         isFlashed_ = true;
 
-    if (paths_.empty())
+    if(paths_.empty())
         draw();
 
     Paths retPaths(paths_);
 
-    for (Path& path : retPaths) {
-        if (state.imgPolarity() == Negative)
+    for(Path& path: retPaths) {
+        if(state.imgPolarity() == Negative)
             ReversePath(path);
 
-        if (file_->format().unitMode == Inches && type() == Macro) {
-            for (Point& pt : path)
+        if(file_->format().unitMode == Inches && type() == Macro)
+            for(Point& pt: path)
                 pt *= 25.4;
-        }
 
         transform(path, state);
 
-        if (!state.curPos().isNull()) //??????????
+        if(!state.curPos().isNull()) //??????????
             TranslatePath(path, state.curPos());
     }
 
@@ -81,18 +80,18 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
 }
 
 double AbstractAperture::apSize() {
-    if (paths_.empty())
+    if(paths_.empty())
         draw();
     return size_;
 }
 
 Path AbstractAperture::drawDrill(const State& state) {
-    if (qFuzzyIsNull(drillDiam_))
+    if(qFuzzyIsNull(drillDiam_))
         return Path();
 
     Path drill = CirclePath(drillDiam_ * uScale);
 
-    if (state.imgPolarity() == Positive)
+    if(state.imgPolarity() == Positive)
         ReversePath(drill);
 
     TranslatePath(drill, state.curPos());
@@ -101,19 +100,19 @@ Path AbstractAperture::drawDrill(const State& state) {
 
 void AbstractAperture::transform(Path& poligon, const State& state) {
     QTransform m;
-    if (!qFuzzyIsNull(state.rotating()))
+    if(!qFuzzyIsNull(state.rotating()))
         m.rotate(state.rotating());
-    if (!qFuzzyCompare(state.scaling(), 1.0))
+    if(!qFuzzyCompare(state.scaling(), 1.0))
         m.scale(state.scaling(), state.scaling());
-    if (state.mirroring() & X_Mirroring)
+    if(state.mirroring() & X_Mirroring)
         m.scale(-1, +1);
-    if (state.mirroring() & Y_Mirroring)
+    if(state.mirroring() & Y_Mirroring)
         m.scale(+1, -1);
 
-    if (!m.isIdentity()) {
-        for (Point& pt : poligon)
+    if(!m.isIdentity()) {
+        for(Point& pt: poligon)
             pt = m.map(pt);
-        if (m.m11() < 0 ^ m.m22() < 0)
+        if(m.m11() < 0 ^ m.m22() < 0)
             ReversePath(poligon);
     }
 }
@@ -175,7 +174,7 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fi
 
 QString ApRectangle::name() const // RECTANGLE
 {
-    if (qFuzzyCompare(width_, height_))
+    if(qFuzzyCompare(width_, height_))
         return QString("R(SQ %1)").arg(width_);
     else
         return QString("R(%1 x %2)").arg(width_).arg(height_);
@@ -253,10 +252,10 @@ void ApObround::draw() {
     Clipper clipper;
     const Point::Type h = static_cast<Point::Type>(height_ * uScale);
     const Point::Type w = static_cast<Point::Type>(width_ * uScale);
-    if (qFuzzyCompare(w + 1.0, h + 1.0)) {
+    if(qFuzzyCompare(w + 1.0, h + 1.0)) {
         paths_.emplace_back(CirclePath(w));
     } else {
-        if (w > h) {
+        if(w > h) {
             clipper.AddSubject({//
                 CirclePath(h, Point(-(w - h) / 2., 0.)),
                 CirclePath(h, Point((w - h) / 2., 0.)),
@@ -264,7 +263,7 @@ void ApObround::draw() {
             //            clipper.AddPath(CirclePath(h, Point(-(w - h) / 2, 0)), PathType::Clip, true);
             //            clipper.AddPath(c PathType::Clip, true);
             //            clipper.AddPath(RectanglePath(w - h, h), PathType::Clip, true);
-        } else if (w < h) {
+        } else if(w < h) {
             clipper.AddSubject({//
                 CirclePath(w, Point(0., -(h - w) / 2.)),
                 CirclePath(w, Point(0., (h - w) / 2.)),
@@ -331,14 +330,12 @@ void ApPolygon::draw() {
     Path poligon;
     const double step = 360.0 / verticesCount_;
     const double diam = diam_ * uScale;
-    for (int i = 0; i < verticesCount_; ++i) {
+    for(int i = 0; i < verticesCount_; ++i)
         poligon.emplace_back(Point(
             static_cast<Point::Type>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast<Point::Type>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
-    }
-    if (rotation_ > 0.1) {
+    if(rotation_ > 0.1)
         RotatePath(poligon, rotation_);
-    }
     paths_.push_back(poligon);
     minSize_ = size_ = diam_;
 }
@@ -355,9 +352,8 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const Va
     , macro_(macro)
     , modifiers_(modifiers)
     , coefficients_(coefficients) {
-    while (modifiers_.size() && modifiers_.back().isEmpty()) {
+    while(modifiers_.size() && modifiers_.back().isEmpty())
         modifiers_.removeLast();
-    }
 }
 
 QString ApMacro::name() const { return QString("M(%1)").arg(macro_); } // MACRO
@@ -389,7 +385,7 @@ void ApMacro::draw() {
     enum {
         Comment = 0,
         Circle = 1,
-        OutlineCustomPolygon = 4,  // MAXIMUM 5000 POINTS
+        OutlineCustomPolygon = 4, // MAXIMUM 5000 POINTS
         OutlineRegularPolygon = 5, // 3-12 POINTS
         Moire = 6,
         Thermal = 7,
@@ -397,38 +393,36 @@ void ApMacro::draw() {
         CenterLine = 21,
     };
 
-    VarMap macroCoefficients {coefficients_};
+    VarMap macroCoefficients{coefficients_};
     mvector<QPair<bool, Path>> items;
     try {
         //        for (int i = 0; i < modifiers_.size(); ++i) {
         //            QString var(modifiers_[i]);
-        for (QString& var : modifiers_) {
-            if (var.at(0) == '0') // Skip Comment
+        for(QString& var: modifiers_) {
+            if(var.at(0) == '0') // Skip Comment
                 continue;
 
             mvector<double> mod;
 
-            if (var.contains('=')) {
+            if(var.contains('=')) {
                 QList<QString> stringList = var.split('=');
                 stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive);
                 macroCoefficients[stringList.first()] = MathParser(&macroCoefficients).parse(stringList.last());
                 continue;
             } else {
-                for (auto&& var2 : var.split(',')) {
+                for(auto&& var2: var.split(',')) {
                     var2.replace(QChar('x'), '*', Qt::CaseInsensitive);
-                    mod.push_back(var2.contains('$') ?
-                            MathParser(&macroCoefficients).parse(var2) :
-                            var2.toDouble());
+                    mod.push_back(var2.contains('$') ? MathParser(&macroCoefficients).parse(var2) : var2.toDouble());
                 }
             }
 
-            if (mod.size() < 2)
+            if(mod.size() < 2)
                 continue;
 
             const bool exposure = !qFuzzyIsNull(mod[1]);
             Path path;
 
-            switch (static_cast<int>(mod[0])) {
+            switch(static_cast<int>(mod[0])) {
             case Comment:
                 continue;
             case Circle:
@@ -455,28 +449,27 @@ void ApMacro::draw() {
             }
 
             const double area = Area(path);
-            if (area < 0 && exposure) {
+            if(area < 0 && exposure)
                 ReversePath(path);
-            } else if (area > 0 && !exposure) {
+            else if(area > 0 && !exposure)
                 ReversePath(path);
-            }
 
             items.emplace_back(exposure, path);
         }
-    } catch (...) {
+    } catch(...) {
         qWarning() << "Macro draw error";
         throw QString("Macro draw error");
     }
 
-    if (items.size() > 1) {
+    if(items.size() > 1) {
         Clipper clipper;
-        for (int i = 0; i < items.size();) {
+        for(int i = 0; i < items.size();) {
             clipper.Clear();
             clipper.AddSubject(paths_);
             bool exp = items[i].first;
-            while (i < items.size() && exp == items[i].first)
+            while(i < items.size() && exp == items[i].first)
                 clipper.AddClip({items[i++].second});
-            if (exp)
+            if(exp)
                 clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
             else
                 clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
@@ -513,7 +506,7 @@ Path ApMacro::drawCenterLine(const mvector<double>& mod) {
 
     Path polygon = RectanglePath(mod[Width] * uScale, mod[Height] * uScale, center);
 
-    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+    if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
 
     return polygon;
@@ -533,7 +526,7 @@ Path ApMacro::drawCircle(const mvector<double>& mod) {
 
     Path polygon = CirclePath(mod[Diameter] * uScale, center);
 
-    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+    if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
 
     return polygon;
@@ -564,8 +557,8 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
 
     {
         Clipper clipper;
-        if (thickness && gap) {
-            for (int num = 0; num < mod[NumberOfRings]; ++num) {
+        if(thickness && gap) {
+            for(int num = 0; num < mod[NumberOfRings]; ++num) {
                 clipper.AddClip({CirclePath(diameter)});
                 diameter -= thickness * 2;
                 Path polygon(CirclePath(diameter));
@@ -574,19 +567,17 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
                 diameter -= gap * 2;
             }
         }
-        if (cl && ct) {
+        if(cl && ct)
             clipper.AddClip({RectanglePath(cl, ct), RectanglePath(ct, cl)});
-        }
         clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
     }
 
-    for (Path& path : paths_)
+    for(Path& path: paths_)
         TranslatePath(path, center);
 
-    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
-        for (Path& path : paths_)
+    if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+        for(Path& path: paths_)
             RotatePath(path, mod[RotationAngle]);
-    }
 }
 
 Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
@@ -599,12 +590,12 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
     const int num = static_cast<int>(mod[NumberOfVertices]);
 
     Path polygon;
-    for (int j = 0; j < int(num); ++j)
+    for(int j = 0; j < int(num); ++j)
         polygon.emplace_back(Point(
             static_cast<Point::Type>(mod[X + j * 2] * uScale),
             static_cast<Point::Type>(mod[Y + j * 2] * uScale)));
 
-    if (mod.size() > (num * 2 + 3) && mod.back() > 0)
+    if(mod.size() > (num * 2 + 3) && mod.back() > 0)
         RotatePath(polygon, mod.back());
 
     return polygon;
@@ -620,7 +611,7 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     };
 
     const int num = static_cast<int>(mod[NumberOfVertices]);
-    if (3 > num || num > 12)
+    if(3 > num || num > 12)
         throw GbrObj::tr("Bad outline (regular polygon) macro!");
 
     const Point::Type diameter = static_cast<Point::Type>(mod[Diameter] * uScale * 0.5);
@@ -629,14 +620,14 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
         static_cast<Point::Type>(mod[CenterY] * uScale));
 
     Path polygon;
-    for (int j = 0; j < num; ++j) {
+    for(int j = 0; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
         polygon.emplace_back(Point(
             static_cast<Point::Type>(qCos(angle) * diameter),
             static_cast<Point::Type>(qSin(angle) * diameter)));
     }
 
-    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+    if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
 
     TranslatePath(polygon, center);
@@ -654,7 +645,7 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
         RotationAngle
     };
 
-    if (mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
+    if(mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
         throw GbrObj::tr("Bad thermal macro!");
 
     const Point::Type outer = static_cast<Point::Type>(mod[OuterDiameter] * uScale);
@@ -676,13 +667,12 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
         clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
     }
 
-    for (Path& path : paths_)
+    for(Path& path: paths_)
         TranslatePath(path, center);
 
-    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0) {
-        for (Path& path : paths_)
+    if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+        for(Path& path: paths_)
             RotatePath(path, mod[RotationAngle]);
-    }
 }
 
 Path ApMacro::drawVectorLine(const mvector<double>& mod) {
@@ -710,7 +700,7 @@ Path ApMacro::drawVectorLine(const mvector<double>& mod) {
     RotatePath(polygon, angle);
     TranslatePath(polygon, center);
 
-    if (mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
+    if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
 
     return polygon;
@@ -745,15 +735,15 @@ void ApBlock::write(QDataStream& stream) const {
 void ApBlock::draw() {
     paths_.clear();
     int i = 0;
-    while (i < size()) {
+    while(i < size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddSubject(paths_);
         const int exp = at(i).state.imgPolarity();
         do {
             paths_.append(at(i).fill);
             clipper.AddClip(at(i++).fill);
-        } while (i < size() && exp == at(i).state.imgPolarity());
-        if (at(i - 1).state.imgPolarity() == Positive)
+        } while(i < size() && exp == at(i).state.imgPolarity());
+        if(at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
         else
             clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
@@ -762,7 +752,7 @@ void ApBlock::draw() {
     {
         Clipper clipperBase;
         clipperBase.AddSubject(paths_);
-        auto rect {Bounds(paths_)};
+        auto rect{Bounds(paths_)};
         rect.right -= rect.left;
         rect.top -= rect.bottom;
         const double x = rect.right * dScale;

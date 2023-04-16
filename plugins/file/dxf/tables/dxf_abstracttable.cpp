@@ -20,10 +20,10 @@ AbstractTable::AbstractTable(SectionParser* sp)
 }
 
 void AbstractTable::parse(CodeData& code) {
-    switch (code.code()) {
-    case EntityName:      // -1
+    switch(code.code()) {
+    case EntityName: // -1
         break;
-    case EntityType:      // 0
+    case EntityType: // 0
         break;
     case HandleAllExcept: // 5
         break;
@@ -35,7 +35,7 @@ void AbstractTable::parse(CodeData& code) {
         //        break;
     case IndicatesTheStartOfTheAutocadPersistentReactorsGroup: // 102
         break;
-    case HandleToOwnerDictionary:                              // 330
+    case HandleToOwnerDictionary: // 330
         break;
         //    case IndicatesEndOfGroup: // 102
         //        break;

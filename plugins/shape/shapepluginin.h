@@ -27,7 +27,7 @@ class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
     //    std::atomic<AbstractShape*> item {};
-    AbstractShape* item {};
+    AbstractShape* item{};
 
 public:
     explicit Plugin();
@@ -49,7 +49,9 @@ signals:
     void actionUncheck(bool = false);
 
 protected:
-    enum { IconSize = 24 };
+    enum {
+        IconSize = 24
+    };
 };
 
 } // namespace Shapes

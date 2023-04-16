@@ -23,7 +23,9 @@
 
 namespace Thermal {
 
-enum { Size = 24 };
+enum {
+    Size = 24
+};
 
 Form::Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
@@ -61,7 +63,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     updateName();
     updateButtonIconSize();
 
-    if (0) {
+    if(0) {
         chbx = new QCheckBox("", ui->treeView);
         chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
         chbx->setEnabled(false);
@@ -72,7 +74,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
     updateFiles();
 
-    if (ui->cbxFile->count() < 1)
+    if(ui->cbxFile->count() < 1)
         return;
 
     ui->treeView->setUniformRowHeights(true);
@@ -111,7 +113,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 Form::~Form() {
     MySettings settings;
     settings.beginGroup("Form");
-    if (model && model->data_.size()) {
+    if(model && model->data_.size()) {
         settings.setValue(model->thParam().angle, "angle");
         settings.setValue(model->thParam().count, "count");
         settings.setValue(model->thParam().tickness, "tickness");
@@ -131,13 +133,13 @@ void Form::updateFiles() {
     ui->cbxFile->clear();
 
     updateCriterias();
-    for (auto file : App::project().files()) {
+    for(auto file: App::project().files()) {
         auto gos = file->getDataForGC(criterias, GCType::Profile, true);
-        if (gos.size())
+        if(gos.size())
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
     }
 
-    if (ui->cbxFile->count())
+    if(ui->cbxFile->count())
         updateThermalGi();
 
     widget()->setEnabled(ui->cbxFile->count());
@@ -149,17 +151,17 @@ void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void Form::computePaths() {
     qDebug(__FUNCTION__);
-    if (!tool.isValid()) {
+    if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
     auto gpc = new GCode::Params;
 
-    for (auto& item : items_) {
-        if (item->isValid()) {
+    for(auto& item: items_) {
+        if(item->isValid()) {
             gpc->closedPaths.append(item->paths());
-            if (Paths bridge = item->bridge(); bridge.size())
+            if(Paths bridge = item->bridge(); bridge.size())
                 gpc->supportPathss.emplace_back(item->bridge());
         }
     }
@@ -182,10 +184,10 @@ void Form::updateName() {
 
 void Form::updateThermalGi() {
     auto file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
-    if (!file)
+    if(!file)
         return;
 
-    if (model)
+    if(model)
         delete ui->treeView->model();
 
     model = new Model(ui->treeView);
@@ -194,7 +196,7 @@ void Form::updateThermalGi() {
 
     updateCriterias();
     thPaths.clear();
-    for (auto&& var : file->getDataForGC(criterias, GCType::Profile))
+    for(auto&& var: file->getDataForGC(criterias, GCType::Profile))
         thPaths[var.name].emplace_back(var.fill, var.pos);
 
     int count = std::accumulate(thPaths.begin(), thPaths.end(),
@@ -204,14 +206,14 @@ void Form::updateThermalGi() {
     pd.setCancelButton(nullptr);
     count = 0;
     { // create Preview Items
-        QColor color {App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
         items_.clear();
-        for (const auto& [keyId, valVec] : thPaths) {
-            if (valVec.empty())
+        for(const auto& [keyId, valVec]: thPaths) {
+            if(valVec.empty())
                 continue;
             auto node = model->appendRow(drawIcon(valVec.front().first, color), keyId, par);
-            for (const auto& [paths, pos] : valVec) {
+            for(const auto& [paths, pos]: valVec) {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
@@ -221,7 +223,7 @@ void Form::updateThermalGi() {
             pd.setValue(++count);
         }
 
-        for (auto& item : items_) {
+        for(auto& item: items_) {
             App::graphicsView().addItem(item.get());
             connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
         }
@@ -229,65 +231,58 @@ void Form::updateThermalGi() {
 
     ui->treeView->setModel(model);
     connect(ui->treeView->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Form::onSelectionChanged);
-    if (0 && App::isDebug())
+    if(0 && App::isDebug())
         ui->treeView->expandAll();
 }
 
 void Form::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-    for (const auto& index : selected.indexes()) {
+    for(const auto& index: selected.indexes()) {
         auto* node = static_cast<Node*>(index.internalPointer());
         auto* item = node->item();
-        if (item)
+        if(item)
             item->setSelected(true);
-        else {
-            for (int i = 0; i < node->childCount(); ++i) {
+        else
+            for(int i = 0; i < node->childCount(); ++i)
                 ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Select | QItemSelectionModel::Rows);
-            }
-        }
     }
-    for (const auto& index : deselected.indexes()) {
+    for(const auto& index: deselected.indexes()) {
         auto* node = static_cast<Node*>(index.internalPointer());
         auto* item = node->item();
-        if (item)
+        if(item)
             item->setSelected(false);
-        else {
-            for (int i = 0; i < node->childCount(); ++i) {
+        else
+            for(int i = 0; i < node->childCount(); ++i)
                 ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
-            }
-        }
     }
 }
 
 void Form::setSelection(const QModelIndex& selected, const QModelIndex& deselected) {
-    if (selected.isValid())
+    if(selected.isValid())
         ui->treeView->selectionModel()->select(selected, QItemSelectionModel::Select | QItemSelectionModel::Rows);
-    if (deselected.isValid())
+    if(deselected.isValid())
         ui->treeView->selectionModel()->select(deselected, QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
 }
 
 void Form::updateCriterias() {
     criterias.clear();
-    if (ui->chbxAperture->isChecked()) {
+    if(ui->chbxAperture->isChecked())
         criterias.emplace_back(
-            std::vector {GraphicObject::FlStamp} //
+            std::vector{GraphicObject::FlStamp} //
         );
-    }
-    if (ui->chbxPath->isChecked()) {
+    if(ui->chbxPath->isChecked())
         criterias.emplace_back(
-            std::vector {GraphicObject::Line, GraphicObject::PolyLine},
-            Range {ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
+            std::vector{GraphicObject::Line, GraphicObject::PolyLine},
+            Range{ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
         );
-    }
-    if (ui->chbxPour->isChecked()) {
+    if(ui->chbxPour->isChecked())
         criterias.emplace_back(
-            std::vector {GraphicObject::Polygon, GraphicObject::Composite},
-            Range {ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
+            std::vector{GraphicObject::Polygon, GraphicObject::Composite},
+            Range{ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
         );
-    }
 }
 
 void Form::redraw() {
-    for (auto item : items_)
+    for(auto item: items_)
         item->redraw();
 }
 
@@ -299,12 +294,12 @@ void Form::onDsbxDepthValueChanged(double arg1) {
 void Form::editFile(GCode::File* /*file*/) { }
 
 void Form::onDsbxAreaMinEditingFinished() {
-    if (lastMin != ui->dsbxAreaMin->value()) // skip if dsbxAreaMin hasn't changed
+    if(lastMin != ui->dsbxAreaMin->value()) // skip if dsbxAreaMin hasn't changed
         lastMin = ui->dsbxAreaMin->value(), updateThermalGi();
 }
 
 void Form::onDsbxAreaMaxEditingFinished() {
-    if (lastMax != ui->dsbxAreaMax->value()) // skip if dsbAreaMax hasn't changed
+    if(lastMax != ui->dsbxAreaMax->value()) // skip if dsbAreaMax hasn't changed
         lastMax = ui->dsbxAreaMax->value(), updateThermalGi();
 }
 

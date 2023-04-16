@@ -47,59 +47,59 @@ AttDef::AttDef(SectionParser* sp)
 void AttDef::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
-        case SubclassMarkerAcDbText:          // 100
-            break;                            //	Маркер подкласса (AcDbText)
-        case Thickness:                       // 39
-            break;                            //	Толщина (необязательно; значение по умолчанию = 0)
-        case FirstAlignmentPtX:               // 10
-            break;                            //	Первая точка выравнивания (в ОСК)
-        case FirstAlignmentPtY:               // 20
-            break;                            // DXF: Alue; APP: 3DPoint				//	Файл DXF: значение X; приложение: 3D-точка
-        case FirstAlignmentPtZ:               // 30
-            break;                            // DXF: N_ valuesOfTextStartPoint (in_OCS)	=	20, 30	,	//	Файл DXF: значения Y и Z начальной точки текста (в ОСК)
-        case TextHeight:                      // 40
-            break;                            //	Высота текста
-        case DefaultValue:                    // 1
-            break;                            //	Значение по умолчанию (строка)
-        case TextRotation:                    // 50
-            break;                            //	Поворот текста (необязательно; значение по умолчанию = 0)
-        case RelativeXScaleFactor:            // 41
-            break;                            //	Относительный масштабный коэффициент по оси X (ширина) (необязательно; значение по умолчанию = 1). Это значение корректируется при использовании вписываемого текста
-        case ObliqueAngle:                    // 51
-            break;                            //	Угол наклона (необязательно; значение по умолчанию = 0)
-        case TextStyleName:                   // 7
-            break;                            //	Имя стиля текста (необязательно; значение по умолчанию = STANDARD)
-        case TextGenerationFlags:             // 71
-            break;                            // see_TEXT_groupCodes	Флаги создания текста (необязательно; значение по умолчанию = 0); см. "Групповые коды TEXT"
+        switch(code.code()) {
+        case SubclassMarkerAcDbText: // 100
+            break; //	Маркер подкласса (AcDbText)
+        case Thickness: // 39
+            break; //	Толщина (необязательно; значение по умолчанию = 0)
+        case FirstAlignmentPtX: // 10
+            break; //	Первая точка выравнивания (в ОСК)
+        case FirstAlignmentPtY: // 20
+            break; // DXF: Alue; APP: 3DPoint				//	Файл DXF: значение X; приложение: 3D-точка
+        case FirstAlignmentPtZ: // 30
+            break; // DXF: N_ valuesOfTextStartPoint (in_OCS)	=	20, 30	,	//	Файл DXF: значения Y и Z начальной точки текста (в ОСК)
+        case TextHeight: // 40
+            break; //	Высота текста
+        case DefaultValue: // 1
+            break; //	Значение по умолчанию (строка)
+        case TextRotation: // 50
+            break; //	Поворот текста (необязательно; значение по умолчанию = 0)
+        case RelativeXScaleFactor: // 41
+            break; //	Относительный масштабный коэффициент по оси X (ширина) (необязательно; значение по умолчанию = 1). Это значение корректируется при использовании вписываемого текста
+        case ObliqueAngle: // 51
+            break; //	Угол наклона (необязательно; значение по умолчанию = 0)
+        case TextStyleName: // 7
+            break; //	Имя стиля текста (необязательно; значение по умолчанию = STANDARD)
+        case TextGenerationFlags: // 71
+            break; // see_TEXT_groupCodes	Флаги создания текста (необязательно; значение по умолчанию = 0); см. "Групповые коды TEXT"
         case HorizontalTextJustificationType: // 72
-            break;                            // see_TEXT_groupCodes	Тип выравнивания текста по горизонтали (необязательно; значение по умолчанию = 0); см. "Групповые коды TEXT"
-        case SecondAlignmentPointPtX:         // 11
-            break;                            //	Вторая точка выравнивания (в ОСК) (необязательно)
-        case SecondAlignmentPointPtY:         // 21
-            break;                            //	Файл DXF: значения Y и Z второй точки выравнивания (в ОСК) (необязательно)
-        case SecondAlignmentPointPtZ:         // 31
+            break; // see_TEXT_groupCodes	Тип выравнивания текста по горизонтали (необязательно; значение по умолчанию = 0); см. "Групповые коды TEXT"
+        case SecondAlignmentPointPtX: // 11
+            break; //	Вторая точка выравнивания (в ОСК) (необязательно)
+        case SecondAlignmentPointPtY: // 21
+            break; //	Файл DXF: значения Y и Z второй точки выравнивания (в ОСК) (необязательно)
+        case SecondAlignmentPointPtZ: // 31
             break;
-        case ExtrusionDirectionX:             // 210
-            break;                            //	Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
-        case ExtrusionDirectionY:             // 220
-            break;                            //	Файл DXF: значение X; приложение: 3D-вектор
-        case ExtrusionDirectionZ:             // 230
-            break;                            //	Файл DXF: значения Y и Z направления выдавливания
+        case ExtrusionDirectionX: // 210
+            break; //	Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
+        case ExtrusionDirectionY: // 220
+            break; //	Файл DXF: значение X; приложение: 3D-вектор
+        case ExtrusionDirectionZ: // 230
+            break; //	Файл DXF: значения Y и Z направления выдавливания
             //        case SubclassMarkerAcDbAttributeDefinition: //100
             //            break; //	Маркер подкласса (AcDbAttributeDefinition)
-        case VersionNumber:                 // 280
-            break;                          //	Номер версии: 0 - 2010
-        case PromptString:                  // 3
-            break;                          //	Строка запроса
-        case TagString:                     // 2
-            break;                          //	Строка тега (не может содержать пробелы)
-        case AttributeFlags:                // 70
-            break;                          //	Флаги атрибута:
-        case FieldLength:                   // 73
-            break;                          //	Длина поля (необязательно; значение по умолчанию = 0) (в настоящее время не используется)
+        case VersionNumber: // 280
+            break; //	Номер версии: 0 - 2010
+        case PromptString: // 3
+            break; //	Строка запроса
+        case TagString: // 2
+            break; //	Строка тега (не может содержать пробелы)
+        case AttributeFlags: // 70
+            break; //	Флаги атрибута:
+        case FieldLength: // 73
+            break; //	Длина поля (необязательно; значение по умолчанию = 0) (в настоящее время не используется)
         case VerticalTextJustificationType: // 74
-            break;                          //	Тип выравнивания текста по вертикали (необязательно, по умолчанию = 0); см. групповой код 73 в разделе TEXT
+            break; //	Тип выравнивания текста по вертикали (необязательно, по умолчанию = 0); см. групповой код 73 в разделе TEXT
             //        case LockPositionFlag: //280
             //            break; //	Флаг фиксирования положения. Фиксирование положения атрибута в пределах вхождения блока
             //        case SubclassMarkerAcDbXrecord: //100
@@ -127,7 +127,7 @@ void AttDef::parse(CodeData& code) {
             //        case SubclassMarkerAcDbEntity: //100
             //            break; //	Маркер подкласса (AcDbEntity)
         case LayerName: // 8
-            break;      //	Имя слоя
+            break; //	Имя слоя
             //        case SubclassMarkerAcDbMText: //100
             //            break; //	Маркер подкласса (AcDbMText)
             //        case InsertionPointX: //10
@@ -139,7 +139,7 @@ void AttDef::parse(CodeData& code) {
             //        case ReferenceRectangleWidth: //41
             //            break; //	Ширина опорного прямоугольника
         case DefinedAnnotationHeight: // 46
-            break;                    //	Определенная высота аннотаций
+            break; //	Определенная высота аннотаций
             //        case AttachmentPoint: //71
             //            break; //	Точка вставки:
             //        case DrawingDirection: //72
@@ -157,28 +157,28 @@ void AttDef::parse(CodeData& code) {
             //        case ZAxisDirectionVector: //31
             //            break;
         case HorizontalWidthOfTheCharactersThatMakeUpTheMtextEntity: // 42
-            break;                                                   //	Ширина символов, образующих объект многострочного текста, по горизонтали.
+            break; //	Ширина символов, образующих объект многострочного текста, по горизонтали.
             //        case RotationAngleInRadians: //50
             //            break; //	Угол поворота в радианах
             //        case MtextLineSpacingStyle: //73
             //            break; //	Стиль межстрочного интервала многострочного текста (необязательно):
         case MtextLineSpacingFactor: // 44
-            break;                   //	Коэффициент межстрочного интервала многострочного текста (необязательно):
-        case BackgroundFillSetting:  // 90
-            break;                   //	Настройка заливки фона:
-        case BackgroundColor:        // 63
-            break;                   //	Цвет фона (если используется номер индекса цвета)
-        case FillBoxScale:           // 45
-            break;                   //	Масштаб рамки заливки (необязательно):
+            break; //	Коэффициент межстрочного интервала многострочного текста (необязательно):
+        case BackgroundFillSetting: // 90
+            break; //	Настройка заливки фона:
+        case BackgroundColor: // 63
+            break; //	Цвет фона (если используется номер индекса цвета)
+        case FillBoxScale: // 45
+            break; //	Масштаб рамки заливки (необязательно):
             //        case BackgroundFillColor: //63
             //            break; //	Цвет заливки фона (необязательно):
         case TransparencyOfBackgroundFillColor: // 441
-            break;                              //	П+R[-99]C[-5]:RCрозрачность цвета заливки фона (не поддерживается)
+            break; //	П+R[-99]C[-5]:RCрозрачность цвета заливки фона (не поддерживается)
         default:
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type AttDef::type() const { return Type::ATTDEF; }

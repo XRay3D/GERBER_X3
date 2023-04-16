@@ -23,32 +23,32 @@ InsertEntity::InsertEntity(Blocks& blocks, SectionParser* sp)
 }
 
 void InsertEntity::draw(const InsertEntity* const i) const {
-    if (!blocks.contains(blockName))
+    if(!blocks.contains(blockName))
         return;
-    if (blocks[blockName]->entities.empty())
+    if(blocks[blockName]->entities.empty())
         return;
 
     basePoint = blocks[blockName]->basePoint;
 
-    for (auto entity : blocks[blockName]->entities) {
-        if (i) {
+    for(auto entity: blocks[blockName]->entities) {
+        if(i) {
             InsertEntity copy(*this);
-            if (layerName == "0")
+            if(layerName == "0")
                 copy.layerName = i->layerName;
-            if (insPos.isNull())
+            if(insPos.isNull())
                 copy.insPos = i->insPos;
 
-            if (qFuzzyIsNull(rotationAngle))
+            if(qFuzzyIsNull(rotationAngle))
                 copy.rotationAngle = i->rotationAngle;
 
-            if (entity->type() != INSERT) {
-                if (copy.layerName == "0")
+            if(entity->type() != INSERT) {
+                if(copy.layerName == "0")
                     copy.layerName = entity->layerName;
             }
             entity->draw(&copy);
-        } else if (entity->type() != INSERT) {
+        } else if(entity->type() != INSERT) {
             InsertEntity copy(*this);
-            if (copy.layerName == "0")
+            if(copy.layerName == "0")
                 copy.layerName = entity->layerName;
             entity->draw(&copy);
         } else {
@@ -59,7 +59,7 @@ void InsertEntity::draw(const InsertEntity* const i) const {
 
 void InsertEntity::parse(CodeData& code) {
     do {
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMrker:
         case VariableAttributes:
             break;
@@ -105,7 +105,7 @@ void InsertEntity::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 void InsertEntity::transform(DxfGo& item, QPointF tr) const {

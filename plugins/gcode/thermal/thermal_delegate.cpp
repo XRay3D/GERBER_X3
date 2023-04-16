@@ -23,7 +23,7 @@ Delegate::Delegate(QObject* parent)
 }
 
 QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
-    switch (index.column()) {
+    switch(index.column()) {
     case Model::Name:
         //    case Model::Position:
         break;
@@ -58,21 +58,21 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
 }
 
 void Delegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
-    switch (index.column()) {
+    switch(index.column()) {
     case Model::Name:
         //    case Model::Position:
         return;
     case Model::GapAngle:
     case Model::apThickness: {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
-        if (!dsbx)
+        if(!dsbx)
             return;
         dsbx->setValue(index.data(Qt::EditRole).toDouble());
         return;
     }
     case Model::GapCount: {
         auto* sbx = qobject_cast<QSpinBox*>(editor);
-        if (!sbx)
+        if(!sbx)
             return;
         sbx->setValue(index.data(Qt::EditRole).toInt());
         return;
@@ -81,21 +81,21 @@ void Delegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
 }
 
 void Delegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
-    switch (index.column()) {
+    switch(index.column()) {
     case Model::Name:
         //    case Model::Position:
         return;
     case Model::GapAngle:
     case Model::apThickness: {
         auto* dsbx = qobject_cast<QDoubleSpinBox*>(editor);
-        if (!dsbx)
+        if(!dsbx)
             return;
         model->setData(index, dsbx->value());
         return;
     }
     case Model::GapCount: {
         auto* sbx = qobject_cast<QSpinBox*>(editor);
-        if (!sbx)
+        if(!sbx)
             return;
         model->setData(index, sbx->value());
         return;

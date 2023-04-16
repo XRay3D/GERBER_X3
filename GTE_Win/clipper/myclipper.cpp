@@ -18,7 +18,7 @@
 Path toPath(const QPolygonF& p) {
     Path path;
     path.reserve(p.size());
-    for (const QPointF& pt : p)
+    for(const QPointF& pt: p)
         path.push_back(toIntPoint(pt));
     return path;
 }
@@ -26,7 +26,7 @@ Path toPath(const QPolygonF& p) {
 Paths toPaths(const QVector<QPolygonF>& p) {
     Paths paths;
     paths.reserve(p.size());
-    for (const QPolygonF& pl : p)
+    for(const QPolygonF& pl: p)
         paths.push_back(toPath(pl));
     return paths;
 }
@@ -34,7 +34,7 @@ Paths toPaths(const QVector<QPolygonF>& p) {
 QPolygonF toQPolygon(const Path& p) {
     QPolygonF polygon;
     polygon.reserve(p.size());
-    for (const IntPoint& pt : p)
+    for(const IntPoint& pt: p)
         polygon.push_back(toQPointF(pt));
     return polygon;
 }
@@ -42,7 +42,7 @@ QPolygonF toQPolygon(const Path& p) {
 QVector<QPolygonF> toQPolygons(const Paths& p) {
     QVector<QPolygonF> polygons;
     polygons.reserve(p.size());
-    for (const Path& pl : p)
+    for(const Path& pl: p)
         polygons.push_back(toQPolygon(pl));
     return polygons;
 }
@@ -52,7 +52,7 @@ double Angle(const IntPoint& pt1, const IntPoint& pt2) {
     const double dy = pt2.Y - pt1.Y;
     const double theta = atan2(-dy, dx) * 360.0 / two_pi;
     const double theta_normalized = theta < 0 ? theta + 360 : theta;
-    if (qFuzzyCompare(theta_normalized, double(360)))
+    if(qFuzzyCompare(theta_normalized, double(360)))
         return 0.0;
     else
         return theta_normalized;
@@ -79,17 +79,16 @@ double Length(const IntPoint& pt1, const IntPoint& pt2) {
 // }
 
 Path CirclePath(double diametr, const IntPoint& center) {
-    if (diametr == 0.0)
+    if(diametr == 0.0)
         return Path();
 
     const double radius = diametr * 0.5;
     const int intSteps = 18;
     Path poligon(intSteps);
-    for (int i = 0; i < intSteps; ++i) {
+    for(int i = 0; i < intSteps; ++i)
         poligon[i] = IntPoint(
             static_cast<cInt>(cos(i * 2 * pi / intSteps) * radius) + center.X,
             static_cast<cInt>(sin(i * 2 * pi / intSteps) * radius) + center.Y);
-    }
     return poligon;
 }
 
@@ -97,13 +96,13 @@ Path RectanglePath(double width, double height, const IntPoint& center) {
 
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    Path poligon {
+    Path poligon{
         IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
         IntPoint(static_cast<cInt>(-halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
         IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(-halfHeight + center.Y)),
         IntPoint(static_cast<cInt>(+halfWidth + center.X), static_cast<cInt>(+halfHeight + center.Y)),
     };
-    if (Area(poligon) < 0.0)
+    if(Area(poligon) < 0.0)
         ReversePath(poligon);
 
     return poligon;
@@ -111,21 +110,21 @@ Path RectanglePath(double width, double height, const IntPoint& center) {
 
 void RotatePath(Path& poligon, double angle, const IntPoint& center) {
     const bool fl = Area(poligon) < 0;
-    for (IntPoint& pt : poligon) {
+    for(IntPoint& pt: poligon) {
         const double dAangle = qDegreesToRadians(angle - Angle(center, pt));
         const double length = Length(center, pt);
         pt = IntPoint(static_cast<cInt>(cos(dAangle) * length), static_cast<cInt>(sin(dAangle) * length));
         pt.X += center.X;
         pt.Y += center.Y;
     }
-    if (fl != (Area(poligon) < 0))
+    if(fl != (Area(poligon) < 0))
         ReversePath(poligon);
 }
 
 void TranslatePath(Path& path, const IntPoint& pos) {
-    if (pos.X == 0 && pos.Y == 0)
+    if(pos.X == 0 && pos.Y == 0)
         return;
-    for (Path::size_type i = 0, size = path.size(); i < size; ++i) {
+    for(Path::size_type i = 0, size = path.size(); i < size; ++i) {
         path[i].X += pos.X;
         path[i].Y += pos.Y;
     }
@@ -133,9 +132,8 @@ void TranslatePath(Path& path, const IntPoint& pos) {
 
 double Perimeter(const Path& path) {
     double p = 0.0;
-    for (int i = 0; i < path.size() - 1; ++i) {
+    for(int i = 0; i < path.size() - 1; ++i)
         p += Length(path[i], path[i + 1]);
-    }
     p += Length(path.first(), path.last());
     return p;
 }

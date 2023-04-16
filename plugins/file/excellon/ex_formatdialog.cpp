@@ -64,18 +64,18 @@ FormatDialog::~FormatDialog() {
 void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
-    for (QGraphicsItem* item : App::graphicsView().selectedItems()) {
-        if (item->type() == GiType::Drill) {
+    for(QGraphicsItem* item: App::graphicsView().selectedItems()) {
+        if(item->type() == GiType::Drill) {
             pair.first = item->boundingRect().center();
             ++c;
         }
-        if (item->type() != GiType::Drill) {
+        if(item->type() != GiType::Drill) {
             pair.second = item->boundingRect().center();
             ++c;
         }
-        if (c == 2) {
+        if(c == 2) {
             QPointF p(pair.second - pair.first);
-            if (QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
+            if(QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
                 return;
 
             App::graphicsView().zoomFit();
@@ -103,7 +103,7 @@ void FormatDialog::acceptFormat() {
 void FormatDialog::rejectFormat() { deleteLater(); }
 
 void FormatDialog::resetFormat() {
-    if (accepted)
+    if(accepted)
         return;
     file_->setFormat(format_);
     App::graphicsView().zoomFit();
@@ -132,4 +132,4 @@ void FormatDialog::on_pbSetAsDefault_clicked() {
 
 } // namespace Excellon
 
-//#include "moc_ex_formatdialog.cpp"
+// #include "moc_ex_formatdialog.cpp"

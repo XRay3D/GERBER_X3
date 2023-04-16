@@ -13,18 +13,18 @@
 
 bool MainWindow::debug() {
 
-    while (App::isDebug()) { // NOTE need for debug
+    while(App::isDebug()) { // NOTE need for debug
         int i = 100;
         int k = 100;
 
-        if (0) {
+        if(0) {
             QDir dir(R"(C:\Users\X-Ray\Documents\TopoR\Examples\Example_01)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
-            if (!dir.exists())
+            if(!dir.exists())
                 break;
-            for (QString str : dir.entryList({"*.gbr"}, QDir::Files)) {
+            for(QString str: dir.entryList({"*.gbr"}, QDir::Files)) {
                 str = dir.path() + '/' + str;
                 QTimer::singleShot(i += k, [this, str] { loadFile(str); });
                 //                break;
@@ -33,29 +33,29 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if (0)
+        if(0)
             QTimer::singleShot(i += k, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
-        if (1) {
+        if(1) {
             constexpr auto TYPE = md5::hash32("PocketRaster");
-            if (!toolpathActions.contains(TYPE))
+            if(!toolpathActions.contains(TYPE))
                 break;
             QTimer::singleShot(i += k, this, [this] { selectAll(); });
             QTimer::singleShot(i += k, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
             QTimer::singleShot(i += k, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if (0) {
+        if(0) {
             constexpr auto DRILLING = md5::hash32("Drilling");
             QTimer::singleShot(i += k, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
         }
 
-        if (0) {
+        if(0) {
             constexpr auto THERMAL = md5::hash32("Thermal");
             QTimer::singleShot(i += k, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
         }
 
-        if (0) {
+        if(0) {
             constexpr auto PROFILE = md5::hash32("Profile");
 
             QTimer::singleShot(i += k, this, [this] { selectAll(); });

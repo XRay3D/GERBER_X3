@@ -23,10 +23,10 @@
 
 GiGcPath::GiGcPath(const Paths& paths, AbstractFile* file)
     : gcFile_(file) {
-    for (const Path& path : paths)
+    for(const Path& path: paths)
         shape_.addPolygon(path);
     double k;
-    if (gcFile_)
+    if(gcFile_)
         k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
@@ -40,7 +40,7 @@ GiGcPath::GiGcPath(const Path& path, AbstractFile* file)
     : gcFile_(file) {
     shape_.addPolygon(path);
     double k;
-    if (gcFile_)
+    if(gcFile_)
         k = 0; // FIXME  gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
@@ -55,19 +55,19 @@ QRectF GiGcPath::boundingRect() const { return boundingRect_; }
 void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
-    if (pnColorPrt_)
+    if(pnColorPrt_)
         pen_.setColor(*pnColorPrt_);
-    if (colorPtr_)
+    if(colorPtr_)
         color_ = *colorPtr_;
 
-    if (pen_.widthF() == 0) {
+    if(pen_.widthF() == 0) {
         QPen pen(pen_);
         pen.setWidthF(1.5 * scaleFactor());
         painter->setPen(pen);
     } else
         painter->setPen(pen_);
 #ifdef QT_DEBUG
-    if (option->state & QStyle::State_MouseOver) {
+    if(option->state & QStyle::State_MouseOver) {
         QPen pen(pen_);
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
@@ -84,7 +84,7 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     ////////////////////////////////////////////////////// for debug cut direction
 #ifdef QT_DEBUG
-    if (sc_ != scaleFactor())
+    if(sc_ != scaleFactor())
         updateArrows();
     painter->drawPath(arrows_);
 #endif
@@ -97,14 +97,14 @@ Paths GiGcPath::paths(int) const { return {} /*paths_*/; }
 void GiGcPath::updateArrows() {
     sc_ = scaleFactor();
     arrows_ = QPainterPath(); //.clear();
-    if (qFuzzyIsNull(pen_.widthF())) {
-        for (const QPolygonF& path : shape_.toSubpathPolygons()) {
-            for (int i = 0; i < path.size() - 1; ++i) {
+    if(qFuzzyIsNull(pen_.widthF())) {
+        for(const QPolygonF& path: shape_.toSubpathPolygons()) {
+            for(int i = 0; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
                 double length = 30 * scaleFactor();
-                if (line.length() < length && i)
+                if(line.length() < length && i)
                     continue;
-                if (length > 0.5)
+                if(length > 0.5)
                     length = 0.5;
                 const double angle = line.angle();
                 line.setLength(length);

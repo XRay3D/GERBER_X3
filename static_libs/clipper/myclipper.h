@@ -17,7 +17,9 @@
 #include <QPolygonF>
 #include <numbers>
 
-enum { IconSize = 24 };
+enum {
+    IconSize = 24
+};
 constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
 constexpr auto two_pi = std::numbers::pi * 2;
 using std::numbers::pi;
@@ -156,9 +158,9 @@ struct LineABC {
     double b;
     double c;
     LineABC(const QLineF& l)
-        : a {l.p1().y() - l.p2().y()}
-        , b {l.p2().x() - l.p1().x()}
-        , c {l.p1().x() * l.p2().y() - l.p2().x() * l.p1().y()} { }
+        : a{l.p1().y() - l.p2().y()}
+        , b{l.p2().x() - l.p1().x()}
+        , c{l.p1().x() * l.p2().y() - l.p2().x() * l.p1().y()} { }
     operator bool() const {
         return !qFuzzyIsNull(a) | !qFuzzyIsNull(b);
     }
@@ -170,15 +172,15 @@ struct LineABC {
 
 inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
     const size_t cnt = path.size();
-    if (cnt < 2)
+    if(cnt < 2)
         return false;
     QPointF p;
-    for (size_t i = 0; i < cnt; ++i) {
+    for(size_t i = 0; i < cnt; ++i) {
         const Point& pt1 = path[(i + 1) % cnt];
         const Point& pt2 = path[i];
         QLineF l1(pt1, pt2);
-        if (QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
-            if (ret)
+        if(QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
+            if(ret)
                 *ret = (p);
             return true;
         }

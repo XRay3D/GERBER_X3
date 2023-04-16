@@ -57,8 +57,8 @@ protected:
     QPainterPath sourcePath_;
     QPainterPath toolPath_;
 
-    bool used {};
-    double sourceDiameter_ {};
+    bool used{};
+    double sourceDiameter_{};
 
     QColor bodyColor_;
     QColor pathColor_;
@@ -76,15 +76,15 @@ protected:
 
     static constexpr int dark = 180;
     static constexpr int light = 255;
-    inline static const QColor colors[] {
-        QColor(128, 128, 128, dark),  // 0 Default         gray dark
+    inline static const QColor colors[]{
+        QColor(128, 128, 128, dark), // 0 Default         gray dark
         QColor(255, 255, 255, light), // 1 DefaultHovered  gray light
-        QColor(0, 255, 0, dark),      // 2 Selected        green dark
-        QColor(0, 255, 0, light),     // 3 SelectedHovered green light
-        QColor(255, 0, 0, dark),      // 4 Used            red dark
-        QColor(255, 0, 0, light),     // 5 UsedHovered     red light
-        QColor(255, 255, 255, 255),   // 6 UnUsed          transparent
-        QColor(255, 255, 255, dark),  // 7 Tool            white
+        QColor(0, 255, 0, dark), // 2 Selected        green dark
+        QColor(0, 255, 0, light), // 3 SelectedHovered green light
+        QColor(255, 0, 0, dark), // 4 Used            red dark
+        QColor(255, 0, 0, light), // 5 UsedHovered     red light
+        QColor(255, 255, 255, 255), // 6 UnUsed          transparent
+        QColor(255, 255, 255, dark), // 7 Tool            white
     };
 
     enum ColorState {

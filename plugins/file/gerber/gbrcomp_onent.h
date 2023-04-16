@@ -26,17 +26,17 @@ namespace Gerber::Comp {
 class Item;
 
 struct Library {
-    QString name;        /* <field> Library name. */
+    QString name; /* <field> Library name. */
     QString description; /* <field> Library description. */
     SERIALIZE_POD(Library)
 };
 struct Manufacturer {
-    QString name;       /* <field> Manufacturer. */
+    QString name; /* <field> Manufacturer. */
     QString partNumber; /* <field> Manufacturer part number. */
     SERIALIZE_POD(Manufacturer)
 };
 struct Package {
-    QString name;        /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
+    QString name; /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
     QString description; /* <field> Package description. */
     SERIALIZE_POD(Package)
 };
@@ -51,7 +51,7 @@ struct Pin {
     SERIALIZE_POD(Pin)
 };
 struct Supplier {
-    QString name;        /* <field> Library name. */
+    QString name; /* <field> Library name. */
     QString description; /* <field> Library description. */
     SERIALIZE_POD(Supplier)
 };
@@ -175,7 +175,7 @@ public:
 
 private:
     double rotation_ = 0.0; /* <decimal> The rotation angle of the component.*/
-    double height_ = 0.0;   /* <decimal> Height, in the unit of the file. */
+    double height_ = 0.0; /* <decimal> Height, in the unit of the file. */
     mutable Item* componentitem_ = nullptr;
     Library library_;
     Manufacturer manufacturer_;
@@ -187,7 +187,7 @@ private:
     mvector<QPolygonF> footprint_;
     QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
     QString refdes_;
-    QString value_;         /* <field> E.g. 220nF. */
+    QString value_; /* <field> E.g. 220nF. */
     bool isNull_ = true;
 };
 

@@ -25,10 +25,10 @@ Plugin::Plugin(QObject* parent)
 }
 
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if (type_ != type())
+    if(type_ != type())
         return nullptr;
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    if(!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
     QTextStream in(&file);
@@ -38,11 +38,11 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 
 bool Plugin::thisIsIt(const QString& fileName) {
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
     QTextStream in(&file);
     QString line(in.readLine());
-    if (line.startsWith("IN;") && fileName.endsWith(".plt", Qt::CaseInsensitive))
+    if(line.startsWith("IN;") && fileName.endsWith(".plt", Qt::CaseInsensitive))
         return true;
     return false;
 }
@@ -54,7 +54,7 @@ QString Plugin::folderName() const { return tr("Dxf Files"); }
 AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
 
 QJsonObject Plugin::info() const {
-    return QJsonObject {
+    return QJsonObject{
         {        "Name",                   "HPGL"},
         {     "Version",                    "1.0"},
         {"VendorAuthor", "X-Ray aka Bakiev Damir"},

@@ -23,13 +23,13 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
 void SyntaxHighlighter::highlightBlock(const QString& text) {
     static QTextCharFormat myClassFormat;
 
-    if (text.startsWith("%") && text.endsWith("*%")) {
+    if(text.startsWith("%") && text.endsWith("*%")) {
         myClassFormat.setForeground(QColor(0x80, 0x80, 0x00));
         setFormat(0, text.size(), myClassFormat);
         return;
     }
 
-    static const std::map<QChar, QColor> color {
+    static const std::map<QChar, QColor> color{
         {'D', QColor(0x00, 0xFF, 0xFF)},
         {'G', QColor(0x7F, 0x7F, 0x7F)},
         {'I', QColor(0x00, 0x00, 0xFF)},
@@ -41,7 +41,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     std::u16string_view data(reinterpret_cast<const char16_t*>(text.utf16()), text.size());
 
-    for (auto&& m : ctre::range<R"([DGIJMXY][+\-]?\d+\.?\d*)">(data)) {
+    for(auto&& m: ctre::range<R"([DGIJMXY][+\-]?\d+\.?\d*)">(data)) {
         myClassFormat.setForeground(color.at(*m.data()));
         int start = std::distance(data.data(), m.data());
         int count = static_cast<int>(m.size());

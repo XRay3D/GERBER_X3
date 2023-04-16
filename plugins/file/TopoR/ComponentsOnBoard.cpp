@@ -52,15 +52,12 @@ bool ComponentsOnBoard::ShouldSerialize_FreePads() {
 
 QString ComponentsOnBoard::AddComponent(const QString& name, units units, const QString& componentRef, const QString& footprintRef) {
     float x = 0, y = 0; // координаты нового компонента
-    if (_Components.empty()) {
+    if(_Components.empty())
         return "";
-    }
-    auto name_ {name};
-    while (ComponentIndexOf(name_) >= 0) // проверка на уникальность имени и добавление префикса
-    {
+    auto name_{name};
+    while(ComponentIndexOf(name_) >= 0) // проверка на уникальность имени и добавление префикса
         name_ += "_";
-    }
-    for (int i = _Components.size(); i > 0; i--) // вычисление максимально возможных координат
+    for(int i = _Components.size(); i > 0; i--) // вычисление максимально возможных координат
     {
         x = std::max(x, _Components[i - 1]->_Org->_x);
         y = std::max(y, _Components[i - 1]->_Org->_y);
@@ -90,7 +87,7 @@ QString ComponentsOnBoard::AddComponent(const QString& name, units units, const 
 
 bool ComponentsOnBoard::RemoveComponent(const QString& name) {
     int x = ComponentIndexOf(name);
-    if (x >= 0) {
+    if(x >= 0) {
         _Components.erase(_Components.begin() + x);
         return true;
     }
@@ -98,17 +95,15 @@ bool ComponentsOnBoard::RemoveComponent(const QString& name) {
 }
 
 int ComponentsOnBoard::ComponentIndexOf(const QString& name) {
-    for (int x = _Components.empty() ? false : ((_Components.size() != 0) ? _Components.size() : 0); x > 0; x--) {
-        if (_Components[x - 1]->_name == name) {
+    for(int x = _Components.empty() ? false : ((_Components.size() != 0) ? _Components.size() : 0); x > 0; x--)
+        if(_Components[x - 1]->_name == name)
             return x - 1;
-        }
-    }
     return -1;
 }
 
 int ComponentsOnBoard::RenameComponent(const QString& oldname, const QString& newname) {
     int x = ComponentIndexOf(oldname);
-    if (x >= 0) {
+    if(x >= 0) {
         _Components[x]->_name = newname;
         return x;
     }
@@ -116,17 +111,14 @@ int ComponentsOnBoard::RenameComponent(const QString& oldname, const QString& ne
 }
 
 QString ComponentsOnBoard::UniqueId() {
-    QString ABC {"ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
-    QString uniqueId {""};
-    for (int i = 0; i < 8; i++) {
+    QString ABC{"ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
+    QString uniqueId{""};
+    for(int i = 0; i < 8; i++)
         uniqueId += ABC[rand() % 26];
-    }
-    if (_Components.empty() ? false : _Components.size() > 0) {
-        for (auto c : _Components) {
-            if (c->_uniqueId == uniqueId) {
+    if(_Components.empty() ? false : _Components.size() > 0) {
+        for(auto c: _Components)
+            if(c->_uniqueId == uniqueId)
                 uniqueId = UniqueId();
-            }
-        }
     }
 
     return uniqueId;

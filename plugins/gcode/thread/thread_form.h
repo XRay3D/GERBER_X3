@@ -40,8 +40,8 @@ private:
     Ui::ThreadForm* ui;
     //    GiBridge* brItem = nullptr;
 
-    const QStringList names {tr("Thread On"), tr("Thread Outside"), tr("Thread Inside")};
-    static inline const std::array pixmaps {
+    const QStringList names{tr("Thread On"), tr("Thread Outside"), tr("Thread Inside")};
+    static inline const std::array pixmaps{
         QStringLiteral("prof_on_climb"),
         QStringLiteral("prof_out_climb"),
         QStringLiteral("prof_in_climb"),
@@ -89,7 +89,7 @@ public:
     // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); } // FIXME
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
-    QWidget* createForm() override { return /*new Form(this);*/ };
+    QWidget* createForm() override{return /*new Form(this);*/};
     uint32_t type() const override { return md5::hash32("Thread"); }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 
@@ -100,7 +100,7 @@ public:
 
         public:
             Tab(QWidget* parent)
-                : AbstractFileSettings {parent} {
+                : AbstractFileSettings{parent} {
                 setWindowTitle(tr("Thread"));
                 auto lbl = new QLabel(QApplication::translate("Thread", "Milling sequence:", nullptr), this);
 

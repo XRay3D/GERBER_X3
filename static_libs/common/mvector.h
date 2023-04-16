@@ -28,11 +28,11 @@ struct mvector : std::vector<T> {
     }
 
     inline void append(V&& vec) {
-        if (vec.empty())
+        if(vec.empty())
             return;
-        if (V::capacity() - V::size() < vec.size())
+        if(V::capacity() - V::size() < vec.size())
             V::reserve(V::size() + vec.size());
-        for (auto&& var : vec)
+        for(auto&& var: vec)
             V::emplace_back(std::move(var));
     }
 
@@ -40,7 +40,7 @@ struct mvector : std::vector<T> {
 
     bool removeOne(const T& t) {
         auto it = std::find(V::begin(), V::end(), t);
-        if (it == V::end())
+        if(it == V::end())
             return false;
         V::erase(it);
         return true;
@@ -48,13 +48,13 @@ struct mvector : std::vector<T> {
 
     mvector mid(size_t idx, size_t len) const {
         mvector v;
-        if (idx >= V::size())
+        if(idx >= V::size())
             return v;
         typename V::const_iterator end;
         typename V::const_iterator begin = V::cbegin() + idx;
-        if (len == 0)
+        if(len == 0)
             end = V::cend();
-        else if (idx + len > V::size())
+        else if(idx + len > V::size())
             end = begin + (V::size() - idx);
         else
             end = begin + len;
@@ -64,13 +64,13 @@ struct mvector : std::vector<T> {
     }
 
     std::span<T> midRef(size_t idx, size_t len) const {
-        if (idx >= V::size())
+        if(idx >= V::size())
             return {};
         typename V::const_iterator end;
         typename V::const_iterator begin = V::cbegin() + idx;
-        if (len == 0)
+        if(len == 0)
             end = V::cend();
-        else if (idx + len > V::size())
+        else if(idx + len > V::size())
             end = begin + (V::size() - idx);
         else
             end = begin + len;
@@ -79,16 +79,16 @@ struct mvector : std::vector<T> {
 
     mvector mid(size_t idx) const {
         mvector v;
-        if (idx >= V::size())
+        if(idx >= V::size())
             return v;
         v.insert(v.end(), V::cbegin() + idx, V::cend());
         return v;
     }
 
     auto midRef(size_t idx) const {
-        if (idx >= V::size())
-            return std::span {V::cend(), V::cend()};
-        return std::span {V::cbegin() + idx, V::cend()};
+        if(idx >= V::size())
+            return std::span{V::cend(), V::cend()};
+        return std::span{V::cbegin() + idx, V::cend()};
     }
 
     //    mvector mid(size_t idx, size_t len = 0)
@@ -135,7 +135,7 @@ struct mvector : std::vector<T> {
     }
 
     inline auto indexOf(const T& t) const noexcept {
-        if (auto it = std::find(V::begin(), V::end(), t); it == V::end())
+        if(auto it = std::find(V::begin(), V::end(), t); it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);
@@ -148,7 +148,7 @@ struct mvector : std::vector<T> {
         // using CP = const P;
         // auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
         auto it = std::ranges::find(V::begin(), V::end(), ptr, &T::get);
-        if (it == V::end())
+        if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);
@@ -160,7 +160,7 @@ struct mvector : std::vector<T> {
     {
         // auto it = std::find(V::begin(), V::end(), t /*std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})*/);
         auto it = std::ranges::find(V::begin(), V::end(), ptr, &T::get);
-        if (it == V::end())
+        if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);
@@ -168,7 +168,7 @@ struct mvector : std::vector<T> {
 
     inline T takeAt(const T& t) noexcept {
         auto it = std::find(V::begin(), V::end(), t);
-        if (it == V::end())
+        if(it == V::end())
             return {};
         T r(std::move(*it));
         V::erase(it);
@@ -176,7 +176,7 @@ struct mvector : std::vector<T> {
     }
 
     inline T takeAt(size_t idx) noexcept {
-        if (V::begin() + idx >= V::end())
+        if(V::begin() + idx >= V::end())
             return {};
         T r(std::move(*(V::begin() + idx)));
         V::erase(V::begin() + idx);

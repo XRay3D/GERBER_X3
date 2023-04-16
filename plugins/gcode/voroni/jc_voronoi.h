@@ -208,7 +208,7 @@ typedef struct _jcv_graphedge {
 
 typedef struct _jcv_site {
     jcv_point p;
-    int index;            // Index into the original list of points
+    int index; // Index into the original list of points
     jcv_graphedge* edges; // The half edges owned by the cell
 } jcv_site;
 

@@ -47,7 +47,7 @@ inline QIcon errorIcon(const QPainterPath& path) {
 
     double ky = rect.bottom() * scale;
     double kx = rect.left() * scale;
-    if (rect.width() > rect.height())
+    if(rect.width() > rect.height())
         ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
@@ -81,21 +81,21 @@ public:
     int rowCount(const QModelIndex&) const override { return static_cast<int>(items.size()); }
     int columnCount(const QModelIndex&) const override { return 2; }
     QVariant data(const QModelIndex& index, int role) const override {
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
-            if (index.column() == 0) {
-                auto pos {items[index.row()]->boundingRect().center()};
+            if(index.column() == 0) {
+                auto pos{items[index.row()]->boundingRect().center()};
                 return QString("X = %1\nY = %2").arg(pos.x()).arg(pos.y());
             }
             return items[index.row()]->area();
         case Qt::UserRole:
             return QVariant::fromValue(items[index.row()]);
         case Qt::DecorationRole:
-            if (index.column() == 0)
+            if(index.column() == 0)
                 return errorIcon(items[index.row()]->shape());
             return {};
         case Qt::TextAlignmentRole:
-            if (index.column() == 0)
+            if(index.column() == 0)
                 return Qt::AlignVCenter;
             return Qt::AlignCenter;
         default:
@@ -105,20 +105,19 @@ public:
     }
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
-        if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-            if (section == 0) {
+        if(orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+            if(section == 0)
                 return QObject::tr("Position");
-            } else {
+            else
                 return QObject::tr("Area mm²");
-            }
         }
         return QAbstractTableModel::headerData(section, orientation, role);
     }
 
     void updateScene() {
         QRectF rect;
-        for (auto item : items)
-            if (item->isSelected())
+        for(auto item: items)
+            if(item->isSelected())
                 rect = rect.united(item->boundingRect());
         App::graphicsView().fitInView(rect);
         //        App::graphicsView().zoomOut();
@@ -142,12 +141,10 @@ public:
 protected slots:
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override {
         QTableView::selectionChanged(selected, deselected);
-        for (auto& var : selected.indexes()) {
+        for(auto& var: selected.indexes())
             var.data(Qt::UserRole).value<GiError*>()->setSelected(true);
-        }
-        for (auto& var : deselected.indexes()) {
+        for(auto& var: deselected.indexes())
             var.data(Qt::UserRole).value<GiError*>()->setSelected(false);
-        }
         static_cast<ErrorModel*>(model())->updateScene();
     }
 
@@ -198,8 +195,8 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
         grid->setContentsMargins(6, 6, 6, 6);
         grid->setSpacing(6);
 
-        int row {};
-        constexpr int rowSpan {1}, columnSpan {2};
+        int row{};
+        constexpr int rowSpan{1}, columnSpan{2};
         // clang-format off
         grid->addWidget(dsbxDepth,                       row, 0, rowSpan, columnSpan); // row 0
         grid->addWidget(line(),                        ++row, 0, rowSpan, columnSpan); // row 1
@@ -243,7 +240,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
 }
 
 BaseForm::~BaseForm() {
-    if (errWidget->isVisible())
+    if(errWidget->isVisible())
         errBreak();
     thread.quit();
     thread.wait();
@@ -252,9 +249,9 @@ BaseForm::~BaseForm() {
 void BaseForm::setCreator(Creator* newCreator) {
     qDebug() << __FUNCTION__ << creator_ << newCreator;
 
-    if (creator_ != newCreator && newCreator) {
+    if(creator_ != newCreator && newCreator) {
         qDebug(__FUNCTION__);
-        if (thread.isRunning()) {
+        if(thread.isRunning()) {
             thread.quit();
             thread.wait();
         }
@@ -267,7 +264,7 @@ void BaseForm::setCreator(Creator* newCreator) {
         creator_->moveToThread(&thread);
         connect(&thread, &QThread::finished, creator_, &QObject::deleteLater);
         thread.start(QThread::LowPriority /*HighestPriority*/);
-    } else if (creator_ && !newCreator) {
+    } else if(creator_ && !newCreator) {
         thread.quit();
         thread.wait();
         creator_ = nullptr;
@@ -276,12 +273,12 @@ void BaseForm::setCreator(Creator* newCreator) {
 
 void BaseForm::fileHandler(File* file) {
     qDebug() << __FUNCTION__ << file;
-    if (--fileCount == 0)
+    if(--fileCount == 0)
         cancel();
 
-    if (file == nullptr) {
+    if(file == nullptr) {
         auto message = tr("The tool doesn`t fit in the Working items!");
-        if (App::isDebug())
+        if(App::isDebug())
             qDebug() << __FUNCTION__ << message;
         else
             QMessageBox::information(this, tr("Warning"), message);
@@ -290,7 +287,7 @@ void BaseForm::fileHandler(File* file) {
 
     file->setFileName(fileName_ + "_" + file->name());
     file->setSide(boardSide);
-    if (fileId > -1) {
+    if(fileId > -1) {
         exit(-123456);
         //        App::project().reload(fileId, file);
         //        editMode_ = false;
@@ -301,7 +298,7 @@ void BaseForm::fileHandler(File* file) {
 }
 
 void BaseForm::timerEvent(QTimerEvent* event) {
-    if (event->timerId() == progressTimerId && progressDialog && creator_) {
+    if(event->timerId() == progressTimerId && progressDialog && creator_) {
         const auto [max, val] = creator_->getProgress();
         progressDialog->setMaximum(max);
         progressDialog->setValue(val);
@@ -350,15 +347,15 @@ Params* BaseForm::getNewGcp() {
     */
 
     AbstractFile const* file = nullptr;
-    bool skip {true};
-    for (auto* gi : App::graphicsView().selectedItems<GraphicsItem>()) {
-        switch (gi->type()) {
+    bool skip{true};
+    for(auto* gi: App::graphicsView().selectedItems<GraphicsItem>()) {
+        switch(gi->type()) {
         case GiType::DataSolid:
             gcp->closedPaths.append(gi->paths());
             break;
         case GiType::DataPath: {
             auto paths = gi->paths();
-            if (paths.front() == paths.back())
+            if(paths.front() == paths.back())
                 gcp->closedPaths.append(paths);
             else
                 gcp->openPaths.append(paths);
@@ -393,7 +390,7 @@ Params* BaseForm::getNewGcp() {
         addUsedGi(gi);
     }
 
-    if (gcp->openPaths.empty() && gcp->closedPaths.empty()) {
+    if(gcp->openPaths.empty() && gcp->closedPaths.empty()) {
         delete gcp;
         QMessageBox::warning(this, tr("Warning"), tr("No data for working..."));
         return nullptr;
@@ -403,7 +400,7 @@ Params* BaseForm::getNewGcp() {
 }
 
 void BaseForm::addUsedGi(GraphicsItem* gi) {
-    if (gi->file()) {
+    if(gi->file()) {
         //        File const* file = gi->file();
         //        if (file->type() == FileType::Gerber_) {
         // #ifdef GBR_
@@ -416,17 +413,17 @@ void BaseForm::addUsedGi(GraphicsItem* gi) {
 }
 
 void BaseForm::cancel() {
-    if (creator_ == nullptr)
+    if(creator_ == nullptr)
         return;
     creator_->continueCalc({});
     stopProgress();
 }
 
 void BaseForm::errorHandler(int) {
-    if (creator_ == nullptr)
+    if(creator_ == nullptr)
         return;
 
-    if (creator_->items.empty())
+    if(creator_->items.empty())
         return;
 
     creator_->checkMillingFl = false;
@@ -445,7 +442,7 @@ void BaseForm::errorHandler(int) {
 }
 
 void BaseForm::errContinue() {
-    if (creator_ == nullptr)
+    if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
     App::graphicsView().stopUpdateTimer();
@@ -460,7 +457,7 @@ void BaseForm::errContinue() {
 }
 
 void BaseForm::errBreak() {
-    if (creator_ == nullptr)
+    if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
     App::graphicsView().stopUpdateTimer();
@@ -474,10 +471,10 @@ void BaseForm::errBreak() {
 }
 
 void BaseForm::startProgress() {
-    if (creator_ == nullptr)
+    if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    if (!fileCount)
+    if(!fileCount)
         fileCount = 1;
     creator_->msg = fileName_;
     progressDialog->setLabelText(creator_->msg);
@@ -485,10 +482,10 @@ void BaseForm::startProgress() {
 }
 
 void BaseForm::stopProgress() {
-    if (creator_ == nullptr)
+    if(creator_ == nullptr)
         return;
     qDebug() << __FUNCTION__ << creator_->checkMillingFl;
-    if (creator_->checkMillingFl)
+    if(creator_->checkMillingFl)
         return;
     killTimer(progressTimerId);
     progressTimerId = 0;

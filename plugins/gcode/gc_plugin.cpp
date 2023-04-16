@@ -22,7 +22,7 @@
 namespace GCode {
 
 Plugin::Plugin(QObject* parent)
-    : AbstractFilePlugin {parent} {
+    : AbstractFilePlugin{parent} {
     App app;
 }
 
@@ -39,7 +39,7 @@ Plugin::Plugin(QObject* parent)
 QAction* Plugin::addAction(QMenu* menu, QToolBar* toolbar) {
     auto action = toolbar->addAction(icon(), info()["Name"].toString());
     connect(action, &QAction::toggled, [=, this](bool checked) {
-        if (checked && canToShow())
+        if(checked && canToShow())
             emit setDockWidget(createForm());
         else
             action->setChecked(false);
@@ -51,7 +51,7 @@ QAction* Plugin::addAction(QMenu* menu, QToolBar* toolbar) {
 ///////////////////
 void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("edit-delete"), tr("&Delete All Toolpaths"), [tv] {
-        if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+        if(QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();
     });
     menu.addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."),

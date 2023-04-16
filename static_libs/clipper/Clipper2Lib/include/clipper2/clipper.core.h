@@ -33,10 +33,12 @@ static const int_t INVALID = std::numeric_limits<int_t>::max();
 // By far the most widely used filling rules for polygons are EvenOdd
 // and NonZero, sometimes called Alternate and Winding respectively.
 // https://en.wikipedia.org/wiki/Nonzero-rule
-enum class FillRule { EvenOdd,
+enum class FillRule {
+    EvenOdd,
     NonZero,
     Positive,
-    Negative };
+    Negative
+};
 
 /*
 // Point ------------------------------------------------------------------------
@@ -176,9 +178,9 @@ enum class FillRule { EvenOdd,
 
 template <typename T>
 std::ostream& operator<<(std::ostream& outstream, const Path<T>& path) {
-    if (!path.empty()) {
+    if(!path.empty()) {
         auto pt = path.cbegin(), last = path.cend() - 1;
-        while (pt != last)
+        while(pt != last)
             outstream << *pt++ << ", ";
         outstream << *last << std::endl;
     }
@@ -187,7 +189,7 @@ std::ostream& operator<<(std::ostream& outstream, const Path<T>& path) {
 
 template <typename T>
 std::ostream& operator<<(std::ostream& outstream, const Paths<T>& paths) {
-    for (auto p : paths)
+    for(auto p: paths)
         outstream << p;
     return outstream;
 }
@@ -197,10 +199,10 @@ inline Path<T1> ScalePath(const Path<T2>& path, double scale_x, double scale_y) 
     Path<T1> result;
     result.reserve(path.size());
 #ifdef USINGZ
-    for (const Point<T2>& pt : path)
+    for(const Point<T2>& pt: path)
         result.push_back(Point<T1>(pt.x * scale_x, pt.y * scale_y, pt.z));
 #else
-    for (const Point<T2>& pt : path)
+    for(const Point<T2>& pt: path)
         result.push_back(Point<T1>(pt.x * scale_x, pt.y * scale_y));
 #endif
     return result;
@@ -215,7 +217,7 @@ template <typename T1, typename T2>
 inline Paths<T1> ScalePaths(const Paths<T2>& paths, double scale_x, double scale_y) {
     Paths<T1> result;
     result.reserve(paths.size());
-    for (const Path<T2>& path : paths)
+    for(const Path<T2>& path: paths)
         result.push_back(ScalePath<T1, T2>(path, scale_x, scale_y));
     return result;
 }
@@ -272,22 +274,22 @@ inline bool NearEqual(const Point<T>& p1,
 template <typename T>
 inline Path<T> StripNearEqual(const Path<T>& path,
     double max_dist_sqrd, bool is_closed_path) {
-    if (path.size() == 0)
+    if(path.size() == 0)
         return Path<T>();
     Path<T> result;
     result.reserve(path.size());
     typename Path<T>::const_iterator path_iter = path.cbegin();
     Point<T> first_pt = *path_iter++, last_pt = first_pt;
     result.push_back(first_pt);
-    for (; path_iter != path.cend(); ++path_iter) {
-        if (!NearEqual(*path_iter, last_pt, max_dist_sqrd)) {
+    for(; path_iter != path.cend(); ++path_iter) {
+        if(!NearEqual(*path_iter, last_pt, max_dist_sqrd)) {
             last_pt = *path_iter;
             result.push_back(last_pt);
         }
     }
-    if (!is_closed_path)
+    if(!is_closed_path)
         return result;
-    while (result.size() > 1 && NearEqual(result.back(), first_pt, max_dist_sqrd))
+    while(result.size() > 1 && NearEqual(result.back(), first_pt, max_dist_sqrd))
         result.pop_back();
     return result;
 }
@@ -297,31 +299,30 @@ inline Paths<T> StripNearEqual(const Paths<T>& paths,
     double max_dist_sqrd, bool is_closed_path) {
     Paths<T> result;
     result.reserve(paths.size());
-    for (typename Paths<T>::const_iterator paths_citer = paths.cbegin();
-         paths_citer != paths.cend(); ++paths_citer) {
+    for(typename Paths<T>::const_iterator paths_citer = paths.cbegin();
+        paths_citer != paths.cend(); ++paths_citer)
         result.push_back(StripNearEqual(*paths_citer, max_dist_sqrd, is_closed_path));
-    }
     return result;
 }
 
 template <typename T>
 inline Path<T> StripDuplicates(const Path<T>& path, bool is_closed_path) {
-    if (path.size() == 0)
+    if(path.size() == 0)
         return Path<T>();
     Path<T> result;
     result.reserve(path.size());
     typename Path<T>::const_iterator path_iter = path.cbegin();
     Point<T> first_pt = *path_iter++, last_pt = first_pt;
     result.push_back(first_pt);
-    for (; path_iter != path.cend(); ++path_iter) {
-        if (*path_iter != last_pt) {
+    for(; path_iter != path.cend(); ++path_iter) {
+        if(*path_iter != last_pt) {
             last_pt = *path_iter;
             result.push_back(last_pt);
         }
     }
-    if (!is_closed_path)
+    if(!is_closed_path)
         return result;
-    while (result.size() > 1 && result.back() == first_pt)
+    while(result.size() > 1 && result.back() == first_pt)
         result.pop_back();
     return result;
 }
@@ -330,10 +331,9 @@ template <typename T>
 inline Paths<T> StripDuplicates(const Paths<T>& paths, bool is_closed_path) {
     Paths<T> result;
     result.reserve(paths.size());
-    for (typename Paths<T>::const_iterator paths_citer = paths.cbegin();
-         paths_citer != paths.cend(); ++paths_citer) {
+    for(typename Paths<T>::const_iterator paths_citer = paths.cbegin();
+        paths_citer != paths.cend(); ++paths_citer)
         result.push_back(StripDuplicates(*paths_citer, is_closed_path));
-    }
     return result;
 }
 
@@ -416,7 +416,7 @@ template <typename T1, typename T2>
 inline Rect<T1> ScaleRect(const Rect<T2>& rect, double scale) {
     Rect<T1> result;
 
-    if constexpr (std::numeric_limits<T1>::is_integer && !std::numeric_limits<T2>::is_integer) {
+    if constexpr(std::numeric_limits<T1>::is_integer && !std::numeric_limits<T2>::is_integer) {
         result.left = static_cast<T1>(std::round(rect.left * scale));
         result.top = static_cast<T1>(std::round(rect.top * scale));
         result.right = static_cast<T1>(std::round(rect.right * scale));
@@ -447,7 +447,7 @@ private:
 // Miscellaneous ------------------------------------------------------------
 
 inline void CheckPrecision(int& precision) {
-    if (precision >= -8 && precision <= 8)
+    if(precision >= -8 && precision <= 8)
         return;
 #ifdef __cpp_exceptions
     throw Clipper2Exception(precision_error);
@@ -495,19 +495,19 @@ inline double DistanceFromLineSqrd(const Point<T>& pt, const Point<T>& ln1, cons
 template <typename T>
 inline double Area(const Path<T>& path) {
     size_t cnt = path.size();
-    if (cnt < 3)
+    if(cnt < 3)
         return 0.0;
     double a = 0.0;
     typename Path<T>::const_iterator it1, it2 = path.cend() - 1, stop = it2;
-    if (!(cnt & 1))
+    if(!(cnt & 1))
         ++stop;
-    for (it1 = path.cbegin(); it1 != stop;) {
+    for(it1 = path.cbegin(); it1 != stop;) {
         a += static_cast<double>(it2->y + it1->y) * (it2->x - it1->x);
         it2 = it1 + 1;
         a += static_cast<double>(it1->y + it2->y) * (it1->x - it2->x);
         it1 += 2;
     }
-    if (cnt & 1)
+    if(cnt & 1)
         a += static_cast<double>(it2->y + it1->y) * (it2->x - it1->x);
     return a * 0.5;
 }
@@ -515,10 +515,9 @@ inline double Area(const Path<T>& path) {
 template <typename T>
 inline double Area(const Paths<T>& paths) {
     double a = 0.0;
-    for (typename Paths<T>::const_iterator paths_iter = paths.cbegin();
-         paths_iter != paths.cend(); ++paths_iter) {
+    for(typename Paths<T>::const_iterator paths_iter = paths.cbegin();
+        paths_iter != paths.cend(); ++paths_iter)
         a += Area<T>(*paths_iter);
-    }
     return a;
 }
 
@@ -535,7 +534,7 @@ static const double max_coord = static_cast<double>(MAX_COORD);
 static const double min_coord = static_cast<double>(MIN_COORD);
 
 inline int_t CheckCastInt64(double val) {
-    if ((val >= max_coord) || (val <= min_coord))
+    if((val >= max_coord) || (val <= min_coord))
         return INVALID;
     else
         return static_cast<int_t>(val);
@@ -550,7 +549,7 @@ inline bool GetIntersectPoint(const Point64& ln1a, const Point64& ln1b,
     double dx2 = static_cast<double>(ln2b.x - ln2a.x);
     double dy2 = static_cast<double>(ln2b.y - ln2a.y);
     double det = dy1 * dx2 - dy2 * dx1;
-    if (det == 0.0)
+    if(det == 0.0)
         return 0;
     double qx = dx1 * ln1a.y - dy1 * ln1a.x;
     double qy = dx2 * ln2a.y - dy2 * ln2a.x;
@@ -561,14 +560,14 @@ inline bool GetIntersectPoint(const Point64& ln1a, const Point64& ln1b,
 
 inline bool SegmentsIntersect(const Point64& seg1a, const Point64& seg1b,
     const Point64& seg2a, const Point64& seg2b, bool inclusive = false) {
-    if (inclusive) {
+    if(inclusive) {
         double res1 = CrossProduct(seg1a, seg2a, seg2b);
         double res2 = CrossProduct(seg1b, seg2a, seg2b);
-        if (res1 * res2 > 0)
+        if(res1 * res2 > 0)
             return false;
         double res3 = CrossProduct(seg2a, seg1a, seg1b);
         double res4 = CrossProduct(seg2b, seg1a, seg1b);
-        if (res3 * res4 > 0)
+        if(res3 * res4 > 0)
             return false;
         return (res1 || res2 || res3 || res4); // ensures not collinear
     } else {
@@ -578,82 +577,82 @@ inline bool SegmentsIntersect(const Point64& seg1a, const Point64& seg1b,
 
 inline Point64 GetClosestPointOnSegment(const Point64& offPt,
     const Point64& seg1, const Point64& seg2) {
-    if (seg1.x == seg2.x && seg1.y == seg2.y)
+    if(seg1.x == seg2.x && seg1.y == seg2.y)
         return seg1;
     double dx = static_cast<double>(seg2.x - seg1.x);
     double dy = static_cast<double>(seg2.y - seg1.y);
     double q = (static_cast<double>(offPt.x - seg1.x) * dx + static_cast<double>(offPt.y - seg1.y) * dy) / (Sqr(dx) + Sqr(dy));
-    if (q < 0)
+    if(q < 0)
         q = 0;
-    else if (q > 1)
+    else if(q > 1)
         q = 1;
     return Point64(
         seg1.x + static_cast<int_t>(nearbyint(q * dx)),
         seg1.y + static_cast<int_t>(nearbyint(q * dy)));
 }
 
-enum class PointInPolygonResult { IsOn,
+enum class PointInPolygonResult {
+    IsOn,
     IsInside,
-    IsOutside };
+    IsOutside
+};
 
 template <typename T>
 inline PointInPolygonResult PointInPolygon(const Point<T>& pt, const Path<T>& polygon) {
-    if (polygon.size() < 3)
+    if(polygon.size() < 3)
         return PointInPolygonResult::IsOutside;
 
     int val = 0;
     typename Path<T>::const_iterator start = polygon.cbegin(), cit = start;
     typename Path<T>::const_iterator cend = polygon.cend(), pit = cend - 1;
 
-    while (pit->y == pt.y) {
-        if (pit == start)
+    while(pit->y == pt.y) {
+        if(pit == start)
             return PointInPolygonResult::IsOutside;
         --pit;
     }
     bool is_above = pit->y < pt.y;
 
-    while (cit != cend) {
-        if (is_above) {
-            while (cit != cend && cit->y < pt.y)
+    while(cit != cend) {
+        if(is_above) {
+            while(cit != cend && cit->y < pt.y)
                 ++cit;
-            if (cit == cend)
+            if(cit == cend)
                 break;
         } else {
-            while (cit != cend && cit->y > pt.y)
+            while(cit != cend && cit->y > pt.y)
                 ++cit;
-            if (cit == cend)
+            if(cit == cend)
                 break;
         }
 
-        if (cit == start)
+        if(cit == start)
             pit = cend - 1;
         else
             pit = cit - 1;
 
-        if (cit->y == pt.y) {
-            if (cit->x == pt.x || (cit->y == pit->y && ((pt.x < pit->x) != (pt.x < cit->x))))
+        if(cit->y == pt.y) {
+            if(cit->x == pt.x || (cit->y == pit->y && ((pt.x < pit->x) != (pt.x < cit->x))))
                 return PointInPolygonResult::IsOn;
             ++cit;
             continue;
         }
 
-        if (pt.x < cit->x && pt.x < pit->x) {
+        if(pt.x < cit->x && pt.x < pit->x) {
             // we're only interested in edges crossing on the left
-        } else if (pt.x > pit->x && pt.x > cit->x)
+        } else if(pt.x > pit->x && pt.x > cit->x)
             val = 1 - val; // toggle val
         else {
             double d = CrossProduct(*pit, *cit, pt);
-            if (d == 0)
+            if(d == 0)
                 return PointInPolygonResult::IsOn;
-            if ((d < 0) == is_above)
+            if((d < 0) == is_above)
                 val = 1 - val;
         }
         is_above = !is_above;
         ++cit;
     }
-    return (val == 0) ?
-        PointInPolygonResult::IsOutside :
-        PointInPolygonResult::IsInside;
+    return (val == 0) ? PointInPolygonResult::IsOutside : PointInPolygonResult::IsInside;
 }
 
 } // namespace Clipper2Lib

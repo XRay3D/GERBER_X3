@@ -43,7 +43,7 @@ Dialog::~Dialog() {
 void Dialog::setFile(int fileId) { componentsView->setFile(fileId); }
 
 void Dialog::setupUi(QDialog* dialog) {
-    if (dialog->objectName().isEmpty())
+    if(dialog->objectName().isEmpty())
         dialog->setObjectName(QString::fromUtf8("Dialog"));
     dialog->resize(800, 600);
 
@@ -87,7 +87,7 @@ void Dialog::showEvent(QShowEvent* event) {
 }
 
 void Dialog::resizeEvent(QResizeEvent* event) {
-    if (event)
+    if(event)
         QDialog::resizeEvent(event);
     graphicsView->fitInView(graphicsView->scene()->itemsBoundingRect(), Qt::KeepAspectRatio);
 }

@@ -65,10 +65,10 @@ using Tables = std::map<int, QVector<AbstractTable*>>;
 
 class Settings {
 protected:
-    static inline QString defaultFont_ {"Arial"};
-    static inline bool boldFont_ {false};
-    static inline bool italicFont_ {false};
-    static inline bool overrideFonts_ {false};
+    static inline QString defaultFont_{"Arial"};
+    static inline bool boldFont_{false};
+    static inline bool italicFont_{false};
+    static inline bool overrideFonts_{false};
 
 public:
     static QString defaultFont() { return defaultFont_; }

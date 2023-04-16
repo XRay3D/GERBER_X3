@@ -53,7 +53,7 @@ inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
     uint32_t n;
     s >> n;
     n = std::min<uint32_t>(n, N);
-    for (int i {}; i < n; ++i)
+    for(int i{}; i < n; ++i)
         s >> p[i];
     return s;
 }
@@ -61,7 +61,7 @@ inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
 template <class T, size_t N>
 inline QDataStream& operator<<(QDataStream& s, const T (&p)[N]) {
     s << uint32_t(N);
-    for (auto& var : p)
+    for(auto& var: p)
         s << var;
     return s;
 }
@@ -74,9 +74,9 @@ inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& conta
     uint32_t n;
     stream >> n;
     container.resize(n);
-    for (auto& var : container) {
+    for(auto& var: container) {
         stream >> var;
-        if (stream.status() != QDataStream::Ok)
+        if(stream.status() != QDataStream::Ok)
             return container.clear(), stream;
     }
     return stream;
@@ -85,7 +85,7 @@ inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& conta
 template <typename T, class Alloc>
 inline QDataStream& operator<<(QDataStream& stream, const std::vector<T, Alloc>& container) {
     stream << uint32_t(container.size());
-    for (const auto& var : container)
+    for(const auto& var: container)
         stream << var;
     return stream;
 }
@@ -99,11 +99,11 @@ inline QDataStream& operator>>(QDataStream& stream, std::map<Key, Val, Comp, All
     map.clear();
     uint32_t n;
     stream >> n;
-    while (n--) {
+    while(n--) {
         Key key;
         Val val;
         stream >> key >> val;
-        if (stream.status() != QDataStream::Ok)
+        if(stream.status() != QDataStream::Ok)
             return map.clear(), stream;
         map.emplace(key, val);
     }
@@ -119,7 +119,7 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
 
     auto it = map.cend();
     auto begin = map.cbegin();
-    while (it != begin) {
+    while(it != begin) {
         --it;
         stream << it->first << it->second;
     }
@@ -130,11 +130,11 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
 class Block {
     QDataStream& stream;
     //    QByteArray data;
-    uint32_t count {};
+    uint32_t count{};
 
 public:
     explicit Block(QDataStream& stream)
-        : stream {stream} { }
+        : stream{stream} { }
 #if 1
     template <typename T>
         requires(pfr::detail::fields_count<T>() > 1)
@@ -173,7 +173,7 @@ public:
     QDataStream& read(Args&... args) {
         uint32_t count;
         stream >> count;
-        if constexpr (requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); })
+        if constexpr(requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); })
             pfr::for_each_field(args..., [this, &count](auto& field) { count-- ? stream >> field : stream; });
         else
             ((count-- ? stream >> args : stream), ...);
@@ -182,7 +182,7 @@ public:
 
     template <typename... Args>
     QDataStream& write(const Args&... args) {
-        if constexpr (requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); }) {
+        if constexpr(requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); }) {
             ((stream << uint32_t(pfr::tuple_size_v<Args>)), ...);
             pfr::for_each_field(args..., [this](const auto& field) { stream << field; });
         } else {
@@ -195,7 +195,7 @@ public:
 
     template <typename... Args>
     QDataStream& rw(Args&... args) {
-        if constexpr ((std::is_const_v<Args> && ... && true))
+        if constexpr((std::is_const_v<Args> && ... && true))
             return write(args...);
         else
             return read(args...);

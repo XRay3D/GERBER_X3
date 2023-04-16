@@ -31,7 +31,7 @@ add_library(common STATIC
     ${SOURCES}
 )
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(common PRIVATE
     filetree

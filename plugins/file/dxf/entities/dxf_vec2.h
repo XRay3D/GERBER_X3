@@ -119,7 +119,7 @@ struct Vec2 {
     Vec2 sum(const T items) {
         /* Add all vectors in `items`. */
         Vec2 s;
-        for (auto v : items)
+        for(auto v: items)
             s += v;
         return s;
     }

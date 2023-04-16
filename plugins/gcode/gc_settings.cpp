@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_settings.h"
+#include "gc_plugin.h"
+#include "gc_types.h"
 
 GCode::Tab::Tab(QWidget* parent)
     : AbstractFileSettings(parent) {
@@ -152,10 +154,9 @@ GCode::Tab::Tab(QWidget* parent)
 
     vLayout->addWidget(grbxSpindle);
 
-    for (auto& [type, ptr] : App::gCodePlugins()) {
-        if (auto tab = ptr->createSettingsTab(tabCommon); tab)
+    for(auto& [type, ptr]: App::gCodePlugins())
+        if(auto tab = ptr->createSettingsTab(tabCommon); tab)
             tabWidget->addTab(tab, tab->windowTitle());
-    }
 }
 
 GCode::Tab::~Tab() { }
@@ -178,7 +179,7 @@ void GCode::Tab::readSettings(MySettings& settings) {
     App::gcSettings().laserEnd_ = settings.getValue(pteLaserEnd, App::gcSettings().laserEnd_);
     App::gcSettings().laserStart_ = settings.getValue(pteLaserStart, App::gcSettings().laserStart_);
 
-    for (int i {1}; i < tabWidget->count(); ++i) {
+    for(int i{1}; i < tabWidget->count(); ++i) {
         auto tab = static_cast<AbstractFileSettings*>(tabWidget->widget(i));
         tab->readSettings(settings);
     }
@@ -204,7 +205,7 @@ void GCode::Tab::writeSettings(MySettings& settings) {
     App::gcSettings().laserStart_ = settings.setValue(pteLaserStart);
     App::gcSettings().laserEnd_ = settings.setValue(pteLaserEnd);
 
-    for (int i {1}; i < tabWidget->count(); ++i) {
+    for(int i{1}; i < tabWidget->count(); ++i) {
         auto tab = static_cast<AbstractFileSettings*>(tabWidget->widget(i));
         tab->writeSettings(settings);
     }

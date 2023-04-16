@@ -68,7 +68,7 @@ public:                                           \
         return app_->NAME##_;                     \
     }                                             \
     static void SET(TYPE* NAME) {                 \
-        if (app_->NAME##_ && NAME)                \
+        if(app_->NAME##_ && NAME)                 \
             throw std::logic_error(__FUNCTION__); \
         else                                      \
             app_->NAME##_ = NAME;                 \
@@ -104,28 +104,27 @@ class App {
     //    QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
-    int dashOffset_ {};
+    int dashOffset_{};
 
     App& operator=(App&& a) = delete;
     App& operator=(const App& app) = delete;
     App(App&&) = delete;
     App(const App&) = delete;
 
-    QSharedMemory sharedMemory {"AppSettings"};
+    QSharedMemory sharedMemory{"AppSettings"};
 
-    const bool isDebug_ {QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
+    const bool isDebug_{QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
 
-    bool drawPdf_ {};
+    bool drawPdf_{};
 
 public:
     explicit App() {
-        if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite)) {
+        if(sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
             app_ = *reinterpret_cast<App**>(sharedMemory.data()) = this;
-        } else if (sharedMemory.attach(QSharedMemory::ReadOnly)) {
+        else if(sharedMemory.attach(QSharedMemory::ReadOnly))
             app_ = *reinterpret_cast<App**>(sharedMemory.data());
-        } else {
+        else
             qDebug() << "App" << app_ << sharedMemory.errorString();
-        }
     }
     static auto& dashOffset() { return app_->dashOffset_; }
 

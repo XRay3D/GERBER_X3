@@ -31,7 +31,7 @@ QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&
 
 void SideDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* comboBox = qobject_cast<QComboBox*>(editor);
-    if (!comboBox)
+    if(!comboBox)
         return;
     comboBox->setCurrentIndex(index.data(Qt::EditRole).toInt());
     comboBox->showPopup();
@@ -39,7 +39,7 @@ void SideDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
 
 void SideDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* comboBox = qobject_cast<QComboBox*>(editor);
-    if (!comboBox)
+    if(!comboBox)
         return;
     model->setData(index, bool(comboBox->currentIndex()));
 }

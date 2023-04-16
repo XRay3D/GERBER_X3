@@ -14,7 +14,6 @@
 #include "ft_view.h"
 #include "qgraphicsscene.h"
 #include "shhandler.h"
-#include "shnode.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
@@ -63,8 +62,8 @@ void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // груп�
 {
     QGraphicsItem::mouseMoveEvent(event);
     const auto dp(App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos);
-    for (auto& [shape, hPos] : hInitPos) {
-        for (size_t i = 0, e = hPos.size(); i < e; ++i)
+    for(auto& [shape, hPos]: hInitPos) {
+        for(size_t i = 0, e = hPos.size(); i < e; ++i)
             shape->handlers[i]->setPos(hPos[i] + dp);
         shape->redraw();
     }
@@ -72,17 +71,17 @@ void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // груп�
 
 void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
     QGraphicsItem::mousePressEvent(event);
-    if (currentHandler)
+    if(currentHandler)
         return;
     currentHandler = {};
     hInitPos.clear();
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
-    for (auto item : scene()->selectedItems()) {
-        if (item->type() >= GiType::ShCircle) {
+    for(auto item: scene()->selectedItems()) {
+        if(item->type() >= GiType::ShCircle) {
             auto* shape = static_cast<AbstractShape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
-            for (auto&& h : shape->handlers) {
+            for(auto&& h: shape->handlers) {
                 h->setFlag(ItemSendsScenePositionChanges, false);
                 hInitPos[shape].emplace_back(h->pos());
             }
@@ -97,16 +96,15 @@ void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 }
 
 QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if (change == ItemSelectedChange) {
+    if(change == ItemSelectedChange) {
         const bool selected = value.toInt();
-        for (auto& item : handlers)
+        for(auto& item: handlers)
             item->setVisible(selected);
-        if (/*node_->*/ index().isValid()) {
+        if(/*node_->*/ index().isValid())
             App::fileTreeView().selectionModel()->select(/*node_->*/ index(),
                 (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
                     | QItemSelectionModel::Rows);
-        }
-    } else if (change == ItemVisibleChange) {
+    } else if(change == ItemVisibleChange) {
         emit App::fileModel().dataChanged(/*node_->*/ index(), /*node_->*/ index(), {Qt::CheckStateRole});
     }
     return GraphicsItem::itemChange(change, value);
@@ -117,7 +115,7 @@ void AbstractShape::updateOtherHandlers(Handle* h, int mode) { currentHandler = 
 void AbstractShape::changeColor() {
     //    animation.setStartValue(bodyColor_);
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         bodyColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
         bodyColor_.setAlpha(50);
@@ -141,9 +139,9 @@ void AbstractShape::changeColor() {
 // Node* AbstractShape::node() const { return node_; }
 
 bool AbstractShape::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         // case Qt::DisplayRole:
         //     return QString("%1 (%2)").arg(name()).arg(giId_);
         case Qt::CheckStateRole:
@@ -166,9 +164,9 @@ bool AbstractShape::setData(const QModelIndex& index, const QVariant& value, int
 }
 
 QVariant AbstractShape::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return QString("%1 (%2)").arg(name()).arg(id_);
         case Qt::CheckStateRole:
@@ -189,7 +187,7 @@ QVariant AbstractShape::data(const QModelIndex& index, int role) const {
 
 Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree::Column::Side:
@@ -219,7 +217,7 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
 void AbstractShape::write(QDataStream& stream) const {
     stream << bool(GraphicsItem::flags() & ItemIsSelectable);
     stream << qint32(handlers.size());
-    for (const auto& item : handlers) {
+    for(const auto& item: handlers) {
         stream << item->pos();
         stream << item->type_;
     }
@@ -237,10 +235,10 @@ void AbstractShape::read(QDataStream& stream) {
     handlers.reserve(size);
     QPointF pos;
     Handle::Type type;
-    for (int i {}; i < size; ++i) {
+    for(int i{}; i < size; ++i) {
         stream >> pos;
         stream >> type;
-        if (handlers.size() < size)
+        if(handlers.size() < size)
             handlers.emplace_back(std::make_unique<Handle>(this, type));
         handlers[i]->QGraphicsItem::setPos(pos);
         handlers[i]->setVisible(false);

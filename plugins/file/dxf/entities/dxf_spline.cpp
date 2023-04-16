@@ -25,12 +25,12 @@ namespace Dxf {
 QPolygonF interpolate(const QPolygonF& points, int numValues) {
     QwtSpline spline;
     spline.setSplineType(QwtSpline::Periodic);
-    if (!spline.setPoints(points))
+    if(!spline.setPoints(points))
         return points;
 
     QPolygonF interpolatedPoints(numValues);
     const double delta = (points[/*numPoints*/ points.size() - 1].x() - points[0].x()) / (points.size() - 1);
-    for (int i = 0; i < points.size(); i++) // interpolate
+    for(int i = 0; i < points.size(); i++) // interpolate
     {
         const double x = points[0].x() + i * delta;
         interpolatedPoints[i].setX(x);
@@ -83,8 +83,8 @@ void BSplineCurve(const QPointF& point1,
 //     return b;
 // }
 double blend(QVector<double>& uVec, double u, int k, int d) {
-    if (d == 1) {
-        if (uVec[k] <= u && u < uVec[k + 1])
+    if(d == 1) {
+        if(uVec[k] <= u && u < uVec[k + 1])
             return 1;
         return 0;
     }
@@ -101,23 +101,22 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
     n = poly.ControlPoints.size();
     QVector<double> uVec;
     //  poly.KnotValues;
-    for (int i = 0; i < n + d; i++) {
+    for(int i = 0; i < n + d; i++)
         uVec.push_back(((double)i) / (n + d - 1));
-    }
     double x, y, basis, u;
-    for (u = 0; u <= 1; u += 0.05) {
+    for(u = 0; u <= 1; u += 0.05) {
         x = 0;
         y = 0;
-        for (int i = 0.0; i < poly.ControlPoints.size(); i++) {
+        for(int i = 0.0; i < poly.ControlPoints.size(); i++) {
             // basis = blend(uVec, u, i, d);
             basis = blend(uVec, u, i, d);
             x += basis * poly.ControlPoints[i].x();
             y += basis * poly.ControlPoints[i].y();
         }
 
-        if (u == 0.0 && x != 0.0 && x != 0.0)
+        if(u == 0.0 && x != 0.0 && x != 0.0)
             path.moveTo(x, y);
-        else if (x != 0.0 && x != 0.0)
+        else if(x != 0.0 && x != 0.0)
             path.lineTo(x, y);
         //        putpixel(roundOff(x), roundOff(y), YELLOW);
     }
@@ -130,8 +129,8 @@ Spline::Spline(SectionParser* sp)
 void Spline::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
-        case SubclassMarker:      // 100
+        switch(static_cast<DataEnum>(code.code())) {
+        case SubclassMarker: // 100
             break;
         case ExtrusionDirectionX: // 210
             break;
@@ -139,7 +138,7 @@ void Spline::parse(CodeData& code) {
             break;
         case ExtrusionDirectionZ: // 230
             break;
-        case SplineFlag:          // 70
+        case SplineFlag: // 70
             splineFlag = code;
             break;
         case DegreeOfTheSplineCurve: // 71
@@ -174,7 +173,7 @@ void Spline::parse(CodeData& code) {
             break;
         case StartTangentZ: // 32
             break;
-        case EndTangentX:   // 13
+        case EndTangentX: // 13
             EndTangent.setX(code);
             break;
         case EndTangentY: // 23
@@ -182,7 +181,7 @@ void Spline::parse(CodeData& code) {
             break;
         case EndTangentZ: // 33
             break;
-        case KnotValue:   // 40
+        case KnotValue: // 40
             KnotValues << double(code);
             break;
         case Weight: // 41
@@ -197,7 +196,7 @@ void Spline::parse(CodeData& code) {
             break;
         case ControlPointsZ: // 30
             break;
-        case FitPointsX:     // 11
+        case FitPointsX: // 11
             FitPoints.resize(FitPoints.size() + 1);
             FitPoints.last().setX(code);
             break;
@@ -210,7 +209,7 @@ void Spline::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Spline::type() const { return Type::SPLINE; }
@@ -293,10 +292,10 @@ void Spline::read(QDataStream& stream) {
 inline int qwtFuzzyCompare(double value1, double value2, double intervalSize) {
     const double eps = qAbs(1.0e-6 * intervalSize);
 
-    if (value2 - value1 > eps)
+    if(value2 - value1 > eps)
         return -1;
 
-    if (value1 - value2 > eps)
+    if(value1 - value2 > eps)
         return 1;
 
     return 0;
@@ -312,9 +311,9 @@ inline bool qwtFuzzyLessOrEqual(double d1, double d2) {
 
 //! Return the sign
 inline int qwtSign(double x) {
-    if (x > 0.0)
+    if(x > 0.0)
         return 1;
-    else if (x < 0.0)
+    else if(x < 0.0)
         return (-1);
     else
         return 0;
@@ -327,10 +326,10 @@ inline double qwtSqr(double x) {
 
 //! Approximation of arc tangent ( error below 0,005 radians )
 inline double qwtFastAtan(double x) {
-    if (x < -1.0)
+    if(x < -1.0)
         return -M_PI_2 - x / (x * x + 0.28);
 
-    if (x > 1.0)
+    if(x > 1.0)
         return M_PI_2 - x / (x * x + 0.28);
 
     return x / (1.0 + x * x * 0.28);
@@ -338,18 +337,18 @@ inline double qwtFastAtan(double x) {
 
 //! Approximation of arc tangent ( error below 0,005 radians )
 inline double qwtFastAtan2(double y, double x) {
-    if (x > 0)
+    if(x > 0)
         return qwtFastAtan(y / x);
 
-    if (x < 0) {
+    if(x < 0) {
         const double d = qwtFastAtan(y / x);
         return (y >= 0) ? d + pi : d - pi;
     }
 
-    if (y < 0.0)
+    if(y < 0.0)
         return -M_PI_2;
 
-    if (y > 0.0)
+    if(y > 0.0)
         return M_PI_2;
 
     return 0.0;
@@ -366,11 +365,11 @@ inline double qwtDegrees(double degrees) {
 }
 
 inline double qwtGetMin(const double* array, int size) {
-    if (size <= 0)
+    if(size <= 0)
         return 0.0;
 
     double rv = array[0];
-    for (int i = 1; i < size; i++)
+    for(int i = 1; i < size; i++)
         rv = qMin(rv, array[i]);
 
     return rv;
@@ -382,11 +381,11 @@ inline double qwtGetMin(const double* array, int size) {
   \param size Array size
 */
 inline double qwtGetMax(const double* array, int size) {
-    if (size <= 0)
+    if(size <= 0)
         return 0.0;
 
     double rv = array[0];
-    for (int i = 1; i < size; i++)
+    for(int i = 1; i < size; i++)
         rv = std::max(rv, array[i]);
 
     return rv;
@@ -399,7 +398,7 @@ inline double qwtGetMax(const double* array, int size) {
 */
 inline double qwtNormalizeRadians(double radians) {
     double a = ::fmod(radians, 2.0 * pi);
-    if (a < 0.0)
+    if(a < 0.0)
         a += 2.0 * pi;
 
     return a;
@@ -412,7 +411,7 @@ inline double qwtNormalizeRadians(double radians) {
 */
 inline double qwtNormalizeDegrees(double degrees) {
     double a = ::fmod(degrees, 360.0);
-    if (a < 0.0)
+    if(a < 0.0)
         a += 360.0;
 
     return a;
@@ -443,19 +442,19 @@ static int lookup(double x, const QPolygonF& values) {
     int i1;
     const int size = values.size();
 
-    if (x <= values[0].x())
+    if(x <= values[0].x())
         i1 = 0;
-    else if (x >= values[size - 2].x())
+    else if(x >= values[size - 2].x())
         i1 = size - 2;
     else {
         i1 = 0;
         int i2 = size - 2;
         int i3 = 0;
 
-        while (i2 - i1 > 1) {
+        while(i2 - i1 > 1) {
             i3 = i1 + ((i2 - i1) >> 1);
 
-            if (values[i3].x() > x)
+            if(values[i3].x() > x)
                 i2 = i3;
             else
                 i1 = i3;
@@ -522,7 +521,7 @@ QwtSpline::SplineType QwtSpline::splineType() const {
 */
 bool QwtSpline::setPoints(const QPolygonF& points) {
     const int size = points.size();
-    if (size <= 2) {
+    if(size <= 2) {
         reset();
         return false;
     }
@@ -534,12 +533,12 @@ bool QwtSpline::setPoints(const QPolygonF& points) {
     d_data->c.resize(size - 1);
 
     bool ok;
-    if (d_data->splineType == Periodic)
+    if(d_data->splineType == Periodic)
         ok = buildPeriodicSpline(points);
     else
         ok = buildNaturalSpline(points);
 
-    if (!ok)
+    if(!ok)
         reset();
 
     return ok;
@@ -587,7 +586,7 @@ bool QwtSpline::isValid() const {
   \return Interpolated coordinate
 */
 double QwtSpline::value(double x) const {
-    if (d_data->a.size() == 0)
+    if(d_data->a.size() == 0)
         return 0.0;
 
     const int i = lookup(x, d_data->points);
@@ -617,15 +616,15 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points) {
     //  set up tridiagonal equation system; use coefficient
     //  vectors as temporary buffers
     QVector<double> h(size - 1);
-    for (i = 0; i < size - 1; i++) {
+    for(i = 0; i < size - 1; i++) {
         h[i] = p[i + 1].x() - p[i].x();
-        if (h[i] <= 0)
+        if(h[i] <= 0)
             return false;
     }
 
     QVector<double> d(size - 1);
     double dy1 = (p[1].y() - p[0].y()) / h[0];
-    for (i = 1; i < size - 1; i++) {
+    for(i = 1; i < size - 1; i++) {
         b[i] = c[i] = h[i];
         a[i] = 2.0 * (h[i - 1] + h[i]);
 
@@ -639,7 +638,7 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points) {
     //
 
     // L-U Factorization
-    for (i = 1; i < size - 2; i++) {
+    for(i = 1; i < size - 2; i++) {
         c[i] /= a[i];
         a[i + 1] -= b[i] * c[i];
     }
@@ -647,19 +646,19 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points) {
     // forward elimination
     QVector<double> s(size);
     s[1] = d[1];
-    for (i = 2; i < size - 1; i++)
+    for(i = 2; i < size - 1; i++)
         s[i] = d[i] - c[i - 1] * s[i - 1];
 
     // backward elimination
     s[size - 2] = -s[size - 2] / a[size - 2];
-    for (i = size - 3; i > 0; i--)
+    for(i = size - 3; i > 0; i--)
         s[i] = -(s[i] + b[i] * s[i + 1]) / a[i];
     s[size - 1] = s[0] = 0.0;
 
     //
     // Finally, determine the spline coefficients
     //
-    for (i = 0; i < size - 1; i++) {
+    for(i = 0; i < size - 1; i++) {
         a[i] = (s[i + 1] - s[i]) / (6.0 * h[i]);
         b[i] = 0.5 * s[i];
         c[i] = (p[i + 1].y() - p[i].y()) / h[i]
@@ -691,16 +690,16 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     //  setup equation system; use coefficient
     //  vectors as temporary buffers
     //
-    for (i = 0; i < size - 1; i++) {
+    for(i = 0; i < size - 1; i++) {
         h[i] = p[i + 1].x() - p[i].x();
-        if (h[i] <= 0.0)
+        if(h[i] <= 0.0)
             return false;
     }
 
     const int imax = size - 2;
     double htmp = h[imax];
     double dy1 = (p[0].y() - p[imax].y()) / htmp;
-    for (i = 0; i <= imax; i++) {
+    for(i = 0; i <= imax; i++) {
         b[i] = c[i] = h[i];
         a[i] = 2.0 * (htmp + h[i]);
         const double dy2 = (p[i + 1].y() - p[i].y()) / h[i];
@@ -718,9 +717,9 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     c[0] = h[imax] / a[0];
     double sum = 0;
 
-    for (i = 0; i < imax - 1; i++) {
+    for(i = 0; i < imax - 1; i++) {
         b[i] /= a[i];
-        if (i > 0)
+        if(i > 0)
             c[i] = -c[i - 1] * b[i - 1] / a[i];
         a[i + 1] = std::sqrt(a[i + 1] - qwtSqr(b[i]));
         sum += qwtSqr(c[i]);
@@ -731,7 +730,7 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     // forward elimination
     s[0] = d[0] / a[0];
     sum = 0;
-    for (i = 1; i < imax; i++) {
+    for(i = 1; i < imax; i++) {
         s[i] = (d[i] - b[i - 1] * s[i - 1]) / a[i];
         sum += c[i - 1] * s[i - 1];
     }
@@ -740,14 +739,14 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     // backward elimination
     s[imax] = -s[imax] / a[imax];
     s[imax - 1] = -(s[imax - 1] + b[imax - 1] * s[imax]) / a[imax - 1];
-    for (i = imax - 2; i >= 0; i--)
+    for(i = imax - 2; i >= 0; i--)
         s[i] = -(s[i] + b[i] * s[i + 1] + c[i] * s[imax]) / a[i];
 
     //
     // Finally, determine the spline coefficients
     //
     s[size - 1] = s[0];
-    for (i = 0; i < size - 1; i++) {
+    for(i = 0; i < size - 1; i++) {
         a[i] = (s[i + 1] - s[i]) / (6.0 * h[i]);
         b[i] = 0.5 * s[i];
         c[i] = (p[i + 1].y() - p[i].y())

@@ -12,6 +12,7 @@
 
 #include "abstract_file.h"
 #include "gc_types.h"
+#include "project.h"
 #include <QList>
 #include <QString>
 
@@ -59,10 +60,10 @@ public:
     FileTree::Node* node() override;
 
 private:
-    double feedRate_ {};
-    double plungeRate_ {};
-    int spindleSpeed_ {};
-    int toolType_ {};
+    double feedRate_{};
+    double plungeRate_{};
+    int spindleSpeed_{};
+    int toolType_{};
 
 protected:
     void startPath(const QPointF& point);
@@ -100,7 +101,7 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    inline static const mvector<QChar> cmdList {'G', 'X', 'Y', 'Z', 'F', 'S'};
+    inline static const mvector<QChar> cmdList{'G', 'X', 'Y', 'Z', 'F', 'S'};
 
     mvector<double> getDepths();
 

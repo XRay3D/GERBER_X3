@@ -50,7 +50,7 @@ void GraphicsItem::setColor(const QColor& brush) {
 }
 
 void GraphicsItem::setColorPtr(QColor* brushColor) {
-    if (brushColor)
+    if(brushColor)
         bodyColor_ = *(colorPtr_ = brushColor);
     pathColor_ = colorPtr_ ? *colorPtr_ : color_;
     colorChanged();
@@ -62,7 +62,7 @@ void GraphicsItem::setPen(const QPen& pen) {
 }
 
 void GraphicsItem::setPenColorPtr(const QColor* penColor) {
-    if (penColor)
+    if(penColor)
         pnColorPrt_ = penColor;
     colorChanged();
 }
@@ -99,27 +99,27 @@ void GraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
 }
 
 QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if (change == ItemSelectedChange) {
+    if(change == ItemSelectedChange) {
         const bool fl = value.toInt();
         fl ? colorState |= Selected : colorState &= ~Selected;
         changeColor();
-    } else if (change == ItemSceneChange) {
+    } else if(change == ItemSceneChange) {
     }
     return QGraphicsItem::itemChange(change, value);
 }
 
 double GraphicsItem::scaleFactor() const {
     double scale = 1.0;
-    if (scene() && scene()->views().size()) {
+    if(scene() && scene()->views().size()) {
         scale /= scene()->views().first()->transform().m11();
-        if (file_)
+        if(file_)
             scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
     }
     return scale;
 };
 
 QRectF GraphicsItem::boundingRect() const {
-    if (App::graphicsView().boundingRectFl())
+    if(App::graphicsView().boundingRectFl())
         return shape_.toFillPolygon(transform()).boundingRect();
     return boundingRect_;
 }

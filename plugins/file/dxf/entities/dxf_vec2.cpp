@@ -32,7 +32,7 @@ Vec2 Vec2::orthogonal(bool ccw) {
         Args:
             ccw: counter clockwise if ``True`` else clockwise
         */
-    if (ccw)
+    if(ccw)
         return {-y, x};
     else
         return {y, -x};
@@ -67,7 +67,7 @@ bool Vec2::operator==(Vec2 other) { return qFuzzyCompare(x, other.x) && qFuzzyCo
 
 bool Vec2::operator<(Vec2 other) {
     // # accepts also tuples, for more convenience at testing
-    if (qFuzzyCompare(x, other.x))
+    if(qFuzzyCompare(x, other.x))
         return y < other.y;
     else
         return x < other.x;
@@ -118,9 +118,9 @@ double Vec2::angle_between(Vec2 other) {
         */
     double cos_theta = normalize().dot(other.normalize());
     // # avoid domain errors caused by doubleing point imprecision:
-    if (cos_theta < -1.0)
+    if(cos_theta < -1.0)
         cos_theta = -1.0;
-    else if (cos_theta > 1.0)
+    else if(cos_theta > 1.0)
         cos_theta = 1.0;
     return acos(cos_theta);
 }

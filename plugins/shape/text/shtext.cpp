@@ -15,7 +15,7 @@
 #include "abstract_file.h"
 #include "graphicsview.h"
 #include "shhandler.h"
-#include "shnode.h"
+
 #include "shtextdialog.h"
 
 #include <QApplication>
@@ -52,7 +52,7 @@ void Text::redraw() {
 
     QPointF handlePt;
 
-    switch (iData.handleAlign) {
+    switch(iData.handleAlign) {
     case BotCenter:
         handlePt -= QPointF(bRect.width() * 0.5, 0);
         break;
@@ -85,7 +85,7 @@ void Text::redraw() {
     QTransform transform;
     transform.translate(-bRect.left() * scale, 0);
     transform.translate(handlePt.x() * scale, handlePt.y() * scale);
-    if (iData.side == Bottom) {
+    if(iData.side == Bottom) {
         transform.translate((bRect.right() + bRect.left()) * scale, 0);
         //        matrix.scale(
         //            -scale * iData.xy > 0.0 ? 1 * iData.xy : 1,
@@ -97,14 +97,12 @@ void Text::redraw() {
     }
     {
         QPainterPath tmpPainterPath;
-        for (auto& polygon : painterPath.toSubpathPolygons()) { // text to polygons
+        for(auto& polygon: painterPath.toSubpathPolygons()) // text to polygons
             tmpPainterPath.addPolygon(polygon);
-        }
         painterPath = std::move(tmpPainterPath);
         tmpPainterPath = QPainterPath();
-        for (auto& polygon : painterPath.toSubpathPolygons(transform)) { // transform polygons with matrix
+        for(auto& polygon: painterPath.toSubpathPolygons(transform)) // transform polygons with matrix
             tmpPainterPath.addPolygon(polygon);
-        }
         painterPath = std::move(tmpPainterPath);
     }
     transform.reset();
@@ -115,13 +113,13 @@ void Text::redraw() {
     shape_ = {};
 
     Clipper clipper;
-    for (auto& sp : painterPath.toSubpathPolygons(transform)) {
+    for(auto& sp: painterPath.toSubpathPolygons(transform)) {
         clipper.AddClip({sp});
         //        paths_.push_back(sp);
         //        shape_.addPolygon(sp);
     }
     clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
-    for (auto& sp : paths_) {
+    for(auto& sp: paths_) {
         sp.emplace_back(sp.front());
         shape_.addPolygon(sp);
     }
@@ -151,9 +149,9 @@ void Text::setPt(const QPointF& point) {
 }
 
 bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::CheckStateRole:
             setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
@@ -163,7 +161,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
         }
         break;
     case FileTree_::Column::Side:
-        if (role == Qt::EditRole) {
+        if(role == Qt::EditRole) {
             setSide(static_cast<Side>(value.toBool()));
             return true;
         }
@@ -175,7 +173,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 Qt::ItemFlags Text::flags(const QModelIndex& index) const {
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
         return AbstractShape::flags(index) | Qt::ItemIsEditable;
     case FileTree_::Column::Side:
@@ -186,9 +184,9 @@ Qt::ItemFlags Text::flags(const QModelIndex& index) const {
 }
 
 QVariant Text::data(const QModelIndex& index, int role) const {
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
                 .arg(name())
@@ -200,7 +198,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
             return AbstractShape::data(index, role);
         }
     case FileTree_::Column::Side:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
             return node_->sideStrList[side()];

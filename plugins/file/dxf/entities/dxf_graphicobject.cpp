@@ -39,7 +39,7 @@ size_t DxfGo::entityId() const { return entityId_; }
 DxfGo::DxfGo() { }
 
 DxfGo::DxfGo(int entityId, const Path& path, const Paths& paths)
-    : entityId_ {entityId} {
+    : entityId_{entityId} {
     fill = paths;
     ::GraphicObject::path = path;
 }
@@ -47,7 +47,7 @@ DxfGo::DxfGo(int entityId, const Path& path, const Paths& paths)
 void DxfGo::setRotation(double rotationAngle) {
     rotationAngle_ = rotationAngle;
     RotatePath(path, rotationAngle_ /*, pos_*/);
-    for (auto& path : fill)
+    for(auto& path: fill)
         RotatePath(path, rotationAngle_ /*, pos_*/);
 }
 
@@ -57,19 +57,19 @@ void DxfGo::setScale(double scaleX, double scaleY) {
     scaleX_ = scaleX, scaleY_ = scaleY;
     auto scale = [](Path& path, double sx, double sy, const Point& center = {}) {
         const bool fl = Area(path) < 0;
-        for (Point& pt : path) {
+        for(Point& pt: path) {
             const double dAangle = (pi * 2) - center.angleRadTo(pt);
             const double length = center.distTo(pt);
             pt = Point(static_cast<Point::Type>(cos(dAangle) * length * sx), static_cast<Point::Type>(sin(dAangle) * length * sy));
             pt.x += center.x;
             pt.y += center.y;
         }
-        if (fl != (Area(path) < 0))
+        if(fl != (Area(path) < 0))
             ReversePath(path);
     };
 
     scale(path, scaleX_, scaleY_, {} /*pos_*/);
-    for (auto& path : fill)
+    for(auto& path: fill)
         scale(path, scaleX_, scaleY_, {} /*pos_*/);
 }
 
@@ -82,7 +82,7 @@ double DxfGo::scaleY() const { return scaleY_; }
 void DxfGo::setPos(QPointF pos) {
     ::GraphicObject::pos = pos;
     TranslatePath(::GraphicObject::path, pos);
-    for (auto& path : fill)
+    for(auto& path: fill)
         TranslatePath(path, ::GraphicObject::pos);
 }
 

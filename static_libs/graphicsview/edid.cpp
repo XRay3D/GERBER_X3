@@ -25,10 +25,10 @@
 
 QSizeF GetRealSize() {
     static QSizeF size;
-    if (!size.isEmpty())
+    if(!size.isEmpty())
         return size;
 
-#if 0                   // ndef linux
+#if 0 // ndef linux
     GUID GUID_CLASS_MONITOR = { 0x4d36e96e, 0xe325, 0x11ce, { 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18 } };
     HDEVINFO devInfo = nullptr;
     SP_DEVINFO_DATA devInfoData;
@@ -86,7 +86,7 @@ QSizeF GetRealSize() {
         } // for
     } while (0);
 #endif
-    if (size.isEmpty()) // FIXME current display of graficsview
+    if(size.isEmpty()) // FIXME current display of graficsview
         size = QGuiApplication::screens()[0]->physicalSize();
 
     return size;

@@ -58,7 +58,7 @@ public:
     template <typename T = AbstractFile>
     T* file(int32_t id) {
         QMutexLocker locker(&mutex);
-        if (files_.contains(id))
+        if(files_.contains(id))
             return static_cast<T*>(files_[id].get());
         return nullptr;
     }
@@ -67,9 +67,9 @@ public:
     mvector<T*> files() {
         QMutexLocker locker(&mutex);
         mvector<T*> rfiles;
-        for (const auto& [id, sp] : files_) {
+        for(const auto& [id, sp]: files_) {
             T* file = dynamic_cast<T*>(sp.get());
-            if (file)
+            if(file)
                 rfiles.push_back(file);
         }
         return rfiles;
@@ -79,10 +79,9 @@ public:
     mvector<T*> count() {
         QMutexLocker locker(&mutex);
         int count = 0;
-        for (const auto& [id, sp] : files_) {
-            if (dynamic_cast<T*>(sp.get()))
+        for(const auto& [id, sp]: files_)
+            if(dynamic_cast<T*>(sp.get()))
                 ++count;
-        }
         return count;
     }
 
@@ -199,24 +198,24 @@ private:
     bool isModified_ = false;
     bool isUntitled_ = true;
     bool isPinsPlaced_ = false;
-    bool pinsUsed_[4] {true, true, true, true};
+    bool pinsUsed_[4]{true, true, true, true};
     QPointF pins_[4];
     QPointF home_;
     QPointF zero_;
     QRectF worckRect_;
 
-    double safeZ_ {};
-    double boardThickness_ {};
-    double copperThickness_ {};
-    double clearence_ {};
-    double plunge_ {};
-    double glue_ {};
+    double safeZ_{};
+    double boardThickness_{};
+    double copperThickness_{};
+    double clearence_{};
+    double plunge_{};
+    double glue_{};
 
     struct Tailing {
-        double spacingX {};
-        double spacingY {};
-        uint stepsX {1};
-        uint stepsY {1};
+        double spacingX{};
+        double spacingY{};
+        uint stepsX{1};
+        uint stepsY{1};
         SERIALIZE_POD(Tailing)
     } tailing;
 };

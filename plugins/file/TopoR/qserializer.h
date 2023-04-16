@@ -102,15 +102,13 @@ public:
     /*! \brief  Serialize all accessed JSON propertyes for this object. */
     QJsonObject toJson() const {
         QJsonObject json;
-        for (int i {}; i < metaObject()->propertyCount(); ++i) {
+        for(int i{}; i < metaObject()->propertyCount(); ++i) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-            if (QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QJsonValue>())) {
+            if(QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QJsonValue>()))
                 continue;
-            }
 #else
-            if (metaObject()->property(i).metaType().id() != QMetaType::QJsonValue) {
+            if(metaObject()->property(i).metaType().id() != QMetaType::QJsonValue)
                 continue;
-            }
 #endif
 
             json.insert(metaObject()->property(i).name(), metaObject()->property(i).readOnGadget(this).toJsonValue());
@@ -125,23 +123,21 @@ public:
 
     /*! \brief  Deserialize all accessed XML propertyes for this object. */
     void fromJson(const QJsonValue& val) {
-        if (val.isObject()) {
+        if(val.isObject()) {
             QJsonObject json = val.toObject();
             QStringList keys = json.keys();
             int propCount = metaObject()->propertyCount();
-            for (int i {}; i < propCount; ++i) {
+            for(int i{}; i < propCount; ++i) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-                if (QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QJsonValue>())) {
+                if(QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QJsonValue>()))
                     continue;
-                }
 #else
-                if (metaObject()->property(i).metaType().id() != QMetaType::QJsonValue) {
+                if(metaObject()->property(i).metaType().id() != QMetaType::QJsonValue)
                     continue;
-                }
 #endif
 
-                for (auto key : json.keys()) {
-                    if (key == metaObject()->property(i).name()) {
+                for(auto key: json.keys()) {
+                    if(key == metaObject()->property(i).name()) {
                         metaObject()->property(i).writeOnGadget(this, json.value(key));
                         break;
                     }
@@ -161,15 +157,13 @@ public:
     QDomNode toXml() const {
         QDomDocument doc;
         QDomElement el = doc.createElement(metaObject()->className());
-        for (int i {}; i < metaObject()->propertyCount(); ++i) {
+        for(int i{}; i < metaObject()->propertyCount(); ++i) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-            if (QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QDomNode>())) {
+            if(QString(metaObject()->property(i).typeName()) != QMetaType::typeName(qMetaTypeId<QDomNode>()))
                 continue;
-            }
 #else
-            if (metaObject()->property(i).metaType().id() != qMetaTypeId<QDomNode>()) {
+            if(metaObject()->property(i).metaType().id() != qMetaTypeId<QDomNode>())
                 continue;
-            }
 #endif
             el.appendChild(QDomNode(metaObject()->property(i).readOnGadget(this).value<QDomNode>()));
         }
@@ -190,8 +184,8 @@ public:
         QDomElement n = doc.firstChildElement(metaObject()->className());
         qDebug() << "0" << n.isNull() << n.tagName() << n.text() << metaObject()->className();
 
-        if (!n.isNull()) {
-            for (int i {}; i < metaObject()->propertyCount(); ++i) {
+        if(!n.isNull()) {
+            for(int i{}; i < metaObject()->propertyCount(); ++i) {
                 QString name = metaObject()->property(i).name();
                 QDomElement tmp = metaObject()->property(i).readOnGadget(this).value<QDomNode>().firstChildElement();
                 auto f = n.firstChildElement(tmp.tagName());
@@ -199,10 +193,10 @@ public:
                 metaObject()->property(i).writeOnGadget(this, QVariant::fromValue<QDomNode>(f));
             }
         } else {
-            for (int i {}; i < metaObject()->propertyCount(); ++i) {
+            for(int i{}; i < metaObject()->propertyCount(); ++i) {
                 QString name = metaObject()->property(i).name();
                 QDomNode f = doc.firstChildElement(name);
-                if (f.isNull())
+                if(f.isNull())
                     f = doc.attributes().namedItem(name);
                 metaObject()->property(i).writeOnGadget(this, QVariant::fromValue<QDomNode>(f));
             }
@@ -257,9 +251,9 @@ private:                                                                        
         return QDomNode(doc);                                                            \
     }                                                                                    \
     void SET(xml, name)(const QDomNode& node) {                                          \
-        if (!node.isNull() && node.isElement()) {                                        \
+        if(!node.isNull() && node.isElement()) {                                         \
             QDomElement domElement = node.toElement();                                   \
-            if (domElement.tagName() == #name)                                           \
+            if(domElement.tagName() == #name)                                            \
                 name = QVariant(domElement.text()).value<type>();                        \
         }                                                                                \
     }
@@ -282,7 +276,7 @@ private:                                                                        
         return QDomNode(doc);                                                            \
     }                                                                                    \
     void SET(xml_attr, name)(const QDomNode& node) {                                     \
-        if (!node.isNull()) {                                                            \
+        if(!node.isNull()) {                                                             \
             name = QVariant(node.nodeValue()).value<type>();                             \
             qDebug() << "4" << name << node.nodeValue() << #name;                        \
         }                                                                                \
@@ -299,16 +293,16 @@ private:                                                                        
 private:                                                                   \
     QJsonValue GET(json, name)() const {                                   \
         QJsonArray val;                                                    \
-        for (int i {}; i < name.size(); ++i)                               \
+        for(int i{}; i < name.size(); ++i)                                 \
             val.push_back(name.at(i));                                     \
         return QJsonValue::fromVariant(val);                               \
     }                                                                      \
     void SET(json, name)(const QJsonValue& varname) {                      \
-        if (!varname.isArray())                                            \
+        if(!varname.isArray())                                             \
             return;                                                        \
         name.clear();                                                      \
         QJsonArray val = varname.toArray();                                \
-        for (auto item : val) {                                            \
+        for(auto item: val) {                                              \
             itemType tmp;                                                  \
             tmp = item.toVariant().value<itemType>();                      \
             name.append(tmp);                                              \
@@ -330,7 +324,7 @@ private:                                                                        
         QDomElement arrayXml = doc.createElement(QString(strname));             \
         arrayXml.setAttribute("type", "array");                                 \
                                                                                 \
-        for (int i {}; i < name.size(); ++i) {                                  \
+        for(int i{}; i < name.size(); ++i) {                                    \
             itemType item = name.at(i);                                         \
             QDomElement itemXml = doc.createElement("item");                    \
             itemXml.setAttribute("type", #itemType);                            \
@@ -345,8 +339,8 @@ private:                                                                        
     void SET(xml, name)(const QDomNode& node) {                                 \
         QDomNode domNode = node.firstChild();                                   \
         name.clear();                                                           \
-        while (!domNode.isNull()) {                                             \
-            if (domNode.isElement()) {                                          \
+        while(!domNode.isNull()) {                                              \
+            if(domNode.isElement()) {                                           \
                 QDomElement domElement = domNode.toElement();                   \
                 name.append(QVariant(domElement.text()).value<itemType>());     \
             }                                                                   \
@@ -368,7 +362,7 @@ private:                                                                   \
         return QJsonValue(val);                                            \
     }                                                                      \
     void SET(json, name)(const QJsonValue& varname) {                      \
-        if (!varname.isObject())                                           \
+        if(!varname.isObject())                                            \
             return;                                                        \
         name.fromJson(varname);                                            \
     }
@@ -401,16 +395,16 @@ private:                                                               \
 private:                                                                   \
     QJsonValue GET(json, name)() const {                                   \
         QJsonArray val;                                                    \
-        for (int i {}; i < name.size(); ++i)                               \
+        for(int i{}; i < name.size(); ++i)                                 \
             val.push_back(name.at(i).toJson());                            \
         return QJsonValue::fromVariant(val);                               \
     }                                                                      \
     void SET(json, name)(const QJsonValue& varname) {                      \
-        if (!varname.isArray())                                            \
+        if(!varname.isArray())                                             \
             return;                                                        \
         name.clear();                                                      \
         QJsonArray val = varname.toArray();                                \
-        for (int i {}; i < val.size(); ++i) {                              \
+        for(int i{}; i < val.size(); ++i) {                                \
             itemType tmp;                                                  \
             tmp.fromJson(val.at(i));                                       \
             name.append(tmp);                                              \
@@ -431,7 +425,7 @@ private:                                                               \
         QDomDocument doc;                                              \
         QDomElement element = doc.createElement(#name);                \
         element.setAttribute("type", "array");                         \
-        for (int i {}; i < name.size(); ++i)                           \
+        for(int i{}; i < name.size(); ++i)                             \
             element.appendChild(name.at(i).toXml());                   \
         doc.appendChild(element);                                      \
         return QDomNode(doc);                                          \
@@ -439,7 +433,7 @@ private:                                                               \
     void SET(xml, name)(const QDomNode& node) {                        \
         name.clear();                                                  \
         QDomNodeList nodesList = node.childNodes();                    \
-        for (int i {}; i < nodesList.size(); ++i) {                    \
+        for(int i{}; i < nodesList.size(); ++i) {                      \
             itemType tmp;                                              \
             tmp.fromXml(nodesList.at(i));                              \
             name.emplace_back(std::move(tmp));                         \
@@ -459,7 +453,7 @@ private:                                                               \
 private:                                                                   \
     QJsonValue GET(json, name)() const {                                   \
         QJsonObject val;                                                   \
-        for (auto p = name.constBegin(); p != name.constEnd(); ++p) {      \
+        for(auto p = name.constBegin(); p != name.constEnd(); ++p) {       \
             val.insert(                                                    \
                 QVariant(p.key()).toString(),                              \
                 QJsonValue::fromVariant(QVariant(p.value())));             \
@@ -469,7 +463,7 @@ private:                                                                   \
     void SET(json, name)(const QJsonValue& varname) {                      \
         QJsonObject val = varname.toObject();                              \
         name.clear();                                                      \
-        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+        for(auto p = val.constBegin(); p != val.constEnd(); ++p) {         \
             name.insert(                                                   \
                 QVariant(p.key()).value<map::key_type>(),                  \
                 QVariant(p.value()).value<map::mapped_type>());            \
@@ -491,7 +485,7 @@ private:                                                                        
         QDomDocument doc;                                                                           \
         QDomElement element = doc.createElement(#name);                                             \
         element.setAttribute("type", "map");                                                        \
-        for (auto p = name.begin(); p != name.end(); ++p) {                                         \
+        for(auto p = name.begin(); p != name.end(); ++p) {                                          \
             QDomElement e = doc.createElement("item");                                              \
             e.setAttribute("key", QVariant(p.key()).toString());                                    \
             e.setAttribute("value", QVariant(p.value()).toString());                                \
@@ -501,12 +495,12 @@ private:                                                                        
         return QDomNode(doc);                                                                       \
     }                                                                                               \
     void SET(xml, name)(const QDomNode& node) {                                                     \
-        if (!node.isNull() && node.isElement()) {                                                   \
+        if(!node.isNull() && node.isElement()) {                                                    \
             QDomElement root = node.toElement();                                                    \
-            if (root.tagName() == #name) {                                                          \
+            if(root.tagName() == #name) {                                                           \
                 QDomNodeList childs = root.childNodes();                                            \
                                                                                                     \
-                for (int i {}; i < childs.size(); ++i) {                                            \
+                for(int i{}; i < childs.size(); ++i) {                                              \
                     QDomElement item = childs.at(i).toElement();                                    \
                     name.insert(QVariant(item.attributeNode("key").value()).value<map::key_type>(), \
                         QVariant(item.attributeNode("value").value()).value<map::mapped_type>());   \
@@ -528,7 +522,7 @@ private:                                                                        
 private:                                                                   \
     QJsonValue GET(json, name)() const {                                   \
         QJsonObject val;                                                   \
-        for (auto p = name.begin(); p != name.end(); ++p) {                \
+        for(auto p = name.begin(); p != name.end(); ++p) {                 \
             val.insert(                                                    \
                 QVariant::fromValue(p.key()).toString(),                   \
                 p.value().toJson());                                       \
@@ -538,7 +532,7 @@ private:                                                                   \
     void SET(json, name)(const QJsonValue& varname) {                      \
         QJsonObject val = varname.toObject();                              \
         name.clear();                                                      \
-        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+        for(auto p = val.constBegin(); p != val.constEnd(); ++p) {         \
             map::mapped_type tmp;                                          \
             tmp.fromJson(p.value());                                       \
             name.insert(                                                   \
@@ -562,7 +556,7 @@ private:                                                                        
         QDomDocument doc;                                                                           \
         QDomElement element = doc.createElement(#name);                                             \
         element.setAttribute("type", "map");                                                        \
-        for (auto p = name.begin(); p != name.end(); ++p) {                                         \
+        for(auto p = name.begin(); p != name.end(); ++p) {                                          \
             QDomElement e = doc.createElement("item");                                              \
             e.setAttribute("key", QVariant(p.key()).toString());                                    \
             e.appendChild(p.value().toXml());                                                       \
@@ -572,12 +566,12 @@ private:                                                                        
         return QDomNode(doc);                                                                       \
     }                                                                                               \
     void SET(xml, name)(const QDomNode& node) {                                                     \
-        if (!node.isNull() && node.isElement()) {                                                   \
+        if(!node.isNull() && node.isElement()) {                                                    \
             QDomElement root = node.toElement();                                                    \
-            if (root.tagName() == #name) {                                                          \
+            if(root.tagName() == #name) {                                                           \
                 QDomNodeList childs = root.childNodes();                                            \
                                                                                                     \
-                for (int i {}; i < childs.size(); ++i) {                                            \
+                for(int i{}; i < childs.size(); ++i) {                                              \
                     QDomElement item = childs.at(i).toElement();                                    \
                     map::mapped_type tmp;                                                           \
                     tmp.fromXml(item.firstChild());                                                 \
@@ -601,7 +595,7 @@ private:                                                                        
 private:                                                                   \
     QJsonValue GET(json, name)() const {                                   \
         QJsonObject val;                                                   \
-        for (auto p : name) {                                              \
+        for(auto p: name) {                                                \
             val.insert(                                                    \
                 QVariant::fromValue(p.first).toString(),                   \
                 QJsonValue::fromVariant(QVariant(p.second)));              \
@@ -611,7 +605,7 @@ private:                                                                   \
     void SET(json, name)(const QJsonValue& varname) {                      \
         QJsonObject val = varname.toObject();                              \
         name.clear();                                                      \
-        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+        for(auto p = val.constBegin(); p != val.constEnd(); ++p) {         \
             name.insert(std::pair<map::key_type, map::mapped_type>(        \
                 QVariant(p.key()).value<map::key_type>(),                  \
                 QVariant(p.value()).value<map::mapped_type>()));           \
@@ -629,7 +623,7 @@ private:                                                                        
         QDomDocument doc;                                                                          \
         QDomElement element = doc.createElement(#name);                                            \
         element.setAttribute("type", "map");                                                       \
-        for (auto p : name) {                                                                      \
+        for(auto p: name) {                                                                        \
             QDomElement e = doc.createElement("item");                                             \
             e.setAttribute("key", QVariant(p.first).toString());                                   \
             e.setAttribute("value", QVariant(p.second).toString());                                \
@@ -639,12 +633,12 @@ private:                                                                        
         return QDomNode(doc);                                                                      \
     }                                                                                              \
     void SET(xml, name)(const QDomNode& node) {                                                    \
-        if (!node.isNull() && node.isElement()) {                                                  \
+        if(!node.isNull() && node.isElement()) {                                                   \
             QDomElement root = node.toElement();                                                   \
-            if (root.tagName() == #name) {                                                         \
+            if(root.tagName() == #name) {                                                          \
                 QDomNodeList childs = root.childNodes();                                           \
                                                                                                    \
-                for (int i {}; i < childs.size(); ++i) {                                           \
+                for(int i{}; i < childs.size(); ++i) {                                             \
                     QDomElement item = childs.at(i).toElement();                                   \
                     name.insert(std::pair<map::key_type, map::mapped_type>(                        \
                         QVariant(item.attributeNode("key").value()).value<map::key_type>(),        \
@@ -667,7 +661,7 @@ private:                                                                        
 private:                                                                   \
     QJsonValue GET(json, name)() const {                                   \
         QJsonObject val;                                                   \
-        for (auto p : name) {                                              \
+        for(auto p: name) {                                                \
             val.insert(                                                    \
                 QVariant::fromValue(p.first).toString(),                   \
                 p.second.toJson());                                        \
@@ -677,7 +671,7 @@ private:                                                                   \
     void SET(json, name)(const QJsonValue& varname) {                      \
         QJsonObject val = varname.toObject();                              \
         name.clear();                                                      \
-        for (auto p = val.constBegin(); p != val.constEnd(); ++p) {        \
+        for(auto p = val.constBegin(); p != val.constEnd(); ++p) {         \
             map::mapped_type tmp;                                          \
             tmp.fromJson(p.value());                                       \
             name.insert(std::pair<map::key_type, map::mapped_type>(        \
@@ -701,7 +695,7 @@ private:                                                                        
         QDomDocument doc;                                                                   \
         QDomElement element = doc.createElement(#name);                                     \
         element.setAttribute("type", "map");                                                \
-        for (auto p : name) {                                                               \
+        for(auto p: name) {                                                                 \
             QDomElement e = doc.createElement("item");                                      \
             e.setAttribute("key", QVariant(p.first).toString());                            \
             e.appendChild(p.second.toXml());                                                \
@@ -711,12 +705,12 @@ private:                                                                        
         return QDomNode(doc);                                                               \
     }                                                                                       \
     void SET(xml, name)(const QDomNode& node) {                                             \
-        if (!node.isNull() && node.isElement()) {                                           \
+        if(!node.isNull() && node.isElement()) {                                            \
             QDomElement root = node.toElement();                                            \
-            if (root.tagName() == #name) {                                                  \
+            if(root.tagName() == #name) {                                                   \
                 QDomNodeList childs = root.childNodes();                                    \
                                                                                             \
-                for (int i {}; i < childs.size(); ++i) {                                    \
+                for(int i{}; i < childs.size(); ++i) {                                      \
                     QDomElement item = childs.at(i).toElement();                            \
                     map::mapped_type tmp;                                                   \
                     tmp.fromXml(item.firstChild());                                         \

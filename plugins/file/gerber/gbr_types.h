@@ -266,14 +266,14 @@ struct GrObject : public GraphicObject {
         return ::Block(stream).read(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
-    File* gFile {nullptr};
+    File* gFile{nullptr};
     State state;
 
     // public:
     GrObject() { }
     GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
-        : gFile {gFile}
-        , state {state} {
+        : gFile{gFile}
+        , state{state} {
         GraphicObject::id = id;
         GraphicObject::fill = std::move(paths);
         GraphicObject::path = std::move(path);
@@ -289,10 +289,10 @@ struct StepRepeatStr {
         j = 0.0;
         storage.clear();
     }
-    int x {};
-    int y {};
-    double i {};
-    double j {};
+    int x{};
+    int y{};
+    double i{};
+    double j{};
     QList<GrObject> storage;
 };
 

@@ -33,9 +33,9 @@ namespace Gerber {
 
 void Node::repaint(FileTree::Node* parent) {
     const int count = parent->childCount();
-    for (int i {}; i < count; ++i) {
+    for(int i{}; i < count; ++i) {
         auto node = static_cast<Node*>(parent->child(i));
-        if (node->file->userColor())
+        if(node->file->userColor())
             continue;
         const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
         node->file->setColor(QColor::fromHsv(k, 255, 255, 150));
@@ -55,12 +55,12 @@ Node::~Node() {
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (role) {
+    switch(role) {
     case Qt::CheckStateRole:
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
     case Qt::EditRole:
-        switch (FileTree::Column(index.column())) {
+        switch(FileTree::Column(index.column())) {
         case FileTree::Column::Side:
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
@@ -74,7 +74,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         }
         break;
     case FileTree::Select:
-        for (auto ig : file->itemGroups())
+        for(auto ig: file->itemGroups())
             ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
         return true;
     }
@@ -83,7 +83,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree::Column::Side:
@@ -96,9 +96,9 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return file->shortName();
         case Qt::ToolTipRole:
@@ -113,7 +113,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             return {};
         }
     case FileTree::Column::Side:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
             return sideStrList[file->side()];
@@ -125,7 +125,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             return {};
         }
     case FileTree::Column::ItemsType:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return file->displayedTypes().at(file->itemsType()).shortActName();
         case Qt::ToolTipRole:
@@ -165,24 +165,23 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
         verticalLayout->addWidget(textBrowser);
         QString s;
         s.reserve(1000000);
-        for (const QString& str : file->lines())
+        for(const QString& str: file->lines())
             s += str + '\n';
         textBrowser->setPlainText(s);
         dialog->exec();
         delete dialog;
     });
-    if (!file->itemGroup(File::Components)->empty()) {
+    if(!file->itemGroup(File::Components)->empty())
         menu.addAction(QIcon(), GbrObj::tr("Show &Components"), [this, tv] {
             Comp::Dialog dialog(tv);
             dialog.setFile(id());
             dialog.exec();
         });
-    }
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("color-management"), GbrObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);
         cd.setCurrentColor(file->color());
-        if (cd.exec()) {
+        if(cd.exec()) {
             auto color = cd.currentColor();
             color.setAlpha(150);
             file->setColor(color);

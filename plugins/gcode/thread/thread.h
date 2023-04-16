@@ -19,7 +19,7 @@
 namespace Thread {
 
 struct Settings {
-    int sort {};
+    int sort{};
 };
 
 inline Settings settings;

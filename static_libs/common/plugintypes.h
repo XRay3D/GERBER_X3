@@ -46,9 +46,9 @@
 // };
 
 struct Transform {
-    double angle {};
-    QPointF translate {};
-    QPointF scale {1, 1};
+    double angle{};
+    QPointF translate{};
+    QPointF scale{1, 1};
 
     friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
         return Block(stream).write(tr);
@@ -111,10 +111,10 @@ struct GraphicObject {
 
     Paths fill;
     Path path;
-    Point pos {std::numeric_limits<Point::Type>::lowest(), std::numeric_limits<Point::Type>::lowest()};
+    Point pos{std::numeric_limits<Point::Type>::lowest(), std::numeric_limits<Point::Type>::lowest()};
     QByteArray name;
-    Type type {Null};
-    int32_t id {-1};
+    Type type{Null};
+    int32_t id{-1};
     std::any raw;
 
     inline bool isType(uint32_t t) const { return (t & 0xFF) ? (type & 0xFF) == (t & 0xFF) : true; }
@@ -125,7 +125,7 @@ struct GraphicObject {
 };
 
 inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    for (auto& path : go.fill)
+    for(auto& path: go.fill)
         path = t.map(path);
     go.path = t.map(go.path);
     go.pos = t.map(go.pos);
@@ -133,8 +133,8 @@ inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
 }
 
 struct Range {
-    double min {-std::numeric_limits<double>::max()};
-    double max {+std::numeric_limits<double>::max()};
+    double min{-std::numeric_limits<double>::max()};
+    double max{+std::numeric_limits<double>::max()};
     bool operator()(double val) const { return min <= val && val <= max; }
     inline bool isNull() const {
         return min == -std::numeric_limits<double>::max()
@@ -144,18 +144,17 @@ struct Range {
 
 struct Criteria {
     std::vector<GraphicObject::Type> types;
-    Range area {};
-    Range length {};
-    bool positiveOnly {}; /// NOTE
+    Range area{};
+    Range length{};
+    bool positiveOnly{}; /// NOTE
     bool test(const GraphicObject& go) const {
-        bool fl {};
-        for (auto type : types) {
-            if ((fl = go.test(type)))
+        bool fl{};
+        for(auto type: types)
+            if((fl = go.test(type)))
                 break;
-        }
-        if (fl && !length.isNull())
+        if(fl && !length.isNull())
             fl &= length(Clipper2Lib::Length(go.path));
-        if (fl && !area.isNull())
+        if(fl && !area.isNull())
             fl &= area(Clipper2Lib::Area(go.fill));
         return fl;
     }

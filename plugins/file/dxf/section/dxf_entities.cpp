@@ -34,7 +34,7 @@ SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* 
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
         entities.push_back(file->entities_.back().get());
-    } while (code != "ENDBLK");
+    } while(code != "ENDBLK");
 }
 
 SectionENTITIES::~SectionENTITIES() {
@@ -48,8 +48,8 @@ void SectionENTITIES::parse() {
         file->entities_.emplace_back(entityParse(code));
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
-    } while (hasNext());
-    for (auto& e : qAsConst(file->entities_))
+    } while(hasNext());
+    for(auto& e: qAsConst(file->entities_))
         e->draw();
 }
 
@@ -58,7 +58,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
 
     return createEntity(key, blocks, sp);
 
-    switch (key) {
+    switch(key) {
     case Entity::ACAD_PROXY_ENTITY:
         break; // return std::make_shared<ACADProxyEntity>(sp);
     case Entity::ARC:

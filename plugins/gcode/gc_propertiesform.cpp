@@ -26,16 +26,16 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     ui->setupUi(this);
 
     connect(ui->dsbxClearence, &QDoubleSpinBox::valueChanged, [this](double value) {
-        if (value > ui->dsbxSafeZ->value())
+        if(value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
-        if (value < ui->dsbxPlunge->value())
+        if(value < ui->dsbxPlunge->value())
             ui->dsbxPlunge->setValue(value);
     });
 
     connect(ui->dsbxPlunge, &QDoubleSpinBox::valueChanged, [this](double value) {
-        if (value > ui->dsbxSafeZ->value())
+        if(value > ui->dsbxSafeZ->value())
             ui->dsbxSafeZ->setValue(value);
-        if (value > ui->dsbxClearence->value())
+        if(value > ui->dsbxClearence->value())
             ui->dsbxClearence->setValue(value);
     });
 
@@ -57,9 +57,9 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, [this](double value) {
         ui->dsbxSafeZ->setValue(value);
         ui->dsbxSafeZ->setValue(value);
-        if (value < ui->dsbxClearence->value())
+        if(value < ui->dsbxClearence->value())
             ui->dsbxClearence->setValue(value);
-        if (value < ui->dsbxPlunge->value())
+        if(value < ui->dsbxPlunge->value())
             ui->dsbxPlunge->setValue(value);
     });
 
@@ -86,7 +86,7 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     App::project().setPlunge(ui->dsbxPlunge->value());
 
     connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
-        if (parent
+        if(parent
             && ui->dsbxThickness->value() > 0.0
             && ui->dsbxCopperThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
@@ -95,20 +95,20 @@ PropertiesForm::PropertiesForm(QWidget* parent)
             parent->close();
             return;
         }
-        if (ui->dsbxCopperThickness->value() == 0.0)
+        if(ui->dsbxCopperThickness->value() == 0.0)
             ui->dsbxCopperThickness->flicker();
-        if (ui->dsbxThickness->value() == 0.0)
+        if(ui->dsbxThickness->value() == 0.0)
             ui->dsbxThickness->flicker();
-        if (ui->dsbxClearence->value() == 0.0)
+        if(ui->dsbxClearence->value() == 0.0)
             ui->dsbxClearence->flicker();
     });
 
     ui->pbOk->setIcon(QIcon::fromTheme("dialog-ok-apply"));
 
-    if (parent != nullptr)
+    if(parent != nullptr)
         setWindowTitle(ui->label->text());
 
-    for (auto* button : findChildren<QPushButton*>())
+    for(auto* button: findChildren<QPushButton*>())
         button->setIconSize({16, 16});
 
     App::setGCodePropertiesForm(this);
@@ -117,9 +117,9 @@ PropertiesForm::PropertiesForm(QWidget* parent)
 PropertiesForm::~PropertiesForm() {
     App::setGCodePropertiesForm(nullptr);
 
-    if (App::homePtr())
+    if(App::homePtr())
         App::home().setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
-    if (App::zeroPtr())
+    if(App::zeroPtr())
         App::zero().setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     MySettings settings;

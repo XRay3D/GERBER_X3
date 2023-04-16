@@ -16,7 +16,7 @@
 
 namespace FileTree {
 
-constexpr int FolderNodeId {-1};
+constexpr int FolderNodeId{-1};
 
 FolderNode::FolderNode(const QString& name)
     : FileTree::Node(Folder)
@@ -33,8 +33,8 @@ FolderNode::FolderNode(const QString& name, int32_t id)
 FolderNode::~FolderNode() { }
 
 QVariant FolderNode::data(const QModelIndex& index, int role) const {
-    if (!index.column()) {
-        switch (role) {
+    if(!index.column()) {
+        switch(role) {
         case Qt::DisplayRole:
             return name;
         case Qt::DecorationRole:
@@ -43,7 +43,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const {
             break;
         }
     }
-    switch (role) {
+    switch(role) {
     case Role::Id:
         return id();
     case Role::NodeType:
@@ -60,10 +60,10 @@ Qt::ItemFlags FolderNode::flags(const QModelIndex& /*index*/) const {
 }
 
 bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int role) {
-    if (index.column())
+    if(index.column())
         return false;
 
-    switch (role) {
+    switch(role) {
     case Qt::CheckStateRole:
         checkState_ = value.value<Qt::CheckState>();
         return true;

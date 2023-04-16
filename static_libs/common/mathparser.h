@@ -76,8 +76,8 @@ using VarMap = std::map<QString, double>;
 
 class Result {
 public:
-    double acc {};       // Аккамулятор
-    QStringView rest {}; // остаток строки, которую мы еще не обработали
+    double acc{}; // Аккамулятор
+    QStringView rest{}; // остаток строки, которую мы еще не обработали
     //    Result(double v = 0.0, const QStringView& r = {})
     //        : acc(v)
     //        , rest(r) {
@@ -91,7 +91,7 @@ public:
     double parse(const QString& s = "");
 
 private:
-    VarMap* variables {nullptr};
+    VarMap* variables{nullptr};
     Result plusMinus(QStringView s);
     Result bracket(QStringView s);
     Result functionVariable(QStringView s);

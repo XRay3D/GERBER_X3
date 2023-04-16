@@ -111,7 +111,7 @@ public:
     QString handle;
     QString softPointerID;
     int16_t colorNumber = 0;
-    int32_t id {};
+    int32_t id{};
 
 #ifdef QT_DEBUG
     static constexpr double u = 10.;
@@ -234,7 +234,6 @@ public:
         Other6Z = 36,
         Other7Z = 37,
         Other8Z = 38,
-
     };
 };
 

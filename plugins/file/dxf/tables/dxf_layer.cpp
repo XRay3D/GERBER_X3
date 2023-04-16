@@ -33,7 +33,7 @@ Layer::Layer(SectionParser* sp, const QString& name)
 void Layer::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker:
             break;
         case LayerName:
@@ -61,7 +61,7 @@ void Layer::parse(CodeData& code) {
             break;
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
     setColor(dxfColors[colorNumber_]);
 }
 
@@ -87,8 +87,8 @@ bool Layer::isVisible() const { return visible_; }
 
 void Layer::setVisible(bool visible) {
     visible_ = visible;
-    if (itemGroupNorm && itemGroupPath) {
-        switch (itemsType_) {
+    if(itemGroupNorm && itemGroupPath) {
+        switch(itemsType_) {
         case ItemsType::Null:
         case ItemsType::Normal:
             itemGroupNorm->setVisible(visible_);
@@ -115,15 +115,15 @@ bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }
 ItemsType Layer::itemsType() const { return itemsType_; }
 
 void Layer::setItemsType(ItemsType itemsType) {
-    if (itemsType_ == itemsType)
+    if(itemsType_ == itemsType)
         return;
     itemsType_ = itemsType;
-    if (itemGroupNorm && itemGroupPath) {
-        if (itemGroupNorm->empty())
+    if(itemGroupNorm && itemGroupPath) {
+        if(itemGroupNorm->empty())
             itemsType_ = ItemsType::Paths;
-        else if (itemGroupPath->empty())
+        else if(itemGroupPath->empty())
             itemsType_ = ItemsType::Normal;
-        switch (itemsType_) {
+        switch(itemsType_) {
         case ItemsType::Null:
         case ItemsType::Normal:
             itemGroupNorm->setVisible(visible_);

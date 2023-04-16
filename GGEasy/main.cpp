@@ -16,6 +16,8 @@
 // #include "gc_fileplugin.h"
 // #include "gc_plugin.h"
 #include "abstract_fileplugin.h"
+#include "gc_plugin.h"
+#include "gc_types.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
@@ -26,7 +28,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QTextCodec>
+#include <QTextCodec>
 #endif
 
 #include <algorithm>
@@ -72,7 +74,7 @@ int main(int argc, char** argv) {
     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
 #endif
 
-    int retCode {};
+    int retCode{};
 
     qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
     //    qInstallMessageHandler(myMessageOutput);
@@ -94,7 +96,7 @@ int main(int argc, char** argv) {
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     QSharedMemory nixFixSharedMemory("AppSettings");
-    if (nixFixSharedMemory.attach())
+    if(nixFixSharedMemory.attach())
         nixFixSharedMemory.detach();
 #endif
     QApplication::setApplicationName("GGEasy");
@@ -111,7 +113,7 @@ int main(int argc, char** argv) {
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
     App::toolHolder().readTools();
 
-    if (QDir dir(App::settingsPath()); !dir.exists())
+    if(QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
     QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
@@ -121,34 +123,34 @@ int main(int argc, char** argv) {
     //    glf.setSamples(16);
     //    QGLFormat::setDefaultFormat(glf);
 
-    if constexpr (0) {
+    if constexpr(0) {
         QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
-        semaphore.acquire();                              // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
+        semaphore.acquire(); // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
         QSharedMemory nix_fix_shared_memory("GGEasyMemory");
-        if (nix_fix_shared_memory.attach())
+        if(nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
 #endif
         MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running = false;                    // переменную для проверки ууже запущенного приложения
-        if (sharedMemory.attach()) {                // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
-            is_running = true;                      // Если успешно, то определяем, что уже есть запущенный экземпляр
+        bool is_running = false; // переменную для проверки ууже запущенного приложения
+        if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
+            is_running = true; // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
-            sharedMemory.create(sizeof(mainWin));   // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
-            is_running = false;                     // И определяем, что других экземпляров не запущено
+            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
+            is_running = false; // И определяем, что других экземпляров не запущено
         }
-        semaphore.release();                        // Опускаем семафор
+        semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;
         parser.addPositionalArgument("url", "Url of file to open");
         parser.process(app);
-        if (is_running) {
+        if(is_running) {
             system("pause");
-            if (parser.positionalArguments().length())
-                for (const QString& fileName : parser.positionalArguments())
+            if(parser.positionalArguments().length())
+                for(const QString& fileName: parser.positionalArguments())
                     instance()->loadFile(fileName);
             return 1;
         } else {
@@ -166,7 +168,7 @@ int main(int argc, char** argv) {
         QSettings settings;
         settings.beginGroup("MainWindow");
         QString locale(settings.value("locale").toString());
-        if (locale.isEmpty())
+        if(locale.isEmpty())
             locale = QLocale().name().left(2);
         settings.setValue("locale", locale);
         settings.endGroup();
@@ -184,11 +186,11 @@ int main(int argc, char** argv) {
     macOS and iOS	.dylib, .bundle, .so
     */
 #ifdef __unix__
-    #ifdef QT_DEBUG
+#ifdef QT_DEBUG
     const QString suffix("*.so");
-    #else
+#else
     const QString suffix("*.so");
-    #endif
+#endif
 #elif _WIN32
     const auto suffix = QStringLiteral("*.dll");
 #else
@@ -199,21 +201,21 @@ int main(int argc, char** argv) {
 
     // load plugins
     QDir dir(QApplication::applicationDirPath() + "/plugins");
-    if (dir.exists()) {                     // Поиск всех файлов в папке "plugins"
+    if(dir.exists()) { // Поиск всех файлов в папке "plugins"
         QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
-        for (const auto& str : listFiles) { // Проход по всем файлам
+        for(const auto& str: listFiles) { // Проход по всем файлам
             splash->showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
             loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + "/" + str));
-            if (auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
-                if (auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
+            if(auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
+                if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
                     gCode->setInfo(loaders.back()->metaData().value("MetaData").toObject());
                     App::gCodePlugins().emplace(gCode->type(), gCode);
                     continue;
-                } else if (auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
+                } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
                     file->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::filePlugins().emplace(std::pair {file->type(), file});
+                    App::filePlugins().emplace(std::pair{file->type(), file});
                     continue;
-                } else if (auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
+                } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
                     shape->setInfo(loaders.back()->metaData().value("MetaData").toObject());
                     App::shapePlugins().emplace(shape->type(), shape);
                     continue;
@@ -234,7 +236,7 @@ int main(int argc, char** argv) {
     parser.addPositionalArgument("url", "Url of file to open");
     parser.process(app);
 
-    for (const QString& fileName : parser.positionalArguments())
+    for(const QString& fileName: parser.positionalArguments())
         mainWin.loadFile(fileName);
 
     mainWin.show();
@@ -242,7 +244,7 @@ int main(int argc, char** argv) {
 
     retCode = app.exec();
 
-    for (auto&& loader : loaders)
+    for(auto&& loader: loaders)
         loader->unload();
 
     return retCode;

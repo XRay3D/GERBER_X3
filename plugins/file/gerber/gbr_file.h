@@ -12,6 +12,7 @@
 
 #include "abstract_file.h"
 #include "gbrcomp_onent.h"
+#include "gbr_aperture.h"
 #include <forward_list>
 
 namespace Gerber {
@@ -64,7 +65,7 @@ private:
     ApertureMap apertures_;
     void grouping(PolyTree& node, Pathss* pathss);
     Format format_;
-    Group group_ {};
+    Group group_{};
     // Layer layer = Copper;
 
     QVector<int> rawIndex;

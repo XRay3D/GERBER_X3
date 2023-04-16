@@ -42,7 +42,9 @@ signals:
     void setDockWidget(QWidget* w);
 
 protected:
-    enum { IconSize = 24 };
+    enum {
+        IconSize = 24
+    };
 };
 
 } // namespace GCode

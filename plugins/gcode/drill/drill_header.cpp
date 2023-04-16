@@ -29,8 +29,8 @@ Header::Header(Qt::Orientation orientation, QWidget* parent)
 Header::~Header() { }
 
 void Header::setAll(bool ch) {
-    for (int i = 0; i < count(); ++i) {
-        if (checked(i) != ch) {
+    for(int i = 0; i < count(); ++i) {
+        if(checked(i) != ch) {
             setChecked(i, ch);
             updateSection(i);
         }
@@ -62,34 +62,34 @@ void Header::mouseMoveEvent(QMouseEvent* event) {
     static int index = 0;
     do {
 
-        if (index == logicalIndexAt(event->pos()))
+        if(index == logicalIndexAt(event->pos()))
             break;
         index = logicalIndexAt(event->pos());
-        if (index < 0)
+        if(index < 0)
             break;
-        if (event->buttons() != Qt::RightButton)
+        if(event->buttons() != Qt::RightButton)
             break;
-        if (orientation() == Qt::Horizontal) {
+        if(orientation() == Qt::Horizontal) {
             // setSingle(index);
         } else
             togle(index);
         event->accept();
         return;
-    } while (0);
+    } while(0);
     QHeaderView::mouseMoveEvent(event);
 }
 
 void Header::mousePressEvent(QMouseEvent* event) {
     int index = logicalIndexAt(event->pos());
     do {
-        if (index < 0)
+        if(index < 0)
             break;
-        if (!checkRect_[index].contains(event->pos()) && event->buttons() != Qt::RightButton)
+        if(!checkRect_[index].contains(event->pos()) && event->buttons() != Qt::RightButton)
             break;
         togle(index);
         event->accept();
         return;
-    } while (0);
+    } while(0);
     QHeaderView::mousePressEvent(event);
 }
 

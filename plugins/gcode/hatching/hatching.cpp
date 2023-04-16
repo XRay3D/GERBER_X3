@@ -64,7 +64,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     QElapsedTimer t;
     t.start();
 
-    switch (gcp_.side()) {
+    switch(gcp_.side()) {
     case GCode::Outer:
         groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast<Point::Type>(toolDiameter_ + 5)*/);
         break;
@@ -89,23 +89,22 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         clipper.AddClip(src);
         clipper.AddOpenSubject({frame});
         clipper.Execute(ClipType::Intersection, FillRule::NonZero, sl, sl);
-        if (!sl.size())
+        if(!sl.size())
             return sl;
 
         std::ranges::sort(sl, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
         Point::Type start = sl.front().front().y;
         bool fl = {};
-        for (size_t i {}, last {}; i < sl.size(); ++i) {
-            if (auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
+        for(size_t i{}, last{}; i < sl.size(); ++i) {
+            if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
 
-                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
-                     std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
+                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) : // horizontal sort
+                    std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
 
-                for (size_t k = last; k < i; ++k) {                                                                                  // fix direction
-                    if (fl ^ (sl[k].front().x < sl[k].back().x))
+                for(size_t k = last; k < i; ++k) // fix direction
+                    if(fl ^ (sl[k].front().x < sl[k].back().x))
                         std::swap(sl[k].front().x, sl[k].back().x);
-                }
 
                 start = y;
                 fl = !fl;
@@ -128,13 +127,12 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             // dbgPaths(tmp, "ClipType::Difference");
             frames.append(tmp);
 
-            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; });                                        // vertical sort
+            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
             std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
-            for (auto& path : frames) {
-                if (path.front().y > path.back().y)
+            for(auto& path: frames)
+                if(path.front().y > path.back().y)
                     ReversePath(path); // fix vertical direction
-            }
         }
         return frames;
     };
@@ -150,10 +148,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         Path zigzag;
         Point::Type step = hatchStep * uScale;
         Point::Type start = rect.top;
-        bool fl {};
+        bool fl{};
 
-        for (; start <= rect.bottom || fl; fl = !fl, start += step) {
-            if (!fl) {
+        for(; start <= rect.bottom || fl; fl = !fl, start += step) {
+            if(!fl) {
                 zigzag.emplace_back(rect.left, start);
                 zigzag.emplace_back(rect.right, start);
             } else {
@@ -170,26 +168,26 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         Paths merged;
         merged.reserve(scanLines.size() / 10);
         std::list<Path> bList;
-        for (auto&& path : scanLines)
+        for(auto&& path: scanLines)
             bList.emplace_back(std::move(path));
 
         std::list<Path> fList;
-        for (auto&& path : frames)
+        for(auto&& path: frames)
             fList.emplace_back(std::move(path));
 
         setMax(bList.size());
-        while (bList.begin() != bList.end()) {
+        while(bList.begin() != bList.end()) {
             setCurrent(bList.size());
 
             merged.resize(merged.size() + 1);
             auto& path = merged.back();
-            for (auto bit = bList.begin(); bit != bList.end(); ++bit) {
+            for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
                 ifCancelThenThrow();
-                if (path.empty() || path.back() == bit->front()) {
+                if(path.empty() || path.back() == bit->front()) {
                     path.append(path.empty() ? *bit : bit->mid(1));
                     bList.erase(bit);
-                    for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                        if (path.back() == fit->front() && fit->front().y < fit->at(1).y) {
+                    for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                        if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
                             path.append(fit->mid(1));
                             fList.erase(fit);
                             bit = bList.begin();
@@ -198,11 +196,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                     }
                     bit = bList.begin();
                 }
-                if (bList.begin() == bList.end())
+                if(bList.begin() == bList.end())
                     break;
             }
-            for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                if (path.front() == fit->back() && fit->front().y > fit->at(1).y) {
+            for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
                     fit->append(path.mid(1));
                     std::swap(*fit, path);
                     fList.erase(fit);
@@ -214,42 +212,42 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         return merged;
     };
 
-    for (Paths src : groupedPss) {
+    for(Paths src: groupedPss) {
         {
             ClipperOffset offset(uScale);
             offset.AddPaths(src, JoinType::Round, EndType::Polygon);
             src = offset.Execute(-dOffset);
-            for (auto& path : src)
+            for(auto& path: src)
                 path.push_back(path.front());
-            if (prPass)
+            if(prPass)
                 profilePaths.append(src);
         }
 
         QElapsedTimer t;
         t.start();
-        if (src.size()) {
+        if(src.size()) {
             {
-                for (auto& path : src)
+                for(auto& path: src)
                     RotatePath(path, angle);
-                auto zigzag {calcZigzag(src)};
-                auto scanLines {calcScanLines(src, zigzag)};
-                auto frames {calcFrames(src, zigzag)};
-                if (scanLines.size() && frames.size()) {
-                    auto merged {merge(scanLines, frames)};
-                    for (auto& path : merged)
+                auto zigzag{calcZigzag(src)};
+                auto scanLines{calcScanLines(src, zigzag)};
+                auto frames{calcFrames(src, zigzag)};
+                if(scanLines.size() && frames.size()) {
+                    auto merged{merge(scanLines, frames)};
+                    for(auto& path: merged)
                         RotatePath(path, -angle);
                     returnPs.append(merged);
                 }
             }
             {
-                for (auto& path : src)
+                for(auto& path: src)
                     RotatePath(path, 90);
-                auto zigzag {calcZigzag(src)};
-                auto scanLines {calcScanLines(src, zigzag)};
-                auto frames {calcFrames(src, zigzag)};
-                if (scanLines.size() && frames.size()) {
-                    auto merged {merge(scanLines, frames)};
-                    for (auto& path : merged)
+                auto zigzag{calcZigzag(src)};
+                auto scanLines{calcScanLines(src, zigzag)};
+                auto frames{calcFrames(src, zigzag)};
+                if(scanLines.size() && frames.size()) {
+                    auto merged{merge(scanLines, frames)};
+                    for(auto& path: merged)
                         RotatePath(path, -(angle + 90));
                     returnPs.append(merged);
                 }
@@ -260,34 +258,34 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     mergeSegments(returnPs);
     sortB(returnPs);
 
-    if (!profilePaths.empty() && prPass) {
+    if(!profilePaths.empty() && prPass) {
         sortB(profilePaths);
-        if (gcp_.convent())
+        if(gcp_.convent())
             ReversePaths(profilePaths);
-        for (Path& path : profilePaths)
+        for(Path& path: profilePaths)
             path.push_back(path.front());
     }
 
     returnPss.clear();
-    switch (prPass) {
+    switch(prPass) {
     case NoProfilePass:
         returnPss.push_back(returnPs);
         break;
     case First:
-        if (!profilePaths.empty())
+        if(!profilePaths.empty())
             returnPss.push_back(profilePaths);
         returnPss.push_back(returnPs);
         break;
     case Last:
         returnPss.push_back(returnPs);
-        if (!profilePaths.empty())
+        if(!profilePaths.empty())
             returnPss.push_back(profilePaths);
         break;
     default:
         break;
     }
 
-    if (returnPss.empty()) {
+    if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
 
@@ -303,7 +301,7 @@ File::File()
 
 File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if (gcp_.tools.front().diameter()) {
+    if(gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -314,16 +312,16 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 
 void File::genGcodeAndTile() {
     const QRectF rect = App::project().worckRect();
-    for (size_t x = 0; x < App::project().stepsX(); ++x) {
-        for (size_t y = 0; y < App::project().stepsY(); ++y) {
+    for(size_t x = 0; x < App::project().stepsX(); ++x) {
+        for(size_t y = 0; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if (toolType() == Tool::Laser)
+            if(toolType() == Tool::Laser)
                 saveLaserProfile(offset);
             else
                 saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

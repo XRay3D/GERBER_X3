@@ -20,7 +20,7 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
     ui->setupUi(this);
     ui->toolEdit->setDialog();
     connect(ui->buttonBox, &QDialogButtonBox::accepted, [this] {
-        if (ui->toolEdit->tool_.isValid()) {
+        if(ui->toolEdit->tool_.isValid()) {
             ui->toolEdit->tool_.setId(-1);
             accept();
         } else {

@@ -48,13 +48,13 @@ public:
         friend QDataStream& operator<<(QDataStream& stream, const InternalData& d);
         friend QDataStream& operator>>(QDataStream& stream, InternalData& d);
 
-        QString font {};
-        QString text {"Text"};
-        Side side {Top};
-        double angle {0.0};
-        double height {10.0};
-        double xy {100.0};
-        int handleAlign {BotLeft};
+        QString font{};
+        QString text{"Text"};
+        Side side{Top};
+        double angle{0.0};
+        double height{10.0};
+        double xy{100.0};
+        int handleAlign{BotLeft};
     };
 
     // QGraphicsItem interface

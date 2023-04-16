@@ -33,18 +33,18 @@ Node::Node(File* file)
 Node::~Node() { App::project().deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (role) {
+    switch(role) {
     case Qt::CheckStateRole:
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
     case Qt::EditRole:
-        if (index.column() == FileTree::Column::Side) {
+        if(index.column() == FileTree::Column::Side) {
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
         }
         break;
     case FileTree::Select:
-        for (auto ig : file->itemGroups())
+        for(auto ig: file->itemGroups())
             ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
         return true;
     }
@@ -53,7 +53,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree::Column::Side:
@@ -64,10 +64,10 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    if (file)
-        switch (FileTree::Column(index.column())) {
+    if(file)
+        switch(FileTree::Column(index.column())) {
         case FileTree::Column::NameColorVisible:
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
                 return file->shortName();
             case Qt::ToolTipRole:
@@ -82,7 +82,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
                 return {};
             }
         case FileTree::Column::Side:
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
                 return sideStrList[file->side()];
@@ -113,17 +113,16 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
         new SyntaxHighlighter(textBrowser->document());
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
-        for (const QString& str : file->lines())
+        for(const QString& str: file->lines())
             textBrowser->append(str);
         dialog->exec();
         delete dialog;
     });
     menu.addSeparator();
-    if (!FormatDialog::showed()) {
+    if(!FormatDialog::showed())
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
             (new FormatDialog(file))->show();
         });
-    }
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }

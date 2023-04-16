@@ -31,7 +31,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
 
     dbgPaths(workingPs, "workingPs");
 
-    {     // create tool path
+    { // create tool path
         { // execute offset
             ClipperOffset offset;
             offset.AddPaths(workingPs, JoinType::Round, EndType::Polygon);
@@ -40,15 +40,15 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         dbgPaths(returnPs, "returnPs");
 
         // fix direction
-        if (gcp_.side() == GCode::Outer && !gcp_.convent())
+        if(gcp_.side() == GCode::Outer && !gcp_.convent())
             ReversePaths(returnPs);
-        else if (gcp_.side() == GCode::Inner && gcp_.convent())
+        else if(gcp_.side() == GCode::Inner && gcp_.convent())
             ReversePaths(returnPs);
 
-        for (Path& path : returnPs)
+        for(Path& path: returnPs)
             path.push_back(path.front());
 
-        if (returnPs.empty()) {
+        if(returnPs.empty()) {
             emit fileReady(nullptr);
             return;
         }
@@ -60,16 +60,15 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         Clipper clipper;
         {
             ClipperOffset offset;
-            for (auto go : graphicObjects) {
-                if (go->positive())
+            for(auto go: graphicObjects)
+                if(go->positive())
                     offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
-            }
             framePaths = offset.Execute(dOffset - 0.005 * uScale);
             clipper.AddSubject(framePaths);
         }
-        if (!gcp_.params[IgnoreCopper].toInt()) {
+        if(!gcp_.params[IgnoreCopper].toInt()) {
             ClipperOffset offset;
-            for (auto go : graphicObjects) {
+            for(auto go: graphicObjects) {
                 //                if (go->closed()) {
                 //                    if (go->positive())
                 offset.AddPaths(go->fill /*polygonWholes()*/, JoinType::Round, EndType::Polygon);
@@ -83,7 +82,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             framePaths = offset.Execute(dOffset - 0.005 * uScale);
             clipper.AddClip(framePaths);
         }
-        for (const Paths& paths : supportPss)
+        for(const Paths& paths: supportPss)
             clipper.AddClip(paths);
         clipper.Execute(ClipType::Union, FillRule::EvenOdd, framePaths);
     }
@@ -96,10 +95,10 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         sortBeginEnd(returnPs);
     }
 
-    if (returnPs.size())
+    if(returnPs.size())
         returnPss.push_back(sortB(returnPs));
 
-    if (returnPss.empty()) {
+    if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
         sortB(returnPss);
@@ -116,7 +115,7 @@ File::File()
 
 File::File(GCode::Params&& gcp, Pathss&& toolPathss)
     : GCode::File(std::move(gcp), std::move(toolPathss)) {
-    if (gcp_.tools.front().diameter()) {
+    if(gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -127,16 +126,16 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss)
 
 void File::genGcodeAndTile() {
     const QRectF rect = App::project().worckRect();
-    for (size_t x = 0; x < App::project().stepsX(); ++x) {
-        for (size_t y = 0; y < App::project().stepsY(); ++y) {
+    for(size_t x = 0; x < App::project().stepsX(); ++x) {
+        for(size_t y = 0; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if (toolType() == Tool::Laser)
+            if(toolType() == Tool::Laser)
                 saveLaserProfile(offset);
             else
                 saveMillingProfile(offset);
 
-            if (gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp_.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

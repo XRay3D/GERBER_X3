@@ -226,7 +226,7 @@ void Form::rb_clicked() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if (GiBridge::moveBrPtr)
+    if(GiBridge::moveBrPtr)
         GiBridge::moveBrPtr->setPos(pos);
 }
 

@@ -40,7 +40,7 @@ class AbstractFilePlugin : public QObject, public PluginData {
 
 public:
     explicit AbstractFilePlugin(QObject* parent = nullptr)
-        : QObject {parent} { }
+        : QObject{parent} { }
     virtual ~AbstractFilePlugin() = default;
 
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
@@ -54,12 +54,12 @@ public:
         [[maybe_unused]] QMenu& menu,
         [[maybe_unused]] FileTree::View* tv) {
         menu.addAction(QIcon::fromTheme("document-close"), tr("&Close All Files"), [tv] {
-            if (QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+            if(QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 tv->closeFiles();
         });
     };
 
-    virtual void updateFileModel([[maybe_unused]] AbstractFile* file) {};
+    virtual void updateFileModel([[maybe_unused]] AbstractFile* file){};
 
 signals:
     void fileError(const QString& fileName, const QString& error);

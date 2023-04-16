@@ -19,7 +19,7 @@
 namespace Profile {
 
 struct Settings {
-    int sort {};
+    int sort{};
 };
 
 inline Settings settings;

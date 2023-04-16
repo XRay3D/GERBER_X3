@@ -9,10 +9,10 @@ bool Layer::getThicknessSpecified() const { return type != layer_type::Assy; }
 Layer::Layer() { }
 
 Layer::Layer(const QString& name, layer_type type, Bool compsOutline, float thickness)
-    : name {name}
-    , type {type}
-    , compsOutline {compsOutline}
-    , thickness {thickness} {
+    : name{name}
+    , type{type}
+    , compsOutline{compsOutline}
+    , thickness{thickness} {
 }
 
 QString Layer::ToString() { return name; }

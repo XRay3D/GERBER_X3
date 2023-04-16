@@ -87,7 +87,7 @@ else()
     qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper

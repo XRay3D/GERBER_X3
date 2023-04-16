@@ -31,7 +31,7 @@ struct merge_info {
     using Info = int;
     using result_type = Info;
     inline Info operator()(const Info& info0, const Info& info1) const {
-        if (info0 == info1)
+        if(info0 == info1)
             return info0;
         return info0;
     }
@@ -44,7 +44,7 @@ using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<GT, int, conv
 using DS = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<GT>>;
 using SDG2 = CGAL::Segment_Delaunay_graph_2<GT, ST, DS>;
 
-inline auto toPoint(const CGAL::Point_2<K>& point) { return Point {static_cast<Point::Type>(point.x()), static_cast<Point::Type>(point.y())}; }
+inline auto toPoint(const CGAL::Point_2<K>& point) { return Point{static_cast<Point::Type>(point.x()), static_cast<Point::Type>(point.y())}; }
 
 ///////////////////////////////////
 
@@ -82,17 +82,17 @@ void VoronoiCgal::cgalVoronoi() {
     // add line segments to diagram
     msg = QObject::tr("Calc CGAL Voronoi");
 
-    size_t max {};
-    for (const Paths& paths : groupedPss_)
-        for (const Path& path : paths)
+    size_t max{};
+    for(const Paths& paths: groupedPss_)
+        for(const Path& path: paths)
             max += path.size();
 
     setMax(max);
     setCurrent();
 
-    for (const Paths& paths : groupedPss_) {
-        for (const Path& path : paths) {
-            for (size_t i = 0; i < path.size(); ++i) {
+    for(const Paths& paths: groupedPss_) {
+        for(const Path& path: paths) {
+            for(size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
                 getCancelThrow();
                 const Point& point = path[i];
@@ -117,37 +117,37 @@ void VoronoiCgal::cgalVoronoi() {
     segments.reserve(id);
     {
         std::map<int, Paths> pathPairs;
-        for (auto eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
+        for(auto eit = sdg.finite_edges_begin(); eit != sdg.finite_edges_end(); ++eit) {
             const SDG2::Edge e = *eit;
             CGAL_precondition(!sdg.is_infinite(e));
-            if (e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
+            if(e.first->vertex(sdg.cw(e.second))->storage_site().info() == e.first->vertex(sdg.ccw(e.second))->storage_site().info())
                 continue;
             const int idIdx = e.first->vertex(sdg.cw(e.second))->storage_site().info() ^ e.first->vertex(sdg.ccw(e.second))->storage_site().info();
             CGAL::Object o = sdg.primal(e);
-            /*  */ if (SDG2::Geotraits_::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
-                pathPairs[idIdx].push_back(Path {toPoint(sdgLine.point(0)), toPoint(sdgLine.point(1))});
-            } else if (SDG2::Geotraits_::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
-                pathPairs[idIdx].push_back(Path {toPoint(sdgRay.point(0)), toPoint(sdgRay.point(1))});
-            } else if (SDG2::Geotraits_::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
-                pathPairs[idIdx].push_back(Path {toPoint(sdgSegment.point(0)), toPoint(sdgSegment.point(1))});
-            } else if (CGAL::Parabola_segment_2<GT> cgalParabola; CGAL::assign(cgalParabola, o)) {
+            /*  */ if(SDG2::Geotraits_::Line_2 sdgLine; CGAL::assign(sdgLine, o)) {
+                pathPairs[idIdx].push_back(Path{toPoint(sdgLine.point(0)), toPoint(sdgLine.point(1))});
+            } else if(SDG2::Geotraits_::Ray_2 sdgRay; CGAL::assign(sdgRay, o)) {
+                pathPairs[idIdx].push_back(Path{toPoint(sdgRay.point(0)), toPoint(sdgRay.point(1))});
+            } else if(SDG2::Geotraits_::Segment_2 sdgSegment; CGAL::assign(sdgSegment, o) && !sdgSegment.is_degenerate()) {
+                pathPairs[idIdx].push_back(Path{toPoint(sdgSegment.point(0)), toPoint(sdgSegment.point(1))});
+            } else if(CGAL::Parabola_segment_2<GT> cgalParabola; CGAL::assign(cgalParabola, o)) {
                 mvector<SDG2::Point_2> points;
                 cgalParabola.generate_points(points, 0.1 * uScale);
                 Path path;
                 path.reserve(static_cast<int>(points.size()));
-                for (const SDG2::Point_2& pt : points)
+                for(const SDG2::Point_2& pt: points)
                     path.push_back(toPoint(pt));
                 pathPairs[idIdx].push_back(path);
             }
         }
-        for (auto& [key, edge] : pathPairs) {
+        for(auto& [key, edge]: pathPairs) {
             mergePaths(edge);
             mergePaths(edge, 0.005 * uScale);
             segments.append(edge);
         }
     }
     const Point::Type fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
-    Path frame {
+    Path frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
         {maxX + fo, maxY + fo},
@@ -166,12 +166,11 @@ void VoronoiCgal::cgalVoronoi() {
     mergeSegments(segments, 0.005 * uScale);
 
     auto clean = [kAngle = 2.0](Path& path) {
-        for (size_t i = 1; i < path.size() - 1; ++i) {
+        for(size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = path[i - 1].angleTo(path[i + 0]);
             const double a2 = path[i + 0].angleTo(path[i + 1]);
-            if (abs(a1 - a2) < kAngle) {
+            if(abs(a1 - a2) < kAngle)
                 path.remove(i--);
-            }
         }
     };
     std::ranges::for_each(segments, clean);

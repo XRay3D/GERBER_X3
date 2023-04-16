@@ -34,10 +34,10 @@ Plugin::Plugin(QObject* parent)
 }
 
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if (type_ != type())
+    if(type_ != type())
         return nullptr;
     QFile file(fileName);
-    if (!file.open(QIODevice::ReadOnly | QIODevice::Text))
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
         return nullptr;
 
     file_ = new File;
@@ -49,7 +49,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     codes.reserve(10000);
 
     QTextStream in(&file);
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if(QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     in.setCodec("Windows-1251");
 #endif
     //    in.setAutoDetectUnicode(true);
@@ -60,13 +60,13 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
         file_->lines().push_back(strCode);
         bool ok;
         auto code(strCode.toInt(&ok));
-        if (!ok)
+        if(!ok)
             throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
         // Value
         QString strValue(in.readLine());
         file_->lines().push_back(strValue);
         int multi = 0;
-        while (strValue.endsWith("\\P")) {
+        while(strValue.endsWith("\\P")) {
             file_->lines().emplace_back(in.readLine());
             strValue.append("\n" + file_->lines().back());
             ++multi;
@@ -80,23 +80,23 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
         int progress = 0;
         // int progressCtr = 0;
         do {
-            if (auto code = getCode(); code.code() == 0 && code == "SECTION")
+            if(auto code = getCode(); code.code() == 0 && code == "SECTION")
                 ++progress;
-        } while (!in.atEnd() || *(codes.end() - 1) != "EOF");
+        } while(!in.atEnd() || *(codes.end() - 1) != "EOF");
         codes.shrink_to_fit();
         file.close();
 
         // emit fileProgress(file_->shortName(), progress, progressCtr);
-        Timer t {"Section Parser"};
+        Timer t{"Section Parser"};
 
-        for (auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
-            if (*it == "SECTION")
+        for(auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
+            if(*it == "SECTION")
                 from = it;
-            if (auto it_ = it + 1; *it == "ENDSEC" && (*it_ == "SECTION" || *it_ == "EOF")) {
+            if(auto it_ = it + 1; *it == "ENDSEC" && (*it_ == "SECTION" || *it_ == "EOF")) {
                 // emit fileProgress(file_->shortName(), 0, progressCtr++);
                 to = it;
                 const auto type = SectionParser::toType(*(from + 1));
-                switch (type) {
+                switch(type) {
                 case SectionParser::HEADER:
                     file_->sections_[type] = new SectionHEADER(file_, from, to);
                     continue;
@@ -123,26 +123,26 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
                 }
             }
         }
-        if (file_->sections_.size() == 0) {
+        if(file_->sections_.size() == 0) {
             delete file_;
             file_ = nullptr;
         } else {
             // emit fileProgress(file_->shortName(), 1, 1);
             emit fileReady(file_);
         }
-    } catch (const QString& wath) {
+    } catch(const QString& wath) {
         qWarning() << "exeption QString:" << wath;
         // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), wath);
         delete file_;
         return nullptr;
-    } catch (const std::exception& e) {
+    } catch(const std::exception& e) {
         qWarning() << "exeption:" << e.what();
         // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
         delete file_;
         return nullptr;
-    } catch (...) {
+    } catch(...) {
         qWarning() << "exeption:" << errno;
         // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
@@ -154,30 +154,30 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 
 bool Plugin::thisIsIt(const QString& fileName) {
 
-    if (fileName.endsWith(".dxf", Qt::CaseInsensitive))
+    if(fileName.endsWith(".dxf", Qt::CaseInsensitive))
         return true;
 
     QFile file(fileName);
-    if (!file.open(QFile::ReadOnly | QFile::Text))
+    if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
     QTextStream in(&file);
     do {
         QString line(in.readLine());
-        if (line.toInt() == 999) {
+        if(line.toInt() == 999) {
             line = in.readLine();
             line = in.readLine();
         }
-        if (line.toInt() != 0)
+        if(line.toInt() != 0)
             break;
-        if (line = in.readLine(); line != "SECTION")
+        if(line = in.readLine(); line != "SECTION")
             break;
-        if (line = in.readLine(); line.toInt() != 2)
+        if(line = in.readLine(); line.toInt() != 2)
             break;
-        if (line = in.readLine(); line != "HEADER")
+        if(line = in.readLine(); line != "HEADER")
             break;
         return true;
-    } while (false);
+    } while(false);
     return false;
 }
 
@@ -198,25 +198,23 @@ void Plugin::updateFileModel(AbstractFile* file) {
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
     // clean before insert new layers
-    if (int count = fm->getItem(fileIndex)->childCount(); count) {
+    if(int count = fm->getItem(fileIndex)->childCount(); count) {
         fm->beginRemoveRows_(index, 0, count - 1);
         auto item = fm->getItem(index);
         do {
             item->remove(--count);
-        } while (count);
+        } while(count);
         fm->endRemoveRows_();
     }
     Dxf::Layers layers;
-    for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
+    for(auto& [name, layer]: reinterpret_cast<File*>(file)->layers())
 
-        if (!layer->isEmpty())
+        if(!layer->isEmpty())
             layers[name] = layer;
-    }
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
-    for (auto& [name, layer] : layers) {
+    for(auto& [name, layer]: layers)
 
         fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
-    }
     fm->endInsertRows_();
 }
 

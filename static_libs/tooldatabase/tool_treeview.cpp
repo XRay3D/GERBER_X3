@@ -36,7 +36,7 @@ ToolTreeView::ToolTreeView(QWidget* parent)
         setIconSize(QSize(24, 24));
         const int w = indentation();
         const QModelIndex& row = model()->index(0, 0, QModelIndex());
-        if (row.isValid()) {
+        if(row.isValid()) {
             const int h = rowHeight(row);
             QImage i(w, h, QImage::Format_ARGB32);
             QPainter p(&i);
@@ -63,9 +63,9 @@ ToolTreeView::ToolTreeView(QWidget* parent)
 
 void ToolTreeView::newGroup() {
     QModelIndex index = selectionModel()->currentIndex();
-    if (index.data(Qt::UserRole).toInt())
+    if(index.data(Qt::UserRole).toInt())
         index = index.parent();
-    if (!model_->insertRows(0, 1, index))
+    if(!model_->insertRows(0, 1, index))
         return;
     index = model_->index(0, 0, index);
     model_->setData(index, tr("New Group"), Qt::EditRole);
@@ -74,19 +74,19 @@ void ToolTreeView::newGroup() {
 
 void ToolTreeView::newTool() {
     QModelIndex index = selectionModel()->currentIndex();
-    if (index.data(Qt::UserRole).toInt())
+    if(index.data(Qt::UserRole).toInt())
         index = index.parent();
-    if (!model_->insertRows(index.data(Qt::UserRole + 1).toInt(), 1, index))
+    if(!model_->insertRows(index.data(Qt::UserRole + 1).toInt(), 1, index))
         return;
 
     ToolItem* item = nullptr;
 
-    if (!index.isValid())
+    if(!index.isValid())
         item = static_cast<ToolItem*>(model_->index(0, 0, index).internalPointer());
     else
         item = static_cast<ToolItem*>(index.internalPointer())->lastChild();
 
-    if (item) {
+    if(item) {
         item->setIsTool();
         item->tool().setName(tr("New Tool ") + QString::number(item->toolId()));
         index = model_->createIndex(item->row(), 0, item);
@@ -95,17 +95,17 @@ void ToolTreeView::newTool() {
 }
 
 void ToolTreeView::deleteItem() {
-    if (QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
+    if(QMessageBox::question(this, tr("Warning"), tr("Are you sure you want to delete the item and all content?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)
         return;
     QModelIndex index = selectionModel()->currentIndex();
-    if (model_->removeRows(index.row(), 1, index.parent()))
+    if(model_->removeRows(index.row(), 1, index.parent()))
         updateActions();
 }
 
 void ToolTreeView::copyTool() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* itemSrc = static_cast<ToolItem*>(index.internalPointer());
-    if (!model_->insertRows(index.row() + 1, 1, index.parent()))
+    if(!model_->insertRows(index.row() + 1, 1, index.parent()))
         return;
 
     index = index.sibling(index.row() + 1, 0);
@@ -120,7 +120,7 @@ void ToolTreeView::updateActions() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
     buttons_[Delete]->setEnabled(!selectionModel()->selection().isEmpty());
-    if (item) {
+    if(item) {
         buttons_[Copy]->setEnabled(item->isTool());
         emit itemSelected(item);
     } else
@@ -138,9 +138,8 @@ void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons) {
 
 void ToolTreeView::updateItem() {
     resizeColumnToContents(0);
-    for (QModelIndex index : selectionModel()->selection().indexes()) {
+    for(QModelIndex index: selectionModel()->selection().indexes())
         update(index);
-    }
 }
 
 #include "moc_tool_treeview.cpp"

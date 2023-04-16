@@ -34,8 +34,8 @@ struct Row {
     /*const*/ QStringList name;
     /*const*/ double diameter;
     /*const*/ bool isSlot;
-    bool useForCalc {};
-    int toolId {-1};
+    bool useForCalc{};
+    int toolId{-1};
     mvector<GiPreview*> items;
 };
 

@@ -65,14 +65,14 @@ Form::~Form() {
 }
 
 void Form::computePaths() {
-    const auto tool {ui->toolHolder->tool()};
-    if (!tool.isValid()) {
+    const auto tool{ui->toolHolder->tool()};
+    if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
     auto gcp = getNewGcp();
-    if (!gcp)
+    if(!gcp)
         return;
 
     gcp->setConvent(true);
@@ -97,9 +97,9 @@ void Form::onNameTextChanged(const QString& arg1) {
 }
 
 void Form::setWidth(double) {
-    const auto tool {ui->toolHolder->tool()};
+    const auto tool{ui->toolHolder->tool()};
     const double d = tool.getDiameter(dsbxDepth->value());
-    if (ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
+    if(ui->dsbxWidth->value() > 0.0 && (qFuzzyCompare(ui->dsbxWidth->value(), d) || ui->dsbxWidth->value() < d)) {
         QMessageBox::warning(this, tr("Warning"), tr("The width must be larger than the tool diameter!"));
         ui->dsbxWidth->setValue(d + 0.05);
     }

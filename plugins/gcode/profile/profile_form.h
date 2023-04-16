@@ -12,6 +12,8 @@
 
 #include "gc_baseform.h"
 #include "gc_plugin.h"
+#include "profile.h"
+#include <QToolBar>
 #include <array>
 
 namespace Ui {
@@ -40,8 +42,8 @@ private:
     Ui::ProfileForm* ui;
     //    GiBridge* brItem = nullptr;
 
-    const QStringList names {tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
-    static inline const std::array pixmaps {
+    const QStringList names{tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
+    static inline const std::array pixmaps{
         QStringLiteral("prof_on_climb"),
         QStringLiteral("prof_out_climb"),
         QStringLiteral("prof_in_climb"),
@@ -80,14 +82,11 @@ public:
     void editFile(GCode::File* file) override;
 };
 
-#include "profile.h"
-#include <QToolBar>
-
 class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
     Q_INTERFACES(GCode::Plugin)
-    Form form {this};
+    Form form{this};
 
 public:
     // GCode::Plugin interface
@@ -104,7 +103,7 @@ public:
 
         public:
             Tab(QWidget* parent)
-                : AbstractFileSettings {parent} {
+                : AbstractFileSettings{parent} {
                 setWindowTitle(tr("Profile"));
                 auto lbl = new QLabel(QApplication::translate("Profile", "Milling sequence:", nullptr), this);
 

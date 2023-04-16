@@ -30,8 +30,7 @@ class QTabWidget;
 
 #define varName(val) val, #val
 
-template <typename W>
-concept IsWidget = std::is_base_of_v<QWidget, W>;
+template <typename W> concept IsWidget = std::is_base_of_v<QWidget, W>;
 
 class MySettings : public QSettings {
 public:
@@ -49,31 +48,31 @@ public:
 
     template <IsWidget W>
     auto setValue(W* widget) {
-        const QString name {widget->objectName()};
+        const QString name{widget->objectName()};
         assert(!name.isEmpty());
 
-        if constexpr (std::is_base_of_v<QAbstractButton, W>) {
+        if constexpr(std::is_base_of_v<QAbstractButton, W>) {
             QSettings::setValue(name, widget->isChecked());
             return widget->isChecked();
-        } else if constexpr (std::is_base_of_v<QDoubleSpinBox, W>) {
+        } else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>) {
             QSettings::setValue(name, widget->value());
             return widget->value();
-        } else if constexpr (std::is_same_v<W, QSpinBox>) {
+        } else if constexpr(std::is_same_v<W, QSpinBox>) {
             QSettings::setValue(name, widget->value());
             return widget->value();
-        } else if constexpr (std::is_same_v<W, QComboBox>) {
+        } else if constexpr(std::is_same_v<W, QComboBox>) {
             QSettings::setValue(name, widget->currentIndex());
             return widget->currentIndex();
-        } else if constexpr (std::is_same_v<W, QFontComboBox>) { //
+        } else if constexpr(std::is_same_v<W, QFontComboBox>) { //
             QSettings::setValue(name, widget->currentFont().family());
             return widget->currentFont().family();
-        } else if constexpr (std::is_same_v<W, QLineEdit>) {
+        } else if constexpr(std::is_same_v<W, QLineEdit>) {
             QSettings::setValue(name, widget->text());
             return widget->text();
-        } else if constexpr (std::is_same_v<W, QPlainTextEdit>) {
+        } else if constexpr(std::is_same_v<W, QPlainTextEdit>) {
             QSettings::setValue(name, widget->toPlainText());
             return widget->toPlainText();
-        } else if constexpr (std::is_same_v<W, QTabWidget>) {
+        } else if constexpr(std::is_same_v<W, QTabWidget>) {
             QSettings::setValue(name, widget->currentIndex());
             return widget->currentIndex();
         } else {
@@ -83,31 +82,31 @@ public:
 
     template <IsWidget W>
     auto getValue(W* widget, const QVariant& defaultValue = {}) const {
-        const QString name {widget->objectName()};
+        const QString name{widget->objectName()};
         assert(!name.isEmpty());
 
-        if constexpr (std::is_base_of_v<QAbstractButton, W>) {
+        if constexpr(std::is_base_of_v<QAbstractButton, W>) {
             widget->setChecked(QSettings::value(name, defaultValue).toBool());
             return widget->isChecked();
-        } else if constexpr (std::is_base_of_v<QDoubleSpinBox, W>) {
+        } else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>) {
             widget->setValue(QSettings::value(name, defaultValue).toDouble());
             return widget->value();
-        } else if constexpr (std::is_same_v<W, QSpinBox>) {
+        } else if constexpr(std::is_same_v<W, QSpinBox>) {
             widget->setValue(QSettings::value(name, defaultValue).toInt());
             return widget->value();
-        } else if constexpr (std::is_same_v<W, QComboBox>) {
+        } else if constexpr(std::is_same_v<W, QComboBox>) {
             widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt());
             return widget->currentIndex();
-        } else if constexpr (std::is_same_v<W, QFontComboBox>) { //
+        } else if constexpr(std::is_same_v<W, QFontComboBox>) { //
             widget->setCurrentFont(QFont(QSettings::value(name, defaultValue).toString()));
             return widget->currentFont().family();
-        } else if constexpr (std::is_same_v<W, QLineEdit>) {
+        } else if constexpr(std::is_same_v<W, QLineEdit>) {
             widget->setText(QSettings::value(name, defaultValue).toString());
             return widget->text();
-        } else if constexpr (std::is_same_v<W, QPlainTextEdit>) {
+        } else if constexpr(std::is_same_v<W, QPlainTextEdit>) {
             widget->setPlainText(QSettings::value(name, defaultValue).toString());
             return widget->toPlainText();
-        } else if constexpr (std::is_same_v<W, QTabWidget>) {
+        } else if constexpr(std::is_same_v<W, QTabWidget>) {
             widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt());
             return widget->currentIndex();
         } else {
@@ -119,10 +118,10 @@ public:
     auto getValue(V& val, const char* name, V def = {}) const
         requires std::is_arithmetic_v<V>
     {
-        if constexpr (std::is_floating_point_v<V>) {
+        if constexpr(std::is_floating_point_v<V>) {
             val = QSettings::value(name, def).toDouble();
             return val;
-        } else if constexpr (std::is_integral_v<V>) {
+        } else if constexpr(std::is_integral_v<V>) {
             val = QSettings::value(name, def).toInt();
             return val;
         } else {
@@ -218,36 +217,38 @@ private:
     //    inline static AppSettings* settings_ = nullptr;
 
     /*GUI*/
-    enum { gridColor = 100 };
-    QColor guiColor_[GuiColors::Count] {
-        QColor(Qt::black),                            // Background
-        QColor(255, 255, 0, 120),                     // Pin
-        QColor(Qt::gray),                             // CutArea
-        QColor(gridColor, gridColor, gridColor, 50),  // Grid1
+    enum {
+        gridColor = 100
+    };
+    QColor guiColor_[GuiColors::Count]{
+        QColor(Qt::black), // Background
+        QColor(255, 255, 0, 120), // Pin
+        QColor(Qt::gray), // CutArea
+        QColor(gridColor, gridColor, gridColor, 50), // Grid1
         QColor(gridColor, gridColor, gridColor, 100), // Grid5
         QColor(gridColor, gridColor, gridColor, 200), // Grid10
-        QColor(),                                     // Hole
-        QColor(0, 255, 0, 120),                       // Home
-        QColor(Qt::white),                            // ToolPath
-        QColor(255, 0, 0, 120),                       // Zero
-        QColor(Qt::red)                               // G0
+        QColor(), // Hole
+        QColor(0, 255, 0, 120), // Home
+        QColor(Qt::white), // ToolPath
+        QColor(255, 0, 0, 120), // Zero
+        QColor(Qt::red) // G0
     };
     bool animSelection_ = true;
     bool guiSmoothScSh_;
-    bool scaleHZMarkers_ {};
-    bool scalePinMarkers_ {};
+    bool scaleHZMarkers_{};
+    bool scalePinMarkers_{};
     int theme_ = false;
 
     /*Clipper*/
-    double clpMinCircleSegmentLength_ {0.5};
-    int clpMinCircleSegments_ {36};
+    double clpMinCircleSegmentLength_{0.5};
+    int clpMinCircleSegments_{36};
 
     /*Markers*/
     QPointF mrkHomeOffset_;
     QPointF mrkPinOffset_;
     QPointF mrkZeroOffset_;
-    int mrkHomePos_ {Qt::BottomLeftCorner};
-    int mrkZeroPos_ {Qt::BottomLeftCorner};
+    int mrkHomePos_{Qt::BottomLeftCorner};
+    int mrkZeroPos_{Qt::BottomLeftCorner};
 
     /*Other*/
     bool inch_ = false;

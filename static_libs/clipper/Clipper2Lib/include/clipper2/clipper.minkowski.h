@@ -18,60 +18,60 @@
 namespace Clipper2Lib {
 
 namespace detail {
-    inline Paths64 Minkowski(const Path64& pattern, const Path64& path, bool isSum, bool isClosed) {
-        size_t delta = isClosed ? 0 : 1;
-        size_t patLen = pattern.size(), pathLen = path.size();
-        if (patLen == 0 || pathLen == 0)
-            return Paths64();
-        Paths64 tmp;
-        tmp.reserve(pathLen);
+inline Paths64 Minkowski(const Path64& pattern, const Path64& path, bool isSum, bool isClosed) {
+    size_t delta = isClosed ? 0 : 1;
+    size_t patLen = pattern.size(), pathLen = path.size();
+    if(patLen == 0 || pathLen == 0)
+        return Paths64();
+    Paths64 tmp;
+    tmp.reserve(pathLen);
 
-        if (isSum) {
-            for (const Point64& p : path) {
-                Path64 path2(pattern.size());
-                std::transform(pattern.cbegin(), pattern.cend(),
-                    path2.begin(), [p](const Point64& pt2) { return p + pt2; });
-                tmp.push_back(path2);
-            }
-        } else {
-            for (const Point64& p : path) {
-                Path64 path2(pattern.size());
-                std::transform(pattern.cbegin(), pattern.cend(),
-                    path2.begin(), [p](const Point64& pt2) { return p - pt2; });
-                tmp.push_back(path2);
-            }
+    if(isSum) {
+        for(const Point64& p: path) {
+            Path64 path2(pattern.size());
+            std::transform(pattern.cbegin(), pattern.cend(),
+                path2.begin(), [p](const Point64& pt2) { return p + pt2; });
+            tmp.push_back(path2);
         }
-
-        Paths64 result;
-        result.reserve((pathLen - delta) * patLen);
-        size_t g = isClosed ? pathLen - 1 : 0;
-        for (size_t h = patLen - 1, i = delta; i < pathLen; ++i) {
-            for (size_t j = 0; j < patLen; j++) {
-                Path64 quad;
-                quad.reserve(4);
-                {
-                    quad.push_back(tmp[g][h]);
-                    quad.push_back(tmp[i][h]);
-                    quad.push_back(tmp[i][j]);
-                    quad.push_back(tmp[g][j]);
-                };
-                if (!IsPositive(quad))
-                    std::reverse(quad.begin(), quad.end());
-                result.push_back(quad);
-                h = j;
-            }
-            g = i;
+    } else {
+        for(const Point64& p: path) {
+            Path64 path2(pattern.size());
+            std::transform(pattern.cbegin(), pattern.cend(),
+                path2.begin(), [p](const Point64& pt2) { return p - pt2; });
+            tmp.push_back(path2);
         }
-        return result;
     }
 
-    inline Paths64 Union(const Paths64& subjects, FillRule fillrule) {
-        Paths64 result;
-        Clipper64 clipper;
-        clipper.AddSubject(subjects);
-        clipper.Execute(ClipType::Union, fillrule, result);
-        return result;
+    Paths64 result;
+    result.reserve((pathLen - delta) * patLen);
+    size_t g = isClosed ? pathLen - 1 : 0;
+    for(size_t h = patLen - 1, i = delta; i < pathLen; ++i) {
+        for(size_t j = 0; j < patLen; j++) {
+            Path64 quad;
+            quad.reserve(4);
+            {
+                quad.push_back(tmp[g][h]);
+                quad.push_back(tmp[i][h]);
+                quad.push_back(tmp[i][j]);
+                quad.push_back(tmp[g][j]);
+            };
+            if(!IsPositive(quad))
+                std::reverse(quad.begin(), quad.end());
+            result.push_back(quad);
+            h = j;
+        }
+        g = i;
     }
+    return result;
+}
+
+inline Paths64 Union(const Paths64& subjects, FillRule fillrule) {
+    Paths64 result;
+    Clipper64 clipper;
+    clipper.AddSubject(subjects);
+    clipper.Execute(ClipType::Union, fillrule, result);
+    return result;
+}
 
 } // namespace detail
 

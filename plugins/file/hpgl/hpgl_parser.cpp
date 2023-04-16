@@ -27,7 +27,7 @@ Parser::Parser(AbstractFilePlugin* const interface)
 
 AbstractFile* Parser::parseFile(const QString& fileName) {
     QFile file_(fileName);
-    if (!file_.open(QFile::ReadOnly | QFile::Text))
+    if(!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
     file = new File;
@@ -37,8 +37,8 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
     in.setAutoDetectUnicode(true);
 
     QString line;
-    while (in.readLineInto(&line)) {
-        switch (Cmd cmd = toCmd(line.midRef(0, 2)); cmd) {
+    while(in.readLineInto(&line)) {
+        switch(Cmd cmd = toCmd(line.midRef(0, 2)); cmd) {
         default:
             qDebug() << cmd;
         }

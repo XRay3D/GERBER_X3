@@ -41,8 +41,8 @@ public:
     };
 
 private:
-    mutable double radius_ {};
-    int ptCtr {};
+    mutable double radius_{};
+    int ptCtr{};
 };
 
 class PluginImpl : public Shapes::Plugin {

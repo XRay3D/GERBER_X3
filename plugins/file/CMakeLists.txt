@@ -34,7 +34,7 @@ set(PROJECT_SOURCES
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
-target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 link_directories(
     ${CMAKE_SOURCE_DIR}/libs${PATHS}
@@ -65,7 +65,7 @@ endif()
 
 #add_subdirectory(dxf)
 #add_subdirectory(excellon)
-#add_subdirectory(gerber)
+add_subdirectory(gerber)
 
 #add_subdirectory(file)
 #add_subdirectory(TopoR)

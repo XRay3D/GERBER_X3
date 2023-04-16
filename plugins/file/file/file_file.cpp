@@ -20,12 +20,12 @@ QDataStream& operator>>(QDataStream& s, Tools& c) {
     c.clear();
     quint32 n;
     s >> n;
-    for (quint32 i = 0; i < n; ++i) {
+    for(quint32 i = 0; i < n; ++i) {
         Tools::key_type key;
         Tools::mapped_type val;
         s >> key;
         s >> val;
-        if (s.status() != QDataStream::Ok) {
+        if(s.status() != QDataStream::Ok) {
             c.clear();
             break;
         }
@@ -36,9 +36,8 @@ QDataStream& operator>>(QDataStream& s, Tools& c) {
 
 QDataStream& operator<<(QDataStream& s, const Tools& c) {
     s << quint32(c.size());
-    for (auto& [key, val] : c) {
+    for(auto& [key, val]: c)
         s << key << val;
-    }
     return s;
 }
 
@@ -48,7 +47,7 @@ File::File()
 File::~File() { }
 
 Paths File::merge() const {
-    for (GraphicsItem* item : *itemGroups_.back())
+    for(GraphicsItem* item: *itemGroups_.back())
         mergedPaths_.append(item->paths());
     return mergedPaths_;
 }

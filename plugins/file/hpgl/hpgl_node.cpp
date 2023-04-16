@@ -29,7 +29,7 @@ class Dialog : public QDialog {
     QPushButton* pushButtonColorize;
     QTableView* tableView;
     void setupUi(QDialog* dialog) {
-        if (dialog->objectName().isEmpty())
+        if(dialog->objectName().isEmpty())
             dialog->setObjectName(QString::fromUtf8("Dialog"));
         verticalLayout = new QVBoxLayout(dialog);
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
@@ -178,23 +178,23 @@ Node::Node(File* file, int* id)
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
-        if (role == Qt::CheckStateRole) {
+        if(role == Qt::CheckStateRole) {
             file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
             return true;
         }
         return false;
     case FileTree_::Column::Side:
-        if (role == Qt::EditRole) {
+        if(role == Qt::EditRole) {
             file->setSide(static_cast<Side>(value.toBool()));
             // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
             return true;
         }
         return false;
     case FileTree_::Column::ItemsType:
-        if (role == Qt::EditRole) {
+        if(role == Qt::EditRole) {
             file->setItemType(value.toInt());
             emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
             return true;
@@ -207,7 +207,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree_::Column::Side:
@@ -220,9 +220,9 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return file->shortName();
         case Qt::ToolTipRole:
@@ -234,7 +234,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         }
         break;
     case FileTree_::Column::Side:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
             return sideStrList[file->side()];
@@ -243,7 +243,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         }
         break;
     case FileTree_::Column::ItemsType:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return file->displayedTypes().at(int(file->itemsType())).shortActName();
         case Qt::ToolTipRole:
@@ -255,7 +255,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     default:
         break;
     }
-    switch (role) {
+    switch(role) {
     case FileTree_::Id:
         return *m_id;
     default:
@@ -339,7 +339,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
 
 Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren; //| Qt::ItemIsSelectable;
-    switch (FileTree_::Column(index.column())) {
+    switch(FileTree_::Column(index.column())) {
     case FileTree_::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree_::Column::ItemsType:

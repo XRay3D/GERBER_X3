@@ -95,11 +95,11 @@ private:
     mvector<std::shared_ptr<Node>> childs;
     bool checked_ = false;
 
-    Model* const model;      // static wrong from anotherr dll
-    static inline const Qt::CheckState chState[] {
-        Qt::Unchecked,       // index 0
-        Qt::Unchecked,       // index 1
-        Qt::Checked,         // index 2
+    Model* const model; // static wrong from anotherr dll
+    static inline const Qt::CheckState chState[]{
+        Qt::Unchecked, // index 0
+        Qt::Unchecked, // index 1
+        Qt::Checked, // index 2
         Qt::PartiallyChecked // index 3
     };
 };

@@ -32,9 +32,9 @@ Node::~Node() { App::project().deleteFile(file->id()); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
-    switch (index.column()) {
+    switch(index.column()) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::CheckStateRole:
             file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
@@ -44,14 +44,14 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         default:;
         }
     case FileTree::Column::Side:
-        switch (role) {
+        switch(role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
         default:;
         }
     default:
-        if (role == FileTree::Select) {
+        if(role == FileTree::Select) {
             file->itemGroup()->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
             return true;
         }
@@ -60,9 +60,9 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    switch (index.column()) {
+    switch(index.column()) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             //            if (file->shortName().endsWith(App::gcSettings().fileExtension()))
             //                return file->shortName();
@@ -82,7 +82,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             return {};
         }
     case FileTree::Column::Side:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
             return sideStrList[file->side()];
@@ -98,7 +98,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
-    switch (index.column()) {
+    switch(index.column()) {
     case FileTree::Column::NameColorVisible:
         //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
         //            return itemFlag | Qt::ItemIsUserCheckable;
@@ -121,7 +121,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) const {
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    if (!dialog[id()])
+    if(!dialog[id()])
         menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
             dialog[id()] = new Dialog(file->lines2(), file->name(), tv);
             auto destroy = [this] {
