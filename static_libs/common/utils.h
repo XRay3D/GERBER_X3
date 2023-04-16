@@ -168,3 +168,13 @@ QString toString(E value) {
     return QString::fromUtf8(QMetaEnum::fromType<E>().valueToKey(intValue));
 }
 } // namespace EnumHelper
+
+struct Deleter {
+    enum Polycy {
+        DontDelete,
+        Delete
+    } del{Delete};
+    void operator()(auto* ptr) const {
+        if(del == Delete) delete ptr;
+    }
+};

@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "utils.h"
 #include <memory>
 #include <mvector.h>
 
@@ -57,11 +58,6 @@ public:
     explicit Node(Type type);
     virtual ~Node();
 
-    enum DelPolycy {
-        DontDelete,
-        Delete
-    };
-
     Node* child(int row) const;
     Node* parent() const;
 
@@ -70,7 +66,7 @@ public:
     int childCount() const;
     int row() const;
 
-    void addChild(Node* item, DelPolycy delPolycy = Delete);
+    void addChild(Node* item, Deleter::Polycy delPolycy = Deleter::Delete);
     void remove(int row);
 
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
@@ -84,15 +80,11 @@ public:
     QModelIndex index(int column = 0) const;
 
     const QStringList sideStrList{QObject::tr("Top|Bottom").split('|')};
-    const Type type;
+    const Type type_;
 
 protected:
     int32_t id__{-1};
     Node* parent_ = nullptr;
-    struct Deleter {
-        DelPolycy del{Delete};
-        void operator()(Node* node) const { (del == Delete) ? delete node, void() : void(); }
-    };
     mvector<std::unique_ptr<Node, Deleter>> childs;
 };
 

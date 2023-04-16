@@ -34,7 +34,9 @@ AbstractShape::AbstractShape()
     // setZValue(std::numeric_limits<double>::max());
 }
 
-AbstractShape::~AbstractShape() { }
+AbstractShape::~AbstractShape() {
+    App::project().deleteShape(id_);
+}
 
 void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
     // FIXME   if (App::drawPdf()) [[unlikely]] {
@@ -199,7 +201,9 @@ Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
 
 void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
     auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
-        App::fileModel().removeRow(/*node_->*/ row(), /*node_->*/ index().parent());
+        auto r = row();
+        auto p = index().parent();
+        App::fileModel().removeRow(r, p);
     });
     // FIXME   action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { AbstractShape::setVisible(fl); } /*this, &GraphicsItem::setVisible*/);
     //    action->setCheckable(true);

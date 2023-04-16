@@ -111,7 +111,7 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     QModelIndex index = createIndex(0, 0, itemFolder);
     int rowCount = itemFolder->childCount();
     beginInsertRows(index, rowCount, rowCount);
-    itemFolder->addChild(shape, Node::DontDelete);
+    itemFolder->addChild(shape); //, Node::DontDelete);
     endInsertRows();
     // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }

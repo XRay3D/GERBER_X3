@@ -24,7 +24,7 @@
 namespace FileTree {
 
 Node::Node(Type type)
-    : type(type) { }
+    : type_(type) { }
 
 Node::~Node() {
     //    if (id__ > -1) {
@@ -58,9 +58,7 @@ void Node::setChild(int row, Node* item) {
     }
 }
 
-int Node::childCount() const {
-    return static_cast<int>(childs.size());
-}
+int Node::childCount() const { return static_cast<int>(childs.size()); }
 
 int Node::row() const {
     if(parent_)
@@ -71,11 +69,13 @@ int Node::row() const {
     return -1;
 }
 
-void Node::addChild(Node* item, DelPolycy delPolycy) {
+void Node::addChild(Node* item, Deleter::Polycy delPolycy) {
     item->parent_ = this;
-    childs.resize(childs.size() + 1);
-    childs.back().reset(item);
-    childs.back().get_deleter().del = delPolycy; // swap(std::unique_ptr<Node, Deleter>(item, Deleter {!dontDelete}));
+    childs.emplace_back(item).get_deleter().del = delPolycy;
+
+    //    childs.resize(childs.size() + 1);
+    //    childs.back().reset(item);
+    //    childs.back().get_deleter().del = delPolycy; // swap(std::unique_ptr<Node, Deleter>(item, Deleter {!dontDelete}));
 }
 
 void Node::remove(int row) { childs.takeAt(row); }

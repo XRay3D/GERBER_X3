@@ -14,6 +14,7 @@
 
 #include <QDataStream>
 #include <map>
+#include <ranges>
 #include <type_traits>
 
 // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
@@ -117,12 +118,9 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
     // Otherwise, value() will return the least recently inserted
     // value instead of the most recently inserted one.
 
-    auto it = map.cend();
-    auto begin = map.cbegin();
-    while(it != begin) {
-        --it;
-        stream << it->first << it->second;
-    }
+    for(auto& [key, val]: std::views::reverse(map))
+        stream << key << val;
+
     return stream;
 }
 

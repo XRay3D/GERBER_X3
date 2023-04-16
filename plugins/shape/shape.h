@@ -26,21 +26,27 @@ class AbstractShape : public GraphicsItem, public ::FileTree::Node {
     friend class Handle;
 
     friend QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
-        stream << shape.GraphicsItem::type();
-        stream << shape.id_;
-        stream << shape.isVisible();
-        shape.write(stream);
-        return stream;
+        QByteArray data;
+        QDataStream out(&data, QIODevice::WriteOnly);
+        Block(out).write(
+            shape.id_,
+            shape.isVisible());
+        shape.write(out);
+        return stream << data;
     }
 
     friend QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
-        stream >> shape.id_;
+        QByteArray data;
+        stream >> data;
+        QDataStream in(&data, QIODevice::ReadOnly);
         bool visible;
-        stream >> visible;
+        Block(in).read(
+            shape.id_,
+            visible);
+        shape.read(in);
         shape.setZValue(shape.id_);
         shape.setVisible(visible);
         shape.setToolTip(QString::number(shape.id_));
-        shape.read(stream);
         return stream;
     }
 
@@ -75,7 +81,7 @@ protected:
     Paths paths_;
     //    Node* node_;
     std::map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
-    QPointF initPos; // групповое перемещение
+    QPointF initPos;                                     // групповое перемещение
     bool isFinal{};
 
     // QGraphicsItem interface
