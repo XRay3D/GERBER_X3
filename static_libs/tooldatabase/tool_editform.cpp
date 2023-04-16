@@ -156,7 +156,7 @@ void ToolEditForm::setItem(ToolItem* item) {
 }
 
 void ToolEditForm::setTool(const Tool& tool) {
-    qDebug(__FUNCTION__);
+    // qDebug(__FUNCTION__);
     tool_ = tool;
 
     for (auto& data : dsbxMapdsbxMap) {
@@ -220,9 +220,9 @@ void ToolEditForm::setVisibleToolWidgets(bool visible) {
     setMinimumWidth(width());
 }
 
-bool operator<(std::set<Tool::Type> l, std::set<Tool::Type> r) {
-    return l < r;
-}
+// bool operator<(std::set<Tool::Type> l, std::set<Tool::Type> r) {
+//     return l < r;
+// }
 
 void ToolEditForm::setupToolWidgets(int) {
     const auto lastType = tool_.type();
@@ -230,7 +230,7 @@ void ToolEditForm::setupToolWidgets(int) {
     auto currType = ui->cbxToolType->currentData().value<Tool::Type>();
     tool_.setType(currType);
 
-    qDebug() << "\n\n";
+    // qDebug() << "\n\n";
 
     static Overload value {
         [](auto* val) { return val->value(); },
@@ -258,7 +258,7 @@ void ToolEditForm::setupToolWidgets(int) {
             data.dsbx[1]->setEnabled(data.dsbx[0]->isEnabled());
     }
 
-    // qDebug() << lastVal;
+    // //qDebug() << lastVal;
 
     static const std::unordered_map<Tool::Type, QString> lblText {
         {Tool::Drill, tr("Pass")},
@@ -338,12 +338,12 @@ void ToolEditForm::updateName() {
 }
 
 void ToolEditForm::updateDsbxAngle(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setAngle(val);
 }
 
 void ToolEditForm::updateDsbxDiameter(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setDiameter(val);
     ui->dsbxOneTurnCut->setMaximum(val);
     ui->dsbxStepover->setMaximum(val);
@@ -356,12 +356,12 @@ void ToolEditForm::updateDsbxDiameter(double val) {
 }
 
 void ToolEditForm::updateDsbxFeedRate(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setFeedRate(val / feed);
 }
 
 void ToolEditForm::updateDsbxOneTurnCut(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setOneTurnCut(val);
     ui->dsbxOneTurnCutPercent->setValue(tool_.diameter() > 0.0 ? val / (tool_.diameter() * 0.01) : 0.0);
     if (ui->chbxFeedRate->isChecked())
@@ -371,17 +371,17 @@ void ToolEditForm::updateDsbxOneTurnCut(double val) {
 }
 
 void ToolEditForm::updateDsbxPassDepth(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setPassDepth(val);
 }
 
 void ToolEditForm::updateDsbxPlungeRate(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setPlungeRate(val / feed);
 }
 
 void ToolEditForm::updateDsbxSpindleSpeed(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setSpindleSpeed(val); /*rpm*/
     if (ui->chbxFeedRate->isChecked())
         ui->dsbxFeedRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed);
@@ -390,23 +390,23 @@ void ToolEditForm::updateDsbxSpindleSpeed(double val) {
 }
 
 void ToolEditForm::updateDsbxStepover(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setStepover(val);
     ui->dsbxStepoverPercent->setValue(tool_.diameter() > 0.0 ? val / (tool_.diameter() * 0.01) : 0.0);
 }
 
 void ToolEditForm::updateDsbxLenght(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     tool_.setLenght(val);
 }
 
 void ToolEditForm::updateDsbxOneTurnCutPercent(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     ui->dsbxOneTurnCut->setValue(val * (tool_.diameter() * 0.01));
 }
 
 void ToolEditForm::updateDsbxStepoverPercent(double val) {
-    qDebug() << __FUNCTION__ << val;
+    // qDebug() << __FUNCTION__ << val;
     ui->dsbxStepover->setValue(val * (tool_.diameter() * 0.01));
 }
 

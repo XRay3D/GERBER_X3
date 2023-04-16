@@ -37,6 +37,8 @@ public:
     explicit MainWindow(QWidget* parent = nullptr);
     ~MainWindow() override;
 
+    void init();
+
     // QMainWindow interface
     QMenu* createPopupMenu() override;
     const QDockWidget* dockWidget() const;

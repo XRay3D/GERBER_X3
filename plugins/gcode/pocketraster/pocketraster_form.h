@@ -65,7 +65,7 @@ class GCPluginImpl final : public GCode::Plugin {
 public:
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
-    QWidget* createForm() override { return new Form(this); };
+    QWidget* createForm() override { return /*new Form(this);*/ };
     uint32_t type() const override { return POCKET_RASTER; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

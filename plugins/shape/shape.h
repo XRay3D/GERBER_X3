@@ -21,12 +21,12 @@ namespace Shapes {
 class Handle;
 class Node;
 
-class AbstractShape : public GraphicsItem {
+class AbstractShape : public GraphicsItem, public ::FileTree::Node {
     friend class Node;
     friend class Handle;
 
     friend QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
-        stream << shape.type();
+        stream << shape.GraphicsItem::type();
         stream << shape.id_;
         stream << shape.isVisible();
         shape.write(stream);
@@ -62,11 +62,18 @@ public:
     Node* node() const;
     void finalize() { isFinal = true; }
 
+    //::FileTree::Node interface
+    /*virtual*/ bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    /*virtual*/ Qt::ItemFlags flags(const QModelIndex& index) const override;
+    /*virtual*/ QVariant data(const QModelIndex& index, int role) const override;
+    /*virtual*/ void menu(QMenu& menu, FileTree::View* tv) const override;
+    int32_t id() const override { return id_; };
+
 protected:
     Handle* currentHandler {};
     mutable mvector<std::unique_ptr<Handle>> handlers;
     Paths paths_;
-    Node* node_;
+    //    Node* node_;
     std::map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos;                                     // групповое перемещение
     bool isFinal {};
@@ -81,11 +88,6 @@ protected:
 
     // AbstractShape interface
     virtual void updateOtherHandlers(Handle* handler, int mode = {});
-
-    virtual bool setData(const QModelIndex& index, const QVariant& value, int role);
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const;
-    virtual QVariant data(const QModelIndex& index, int role) const;
-    virtual void menu(QMenu& menu, FileTree::View* tv) const;
 
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);

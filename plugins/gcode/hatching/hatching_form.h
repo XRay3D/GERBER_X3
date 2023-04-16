@@ -61,7 +61,7 @@ class GCPluginImpl final : public GCode::Plugin {
 public:
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+C"}; }
-    QWidget* createForm() override { return new Form(this); };
+    QWidget* createForm() override { return /*new Form(this);*/ };
     uint32_t type() const override { return CROSS_HATCH; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

@@ -52,10 +52,10 @@ MainWindow::MainWindow(QWidget* parent)
     , reloadQuestion {this} {
     App::setMainWindow(this);
     App::setUndoStack(&undoStack_);
+    setIconSize({24, 24});
 
     ui.setupUi(this);
 
-    initWidgets();
     LayoutFrames* lfp;
     ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
     ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
@@ -65,51 +65,33 @@ MainWindow::MainWindow(QWidget* parent)
     ui.graphicsView->scene()->addItem(new GiPin());
     ui.graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
-    GCode::PropertiesForm(); // init default vars;
+    connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+    connect(ui.graphicsView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
+        ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
+    });
 
     connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&GiMarker::setPos));
     connect(project_, &Project::zeroPosChanged, App::zeroPtr(), qOverload<const QPointF&>(&GiMarker::setPos));
     connect(project_, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&GiPin::setPos));
     connect(project_, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
-    menuBar()->installEventFilter(this);
 
-    // connect plugins
-    for (auto& [type, ptr] : App::filePlugins()) {
-        //        if (ptr->type() == int(FileType::GCode_))
-        //            continue;
+    for (auto& [type, ptr] : App::filePlugins()) { // connect plugins
         ptr->moveToThread(&parserThread);
         connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
         connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
-        connect(project_, &Project::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
+        connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
     }
 
     parserThread.start(QThread::HighestPriority);
-
-    connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
-
-    // Shapes::Constructor
-
-    // status bar
-    connect(ui.graphicsView, &GraphicsView::mouseMove, [this](const QPointF& point) {
-        ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
-    });
 
     ui.treeView->setModel(new FileTree::Model(ui.treeView));
 
     connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
     connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
     connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
-
-    App::toolHolder().readTools();
-    setCurrentFile(QString());
-
-    readSettings();
-    toolpathActions[G_CODE_PROPERTIES]->triggered();
-
-    debug();
 }
 
 MainWindow::~MainWindow() {
@@ -118,9 +100,25 @@ MainWindow::~MainWindow() {
     App::setMainWindow(nullptr);
 }
 
+void MainWindow::init() {
+    initWidgets();
+
+    GCode::PropertiesForm(); // init default vars;
+
+    setCurrentFile(QString());
+    readSettings();
+    menuBar()->installEventFilter(this);
+
+    toolpathActions[G_CODE_PROPERTIES]->triggered();
+
+    debug();
+}
+
 void MainWindow::closeEvent(QCloseEvent* event) {
     if (App::isDebug() || maybeSave()) {
+        resetToolPathsActions();
         delete dockWidget_;
+
         writeSettings();
         App::fileModel().closeProject();
         event->accept();
@@ -430,6 +428,14 @@ void MainWindow::createActionsShape() {
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
+    //    for (auto& [type, gCodePlugin] : App::gCodePlugins()) {
+    //        auto action = gCodePlugin->addAction(menu, toolpathToolBar);
+    //        action->setCheckable(true);
+    //        actionGroup.addAction(action);
+    //        toolpathActions.emplace(type, action);
+    //        connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
+    //    }
+
     for (auto& [type, shPlugin] : App::shapePlugins()) {
         auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value("Name").toString());
         action->setCheckable(true);
@@ -440,7 +446,7 @@ void MainWindow::createActionsShape() {
                 connect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
                 connect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
                 connect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
-                setDockWidget(new QPushButton);
+                setDockWidget(shPlugin->editor());
             } else {
                 shPlugin->finalizeShape();
                 disconnect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
@@ -714,7 +720,6 @@ void MainWindow::renderPdf() {
             rect |= item->boundingRect();
 
     //    QRectF rect(ui.graphicsView->scene()->itemsBoundingRect());
-
     //    QRectF rect {App::layoutFrames().boundingRect()};
 
     QSizeF size(rect.size());
@@ -789,8 +794,10 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 }
 
 void MainWindow::resetToolPathsActions() {
-    delete dockWidget_->widget();
-    dockWidget_->setWidget(nullptr);
+    if (auto widget = dockWidget_->widget(); widget) {
+        dockWidget_->setWidget(new QWidget); // NOTE  заменяет виджет новым и сбрасывается предок
+        widget->setParent(nullptr);          //       так как виджет лежит полем класса плагина.
+    }
     dockWidget_->setVisible(false);
     if (auto action {actionGroup.checkedAction()}; action)
         action->setChecked(false);
@@ -951,7 +958,7 @@ void MainWindow::updateTheme() {
             "11 13 3 1",
             "  c None",
             "@ c #6C6A67",
-            "$ c #6C6A67",// B5B0AC
+            "$ c #6C6A67", // B5B0AC
             "           ",
             "           ",
             "           ",
@@ -1082,7 +1089,7 @@ void MainWindow::updateTheme() {
             break;
         case DarkBlue:
             baseColor = QColor(20, 20, 20);
-            disabledColor = QColor(100, 100, 100);
+            disabledColor = QColor(80, 80, 80);
             highlightColor = QColor(61, 174, 233);
             linkColor = QColor(61, 174, 233);
             windowColor = QColor(30, 30, 30);
@@ -1090,7 +1097,7 @@ void MainWindow::updateTheme() {
             break;
         case DarkRed:
             baseColor = QColor(20, 20, 20);
-            disabledColor = QColor(100, 100, 100);
+            disabledColor = QColor(80, 80, 80);
             highlightColor = QColor(218, 68, 83);
             linkColor = QColor(61, 174, 233);
             windowColor = QColor(30, 30, 30);
@@ -1168,9 +1175,11 @@ void MainWindow::updateTheme() {
 void MainWindow::setDockWidget(QWidget* dwContent) {
     if (!dwContent)
         exit(-66);
-
-    delete dockWidget_->widget();
-    dockWidget_->setWidget(dwContent);
+    if (auto widget = dockWidget_->widget(); widget) {
+        dockWidget_->setWidget(dwContent); // NOTE  заменяет виджет новым и сбрасывается предок
+        widget->setParent(nullptr);        //       так как виджет лежит полем класса плагина.
+    } else
+        dockWidget_->setWidget(dwContent);
     dockWidget_->setWindowTitle(dwContent->windowTitle());
     if (auto pbClose {dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
         connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);

@@ -102,3 +102,8 @@ add_subdirectory(plugins)
 add_subdirectory(GGEasy)
 
 
+#add_subdirectory(ToolTest)
+
+
+
+

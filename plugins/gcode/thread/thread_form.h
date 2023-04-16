@@ -89,7 +89,7 @@ public:
     // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); } // FIXME
     QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
-    QWidget* createForm() override { return new Form(this); };
+    QWidget* createForm() override { return /*new Form(this);*/ };
     uint32_t type() const override { return md5::hash32("Thread"); }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 

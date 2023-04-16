@@ -402,5 +402,11 @@
         <file>icons/ggeasy-light/actions/22/edit-undo.svg</file>
         <file>icons/ggeasy-light/actions/24/edit-redo.svg</file>
         <file>icons/ggeasy-light/actions/24/edit-undo.svg</file>
+        <file>icons/ggeasy-dark/actions/16/thread_mill.svg</file>
+        <file>icons/ggeasy-dark/actions/22/thread_mill.svg</file>
+        <file>icons/ggeasy-dark/actions/24/thread_mill.svg</file>
+        <file>icons/ggeasy-light/actions/16/thread_mill.svg</file>
+        <file>icons/ggeasy-light/actions/22/thread_mill.svg</file>
+        <file>icons/ggeasy-light/actions/24/thread_mill.svg</file>
     </qresource>
 </RCC>

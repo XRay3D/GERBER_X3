@@ -32,6 +32,7 @@ target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     gi
+
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

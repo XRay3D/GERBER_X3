@@ -179,7 +179,7 @@ signals:
     // need for debuging
     void addFileDbg(GCode::File* file);
     // File Watcher
-    void parseFile(const QString& filename, int type);
+    void reloadFile(const QString& filename, int type);
 
 private:
     bool reload(int32_t id, AbstractFile* file);
