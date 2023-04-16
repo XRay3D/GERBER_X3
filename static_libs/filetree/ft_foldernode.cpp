@@ -49,7 +49,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const {
     case Role::NodeType:
         return Folder;
     case Role::ContentType:
-        return childs.size() ? childs.front()->type : Type::Null;
+        return childs.size() ? childs.front()->type_ : Type::Null;
     default:
         return {};
     }

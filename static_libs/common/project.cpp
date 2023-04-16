@@ -66,22 +66,27 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
     return stream;
 }
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Shapes::AbstractShape>& shape) {
-    stream << shape->GraphicsItem::type();
-    //    stream << shape->loadErrorMessage();
+QDataStream& operator<<(QDataStream& stream, Shapes::AbstractShape* shape) {
+    stream << shape->type();
+    stream << shape->name();
     stream << *shape;
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Shapes::AbstractShape>& shape) {
+QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     uint32_t type;
     QString loadErrorMessage;
     stream >> type;
     stream >> loadErrorMessage;
-    if(App::shapePlugins().contains(type))
-        shape.reset(App::shapePlugin(type)->createShape());
-    stream >> *shape;
-    App::graphicsView().addItem(shape.get());
+    if(App::shapePlugins().contains(type)) {
+        shape = App::shapePlugin(type)->createShape();
+        stream >> *shape;
+        App::graphicsView().addItem(shape);
+    } else {
+        QByteArray data;
+        stream >> data;
+        qDebug() << type << loadErrorMessage << data;
+    }
     return stream;
 }
 
@@ -196,7 +201,7 @@ bool Project::open(const QString& fileName) {
         for(const auto& [id, filePtr]: files_)
             App::fileModel().addFile(filePtr.get());
         for(const auto& [id, shPtr]: shapes_)
-            App::fileModel().addShape(shPtr.get());
+            App::fileModel().addShape(shPtr);
 
         emit homePosChanged(home_);
         emit zeroPosChanged(zero_);
@@ -344,7 +349,7 @@ mvector<AbstractFile*> Project::files(const mvector<int> types) {
 
 Shapes::AbstractShape* Project::shape(int32_t id) {
     QMutexLocker locker(&mutex);
-    return shapes_[id].get();
+    return shapes_[id];
 }
 
 int Project::addFile(AbstractFile* file) {
@@ -402,7 +407,7 @@ int Project::addShape(Shapes::AbstractShape* const shape) {
     shape->id_ = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
-    shapes_.emplace(newId, shape);
+    shapes_.emplace(newId, shape); // NOTE destroy on filetree model
     App::fileModel().addShape(shape);
     setChanged();
     return newId;

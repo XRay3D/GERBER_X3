@@ -12,6 +12,7 @@
 
 #include "datastream.h"
 #include "mvector.h"
+#include "utils.h"
 
 #include <QFileSystemWatcher>
 #include <QMutex>
@@ -44,7 +45,8 @@ class QFile;
 class QFileSystemWatcher;
 
 using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
-using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
+// using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
+using ShapesMap = std::map<int, Shapes::AbstractShape*>;
 
 class Project : public QObject {
     Q_OBJECT
