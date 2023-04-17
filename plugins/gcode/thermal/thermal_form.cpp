@@ -84,30 +84,6 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->treeView->header()->setStretchLastSection(false);
     //    ui->treeView->hideColumn(1);
     ui->treeView->setItemDelegate(new Delegate(this));
-    {
-        ui->treeView->setIconSize({Size, Size});
-        const int w = ui->treeView->indentation();
-        const int h = Size;
-        QImage i(w, h, QImage::Format_ARGB32);
-        QPainter p(&i);
-        p.setPen(QColor(128, 128, 128));
-        // │
-        i.fill(Qt::transparent);
-        p.drawLine(w >> 1, /**/ 0, w >> 1, /**/ h);
-        i.save("settings/vline.png", "PNG");
-        // ├─
-        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-        i.save("settings/branch-more.png", "PNG");
-        // └─
-        i.fill(Qt::transparent);
-        p.drawLine(w >> 1, /**/ 0, w >> 1, h >> 1);
-        p.drawLine(w >> 1, h >> 1, /**/ w, h >> 1);
-        i.save("settings/branch-end.png", "PNG");
-        QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-        file.open(QFile::ReadOnly);
-        ui->treeView->setStyleSheet(file.readAll());
-        ui->treeView->header()->setMinimumHeight(h);
-    }
 }
 
 Form::~Form() {
