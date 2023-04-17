@@ -99,7 +99,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     return {};
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
+void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;

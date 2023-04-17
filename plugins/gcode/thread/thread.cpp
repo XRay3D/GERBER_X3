@@ -137,7 +137,7 @@ void Creator::cornerTrimming() {
     auto insert = [=](auto& path, auto cornerPrev, auto&& corner, auto cornerNext) {
         QLineF l1(*cornerPrev, *corner);
         QLineF l2(*corner, *cornerNext);
-        if(abs(l1.angleTo(l2) - testAngle) < 1.e-3 // Angle is 90
+        if(abs(l1.angleTo(l2) - testAngle) < 1.e-3                     // Angle is 90
             && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
             l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
             path.insert(corner, {l2.p1(), l2.p2()});
@@ -159,7 +159,7 @@ void Creator::cornerTrimming() {
     auto insert = [=](auto& path, auto cornerPrev, auto&& corner, auto cornerNext) {
         QLineF l1(*cornerPrev, *corner);
         QLineF l2(*corner, *cornerNext);
-        if(abs(l1.angleTo(l2) - testAngle) < 1.e-3 // Angle is 90
+        if(abs(l1.angleTo(l2) - testAngle) < 1.e-3                     // Angle is 90
             && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
             l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
             path.insert(path.begin() + std::distance(path.data(), corner), {l2.p1(), l2.p2()});

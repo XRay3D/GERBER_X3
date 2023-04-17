@@ -72,7 +72,7 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
     }
 }
 
-void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) const {
+void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) {
 }
 
 } // namespace FileTree

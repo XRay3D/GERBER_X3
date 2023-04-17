@@ -81,42 +81,42 @@ void Ellipse::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker: // 100
-            break; //	100	Маркер подкласса (AcDbEllipse)
+        case SubclassMarker:       // 100
+            break;                 //	100	Маркер подкласса (AcDbEllipse)
 
-        case CenterPointX: // 10
+        case CenterPointX:         // 10
             CenterPoint.setX(code);
-            break; //	10	Центральная точка (в МСК)
-        case CenterPointY: // 20
+            break;                 //	10	Центральная точка (в МСК)
+        case CenterPointY:         // 20
             CenterPoint.setY(code);
-            break; //		Файл DXF: значение X; приложение: 3D-точка
-        case CenterPointZ: // 30
-            break; //	20, 30	Файл DXF: значения Y и Z для центральной точки (в МСК)
+            break;                 //		Файл DXF: значение X; приложение: 3D-точка
+        case CenterPointZ:         // 30
+            break;                 //	20, 30	Файл DXF: значения Y и Z для центральной точки (в МСК)
 
         case EndpointOfMajorAxisX: // 11
             EndpointOfMajorAxis.setX(code);
-            break; //	11	Конечная точка главной оси относительно центральной точки (в МСК)
+            break;                 //	11	Конечная точка главной оси относительно центральной точки (в МСК)
         case EndpointOfMajorAxisY: // 21
             EndpointOfMajorAxis.setY(code);
-            break; //		Файл DXF: значение X; приложение: 3D-точка
+            break;                 //		Файл DXF: значение X; приложение: 3D-точка
         case EndpointOfMajorAxisZ: // 31
-            break; //	21, 31	Файл DXF: значения Y и Z для конечной точки главной оси относительно центральной точки (в МСК)
+            break;                 //	21, 31	Файл DXF: значения Y и Z для конечной точки главной оси относительно центральной точки (в МСК)
 
-        case ExtrusionDirectionX: // 210
-        case ExtrusionDirectionY: // 220
-        case ExtrusionDirectionZ: // 230
+        case ExtrusionDirectionX:  // 210
+        case ExtrusionDirectionY:  // 220
+        case ExtrusionDirectionZ:  // 230
             break;
 
         case RatioOfMinorAxisToMajorAxis: // 40
             ratioOfMinorAxisToMajorAxis = code;
-            break; //	40	Соотношение малой и главной осей
+            break;                        //	40	Соотношение малой и главной осей
 
-        case StartParameter: // 41
+        case StartParameter:              // 41
             startParameter = code;
-            break; //	41	Начальный параметр (значение для полного эллипса — 0,0)
-        case EndParameter: // 42
+            break;                        //	41	Начальный параметр (значение для полного эллипса — 0,0)
+        case EndParameter:                // 42
             endParameter = code;
-            break; //	42	Конечный параметр (значение для полного эллипса — 2 пи)
+            break;                        //	42	Конечный параметр (значение для полного эллипса — 2 пи)
         default:
             Entity::parse(code);
         }

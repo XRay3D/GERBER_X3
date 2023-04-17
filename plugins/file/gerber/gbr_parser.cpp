@@ -86,7 +86,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             auto dummy = [](const QString& gLine) -> bool {
                 auto data{toU16StrView(gLine)};
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
-                if(auto [whole, id, par] = ctre::match<ptrnDummy>(data); whole) ///*regexp.match(gLine)); match.hasMatch()*/) {
+                if(auto [whole, id, par] = ctre::match<ptrnDummy>(data); whole)       ///*regexp.match(gLine)); match.hasMatch()*/) {
 
                     return true;
                 return false;
@@ -843,9 +843,9 @@ bool Parser::parseAttributes(const QString& gLine) {
                 cap[3].remove(i, 1);
             auto sl(cap[3].split(',')); // remove symbol "
             switch(int index = Comp::Component::value1(sl.first()); index) {
-            case Comp::Component::N: // The CAD net name of a conducting object, e.g. Clk13.
+            case Comp::Component::N:    // The CAD net name of a conducting object, e.g. Clk13.
                 break;
-            case Comp::Component::P: // Pins
+            case Comp::Component::P:    // Pins
                 components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}});
                 break;
             case Comp::Component::C:

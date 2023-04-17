@@ -92,7 +92,7 @@ Result MathParser::functionVariable(QString s) // throws Exception
         f += s.at(i);
         i++;
     }
-    if(!f.isEmpty()) { // если что-нибудь нашли
+    if(!f.isEmpty()) {                         // если что-нибудь нашли
         if(s.length() > i && s.at(i) == '(') { // и следующий символ скобка значит - это функция
             Result r = bracket(s.mid(f.length()));
             return processFunction(f, r);

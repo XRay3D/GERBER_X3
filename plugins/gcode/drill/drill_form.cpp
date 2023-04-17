@@ -11,6 +11,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_form.h"
+#include "gi_point.h"
+#include "tool_database.h"
 #include "ui_drillform.h"
 
 #include "drill_gi_preview.h"
@@ -20,7 +22,7 @@
 // #include "file.h"
 // #include "gi_point.h"
 // #include "gi_preview.h"
-// #include "graphicsview.h"
+#include "graphicsview.h"
 // #include "project.h"
 // #include "settings.h"
 // #include "tool_pch.h"

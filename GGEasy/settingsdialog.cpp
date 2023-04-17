@@ -25,17 +25,17 @@
 const int gridColor = 100;
 
 const QColor defaultColor[GuiColors::Count]{
-    QColor(), // Background
-    QColor(255, 255, 0, 120), // Pin
-    QColor(Qt::gray), // CutArea
-    QColor(gridColor, gridColor, gridColor, 50), // Grid1
+    QColor(),                                     // Background
+    QColor(255, 255, 0, 120),                     // Pin
+    QColor(Qt::gray),                             // CutArea
+    QColor(gridColor, gridColor, gridColor, 50),  // Grid1
     QColor(gridColor, gridColor, gridColor, 100), // Grid5
     QColor(gridColor, gridColor, gridColor, 200), // Grid10
-    QColor(), // Hole
-    QColor(0, 255, 0, 120), // Home
-    QColor(Qt::black), // ToolPath
-    QColor(255, 0, 0, 120), // Zero
-    QColor(Qt::red) // G0
+    QColor(),                                     // Hole
+    QColor(0, 255, 0, 120),                       // Home
+    QColor(Qt::black),                            // ToolPath
+    QColor(255, 0, 0, 120),                       // Zero
+    QColor(Qt::red)                               // G0
 };
 
 const QString colorName[GuiColors::Count]{

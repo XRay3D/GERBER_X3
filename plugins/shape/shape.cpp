@@ -15,6 +15,8 @@
 #include "qgraphicsscene.h"
 #include "shhandler.h"
 
+#include "mainwindow.h"
+
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
 #include <QPropertyAnimation>
@@ -89,6 +91,10 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
             }
         }
     }
+}
+
+void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+    App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
 }
 
 void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
@@ -199,21 +205,27 @@ Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
     }
 }
 
-void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
+void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
     auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
         auto r = row();
         auto p = index().parent();
         App::fileModel().removeRow(r, p);
     });
-    // FIXME   action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { AbstractShape::setVisible(fl); } /*this, &GraphicsItem::setVisible*/);
-    //    action->setCheckable(true);
-    //    action->setChecked(isVisible());
+
+    action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { GraphicsItem::setVisible(fl); });
+    action->setCheckable(true);
+    action->setChecked(isVisible());
 
     action = menu.addAction(QIcon::fromTheme(""), QObject::tr("&Selectable \"%1\"").arg(name()), [item = const_cast<AbstractShape*>(this)](bool fl) {
         item->setFlag(ItemIsSelectable, fl);
     });
     action->setCheckable(true);
     action->setChecked(GraphicsItem::flags() & ItemIsSelectable);
+
+    action = menu.addAction(QIcon::fromTheme("document-edit"), QObject::tr("Edit Selected"), [this] {
+        App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
+    });
+
     //    action->connect(action, &QAction::toggled );
 }
 

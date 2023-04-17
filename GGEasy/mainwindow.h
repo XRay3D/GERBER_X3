@@ -13,9 +13,12 @@
 
 #include "recent.h"
 
+#include <QAction>
 #include <QActionGroup>
+#include <QDockWidget>
 #include <QMainWindow>
 #include <QMessageBox>
+#include <QPushButton>
 #include <QThread>
 #include <QUndoStack>
 
@@ -50,6 +53,22 @@ public:
 
     QUndoStack& undoStack() { return undoStack_; }
 
+    void setDockWidget(QWidget* dwContent) {
+        if(!dwContent)
+            exit(-66);
+        if(dockWidget_->widget() == dwContent)
+            return;
+        if(auto widget = dockWidget_->widget(); widget) {
+            dockWidget_->setWidget(dwContent); // NOTE  заменяет виджет новым и сбрасывается предок
+            widget->setParent(nullptr);        //       так как виджет лежит полем класса плагина.
+        } else
+            dockWidget_->setWidget(dwContent);
+        dockWidget_->setWindowTitle(dwContent->windowTitle());
+        if(auto pbClose{dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
+            connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
+        dockWidget_->show();
+    }
+
 signals:
     void parseFile(const QString& filename, int type);
 
@@ -57,7 +76,7 @@ private slots:
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
     void addFileToPro(class AbstractFile* file);
-    void setDockWidget(QWidget* dwContent);
+    //    void setDockWidget(QWidget* dwContent);
 
 private:
     QDockWidget* dockWidget_ = nullptr;
@@ -102,7 +121,17 @@ private:
     void renderPdf();
 
     void readSettings();
-    void resetToolPathsActions();
+
+    void resetToolPathsActions() {
+        if(auto widget = dockWidget_->widget(); widget) {
+            dockWidget_->setWidget(new QWidget); // NOTE  заменяет виджет новым и сбрасывается предок
+            widget->setParent(nullptr);          //       так как виджет лежит полем класса плагина.
+        }
+        dockWidget_->setVisible(false);
+        if(auto action{actionGroup.checkedAction()}; action)
+            action->setChecked(false);
+    }
+
     void selectAll();
     void deSelectAll();
 
@@ -159,7 +188,7 @@ private:
         class QWidget* widget;
         class QVBoxLayout* verticalLayout;
         FileTree::View* treeView;
-        void setupUi(QMainWindow* MainWindow); // setupUi
+        void setupUi(QMainWindow* MainWindow);       // setupUi
         void retranslateUi(QMainWindow* MainWindow); // retranslateUi
     } ui;
 };

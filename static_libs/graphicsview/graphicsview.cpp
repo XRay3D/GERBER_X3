@@ -167,7 +167,7 @@ void GraphicsView::zoom100() {
         x = qAbs(1.0 / m11 / (25.4 / physicalDpiX()));
         y = qAbs(1.0 / m22 / (25.4 / physicalDpiY()));
     } else {
-        const QSizeF size(GetRealSize()); // size in mm
+        const QSizeF size(GetRealSize());                                      // size in mm
         const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
         x = qAbs(1.0 / m11 / (size.height() / scrGeometry.height()));
         y = qAbs(1.0 / m22 / (size.width() / scrGeometry.width()));

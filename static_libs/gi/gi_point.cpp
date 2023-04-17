@@ -356,16 +356,16 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             settings.beginGroup("Pin");
             bool ok;
             double depth = QInputDialog::getDouble(
-                nullptr, // parent
-                "", // title
-                tr("Set Depth"), // label
+                nullptr,                            // parent
+                "",                                 // title
+                tr("Set Depth"),                    // label
                 settings.value("depth").toDouble(), // value
-                0, // minValue
-                20, // maxValue
-                1, // decimals
-                &ok, // ok
-                Qt::WindowFlags(), // flags
-                1 // step
+                0,                                  // minValue
+                20,                                 // maxValue
+                1,                                  // decimals
+                &ok,                                // ok
+                Qt::WindowFlags(),                  // flags
+                1                                   // step
             );
             if(!ok)
                 return;

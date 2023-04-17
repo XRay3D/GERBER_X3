@@ -95,8 +95,8 @@ void Ruler::paintEvent(QPaintEvent* event) {
     Q_UNUSED(event)
     QPainter painter(this);
     painter.setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
-    painter.setPen(QPen(Qt::darkGray, 0.0)); // zero width pen is cosmetic pen
-    QRectF rulerRect(rect()); // We want to work with floating point, so we are considering the rect as QRectF
+    painter.setPen(QPen(Qt::darkGray, 0.0));            // zero width pen is cosmetic pen
+    QRectF rulerRect(rect());                           // We want to work with floating point, so we are considering the rect as QRectF
 
     // at first fill the rect
     painter.fillRect(rulerRect, App::settings().guiColor(GuiColors::Background));

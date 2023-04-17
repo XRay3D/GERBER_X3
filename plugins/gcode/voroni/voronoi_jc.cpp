@@ -88,7 +88,7 @@ void VoronoiJc::jcVoronoi() {
                 const jcv_edge* edge = graph_edge->edge;
                 const Pair pair{toPoint(edge, 0), toPoint(edge, 1), sites[i].p.id};
                 if(edge->sites[0] == nullptr || edge->sites[1] == nullptr)
-                    frame.insert(pair); // frame
+                    frame.insert(pair);                                              // frame
                 else if(edge->sites[0]->p.id != edge->sites[1]->p.id)
                     edges[edge->sites[0]->p.id ^ edge->sites[1]->p.id].insert(pair); // other
                 graph_edge = graph_edge->next;

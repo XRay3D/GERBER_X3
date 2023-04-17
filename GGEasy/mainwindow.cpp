@@ -259,8 +259,8 @@ void MainWindow::createActionsEdit() {
     action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
-    auto dsaShortcut = new QShortcut(this); // Инициализируем объект
-    dsaShortcut->setKey(Qt::Key_Escape); // Устанавливаем код клавиши
+    auto dsaShortcut = new QShortcut(this);                                      // Инициализируем объект
+    dsaShortcut->setKey(Qt::Key_Escape);                                         // Устанавливаем код клавиши
     connect(dsaShortcut, &QShortcut::activated, this, &MainWindow::deSelectAll); // цепляем обработчик нажатия клавиши
 
     editMenu->addSeparator();
@@ -790,16 +790,6 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
     textBrowser->append("");
 }
 
-void MainWindow::resetToolPathsActions() {
-    if(auto widget = dockWidget_->widget(); widget) {
-        dockWidget_->setWidget(new QWidget); // NOTE  заменяет виджет новым и сбрасывается предок
-        widget->setParent(nullptr); //       так как виджет лежит полем класса плагина.
-    }
-    dockWidget_->setVisible(false);
-    if(auto action{actionGroup.checkedAction()}; action)
-        action->setChecked(false);
-}
-
 void MainWindow::documentWasModified() { setWindowModified(project_->isModified()); }
 
 bool MainWindow::maybeSave() {
@@ -1166,20 +1156,6 @@ void MainWindow::updateTheme() {
     QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
     if(App::mainWindowPtr() && App::mainWindow().isVisible())
         SettingsDialog().show();
-}
-
-void MainWindow::setDockWidget(QWidget* dwContent) {
-    if(!dwContent)
-        exit(-66);
-    if(auto widget = dockWidget_->widget(); widget) {
-        dockWidget_->setWidget(dwContent); // NOTE  заменяет виджет новым и сбрасывается предок
-        widget->setParent(nullptr); //       так как виджет лежит полем класса плагина.
-    } else
-        dockWidget_->setWidget(dwContent);
-    dockWidget_->setWindowTitle(dwContent->windowTitle());
-    if(auto pbClose{dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
-        connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
-    dockWidget_->show();
 }
 
 void MainWindow::open() {

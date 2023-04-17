@@ -72,7 +72,7 @@ public:
     /*virtual*/ bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     /*virtual*/ Qt::ItemFlags flags(const QModelIndex& index) const override;
     /*virtual*/ QVariant data(const QModelIndex& index, int role) const override;
-    /*virtual*/ void menu(QMenu& menu, FileTree::View* tv) const override;
+    /*virtual*/ void menu(QMenu& menu, FileTree::View* tv) override;
     int32_t id() const override { return id_; };
 
 protected:
@@ -87,6 +87,7 @@ protected:
     // QGraphicsItem interface
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
@@ -94,7 +95,6 @@ protected:
 
     // AbstractShape interface
     virtual void updateOtherHandlers(Handle* handler, int mode = {});
-
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);
 };

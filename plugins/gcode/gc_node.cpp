@@ -113,7 +113,7 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     }
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
+void Node::menu(QMenu& menu, FileTree::View* tv) {
     static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(id());

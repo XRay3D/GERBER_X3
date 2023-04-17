@@ -72,7 +72,7 @@ public:
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
     virtual QVariant data(const QModelIndex& index, int role) const = 0;
-    virtual void menu(QMenu& menu, View* tv) const = 0;
+    virtual void menu(QMenu& menu, View* tv) = 0;
 
     virtual int32_t id() const { return id__; }
     virtual void setId(int32_t id) { id__ = id; }

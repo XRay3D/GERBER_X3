@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi.h"
+#include "gi_gcpath.h"
 #include "jc_voronoi.h"
 
 // namespace ClipperLib {

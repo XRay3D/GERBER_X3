@@ -130,7 +130,7 @@ void Spline::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker: // 100
+        case SubclassMarker:      // 100
             break;
         case ExtrusionDirectionX: // 210
             break;
@@ -138,7 +138,7 @@ void Spline::parse(CodeData& code) {
             break;
         case ExtrusionDirectionZ: // 230
             break;
-        case SplineFlag: // 70
+        case SplineFlag:          // 70
             splineFlag = code;
             break;
         case DegreeOfTheSplineCurve: // 71
@@ -173,7 +173,7 @@ void Spline::parse(CodeData& code) {
             break;
         case StartTangentZ: // 32
             break;
-        case EndTangentX: // 13
+        case EndTangentX:   // 13
             EndTangent.setX(code);
             break;
         case EndTangentY: // 23
@@ -181,7 +181,7 @@ void Spline::parse(CodeData& code) {
             break;
         case EndTangentZ: // 33
             break;
-        case KnotValue: // 40
+        case KnotValue:   // 40
             KnotValues << double(code);
             break;
         case Weight: // 41
@@ -196,7 +196,7 @@ void Spline::parse(CodeData& code) {
             break;
         case ControlPointsZ: // 30
             break;
-        case FitPointsX: // 11
+        case FitPointsX:     // 11
             FitPoints.resize(FitPoints.size() + 1);
             FitPoints.last().setX(code);
             break;

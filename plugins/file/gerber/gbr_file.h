@@ -11,8 +11,8 @@
 #pragma once
 
 #include "abstract_file.h"
-#include "gbrcomp_onent.h"
 #include "gbr_aperture.h"
+#include "gbrcomp_onent.h"
 #include <forward_list>
 
 namespace Gerber {

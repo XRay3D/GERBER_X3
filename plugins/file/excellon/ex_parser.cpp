@@ -95,7 +95,7 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
 bool Parser::parseComment(QString line) {
     if(line.startsWith(';')) {
         line = line.toUpper();
-        if(auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) { // regexComment
+        if(auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) {                                               // regexComment
 
             if(auto [matchTool, tool, diam] = ctre::match<R"(\s*(?:HOLESIZE)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)">(comment); matchTool) { // tool
                 qDebug() << __FUNCTION__ << tool << diam;

@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gc_creator.h"
+#include "gc_file.h"
 
 namespace CrossHatch {
 

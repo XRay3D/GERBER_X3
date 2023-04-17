@@ -115,10 +115,10 @@ enum GCode {
 };
 
 enum AttributeType {
-    AttributeA, // TF
+    AttributeA,        // TF
     ApertureAttribute, // TA
-    ObjectAttribute, // TO
-    DeleteAttribute // TD
+    ObjectAttribute,   // TO
+    DeleteAttribute    // TD
 };
 
 enum PrimitiveType {
