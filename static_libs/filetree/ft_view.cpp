@@ -148,33 +148,7 @@ void View::setModel(QAbstractItemModel* model) {
     setItemDelegateForColumn(1, new SideDelegate(this));
     setItemDelegateForColumn(2, new TypeDelegate(this));
 
-    {
-        setIconSize(QSize(24, 24));
-        const int w = indentation();
-        const QModelIndex& row = model->index(0, 0, QModelIndex());
-        if(row.isValid()) {
-            const int h = rowHeight(row);
-            QImage i(w, h, QImage::Format_ARGB32);
-            QPainter p(&i);
-            p.setPen(QColor(128, 128, 128));
-            // │
-            i.fill(Qt::transparent);
-            p.drawLine(w / 2, 0, w / 2, h);
-            i.save("settings/vline.png", "PNG");
-            // ├─
-            p.drawLine(w / 2, h / 2, w, h / 2);
-            i.save("settings/branch-more.png", "PNG");
-            // └─
-            i.fill(Qt::transparent);
-            p.drawLine(w / 2, 0, w / 2, h / 2);
-            p.drawLine(w / 2, h / 2, w, h / 2);
-            i.save("settings/branch-end.png", "PNG");
-            QFile file(":/qtreeviewstylesheet/QTreeView.qss");
-            file.open(QFile::ReadOnly);
-            setStyleSheet(file.readAll());
-            header()->setMinimumHeight(h);
-        }
-    }
+    setIconSize(QSize(24, 24));
 }
 
 void View::showExcellonDialog() { }

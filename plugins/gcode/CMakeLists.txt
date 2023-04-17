@@ -77,5 +77,5 @@ add_subdirectory(voroni)
 
 add_subdirectory(thermal)
 
-#add_subdirectory(thread)
+add_subdirectory(thread)
 

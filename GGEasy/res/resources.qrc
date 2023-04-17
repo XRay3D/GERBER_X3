@@ -349,7 +349,6 @@
         <file>icons/ggeasy-light/toolpath/prof_on_conv.svg</file>
         <file>icons/ggeasy-light/toolpath/prof_out_climb.svg</file>
         <file>icons/ggeasy-light/toolpath/prof_out_conv.svg</file>
-        <file>qtreeviewstylesheet/QTreeView.qss</file>
         <file>tool/drill.png</file>
         <file>tool/endmill.png</file>
         <file>tool/engraving.png</file>
