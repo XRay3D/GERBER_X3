@@ -76,7 +76,7 @@ using VarMap = std::map<QString, double>;
 
 class Result {
 public:
-    double acc{}; // Аккамулятор
+    double acc{};       // Аккамулятор
     QStringView rest{}; // остаток строки, которую мы еще не обработали
     //    Result(double v = 0.0, const QStringView& r = {})
     //        : acc(v)

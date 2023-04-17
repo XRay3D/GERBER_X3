@@ -31,7 +31,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
 
     dbgPaths(workingPs, "workingPs");
 
-    { // create tool path
+    {     // create tool path
         { // execute offset
             ClipperOffset offset;
             offset.AddPaths(workingPs, JoinType::Round, EndType::Polygon);

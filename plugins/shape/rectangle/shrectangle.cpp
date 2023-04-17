@@ -14,6 +14,7 @@
 #include "graphicsview.h"
 #include "shhandler.h"
 #include <QIcon>
+#include <array>
 #include <ranges>
 
 namespace Rectangle_ {
@@ -35,6 +36,12 @@ Shape::Shape(QPointF pt1, QPointF pt2) {
     redraw();
 
     App::graphicsView().addItem(this);
+}
+
+QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if(change == GraphicsItemChange::ItemSelectedChange)
+        qobject_cast<QTableView*>(model->parent())->reset();
+    return Shapes::AbstractShape::itemChange(change, value);
 }
 
 void Shape::redraw() {
@@ -106,22 +113,81 @@ Model::Model(QObject* parent)
 Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    if(shape && (role == Qt::DisplayRole || role == Qt::EditRole)) {
+    auto shapes = this->shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    if(!std::ranges::empty(shapes) /*shapes.size()*/ && (role == Qt::DisplayRole || role == Qt::EditRole)) {
+        double val{};
+        bool fl{true};
+
+        std::array getter{&QGraphicsItem::x, &QGraphicsItem::y};
         switch(index.row()) {
         case 0:
-            return abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+            for(int i{}; auto* shape: shapes) {
+                qDebug() << shape << i << val;
+                if(!i++)
+                    val = abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+                else
+                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()));
+            }
+            return val; // fl ? val : std::nan("");
         case 1:
-            return abs(shape->handlers[Shape::Point1]->y() - shape->handlers[Shape::Point3]->y());
+            for(int i{}; auto* shape: shapes) {
+                qDebug() << shape << i << val;
+                if(!i++)
+                    val = abs(shape->handlers[Shape::Point1]->y() - shape->handlers[Shape::Point3]->y());
+                else
+                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->y() - shape->handlers[Shape::Point3]->y()));
+            }
+            return val; // fl ? val : std::nan("");
         case 2:
-            return index.column() ? shape->handlers[Shape::Center]->y() : shape->handlers[Shape::Center]->x();
+            for(int i{}; auto* shape: shapes)
+                return (*shape->handlers[Shape::Center].*getter[index.column()])();
+            //            for(int i{}; auto* shape: shapes) {
+            //                qDebug() << shape << i << val;
+            //                if(!i++)
+            //                    val = abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+            //                else
+            //                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()));
+            //            }
         case 3:
-            return index.column() ? shape->handlers[Shape::Point1]->y() : shape->handlers[Shape::Point1]->x();
+            for(int i{}; auto* shape: shapes)
+                return (*shape->handlers[Shape::Point1].*getter[index.column()])();
+            //            for(int i{}; auto* shape: shapes) {
+            //                qDebug() << shape << i << val;
+            //                if(!i++)
+            //                    val = abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+            //                else
+            //                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()));
+            //            }
         case 4:
-            return index.column() ? shape->handlers[Shape::Point2]->y() : shape->handlers[Shape::Point2]->x();
+            for(int i{}; auto* shape: shapes)
+                return (*shape->handlers[Shape::Point2].*getter[index.column()])();
+            //            for(int i{}; auto* shape: shapes) {
+            //                qDebug() << shape << i << val;
+            //                if(!i++)
+            //                    val = abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+            //                else
+            //                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()));
+            //            }
         case 5:
-            return index.column() ? shape->handlers[Shape::Point3]->y() : shape->handlers[Shape::Point3]->x();
+            for(int i{}; auto* shape: shapes)
+                return (*shape->handlers[Shape::Point3].*getter[index.column()])();
+            //            for(int i{}; auto* shape: shapes) {
+            //                qDebug() << shape << i << val;
+            //                if(!i++)
+            //                    val = abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+            //                else
+            //                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()));
+            //            }
         case 6:
-            return index.column() ? shape->handlers[Shape::Point4]->y() : shape->handlers[Shape::Point4]->x();
+            for(int i{}; auto* shape: shapes)
+                return (*shape->handlers[Shape::Point4].*getter[index.column()])();
+            //            for(int i{}; auto* shape: shapes) {
+            //                qDebug() << shape << i << val;
+            //                if(!i++)
+            //                    val = abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x());
+            //                else
+            //                    fl &= qFuzzyCompare(val, abs(shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()));
+            //            }
         }
     }
     if(role == Qt::TextAlignmentRole)
@@ -145,32 +211,76 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    if(shape && role == Qt::EditRole) {
+    auto shapes = this->shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    if(!std::ranges::empty(shapes) /*shapes.size()*/ && role == Qt::EditRole) {
         double val = value.toDouble();
+
+        auto WidthHeight = [&shapes, val](auto get, auto set) {
+            for(auto* shape: shapes) {
+                (((*shape->handlers[Shape::Point1].*get)() - (*shape->handlers[Shape::Point3].*get)()) < 0
+                        ? (*shape->handlers[Shape::Point3].*set)((*shape->handlers[Shape::Point1].*get)() + val)
+                        : (*shape->handlers[Shape::Point3].*set)((*shape->handlers[Shape::Point1].*get)() - val));
+                shape->currentHandler = shape->handlers[Shape::Point3].get();
+                shape->redraw();
+            }
+        };
+
         switch(index.row()) {
         case 0:
-            ((shape->handlers[Shape::Point1]->x() - shape->handlers[Shape::Point3]->x()) < 0 ? shape->handlers[Shape::Point3]->setX(shape->handlers[Shape::Point1]->x() + val) : shape->handlers[Shape::Point3]->setX(shape->handlers[Shape::Point1]->x() - val));
+            WidthHeight(&QGraphicsItem::x, &QGraphicsItem::setX);
             break;
         case 1:
-            ((shape->handlers[Shape::Point1]->y() - shape->handlers[Shape::Point3]->y()) < 0 ? shape->handlers[Shape::Point3]->setY(shape->handlers[Shape::Point1]->y() + val) : shape->handlers[Shape::Point3]->setY(shape->handlers[Shape::Point1]->y() - val));
+            WidthHeight(&QGraphicsItem::y, &QGraphicsItem::setY);
             break;
         case 2:
-            (index.column() ? shape->handlers[Shape::Center]->setY(val) : shape->handlers[Shape::Center]->setX(val));
+            for(auto* shape: shapes) {
+                (index.column()
+                        ? shape->handlers[Shape::Center]->setY(val)
+                        : shape->handlers[Shape::Center]->setX(val));
+                shape->currentHandler = shape->handlers[Shape::Point3].get();
+                shape->redraw();
+            }
             break;
         case 3:
-            (index.column() ? shape->handlers[Shape::Point1]->setY(val) : shape->handlers[Shape::Point1]->setX(val));
+            for(auto* shape: shapes) {
+                (index.column()
+                        ? shape->handlers[Shape::Point1]->setY(val)
+                        : shape->handlers[Shape::Point1]->setX(val));
+                shape->currentHandler = shape->handlers[Shape::Point1].get();
+                shape->redraw();
+            }
             break;
         case 4:
-            (index.column() ? shape->handlers[Shape::Point2]->setY(val) : shape->handlers[Shape::Point2]->setX(val));
+            for(auto* shape: shapes) {
+                (index.column()
+                        ? shape->handlers[Shape::Point2]->setY(val)
+                        : shape->handlers[Shape::Point2]->setX(val));
+                shape->currentHandler = shape->handlers[Shape::Point2].get();
+                shape->redraw();
+            }
             break;
         case 5:
-            (index.column() ? shape->handlers[Shape::Point3]->setY(val) : shape->handlers[Shape::Point3]->setX(val));
+            for(auto* shape: shapes) {
+                (index.column()
+                        ? shape->handlers[Shape::Point3]->setY(val)
+                        : shape->handlers[Shape::Point3]->setX(val));
+                shape->currentHandler = shape->handlers[Shape::Point3].get();
+                shape->redraw();
+            }
             break;
         case 6:
-            (index.column() ? shape->handlers[Shape::Point4]->setY(val) : shape->handlers[Shape::Point4]->setX(val));
+            for(auto* shape: shapes) {
+                (index.column()
+                        ? shape->handlers[Shape::Point4]->setY(val)
+                        : shape->handlers[Shape::Point4]->setX(val));
+                shape->currentHandler = shape->handlers[Shape::Point4].get();
+                shape->redraw();
+            }
             break;
         }
-        shape->redraw();
+
+        //        for(auto* shape: shapes)
+        //            shape->redraw();
         return true;
     }
     return {};
@@ -231,6 +341,12 @@ Editor::Editor(Plugin* plugin)
     view->setSpan(1, 0, 1, 2);
     view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
+}
+
+void Editor::addShape(Shape* shape) {
+    model->shapes.emplace_back(shape);
+    shape->model = model;
+    view->reset();
 }
 
 } // namespace Rectangle_

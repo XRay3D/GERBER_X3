@@ -30,7 +30,7 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree_::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) override;
 };
 
 class NodeLayer : public FileTree_::Node {
@@ -46,7 +46,7 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree_::View* tv) const override;
+    void menu(QMenu& menu, FileTree_::View* tv) override;
 };
 
 } // namespace Hpgl

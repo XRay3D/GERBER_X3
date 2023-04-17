@@ -131,9 +131,9 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
             go.fill = C2::InflatePaths(Paths{hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
         }
         go.name = QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
-        go.type = GraphicObject::FlStamp; // type{},//{Null};
-                                          // go.id = int32_t {};                                                                             // id {-1};
-        go.raw = tools_.at(hole.state.toolId); // raw;
+        go.type = GraphicObject::FlStamp;                                                               // type{},//{Null};
+                                                                                                        // go.id = int32_t {};                                                                             // id {-1};
+        go.raw = tools_.at(hole.state.toolId);                                                          // raw;
         retData.emplace_back(go * transform_);
 
         //        if (bool slot = hole.state.path.size(); slot)

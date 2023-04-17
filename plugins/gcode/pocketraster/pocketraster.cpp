@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketraster.h"
+#include "project.h"
 #include <QElapsedTimer>
 #include <execution>
 
@@ -187,7 +188,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         c.AddOpenSubject({zPath});
         c.AddClip(laserPath);
         c.Execute(ClipType::Intersection, FillRule::NonZero, laserPath, laserPath); // laser on
-        addAcc(laserPath, gcp_.params[AccDistance].toDouble() * uScale); // add laser off paths
+        addAcc(laserPath, gcp_.params[AccDistance].toDouble() * uScale);            // add laser off paths
     }
 
     if(!qFuzzyIsNull(angle)) // Rotate Paths

@@ -145,7 +145,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 
 int Node::id() const { return file->id(); }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
+void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.setToolTipDuration(0);
     menu.setToolTipsVisible(true);

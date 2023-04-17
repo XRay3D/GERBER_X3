@@ -132,7 +132,7 @@ void File::statFile() {
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
-        QString str(App::gcSettings().start()); //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().start());      //"G21 G17 G90"); //G17 XY plane
         str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
@@ -148,7 +148,7 @@ void File::endFile() {
     } else {
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
         QPointF home(App::home().pos() - App::zero().pos());
-        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
+        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())}));  // HomeXY
         lines_.emplace_back(App::gcSettings().end());
     }
     for(size_t i = 0; i < lines_.size(); ++i) // remove epty lines
@@ -200,7 +200,7 @@ void File::startPath(const QPointF& point) {
         //        gCodeText_.push_back(formated({ g1(), speed(spindleSpeed) }));
     } else {
         lines_.emplace_back(formated({g0(), x(point.x()), y(point.y()), speed(spindleSpeed())})); // start xy
-        lines_.emplace_back(formated({g0(), z(App::project().plunge())})); // start z
+        lines_.emplace_back(formated({g0(), z(App::project().plunge())}));                        // start z
         //        lastValues[AlwaysF].clear();
     }
 }

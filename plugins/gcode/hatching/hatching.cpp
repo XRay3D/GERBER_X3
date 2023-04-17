@@ -99,10 +99,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         for(size_t i{}, last{}; i < sl.size(); ++i) {
             if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
 
-                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) : // horizontal sort
+                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
                     std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
 
-                for(size_t k = last; k < i; ++k) // fix direction
+                for(size_t k = last; k < i; ++k)                                                                                     // fix direction
                     if(fl ^ (sl[k].front().x < sl[k].back().x))
                         std::swap(sl[k].front().x, sl[k].back().x);
 
@@ -127,7 +127,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             // dbgPaths(tmp, "ClipType::Difference");
             frames.append(tmp);
 
-            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
+            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; });                                        // vertical sort
 
             std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
             for(auto& path: frames)

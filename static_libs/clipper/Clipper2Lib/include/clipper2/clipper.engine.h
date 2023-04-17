@@ -118,9 +118,9 @@ struct OutRec {
 struct Active {
     Point64 bot;
     Point64 top;
-    int_t curr_x = 0; // current (updated at every new scanline)
+    int_t curr_x = 0;  // current (updated at every new scanline)
     double dx = 0.0;
-    int wind_dx = 1; // 1 or -1 depending on winding direction
+    int wind_dx = 1;   // 1 or -1 depending on winding direction
     int wind_cnt = 0;
     int wind_cnt2 = 0; // winding count of the opposite polytype
     OutRec* outrec = nullptr;
@@ -333,7 +333,7 @@ public:
     pp64_itor end() const { return childs_.cend(); }
 
     auto begin() { return childs_.begin(); } // x-ray
-    auto end() { return childs_.end(); } // x-ray
+    auto end() { return childs_.end(); }     // x-ray
 
     PolyPath64* AddChild(const Path64& path) override {
         auto p = std::make_unique<PolyPath64>(this);

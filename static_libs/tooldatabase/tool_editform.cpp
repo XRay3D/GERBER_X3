@@ -26,41 +26,41 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     ui->setupUi(this);
     // clang-format AlignArrayOfStructures: Left
     update = {
-        {ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle            },
-        {ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter         },
-        {ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate         },
-        {ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght           },
-        {ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut       },
+        {            ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle},
+        {         ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter},
+        {         ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate},
+        {           ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght},
+        {       ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut},
         {ui->dsbxOneTurnCutPercent, &ToolEditForm::updateDsbxOneTurnCutPercent},
-        {ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth        },
-        {ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate       },
-        {ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed     },
-        {ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover         },
-        {ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent  },
+        {        ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth},
+        {       ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate},
+        {     ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed},
+        {         ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover},
+        {  ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent},
     };
 
     get = {
-        std::pair{ui->dsbxAngle,        &Tool::angle       },
-        std::pair{ui->dsbxDiameter,     &Tool::diameter    },
-        std::pair{ui->dsbxFeedRate,     &Tool::feedRate    },
-        std::pair{ui->dsbxLenght,       &Tool::lenght      },
-        std::pair{ui->dsbxOneTurnCut,   &Tool::oneTurnCut  },
-        std::pair{ui->dsbxPassDepth,    &Tool::passDepth   },
-        std::pair{ui->dsbxPlungeRate,   &Tool::plungeRate  },
+        std::pair{       ui->dsbxAngle,        &Tool::angle},
+        std::pair{    ui->dsbxDiameter,     &Tool::diameter},
+        std::pair{    ui->dsbxFeedRate,     &Tool::feedRate},
+        std::pair{      ui->dsbxLenght,       &Tool::lenght},
+        std::pair{  ui->dsbxOneTurnCut,   &Tool::oneTurnCut},
+        std::pair{   ui->dsbxPassDepth,    &Tool::passDepth},
+        std::pair{  ui->dsbxPlungeRate,   &Tool::plungeRate},
         std::pair{ui->dsbxSpindleSpeed, &Tool::spindleSpeed},
-        std::pair{ui->dsbxStepover,     &Tool::stepover    },
+        std::pair{    ui->dsbxStepover,     &Tool::stepover},
     };
 
     set = {
-        std::pair{ui->dsbxAngle,        &Tool::setAngle       },
-        std::pair{ui->dsbxDiameter,     &Tool::setDiameter    },
-        std::pair{ui->dsbxFeedRate,     &Tool::setFeedRate    },
-        std::pair{ui->dsbxLenght,       &Tool::setLenght      },
-        std::pair{ui->dsbxOneTurnCut,   &Tool::setOneTurnCut  },
-        std::pair{ui->dsbxPassDepth,    &Tool::setPassDepth   },
-        std::pair{ui->dsbxPlungeRate,   &Tool::setPlungeRate  },
+        std::pair{       ui->dsbxAngle,        &Tool::setAngle},
+        std::pair{    ui->dsbxDiameter,     &Tool::setDiameter},
+        std::pair{    ui->dsbxFeedRate,     &Tool::setFeedRate},
+        std::pair{      ui->dsbxLenght,       &Tool::setLenght},
+        std::pair{  ui->dsbxOneTurnCut,   &Tool::setOneTurnCut},
+        std::pair{   ui->dsbxPassDepth,    &Tool::setPassDepth},
+        std::pair{  ui->dsbxPlungeRate,   &Tool::setPlungeRate},
         std::pair{ui->dsbxSpindleSpeed, &Tool::setSpindleSpeed},
-        std::pair{ui->dsbxStepover,     &Tool::setStepover    },
+        std::pair{    ui->dsbxStepover,     &Tool::setStepover},
     };
 
     dsbxMapdsbxMap = {
@@ -240,7 +240,7 @@ void ToolEditForm::setupToolWidgets(int) {
         if(data.set.contains(currType)) {
             data.dsbx[0]->setMaximum(std::visit(value, data.max));
 
-            if(data.lastVal) // restore last val
+            if(data.lastVal)     // restore last val
                 data.dsbx[0]->setValue(data.lastVal.value());
             else if(data.defVal) // set default val
                 data.dsbx[0]->setValue(data.defVal.value());

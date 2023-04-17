@@ -277,7 +277,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     return {};
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
+void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
         auto dialog = new SourceDialog(id(), tv);
@@ -395,7 +395,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
     return {};
 }
 
-void NodeLayer::menu(QMenu& menu, FileTree::View* tv) const {
+void NodeLayer::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);
         cd.setCurrentColor(layer->color());

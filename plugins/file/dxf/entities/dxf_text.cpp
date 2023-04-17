@@ -162,16 +162,16 @@ DxfGo Text::toGo() const {
         break;
     case MiddleH: // 4
         break;
-    case Fit: // 5
+    case Fit:     // 5
         break;
     }
 
     switch(verticalJustType) {
     case Baseline: // 0
         break;
-    case Bottom: // 1
+    case Bottom:   // 1
         break;
-    case MiddleV: // 2
+    case MiddleV:  // 2
         offset.ry() += ascent / 2;
         break;
     case Top: // 3

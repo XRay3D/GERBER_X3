@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "gc_file.h"
 #include "gc_types.h"
 
 namespace Voronoi {

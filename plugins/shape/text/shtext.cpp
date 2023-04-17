@@ -212,7 +212,7 @@ QVariant Text::data(const QModelIndex& index, int role) const {
     }
 }
 
-void Text::menu(QMenu& menu, FileTree_::View* tv) const {
+void Text::menu(QMenu& menu, FileTree_::View* tv) {
     AbstractShape::menu(menu, tv);
     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
         ShTextDialog dlg({const_cast<Text*>(this)}, tv);

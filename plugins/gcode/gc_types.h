@@ -163,7 +163,7 @@ public:
         Depth,
         GrItems,
         MultiToolIndex, // need for Pocket
-        NotTile, // не раскладывать если даже раскладка включена
+        NotTile,        // не раскладывать если даже раскладка включена
         Side,
 
         UserParam = 100

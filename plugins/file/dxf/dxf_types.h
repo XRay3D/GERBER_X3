@@ -11,6 +11,7 @@
 #pragma once
 
 #include "entities/dxf_graphicobject.h"
+#include "md5.h"
 
 #include <QColor>
 #include <QVariant>

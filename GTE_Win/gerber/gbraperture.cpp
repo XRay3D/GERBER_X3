@@ -271,7 +271,7 @@ void ApMacro::draw() {
     enum {
         Comment = 0,
         Circle = 1,
-        OutlineCustomPolygon = 4, // MAXIMUM 5000 POINTS
+        OutlineCustomPolygon = 4,  // MAXIMUM 5000 POINTS
         OutlineRegularPolygon = 5, // 3-12 POINTS
         Moire = 6,
         Thermal = 7,

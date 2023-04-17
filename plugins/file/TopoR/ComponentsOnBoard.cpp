@@ -55,7 +55,7 @@ QString ComponentsOnBoard::AddComponent(const QString& name, units units, const 
     if(_Components.empty())
         return "";
     auto name_{name};
-    while(ComponentIndexOf(name_) >= 0) // проверка на уникальность имени и добавление префикса
+    while(ComponentIndexOf(name_) >= 0)         // проверка на уникальность имени и добавление префикса
         name_ += "_";
     for(int i = _Components.size(); i > 0; i--) // вычисление максимально возможных координат
     {

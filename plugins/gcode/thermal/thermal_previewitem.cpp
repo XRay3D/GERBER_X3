@@ -225,7 +225,7 @@ void PreviewItem::redraw() {
         const Point& center(rect.center());
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
         const auto fp(sourcePath.toFillPolygons()); // FIXME not used
-        for(int i = 0; i < node_->count(); ++i) { // Gaps
+        for(int i = 0; i < node_->count(); ++i) {   // Gaps
             ClipperOffset offset;
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
             offset.AddPath({center,

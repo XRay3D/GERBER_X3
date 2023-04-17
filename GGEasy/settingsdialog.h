@@ -107,7 +107,7 @@ private:
         DoubleSpinBox* dsbxMinCircleSegmentLength;
         QSpacerItem* verticalSpacer_2;
 
-        void setupUi(QDialog* SettingsDialog); // setupUi
+        void setupUi(QDialog* SettingsDialog);       // setupUi
 
         void retranslateUi(QDialog* SettingsDialog); // retranslateUi
 

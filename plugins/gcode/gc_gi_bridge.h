@@ -33,9 +33,9 @@ public:
     bool test(const Path& path);
     QPointF snapedPos(const QPointF& pos);
 
-    static inline GiBridge* moveBrPtr; // NOTE приватизировать в будущем??
-    static inline double lenght{}; //
-    static inline double toolDiam{}; //
+    static inline GiBridge* moveBrPtr;         // NOTE приватизировать в будущем??
+    static inline double lenght{};             //
+    static inline double toolDiam{};           //
     static inline GCode::SideOfMilling side{}; //
 
 protected:

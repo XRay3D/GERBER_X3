@@ -100,7 +100,7 @@ public:
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
-    void setVisible(bool visible);
+    Q_INVOKABLE void setVisible(bool visible);
 
     const AbstractFile* file() const;
     template <typename T>
