@@ -80,7 +80,7 @@ class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thermal.json")
     Q_INTERFACES(GCode::Plugin)
- Form form{this};
+    Form form{this};
     // GCode::Plugin interface
 public:
     QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
@@ -90,7 +90,7 @@ public:
     }
     QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
-    QWidget* createForm() override{return &form;};
+    QWidget* createForm() override { return &form; };
     //    bool canToShow() const override { return /*Form::canToShow()*/; }
     uint32_t type() const override { return THERMAL; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

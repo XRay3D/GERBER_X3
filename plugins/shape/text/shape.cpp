@@ -10,23 +10,19 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "shtext.h"
-
-#include "abstract_file.h"
+#include "shape.h"
 #include "graphicsview.h"
+#include "math.h"
 #include "shhandler.h"
-
 #include "shtextdialog.h"
-
-#include <QApplication>
 #include <QIcon>
-#include <QPainter>
-#include <QStyleOptionGraphicsItem>
-#include <QTimer>
+#include <assert.h>
 
-namespace Shapes {
+using Shapes::Handle;
 
-Text::Text(QPointF pt1) {
+namespace ShTxt {
+
+Shape::Shape(QPointF pt1) {
     loadIData();
     paths_.resize(1);
     handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
@@ -35,7 +31,12 @@ Text::Text(QPointF pt1) {
     App::graphicsView().addItem(this);
 }
 
-void Text::redraw() {
+Shape::~Shape() {
+    std::erase(model->shapes, this);
+    qobject_cast<QTableView*>(model->parent())->reset();
+}
+
+void Shape::redraw() {
     QPainterPath painterPath;
 
     QFont font;
@@ -46,41 +47,28 @@ void Text::redraw() {
     auto bRect = painterPath.boundingRect();
 
     QFontMetrics fm(font);
-    const auto capHeight = fm.capHeight();
-    const auto scale = iData.height / capHeight;
-    const auto xyScale = 100.0 / iData.xy;
+    const double capHeight = fm.capHeight();
+    const double scale = iData.height / capHeight;
+    const double xyScale = 100.0 / iData.xy;
 
     QPointF handlePt;
 
-    switch(iData.handleAlign) {
-    case BotCenter:
-        handlePt -= QPointF(bRect.width() * 0.5, 0);
-        break;
-    case BotLeft:
-        handlePt -= QPointF();
-        break;
-    case BotRight:
-        handlePt -= QPointF(bRect.width(), 0);
-        break;
-    case Center:
-        handlePt -= QPointF(bRect.width() * 0.5, capHeight * 0.5);
-        break;
-    case CenterLeft:
-        handlePt -= QPointF(0, capHeight * 0.5);
-        break;
-    case CenterRight:
-        handlePt -= QPointF(bRect.width(), capHeight * 0.5);
-        break;
-    case TopCenter:
-        handlePt -= QPointF(bRect.width() * 0.5, capHeight);
-        break;
-    case TopLeft:
-        handlePt -= QPointF(0, capHeight);
-        break;
-    case TopRight:
-        handlePt -= QPointF(bRect.width(), capHeight);
-        break;
-    }
+    handlePt -= [width = bRect.width(), capHeight](auto handleAlign) -> QPointF {
+        // clang-format off
+        switch(handleAlign) {
+        case BotCenter:   return {width / 2, 0            };
+        case BotLeft:     return {                        };
+        case BotRight:    return {width,     0            };
+        case Center:      return {width / 2, capHeight / 2};
+        case CenterLeft:  return {0,         capHeight / 2};
+        case CenterRight: return {width,     capHeight / 2};
+        case TopCenter:   return {width / 2, capHeight    };
+        case TopLeft:     return {0,         capHeight    };
+        case TopRight:    return {width,     capHeight    };
+        default:          return {                        };
+            // clang-format on
+        }
+    }(iData.handleAlign);
 
     QTransform transform;
     transform.translate(-bRect.left() * scale, 0);
@@ -129,28 +117,28 @@ void Text::redraw() {
     //    update();
 }
 
-QString Text::text() const { return iData.text; }
+QString Shape::text() const { return iData.text; }
 
-void Text::setText(const QString& value) {
+void Shape::setText(const QString& value) {
     iData.text = value;
     redraw();
 }
 
-Side Text::side() const { return iData.side; }
+Side Shape::side() const { return iData.side; }
 
-void Text::setSide(const Side& side) {
+void Shape::setSide(const Side& side) {
     iData.side = side;
     redraw();
 }
 
-void Text::setPt(const QPointF& point) {
+void Shape::setPt(const QPointF& point) {
     handlers.front()->setPos(point);
     redraw();
 }
 
-bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch(FileTree_::Column(index.column())) {
-    case FileTree_::Column::NameColorVisible:
+bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
+    switch(FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch(role) {
         case Qt::CheckStateRole:
             setVisible(value.value<Qt::CheckState>() == Qt::Checked);
@@ -160,7 +148,7 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         }
         break;
-    case FileTree_::Column::Side:
+    case FileTree::Column::Side:
         if(role == Qt::EditRole) {
             setSide(static_cast<Side>(value.toBool()));
             return true;
@@ -172,20 +160,20 @@ bool Text::setData(const QModelIndex& index, const QVariant& value, int role) {
     return AbstractShape::setData(index, value, role);
 }
 
-Qt::ItemFlags Text::flags(const QModelIndex& index) const {
-    switch(FileTree_::Column(index.column())) {
-    case FileTree_::Column::NameColorVisible:
+Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
+    switch(FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         return AbstractShape::flags(index) | Qt::ItemIsEditable;
-    case FileTree_::Column::Side:
+    case FileTree::Column::Side:
         return AbstractShape::flags(index) | Qt::ItemIsEditable;
     default:
         return AbstractShape::flags(index);
     }
 }
 
-QVariant Text::data(const QModelIndex& index, int role) const {
-    switch(FileTree_::Column(index.column())) {
-    case FileTree_::Column::NameColorVisible:
+QVariant Shape::data(const QModelIndex& index, int role) const {
+    switch(FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         switch(role) {
         case Qt::DisplayRole:
             return QString("%1 (%2, %3)")
@@ -197,11 +185,11 @@ QVariant Text::data(const QModelIndex& index, int role) const {
         default:
             return AbstractShape::data(index, role);
         }
-    case FileTree_::Column::Side:
+    case FileTree::Column::Side:
         switch(role) {
         case Qt::DisplayRole:
         case Qt::ToolTipRole:
-            return node_->sideStrList[side()];
+            return sideStrList[side()];
         case Qt::EditRole:
             return static_cast<bool>(side());
         default:
@@ -212,19 +200,19 @@ QVariant Text::data(const QModelIndex& index, int role) const {
     }
 }
 
-void Text::menu(QMenu& menu, FileTree_::View* tv) {
+void Shape::menu(QMenu& menu, FileTree::View* tv) {
     AbstractShape::menu(menu, tv);
-    menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Text"), [this, tv] {
-        ShTextDialog dlg({const_cast<Text*>(this)}, tv);
+    menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Shape"), [this, tv] {
+        ShTextDialog dlg({const_cast<Shape*>(this)}, tv);
         dlg.exec();
     });
 }
 
-void Text::write(QDataStream& stream) const { stream << iData; }
+void Shape::write(QDataStream& stream) const { stream << iData; }
 
-void Text::read(QDataStream& stream) { stream >> iData; }
+void Shape::read(QDataStream& stream) { stream >> iData; }
 
-void Text::saveIData() {
+void Shape::saveIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
     settings.setValue("font", iData.font);
@@ -236,11 +224,11 @@ void Text::saveIData() {
     settings.setValue("handleAlign", iData.handleAlign);
 }
 
-Text::InternalData Text::loadIData() {
+Shape::InternalData Shape::loadIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
     iData.font = settings.value("font").toString();
-    iData.text = settings.value("text", QObject::tr("Text")).toString();
+    iData.text = settings.value("text", QObject::tr("Shape")).toString();
     iData.side = static_cast<Side>(settings.value("side", Side::Top).toInt());
     iData.angle = settings.value("angle", 0.0).toDouble();
     iData.height = settings.value("height", 10.0).toDouble();
@@ -249,29 +237,35 @@ Text::InternalData Text::loadIData() {
     return iData;
 }
 
-void Text::save() { iDataCopy = iData; }
+void Shape::save() { iDataCopy = iData; }
 
-void Text::restore() {
+void Shape::restore() {
     iData = std::move(iDataCopy);
     redraw();
 }
 
-void Text::ok() { saveIData(); }
+void Shape::ok() { saveIData(); }
 
-void Text::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);
     ShTextDialog dlg({this}, nullptr);
     dlg.exec();
     redraw();
 }
 
-QPainterPath Text::shape() const { return shape_; }
+QPainterPath Shape::shape() const { return shape_; }
 
-QString Text::name() const { return QObject::tr("Text"); }
+QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if(change == GraphicsItemChange::ItemSelectedChange)
+        qobject_cast<QTableView*>(model->parent())->reset();
+    return Shapes::AbstractShape::itemChange(change, value);
+}
 
-QIcon Text::icon() const { return QIcon::fromTheme("draw-text"); }
+QString Shape::name() const { return QObject::tr("Shape"); }
 
-QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d) {
+QIcon Shape::icon() const { return QIcon::fromTheme("draw-text"); }
+
+QDataStream& operator<<(QDataStream& stream, const Shape::InternalData& d) {
     stream << d.text;
     stream << d.font;
     stream << d.angle;
@@ -282,7 +276,7 @@ QDataStream& operator<<(QDataStream& stream, const Text::InternalData& d) {
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, Text::InternalData& d) {
+QDataStream& operator>>(QDataStream& stream, Shape::InternalData& d) {
     stream >> d.text;
     stream >> d.font;
     stream >> d.angle;
@@ -293,16 +287,6 @@ QDataStream& operator>>(QDataStream& stream, Text::InternalData& d) {
     return stream;
 }
 
-////////////////////////////////////////////////////////////
-/// \brief PluginText::PluginText
-///
+} // namespace ShTxt
 
-int PluginImpl::type() const { return GiType::ShText; }
-
-QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-text"); }
-
-AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Text(point); }
-
-} // namespace Shapes
-
-#include "moc_shtext.cpp"
+#include "moc_shape.cpp"

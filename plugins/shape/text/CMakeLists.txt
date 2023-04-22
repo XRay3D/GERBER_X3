@@ -25,13 +25,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-set(PROJECT_SOURCES
-    shtext.cpp
-    shtext.h
-    shtextdialog.cpp
-    shtextdialog.h
-    shtextdialog.ui
-    text.json
+file(GLOB PROJECT_SOURCES
+    *.json
+    *.cpp
+    *.h
 )
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})

@@ -670,6 +670,7 @@ void MainWindow::selectAll() {
 }
 
 void MainWindow::deSelectAll() {
+    if(dockWidget_->isVisible()) return;
     for(QGraphicsItem* item: App::graphicsView().items())
         if(item->isVisible())
             item->setSelected(false);

@@ -10,14 +10,17 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "shpolyline.h"
+#include "shape.h"
 #include "graphicsview.h"
+#include "math.h"
 #include "shhandler.h"
 #include <QIcon>
 
-namespace Shapes {
+using Shapes::Handle;
 
-PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
+namespace ShPoly {
+
+Shape::Shape(QPointF pt1, QPointF pt2) {
     paths_.resize(1);
     handlers.reserve(4);
 
@@ -35,7 +38,18 @@ PolyLine::PolyLine(QPointF pt1, QPointF pt2) {
     App::graphicsView().addItem(this);
 }
 
-void PolyLine::redraw() {
+Shape::~Shape() {
+    std::erase(model->shapes, this);
+    qobject_cast<QTableView*>(model->parent())->reset();
+}
+
+QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if(change == GraphicsItemChange::ItemSelectedChange)
+        qobject_cast<QTableView*>(model->parent())->reset();
+    return Shapes::AbstractShape::itemChange(change, value);
+}
+
+void Shape::redraw() {
     if(currentHandler) {
         if(currentHandler->hType() == Handle::Adder) {
             int idx = handlers.indexOf(currentHandler);
@@ -95,19 +109,22 @@ void PolyLine::redraw() {
         handlers[0]->setVisible(false);
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
+
+    //    if(model)
+    //        qobject_cast<QTableView*>(model->parent())->reset();
 }
 
-QString PolyLine::name() const { return QObject::tr("Line"); }
+QString Shape::name() const { return QObject::tr("Line"); }
 
-QIcon PolyLine::icon() const { return QIcon::fromTheme("draw-line"); }
+QIcon Shape::icon() const { return QIcon::fromTheme("draw-line"); }
 
-void PolyLine::setPt(const QPointF& pt) {
+void Shape::setPt(const QPointF& pt) {
     handlers[handlers.size() - 2]->setPos(QLineF(handlers[handlers.size() - 3]->pos(), pt).center());
     handlers.back()->setPos(pt);
     updateOtherHandlers(nullptr);
 }
 
-bool PolyLine::addPt(const QPointF& pt) {
+bool Shape::addPt(const QPointF& pt) {
     auto pos = handlers.back()->pos();
     auto adder = handlers.emplace_back(std::make_unique<Handle>(this, Handle::Adder)).get();
     handlers.emplace_back(std::make_unique<Handle>(this))->setPos(pt);
@@ -116,9 +133,9 @@ bool PolyLine::addPt(const QPointF& pt) {
     return !closed();
 }
 
-bool PolyLine::closed() const { return handlers[1]->pos() == handlers.back()->pos(); }
+bool Shape::closed() const { return handlers[1]->pos() == handlers.back()->pos(); }
 
-QPointF PolyLine::centroid() {
+QPointF Shape::centroid() {
     return {};
     QPointF centroid;
     double signedArea = 0.0;
@@ -142,7 +159,7 @@ QPointF PolyLine::centroid() {
     return centroid;
 }
 
-QPointF PolyLine::centroidFast() {
+QPointF Shape::centroidFast() {
     return {};
     QPointF centroid;
     double signedArea = 0.0;
@@ -173,16 +190,6 @@ QPointF PolyLine::centroidFast() {
     return centroid;
 }
 
-////////////////////////////////////////////////////////////
-/// \brief Plugin::Plugin
-///
+} // namespace ShPoly
 
-int PluginImpl::type() const { return GiType::ShPolyLine; }
-
-QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-line"); }
-
-AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new PolyLine(point, point); }
-
-} // namespace Shapes
-
-#include "moc_shpolyline.cpp"
+#include "moc_shape.cpp"

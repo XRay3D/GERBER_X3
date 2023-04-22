@@ -85,6 +85,7 @@ class Plugin final : public GCode::Plugin {
 
     // GCode::Plugin interface
     Form form{this};
+
 public:
     QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
         auto action = GCode::Plugin ::addAction(menu, toolbar);
@@ -93,7 +94,7 @@ public:
     }
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
-    QWidget* createForm() override{return &form;};
+    QWidget* createForm() override { return &form; };
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return DRILLING; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
