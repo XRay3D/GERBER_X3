@@ -10,48 +10,62 @@
  *******************************************************************************/
 #pragma once
 
+#include "editor.h"
 #include "gi.h"
 #include "shape.h"
 #include "shapepluginin.h"
-#include <QJsonObject>
 
-namespace Shapes {
+namespace ShRect {
 
-class Circle final : public AbstractShape {
+class Shape final : public Shapes::AbstractShape {
+    friend class Model;
+
 public:
-    explicit Circle(QPointF center = {}, QPointF pt = {});
-    ~Circle() override = default;
-    ;
+    explicit Shape(QPointF pt1 = {}, QPointF pt2 = {});
+    ~Shape() override;
 
     // QGraphicsItem interface
-    int type() const override { return GiType::ShCircle; }
+    int type() const override { return GiType::ShRectangle; }
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
+
+    // GraphicsItem interface
     void redraw() override;
+
     // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
     void setPt(const QPointF& pt) override;
-    double radius() const;
-    void setRadius(double radius);
-    enum {
+
+    enum PointEnum {
         Center,
         Point1,
-        PtCount
+        Point2,
+        Point3,
+        Point4,
+        PtCount,
+        Width = PtCount, // model
+        Height,          // model
     };
-
-private:
-    double radius_;
+    Model* model{};
 };
 
-class PluginImpl : public Plugin {
+class Plugin final : public Shapes::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "circle.json")
+    Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "rectangle.json")
     Q_INTERFACES(Shapes::Plugin)
 
+    mutable Editor editor_{this};
+
 public:
-    // Shapes::Plugin interface
-    int type() const override;
-    QIcon icon() const override;
-    AbstractShape* createShape(const QPointF& point) const override;
+    // Shapes::Plugin interface *
+    uint32_t type() const override { return GiType::ShRectangle; }
+    QIcon icon() const override { return QIcon::fromTheme("draw-rectangle"); }
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+        auto shape = new Shape(point, point + QPointF{10, 10});
+        editor_.addShape(shape);
+        return shape;
+    }
+    QWidget* editor() override { return &editor_; };
 };
 
-} // namespace Shapes
+} // namespace ShRect

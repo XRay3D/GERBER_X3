@@ -25,10 +25,10 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
 endif()
 
-set(PROJECT_SOURCES
-    circlearc.json
-    sharc.cpp
-    sharc.h
+file(GLOB PROJECT_SOURCES
+    *.json
+    *.cpp
+    *.h
 )
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})

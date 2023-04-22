@@ -10,43 +10,57 @@
  *******************************************************************************/
 #pragma once
 
+#include "editor.h"
 #include "gi.h"
 #include "shape.h"
 #include "shapepluginin.h"
-#include <QJsonObject>
 
-namespace Shapes {
-class PolyLine final : public AbstractShape {
+namespace ShPoly {
+
+class Shape final : public Shapes::AbstractShape {
+    friend class Model;
+
 public:
-    explicit PolyLine(QPointF pt1 = {}, QPointF pt2 = {});
-    ~PolyLine() = default;
+    explicit Shape(QPointF pt1 = {}, QPointF pt2 = {});
+    ~Shape() override;
 
     // QGraphicsItem interface
     int type() const override { return GiType::ShPolyLine; }
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
+
+    // GraphicsItem interface
     void redraw() override;
+
     // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
-
     void setPt(const QPointF& pt) override;
     bool addPt(const QPointF& pt) override;
+
     bool closed() const;
+    Model* model{};
 
 private:
     QPointF centroid();
     QPointF centroidFast(); //??????
 };
 
-class PluginImpl : public Shapes::Plugin {
+class Plugin : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "polyline.json")
     Q_INTERFACES(Shapes::Plugin)
+    mutable Editor editor_{this};
 
 public:
     // Shapes::Plugin interface
-    int type() const override;
-    QIcon icon() const override;
-    AbstractShape* createShape(const QPointF& point) const override;
+    uint32_t type() const override { return GiType::ShPolyLine; }
+    QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+        auto shape = new Shape(point, point + QPointF{5, 5});
+        editor_.addShape(shape);
+        return shape;
+    }
+    QWidget* editor() override { return &editor_; }
 };
 
-} // namespace Shapes
+} // namespace ShPoly

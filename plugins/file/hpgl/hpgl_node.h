@@ -16,7 +16,7 @@ namespace Hpgl {
 class Layer;
 class File;
 
-class Node : public FileTree_::Node {
+class Node : public FileTree::Node {
     mutable bool header = true;
     mutable bool layer = true;
     friend class File;
@@ -26,14 +26,14 @@ public:
     explicit Node(File* file, int* id);
     ~Node() override = default;
 
-    // FileTree_::Node interface
+    // FileTree::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree_::View* tv) override;
+    void menu(QMenu& menu, FileTree::View* tv) override;
 };
 
-class NodeLayer : public FileTree_::Node {
+class NodeLayer : public FileTree::Node {
     friend class Node;
     const QString name;
     Layer* const layer;
@@ -42,11 +42,11 @@ public:
     explicit NodeLayer(const QString& name, Layer* layer);
     ~NodeLayer() override = default;
 
-    // FileTree_::Node interface
+    // FileTree::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree_::View* tv) override;
+    void menu(QMenu& menu, FileTree::View* tv) override;
 };
 
 } // namespace Hpgl

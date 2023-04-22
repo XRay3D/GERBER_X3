@@ -14,22 +14,23 @@
 namespace Ui {
 class ShTextDialog;
 }
-namespace Shapes {
-class Text;
-}
+
+namespace ShTxt {
+
+class Shape;
 
 class ShTextDialog : public QDialog {
     Q_OBJECT
-    friend Shapes::Text;
+    friend Shape;
 
 public:
-    explicit ShTextDialog(QVector<Shapes::Text*> text, QWidget* parent = nullptr);
+    explicit ShTextDialog(QVector<Shape*> text, QWidget* parent = nullptr);
     ~ShTextDialog();
 
 private:
     Ui::ShTextDialog* ui;
 
-    QVector<Shapes::Text*> shapeText;
+    QVector<Shape*> shapeText;
 
     void updateText();
     void updateFont();
@@ -44,3 +45,5 @@ public slots:
     void accept() override;
     void reject() override;
 };
+
+} // namespace ShTxt

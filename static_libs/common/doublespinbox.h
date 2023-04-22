@@ -16,6 +16,10 @@
 
 class DoubleSpinBox : public QDoubleSpinBox {
     //    Q_OBJECT
+    void red();
+    void normal();
+    mutable QString str;
+
 public:
     explicit DoubleSpinBox(QWidget* parent = nullptr);
     void setRange(double min, double max);
@@ -26,18 +30,13 @@ public:
     // QObject interface
     bool eventFilter(QObject* watched, QEvent* event) override;
 
-private:
-    void red();
-    void normal();
-    mutable QString str;
-    // QWidget interface
-protected:
-    void keyPressEvent(QKeyEvent* event) override;
-
 public:
     // QAbstractSpinBox interface
     double valueFromText(const QString& text) const override;
     QString textFromValue(double value) const override;
     QValidator::State validate(QString& input, int& pos) const override;
-    void fixup(QString& input) const override;
+//    void fixup(QString& input) const override;
+
+protected:
+    void keyPressEvent(QKeyEvent* event) override;
 };

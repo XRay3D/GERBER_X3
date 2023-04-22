@@ -6,7 +6,19 @@
 #include <chrono>
 #include <concepts>
 #include <map>
+
+#if defined(_MSC_VER)
+#pragma warning(push)
+#pragma warning(disable : 4117) // warning C4117: имя макроопределения "__cpp_consteval" зарезервировано, пропуск "#define"
+#endif
+
+#define __cpp_consteval 1 // NOTE костыли для clang tidy
 #include <source_location>
+
+#if defined(_MSC_VER)
+#pragma warning(pop)
+#endif
+
 #include <string_view>
 
 using nS = std::nano;
