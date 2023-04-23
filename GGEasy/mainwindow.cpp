@@ -76,15 +76,6 @@ MainWindow::MainWindow(QWidget* parent)
     connect(project_, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
 
-    for(auto& [type, ptr]: App::filePlugins()) { // connect plugins
-        ptr->moveToThread(&parserThread);
-        connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
-        connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
-        connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-        connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
-        connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
-    }
-
     parserThread.start(QThread::HighestPriority);
 
     ui.treeView->setModel(new FileTree::Model(ui.treeView));
@@ -101,6 +92,16 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::init() {
+
+    for(auto& [type, ptr]: App::filePlugins()) { // connect plugins
+        ptr->moveToThread(&parserThread);
+        connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
+        connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+        connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
+        connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
+        connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
+    }
+
     initWidgets();
 
     GCode::PropertiesForm(); // init default vars;
