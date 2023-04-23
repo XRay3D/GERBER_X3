@@ -71,11 +71,11 @@ add_subdirectory(pocketoffset)
 add_subdirectory(profile)
 add_subdirectory(drill)
 
-#add_subdirectory(hatching)
-#add_subdirectory(pocketraster)
-#add_subdirectory(voroni)
+add_subdirectory(hatching)
+add_subdirectory(pocketraster)
+add_subdirectory(voroni)
 
-#add_subdirectory(thermal)
+add_subdirectory(thermal)
 
-#add_subdirectory(thread)
+add_subdirectory(thread)
 

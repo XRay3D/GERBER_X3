@@ -54,7 +54,7 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if(0)
+        if(1)
             QTimer::singleShot(i += k, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
         if(0) {
@@ -86,7 +86,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, this, [this] { App::graphicsView().zoomFit(); });
         }
 
-        if(1) {
+        if(0) {
             /*
             qDebug() << actionGroup.actions();
             0   QAction(0x210e31c2160 text="&G-Code Properties" toolTip="G-Code Properties" checked=false shortcut=QKeySequence("Ctrl+Shift+G") menuRole=TextHeuristicRole visible=true),
