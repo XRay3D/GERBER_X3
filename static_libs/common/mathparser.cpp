@@ -388,10 +388,10 @@ Result MathParser::processFunction(QStringView func, Result r) {
 
     using F = double (*)(double);
     static std::unordered_map<QStringView, F> funcMap{
-        {QStringLiteral("cos"),  [](double val) { return cos(val); } },
-        {QStringLiteral("sin"),  [](double val) { return sin(val); } },
+        { QStringLiteral("cos"),  [](double val) { return cos(val); }},
+        { QStringLiteral("sin"),  [](double val) { return sin(val); }},
         {QStringLiteral("sqrt"), [](double val) { return sqrt(val); }},
-        {QStringLiteral("tan"),  [](double val) { return tan(val); } },
+        { QStringLiteral("tan"),  [](double val) { return tan(val); }},
     };
 
     if(funcMap.contains(func))

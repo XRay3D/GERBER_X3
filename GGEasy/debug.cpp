@@ -89,22 +89,23 @@ bool MainWindow::debug() {
         if(1) {
             /*
             qDebug() << actionGroup.actions();
-            0   QAction(0x206ff5cee40 text="&G-Code Properties" toolTip="G-Code Properties" checked=false shortcut=QKeySequence("Ctrl+Shift+G") menuRole=TextHeuristicRole visible=true),
-            1   QAction(0x206ff5d0100 text="Thermal" toolTip="Thermal" checked=false shortcut=QKeySequence("Ctrl+Shift+T") menuRole=TextHeuristicRole visible=true),
-            2   QAction(0x206ff5cf430 text="Pocket Raster" toolTip="Pocket Raster" checked=false shortcut=QKeySequence("Ctrl+Shift+R") menuRole=TextHeuristicRole visible=true),
-            3   QAction(0x206ff5cffc0 text="Drill" toolTip="Drill" checked=false shortcut=QKeySequence("Ctrl+Shift+D") menuRole=TextHeuristicRole visible=true),
-            4   QAction(0x206ff5cf480 text="Profile" toolTip="Profile" checked=false shortcut=QKeySequence("Ctrl+Shift+F") menuRole=TextHeuristicRole visible=true),
-            5   QAction(0x206ff5d02e0 text="Voronoi" toolTip="Voronoi" checked=false shortcut=QKeySequence("Ctrl+Shift+V") menuRole=TextHeuristicRole visible=true),
-            6   QAction(0x206ff5d05b0 text="Pocket Offset" toolTip="Pocket Offset" checked=false shortcut=QKeySequence("Ctrl+Shift+P") menuRole=TextHeuristicRole visible=true),
-            7   QAction(0x206ff5cfb60 text="Crosshatch" toolTip="Crosshatch" checked=false shortcut=QKeySequence("Ctrl+Shift+C") menuRole=TextHeuristicRole visible=true),
-            8   QAction(0x206ff5cf8e0 text="Circle" toolTip="Circle" checked=false menuRole=TextHeuristicRole visible=true),
-            9   QAction(0x206ff5cfbb0 text="Rectangle" toolTip="Rectangle" checked=false menuRole=TextHeuristicRole visible=true),
-            10  QAction(0x206ff5d07e0 text="Poly Line" toolTip="Poly Line" checked=false menuRole=TextHeuristicRole visible=true),
-            11  QAction(0x206ff5d0b00 text="Circle Arc" toolTip="Circle Arc" checked=false menuRole=TextHeuristicRole visible=true),
+            0   QAction(0x210e31c2160 text="&G-Code Properties" toolTip="G-Code Properties" checked=false shortcut=QKeySequence("Ctrl+Shift+G") menuRole=TextHeuristicRole visible=true),
+            1   QAction(0x210e31c2c50 text="Thermal" toolTip="Thermal" checked=false shortcut=QKeySequence("Ctrl+Shift+T") menuRole=TextHeuristicRole visible=true),
+            2   QAction(0x210e31c2d40 text="Pocket Raster" toolTip="Pocket Raster" checked=false shortcut=QKeySequence("Ctrl+Shift+R") menuRole=TextHeuristicRole visible=true),
+            3   QAction(0x210e31c36a0 text="Drill" toolTip="Drill" checked=false shortcut=QKeySequence("Ctrl+Shift+D") menuRole=TextHeuristicRole visible=true),
+            4   QAction(0x210e31c3100 text="Profile" toolTip="Profile" checked=false shortcut=QKeySequence("Ctrl+Shift+F") menuRole=TextHeuristicRole visible=true),
+            5   QAction(0x210e31c2ed0 text="Voronoi" toolTip="Voronoi" checked=false shortcut=QKeySequence("Ctrl+Shift+V") menuRole=TextHeuristicRole visible=true),
+            6   QAction(0x210e31c3790 text="Pocket Offset" toolTip="Pocket Offset" checked=false shortcut=QKeySequence("Ctrl+Shift+P") menuRole=TextHeuristicRole visible=true),
+            7   QAction(0x210e31c3420 text="Crosshatch" toolTip="Crosshatch" checked=false shortcut=QKeySequence("Ctrl+Shift+C") menuRole=TextHeuristicRole visible=true),
+            8   QAction(0x210e31c35b0 text="Circle" toolTip="Circle" checked=false menuRole=TextHeuristicRole visible=true),
+            9   QAction(0x210e31c3b50 text="Rectangle" toolTip="Rectangle" checked=false menuRole=TextHeuristicRole visible=true),
+            10  QAction(0x210e31c3290 text="Poly Line" toolTip="Poly Line" checked=false menuRole=TextHeuristicRole visible=true),
+            11  QAction(0x210e31c32e0 text="Circle Arc" toolTip="Circle Arc" checked=false menuRole=TextHeuristicRole visible=true),
+            12  QAction(0x210e31c4320 text="Text" toolTip="Text" checked=false menuRole=TextHeuristicRole visible=true)
             */
 
             for(auto* action: actionGroup.actions())
-                if(action->text() == "Poly Line")
+                if(action->text() == "Text")
                     QTimer::singleShot(i += k, this, [this, action] { action->toggle(); });
             QTimer::singleShot(i += k, this, [this] { selectAll(); });
         }

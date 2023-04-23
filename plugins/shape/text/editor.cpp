@@ -15,239 +15,292 @@
 #include "shape.h"
 #include "shhandler.h"
 
+#include <QtWidgets>
 #include <array>
 #include <set>
 
 Q_DECLARE_METATYPE(std::set<double>)
 
+#define TR QCoreApplication::translate
+
 namespace ShTxt {
 
 //////////////////////////////////////////
-/// \brief Model::Model
-Model::Model(QObject* parent)
-    : QAbstractTableModel{parent} { }
-
-Model::~Model() { }
-
-QVariant Model::data(const QModelIndex& index, int role) const {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array getter{&QGraphicsItem::x, &QGraphicsItem::y};
-
-    //    auto set = [&] {
-    //        std::set<double> set;
-    //        auto widthHeight = [&](auto get) {
-    //            for(auto* shape: sh) {
-    //                auto tmp = abs((*shape->handlers[Shape::Point1].*get)() - (*shape->handlers[Shape::Point3].*get)());
-    //                set.emplace(tmp);
-    //            }
-    //            return set;
-    //        };
-    //        switch(index.row()) {
-    //        case Shape::Center:
-    //        case Shape::Point1:
-    //        case Shape::Point2:
-    //        case Shape::Point3:
-    //        case Shape::Point4:
-    //            for(auto* shape: sh) {
-    //                auto tmp = (*shape->handlers[index.row()].*getter[index.column()])();
-    //                set.emplace(tmp);
-    //            }
-    //            return set;
-    //        case Shape::Width:
-    //            return widthHeight(&QGraphicsItem::x);
-    //        case Shape::Height:
-    //            return widthHeight(&QGraphicsItem::y);
-    //        default: return set;
-    //        }
-    //    };
-    //    if(role == Qt::DisplayRole) {
-    //        if(std::ranges::empty(sh)) return {};
-    //        QString ret;
-    //        for(auto val: set())
-    //            ret += (ret.size() ? " | " : "") + QString::number(val);
-    //        return ret;
-    //    }
-
-    if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
-        return QVariant::fromValue(set());
-    }
-    if(role == Qt::TextAlignmentRole)
-        return Qt::AlignCenter;
-
-    return {};
-}
-
-QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    if(role == Qt::DisplayRole) {
-        if(orientation == Qt::Vertical)
-            return headerData_[section];
-        else
-            return section ? "Y" : "X";
-    }
-    return QAbstractTableModel::headerData(section, orientation, role);
-}
-
-bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array setter{&QGraphicsItem::setX, &QGraphicsItem::setY};
-
-    if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
-
-        double val = value.toDouble();
-
-        //        auto widthHeight = [&sh, val](auto get, auto set) {
-        //            for(auto* shape: sh) {
-        //                (((*shape->handlers[Shape::Point1].*get)() - (*shape->handlers[Shape::Point3].*get)()) < 0
-        //                        ? (*shape->handlers[Shape::Point3].*set)((*shape->handlers[Shape::Point1].*get)() + val)
-        //                        : (*shape->handlers[Shape::Point3].*set)((*shape->handlers[Shape::Point1].*get)() - val));
-        //                shape->currentHandler = shape->handlers[Shape::Point3].get();
-        //                shape->redraw();
-        //            }
-        //        };
-
-        //        switch(index.row()) {
-        //        case Shape::Center:
-        //        case Shape::Point1:
-        //        case Shape::Point2:
-        //        case Shape::Point3:
-        //        case Shape::Point4:
-        //            for(auto* shape: sh) {
-        //                (*shape->handlers[index.row()].*setter[index.column()])(val);
-        //                shape->currentHandler = shape->handlers[index.row()].get();
-        //                shape->redraw();
-        //            }
-        //            break;
-        //        case Shape::Width:
-        //            widthHeight(&QGraphicsItem::x, &QGraphicsItem::setX);
-        //            break;
-        //        case Shape::Height:
-        //            widthHeight(&QGraphicsItem::y, &QGraphicsItem::setY);
-        //            break;
-        //        }
-        return true;
-    }
-    return {};
-}
-
-class Delegate : public QStyledItemDelegate {
-    mutable DoubleSpinBox* dsbx{};
-    mutable double last;
-
-public:
-    Delegate(QObject* parent)
-        : QStyledItemDelegate{parent} { }
-    ~Delegate() override = default;
-
-    // QAbstractItemDelegate interface
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-        qDebug(__FUNCTION__);
-        // if(cbx) return cbx;
-        dsbx = new DoubleSpinBox{parent};
-        //        cbx->setCompleter(nullptr); //
-        connect(dsbx, &DoubleSpinBox::valueChanged, this, &Delegate::emitCommitData);
-        connect(dsbx, &QObject::destroyed, this, [] { qDebug(__FUNCTION__); });
-        return dsbx;
-    }
-
-    void setEditorData(QWidget* editor, const QModelIndex& index) const override {
-        dsbx = static_cast<DoubleSpinBox*>(editor);
-        dsbx->setRange(-1000, +1000);
-        dsbx->setValue(last = *index.data(Qt::EditRole).value<std::set<double>>().begin());
-        //        for(auto val: index.data(Qt::EditRole).value<std::set<double>>())
-        //            cbx->addItem(QString::number(val), val);
-        //        last = cbx->currentText();
-        //        cbx->lineEdit()->setValidator(new QDoubleValidator{cbx});
-        //        cbx->installEventFilter(const_cast<Delegate*>(this));
-    }
-
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
-        if(qFuzzyCompare(last, dsbx->value())) return;
-        model->setData(index, dsbx->value());
-    }
-
-    void emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
-
-    // QObject interface
-    //    bool eventFilter(QObject* watched, QEvent* event) override {
-    //        if(dsbx == watched && event->type() == QEvent::Show) {
-    //            if(dsbx->count() > 1) dsbx->showPopup();
-    //            dsbx->lineEdit()->selectAll();
-    //        }
-    //        return QStyledItemDelegate::eventFilter(watched, event);
-    //    }
-};
-
-//////////////////////////////////////////
 /// \brief Editor::Editor
-Editor::Editor(Plugin* plugin)
-    : /* QWidget {parent}*/ view{new QTableView{this}}
-    , model{new Model{view}}
-    , plugin{plugin} {
-    setWindowTitle("Rectangle");
+void Editor::setupUi() {
 
-    auto vLayout = new QVBoxLayout{this};
-    vLayout->setContentsMargins(6, 6, 6, 6);
-    vLayout->setSpacing(6);
+    QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    sizePolicy.setHorizontalStretch(0);
+    sizePolicy.setVerticalStretch(0);
+    sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());
+    setSizePolicy(sizePolicy);
+    auto formLayout = new QFormLayout{this};
+    formLayout->setContentsMargins(6, 6, 6, 6);
+    formLayout->setLabelAlignment(Qt::AlignRight);
+
+    formLayout->addRow(plainTextEdit = new QPlainTextEdit{this});
+
     {
-        auto hLayout = new QHBoxLayout;
-        hLayout->setContentsMargins(0, 0, 0, 0);
-        hLayout->setSpacing(6);
-        for(int i = 0; i < 6; ++i) {
-            auto action = new QAction{this};
-            action->setIcon(QIcon::fromTheme("draw-rectangle"));
-            action->setCheckable(true);
-            auto toolButton = new QToolButton{this};
-            toolButton->setIconSize({24, 24});
-            toolButton->setDefaultAction(action);
-            actionGroup.addAction(action);
-            hLayout->addWidget(toolButton);
-        }
-
-        vLayout->addLayout(hLayout);
-        hLayout->stretch(5);
+        auto groupBox = new QWidget{this};
+        auto gridLayout = new QGridLayout(groupBox);
+        gridLayout->setContentsMargins(6, 6, 6, 6);
+        gridLayout->addWidget(rb_tl = new QRadioButton(groupBox), 0, 0 + 1);
+        gridLayout->addWidget(rb_tc = new QRadioButton(groupBox), 0, 1 + 1);
+        gridLayout->addWidget(rb_tr = new QRadioButton(groupBox), 0, 2 + 1);
+        gridLayout->addWidget(rb_lc = new QRadioButton(groupBox), 1, 0 + 1);
+        gridLayout->addWidget(rb_cc = new QRadioButton(groupBox), 1, 1 + 1);
+        gridLayout->addWidget(rb_rc = new QRadioButton(groupBox), 1, 2 + 1);
+        gridLayout->addWidget(rb_bl = new QRadioButton(groupBox), 2, 0 + 1);
+        gridLayout->addWidget(rb_bc = new QRadioButton(groupBox), 2, 1 + 1);
+        gridLayout->addWidget(rb_br = new QRadioButton(groupBox), 2, 2 + 1);
+        gridLayout->setColumnStretch(0, 1);
+        gridLayout->setColumnStretch(4, 1);
+        formLayout->addRow(new QLabel{TR("TextEditor", "Align:", nullptr), this}, groupBox);
+        rb_bl->setChecked(true);
     }
-    vLayout->addWidget(view);
 
-    auto pushButton = new QPushButton{tr("Apply"), this};
+    formLayout->addRow(new QLabel{TR("TextEditor", "Font:", nullptr), this}, cbxFont = new QFontComboBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Bold:", nullptr), this}, chbxBold = new QCheckBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Italic:", nullptr), this}, chbxItalic = new QCheckBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Angle:", nullptr), this}, dsbxAngle = new DoubleSpinBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Height:", nullptr), this}, dsbxHeight = new DoubleSpinBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "X/Y:", nullptr), this}, dsbxXY = new DoubleSpinBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Side:", nullptr), this}, cbxSide = new QComboBox{this});
+
+    cbxSide->addItems(TR("TextEditor", "Top|Bottom").split('|'));
+
+    dsbxAngle->setDecimals(0);
+    dsbxAngle->setMaximum(360.0);
+    dsbxAngle->setSuffix(TR("TextEditor", " \302\260", nullptr));
+
+    dsbxHeight->setMaximum(100.0);
+    dsbxHeight->setSuffix(TR("TextEditor", " mm", nullptr));
+
+    dsbxXY->setDecimals(3);
+    dsbxXY->setMaximum(1000.0);
+    dsbxXY->setMinimum(0.001);
+    dsbxXY->setSuffix(TR("TextEditor", " %", nullptr));
+    dsbxXY->setValue(100.0);
+
+    // Apply
+    auto pushButton = new QPushButton{TR("TextEditor", "Apply"), this};
     pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
-    vLayout->addWidget(pushButton);
+    formLayout->addRow(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
+    connect(pushButton, &QPushButton::clicked, this, [this] {
+        auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+        for(auto text: sh)
+            text->iDataCopy = text->iData;
+    });
 
-    pushButton = new QPushButton{tr("Add New"), this};
-    pushButton->setObjectName("pbAddNew");
+    // Add New
+    pushButton = new QPushButton{TR("TextEditor", "Add New"), this};
     pushButton->setIcon(QIcon::fromTheme("list-add"));
-    vLayout->addWidget(pushButton);
-    connect(pushButton, &QPushButton::clicked, this, [plugin, this] {
+    formLayout->addRow(pushButton);
+    connect(pushButton, &QPushButton::clicked, this, [this] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
 
+    // Close
     pushButton = new QPushButton{"Close", this};
     pushButton->setObjectName("pbClose");
     pushButton->setIcon(QIcon::fromTheme("window-close"));
-    vLayout->addWidget(pushButton);
+    formLayout->addRow(pushButton);
+}
 
-    vLayout->setSpacing(6);
+void Editor::updateText() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    QString text_(plainTextEdit->toPlainText());
+    for(auto text: sh) {
+        text->iData.text = text_;
+        text->redraw();
+    }
+}
 
-    view->setItemDelegate(new Delegate{view});
+void Editor::updateFont() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
 
-    view->setModel(model);
-    //    view->setSpan(Shape::Width, 0, 1, 2);
-    //    view->setSpan(Shape::Height, 0, 1, 2);
-    view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
-    view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    view->setEditTriggers(QAbstractItemView::AllEditTriggers);
-    //    connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-    //        view->edit(current);
-    //    });
+    auto font{cbxFont->currentFont()};
+    font.setBold(chbxBold->isChecked());
+    font.setItalic(chbxItalic->isChecked());
+    plainTextEdit->setFont(font);
+    auto strFont(font.toString());
+    for(auto text: sh) {
+        text->iData.font = strFont;
+        text->redraw();
+    }
+}
+
+void Editor::updateAngle() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+
+    for(auto text: sh) {
+        text->iData.angle = dsbxAngle->value();
+        text->redraw();
+    }
+}
+
+void Editor::updateHeight() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+
+    for(auto text: sh) {
+        text->iData.height = dsbxHeight->value();
+        text->redraw();
+    }
+}
+
+void Editor::updateXY() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+
+    for(auto text: sh) {
+        text->iData.xy = dsbxXY->value();
+        text->redraw();
+    }
+}
+
+void Editor::updateCenterAlign() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+
+    int handleAlign;
+    if(rb_bc->isChecked())
+        handleAlign = Shape::BotCenter;
+    else if(rb_bl->isChecked())
+        handleAlign = Shape::BotLeft;
+    else if(rb_br->isChecked())
+        handleAlign = Shape::BotRight;
+    else if(rb_cc->isChecked())
+        handleAlign = Shape::Center;
+    else if(rb_lc->isChecked())
+        handleAlign = Shape::CenterLeft;
+    else if(rb_rc->isChecked())
+        handleAlign = Shape::CenterRight;
+    else if(rb_tc->isChecked())
+        handleAlign = Shape::TopCenter;
+    else if(rb_tl->isChecked())
+        handleAlign = Shape::TopLeft;
+    else if(rb_tr->isChecked())
+        handleAlign = Shape::TopRight;
+    for(auto text: sh) {
+        text->iData.handleAlign = handleAlign;
+        text->redraw();
+    }
+}
+
+void Editor::updateSide() {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+
+    for(auto text: sh) {
+        text->iData.side = static_cast<Side>(cbxSide->currentIndex());
+        text->redraw();
+    }
+}
+
+Editor::Editor(Plugin* plugin)
+    : plugin{plugin} {
+    setWindowTitle(plugin->name());
+
+    setupUi();
 }
 
 void Editor::addShape(Shape* shape) {
-    model->shapes.emplace_back(shape);
-    shape->model = model;
-    view->reset();
+    shapes.emplace_back(shape);
+    shape->editor = this;
+    reset();
+}
+
+void Editor::reset() {
+    if(!isVisible()) return;
+
+    // clang-format off
+    disconnect(plainTextEdit, &QPlainTextEdit::textChanged, this, &Editor::updateText);
+    disconnect(dsbxAngle, &QDoubleSpinBox::valueChanged,    this, &Editor::updateAngle);
+    disconnect(dsbxHeight, &QDoubleSpinBox::valueChanged,   this, &Editor::updateHeight);
+    disconnect(dsbxXY, &QDoubleSpinBox::valueChanged,       this, &Editor::updateXY);
+    disconnect(cbxFont, &QFontComboBox::currentFontChanged, this, &Editor::updateFont);
+    disconnect(cbxSide, &QComboBox::currentIndexChanged,    this, &Editor::updateSide);
+
+    disconnect(rb_bc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_bl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_br, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_cc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_lc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_rc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_tc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_tl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    disconnect(rb_tr, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+
+    disconnect(chbxBold, &QCheckBox::toggled,               this, &Editor::updateFont);
+    disconnect(chbxItalic, &QCheckBox::toggled,             this, &Editor::updateFont);
+    // clang-format on
+
+    for(auto text: shapes)
+        text->save();
+
+    //    plainTextEdit->setStyleSheet("QPlainTextEdit { font-size: 32pt }");
+
+    cbxFont->setFontFilters(
+        QFontComboBox::ScalableFonts
+        //        | QFontComboBox::NonScalableFonts
+        | QFontComboBox::MonospacedFonts
+        | QFontComboBox::ProportionalFonts);
+
+    {
+        QFont font;
+        font.fromString(shapes.front()->iData.font);
+        cbxFont->setCurrentFont(font);
+        plainTextEdit->setFont(font);
+        chbxBold->setChecked(font.bold());
+        chbxItalic->setChecked(font.italic());
+    }
+
+    cbxSide->setCurrentIndex(static_cast<int>(shapes.front()->iData.side));
+    plainTextEdit->setPlainText(shapes.front()->iData.text);
+    dsbxAngle->setValue(shapes.front()->iData.angle);
+    dsbxHeight->setValue(shapes.front()->iData.height);
+    dsbxXY->setValue(shapes.front()->iData.xy);
+
+    // clang-format off
+    switch(shapes.front()->iData.handleAlign) {
+    case Shape::BotCenter:   rb_bc->setChecked(true); break;
+    case Shape::BotLeft:     rb_bl->setChecked(true); break;
+    case Shape::BotRight:    rb_br->setChecked(true); break;
+    case Shape::Center:      rb_cc->setChecked(true); break;
+    case Shape::CenterLeft:  rb_lc->setChecked(true); break;
+    case Shape::CenterRight: rb_rc->setChecked(true); break;
+    case Shape::TopCenter:   rb_tc->setChecked(true); break;
+    case Shape::TopLeft:     rb_tl->setChecked(true); break;
+    case Shape::TopRight:    rb_tr->setChecked(true); break;
+    }
+
+    // clang-format off
+    connect(plainTextEdit, &QPlainTextEdit::textChanged, this, &Editor::updateText);
+    connect(dsbxAngle, &QDoubleSpinBox::valueChanged,    this, &Editor::updateAngle);
+    connect(dsbxHeight, &QDoubleSpinBox::valueChanged,   this, &Editor::updateHeight);
+    connect(dsbxXY, &QDoubleSpinBox::valueChanged,       this, &Editor::updateXY);
+    connect(cbxFont, &QFontComboBox::currentFontChanged, this, &Editor::updateFont);
+    connect(cbxSide, &QComboBox::currentIndexChanged,    this, &Editor::updateSide);
+
+    connect(rb_bc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_bl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_br, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_cc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_lc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_rc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_tc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_tl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_tr, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+
+    connect(chbxBold, &QCheckBox::toggled,               this, &Editor::updateFont);
+    connect(chbxItalic, &QCheckBox::toggled,             this, &Editor::updateFont);
+    // clang-format on
+}
+
+void Editor::hideEvent(QHideEvent* event) {
+    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    for(auto text: sh)
+        text->restore();
+    QWidget::hideEvent(event);
 }
 
 } // namespace ShTxt

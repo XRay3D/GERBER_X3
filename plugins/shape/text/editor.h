@@ -15,51 +15,62 @@
 #include <QTableView>
 #include <QWidget>
 
+class DoubleSpinBox;
+class QCheckBox;
+class QComboBox;
+class QFontComboBox;
+class QPlainTextEdit;
+class QRadioButton;
+
 namespace ShTxt {
-
-class Model : public QAbstractTableModel {
-    Q_OBJECT
-    friend class Shape;
-    QStringList headerData_{
-        tr(" Pos "),
-        tr(" Text "),
-        tr(" Font "),
-        tr(" Angle "),
-        tr(" Height "),
-        tr(" X/Y "),
-        tr(" Handle Align "),
-        tr(" Side "),
-    };
-
-public:
-    Model(QObject* parent);
-    virtual ~Model();
-
-    // QAbstractItemModel interface
-    int rowCount(const QModelIndex& = {}) const override { return headerData_.size(); }
-    int columnCount(const QModelIndex& = {}) const override { return 2; }
-    QVariant data(const QModelIndex& index, int role) const override;
-    QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override { return Qt::ItemIsEditable | Qt::ItemIsEnabled; }
-    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-
-    std::vector<Shape*> shapes;
-};
 
 class Editor : public QWidget {
     Q_OBJECT
+    friend class Shape;
+    std::vector<Shape*> shapes;
 
-    QTableView* view;
-    QActionGroup actionGroup{this};
+    DoubleSpinBox* dsbxAngle;
+    DoubleSpinBox* dsbxHeight;
+    DoubleSpinBox* dsbxXY;
+    QCheckBox* chbxBold;
+    QCheckBox* chbxItalic;
+    QComboBox* cbxSide;
+    QFontComboBox* cbxFont;
+    QPlainTextEdit* plainTextEdit;
+    QRadioButton* rb_bc;
+    QRadioButton* rb_bl;
+    QRadioButton* rb_br;
+    QRadioButton* rb_cc;
+    QRadioButton* rb_lc;
+    QRadioButton* rb_rc;
+    QRadioButton* rb_tc;
+    QRadioButton* rb_tl;
+    QRadioButton* rb_tr;
+
+    void setupUi();
+
+    void updateText();
+    void updateFont();
+    void updateAngle();
+    void updateHeight();
+    void updateXY();
+    void updateCenterAlign();
+    void updateSide();
 
 public:
     Editor(class Plugin* plugin);
 
     void addShape(Shape* shape);
 
+    void reset();
+
     ~Editor() override = default;
-    Model* model;
+    //    Model* model;
     class Plugin* plugin;
+
+    // QWidget interface
+protected:
+    void hideEvent(QHideEvent* event) override;
 };
 
 } // namespace ShTxt

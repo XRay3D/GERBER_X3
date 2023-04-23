@@ -35,7 +35,7 @@ public:
     double valueFromText(const QString& text) const override;
     QString textFromValue(double value) const override;
     QValidator::State validate(QString& input, int& pos) const override;
-//    void fixup(QString& input) const override;
+    //    void fixup(QString& input) const override;
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;

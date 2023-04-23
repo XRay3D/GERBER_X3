@@ -84,7 +84,7 @@ public:
 
 protected:
     int32_t id__{-1};
-    Node* parent_ = nullptr;
+    Node* parent_{nullptr};
     mvector<std::unique_ptr<Node, Deleter>> childs;
 };
 
