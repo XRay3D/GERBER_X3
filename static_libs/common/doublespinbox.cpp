@@ -82,19 +82,19 @@ double DoubleSpinBox::valueFromText(const QString& text) const {
     double val{};
     try {
         static VarMap varmap{
-            {"e",          std::numbers::e         },
-            {"egamma",     std::numbers::egamma    },
-            {"inv_pi",     std::numbers::inv_pi    },
-            {"inv_sqrt3",  std::numbers::inv_sqrt3 },
+            {         "e",          std::numbers::e},
+            {    "egamma",     std::numbers::egamma},
+            {    "inv_pi",     std::numbers::inv_pi},
+            { "inv_sqrt3",  std::numbers::inv_sqrt3},
             {"inv_sqrtpi", std::numbers::inv_sqrtpi},
-            {"ln10",       std::numbers::ln10      },
-            {"ln2",        std::numbers::ln2       },
-            {"log10e",     std::numbers::log10e    },
-            {"log2e",      std::numbers::log2e     },
-            {"phi",        std::numbers::phi       },
-            {"pi",         std::numbers::pi        },
-            {"sqrt2",      std::numbers::sqrt2     },
-            {"sqrt3",      std::numbers::sqrt3     },
+            {      "ln10",       std::numbers::ln10},
+            {       "ln2",        std::numbers::ln2},
+            {    "log10e",     std::numbers::log10e},
+            {     "log2e",      std::numbers::log2e},
+            {       "phi",        std::numbers::phi},
+            {        "pi",         std::numbers::pi},
+            {     "sqrt2",      std::numbers::sqrt2},
+            {     "sqrt3",      std::numbers::sqrt3},
         };
         if(str.size())
             val = MathParser(&varmap).parse(str.replace(',', '.'));

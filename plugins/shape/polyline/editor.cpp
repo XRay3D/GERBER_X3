@@ -152,7 +152,7 @@ Editor::Editor(Plugin* plugin)
     : /* QWidget {parent}*/ view{new QTableView{this}}
     , model{new Model{view}}
     , plugin{plugin} {
-    setWindowTitle("Rectangle");
+    setWindowTitle(plugin->name());
 
     auto vLayout = new QVBoxLayout{this};
     vLayout->setContentsMargins(6, 6, 6, 6);

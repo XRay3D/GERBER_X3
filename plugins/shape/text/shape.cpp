@@ -14,7 +14,6 @@
 #include "graphicsview.h"
 #include "math.h"
 #include "shhandler.h"
-#include "shtextdialog.h"
 #include <QIcon>
 #include <assert.h>
 
@@ -32,8 +31,8 @@ Shape::Shape(QPointF pt1) {
 }
 
 Shape::~Shape() {
-    std::erase(model->shapes, this);
-    qobject_cast<QTableView*>(model->parent())->reset();
+    std::erase(editor->shapes, this);
+    editor->reset();
 }
 
 void Shape::redraw() {
@@ -112,7 +111,7 @@ void Shape::redraw() {
         shape_.addPolygon(sp);
     }
 
-    setPos({1, 1}); // костыли    //update();
+    setPos({1, 1}); // костыли
     setPos({0, 0});
     //    update();
 }
@@ -200,17 +199,23 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     }
 }
 
-void Shape::menu(QMenu& menu, FileTree::View* tv) {
-    AbstractShape::menu(menu, tv);
-    menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Shape"), [this, tv] {
-        ShTextDialog dlg({const_cast<Shape*>(this)}, tv);
-        dlg.exec();
-    });
+// void Shape::menu(QMenu& menu, FileTree::View* tv) {
+//     AbstractShape::menu(menu, tv);
+//     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Shape"), [this, tv] {
+//         ShTextDialog dlg({const_cast<Shape*>(this)}, tv);
+//         dlg.exec();
+//     });
+// }
+
+void Shape::write(QDataStream& stream) const {
+    Block(stream).write(iData);
+    Shapes::AbstractShape::write(stream);
 }
 
-void Shape::write(QDataStream& stream) const { stream << iData; }
-
-void Shape::read(QDataStream& stream) { stream >> iData; }
+void Shape::read(QDataStream& stream) {
+    Block(stream).read(iData);
+    Shapes::AbstractShape::read(stream);
+}
 
 void Shape::saveIData() {
     QSettings settings;
@@ -246,46 +251,24 @@ void Shape::restore() {
 
 void Shape::ok() { saveIData(); }
 
-void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
-    QGraphicsItem::mouseDoubleClickEvent(event);
-    ShTextDialog dlg({this}, nullptr);
-    dlg.exec();
-    redraw();
-}
+// void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+//     QGraphicsItem::mouseDoubleClickEvent(event);
+//     ShTextDialog dlg({this}, nullptr);
+//     dlg.exec();
+//     redraw();
+// }
 
 QPainterPath Shape::shape() const { return shape_; }
 
 QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
     if(change == GraphicsItemChange::ItemSelectedChange)
-        qobject_cast<QTableView*>(model->parent())->reset();
+        editor->reset();
     return Shapes::AbstractShape::itemChange(change, value);
 }
 
 QString Shape::name() const { return QObject::tr("Shape"); }
 
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-text"); }
-
-QDataStream& operator<<(QDataStream& stream, const Shape::InternalData& d) {
-    stream << d.text;
-    stream << d.font;
-    stream << d.angle;
-    stream << d.height;
-    stream << d.xy;
-    stream << d.handleAlign;
-    stream << d.side;
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Shape::InternalData& d) {
-    stream >> d.text;
-    stream >> d.font;
-    stream >> d.angle;
-    stream >> d.height;
-    stream >> d.xy;
-    stream >> d.handleAlign;
-    stream >> d.side;
-    return stream;
-}
 
 } // namespace ShTxt
 

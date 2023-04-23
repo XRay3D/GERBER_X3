@@ -22,7 +22,7 @@ namespace ShTxt {
 class Shape final : public Shapes::AbstractShape {
     friend ShTextDialog;
     friend AbstractShape;
-    friend class Model;
+    friend class Editor;
 
 public:
     explicit Shape(QPointF pt1 = {});
@@ -30,24 +30,21 @@ public:
 
     enum {
         // clang-format off
-        BotCenter =   Qt::AlignBottom | Qt::AlignHCenter,
-        BotLeft =     Qt::AlignBottom | Qt::AlignLeft,
-        BotRight =    Qt::AlignBottom | Qt::AlignRight,
+        BotCenter   = Qt::AlignBottom | Qt::AlignHCenter,
+        BotLeft     = Qt::AlignBottom | Qt::AlignLeft,
+        BotRight    = Qt::AlignBottom | Qt::AlignRight,
 
-        Center =      Qt::AlignHCenter | Qt::AlignVCenter,
-        CenterLeft =  Qt::AlignHCenter | Qt::AlignLeft,
+        Center      = Qt::AlignHCenter | Qt::AlignVCenter,
+        CenterLeft  = Qt::AlignHCenter | Qt::AlignLeft,
         CenterRight = Qt::AlignHCenter | Qt::AlignRight,
 
-        TopCenter =   Qt::AlignTop | Qt::AlignHCenter,
-        TopLeft =     Qt::AlignTop | Qt::AlignLeft,
-        TopRight =    Qt::AlignTop | Qt::AlignRight,
+        TopCenter   = Qt::AlignTop | Qt::AlignHCenter,
+        TopLeft     = Qt::AlignTop | Qt::AlignLeft,
+        TopRight    = Qt::AlignTop | Qt::AlignRight,
         // clang-format on
     };
 
     struct InternalData {
-        friend QDataStream& operator<<(QDataStream& stream, const InternalData& d);
-        friend QDataStream& operator>>(QDataStream& stream, InternalData& d);
-
         QString font{};
         QString text{"Shape"};
         Side side{Top};
@@ -59,7 +56,7 @@ public:
 
     // QGraphicsItem interface
     int type() const override { return GiType::ShText; }
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    //    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     QPainterPath shape() const override; // AbstractShape interface
 
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
@@ -72,16 +69,16 @@ public:
 
     QString text() const;
     void setText(const QString& value);
-
     Side side() const;
     void setSide(const Side& side);
+
     // AbstractShape interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) override;
+    //    void menu(QMenu& menu, FileTree::View* tv) override;
 
-    Model* model{};
+    Editor* editor{};
 
 protected:
     // AbstractShape interface
@@ -109,7 +106,11 @@ public:
     // Shapes::Plugin interface
     uint32_t type() const override { return GiType::ShText; }
     QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
-    Shapes::AbstractShape* createShape(const QPointF& point) const override { return new Shape(point); }
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+        auto shape = new Shape(point);
+        editor_.addShape(shape);
+        return shape;
+    }
     QWidget* editor() override { return &editor_; };
 };
 
