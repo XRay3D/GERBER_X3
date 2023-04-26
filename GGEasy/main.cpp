@@ -84,6 +84,17 @@ int main(int argc, char** argv) {
     {
         QApplication app(argc, argv);
 
+        //        QFont f;
+        //        f.setPixelSize(50);
+        //        QApplication::setFont(f);
+
+        //        DoubleSpinBox dsbx;
+        //        dsbx.setRange(-1000, +1000);
+        //        dsbx.setSuffix(" MMM");
+        //        dsbx.show();
+        //        dsbx.flicker();
+        //        return app.exec();
+
         // #ifdef Q_OS_WIN
         //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
         //     if (settings.value("AppsUseLightTheme") == 0) {

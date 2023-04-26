@@ -10,15 +10,17 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "shcircle.h"
+#include "shape.h"
 #include "graphicsview.h"
 #include "math.h"
 #include "shhandler.h"
 #include <QIcon>
 
-namespace Shapes {
+using Shapes::Handle;
 
-Circle::Circle(QPointF center, QPointF pt)
+namespace ShCirc {
+
+Shape::Shape(QPointF center, QPointF pt)
     : radius_(QLineF(center, pt).length()) {
     paths_.resize(1);
 
@@ -35,7 +37,18 @@ Circle::Circle(QPointF center, QPointF pt)
     App::graphicsView().addItem(this);
 }
 
-void Circle::redraw() {
+Shape::~Shape() {
+    std::erase(model->shapes, this);
+    qobject_cast<QTableView*>(model->parent())->reset();
+}
+
+QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if(change == GraphicsItemChange::ItemSelectedChange)
+        qobject_cast<QTableView*>(model->parent())->reset();
+    return Shapes::AbstractShape::itemChange(change, value);
+}
+
+void Shape::redraw() {
     radius_ = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
     const int intSteps = App::settings().clpCircleSegments(radius_);
     const Point::Type radius = static_cast<Point::Type>(radius_ * uScale);
@@ -53,36 +66,32 @@ void Circle::redraw() {
     shape_.addPolygon(path);
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
+
+    //    if(model)
+    //        model->dataChanged(model->index(Center, 0), model->index(Diameter, 0));
 }
 
-QString Circle::name() const { return QObject::tr("Circle"); }
+QString Shape::name() const { return QObject::tr("Shape"); }
 
-QIcon Circle::icon() const { return QIcon::fromTheme("draw-ellipse"); }
+QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
-void Circle::setPt(const QPointF& pt) {
+void Shape::setPt(const QPointF& pt) {
     handlers[Point1]->setPos(pt);
     redraw();
 }
 
-double Circle::radius() const { return radius_; }
+double Shape::radius() const { return radius_; }
 
-void Circle::setRadius(double radius) {
-    if(!qFuzzyCompare(radius_, radius))
+void Shape::setRadius(double radius) {
+    if(qFuzzyIsNull(radius) || qFuzzyCompare(radius_, radius))
         return;
-    radius_ = radius;
+    QLineF line(handlers[Center]->pos(), handlers[Point1]->pos());
+    line.setLength(radius);
+    handlers[Point1]->setPos(line.p2());
+    currentHandler = handlers[Point1].get();
     redraw();
 }
 
-////////////////////////////////////////////////////////////
-/// \brief Plugin::Plugin
-///
+} // namespace ShCirc
 
-int PluginImpl::type() const { return GiType::ShCircle; }
-
-QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse"); }
-
-AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Circle(point, point + QPointF{5, 0}); }
-
-} // namespace Shapes
-
-#include "moc_shcircle.cpp"
+#include "moc_shape.cpp"

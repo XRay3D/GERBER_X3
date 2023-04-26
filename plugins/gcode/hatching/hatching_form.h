@@ -57,12 +57,12 @@ class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "hatching.json")
     Q_INTERFACES(GCode::Plugin)
- Form form{this};
+    Form form{this};
     // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+C"}; }
-    QWidget* createForm() override{return &form;};
+    QWidget* createForm() override { return &form; };
     uint32_t type() const override { return CROSS_HATCH; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

@@ -250,6 +250,19 @@ double MathParser::parse(const QString& s) {
     return result.acc;
 }
 
+double MathParser::parse(QStringView s) {
+    Result result;
+
+    try {
+        result = plusMinus(s);
+        if(result.rest.size())
+            qWarning() << "Error: can't full parse\"" % s % "\"rest: " << result.rest;
+    } catch(const QString& str) {
+        qWarning() << str;
+    }
+    return result.acc;
+}
+
 Result MathParser::plusMinus(QStringView s) // throws Exception
 {
     Result current = mulDiv(s);
@@ -261,7 +274,8 @@ Result MathParser::plusMinus(QStringView s) // throws Exception
 
         QChar sign = current.rest.at(0);
         QStringView next = current.rest.mid(1);
-
+        if(next.empty())
+            throw QString("next.empty()");
         current = mulDiv(next);
         if(sign == '+')
             acc += current.acc;
@@ -315,6 +329,8 @@ Result MathParser::functionVariable(QStringView s) // throws Exception
 
 Result MathParser::mulDiv(QStringView s) // throws Exception
 {
+    if(s.empty())
+        throw QString("mulDiv s.empty()");
     Result current = bracket(s);
 
     double acc = current.acc;
@@ -327,6 +343,8 @@ Result MathParser::mulDiv(QStringView s) // throws Exception
             return current;
 
         QStringView next = current.rest.mid(1);
+        if(next.empty())
+            throw QString("next.empty()");
         Result right = bracket(next);
 
         if(sign == '*')
@@ -370,9 +388,10 @@ Result MathParser::processFunction(QStringView func, Result r) {
 
     using F = double (*)(double);
     static std::unordered_map<QStringView, F> funcMap{
-        {QStringLiteral("cos"), static_cast<F>([](double val) { return cos(val); })},
-        {QStringLiteral("sin"), static_cast<F>([](double val) { return sin(val); })},
-        {QStringLiteral("tan"), static_cast<F>([](double val) { return tan(val); })},
+        { QStringLiteral("cos"),  [](double val) { return cos(val); }},
+        { QStringLiteral("sin"),  [](double val) { return sin(val); }},
+        {QStringLiteral("sqrt"), [](double val) { return sqrt(val); }},
+        { QStringLiteral("tan"),  [](double val) { return tan(val); }},
     };
 
     if(funcMap.contains(func))

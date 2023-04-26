@@ -10,46 +10,43 @@
  *******************************************************************************/
 #pragma once
 
+#include "editor.h"
 #include "gi.h"
-#include "plugintypes.h"
 #include "shape.h"
 #include "shapepluginin.h"
-#include <QJsonObject>
 
 class ShTextDialog;
 
-namespace Shapes {
+namespace ShTxt {
 
-class Text final : public AbstractShape {
+class Shape final : public Shapes::AbstractShape {
     friend ShTextDialog;
     friend AbstractShape;
+    friend class Editor;
 
 public:
-    explicit Text(QPointF pt1 = {});
-    ~Text() = default;
+    explicit Shape(QPointF pt1 = {});
+    ~Shape() override;
 
     enum {
         // clang-format off
-        BotCenter =   Qt::AlignBottom | Qt::AlignHCenter,
-        BotLeft =     Qt::AlignBottom | Qt::AlignLeft,
-        BotRight =    Qt::AlignBottom | Qt::AlignRight,
+        BotCenter   = Qt::AlignBottom | Qt::AlignHCenter,
+        BotLeft     = Qt::AlignBottom | Qt::AlignLeft,
+        BotRight    = Qt::AlignBottom | Qt::AlignRight,
 
-        Center =      Qt::AlignHCenter | Qt::AlignVCenter,
-        CenterLeft =  Qt::AlignHCenter | Qt::AlignLeft,
+        Center      = Qt::AlignHCenter | Qt::AlignVCenter,
+        CenterLeft  = Qt::AlignHCenter | Qt::AlignLeft,
         CenterRight = Qt::AlignHCenter | Qt::AlignRight,
 
-        TopCenter =   Qt::AlignTop | Qt::AlignHCenter,
-        TopLeft =     Qt::AlignTop | Qt::AlignLeft,
-        TopRight =    Qt::AlignTop | Qt::AlignRight,
+        TopCenter   = Qt::AlignTop | Qt::AlignHCenter,
+        TopLeft     = Qt::AlignTop | Qt::AlignLeft,
+        TopRight    = Qt::AlignTop | Qt::AlignRight,
         // clang-format on
     };
 
     struct InternalData {
-        friend QDataStream& operator<<(QDataStream& stream, const InternalData& d);
-        friend QDataStream& operator>>(QDataStream& stream, InternalData& d);
-
         QString font{};
-        QString text{"Text"};
+        QString text{"Shape"};
         Side side{Top};
         double angle{0.0};
         double height{10.0};
@@ -59,8 +56,10 @@ public:
 
     // QGraphicsItem interface
     int type() const override { return GiType::ShText; }
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    //    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     QPainterPath shape() const override; // AbstractShape interface
+
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
     // AbstractShape interface
     void redraw() override;
@@ -70,14 +69,16 @@ public:
 
     QString text() const;
     void setText(const QString& value);
-
     Side side() const;
     void setSide(const Side& side);
+
     // AbstractShape interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree_::View* tv) override;
+    //    void menu(QMenu& menu, FileTree::View* tv) override;
+
+    Editor* editor{};
 
 protected:
     // AbstractShape interface
@@ -95,16 +96,22 @@ private:
     void ok();
 };
 
-class PluginImpl : public Shapes::Plugin {
+class Plugin : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "text.json")
     Q_INTERFACES(Shapes::Plugin)
+    mutable Editor editor_{this};
 
 public:
-    // ShapePluginTextInterface interface
-    int type() const override;
-    QIcon icon() const override;
-    AbstractShape* createShape(const QPointF& point) const override;
+    // Shapes::Plugin interface
+    uint32_t type() const override { return GiType::ShText; }
+    QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+        auto shape = new Shape(point);
+        editor_.addShape(shape);
+        return shape;
+    }
+    QWidget* editor() override { return &editor_; };
 };
 
-} // namespace Shapes
+} // namespace ShTxt

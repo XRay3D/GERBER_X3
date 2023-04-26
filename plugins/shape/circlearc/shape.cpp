@@ -10,25 +10,26 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
-#include "sharc.h"
+#include "shape.h"
 #include "graphicsview.h"
+#include "math.h"
 #include "shhandler.h"
-#include "utils.h"
 #include <QIcon>
-#include <QVector2D>
-#include <QtMath>
+#include <assert.h>
 
-namespace Shapes {
+using Shapes::Handle;
 
-Arc::Arc(QPointF center, QPointF pt1, QPointF pt2)
+namespace ShArc {
+
+Shape::Shape(QPointF center, QPointF pt1, QPointF pt2)
     : radius_(QLineF(center, pt1).length()) {
     paths_.resize(1);
 
     handlers.reserve(PtCount);
 
+    handlers.emplace_back(std::make_unique<Handle>(this));
+    handlers.emplace_back(std::make_unique<Handle>(this));
     handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.emplace_back(std::make_unique<Handle>(this));
 
     handlers[Point1]->setPos(pt1);
     handlers[Point2]->setPos(pt2);
@@ -37,6 +38,17 @@ Arc::Arc(QPointF center, QPointF pt1, QPointF pt2)
     redraw();
 
     App::graphicsView().addItem(this);
+}
+
+Shape::~Shape() {
+    std::erase(model->shapes, this);
+    qobject_cast<QTableView*>(model->parent())->reset();
+}
+
+QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if(change == GraphicsItemChange::ItemSelectedChange)
+        qobject_cast<QTableView*>(model->parent())->reset();
+    return Shapes::AbstractShape::itemChange(change, value);
 }
 
 constexpr auto dot(auto u, auto v) { return u.x() * v.x() + u.y() * v.y(); }
@@ -60,7 +72,7 @@ double distancePointToLine(const QPointF& pt, const QLineF& line) {
     return d(pt, Pb);
 }
 
-void Arc::redraw() {
+void Shape::redraw() {
     shape_ = QPainterPath();
 
     if(currentHandler) {
@@ -144,13 +156,16 @@ void Arc::redraw() {
 
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
+
+    //    if(model)
+    //        model->dataChanged(model->index(Center, 0), model->index(Angle2, 0));
 }
 
-QString Arc::name() const { return QObject::tr("Arc"); }
+QString Shape::name() const { return QObject::tr("Shape"); }
 
-QIcon Arc::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
+QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
-bool Arc::addPt(const QPointF& pt) {
+bool Shape::addPt(const QPointF& pt) {
     if(!ptCtr++) {
         handlers[Point2 + ptCtr].get()->setPos(pt);
         updateOtherHandlers(handlers[Point2 + ptCtr].get());
@@ -159,30 +174,45 @@ bool Arc::addPt(const QPointF& pt) {
     return currentHandler = nullptr, false;
 }
 
-void Arc::setPt(const QPointF& pt) {
+void Shape::setPt(const QPointF& pt) {
     handlers[Point2 + ptCtr].get()->setPos(pt);
     updateOtherHandlers(handlers[Point2 + ptCtr].get());
 }
 
-double Arc::radius() const { return radius_; }
+double Shape::radius() const { return radius_; }
 
-void Arc::setRadius(double radius) {
-    if(!qFuzzyCompare(radius_, radius))
+void Shape::setRadius(double radius) {
+    if(qFuzzyIsNull(radius) || qFuzzyCompare(radius_, radius))
         return;
     radius_ = radius;
+    {
+        QLineF line(handlers[Center]->pos(), handlers[Point1]->pos());
+        line.setLength(radius);
+        handlers[Point1]->setPos(line.p2());
+    }
+    {
+        QLineF line(handlers[Center]->pos(), handlers[Point2]->pos());
+        line.setLength(radius);
+        handlers[Point2]->setPos(line.p2());
+    }
+    currentHandler = handlers[Point2].get();
     redraw();
 }
 
-////////////////////////////////////////////////////////////
-/// \brief PluginImpl::PluginImpl
-///
+double Shape::angle(int i) const {
+    assert(i < 2);
+    return QLineF(handlers[Center]->pos(), handlers[i]->pos()).angle();
+}
 
-int PluginImpl::type() const { return GiType::ShCirArc; }
+void Shape::setAngle(int i, double radius) {
+    assert(i < 2);
+    QLineF line(handlers[Center]->pos(), handlers[i]->pos());
+    line.setAngle(radius);
+    handlers[i]->setPos(line.p2());
+    currentHandler = handlers[i].get();
+    redraw();
+}
 
-QIcon PluginImpl::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
+} // namespace ShArc
 
-AbstractShape* PluginImpl::createShape(const QPointF& point) const { return new Arc(point + QPointF{0, 5}, point, point + QPointF{0, 10}); }
-
-} // namespace Shapes
-
-#include "moc_sharc.cpp"
+#include "moc_shape.cpp"

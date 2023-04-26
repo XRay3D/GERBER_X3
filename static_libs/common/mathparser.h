@@ -89,6 +89,7 @@ public:
     MathParser(VarMap* variables);
     double getVariable(QStringView variableName);
     double parse(const QString& s = "");
+    double parse(QStringView s = {});
 
 private:
     VarMap* variables{nullptr};
