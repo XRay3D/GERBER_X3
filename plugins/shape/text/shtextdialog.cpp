@@ -11,12 +11,12 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shtextdialog.h"
-#include "shtext.h"
+#include "shape.h"
 #include "ui_shtextdialog.h"
 
-using namespace Shapes;
+namespace ShTxt {
 
-ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
+ShTextDialog::ShTextDialog(QVector<Shape*> text, QWidget* parent)
     : QDialog(parent)
     , ui(new Ui::ShTextDialog)
     , shapeText(text) {
@@ -50,31 +50,31 @@ ShTextDialog::ShTextDialog(QVector<Text*> text, QWidget* parent)
     ui->dsbxXY->setValue(shapeText.first()->iData.xy);
 
     switch(shapeText.first()->iData.handleAlign) {
-    case Text::BotCenter:
+    case Shape::BotCenter:
         ui->rb_bc->setChecked(true);
         break;
-    case Text::BotLeft:
+    case Shape::BotLeft:
         ui->rb_bl->setChecked(true);
         break;
-    case Text::BotRight:
+    case Shape::BotRight:
         ui->rb_br->setChecked(true);
         break;
-    case Text::Center:
+    case Shape::Center:
         ui->rb_c->setChecked(true);
         break;
-    case Text::CenterLeft:
+    case Shape::CenterLeft:
         ui->rb_lc->setChecked(true);
         break;
-    case Text::CenterRight:
+    case Shape::CenterRight:
         ui->rb_rc->setChecked(true);
         break;
-    case Text::TopCenter:
+    case Shape::TopCenter:
         ui->rb_tc->setChecked(true);
         break;
-    case Text::TopLeft:
+    case Shape::TopLeft:
         ui->rb_tl->setChecked(true);
         break;
-    case Text::TopRight:
+    case Shape::TopRight:
         ui->rb_tr->setChecked(true);
         break;
     }
@@ -146,23 +146,23 @@ void ShTextDialog::updateXY() {
 void ShTextDialog::updateCenterAlign() {
     int handleAlign;
     if(ui->rb_bc->isChecked())
-        handleAlign = Text::BotCenter;
+        handleAlign = Shape::BotCenter;
     else if(ui->rb_bl->isChecked())
-        handleAlign = Text::BotLeft;
+        handleAlign = Shape::BotLeft;
     else if(ui->rb_br->isChecked())
-        handleAlign = Text::BotRight;
+        handleAlign = Shape::BotRight;
     else if(ui->rb_c->isChecked())
-        handleAlign = Text::Center;
+        handleAlign = Shape::Center;
     else if(ui->rb_lc->isChecked())
-        handleAlign = Text::CenterLeft;
+        handleAlign = Shape::CenterLeft;
     else if(ui->rb_rc->isChecked())
-        handleAlign = Text::CenterRight;
+        handleAlign = Shape::CenterRight;
     else if(ui->rb_tc->isChecked())
-        handleAlign = Text::TopCenter;
+        handleAlign = Shape::TopCenter;
     else if(ui->rb_tl->isChecked())
-        handleAlign = Text::TopLeft;
+        handleAlign = Shape::TopLeft;
     else if(ui->rb_tr->isChecked())
-        handleAlign = Text::TopRight;
+        handleAlign = Shape::TopRight;
     for(auto text: shapeText) {
         text->iData.handleAlign = handleAlign;
         text->redraw();
@@ -186,5 +186,7 @@ void ShTextDialog::reject() {
         text->restore();
     QDialog::reject();
 }
+
+} // namespace ShTxt
 
 #include "moc_shtextdialog.cpp"

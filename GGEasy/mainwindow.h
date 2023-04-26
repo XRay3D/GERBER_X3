@@ -54,9 +54,7 @@ public:
     QUndoStack& undoStack() { return undoStack_; }
 
     void setDockWidget(QWidget* dwContent) {
-        if(!dwContent)
-            exit(-66);
-        if(dockWidget_->widget() == dwContent)
+        if(dwContent == nullptr || dockWidget_->widget() == dwContent)
             return;
         if(auto widget = dockWidget_->widget(); widget) {
             dockWidget_->setWidget(dwContent); // NOTE  заменяет виджет новым и сбрасывается предок

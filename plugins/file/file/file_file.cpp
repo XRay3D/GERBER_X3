@@ -66,7 +66,7 @@ void File::initFrom(AbstractFile* file) {
     AbstractFile::initFrom(file);
 }
 
-FileTree_::Node* File::node() {
+FileTree::Node* File::node() {
     return node_ ? node_ : node_ = new Node(this);
 }
 

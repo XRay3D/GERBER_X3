@@ -41,18 +41,17 @@ AbstractShape::~AbstractShape() {
 }
 
 void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
-    // FIXME   if (App::drawPdf()) [[unlikely]] {
-    //        pathColor_ = Qt::black;
-    //        pathColor_.setAlpha(255);
-    //        pen_.setColor(pathColor_);
-    //    } else [[likely]] {
-    pathColor_ = bodyColor_;
-    pathColor_.setAlpha(255);
-    pen_.setColor(pathColor_);
-    //    }
-
+    if(App::drawPdf()) [[unlikely]] {
+        pathColor_ = Qt::black;
+        pathColor_.setAlpha(255);
+        pen_.setColor(pathColor_);
+    } else [[likely]] {
+        pathColor_ = bodyColor_;
+        pathColor_.setAlpha(255);
+        pen_.setColor(pathColor_);
+    }
     painter->setPen(pen_);
-    painter->setBrush(bodyColor_);
+    painter->setBrush(QGraphicsItem::flags().testFlag(ItemIsSelectable) ? QBrush{bodyColor_} : QBrush{Qt::NoBrush});
     painter->drawPath(shape_);
 }
 
@@ -94,6 +93,7 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
 }
 
 void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseDoubleClickEvent(event);
     App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
 }
 

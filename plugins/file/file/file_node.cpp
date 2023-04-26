@@ -24,7 +24,7 @@
 namespace TmpFile {
 
 Node::Node(File* file)
-    : FileTree_::Node(file->id(), FileTree_::File)
+    : FileTree::Node(file->id(), FileTree::File)
     , file(file) {
 }
 
@@ -34,12 +34,12 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
     case Qt::EditRole:
-        if(index.column() == FileTree_::Column::Side) {
+        if(index.column() == FileTree::Column::Side) {
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
         }
         break;
-    case FileTree_::Select:
+    case FileTree::Select:
         for(auto ig: file->itemGroups())
             ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
         return true;
@@ -49,10 +49,10 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch(FileTree_::Column(index.column())) {
-    case FileTree_::Column::NameColorVisible:
+    switch(FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree_::Column::Side:
+    case FileTree::Column::Side:
         return itemFlag | Qt::ItemIsEditable;
     default:
         return itemFlag;
@@ -61,8 +61,8 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 
 QVariant Node::data(const QModelIndex& index, int role) const {
     if(file)
-        switch(FileTree_::Column(index.column())) {
-        case FileTree_::Column::NameColorVisible:
+        switch(FileTree::Column(index.column())) {
+        case FileTree::Column::NameColorVisible:
             switch(role) {
             case Qt::DisplayRole:
                 return file->shortName();
@@ -73,19 +73,19 @@ QVariant Node::data(const QModelIndex& index, int role) const {
                 return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
                 return QIcon::fromTheme("drill-path");
-            case FileTree_::Id:
+            case FileTree::Id:
                 return id();
             default:
                 return {};
             }
-        case FileTree_::Column::Side:
+        case FileTree::Column::Side:
             switch(role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
                 return sideStrList[file->side()];
             case Qt::EditRole:
                 return static_cast<bool>(file->side());
-            case FileTree_::Id:
+            case FileTree::Id:
                 return id();
             default:
                 return {};
@@ -96,8 +96,8 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     return {};
 }
 
-void Node::menu(QMenu& menu, FileTree_::View* tv) {
-    menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree_::View::hideOther);
+void Node::menu(QMenu& menu, FileTree::View* tv) {
+    menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
         dialog->setObjectName(QString::fromUtf8("dialog"));
@@ -122,7 +122,7 @@ void Node::menu(QMenu& menu, FileTree_::View* tv) {
     //        });
     //    }
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree_::View::closeFile);
+    menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
 } // namespace TmpFile

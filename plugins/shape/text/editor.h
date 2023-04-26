@@ -9,28 +9,45 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include <QDialog>
 
-namespace Ui {
-class ShTextDialog;
-}
+#include <QAbstractTableModel>
+#include <QActionGroup>
+#include <QTableView>
+#include <QWidget>
+
+class DoubleSpinBox;
+class QCheckBox;
+class QComboBox;
+class QFontComboBox;
+class QPlainTextEdit;
+class QRadioButton;
 
 namespace ShTxt {
 
-class Shape;
-
-class ShTextDialog : public QDialog {
+class Editor : public QWidget {
     Q_OBJECT
-    friend Shape;
+    friend class Shape;
+    std::vector<Shape*> shapes;
 
-public:
-    explicit ShTextDialog(QVector<Shape*> text, QWidget* parent = nullptr);
-    ~ShTextDialog();
+    DoubleSpinBox* dsbxAngle;
+    DoubleSpinBox* dsbxHeight;
+    DoubleSpinBox* dsbxXY;
+    QCheckBox* chbxBold;
+    QCheckBox* chbxItalic;
+    QComboBox* cbxSide;
+    QFontComboBox* cbxFont;
+    QPlainTextEdit* plainTextEdit;
+    QRadioButton* rb_bc;
+    QRadioButton* rb_bl;
+    QRadioButton* rb_br;
+    QRadioButton* rb_cc;
+    QRadioButton* rb_lc;
+    QRadioButton* rb_rc;
+    QRadioButton* rb_tc;
+    QRadioButton* rb_tl;
+    QRadioButton* rb_tr;
 
-private:
-    Ui::ShTextDialog* ui;
-
-    QVector<Shape*> shapeText;
+    void setupUi();
 
     void updateText();
     void updateFont();
@@ -40,10 +57,20 @@ private:
     void updateCenterAlign();
     void updateSide();
 
-    // QDialog interface
-public slots:
-    void accept() override;
-    void reject() override;
+public:
+    Editor(class Plugin* plugin);
+
+    void addShape(Shape* shape);
+
+    void reset();
+
+    ~Editor() override = default;
+    //    Model* model;
+    class Plugin* plugin;
+
+    // QWidget interface
+protected:
+    void hideEvent(QHideEvent* event) override;
 };
 
 } // namespace ShTxt
