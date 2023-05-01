@@ -7,3 +7,6 @@
 [submodule "external_dependencies/Clipper2"]
 	path = external_dependencies/Clipper2
 	url = git@github.com:AngusJohnson/Clipper2.git
+[submodule "external_dependencies/ChaiScript"]
+	path = external_dependencies/ChaiScript
+	url = git@github.com:ChaiScript/ChaiScript.git
