@@ -1068,27 +1068,27 @@ void MainWindow::updateTheme() {
                 QProxyStyle::drawPrimitive(element, option, painter, widget);
             }
 
-            void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
-                if(element == QStyle::PE_IndicatorBranch) {
-                    auto r = option->rect;
-                    auto c = r.center();
-                    auto color = Qt::darkGray; // qApp->palette().color(QPalette::Highlight);
-                    painter->setPen(color);
-                    if(!(option->state & State_Children)) {
-                        if(option->state & State_Sibling) // The node in the tree has a sibling (i.e., there is another node in the same column).
-                            painter->drawLine(c.x(), r.top(), c.x(), r.bottom());
-                        if(option->state & State_Item) {  // This branch indicator has an item.
-                            painter->drawLine(c.x(), r.top(), c.x(), c.y());
-                            painter->drawLine(c.x(), c.y(), r.right(), c.y());
-                        }
-                    }
-                    //                    if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
-                    //                        painter->fillRect(option->rect, Qt::blue);
-                    //                    if(option->state & State_Open) // The branch indicator has an opened sub-tree.
-                    //                        painter->fillRect(option->rect, Qt::yellow);
-                }
-                QProxyStyle::drawPrimitive(element, option, painter, widget);
-            }
+//            void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
+//                if(element == QStyle::PE_IndicatorBranch) {
+//                    auto r = option->rect;
+//                    auto c = r.center();
+//                    auto color = Qt::darkGray; // qApp->palette().color(QPalette::Highlight);
+//                    painter->setPen(color);
+//                    if(!(option->state & State_Children)) {
+//                        if(option->state & State_Sibling) // The node in the tree has a sibling (i.e., there is another node in the same column).
+//                            painter->drawLine(c.x(), r.top(), c.x(), r.bottom());
+//                        if(option->state & State_Item) {  // This branch indicator has an item.
+//                            painter->drawLine(c.x(), r.top(), c.x(), c.y());
+//                            painter->drawLine(c.x(), c.y(), r.right(), c.y());
+//                        }
+//                    }
+//                    //                    if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
+//                    //                        painter->fillRect(option->rect, Qt::blue);
+//                    //                    if(option->state & State_Open) // The branch indicator has an opened sub-tree.
+//                    //                        painter->fillRect(option->rect, Qt::yellow);
+//                }
+//                QProxyStyle::drawPrimitive(element, option, painter, widget);
+//            }
         };
 
         qApp->setStyle(new Style);

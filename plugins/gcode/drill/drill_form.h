@@ -69,10 +69,15 @@ private:
 
     inline void zoomToSelected();
 
-    // FormsUtil interface
 protected:
+    // FormsUtil interface
     void computePaths() override;
     void updateName() override;
+    // QWidget interface
+    void showEvent(QShowEvent* event) override {
+        updateFiles();
+        event->accept();
+    }
 
 public:
     void editFile(GCode::File* file) override;

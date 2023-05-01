@@ -256,13 +256,15 @@ void BaseForm::setCreator(Creator* newCreator) {
             thread.wait();
         }
         creator_ = newCreator;
-        connect(this, &BaseForm::createToolpath, this, &BaseForm::startProgress);
-        connect(this, &BaseForm::createToolpath, creator_, &Creator::createGc, Qt::QueuedConnection);
-        connect(creator_, &Creator::canceled, this, &BaseForm::stopProgress);
-        connect(creator_, &Creator::errorOccurred, this, &BaseForm::errorHandler);
-        connect(creator_, &Creator::fileReady, this, &BaseForm::fileHandler);
         creator_->moveToThread(&thread);
-        connect(&thread, &QThread::finished, creator_, &QObject::deleteLater);
+        // clang-format off
+        connect(&thread,  &QThread::finished,        creator_, &QObject::deleteLater);
+        connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress);
+        connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler);
+        connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler);
+        connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,              Qt::QueuedConnection);
+        connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress);
+        // clang-format on
         thread.start(QThread::LowPriority /*HighestPriority*/);
     } else if(creator_ && !newCreator) {
         thread.quit();
@@ -354,11 +356,11 @@ Params* BaseForm::getNewGcp() {
             gcp->closedPaths.append(gi->paths());
             break;
         case GiType::DataPath: {
-            auto paths = gi->paths();
-            if(paths.front() == paths.back())
-                gcp->closedPaths.append(paths);
+            auto path = gi->paths().front();
+            if(path.front() == path.back())
+                gcp->closedPaths.emplace_back(path);
             else
-                gcp->openPaths.append(paths);
+                gcp->openPaths.emplace_back(path);
         } break;
             //            if (!file) {
             //                file = gi->file();
