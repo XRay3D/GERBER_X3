@@ -13,7 +13,7 @@
 #include "gc_types.h"
 #include "gi.h"
 
-class GiBridge final : public GraphicsItem {
+class GiBridge final : public Gi::Item {
 
 public:
     explicit GiBridge();
@@ -24,7 +24,7 @@ public:
     QPainterPath shape() const override { return pPath; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    // GraphicsItem interface
+    // Gi::Item interface
     Paths paths(int alternate = {}) const override;
     void changeColor() override { }
 

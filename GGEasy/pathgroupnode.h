@@ -7,28 +7,19 @@
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
+ ********************************************************************************/
 #pragma once
-#include "datastream.h"
-#include <QPolygonF>
-#include <type_traits>
 
-class Gi::Drill;
+#include "ft_node.h"
 
-namespace TmpFile {
-
-class File;
-
-class Settings {
-protected:
-    static inline QString parseZeroMode_;
-    static inline QString parseUnitMode_;
-    static inline QString parseDecimalAndInteger_;
-
+class PathGroupNode : public FileTree::Node {
 public:
-    static QString parseZeroMode() { return parseZeroMode_; }
-    static QString parseUnitMode() { return parseUnitMode_; }
-    static QString parseDecimalAndInteger() { return parseDecimalAndInteger_; }
-};
+    PathGroupNode();
 
-} // namespace TmpFile
+    // Node interface
+public:
+    bool setData(const QModelIndex &index, const QVariant &value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex &index) const override;
+    QVariant data(const QModelIndex &index, int role) const override;
+    void menu(QMenu &menu, FileTree::View *tv) override;
+};

@@ -10,20 +10,27 @@
  ********************************************************************************/
 #pragma once
 
-#include "gi.h"
+#include "myclipper.h"
 
-class GiError : public QGraphicsItem {
+#include <QGraphicsItem>
+
+namespace Gi {
+
+class Error final : public QGraphicsItem {
     QPainterPath shape_;
     const double area_;
 
 public:
-    GiError(const Paths& paths, double area);
+    Error(const Paths& paths, double area);
     double area() const;
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
+    int type() const override;
 };
 
-Q_DECLARE_METATYPE(GiError*)
+} // namespace Gi
+
+Q_DECLARE_METATYPE(Gi::Error*)

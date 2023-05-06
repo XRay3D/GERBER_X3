@@ -138,8 +138,8 @@ void File::createGi() {
         for(auto& go: layer->graphicObjects_)
             go.file_ = this;
 
-    GiGroup* igNorm = itemGroups_.back();
-    GiGroup* igPath = new GiGroup;
+    Gi::Group* igNorm = itemGroups_.back();
+    Gi::Group* igPath = new Gi::Group;
     itemGroups_.push_back(igPath);
 
     int i = 0;
@@ -147,8 +147,8 @@ void File::createGi() {
     for(auto& [name, layer]: layers_) {
         if(layer->graphicObjects_.size()) {
             if(i++) {
-                itemGroups_.push_back(igNorm = new GiGroup);
-                itemGroups_.push_back(igPath = new GiGroup);
+                itemGroups_.push_back(igNorm = new Gi::Group);
+                itemGroups_.push_back(igPath = new Gi::Group);
             }
 
             Clipper clipper; // Clipper
@@ -158,7 +158,7 @@ void File::createGi() {
                     clipper.AddSubject(go.fill);
 
                 if(go.path.size() > 1) {
-                    auto gItem = new GiDataPath(go.path, this);
+                    auto gItem = new Gi::DataPath(go.path, this);
                     if(go.entity()) {
                         //                        gItem->setToolTip(QString("Line %1\n%2")
                         //                                              .arg(go.entity()->data[0].line())
@@ -179,7 +179,7 @@ void File::createGi() {
             }
 
             for(Paths& paths: layer->groupedPaths_) {
-                auto gItem = new GiDataSolid(paths, this);
+                auto gItem = new Gi::DataSolid(paths, this);
                 gItem->setColorPtr(&layer->colorNorm_);
                 igNorm->push_back(gItem);
             }

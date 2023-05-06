@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketoffset.h"
+#include "project.h"
 #include <QStringBuilder>
 
 namespace PocketOffset {
@@ -63,7 +64,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
             calculate(std::move(paths));
         }
     } else { // Outer
-        Paths paths{InflatePaths(workingPs, +dOffset, JT::Round, ET::Polygon, uScale)};
+        Paths paths{InflatePaths(closedSrcPaths, +dOffset, JT::Round, ET::Polygon, uScale)};
         if(paths.empty()) {
             emit fileReady(nullptr);
             return;
@@ -100,6 +101,8 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
+    dbgPaths(groupedPss, "groupedPss", Qt::red);
+
     setCurrent(0);
 
     for(Paths paths: groupedPss) {
@@ -117,6 +120,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
         emit fileReady(nullptr);
         return;
     }
+
 
     stacking(returnPs);
     assert(returnPss.size());
@@ -169,7 +173,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
             for(size_t pIdx{}; const Paths& paths: groupedPss) {
                 Paths wp = InflatePaths(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
-                if(tIdx)                                                                      // обрезка текущего пути предыдущим
+                if(tIdx) // обрезка текущего пути предыдущим
                     wp = C2::Difference(wp, clipFrame, FR::EvenOdd);
 
                 if(tIdx == size - 1)

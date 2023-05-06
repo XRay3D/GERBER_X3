@@ -106,7 +106,7 @@ void Layer::setVisible(bool visible) {
     }
 }
 
-GiGroup* Layer::itemGroup() const {
+Gi::Group* Layer::itemGroup() const {
     return itemsType_ == ItemsType::Paths ? itemGroupPath : itemGroupNorm;
 }
 

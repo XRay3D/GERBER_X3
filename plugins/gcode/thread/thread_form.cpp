@@ -81,7 +81,7 @@ Form::~Form() {
     //    settings.endGroup();
 
     //    for (QGraphicsItem* giItem : App::graphicsView().items()) {
-    //        if (giItem->type() == GiType::Bridge)
+    //        if (giItem->type() == Gi::Type::Bridge)
     //            delete giItem;
     //    }
     delete ui;
@@ -100,12 +100,12 @@ void Form::computePaths() {
     //    AbstractFile const* file = nullptr;
     //    bool skip {true};
 
-    //    for (auto* gi : App::graphicsView().selectedItems<GraphicsItem>()) {
+    //    for (auto* gi : App::graphicsView().selectedItems<Gi::Item>()) {
     //        switch (gi->type()) {
-    //        case GiType::DataSolid:
+    //        case Gi::Type::DataSolid:
     //            wPaths.append(gi->paths());
     //            break;
-    //        case GiType::DataPath: {
+    //        case Gi::Type::DataPath: {
     //            auto paths = gi->paths();
     //            if (paths.front() == paths.back())
     //                wPaths.append(paths);
@@ -121,19 +121,19 @@ void Form::computePaths() {
     //            //                        return;
     //            //                }
     //            //            }
-    //            //            if (gi->type() == GiType::DataSolid)
+    //            //            if (gi->type() == Gi::Type::DataSolid)
     //            //                wPaths.append(gi->paths());
     //            //            else
     //            //                wRawPaths.append(gi->paths());
     //            //            break;
-    //        case GiType::ShCircle:
-    //        case GiType::ShRectangle:
-    //        case GiType::ShText:
-    //        case GiType::Drill:
+    //        case Gi::Type::ShCircle:
+    //        case Gi::Type::ShRectangle:
+    //        case Gi::Type::ShText:
+    //        case Gi::Type::Drill:
     //            wPaths.append(gi->paths());
     //            break;
-    //        case GiType::ShPolyLine:
-    //        case GiType::ShCirArc:
+    //        case Gi::Type::ShPolyLine:
+    //        case Gi::Type::ShCirArc:
     //            wRawPaths.append(gi->paths());
     //            break;
     //        default:
@@ -166,7 +166,7 @@ void Form::computePaths() {
 
     //    QPolygonF brv;
     //    for (QGraphicsItem* item : App::graphicsView().items()) {
-    //        if (item->type() == GiType::Bridge)
+    //        if (item->type() == Gi::Type::Bridge)
     //            brv.push_back(item->pos());
     //    }
     //    if (!brv.isEmpty()) {

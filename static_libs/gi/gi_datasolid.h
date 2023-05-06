@@ -15,20 +15,24 @@ namespace Gerber {
 class File;
 }
 
-class GiDataSolid final : public GraphicsItem {
+namespace Gi {
+
+class DataSolid final : public Item {
     Paths& paths_;
 
 public:
-    explicit GiDataSolid(Paths& paths_, AbstractFile* file);
-    ~GiDataSolid() override;
+    explicit DataSolid(Paths& paths_, AbstractFile* file);
+    ~DataSolid() override;
 
     // QGraphicsItem interface
     //   QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    // GraphicsItem interface
+    // Item interface
     void redraw() override;
     void setPaths(Paths paths, int alternate = {}) override;
-    // GraphicsItem interface
+    // Item interface
     void changeColor() override;
 };
+
+} // namespace Gi

@@ -31,7 +31,7 @@ public:
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override { return GiType::ShHandler; }
+    int type() const override { return Gi::Type::ShHandler; }
 
     Type hType() const;
     void setHType(Type value);

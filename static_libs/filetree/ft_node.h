@@ -46,6 +46,7 @@ enum Type : int {
     File,
     SubFile,
     AbstractShape,
+    PathGroup
 };
 
 class Node {

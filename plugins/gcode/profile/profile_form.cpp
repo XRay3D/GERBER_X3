@@ -95,7 +95,7 @@ Form::~Form() {
     settings.endGroup();
 
     for(QGraphicsItem* giItem: App::graphicsView().items())
-        if(giItem->type() == GiType::Bridge)
+        if(giItem->type() == Gi::Type::Bridge)
             delete giItem;
     delete ui;
 }
@@ -130,7 +130,7 @@ void Form::computePaths() {
 
     QPolygonF brv;
     for(QGraphicsItem* item: App::graphicsView().items())
-        if(item->type() == GiType::Bridge)
+        if(item->type() == Gi::Type::Bridge)
             brv.push_back(item->pos());
     if(!brv.isEmpty()) {
         // gcp_.params[GCode::Params::Bridges].fromValue(brv);
@@ -175,7 +175,7 @@ void Form::onAddBridgeClicked() {
             }
         };
 
-        for(GraphicsItem* gi: App::graphicsView().selectedItems<GraphicsItem>()) {
+        for(Gi::Item* gi: App::graphicsView().selectedItems<Gi::Item>()) {
             auto bounds = Bounds(gi->paths());
             int step = bounds.Width() / (value + 1);
             for(int var: std::views::iota(1, lround(value) + 1)) {

@@ -13,7 +13,9 @@
 #include "gi.h"
 #include "qparallelanimationgroup.h"
 
-class GiAbstractPreview : public QGraphicsObject {
+namespace Gi {
+
+class AbstractPreview : public QGraphicsObject {
     friend class Node;
 
     Q_OBJECT
@@ -34,8 +36,8 @@ signals:
     void colorChanged();
 
 public:
-    GiAbstractPreview();
-    ~GiAbstractPreview() override = default;
+    AbstractPreview();
+    ~AbstractPreview() override = default;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
@@ -114,3 +116,5 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
+
+} // namespace Gi

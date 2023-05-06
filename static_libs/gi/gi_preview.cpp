@@ -17,7 +17,9 @@
 #include <QPainter>
 #include <QPropertyAnimation>
 
-GiAbstractPreview::GiAbstractPreview()
+namespace Gi {
+
+AbstractPreview::AbstractPreview()
     : propAnimGr(this)
     , propAnimBr(this, "bodyColor")
     , propAnimPn(this, "pathColor")
@@ -31,7 +33,7 @@ GiAbstractPreview::GiAbstractPreview()
     propAnimPn.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     propAnimPn.setDuration(150);
 
-    connect(this, &GiAbstractPreview::colorChanged, [this] { update(); });
+    connect(this, &AbstractPreview::colorChanged, [this] { update(); });
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
@@ -39,7 +41,7 @@ GiAbstractPreview::GiAbstractPreview()
     App::graphicsView().addItem(this);
 }
 
-void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     painter->setPen({bodyColor_, 0.0});
     painter->setBrush(bodyColor_);
     painter->drawPath(sourcePath_);
@@ -54,15 +56,15 @@ void GiAbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*
     }
 }
 
-QRectF GiAbstractPreview::boundingRect() const { return sourcePath_.boundingRect(); }
+QRectF AbstractPreview::boundingRect() const { return sourcePath_.boundingRect(); }
 
-QPainterPath GiAbstractPreview::shape() const { return sourcePath_; }
+QPainterPath AbstractPreview::shape() const { return sourcePath_; }
 
-int GiAbstractPreview::type() const { return int(GiType::Preview); }
+int AbstractPreview::type() const { return int(Type::Preview); }
 
-double GiAbstractPreview::sourceDiameter() const { return sourceDiameter_; }
+double AbstractPreview::sourceDiameter() const { return sourceDiameter_; }
 
-void GiAbstractPreview::changeColor() {
+void AbstractPreview::changeColor() {
     if(flags() & ItemIsSelectable)
         colorState |= Used;
     else
@@ -86,19 +88,19 @@ void GiAbstractPreview::changeColor() {
     propAnimGr.start();
 }
 
-void GiAbstractPreview::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+void AbstractPreview::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void GiAbstractPreview::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
+void AbstractPreview::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant GiAbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+QVariant AbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if(change == ItemSelectedChange) {
         if(value.toInt())
             colorState |= Selected;
@@ -121,5 +123,7 @@ QVariant GiAbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change,
     }
     return QGraphicsItem::itemChange(change, value);
 }
+
+} // namespace Gi
 
 #include "moc_gi_preview.cpp"

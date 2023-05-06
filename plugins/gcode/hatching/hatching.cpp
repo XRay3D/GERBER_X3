@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "hatching.h"
+#include "project.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__

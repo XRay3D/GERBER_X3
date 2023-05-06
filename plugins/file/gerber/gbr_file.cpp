@@ -40,7 +40,7 @@ QDebug operator<<(QDebug debug, const State& state) {
 
 File::File()
     : AbstractFile() {
-    itemGroups_.append({new GiGroup, new GiGroup});
+    itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
         {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
         {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
@@ -317,7 +317,7 @@ void File::read(QDataStream& stream) {
 void File::createGi() {
     if constexpr(1) { // fill copper
         for(Paths& paths: groupedPaths()) {
-            GraphicsItem* item = new GiDataSolid(paths, this);
+            Gi::Item* item = new Gi::DataSolid(paths, this);
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();
@@ -358,16 +358,16 @@ void File::createGi() {
                         path.push_back(path.front());
                         if(!Settings::skipDuplicates()) {
                             checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
+                            itemGroups_[ApPaths]->push_back(new Gi::DataPath(checkList.front(), this));
                         } else if(!contains(path)) {
                             checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new GiDataPath(checkList.front(), this));
+                            itemGroups_[ApPaths]->push_back(new Gi::DataPath(checkList.front(), this));
                         }
                     }
                 } else if(!Settings::skipDuplicates()) {
-                    itemGroups_[ApPaths]->push_back(new GiDataPath(go.path, this));
+                    itemGroups_[ApPaths]->push_back(new Gi::DataPath(go.path, this));
                 } else if(!contains(go.path)) {
-                    itemGroups_[ApPaths]->push_back(new GiDataPath(go.path, this));
+                    itemGroups_[ApPaths]->push_back(new Gi::DataPath(go.path, this));
                     checkList.push_front(go.path);
                 }
             }

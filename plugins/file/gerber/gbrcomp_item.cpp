@@ -22,7 +22,7 @@
 namespace Gerber::Comp {
 
 Item::Item(const Component& component, AbstractFile* file)
-    : GraphicsItem(file)
+    : Gi::Item(file)
     , component_(component) {
     component.setitem(this);
     pathPins.resize(component_.pins().size());

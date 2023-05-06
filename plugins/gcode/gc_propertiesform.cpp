@@ -39,10 +39,10 @@ PropertiesForm::PropertiesForm(QWidget* parent)
             ui->dsbxClearence->setValue(value);
     });
 
-    connect(ui->dsbxHomeX, &QDoubleSpinBox::valueChanged, App::homePtr(), &GiMarker::setPosX);
-    connect(ui->dsbxHomeY, &QDoubleSpinBox::valueChanged, App::homePtr(), &GiMarker::setPosY);
-    connect(ui->dsbxZeroX, &QDoubleSpinBox::valueChanged, App::zeroPtr(), &GiMarker::setPosX);
-    connect(ui->dsbxZeroY, &QDoubleSpinBox::valueChanged, App::zeroPtr(), &GiMarker::setPosY);
+    connect(ui->dsbxHomeX, &QDoubleSpinBox::valueChanged, App::homePtr(), &Gi::Marker::setPosX);
+    connect(ui->dsbxHomeY, &QDoubleSpinBox::valueChanged, App::homePtr(), &Gi::Marker::setPosY);
+    connect(ui->dsbxZeroX, &QDoubleSpinBox::valueChanged, App::zeroPtr(), &Gi::Marker::setPosX);
+    connect(ui->dsbxZeroY, &QDoubleSpinBox::valueChanged, App::zeroPtr(), &Gi::Marker::setPosY);
 
     connect(ui->dsbxGlue, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setGlue);
     connect(ui->dsbxSpaceX, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSpaceX);

@@ -16,11 +16,13 @@ namespace GCode {
 class File;
 }
 
-class GiGcPath : public GraphicsItem {
+namespace Gi {
+
+class GcPath : public Item {
 public:
-    GiGcPath(const Paths& paths, AbstractFile* file = nullptr);
-    GiGcPath(const Path& path, AbstractFile* file = nullptr);
-    ~GiGcPath() override = default;
+    GcPath(const Paths& paths, AbstractFile* file = nullptr);
+    GcPath(const Path& path, AbstractFile* file = nullptr);
+    ~GcPath() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
@@ -37,3 +39,4 @@ protected:
     void changeColor() override { }
 };
 #undef QT_DEBUG
+} // namespace Gi

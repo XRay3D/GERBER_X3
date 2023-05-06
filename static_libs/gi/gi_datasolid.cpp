@@ -19,8 +19,10 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-GiDataSolid::GiDataSolid(Paths& paths, AbstractFile* file)
-    : GraphicsItem(file)
+namespace Gi {
+
+DataSolid::DataSolid(Paths& paths, AbstractFile* file)
+    : Item(file)
     , paths_{paths} {
     for(Path path: paths) {
         if(path.size() && path.back() != path.front())
@@ -32,9 +34,9 @@ GiDataSolid::GiDataSolid(Paths& paths, AbstractFile* file)
     setFlag(ItemIsSelectable, true);
 }
 
-GiDataSolid::~GiDataSolid() { }
+DataSolid::~DataSolid() { }
 
-void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void DataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
@@ -56,9 +58,9 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
     painter->strokePath(shape_, pen_);
 }
 
-int GiDataSolid::type() const { return GiType::DataSolid; }
+int DataSolid::type() const { return Type::DataSolid; }
 
-void GiDataSolid::redraw() {
+void DataSolid::redraw() {
     //    shape_ = QPainterPath();
     //    for (Path path : qAsConst(paths_)) {
     //        path.push_back(path.front());
@@ -69,7 +71,7 @@ void GiDataSolid::redraw() {
     // update();
 }
 
-void GiDataSolid::setPaths(Paths paths, int alternate) {
+void DataSolid::setPaths(Paths paths, int alternate) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
@@ -89,7 +91,7 @@ void GiDataSolid::setPaths(Paths paths, int alternate) {
     redraw();
 }
 
-void GiDataSolid::changeColor() {
+void DataSolid::changeColor() {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);
@@ -132,3 +134,5 @@ void GiDataSolid::changeColor() {
     //    animation.setEndValue(bodyColor_);
     //    animation.start();
 }
+
+} // namespace Gi

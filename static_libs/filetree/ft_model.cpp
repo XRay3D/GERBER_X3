@@ -116,6 +116,11 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }
 
+void Model::addPathGroup(Gi::DataPath *)
+{
+
+}
+
 void Model::closeProject() {
     Node* item;
     for(int i = 0; i < rootItem->childCount(); ++i) {

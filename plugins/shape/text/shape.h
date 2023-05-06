@@ -55,7 +55,7 @@ public:
     };
 
     // QGraphicsItem interface
-    int type() const override { return GiType::ShText; }
+    int type() const override { return Gi::Type::ShText; }
     //    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     QPainterPath shape() const override; // AbstractShape interface
 
@@ -104,7 +104,7 @@ class Plugin : public Shapes::Plugin {
 
 public:
     // Shapes::Plugin interface
-    uint32_t type() const override { return GiType::ShText; }
+    uint32_t type() const override { return Gi::Type::ShText; }
     QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
         auto shape = new Shape(point);

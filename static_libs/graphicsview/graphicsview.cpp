@@ -528,7 +528,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     } else if(event->button() == Qt::RightButton) {
         //        { // удаление мостика
         //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-        //            if (item && item->type() == GiType::Bridge && !static_cast<BridgeItem*>(item)->ok())
+        //            if (item && item->type() == Gi::Type::Bridge && !static_cast<BridgeItem*>(item)->ok())
         //                delete item;
         //        }
         // это что бы при вызове контекстного меню ничего постороннего не было
@@ -970,7 +970,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //        QList<QGraphicsItem*> items = QGraphicsScene::items(cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
 //        bool fl = false;
 //        for (QGraphicsItem* item : items) {
-//            if (item && item->type() != GiType::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
+//            if (item && item->type() != Gi::Type::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
 //                fl = true;
 //                break;
 //            }

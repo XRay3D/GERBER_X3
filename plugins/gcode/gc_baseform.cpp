@@ -67,10 +67,10 @@ inline QIcon errorIcon(const QPainterPath& path) {
 }
 
 class ErrorModel : public QAbstractTableModel {
-    mvector<GiError*> items;
+    mvector<Gi::Error*> items;
 
 public:
-    ErrorModel(mvector<GiError*>&& items, QObject* parent = nullptr)
+    ErrorModel(mvector<Gi::Error*>&& items, QObject* parent = nullptr)
         : QAbstractTableModel(parent)
         , items(std::move(items)) {
     }
@@ -142,9 +142,9 @@ protected slots:
     void selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) override {
         QTableView::selectionChanged(selected, deselected);
         for(auto& var: selected.indexes())
-            var.data(Qt::UserRole).value<GiError*>()->setSelected(true);
+            var.data(Qt::UserRole).value<Gi::Error*>()->setSelected(true);
         for(auto& var: deselected.indexes())
-            var.data(Qt::UserRole).value<GiError*>()->setSelected(false);
+            var.data(Qt::UserRole).value<Gi::Error*>()->setSelected(false);
         static_cast<ErrorModel*>(model())->updateScene();
     }
 
@@ -248,27 +248,24 @@ BaseForm::~BaseForm() {
 
 void BaseForm::setCreator(Creator* newCreator) {
     qDebug() << __FUNCTION__ << creator_ << newCreator;
-
+    if(thread.isRunning()) {
+        thread.quit();
+        thread.wait();
+    }
     if(creator_ != newCreator && newCreator) {
         qDebug(__FUNCTION__);
-        if(thread.isRunning()) {
-            thread.quit();
-            thread.wait();
-        }
         creator_ = newCreator;
         creator_->moveToThread(&thread);
         // clang-format off
-        connect(&thread,  &QThread::finished,        creator_, &QObject::deleteLater);
-        connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress);
-        connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler);
-        connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler);
-        connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,              Qt::QueuedConnection);
-        connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress);
+        connect(&thread,  &QThread::finished,        creator_, &QObject::deleteLater                        );
+        connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress                      );
+        connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler                      );
+        connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler                       );
+        connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,      Qt::QueuedConnection);
+        connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress                     );
         // clang-format on
         thread.start(QThread::LowPriority /*HighestPriority*/);
     } else if(creator_ && !newCreator) {
-        thread.quit();
-        thread.wait();
         creator_ = nullptr;
     }
 }
@@ -312,7 +309,7 @@ Params* BaseForm::getNewGcp() {
     auto gcp = new GCode::Params;
 
     /*
-    auto testFile = [&file, &skip, this](GraphicsItem* gi) -> bool {
+    auto testFile = [&file, &skip, this](Gi::Item* gi) -> bool {
         if (!file) {
             file = gi->file();
             boardSide = gi->file()->side();
@@ -327,20 +324,20 @@ Params* BaseForm::getNewGcp() {
     };
 
     for (auto* item : App::graphicsView().selectedItems()) {
-        auto gi = dynamic_cast<GraphicsItem*>(item);
+        auto gi = dynamic_cast<Gi::Item*>(item);
         switch (item->type()) {
-        case GiType::DataSolid:
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths());
+        case Gi::Type::DataSolid:
+            wPaths.append(static_cast<Gi::Item*>(item)->paths());
             break;
-        case GiType::DataPath:
+        case Gi::Type::DataPath:
             if (testFile(gi))
                 return;
-            wRawPaths.append(static_cast<GraphicsItem*>(item)->paths());
+            wRawPaths.append(static_cast<Gi::Item*>(item)->paths());
             break;
-        case GiType::Drill:
+        case Gi::Type::Drill:
             if (testFile(gi))
                 return;
-            wPaths.append(static_cast<GraphicsItem*>(item)->paths(1));
+            wPaths.append(static_cast<Gi::Item*>(item)->paths(1));
         default:
             break;
         }
@@ -350,12 +347,12 @@ Params* BaseForm::getNewGcp() {
 
     AbstractFile const* file = nullptr;
     bool skip{true};
-    for(auto* gi: App::graphicsView().selectedItems<GraphicsItem>()) {
+    for(auto* gi: App::graphicsView().selectedItems<Gi::Item>()) {
         switch(gi->type()) {
-        case GiType::DataSolid:
+        case Gi::Type::DataSolid:
             gcp->closedPaths.append(gi->paths());
             break;
-        case GiType::DataPath: {
+        case Gi::Type::DataPath: {
             auto path = gi->paths().front();
             if(path.front() == path.back())
                 gcp->closedPaths.emplace_back(path);
@@ -371,19 +368,19 @@ Params* BaseForm::getNewGcp() {
             //                        return;
             //                }
             //            }
-            //            if (gi->type() == GiType::DataSolid)
+            //            if (gi->type() == Gi::Type::DataSolid)
             //                gcp->closedPaths.append(gi->paths());
             //            else
             //                gcp->openPaths.append(gi->paths());
             //            break;
-        case GiType::ShCircle:
-        case GiType::ShRectangle:
-        case GiType::ShText:
-        case GiType::Drill:
+        case Gi::Type::ShCircle:
+        case Gi::Type::ShRectangle:
+        case Gi::Type::ShText:
+        case Gi::Type::Drill:
             gcp->closedPaths.append(gi->paths());
             break;
-        case GiType::ShPolyLine:
-        case GiType::ShCirArc:
+        case Gi::Type::ShPolyLine:
+        case Gi::Type::ShCirArc:
             gcp->openPaths.append(gi->paths());
             break;
         default:
@@ -401,7 +398,7 @@ Params* BaseForm::getNewGcp() {
     return gcp;
 }
 
-void BaseForm::addUsedGi(GraphicsItem* gi) {
+void BaseForm::addUsedGi(Gi::Item* gi) {
     if(gi->file()) {
         //        File const* file = gi->file();
         //        if (file->type() == FileType::Gerber_) {

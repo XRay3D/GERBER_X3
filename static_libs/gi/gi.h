@@ -17,7 +17,15 @@
 #include <QPropertyAnimation>
 #include <qmath.h>
 
-enum /*class*/ GiType : int {
+class AbstractFile;
+namespace Shapes {
+class AbstractShape;
+}
+
+namespace Gi {
+
+namespace Type {
+enum /*class*/ Type : int {
     DataPath = QGraphicsItem::UserType,
     DataSolid,
     Drill,
@@ -46,17 +54,14 @@ enum /*class*/ GiType : int {
     ShHandler,
     ShapeEnd
 };
+}; // namespace Type
 
-class AbstractFile;
-class GiGroup;
-namespace Shapes {
-class AbstractShape;
-}
+class Group;
 
-class GraphicsItem : public /*QGraphicsObject*/ QGraphicsItem {
+class Item : public /*QGraphicsObject*/ QGraphicsItem {
 
-    friend class GiGroup;
-    friend class Project;
+    friend class Group;
+    friend class ::Project;
 
     //    Q_OBJECT
     Q_GADGET
@@ -70,8 +75,8 @@ public:
     void colorChanged() { update(); };
 
 public:
-    explicit GraphicsItem(AbstractFile* file = nullptr);
-    ~GraphicsItem() override = default;
+    explicit Item(AbstractFile* file = nullptr);
+    ~Item() override = default;
 
     QColor color() const { return color_; }
     void setColor(const QColor& brush);
@@ -117,7 +122,7 @@ protected:
     mutable QRectF boundingRect_;
 
     const AbstractFile* file_;
-    GiGroup* itemGroup = nullptr;
+    Group* itemGroup = nullptr;
     QPainterPath shape_;
 
     QPen pen_;
@@ -144,3 +149,5 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
+
+} // namespace Gi

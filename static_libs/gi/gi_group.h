@@ -12,10 +12,12 @@
 
 #include "gi.h"
 
-class GiGroup : public mvector<GraphicsItem*> {
+namespace Gi {
+
+class Group : public mvector<Item*> {
 public:
-    ~GiGroup();
-    void push_back(GraphicsItem* item);
+    ~Group();
+    void push_back(Item* item);
     void setVisible(bool visible);
     void setSelected(const mvector<int>& ids);
     bool isVisible() { return visible_; }
@@ -34,3 +36,5 @@ private:
     QPen pen_;
     QColor brushColor_;
 };
+
+} // namespace Gi

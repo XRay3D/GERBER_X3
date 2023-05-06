@@ -57,12 +57,12 @@ MainWindow::MainWindow(QWidget* parent)
     ui.setupUi(this);
 
     LayoutFrames* lfp;
-    ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Home));
-    ui.graphicsView->scene()->addItem(new GiMarker(GiMarker::Zero));
-    ui.graphicsView->scene()->addItem(new GiPin());
-    ui.graphicsView->scene()->addItem(new GiPin());
-    ui.graphicsView->scene()->addItem(new GiPin());
-    ui.graphicsView->scene()->addItem(new GiPin());
+    ui.graphicsView->scene()->addItem(new Gi::Marker(Gi::Marker::Home));
+    ui.graphicsView->scene()->addItem(new Gi::Marker(Gi::Marker::Zero));
+    ui.graphicsView->scene()->addItem(new Gi::Pin());
+    ui.graphicsView->scene()->addItem(new Gi::Pin());
+    ui.graphicsView->scene()->addItem(new Gi::Pin());
+    ui.graphicsView->scene()->addItem(new Gi::Pin());
     ui.graphicsView->scene()->addItem(lfp = new LayoutFrames());
 
     connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
@@ -70,9 +70,9 @@ MainWindow::MainWindow(QWidget* parent)
         ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
     });
 
-    connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&GiMarker::setPos));
-    connect(project_, &Project::zeroPosChanged, App::zeroPtr(), qOverload<const QPointF&>(&GiMarker::setPos));
-    connect(project_, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&GiPin::setPos));
+    connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
+    connect(project_, &Project::zeroPosChanged, App::zeroPtr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
+    connect(project_, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Gi::Pin::setPos));
     connect(project_, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
 
@@ -309,7 +309,7 @@ void MainWindow::createActionsService() {
     // Autoplace All Refpoints
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
         if(updateRect()) {
-            GiPin::resetPos(false);
+            Gi::Pin::resetPos(false);
             App::home().resetPos(false);
             App::zero().resetPos(false);
         }
@@ -465,13 +465,13 @@ void MainWindow::createActionsShape() {
         auto selectedItems(App::graphicsView().selectedItems());
         Paths clipPaths;
         for(QGraphicsItem* clipItem: selectedItems)
-            if(clipItem->type() >= GiType::ShCircle)
-                clipPaths.append(static_cast<GraphicsItem*>(clipItem)->paths());
+            if(clipItem->type() >= Gi::Type::ShCircle)
+                clipPaths.append(static_cast<Gi::Item*>(clipItem)->paths());
 
-        QList<GraphicsItem*> rmi;
+        QList<Gi::Item*> rmi;
         for(QGraphicsItem* item: selectedItems) {
-            if(item->type() == GiType::DataSolid) {
-                auto gitem = static_cast<GiDataSolid*>(item);
+            if(item->type() == Gi::Type::DataSolid) {
+                auto gitem = static_cast<Gi::DataSolid*>(item);
                 Clipper clipper;
                 clipper.AddSubject(gitem->paths());
                 clipper.AddClip(clipPaths);
@@ -485,7 +485,7 @@ void MainWindow::createActionsShape() {
                 }
             }
         }
-        for(GraphicsItem* item: rmi)
+        for(Gi::Item* item: rmi)
             delete item->file()->itemGroup()->takeAt(item);
     };
     toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ClipType::Union); });
@@ -661,7 +661,7 @@ void MainWindow::writeSettings() {
 void MainWindow::selectAll() {
     auto data{actionGroup.checkedAction() ? actionGroup.checkedAction()->data() : QVariant{}};
     if(!data.isNull() && data.toBool()) {
-        for(QGraphicsItem* item: App::graphicsView().items(GiType::Preview))
+        for(QGraphicsItem* item: App::graphicsView().items(Gi::Type::Preview))
             item->setSelected(true);
     } else {
         for(QGraphicsItem* item: App::graphicsView().items())
@@ -1239,6 +1239,9 @@ bool MainWindow::saveAs() {
 
 void MainWindow::showEvent(QShowEvent* event) {
     // toolpathActionList[G_CODE_PROPERTIES]->trigger();//////////////////////////////////////////////////////
+    ///
+    ui.treeView->reset();
+    ui.treeView->expandAll();
     QMainWindow::showEvent(event);
 }
 

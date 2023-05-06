@@ -25,10 +25,10 @@ public:
     ~Shape() override;
 
     // QGraphicsItem interface
-    int type() const override { return GiType::ShRectangle; }
+    int type() const override { return Gi::Type::ShRectangle; }
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
-    // GraphicsItem interface
+    // Gi::Item interface
     void redraw() override;
 
     // AbstractShape interface
@@ -58,7 +58,7 @@ class Plugin final : public Shapes::Plugin {
 
 public:
     // Shapes::Plugin interface *
-    uint32_t type() const override { return GiType::ShRectangle; }
+    uint32_t type() const override { return Gi::Type::ShRectangle; }
     QIcon icon() const override { return QIcon::fromTheme("draw-rectangle"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
         auto shape = new Shape(point, point + QPointF{10, 10});

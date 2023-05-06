@@ -16,6 +16,7 @@
 #include "gc_types.h"
 
 #include "app.h"
+#include "gi.h"
 #include "gi_datapath.h"
 #include "gi_error.h"
 #include "gi_gcpath.h"
@@ -49,14 +50,14 @@ public:
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
     uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
-        GraphicsItem* item;
-        item = new GiGcPath(pocketPaths_, this);
+        Gi::Item* item;
+        item = new Gi::GcPath(pocketPaths_, this);
         item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&color);
         itemGroup()->push_back(item);
         for(int i{}; i < pocketPaths_.size() - 1; ++i)
             g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
-        item = new GiGcPath(g0path_);
+        item = new Gi::GcPath(g0path_);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         itemGroup()->push_back(item);
         itemGroup()->setVisible(true);
@@ -86,8 +87,8 @@ void Creator::reset() {
 
     file_ = nullptr;
 
-    workingPs.clear();
-    workingRawPs.clear();
+    closedSrcPaths.clear();
+    openSrcPaths.clear();
     returnPs.clear();
     returnPss.clear();
     supportPss.clear();
@@ -105,8 +106,8 @@ Pathss& Creator::groupedPaths(Grouping group, Point::Type offset, bool skipFrame
     {
         Timer t("Union EvenOdd");
         Clipper clipper;
-        clipper.AddSubject(workingPs);
-        clipper.AddSubject({boundOfPaths(workingPs, offset)});
+        clipper.AddSubject(closedSrcPaths);
+        clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
     }
     groupedPss.clear();
@@ -178,13 +179,13 @@ void Creator::addRawPaths(Paths&& rawPaths) {
         if(path.size() > 3 && (pf == pl || pf.distTo(pl) < mergDist))
             clipper.AddSubject({path});
         else
-            workingRawPs.push_back(path);
+            openSrcPaths.push_back(path);
     }
 
     Paths paths;
     clipper.AddClip({boundOfPaths(rawPaths, uScale)});
     clipper.Execute(ClipType::Xor, FillRule::EvenOdd, paths);
-    workingPs.insert(workingPs.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
+    closedSrcPaths.insert(closedSrcPaths.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
 }
 
 void Creator::createGc(Params* gcp) {
@@ -193,15 +194,18 @@ void Creator::createGc(Params* gcp) {
     reset();
 
     if(gcp->closedPaths.size())
-        workingPs.append(std::move(gcp->closedPaths));
+        closedSrcPaths.append(std::move(gcp->closedPaths));
     if(gcp->openPaths.size())
         addRawPaths(std::move(gcp->openPaths));
     if(gcp->supportPathss.size())
         supportPss.append(std::move(gcp->supportPathss));
 
-    //    dbgPaths(workingPs, "workingPs");
+    dbgPaths(closedSrcPaths, "closedPaths");
+    dbgPaths(openSrcPaths, "openPaths");
+
+    //    dbgPaths(closedSrcPaths, "closedSrcPaths");
     //    dbgPaths(supportPss, "supportPathss");
-    //    dbgPaths(workingRawPs, "openPaths");
+    //    dbgPaths(openSrcPaths, "openPaths");
 
     gcp_ = std::move(*gcp);
     //    gcp_ = *gcp;
@@ -333,8 +337,13 @@ void Creator::stacking(Paths& paths) {
 
     stacker({&polyTree, false});
 
+
     if(returnPss.front().size() == 1)
         returnPss.remove(0); // remove frame (boundPaths + k)
+    else
+        returnPss.front().remove(0); // remove frame (boundPaths + k)
+
+    dbgPaths(returnPss, __FUNCTION__, Qt::green);
 
     for(Paths& retPaths: returnPss) {
         //        dbgPaths(retPaths, __FUNCTION__, Qt::red);
@@ -665,11 +674,11 @@ bool Creator::checkMilling(SideOfMilling side) {
                     nonCutPaths.emplace_back(frPath.toFillPolygon());
             std::erase_if(nonCutPaths, [](Path& path) { return path.empty(); }); // убрать пустые
             std::ranges::for_each(nonCutPaths, [this](auto&& path) {
-                items.push_back(new GiError({path}, Area(path) * dScale * dScale));
+                items.push_back(new Gi::Error({path}, Area(path) * dScale * dScale));
             });
         } else {
-            Paths srcPaths{workingPs};
-            srcPaths.emplace_back(boundOfPaths(workingPs, uScale));
+            Paths srcPaths{closedSrcPaths};
+            srcPaths.emplace_back(boundOfPaths(closedSrcPaths, uScale));
 
             Paths frPaths = createFrame(srcPaths);
             CleanPaths(frPaths, uScale * 0.0001);
@@ -698,7 +707,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             items.reserve(checker.size());
             std::for_each(std::execution::par, std::begin(checker), std::end(checker), [&](auto&& checker) {
                 auto&& [frame, set] = checker;
-                items.push_back(new GiError({*frame}, Area(*frame) * dScale * dScale));
+                items.push_back(new Gi::Error({*frame}, Area(*frame) * dScale * dScale));
             });
         }
     } break;
@@ -711,7 +720,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             Paths frPaths = createFrame(srcPaths);
             if(frPaths.size() == 0) { // Doesn't fit at all
                 std::lock_guard guard{m};
-                items.push_back(new GiError(srcPaths, Area(srcPaths) * dScale * dScale));
+                items.push_back(new Gi::Error(srcPaths, Area(srcPaths) * dScale * dScale));
             } else if(frPaths.size() > 1) { // Fits with breaks
                 srcPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
                 if(srcPaths.empty())
@@ -721,7 +730,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                 auto checker{testFrame(srcPaths, frPaths)};
                 std::lock_guard guard{m};
                 for(auto&& [frame, set]: checker)
-                    items.push_back(new GiError({*frame}, Area(*frame) * dScale * dScale));
+                    items.push_back(new Gi::Error({*frame}, Area(*frame) * dScale * dScale));
             }
         });
     } break;

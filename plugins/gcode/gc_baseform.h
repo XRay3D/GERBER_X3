@@ -42,7 +42,7 @@ protected:
         for(auto* button: findChildren<QPushButton*>())
             button->setIconSize({16, 16});
     }
-    void addUsedGi(class ::GraphicsItem* gi);
+    void addUsedGi(class ::Gi::Item* gi);
     QWidget* widget() const { return ctrWidget; }
 
     // QObject interface
