@@ -21,7 +21,9 @@
 #define QT_DEBUG
 // #undef QT_DEBUG
 
-GiGcPath::GiGcPath(const Paths& paths, AbstractFile* file)
+namespace Gi {
+
+GcPath::GcPath(const Paths& paths, AbstractFile* file)
     : gcFile_(file) {
     for(const Path& path: paths)
         shape_.addPolygon(path);
@@ -36,7 +38,7 @@ GiGcPath::GiGcPath(const Paths& paths, AbstractFile* file)
 #endif
 }
 
-GiGcPath::GiGcPath(const Path& path, AbstractFile* file)
+GcPath::GcPath(const Path& path, AbstractFile* file)
     : gcFile_(file) {
     shape_.addPolygon(path);
     double k;
@@ -50,9 +52,9 @@ GiGcPath::GiGcPath(const Path& path, AbstractFile* file)
 #endif
 }
 
-QRectF GiGcPath::boundingRect() const { return boundingRect_; }
+QRectF GcPath::boundingRect() const { return boundingRect_; }
 
-void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
     if(pnColorPrt_)
@@ -90,11 +92,11 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 #endif
 }
 
-int GiGcPath::type() const { return GiType::Path_; }
+int GcPath::type() const { return Type::Path_; }
 
-Paths GiGcPath::paths(int) const { return {} /*paths_*/; }
+Paths GcPath::paths(int) const { return {} /*paths_*/; }
 #ifdef QT_DEBUG
-void GiGcPath::updateArrows() {
+void GcPath::updateArrows() {
     sc_ = scaleFactor();
     arrows_ = QPainterPath(); //.clear();
     if(qFuzzyIsNull(pen_.widthF())) {
@@ -121,3 +123,4 @@ void GiGcPath::updateArrows() {
     }
 }
 #endif
+} // namespace Gi

@@ -11,12 +11,17 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_error.h"
+#include "gi.h"
+
 #include <QPainter>
 #include <QTime>
 #include <QtMath>
+
 #include <numbers>
 
-GiError::GiError(const Paths& paths, double area)
+namespace Gi {
+
+Error::Error(const Paths& paths, double area)
     : area_(area) {
     for(auto& path: paths)
         shape_.addPolygon(path);
@@ -24,11 +29,11 @@ GiError::GiError(const Paths& paths, double area)
     setZValue(std::numeric_limits<double>::max());
 }
 
-double GiError::area() const { return area_; }
+double Error::area() const { return area_; }
 
-QRectF GiError::boundingRect() const { return shape_.boundingRect(); }
+QRectF Error::boundingRect() const { return shape_.boundingRect(); }
 
-void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void Error::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
     if(isSelected()) {
         static QTime t(QTime::currentTime());
@@ -45,4 +50,8 @@ void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*
     painter->drawPath(shape_);
 }
 
-QPainterPath GiError::shape() const { return shape_; }
+QPainterPath Error::shape() const { return shape_; }
+
+int Error::type() const { return Gi::Type::Error; }
+
+} // namespace Gi

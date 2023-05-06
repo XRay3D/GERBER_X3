@@ -65,15 +65,15 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
 
     auto filter = [](auto* item) {
         auto ty = item->type();
-        using enum GiType;
-        return item->isSelected() && (ty >= ShCircle || ty == Drill || ty == DataSolid || ty == DataPath);
+        //using enum Gi::Type;
+        return item->isSelected() && (ty >= Gi::Type::ShCircle || ty == Gi::Type::Drill || ty == Gi::Type::DataSolid || ty == Gi::Type::DataPath);
     };
 
-    auto transform = [](auto* item) { return static_cast<GraphicsItem*>(item); };
+    auto transform = [](auto* item) { return static_cast<Gi::Item*>(item); };
 
-    for(GraphicsItem* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
+    for(Gi::Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
         auto paths = gi->paths();
-        if(gi->type() == GiType::DataPath
+        if(gi->type() == Gi::Type::DataPath
             && paths.size() == 1
             && paths.front().front() == paths.front().back()
             && IsPositive(paths.front())) // fix direction for drawing
@@ -183,6 +183,6 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     }
 }
 
-int GiBridge::type() const { return GiType::Bridge; }
+int GiBridge::type() const { return Gi::Type::Bridge; }
 
 Paths GiBridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }

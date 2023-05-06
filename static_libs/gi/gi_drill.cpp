@@ -12,14 +12,15 @@
  ********************************************************************************/
 #include "gi_drill.h"
 
-#include "graphicsview.h"
 #include "myclipper.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-GiDrill::GiDrill(const Path& path, double diameter, AbstractFile* file, int toolId)
-    : GraphicsItem{file}
+namespace Gi {
+
+Drill::Drill(const Path& path, double diameter, AbstractFile* file, int toolId)
+    : Item{file}
     , diameter_{diameter}
     , path_{path}
     , toolId_{toolId} {
@@ -30,7 +31,7 @@ GiDrill::GiDrill(const Path& path, double diameter, AbstractFile* file, int tool
     changeColor();
 }
 
-void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
@@ -47,9 +48,9 @@ void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     painter->strokePath(shape_, pen_);
 }
 
-bool GiDrill::isSlot() { return path_.size() > 1; }
+bool Drill::isSlot() { return path_.size() > 1; }
 
-void GiDrill::setDiameter(double diameter) {
+void Drill::setDiameter(double diameter) {
     if(diameter_ == diameter)
         return;
     diameter_ = diameter;
@@ -58,20 +59,20 @@ void GiDrill::setDiameter(double diameter) {
     update();
 }
 
-void GiDrill::update(const Path& path, double diameter) {
+void Drill::update(const Path& path, double diameter) {
     diameter_ = diameter;
     path_ = path;
     create();
     update();
 }
 
-Paths GiDrill::paths(int alternate) const {
+Paths Drill::paths(int alternate) const {
     Path path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
     path = QTransform::fromScale(0.01, 0.01).map(path);
     return {transform().map(path)};
 }
 
-void GiDrill::changeColor() {
+void Drill::changeColor() {
     //    animation.setStartValue(bodyColor_);
 
     switch(colorState) {
@@ -107,7 +108,7 @@ void GiDrill::changeColor() {
     //    animation.start();
 }
 
-void GiDrill::create() {
+void Drill::create() {
     shape_ = QPainterPath();
 
     if(!path_.size()) {
@@ -130,3 +131,5 @@ void GiDrill::create() {
     boundingRect_ = shape_.boundingRect();
     fillPolygon = shape_.toFillPolygon();
 }
+
+} // namespace Gi

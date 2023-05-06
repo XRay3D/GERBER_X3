@@ -22,8 +22,10 @@
 #include <ranges>
 #include <set>
 
-GiDataPath::GiDataPath(const Path& path, AbstractFile* file)
-    : GraphicsItem(file) {
+namespace Gi {
+
+DataPath::DataPath(const Path& path, AbstractFile* file)
+    : Item(file) {
     shape_.addPolygon(path);
     updateSelection();
     setAcceptHoverEvents(true);
@@ -31,7 +33,7 @@ GiDataPath::GiDataPath(const Path& path, AbstractFile* file)
     setSelected(false);
 }
 
-void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if(pnColorPrt_)
         pen_.setColor(*pnColorPrt_);
     if(colorPtr_)
@@ -60,11 +62,11 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     painter->drawPath(shape_);
 }
 
-int GiDataPath::type() const { return GiType::DataPath; }
+int DataPath::type() const { return Type::DataPath; }
 
-QPainterPath GiDataPath::shape() const { return selectionShape_; }
+QPainterPath DataPath::shape() const { return selectionShape_; }
 
-void GiDataPath::updateSelection() const {
+void DataPath::updateSelection() const {
     if(const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
         scale_ = scale;
         selectionShape_ = QPainterPath();
@@ -77,13 +79,13 @@ void GiDataPath::updateSelection() const {
     }
 }
 
-void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    GraphicsItem::mouseReleaseEvent(event);
+void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    Item::mouseReleaseEvent(event);
     std::set<void*> set;
     std::function<void(QGraphicsItem*)> selector = [&](QGraphicsItem* item) {
         auto collidingItems = scene()->collidingItems(item, Qt::IntersectsItemShape);
         for(auto* item: collidingItems) {
-            if(item->type() == int(GiType::DataPath) && itemGroup->contains((GraphicsItem*)item) && set.emplace(item).second) {
+            if(item->type() == int(Type::DataPath) && itemGroup->contains((Item*)item) && set.emplace(item).second) {
                 item->setSelected(true);
                 selector(item);
             }
@@ -94,22 +96,24 @@ void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         selector(this);
 }
 
-QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+QVariant DataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
     if(change == ItemVisibleChange && value.toBool()) {
         updateSelection();
     } else if(change == ItemSelectedChange && App::settings().animSelection()) {
         if(value.toBool()) {
             updateSelection();
-            //  FIXME          timer.connect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
+            //  FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
         } else {
-            //   FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
+            //   FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
             update();
         }
     }
     return value;
 }
 
-void GiDataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+void DataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     QGraphicsItem::hoverEnterEvent(event);
     updateSelection();
 }
+
+} // namespace Gi

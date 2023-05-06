@@ -21,7 +21,7 @@ namespace Shapes {
 class Handle;
 class Node;
 
-class AbstractShape : public GraphicsItem, public ::FileTree::Node {
+class AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend class Node;
     friend class Handle;
 
@@ -57,7 +57,7 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
-    // GraphicsItem interface
+    // Gi::Item interface
     Paths paths(int alternate = {}) const override;
     void changeColor() override;
     // AbstractShape interface

@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gc_file.h"
+#include "project.h"
 
 namespace Drilling {
 

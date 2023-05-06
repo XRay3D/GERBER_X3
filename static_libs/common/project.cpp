@@ -273,7 +273,7 @@ QRectF Project::getBoundingRect() {
     Point botRight(std::numeric_limits<Point::Type>::min(), std::numeric_limits<Point::Type>::min());
     for(const auto& [id, filePtr]: files_) {
         if(filePtr && filePtr->itemGroup()->isVisible()) {
-            for(const GraphicsItem* const item: *filePtr->itemGroup()) {
+            for(const Gi::Item* const item: *filePtr->itemGroup()) {
                 for(const Path& path: item->paths()) {
                     for(const Point& pt: path) {
                         topLeft.x = std::min(pt.x, topLeft.x);

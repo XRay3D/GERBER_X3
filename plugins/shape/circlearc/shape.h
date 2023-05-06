@@ -25,10 +25,10 @@ public:
     ~Shape() override;
 
     // QGraphicsItem interface
-    int type() const override { return GiType::ShCirArc; }
+    int type() const override { return Gi::Type::ShCirArc; }
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
-    // GraphicsItem interface
+    // Gi::Item interface
     void redraw() override;
 
     // AbstractShape interface
@@ -70,7 +70,7 @@ class Plugin : public Shapes::Plugin {
 
 public:
     // Shapes::Plugin interface
-    uint32_t type() const override { return GiType::ShCirArc; }
+    uint32_t type() const override { return Gi::Type::ShCirArc; }
     QIcon icon() const override { return QIcon::fromTheme("draw-ellipse-arc"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
         auto shape = new Shape(point, point + QPointF{5, 0}, point + QPointF{0, 5});

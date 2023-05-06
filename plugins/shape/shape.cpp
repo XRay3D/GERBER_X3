@@ -81,7 +81,7 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
     for(auto item: scene()->selectedItems()) {
-        if(item->type() >= GiType::ShCircle) {
+        if(item->type() >= Gi::Type::ShCircle) {
             auto* shape = static_cast<AbstractShape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
             for(auto&& h: shape->handlers) {
@@ -115,7 +115,7 @@ QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, con
     } else if(change == ItemVisibleChange) {
         emit App::fileModel().dataChanged(/*node_->*/ index(), /*node_->*/ index(), {Qt::CheckStateRole});
     }
-    return GraphicsItem::itemChange(change, value);
+    return Gi::Item::itemChange(change, value);
 }
 
 void AbstractShape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(), currentHandler = nullptr; }
@@ -212,7 +212,7 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
         App::fileModel().removeRow(r, p);
     });
 
-    action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { GraphicsItem::setVisible(fl); });
+    action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { Gi::Item::setVisible(fl); });
     action->setCheckable(true);
     action->setChecked(isVisible());
 
@@ -220,7 +220,7 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
         item->setFlag(ItemIsSelectable, fl);
     });
     action->setCheckable(true);
-    action->setChecked(GraphicsItem::flags() & ItemIsSelectable);
+    action->setChecked(Gi::Item::flags() & ItemIsSelectable);
 
     action = menu.addAction(QIcon::fromTheme("document-edit"), QObject::tr("Edit Selected"), [this] {
         App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
@@ -231,7 +231,7 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
 
 // write to project
 void AbstractShape::write(QDataStream& stream) const {
-    stream << bool(GraphicsItem::flags() & ItemIsSelectable);
+    stream << bool(Gi::Item::flags() & ItemIsSelectable);
     stream << qint32(handlers.size());
     for(const auto& item: handlers) {
         stream << item->pos();

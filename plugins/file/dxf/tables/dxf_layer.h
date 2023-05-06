@@ -17,7 +17,7 @@
 
 #include "datastream.h"
 
-class GiGroup;
+class Gi::Group;
 
 namespace Dxf {
 
@@ -70,7 +70,7 @@ public:
     const GraphicObjects& graphicObjects() const;
     void addGraphicObject(DxfGo&& go);
 
-    GiGroup* itemGroup() const;
+    Gi::Group* itemGroup() const;
     bool isEmpty() const;
 
     ItemsType itemsType() const;
@@ -84,8 +84,8 @@ public:
     void setVisible(bool visible);
 
 private:
-    GiGroup* itemGroupNorm = nullptr;
-    GiGroup* itemGroupPath = nullptr;
+    Gi::Group* itemGroupNorm = nullptr;
+    Gi::Group* itemGroupPath = nullptr;
     //    File* fiGle_ = nullptr;
     Pathss groupedPaths_;
 

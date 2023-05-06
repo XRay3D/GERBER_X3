@@ -107,7 +107,7 @@ int GiPreview::toolId() const {
 //    return {}/*retPaths*/;
 //}
 
-int GiPreview::type() const { return int(GiType::Preview) + (path_.size() > 1); }
+int GiPreview::type() const { return int(Gi::Type::Preview) + (path_.size() > 1); }
 
 bool GiPreview::isSlot() const { return path_.size() > 1; }
 

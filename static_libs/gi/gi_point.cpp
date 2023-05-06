@@ -18,6 +18,7 @@
 // #include "graphicsview.h"
 // #include "project.h"
 // #include "settings.h"
+#include "project.h"
 #include "settingsdialog.h"
 #include "tool_pch.h"
 
@@ -44,7 +45,9 @@ bool updateRect() {
     return true;
 }
 
-GiMarker::GiMarker(Type type)
+namespace Gi {
+
+Marker::Marker(Type type)
     : QGraphicsObject{nullptr}
     , type_{type} {
     setAcceptHoverEvents(true);
@@ -63,17 +66,17 @@ GiMarker::GiMarker(Type type)
     rect_ = path_.boundingRect();
 }
 
-GiMarker::~GiMarker() {
+Marker::~Marker() {
     (type_ == Home) ? App::setHome(nullptr) : App::setZero(nullptr);
 }
 
-QRectF GiMarker::boundingRect() const {
+QRectF Marker::boundingRect() const {
     if(App::drawPdf())
         return {};
     return rect_;
 }
 
-void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if(App::drawPdf())
         return;
 
@@ -94,11 +97,11 @@ void GiMarker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath GiMarker::shape() const { return App::drawPdf() ? QPainterPath() : path_; }
+QPainterPath Marker::shape() const { return App::drawPdf() ? QPainterPath() : path_; }
 
-int GiMarker::type() const { return static_cast<int>(type_ ? GiType::MarkHome : GiType::MarkZero); }
+int Marker::type() const { return static_cast<int>(type_ ? Gi::Type::MarkHome : Gi::Type::MarkZero); }
 
-void GiMarker::resetPos(bool flUpdateRect) {
+void Marker::resetPos(bool flUpdateRect) {
     if(flUpdateRect && !updateRect())
         return;
 
@@ -131,7 +134,7 @@ void GiMarker::resetPos(bool flUpdateRect) {
         App::project().setZeroPos(pos());
 }
 
-void GiMarker::setPosX(double x) {
+void Marker::setPosX(double x) {
     QPointF point(pos());
     if(qFuzzyCompare(point.x(), x))
         return;
@@ -139,7 +142,7 @@ void GiMarker::setPosX(double x) {
     setPos(point);
 }
 
-void GiMarker::setPosY(double y) {
+void Marker::setPosY(double y) {
     QPointF point(pos());
     if(qFuzzyCompare(point.y(), y))
         return;
@@ -151,13 +154,13 @@ void GiMarker::setPosY(double y) {
         App::project().setZeroPos(pos());
 }
 
-void GiMarker::updateGCPForm() {
+void Marker::updateGCPForm() {
     if(App::gCodePropertiesFormPtr())
         App::gCodePropertiesForm().updatePosDsbxs();
 
     if(type_ == Zero) {
         App::project().setZeroPos(pos());
-        for(auto pin: GiPin::pins())
+        for(auto pin: Pin::pins())
             pin->updateToolTip();
 
     } else {
@@ -165,14 +168,14 @@ void GiMarker::updateGCPForm() {
     }
 }
 
-void GiMarker::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
     updateGCPForm();
 }
 
-void GiMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if(!(flags() & QGraphicsItem::ItemIsMovable))
         return;
     resetPos();
@@ -182,7 +185,7 @@ void GiMarker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     updateGCPForm();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
-void GiMarker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
     auto action = menu.addAction(QObject::tr("Fixed"), this, [this](bool fl) {
         setFlag(QGraphicsItem::ItemIsMovable, !fl);
@@ -200,7 +203,7 @@ void GiMarker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 /// \brief Pin::Pin
 /// \param parent
 ///
-GiPin::GiPin()
+Pin::Pin()
     : QGraphicsObject(nullptr)
     , index_(ctr_++) {
     setObjectName("Pin");
@@ -220,15 +223,15 @@ GiPin::GiPin()
     pins_[index_] = this;
 }
 
-GiPin::~GiPin() { }
+Pin::~Pin() { }
 
-QRectF GiPin::boundingRect() const {
+QRectF Pin::boundingRect() const {
     if(App::drawPdf())
         return {};
     return rect_;
 }
 
-void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     if(App::drawPdf())
         return;
 
@@ -250,13 +253,13 @@ void GiPin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     painter->drawEllipse(QPoint(0, 0), 2, 2);
 }
 
-QPainterPath GiPin::shape() const {
+QPainterPath Pin::shape() const {
     if(App::drawPdf())
         return {};
     return shape_;
 }
 
-void GiPin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
+void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
@@ -321,19 +324,19 @@ void GiPin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     App::project().setPinsPos(pt);
 }
 
-void GiPin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     if(!(flags() & QGraphicsItem::ItemIsMovable))
         return;
     resetPos();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
-void GiPin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     for(int i = 0; i < 4; ++i)
         pins_[i]->lastPos_ = pins_[i]->pos();
     QGraphicsItem::mousePressEvent(event);
 }
-void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
@@ -343,7 +346,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
             QPolygonF dst;
 
-            for(GiPin* pin: pins_) {
+            for(Pin* pin: pins_) {
                 pin->setFlag(QGraphicsItem::ItemIsMovable, false);
                 QPointF point(pin->pos());
                 if(dst.contains(point))
@@ -386,7 +389,7 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     });
 
     action = menu.addAction(tr("Fixed"), [](bool fl) {
-        for (GiPin* pin : pins_) pin->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
+        for (Pin* pin : pins_) pin->setFlag(QGraphicsItem::ItemIsMovable, !fl); });
     action->setCheckable(true);
     action->setChecked(!(pins_[0]->flags() & QGraphicsItem::ItemIsMovable));
 
@@ -402,14 +405,14 @@ void GiPin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     menu.exec(event->screenPos());
 }
 
-int GiPin::type() const { return GiType::MarkPin; }
+int Pin::type() const { return Type::MarkPin; }
 
-void GiPin::setPinsPos(QPointF pos[]) {
+void Pin::setPinsPos(QPointF pos[]) {
     for(int i = 0; i < 4; ++i)
         pins_[i]->setPos(pos[i]);
 }
 
-void GiPin::resetPos(bool fl) {
+void Pin::resetPos(bool fl) {
     if(fl)
         if(!updateRect())
             return;
@@ -449,12 +452,12 @@ void GiPin::resetPos(bool fl) {
     App::project().setPinsPos(pt);
 }
 
-void GiPin::setPos(const QPointF pos[]) {
+void Pin::setPos(const QPointF pos[]) {
     for(int i = 0; i < 4; ++i)
         pins_[i]->setPos(pos[i]);
 }
 
-void GiPin::updateToolTip() {
+void Pin::updateToolTip() {
     const QPointF p(pos() - App::zero().pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3")
                    .arg(index_ + 1)
@@ -462,10 +465,12 @@ void GiPin::updateToolTip() {
                    .arg(p.y()));
 }
 
-void GiPin::setPos(const QPointF& pos) {
+void Pin::setPos(const QPointF& pos) {
     QGraphicsItem::setPos(pos);
     updateToolTip();
 }
+
+} // namespace Gi
 
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
@@ -480,7 +485,7 @@ LayoutFrames::~LayoutFrames() {
 }
 
 int LayoutFrames::type() const {
-    return GiType::MarkLayoutFrames;
+    return Gi ::Type::MarkLayoutFrames;
 }
 
 QRectF LayoutFrames::boundingRect() const {
@@ -580,7 +585,7 @@ void LayoutFrames::updateRect(bool fl) {
     if(fl) {
         App::home().resetPos(false);
         App::zero().resetPos(false);
-        GiPin::resetPos(false);
+        Gi ::Pin::resetPos(false);
     }
 }
 

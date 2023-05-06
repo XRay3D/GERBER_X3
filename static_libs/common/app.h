@@ -48,6 +48,10 @@ namespace Drilling {
 class Form;
 } // namespace Drilling
 
+namespace Gi {
+class Marker;
+} // namespace Gi
+
 using Handlers = mvector<Shapes::Handle*>;
 
 using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
@@ -90,8 +94,8 @@ class App {
     HOLDER(QSplashScreen,         setSplashScreen,        splashScreen       )
     HOLDER(GCode::Settings,       setGcSettings,          gcSettings         )
 
-    HOLDER(GiMarker,              setHome,                home               )
-    HOLDER(GiMarker,              setZero,                zero               )
+    HOLDER(Gi::Marker,            setHome,                home               )
+    HOLDER(Gi::Marker,            setZero,                zero               )
     // clang-format on
 
     FilePluginMap filePlugins_;

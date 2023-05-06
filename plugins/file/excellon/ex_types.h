@@ -15,7 +15,9 @@
 #include <numbers>
 #include <type_traits>
 
-class GiDrill;
+namespace Gi {
+class Drill;
+}
 
 namespace Excellon {
 
@@ -281,7 +283,7 @@ public:
     // const File* const file = nullptr;
     File* file = nullptr;
     State state;
-    GiDrill* item = nullptr;
+    Gi::Drill* item = nullptr;
 
     friend QDataStream& operator<<(QDataStream& stream, const Hole& hole) {
         stream << hole.state;

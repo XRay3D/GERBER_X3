@@ -13,21 +13,19 @@
 #include <QTimer>
 #include <cmath>
 
-namespace Gerber {
-class File;
-}
+namespace Gi {
 
-class GiDataPath : public GraphicsItem {
+class DataPath : public Item {
     mutable QPainterPath selectionShape_;
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;
 
     void redraw() override { update(); }
     void changeColor() override { }
-    friend class MainWindow;
+    friend class ::MainWindow;
 
 public:
-    GiDataPath(const Path& path, AbstractFile* file);
+    DataPath(const Path& path, AbstractFile* file);
 
 protected:
     // QGraphicsItem interface
@@ -38,3 +36,5 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 };
+
+} // namespace Gi

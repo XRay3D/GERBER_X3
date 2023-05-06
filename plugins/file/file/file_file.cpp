@@ -47,7 +47,7 @@ File::File()
 File::~File() { }
 
 Paths File::merge() const {
-    for(GraphicsItem* item: *itemGroups_.back())
+    for(Gi::Item* item: *itemGroups_.back())
         mergedPaths_.append(item->paths());
     return mergedPaths_;
 }

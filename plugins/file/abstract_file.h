@@ -118,9 +118,9 @@ public:
 
     void addToScene() const;
 
-    GiGroup* itemGroup(int type = -1) const;
+    Gi::Group* itemGroup(int type = -1) const;
 
-    const mvector<GiGroup*>& itemGroups() const;
+    const mvector<Gi::Group*>& itemGroups() const;
 
     Paths mergedPaths() const;
     Pathss groupedPaths() const;
@@ -181,14 +181,14 @@ protected:
     int itemsType_ = -1;
     mutable Paths mergedPaths_;
     mutable bool visible_ = false;
-    mvector<GiGroup*> itemGroups_;
+    mvector<Gi::Group*> itemGroups_;
     mvector<QString> lines_;
     //    QTransform transform_;
     Transform transform_;
 };
 
 inline AbstractFile::AbstractFile()
-    : itemGroups_{new GiGroup} {
+    : itemGroups_{new Gi::Group} {
 }
 
 inline AbstractFile::~AbstractFile() { qDeleteAll(itemGroups_); }
@@ -208,7 +208,7 @@ inline void AbstractFile::addToScene() const {
     }
 }
 
-inline GiGroup* AbstractFile::itemGroup(int type) const {
+inline Gi::Group* AbstractFile::itemGroup(int type) const {
     const int size(static_cast<int>(itemGroups_.size()));
     if(type == -1 && 0 <= itemsType_ && itemsType_ < size)
         return itemGroups_[itemsType_];
@@ -217,7 +217,7 @@ inline GiGroup* AbstractFile::itemGroup(int type) const {
     return itemGroups_.front();
 }
 
-inline const mvector<GiGroup*>& AbstractFile::itemGroups() const { return itemGroups_; }
+inline const mvector<Gi::Group*>& AbstractFile::itemGroups() const { return itemGroups_; }
 
 inline Paths AbstractFile::mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
 

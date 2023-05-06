@@ -13,6 +13,7 @@
 #include "voronoi.h"
 #include "gi_gcpath.h"
 #include "jc_voronoi.h"
+#include "project.h"
 
 // namespace ClipperLib {
 // inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
@@ -52,7 +53,7 @@ void Creator::create() {
 
         { // создание пермычек.
             Clipper clipper;
-            clipper.AddClip(workingRawPs);
+            clipper.AddClip(openSrcPaths);
             clipper.AddOpenSubject(copy);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
             sortBeginEnd(copy);
@@ -62,9 +63,9 @@ void Creator::create() {
         dbgPaths(returnPs, "создание пермычек");
         { // создание заливки.
             ClipperOffset offset(uScale);
-            offset.AddPaths(workingRawPs, JoinType::Round, EndType::Polygon);
+            offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Polygon);
             offset.AddPaths(copy, JoinType::Round, EndType::Round);
-            workingRawPs = offset.Execute(dOffset + 10);
+            openSrcPaths = offset.Execute(dOffset + 10);
         }
         // erase empty paths
         auto begin = returnPss.begin();
@@ -73,8 +74,8 @@ void Creator::create() {
                 returnPss.erase(begin);
             else
                 ++begin;
-
-        file_ = new File(std::move(gcp_), std::move(returnPss), std::move(workingRawPs));
+        
+        file_ = new File(std::move(gcp_), std::move(returnPss), std::move(openSrcPaths));
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
@@ -111,7 +112,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
         offset.AddPaths(returnPs, JoinType::Round, EndType::Polygon);
         Paths tmpPaths1;
         tmpPaths1 = offset.Execute(-dOffset);
-        workingRawPs = tmpPaths1;
+        openSrcPaths = tmpPaths1;
         Paths tmpPaths;
         do {
             tmpPaths.append(tmpPaths1);
@@ -169,8 +170,8 @@ void File::genGcodeAndTile() {
 
 void File::createGi() {
     if(toolPathss_.size() > 1) {
-        GraphicsItem* item;
-        item = new GiGcPath(toolPathss_.back().back(), this);
+        Gi::Item* item;
+        item = new Gi::GcPath(toolPathss_.back().back(), this);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);

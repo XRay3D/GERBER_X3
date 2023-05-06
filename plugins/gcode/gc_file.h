@@ -12,7 +12,7 @@
 
 #include "abstract_file.h"
 #include "gc_types.h"
-#include "project.h"
+
 #include <QList>
 #include <QString>
 

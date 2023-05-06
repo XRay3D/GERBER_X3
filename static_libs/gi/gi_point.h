@@ -17,7 +17,9 @@
 
 bool updateRect();
 
-class GiMarker : public QGraphicsObject {
+namespace Gi {
+
+class Marker : public QGraphicsObject {
     Q_OBJECT
 public:
     enum Type {
@@ -25,8 +27,8 @@ public:
         Home
     };
 
-    GiMarker(Type type);
-    ~GiMarker() override;
+    Marker(Type type);
+    ~Marker() override;
 
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -51,11 +53,11 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
 
-class GiPin : public QGraphicsObject {
+class Pin : public QGraphicsObject {
     Q_OBJECT
 public:
-    GiPin();
-    ~GiPin() override;
+    Pin();
+    ~Pin() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
@@ -80,7 +82,7 @@ private:
     QRectF rect_;
     QPointF lastPos_;
     const uint index_;
-    static inline GiPin* pins_[4];
+    static inline Pin* pins_[4];
     static inline int ctr_ = 0;
 
 protected:
@@ -89,6 +91,8 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
+
+} // namespace Gi
 
 class LayoutFrames : public QGraphicsObject {
     Q_OBJECT

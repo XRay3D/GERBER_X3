@@ -113,7 +113,7 @@ Form::~Form() {
     settings.setValue(ui->chbxZoomToSelected);
     settings.endGroup();
 
-    // for (auto* var : App::graphicsView().items<GiDataSolid>())
+    // for (auto* var : App::graphicsView().items<Gi::DataSolid>())
     // delete var;
 
     delete ui;

@@ -19,10 +19,15 @@ class AbstractFile;
 namespace Shapes {
 class AbstractShape;
 }
+
 class Project;
 
 namespace GCode {
 class File;
+}
+
+namespace Gi {
+class DataPath;
 }
 
 namespace FileTree {
@@ -89,7 +94,10 @@ private:
     int addFile(Node* item, AbstractFile* file);
     void addFile(AbstractFile* file);
     void addShape(Shapes::AbstractShape* shape);
+
+    void addPathGroup(Gi::DataPath*);
 };
 
 } // namespace FileTree
+
 #include "app.h"

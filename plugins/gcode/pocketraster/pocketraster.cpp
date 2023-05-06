@@ -108,6 +108,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         break;
     }
 
+    for(auto&& paths: returnPss)
+        std::erase_if(paths, [](auto&& path) { return path.size() < 2; });
+    std::erase_if(returnPss, [](auto&& paths) { return paths.empty(); });
+
     if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {

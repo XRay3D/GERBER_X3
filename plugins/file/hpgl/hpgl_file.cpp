@@ -132,7 +132,7 @@ void File::createGi() {
     //                    clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
 
     //                if (go.path().size() > 1) {
-    //                    auto gItem = new GiDataPath(go.path(), this);
+    //                    auto gItem = new Gi::DataPath(go.path(), this);
     //                    if (go.entity()) {
     //                        gItem->setToolTip(QString("Line %1\n%2")
     //                                              .arg(go.entity()->data[0].line())
@@ -153,7 +153,7 @@ void File::createGi() {
     //            }
 
     //            for (Paths& paths : layer->m_groupedPaths) {
-    //                auto gItem = new GiDataSolid(paths, this);
+    //                auto gItem = new Gi::DataSolid(paths, this);
     //                gItem->setColorPtr(&layer->m_colorNorm);
     //                igNorm->push_back(gItem);
     //            }

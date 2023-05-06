@@ -106,7 +106,7 @@ void Handle::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 //             shape->handlers[i]->QGraphicsItem::setPos(pt[i] + pos - pt.front());
 //     } else if (shape->isFinal) { // прилипание
 //         const double k = App::graphicsView().scaleFactor() * StickingDistance;
-//         const bool fl = shape->type() == int(GiType::ShPolyLine) && shape->handlers.size() > 3;
+//         const bool fl = shape->type() == int(Gi::Type::ShPolyLine) && shape->handlers.size() > 3;
 //         for (Handler* h : App::shapeHandlers()) {
 //             if (h != this &&                                          //
 //                 (h->shape != shape || (fl && h->hType() != Adder)) && //

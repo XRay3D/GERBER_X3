@@ -25,10 +25,10 @@ public:
     ~Shape() override;
 
     // QGraphicsItem interface
-    int type() const override { return GiType::ShPolyLine; }
+    int type() const override { return Gi::Type::ShPolyLine; }
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
-    // GraphicsItem interface
+    // Gi::Item interface
     void redraw() override;
 
     // AbstractShape interface
@@ -53,7 +53,7 @@ class Plugin : public Shapes::Plugin {
 
 public:
     // Shapes::Plugin interface
-    uint32_t type() const override { return GiType::ShPolyLine; }
+    uint32_t type() const override { return Gi::Type::ShPolyLine; }
     QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
         auto shape = new Shape(point, point + QPointF{5, 5});

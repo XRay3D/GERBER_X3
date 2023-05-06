@@ -10,20 +10,16 @@
  ********************************************************************************/
 #pragma once
 
-// #include "abstract_file.h"
 #include "gc_types.h"
+#include "gi_error.h"
 #include "myclipper.h"
-// #include "utils.h"
 
 #include <QObject>
 
 #include <condition_variable>
 #include <mutex>
-#include <sstream>
-
 #include <ranges>
-namespace ranges = std::ranges;
-namespace rviews = std::ranges::views;
+#include <sstream>
 
 // #if __has_include(<source_location>)
 //     #include <source_location>
@@ -32,6 +28,13 @@ namespace rviews = std::ranges::views;
 //     #include <experimental/source_location>
 // using sl = std::experimental::source_location;
 // #endif
+
+namespace ranges = std::ranges;
+namespace rviews = std::ranges::views;
+
+// namespace Gi {
+// class Error;
+// }
 
 void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
 
@@ -42,8 +45,6 @@ inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red
         pss.front().append(std::move(paths));
     dbgPaths(pss.front(), fileName, color, closed, tool);
 }
-
-class GiError;
 
 namespace GCode {
 
@@ -82,8 +83,8 @@ public:
     //    static void //PROG setProgInc();
 
     QString msg;
-
-    mvector<GiError*> items;
+    
+    mvector<Gi::Error*> items;
 
     bool checkMillingFl{};
 
@@ -126,8 +127,8 @@ protected:
     //    static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
-    Paths workingPs;
-    Paths workingRawPs;
+    Paths closedSrcPaths;
+    Paths openSrcPaths;
     Paths returnPs;
     Pathss returnPss;
     Pathss supportPss;

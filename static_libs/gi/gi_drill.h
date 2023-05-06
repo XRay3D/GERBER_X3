@@ -12,18 +12,20 @@
 
 #include "gi.h"
 
-class GiDrill final : public GraphicsItem {
-    using GraphicsItem::update;
+namespace Gi {
+
+class Drill final : public Item {
+    using Item::update;
 
 public:
-    GiDrill(const Path& path, double diameter, AbstractFile* file, int toolId);
-    ~GiDrill() override { }
+    Drill(const Path& path, double diameter, AbstractFile* file, int toolId);
+    ~Drill() override { }
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override { return int(GiType::Drill); }
+    int type() const override { return int(Type::Drill); }
 
-    // GraphicsItem interface
+    // Item interface
     Paths paths(int alternate = {}) const override;
     void changeColor() override;
 
@@ -45,3 +47,5 @@ private:
     QPolygonF fillPolygon;
     int toolId_ = -1;
 };
+
+} // namespace Gi

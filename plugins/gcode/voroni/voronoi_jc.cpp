@@ -25,7 +25,7 @@ void VoronoiJc::jcVoronoi() {
 
     mvector<jcv_point> points;
     points.reserve(100000);
-    CleanPaths(workingPs, tolerance * 0.1 * uScale);
+    CleanPaths(closedSrcPaths, tolerance * 0.1 * uScale);
     groupedPaths(GCode::Grouping::Copper);
     int32_t id = 0;
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
@@ -51,8 +51,8 @@ void VoronoiJc::jcVoronoi() {
         }
         ++id;
     }
-
-    for(const Path& path: workingRawPs) {
+    
+    for(const Path& path: openSrcPaths) {
         Point tmp(path.front());
         for(const Point& point: path) {
             condei(tmp, point);
@@ -66,8 +66,8 @@ void VoronoiJc::jcVoronoi() {
     Clipper clipper;
     for(const Paths& paths: groupedPss)
         clipper.AddClip(paths);
-    clipper.AddClip(workingRawPs);
-    const Rect r(/*Bounds(groupedPss) +*/ Bounds(workingRawPs)); // FIXME
+    clipper.AddClip(openSrcPaths);
+    const Rect r(/*Bounds(groupedPss) +*/ Bounds(openSrcPaths)); // FIXME
     std::map<int, Pairs> edges;
     Pairs frame;
     {

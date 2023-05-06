@@ -15,6 +15,7 @@
 #include "gc_gi_bridge.h"
 #include "gi_gcpath.h"
 #include "graphicsview.h"
+#include "project.h"
 #include "utils.h"
 
 #include <execution>
@@ -35,34 +36,34 @@ void Creator::createProfile(const Tool& tool, const double depth) {
 
         if(gcp_.side() == GCode::On) {
             if(gcp_.params[TrimmingOpenPaths].toBool())
-                trimmingOpenPaths(workingRawPs);
-            returnPs = std::move(workingPs);
+                trimmingOpenPaths(openSrcPaths);
+            returnPs = std::move(closedSrcPaths);
         } else {
-            if(workingPs.size()) {
+            if(closedSrcPaths.size()) {
                 ClipperOffset offset;
                 for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
                     offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
                 returnPs = offset.Execute(dOffset);
             }
-            if(workingRawPs.size()) {
+            if(openSrcPaths.size()) {
                 ClipperOffset offset;
-                offset.AddPaths(workingRawPs, JoinType::Round, EndType::Round);
-                workingRawPs = offset.Execute(dOffset);
-                if(!workingRawPs.empty())
-                    returnPs.append(workingRawPs);
+                offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
+                openSrcPaths = offset.Execute(dOffset);
+                if(!openSrcPaths.empty())
+                    returnPs.append(openSrcPaths);
             }
         }
-
-        if(returnPs.empty() && workingRawPs.empty())
+        
+        if(returnPs.empty() && openSrcPaths.empty())
             break;
 
         reorder();
-
-        if(gcp_.side() == GCode::On && workingRawPs.size()) {
-            returnPss.reserve(returnPss.size() + workingRawPs.size());
-            mergePaths(workingRawPs);
-            sortBeginEnd(workingRawPs);
-            for(auto&& path: workingRawPs)
+        
+        if(gcp_.side() == GCode::On && openSrcPaths.size()) {
+            returnPss.reserve(returnPss.size() + openSrcPaths.size());
+            mergePaths(openSrcPaths);
+            sortBeginEnd(openSrcPaths);
+            for(auto&& path: openSrcPaths)
                 returnPss.push_back({std::move(path)});
         }
 
@@ -182,7 +183,7 @@ void Creator::cornerTrimming() {
 }
 
 void Creator::makeBridges() {
-    auto bridgeItems{App::graphicsView().items<GiBridge>(GiType::Bridge)};
+    auto bridgeItems{App::graphicsView().items<GiBridge>(Gi::Type::Bridge)};
     if(bridgeItems.empty())
         return;
 
@@ -382,16 +383,16 @@ void File::genGcodeAndTile() {
 
 void File::createGi() {
 
-    GraphicsItem* item;
+    Gi::Item* item;
     for(const Paths& paths: toolPathss_) {
-        item = new GiGcPath(paths, this);
+        item = new Gi::GcPath(paths, this);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
 
     for(size_t i{}; const Paths& paths: toolPathss_) {
-        item = new GiGcPath(toolPathss_[i], this);
+        item = new Gi::GcPath(toolPathss_[i], this);
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for(size_t j = 0; j < paths.size() - 1; ++j)
@@ -400,7 +401,7 @@ void File::createGi() {
             g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
     }
 
-    item = new GiGcPath(g0path_);
+    item = new Gi::GcPath(g0path_);
     //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);

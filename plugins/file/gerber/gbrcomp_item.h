@@ -15,7 +15,7 @@
 
 namespace Gerber::Comp {
 
-class Item final : public GraphicsItem {
+class Item final : public Gi::Item {
     const Component& component_;
     QVector<QRectF> pins;
     mutable QPainterPath pathRefDes;
@@ -31,7 +31,7 @@ public:
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    // GraphicsItem interface
+    // Gi::Item interface
     Paths paths(int alternate = {}) const override;
     void changeColor() override { }
 

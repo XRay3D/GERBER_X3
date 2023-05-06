@@ -13,7 +13,7 @@
 #include <QPolygonF>
 #include <type_traits>
 
-class GiDrill;
+class Gi::Drill;
 
 namespace TopoR {
 

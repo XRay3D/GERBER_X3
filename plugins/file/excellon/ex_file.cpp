@@ -76,7 +76,7 @@ Tools File::tools() const {
 }
 
 Paths Excellon::File::merge() const {
-    for(GraphicsItem* item: *itemGroups_.back())
+    for(Gi::Item* item: *itemGroups_.back())
         mergedPaths_.append(item->paths());
     return mergedPaths_;
 }
@@ -100,7 +100,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     for(Hole& hole: *this)
-        itemGroup()->push_back(hole.item = new GiDrill(hole.state.path.size() ? Path{hole.state.path} : Path{hole.state.pos}, hole.state.currentToolDiameter(), this, hole.state.toolId));
+        itemGroup()->push_back(hole.item = new Gi::Drill(hole.state.path.size() ? Path{hole.state.path} : Path{hole.state.pos}, hole.state.currentToolDiameter(), this, hole.state.toolId));
     itemGroup()->setVisible(true);
 }
 

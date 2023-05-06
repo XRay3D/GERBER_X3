@@ -28,13 +28,13 @@ void Creator::create() {
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
-
-    dbgPaths(workingPs, "workingPs");
+    
+    dbgPaths(closedSrcPaths, "closedSrcPaths");
 
     {     // create tool path
         { // execute offset
             ClipperOffset offset;
-            offset.AddPaths(workingPs, JoinType::Round, EndType::Polygon);
+            offset.AddPaths(closedSrcPaths, JoinType::Round, EndType::Polygon);
             returnPs = offset.Execute(dOffset);
         }
         dbgPaths(returnPs, "returnPs");
