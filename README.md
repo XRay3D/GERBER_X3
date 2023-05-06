@@ -16,6 +16,4 @@ Partial support for DXF files.
 * Windows: [x86](https://github.com/XRay3D/GERBER_X2/releases)
 * Windows: [amd64](https://github.com/XRay3D/GERBER_X2/releases)
 
-[![СБЕР](https://www.sberbank.ru/portalserver/static/templates/[BBHOST]/RuMasterpageTemplate/static/favicon.ico)]  2202 2023 9322 2983
-
-https://boosty.to/x-ray_3d
+Поддержать автора https://boosty.to/x-ray_3d
