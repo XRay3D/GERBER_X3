@@ -37,7 +37,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     grid->setRowStretch(7, 0);
 
     MySettings settings;
-    settings.beginGroup("Form");
+    settings.beginGroup("Thermal");
     settings.getValue(par.angle, "angle", 0.0);
     settings.getValue(par.count, "count", 4);
     settings.getValue(par.tickness, "tickness", 0.5);
@@ -88,7 +88,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("Form");
+    settings.beginGroup("Thermal");
     if(model && model->data_.size()) {
         settings.setValue(model->thParam().angle, "angle");
         settings.setValue(model->thParam().count, "count");
