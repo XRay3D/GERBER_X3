@@ -36,14 +36,12 @@ class MySettings : public QSettings {
 public:
     template <typename T>
     auto setValue(const QString& key, const T& value) {
-        QSettings::setValue(key, value);
-        return value;
+        return QSettings::setValue(key, value), value;
     }
 
     template <typename T>
     auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const {
-        value = QSettings::value(key, defaultValue).value<T>();
-        return value;
+        return value = QSettings::value(key, defaultValue).value<T>();
     }
 
     template <IsWidget W>
@@ -51,33 +49,32 @@ public:
         const QString name{widget->objectName()};
         assert(!name.isEmpty());
 
-        if constexpr(std::is_base_of_v<QAbstractButton, W>) {
-            QSettings::setValue(name, widget->isChecked());
-            return widget->isChecked();
-        } else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>) {
-            QSettings::setValue(name, widget->value());
-            return widget->value();
-        } else if constexpr(std::is_same_v<W, QSpinBox>) {
-            QSettings::setValue(name, widget->value());
-            return widget->value();
-        } else if constexpr(std::is_same_v<W, QComboBox>) {
-            QSettings::setValue(name, widget->currentIndex());
-            return widget->currentIndex();
-        } else if constexpr(std::is_same_v<W, QFontComboBox>) { //
-            QSettings::setValue(name, widget->currentFont().family());
-            return widget->currentFont().family();
-        } else if constexpr(std::is_same_v<W, QLineEdit>) {
-            QSettings::setValue(name, widget->text());
-            return widget->text();
-        } else if constexpr(std::is_same_v<W, QPlainTextEdit>) {
-            QSettings::setValue(name, widget->toPlainText());
-            return widget->toPlainText();
-        } else if constexpr(std::is_same_v<W, QTabWidget>) {
-            QSettings::setValue(name, widget->currentIndex());
-            return widget->currentIndex();
-        } else {
+        if constexpr(std::is_base_of_v<QAbstractButton, W>)
+            return QSettings::setValue(name, widget->isChecked()),
+                   widget->isChecked();
+        else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>)
+            return QSettings::setValue(name, widget->value()),
+                   widget->value();
+        else if constexpr(std::is_same_v<W, QSpinBox>)
+            return QSettings::setValue(name, widget->value()),
+                   widget->value();
+        else if constexpr(std::is_same_v<W, QComboBox>)
+            return QSettings::setValue(name, widget->currentIndex()),
+                   widget->currentIndex();
+        else if constexpr(std::is_same_v<W, QFontComboBox>) //
+            return QSettings::setValue(name, widget->currentFont().family()),
+                   widget->currentFont().family();
+        else if constexpr(std::is_same_v<W, QLineEdit>)
+            return QSettings::setValue(name, widget->text()),
+                   widget->text();
+        else if constexpr(std::is_same_v<W, QPlainTextEdit>)
+            return QSettings::setValue(name, widget->toPlainText()),
+                   widget->toPlainText();
+        else if constexpr(std::is_same_v<W, QTabWidget>)
+            return QSettings::setValue(name, widget->currentIndex()),
+                   widget->currentIndex();
+        else
             throw std::logic_error(typeid(W).name());
-        }
     }
 
     template <IsWidget W>
@@ -85,33 +82,32 @@ public:
         const QString name{widget->objectName()};
         assert(!name.isEmpty());
 
-        if constexpr(std::is_base_of_v<QAbstractButton, W>) {
-            widget->setChecked(QSettings::value(name, defaultValue).toBool());
-            return widget->isChecked();
-        } else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>) {
-            widget->setValue(QSettings::value(name, defaultValue).toDouble());
-            return widget->value();
-        } else if constexpr(std::is_same_v<W, QSpinBox>) {
-            widget->setValue(QSettings::value(name, defaultValue).toInt());
-            return widget->value();
-        } else if constexpr(std::is_same_v<W, QComboBox>) {
-            widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt());
-            return widget->currentIndex();
-        } else if constexpr(std::is_same_v<W, QFontComboBox>) { //
-            widget->setCurrentFont(QFont(QSettings::value(name, defaultValue).toString()));
-            return widget->currentFont().family();
-        } else if constexpr(std::is_same_v<W, QLineEdit>) {
-            widget->setText(QSettings::value(name, defaultValue).toString());
-            return widget->text();
-        } else if constexpr(std::is_same_v<W, QPlainTextEdit>) {
-            widget->setPlainText(QSettings::value(name, defaultValue).toString());
-            return widget->toPlainText();
-        } else if constexpr(std::is_same_v<W, QTabWidget>) {
-            widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt());
-            return widget->currentIndex();
-        } else {
+        if constexpr(std::is_base_of_v<QAbstractButton, W>)
+            return widget->setChecked(QSettings::value(name, defaultValue).toBool()),
+                   widget->isChecked();
+        else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>)
+            return widget->setValue(QSettings::value(name, defaultValue).toDouble()),
+                   widget->value();
+        else if constexpr(std::is_same_v<W, QSpinBox>)
+            return widget->setValue(QSettings::value(name, defaultValue).toInt()),
+                   widget->value();
+        else if constexpr(std::is_same_v<W, QComboBox>)
+            return widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt()),
+                   widget->currentIndex();
+        else if constexpr(std::is_same_v<W, QFontComboBox>) //
+            return widget->setCurrentFont(QFont(QSettings::value(name, defaultValue).toString())),
+                   widget->currentFont().family();
+        else if constexpr(std::is_same_v<W, QLineEdit>)
+            return widget->setText(QSettings::value(name, defaultValue).toString()),
+                   widget->text();
+        else if constexpr(std::is_same_v<W, QPlainTextEdit>)
+            return widget->setPlainText(QSettings::value(name, defaultValue).toString()),
+                   widget->toPlainText();
+        else if constexpr(std::is_same_v<W, QTabWidget>)
+            return widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt()),
+                   widget->currentIndex();
+        else
             throw std::logic_error(typeid(W).name());
-        }
     }
 
     template <typename V>

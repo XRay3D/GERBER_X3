@@ -25,8 +25,7 @@ enum {
     Raster,
 };
 
-Form::
-    Form(GCode::Plugin* plugin, QWidget* parent)
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new ::Ui::PocketOffsetForm)
     , names{tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
@@ -39,47 +38,45 @@ Form::
     setWindowTitle(tr("Pocket Offset Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("Form");
-    settings.getValue(ui->sbxToolQty);
+    settings.beginGroup("PocketOffset");
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
     settings.getValue(ui->rbInside);
     settings.getValue(ui->rbOutside);
     settings.getValue(ui->sbxSteps);
+    settings.getValue(ui->sbxToolQty);
     settings.endGroup();
 
     rb_clicked();
+    // clang-format off
+    connect(ui->rbClimb,        &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbInside,       &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->rbOutside,      &QRadioButton::clicked,        this, &Form::rb_clicked);
+    connect(ui->sbxToolQty,     &QSpinBox::valueChanged,       this, &Form::rb_clicked);
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &Form::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &Form::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &Form::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &Form::rb_clicked);
-    connect(ui->sbxToolQty, qOverload<int>(&QSpinBox::valueChanged), this, &Form::rb_clicked);
+    connect(ui->toolHolder1,    &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(ui->toolHolder2,    &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(ui->toolHolder3,    &ToolSelectorForm::updateName, this, &Form::updateName);
+    connect(ui->toolHolder4,    &ToolSelectorForm::updateName, this, &Form::updateName);
 
-    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &Form::updateName);
-    connect(ui->toolHolder2, &ToolSelectorForm::updateName, this, &Form::updateName);
-    connect(ui->toolHolder3, &ToolSelectorForm::updateName, this, &Form::updateName);
-    connect(ui->toolHolder4, &ToolSelectorForm::updateName, this, &Form::updateName);
-
-    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
-
-    connect(ui->sbxSteps, &QSpinBox::valueChanged, this, &Form::onSbxStepsValueChanged);
-
-    //
+    connect(leName,             &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
+    connect(ui->sbxSteps,       &QSpinBox::valueChanged,       this, &Form::onSbxStepsValueChanged);
+    // clang-format on
     if(ui->sbxSteps->value() == 0)
         ui->sbxSteps->setSuffix(tr(" - Infinity"));
+    qDebug(__FUNCTION__);
 }
 
 Form::~Form() {
-
     MySettings settings;
-    settings.beginGroup("Form");
-    settings.setValue(ui->sbxToolQty);
+    settings.beginGroup("PocketOffset");
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
     settings.setValue(ui->rbInside);
     settings.setValue(ui->rbOutside);
     settings.setValue(ui->sbxSteps);
+    settings.setValue(ui->sbxToolQty);
     settings.endGroup();
     delete ui;
 }
@@ -89,7 +86,8 @@ void Form::computePaths() {
         ui->toolHolder1->tool(),
         ui->toolHolder2->tool(),
         ui->toolHolder3->tool(),
-        ui->toolHolder4->tool()};
+        ui->toolHolder4->tool(),
+    };
 
     for(const Tool& t: tool) {
         if(!t.isValid()) {

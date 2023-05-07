@@ -54,11 +54,20 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if(1)
+        if(0)
             QTimer::singleShot(i += k, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
 
         if(0) {
             constexpr auto TYPE = md5::hash32("PocketRaster");
+            if(!toolpathActions.contains(TYPE))
+                break;
+            QTimer::singleShot(i += k, this, [this] { selectAll(); });
+            QTimer::singleShot(i += k, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
+            QTimer::singleShot(i += k, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+        }
+
+        if(1) {
+            constexpr auto TYPE = md5::hash32("PocketOffset");
             if(!toolpathActions.contains(TYPE))
                 break;
             QTimer::singleShot(i += k, this, [this] { selectAll(); });

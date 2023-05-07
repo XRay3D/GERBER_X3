@@ -28,7 +28,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     setWindowTitle(tr("Thread Toolpath"));
 
     //    MySettings settings;
-    //    settings.beginGroup("Form");
+    //    settings.beginGroup("Thread");
     //    settings.getValue(ui->dsbxBridgeLenght, 1.0);
     //    settings.getValue(ui->rbClimb);
     //    settings.getValue(ui->rbConventional);
@@ -67,7 +67,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     //    MySettings settings;
-    //    settings.beginGroup("Form");
+    //    settings.beginGroup("Thread");
     //    settings.setValue(ui->dsbxBridgeLenght);
     //    settings.setValue(ui->rbClimb);
     //    settings.setValue(ui->rbConventional);

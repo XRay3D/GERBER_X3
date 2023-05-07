@@ -158,7 +158,7 @@ protected:
 
 BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     : QWidget(parent)
-    //, plugin {plugin}
+    , plugin{plugin}
     , progressDialog(new QProgressDialog(this)) {
 
     auto vLayout = new QVBoxLayout(this);
@@ -244,6 +244,7 @@ BaseForm::~BaseForm() {
         errBreak();
     thread.quit();
     thread.wait();
+    qDebug(__FUNCTION__);
 }
 
 void BaseForm::setCreator(Creator* newCreator) {
