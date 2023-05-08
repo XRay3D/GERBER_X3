@@ -290,73 +290,71 @@ void Creator::stacking(Paths& paths) {
         return true;
     };
 
-    using Worck = std::pair<PolyTree*, bool>;
-    std::function<void(Worck)> stacker = [&stacker, &rotateDiest, this](Worck w) {
-        auto [node, newPaths] = w;
+    std::function<void(PolyTree*, bool)> stacker = [&stacker, &rotateDiest, this](PolyTree* node, bool newPaths) {
         if(!returnPss.empty() || newPaths) {
             Path path(node->Polygon());
             if(!(gcp_.convent() ^ !node->IsHole()) ^ (gcp_.side() == Outer))
                 ReversePath(path);
-            //            if (App::settings().gbrCleanPolygons())
-            //                CleanPolygon(path, uScale * 0.0005);
+
+            // if(false && App::settings().cleanPolygons())
+            //     CleanPolygon(path, uScale * 0.0005);
+
             if(returnPss.empty() || newPaths) {
-                returnPss.push_back({path});
+                returnPss.push_back({std::move(path)});
             } else {
                 // check distance;
                 std::pair<size_t, size_t> idx;
                 double d = std::numeric_limits<double>::max();
-                for(size_t id = 0; id < returnPss.back().back().size(); ++id) {
-                    const Point& ptd = returnPss.back().back()[id];
-                    for(size_t is = 0; is < path.size(); ++is) {
-                        const Point& pts = path[is];
-                        const double l = ptd.distTo(pts);
-                        if(d >= l) {
+                //                for(size_t id {}; id < returnPss.back().back().size(); ++id) {
+                //                    const Point& ptd = returnPss.back().back()[id];
+                //                    for(size_t is {}; is < path.size(); ++is) {
+                //                        const Point& pts = path[is];
+                //                        const double l = ptd.distTo(pts);
+                //                        if(d >= l) {
+                //                            d = l;
+                //                            idx.first = id;
+                //                            idx.second = is;
+                //                        }
+                //                    }
+                //                }
+
+                for(size_t iDst{}; auto ptd: returnPss.back().back()) {
+                    for(size_t iSrc{}; auto pts: path) {
+                        if(const double l = ptd.distTo(pts); d >= l) {
                             d = l;
-                            idx.first = id;
-                            idx.second = is;
+                            idx.first = iDst;
+                            idx.second = iSrc;
                         }
+                        ++iSrc;
                     }
+                    ++iDst;
                 }
+
                 if(d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
-                    returnPss.back().push_back(path);
+                    returnPss.back().emplace_back(std::move(path)); // append to last Paths
                 else
-                    returnPss.push_back({path});
+                    returnPss.push_back({std::move(path)});         // new Paths
             }
-            // for (size_t i = 0, end = node->Count(); i < end; ++i)
-            //      stacker({(*node)[i]->get(), static_cast<bool>(i)});
+
             for(size_t i{}; auto&& var: *node)
-                stacker({var.get(), static_cast<bool>(i++)});
+                stacker(var.get(), static_cast<bool>(i++));
         } else { // Start from here
             for(auto&& var: *node)
-                stacker({var.get(), true});
-            // for (size_t i = 0, end = node->Count(); i < end; ++i)
-            //     stacker({(*node)[i]->get(), true});
+                stacker(var.get(), true);
         }
     };
     /**************************************************************************************/
 
-    stacker({&polyTree, false});
-
-
-    if(returnPss.front().size() == 1)
-        returnPss.remove(0); // remove frame (boundPaths + k)
-    else
-        returnPss.front().remove(0); // remove frame (boundPaths + k)
-
-    dbgPaths(returnPss, __FUNCTION__, Qt::green);
+    stacker(polyTree.Count() == 1 ? polyTree[0] : &polyTree, false);
 
     for(Paths& retPaths: returnPss) {
-        //        dbgPaths(retPaths, __FUNCTION__, Qt::red);
-
-        for(size_t i = 0; i < retPaths.size(); ++i)
-            if(retPaths[i].empty())
-                retPaths.erase(retPaths.begin() + i--);
-
+        for(size_t i{}; i < retPaths.size(); ++i)
+            if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
         std::ranges::reverse(retPaths);
-
         for(Path& path: retPaths)
-            path.push_back(path.front());
+            path.emplace_back(path.front());
     }
+
     sortB(returnPss);
 }
 
@@ -366,10 +364,10 @@ void Creator::mergeSegments(Paths& paths, double maxDist) {
     size_t size;
     do {
         size = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             if(i >= paths.size())
                 break;
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j)
                     continue;
                 if(i >= paths.size())
@@ -401,10 +399,10 @@ void Creator::mergeSegments(Paths& paths, double maxDist) {
         return;
     do {
         size = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             if(i >= paths.size())
                 break;
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j)
                     continue;
                 if(i >= paths.size())
@@ -447,11 +445,11 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
 
     do {
         max = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             setMax(max);
             setCurrent(max - paths.size());
             ifCancelThenThrow();
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j)
                     continue;
                 else if(paths[i].front() == paths[j].front()) {
@@ -493,7 +491,7 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
 void Creator::markPolyTreeDByNesting(PolyTree& polynode) {
     qDebug(__FUNCTION__);
 
-    int nestCtr = 0;
+    int nestCtr{};
     nesting.clear();
     std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr, this](PolyTree& polynode) {
         ++nestCtr;
@@ -507,7 +505,7 @@ void Creator::markPolyTreeDByNesting(PolyTree& polynode) {
 void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
     qDebug(__FUNCTION__);
 
-    int nestCtr = 0;
+    int nestCtr{};
     nesting.clear();
     std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr, this](PolyTree& polynode) {
         ++nestCtr;
@@ -532,7 +530,7 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
     sorter(polynode);
 }
 
-static int condition = 0;
+static int condition{};
 
 void Creator::isContinueCalc() {
     condition = 0;
@@ -755,7 +753,7 @@ Paths& Creator::sortB(Paths& src) {
     qDebug(__FUNCTION__);
 
     Point startPt(App::home().pos() + App::zero().pos());
-    for(size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
@@ -776,7 +774,7 @@ Paths& Creator::sortBeginEnd(Paths& src) {
     qDebug(__FUNCTION__);
 
     Point startPt(App::home().pos() + App::zero().pos());
-    for(size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
 
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -811,10 +809,10 @@ Pathss& Creator::sortB(Pathss& src) {
     qDebug(__FUNCTION__);
 
     Point startPt(App::home().pos() + App::zero().pos());
-    for(size_t i = 0; i < src.size(); ++i)
+    for(size_t i{}; i < src.size(); ++i)
         if(src[i].empty())
             src.erase(src.begin() + i--);
-    for(size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
@@ -835,7 +833,7 @@ Pathss& Creator::sortBeginEnd(Pathss& src) {
     qDebug(__FUNCTION__);
 
     Point startPt(App::home().pos() + App::zero().pos());
-    for(size_t firstIdx = 0; firstIdx < src.size(); ++firstIdx) {
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
