@@ -44,7 +44,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     //    rb_clicked();
 
     //    // clang-format off
-    //    connect(App::graphicsViewPtr(), &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
+    //    connect(App::grViewPtr(), &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
     //    connect(dsbxDepth,              &DepthForm::valueChanged,      this, &Form::updateBridges);
     //    connect(leName,                 &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
     //    connect(ui->dsbxBridgeLenght,   &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);
@@ -80,7 +80,7 @@ Form::~Form() {
     //    settings.setValue(varName(trimming_));
     //    settings.endGroup();
 
-    //    for (QGraphicsItem* giItem : App::graphicsView().items()) {
+    //    for (QGraphicsItem* giItem : App::grView().items()) {
     //        if (giItem->type() == Gi::Type::Bridge)
     //            delete giItem;
     //    }
@@ -100,7 +100,7 @@ void Form::computePaths() {
     //    AbstractFile const* file = nullptr;
     //    bool skip {true};
 
-    //    for (auto* gi : App::graphicsView().selectedItems<Gi::Item>()) {
+    //    for (auto* gi : App::grView().selectedItems<Gi::Item>()) {
     //        switch (gi->type()) {
     //        case Gi::Type::DataSolid:
     //            wPaths.append(gi->paths());
@@ -165,7 +165,7 @@ void Form::computePaths() {
     //    gcp->params[GCode::Params::GrItems].setValue(usedItems_);
 
     //    QPolygonF brv;
-    //    for (QGraphicsItem* item : App::graphicsView().items()) {
+    //    for (QGraphicsItem* item : App::grView().items()) {
     //        if (item->type() == Gi::Type::Bridge)
     //            brv.push_back(item->pos());
     //    }
@@ -286,7 +286,7 @@ void Form::editFile(GCode::File* file) {
     //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
     //            //            for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
     //            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
-    //            //                 App::graphicsView().addItem(brItem);
+    //            //                 App::grView().addItem(brItem);
     //            //                brItem->setPos(pos);
     //            //                brItem->lastPos_ = pos;
     //            //            }

@@ -58,44 +58,45 @@ using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
 using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
-#define HOLDER(TYPE, SET, NAME)                   \
+#define SINGLETON(TYPE, SET, NAME)                \
 private:                                          \
     class TYPE* NAME##_ = nullptr;                \
                                                   \
 public:                                           \
     static auto& NAME() {                         \
-        /* assert(app_->NAME##_); */              \
-        return *app_->NAME##_;                    \
+        /* assert(app->NAME##_); */               \
+        return *app->NAME##_;                     \
     }                                             \
     static auto NAME##Ptr() {                     \
-        /* assert(app_->NAME##_); */              \
-        return app_->NAME##_;                     \
+        /* assert(app->NAME##_); */               \
+        return app->NAME##_;                      \
     }                                             \
     static void SET(TYPE* NAME) {                 \
-        if(app_->NAME##_ && NAME)                 \
+        if(app->NAME##_ && NAME)                  \
             throw std::logic_error(__FUNCTION__); \
         else                                      \
-            app_->NAME##_ = NAME;                 \
+            app->NAME##_ = NAME;                  \
     }
 
 class App {
-    inline static App* app_ = nullptr;
+    Q_DISABLE_COPY_MOVE(App)
+    inline static App* app{};
 
     // clang-format off
-    HOLDER(Drilling::Form,        setDrillForm,           drillForm          )
-    HOLDER(FileTree::Model,       setFileModel,           fileModel          )
-    HOLDER(FileTree::View,        setFileTreeView,        fileTreeView       )
-    HOLDER(GCode::PropertiesForm, setGCodePropertiesForm, gCodePropertiesForm)
-    HOLDER(QUndoStack,            setUndoStack,           undoStack          )
-    HOLDER(GraphicsView,          setGraphicsView,        graphicsView       )
-    HOLDER(LayoutFrames,          setLayoutFrames,        layoutFrames       )
-    HOLDER(MainWindow,            setMainWindow,          mainWindow         )
-    HOLDER(Project,               setProject,             project            )
-    HOLDER(QSplashScreen,         setSplashScreen,        splashScreen       )
-    HOLDER(GCode::Settings,       setGcSettings,          gcSettings         )
+    SINGLETON(Drilling::Form,        setDrillForm,           drillForm       )
+    SINGLETON(FileTree::Model,       setFileModel,           fileModel       )
+    SINGLETON(FileTree::View,        setFileTreeView,        fileTreeView    )
+    SINGLETON(GCode::PropertiesForm, setGCodePropertiesForm, gcPropertiesForm)
+    SINGLETON(QUndoStack,            setUndoStack,           undoStack       )
+    SINGLETON(GraphicsView,          setGraphicsView,        grView          )
+    SINGLETON(LayoutFrames,          setLayoutFrames,        layoutFrames    )
+    SINGLETON(MainWindow,            setMainWindow,          mainWindow      )
+    SINGLETON(Project,               setProject,             project         )
+    SINGLETON(QSplashScreen,         setSplashScreen,        splashScreen    )
+    SINGLETON(GCode::Settings,       setGcSettings,          gcSettings      )
 
-    HOLDER(Gi::Marker,            setHome,                home               )
-    HOLDER(Gi::Marker,            setZero,                zero               )
+    SINGLETON(Gi::Marker,            setHome,                home            )
+    SINGLETON(Gi::Marker,            setZero,                zero            )
     // clang-format on
 
     FilePluginMap filePlugins_;
@@ -110,11 +111,6 @@ class App {
     ToolHolder toolHolder_;
     int dashOffset_{};
 
-    App& operator=(App&& a) = delete;
-    App& operator=(const App& app) = delete;
-    App(App&&) = delete;
-    App(const App&) = delete;
-
     QSharedMemory sharedMemory{"AppSettings"};
 
     const bool isDebug_{QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
@@ -124,34 +120,34 @@ class App {
 public:
     explicit App() {
         if(sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
-            app_ = *reinterpret_cast<App**>(sharedMemory.data()) = this;
+            app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
         else if(sharedMemory.attach(QSharedMemory::ReadOnly))
-            app_ = *reinterpret_cast<App**>(sharedMemory.data());
+            app = *reinterpret_cast<App**>(sharedMemory.data());
         else
-            qDebug() << "App" << app_ << sharedMemory.errorString();
+            qDebug() << "App" << app << sharedMemory.errorString();
     }
-    static auto& dashOffset() { return app_->dashOffset_; }
+    static auto& dashOffset() { return app->dashOffset_; }
 
-    static bool isDebug() { return app_->isDebug_; }
+    static bool isDebug() { return app->isDebug_; }
 
-    static auto& settingsPath() { return app_->settingsPath_; }
+    static auto& settingsPath() { return app->settingsPath_; }
 
-    static AbstractFilePlugin* filePlugin(uint32_t type) { return app_->filePlugins_.contains(type) ? app_->filePlugins_[type] : nullptr; }
-    static auto& filePlugins() { return app_->filePlugins_; }
+    static AbstractFilePlugin* filePlugin(uint32_t type) { return app->filePlugins_.contains(type) ? app->filePlugins_[type] : nullptr; }
+    static auto& filePlugins() { return app->filePlugins_; }
 
-    static GCode::Plugin* gCodePlugin(uint32_t type) { return app_->gCodePlugin_.contains(type) ? app_->gCodePlugin_[type] : nullptr; }
-    static auto& gCodePlugins() { return app_->gCodePlugin_; }
+    static GCode::Plugin* gCodePlugin(uint32_t type) { return app->gCodePlugin_.contains(type) ? app->gCodePlugin_[type] : nullptr; }
+    static auto& gCodePlugins() { return app->gCodePlugin_; }
 
-    static Shapes::Plugin* shapePlugin(int type) { return app_->shapePlugin_.contains(type) ? app_->shapePlugin_[type] : nullptr; }
-    static auto& shapePlugins() { return app_->shapePlugin_; }
+    static Shapes::Plugin* shapePlugin(int type) { return app->shapePlugin_.contains(type) ? app->shapePlugin_[type] : nullptr; }
+    static auto& shapePlugins() { return app->shapePlugin_; }
 
-    static auto& shapeHandlers() { return app_->handlers_; }
+    static auto& shapeHandlers() { return app->handlers_; }
 
-    static auto& settings() { return app_->appSettings_; }
+    static auto& settings() { return app->appSettings_; }
 
-    static auto& toolHolder() { return app_->toolHolder_; }
-    //    static auto* qSettings() { return &app_->settings_; }
+    static auto& toolHolder() { return app->toolHolder_; }
+    //    static auto* qSettings() { return &app->settings_; }
 
-    static bool drawPdf() { return app_->drawPdf_; }
-    static void setDrawPdf(bool newDrawPdf) { app_->drawPdf_ = newDrawPdf; }
+    static bool drawPdf() { return app->drawPdf_; }
+    static void setDrawPdf(bool newDrawPdf) { app->drawPdf_ = newDrawPdf; }
 };

@@ -704,9 +704,9 @@ void calcArcs(Path path) {
     //        return;
     //    auto addPoint = [](const QPointF& pos, const QColor& color = QColor(255, 255, 255)) {
     //        QGraphicsLineItem* item;
-    //        item = App::graphicsView().scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
+    //        item = App::grView().scene()->addLine(.0, +.1, .0, -.1, QPen(color, 0.0));
     //        item->setPos(pos);
-    //        item = App::graphicsView().scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
+    //        item = App::grView().scene()->addLine(+.1, .0, -.1, .0, QPen(color, 0.0));
     //        item->setPos(pos);
     //    };
 
@@ -734,7 +734,7 @@ void calcArcs(Path path) {
     //        line = line.normalVector();
     //        if (beg.isNull())
     //            beg = poly[i];
-    //        //                App::graphicsView().scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
+    //        //                App::grView().scene()->addLine(line, QPen(QColor(0, 255, 0), 0.0));
     //        if (normals.size()) {
     //            QPointF intersectionPoint;
     // #if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
@@ -753,7 +753,7 @@ void calcArcs(Path path) {
     //                double r = QLineF(center, beg).length();
     //                QRectF rect(-r, -r, +r * 2, +r * 2);
 
-    //                App::graphicsView().scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
+    //                App::grView().scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
     //                ctr = {};
     //                center = {};
     //                beg = {};

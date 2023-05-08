@@ -16,7 +16,7 @@
 namespace Gi {
 
 Group::~Group() {
-    auto scene{App::graphicsView().scene()};
+    auto scene{App::grView().scene()};
     if(scene && scene->items().size())
         qDeleteAll(*this);
 }
@@ -44,7 +44,7 @@ void Group::setSelected(const mvector<int>& ids) {
 
 void Group::addToScene(QGraphicsScene* scene) {
     if(!scene)
-        scene = App::graphicsView().scene();
+        scene = App::grView().scene();
     for(auto* item: *this)
         scene->addItem(item);
 }

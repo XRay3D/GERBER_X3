@@ -38,7 +38,7 @@ Shape::Shape(QPointF pt1, QPointF pt2) {
     currentHandler = handlers[Point1].get();
     redraw();
 
-    App::graphicsView().addItem(this);
+    App::grView().addItem(this);
 }
 
 Shape::~Shape() {

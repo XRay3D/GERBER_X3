@@ -32,7 +32,7 @@
 // #include <array>
 
 bool updateRect() {
-    QRectF rect(App::graphicsView().getSelectedBoundingRect());
+    QRectF rect(App::grView().getSelectedBoundingRect());
     if(rect.isEmpty()) {
         if(QMessageBox::question(nullptr, "",
                QObject::tr("There are no selected items to define the border.\n"
@@ -86,7 +86,7 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     if(!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
     if(App::settings().scaleHZMarkers()) {
-        auto sf = App::graphicsView().scaleFactor() * 10;
+        auto sf = App::grView().scaleFactor() * 10;
         painter->scale(sf, sf);
     }
     painter->setPen(Qt::NoPen);
@@ -155,8 +155,8 @@ void Marker::setPosY(double y) {
 }
 
 void Marker::updateGCPForm() {
-    if(App::gCodePropertiesFormPtr())
-        App::gCodePropertiesForm().updatePosDsbxs();
+    if(App::gcPropertiesFormPtr())
+        App::gcPropertiesForm().updatePosDsbxs();
 
     if(type_ == Zero) {
         App::project().setZeroPos(pos());
@@ -242,7 +242,7 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
     // c.setAlpha(50);
     if(App::settings().scalePinMarkers()) {
-        auto sf = App::graphicsView().scaleFactor() * 10;
+        auto sf = App::grView().scaleFactor() * 10;
         painter->scale(sf, sf);
     }
     painter->setPen(Qt::NoPen);
@@ -340,7 +340,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
-        ToolDatabase tdb(App::graphicsViewPtr(), {Tool::Drill, Tool::EndMill});
+        ToolDatabase tdb(App::grViewPtr(), {Tool::Drill, Tool::EndMill});
         if(tdb.exec()) {
             Tool tool(tdb.tool());
 
@@ -499,7 +499,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
 
-    QPen pen(QColor(255, 0, 255), 2.0 * App::graphicsView().scaleFactor());
+    QPen pen(QColor(255, 0, 255), 2.0 * App::grView().scaleFactor());
     pen.setJoinStyle(Qt::MiterJoin);
     painter->setPen(pen);
 

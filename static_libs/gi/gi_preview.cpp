@@ -38,7 +38,7 @@ AbstractPreview::AbstractPreview()
     setFlag(ItemIsSelectable, true);
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
-    App::graphicsView().addItem(this);
+    App::grView().addItem(this);
 }
 
 void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
@@ -47,7 +47,7 @@ void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, 
     painter->drawPath(sourcePath_);
     // draw tool
     if(toolId() > -1) {
-        painter->setPen(QPen(pathColor_, 2 * App::graphicsView().scaleFactor()));
+        painter->setPen(QPen(pathColor_, 2 * App::grView().scaleFactor()));
         painter->setBrush(Qt::NoBrush);
         if(toolPath_.isEmpty())
             painter->drawPath(App::toolHolder().tool(toolId()).path(pos()));

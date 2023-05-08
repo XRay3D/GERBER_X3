@@ -119,8 +119,8 @@ public:
         for(auto item: items)
             if(item->isSelected())
                 rect = rect.united(item->boundingRect());
-        App::graphicsView().fitInView(rect);
-        //        App::graphicsView().zoomOut();
+        App::grView().fitInView(rect);
+        //        App::grView().zoomOut();
     }
 };
 
@@ -324,7 +324,7 @@ Params* BaseForm::getNewGcp() {
         return {};
     };
 
-    for (auto* item : App::graphicsView().selectedItems()) {
+    for (auto* item : App::grView().selectedItems()) {
         auto gi = dynamic_cast<Gi::Item*>(item);
         switch (item->type()) {
         case Gi::Type::DataSolid:
@@ -348,7 +348,7 @@ Params* BaseForm::getNewGcp() {
 
     AbstractFile const* file = nullptr;
     bool skip{true};
-    for(auto* gi: App::graphicsView().selectedItems<Gi::Item>()) {
+    for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         switch(gi->type()) {
         case Gi::Type::DataSolid:
             gcp->closedPaths.append(gi->paths());
@@ -432,20 +432,20 @@ void BaseForm::errorHandler(int) {
     ctrWidget->setVisible(false);
     errWidget->setVisible(true);
 
-    std::ranges::for_each(creator_->items, [](auto i) { App::graphicsView().addItem(i); });
+    std::ranges::for_each(creator_->items, [](auto i) { App::grView().addItem(i); });
 
     errTable->setModel(new ErrorModel(std::move(creator_->items), errTable));
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    App::graphicsView().startUpdateTimer(32);
+    App::grView().startUpdateTimer(32);
 }
 
 void BaseForm::errContinue() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::graphicsView().stopUpdateTimer();
+    App::grView().stopUpdateTimer();
 
     delete errTable->model();
 
@@ -460,7 +460,7 @@ void BaseForm::errBreak() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::graphicsView().stopUpdateTimer();
+    App::grView().stopUpdateTimer();
 
     delete errTable->model();
 

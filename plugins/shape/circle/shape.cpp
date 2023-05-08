@@ -34,7 +34,7 @@ Shape::Shape(QPointF center, QPointF pt)
 
     redraw();
 
-    App::graphicsView().addItem(this);
+    App::grView().addItem(this);
 }
 
 Shape::~Shape() {

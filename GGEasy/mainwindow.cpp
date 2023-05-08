@@ -57,16 +57,16 @@ MainWindow::MainWindow(QWidget* parent)
     ui.setupUi(this);
 
     LayoutFrames* lfp;
-    ui.graphicsView->scene()->addItem(new Gi::Marker(Gi::Marker::Home));
-    ui.graphicsView->scene()->addItem(new Gi::Marker(Gi::Marker::Zero));
-    ui.graphicsView->scene()->addItem(new Gi::Pin());
-    ui.graphicsView->scene()->addItem(new Gi::Pin());
-    ui.graphicsView->scene()->addItem(new Gi::Pin());
-    ui.graphicsView->scene()->addItem(new Gi::Pin());
-    ui.graphicsView->scene()->addItem(lfp = new LayoutFrames());
+    ui.grView->scene()->addItem(new Gi::Marker(Gi::Marker::Home));
+    ui.grView->scene()->addItem(new Gi::Marker(Gi::Marker::Zero));
+    ui.grView->scene()->addItem(new Gi::Pin());
+    ui.grView->scene()->addItem(new Gi::Pin());
+    ui.grView->scene()->addItem(new Gi::Pin());
+    ui.grView->scene()->addItem(new Gi::Pin());
+    ui.grView->scene()->addItem(lfp = new LayoutFrames());
 
-    connect(ui.graphicsView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
-    connect(ui.graphicsView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
+    connect(ui.grView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
+    connect(ui.grView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
         ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
     });
 
@@ -135,7 +135,7 @@ bool MainWindow::closeProject() {
         App::fileModel().closeProject();
         setCurrentFile(QString());
         project_->close();
-        // ui.graphicsView->scene()->clear();
+        // ui.grView->scene()->clear();
         return true;
     }
     return false;
@@ -314,7 +314,7 @@ void MainWindow::createActionsService() {
             App::home().resetPos(false);
             App::zero().resetPos(false);
         }
-        ui.graphicsView->zoomFit();
+        ui.grView->zoomFit();
     }));
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
@@ -323,7 +323,7 @@ void MainWindow::createActionsService() {
     action->setCheckable(true);
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("ruller-on"), tr("Ruller"), ui.graphicsView, &GraphicsView::setRuler));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("ruller-on"), tr("Ruller"), ui.grView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
     if(App::isDebug()) { // (need for debug)
@@ -364,26 +364,26 @@ void MainWindow::createActionsZoom() {
 
     QAction* action;
     // Fit best
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.graphicsView, &GraphicsView::zoomFit);
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.grView, &GraphicsView::zoomFit);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.grView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
     vievMenu->addAction(action);
 
     // 100%
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.graphicsView, &GraphicsView::zoom100);
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.grView, &GraphicsView::zoom100);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.grView, &GraphicsView::zoom100);
     action->setShortcut(tr("Ctrl+0"));
     vievMenu->addAction(action);
 
     // Zoom in
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.graphicsView, &GraphicsView::zoomIn);
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.grView, &GraphicsView::zoomIn);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.grView, &GraphicsView::zoomIn);
     action->setShortcut(QKeySequence::ZoomIn);
     vievMenu->addAction(action);
 
     // Zoom out
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.graphicsView, &GraphicsView::zoomOut);
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.grView, &GraphicsView::zoomOut);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.grView, &GraphicsView::zoomOut);
     action->setShortcut(QKeySequence::ZoomOut);
     vievMenu->addAction(action);
 
@@ -392,8 +392,8 @@ void MainWindow::createActionsZoom() {
     vievMenu->addSeparator();
 
     // Zoom to selected
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.graphicsView, &GraphicsView::zoomToSelected);
+    zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.grView, &GraphicsView::zoomToSelected);
+    action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.grView, &GraphicsView::zoomToSelected);
     action->setShortcut(QKeySequence("F12"));
     vievMenu->addAction(action);
 }
@@ -445,15 +445,15 @@ void MainWindow::createActionsShape() {
         connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
         connect(action, &QAction::toggled, [shPlugin = shPlugin, this](bool checked) {
             if(checked) {
-                connect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
-                connect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
-                connect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+                connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                connect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
                 setDockWidget(shPlugin->editor());
             } else {
                 shPlugin->finalizeShape();
-                disconnect(ui.graphicsView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
-                disconnect(ui.graphicsView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
-                disconnect(ui.graphicsView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+                disconnect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                disconnect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                disconnect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
             }
         });
     }
@@ -463,7 +463,7 @@ void MainWindow::createActionsShape() {
     auto executor = [](ClipType type) {
         qDebug("На переделке");
 
-        auto selectedItems(App::graphicsView().selectedItems());
+        auto selectedItems(App::grView().selectedItems());
         Paths clipPaths;
         for(QGraphicsItem* clipItem: selectedItems)
             if(clipItem->type() >= Gi::Type::ShCircle)
@@ -662,10 +662,10 @@ void MainWindow::writeSettings() {
 void MainWindow::selectAll() {
     auto data{actionGroup.checkedAction() ? actionGroup.checkedAction()->data() : QVariant{}};
     if(!data.isNull() && data.toBool()) {
-        for(QGraphicsItem* item: App::graphicsView().items(Gi::Type::Preview))
+        for(QGraphicsItem* item: App::grView().items(Gi::Type::Preview))
             item->setSelected(true);
     } else {
-        for(QGraphicsItem* item: App::graphicsView().items())
+        for(QGraphicsItem* item: App::grView().items())
             if(item->isVisible() && item->opacity() > 0)
                 item->setSelected(true);
     }
@@ -673,7 +673,7 @@ void MainWindow::selectAll() {
 
 void MainWindow::deSelectAll() {
     if(dockWidget_->isVisible()) return;
-    for(QGraphicsItem* item: App::graphicsView().items())
+    for(QGraphicsItem* item: App::grView().items())
         if(item->isVisible())
             item->setSelected(false);
 }
@@ -685,7 +685,7 @@ void MainWindow::printDialog() {
         // ScopedTrue sTrue(App::app_->drawPdf_);
         // NOTE App::setDrawPdf(true);
         QRectF rect;
-        for(QGraphicsItem* item: App::graphicsView().items())
+        for(QGraphicsItem* item: App::grView().items())
             if(item->isVisible() && !item->boundingRect().isNull())
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
@@ -699,7 +699,7 @@ void MainWindow::printDialog() {
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
-        App::graphicsView().scene()->render(&painter,
+        App::grView().scene()->render(&painter,
             QRectF(0, 0, pPrinter->width(), pPrinter->height()),
             rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
         // NOTE App::setDrawPdf(false);
@@ -715,11 +715,11 @@ void MainWindow::renderPdf() {
     App::setDrawPdf(true);
 
     QRectF rect;
-    for(QGraphicsItem* item: ui.graphicsView->scene()->items())
+    for(QGraphicsItem* item: ui.grView->scene()->items())
         if(item->isVisible() && !item->boundingRect().isNull())
             rect |= item->boundingRect();
 
-    //    QRectF rect(ui.graphicsView->scene()->itemsBoundingRect());
+    //    QRectF rect(ui.grView->scene()->itemsBoundingRect());
     //    QRectF rect {App::layoutFrames().boundingRect()};
 
     QSizeF size(rect.size());
@@ -737,7 +737,7 @@ void MainWindow::renderPdf() {
     QPainter painter(&pdfWriter);
     painter.setTransform(QTransform().scale(1.0, -1.0));
     painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
-    ui.graphicsView->scene()->render(&painter,
+    ui.grView->scene()->render(&painter,
         QRectF(0, 0, pdfWriter.width(), pdfWriter.height()),
         rect, Qt::IgnoreAspectRatio);
 
@@ -873,7 +873,7 @@ void MainWindow::addFileToPro(AbstractFile* file) {
     }
     project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    //    ui.graphicsView->zoomFit();
+    //    ui.grView->zoomFit();
 }
 
 QString MainWindow::strippedName(const QString& fullFileName) {
@@ -1287,12 +1287,12 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     horizontalLayout->setSpacing(0);
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
     horizontalLayout->setContentsMargins(3, 3, 3, 3);
-    graphicsView = new GraphicsView(centralwidget);
-    graphicsView->setObjectName(QString::fromUtf8("graphicsView"));
-    graphicsView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
-    graphicsView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
+    grView = new GraphicsView(centralwidget);
+    grView->setObjectName(QString::fromUtf8("grView"));
+    grView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
+    grView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
 
-    horizontalLayout->addWidget(graphicsView);
+    horizontalLayout->addWidget(grView);
 
     MainWindow->setCentralWidget(centralwidget);
     menubar = new QMenuBar(MainWindow);
