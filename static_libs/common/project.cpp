@@ -81,7 +81,7 @@ QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     if(App::shapePlugins().contains(type)) {
         shape = App::shapePlugin(type)->createShape();
         stream >> *shape;
-        App::graphicsView().addItem(shape);
+        App::grView().addItem(shape);
     } else {
         QByteArray data;
         stream >> data;
@@ -137,7 +137,7 @@ bool Project::save(const QString& fileName) {
             clearence_,
             plunge_,
             glue_,
-            App::graphicsView().getViewRect());
+            App::grView().getViewRect());
         out << files_;
         out << shapes_;
         isModified_ = false;
@@ -210,7 +210,7 @@ bool Project::open(const QString& fileName) {
 
         isModified_ = false;
 
-        App::graphicsView().fitInView(sceneRect, false);
+        App::grView().fitInView(sceneRect, false);
 
         return true;
     } catch(const QString& ex) {
@@ -234,7 +234,7 @@ void Project::close() {
     isModified_ = false;
     for(auto& fl: pinsUsed_)
         fl = true;
-    App::graphicsView().zoom100();
+    App::grView().zoom100();
     emit changed();
 }
 

@@ -179,7 +179,7 @@ private:
     struct Ui {
         class QWidget* centralwidget;
         class QHBoxLayout* horizontalLayout;
-        class GraphicsView* graphicsView;
+        class GraphicsView* grView;
         class QMenuBar* menubar;
         class QStatusBar* statusbar;
         class QDockWidget* treeDockWidget;

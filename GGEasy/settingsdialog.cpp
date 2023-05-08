@@ -222,13 +222,13 @@ void SettingsDialog::saveSettings() {
     /*GUI*/
     settings.beginGroup("Viewer");
     if(settings.value("chbxOpenGl").toBool() != ui.chbxOpenGl->isChecked()) {
-        App::graphicsView().setOpenGL(ui.chbxOpenGl->isChecked());
-        App::graphicsView().viewport()->setObjectName("viewport");
-        App::graphicsView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
+        App::grView().setOpenGL(ui.chbxOpenGl->isChecked());
+        App::grView().viewport()->setObjectName("viewport");
+        App::grView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
         settings.setValue(ui.chbxOpenGl);
     }
     if(settings.value("chbxAntialiasing").toBool() != ui.chbxAntialiasing->isChecked()) {
-        App::graphicsView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
+        App::grView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
         settings.setValue(ui.chbxAntialiasing);
     }
     App::settings().animSelection_ = settings.setValue(ui.chbxAnimSelection);

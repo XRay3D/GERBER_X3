@@ -46,7 +46,7 @@ void sView::setFile(int fileId) {
                 node->item->setBrush(Qt::white);
                 item = node->component.componentitem();
                 item->setSelected(true);
-                App::graphicsView().fitInView(node->item->boundingRect());
+                App::grView().fitInView(node->item->boundingRect());
             }
         }
 

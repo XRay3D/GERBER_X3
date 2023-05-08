@@ -64,7 +64,7 @@ FormatDialog::~FormatDialog() {
 void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
-    for(QGraphicsItem* item: App::graphicsView().selectedItems()) {
+    for(QGraphicsItem* item: App::grView().selectedItems()) {
         if(item->type() == Gi::Type::Drill) {
             pair.first = item->boundingRect().center();
             ++c;
@@ -78,7 +78,7 @@ void FormatDialog::on_pushButton_clicked() {
             if(QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
                 return;
 
-            App::graphicsView().zoomFit();
+            App::grView().zoomFit();
             return;
         }
     }
@@ -92,12 +92,12 @@ void FormatDialog::updateFormat() {
     tmpFormat_.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
 
     file_->setFormat(tmpFormat_);
-    App::graphicsView().zoomFit();
+    App::grView().zoomFit();
 }
 
 void FormatDialog::acceptFormat() {
     accepted = true;
-    App::graphicsView().zoomFit();
+    App::grView().zoomFit();
 }
 
 void FormatDialog::rejectFormat() { deleteLater(); }
@@ -106,7 +106,7 @@ void FormatDialog::resetFormat() {
     if(accepted)
         return;
     file_->setFormat(format_);
-    App::graphicsView().zoomFit();
+    App::grView().zoomFit();
 }
 
 void FormatDialog::closeEvent(QCloseEvent* event) { deleteLater(); }

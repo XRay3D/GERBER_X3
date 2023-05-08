@@ -82,7 +82,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
             QColor c2(App::settings().guiColor(GuiColors::ToolPath));
             a = App::settings().guiColor(GuiColors::ToolPath).alpha();
             c2.setAlpha(std::clamp(pathColor().alpha(), 0, a));
-            painter->setPen(QPen(c2, 2 * App::graphicsView().scaleFactor()));
+            painter->setPen(QPen(c2, 2 * App::grView().scaleFactor()));
             painter->drawPath(painterPath);
         } else {
             painter->setBrush(Qt::NoBrush);
@@ -90,7 +90,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
             painter->drawPath(painterPath);
             QColor pc(bodyColor_);
             pc.setAlpha(255);
-            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::graphicsView().scaleFactor()));
+            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::grView().scaleFactor()));
             painter->drawPath(painterPath);
         }
         //        }

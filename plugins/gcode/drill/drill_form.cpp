@@ -113,7 +113,7 @@ Form::~Form() {
     settings.setValue(ui->chbxZoomToSelected);
     settings.endGroup();
 
-    // for (auto* var : App::graphicsView().items<Gi::DataSolid>())
+    // for (auto* var : App::grView().items<Gi::DataSolid>())
     // delete var;
 
     delete ui;
@@ -235,7 +235,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
                     go->fill);
         }
 
-        App::graphicsView().scene()->update();
+        App::grView().scene()->update();
     } catch(const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what());
         return;
@@ -418,7 +418,7 @@ QModelIndexList Form::selectedIndexes() const { return ui->toolTable->selectionM
 
 void Form::zoomToSelected() {
     if(ui->chbxZoomToSelected->isChecked())
-        App::graphicsView().zoomToSelected();
+        App::grView().zoomToSelected();
 }
 
 void Form::computePaths() {

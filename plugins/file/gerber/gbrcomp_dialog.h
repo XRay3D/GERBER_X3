@@ -35,7 +35,7 @@ private:
     // QDialogButtonBox* buttonBox;
     // QVBoxLayout* verticalLayout;
     sView* componentsView;
-    QGraphicsView* graphicsView;
+    QGraphicsView* grView;
     QSplitter* splitter;
     static inline QGraphicsScene* scene_;
 

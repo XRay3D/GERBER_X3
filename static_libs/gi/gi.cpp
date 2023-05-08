@@ -121,7 +121,7 @@ double Item::scaleFactor() const {
 };
 
 QRectF Item::boundingRect() const {
-    if(App::graphicsView().boundingRectFl())
+    if(App::grView().boundingRectFl())
         return shape_.toFillPolygon(transform()).boundingRect();
     return boundingRect_;
 }

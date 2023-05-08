@@ -200,7 +200,7 @@ void Form::updateThermalGi() {
         }
 
         for(auto& item: items_) {
-            App::graphicsView().addItem(item.get());
+            App::grView().addItem(item.get());
             connect(item.get(), &AbstractThermPrGi::selectionChanged, this, &Form::setSelection);
         }
     }

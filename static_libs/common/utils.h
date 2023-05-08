@@ -60,22 +60,22 @@ struct Timer {
         auto& [ctr, avg] = avgMap[stringView];
         avg += timeout.count();
         ++ctr;
-        qDebug(format(), stringView.data(), timeout.count(), avg / ctr);
+        qDebug(format(), timeout.count(), avg / ctr, stringView.data());
     }
 
     constexpr auto format() const noexcept {
         /**/ if constexpr(std::is_same_v<T, nS>)
-            return "\t%20s -> %1.3f (avg %1.3f) nS";
+            return ">>> %1.3f (avg %1.3f) nS\t -> %s";
         else if constexpr(std::is_same_v<T, uS>)
-            return "\t%20s -> %1.3f (avg %1.3f) uS";
+            return ">>> %1.3f (avg %1.3f) uS\t -> %s";
         else if constexpr(std::is_same_v<T, mS>)
-            return "\t%20s -> %1.3f (avg %1.3f) mS";
+            return ">>> %1.3f (avg %1.3f) mS\t -> %s";
         else if constexpr(std::is_same_v<T, Sec>)
-            return "\t%20s -> %1.3f (avg %1.3f) S";
+            return ">>> %1.3f (avg %1.3f) S\t -> %s";
         else if constexpr(std::is_same_v<T, Mins>)
-            return "\t%20s -> %1.3f (avg %1.3f) M";
+            return ">>> %1.3f (avg %1.3f) M\t -> %s";
         else if constexpr(std::is_same_v<T, Hours>)
-            return "\t%20s -> %1.3f (avg %1.3f) H";
+            return ">>> %1.3f (avg %1.3f) H\t -> %s";
     }
 };
 template <class T>

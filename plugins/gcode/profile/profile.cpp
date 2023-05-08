@@ -183,7 +183,7 @@ void Creator::cornerTrimming() {
 }
 
 void Creator::makeBridges() {
-    auto bridgeItems{App::graphicsView().items<GiBridge>(Gi::Type::Bridge)};
+    auto bridgeItems{App::grView().items<GiBridge>(Gi::Type::Bridge)};
     if(bridgeItems.empty())
         return;
 
