@@ -16,7 +16,7 @@
 
 namespace PocketOffset {
 
-// dbgPaths(clipFrame, QString("clipFrame %1").arg(tIdx), Qt::red);
+// //dbgPaths(clipFrame, QString("clipFrame %1").arg(tIdx), Qt::red);
 
 void Creator::create() {
     setMax(10000);
@@ -101,7 +101,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
-    dbgPaths(groupedPss, "groupedPss", Qt::red);
+    //dbgPaths(groupedPss, "groupedPss", Qt::red);
 
     setCurrent(0);
 
@@ -121,8 +121,8 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
         return;
     }
 
-
     stacking(returnPs);
+
     assert(returnPss.size());
 
     cutAreaPaths = InflatePaths(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
@@ -173,7 +173,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
             for(size_t pIdx{}; const Paths& paths: groupedPss) {
                 Paths wp = InflatePaths(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
-                if(tIdx) // обрезка текущего пути предыдущим
+                if(tIdx)                                                                      // обрезка текущего пути предыдущим
                     wp = C2::Difference(wp, clipFrame, FR::EvenOdd);
 
                 if(tIdx == size - 1)
@@ -181,7 +181,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 else if(tIdx /*+ 1 != size*/)
                     removeSmall(wp, dOffset * 2.0); // остальные
 
-                // dbgPaths(wp, QString("wp %1").arg(pIdx), Qt::red);
+                // //dbgPaths(wp, QString("wp %1").arg(pIdx), Qt::red);
 
                 fillPaths[tIdx].append(wp);
 
@@ -203,7 +203,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
         // make a fill box for the toolpath and create a file
         Timer t{"cutAreaPaths"};
-        // dbgPaths(cutAreaPaths, "cutAreaPaths", Qt::green);
+        // //dbgPaths(cutAreaPaths, "cutAreaPaths", Qt::green);
         cutAreaPaths = InflatePaths(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
 
         stacking(returnPs);
