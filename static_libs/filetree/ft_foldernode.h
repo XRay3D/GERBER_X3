@@ -12,9 +12,13 @@
 
 #include "ft_node.h"
 
+namespace Gi {
+class Item;
+} // namespace Gi
+
 namespace FileTree {
 
-class FolderNode : public FileTree::Node {
+class FolderNode final : public Node {
     QString name;
     Qt::CheckState checkState_ = Qt::Checked;
 
@@ -23,11 +27,25 @@ public:
     explicit FolderNode(const QString& name, int32_t id);
     ~FolderNode() override;
 
-    // FileTree::Node interface
+    // Node interface
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
-    void menu(QMenu& menu, FileTree::View* tv) override;
+    void menu(QMenu& menu, View* tv) override;
+};
+
+class ItemNode final : public Node {
+    Gi::Item* item;
+
+public:
+    explicit ItemNode(Gi::Item* item);
+    ~ItemNode() override;
+
+    // Node interface
+    QVariant data(const QModelIndex& index, int role) const override;
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override;
+    Qt::ItemFlags flags(const QModelIndex& index) const override;
+    void menu(QMenu& menu, View* tv) override;
 };
 
 } // namespace FileTree

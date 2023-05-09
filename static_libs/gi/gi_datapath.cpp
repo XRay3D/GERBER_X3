@@ -25,8 +25,18 @@
 namespace Gi {
 
 DataPath::DataPath(const Path& path, AbstractFile* file)
-    : Item(file) {
+    : Item{file} {
     shape_.addPolygon(path);
+    updateSelection();
+    setAcceptHoverEvents(true);
+    setFlag(ItemIsSelectable, true);
+    setSelected(false);
+}
+
+DataPath::DataPath(const Paths& paths, AbstractFile* file)
+    : Item{file} {
+    for(auto&& path: paths)
+        shape_.addPolygon(path);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);

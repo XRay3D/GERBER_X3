@@ -349,44 +349,45 @@ Params* BaseForm::getNewGcp() {
     AbstractFile const* file = nullptr;
     bool skip{true};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
-        switch(gi->type()) {
-        case Gi::Type::DataSolid:
-            gcp->closedPaths.append(gi->paths());
-            break;
-        case Gi::Type::DataPath: {
-            auto path = gi->paths().front();
-            if(path.front() == path.back())
-                gcp->closedPaths.emplace_back(path);
-            else
-                gcp->openPaths.emplace_back(path);
-        } break;
-            //            if (!file) {
-            //                file = gi->file();
-            //                boardSide = file->side();
-            //            } else if (file != gi->file()) {
-            //                if (skip) {
-            //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-            //                        return;
-            //                }
-            //            }
-            //            if (gi->type() == Gi::Type::DataSolid)
-            //                gcp->closedPaths.append(gi->paths());
-            //            else
-            //                gcp->openPaths.append(gi->paths());
-            //            break;
-        case Gi::Type::ShCircle:
-        case Gi::Type::ShRectangle:
-        case Gi::Type::ShText:
-        case Gi::Type::Drill:
-            gcp->closedPaths.append(gi->paths());
-            break;
-        case Gi::Type::ShPolyLine:
-        case Gi::Type::ShCirArc:
-            gcp->openPaths.append(gi->paths());
-            break;
-        default:
-            break;
-        }
+        qDebug() << gi << gi->file();
+        //        switch(gi->type()) {
+        //        case Gi::Type::DataSolid:
+        //            gcp->closedPaths.append(gi->paths());
+        //            break;
+        //        case Gi::Type::DataPath: {
+        dbgPaths(gi->paths(), __FUNCTION__);
+        for(auto&& path: gi->paths())
+            (path.front() == path.back())
+                ? gcp->closedPaths.emplace_back(path)
+                : gcp->openPaths.emplace_back(path);
+        //        } break;
+        //            //            if (!file) {
+        //            //                file = gi->file();
+        //            //                boardSide = file->side();
+        //            //            } else if (file != gi->file()) {
+        //            //                if (skip) {
+        //            //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+        //            //                        return;
+        //            //                }
+        //            //            }
+        //            //            if (gi->type() == Gi::Type::DataSolid)
+        //            //                gcp->closedPaths.append(gi->paths());
+        //            //            else
+        //            //                gcp->openPaths.append(gi->paths());
+        //            //            break;
+        //        case Gi::Type::ShCircle:
+        //        case Gi::Type::ShRectangle:
+        //        case Gi::Type::ShText:
+        //        case Gi::Type::Drill:
+        //            gcp->closedPaths.append(gi->paths());
+        //            break;
+        //        case Gi::Type::ShPolyLine:
+        //        case Gi::Type::ShCirArc:
+        //            gcp->openPaths.append(gi->paths());
+        //            break;
+        //        default:
+        //            break;
+        //        }
         addUsedGi(gi);
     }
 

@@ -472,7 +472,7 @@ void MainWindow::createActionsShape() {
         QList<Gi::Item*> rmi;
         for(QGraphicsItem* item: selectedItems) {
             if(item->type() == Gi::Type::DataSolid) {
-                auto gitem = static_cast<Gi::DataSolid*>(item);
+                auto gitem = static_cast<Gi::DataFill*>(item);
                 Clipper clipper;
                 clipper.AddSubject(gitem->paths());
                 clipper.AddClip(clipPaths);
@@ -493,6 +493,13 @@ void MainWindow::createActionsShape() {
     toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ClipType::Difference); });
     toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [executor] { executor(ClipType::Xor); });
     toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [executor] { executor(ClipType::Intersection); });
+
+    toolBar->addSeparator();
+
+    toolBar->addAction(QIcon::fromTheme(""), tr("Create Group"), this, [this] {
+        Paths p{CirclePath(100 * uScale, {100 * uScale, 100 * uScale})};
+        App::project().addItem(new Gi::DataPath{p, nullptr});
+    });
 }
 
 void MainWindow::customContextMenuForToolBar(const QPoint& pos) {

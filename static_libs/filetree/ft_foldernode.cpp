@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "ft_foldernode.h"
+#include "gi.h"
 
 #include <QIcon>
 
@@ -19,13 +20,13 @@ namespace FileTree {
 constexpr int FolderNodeId{-1};
 
 FolderNode::FolderNode(const QString& name)
-    : FileTree::Node(Folder)
+    : FileTree::Node{Folder}
     , name(name) {
     setId(FolderNodeId);
 }
 
 FolderNode::FolderNode(const QString& name, int32_t id)
-    : FileTree::Node(Folder)
+    : FileTree::Node{Folder}
     , name(name) {
     setId(id);
 }
@@ -72,7 +73,59 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
     }
 }
 
-void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) {
+void FolderNode::menu(QMenu& /*menu*/, View* /*tv*/) { }
+
+///////////////////////////////////////////////////////////////
+/// \brief ItemNode::ItemNode
+/// \param item
+/// \param id
+///
+ItemNode::ItemNode(Gi::Item* item)
+    : FileTree::Node{PathGroup}
+    , item{item} { }
+
+ItemNode::~ItemNode() { }
+
+QVariant ItemNode::data(const QModelIndex& index, int role) const {
+    if(!index.column()) {
+        switch(role) {
+        case Qt::DisplayRole:
+            return "name";
+        case Qt::DecorationRole:
+            return drawIcon(item->paths(), item->color());
+        default:
+            break;
+        }
+    }
+    switch(role) {
+    case Role::Id:
+        return item->id();
+    case Role::NodeType:
+        return Folder;
+    case Role::ContentType:
+        return childs.size() ? childs.front()->type_ : Type::Null;
+    default:
+        return {};
+    }
 }
+
+bool ItemNode::setData(const QModelIndex& index, const QVariant& value, int role) {
+    if(index.column())
+        return false;
+
+    switch(role) {
+    case Qt::CheckStateRole:
+        item->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+        return true;
+    default:
+        return false;
+    }
+}
+
+Qt::ItemFlags ItemNode::flags(const QModelIndex& index) const {
+    return Qt::ItemIsEnabled /*| Qt::ItemIsDropEnabled*/;
+}
+
+void ItemNode::menu(QMenu& menu, View* tv) { }
 
 } // namespace FileTree

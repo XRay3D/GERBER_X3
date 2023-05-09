@@ -36,6 +36,10 @@ namespace GCode {
 class File;
 }
 
+namespace Gi {
+class Item;
+}
+
 namespace Shapes {
 class AbstractShape;
 }
@@ -47,6 +51,7 @@ class QFileSystemWatcher;
 using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
 // using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
 using ShapesMap = std::map<int, Shapes::AbstractShape*>;
+using ItemMap = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
@@ -100,6 +105,11 @@ public:
     int addShape(Shapes::AbstractShape* const shape);
     Shapes::AbstractShape* shape(int32_t id);
     void deleteShape(int32_t id);
+
+    // Item
+    int addItem(Gi::Item* const item);
+    Gi::Item* Item(int32_t id);
+    void deleteItem(int32_t id);
 
     // Project
     bool save(const QString& fileName);
@@ -193,6 +203,7 @@ private:
 
     FilesMap files_;
     ShapesMap shapes_;
+    ItemMap items_;
 
     QMutex mutex;
 

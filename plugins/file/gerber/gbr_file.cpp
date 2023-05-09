@@ -317,7 +317,7 @@ void File::read(QDataStream& stream) {
 void File::createGi() {
     if constexpr(1) { // fill copper
         for(Paths& paths: groupedPaths()) {
-            Gi::Item* item = new Gi::DataSolid(paths, this);
+                Gi::Item* item = new Gi::DataFill(paths, this);
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();
