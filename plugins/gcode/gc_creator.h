@@ -83,7 +83,7 @@ public:
     //    static void //PROG setProgInc();
 
     QString msg;
-    
+
     mvector<Gi::Error*> items;
 
     bool checkMillingFl{};
@@ -117,8 +117,8 @@ protected:
 
     std::unordered_map<void*, int> nesting;
 
-    virtual void create() = 0;
-    virtual uint32_t type() = 0;
+    virtual void create() { }             /* = 0; */
+    virtual uint32_t type() { return 0; } /* = 0; */
     virtual bool possibleTest() const { return false; }
 
     //    inline static ClipperBase* clipperPtr_;

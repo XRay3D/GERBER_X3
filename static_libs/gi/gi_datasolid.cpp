@@ -21,7 +21,7 @@
 
 namespace Gi {
 
-DataSolid::DataSolid(Paths& paths, AbstractFile* file)
+DataFill::DataFill(Paths& paths, AbstractFile* file)
     : Item(file)
     , paths_{paths} {
     for(Path path: paths) {
@@ -34,9 +34,9 @@ DataSolid::DataSolid(Paths& paths, AbstractFile* file)
     setFlag(ItemIsSelectable, true);
 }
 
-DataSolid::~DataSolid() { }
+DataFill::~DataFill() { }
 
-void DataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
@@ -58,9 +58,9 @@ void DataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*optio
     painter->strokePath(shape_, pen_);
 }
 
-int DataSolid::type() const { return Type::DataSolid; }
+int DataFill::type() const { return Type::DataSolid; }
 
-void DataSolid::redraw() {
+void DataFill::redraw() {
     //    shape_ = QPainterPath();
     //    for (Path path : qAsConst(paths_)) {
     //        path.push_back(path.front());
@@ -71,7 +71,7 @@ void DataSolid::redraw() {
     // update();
 }
 
-void DataSolid::setPaths(Paths paths, int alternate) {
+void DataFill::setPaths(Paths paths, int alternate) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
@@ -91,7 +91,7 @@ void DataSolid::setPaths(Paths paths, int alternate) {
     redraw();
 }
 
-void DataSolid::changeColor() {
+void DataFill::changeColor() {
     //    auto animation = new QPropertyAnimation(this, "bodyColor");
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);

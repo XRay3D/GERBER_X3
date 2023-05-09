@@ -17,15 +17,14 @@ class File;
 
 namespace Gi {
 
-class DataSolid final : public Item {
+class DataFill final : public Item {
     Paths& paths_;
 
 public:
-    explicit DataSolid(Paths& paths_, AbstractFile* file);
-    ~DataSolid() override;
+    explicit DataFill(Paths& paths_, AbstractFile* file);
+    ~DataFill() override;
 
     // QGraphicsItem interface
-    //   QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     // Item interface

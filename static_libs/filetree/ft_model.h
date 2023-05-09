@@ -24,11 +24,11 @@ class Project;
 
 namespace GCode {
 class File;
-}
+} // namespace GCode
 
 namespace Gi {
-class DataPath;
-}
+class Item;
+} // namespace Gi
 
 namespace FileTree {
 
@@ -95,7 +95,7 @@ private:
     void addFile(AbstractFile* file);
     void addShape(Shapes::AbstractShape* shape);
 
-    void addPathGroup(Gi::DataPath*);
+    void addItem(Gi::Item* item);
 };
 
 } // namespace FileTree

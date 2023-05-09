@@ -17,6 +17,7 @@
 #include "ft_model.h"
 #include "gc_file.h"
 #include "gc_plugin.h"
+#include "gi.h"
 #include "graphicsview.h"
 #include "shapepluginin.h"
 
@@ -90,6 +91,29 @@ QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     return stream;
 }
 
+QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
+    stream << uint32_t(shape->type());
+    stream << shape->paths();
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, Gi::Item*& shape) {
+    uint32_t type;
+    Paths paths;
+    stream >> type;
+    stream >> paths;
+    //    if(App::shapePlugins().contains(type)) {
+    //        shape = App::shapePlugin(type)->createShape();
+    //        stream >> *shape;
+    //        App::grView().addItem(shape);
+    //    } else {
+    //        QByteArray data;
+    //        stream >> data;
+    //        qDebug() << type << loadErrorMessage << data;
+    //    }
+    return stream;
+}
+
 Project::Project(QObject* parent)
     : QObject(parent)
     , watcher(this) {
@@ -140,6 +164,7 @@ bool Project::save(const QString& fileName) {
             App::grView().getViewRect());
         out << files_;
         out << shapes_;
+        out << items_;
         isModified_ = false;
         emit changed();
         return true;
@@ -197,11 +222,13 @@ bool Project::open(const QString& fileName) {
             sceneRect);
         in >> files_;
         in >> shapes_;
-
+        // in >> items_;
         for(const auto& [id, filePtr]: files_)
             App::fileModel().addFile(filePtr.get());
         for(const auto& [id, shPtr]: shapes_)
             App::fileModel().addShape(shPtr);
+        for(const auto& [id, itemPtr]: items_)
+            App::fileModel().addItem(itemPtr);
 
         emit homePosChanged(home_);
         emit zeroPosChanged(zero_);
@@ -246,6 +273,7 @@ void Project::deleteFile(int32_t id) {
         setChanged();
     } else
         qWarning() << "Error id" << id << "File not found";
+    isPinsPlaced_ = false;
 }
 
 void Project::deleteShape(int32_t id) {
@@ -259,6 +287,45 @@ void Project::deleteShape(int32_t id) {
     } catch(const std::exception& ex) {
         qWarning() << ex.what();
     }
+    isPinsPlaced_ = false;
+}
+
+int Project::addItem(Gi::Item* const item) {
+    QMutexLocker locker(&mutex);
+    if(!item)
+        return -1;
+    isPinsPlaced_ = false;
+    item->id_ = items_.size() ? (--items_.end())->first + 1 : 0;
+    item->setToolTip(QString::number(item->id_));
+    item->setZValue(item->id_);
+
+    App::grView().addItem(item);
+    item->setColor(Qt::white);
+    item->setVisible(true);
+
+    items_.emplace(item->id_, item);
+    App::fileModel().addItem(item);
+    setChanged();
+    return item->id_;
+}
+
+Gi::Item* Project::Item(int32_t id) {
+    QMutexLocker locker(&mutex);
+    return items_[id];
+}
+
+void Project::deleteItem(int32_t id) {
+    QMutexLocker locker(&mutex);
+    try {
+        if(items_.contains(id)) {
+            items_.erase(id);
+            setChanged();
+        } else
+            qWarning() << "Error id" << id << "Gi::Item not found";
+    } catch(const std::exception& ex) {
+        qWarning() << ex.what();
+    }
+    isPinsPlaced_ = false;
 }
 
 int Project::size() { return int(files_.size() + shapes_.size()); }

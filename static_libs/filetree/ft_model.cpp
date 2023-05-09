@@ -116,9 +116,39 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }
 
-void Model::addPathGroup(Gi::DataPath *)
-{
+void Model::addItem(Gi::Item* item) {
+    if(!item)
+        return;
 
+    static constexpr uint32_t type = md5::hash32("Gi::Item");
+    auto& itemFolder = fileFolders[type];
+    if(!itemFolder) {
+        QModelIndex index = createIndex(0, 0, rootItem);
+        int rowCount = rootItem->childCount();
+        beginInsertRows(index, rowCount, rowCount);
+        auto si = App::shapePlugins().begin()->second;
+        itemFolder = new FolderNode(si->folderName(), type);
+        rootItem->addChild(itemFolder);
+        endInsertRows();
+    }
+
+    QModelIndex index = createIndex(0, 0, itemFolder);
+    int rowCount = itemFolder->childCount();
+    beginInsertRows(index, rowCount, rowCount);
+
+    auto node = new ItemNode(item);
+
+    itemFolder->addChild(node);
+    endInsertRows();
+
+    emit select(createIndex(rowCount, 0, node));
+
+    //    QModelIndex index = createIndex(0, 0, itemFolder);
+    //    int rowCount = itemFolder->childCount();
+    //    beginInsertRows(index, rowCount, rowCount);
+    //    itemFolder->addChild(item); //, Node::DontDelete);
+    //    endInsertRows();
+    // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }
 
 void Model::closeProject() {

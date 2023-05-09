@@ -26,6 +26,7 @@ class DataPath : public Item {
 
 public:
     DataPath(const Path& path, AbstractFile* file);
+    DataPath(const Paths& path, AbstractFile* file);
 
 protected:
     // QGraphicsItem interface

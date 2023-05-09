@@ -539,7 +539,7 @@ void File::createGiPocket() {
         //            offset.AddPaths(pocketPaths_, JoinType::Round, EndType::Polygon);
         //            offset.Execute(pocketPaths_, uScale * gcp_.getToolDiameter() * 0.5);
         //        }
-        item = new Gi::DataSolid(pocketPaths_, nullptr);
+            item = new Gi::DataFill(pocketPaths_, nullptr);
         item->setPen(Qt::NoPen);
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setAcceptHoverEvents(false);
@@ -617,7 +617,7 @@ void File::createGiRaster() {
     g0path_.reserve(toolPathss_.size());
 
     if(pocketPaths_.size()) {
-        item = new Gi::DataSolid(pocketPaths_, nullptr);
+            item = new Gi::DataFill(pocketPaths_, nullptr);
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));

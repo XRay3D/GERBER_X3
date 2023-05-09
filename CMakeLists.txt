@@ -8,10 +8,18 @@
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
 set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
+
+# Optional IPO. Do not use IPO if it's not supported by compiler.
+#check_ipo_supported(RESULT result OUTPUT output)
+#if(result)
+set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+#else()
+#    message(WARNING "IPO is not supported: ${output}")
+#endif()
 
 project(GERBER_X3)
 
