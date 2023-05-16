@@ -17,9 +17,11 @@
 
 namespace ShPoly {
 
+class Shape;
+
 class Model : public QAbstractTableModel {
     Q_OBJECT
-    friend class Shape;
+    friend Shape;
 
 public:
     Model(QObject* parent);

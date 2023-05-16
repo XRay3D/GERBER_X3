@@ -341,5 +341,5 @@ void ToolHolder::writeTools(QJsonObject& json) {
         toolObject["id"] = id;
         toolArray.push_back(toolObject);
     }
-    json["tools"] = toolArray;
+    json["tools"] = QJsonValue{toolArray};
 }

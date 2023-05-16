@@ -24,6 +24,8 @@ class QRadioButton;
 
 namespace ShTxt {
 
+class Shape;
+
 class Editor : public QWidget {
     Q_OBJECT
     friend class Shape;

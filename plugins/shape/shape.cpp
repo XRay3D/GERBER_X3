@@ -15,7 +15,7 @@
 #include "qgraphicsscene.h"
 #include "shhandler.h"
 
-#include "mainwindow.h"
+//#include "mainwindow.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
@@ -94,7 +94,7 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
 
 void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);
-    App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
+    //App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
 }
 
 void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
@@ -223,7 +223,7 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
     action->setChecked(Gi::Item::flags() & ItemIsSelectable);
 
     action = menu.addAction(QIcon::fromTheme("document-edit"), QObject::tr("Edit Selected"), [this] {
-        App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
+        //App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
     });
 
     //    action->connect(action, &QAction::toggled );

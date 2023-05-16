@@ -21,10 +21,10 @@ class Creator :
 #if __has_include(<CGAL/Algebraic_structure_traits_.h>)
     public VoronoiCgal,
 #endif
-    public VoronoiJc,
-#if __has_include(<boost/polygon/voronoi.hpp>)
-    public VoronoiBoost
-#endif
+    public VoronoiJc
+//#if __has_include(<boost/polygon/voronoi.hpp>)
+    ,public VoronoiBoost
+//#endif
 {
 
 public:

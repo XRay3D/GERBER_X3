@@ -74,7 +74,7 @@ else()
     message(FATAL_ERROR "Boost not found!!!")
 endif()
 
-set(INCLUDE_DIRECTORIES
+set(INC_DIRS
     external_dependencies/compile-time-regular-expressions/single-header
     external_dependencies/pfr_non_boost/include
 
@@ -92,7 +92,7 @@ set(INCLUDE_DIRECTORIES
     static_libs/tooldatabase
 )
 
-include_directories(${INCLUDE_DIRECTORIES})
+include_directories(${INC_DIRS})
 
 # STYLE
 if(EXISTS style/XrStyle)
