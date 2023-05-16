@@ -266,7 +266,7 @@ void ToolModel::saveTools() {
             ++row.last();
         }
     }
-    jsonObject["tree"] = treeArray;
+    jsonObject["tree"] = QJsonValue{treeArray};
     QJsonDocument saveDoc(jsonObject);
     file.write(saveDoc.toJson());
 }

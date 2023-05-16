@@ -12,24 +12,29 @@
  ********************************************************************************/
 #include "gi_point.h"
 
-#include "../plugins/gcode/drill/drill_file.h"
+#include "drill/drill_file.h"
 #include "gc_propertiesform.h"
+#include "gc_types.h"
+#include "gi.h"
+#include "project.h"
+#include "../../GGEasy/settingsdialog.h"
+#include "tool_database.h"
+
+#include <QInputDialog>
+#include <QMessageBox>
+#include <QMenu>
+#include <QStyleOptionGraphicsItem>
+#include <QGraphicsSceneEvent>
 // #include "gcode.h"
 // #include "graphicsview.h"
 // #include "project.h"
 // #include "settings.h"
-#include "project.h"
-#include "settingsdialog.h"
-#include "tool_pch.h"
-
 // #include <QAction>
 // #include <QGraphicsSceneContextMenuEvent>
-// #include <QInputDialog>
 // #include <QMenu>
-// #include <QMessageBox>
 // #include <QPainter>
-// #include <QStyleOptionGraphicsItem>
 // #include <array>
+// #include "tool_pch.h"
 
 bool updateRect() {
     QRectF rect(App::grView().getSelectedBoundingRect());

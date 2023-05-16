@@ -17,6 +17,8 @@
 
 namespace ShRect {
 
+class Shape;
+
 class Model : public QAbstractTableModel {
     Q_OBJECT
     friend class Shape;

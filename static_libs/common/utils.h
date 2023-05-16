@@ -10,9 +10,9 @@
 #if defined(_MSC_VER)
 #pragma warning(push)
 #pragma warning(disable : 4117) // warning C4117: имя макроопределения "__cpp_consteval" зарезервировано, пропуск "#define"
+#define __cpp_consteval 1 // NOTE костыли для clang tidy
 #endif
 
-#define __cpp_consteval 1 // NOTE костыли для clang tidy
 #include <source_location>
 
 #if defined(_MSC_VER)
@@ -187,6 +187,7 @@ struct Deleter {
         Delete
     } del{Delete};
     void operator()(auto* ptr) const {
-        if(del == Delete) delete ptr;
+        if(del == Delete)
+            delete ptr;
     }
 };
