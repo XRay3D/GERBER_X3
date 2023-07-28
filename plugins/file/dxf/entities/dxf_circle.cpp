@@ -41,7 +41,7 @@ Circle::Circle(SectionParser* sp)
 void Circle::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch(static_cast<DataEnum>(code.code())) {
+        switch (static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -68,7 +68,7 @@ void Circle::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while(code.code() != 0);
+    } while (code.code() != 0);
 }
 
 Entity::Type Circle::type() const { return Type::CIRCLE; }
@@ -81,13 +81,22 @@ DxfGo Circle::toGo() const {
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
-    for(auto& poly: path.toSubpathPolygons(m))
+    for (auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
     DxfGo go{id, p.value(0), {}}; // return {id, p.value(0), {}};
+
+    go.raw = radius * 2;
+    go.name = layerName.toUtf8(); // QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
+    go.fill.emplace_back(p.value(0));
+    go.path.clear();
+
+    go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
+    go.GraphicObject::pos = centerPoint;
+
     return go;
 }
 

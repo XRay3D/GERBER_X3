@@ -33,16 +33,20 @@ void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     painter->setPen(Qt::NoPen);
     painter->drawPath(pPath);
 
-    if(!ok_)
+    if (!ok_)
         return;
-
     painter->setBrush(Qt::NoBrush);
     painter->setPen(QPen(Qt::gray, 2 * App::grView().scaleFactor()));
-    painter->drawPath(cutoff);
+
+    try {
+        painter->drawPath(cutoff);
+    } catch (...) {
+        //qDebug() << std::current_exception();
+    }
 }
 
 QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == ItemPositionChange)
+    if (change == ItemPositionChange)
         return snapedPos(value.toPointF());
     return QGraphicsItem::itemChange(change, value);
 }
@@ -54,7 +58,7 @@ void GiBridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 
 QPointF GiBridge::snapedPos(const QPointF& pos) {
     auto col = scene()->collidingItems(this);
-    if(col.isEmpty())
+    if (col.isEmpty())
         return pos;
 
     auto retPos{pos};
@@ -65,38 +69,38 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
 
     auto filter = [](auto* item) {
         auto ty = item->type();
-        //using enum Gi::Type;
+        // using enum Gi::Type;
         return item->isSelected() && (ty >= Gi::Type::ShCircle || ty == Gi::Type::Drill || ty == Gi::Type::DataSolid || ty == Gi::Type::DataPath);
     };
 
     auto transform = [](auto* item) { return static_cast<Gi::Item*>(item); };
 
-    for(Gi::Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
+    for (Gi::Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
         auto paths = gi->paths();
-        if(gi->type() == Gi::Type::DataPath
+        if (gi->type() == Gi::Type::DataPath
             && paths.size() == 1
             && paths.front().front() == paths.front().back()
             && IsPositive(paths.front())) // fix direction for drawing
             ReversePath(paths.front());
-        for(Path& path: paths) {
-            for(size_t i{}, s = path.size(); i < s; ++i) {
+        for (Path& path: paths) {
+            for (size_t i{}, s = path.size(); i < s; ++i) {
                 QLineF tmpLine(path[i], path[(i + 1) % s]);
                 double tmp = LineABC(tmpLine).distance(pos);
-                if(minLenght > tmp && tmp < lenght)
+                if (minLenght > tmp && tmp < lenght)
                     minLenght = tmp, line = tmpLine;
             }
         }
     }
 
-    if(!line.isNull()) {
+    if (!line.isNull()) {
         minLenght = line.length() - lenght / 2;
         angle_ = line.angle();
-        if(QLineF(line.center(), pos).length() < lenght / 2 && line.length() < lenght) {
+        if (QLineF(line.center(), pos).length() < lenght / 2 && line.length() < lenght) {
             // точка центра прямой
             retPos = line.center();
             ok_ = true;
             update(); // Cutoff
-        } else if(QLineF(line.p1(), pos).length() < minLenght && QLineF(line.p2(), pos).length() < minLenght) {
+        } else if (QLineF(line.p1(), pos).length() < minLenght && QLineF(line.p2(), pos).length() < minLenght) {
             // точка пересечения на прямой перпендикуляра из 3 точки
             auto k1 = (line.p2().x() - line.p1().x());
             auto k2 = (line.p2().y() - line.p1().y());
@@ -118,12 +122,12 @@ void GiBridge::update() {
 
     cutoff.clear();
 
-    if(!ok_)
+    if (!ok_)
         return;
 
     QLineF lTool, lCenter = QLineF::fromPolar(toolDiam + lenght, angle_);
     double start, span = 180;
-    switch(side) {
+    switch (side) {
     case GCode::On:
         lCenter.translate(-lCenter.center());
         lTool = QLineF::fromPolar(toolDiam, start = angle_ - 90);
@@ -139,7 +143,7 @@ void GiBridge::update() {
         break;
     }
 
-    if(0) { // test
+    if (0) { // test
         QLineF lTool2 = testLine();
         lTool2.translate(pos() - lTool2.center());
         cutoff.moveTo(lTool2.p1());
@@ -172,12 +176,12 @@ bool GiBridge::ok() const { return ok_; }
 
 void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseReleaseEvent(event);
-    if(ok_ && pos() == lastPos) {
+    if (ok_ && pos() == lastPos) {
         moveBrPtr = new GiBridge;
         scene()->addItem(moveBrPtr);
         moveBrPtr->setPos(pos());
         moveBrPtr->setVisible(true);
-    } else if(!ok_) {
+    } else if (!ok_) {
         scene()->removeItem(this);
         delete this;
     }

@@ -78,6 +78,7 @@ protected:
         updateFiles();
         event->accept();
     }
+    void hideEvent(QHideEvent* event) override;
 
 public:
     void editFile(GCode::File* file) override;

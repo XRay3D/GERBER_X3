@@ -13,19 +13,176 @@
 #include "thread_form.h"
 
 #include "gc_gi_bridge.h"
-#include "graphicsview.h"
-#include "settings.h"
+// #include "graphicsview.h"
+// #include "settings.h"
 #include "ui_threadform.h"
 #include <QMessageBox>
 #include <ranges>
 
 namespace Thread {
 
+static QStringList side{QObject::tr("Null"), QObject::tr("Outer"), QObject::tr("Inner")};
+
+struct ThreadParam {
+    int thread;
+    int side;
+    int toolT;
+    int tool;
+    double depth;
+    double x;
+    double y;
+};
+
+class Model : public QAbstractTableModel {
+    //    Q_OBJECT
+
+    std::vector<ThreadParam> data_;
+
+public:
+    Model(QObject* parent = nullptr)
+        : QAbstractTableModel{parent} { data_.resize(1); }
+    ~Model() override = default;
+
+    // QAbstractItemModel interface
+    int rowCount(const QModelIndex& parent) const override { return data_.size(); }
+    int columnCount(const QModelIndex& parent) const override { return 7; }
+
+    QVariant data(const QModelIndex& index, int role) const override {
+        auto& data = data_.at(index.row());
+        if (role == Qt::DisplayRole) {
+            switch (index.column()) {
+            case 0: return Settings::threads.at(data.thread).toStr();
+            case 1: return side[data.side];
+            case 2:
+                if (App::toolHolder().tools().contains(data.toolT))
+                    return App::toolHolder().tool(data.toolT).name();
+            case 3:
+                if (App::toolHolder().tools().contains(data.tool))
+                    return App::toolHolder().tool(data.tool).name();
+            case 4: return data.depth;
+            case 5: return data.x;
+            case 6: return data.y;
+            }
+        }
+        if (role == Qt::EditRole) {
+            switch (index.column()) {
+            case 0: return data.thread;
+            case 1: return data.side;
+            case 2: return data.toolT;
+            case 3: return data.tool;
+            case 4: return data.depth;
+            case 5: return data.x;
+            case 6: return data.y;
+            }
+        }
+
+        return {};
+    }
+
+    bool setData(const QModelIndex& index, const QVariant& value, int role) override {
+        auto& data = data_.at(index.row());
+        if (role == Qt::EditRole) {
+            switch (index.column()) {
+            case 0: data.thread = value.value<decltype(data.thread)>(); return true;
+            case 1: data.side = value.value<decltype(data.side)>(); return true;
+            case 2: data.toolT = value.value<decltype(data.toolT)>(); return true;
+            case 3: data.tool = value.value<decltype(data.tool)>(); return true;
+            case 4: data.depth = value.value<decltype(data.depth)>(); return true;
+            case 5: data.x = value.value<decltype(data.x)>(); return true;
+            case 6: data.y = value.value<decltype(data.y)>(); return true;
+            }
+        }
+        return {};
+    }
+
+    QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
+        if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+            switch (section) {
+            case 0: return tr("Thread");
+            case 1: return tr("Side");
+            case 2: return tr("ToolT");
+            case 3: return tr("ToolD");
+            case 4: return tr("Depth, mm");
+            case 5: return tr("X, mm");
+            case 6: return tr("Y, mm");
+            }
+        }
+        return QAbstractTableModel::headerData(section, orientation, role);
+    }
+
+    Qt::ItemFlags flags(const QModelIndex& index) const override {
+        return QAbstractTableModel::flags(index) | Qt::ItemIsEditable;
+    }
+};
+
+class Delegate : public QStyledItemDelegate {
+
+public:
+    Delegate(QObject* parent)
+        : QStyledItemDelegate{parent} { }
+    ~Delegate() override = default;
+
+    // QAbstractItemDelegate interface
+
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
+        switch (index.column()) {
+        case 0: {
+            auto cbx = new QComboBox{parent};
+            for (int i{}; auto&& thread: Settings::threads)
+                cbx->addItem(thread.toStr(), i++);
+            return cbx;
+        }
+        case 1: {
+            auto cbx = new QComboBox{parent};
+            for (int i{}; auto&& side: side)
+                cbx->addItem(side, i++);
+            return cbx;
+        }
+        case 2: {
+            auto cbx = new QComboBox{parent};
+            for (auto&& [id, tool]: App::toolHolder().tools())
+                if (tool.type() == Tool::ThreadMill)
+                    cbx->addItem(tool.name(), tool.id());
+            return cbx;
+        }
+        case 3: {
+            auto cbx = new QComboBox{parent};
+            for (auto&& [id, tool]: App::toolHolder().tools())
+                if (tool.type() == Tool::EndMill || tool.type() == Tool::Drill)
+                    cbx->addItem(tool.name(), tool.id());
+            return cbx;
+        }
+        case 4:
+        case 5:
+        case 6: return new QDoubleSpinBox{parent};
+        }
+        return nullptr;
+    }
+    void setEditorData(QWidget* editor, const QModelIndex& index) const override {
+        if (auto* sbx = dynamic_cast<QDoubleSpinBox*>(editor); sbx) {
+            sbx->setDecimals(3);
+        }
+        QStyledItemDelegate::setEditorData(editor, index);
+    }
+    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
+        if (auto* sbx = dynamic_cast<QDoubleSpinBox*>(editor); sbx)
+            model->setData(index, sbx->value());
+        else if (auto* cbx = dynamic_cast<QComboBox*>(editor); cbx)
+            model->setData(index, cbx->currentData());
+
+        QStyledItemDelegate::setModelData(editor, model, index);
+    }
+};
+
 Form::Form(GCode::Plugin* plugin, QWidget* parent)
     : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::ThreadForm) {
     ui->setupUi(content);
     setWindowTitle(tr("Thread Toolpath"));
+
+    ui->tableView->setModel(new Model{ui->tableView});
+    ui->tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
+    ui->tableView->setItemDelegate(new Delegate{ui->tableView});
 
     //    MySettings settings;
     //    settings.beginGroup("Thread");
@@ -226,7 +383,7 @@ void Form::rb_clicked() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if(GiBridge::moveBrPtr)
+    if (GiBridge::moveBrPtr)
         GiBridge::moveBrPtr->setPos(pos);
 }
 

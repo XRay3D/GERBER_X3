@@ -50,6 +50,7 @@ class Form;
 
 namespace Gi {
 class Marker;
+class Pin;
 } // namespace Gi
 
 using Handlers = mvector<Shapes::Handle*>;
@@ -72,7 +73,7 @@ public:                                           \
         return app->NAME##_;                      \
     }                                             \
     static void SET(TYPE* NAME) {                 \
-        if(app->NAME##_ && NAME)                  \
+        if (app->NAME##_ && NAME)                 \
             throw std::logic_error(__FUNCTION__); \
         else                                      \
             app->NAME##_ = NAME;                  \
@@ -97,6 +98,12 @@ class App {
 
     SINGLETON(Gi::Marker,            setHome,                home            )
     SINGLETON(Gi::Marker,            setZero,                zero            )
+
+    SINGLETON(Gi::Pin,               setPin0,                pin0            )
+    SINGLETON(Gi::Pin,               setPin1,                pin1            )
+    SINGLETON(Gi::Pin,               setPin2,                pin2            )
+    SINGLETON(Gi::Pin,               setPin3,                pin3            )
+
     // clang-format on
 
     FilePluginMap filePlugins_;
@@ -119,14 +126,19 @@ class App {
 
 public:
     explicit App() {
-        if(sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
+        if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
             app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
-        else if(sharedMemory.attach(QSharedMemory::ReadOnly))
+        else if (sharedMemory.attach(QSharedMemory::ReadOnly))
             app = *reinterpret_cast<App**>(sharedMemory.data());
         else
             qDebug() << "App" << app << sharedMemory.errorString();
     }
     static auto& dashOffset() { return app->dashOffset_; }
+
+    static auto pins() {
+        static std::vector pins{&App::pin0(), &App::pin1(), &App::pin2(), &App::pin3()};
+        return pins;
+    }
 
     static bool isDebug() { return app->isDebug_; }
 

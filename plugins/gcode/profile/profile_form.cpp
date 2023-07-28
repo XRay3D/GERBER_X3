@@ -20,6 +20,15 @@
 #include "settings.h"
 #include <QMessageBox>
 #include <ranges>
+#include <unordered_set>
+
+template <>
+struct std::hash<QPointF> {
+    size_t operator()(QPointF const& p) const noexcept {
+        size_t h = (size_t)p.x() ^ (size_t)p.y();
+        return h;
+    }
+};
 
 namespace Profile {
 
@@ -38,6 +47,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
         tr("Horizontally and vertically"), // По Горизонтали и вертикали.
         tr("Through the distance"),        // Через расстояние.
         tr("Evenly around the perimeter"), // Равномерно по периметру.
+        tr("Split"),                       // Разделить на Х частей.
     });
 
     MySettings settings;
@@ -62,6 +72,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     connect(leName,               &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
     connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);
     connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &Form::onAddBridgeClicked);
+    connect(ui->pbClearBridges,   &QPushButton::clicked,         this, &Form::onAddBridgeClicked);
     connect(ui->rbClimb,          &QRadioButton::clicked,        this, &Form::rb_clicked);
     connect(ui->rbConventional,   &QRadioButton::clicked,        this, &Form::rb_clicked);
     connect(ui->rbInside,         &QRadioButton::clicked,        this, &Form::rb_clicked);
@@ -92,8 +103,8 @@ Form::~Form() {
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
-    for(QGraphicsItem* giItem: App::grView().items())
-        if(giItem->type() == Gi::Type::Bridge)
+    for (QGraphicsItem* giItem: App::grView().items())
+        if (giItem->type() == Gi::Type::Bridge)
             delete giItem;
     delete ui;
 }
@@ -101,13 +112,13 @@ Form::~Form() {
 void Form::computePaths() {
     usedItems_.clear();
     const auto tool{ui->toolHolder->tool()};
-    if(!tool.isValid()) {
+    if (!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
     auto gcp = getNewGcp();
-    if(!gcp)
+    if (!gcp)
         return;
 
     gcp->setConvent(ui->rbConventional->isChecked());
@@ -119,7 +130,7 @@ void Form::computePaths() {
     gcp->params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
     // NOTE reserve   gcp_.params[Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
 
-    if(side == GCode::On)
+    if (side == GCode::On)
         gcp->params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
     else
         gcp->params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
@@ -127,10 +138,10 @@ void Form::computePaths() {
     gcp->params[GCode::Params::GrItems].setValue(usedItems_);
 
     QPolygonF brv;
-    for(QGraphicsItem* item: App::grView().items())
-        if(item->type() == Gi::Type::Bridge)
+    for (QGraphicsItem* item: App::grView().items())
+        if (item->type() == Gi::Type::Bridge)
             brv.push_back(item->pos());
-    if(!brv.isEmpty()) {
+    if (!brv.isEmpty()) {
         // gcp_.params[GCode::Params::Bridges].fromValue(brv);
         gcp->params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
@@ -155,12 +166,17 @@ void Form::showEvent(QShowEvent* event) {
 }
 
 void Form::onAddBridgeClicked() {
+    if (sender() == ui->pbClearBridges) {
+        qDeleteAll(App::grView().items<GiBridge>());
+        return;
+    }
+
     const double value = ui->dsbxBridgeValue->value();
 
     auto addHorizontallyVertically = [this, value](BridgeAlign align) {
         auto testAndAdd = [this](QLineF testLineV, QLineF srcline) {
             QPointF intersects;
-            if(auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
+            if (auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
                 qDebug() << "intersects1" << is << intersects;
                 auto brItem = App::grView().addItem<GiBridge>();
                 //                brItem->pathHash = pathHash;
@@ -168,28 +184,30 @@ void Form::onAddBridgeClicked() {
                 brItem->setPos(brItem->snapedPos(intersects));
                 brItem->setVisible(true);
                 brItem->setOpacity(1.0);
-                if(!brItem->ok())
+                if (!brItem->ok())
                     delete brItem;
             }
         };
 
-        for(Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
+        for (Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
             auto bounds = Bounds(gi->paths());
-            int step = bounds.Width() / (value + 1);
-            for(int var: std::views::iota(1, lround(value) + 1)) {
+            int stepH = bounds.Width() / (value + 1);
+            int stepV = bounds.Height() / (value + 1);
+            for (int var: std::views::iota(1, lround(value) + 1)) {
                 QLineF testLineH{
-                    Point(bounds.left + step * var, bounds.bottom + uScale),
-                    Point(bounds.left + step * var, bounds.top - uScale)};
+                    Point(bounds.left + stepH * var, bounds.bottom + uScale),
+                    Point(bounds.left + stepH * var, bounds.top - uScale)};
                 QLineF testLineV{
-                    Point(bounds.left - uScale, bounds.top + step * var),
-                    Point(bounds.right + uScale, bounds.top + step * var)};
-                for(auto&& path: gi->paths()) {
+                    Point(bounds.left - uScale, bounds.top + stepV * var),
+                    Point(bounds.right + uScale, bounds.top + stepV * var)};
+                for (auto&& path: gi->paths()) {
                     auto pathHash = path.hash();
-                    for(int i{}; i < path.size(); ++i) {
+                    for (int i{}; i < path.size(); ++i) {
+
                         QLineF srcline{path[i], path[(i + 1) % path.size()]};
-                        if(align & Horizontally)
+                        if (align & Horizontally)
                             testAndAdd(testLineH, srcline);
-                        if(align & Vertically)
+                        if (align & Vertically)
                             testAndAdd(testLineV, srcline);
                     }
                 }
@@ -198,7 +216,7 @@ void Form::onAddBridgeClicked() {
     };
 
     auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
-    switch(at) {
+    switch (at) {
     case Manually: {
         //        GiBridge::lenght = ui->dsbxBridgeLenght->value();
         //        GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
@@ -211,12 +229,30 @@ void Form::onAddBridgeClicked() {
     case Horizontally:
     case Vertically:
     case HorizontallyVertically:
-        qDeleteAll(App::grView().items<GiBridge>());
+        // qDeleteAll(App::grView().items<GiBridge>());
         addHorizontallyVertically(at);
         break;
     case ThroughTheDistance: {
     } break;
     case EvenlyDround: {
+    } break;
+    case Split: {
+        // qDeleteAll(App::grView().items<GiBridge>());
+        std::unordered_set<QPointF> set;
+        for (Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
+            for (auto&& path: gi->paths()) {
+                if (path.size() != 2) continue;
+                QLineF srcline{path.front(), path.back()};
+                if (!set.emplace(srcline.center()).second) continue;
+                auto brItem = App::grView().addItem<GiBridge>();
+                brItem->setPos(srcline.center()); // NOTE need to collidingItems in snapedPos
+                brItem->setPos(brItem->snapedPos(srcline.center()));
+                brItem->setVisible(true);
+                brItem->setOpacity(1.0);
+                if (!brItem->ok())
+                    delete brItem;
+            }
+        }
     } break;
     default:
         break;
@@ -227,7 +263,7 @@ void Form::updateBridges() {
     GiBridge::lenght = ui->dsbxBridgeLenght->value();
     GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
     GiBridge::side = side;
-    for(GiBridge* item: App::grView().items<GiBridge>())
+    for (GiBridge* item: App::grView().items<GiBridge>())
         item->update();
 }
 
@@ -237,23 +273,23 @@ void Form::updatePixmap() {
 }
 
 void Form::rb_clicked() {
-    if(ui->rbOn->isChecked()) {
+    if (ui->rbOn->isChecked()) {
         side = GCode::On;
         ui->cbxTrimming->setText(tr("Trimming"));
         ui->cbxTrimming->setChecked(trimming_ & Trimming::Line);
-    } else if(ui->rbOutside->isChecked()) {
+    } else if (ui->rbOutside->isChecked()) {
         side = GCode::Outer;
         ui->cbxTrimming->setText(tr("Corner Trimming"));
         ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
-    } else if(ui->rbInside->isChecked()) {
+    } else if (ui->rbInside->isChecked()) {
         side = GCode::Inner;
         ui->cbxTrimming->setText(tr("Corner Trimming"));
         ui->cbxTrimming->setChecked(trimming_ & Trimming::Corner);
     }
 
-    if(ui->rbClimb->isChecked())
+    if (ui->rbClimb->isChecked())
         direction = GCode::Climb;
-    else if(ui->rbConventional->isChecked())
+    else if (ui->rbConventional->isChecked())
         direction = GCode::Conventional;
 
     updateName();
@@ -263,7 +299,7 @@ void Form::rb_clicked() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if(GiBridge::moveBrPtr)
+    if (GiBridge::moveBrPtr)
         GiBridge::moveBrPtr->setPos(pos);
 }
 

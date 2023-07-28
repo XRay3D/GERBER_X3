@@ -125,7 +125,7 @@ struct GraphicObject {
 };
 
 inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    for(auto& path: go.fill)
+    for (auto& path: go.fill)
         path = t.map(path);
     go.path = t.map(go.path);
     go.pos = t.map(go.pos);
@@ -149,12 +149,12 @@ struct Criteria {
     bool positiveOnly{}; /// NOTE
     bool test(const GraphicObject& go) const {
         bool fl{};
-        for(auto type: types)
-            if((fl = go.test(type)))
+        for (auto type: types)
+            if ((fl = go.test(type)))
                 break;
-        if(fl && !length.isNull())
+        if (fl && !length.isNull())
             fl &= length(Clipper2Lib::Length(go.path));
-        if(fl && !area.isNull())
+        if (fl && !area.isNull())
             fl &= area(Clipper2Lib::Area(go.fill));
         return fl;
     }

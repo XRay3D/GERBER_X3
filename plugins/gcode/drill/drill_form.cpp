@@ -585,6 +585,11 @@ void Form::computePaths() {
 
 void Form::updateName() { }
 
+void Form::hideEvent(QHideEvent *event) {
+    delete ui->toolTable->model();
+    event->accept();
+}
+
 void Form::editFile(GCode::File* file) { }
 
 
