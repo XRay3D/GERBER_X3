@@ -1,0 +1,381 @@
+<!DOCTYPE html>
+<!-- saved from url=(0035)http://segakhv.com/ssserg/calc5.php -->
+<html><link type="text/css" rel="stylesheet" id="dark-mode-custom-link"><link type="text/css" rel="stylesheet" id="dark-mode-general-link"><style lang="en" type="text/css" id="dark-mode-custom-style"></style><style lang="en" type="text/css" id="dark-mode-native-style"></style><head><meta http-equiv="Content-Type" content="text/html; charset=UTF-8">
+		
+		<meta name="description" content="Калькулятор внешней конической резьбы">
+		<meta name="keywords" content="Калькулятор внешней конической резьбы">
+		<meta name="author" content="SSSerg">
+		<link rel="shortcut icon" type="image/png" href="http://segakhv.com/ssserg/favicon.ico">
+		<link rel="stylesheet" type="text/css" href="./Calc5_files/style.css">
+		<script src="./Calc5_files/clipboard.js"></script>
+		<title>Calc5</title>
+		<style>
+			#left {
+			float: left; /* Обтекание по правому  краю */
+			padding-left: 10px;
+			padding-top: 50px;
+			width: 300px; /* Ширина слоя */
+			text-align: center;
+			}
+			#content_mobile {
+			float: right; /* Обтекание по левому краю */
+			padding-left: 40px;
+			width: 470px; /* Ширина слоя */
+			}
+		</style>
+		
+		<script>
+			function calc_r(form)
+			{
+				// x0   - координаты центра заготовки (default x0=0)
+				// y0   - координаты центра заготовки (default y0=0)
+				// H    - Длина резьбы
+				// m    - Внутренний диаметр резьбы
+				// M    - Внешний диаметр резьбы
+				// mh   - максимальный шаг смещения резьбофрезы при нарезке (default mh=0.1)
+				// F    - рабочая подача мм/сек (default F=300)
+				// P    - шаг резьбы (шаг резьбофрезы)
+				// D    - внешний диаметр резьбофрезы
+				// zSafe - безопасная высота перемещений над заготовкой (default zSafe=10)
+				// NN    - количество заходов для многозаходной резьбы
+				
+				// Области определения значений
+				// (M-m)/2 <= 0.86*P
+				// mh > 0
+				// F > 0
+				// m > D
+				
+				var X0 = parseFloat(form.X0.value.replace(',', '.'));
+				var Y0 = parseFloat(form.Y0.value.replace(',', '.'));
+				var H = parseFloat(form.H.value.replace(',', '.'));
+				var zSafe = parseFloat(form.zSafe.value.replace(',', '.'));
+				var M0 = parseFloat(form.M0.value.replace(',', '.'));	// M
+				var M1 = parseFloat(form.M1.value.replace(',', '.'));	// m
+				var MH = parseFloat(form.MH.value.replace(',', '.'));
+				var FR = parseFloat(form.FR.value.replace(',', '.'));
+				var P = parseFloat(form.P.value.replace(',', '.'));
+				var D = parseFloat(form.D.value.replace(',', '.'));
+				var L = parseFloat(form.L.value.replace(',', '.'));
+				var F = parseFloat(form.F.value.replace(',', '.'));
+				//var NN = parseFloat(form.NN.value.replace(',', '.'));
+				var a1 = parseFloat(form.a1.value.replace(',', '.'));
+				var a2 = parseFloat(form.a2.value.replace(',', '.'));
+				
+				var nh;         // количество шагов приращения глубины резьбы
+				var mhReal;       // расчетный шаг приращения глубины резьбы
+				var n;          // количество полных витков с округлением в большую сторону n=ceil(H/P)
+				var R;            // внешний радиус резьбонарезной фрезы
+				var chbox;
+				var UpDown;
+				var G;
+				var isLeft;
+				var dR4;
+				var F_temp;
+				
+				chbox=document.getElementById('LR');
+				UpDown=document.getElementById('Direction');
+				
+				// 3 для правой резьбы и 2 для левой
+				
+				if (!UpDown.checked)
+				{
+					if (chbox.checked) {G = "G2"; isLeft=-1;}
+					else {G = "G3"; isLeft=1;}
+				}
+				else
+				{
+					if (chbox.checked) {G = "G3"; isLeft=1;}
+					else {G = "G2"; isLeft=-1;}
+				}
+				
+				
+				if ((M0-M1)/2 > 0.86*P) {document.getElementById("GCODE").innerHTML = "Не корректный ввод диаметра резьбы или выбор фрезы"; return false;}
+				if ((M1 >= M0) || (D > M1)) {document.getElementById("GCODE").innerHTML = "Не корректный ввод диаметра резьбы"; return false;}
+				if (MH <= 0) {document.getElementById("GCODE").innerHTML = "Не корректный шаг смещения резьбы"; return false;}
+				if (F <= 0) {document.getElementById("GCODE").innerHTML = "Не корректная рабочая подача"; return false;}
+				if (H > L) {document.getElementById("GCODE").innerHTML = "Слишком большая длина стержня для выбранной фрезы"; return false;}
+				//if (NN > 20) {document.getElementById("GCODE").innerHTML = "Количество заходов должно быть меньше 20"; return false;}
+				if (F > 999) {document.getElementById("GCODE").innerHTML = "Уменьши подачу, изверг!"; return false;}
+				if (isNaN(H)) {document.getElementById("GCODE").innerHTML = "Введите H - длинну резьбы"; return false;}
+				if (isNaN(M0)) {document.getElementById("GCODE").innerHTML = "Введите M - внешний диаметр резьбы"; return false;}
+				if (isNaN(M1)) {document.getElementById("GCODE").innerHTML = "Введите m - внутренний диаметр резьбы"; return false;}
+				if (isNaN(P) || isNaN(D) || isNaN(L)) {document.getElementById("GCODE").innerHTML = "Надо выбрать фрезу"; return false;}
+				
+				dR4 = P *(a1/a2)/8;
+				nh = Math.ceil(((M0-M1)/2)/MH);
+				mhReal = ((M0-M1)/2)/nh;
+				n = Math.ceil(H/P);
+				R = D/2;
+				
+				var tempI;
+				var tempJ;
+				var tempX;
+				var tempY;
+				var x1, x2, x3;
+				var y1, y2, y3;
+				var jj=0;
+				
+
+				document.getElementById("GCODE").innerHTML = "G90" + " G91.1" + " G21"+ "<br>";
+				document.getElementById("GCODE").innerHTML += "G17" + "<br>";
+				document.getElementById("GCODE").innerHTML += "M03" + "S" + 10000 + "<br>";
+				
+				
+				
+				document.getElementById("GCODE").innerHTML += "G0Z"+zSafe+"<br>";
+				document.getElementById("GCODE").innerHTML += "G0X"+(X0+MyRound((M0/2 + R + 0.1)*Math.cos(isLeft*jj*Math.PI/4)))+"Y"+(Y0+MyRound((M0/2 + R + 0.1)*Math.sin(isLeft*jj*Math.PI/4)))+"<br>";
+				
+				
+				
+				
+				if (!UpDown.checked)
+				{
+				for (var i=1; i<=nh; i++) // режем снизу вверх
+				{
+					jj=0;
+					F_temp = Math.round(F/40);
+					document.getElementById("GCODE").innerHTML += "G1Z"+H*(-1)+"F"+F+"<br>";
+					
+					x1 = X0+MyRound(((M0/2-jj*dR4)+R-i*mhReal)*Math.cos(isLeft*jj*Math.PI/4));
+					y1 = Y0+MyRound(((M0/2-jj*dR4)+R-i*mhReal)*Math.sin(isLeft*jj*Math.PI/4));
+					document.getElementById("GCODE").innerHTML += "G1X"+ x1 +"Y"+ y1+"F"+F_temp+"<br>";
+					
+					for (var j=1; j<=n; j++)
+					{
+						
+						for (var s=1; s<=8; s++)
+						{
+						
+						if (F_temp < F)
+							{F_temp = F_temp + Math.round(F/40)}
+							else
+							{F_temp = F}
+						
+						jj++;
+						vector = M0/2-jj*dR4+R-i*mhReal;
+						x2 = X0 + MyRound(vector * Math.cos(isLeft*jj*Math.PI/4));
+						y2 = Y0 + MyRound(vector * Math.sin(isLeft*jj*Math.PI/4));
+						
+						x3 = X0 + MyRound((vector + 4*dR4)*Math.cos(isLeft*(jj+4)*Math.PI/4));
+						y3 = Y0 + MyRound((vector + 4*dR4)*Math.sin(isLeft*(jj+4)*Math.PI/4));
+						
+						tempI = MyRound(x0circle(x1,y1,x2,y2,x3,y3) - x1);
+						tempJ = MyRound(y0circle(x1,y1,x2,y2,x3,y3) - y1);
+						
+						//document.getElementById("GCODE").innerHTML += "x0=" + x0circle(x1,y1,x2,y2,x3,y3) + " y0=" + y0circle(x1,y1,x2,y2,x3,y3) + "<br>";
+						document.getElementById("GCODE").innerHTML += G+"X"+MyRound(x2)+"Y"+MyRound(y2)+"Z"+MyRound(H*(-1)+(j-1)*P+s*P/8)+"I"+tempI+"J"+tempJ+"F"+F_temp+"<br>";
+					
+						x1 = x2;
+						y1 = y2;
+						
+						}
+					
+					}
+					document.getElementById("GCODE").innerHTML += "G0X"+(X0+MyRound((M0/2 + R + 0.1)*Math.cos(isLeft*jj*Math.PI/4)))+"Y"+(Y0+MyRound((M0/2 + R + 0.1)*Math.sin(isLeft*jj*Math.PI/4)))+"<br>";
+				}
+				}
+				else
+				{
+					for (var i=1; i<=nh; i++) // режем сверху вниз
+				{
+					jj=0;
+					F_temp = Math.round(F/40);
+					document.getElementById("GCODE").innerHTML += "G1Z"+(H*(-1)+P*n)+"F"+F+"<br>";
+					
+					x1 = X0+MyRound(((M0/2-8*dR4*n)+R-i*mhReal)*Math.cos(isLeft*jj*Math.PI/4));
+					y1 = Y0+MyRound(((M0/2-8*dR4*n)+R-i*mhReal)*Math.sin(isLeft*jj*Math.PI/4));
+					document.getElementById("GCODE").innerHTML += "G1X"+x1+"Y"+y1+"F"+F_temp+"<br>";
+					for (var j=1; j<=n; j++)
+					{
+						
+						for (var s=1; s<=8; s++)
+						{
+						
+						if (F_temp < F)
+							//{F_temp = F_temp + Math.round(F/20)}
+						    {F_temp = F_temp + Math.round(F/40)}
+							else
+							{F_temp = F}
+						
+						//tempI = -MyRound(((M0/2-4*dR4*n+jj*dR4)+R-i*mhReal)*Math.cos(isLeft*jj*Math.PI/2)) - isLeft*MyRound(dR4*Math.sin(isLeft*jj*Math.PI/2));
+						//tempJ = -MyRound(((M0/2-4*dR4*n+jj*dR4)+R-i*mhReal)*Math.sin(isLeft*jj*Math.PI/2)) + isLeft*MyRound(dR4*Math.cos(isLeft*jj*Math.PI/2));
+						
+						jj++;
+						
+						
+						vector = M0/2-8*dR4*n+jj*dR4+R-i*mhReal;
+						
+						x2 = X0 + MyRound(vector*Math.cos(isLeft*jj*Math.PI/4));
+						y2 = Y0 + MyRound(vector*Math.sin(isLeft*jj*Math.PI/4));
+						
+						x3 = X0 + MyRound((vector + 2*dR4)*Math.cos(isLeft*(jj+2)*Math.PI/4));
+						y3 = Y0 + MyRound((vector + 2*dR4)*Math.sin(isLeft*(jj+2)*Math.PI/4));
+						
+						tempI = MyRound(x0circle(x1,y1,x2,y2,x3,y3) - x1);
+						tempJ = MyRound(y0circle(x1,y1,x2,y2,x3,y3) - y1);
+						
+						document.getElementById("GCODE").innerHTML += G+"X"+MyRound(x2)+"Y"+"Z"+MyRound((H*(-1)+P*n)-(j-1)*P-s*P/8)+MyRound(y2)+"I"+tempI+"J"+tempJ+"F"+F_temp+"<br>";
+						
+						x1 = x2;
+						y1 = y2;
+					
+						}
+					
+					}
+					document.getElementById("GCODE").innerHTML += "G0X"+(X0+MyRound((M0/2 + R + 0.1)*Math.cos(isLeft*jj*Math.PI/4)))+"Y"+(Y0+MyRound((M0/2 + R + 0.1)*Math.sin(isLeft*jj*Math.PI/4)))+"<br>";
+				}
+				}
+					
+					
+					
+					
+				
+				
+				document.getElementById("GCODE").innerHTML += "G0Z"+zSafe+"<br>";
+				document.getElementById("GCODE").innerHTML += "G0X0Y0"+"<br>";
+				document.getElementById("GCODE").innerHTML += "M05"+"<br>";
+				document.getElementById("GCODE").innerHTML += "M30"+"<br>";
+
+				
+			}
+			
+			function freza(form) 
+			{
+				var RForm = document.forms.rezba;
+				var FElem = RForm.elements.FR;
+				// console.log(FElem.value);
+				tsv = FElem.value.split('*');
+				RForm.P.value=tsv[1].match(/[\d.]+/)[0];
+				RForm.D.value=tsv[2].match(/[\d.]+/)[0];
+				RForm.L.value=tsv[3].match(/[\d.]+/)[0];
+			}
+			
+			function MyRound(D)
+			{
+				return Math.round(D*1000)/1000;
+			}
+			
+			
+			function x0circle(x1,y1,x2,y2,x3,y3)
+			{
+				A = x2 - x1;
+				B = y2 - y1;
+				C = x3 - x1;
+				D = y3 - y1;
+				E = A*(x1+x2)+B*(y1+y2);
+				F = C*(x1+x3)+D*(y1+y3);
+				G = 2*(A*(y3-y2)-B*(x3-x2));
+				
+				return Math.round(((D * E - B * F) / G)*1000)/1000;
+				 
+			}
+			
+			function y0circle(x1,y1,x2,y2,x3,y3)
+			{
+				A = x2 - x1;
+				B = y2 - y1;
+				C = x3 - x1;
+				D = y3 - y1;
+				E = A*(x1+x2)+B*(y1+y2);
+				F = C*(x1+x3)+D*(y1+y3);
+				G = 2*(A*(y3-y2)-B*(x3-x2));
+				
+				return Math.round(((A * F - C * E) / G)*1000)/1000;
+			
+			}
+			
+			
+			
+			
+		</script>
+		
+	</head>
+	<body>
+		<div id="body_mobile">
+			
+			
+			<h1>Генератор G-кода внешней конической резьбы</h1>
+			<h4>(12.01.2021 запущена первая версия)</h4>
+			<h4>(15.05.2021 добавлен расчет траектории сверху-вниз)</h4>
+			<h4>(16.05.2021 теперь спираль аппроксимируется дугами по 45 гр.)</h4>
+			<br>
+			<div id="left">
+				<img src="./Calc5_files/calc5.png">
+			</div>
+			
+			<div id="content_mobile">
+			<a class="button_color" href="http://segakhv.com/ssserg/donate.php" target="_blank" type="button" title="Большое спасибо!">Донат автору</a><br> 
+				<form name="rezba">
+					<p><b>Параметры резьбы</b></p>
+					<p>Координаты центра заготовки круглого сечения:</p>
+					x0 = <input name="X0" size="6" value="0.000">  y0 = <input name="Y0" size="6" value="0.000">
+					<p>Длина резьбы и безопасная высота:</p>
+					H = <input name="H" size="6" value="">  zSafe = <input name="zSafe" size="6" value="10">
+					<p>Внешний диаметр резьбы и внутренний:</p>
+					M = <input name="M0" size="6" value="">  m = <input name="M1" size="6" value="">
+					<p>Шаг смещения и уклон (вида 1/32):</p>
+					mh = <input name="MH" size="6" value="0.1">  a = <input name="a1" size="3" value="1">/<input name="a2" size="3" value="32">
+					<p><b>Параметры фрезы</b></p>
+					Выбрать фрезу
+					<select name="FR" onchange="freza();">
+					<option disabled="" selected="" value="Фреза">Фреза</option>
+						<option>M3*P0.5*d2.35*7.5L*D4*50</option>
+						<option>M4*P0.7*d3.15*10L*D4*50</option>
+						<option>M6*P1.0*d4.85*15L*D6*50</option>
+						<option>M8*P1.25*d6.0*20L*D6*60</option>
+						<option>-------0*0*0*0---------</option>
+						<option>M0.8*P0.2*d0.55*L1.5*D4*50</option>
+						<option>M0.9*P0.225*d0.625*L1.8*D4*50</option>
+						<option>M1.0*P0.25*d0.7*L3.5*D4*50</option>
+						<option>M1.2*P0.25*d0.9*L3.8*D4*50</option>
+						<option>M1.4*P0.3*d1.05*L4*D4*50</option>
+						<option>M1.6*P0.35*d1.2*L4.5*D4*40</option>
+						<option>M2.0*P0.4*d1.55*L6*D4*50</option>
+						<option>M2.5*P0.45*d1.96*L6.5*D4*50</option>
+						<option>M3*P0.5*d2.35*L8*D4*50</option>
+						<option>M4*P0.7*d3.15*L10*D4*50</option>
+						<option>M5*P0.8*d3.9*L12*D4*50</option>
+						<option>M6*P1.0*d4.0*L13*D6*50</option>
+						<option>M6*P1.0*d4.8*L15*D6*50</option>
+						<option>M8*P1.25*d6*L20*D6*60</option>
+						<option>M10*P1.5*d7.7*L25*D8*60</option>
+						<option>M12*P1.75*d9.6*L30*D10*75</option>
+						<option>M14*P2.0*d10*L36*D10*75</option>
+						<option>M18*P2.5*d12*L38*D12*75</option>
+					</select>
+					<p>Шаг резьбы, диаметр и длина фрезы:</p>
+					P = <input name="P" size="6" value="">  D = <input name="D" size="6" value="">  L = <input name="L" size="6" value="">
+					<p>Рабочая подача: F = <input name="F" size="6" value="150"></p>
+					Левая резьба <input type="checkbox" id="LR">  Сверху вниз <input type="checkbox" id="Direction">
+					<br><br>
+					<input name="Button" onclick="calc_r(this.form)" value="Считать " type="button"><br>
+				</form>
+			</div>
+			<div style=" width:100%; height:1px; clear:both;"> </div>
+			<button class="button" id="copy-button" data-clipboard-target="#GCODE">Скопировать G-Code</button>
+			<div class="GCODE" id="GCODE"></div>
+		</div>
+		<script>
+			var clipboard = new ClipboardJS('#copy-button');
+			
+			clipboard.on('success', function(event) {
+				// убираем выделение
+				event.clearSelection();
+				// изменяем текст триггера на Скопировано
+				event.trigger.textContent = 'G-Code скопирован в буфер обмена';
+				// Возращаем через 3 секунды текст триггеру на Копировать 
+				window.setTimeout(function() {
+					event.trigger.textContent = 'Скопировать G-Code';
+				}, 3000);
+			});
+			// если копирование завершилось с ошибкой
+			clipboard.on('error', function(event) {
+				// изменяем текст кнопки 
+				event.trigger.textContent = 'Нажмите "Ctrl + C" для копирования';
+				// через 3 секунды возвращаем кнопки текст "Копировать"
+				window.setTimeout(function() {
+					event.trigger.textContent = 'Скопировать G-Code';
+				}, 3000);
+			});
+		</script>
+																																																																																																																				</body></html>

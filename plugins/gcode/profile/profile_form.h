@@ -64,6 +64,7 @@ private:
         HorizontallyVertically,
         ThroughTheDistance,
         EvenlyDround,
+        Split,
     };
 
     void updateBridgePos(QPointF pos);

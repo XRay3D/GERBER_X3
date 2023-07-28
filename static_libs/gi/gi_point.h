@@ -63,13 +63,12 @@ public:
     QPainterPath shape() const override;
     int type() const override;
 
-    static auto pins() { return std::span(pins_, 4); }
     static void setPinsPos(QPointF pos[4]);
 
-    static double minX() { return qMin(pins_[0]->pos().x(), pins_[1]->pos().x()); }
-    static double maxX() { return std::max(pins_[0]->pos().x(), pins_[1]->pos().x()); }
-    static double minY() { return qMin(pins_[0]->pos().y(), pins_[2]->pos().y()); }
-    static double maxY() { return std::max(pins_[0]->pos().y(), pins_[2]->pos().y()); }
+    static double minX() { return qMin(App::pin0().x(), App::pin1().x()); }
+    static double maxX() { return std::max(App::pin0().x(), App::pin1().x()); }
+    static double minY() { return qMin(App::pin0().y(), App::pin2().y()); }
+    static double maxY() { return std::max(App::pin0().y(), App::pin2().y()); }
 
     static void resetPos(bool fl = true);
     static void setPos(const QPointF pos[4]);
@@ -82,8 +81,7 @@ private:
     QRectF rect_;
     QPointF lastPos_;
     const uint index_;
-    static inline Pin* pins_[4];
-    static inline int ctr_ = 0;
+    static inline int ctr_;
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
