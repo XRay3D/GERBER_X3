@@ -106,14 +106,14 @@ public:
             Tab(QWidget* parent)
                 : AbstractFileSettings{parent} {
                 setWindowTitle(tr("Profile"));
-                auto lbl = new QLabel(QApplication::translate("Profile", "Milling sequence:", nullptr), this);
+                auto lbl = new QLabel{QApplication::translate("Profile", "Milling sequence:", nullptr), this};
 
-                cbxProfileSort = new QComboBox(this);
+                cbxProfileSort = new QComboBox{this};
                 cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting"));
                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting depth"));
 
-                auto layout = new QVBoxLayout(this);
+                auto layout = new QVBoxLayout{this};
                 layout->setContentsMargins(6, 6, 6, 6);
                 layout->addWidget(lbl);
                 layout->addWidget(cbxProfileSort);
@@ -127,7 +127,7 @@ public:
                 Profile::settings.sort = settings.setValue(cbxProfileSort);
             }
         };
-        return new Tab(parent);
+        return new Tab{parent};
     }
 };
 

@@ -80,7 +80,7 @@ AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<Fi
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'E'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
-    auto tab = new ExSettingsTab(parent);
+    auto tab = new ExSettingsTab{parent};
     tab->setWindowTitle("Excellon");
     return tab;
 }

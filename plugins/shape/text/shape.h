@@ -107,7 +107,7 @@ public:
     uint32_t type() const override { return Gi::Type::ShText; }
     QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape(point);
+        auto shape = new Shape{point};
         editor_.addShape(shape);
         return shape;
     }

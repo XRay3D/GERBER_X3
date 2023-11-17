@@ -92,7 +92,7 @@ void DataFill::setPaths(Paths paths, int alternate) {
 }
 
 void DataFill::changeColor() {
-    //    auto animation = new QPropertyAnimation(this, "bodyColor");
+    //    auto animation = new QPropertyAnimation{this, "bodyColor"};
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);
     //    animation.setStartValue(bodyColor_);

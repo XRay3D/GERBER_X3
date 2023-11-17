@@ -106,11 +106,11 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         dialog->setObjectName(QString::fromUtf8("dialog"));
         dialog->resize(600, 600);
         // Dialog->resize(400, 300);
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+        QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        QTextBrowser* textBrowser = new QTextBrowser(dialog);
+        QTextBrowser* textBrowser = new QTextBrowser{dialog};
         textBrowser->setFont(QFont("JetBrains Mono"));
-        new SyntaxHighlighter(textBrowser->document());
+        new SyntaxHighlighter{textBrowser->document()};
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
         for(const QString& str: file->lines())
@@ -121,7 +121,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addSeparator();
     if(!FormatDialog::showed())
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
-            (new FormatDialog(file))->show();
+            (new FormatDialog{file})->show();
         });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);

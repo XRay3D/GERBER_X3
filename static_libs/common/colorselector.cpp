@@ -73,20 +73,20 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
     , defaultColor_(defaultColor) {
     if(objectName().isEmpty())
         setObjectName(QString::fromUtf8("ColorSelector"));
-    auto horizontalLayout = new QHBoxLayout(this);
+    auto horizontalLayout = new QHBoxLayout{this};
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
 
-    lineEdit = new QLineEdit(this);
+    lineEdit = new QLineEdit{this};
     lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
     lineEdit->setReadOnly(true);
     horizontalLayout->addWidget(lineEdit);
 
-    pbSelectColor = new PushButton(color, this);
+    pbSelectColor = new PushButton{color, this};
     pbSelectColor->setObjectName(QString::fromUtf8("pbSelectColor"));
     horizontalLayout->addWidget(pbSelectColor);
 
-    pbResetColor = new QPushButton(tr("Reset"), this);
+    pbResetColor = new QPushButton{tr("Reset"), this};
     pbResetColor->setObjectName(QString::fromUtf8("pbResetColor"));
     horizontalLayout->addWidget(pbResetColor);
     horizontalLayout->setStretch(1, 1);

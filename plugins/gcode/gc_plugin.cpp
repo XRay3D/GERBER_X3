@@ -59,7 +59,7 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
 }
 
 // AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
-//    auto tab = new Tab(parent);
+//    auto tab = new Tab{parent};
 //    tab->setWindowTitle("G-Code");
 //    return tab;
 //}

@@ -92,12 +92,12 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
         ToolSelectorForm->setObjectName(QString::fromUtf8("ToolSelectorForm"));
     ToolSelectorForm->resize(236, 180);
 
-    auto gridLayout = new QGridLayout(ToolSelectorForm);
+    auto gridLayout = new QGridLayout{ToolSelectorForm};
     gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
     gridLayout->setContentsMargins(0, 0, 0, 0);
 
     {
-        label_ = new QLabel(ToolSelectorForm);
+        label_ = new QLabel{ToolSelectorForm};
         label_->setObjectName(QString::fromUtf8("label"));
 
         {
@@ -120,11 +120,11 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
         auto horizontalLayout = new QHBoxLayout();
         horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
 
-        lblPixmap = new QLabel(ToolSelectorForm);
+        lblPixmap = new QLabel{ToolSelectorForm};
         lblPixmap->setObjectName(QString::fromUtf8("lblPixmap"));
         horizontalLayout->addWidget(lblPixmap);
 
-        lblName = new QLabel(ToolSelectorForm);
+        lblName = new QLabel{ToolSelectorForm};
         lblName->setObjectName(QString::fromUtf8("lblName"));
         horizontalLayout->addWidget(lblName);
 
@@ -132,14 +132,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
         gridLayout->addLayout(horizontalLayout, 0, 1, 1, 2);
     }
     {
-        pbSelect = new QPushButton(ToolSelectorForm);
+        pbSelect = new QPushButton{ToolSelectorForm};
         pbSelect->setObjectName(QString::fromUtf8("pbSelect"));
         pbSelect->setIcon(QIcon::fromTheme("view-form"));
         gridLayout->addWidget(pbSelect, 1, 1, 1, 1);
     }
 
     {
-        pbEdit = new QPushButton(ToolSelectorForm);
+        pbEdit = new QPushButton{ToolSelectorForm};
         pbEdit->setObjectName(QString::fromUtf8("pbEdit"));
         pbEdit->setIcon(QIcon::fromTheme("document-edit"));
         gridLayout->addWidget(pbEdit, 1, 2, 1, 1);

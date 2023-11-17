@@ -33,7 +33,7 @@ sView::~sView() {
 }
 
 void sView::setFile(int fileId) {
-    setModel(new sModel(fileId, this));
+    setModel(new sModel{fileId, this});
     expandAll();
 
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, [this](const QItemSelection& selected, const QItemSelection& deselected) {

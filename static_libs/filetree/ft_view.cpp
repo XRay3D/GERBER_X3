@@ -144,9 +144,9 @@ void View::setModel(QAbstractItemModel* model) {
     header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, "123456789").width()); // ~6 символов и ...
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
-    setItemDelegateForColumn(0, new TextDelegate(this));
-    setItemDelegateForColumn(1, new SideDelegate(this));
-    setItemDelegateForColumn(2, new TypeDelegate(this));
+    setItemDelegateForColumn(0, new TextDelegate{this});
+    setItemDelegateForColumn(1, new SideDelegate{this});
+    setItemDelegateForColumn(2, new TypeDelegate{this});
 
     setIconSize(QSize(24, 24));
 }

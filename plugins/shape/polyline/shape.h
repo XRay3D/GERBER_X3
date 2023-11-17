@@ -56,7 +56,7 @@ public:
     uint32_t type() const override { return Gi::Type::ShPolyLine; }
     QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape(point, point + QPointF{5, 5});
+        auto shape = new Shape{point, point + QPointF{5, 5}};
         editor_.addShape(shape);
         return shape;
     }

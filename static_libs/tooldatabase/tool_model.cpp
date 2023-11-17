@@ -204,9 +204,9 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
                 parentItem = rootItem;
             insertRows(beginRow, list.size(), parent);
             if(parentItem->childCount() > beginRow)
-                parentItem->setChild(beginRow, new ToolItem(*copyItem));
+                parentItem->setChild(beginRow, new ToolItem{*copyItem});
             else
-                parentItem->setChild(parentItem->childCount() - 1, new ToolItem(*copyItem));
+                parentItem->setChild(parentItem->childCount() - 1, new ToolItem{*copyItem});
         }
         ++beginRow;
     }
@@ -315,7 +315,7 @@ void ToolModel::loadTools() {
         ToolItem* parent = parentsStack.last();
         ToolItem* item;
         if(json["tool"].toBool())
-            item = new ToolItem(json["id"].toInt());
+            item = new ToolItem{json["id"].toInt()};
         else {
             item = new ToolItem();
             item->setName(json["name"].toString());

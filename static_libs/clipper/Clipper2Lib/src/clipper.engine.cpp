@@ -254,7 +254,7 @@ inline int PointCount(OutPt* op) {
 }
 
 inline OutPt* InsertOp(const Point64& pt, OutPt* insertAfter) {
-    OutPt* result = new OutPt(pt, insertAfter->outrec);
+    OutPt* result = new OutPt{pt, insertAfter->outrec};
     result->next = insertAfter->next;
     insertAfter->next->prev = result;
     insertAfter->next = result;
@@ -643,7 +643,7 @@ void ClipperBase::AddLocMin(Vertex& vert, PathType polytype, bool is_open) {
         return;
 
     vert.flags = (vert.flags | VertexFlags::LocalMin);
-    minima_list_.push_back(new LocalMinima(&vert, polytype, is_open));
+    minima_list_.push_back(new LocalMinima{&vert, polytype, is_open});
 }
 
 bool ClipperBase::IsContributingClosed(const Active& e) const {
@@ -1061,7 +1061,7 @@ OutPt* ClipperBase::AddLocalMinPoly(Active& e1, Active& e2,
         }
     }
 
-    OutPt* op = new OutPt(pt, outrec);
+    OutPt* op = new OutPt{pt, outrec};
     outrec->pts = op;
     return op;
 }
@@ -1169,7 +1169,7 @@ OutPt* ClipperBase::AddOutPt(const Active& e, const Point64& pt) {
     } else if(pt == op_back->pt)
         return op_back;
 
-    new_op = new OutPt(pt, outrec);
+    new_op = new OutPt{pt, outrec};
     op_back->prev = new_op;
     new_op->prev = op_front;
     new_op->next = op_back;
@@ -1255,7 +1255,7 @@ void ClipperBase::DoSplitOp(OutRec* outrec, OutPt* splitOp) {
         nextNextOp->prev = prevOp;
         prevOp->next = nextNextOp;
     } else {
-        OutPt* newOp2 = new OutPt(ip, prevOp->outrec);
+        OutPt* newOp2 = new OutPt{ip, prevOp->outrec};
         newOp2->prev = prevOp;
         newOp2->next = nextNextOp;
         nextNextOp->prev = newOp2;
@@ -1274,7 +1274,7 @@ void ClipperBase::DoSplitOp(OutRec* outrec, OutPt* splitOp) {
         splitOp->outrec = newOutRec;
         splitOp->next->outrec = newOutRec;
 
-        OutPt* newOp = new OutPt(ip, newOutRec);
+        OutPt* newOp = new OutPt{ip, newOutRec};
         newOp->prev = splitOp->next;
         newOp->next = splitOp;
         newOutRec->pts = newOp;
@@ -1396,7 +1396,7 @@ OutPt* ClipperBase::StartOpenPath(Active& e, const Point64& pt) {
 
     e.outrec = outrec;
 
-    OutPt* op = new OutPt(pt, outrec);
+    OutPt* op = new OutPt{pt, outrec};
     outrec->pts = op;
     return op;
 }
@@ -2228,7 +2228,7 @@ bool ClipperBase::OutPtInTrialHorzList(OutPt* op) {
 void ClipperBase::AddTrialHorzJoin(OutPt* op) {
     // make sure 'op' isn't added more than once
     if(!op->outrec->is_open && !OutPtInTrialHorzList(op))
-        horz_joiners_ = new Joiner(op, nullptr, horz_joiners_);
+        horz_joiners_ = new Joiner{op, nullptr, horz_joiners_};
 }
 
 Joiner* FindTrialJoinParent(Joiner*& joiner, const OutPt* op) {
@@ -2423,7 +2423,7 @@ void ClipperBase::AddJoin(OutPt* op1, OutPt* op2) {
            ((op1->next == op2) && (op1 != op1->outrec->pts)) || ((op2->next == op1) && (op2 != op1->outrec->pts))))
         return;
 
-    Joiner* j = new Joiner(op1, op2, nullptr);
+    Joiner* j = new Joiner{op1, op2, nullptr};
     j->idx = static_cast<int>(joiner_list_.size());
     joiner_list_.push_back(j);
 }

@@ -102,13 +102,13 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     resize(600, 600);
     setWindowTitle(windowTitle);
 
-    auto textBrowser = new QTextBrowser(this);
+    auto textBrowser = new QTextBrowser{this};
     textBrowser->setFontFamily("JetBrains Mono");
     textBrowser->setFontPointSize(16);
-    new Highlighter(textBrowser->document());
+    new Highlighter{textBrowser->document()};
     textBrowser->setPlainText(text);
 
-    auto verticalLayout = new QVBoxLayout(this);
+    auto verticalLayout = new QVBoxLayout{this};
     verticalLayout->setContentsMargins(6, 6, 6, 6);
     verticalLayout->addWidget(textBrowser);
 }

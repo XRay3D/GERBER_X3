@@ -28,7 +28,7 @@ using TreeItem = Node;
 
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new FolderNode("rootItem"))
+    , rootItem(new FolderNode{"rootItem"})
     , mimeType(QStringLiteral("application/GCodeItem")) {
     App::setFileModel(this);
 }
@@ -57,7 +57,7 @@ void Model::addFile(AbstractFile* file) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = new FolderNode(App::filePlugin(type)->folderName(), type);
+            itemFolder = new FolderNode{App::filePlugin(type)->folderName(), static_cast<int32_t>(type)};
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
@@ -71,7 +71,7 @@ void Model::addFile(AbstractFile* file) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = new FolderNode(tr("GCode"), type);
+            itemFolder = new FolderNode{tr("GCode"), static_cast<int32_t>(type)};
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
@@ -83,7 +83,7 @@ void Model::addFile(AbstractFile* file) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = new FolderNode("GCode Debug", type);
+            itemFolder = new FolderNode{"GCode Debug", static_cast<int32_t>(type)};
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
@@ -103,7 +103,7 @@ void Model::addShape(Shapes::AbstractShape* shape) {
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         auto si = App::shapePlugins().begin()->second;
-        itemFolder = new FolderNode(si->folderName(), type);
+        itemFolder = new FolderNode{si->folderName(), type};
         rootItem->addChild(itemFolder);
         endInsertRows();
     }
@@ -112,6 +112,7 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     int rowCount = itemFolder->childCount();
     beginInsertRows(index, rowCount, rowCount);
     itemFolder->addChild(shape); //, Node::DontDelete);
+
     endInsertRows();
     // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }
@@ -127,7 +128,7 @@ void Model::addItem(Gi::Item* item) {
         int rowCount = rootItem->childCount();
         beginInsertRows(index, rowCount, rowCount);
         auto si = App::shapePlugins().begin()->second;
-        itemFolder = new FolderNode(si->folderName(), type);
+        itemFolder = new FolderNode{si->folderName(), static_cast<int32_t>(type)};
         rootItem->addChild(itemFolder);
         endInsertRows();
     }
@@ -136,7 +137,7 @@ void Model::addItem(Gi::Item* item) {
     int rowCount = itemFolder->childCount();
     beginInsertRows(index, rowCount, rowCount);
 
-    auto node = new ItemNode(item);
+    auto node = new ItemNode{item};
 
     itemFolder->addChild(node);
     endInsertRows();

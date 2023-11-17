@@ -163,7 +163,7 @@ ItemsTypeDelegate::ItemsTypeDelegate(QObject* parent)
 }
 
 QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    auto* comboBox = new QComboBox(parent);
+    auto* comboBox = new QComboBox{parent};
     comboBox->addItems({DxfObj::tr("Solid"), DxfObj::tr("Paths")});
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);

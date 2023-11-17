@@ -43,7 +43,7 @@ void Creator::create() {
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
 
-        file_ = new File(std::move(gcp_), {sortBeginEnd(returnPs)}, {});
+        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs)}, {}};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
@@ -75,7 +75,7 @@ void Creator::create() {
             else
                 ++begin;
         
-        file_ = new File(std::move(gcp_), std::move(returnPss), std::move(openSrcPaths));
+        file_ = new File{std::move(gcp_), std::move(returnPss), std::move(openSrcPaths)};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
@@ -171,7 +171,7 @@ void File::genGcodeAndTile() {
 void File::createGi() {
     if(toolPathss_.size() > 1) {
         Gi::Item* item;
-        item = new Gi::GcPath(toolPathss_.back().back(), this);
+        item = new Gi::GcPath{toolPathss_.back().back(), this};
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);

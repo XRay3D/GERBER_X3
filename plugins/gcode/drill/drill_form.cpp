@@ -173,9 +173,9 @@ void Form::initToolTable() {
     auto cornerButton = ui->toolTable->findChild<QAbstractButton*>();
     if(!cornerButton)
         exit(-67);
-    header = new Header(Qt::Vertical, ui->toolTable);
+    header = new Header{Qt::Vertical, ui->toolTable};
     ui->toolTable->setVerticalHeader(header);
-    checkBox = new QCheckBox(cornerButton);
+    checkBox = new QCheckBox{cornerButton};
     checkBox->setFocusPolicy(Qt::NoFocus);
     checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
     connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
@@ -214,7 +214,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
         for(auto& var: gos)
             map[Key{var.name, var.path.size() > 1}].emplace_back(&var);
 
-        model = new Model(map.size(), ui->toolTable);
+        model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
         QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
@@ -227,12 +227,12 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.diameter = std::any_cast<double>(val.front()->raw);
             row.isSlot = key.second;
             for(auto* go: val)
-                new GiPreview(
+                new GiPreview{
                     (go->path.size() > 1 ? Path{go->path} : Path{go->pos}),
                     row.diameter,
                     data.back().toolId,
                     row,
-                    go->fill);
+                    go->fill};
         }
 
         App::grView().scene()->update();
@@ -457,7 +457,7 @@ void Form::computePaths() {
         for(auto [usedToolId, _]: pathsMap) {
             (void)_;
             if(pathsMap[usedToolId].paths.size()) {
-                // GCode::File* gcode = new GCode::File({App::toolHolder().tool(usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
+                // GCode::File* gcode = new GCode::File({App::toolHolder().tool{usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
                 // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
                 // gcode->setSide(file->side());
                 // App::project().addFile(gcode);
@@ -544,7 +544,7 @@ void Form::computePaths() {
                         point1 = val.drillPath[counter++];
                     }
                 }
-                GCode::File* gcode = new File({App::toolHolder().tool(toolId), dsbxDepth->value()}, {{val.drillPath}});
+                GCode::File* gcode = new File{{App::toolHolder().tool(toolId), dsbxDepth->value()}, {{val.drillPath}}};
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + /*type_ +*/ indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project().addFile(gcode);

@@ -18,10 +18,10 @@
 
 ToolName::ToolName(QWidget* parent)
     : QWidget(parent) {
-    QHBoxLayout* l = new QHBoxLayout(this);
-    lblPixmap = new QLabel(this);
+    QHBoxLayout* l = new QHBoxLayout{this};
+    lblPixmap = new QLabel{this};
     l->addWidget(lblPixmap);
-    lblName = new QLabel(this);
+    lblName = new QLabel{this};
     lblName->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     l->addWidget(lblName);
     l->setContentsMargins(0, 0, 0, 0);

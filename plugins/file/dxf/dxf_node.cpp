@@ -35,17 +35,17 @@ class Dialog : public QDialog {
     void setupUi(QDialog* dialog) {
         if(dialog->objectName().isEmpty())
             dialog->setObjectName(QString::fromUtf8("Dialog"));
-        verticalLayout = new QVBoxLayout(dialog);
+        verticalLayout = new QVBoxLayout{dialog};
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         verticalLayout->setContentsMargins(6, 6, 6, 6);
 
-        pushButtonColorize = new QPushButton(dialog);
+        pushButtonColorize = new QPushButton{dialog};
         pushButtonColorize->setObjectName(QString::fromUtf8("pushButtonColorize"));
         pushButtonColorize->setText(DxfObj::tr("Colorize"));
         pushButtonColorize->setIcon(QIcon::fromTheme("color-management"));
         verticalLayout->addWidget(pushButtonColorize);
 
-        tableView = new QTableView(dialog);
+        tableView = new QTableView{dialog};
         tableView->setObjectName(QString::fromUtf8("tableView"));
         verticalLayout->addWidget(tableView);
 
@@ -62,11 +62,11 @@ public:
 
         setWindowTitle(file->shortName());
 
-        tableView->setModel(new LayerModel(file->layers(), tableView));
+        tableView->setModel(new LayerModel{file->layers(), tableView});
         tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         tableView->horizontalHeader()->setSectionResizeMode(LayerModel::Type, QHeaderView::Stretch);
         tableView->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
-        tableView->setItemDelegateForColumn(LayerModel::Type, new ItemsTypeDelegate(tableView));
+        tableView->setItemDelegateForColumn(LayerModel::Type, new ItemsTypeDelegate{tableView});
 
         QStringList names(keys(file->layers()));
         std::map<QString, QColor> colors;
@@ -127,12 +127,14 @@ public:
         auto iPar = file->header().cbegin();
         QList<QTreeWidgetItem*> items;
         while(iPar != file->header().cend()) {
-            items.append(new QTreeWidgetItem((QTreeWidget*)0, QStringList(iPar->first)));
+            items.append(new QTreeWidgetItem{static_cast<QTreeWidget*>(nullptr), QStringList(iPar->first)});
             {
                 auto iVal = iPar->second.cbegin();
                 while(iVal != iPar->second.cend()) {
-                    items.last()->addChild(new QTreeWidgetItem(static_cast<QTreeWidget*>(nullptr),
-                        {QString::number(iVal->first), iVal->second.toString()}));
+                    items.last()->addChild(new QTreeWidgetItem{
+                        static_cast<QTreeWidget*>(nullptr),
+                        {QString::number(iVal->first), iVal->second.toString()}
+                    });
                     ++iVal;
                 }
             }
@@ -254,7 +256,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
-        auto dialog = new SourceDialog(id(), tv);
+        auto dialog = new SourceDialog{id(), tv};
         dialog->exec();
         delete dialog;
     });
@@ -273,12 +275,12 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addSeparator();
     if(layer)
         menu.addAction(QIcon::fromTheme("layer-visible-on"), DxfObj::tr("&Layers"), [tv, this] {
-            auto dialog = new Dialog(static_cast<File*>(file), layer, tv);
+            auto dialog = new Dialog{static_cast<File*>(file), layer, tv};
             dialog->show();
         });
     if(header)
         menu.addAction(QIcon::fromTheme("/*document-close*/"), DxfObj::tr("Header"), [tv, this] {
-            auto tw = new TreeWidget(static_cast<File*>(file), header, tv);
+            auto tw = new TreeWidget{static_cast<File*>(file), header, tv};
             tw->show();
         });
 
@@ -381,6 +383,8 @@ void NodeLayer::menu(QMenu& menu, FileTree::View* tv) {
     });
 }
 
-int NodeLayer::id() const { return layer->file()->id(); }
+int NodeLayer::id() const {
+    return layer->file()->id();
+}
 
 } // namespace Dxf

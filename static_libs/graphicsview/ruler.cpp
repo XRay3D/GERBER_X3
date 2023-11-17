@@ -30,7 +30,7 @@
 #include <cstring>
 
 static QLabel* createDragLabel(const QString& text, QWidget* parent) {
-    QLabel* label = new QLabel(text, parent);
+    QLabel* label = new QLabel{text, parent};
     label->setAutoFillBackground(true);
     label->setFrameShape(QFrame::Panel);
     label->setFrameShadow(QFrame::Raised);
@@ -235,7 +235,7 @@ void Ruler::mousePressEvent(QMouseEvent* event) {
     QPixmap pixmapIcon{Breadth, Breadth};
     pixmapIcon.fill(Qt::Horizontal == orientation_ ? Qt::red : Qt::green);
 
-    QDrag* drag = new QDrag(this);
+    QDrag* drag = new QDrag{this};
     drag->setMimeData(mimeData);
     drag->setPixmap(pixmapIcon);
     drag->setHotSpot(pixmapIcon.rect().center());

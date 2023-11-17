@@ -57,8 +57,8 @@ MainWindow::MainWindow(QWidget* parent)
     ui.setupUi(this);
 
     LayoutFrames* lfp;
-    ui.grView->scene()->addItem(new Gi::Marker(Gi::Marker::Home));
-    ui.grView->scene()->addItem(new Gi::Marker(Gi::Marker::Zero));
+    ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Home});
+    ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Zero});
 
     App::setPin0(new Gi::Pin);
     App::setPin1(new Gi::Pin);
@@ -84,7 +84,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     parserThread.start(QThread::HighestPriority);
 
-    ui.treeView->setModel(new FileTree::Model(ui.treeView));
+    ui.treeView->setModel(new FileTree::Model{ui.treeView});
 
     connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
     connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
@@ -158,7 +158,7 @@ void MainWindow::initWidgets() {
 }
 
 void MainWindow::createActions() {
-    dockWidget_ = new QDockWidget(this);
+    dockWidget_ = new QDockWidget{this};
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     // dockWidget_->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     dockWidget_->setObjectName(QStringLiteral("dwCreatePath"));
@@ -267,7 +267,7 @@ void MainWindow::createActionsEdit() {
     action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
-    auto dsaShortcut = new QShortcut(this);                                      // Инициализируем объект
+    auto dsaShortcut = new QShortcut{this};                                      // Инициализируем объект
     dsaShortcut->setKey(Qt::Key_Escape);                                         // Устанавливаем код клавиши
     connect(dsaShortcut, &QShortcut::activated, this, &MainWindow::deSelectAll); // цепляем обработчик нажатия клавиши
 
@@ -759,7 +759,7 @@ void MainWindow::renderPdf() {
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value) {
     if(max && !value) {
-        QProgressDialog* pd = new QProgressDialog(this);
+        QProgressDialog* pd = new QProgressDialog{this};
         pd->setCancelButton(nullptr);
         pd->setLabelText(fileName);
         pd->setMaximum(max);
@@ -782,16 +782,16 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
     static QTextBrowser* textBrowser;
 
     if(!fileErrordialog) {
-        fileErrordialog = new QDialog(this);
+        fileErrordialog = new QDialog{this};
         fileErrordialog->setObjectName(QString::fromUtf8("dialog"));
         fileErrordialog->setWindowTitle(tr("File open errors"));
 
         fileErrordialog->resize(600, 600);
 
-        auto verticalLayout = new QVBoxLayout(fileErrordialog);
+        auto verticalLayout = new QVBoxLayout{fileErrordialog};
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
 
-        textBrowser = new QTextBrowser(fileErrordialog);
+        textBrowser = new QTextBrowser{fileErrordialog};
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
 
         verticalLayout->addWidget(textBrowser);
@@ -1024,13 +1024,13 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     MainWindow->resize(1600, 1000);
     MainWindow->setWindowTitle(QString::fromUtf8("[*] GGEasy"));
     MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
-    centralwidget = new QWidget(MainWindow);
+    centralwidget = new QWidget{MainWindow};
     centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-    horizontalLayout = new QHBoxLayout(centralwidget);
+    horizontalLayout = new QHBoxLayout{centralwidget};
     horizontalLayout->setSpacing(0);
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
     horizontalLayout->setContentsMargins(3, 3, 3, 3);
-    grView = new GraphicsView(centralwidget);
+    grView = new GraphicsView{centralwidget};
     grView->setObjectName(QString::fromUtf8("grView"));
     grView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     grView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
@@ -1038,25 +1038,25 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     horizontalLayout->addWidget(grView);
 
     MainWindow->setCentralWidget(centralwidget);
-    menubar = new QMenuBar(MainWindow);
+    menubar = new QMenuBar{MainWindow};
     menubar->setObjectName(QString::fromUtf8("menubar"));
     menubar->setGeometry(QRect(0, 0, 1600, 26));
     MainWindow->setMenuBar(menubar);
-    statusbar = new QStatusBar(MainWindow);
+    statusbar = new QStatusBar{MainWindow};
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     MainWindow->setStatusBar(statusbar);
-    treeDockWidget = new QDockWidget(MainWindow);
+    treeDockWidget = new QDockWidget{MainWindow};
     treeDockWidget->setObjectName(QString::fromUtf8("treeDockWidget"));
     treeDockWidget->setMinimumSize(QSize(100, 119));
     treeDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     treeDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     widget = new QWidget();
     widget->setObjectName(QString::fromUtf8("widget"));
-    verticalLayout = new QVBoxLayout(widget);
+    verticalLayout = new QVBoxLayout{widget};
     verticalLayout->setSpacing(6);
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     verticalLayout->setContentsMargins(3, 3, 3, 3);
-    treeView = new FileTree::View(widget);
+    treeView = new FileTree::View{widget};
     treeView->setObjectName(QString::fromUtf8("treeView"));
     treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 

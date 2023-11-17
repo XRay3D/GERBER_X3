@@ -29,13 +29,13 @@ QIcon Model::repaint(QColor color, const QIcon& icon) const {
 
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new Node(this)) {
+    , rootItem(new Node{this}) {
 }
 
 Model::~Model() { delete rootItem; }
 
 Node* Model::appendRow(const QIcon& icon, const QString& name, const ThParam& par) {
-    data_.push_back(new Node(icon, name, par, this));
+    data_.push_back(new Node{icon, name, par, this});
     rootItem->append(data_.back());
     return data_.back();
 }

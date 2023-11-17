@@ -154,12 +154,12 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         dialog->setObjectName(QString::fromUtf8("dialog"));
         dialog->resize(800, 600);
 
-        QTextBrowser* textBrowser = new QTextBrowser(dialog);
+        QTextBrowser* textBrowser = new QTextBrowser{dialog};
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         textBrowser->setFontFamily("JetBrains Mono");
         textBrowser->setLineWrapMode(QTextEdit::NoWrap);
-        new SyntaxHighlighter(textBrowser->document());
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+        new SyntaxHighlighter{textBrowser->document()};
+        QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
         verticalLayout->setContentsMargins(6, 6, 6, 6);
         verticalLayout->addWidget(textBrowser);

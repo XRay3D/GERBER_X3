@@ -51,13 +51,13 @@ public:
     uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
         Gi::Item* item;
-        item = new Gi::GcPath(pocketPaths_, this);
+        item = new Gi::GcPath{pocketPaths_, this};
         item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&color);
         itemGroup()->push_back(item);
         for(int i{}; i < pocketPaths_.size() - 1; ++i)
             g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
-        item = new Gi::GcPath(g0path_);
+        item = new Gi::GcPath{g0path_};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         itemGroup()->push_back(item);
         itemGroup()->setVisible(true);
@@ -73,7 +73,7 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const
     if(close)
         std::ranges::for_each(ps, [](Path& p) { p.push_back(p.front()); });
     GCode::Params gcp{tool, 0.0};
-    auto file = new GCDbgFile(std::move(gcp), std::move(ps), color);
+    auto file = new GCDbgFile{std::move(gcp), std::move(ps), color};
     file->setFileName(fileName);
     emit App::project().addFileDbg(file);
 };
@@ -672,7 +672,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                     nonCutPaths.emplace_back(frPath.toFillPolygon());
             std::erase_if(nonCutPaths, [](Path& path) { return path.empty(); }); // убрать пустые
             std::ranges::for_each(nonCutPaths, [this](auto&& path) {
-                items.push_back(new Gi::Error({path}, Area(path) * dScale * dScale));
+                items.push_back(new Gi::Error{{path}, Area(path) * dScale * dScale});
             });
         } else {
             Paths srcPaths{closedSrcPaths};
@@ -705,7 +705,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             items.reserve(checker.size());
             std::for_each(std::execution::par, std::begin(checker), std::end(checker), [&](auto&& checker) {
                 auto&& [frame, set] = checker;
-                items.push_back(new Gi::Error({*frame}, Area(*frame) * dScale * dScale));
+                items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
             });
         }
     } break;
@@ -718,7 +718,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             Paths frPaths = createFrame(srcPaths);
             if(frPaths.size() == 0) { // Doesn't fit at all
                 std::lock_guard guard{m};
-                items.push_back(new Gi::Error(srcPaths, Area(srcPaths) * dScale * dScale));
+                items.push_back(new Gi::Error{srcPaths, Area(srcPaths) * dScale * dScale});
             } else if(frPaths.size() > 1) { // Fits with breaks
                 srcPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
                 if(srcPaths.empty())
@@ -728,7 +728,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                 auto checker{testFrame(srcPaths, frPaths)};
                 std::lock_guard guard{m};
                 for(auto&& [frame, set]: checker)
-                    items.push_back(new Gi::Error({*frame}, Area(*frame) * dScale * dScale));
+                    items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
             }
         });
     } break;

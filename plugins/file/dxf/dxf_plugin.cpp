@@ -98,25 +98,25 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
                 const auto type = SectionParser::toType(*(from + 1));
                 switch(type) {
                 case SectionParser::HEADER:
-                    file_->sections_[type] = new SectionHEADER(file_, from, to);
+                    file_->sections_[type] = new SectionHEADER{file_, from, to};
                     continue;
                 case SectionParser::CLASSES:
-                    // dxfFile()->sections_[type] = new SectionCLASSES(dxfFile(), from, to);
+                    // dxfFile()->sections_[type] = new SectionCLASSES{dxfFile(), from, to};
                     continue;
                 case SectionParser::TABLES:
-                    file_->sections_[type] = new SectionTABLES(file_, from, to);
+                    file_->sections_[type] = new SectionTABLES{file_, from, to};
                     continue;
                 case SectionParser::BLOCKS:
-                    file_->sections_[type] = new SectionBLOCKS(file_, from, to);
+                    file_->sections_[type] = new SectionBLOCKS{file_, from, to};
                     continue;
                 case SectionParser::ENTITIES:
-                    file_->sections_[type] = new SectionENTITIES(file_, from, to);
+                    file_->sections_[type] = new SectionENTITIES{file_, from, to};
                     continue;
                 case SectionParser::OBJECTS:
-                    // dxfFile()->sections_[type] = new SectionOBJECTS(dxfFile(), from, to);
+                    // dxfFile()->sections_[type] = new SectionOBJECTS{dxfFile(), from, to};
                     continue;
                 case SectionParser::THUMBNAILIMAGE:
-                    // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE(dxfFile(), from, to);
+                    // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE{dxfFile(), from, to};
                     continue;
                 default:
                     throw QString("Unknowh Section!");
@@ -188,7 +188,7 @@ AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<Fi
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'D'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
-    auto settingsTab = new SettingsTab(parent);
+    auto settingsTab = new SettingsTab{parent};
     settingsTab->setWindowTitle("DXF");
     return settingsTab;
 }
@@ -214,7 +214,7 @@ void Plugin::updateFileModel(AbstractFile* file) {
     fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for(auto& [name, layer]: layers)
 
-        fm->getItem(index)->addChild(new Dxf::NodeLayer(name, layer));
+        fm->getItem(index)->addChild(new Dxf::NodeLayer{name, layer});
     fm->endInsertRows_();
 }
 

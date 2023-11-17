@@ -80,7 +80,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     stacking(returnPs);
     assert(returnPss.size());
 
-    file_ = new File(std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths));
+    file_ = new File{std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths)};
     file_->setFileName(tool.nameEnc());
     emit fileReady(file_);
 }
@@ -127,7 +127,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
 
     cutAreaPaths = InflatePaths(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
 
-    file_ = new File(std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths));
+    file_ = new File{std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths)};
     file_->setFileName(tool.nameEnc());
     emit fileReady(file_);
 }
@@ -211,7 +211,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
         gcp_.params[GCode::Params::MultiToolIndex] = tIdx;
 
-        file_ = new File(GCode::Params{gcp_}, std::move(returnPss), std::move(cutAreaPaths));
+        file_ = new File{GCode::Params{gcp_}, std::move(returnPss), std::move(cutAreaPaths)};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
 

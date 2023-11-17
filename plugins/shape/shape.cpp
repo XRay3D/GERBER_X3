@@ -26,7 +26,7 @@ namespace Shapes {
 
 AbstractShape::AbstractShape()
     : FileTree::Node(FileTree::AbstractShape)
-//    : node_(new Node(this))
+//    : node_(new Node{this})
 {
     paths_.resize(1);
     changeColor();

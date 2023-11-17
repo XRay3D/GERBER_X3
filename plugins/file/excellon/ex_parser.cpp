@@ -454,7 +454,7 @@ void Parser::circularRout() {
         QPointF c = (a + b) / 2;
         // находим перпендикуляр, нормируем его
         QPointF n = QLineF(QPointF(), a - b).normalVector().unitVector().p2();
-        //        n = new Vector2(n.y, -n.x); //поворот на 90 градусов ;)
+        //        n = new Vector2{n.y, -n.x}; //поворот на 90 градусов ;)
         // находим высоту искомого центра на отрезок
         double l = QLineF(QPointF(), a - b).length() / 2;
         double d = sqrt(r * r - l * l);

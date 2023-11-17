@@ -23,16 +23,16 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     setObjectName(QString::fromUtf8("this"));
     resize(600, 600);
     // Dialog->resize(400, 300);
-    auto verticalLayout = new QVBoxLayout(this);
+    auto verticalLayout = new QVBoxLayout{this};
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     // tableView
-    auto tableView = new QTableView(this);
+    auto tableView = new QTableView{this};
     QFont f(font());
     f.setFamily("Consolas");
     tableView->setFont(f);
     tableView->setObjectName(QString::fromUtf8("tableView"));
 
-    tableView->setModel(new Model(App::project().file(fileId)->lines()));
+    tableView->setModel(new Model{App::project().file(fileId)->lines()});
     // horizontal Header
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());
@@ -68,18 +68,18 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //            }
     //        };
     //    };
-    //    tableView->setItemDelegate(new ItemDelegate(tableView));
+    //    tableView->setItemDelegate(new ItemDelegate{tableView});
     verticalLayout->addWidget(tableView);
 
     {
-        auto spinBox = new QSpinBox(this);
+        auto spinBox = new QSpinBox{this};
         spinBox->setObjectName(QString::fromUtf8("spinBox"));
         spinBox->setRange(0, tableView->model()->rowCount());
         connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), tableView, &QTableView::selectRow);
         verticalLayout->addWidget(spinBox);
     }
     // leFind
-    auto leFind = new QLineEdit(this);
+    auto leFind = new QLineEdit{this};
     leFind->setObjectName(QString::fromUtf8("lineEdit"));
     connect(leFind, &QLineEdit::textChanged, [tableView](const QString& text) {
         for(int row = 0; row < tableView->model()->rowCount(); ++row)
@@ -90,7 +90,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     });
     verticalLayout->addWidget(leFind);
     // pbNext
-    auto pbNext = new QPushButton(this);
+    auto pbNext = new QPushButton{this};
     pbNext->setObjectName(QString::fromUtf8("pbNext"));
     pbNext->setText(DxfObj::tr("Next"));
     connect(pbNext, &QPushButton::clicked, [tableView, leFind] {
@@ -102,7 +102,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     });
     verticalLayout->addWidget(pbNext);
     // pbPrev
-    auto pbPrev = new QPushButton(this);
+    auto pbPrev = new QPushButton{this};
     pbPrev->setObjectName(QString::fromUtf8("pbPrev"));
     pbPrev->setText(DxfObj::tr("Prev"));
     connect(pbPrev, &QPushButton::clicked, [tableView, leFind] {
