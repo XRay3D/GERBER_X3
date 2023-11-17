@@ -18,6 +18,7 @@
 #include "mvector.h"
 #include "settings.h"
 #include "tool.h"
+#include "utils.h"
 
 #include <assert.h>
 #include <map>
@@ -73,7 +74,7 @@ public:                                           \
         return app->NAME##_;                      \
     }                                             \
     static void SET(TYPE* NAME) {                 \
-        if (app->NAME##_ && NAME)                 \
+        if(app->NAME##_ && NAME)                  \
             throw std::logic_error(__FUNCTION__); \
         else                                      \
             app->NAME##_ = NAME;                  \
@@ -126,9 +127,9 @@ class App {
 
 public:
     explicit App() {
-        if (sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
+        if(sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
             app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
-        else if (sharedMemory.attach(QSharedMemory::ReadOnly))
+        else if(sharedMemory.attach(QSharedMemory::ReadOnly))
             app = *reinterpret_cast<App**>(sharedMemory.data());
         else
             qDebug() << "App" << app << sharedMemory.errorString();

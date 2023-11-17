@@ -148,14 +148,14 @@ int main(int argc, char** argv) {
         MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running = false;                    // переменную для проверки ууже запущенного приложения
-        if(sharedMemory.attach()) {                 // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
-            is_running = true;                      // Если успешно, то определяем, что уже есть запущенный экземпляр
+        bool is_running = false;    // переменную для проверки ууже запущенного приложения
+        if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
+            is_running = true;      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
-            sharedMemory.create(sizeof(mainWin));   // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
-            is_running = false;                     // И определяем, что других экземпляров не запущено
+            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
+            is_running = false;                   // И определяем, что других экземпляров не запущено
         }
-        semaphore.release();                        // Опускаем семафор
+        semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;
         parser.addPositionalArgument("url", "Url of file to open");
         parser.process(app);
@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
     }
 
     { // Splash Screen
-        auto splash = new QSplashScreen{QPixmap{QStringLiteral(":/256.png")}};
+        auto splash = new QSplashScreen{QPixmap{u":/256.png"_qs}};
         splash->setAttribute(Qt::WA_DeleteOnClose);
         splash->show();
         splash->connect(splash, &QObject::destroyed, splash, [] { App::setSplashScreen(nullptr); });
@@ -205,7 +205,7 @@ int main(int argc, char** argv) {
     const QString suffix("*.so");
 #endif
 #elif _WIN32
-    const auto suffix = QStringLiteral("*.dll");
+    const auto suffix = u"*.dll"_qs;
 #else
     static_assert(false, "Select OS");
 #endif
@@ -214,7 +214,7 @@ int main(int argc, char** argv) {
 
     // load plugins
     QDir dir(QApplication::applicationDirPath() + "/plugins");
-    if(dir.exists()) {                    // Поиск всех файлов в папке "plugins"
+    if(dir.exists()) { // Поиск всех файлов в папке "plugins"
         QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
         for(const auto& str: listFiles) { // Проход по всем файлам
             App::splashScreen().showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);

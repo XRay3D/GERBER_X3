@@ -11,6 +11,7 @@
 #pragma once
 #include <QPen>
 #include <QWidget>
+#include <utils.h>
 
 class Ruler final : public QWidget {
     Q_OBJECT
@@ -31,7 +32,7 @@ public:
     double zoom() const { return rulerZoom_; }
     QSize minimumSizeHint() const override { return QSize(Ruler::Breadth, Ruler::Breadth); }
 
-    static QString mimeType() { return QStringLiteral("image/x-puzzle-piece"); }
+    static QString mimeType() { return u"image/x-puzzle-piece"_qs; }
 
 public slots:
     void setCursorPos(const QPoint cursorPos_);

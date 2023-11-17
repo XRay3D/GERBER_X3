@@ -25,6 +25,7 @@
 
 #include "app.h"
 #include "datastream.h"
+#include "utils.h"
 // #include "settings.h"
 
 static constexpr auto uScale{100'000};
@@ -319,7 +320,7 @@ struct Point {
         return (x_ * x_ + y_ * y_);
     }
 
-    QString toString() const { return QStringLiteral("{%1, %2}").arg(x * dScale).arg(y * dScale); }
+    QString toString() const { return u"{%1, %2}"_qs.arg(x * dScale).arg(y * dScale); }
 };
 
 //------------------------------------------------------------------------------

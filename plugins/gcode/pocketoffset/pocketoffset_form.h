@@ -40,8 +40,8 @@ private:
     void rb_clicked();
     const QStringList names;
     static inline const QString pixmaps[]{
-        QStringLiteral("pock_offs_climb"),
-        QStringLiteral("pock_offs_conv"),
+        u"pock_offs_climb"_qs,
+        u"pock_offs_conv"_qs,
     };
     // QWidget interface
 protected:
