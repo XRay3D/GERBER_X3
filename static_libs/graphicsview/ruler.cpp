@@ -37,7 +37,7 @@ static QLabel* createDragLabel(const QString& text, QWidget* parent) {
     return label;
 }
 
-static QString hotSpotMimeDataKey() { return QStringLiteral("application/x-hotspot"); }
+static QString hotSpotMimeDataKey() { return u"application/x-hotspot"_qs; }
 
 Ruler::Ruler(Qt::Orientation rulerType, QWidget* parent)
     : QWidget{parent}
@@ -193,7 +193,7 @@ void Ruler::dropEvent(QDropEvent* event) {
         //        delete ptr;
 
         //        const QMimeData* mime = event->mimeData();
-        //        QStringList pieces {}; // = mime->text().split(QRegularExpression(QStringLiteral("\\s+")), Qt::SkipEmptyParts);
+        //        QStringList pieces {}; // = mime->text().split(QRegularExpression(u"\\s+"_qs), Qt::SkipEmptyParts);
         //        QPoint position = event->pos();
         //        QPoint hotSpot;
 

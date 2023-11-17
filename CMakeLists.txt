@@ -78,7 +78,7 @@ set(INC_DIRS
     external_dependencies/compile-time-regular-expressions/single-header
     external_dependencies/pfr_non_boost/include
 
-    ggeasy
+    GGEasy
 
     plugins/file
     plugins/gcode

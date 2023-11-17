@@ -24,7 +24,7 @@
 ToolModel::ToolModel(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new ToolItem())
-    , mimeType(QStringLiteral("application/ToolItem")) {
+    , mimeType(u"application/ToolItem"_qs) {
     loadTools();
 }
 
@@ -218,7 +218,7 @@ Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction 
 Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
 void ToolModel::saveTools() {
-    QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
+    QFile file(App::settingsPath() + u"/tools.json"_qs);
     if(!file.open(QIODevice::WriteOnly)) {
         qDebug() << __FUNCTION__ << file.errorString();
         return;
@@ -274,7 +274,7 @@ void ToolModel::saveTools() {
 void ToolModel::loadTools() {
     QJsonDocument loadDoc;
 
-    QFile file(App::settingsPath() + QStringLiteral("/tools.json"));
+    QFile file(App::settingsPath() + u"/tools.json"_qs);
 
     if(!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json");

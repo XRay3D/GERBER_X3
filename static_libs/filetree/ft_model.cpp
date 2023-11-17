@@ -29,7 +29,7 @@ using TreeItem = Node;
 Model::Model(QObject* parent)
     : QAbstractItemModel(parent)
     , rootItem(new FolderNode{"rootItem"})
-    , mimeType(QStringLiteral("application/GCodeItem")) {
+    , mimeType(u"application/GCodeItem"_qs) {
     App::setFileModel(this);
 }
 

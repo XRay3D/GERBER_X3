@@ -140,7 +140,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             if(re.isValid()) {
                 auto match = re.match(leTestParseZero->text());
                 for(int ctr{}; QString & string: match.capturedTexts())
-                    text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
+                    text.append(uR"(%1:("%2"), )"_qs.arg(ctr++).arg(string));
                 if(!match.hasMatch())
                     text = "No captured texts";
             } else {
@@ -157,7 +157,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             if(re.isValid()) {
                 auto match = re.match(leTestParseUnit->text());
                 for(int ctr{}; QString & string: match.capturedTexts())
-                    text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
+                    text.append(uR"(%1:("%2"), )"_qs.arg(ctr++).arg(string));
                 if(!match.hasMatch())
                     text = "No captured texts";
             } else {
@@ -174,7 +174,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             if(re.isValid()) {
                 auto match = re.match(leTestParseDecimalAndInteger->text());
                 for(int ctr{}; QString & string: match.capturedTexts())
-                    text.append(QStringLiteral(R"(%1:("%2"), )").arg(ctr++).arg(string));
+                    text.append(uR"(%1:("%2"), )"_qs.arg(ctr++).arg(string));
                 if(!match.hasMatch())
                     text = "No captured texts";
             } else {

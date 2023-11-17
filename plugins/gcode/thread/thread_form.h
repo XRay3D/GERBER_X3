@@ -42,12 +42,12 @@ private:
 
     const QStringList names{tr("Thread On"), tr("Thread Outside"), tr("Thread Inside")};
     static inline const std::array pixmaps{
-        QStringLiteral("prof_on_climb"),
-        QStringLiteral("prof_out_climb"),
-        QStringLiteral("prof_in_climb"),
-        QStringLiteral("prof_on_conv"),
-        QStringLiteral("prof_out_conv"),
-        QStringLiteral("prof_in_conv"),
+        u"prof_on_climb"_qs,
+        u"prof_out_climb"_qs,
+        u"prof_in_climb"_qs,
+        u"prof_on_conv"_qs,
+        u"prof_out_conv"_qs,
+        u"prof_in_conv"_qs,
     };
 
     enum Trimming {

@@ -69,7 +69,7 @@ void Recent::writeRecentFiles(const QStringList& files, QSettings& settings) {
     settings.endArray();
 }
 
-QString Recent::fileKey() { return QStringLiteral("file"); }
+QString Recent::fileKey() { return u"file"_qs; }
 
 void Recent::setRecentFilesVisible(bool visible) {
     recentFileSubMenuAct->setVisible(visible);
