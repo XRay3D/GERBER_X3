@@ -246,15 +246,24 @@ void GraphicsView::setScale(double s) noexcept {
 }
 
 void GraphicsView::setOpenGL(bool useOpenGL) {
+    if(useOpenGL) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    setViewport(useOpenGL ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)) : new QWidget());
+        if(dynamic_cast<QGLWidget*>(viewport())) return;
+        auto oglWidget = new QGLWidget{this};
+        QGLFormat format{QGL::SampleBuffers | QGL::DoubleBuffer | QGL::Rgba};
 #else
-    auto oglw = new QOpenGLWidget();
-    QSurfaceFormat sf;
-    sf.setSamples(8);
-    oglw->setFormat(sf);
-    setViewport(useOpenGL ? oglw : new QWidget);
+        if(dynamic_cast<QOpenGLWidget*>(viewport())) return;
+        auto oglw = new QOpenGLWidget{this};
+        QSurfaceFormat sf;
 #endif
+        format.setSamples(8);
+        format.setSampleBuffers(true);
+        oglWidget->setFormat(format);
+        setViewport(oglWidget);
+    } else {
+        if(dynamic_cast<QWidget*>(viewport())) return;
+        setViewport(new QWidget{this});
+    }
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
 }
