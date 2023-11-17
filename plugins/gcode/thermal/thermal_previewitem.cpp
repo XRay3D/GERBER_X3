@@ -180,7 +180,7 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
         }
         changeColor();
     } else if(change == ItemVisibleChange) {
-        auto animation = new QPropertyAnimation(this, "opacity");
+        auto animation = new QPropertyAnimation{this, "opacity"};
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(200);
         animation->setStartValue(0.0);

@@ -27,7 +27,7 @@ ToolItem::ToolItem(const ToolItem& item) {
         note_ = item.note_;
     }
     for(ToolItem* i: item.childItems)
-        addChild(new ToolItem(*i));
+        addChild(new ToolItem{*i});
 }
 
 ToolItem::ToolItem(int toolId)

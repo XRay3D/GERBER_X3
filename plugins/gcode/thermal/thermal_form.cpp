@@ -64,10 +64,10 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     updateButtonIconSize();
 
     if(0) {
-        chbx = new QCheckBox("", ui->treeView);
+        chbx = new QCheckBox{"", ui->treeView};
         chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
         chbx->setEnabled(false);
-        auto lay = new QGridLayout(ui->treeView->header());
+        auto lay = new QGridLayout{ui->treeView->header()};
         lay->addWidget(chbx, 0, 0, 1, 1, Qt::AlignLeft | Qt::AlignTop);
         lay->setContentsMargins(3, 0, 0, 0);
     }
@@ -83,7 +83,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->treeView->header()->setStretchLastSection(false);
     //    ui->treeView->hideColumn(1);
-    ui->treeView->setItemDelegate(new Delegate(this));
+    ui->treeView->setItemDelegate(new Delegate{this});
 }
 
 Form::~Form() {
@@ -166,7 +166,7 @@ void Form::updateThermalGi() {
     if(model)
         delete ui->treeView->model();
 
-    model = new Model(ui->treeView);
+    model = new Model{ui->treeView};
     model->appendRow(QIcon(), tr("All"), par);
     boardSide = file->side();
 
@@ -193,7 +193,7 @@ void Form::updateThermalGi() {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
-                node->append(new Node(drawIcon(paths), "", par, pos, tprItem.get(), model));
+                node->append(new Node{drawIcon(paths), "", par, pos, tprItem.get(), model});
             }
             qApp->processEvents();
             pd.setValue(++count);

@@ -170,7 +170,7 @@ int main(int argc, char** argv) {
     }
 
     { // Splash Screen
-        auto splash = new QSplashScreen(QPixmap(QStringLiteral(":/256.png")));
+        auto splash = new QSplashScreen{QPixmap{QStringLiteral(":/256.png")}};
         splash->setAttribute(Qt::WA_DeleteOnClose);
         splash->show();
         splash->connect(splash, &QObject::destroyed, splash, [] { App::setSplashScreen(nullptr); });

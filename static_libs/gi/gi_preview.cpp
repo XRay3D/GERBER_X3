@@ -114,7 +114,7 @@ QVariant AbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change, c
             colorState &= ~Used;
         changeColor();
     } else if(change == ItemVisibleChange) {
-        auto animation = new QPropertyAnimation(this, "opacity");
+        auto animation = new QPropertyAnimation{this, "opacity"};
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
         animation->setStartValue(0.0);

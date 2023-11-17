@@ -102,7 +102,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         emit fileReady(nullptr);
     } else {
         sortB(returnPss);
-        file_ = new File(std::move(gcp_), std::move(returnPss));
+        file_ = new File{std::move(gcp_), std::move(returnPss)};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

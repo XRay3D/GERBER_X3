@@ -55,9 +55,9 @@ void setCursor(QWidget* w) {
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
-    , hRuler{new Ruler(Qt::Horizontal, this)}
-    , vRuler{new Ruler(Qt::Vertical, this)}
-    , gridLayout{new QGridLayout(this)} {
+    , hRuler{new Ruler{Qt::Horizontal, this}}
+    , vRuler{new Ruler{Qt::Vertical, this}}
+    , gridLayout{new QGridLayout{this}} {
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
@@ -70,7 +70,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     setAcceptDrops(true);
 
     ////////////////////////////////////
-    setScene(new QGraphicsScene(this));
+    setScene(new QGraphicsScene{this});
     App::setGraphicsView(this);
 
     scene()->setSceneRect(-1000, -1000, +2000, +2000);
@@ -86,7 +86,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     ::setCursor(vRuler);
 
     // add items to grid layout
-    QPushButton* corner = new QPushButton(App::settings().inch() ? "I" : "M", this);
+    QPushButton* corner = new QPushButton{App::settings().inch() ? "I" : "M", this};
     connect(corner, &QPushButton::clicked, [corner, this](bool fl) {
         corner->setText(fl ? "I" : "M");
         App::settings().setInch(fl);
@@ -123,9 +123,9 @@ GraphicsView::GraphicsView(QWidget* parent)
         viewport()->setObjectName("viewport");
         settings.endGroup();
     }
-    //    auto scene_ = new QGraphicsScene(this);
+    //    auto scene_ = new QGraphicsScene{this};
 
-    //    setScene(scene_ = new Scene(this));
+    //    setScene(scene_ = new Scene{this});
     //    connect(this, &GraphicsView::mouseMove, scene_, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
@@ -503,9 +503,9 @@ void GraphicsView::dropEvent(QDropEvent* event) {
 
     if(mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
 #if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-        scene()->addItem(new GiGuide(mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+        scene()->addItem(new GiGuide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()}.data())));
 #else
-        scene()->addItem(new GiGuide(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+        scene()->addItem(new GiGuide{mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())});
 #endif
     }
 
@@ -565,7 +565,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             QPixmap pixmapIcon{Ruler::Breadth, Ruler::Breadth};
             pixmapIcon.fill(Qt::magenta);
 
-            QDrag* drag = new QDrag(this);
+            QDrag* drag = new QDrag{this};
             drag->setMimeData(mimeData);
             drag->setPixmap(pixmapIcon);
             drag->setHotSpot(pixmapIcon.rect().center());
@@ -700,7 +700,7 @@ void GraphicsView::timerEvent(QTimerEvent* event) {
 
 template <class T>
 void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T begin, T end) {
-    auto* animation = new QPropertyAnimation(target, propertyName);
+    auto* animation = new QPropertyAnimation{target, propertyName};
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
         setProperty(propertyName, end);
         updateRuler();

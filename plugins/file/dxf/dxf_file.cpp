@@ -118,14 +118,14 @@ void File::initFrom(AbstractFile* file) {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Node(this);
+    return node_ ? node_ : node_ = new Node{this};
 }
 
 Layer* File::layer(const QString& name) {
     if(layers_.contains(name))
         return layers_[name];
     else
-        return layers_[name] = new Layer(sections_.begin()->second, name);
+        return layers_[name] = new Layer{sections_.begin()->second, name};
     return nullptr;
 }
 
@@ -158,7 +158,7 @@ void File::createGi() {
                     clipper.AddSubject(go.fill);
 
                 if(go.path.size() > 1) {
-                    auto gItem = new Gi::DataPath(go.path, this);
+                    auto gItem = new Gi::DataPath{go.path, this};
                     if(go.entity()) {
                         //                        gItem->setToolTip(QString("Line %1\n%2")
                         //                                              .arg(go.entity()->data[0].line())
@@ -179,7 +179,7 @@ void File::createGi() {
             }
 
             for(Paths& paths: layer->groupedPaths_) {
-                    auto gItem = new Gi::DataFill(paths, this);
+                    auto gItem = new Gi::DataFill{paths, this};
                 gItem->setColorPtr(&layer->colorNorm_);
                 igNorm->push_back(gItem);
             }
@@ -298,7 +298,7 @@ void File::read(QDataStream& stream) {
         stream >> size;
         while(size--) {
             QString name;
-            Layer* layer = new Layer(this);
+            Layer* layer = new Layer{this};
             stream >> name;
             stream >> *layer;
             layers_[name] = layer;

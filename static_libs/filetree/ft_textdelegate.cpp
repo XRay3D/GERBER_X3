@@ -21,7 +21,7 @@ TextDelegate::TextDelegate(QObject* parent)
 }
 
 QWidget* TextDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& /*index*/) const {
-    auto* le = new QLineEdit(parent);
+    auto* le = new QLineEdit{parent};
     rect_ = option.rect;
     connect(le, &QLineEdit::textChanged, this, &TextDelegate::emitCommitData);
     return le;

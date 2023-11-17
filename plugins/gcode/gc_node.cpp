@@ -123,7 +123,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         tv, &FileTree::View::hideOther);
     if(!dialog[id()])
         menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-            dialog[id()] = new Dialog(file->lines2(), file->name(), tv);
+            dialog[id()] = new Dialog{file->lines2(), file->name(), tv};
             auto destroy = [this] {
                 delete dialog[id()];
                 dialog[id()] = nullptr;

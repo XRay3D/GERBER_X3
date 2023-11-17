@@ -473,7 +473,7 @@ QwtSpline::QwtSpline() {
    \param other Spline used for initialization
 */
 QwtSpline::QwtSpline(const QwtSpline& other) {
-    d_data = new PrivateData(*other.d_data);
+    d_data = new PrivateData{*other.d_data};
 }
 
 /*!

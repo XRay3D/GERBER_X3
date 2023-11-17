@@ -200,7 +200,7 @@ public:
                 : AbstractFileSettings{parent} {
                 setWindowTitle(tr("Thread"));
 
-                tableView = new QTableView(this);
+                tableView = new QTableView{this};
                 auto model = new Model{tableView};
                 tableView->setModel(model);
                 tableView->setItemDelegate(new Delegate{tableView});
@@ -212,7 +212,7 @@ public:
                 connect(pbAdd, &QPushButton::clicked, model, &Model::add);
                 connect(pbAdd, &QPushButton::clicked, tableView, &QTableView::scrollToBottom);
 
-                auto layout = new QVBoxLayout(this);
+                auto layout = new QVBoxLayout{this};
                 layout->setContentsMargins(6, 6, 6, 6);
                 layout->addWidget(tableView);
                 layout->addWidget(pbAdd);
@@ -254,7 +254,7 @@ public:
                 }
             }
         };
-        return new Tab(parent);
+        return new Tab{parent};
     }
 };
 

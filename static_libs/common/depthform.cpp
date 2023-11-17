@@ -77,13 +77,13 @@ void DepthForm::setupUi(QWidget* Form) {
     if(Form->objectName().isEmpty())
         Form->setObjectName(QString::fromUtf8("DepthForm"));
 
-    QHBoxLayout* horizontalLayout = new QHBoxLayout(Form);
+    QHBoxLayout* horizontalLayout = new QHBoxLayout{Form};
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
     horizontalLayout->setSpacing(2);
 
     {
-        label = new QLabel(Form);
+        label = new QLabel{Form};
         label->setObjectName(QString::fromUtf8("label"));
 
         QFontMetrics fm(font());
@@ -101,19 +101,19 @@ void DepthForm::setupUi(QWidget* Form) {
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
 
-        rbCopper = new QRadioButton(Form);
+        rbCopper = new QRadioButton{Form};
         rbCopper->setObjectName(QString::fromUtf8("rbCopper"));
         sizePolicy.setHeightForWidth(rbCopper->sizePolicy().hasHeightForWidth());
         rbCopper->setSizePolicy(sizePolicy);
         horizontalLayout->addWidget(rbCopper);
 
-        rbBoard = new QRadioButton(Form);
+        rbBoard = new QRadioButton{Form};
         rbBoard->setObjectName(QString::fromUtf8("rbBoard"));
         sizePolicy.setHeightForWidth(rbBoard->sizePolicy().hasHeightForWidth());
         rbBoard->setSizePolicy(sizePolicy);
         horizontalLayout->addWidget(rbBoard);
 
-        rbCustom = new QRadioButton(Form);
+        rbCustom = new QRadioButton{Form};
         rbCustom->setObjectName(QString::fromUtf8("rbCustom"));
         sizePolicy.setHeightForWidth(rbCustom->sizePolicy().hasHeightForWidth());
         rbCustom->setSizePolicy(sizePolicy);
@@ -121,7 +121,7 @@ void DepthForm::setupUi(QWidget* Form) {
     }
 
     {
-        dsbx = new DoubleSpinBox(Form);
+        dsbx = new DoubleSpinBox{Form};
         dsbx->setObjectName(QString::fromUtf8("dsbx"));
         dsbx->setDecimals(3);
         dsbx->setMaximum(100.0);

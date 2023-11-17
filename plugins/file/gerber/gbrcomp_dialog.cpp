@@ -21,7 +21,7 @@ namespace Gerber::Comp {
 Dialog::Dialog(QWidget* parent)
     : QDialog(parent) {
     setupUi(this);
-    grView->setScene(scene_ = new QGraphicsScene(grView));
+    grView->setScene(scene_ = new QGraphicsScene{grView});
     grView->scale(+1, -1);
     QSettings settings;
     settings.beginGroup("Dialog");
@@ -47,25 +47,25 @@ void Dialog::setupUi(QDialog* dialog) {
         dialog->setObjectName(QString::fromUtf8("Dialog"));
     dialog->resize(800, 600);
 
-    splitter = new QSplitter(dialog);
+    splitter = new QSplitter{dialog};
     splitter->setObjectName(QString::fromUtf8("splitter"));
     splitter->setOrientation(Qt::Horizontal);
 
-    componentsView = new sView(splitter);
+    componentsView = new sView{splitter};
     componentsView->setObjectName(QString::fromUtf8("componentsView"));
 
-    grView = new QGraphicsView(splitter);
+    grView = new QGraphicsView{splitter};
     grView->setObjectName(QString::fromUtf8("grView"));
 
     splitter->addWidget(componentsView);
     splitter->addWidget(grView);
 
-    auto buttonBox = new QDialogButtonBox(dialog);
+    auto buttonBox = new QDialogButtonBox{dialog};
     buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
-    auto verticalLayout = new QVBoxLayout(dialog);
+    auto verticalLayout = new QVBoxLayout{dialog};
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     verticalLayout->setContentsMargins(6, 6, 6, 6);
     verticalLayout->addWidget(splitter);

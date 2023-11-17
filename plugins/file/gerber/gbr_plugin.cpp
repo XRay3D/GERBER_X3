@@ -105,32 +105,32 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
             : AbstractFileSettings(parent) {
             setObjectName(QString::fromUtf8("tabGerber"));
 
-            auto verticalLayout = new QVBoxLayout(this);
+            auto verticalLayout = new QVBoxLayout{this};
             verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
             verticalLayout->setContentsMargins(6, 6, 6, 6);
 
             {
-                auto groupBox1 = new QGroupBox(this);
+                auto groupBox1 = new QGroupBox{this};
                 groupBox1->setObjectName(QString::fromUtf8("groupBox1"));
                 groupBox1->setTitle(QApplication::translate("SettingsDialog", "Gerber", nullptr));
                 verticalLayout->addWidget(groupBox1);
 
-                chbxCleanPolygons = new QCheckBox(groupBox1);
+                chbxCleanPolygons = new QCheckBox{groupBox1};
                 chbxCleanPolygons->setObjectName(QString::fromUtf8("chbxCleanPolygons"));
 
-                chbxSimplifyRegions = new QCheckBox(groupBox1);
+                chbxSimplifyRegions = new QCheckBox{groupBox1};
                 chbxSimplifyRegions->setObjectName(QString::fromUtf8("chbxSimplifyRegions"));
 
-                chbxSkipDuplicates = new QCheckBox(groupBox1);
+                chbxSkipDuplicates = new QCheckBox{groupBox1};
                 chbxSkipDuplicates->setObjectName(QString::fromUtf8("chbxSkipDuplicates"));
 
-                dsbxCleanPolygonsDist = new DoubleSpinBox(groupBox1);
+                dsbxCleanPolygonsDist = new DoubleSpinBox{groupBox1};
                 dsbxCleanPolygonsDist->setDecimals(4);
                 dsbxCleanPolygonsDist->setObjectName(QString::fromUtf8("dsbxCleanPolygonsDist"));
                 dsbxCleanPolygonsDist->setRange(0.0001, 1.0);
                 dsbxCleanPolygonsDist->setSingleStep(0.001);
 
-                auto vBoxLayout = new QVBoxLayout(groupBox1);
+                auto vBoxLayout = new QVBoxLayout{groupBox1};
                 vBoxLayout->addWidget(chbxCleanPolygons);
                 vBoxLayout->addWidget(chbxSimplifyRegions);
                 vBoxLayout->addWidget(chbxSkipDuplicates);
@@ -139,22 +139,22 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
             }
 
             {
-                auto groupBox2 = new QGroupBox(this);
+                auto groupBox2 = new QGroupBox{this};
                 groupBox2->setObjectName(QString::fromUtf8("groupBox2"));
                 groupBox2->setTitle(QApplication::translate("SettingsDialog", "Wire Creation Method", nullptr));
                 verticalLayout->addWidget(groupBox2);
 
-                rbClipperOffset = new QRadioButton(groupBox2);
+                rbClipperOffset = new QRadioButton{groupBox2};
                 rbClipperOffset->setObjectName(QString::fromUtf8("rbClipperOffset"));
 
-                rbMinkowskiSum = new QRadioButton(groupBox2);
+                rbMinkowskiSum = new QRadioButton{groupBox2};
                 rbMinkowskiSum->setObjectName(QString::fromUtf8("rbMinkowskiSum"));
-                auto vBoxLayout = new QVBoxLayout(groupBox2);
+                auto vBoxLayout = new QVBoxLayout{groupBox2};
                 vBoxLayout->setContentsMargins(6, 9, 6, 6);
                 vBoxLayout->addWidget(rbClipperOffset);
                 vBoxLayout->addWidget(rbMinkowskiSum);
             }
-            verticalLayout->addItem(new QSpacerItem(20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding));
+            verticalLayout->addItem(new QSpacerItem{20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding});
 
             chbxCleanPolygons->setText(QApplication::translate("SettingsDialog", "Cleaning Polygons", nullptr));
             chbxSkipDuplicates->setText(QApplication::translate("SettingsDialog", "Skip duplicates", nullptr));
@@ -188,7 +188,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
             settings.endGroup();
         }
     };
-    auto tab = new Tab(parent);
+    auto tab = new Tab{parent};
     tab->setWindowTitle("Gerber X3");
     return tab;
 }

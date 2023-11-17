@@ -25,7 +25,7 @@ RadioDelegate::RadioDelegate(QObject* parent)
 }
 
 QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    auto* radioButton = new QRadioButton(parent);
+    auto* radioButton = new QRadioButton{parent};
     //    radioButton->addItems({ tr("Top"), tr("Bottom") });
     //        if (index.column() == 1)
     //            comboBox->addItems(IconPreviewArea::iconModeNames());

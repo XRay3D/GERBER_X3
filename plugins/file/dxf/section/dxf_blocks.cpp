@@ -25,7 +25,7 @@ void SectionBLOCKS::parse() {
     do {
         code = nextCode();
         if(code == "BLOCK") {
-            auto block = new Block(blocks, this);
+            auto block = new Block{blocks, this};
             if(!block->blockName.isEmpty()) {
                 blocks[block->blockName] = block;
             } else {

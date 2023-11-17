@@ -24,7 +24,7 @@ TypeDelegate::TypeDelegate(QObject* parent)
 }
 
 QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    auto comboBox = new QComboBox(parent);
+    auto comboBox = new QComboBox{parent};
     connect(comboBox, qOverload<int>(&QComboBox::currentIndexChanged), this, &TypeDelegate::emitCommitData);
     return comboBox;
 }

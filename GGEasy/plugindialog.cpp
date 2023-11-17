@@ -44,7 +44,7 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
         twItem->setExpanded(true);
         for(const auto& [type, ptr]: map) {
             auto json{ptr->info()};
-            auto featureItem = new QTreeWidgetItem(twItem);
+            auto featureItem = new QTreeWidgetItem{twItem};
             featureItem->setExpanded(true);
             featureItem->setIcon(0, ptr->icon());
             featureItem->setText(0, json.value("Name").toString().remove('&'));
@@ -57,17 +57,17 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     };
 
     if(App::filePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("File Plugins"), "", ""});
+        auto interfaceItem = new QTreeWidgetItem{treeWidget, {tr("File Plugins"), "", ""}};
         addRows(interfaceItem, 'F', App::filePlugins());
     }
 
     if(App::shapePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("Shape Plugins"), "", ""});
+        auto interfaceItem = new QTreeWidgetItem{treeWidget, {tr("Shape Plugins"), "", ""}};
         addRows(interfaceItem, 'S', App::shapePlugins());
     }
 
     if(App::gCodePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem(treeWidget, {tr("GCode Plugins"), "", ""});
+        auto interfaceItem = new QTreeWidgetItem{treeWidget, {tr("GCode Plugins"), "", ""}};
         addRows(interfaceItem, 'G', App::gCodePlugins());
     }
 
@@ -80,16 +80,16 @@ void DialogAboutPlugins::setupUi(QDialog* Dialog) {
     if(Dialog->objectName().isEmpty())
         Dialog->setObjectName(QString::fromUtf8("Dialog"));
     Dialog->resize(400, 300);
-    verticalLayout = new QVBoxLayout(Dialog);
+    verticalLayout = new QVBoxLayout{Dialog};
     verticalLayout->setSpacing(6);
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
     verticalLayout->setContentsMargins(6, 6, 6, 6);
 
-    treeWidget = new QTreeWidget(Dialog);
+    treeWidget = new QTreeWidget{Dialog};
     treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
     verticalLayout->addWidget(treeWidget);
 
-    buttonBox = new QDialogButtonBox(Dialog);
+    buttonBox = new QDialogButtonBox{Dialog};
     buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);

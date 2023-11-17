@@ -26,7 +26,7 @@ ToolTreeView::ToolTreeView(QWidget* parent)
     setAlternatingRowColors(true);
     setAnimated(true);
 
-    model_ = new ToolModel(this);
+    model_ = new ToolModel{this};
     setModel(model_); // NOTE V1053. Calling the 'foo' virtual function in the constructor/destructor may lead to unexpected result at runtime.
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &ToolTreeView::updateActions);
     header()->setSectionResizeMode(QHeaderView::ResizeToContents);

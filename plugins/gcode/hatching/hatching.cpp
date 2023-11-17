@@ -290,7 +290,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         emit fileReady(nullptr);
     } else {
 
-        file_ = new File(std::move(gcp_), std::move(returnPss), {});
+        file_ = new File{std::move(gcp_), std::move(returnPss), {}};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }

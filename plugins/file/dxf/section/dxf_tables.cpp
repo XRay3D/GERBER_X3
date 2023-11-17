@@ -37,31 +37,31 @@ void SectionTABLES::parse() {
                 auto type = AbstractTable::toType(code);
                 switch(type) {
                 case AbstractTable::APPID:
-                    // tables[type].append(new AppId(this));
+                    // tables[type].append(new AppId{this});
                     break;
                 case AbstractTable::BLOCK_RECORD:
-                    // tables[type].append(new BlockRecord(this));
+                    // tables[type].append(new BlockRecord{this});
                     break;
                 case AbstractTable::DIMSTYLE:
-                    // tables[type].append(new DimStyle(this));
+                    // tables[type].append(new DimStyle{this});
                     break;
                 case AbstractTable::LAYER:
-                    tables[type].append(new Layer(this));
+                    tables[type].append(new Layer{this});
                     break;
                 case AbstractTable::LTYPE:
-                    // tables[type].append(new LType(this));
+                    // tables[type].append(new LType{this});
                     break;
                 case AbstractTable::STYLE:
-                    tables[type].append(new Style(this));
+                    tables[type].append(new Style{this});
                     break;
                 case AbstractTable::UCS:
-                    // tables[type].append(new UCS(this));
+                    // tables[type].append(new UCS{this});
                     break;
                 case AbstractTable::VIEW:
-                    // tables[type].append(new View(this));
+                    // tables[type].append(new View{this});
                     break;
                 case AbstractTable::VPORT:
-                    // tables[type].append(new VPort(this));
+                    // tables[type].append(new VPort{this});
                     break;
                 }
                 if(tables.contains(type)) {

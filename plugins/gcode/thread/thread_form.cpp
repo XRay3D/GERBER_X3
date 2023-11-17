@@ -442,13 +442,13 @@ void Form::editFile(GCode::File* file) {
     //        if (gcp_.params.contains(GCode::Params::Bridges)) {
     //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
     //            //            for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
-    //            //                brItem = new BridgeItem(lenght_, size_, side, brItem);
+    //            //                brItem = new BridgeItem{lenght_, size_, side, brItem};
     //            //                 App::grView().addItem(brItem);
     //            //                brItem->setPos(pos);
     //            //                brItem->lastPos_ = pos;
     //            //            }
     //            updateBridge();
-    //            brItem = new GiBridge(lenght_, size_, side, brItem);
+    //            brItem = new GiBridge{lenght_, size_, side, brItem};
     //            //        delete item;
     //        }
     //    }

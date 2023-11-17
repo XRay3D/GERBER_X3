@@ -150,7 +150,7 @@ void Handle::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             enum PType{ X, Y };
             // clang-format on
             auto dsbx = [h, this](PType type) {
-                auto ds = new DoubleSpinBox(this);
+                auto ds = new DoubleSpinBox{this};
                 ds->setDecimals(3);
                 ds->setRange(-1000, +1000);
                 ds->setSuffix(QObject::tr(" mm"));
@@ -161,9 +161,9 @@ void Handle::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 });
                 return ds;
             };
-            auto gl = new QFormLayout(this);
-            gl->addRow(new QLabel("X:", this), dsbx(X));
-            gl->addRow(new QLabel("Y:", this), dsbx(Y));
+            auto gl = new QFormLayout{this};
+            gl->addRow(new QLabel{"X:", this}, dsbx(X));
+            gl->addRow(new QLabel{"Y:", this}, dsbx(Y));
             gl->setContentsMargins(6, 6, 6, 6);
         }
         ~Dialog() = default;
@@ -244,7 +244,7 @@ void Handle::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         const Data redoPos;
         Handle* const handle;
     };
-    App::undoStack().push(new ShapeMoveCommand(std::move(lastHandlePos), this, scene()));
+    App::undoStack().push(new ShapeMoveCommand{std::move(lastHandlePos), this, scene()});
 }
 
 } // namespace Shapes

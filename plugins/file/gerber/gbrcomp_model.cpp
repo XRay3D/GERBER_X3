@@ -26,7 +26,7 @@ namespace Gerber::Comp {
 
 sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new sNode("")) {
+    , rootItem(new sNode{""}) {
     //    auto file = App::project().file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))
     //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
@@ -36,7 +36,7 @@ sModel::sModel(int fileId, QObject* parent)
     using pair = std::pair<int, sNode*>;
     std::map<QString, mvector<pair>> map;
 
-    auto unsorted = new sNode(GbrObj::tr("unsorted"));
+    auto unsorted = new sNode{GbrObj::tr("unsorted")};
 
     for(const auto& component: file->components()) {
         static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
@@ -45,10 +45,10 @@ sModel::sModel(int fileId, QObject* parent)
 
         if(auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
             if(map[CtreCapTo(c1)].empty())
-                map[CtreCapTo(c1)].emplace_back(-1, new sNode(CtreCapTo(c1)));
-            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode(component));
+                map[CtreCapTo(c1)].emplace_back(-1, new sNode{CtreCapTo{c1}});
+            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode{component});
         } else {
-            unsorted->append(new sNode(component));
+            unsorted->append(new sNode{component});
         }
     }
 

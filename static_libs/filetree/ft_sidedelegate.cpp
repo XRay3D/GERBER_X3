@@ -21,7 +21,7 @@ SideDelegate::SideDelegate(QObject* parent)
 }
 
 QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    auto* comboBox = new QComboBox(parent);
+    auto* comboBox = new QComboBox{parent};
     comboBox->addItems(tr("Top|Bottom").split('|'));
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);

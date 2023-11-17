@@ -28,7 +28,7 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
         //    case Model::Position:
         break;
     case Model::GapAngle: {
-        auto* dsbx = new DoubleSpinBox(parent);
+        auto* dsbx = new DoubleSpinBox{parent};
         dsbx->setRange(0, 360);
         dsbx->setSingleStep(15);
         dsbx->setDecimals(2);
@@ -37,7 +37,7 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
         return dsbx;
     }
     case Model::apThickness: {
-        auto* dsbx = new DoubleSpinBox(parent);
+        auto* dsbx = new DoubleSpinBox{parent};
         dsbx->setRange(0, 10);
         dsbx->setSingleStep(0.05);
         dsbx->setDecimals(2);
@@ -46,7 +46,7 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
         return dsbx;
     }
     case Model::GapCount: {
-        auto* sbx = new QSpinBox(parent);
+        auto* sbx = new QSpinBox{parent};
         sbx->setRange(0, 16);
         sbx->setSingleStep(1);
         sbx->setAlignment(Qt::AlignCenter);

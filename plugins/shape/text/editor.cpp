@@ -42,17 +42,17 @@ void Editor::setupUi() {
 
     {
         auto groupBox = new QWidget{this};
-        auto gridLayout = new QGridLayout(groupBox);
+        auto gridLayout = new QGridLayout{groupBox};
         gridLayout->setContentsMargins(6, 6, 6, 6);
-        gridLayout->addWidget(rb_tl = new QRadioButton(groupBox), 0, 0 + 1);
-        gridLayout->addWidget(rb_tc = new QRadioButton(groupBox), 0, 1 + 1);
-        gridLayout->addWidget(rb_tr = new QRadioButton(groupBox), 0, 2 + 1);
-        gridLayout->addWidget(rb_lc = new QRadioButton(groupBox), 1, 0 + 1);
-        gridLayout->addWidget(rb_cc = new QRadioButton(groupBox), 1, 1 + 1);
-        gridLayout->addWidget(rb_rc = new QRadioButton(groupBox), 1, 2 + 1);
-        gridLayout->addWidget(rb_bl = new QRadioButton(groupBox), 2, 0 + 1);
-        gridLayout->addWidget(rb_bc = new QRadioButton(groupBox), 2, 1 + 1);
-        gridLayout->addWidget(rb_br = new QRadioButton(groupBox), 2, 2 + 1);
+        gridLayout->addWidget(rb_tl = new QRadioButton{groupBox}, 0, 0 + 1);
+        gridLayout->addWidget(rb_tc = new QRadioButton{groupBox}, 0, 1 + 1);
+        gridLayout->addWidget(rb_tr = new QRadioButton{groupBox}, 0, 2 + 1);
+        gridLayout->addWidget(rb_lc = new QRadioButton{groupBox}, 1, 0 + 1);
+        gridLayout->addWidget(rb_cc = new QRadioButton{groupBox}, 1, 1 + 1);
+        gridLayout->addWidget(rb_rc = new QRadioButton{groupBox}, 1, 2 + 1);
+        gridLayout->addWidget(rb_bl = new QRadioButton{groupBox}, 2, 0 + 1);
+        gridLayout->addWidget(rb_bc = new QRadioButton{groupBox}, 2, 1 + 1);
+        gridLayout->addWidget(rb_br = new QRadioButton{groupBox}, 2, 2 + 1);
         gridLayout->setColumnStretch(0, 1);
         gridLayout->setColumnStretch(4, 1);
         formLayout->addRow(new QLabel{TR("TextEditor", "Align:", nullptr), this}, groupBox);

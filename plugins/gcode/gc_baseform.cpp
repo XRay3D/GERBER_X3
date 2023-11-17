@@ -159,39 +159,39 @@ protected:
 BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     : QWidget(parent)
     , plugin{plugin}
-    , progressDialog(new QProgressDialog(this)) {
+    , progressDialog(new QProgressDialog{this}) {
 
-    auto vLayout = new QVBoxLayout(this);
-    vLayout->addWidget(ctrWidget = new QWidget(this));
-    vLayout->addWidget(errWidget = new QWidget(this));
+    auto vLayout = new QVBoxLayout{this};
+    vLayout->addWidget(ctrWidget = new QWidget{this});
+    vLayout->addWidget(errWidget = new QWidget{this});
     vLayout->setContentsMargins(0, 0, 0, 0);
 
     { // Creator
-        content = new QWidget(ctrWidget);
+        content = new QWidget{ctrWidget};
 
-        dsbxDepth = new DepthForm(ctrWidget);
+        dsbxDepth = new DepthForm{ctrWidget};
         dsbxDepth->setObjectName("dsbxDepth");
 
-        leName = new QLineEdit(ctrWidget);
+        leName = new QLineEdit{ctrWidget};
         leName->setObjectName("leName");
 
-        pbClose = new QPushButton(tr("Close"), ctrWidget);
+        pbClose = new QPushButton{tr("Close"), ctrWidget};
         pbClose->setIcon(QIcon::fromTheme("window-close"));
         pbClose->setObjectName("pbClose");
 
-        pbCreate = new QPushButton(tr("Create"), ctrWidget);
+        pbCreate = new QPushButton{tr("Create"), ctrWidget};
         pbCreate->setIcon(QIcon::fromTheme("document-export"));
         pbCreate->setObjectName("pbCreate");
         connect(pbCreate, &QPushButton::clicked, this, &BaseForm::computePaths);
 
         auto line = [this] {
-            auto line = new QFrame(ctrWidget);
+            auto line = new QFrame{ctrWidget};
             line->setFrameShadow(QFrame::Plain);
             line->setFrameShape(QFrame::HLine);
             return line;
         };
 
-        grid = new QGridLayout(ctrWidget);
+        grid = new QGridLayout{ctrWidget};
         grid->setContentsMargins(6, 6, 6, 6);
         grid->setSpacing(6);
 
@@ -202,18 +202,18 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
         grid->addWidget(line(),                        ++row, 0, rowSpan, columnSpan); // row 1
         grid->addWidget(content,                       ++row, 0, rowSpan, columnSpan); // row 2
         grid->addWidget(line(),                        ++row, 0, rowSpan, columnSpan); // row 3
-        grid->addWidget(new QLabel(tr("Name:"), this), ++row, 0);                      // row 4
+        grid->addWidget(new QLabel{tr("Name:"), this}, ++row, 0);                      // row 4
         grid->addWidget(leName,                          row, 1);                      // row 4
         grid->addWidget(pbCreate,                      ++row, 0, rowSpan, columnSpan); // row 5
         grid->addWidget(pbClose,                       ++row, 0, rowSpan, columnSpan); // row 6
-        grid->addWidget(new QWidget(this),             ++row, 0, rowSpan, columnSpan); // row 7
+        grid->addWidget(new QWidget{this},             ++row, 0, rowSpan, columnSpan); // row 7
         // clang-format on
         grid->setRowStretch(row, 1);
     }
     { // On Error
-        auto grid = new QVBoxLayout(errWidget);
-        grid->addWidget(errTable = new TableView(errWidget));
-        grid->addWidget(errBtnBox = new QDialogButtonBox(errWidget));
+        auto grid = new QVBoxLayout{errWidget};
+        grid->addWidget(errTable = new TableView{errWidget});
+        grid->addWidget(errBtnBox = new QDialogButtonBox{errWidget});
 
         errBtnBox->setObjectName(QString::fromUtf8("errBtnBox"));
         errBtnBox->setOrientation(Qt::Horizontal);
@@ -435,7 +435,7 @@ void BaseForm::errorHandler(int) {
 
     std::ranges::for_each(creator_->items, [](auto i) { App::grView().addItem(i); });
 
-    errTable->setModel(new ErrorModel(std::move(creator_->items), errTable));
+    errTable->setModel(new ErrorModel{std::move(creator_->items), errTable});
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 

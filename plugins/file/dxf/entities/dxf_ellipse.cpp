@@ -59,7 +59,7 @@ Ellipse::Ellipse(SectionParser* sp)
 //        }
 //        QPointF rad(length, length * ratioOfMinorAxisToMajorAxis);
 //        path.arcTo(QRectF(-rad, +rad), -qRadiansToDegrees(startParameter), -aspan);
-//        //        auto item(new QGraphicsPathItem(path));
+//        //        auto item(new QGraphicsPathItem{path});
 //        //        item->setPen(QPen(color(), 0.0));
 //        //        item->setBrush(Qt::NoBrush);
 //        //        item->setRotation(angle);

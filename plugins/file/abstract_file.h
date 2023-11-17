@@ -307,7 +307,7 @@ public:
         setWindowTitle(tr("Affine Transform"));
 
         for(auto& dsbx: dsbx)
-            dsbx = new DoubleSpinBox(this);
+            dsbx = new DoubleSpinBox{this};
 
         dsbx[Ang]->setRange(-360, +360);
         dsbx[Ang]->setSuffix(tr(" °"));
@@ -319,7 +319,7 @@ public:
         dsbx[TrY]->setSuffix(tr(" mm"));
 
         // QPushButton button(tr("Apply"), &d);
-        // layout.addRow(new QWidget(&d), &button);
+        // layout.addRow(new QWidget{&d), &button};
         resize({0, 0});
 
         auto transform = files_.front()->transform();
@@ -336,7 +336,7 @@ public:
         for(auto& dsbx: dsbx)
             connect(dsbx, &QDoubleSpinBox::valueChanged, this, &TransformDialog::setTransform);
 
-        auto buttonBox = new QDialogButtonBox(this);
+        auto buttonBox = new QDialogButtonBox{this};
         buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
         buttonBox->setGeometry(QRect(30, 240, 341, 32));
         buttonBox->setOrientation(Qt::Horizontal);
@@ -345,12 +345,12 @@ public:
         connect(buttonBox, &QDialogButtonBox::accepted, this, &TransformDialog::accept);
         connect(buttonBox, &QDialogButtonBox::rejected, this, &TransformDialog::reject);
 
-        auto layout = new QFormLayout(this);
-        layout->addRow(new QLabel(tr("Angle:"), this), dsbx[Ang]);
-        layout->addRow(new QLabel(tr("Translate X:"), this), dsbx[TrX]);
-        layout->addRow(new QLabel(tr("Translate Y:"), this), dsbx[TrY]);
-        layout->addRow(new QLabel(tr("Scale X:"), this), dsbx[ScX]);
-        layout->addRow(new QLabel(tr("Scale Y:"), this), dsbx[ScY]);
+        auto layout = new QFormLayout{this};
+        layout->addRow(new QLabel{tr("Angle:"), this}, dsbx[Ang]);
+        layout->addRow(new QLabel{tr("Translate X:"), this}, dsbx[TrX]);
+        layout->addRow(new QLabel{tr("Translate Y:"), this}, dsbx[TrY]);
+        layout->addRow(new QLabel{tr("Scale X:"), this}, dsbx[ScX]);
+        layout->addRow(new QLabel{tr("Scale Y:"), this}, dsbx[ScY]);
         layout->setLabelAlignment(Qt::AlignRight);
         layout->addRow(buttonBox);
 

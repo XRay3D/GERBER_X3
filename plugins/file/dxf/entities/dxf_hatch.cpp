@@ -127,7 +127,7 @@ void Hatch::parse(CodeData& code) {
             edgeType = code;
             switch(edgeType) {
             case Line: { // 1
-                auto line = new LineEdge(edgeType);
+                auto line = new LineEdge{edgeType};
                 edges[edges.size() - 1].push_back(line);
                 for(int i = 0; i < 4; ++i) {
                     code = sp->nextCode();

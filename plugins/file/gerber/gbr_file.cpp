@@ -259,7 +259,7 @@ void File::initFrom(AbstractFile* file_) {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Node(this);
+    return node_ ? node_ : node_ = new Node{this};
 }
 
 QIcon File::icon() const {
@@ -317,7 +317,7 @@ void File::read(QDataStream& stream) {
 void File::createGi() {
     if constexpr(1) { // fill copper
         for(Paths& paths: groupedPaths()) {
-                Gi::Item* item = new Gi::DataFill(paths, this);
+                Gi::Item* item = new Gi::DataFill{paths, this};
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();
@@ -325,7 +325,7 @@ void File::createGi() {
     if constexpr(1) { // add components
         for(const Comp::Component& component: qAsConst(components_))
             if(!component.referencePoint().isNull())
-                itemGroups_[Components]->push_back(new Comp::Item(component, this));
+                itemGroups_[Components]->push_back(new Comp::Item{component, this});
         itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr(1) { // add aperture paths
@@ -358,16 +358,16 @@ void File::createGi() {
                         path.push_back(path.front());
                         if(!Settings::skipDuplicates()) {
                             checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new Gi::DataPath(checkList.front(), this));
+                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{checkList.front(), this});
                         } else if(!contains(path)) {
                             checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new Gi::DataPath(checkList.front(), this));
+                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{checkList.front(), this});
                         }
                     }
                 } else if(!Settings::skipDuplicates()) {
-                    itemGroups_[ApPaths]->push_back(new Gi::DataPath(go.path, this));
+                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{go.path, this});
                 } else if(!contains(go.path)) {
-                    itemGroups_[ApPaths]->push_back(new Gi::DataPath(go.path, this));
+                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{go.path, this});
                     checkList.push_front(go.path);
                 }
             }

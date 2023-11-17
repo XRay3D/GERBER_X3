@@ -100,7 +100,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     for(Hole& hole: *this)
-        itemGroup()->push_back(hole.item = new Gi::Drill(hole.state.path.size() ? Path{hole.state.path} : Path{hole.state.pos}, hole.state.currentToolDiameter(), this, hole.state.toolId));
+        itemGroup()->push_back(hole.item = new Gi::Drill{hole.state.path.size() ? Path{hole.state.path} : Path{hole.state.pos}, hole.state.currentToolDiameter(), this, hole.state.toolId});
     itemGroup()->setVisible(true);
 }
 
@@ -111,7 +111,7 @@ void File::initFrom(AbstractFile* file) {
 }
 
 FileTree::Node* File::node() {
-    return node_ ? node_ : node_ = new Excellon::Node(this);
+    return node_ ? node_ : node_ = new Excellon::Node{this};
 }
 
 mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {

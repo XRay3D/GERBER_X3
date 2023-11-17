@@ -30,7 +30,7 @@ AttDef::AttDef(SectionParser* sp)
 //             for (int c = 0; c < i->colCount; ++c) {
 //                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //                 QPointF rad(radius, radius);
-//                 auto item = new ArcItem2(this, i->color());
+//                 auto item = new ArcItem2{this, i->color()};
 //                 scene->addItem(item);
 //                 //                item->setToolTip(layerName);
 //                 i->transform(item, tr);
@@ -38,7 +38,7 @@ AttDef::AttDef(SectionParser* sp)
 //             }
 //         }
 //     } else {
-//         auto item = new ArcItem2(this, color());
+//         auto item = new ArcItem2{this, color()};
 //         scene->addItem(item);
 //         attachToLayer(item);
 //     }
