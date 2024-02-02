@@ -1,9 +1,9 @@
 [submodule "third_party/compile-time-regular-expressions"]
-        path = third_party/compile-time-regular-expressions
+        path = third_party/ctre
 	url = git@github.com:hanickadot/compile-time-regular-expressions.git
 [submodule "third_party/pfr_non_boost"]
-        path = third_party/pfr_non_boost
+        path = third_party/pfr
 	url = git@github.com:apolukhin/pfr_non_boost.git
 [submodule "third_party/Clipper2"]
-        path = third_party/Clipper2
+        path = third_party/clipper2
         url = git@github.com:XRay3D/Clipper2.git
