@@ -1,0 +1,32 @@
+{
+  "version": 3,
+  "configurePresets": [
+    {
+      "name": "HabrPresetName",
+      "displayName": "GoodPreset",
+      "generator": "Ninja",
+      "binaryDir": "${sourceDir}/../build",
+      "cacheVariables": {
+        "CMAKE_BUILD_TYPE": ["Debug", "Release"]
+      },
+      "environment": {
+        "PATH": "/home/user/Qt/5.15.2/gcc_64/lib/cmake/Qt5",
+        "PATH_": "/home/user/Qt/6.6.0/gcc_64/lib/cmake/Qt6"
+      }
+    }
+  ],
+  "buildPresets": [
+    {
+      "name": "debug",
+      "displayName": "Ninja Debug",
+      "configurePreset": "HabrPresetName",
+      "configuration": "Debug"
+    } ,
+    {
+      "name": "release",
+      "displayName": "Ninja Release",
+      "configurePreset": "HabrPresetName",
+      "configuration": "Release"
+    }
+  ]
+}

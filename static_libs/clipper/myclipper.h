@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "Clipper2Lib/include/clipper2/clipper.h"
+#include <clipper2/clipper.h>
 // #include "clipper.hpp"
 #include <QDebug>
 #include <QIcon>
