@@ -1,12 +1,9 @@
-[submodule "external_dependencies/compile-time-regular-expressions"]
-	path = external_dependencies/compile-time-regular-expressions
+[submodule "third_party/compile-time-regular-expressions"]
+        path = third_party/compile-time-regular-expressions
 	url = git@github.com:hanickadot/compile-time-regular-expressions.git
-[submodule "external_dependencies/pfr_non_boost"]
-	path = external_dependencies/pfr_non_boost
+[submodule "third_party/pfr_non_boost"]
+        path = third_party/pfr_non_boost
 	url = git@github.com:apolukhin/pfr_non_boost.git
-[submodule "external_dependencies/Clipper2"]
-	path = external_dependencies/Clipper2
-	url = git@github.com:AngusJohnson/Clipper2.git
-[submodule "external_dependencies/ChaiScript"]
-	path = external_dependencies/ChaiScript
-	url = git@github.com:ChaiScript/ChaiScript.git
+[submodule "third_party/Clipper2"]
+        path = third_party/Clipper2
+        url = git@github.com:XRay3D/Clipper2.git
