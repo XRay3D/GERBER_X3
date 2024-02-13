@@ -16,6 +16,8 @@
 #include "graphicsview.h"
 #include "edid.h"
 #include "gi.h"
+#include "gi_drill.h"
+#include "gi_datasolid.h"
 #include "mainwindow.h"
 #include "myclipper.h"
 #include "project.h"
@@ -45,6 +47,7 @@
 #include <QDrag>
 #include <QDragEnterEvent>
 #include <QMimeData>
+#include <QMenu>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -550,6 +553,10 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             // FIXME           scene_->setCross2(point);
             emit mouseClickR(point);
         }
+
+        QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
+        if (item && ( item->type() == GiType::Drill || item->type() == GiType::DataSolid))
+            GiToShapeEvent(event, item);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
@@ -575,6 +582,57 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             }
         }
     }
+}
+
+void GraphicsView::GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item){
+    QPointF center, radius, rect;
+    qreal maxX = -1000000, maxY = -1000000;
+
+    if (item->type() == GiType::Drill) {
+        GiDrill* gitem = dynamic_cast<GiDrill*>(item);
+
+        center = item->boundingRect().center();
+        radius = QPointF{ gitem->diameter() / 2, 0 };
+        rect = QPointF{ gitem->diameter() / 2, gitem->diameter() / 2};
+    }
+
+    if (item->type() == GiType::DataSolid) {
+        GiDataSolid* ditem = dynamic_cast<GiDataSolid*>(item);
+        qreal distance = 0;
+        center = item->boundingRect().center();
+
+        for (const auto& paths : ditem->getPaths()) {
+            for (const auto& path : paths) {
+                qreal x = path.X / 100000.;
+                qreal y = path.Y / 100000.;
+
+                QPointF poi(x, y);
+                distance = std::max(distance, std::sqrt(std::pow(poi.x() - center.x(), 2) + std::pow(poi.y() - center.y(), 2)));
+                maxX = std::max(maxX, poi.x());
+                maxY = std::max(maxY, poi.y());
+            }
+        }
+ 
+        radius = QPointF{ distance, 0 };
+        rect = QPointF(maxX, maxY) - center;
+    }
+
+    QMenu menu;
+    QAction makeCircle(QObject::tr("Circle from Item"), &menu);
+    QAction makeRect(QObject::tr("Rectangle from Item"), &menu);
+    menu.addAction(&makeCircle);
+    menu.addAction(&makeRect);
+
+    QObject::connect(&makeCircle, &QAction::triggered, [&center, &radius]() {
+        App::project()->makeShapeCircle(center, center + radius);
+    });
+
+    QObject::connect(&makeRect, &QAction::triggered, [&center, &rect]() {
+        App::project()->makeShapeRectangle(center - rect, center + rect);
+    });
+
+    menu.exec(event->globalPos());
+    scene()->update();
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
