@@ -429,7 +429,7 @@ void Form::createFile() {
                     else
                         pathsMap[row.toolId].paths.push_back(item->paths().front());
                 }            
-            model->setCreate(i++, !pathsMap.contains(row.toolId));
+                model->setCreate(i++, !pathsMap.contains(row.toolId));
             }
         }
 
