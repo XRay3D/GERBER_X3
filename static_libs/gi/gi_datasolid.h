@@ -28,6 +28,7 @@ public:
     int type() const override;
     // GraphicsItem interface
     void redraw() override;
+    Paths& getPaths();
     void setPaths(Paths paths, int alternate = {}) override;
     // GraphicsItem interface
     void changeColor() override;

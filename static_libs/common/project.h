@@ -88,6 +88,8 @@ public:
     int contains(const QString& name);
 
     // Shape
+    int makeShapeCircle(const QPointF& center, const QPointF& rad);
+    int makeShapeRectangle(const QPointF& center, const QPointF& rect);
     int addShape(Shapes::Shape* const shape);
     Shapes::Shape* shape(int id);
     void deleteShape(int id);
