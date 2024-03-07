@@ -95,6 +95,10 @@ MainWindow::MainWindow(QWidget* parent)
         ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
     });
 
+    connect(ui.graphicsView, &GraphicsView::mouseMove2, [this](const QPointF& point, const QPointF& gpoint) {
+        ui.statusbar->showMessage(QString("Home: X = %1, Y = %2\t\t\t\tZero: X = %3, Y = %4").arg(point.x()).arg(point.y()).arg(gpoint.x()).arg(gpoint.y()));
+    });
+
     ui.treeView->setModel(new FileTree::Model(ui.treeView));
 
     connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);

@@ -52,6 +52,7 @@ public:
 signals:
     void fileDroped(const QString&);
     void mouseMove(const QPointF&);
+    void mouseMove2(const QPointF&, const QPointF&);
     void mouseClickR(const QPointF&);
     void mouseClickL(const QPointF&);
 

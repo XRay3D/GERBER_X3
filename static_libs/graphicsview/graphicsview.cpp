@@ -670,7 +670,12 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
     if (ruler_ && rulerCtr & 0x1)
         rulPt2 = point;
 
-    emit mouseMove(point);
+    // расчёт смещения для нулевых координат
+    QPointF hpoint = App::project()->homePos();
+    QPointF zpoint = App::project()->zeroPos();
+    QPointF gpoint = hpoint - zpoint + point;
+
+    emit mouseMove2(point, gpoint);
     scene()->update();
 }
 
