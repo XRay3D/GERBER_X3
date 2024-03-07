@@ -84,18 +84,18 @@ void Shape::redraw() {
         break;
     }
 
-    paths_.front() = Path{
-        handlers[Point1]->pos(),
-        handlers[Point2]->pos(),
-        handlers[Point3]->pos(),
-        handlers[Point4]->pos(),
-        handlers[Point1]->pos(),
+    paths_.front() = {
+        ~handlers[Point1]->pos(),
+        ~handlers[Point2]->pos(),
+        ~handlers[Point3]->pos(),
+        ~handlers[Point4]->pos(),
+        ~handlers[Point1]->pos(),
     };
 
     if(Area(paths_.front()) < 0)
         ReversePath(paths_.front());
     shape_ = QPainterPath();
-    shape_.addPolygon(paths_.front());
+    shape_.addPolygon(~paths_.front());
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
 

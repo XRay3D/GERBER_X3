@@ -35,7 +35,7 @@
 #include <QPrinter>
 #include <QtWidgets>
 
-static auto PointConverter = QMetaType::registerConverter(&Point::toString);
+// static auto PointConverter = QMetaType::registerConverter(&Point::toString); NOTE
 
 inline constexpr auto G_CODE_PROPERTIES = md5::hash32("GCodeProperties");
 
@@ -473,7 +473,7 @@ void MainWindow::createActionsShape() {
         Paths clipPaths;
         for(QGraphicsItem* clipItem: selectedItems)
             if(clipItem->type() >= Gi::Type::ShCircle)
-                clipPaths.append(static_cast<Gi::Item*>(clipItem)->paths());
+                clipPaths += static_cast<Gi::Item*>(clipItem)->paths();
 
         QList<Gi::Item*> rmi;
         for(QGraphicsItem* item: selectedItems) {
@@ -539,8 +539,7 @@ void MainWindow::saveGCodeFile(int32_t id) {
     file->save(name);
 }
 
-void MainWindow::saveGCodeFiles() {
-}
+void MainWindow::saveGCodeFiles() { }
 
 void MainWindow::saveSelectedGCodeFiles() {
 
@@ -912,8 +911,6 @@ const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
 
 QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
 
-
-
 void MainWindow::loadFile(const QString& fileName) {
     if(!QFile(fileName).exists())
         return;
@@ -943,8 +940,6 @@ void MainWindow::loadFile(const QString& fileName) {
 #if __has_include("xrstyle.h") && 0
 #include "xrstyle.h"
 #endif
-
-
 
 void MainWindow::open() {
     QStringList files(QFileDialog::getOpenFileNames(

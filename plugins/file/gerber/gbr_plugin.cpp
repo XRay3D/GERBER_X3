@@ -49,7 +49,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 QIcon drawApertureIcon(AbstractAperture* aperture) {
     QPainterPath painterPath;
     for(const auto& polygon: aperture->draw(State()))
-        painterPath.addPolygon(polygon);
+        painterPath.addPolygon(~polygon);
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
     const QRectF rect = painterPath.boundingRect();
     double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());

@@ -364,7 +364,7 @@ Path64 RectClip::Execute(const Path64& path) {
     if(first_cross_ == Location::Inside) {
         if(starting_loc == Location::Inside)
             return path;
-        Rect64 tmp_rect = Bounds(path);
+        Rect64 tmp_rect = GetBounds(path);
         if(tmp_rect.Contains(rect_) && Path1ContainsPath2(path, rectPath_) != PointInPolygonResult::IsOutside)
             return rectPath_;
         else

@@ -13,6 +13,8 @@
 #include <QTimer>
 #include <cmath>
 
+class MainWindow;
+
 namespace Gi {
 
 class DataPath : public Item {

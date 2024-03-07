@@ -55,12 +55,12 @@ double DxfGo::rotationAngle() const { return rotationAngle_; }
 
 void DxfGo::setScale(double scaleX, double scaleY) {
     scaleX_ = scaleX, scaleY_ = scaleY;
-    auto scale = [](Path& path, double sx, double sy, const Point& center = {}) {
+    auto scale = [](Path& path, double sx, double sy, const Point& center = Point{}) {
         const bool fl = Area(path) < 0;
         for(Point& pt: path) {
-            const double dAangle = (pi * 2) - center.angleRadTo(pt);
-            const double length = center.distTo(pt);
-            pt = Point(static_cast<Point::Type>(cos(dAangle) * length * sx), static_cast<Point::Type>(sin(dAangle) * length * sy));
+            const double dAangle = (pi * 2) - angleRadTo(center, pt);
+            const double length = distTo(center, pt);
+            pt = Point(static_cast</*Point::Type*/ int32_t>(cos(dAangle) * length * sx), static_cast</*Point::Type*/ int32_t>(sin(dAangle) * length * sy));
             pt.x += center.x;
             pt.y += center.y;
         }
@@ -68,9 +68,9 @@ void DxfGo::setScale(double scaleX, double scaleY) {
             ReversePath(path);
     };
 
-    scale(path, scaleX_, scaleY_, {} /*pos_*/);
+    scale(path, scaleX_, scaleY_, Point{} /*pos_*/);
     for(auto& path: fill)
-        scale(path, scaleX_, scaleY_, {} /*pos_*/);
+        scale(path, scaleX_, scaleY_, Point{} /*pos_*/);
 }
 
 std::tuple<double, double> DxfGo::scale() const { return {scaleX_, scaleY_}; }
@@ -80,13 +80,13 @@ double DxfGo::scaleX() const { return scaleX_; }
 double DxfGo::scaleY() const { return scaleY_; }
 
 void DxfGo::setPos(QPointF pos) {
-    ::GraphicObject::pos = pos;
-    TranslatePath(::GraphicObject::path, pos);
+    ::GraphicObject::pos = ~pos;
+    TranslatePath(::GraphicObject::path, ~pos);
     for(auto& path: fill)
         TranslatePath(path, ::GraphicObject::pos);
 }
 
-QPointF DxfGo::pos() const { return ::GraphicObject::pos; }
+QPointF DxfGo::pos() const { return ~::GraphicObject::pos; }
 
 const Entity* DxfGo::entity() const { return file_ ? file_->entities().at(entityId_).get() : nullptr; }
 

@@ -95,9 +95,9 @@ void Shape::redraw() {
     path.clear();
     for(size_t i{1}, e = handlers.size(); i < e; ++i)
         if(handlers[i]->hType() == Handle::Corner)
-            path.emplace_back((handlers[i]->pos()));
-    shape_ = QPainterPath();
-    shape_.addPolygon(path);
+            path.emplace_back(~handlers[i]->pos());
+    shape_ = {};
+    shape_.addPolygon(~path);
     //    rect_ = shape_.boundingRect();
     if(handlers.size() > 4) {
         QPointF c(centroidFast());
@@ -172,16 +172,16 @@ QPointF Shape::centroidFast() {
     // For all vertices except last
     size_t i = 0;
     for(; i < vertices.size() - 1; ++i) {
-        QPointF p0(vertices[i]);
-        QPointF p1(vertices[i + 1]);
+        QPointF p0{vertices[i]};
+        QPointF p1{vertices[i + 1]};
         a = p0.x() * p1.y() - p1.x() * p0.y();
         signedArea += a;
         centroid += (p0 + p1) * a;
     }
     // Do last vertex separately to avoid performing an expensive
     // modulus operation in each iteration.
-    QPointF p0(vertices[i]);
-    QPointF p1(vertices[0]);
+    QPointF p0{vertices[i]};
+    QPointF p1{vertices[0]};
     a = p0.x() * p1.y() - p1.x() * p0.y();
     signedArea += a;
     centroid += (p0 + p1) * a;

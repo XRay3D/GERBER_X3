@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "datastream.h"
 #include <any>
 #include <myclipper.h>
 
@@ -111,7 +112,7 @@ struct GraphicObject {
 
     Paths fill;
     Path path;
-    Point pos{std::numeric_limits<Point::Type>::lowest(), std::numeric_limits<Point::Type>::lowest()};
+    Point pos{std::numeric_limits</*Point::Type*/ int32_t>::lowest(), std::numeric_limits</*Point::Type*/ int32_t>::lowest()};
     QByteArray name;
     Type type{Null};
     int32_t id{-1};
@@ -125,10 +126,10 @@ struct GraphicObject {
 };
 
 inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    for (auto& path: go.fill)
-        path = t.map(path);
-    go.path = t.map(go.path);
-    go.pos = t.map(go.pos);
+    for(auto& path: go.fill)
+        path = ~t.map(~path);
+    go.path = ~t.map(~go.path);
+    go.pos = ~t.map(~go.pos);
     return go;
 }
 
@@ -149,12 +150,12 @@ struct Criteria {
     bool positiveOnly{}; /// NOTE
     bool test(const GraphicObject& go) const {
         bool fl{};
-        for (auto type: types)
-            if ((fl = go.test(type)))
+        for(auto type: types)
+            if((fl = go.test(type)))
                 break;
-        if (fl && !length.isNull())
+        if(fl && !length.isNull())
             fl &= length(Clipper2Lib::Length(go.path));
-        if (fl && !area.isNull())
+        if(fl && !area.isNull())
             fl &= area(Clipper2Lib::Area(go.fill));
         return fl;
     }

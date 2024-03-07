@@ -95,7 +95,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(i += k, this, [this] { App::grView().zoomFit(); });
         }
 
-        if (1) {
+        if (0) {
             constexpr auto THREAD = md5::hash32("Thread");
             QTimer::singleShot(i += k, this, [this, THREAD] { toolpathActions[THREAD]->toggle(); });
 

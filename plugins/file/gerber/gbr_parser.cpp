@@ -320,7 +320,7 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
     return d;
 }
 
-bool Parser::parseNumber(QString Str, Point::Type& val, int integer, int decimal) {
+bool Parser::parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer, int decimal) {
     bool flag = false;
     int sign = 1;
     if(!Str.isEmpty()) {
@@ -357,7 +357,7 @@ bool Parser::parseNumber(QString Str, Point::Type& val, int integer, int decimal
 #endif
             }
         }
-        val = static_cast<Point::Type>(toDouble(Str, true) * pow(10.0, -decimal) * sign);
+        val = static_cast</*Point::Type*/ int32_t>(toDouble(Str, true) * pow(10.0, -decimal) * sign);
         return true;
     }
     return flag;
@@ -373,7 +373,7 @@ void Parser::addPath() {
 
     if(aperFunctionMap.contains(state_.aperture())
         && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline)
-        components[refDes].addFootprint(path_);
+        components[refDes].addFootprint(~path_);
 
     switch(state_.region()) {
     case On:
@@ -473,10 +473,10 @@ void Parser::addFlash() {
     if(aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
         switch(aperFunctionMap[state_.aperture()].function_->function) {
         case Attr::Aperture::ComponentPin:
-            components[refDes].pins().back().pos = state_.curPos();
+            components[refDes].pins().back().pos = ~state_.curPos();
             break;
         case Attr::Aperture::ComponentMain:
-            components[refDes].setReferencePoint(state_.curPos());
+            components[refDes].setReferencePoint(~state_.curPos());
             break;
         default:
             break;
@@ -511,7 +511,7 @@ Point Parser::parsePosition(const QString& xyStr) {
     auto data{toU16StrView(xyStr)};
     static constexpr ctll::fixed_string ptrnPosition(R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"); // fixed_string("(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+");
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
-        Point::Type tmp = 0;
+        /*Point::Type*/ int32_t tmp = 0;
         if(x && parseNumber(CtreCapTo(x), tmp, file->format().xInteger, file->format().xDecimal))
             file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().x = tmp : state_.curPos().x += tmp;
         tmp = 0;
@@ -544,8 +544,8 @@ Path Parser::arc(const Point& center, double radius, double start, double stop) 
     for(int i = 0; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
         points.emplace_back(Point(
-            static_cast<Point::Type>(center.x + radius * cos(theta)),
-            static_cast<Point::Type>(center.y + radius * sin(theta))));
+            static_cast</*Point::Type*/ int32_t>(center.x + radius * cos(theta)),
+            static_cast</*Point::Type*/ int32_t>(center.y + radius * sin(theta))));
     }
 
     return points;
@@ -769,7 +769,7 @@ void Parser::closeStepRepeat() {
     addPath();
     for(int y = 0; y < stepRepeat_.y; ++y) {
         for(int x = 0; x < stepRepeat_.x; ++x) {
-            const Point pt(static_cast<Point::Type>(stepRepeat_.i * x), static_cast<Point::Type>(stepRepeat_.j * y));
+            const Point pt(static_cast</*Point::Type*/ int32_t>(stepRepeat_.i * x), static_cast</*Point::Type*/ int32_t>(stepRepeat_.j * y));
             for(GrObject& go: stepRepeat_.storage) {
                 Paths paths(go.fill);
                 for(Path& path: paths)
@@ -843,9 +843,9 @@ bool Parser::parseAttributes(const QString& gLine) {
                 cap[3].remove(i, 1);
             auto sl(cap[3].split(',')); // remove symbol "
             switch(int index = Comp::Component::value1(sl.first()); index) {
-            case Comp::Component::N:    // The CAD net name of a conducting object, e.g. Clk13.
+            case Comp::Component::N: // The CAD net name of a conducting object, e.g. Clk13.
                 break;
-            case Comp::Component::P:    // Pins
+            case Comp::Component::P: // Pins
                 components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}});
                 break;
             case Comp::Component::C:
@@ -915,7 +915,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     if(auto [whole, cg, cx, cy, ci, cj, cd] = ctre::match<ptrnCircularInterpolation>(data); whole) {
         if(!cg.size() && state_.gCode() != G02 && state_.gCode() != G03)
             return false;
-        Point::Type x = 0, y = 0, i = 0, j = 0;
+        /*Point::Type*/ int32_t x = 0, y = 0, i = 0, j = 0;
         cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = state_.curPos().x;
         cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = state_.curPos().y;
         parseNumber(CtreCapTo(ci), i, file->format().xInteger, file->format().xDecimal);
@@ -1030,7 +1030,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             return true;
             // break;
         }
-        path_.append(arcPolygon);
+        path_ += std::move(arcPolygon);
         return true;
     }
     return false;

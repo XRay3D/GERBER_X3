@@ -101,7 +101,7 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, Point::Type offset, bool skipFrame) {
+Pathss& Creator::groupedPaths(Grouping group, /*Point::Type*/ int32_t offset, bool skipFrame) {
     PolyTree polyTree;
     {
         Timer t("Union EvenOdd");
@@ -137,8 +137,8 @@ void Creator::grouping(Grouping group, PolyTree& node) {
         grouping(group, *child);
 }
 
-Path Creator::boundOfPaths(const Paths& paths, Point::Type k) const {
-    Rect rect(Bounds(paths));
+Path Creator::boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const {
+    Rect rect(GetBounds(paths));
     rect.bottom += k;
     rect.left -= k;
     rect.right += k;
@@ -165,7 +165,7 @@ void Creator::addRawPaths(Paths&& rawPaths) {
     for(size_t i{}; i < rawPaths.size(); ++i) {
         Point& pf = rawPaths[i].front();
         Point& pl = rawPaths[i].back();
-        if(rawPaths[i].size() > 3 && (pf == pl || pf.distTo(pl) < mergDist)) {
+        if(rawPaths[i].size() > 3 && (pf == pl || distTo(pf, pl) < mergDist)) {
             clipper.AddSubject({rawPaths[i]});
             rawPaths.erase(rawPaths.begin() + i--);
         }
@@ -176,7 +176,7 @@ void Creator::addRawPaths(Paths&& rawPaths) {
     for(Path& path: rawPaths) {
         Point& pf = path.front();
         Point& pl = path.back();
-        if(path.size() > 3 && (pf == pl || pf.distTo(pl) < mergDist))
+        if(path.size() > 3 && (pf == pl || distTo(pf, pl) < mergDist))
             clipper.AddSubject({path});
         else
             openSrcPaths.push_back(path);
@@ -194,7 +194,7 @@ void Creator::createGc(Params* gcp) {
     reset();
 
     if(gcp->closedPaths.size())
-        closedSrcPaths.append(std::move(gcp->closedPaths));
+        closedSrcPaths.insert(closedSrcPaths.end(), gcp->closedPaths.begin(), gcp->closedPaths.end());
     if(gcp->openPaths.size())
         addRawPaths(std::move(gcp->openPaths));
     if(gcp->supportPathss.size())
@@ -266,20 +266,20 @@ void Creator::stacking(Paths& paths) {
     /**************************************************************************************/
     // повернуть для уменшения дистанции между путями
     auto rotateDiest = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
-        std::forward_list<decltype(Path{}.indexOf(Point{}))> list;
+        std::forward_list<size_t> list;
         list.emplace_front(idx.first);
         for(size_t i = paths.size() - 1, index = idx.first; i; --i) {
             double minDist = std::numeric_limits<double>::max();
             Point point;
             for(Point pt: paths[i - 1]) {
-                double dist = pt.distTo(paths[i][index]);
+                double dist = distTo(pt, paths[i][index]);
                 if(minDist >= dist) {
                     minDist = dist;
                     point = pt;
                 }
             }
             if(minDist <= toolDiameter) {
-                list.emplace_front(paths[i - 1].indexOf(point));
+                list.emplace_front(indexOf(paths[i - 1], point));
                 index = list.front();
             } else
                 return false;
@@ -309,7 +309,7 @@ void Creator::stacking(Paths& paths) {
                 //                    const Point& ptd = returnPss.back().back()[id];
                 //                    for(size_t is {}; is < path.size(); ++is) {
                 //                        const Point& pts = path[is];
-                //                        const double l = ptd.distTo(pts);
+                //                        const double l = distTo(ptdpts);
                 //                        if(d >= l) {
                 //                            d = l;
                 //                            idx.first = id;
@@ -320,7 +320,7 @@ void Creator::stacking(Paths& paths) {
 
                 for(size_t iDst{}; auto ptd: returnPss.back().back()) {
                     for(size_t iSrc{}; auto pts: path) {
-                        if(const double l = ptd.distTo(pts); d >= l) {
+                        if(const double l = distTo(ptd, pts); d >= l) {
                             d = l;
                             idx.first = iDst;
                             idx.second = iSrc;
@@ -333,7 +333,7 @@ void Creator::stacking(Paths& paths) {
                 if(d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
                     returnPss.back().emplace_back(std::move(path)); // append to last Paths
                 else
-                    returnPss.push_back({std::move(path)});         // new Paths
+                    returnPss.push_back({std::move(path)}); // new Paths
             }
 
             for(size_t i{}; auto&& var: *node)
@@ -375,21 +375,21 @@ void Creator::mergeSegments(Paths& paths, double maxDist) {
                 Point pib = paths[i].back();
                 Point pjf = paths[j].front();
                 if(pib == pjf) {
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
-                    paths.erase(paths.begin() + j--);
+                    paths[i] += paths[j] | skipFront;
+                    paths -= j--;
                     continue;
                 }
                 Point pif = paths[i].front();
                 Point pjb = paths[j].back();
                 if(pif == pjb) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
-                    paths.erase(paths.begin() + i--);
+                    paths -= i--;
                     break;
                 }
                 if(pib == pjb) {
                     ReversePath(paths[j]);
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
-                    paths.erase(paths.begin() + j--);
+                    paths[i] += paths[j] | skipFront;
+                    paths -= j--;
                     continue;
                 }
             }
@@ -409,22 +409,22 @@ void Creator::mergeSegments(Paths& paths, double maxDist) {
                     break;
                 Point pib = paths[i].back();
                 Point pjf = paths[j].front();
-                if(pib.distTo(pjf) < maxDist) {
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
-                    paths.erase(paths.begin() + j--);
+                if(distTo(pib, pjf) < maxDist) {
+                    paths[i] += paths[j] | skipFront;
+                    paths -= j--;
                     continue;
                 }
                 Point pif = paths[i].front();
                 Point pjb = paths[j].back();
-                if(pif.distTo(pjb) < maxDist) {
+                if(distTo(pif, pjb) < maxDist) {
                     paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
-                    paths.erase(paths.begin() + i--);
+                    paths -= i--;
                     break;
                 }
-                if(pib.distTo(pjb) < maxDist) {
+                if(distTo(pib, pjb) < maxDist) {
                     ReversePath(paths[j]);
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
-                    paths.erase(paths.begin() + j--);
+                    paths[i] += paths[j] | skipFront;
+                    paths -= j--;
                     continue;
                 }
             }
@@ -439,8 +439,8 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
     size_t max;
 
     auto append = [&](size_t& i, size_t& j) {
-        paths[i].append(paths[j].mid(1));
-        paths.remove(j--);
+        paths[i] += paths[j] | skipFront; // paths[i].append(paths[j].mid(1));
+        paths -= j--;                     // paths.remove(j--;
     };
 
     do {
@@ -467,17 +467,17 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
                     append(i, j);
                     break;
                 } else if(maxDist > 0.0) {
-                    if /*  */ (paths[i].back().distTo(paths[j].back()) < maxDist) {
+                    if /*  */ (distTo(paths[i].back(), paths[j].back()) < maxDist) {
                         ReversePath(paths[j]);
                         append(i, j);
                         break; //
-                    } else if(paths[i].back().distTo(paths[j].front()) < maxDist) {
+                    } else if(distTo(paths[i].back(), paths[j].front()) < maxDist) {
                         append(i, j);
                         break; //
-                    } else if(paths[i].front().distTo(paths[j].back()) < maxDist) {
+                    } else if(distTo(paths[i].front(), paths[j].back()) < maxDist) {
                         append(j, i);
                         break;
-                    } else if(paths[i].front().distTo(paths[j].front()) < maxDist) {
+                    } else if(distTo(paths[i].front(), paths[j].front()) < maxDist) {
                         ReversePath(paths[j]);
                         append(j, i);
                         break;
@@ -576,7 +576,7 @@ bool Creator::checkMilling(SideOfMilling side) {
         std::for_each(std::execution::par, std::begin(frames), std::end(frames), [&](auto&& frame) {
             incCurrent();
             QPainterPath F;
-            F.addPolygon(frame);
+            F.addPolygon(~frame);
             for(auto&& srcPath: sources) {
                 if(intersect) {
                     //                    QPainterPath S;
@@ -636,16 +636,16 @@ bool Creator::checkMilling(SideOfMilling side) {
             mvector<QPainterPath> nonCutPPaths;
             srcPPaths.reserve(groupedPss.size());
             for(auto&& paths: groupedPss) {
-                srcPaths.append(paths);
+                srcPaths.insert(srcPaths.end(), paths.begin(), paths.end()); //  srcPaths.append(paths);
                 srcPPaths.push_back({});
                 for(auto&& path: paths)
-                    srcPPaths.back().addPolygon(path);
+                    srcPPaths.back().addPolygon(~path);
             }
             nonCutPaths = nonCuts(mill(srcPaths, +toolRadius, -toolRadius - k), srcPaths);
             nonCutPPaths.reserve(nonCutPaths.size());
             for(auto&& frPath: nonCutPaths) {
                 nonCutPPaths.push_back({});
-                nonCutPPaths.back().addPolygon(frPath);
+                nonCutPPaths.back().addPolygon(~frPath);
             }
 
             std::mutex m;
@@ -662,14 +662,14 @@ bool Creator::checkMilling(SideOfMilling side) {
                         set.emplace(&srcPath);
                     }
                 }
-                if(set.size() < 2 && Area<Point::Type>(nonCut.toFillPolygon()) < testArea)
+                if(set.size() < 2 && Area(~nonCut.toFillPolygon()) < testArea)
                     nonCut.clear();
             });
 
             nonCutPaths.clear();
             for(auto&& frPath: nonCutPPaths)
                 if(!frPath.isEmpty())
-                    nonCutPaths.emplace_back(frPath.toFillPolygon());
+                    nonCutPaths.emplace_back(~frPath.toFillPolygon());
             std::erase_if(nonCutPaths, [](Path& path) { return path.empty(); }); // убрать пустые
             std::ranges::for_each(nonCutPaths, [this](auto&& path) {
                 items.push_back(new Gi::Error{{path}, Area(path) * dScale * dScale});
@@ -687,7 +687,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             std::for_each(std::execution::par, std::begin(frPaths), std::end(frPaths), [](auto&& frPath) {
                 ClipperOffset offset(uScale);
                 offset.AddPath(frPath, JoinType::Round, EndType::Polygon);
-                frPath = offset.Execute(100).front();
+                frPath = InflatePaths(frPath, 100, JoinType::Round, EndType::Polygon).front(); // offset.Execute(100).front();
             });
 
             //        ClipperOffset offset(uScale);
@@ -752,12 +752,12 @@ void Creator::setGcp(const Params& gcp) {
 Paths& Creator::sortB(Paths& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home().pos() + App::zero().pos());
+    Point startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = startPt.distTo(src[secondIdx].front());
+            const double length = distTo(startPt, src[secondIdx].front());
             if(destLen > length) {
                 destLen = length;
                 swapIdx = secondIdx;
@@ -773,15 +773,15 @@ Paths& Creator::sortB(Paths& src) {
 Paths& Creator::sortBeginEnd(Paths& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home().pos() + App::zero().pos());
+    Point startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
 
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = startPt.distTo(src[secondIdx].front());
-            const double lenLast = startPt.distTo(src[secondIdx].back());
+            const double lenFirst = distTo(startPt, src[secondIdx].front());
+            const double lenLast = distTo(startPt, src[secondIdx].back());
             if(lenFirst < lenLast) {
                 if(destLen > lenFirst) {
                     destLen = lenFirst;
@@ -808,7 +808,7 @@ Paths& Creator::sortBeginEnd(Paths& src) {
 Pathss& Creator::sortB(Pathss& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home().pos() + App::zero().pos());
+    Point startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t i{}; i < src.size(); ++i)
         if(src[i].empty())
             src.erase(src.begin() + i--);
@@ -816,7 +816,7 @@ Pathss& Creator::sortB(Pathss& src) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = startPt.distTo(src[secondIdx].front().front());
+            const double length = distTo(startPt, src[secondIdx].front().front());
             if(destLen > length) {
                 destLen = length;
                 swapIdx = secondIdx;
@@ -832,14 +832,14 @@ Pathss& Creator::sortB(Pathss& src) {
 Pathss& Creator::sortBeginEnd(Pathss& src) {
     qDebug(__FUNCTION__);
 
-    Point startPt(App::home().pos() + App::zero().pos());
+    Point startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
         bool reverse = false;
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = startPt.distTo(src[secondIdx].front().front());
-            const double lenLast = startPt.distTo(src[secondIdx].back().back());
+            const double lenFirst = distTo(startPt, src[secondIdx].front().front());
+            const double lenLast = distTo(startPt, src[secondIdx].back().back());
             if(lenFirst < lenLast) {
                 if(destLen > lenFirst) {
                     destLen = lenFirst;

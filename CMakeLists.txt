@@ -34,8 +34,10 @@ set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
 add_definitions(
-    -DQT_MESSAGELOGCONTEXT# qDebug()
+    -DQT_MESSAGELOGCONTEXT # qDebug()
     -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
+    -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a, const QStringBuilder<A, B> &b, QChar)
+
 )
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
@@ -65,17 +67,15 @@ endif()
 find_package(Boost)
 if (Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIR})
-    message(${Boost_INCLUDE_DIR})
-    add_definitions( "-D_USE_BOOST_" )
 else()
     message(FATAL_ERROR "Boost not found!!!")
 endif()
 
 set(INC_DIRS
-    external_dependencies/compile-time-regular-expressions/single-header
-    external_dependencies/pfr_non_boost/include
+    third_party/ctre/single-header/
+    third_party/clipper2/CPP/Clipper2Lib/include/
 
-    GGEasy
+    ggeasy
 
     plugins/file
     plugins/gcode
@@ -89,19 +89,13 @@ set(INC_DIRS
     static_libs/tooldatabase
 )
 
+add_subdirectory(third_party/clipper2/CPP)
+
 include_directories(${INC_DIRS})
-
-
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-
-# STYLE
-if(EXISTS style/XrStyle)
-    include_directories(style/XrStyle)
-    add_subdirectory(style/XrStyle)
-endif()
 
 # STATIC LIBS
 add_subdirectory(static_libs)
@@ -110,7 +104,7 @@ add_subdirectory(static_libs)
 add_subdirectory(plugins)
 
 # MAIN APP
-add_subdirectory(GGEasy)
+add_subdirectory(ggeasy)
 
 
 #add_subdirectory(ToolTest)

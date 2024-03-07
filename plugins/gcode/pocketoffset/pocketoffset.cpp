@@ -12,7 +12,7 @@
  *******************************************************************************/
 #include "pocketoffset.h"
 #include "project.h"
-#include <QStringBuilder>
+// #include <QStringBuilder>
 
 namespace PocketOffset {
 
@@ -43,12 +43,12 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     Paths cutAreaPaths;
 
     auto calculate = [&cutAreaPaths, steps, this](Paths&& paths) {
-        cutAreaPaths.append(InflatePaths(paths, -dOffset, JT::Round, ET::Polygon, uScale)); // inner
+        cutAreaPaths += InflatePaths(paths, -dOffset, JT::Round, ET::Polygon, uScale); // inner
         int counter = steps;
         do {
             if(counter == 1)
-                cutAreaPaths.append(InflatePaths(paths, dOffset, JT::Round, ET::Polygon, uScale)); // outer
-            returnPs.append(paths);
+                cutAreaPaths += InflatePaths(paths, dOffset, JT::Round, ET::Polygon, uScale); // outer
+            returnPs += paths;
             CleanPaths(paths, uScale * 0.001);
             paths = InflatePaths(paths, stepOver, JT::Miter, ET::Polygon, uScale);
         } while(paths.size() && --counter);
@@ -97,21 +97,21 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     Paths cutAreaPaths;
 
     if(gcp_.side() == GCode::Outer)
-        groupedPaths(GCode::Grouping::Cutoff, static_cast<Point::Type>(toolDiameter * 1.005));
+        groupedPaths(GCode::Grouping::Cutoff, static_cast</*Point::Type*/ int32_t>(toolDiameter * 1.005));
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
-    //dbgPaths(groupedPss, "groupedPss", Qt::red);
+    // dbgPaths(groupedPss, "groupedPss", Qt::red);
 
     setCurrent(0);
 
     for(Paths paths: groupedPss) {
         paths = InflatePaths(paths, -dOffset, JT::Round, ET::Polygon, uScale);
         // if (App::settings().gbrCleanPolygons()) CleanPaths(paths, uScale * 0.0005);
-        cutAreaPaths.append(paths);
+        cutAreaPaths += paths;
         do {
             CleanPaths(paths, uScale * 0.001);
-            returnPs.append(paths);
+            returnPs += paths;
             paths = InflatePaths(paths, -stepOver, JT::Miter, ET::Polygon, uScale);
         } while(paths.size());
     }
@@ -163,7 +163,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
             // "обтравочная" рамка для текущего инструмента и предыдущих УП
             Paths tmp = InflatePaths(fillPaths[i], -dOffset + uScale * 0.001, JT::Round, ET::Polygon, uScale);
             // объединение рамок
-            clipFrame = C2::Union(clipFrame, tmp, FR::EvenOdd);
+            clipFrame = CL2::Union(clipFrame, tmp, FR::EvenOdd);
         }
 
         Paths cutAreaPaths;
@@ -173,8 +173,8 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
             for(size_t pIdx{}; const Paths& paths: groupedPss) {
                 Paths wp = InflatePaths(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
-                if(tIdx)                                                                      // обрезка текущего пути предыдущим
-                    wp = C2::Difference(wp, clipFrame, FR::EvenOdd);
+                if(tIdx) // обрезка текущего пути предыдущим
+                    wp = CL2::Difference(wp, clipFrame, FR::EvenOdd);
 
                 if(tIdx == size - 1)
                     removeSmall(wp, dOffset * 0.5); // последний
@@ -183,12 +183,12 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
                 // //dbgPaths(wp, QString("wp %1").arg(pIdx), Qt::red);
 
-                fillPaths[tIdx].append(wp);
+                fillPaths[tIdx] += wp;
 
-                cutAreaPaths.append(wp);
+                cutAreaPaths += wp;
 
                 do {
-                    returnPs.append(wp);
+                    returnPs += std::move(wp);
                     CleanPaths(wp, uScale * 0.0005);
                     wp = InflatePaths(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
                 } while(wp.size());

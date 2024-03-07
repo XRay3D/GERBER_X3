@@ -26,7 +26,7 @@ namespace Gi {
 
 DataPath::DataPath(const Path& path, AbstractFile* file)
     : Item{file} {
-    shape_.addPolygon(path);
+    shape_.addPolygon(~path);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -36,7 +36,7 @@ DataPath::DataPath(const Path& path, AbstractFile* file)
 DataPath::DataPath(const Paths& paths, AbstractFile* file)
     : Item{file} {
     for(auto&& path: paths)
-        shape_.addPolygon(path);
+        shape_.addPolygon(~path);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -80,11 +80,12 @@ void DataPath::updateSelection() const {
     if(const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
         scale_ = scale;
         selectionShape_ = QPainterPath();
-        ClipperOffset offset;
-        offset.AddPath(Path{shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
-        auto tmpPpath{offset.Execute(5 * uScale * scale_)};
+        // ClipperOffset offset;
+        // offset.AddPath(Path{~shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
+        // auto tmpPpath{offset.Execute(5 * uScale * scale_)};
+        auto tmpPpath = InflatePaths({~shape_.toSubpathPolygons().front()}, 5 * uScale * scale_, JoinType::Square, EndType::Square);
         for(auto&& path: tmpPpath)
-            selectionShape_.addPolygon(path);
+            selectionShape_.addPolygon(~path);
         boundingRect_ = selectionShape_.boundingRect();
     }
 }

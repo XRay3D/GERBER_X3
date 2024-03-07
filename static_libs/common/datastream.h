@@ -10,12 +10,14 @@
  ********************************************************************************/
 #pragma once
 
-#include <pfr.hpp>
+#include <boost/pfr.hpp>
 
 #include <QDataStream>
 #include <map>
 #include <ranges>
 #include <type_traits>
+
+namespace pfr = boost::pfr;
 
 // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 //  template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>

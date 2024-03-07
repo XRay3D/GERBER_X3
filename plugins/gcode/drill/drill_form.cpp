@@ -43,9 +43,10 @@
 namespace Drilling {
 
 Paths offset(const Path& path, double offset, bool fl = false) {
-    ClipperOffset cpOffset;
-    cpOffset.AddPath(path, JoinType::Round, fl ? EndType::Round : EndType::Round);
-    Paths tmpPpaths = cpOffset.Execute(offset * uScale);
+    // ClipperOffset cpOffset;
+    // cpOffset.AddPath(path, JT::Round, fl ? ET::Round : ET::Round);
+    // Paths tmpPpaths = cpOffset.Execute(offset * uScale);
+    Paths tmpPpaths = InflatePaths({path}, offset * uScale, JT::Round, fl ? ET::Round : ET::Round);
     for(Path& tmpPath: tmpPpaths)
         tmpPath.push_back(tmpPath.front());
     return tmpPpaths;
@@ -486,16 +487,16 @@ void Form::computePaths() {
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             switch(side) {
                             case GCode::On:
-                                pathsMap[row.toolId].paths.append(item->paths());
+                                pathsMap[row.toolId].paths += item->paths();
                                 created = true;
                                 break;
                             case GCode::Outer:
-                                pathsMap[row.toolId].paths.append(item->offset());
+                                pathsMap[row.toolId].paths += item->offset();
                                 created = true;
                                 break;
                             case GCode::Inner:
                                 // if (item->fit(dsbxDepth->value())) {
-                                pathsMap[row.toolId].paths.append(item->offset());
+                                pathsMap[row.toolId].paths += item->offset();
                                 created = true;
                                 // }
                                 break;
@@ -505,14 +506,14 @@ void Form::computePaths() {
                     case GCType::Pocket:
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             // if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(dsbxDepth->value())) {
-                            pathsMap[row.toolId].paths.append(item->offset());
+                            pathsMap[row.toolId].paths += item->offset();
                             created = true;
                             // }
                         }
                         break;
                     case GCType::Drill:
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Engraver || App::toolHolder().tool(row.toolId).type() != Tool::Laser) {
-                            pathsMap[row.toolId].drillPath.push_back(item->pos());
+                            pathsMap[row.toolId].drillPath.emplace_back(~item->pos());
                             created = true;
                         }
                         break;
@@ -527,14 +528,14 @@ void Form::computePaths() {
 
         for(auto& [toolId, val]: pathsMap) {
             if(val.drillPath.size()) {
-                Point point1((App::home().pos()));
+                Point point1{~App::home().pos()};
                 { // sort by distance
                     size_t counter = 0;
                     while(counter < val.drillPath.size()) {
                         size_t selector = 0;
                         double length = std::numeric_limits<double>::max();
                         for(size_t i = counter, end = val.drillPath.size(); i < end; ++i) {
-                            double length2 = point1.distTo(val.drillPath[i]);
+                            double length2 = distTo(point1, val.drillPath[i]);
                             if(length > length2) {
                                 length = length2;
                                 selector = i;
@@ -544,7 +545,10 @@ void Form::computePaths() {
                         point1 = val.drillPath[counter++];
                     }
                 }
-                GCode::File* gcode = new File{{App::toolHolder().tool(toolId), dsbxDepth->value()}, {{val.drillPath}}};
+                GCode::File* gcode = new File{
+                    {App::toolHolder().tool(toolId), dsbxDepth->value()},
+                    {{val.drillPath}}
+                };
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + /*type_ +*/ indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project().addFile(gcode);
@@ -585,14 +589,12 @@ void Form::computePaths() {
 
 void Form::updateName() { }
 
-void Form::hideEvent(QHideEvent *event) {
+void Form::hideEvent(QHideEvent* event) {
     delete ui->toolTable->model();
     event->accept();
 }
 
 void Form::editFile(GCode::File* file) { }
-
-
 
 } // namespace Drilling
 

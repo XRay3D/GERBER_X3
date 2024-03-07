@@ -29,11 +29,11 @@ void VoronoiJc::jcVoronoi() {
     groupedPaths(GCode::Grouping::Copper);
     int32_t id = 0;
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
-        QLineF line(tmp, point);
+        QLineF line{~tmp, ~point};
         if(line.length() > tolerance) {
             for(size_t i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);
-                Point pt((line.p2()));
+                Point pt{~line.p2()};
                 points.push_back({static_cast<jcv_real>(pt.x), static_cast<jcv_real>(pt.y), id});
             }
         }
@@ -51,7 +51,7 @@ void VoronoiJc::jcVoronoi() {
         }
         ++id;
     }
-    
+
     for(const Path& path: openSrcPaths) {
         Point tmp(path.front());
         for(const Point& point: path) {
@@ -67,11 +67,11 @@ void VoronoiJc::jcVoronoi() {
     for(const Paths& paths: groupedPss)
         clipper.AddClip(paths);
     clipper.AddClip(openSrcPaths);
-    const Rect r(/*Bounds(groupedPss) +*/ Bounds(openSrcPaths)); // FIXME
+    const Rect r(/*GetBounds(groupedPss) +*/ GetBounds(openSrcPaths)); // FIXME
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const Point::Type fo = gcp_.params[FrameOffset].toDouble() * uScale;
+        const /*Point::Type*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
@@ -79,7 +79,7 @@ void VoronoiJc::jcVoronoi() {
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
         auto toPoint = [](const jcv_edge* edge, int num) -> const Point {
-            return {static_cast<Point::Type>(edge->pos[num].x), static_cast<Point::Type>(edge->pos[num].y)};
+            return {static_cast</*Point::Type*/ int32_t>(edge->pos[num].x), static_cast</*Point::Type*/ int32_t>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for(int i = 0; i < diagram.numsites; i++) {
@@ -88,7 +88,7 @@ void VoronoiJc::jcVoronoi() {
                 const jcv_edge* edge = graph_edge->edge;
                 const Pair pair{toPoint(edge, 0), toPoint(edge, 1), sites[i].p.id};
                 if(edge->sites[0] == nullptr || edge->sites[1] == nullptr)
-                    frame.insert(pair);                                              // frame
+                    frame.insert(pair); // frame
                 else if(edge->sites[0]->p.id != edge->sites[1]->p.id)
                     edges[edge->sites[0]->p.id ^ edge->sites[1]->p.id].insert(pair); // other
                 graph_edge = graph_edge->next;
@@ -98,12 +98,12 @@ void VoronoiJc::jcVoronoi() {
     }
 
     for(const auto& [key, edge]: edges)
-        returnPs.append(toPath(edge));
+        returnPs += toPath(edge);
     mergePaths(returnPs, 0.005 * uScale);
-    returnPs.append(toPath(frame));
+    returnPs += toPath(frame);
     for(size_t i = 0; i < returnPs.size(); ++i) // remove verry short paths
-        if(returnPs[i].size() < 4 && returnPs[i].front().distTo(returnPs[i].back()) < tolerance * 0.5 * uScale)
-            returnPs.remove(i--);
+        if(returnPs[i].size() < 4 && distTo(returnPs[i].front(), returnPs[i].back()) < tolerance * 0.5 * uScale)
+            returnPs -= i--;
 }
 
 Paths VoronoiJc::toPath(const Pairs& pairs) {
@@ -160,18 +160,18 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
 
     auto clean = [this, kAngle = 2.0](Path& path) {
         for(size_t i = 1; i < path.size() - 2; ++i) {
-            QLineF line(path[i], path[i + 1]);
+            QLineF line{~path[i], ~path[i + 1]};
             if(line.length() < gcp_.params[Tolerance].toDouble()) {
-                path[i] = (line.center());
-                path.remove(i + 1);
+                path[i] = ~line.center();
+                path -= i + 1;
                 --i;
             }
         }
         for(size_t i = 1; i < path.size() - 1; ++i) {
-            const double a1 = path[i - 1].angleTo(path[i]);
-            const double a2 = path[i].angleTo(path[i + 1]);
+            const double a1 = angleTo(path[i - 1], path[i]);
+            const double a2 = angleTo(path[i], path[i + 1]);
             if(abs(a1 - a2) < kAngle)
-                path.remove(i--);
+                path -= i--;
         }
     };
     std::ranges::for_each(paths, clean);

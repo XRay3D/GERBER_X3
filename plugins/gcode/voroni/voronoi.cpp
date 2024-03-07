@@ -65,7 +65,7 @@ void Creator::create() {
             ClipperOffset offset(uScale);
             offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Polygon);
             offset.AddPaths(copy, JoinType::Round, EndType::Round);
-            openSrcPaths = offset.Execute(dOffset + 10);
+            offset.Execute(dOffset + 10, openSrcPaths);
         }
         // erase empty paths
         auto begin = returnPss.begin();
@@ -74,7 +74,7 @@ void Creator::create() {
                 returnPss.erase(begin);
             else
                 ++begin;
-        
+
         file_ = new File{std::move(gcp_), std::move(returnPss), std::move(openSrcPaths)};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
@@ -86,11 +86,13 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
-    const Path frame(returnPs.takeLast());
+    const Path frame{returnPs.back()};
+    // returnPs.pop_back();
     { // create offset
-        ClipperOffset offset;
-        offset.AddPaths(returnPs, JoinType::Round /*JoinType::Miter*/, EndType::Round);
-        returnPs = offset.Execute(width * uScale * 0.5);
+      // ClipperOffset offset;
+      // offset.AddPaths(returnPs, JoinType::Round /*JoinType::Miter*/, EndType::Round);
+      // returnPs = offset.Execute(width * uScale * 0.5);
+        returnPs = InflatePaths(returnPs, width * uScale * 0.5, JoinType::Round /*JoinType::Miter*/, EndType::Round);
     }
     { // fit offset to copper
         Clipper clipper;
@@ -108,17 +110,19 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
         CleanPaths(returnPs, 0.001 * uScale);
     }
     { // create pocket
-        ClipperOffset offset(uScale);
-        offset.AddPaths(returnPs, JoinType::Round, EndType::Polygon);
-        Paths tmpPaths1;
-        tmpPaths1 = offset.Execute(-dOffset);
+        // ClipperOffset offset(uScale);
+        // offset.AddPaths(returnPs, JoinType::Round, EndType::Polygon);
+        // Paths tmpPaths1;
+        // tmpPaths1 = offset.Execute(-dOffset);
+        Paths tmpPaths1 = InflatePaths(returnPs, -dOffset, JoinType::Round, EndType::Polygon);
         openSrcPaths = tmpPaths1;
         Paths tmpPaths;
         do {
-            tmpPaths.append(tmpPaths1);
-            offset.Clear();
-            offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
-            tmpPaths1 = offset.Execute(-stepOver);
+            tmpPaths += tmpPaths1;
+            // offset.Clear();
+            // offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
+            // tmpPaths1 = offset.Execute(-stepOver);
+            tmpPaths1 = InflatePaths(tmpPaths1, -stepOver, JoinType::Miter, EndType::Polygon);
         } while(tmpPaths1.size());
         returnPs = tmpPaths;
     }

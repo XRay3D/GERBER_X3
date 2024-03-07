@@ -194,7 +194,7 @@ PreviewItem::PreviewItem(const Paths& paths, const Point pos, Tool& tool)
     : AbstractThermPrGi(tool)
     , paths_{paths}
     , pos_{pos} {
-    for(QPolygonF polygon: paths) {
+    for(QPolygonF polygon: ~paths) {
         polygon.append(polygon.first());
         sourcePath.addPolygon(polygon);
     }
@@ -207,12 +207,14 @@ Paths PreviewItem::paths() const { return paths_; }
 void PreviewItem::redraw() {
     if(double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
         diameter = d;
-        ClipperOffset offset;
-        offset.AddPaths(paths_, JoinType::Round, EndType::Polygon);
-        cashedPath = offset.Execute(diameter * uScale * 0.5); // toolpath
-        offset.Clear();
-        offset.AddPaths(cashedPath, JoinType::Miter, EndType::Round);
-        cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
+        // ClipperOffset offset;
+        // offset.AddPaths(paths_, JoinType::Round, EndType::Polygon);
+        // cashedPath = offset.Execute(diameter * uScale * 0.5); // toolpath
+        cashedPath = InflatePaths(paths_, diameter * uScale * 0.5, JoinType::Round, EndType::Polygon);
+        // offset.Clear();
+        // offset.AddPaths(cashedPath, JoinType::Miter, EndType::Round);
+        // cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
+        cashedFrame = InflatePaths(cashedPath, diameter * uScale * 0.1, JoinType::Miter, EndType::Round);
         for(Path& path: cashedPath)
             path.push_back(path.front());
     }
@@ -221,19 +223,23 @@ void PreviewItem::redraw() {
     } else {
         Clipper clipper;
         clipper.AddSubject(cashedFrame);
-        const auto rect(sourcePath.boundingRect());
-        const Point& center(rect.center());
+        const auto rect{sourcePath.boundingRect()};
+        const Point center{~rect.center()};
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
         const auto fp(sourcePath.toFillPolygons()); // FIXME not used
         for(int i = 0; i < node_->count(); ++i) {   // Gaps
-            ClipperOffset offset;
+            // ClipperOffset offset;
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
-            offset.AddPath({center,
-                               Point(
-                                   static_cast<Point::Type>((cos(angle) * radius) + center.x),
-                                   static_cast<Point::Type>((sin(angle) * radius) + center.y))},
-                JoinType::Square, EndType::Butt);
-            Paths paths = offset.Execute((node_->tickness() + diameter) * uScale * 0.5);
+            // offset.AddPath({center,
+            // Point(
+            // static_cast</*Point::Type*/ int32_t>((cos(angle) * radius) + center.x),
+            // static_cast</*Point::Type*/ int32_t>((sin(angle) * radius) + center.y))},
+            // JoinType::Square, EndType::Butt);
+            // Paths paths = offset.Execute((node_->tickness() + diameter) * uScale * 0.5);
+            Paths paths = InflatePaths({
+                                           {center, Point{cos(angle) * radius + center.x, sin(angle) * radius + center.y}}
+            },
+                (node_->tickness() + diameter) * uScale * 0.5, JoinType::Square, EndType::Butt);
             clipper.AddClip({paths.front()});
         }
         clipper.Execute(ClipType::Intersection, FillRule::Positive, bridge_);
@@ -245,7 +251,7 @@ void PreviewItem::redraw() {
         clipper.Execute(ClipType::Difference, FillRule::Positive, previewPaths, previewPaths);
     }
     painterPath = QPainterPath();
-    for(QPolygonF polygon: previewPaths) {
+    for(QPolygonF polygon: ~previewPaths) {
         painterPath.moveTo(polygon.first());
         for(QPointF& pt: polygon)
             painterPath.lineTo(pt);

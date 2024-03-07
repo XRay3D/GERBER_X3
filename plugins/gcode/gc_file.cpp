@@ -213,15 +213,15 @@ void File::endPath() {
     }
 }
 
-mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
-    mvector<mvector<QPolygonF>> pathss;
+mvector<QList<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
+    mvector<QList<QPolygonF>> pathss;
     pathss.reserve(toolPathss_.size());
     for(const Paths& paths: toolPathss_) {
         pathss.emplace_back(normalizedPaths(offset, paths));
         //        pathss.push_back(toQPolygons(paths));
     }
 
-    //    for (mvector<QPolygonF>& paths : pathss)
+    //    for (QList<QPolygonF>& paths : pathss)
     //        for (QPolygonF& path : paths)
     //            path.translate(offset);
 
@@ -249,8 +249,8 @@ mvector<mvector<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     return pathss;
 }
 
-mvector<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_) {
-    mvector<QPolygonF> paths(paths_.empty() ? toolPathss_.front() : paths_);
+QList<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_) {
+    QList<QPolygonF> paths{~(paths_.empty() ? toolPathss_.front() : paths_)};
 
     for(QPolygonF& path: paths)
         path.translate(offset);
@@ -394,11 +394,11 @@ void File::saveLaserPocket(const QPointF& offset) {
 void File::saveMillingPocket(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().spindleOn());
 
-    mvector<mvector<QPolygonF>> toolPathss(normalizedPathss(offset));
+    mvector<QList<QPolygonF>> toolPathss(normalizedPathss(offset));
 
     const mvector<double> depths(getDepths());
 
-    for(mvector<QPolygonF>& paths: toolPathss) {
+    for(QList<QPolygonF>& paths: toolPathss) {
         startPath(paths.front().front());
         for(size_t i = 0; i < depths.size(); ++i) {
             lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
@@ -427,7 +427,7 @@ void File::saveMillingProfile(const QPointF& offset) {
     //        return;
     //    }
 
-    mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
+    mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());
 
     for(auto& paths: pathss) {
@@ -458,7 +458,7 @@ void File::saveMillingProfile(const QPointF& offset) {
 void File::saveLaserProfile(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().laserDynamOn());
 
-    mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
+    mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
 
     for(auto& paths: pathss) {
         for(auto& path: paths) {
@@ -473,7 +473,7 @@ void File::saveLaserProfile(const QPointF& offset) {
 void File::saveMillingRaster(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().spindleOn());
 
-    mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
+    mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());
 
     for(auto& paths: pathss) {
@@ -492,7 +492,7 @@ void File::saveMillingRaster(const QPointF& offset) {
 void File::saveLaserHLDI(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().laserConstOn());
 
-    mvector<mvector<QPolygonF>> pathss(normalizedPathss(offset));
+    mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
 
     int i = 0;
 

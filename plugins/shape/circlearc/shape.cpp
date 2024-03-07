@@ -133,8 +133,8 @@ void Shape::redraw() {
 
     int intSteps = App::settings().clpCircleSegments(radius_);
     const double stepAngle = two_pi / intSteps;
-    const Point::Type radius = static_cast<Point::Type>(radius_ * uScale);
-    const Point center((handlers[Center]->pos()));
+    const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
+    const Point center{~handlers[Center]->pos()};
     intSteps *= angle / two_pi;
 
     Path& path = paths_.front();
@@ -144,15 +144,15 @@ void Shape::redraw() {
     for(int i{}; i <= intSteps; i++) {
         const double angle = angle1 + stepAngle * i;
         path.emplace_back(
-            static_cast<Point::Type>(radius * cos(angle)) + center.x,
-            static_cast<Point::Type>(radius * sin(angle)) + center.y);
+            static_cast</*Point::Type*/ int32_t>(radius * cos(angle)) + center.x,
+            static_cast</*Point::Type*/ int32_t>(radius * sin(angle)) + center.y);
     }
 
     path.back() = Point{
-        static_cast<Point::Type>(radius * cos(angle2)) + center.x,
-        static_cast<Point::Type>(radius * sin(angle2)) + center.y};
+        static_cast</*Point::Type*/ int32_t>(radius * cos(angle2)) + center.x,
+        static_cast</*Point::Type*/ int32_t>(radius * sin(angle2)) + center.y};
 
-    shape_.addPolygon(path);
+    shape_.addPolygon(~path);
 
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});

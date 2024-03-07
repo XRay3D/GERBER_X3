@@ -100,15 +100,16 @@ void Shape::redraw() {
     shape_ = {};
 
     Clipper clipper;
-    for(auto& sp: painterPath.toSubpathPolygons(transform)) {
-        clipper.AddClip({sp});
-        //        paths_.push_back(sp);
-        //        shape_.addPolygon(sp);
-    }
+    // for(auto& sp: painterPath.toSubpathPolygons(transform)) {
+    //     clipper.AddClip({sp});
+    //     //        paths_.push_back(sp);
+    //     //        shape_.addPolygon(sp);
+    // }
+    clipper.AddClip(~painterPath.toSubpathPolygons(transform));
     clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
     for(auto& sp: paths_) {
         sp.emplace_back(sp.front());
-        shape_.addPolygon(sp);
+        shape_.addPolygon(~sp);
     }
 
     setPos({1, 1}); // костыли

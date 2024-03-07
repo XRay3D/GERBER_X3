@@ -27,7 +27,7 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
     for (Path path: paths) {
         if (path.size() && path.back() != path.front())
             path.push_back(path.front());
-        shape_.addPolygon(path);
+        shape_.addPolygon(~path);
     }
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
@@ -85,7 +85,7 @@ void DataFill::setPaths(Paths paths, int alternate) {
 
     shape_ = {};
     for (auto&& path: paths)
-        shape_.addPolygon(t.map(path));
+        shape_.addPolygon(t.map(~path));
     paths_ = std::move(paths);
 
     redraw();
