@@ -69,6 +69,10 @@ void GiDataSolid::redraw() {
     // update();
 }
 
+Paths& GiDataSolid::getPaths() {
+    return paths_;
+}
+
 void GiDataSolid::setPaths(Paths paths, int alternate) {
     auto t {transform()};
     auto a {qRadiansToDegrees(asin(t.m12()))};

@@ -70,6 +70,7 @@ private:
     QPointF point, rulPt1, rulPt2;
 
     void drawRuller(QPainter* painter, const QRectF& rect) const;
+    void GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item);
     // QWidget interface
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;
