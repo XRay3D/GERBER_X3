@@ -160,8 +160,11 @@ void Form::initToolTable() {
     ui->toolTable->setVerticalHeader(header);
     checkBox = new QCheckBox(cornerButton);
     checkBox->setFocusPolicy(Qt::NoFocus);
-    checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
-    connect(checkBox, &QCheckBox::clicked, [this](bool checked) { header->setAll(checked); });
+    checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);    
+    connect(checkBox, &QCheckBox::clicked, [this](bool checked) {
+        Qt::CheckState state = header->checkBoxState;
+        header->setAll(checked ? (state == Qt::Unchecked ? 1 : 0) : 0);
+    });
     connect(header, &Header::onChecked, [this](int idx) {
         if (model) {
             int fl {};
@@ -169,7 +172,8 @@ void Form::initToolTable() {
                 if (model->useForCalc(i))
                     ++fl;
 
-            checkBox->setCheckState(!fl ? Qt::Unchecked : (fl == model->rowCount() ? Qt::Checked : Qt::PartiallyChecked));
+            header->checkBoxState = !fl ? Qt::Unchecked : (fl == model->rowCount() ? Qt::Checked : Qt::PartiallyChecked);
+            checkBox->setCheckState(header->checkBoxState);
             pbCreate->setEnabled(fl);
         }
     });

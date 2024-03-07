@@ -12,6 +12,8 @@ public:
     Header(Qt::Orientation orientation, QWidget* parent = nullptr);
     ~Header() override;
 
+    Qt::CheckState checkBoxState;
+
     enum {
         XOffset = 5,
         DelegateSize = 16
