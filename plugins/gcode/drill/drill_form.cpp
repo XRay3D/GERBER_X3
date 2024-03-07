@@ -428,9 +428,9 @@ void Form::createFile() {
                             pathsMap[row.toolId].paths.push_back(path);
                     else
                         pathsMap[row.toolId].paths.push_back(item->paths().front());
-                }
+                }            
+                model->setCreate(i++, !pathsMap.contains(row.toolId));
             }
-            model->setCreate(i++, !pathsMap.contains(row.toolId));
         }
 
         for (auto [usedToolId, _] : pathsMap) {
