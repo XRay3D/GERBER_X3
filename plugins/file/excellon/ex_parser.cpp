@@ -356,10 +356,10 @@ bool Parser::parseRepeat(const QString& line) {
                                               R"((?:X([\+\-]?\d*\.?\d+))?)"
                                               R"((?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"($)");
-    if(auto [whole, C1, C2, C3] = ctre::match<regex>(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2, C3] = ctre::match<regex>(toU16StrView(line)); whole) {
         int count = CtreCapTo(C1).toInt();
         QPointF p;
-        parseNumber(CtreCapTo(C2), p.rx());
+        parseNumber(CtreCapTo(CL2), p.rx());
         parseNumber(CtreCapTo(C3), p.ry());
         for(int i = 0; i < count; ++i) {
             state_.pos += p;
@@ -373,7 +373,7 @@ bool Parser::parseRepeat(const QString& line) {
 bool Parser::parseFormat(const QString& line) {
     static const QVector<QString> unitMode({u"INCH"_qs, u"METRIC"_qs});
     static const QVector<QString> zeroMode({u"LZ"_qs, u"TZ"_qs});
-    if(auto [whole, C1, C2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
         if(C1)
             switch(unitMode.indexOf(CtreCapTo(C1))) {
             case Inches:
@@ -385,8 +385,8 @@ bool Parser::parseFormat(const QString& line) {
             default:
                 break;
             }
-        if(C2)
-            switch(zeroMode.indexOf(CtreCapTo(C2))) {
+        if(CL2)
+            switch(zeroMode.indexOf(CtreCapTo(CL2))) {
             case LeadingZeros:
                 file->format_.zeroMode = LeadingZeros;
                 break;
@@ -399,7 +399,7 @@ bool Parser::parseFormat(const QString& line) {
         return true;
     }
     static constexpr ctll::fixed_string regex2(R"(^(FMAT).*(2)?$)"); // fixed_string("^(FMAT).*(2)?$");
-    if(auto [whole, C1, C2] = ctre::match<regex2>(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2] = ctre::match<regex2>(toU16StrView(line)); whole) {
         file->format_.unitMode = Inches;
         file->format_.zeroMode = LeadingZeros;
         return true;

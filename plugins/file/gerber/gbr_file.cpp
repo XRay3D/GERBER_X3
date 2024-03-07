@@ -121,9 +121,9 @@ Paths File::merge() const {
                         }
                     }
                     offset.AddPaths(paths, JoinType::Round, EndType::Round);
-                    paths = offset.Execute(apertures_.at(aperture)->apSize() * uScale * 0.5);
+                    offset.Execute(apertures_.at(aperture)->apSize() * uScale * 0.5, paths);
                     // pathList.back().append(std::move(paths));
-                    pathList.back().append(paths);
+                    pathList.back() += paths; // NOTE maybe move
                 }
             }
         }
@@ -215,7 +215,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddSubject(mergedPaths());
-        auto r{Bounds(mergedPaths())};
+        auto r{GetBounds(mergedPaths())};
         int k = uScale;
         Path outer = {
             Point(r.left - k, r.bottom + k),
@@ -317,7 +317,7 @@ void File::read(QDataStream& stream) {
 void File::createGi() {
     if constexpr(1) { // fill copper
         for(Paths& paths: groupedPaths()) {
-                Gi::Item* item = new Gi::DataFill{paths, this};
+            Gi::Item* item = new Gi::DataFill{paths, this};
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();

@@ -136,7 +136,7 @@ void Form::computePaths() {
 
     for(auto& item: items_) {
         if(item->isValid()) {
-            gpc->closedPaths.append(item->paths());
+            gpc->closedPaths += item->paths();
             if(Paths bridge = item->bridge(); bridge.size())
                 gpc->supportPathss.emplace_back(item->bridge());
         }

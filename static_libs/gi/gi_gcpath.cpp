@@ -26,7 +26,7 @@ namespace Gi {
 GcPath::GcPath(const Paths& paths, AbstractFile* file)
     : gcFile_(file) {
     for(const Path& path: paths)
-        shape_.addPolygon(path);
+        shape_.addPolygon(~path);
     double k;
     if(gcFile_)
         k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
@@ -40,7 +40,7 @@ GcPath::GcPath(const Paths& paths, AbstractFile* file)
 
 GcPath::GcPath(const Path& path, AbstractFile* file)
     : gcFile_(file) {
-    shape_.addPolygon(path);
+    shape_.addPolygon(~path);
     double k;
     if(gcFile_)
         k = 0; // FIXME  gcFile_->gcp_.getToolDiameter() * 0.5;

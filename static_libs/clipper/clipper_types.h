@@ -8,7 +8,7 @@
  *******************************************************************************/
 
 #pragma once
-
+#if 0
 #include <algorithm>
 #include <climits>
 #include <cmath>
@@ -430,8 +430,8 @@ struct Paths : mvector<Path<T>> {
     //        return *this;
     //    }
 
-    operator mvector<QPolygonF>() const {
-        mvector<QPolygonF> polys;
+    operator QList<QPolygonF>() const {
+        QList<QPolygonF> polys;
         polys.reserve(MV::size());
         for(const auto& poly: *this)
             polys.emplace_back(poly);
@@ -463,3 +463,4 @@ using PathD = Path<double>;
 using PathsD = Paths<double>;
 
 } // namespace Clipper2Lib
+#endif

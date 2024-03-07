@@ -54,15 +54,15 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     for(Paths src: groupedPss) {
         //        ClipperOffset offset(uScale);
-        //        offset.AddPaths(src, JoinType::Round, EndType::Polygon);
+        //        offset.AddPaths(src, JT::Round, ET::Polygon);
         //        src = offset.Execute(-dOffset);
 
-        src = C2::InflatePaths(src, -dOffset, JoinType::Round, EndType::Polygon, uScale);
+        src = InflatePaths(src, -dOffset, JT::Round, ET::Polygon, uScale);
 
         for(auto& path: src)
             path.push_back(path.front());
         if(prPass)
-            profilePaths.append(src);
+            profilePaths += src;
 
         if(src.size()) {
             for(auto& path: src)
@@ -74,7 +74,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                 auto merged{merge(scanLines, frames)};
                 for(auto& path: merged)
                     RotatePath(path, -angle);
-                returnPs.append(merged);
+                returnPs += std::move(merged);
             }
         }
     }
@@ -128,7 +128,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
 
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
-    stepOver = static_cast<Point::Type>(tool.stepover() * uScale);
+    stepOver = static_cast</*Point::Type*/ int32_t>(tool.stepover() * uScale);
 
     switch(gcp_.side()) {
     case GCode::Outer:
@@ -145,16 +145,18 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     Paths profilePaths;
 
     { // create exposure frames
-        ClipperOffset o;
-        for(auto& p: groupedPss)
-            o.AddPaths(p, JoinType::Round, EndType::Polygon);
-        profilePaths = o.Execute(-tool.diameter() * uScale);
+      // ClipperOffset o;
+      // for(auto& p: groupedPss)
+      //     o.AddPaths(p, JT::Round, ET::Polygon);
+      // profilePaths = o.Execute(-tool.diameter() * uScale);
+        // auto it = std::views::join(groupedPss);
+        profilePaths = InflatePaths(join(groupedPss), -tool.diameter() * uScale, JT::Round, ET::Polygon);
     }
     auto pss = std::views::join(groupedPss);
-    profilePaths = C2::InflatePaths(Paths{pss.begin(), pss.end()}, -dOffset, JoinType::Round, EndType::Polygon, uScale);
+    profilePaths = InflatePaths(Paths{pss.begin(), pss.end()}, -dOffset, JT::Round, ET::Polygon, uScale);
 
     // get bounds of frames
-    rect = Bounds(profilePaths);
+    rect = GetBounds(profilePaths);
 
     const Point center{rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2};
 
@@ -164,7 +166,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         for(Path& path: laserPath)
             RotatePath(path, angle, center);
         // get bounds of frames if angle > 0.0
-        rect = Bounds(laserPath);
+        rect = GetBounds(laserPath);
     }
 
     rect.left -= uScale;
@@ -172,17 +174,17 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
 
     Path zPath;
     { // create "snake"
-        Point::Type y = rect.top;
+        auto y = rect.top;
         while(y < rect.bottom) {
-            zPath.append({
+            zPath += Path{
                 Point{ rect.left, y},
-                Point{rect.right, y}
-            });
-            y += stepOver;
-            zPath.append({
                 Point{rect.right, y},
-                Point{ rect.left, y}
-            });
+            };
+            y += stepOver;
+            zPath += Path{
+                Point{rect.right, y},
+                Point{ rect.left, y},
+            };
             y += stepOver;
         }
     }
@@ -221,7 +223,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     }
 }
 
-void Creator::addAcc(Paths& src, const Point::Type accDistance) {
+void Creator::addAcc(Paths& src, const /*Point::Type*/ int32_t accDistance) {
 
     Paths pPath;
     pPath.reserve(src.size() * 2 + 1);
@@ -252,26 +254,26 @@ void Creator::addAcc(Paths& src, const Point::Type accDistance) {
             {
                 const Path& path = pPath.back();
                 if(path.front().x < path.back().x) // acc
-                    acc.append(Path{
+                    acc += Path{
                         path.back(), {path.back().x + accDistance, path.front().y}
-                    });
+                    };
                 else
-                    acc.append(Path{
+                    acc += Path{
                         path.back(), {path.back().x - accDistance, path.front().y}
-                    });
+                    };
             }
             {
                 const Path& path = paths.front();
                 if(path.front().x > path.back().x) // acc
-                    acc.append(Path{
+                    acc += Path{
                         {path.front().x + accDistance, path.front().y},
                         path.front()
-                    });
+                    };
                 else
-                    acc.append(Path{
+                    acc += Path{
                         {path.front().x - accDistance, path.front().y},
                         path.front()
-                    });
+                    };
             }
             pPath.push_back(acc);
         } else { // acc first
@@ -288,7 +290,7 @@ void Creator::addAcc(Paths& src, const Point::Type accDistance) {
     };
 
     { //  calculate
-        Point::Type yLast = src.front().front().y;
+        /*Point::Type*/ int32_t yLast = src.front().front().y;
         Paths paths;
 
         for(size_t i = 0; i < src.size(); ++i) {
@@ -331,7 +333,7 @@ Paths Creator::calcScanLines(const Paths& src, const Path& frame) {
     if(!scanLines.size())
         return scanLines;
     std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
-    Point::Type start = scanLines.front().front().y;
+    /*Point::Type*/ int32_t start = scanLines.front().front().y;
     bool fl = {};
     for(size_t i{}, last{}; i < scanLines.size(); ++i) {
         if(auto y = scanLines[i].front().y; y != start || i - 1 == scanLines.size()) {
@@ -358,10 +360,10 @@ Paths Creator::calcFrames(const Paths& src, const Path& frame) {
         clipper.AddClip({frame});
         clipper.Execute(ClipType::Intersection, FillRule::Positive, tmp, tmp); // FillRule::Positive
         // dbgPaths(tmp, "ClipType::Intersection");
-        frames.append(tmp);
+        frames += std::move(tmp);
         clipper.Execute(ClipType::Difference, FillRule::Positive, tmp, tmp); // FillRule::Positive
         // dbgPaths(tmp, "ClipType::Difference");
-        frames.append(tmp);
+        frames += std::move(tmp);
         std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
         for(auto& path: frames)
             if(path.front().y > path.back().y)
@@ -373,14 +375,14 @@ Paths Creator::calcFrames(const Paths& src, const Path& frame) {
 Path Creator::calcZigzag(const Paths& src) {
     Clipper clipper;
     clipper.AddClip(src);
-    Rect rect(Bounds(src));
-    Point::Type o = uScale - (rect.Height() % stepOver) / 2;
+    Rect rect(GetBounds(src));
+    /*Point::Type*/ int32_t o = uScale - (rect.Height() % stepOver) / 2;
     rect.top -= o;
     rect.bottom += o;
     rect.left -= uScale;
     rect.right += uScale;
     Path zigzag;
-    Point::Type start = rect.top;
+    auto start = rect.top;
     bool fl{};
 
     for(; start <= rect.bottom || fl; fl = !fl, start += stepOver) {
@@ -418,11 +420,12 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
         for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
             ifCancelThenThrow();
             if(path.empty() || path.back() == bit->front()) {
-                path.append(path.empty() ? *bit : bit->mid(1));
+                path.empty() ? path += * bit
+                             : path += *bit | skipFront;
                 bList.erase(bit);
                 for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                     if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
-                        path.append(fit->mid(1));
+                        path += *fit | skipFront;
                         fList.erase(fit);
                         bit = bList.begin();
                         break;
@@ -435,7 +438,7 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
         }
         for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
             if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
-                fit->append(path.mid(1));
+                *fit += path | skipFront;
                 std::swap(*fit, path);
                 fList.erase(fit);
                 break;

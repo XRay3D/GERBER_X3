@@ -172,7 +172,7 @@ inline PathsD TranslatePaths(const PathsD& paths, double dx, double dy) {
     return result;
 }
 
-inline Rect64 Bounds(const Path64& path) {
+inline Rect64 GetBounds(const Path64& path) {
     Rect64 rec = MaxInvalidRect64;
     for(const Point64& pt: path) {
         if(pt.x < rec.left)
@@ -189,7 +189,7 @@ inline Rect64 Bounds(const Path64& path) {
     return rec;
 }
 
-inline Rect64 Bounds(const Paths64& paths) {
+inline Rect64 GetBounds(const Paths64& paths) {
     Rect64 rec = MaxInvalidRect64;
     for(const Path64& path: paths)
         for(const Point64& pt: path) {
@@ -207,7 +207,7 @@ inline Rect64 Bounds(const Paths64& paths) {
     return rec;
 }
 
-inline RectD Bounds(const PathD& path) {
+inline RectD GetBounds(const PathD& path) {
     RectD rec = MaxInvalidRectD;
     for(const PointD& pt: path) {
         if(pt.x < rec.left)
@@ -224,7 +224,7 @@ inline RectD Bounds(const PathD& path) {
     return rec;
 }
 
-inline RectD Bounds(const PathsD& paths) {
+inline RectD GetBounds(const PathsD& paths) {
     RectD rec = MaxInvalidRectD;
     for(const PathD& path: paths)
         for(const PointD& pt: path) {
@@ -245,7 +245,7 @@ inline RectD Bounds(const PathsD& paths) {
 inline Path64 RectClip(const Rect64& rect, const Path64& path) {
     if(rect.IsEmpty() || path.empty())
         return Path64();
-    Rect64 pathRec = Bounds(path);
+    Rect64 pathRec = GetBounds(path);
     if(!rect.Intersects(pathRec))
         return Path64();
     if(rect.Contains(pathRec))
@@ -262,7 +262,7 @@ inline Paths64 RectClip(const Rect64& rect, const Paths64& paths) {
     result.reserve(paths.size());
 
     for(const Path64& p: paths) {
-        Rect64 pathRec = Bounds(p);
+        Rect64 pathRec = GetBounds(p);
         if(!rect.Intersects(pathRec))
             continue;
         else if(rect.Contains(pathRec))
@@ -277,7 +277,7 @@ inline Paths64 RectClip(const Rect64& rect, const Paths64& paths) {
 }
 
 inline PathD RectClip(const RectD& rect, const PathD& path, int precision = 2) {
-    if(rect.IsEmpty() || path.empty() || !rect.Contains(Bounds(path)))
+    if(rect.IsEmpty() || path.empty() || !rect.Contains(GetBounds(path)))
         return PathD();
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
@@ -297,7 +297,7 @@ inline PathsD RectClip(const RectD& rect, const PathsD& paths, int precision = 2
     PathsD result;
     result.reserve(paths.size());
     for(const PathD& path: paths) {
-        RectD pathRec = Bounds(path);
+        RectD pathRec = GetBounds(path);
         if(!rect.Intersects(pathRec))
             continue;
         else if(rect.Contains(pathRec))
@@ -316,7 +316,7 @@ inline Paths64 RectClipLines(const Rect64& rect, const Path64& path) {
     Paths64 result;
     if(rect.IsEmpty() || path.empty())
         return result;
-    Rect64 pathRec = Bounds(path);
+    Rect64 pathRec = GetBounds(path);
     if(!rect.Intersects(pathRec))
         return result;
     if(rect.Contains(pathRec)) {
@@ -333,7 +333,7 @@ inline Paths64 RectClipLines(const Rect64& rect, const Paths64& paths) {
         return result;
     class RectClipLines rcl(rect);
     for(const Path64& p: paths) {
-        Rect64 pathRec = Bounds(p);
+        Rect64 pathRec = GetBounds(p);
         if(!rect.Intersects(pathRec))
             continue;
         else if(rect.Contains(pathRec))
@@ -348,7 +348,7 @@ inline Paths64 RectClipLines(const Rect64& rect, const Paths64& paths) {
 }
 
 inline PathsD RectClipLines(const RectD& rect, const PathD& path, int precision = 2) {
-    if(rect.IsEmpty() || path.empty() || !rect.Contains(Bounds(path)))
+    if(rect.IsEmpty() || path.empty() || !rect.Contains(GetBounds(path)))
         return PathsD();
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);
@@ -368,7 +368,7 @@ inline PathsD RectClipLines(const RectD& rect, const PathsD& paths, int precisio
     class RectClipLines rcl(r);
     result.reserve(paths.size());
     for(const PathD& path: paths) {
-        RectD pathRec = Bounds(path);
+        RectD pathRec = GetBounds(path);
         if(!rect.Intersects(pathRec))
             continue;
         else if(rect.Contains(pathRec))

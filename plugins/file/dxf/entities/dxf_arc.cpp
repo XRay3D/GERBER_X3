@@ -113,7 +113,7 @@ DxfGo Arc::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2).first());
 
-    DxfGo go{id, p, {}}; // return {id, p, {}};
+    DxfGo go{id, ~p, {}}; // return {id, p, {}};
     return go;
 }
 

@@ -67,9 +67,9 @@ void Drill::update(const Path& path, double diameter) {
 }
 
 Paths Drill::paths(int alternate) const {
-    Path path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
+    auto path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
     path = QTransform::fromScale(0.01, 0.01).map(path);
-    return {transform().map(path)};
+    return {~transform().map(path)};
 }
 
 void Drill::changeColor() {
@@ -118,13 +118,13 @@ void Drill::create() {
         //        ReversePath(path_);
         //        path_.push_back(path_.front());
         // shape_.addPolygon(path_);
-        shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
+        shape_.addEllipse(~path_.front(), diameter_ * 0.5, diameter_ * 0.5);
         //        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
-        for(auto&& path: C2::InflatePaths(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
+        for(auto&& path: InflatePaths(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
             path.push_back(path.front());
-            shape_.addPolygon(path);
+            shape_.addPolygon(~path);
         }
     }
 

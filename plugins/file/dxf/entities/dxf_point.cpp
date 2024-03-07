@@ -67,10 +67,10 @@ void Point::parse(Dxf::CodeData& code) {
 Entity::Type Point::type() const { return POINT; }
 
 DxfGo Point::toGo() const {
-    QPolygonF p;
-    p.append(point);
+    // QPolygonF p;
+    // p.append(point);
 
-    DxfGo go{id, p, {}}; // return {id, p, {}};
+    DxfGo go{id, {~point}, {}}; // return {id, p, {}};
     return go;
 }
 

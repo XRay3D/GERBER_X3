@@ -20,11 +20,11 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include)
-include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include/clipper2)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include/clipper2)
 
 add_library(clipper STATIC
     ${HEADERS}
@@ -34,6 +34,7 @@ add_library(clipper STATIC
 #target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(clipper PRIVATE
+    Clipper2
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
 )

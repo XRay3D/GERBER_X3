@@ -72,7 +72,7 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
 
         transform(path, state);
 
-        if(!state.curPos().isNull()) //??????????
+        if(state.curPos().x || state.curPos().y) //??????????
             TranslatePath(path, state.curPos());
     }
 
@@ -100,18 +100,14 @@ Path AbstractAperture::drawDrill(const State& state) {
 
 void AbstractAperture::transform(Path& poligon, const State& state) {
     QTransform m;
-    if(!qFuzzyIsNull(state.rotating()))
-        m.rotate(state.rotating());
-    if(!qFuzzyCompare(state.scaling(), 1.0))
-        m.scale(state.scaling(), state.scaling());
-    if(state.mirroring() & X_Mirroring)
-        m.scale(-1, +1);
-    if(state.mirroring() & Y_Mirroring)
-        m.scale(+1, -1);
+    if(!qFuzzyIsNull(state.rotating())) m.rotate(state.rotating());
+    if(!qFuzzyCompare(state.scaling(), 1.0)) m.scale(state.scaling(), state.scaling());
+    if(state.mirroring() & X_Mirroring) m.scale(-1, +1);
+    if(state.mirroring() & Y_Mirroring) m.scale(+1, -1);
 
     if(!m.isIdentity()) {
         for(Point& pt: poligon)
-            pt = m.map(pt);
+            pt = ~m.map(~pt);
         if(m.m11() < 0 ^ m.m22() < 0)
             ReversePath(poligon);
     }
@@ -250,8 +246,8 @@ void ApObround::write(QDataStream& stream) const {
 
 void ApObround::draw() {
     Clipper clipper;
-    const Point::Type h = static_cast<Point::Type>(height_ * uScale);
-    const Point::Type w = static_cast<Point::Type>(width_ * uScale);
+    const /*Point::Type*/ int32_t h = static_cast</*Point::Type*/ int32_t>(height_ * uScale);
+    const /*Point::Type*/ int32_t w = static_cast</*Point::Type*/ int32_t>(width_ * uScale);
     if(qFuzzyCompare(w + 1.0, h + 1.0)) {
         paths_.emplace_back(CirclePath(w));
     } else {
@@ -332,8 +328,8 @@ void ApPolygon::draw() {
     const double diam = diam_ * uScale;
     for(int i = 0; i < verticesCount_; ++i)
         poligon.emplace_back(Point(
-            static_cast<Point::Type>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
-            static_cast<Point::Type>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
+            static_cast</*Point::Type*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
+            static_cast</*Point::Type*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     if(rotation_ > 0.1)
         RotatePath(poligon, rotation_);
     paths_.push_back(poligon);
@@ -481,7 +477,7 @@ void ApMacro::draw() {
     /// normalize(paths_);
 
     {
-        auto rect = Bounds(paths_);
+        auto rect = GetBounds(paths_);
         rect.right -= rect.left;
         rect.top -= rect.bottom;
         const double x = rect.right * dScale;
@@ -501,8 +497,8 @@ Path ApMacro::drawCenterLine(const mvector<double>& mod) {
     };
 
     const Point center(
-        static_cast<Point::Type>(mod[CenterX] * uScale),
-        static_cast<Point::Type>(mod[CenterY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
 
     Path polygon = RectanglePath(mod[Width] * uScale, mod[Height] * uScale, center);
 
@@ -521,8 +517,8 @@ Path ApMacro::drawCircle(const mvector<double>& mod) {
     };
 
     const Point center(
-        static_cast<Point::Type>(mod[CenterX] * uScale),
-        static_cast<Point::Type>(mod[CenterY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
 
     Path polygon = CirclePath(mod[Diameter] * uScale, center);
 
@@ -545,15 +541,15 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
         RotationAngle,
     };
 
-    Point::Type diameter = static_cast<Point::Type>(mod[Diameter] * uScale);
-    const Point::Type thickness = static_cast<Point::Type>(mod[Thickness] * uScale);
-    const Point::Type gap = static_cast<Point::Type>(mod[Gap] * uScale);
-    const Point::Type ct = static_cast<Point::Type>(mod[CrossThickness] * uScale);
-    const Point::Type cl = static_cast<Point::Type>(mod[CrossLength] * uScale);
+    /*Point::Type*/ int32_t diameter = static_cast</*Point::Type*/ int32_t>(mod[Diameter] * uScale);
+    const /*Point::Type*/ int32_t thickness = static_cast</*Point::Type*/ int32_t>(mod[Thickness] * uScale);
+    const /*Point::Type*/ int32_t gap = static_cast</*Point::Type*/ int32_t>(mod[Gap] * uScale);
+    const /*Point::Type*/ int32_t ct = static_cast</*Point::Type*/ int32_t>(mod[CrossThickness] * uScale);
+    const /*Point::Type*/ int32_t cl = static_cast</*Point::Type*/ int32_t>(mod[CrossLength] * uScale);
 
     const Point center(
-        static_cast<Point::Type>(mod[CenterX] * uScale),
-        static_cast<Point::Type>(mod[CenterY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
 
     {
         Clipper clipper;
@@ -592,8 +588,8 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
     Path polygon;
     for(int j = 0; j < int(num); ++j)
         polygon.emplace_back(Point(
-            static_cast<Point::Type>(mod[X + j * 2] * uScale),
-            static_cast<Point::Type>(mod[Y + j * 2] * uScale)));
+            static_cast</*Point::Type*/ int32_t>(mod[X + j * 2] * uScale),
+            static_cast</*Point::Type*/ int32_t>(mod[Y + j * 2] * uScale)));
 
     if(mod.size() > (num * 2 + 3) && mod.back() > 0)
         RotatePath(polygon, mod.back());
@@ -614,17 +610,17 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     if(3 > num || num > 12)
         throw GbrObj::tr("Bad outline (regular polygon) macro!");
 
-    const Point::Type diameter = static_cast<Point::Type>(mod[Diameter] * uScale * 0.5);
+    const /*Point::Type*/ int32_t diameter = static_cast</*Point::Type*/ int32_t>(mod[Diameter] * uScale * 0.5);
     const Point center(
-        static_cast<Point::Type>(mod[CenterX] * uScale),
-        static_cast<Point::Type>(mod[CenterY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
 
     Path polygon;
     for(int j = 0; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
         polygon.emplace_back(Point(
-            static_cast<Point::Type>(qCos(angle) * diameter),
-            static_cast<Point::Type>(qSin(angle) * diameter)));
+            static_cast</*Point::Type*/ int32_t>(qCos(angle) * diameter),
+            static_cast</*Point::Type*/ int32_t>(qSin(angle) * diameter)));
     }
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
@@ -648,13 +644,13 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
     if(mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
         throw GbrObj::tr("Bad thermal macro!");
 
-    const Point::Type outer = static_cast<Point::Type>(mod[OuterDiameter] * uScale);
-    const Point::Type inner = static_cast<Point::Type>(mod[InnerDiameter] * uScale);
-    const Point::Type gap = static_cast<Point::Type>(mod[GapThickness] * uScale);
+    const /*Point::Type*/ int32_t outer = static_cast</*Point::Type*/ int32_t>(mod[OuterDiameter] * uScale);
+    const /*Point::Type*/ int32_t inner = static_cast</*Point::Type*/ int32_t>(mod[InnerDiameter] * uScale);
+    const /*Point::Type*/ int32_t gap = static_cast</*Point::Type*/ int32_t>(mod[GapThickness] * uScale);
 
     const Point center(
-        static_cast<Point::Type>(mod[CenterX] * uScale),
-        static_cast<Point::Type>(mod[CenterY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
 
     {
         Clipper clipper;
@@ -686,17 +682,17 @@ Path ApMacro::drawVectorLine(const mvector<double>& mod) {
     };
 
     const Point start(
-        static_cast<Point::Type>(mod[StartX] * uScale),
-        static_cast<Point::Type>(mod[StartY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[StartX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[StartY] * uScale));
     const Point end(
-        static_cast<Point::Type>(mod[EndX] * uScale),
-        static_cast<Point::Type>(mod[EndY] * uScale));
+        static_cast</*Point::Type*/ int32_t>(mod[EndX] * uScale),
+        static_cast</*Point::Type*/ int32_t>(mod[EndY] * uScale));
     const Point center(
-        static_cast<Point::Type>(0.5 * start.x + 0.5 * end.x),
-        static_cast<Point::Type>(0.5 * start.y + 0.5 * end.y));
+        static_cast</*Point::Type*/ int32_t>(0.5 * start.x + 0.5 * end.x),
+        static_cast</*Point::Type*/ int32_t>(0.5 * start.y + 0.5 * end.y));
 
-    Path polygon = RectanglePath(start.distTo(end), mod[Width] * uScale);
-    double angle = start.angleTo(end);
+    Path polygon = RectanglePath(distTo(start, end), mod[Width] * uScale);
+    double angle = angleTo(start, end);
     RotatePath(polygon, angle);
     TranslatePath(polygon, center);
 
@@ -740,7 +736,7 @@ void ApBlock::draw() {
         clipper.AddSubject(paths_);
         const int exp = at(i).state.imgPolarity();
         do {
-            paths_.append(at(i).fill);
+            paths_ += at(i).fill;
             clipper.AddClip(at(i++).fill);
         } while(i < size() && exp == at(i).state.imgPolarity());
         if(at(i - 1).state.imgPolarity() == Positive)
@@ -752,7 +748,7 @@ void ApBlock::draw() {
     {
         Clipper clipperBase;
         clipperBase.AddSubject(paths_);
-        auto rect{Bounds(paths_)};
+        auto rect{GetBounds(paths_)};
         rect.right -= rect.left;
         rect.top -= rect.bottom;
         const double x = rect.right * dScale;

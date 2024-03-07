@@ -63,7 +63,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddSubject(mergedPaths());
-        Rect r(Bounds(mergedPaths()));
+        Rect r(GetBounds(mergedPaths()));
         int k = /*uScale*/ 1;
         Path outer = {
             Point(r.left - k, r.bottom + k),
@@ -234,7 +234,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                     switch(gcType) {
                     case GCType::Drill: {
                         double drillDiameter{};
-                        auto rect = C2::Bounds(g.fill);
+                        auto rect = CL2::GetBounds(g.fill);
                         //                        auto& ap = *apertures_.at(go.state.aperture());
 
                         //                        auto name {ap.name()};

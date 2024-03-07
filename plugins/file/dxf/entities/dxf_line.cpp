@@ -88,7 +88,7 @@ DxfGo Line::toGo() const {
     //    offset.AddPath(p, JoinType::Round, EndType::Round);
     //    paths = offset.Execute(thickness * uScale);
 
-    DxfGo go{id, p, paths}; // return {id, p, paths};
+    DxfGo go{id, ~p, paths}; // FIXME return {id, p, paths};
     return go;
 }
 

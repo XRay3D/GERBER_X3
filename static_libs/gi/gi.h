@@ -22,6 +22,8 @@ namespace Shapes {
 class AbstractShape;
 }
 
+class Project;
+
 namespace Gi {
 
 namespace Type {
@@ -86,7 +88,7 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
+    virtual Paths paths(int alternate = {}) const { return ~shape_.toSubpathPolygons(transform()); }
     virtual void setPaths(Paths paths, int alternate = {}) {
         auto t{transform()};
         auto a{qRadiansToDegrees(asin(t.m12()))};
@@ -97,7 +99,7 @@ public:
         t = {};
         t.translate(-x, -y);
         t.rotate(-a);
-        for(auto&& path: paths)
+        for(auto&& path: ~paths)
             shape_.addPolygon(t.map(path));
         redraw();
     }

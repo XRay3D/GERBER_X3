@@ -45,49 +45,49 @@ void Hatch::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(code.code()) {
-        case SubclassMarker:                  // 100
+        case SubclassMarker: // 100
             break;
-        case ElevationPointX:                 // 10
+        case ElevationPointX: // 10
             break;
-        case ElevationPointY:                 // 20
+        case ElevationPointY: // 20
             break;
-        case ElevationPointZ:                 // 30
+        case ElevationPointZ: // 30
             break;
-        case ExtrDirectionX:                  // 210
+        case ExtrDirectionX: // 210
             break;
-        case ExtrDirectionY:                  // 220
+        case ExtrDirectionY: // 220
             break;
-        case ExtrDirectionZ:                  // 230
+        case ExtrDirectionZ: // 230
             break;
-        case HatchPatternName:                // 2
+        case HatchPatternName: // 2
             break;
-        case SolidFillFlag:                   // 70
+        case SolidFillFlag: // 70
             break;
-        case PatternFillColor:                // 63
+        case PatternFillColor: // 63
             break;
-        case AssociativityFlag:               // 71
+        case AssociativityFlag: // 71
             break;
-        case NumberOfBoundaryPaths:           // 91
+        case NumberOfBoundaryPaths: // 91
             break;
-        case HatchStyle:                      // 75
+        case HatchStyle: // 75
             break;
-        case HatchPatternType:                // 76
+        case HatchPatternType: // 76
             break;
-        case HatchPatternAngle:               // 52
+        case HatchPatternAngle: // 52
             break;
-        case HatchPatternScaleOrSpacing:      // 41
+        case HatchPatternScaleOrSpacing: // 41
             break;
-        case BoundaryAnnotationFlag:          // 73
+        case BoundaryAnnotationFlag: // 73
             break;
-        case HatchPatternDoubleFlag:          // 77
+        case HatchPatternDoubleFlag: // 77
             break;
-        case NumberOfPatternDefinitionLines:  // 78
+        case NumberOfPatternDefinitionLines: // 78
             break;
-        case PixelSize:                       // 47
+        case PixelSize: // 47
             break;
-        case NumberOfSeedPoints:              // 98
+        case NumberOfSeedPoints: // 98
             break;
-        case OffsetVector:                    // 11
+        case OffsetVector: // 11
             break;
         case NumberOfDegenerateBoundaryPaths: // 99
             break;
@@ -95,23 +95,23 @@ void Hatch::parse(CodeData& code) {
             //            break;
             //        case SeedPointY: // 20
             //            break;
-        case IndicatesSolidHatchOrGradient:       // 450
+        case IndicatesSolidHatchOrGradient: // 450
             break;
-        case Zero:                                // 451
+        case Zero: // 451
             break;
-        case RecordsColors:                       // 452
+        case RecordsColors: // 452
             break;
-        case NumberOfColors:                      // 453
+        case NumberOfColors: // 453
             break;
         case RotationAangleInRadiansForGradients: // 460
             break;
-        case GradientDefinition:                  // 461
+        case GradientDefinition: // 461
             break;
-        case ColorTintValueUsedByDialogCode:      // 462
+        case ColorTintValueUsedByDialogCode: // 462
             break;
-        case ReservedForFutureUse:                // 463
+        case ReservedForFutureUse: // 463
             break;
-        case String:                              // 470
+        case String: // 470
             break;
             // посипроение контура
         case PathTypeFlag:                         // 92
@@ -214,7 +214,7 @@ DxfGo Hatch::toGo() const {
     Paths paths(edges.size());
     for(size_t i = 0; i < edges.size(); ++i)
         for(auto edge: edges[i])
-            paths[i].append(Path(edge->toPolygon()));
+            paths[i] += ~edge->toPolygon();
     Clipper clipper;
     clipper.AddOpenSubject(paths); // FIXME AddSubject???
     clipper.Execute(ClipType::Union, FillRule::EvenOdd, paths);

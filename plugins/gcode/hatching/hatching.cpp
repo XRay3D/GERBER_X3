@@ -67,7 +67,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     switch(gcp_.side()) {
     case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast<Point::Type>(toolDiameter_ + 5)*/);
+        groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast</*Point::Type * / int32_t > (toolDiameter_ + 5) */);
         break;
     case GCode::Inner:
         groupedPaths(GCode::Grouping::Copper);
@@ -95,7 +95,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
         std::ranges::sort(sl, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
-        Point::Type start = sl.front().front().y;
+        /*Point::Type*/ int32_t start = sl.front().front().y;
         bool fl = {};
         for(size_t i{}, last{}; i < sl.size(); ++i) {
             if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
@@ -103,7 +103,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                 fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
                     std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
 
-                for(size_t k = last; k < i; ++k)                                                                                     // fix direction
+                for(size_t k = last; k < i; ++k) // fix direction
                     if(fl ^ (sl[k].front().x < sl[k].back().x))
                         std::swap(sl[k].front().x, sl[k].back().x);
 
@@ -123,12 +123,12 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             clipper.AddClip({frame});
             clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, "ClipType::Intersection");
-            frames.append(tmp);
+            frames += std::move(tmp);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, "ClipType::Difference");
-            frames.append(tmp);
+            frames += std::move(tmp);
 
-            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; });                                        // vertical sort
+            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
             std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
             for(auto& path: frames)
@@ -140,15 +140,15 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     auto calcZigzag = [hatchStep](const Paths& src) {
         Clipper clipper;
         clipper.AddClip(src);
-        Rect rect(Bounds(src));
-        Point::Type o = uScale - (rect.Height() % static_cast<Point::Type>(hatchStep * uScale)) / 2;
+        Rect rect(GetBounds(src));
+        /*Point::Type*/ int32_t o = uScale - (rect.Height() % static_cast</*Point::Type*/ int32_t>(hatchStep * uScale)) / 2;
         rect.top -= o;
         rect.bottom += o;
         rect.left -= uScale;
         rect.right += uScale;
         Path zigzag;
-        Point::Type step = hatchStep * uScale;
-        Point::Type start = rect.top;
+        auto step = hatchStep * uScale;
+        auto start = rect.top;
         bool fl{};
 
         for(; start <= rect.bottom || fl; fl = !fl, start += step) {
@@ -185,11 +185,12 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
                 ifCancelThenThrow();
                 if(path.empty() || path.back() == bit->front()) {
-                    path.append(path.empty() ? *bit : bit->mid(1));
+                    path.empty() ? path += * bit
+                                 : path += *bit | skipFront;
                     bList.erase(bit);
                     for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                         if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
-                            path.append(fit->mid(1));
+                            path += *fit | skipFront;
                             fList.erase(fit);
                             bit = bList.begin();
                             break;
@@ -202,7 +203,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             }
             for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                 if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
-                    fit->append(path.mid(1));
+                    *fit += path | skipFront;
                     std::swap(*fit, path);
                     fList.erase(fit);
                     break;
@@ -215,13 +216,14 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     for(Paths src: groupedPss) {
         {
-            ClipperOffset offset(uScale);
-            offset.AddPaths(src, JoinType::Round, EndType::Polygon);
-            src = offset.Execute(-dOffset);
+            // ClipperOffset offset(uScale);
+            // offset.AddPaths(src, JoinType::Round, EndType::Polygon);
+            // src = offset.Execute(-dOffset);
+            src = InflatePaths(src, -dOffset, JoinType::Round, EndType::Polygon);
             for(auto& path: src)
                 path.push_back(path.front());
             if(prPass)
-                profilePaths.append(src);
+                profilePaths += src;
         }
 
         QElapsedTimer t;
@@ -237,7 +239,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                     auto merged{merge(scanLines, frames)};
                     for(auto& path: merged)
                         RotatePath(path, -angle);
-                    returnPs.append(merged);
+                    returnPs += std::move(merged);
                 }
             }
             {
@@ -250,7 +252,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                     auto merged{merge(scanLines, frames)};
                     for(auto& path: merged)
                         RotatePath(path, -(angle + 90));
-                    returnPs.append(merged);
+                    returnPs += std::move(merged);
                 }
             }
         }

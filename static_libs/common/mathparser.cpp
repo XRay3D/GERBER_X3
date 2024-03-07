@@ -222,7 +222,7 @@
  */
 #include "mathparser.h"
 #include <QDebug>
-#include <QStringBuilder>
+// #include <QStringBuilder>
 #include <cmath>
 #include <functional>
 
@@ -231,7 +231,7 @@ MathParser::MathParser(VarMap* variables)
 
 double MathParser::getVariable(QStringView variableName) {
     if(!variables || !variables->contains(variableName.toString())) {
-        qWarning() << "Error: Try get unexists variable '" % variableName % "'";
+        qWarning() << "Error: Try get unexists variable '" + variableName.toString() + "'";
         return 0.0;
     }
     return variables->at(variableName.toString());
@@ -243,7 +243,7 @@ double MathParser::parse(const QString& s) {
     try {
         result = plusMinus(s);
         if(result.rest.size())
-            qWarning() << "Error: can't full parse\"" % s % "\"rest: " << result.rest;
+            qWarning() << "Error: can't full parse\"" + s + "\"rest: " << result.rest;
     } catch(const QString& str) {
         qWarning() << str;
     }
@@ -256,7 +256,7 @@ double MathParser::parse(QStringView s) {
     try {
         result = plusMinus(s);
         if(result.rest.size())
-            qWarning() << "Error: can't full parse\"" % s % "\"rest: " << result.rest;
+            qWarning() << "Error: can't full parse\"" + s.toString() + "\"rest: " << result.rest;
     } catch(const QString& str) {
         qWarning() << str;
     }
@@ -370,12 +370,12 @@ Result MathParser::num(QStringView s) // throws Exception
     while(i < s.length() && (s.at(i).isDigit() || s.at(i) == '.')) {
         // но также проверям, что в числе может быть только одна точка!
         if(s.at(i) == '.' && ++dot_cnt > 1)
-            throw QString("not valid number '" % s.mid(0, i + 1) % "'");
+            throw QString("not valid number '" + s.mid(0, i + 1).toString() + "'");
 
         i++;
     }
     if(i == 0) // что-либо похожее на число мы не нашли
-        throw QString("can't get valid number in '" % s % "'");
+        throw QString("can't get valid number in '" + s.toString() + "'");
 
     double dPart = s.mid(0, i).toDouble();
     if(negative)
@@ -397,7 +397,7 @@ Result MathParser::processFunction(QStringView func, Result r) {
     if(funcMap.contains(func))
         return Result{funcMap[func](r.acc), r.rest};
     else
-        qWarning() << "function '" % func % "' is not defined";
+        qWarning() << "function '" + func.toString() + "' is not defined";
 
     //    enum class Func {
     //        sin,
@@ -412,7 +412,7 @@ Result MathParser::processFunction(QStringView func, Result r) {
     //    case Func::tan:
     //        return Result {tan(r.acc), r.rest};
     //    default:
-    //        qWarning() << "function '" % func % "' is not defined";
+    //        qWarning() << "function '" + func + "' is not defined";
     //        break;
     //    }
     return r;

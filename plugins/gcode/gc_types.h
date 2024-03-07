@@ -12,7 +12,7 @@
 
 #include "datastream.h"
 #include "md5.h"
-#include "mvector.h"
+#include "myclipper.h"
 #include "tool.h"
 
 #include <QColor>
@@ -23,10 +23,6 @@
 
 constexpr auto G_CODE = md5::hash32("GCode");
 constexpr auto GC_DBG_FILE = md5::hash32("GCDbgFile");
-
-using Path = Clipper2Lib::Path64;
-using Paths = Clipper2Lib::Paths64;
-using Pathss = mvector<Paths>;
 
 namespace GCode {
 

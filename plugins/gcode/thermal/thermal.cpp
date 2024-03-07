@@ -28,14 +28,15 @@ void Creator::create() {
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
-    
+
     dbgPaths(closedSrcPaths, "closedSrcPaths");
 
     {     // create tool path
         { // execute offset
-            ClipperOffset offset;
-            offset.AddPaths(closedSrcPaths, JoinType::Round, EndType::Polygon);
-            returnPs = offset.Execute(dOffset);
+            // ClipperOffset offset;
+            // offset.AddPaths(closedSrcPaths, JoinType::Round, EndType::Polygon);
+            // returnPs = offset.Execute(dOffset);
+            returnPs = InflatePaths(closedSrcPaths, dOffset, JoinType::Round, EndType::Polygon);
         }
         dbgPaths(returnPs, "returnPs");
 
@@ -63,7 +64,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             for(auto go: graphicObjects)
                 if(go->positive())
                     offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
-            framePaths = offset.Execute(dOffset - 0.005 * uScale);
+            offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddSubject(framePaths);
         }
         if(!gcp_.params[IgnoreCopper].toInt()) {
@@ -79,7 +80,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
                 //                    }
                 //                }
             }
-            framePaths = offset.Execute(dOffset - 0.005 * uScale);
+            offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddClip(framePaths);
         }
         for(const Paths& paths: supportPss)

@@ -43,7 +43,7 @@ protected:
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths& src, const Point::Type accDistance);
+    void addAcc(Paths& src, const /*Point::Type*/int32_t accDistance);
 
     Paths calcScanLines(const Paths& src, const Path& frame);
     Paths calcFrames(const Paths& src, const Path& frame);

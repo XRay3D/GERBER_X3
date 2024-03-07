@@ -42,7 +42,7 @@ inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red
     if(pss.empty())
         return;
     for(auto&& paths: pss.midRef(1))
-        pss.front().append(std::move(paths));
+        pss.front().insert(pss.front().end(), paths.begin(), paths.end());
     dbgPaths(pss.front(), fileName, color, closed, tool);
 }
 
@@ -63,10 +63,10 @@ public:
 
     std::pair<int, int> getProgress();
 
-    Pathss& groupedPaths(Grouping group, Point::Type offset = uScale, bool skipFrame = {});
+    Pathss& groupedPaths(Grouping group, /*Point::Type*/ int32_t offset = uScale, bool skipFrame = {});
     void grouping(Grouping group, PolyTree& node);
 
-    Path boundOfPaths(const Paths& paths, Point::Type k) const;
+    Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const;
 
     /*static*/ Paths& sortB(Paths& src);
     /*static*/ Paths& sortBeginEnd(Paths& src);
@@ -136,7 +136,7 @@ protected:
 
     double toolDiameter{};
     double dOffset{};
-    Point::Type stepOver{};
+    /*Point::Type*/ int32_t stepOver{};
     Params gcp_;
 
     void isContinueCalc();

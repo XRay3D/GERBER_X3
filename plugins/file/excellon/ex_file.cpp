@@ -57,7 +57,9 @@ void File::setFormat(const Format& value) {
     (format_ = value).file = this;
     for(Hole& hole: *this) {
         hole.state.updatePos();
-        hole.item->update(hole.state.path.size() ? Path{hole.state.path} : Path{hole.state.pos}, hole.state.currentToolDiameter());
+        hole.item->update(hole.state.path.size() ? ~hole.state.path
+                                                 : Path{~hole.state.pos},
+            hole.state.currentToolDiameter());
     }
 }
 
@@ -77,7 +79,7 @@ Tools File::tools() const {
 
 Paths Excellon::File::merge() const {
     for(Gi::Item* item: *itemGroups_.back())
-        mergedPaths_.append(item->paths());
+        mergedPaths_ += item->paths();
     return mergedPaths_;
 }
 
@@ -100,7 +102,12 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     for(Hole& hole: *this)
-        itemGroup()->push_back(hole.item = new Gi::Drill{hole.state.path.size() ? Path{hole.state.path} : Path{hole.state.pos}, hole.state.currentToolDiameter(), this, hole.state.toolId});
+        itemGroup()->push_back(hole.item = new Gi::Drill{
+                                   hole.state.path.size() ? ~hole.state.path
+                                                          : Path{~hole.state.pos},
+                                   hole.state.currentToolDiameter(),
+                                   this,
+                                   hole.state.toolId});
     itemGroup()->setVisible(true);
 }
 
@@ -122,13 +129,13 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
         GraphicObject go;
         //        go.fill;
         if(bool slot = hole.state.path.size(); !slot) {
-            go.pos = hole.state.pos;
-            go.path.emplace_back(go.pos = hole.state.pos);
+            go.pos = ~hole.state.pos;
+            go.path.emplace_back(go.pos = ~hole.state.pos);
             go.fill.emplace_back(CirclePath(diam * uScale, go.pos));
         } else {
-            go.path = hole.state.path;
+            go.path = ~hole.state.path;
             // go.pos = go.path.front();
-            go.fill = C2::InflatePaths(Paths{hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
+            go.fill = InflatePaths({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
         }
         go.name = QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
         go.type = GraphicObject::FlStamp;                                                               // type{},//{Null};

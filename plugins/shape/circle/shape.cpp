@@ -51,19 +51,20 @@ QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
 void Shape::redraw() {
     radius_ = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
     const int intSteps = App::settings().clpCircleSegments(radius_);
-    const Point::Type radius = static_cast<Point::Type>(radius_ * uScale);
-    const Point center((handlers[Center]->pos()));
+    const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
+    const Point center{~handlers[Center]->pos()};
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
     for(int i = 0; i <= intSteps; i++) {
         const double theta = delta_angle * i;
-        path.emplace_back(Point(
-            static_cast<Point::Type>(radius * cos(theta)) + center.x,
-            static_cast<Point::Type>(radius * sin(theta)) + center.y));
+        path.emplace_back(Point{
+            radius * cos(theta) + center.x,
+            radius * sin(theta) + center.y,
+        });
     }
     shape_ = QPainterPath();
-    shape_.addPolygon(path);
+    shape_.addPolygon(~path);
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
 

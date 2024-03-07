@@ -1186,6 +1186,7 @@
 #include "jc_voronoi.h"
 #include "clipper_types.h"
 #include "memory.h"
+#include "myclipper.h" // NOTE ???
 
 // INTERNAL FUNCTIONS
 
@@ -2068,7 +2069,7 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     memset(originalmem, 0, memsize);
 
     // align memory
-    char* mem = originalmem + 8 - ((size_t)(originalmem)&0x7);
+    char* mem = originalmem + 8 - ((size_t)(originalmem) & 0x7);
 
     jcv_context_internal* internal = (jcv_context_internal*)mem;
     mem += sizeof(jcv_context_internal);

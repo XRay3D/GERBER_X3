@@ -108,7 +108,7 @@ DxfGo PolyLine::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    DxfGo go{id, p.value(0), {}}; // return {id, p.value(0), {}};
+    DxfGo go{id, ~p.value(0), {}}; // return {id, ~p.value(0), {}};
     return go;
 }
 

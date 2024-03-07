@@ -94,7 +94,7 @@ public:
         bottom side component is the one on the top side,
         mirrored around the X axis.
         The rotation is around the flash point.
-        The component reference designator linked to an object, e.g C2. 5.6.15
+        The component reference designator linked to an object, e.g CL2. 5.6.15
         Graphics Object*/
     };
     Q_ENUM(e1)
@@ -153,8 +153,8 @@ public:
     QPointF referencePoint() const { return referencePoint_; }
     void setReferencePoint(const QPointF& referencePoint) { referencePoint_ = referencePoint; }
 
-    mvector<QPolygonF> footprint() const { return footprint_; }
-    void addFootprint(const QPolygonF& footprint) { footprint_.emplace_back(footprint); }
+    QList<QPolygonF> footprint() const { return footprint_; }
+    void addFootprint(const QPolygonF& footprint) { footprint_.push_back(footprint); }
 
     QString footprintName() const { return footprintName_; }
     void setFootprintName(const QString& footprintName) { footprintName_ = footprintName; }
@@ -184,7 +184,7 @@ private:
     mvector<Pin> pins_;
     mvector<Supplier> suppliers_;
     QPointF referencePoint_;
-    mvector<QPolygonF> footprint_;
+    QList<QPolygonF> footprint_;
     QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
     QString refdes_;
     QString value_;         /* <field> E.g. 220nF. */

@@ -69,9 +69,9 @@ protected:
     void startPath(const QPointF& point);
     void endPath();
 
-    mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
+    mvector<QList<QPolygonF>> normalizedPathss(const QPointF& offset);
 
-    mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_);
+    QList<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_);
 
     ////////////////////////////////////////
     Paths pocketPaths_; /////

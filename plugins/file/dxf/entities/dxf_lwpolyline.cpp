@@ -240,15 +240,17 @@ DxfGo LwPolyline::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    ClipperOffset offset;
-    offset.AddPath(Path{p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
-    Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
-
-    DxfGo go{id, p.value(0), paths}; // return {id, p.value(0), paths};
+    // ClipperOffset offset;
+    // offset.AddPath(Path{p.value(0)}, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    // Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
+    const double offset = constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0);
+    Paths paths = InflatePaths({~p.value(0)}, offset,
+        JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    DxfGo go{id, ~p.value(0), paths}; // return {id, ~p.value(0), paths};
 
     if(polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
         go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
-        go.GraphicObject::pos = QLineF{poly.front(), poly.back()}.center();
+        go.GraphicObject::pos = ~QLineF{poly.front(), poly.back()}.center();
         go.path.clear();
     } else {
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);

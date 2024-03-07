@@ -402,7 +402,7 @@
 //     Paths64 result;
 //     result.reserve(pp.size());
 //     for (const Path64& p : pp) {
-//         Rect64 pathRec = Bounds(p);
+//         Rect64 pathRec = GetBounds(p);
 //         if (!r64.Intersects(pathRec))
 //             continue;
 
@@ -430,7 +430,7 @@
 //     Paths64 result;
 //     result.reserve(pp.size());
 //     for (const Path64& p : pp) {
-//         Rect64 pathRec = Bounds(p);
+//         Rect64 pathRec = GetBounds(p);
 //         if (!r.Intersects(pathRec))
 //             continue;
 
@@ -456,7 +456,7 @@
 //     result.reserve(pp.size());
 
 //    for (const Path64& p : pp) {
-//        Rect64 pathRec = Bounds(p);
+//        Rect64 pathRec = GetBounds(p);
 //        if (!r.Intersects(pathRec))
 //            continue;
 
@@ -485,7 +485,7 @@
 
 //    result.reserve(pp.size());
 //    for (const Path64& p : pp) {
-//        Rect64 pathRec = Bounds(p);
+//        Rect64 pathRec = GetBounds(p);
 //        if (!r.Intersects(pathRec))
 //            continue;
 
