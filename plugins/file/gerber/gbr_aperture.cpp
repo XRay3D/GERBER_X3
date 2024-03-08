@@ -692,7 +692,7 @@ Path ApMacro::drawVectorLine(const mvector<double>& mod) {
         static_cast</*Point::Type*/ int32_t>(0.5 * start.y + 0.5 * end.y));
 
     Path polygon = RectanglePath(distTo(start, end), mod[Width] * uScale);
-    double angle = angleTo(start, end);
+    double angle = 180 - (angleTo(start, end) - 360); // FIXME ???
     RotatePath(polygon, angle);
     TranslatePath(polygon, center);
 
