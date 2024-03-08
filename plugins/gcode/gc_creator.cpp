@@ -200,8 +200,8 @@ void Creator::createGc(Params* gcp) {
     if(gcp->supportPathss.size())
         supportPss.append(std::move(gcp->supportPathss));
 
-    dbgPaths(closedSrcPaths, "closedPaths");
-    dbgPaths(openSrcPaths, "openPaths");
+    // dbgPaths(closedSrcPaths, "closedPaths");
+    // dbgPaths(openSrcPaths, "openPaths");
 
     //    dbgPaths(closedSrcPaths, "closedSrcPaths");
     //    dbgPaths(supportPss, "supportPathss");
@@ -558,9 +558,9 @@ bool Creator::checkMilling(SideOfMilling side) {
     msg = tr("Check milling for errors");
 
     auto createFrame = [toolRadius](auto& srcPaths) {
-        auto retPaths = Clipper2Lib::InflatePaths(srcPaths, -toolRadius, JoinType::Round, EndType::Polygon);
+        auto retPaths = InflateRoundPolygon(srcPaths, -toolRadius);
         CleanPaths(retPaths, uScale);
-        return Clipper2Lib::InflatePaths(retPaths, toolRadius + 10, JoinType::Round, EndType::Polygon);
+        return InflateRoundPolygon(retPaths, toolRadius + 10);
     };
 
     auto testFrame = [](Paths& frames, Paths& sources, bool intersect = {}) {
@@ -616,8 +616,8 @@ bool Creator::checkMilling(SideOfMilling side) {
                 Timer t("mill");
                 Paths retPaths;
                 ReversePaths(paths);
-                retPaths = Clipper2Lib::InflatePaths(paths, offset1, JoinType::Round, EndType::Polygon);
-                retPaths = Clipper2Lib::InflatePaths(retPaths, offset2, JoinType::Round, EndType::Polygon);
+                retPaths = InflateRoundPolygon(paths, offset1);
+                retPaths = InflateRoundPolygon(retPaths, offset2);
                 return retPaths;
             };
 
@@ -625,7 +625,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                 Timer t("nonCuts");
                 Paths retPaths;
                 retPaths = Clipper2Lib::Difference(subject, clip, FillRule::Positive);
-                retPaths = Clipper2Lib::InflatePaths(retPaths, k, JoinType::Miter, EndType::Polygon);
+                retPaths = InflateMiterPolygon(retPaths, k);
                 return retPaths;
             };
 
@@ -685,9 +685,10 @@ bool Creator::checkMilling(SideOfMilling side) {
                 break;
 
             std::for_each(std::execution::par, std::begin(frPaths), std::end(frPaths), [](auto&& frPath) {
-                ClipperOffset offset(uScale);
-                offset.AddPath(frPath, JoinType::Round, EndType::Polygon);
-                frPath = InflatePaths(frPath, 100, JoinType::Round, EndType::Polygon).front(); // offset.Execute(100).front();
+                // ClipperOffset offset(uScale);
+                // offset.AddPath(frPath, JoinType::Round, EndType::Polygon);
+                // frPath = offset.Execute(100).front();
+                frPath = InflateRoundPolygon(frPath, 100).front();
             });
 
             //        ClipperOffset offset(uScale);

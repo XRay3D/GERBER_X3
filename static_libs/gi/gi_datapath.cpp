@@ -83,7 +83,7 @@ void DataPath::updateSelection() const {
         // ClipperOffset offset;
         // offset.AddPath(Path{~shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
         // auto tmpPpath{offset.Execute(5 * uScale * scale_)};
-        auto tmpPpath = InflatePaths({~shape_.toSubpathPolygons().front()}, 5 * uScale * scale_, JoinType::Square, EndType::Square);
+        auto tmpPpath = Inflate({~shape_.toSubpathPolygons().front()}, 5 * uScale * scale_, JoinType::Square, EndType::Square);
         for(auto&& path: tmpPpath)
             selectionShape_.addPolygon(~path);
         boundingRect_ = selectionShape_.boundingRect();

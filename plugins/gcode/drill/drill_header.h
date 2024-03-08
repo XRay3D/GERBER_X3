@@ -11,6 +11,7 @@ class Header : public QHeaderView {
 public:
     Header(Qt::Orientation orientation, QWidget* parent = nullptr);
     ~Header() override;
+    Qt::CheckState checkBoxState;
 
     enum {
         XOffset = 5,

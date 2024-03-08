@@ -165,23 +165,23 @@ DxfGo MText::toGo() const {
 
     [&] {
         switch(attachmentPoint) {
-        case TopLeft:      // вверху слева
+        case TopLeft: // вверху слева
             return offset += {0, size.height() - descent};
-        case TopCenter:    // вверху по центру
+        case TopCenter: // вверху по центру
             return offset += {-size.width() / 2, size.height() - descent};
-        case TopRight:     // вверху справа
+        case TopRight: // вверху справа
             return offset += {-size.width(), size.height() - descent};
-        case MiddleLeft:   // посередине слева
+        case MiddleLeft: // посередине слева
             return offset += {size.height() / 2 - descent, -descent};
         case MiddleCenter: // посередине по центру
             return offset += {-size.width() / 2, size.height() / 2 - descent};
-        case MiddleRight:  // посередине справа
+        case MiddleRight: // посередине справа
             return offset += {-size.width(), size.height() / 2 - descent};
-        case BottomLeft:   // снизу слева;
+        case BottomLeft: // снизу слева;
             return offset;
         case BottomCenter: // снизу по центру
             return offset += {-size.width() / 2, 0};
-        case BottomRight:  // снизу справа
+        case BottomRight: // снизу справа
             return offset += {-size.width(), 0};
         default:
             return offset;
@@ -193,9 +193,9 @@ DxfGo MText::toGo() const {
     for(int i = list.size() - 1; i >= 0; --i) {
         double x = {};
         switch(attachmentPoint) {
-        case TopLeft:      // вверху слева
-        case MiddleLeft:   // посередине слева
-        case BottomLeft:   // снизу слева;
+        case TopLeft:    // вверху слева
+        case MiddleLeft: // посередине слева
+        case BottomLeft: // снизу слева;
             break;
         case TopCenter:    // вверху по центру
         case MiddleCenter: // посередине по центру

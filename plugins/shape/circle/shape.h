@@ -64,7 +64,9 @@ public:
     uint32_t type() const override { return Gi::Type::ShCircle; }
     QIcon icon() const override { return QIcon::fromTheme("draw-ellipse"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape{point, point + QPointF{5, 0}};
+        auto shape = new Shape{
+            point, point + QPointF{5, 0}
+        };
         editor_.addShape(shape);
         return shape;
     }

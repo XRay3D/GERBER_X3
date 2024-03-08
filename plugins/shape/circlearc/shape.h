@@ -73,7 +73,10 @@ public:
     uint32_t type() const override { return Gi::Type::ShCirArc; }
     QIcon icon() const override { return QIcon::fromTheme("draw-ellipse-arc"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape{point, point + QPointF{5, 0}, point + QPointF{0, 5}};
+        auto shape = new Shape{
+            point, point + QPointF{5, 0},
+               point + QPointF{0, 5}
+        };
         editor_.addShape(shape);
         return shape;
     }

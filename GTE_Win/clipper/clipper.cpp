@@ -70,7 +70,7 @@ struct TEdge {
     EdgeSide Side; // side only refers to current side of solution poly
     int WindDelta; // 1 or -1 depending on winding direction
     int WindCnt;
-    int WindCnt2;  // winding count of the opposite polytype
+    int WindCnt2; // winding count of the opposite polytype
     int OutIdx;
     TEdge* Next;
     TEdge* Prev;
@@ -837,7 +837,7 @@ bool HorzSegmentsOverlap(cInt seg1a, cInt seg1b, cInt seg2a, cInt seg2b) {
 // ClipperBase class methods ...
 //------------------------------------------------------------------------------
 
-ClipperBase::ClipperBase()              // constructor
+ClipperBase::ClipperBase() // constructor
 {
     m_CurrentLM = m_MinimaList.begin(); // begin() == end() here
     m_UseFullRange = false;

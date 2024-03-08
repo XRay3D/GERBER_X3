@@ -122,7 +122,7 @@ void Drill::create() {
         //        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
-        for(auto&& path: InflatePaths(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
+        for(auto&& path: Inflate(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
             path.push_back(path.front());
             shape_.addPolygon(~path);
         }

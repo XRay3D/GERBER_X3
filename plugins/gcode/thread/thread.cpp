@@ -77,7 +77,7 @@ void Creator::createThread(const Tool& tool, const double depth) {
         //        file_->setFileName(tool.nameEnc());
         //        emit fileReady(file_);
         //        return;
-    } while (0);
+    } while(0);
     emit fileReady(nullptr);
 }
 
@@ -88,7 +88,7 @@ File::File()
 
 File::File(GCode::Params&& gcp, Pathss&& toolPathss)
     : GCode::File(std::move(gcp), std::move(toolPathss)) {
-    if (gcp_.tools.front().diameter()) {
+    if(gcp_.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -117,20 +117,20 @@ void File::genGcodeAndTile() {
 void File::createGi() {
 
     Gi::Item* item;
-    for (const Paths& paths: toolPathss_) {
+    for(const Paths& paths: toolPathss_) {
         item = new Gi::GcPath{paths, this};
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
 
-    for (size_t i{}; const Paths& paths: toolPathss_) {
+    for(size_t i{}; const Paths& paths: toolPathss_) {
         item = new Gi::GcPath{toolPathss_[i], this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
-        for (size_t j = 0; j < paths.size() - 1; ++j)
+        for(size_t j = 0; j < paths.size() - 1; ++j)
             g0path_.push_back({paths[j].back(), paths[j + 1].front()});
-        if (i < toolPathss_.size() - 1)
+        if(i < toolPathss_.size() - 1)
             g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
     }
 

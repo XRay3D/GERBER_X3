@@ -57,7 +57,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         //        offset.AddPaths(src, JT::Round, ET::Polygon);
         //        src = offset.Execute(-dOffset);
 
-        src = InflatePaths(src, -dOffset, JT::Round, ET::Polygon, uScale);
+        src = Inflate(src, -dOffset, JT::Round, ET::Polygon, uScale);
 
         for(auto& path: src)
             path.push_back(path.front());
@@ -150,10 +150,10 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
       //     o.AddPaths(p, JT::Round, ET::Polygon);
       // profilePaths = o.Execute(-tool.diameter() * uScale);
         // auto it = std::views::join(groupedPss);
-        profilePaths = InflatePaths(join(groupedPss), -tool.diameter() * uScale, JT::Round, ET::Polygon);
+        profilePaths = Inflate(join(groupedPss), -tool.diameter() * uScale, JT::Round, ET::Polygon);
     }
     auto pss = std::views::join(groupedPss);
-    profilePaths = InflatePaths(Paths{pss.begin(), pss.end()}, -dOffset, JT::Round, ET::Polygon, uScale);
+    profilePaths = Inflate(Paths{pss.begin(), pss.end()}, -dOffset, JT::Round, ET::Polygon, uScale);
 
     // get bounds of frames
     rect = GetBounds(profilePaths);

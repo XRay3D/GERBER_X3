@@ -32,7 +32,7 @@ protected:
     mvector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
-    bool parseNumber(QString Str, /*Point::Type*/int32_t& val, int integer, int decimal);
+    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer, int decimal);
 
     void addPath();
     void addFlash();
@@ -46,9 +46,6 @@ protected:
 
     Paths createLine();
     Paths createPolygon();
-
-    Clipper clipper_;
-    ClipperOffset offset_;
 
     QMap<QString, QString> apertureMacro_;
 

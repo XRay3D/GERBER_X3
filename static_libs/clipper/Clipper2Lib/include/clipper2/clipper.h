@@ -123,14 +123,14 @@ inline PathsD Xor(const PathsD& subjects, const PathsD& clips, FillRule fillrule
     return BooleanOp(ClipType::Xor, fillrule, subjects, clips, decimal_prec);
 }
 
-inline Paths64 InflatePaths(const Paths64& paths, double delta,
+inline Paths64 Inflate(const Paths64& paths, double delta,
     JoinType jt, EndType et, double miter_limit = 2.0) {
     ClipperOffset clip_offset(miter_limit);
     clip_offset.AddPaths(paths, jt, et);
     return clip_offset.Execute(delta);
 }
 
-inline PathsD InflatePaths(const PathsD& paths, double delta,
+inline PathsD Inflate(const PathsD& paths, double delta,
     JoinType jt, EndType et, double miter_limit = 2.0, int precision = 2) {
     CheckPrecision(precision);
     const double scale = std::pow(10, precision);

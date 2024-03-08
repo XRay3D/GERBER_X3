@@ -135,7 +135,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
         } else {
             go.path = ~hole.state.path;
             // go.pos = go.path.front();
-            go.fill = InflatePaths({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
+            go.fill = Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
         }
         go.name = QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
         go.type = GraphicObject::FlStamp;                                                               // type{},//{Null};

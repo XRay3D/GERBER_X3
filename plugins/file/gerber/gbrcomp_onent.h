@@ -187,7 +187,7 @@ private:
     QList<QPolygonF> footprint_;
     QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
     QString refdes_;
-    QString value_;         /* <field> E.g. 220nF. */
+    QString value_; /* <field> E.g. 220nF. */
     bool isNull_ = true;
 };
 

@@ -26,11 +26,11 @@ public:
     void read(QDataStream& stream) override;
 
     enum DataEnum {
-        SubclassMarkerAcDbText = 100,         //	Маркер подкласса (AcDbText)
-        Thickness = 39,                       //	Толщина (необязательно; значение по умолчанию = 0)
-        FirstAlignmentPtX = 10,               //	Первая точка выравнивания (в ОСК)
-        FirstAlignmentPtY = 20,               // DXF: Alue; APP: 3DPoint				//	Файл DXF: значение X; приложение: 3D-точка
-        FirstAlignmentPtZ = 30,               // DXF: N_ valuesOfTextStartPoint (in_OCS)	=	20, 30	,	//	Файл DXF: значения Y и Z начальной точки текста (в ОСК)
+        SubclassMarkerAcDbText = 100, //	Маркер подкласса (AcDbText)
+        Thickness = 39,               //	Толщина (необязательно; значение по умолчанию = 0)
+        FirstAlignmentPtX = 10,       //	Первая точка выравнивания (в ОСК)
+        FirstAlignmentPtY = 20,       // DXF: Alue; APP: 3DPoint				//	Файл DXF: значение X; приложение: 3D-точка
+        FirstAlignmentPtZ = 30,       // DXF: N_ valuesOfTextStartPoint (in_OCS)	=	20, 30	,	//	Файл DXF: значения Y и Z начальной точки текста (в ОСК)
 
         TextHeight = 40,                      //	Высота текста
         DefaultValue = 1,                     //	Значение по умолчанию (строка)
@@ -43,11 +43,11 @@ public:
         SecondAlignmentPointPtX = 11,         //	Вторая точка выравнивания (в ОСК) (необязательно)
         //	Файл DXF: значение X; приложение: 3D-точка
         //	Имеет значение, только если значения групповых кодов 72 или 74 не равны нулю
-        SecondAlignmentPointPtY = 21,                //	Файл DXF: значения Y и Z второй точки выравнивания (в ОСК) (необязательно)
+        SecondAlignmentPointPtY = 21, //	Файл DXF: значения Y и Z второй точки выравнивания (в ОСК) (необязательно)
         SecondAlignmentPointPtZ = 31,
-        ExtrusionDirectionX = 210,                   //	Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
-        ExtrusionDirectionY = 220,                   //	Файл DXF: значение X; приложение: 3D-вектор
-        ExtrusionDirectionZ = 230,                   //	Файл DXF: значения Y и Z направления выдавливания
+        ExtrusionDirectionX = 210, //	Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
+        ExtrusionDirectionY = 220, //	Файл DXF: значение X; приложение: 3D-вектор
+        ExtrusionDirectionZ = 230, //	Файл DXF: значения Y и Z направления выдавливания
 
         SubclassMarkerAcDbAttributeDefinition = 100, //	Маркер подкласса (AcDbAttributeDefinition)
         VersionNumber = 280,                         //	Номер версии: 0 - 2010
@@ -76,8 +76,8 @@ public:
         //        DXF: XValue; APP: 3DPoint				//	Файл DXF: значение X; приложение: 3D-точка
         AlignmentPointOfAttributeOrAttributeDefinitionY = 20, //	Файл DXF: значения Y и Z точки вставки
         AlignmentPointOfAttributeOrAttributeDefinitionZ = 30,
-        currentAnnotationScale = 40,                          //	Текущий масштаб аннотаций
-        attributeOrAttributeDefinitionTagString = 2,          //	Строка тега атрибута или определения атрибута
+        currentAnnotationScale = 40,                 //	Текущий масштаб аннотаций
+        attributeOrAttributeDefinitionTagString = 2, //	Строка тега атрибута или определения атрибута
         //        EntityType (MTEXT)		0		//	Тип объекта ((MTEXT)
         SubclassMarkerAcDbEntity = 100, //	Маркер подкласса (AcDbEntity)
         //        AbsentOr_zeroIndicatesEntityIsInModelSpace. 1 indicatesEntityIsInPaperSpace 	=	67	,	//	Отсутствие значения или ноль указывают на наличие объекта в пространстве модели. 1 указывает на то, что объект находится в пространстве листа (необязательно)
@@ -107,7 +107,7 @@ public:
         //        ExtrusionDirectionZ = 230,
         XAxisDirectionVector = 11, //	Вектор направления оси X (в МСК)
         //	Файл DXF: значение X; приложение: 3D-вектор
-        YAxisDirectionVector = 21,                                   //	Файл DXF: значения Y и Z вектора направления оси X (в МСК)
+        YAxisDirectionVector = 21, //	Файл DXF: значения Y и Z вектора направления оси X (в МСК)
         ZAxisDirectionVector = 31,
         HorizontalWidthOfTheCharactersThatMakeUpTheMtextEntity = 42, //	Ширина символов, образующих объект многострочного текста, по горизонтали.
         //        ThisValueWillAlwaysBeEqualToOrLessThanTheValueOf_groupCode 41 (read-only, ignoredIfSupplied).				//	Это значение всегда будет равно или меньше, чем значение группового кода 41 (только для чтения; игнорируется, если предоставлено).

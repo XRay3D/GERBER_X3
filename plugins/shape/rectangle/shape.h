@@ -61,7 +61,9 @@ public:
     uint32_t type() const override { return Gi::Type::ShRectangle; }
     QIcon icon() const override { return QIcon::fromTheme("draw-rectangle"); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape{point, point + QPointF{10, 10}};
+        auto shape = new Shape{
+            point, point + QPointF{10, 10}
+        };
         editor_.addShape(shape);
         return shape;
     }

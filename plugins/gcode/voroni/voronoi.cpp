@@ -62,10 +62,10 @@ void Creator::create() {
         }
         dbgPaths(returnPs, "создание пермычек");
         { // создание заливки.
-            ClipperOffset offset(uScale);
+            Clipper2Lib::ClipperOffset offset(uScale);
             offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Polygon);
             offset.AddPaths(copy, JoinType::Round, EndType::Round);
-            offset.Execute(dOffset + 10, openSrcPaths);
+            offset.Execute(dOffset + 10, openSrcPaths); // FIXME maybe dOffset * 0.5
         }
         // erase empty paths
         auto begin = returnPss.begin();
@@ -92,7 +92,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
       // ClipperOffset offset;
       // offset.AddPaths(returnPs, JoinType::Round /*JoinType::Miter*/, EndType::Round);
       // returnPs = offset.Execute(width * uScale * 0.5);
-        returnPs = InflatePaths(returnPs, width * uScale * 0.5, JoinType::Round /*JoinType::Miter*/, EndType::Round);
+        returnPs = Inflate(returnPs, width * uScale * 0.5, JoinType::Round /*JoinType::Miter*/, EndType::Round);
     }
     { // fit offset to copper
         Clipper clipper;
@@ -114,7 +114,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
         // offset.AddPaths(returnPs, JoinType::Round, EndType::Polygon);
         // Paths tmpPaths1;
         // tmpPaths1 = offset.Execute(-dOffset);
-        Paths tmpPaths1 = InflatePaths(returnPs, -dOffset, JoinType::Round, EndType::Polygon);
+        Paths tmpPaths1 = InflateRoundPolygon(returnPs, -dOffset);
         openSrcPaths = tmpPaths1;
         Paths tmpPaths;
         do {
@@ -122,7 +122,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
             // offset.Clear();
             // offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
             // tmpPaths1 = offset.Execute(-stepOver);
-            tmpPaths1 = InflatePaths(tmpPaths1, -stepOver, JoinType::Miter, EndType::Polygon);
+            tmpPaths1 = InflateMiterPolygon(tmpPaths1, -stepOver);
         } while(tmpPaths1.size());
         returnPs = tmpPaths;
     }

@@ -45,13 +45,13 @@ void Creator::createProfile(const Tool& tool, const double depth) {
                 //     offset.AddPaths(paths, JT::Round, ET::Polygon);
                 // returnPs = offset.Execute(dOffset);
                 auto it = std::views::join(groupedPaths(GCode::Grouping::Copper));
-                returnPs = InflatePaths(Paths{it.begin(), it.end()}, dOffset, JT::Round, ET::Polygon);
+                returnPs = Inflate(Paths{it.begin(), it.end()}, dOffset, JT::Round, ET::Polygon);
             }
             if(openSrcPaths.size()) {
                 // ClipperOffset offset;
                 // offset.AddPaths(openSrcPaths, JT::Round, ET::Round);
                 // openSrcPaths = offset.Execute(dOffset);
-                openSrcPaths = InflatePaths(openSrcPaths, dOffset, JT::Round, ET::Round);
+                openSrcPaths = Inflate(openSrcPaths, dOffset, JT::Round, ET::Round);
                 if(!openSrcPaths.empty())
                     returnPs += openSrcPaths;
             }
@@ -110,12 +110,12 @@ void Creator::trimmingOpenPaths(Paths& paths) {
                 // ClipperOffset offset;
                 // offset.AddPath();
                 // ps = offset.Execute(dOffset + 100);
-                ps = InflatePaths({p}, dOffset + 100, JT::Miter, ET::Butt);
+                ps = Inflate({p}, dOffset + 100, JT::Miter, ET::Butt);
 
                 // offset.Clear();
                 // offset.AddPath(ps.front(), JT::Miter, ET::Polygon);
                 // ps = offset.Execute(-dOffset);
-                ps = InflatePaths({ps.front()}, -dOffset, JT::Miter, ET::Polygon);
+                ps = Inflate({ps.front()}, -dOffset, JT::Miter, ET::Polygon);
                 if(ps.empty()) {
                     paths -= i--;
                     continue;
@@ -202,7 +202,7 @@ void Creator::makeBridges() {
         auto isPositive1 = CL2::IsPositive(rPaths.front());
 
         // create frame
-        Paths frame = InflatePaths(rPaths, toolDiameter * uScale * 0.1, JT::Miter, ET::Butt, uScale);
+        Paths frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JT::Miter, ET::Butt, uScale);
         Paths clip;
         for(GiBridge* bip: biStack)
             clip += bip->paths();

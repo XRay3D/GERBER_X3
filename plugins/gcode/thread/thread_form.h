@@ -112,8 +112,8 @@ public:
 
                 QVariant data(const QModelIndex& index, int role) const override {
                     auto& data = Settings::threads.at(index.row());
-                    if (role == Qt::DisplayRole || role == Qt::EditRole) {
-                        switch (index.column()) {
+                    if(role == Qt::DisplayRole || role == Qt::EditRole) {
+                        switch(index.column()) {
                         case 0: return data.D;
                         case 1: return data.P;
                         case 2: return data.D1;
@@ -122,15 +122,15 @@ public:
                         }
                     }
 
-                    if (role == Qt::TextAlignmentRole) return Qt::AlignCenter;
+                    if(role == Qt::TextAlignmentRole) return Qt::AlignCenter;
 
                     return {};
                 }
 
                 bool setData(const QModelIndex& index, const QVariant& value, int role) override {
                     auto& data = Settings::threads.at(index.row());
-                    if (role == Qt::EditRole) {
-                        switch (index.column()) {
+                    if(role == Qt::EditRole) {
+                        switch(index.column()) {
                         case 0:
                             data.D = value.toDouble();
                             data.D2 = data.D - 0.6495 * data.P;
@@ -160,8 +160,8 @@ public:
                 }
 
                 QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
-                    if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-                        switch (section) {
+                    if(orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+                        switch(section) {
                         case 0: return tr("Nominal\nD, mm");
                         case 1: return tr("Pitch\nP, mm");
                         case 2: return tr("Minor\nD1, mm");
@@ -222,16 +222,16 @@ public:
             void readSettings(MySettings& settings) override {
                 // settings.sort = settings.getValue(cbxThreadSort, settings.sort);
                 QFile file{App::settingsPath() + "/threads.json"};
-                if (file.open(QFile::ReadOnly | QFile::Text)) {
+                if(file.open(QFile::ReadOnly | QFile::Text)) {
                     auto array = QJsonDocument::fromJson(file.readAll()).array();
                     Settings::threads.clear();
                     Settings::threads.reserve(array.size());
-                    for (auto objRef: array)
+                    for(auto objRef: array)
                         Settings::threads.emplace_back(-1.0) = objRef.toObject();
                 } else {
                     qWarning() << file.errorString();
                 }
-                if (!Settings::threads.size()) {
+                if(!Settings::threads.size())
                     Settings::threads = {
                         {80,   6, 76.103, 73.505, 72.639},
                         {80,   4, 77.402, 75.670, 75.093},
@@ -240,13 +240,12 @@ public:
                         {80, 1.5, 79.026, 78.376, 78.160},
                         {80,   1, 79.350, 78.917, 78.773},
                     };
-                }
             }
             void writeSettings(MySettings& settings) override {
                 QFile file{App::settingsPath() + "/threads.json"};
-                if (file.open(QFile::WriteOnly | QFile::Text)) {
+                if(file.open(QFile::WriteOnly | QFile::Text)) {
                     QJsonArray arr;
-                    for (auto& thread: Settings::threads)
+                    for(auto& thread: Settings::threads)
                         arr.append(thread.toObj());
                     file.write(QJsonDocument(arr).toJson());
                 } else {

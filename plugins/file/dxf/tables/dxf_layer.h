@@ -16,8 +16,9 @@
 #include "entities/dxf_graphicobject.h"
 
 #include "datastream.h"
-
-class Gi::Group;
+namespace Gi {
+class Group;
+}
 
 namespace Dxf {
 

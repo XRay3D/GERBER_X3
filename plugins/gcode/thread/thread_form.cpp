@@ -49,23 +49,23 @@ public:
 
     QVariant data(const QModelIndex& index, int role) const override {
         auto& data = data_.at(index.row());
-        if (role == Qt::DisplayRole) {
-            switch (index.column()) {
+        if(role == Qt::DisplayRole) {
+            switch(index.column()) {
             case 0: return Settings::threads.at(data.thread).toStr();
             case 1: return side[data.side];
             case 2:
-                if (App::toolHolder().tools().contains(data.toolT))
+                if(App::toolHolder().tools().contains(data.toolT))
                     return App::toolHolder().tool(data.toolT).name();
             case 3:
-                if (App::toolHolder().tools().contains(data.tool))
+                if(App::toolHolder().tools().contains(data.tool))
                     return App::toolHolder().tool(data.tool).name();
             case 4: return data.depth;
             case 5: return data.x;
             case 6: return data.y;
             }
         }
-        if (role == Qt::EditRole) {
-            switch (index.column()) {
+        if(role == Qt::EditRole) {
+            switch(index.column()) {
             case 0: return data.thread;
             case 1: return data.side;
             case 2: return data.toolT;
@@ -81,8 +81,8 @@ public:
 
     bool setData(const QModelIndex& index, const QVariant& value, int role) override {
         auto& data = data_.at(index.row());
-        if (role == Qt::EditRole) {
-            switch (index.column()) {
+        if(role == Qt::EditRole) {
+            switch(index.column()) {
             case 0: data.thread = value.value<decltype(data.thread)>(); return true;
             case 1: data.side = value.value<decltype(data.side)>(); return true;
             case 2: data.toolT = value.value<decltype(data.toolT)>(); return true;
@@ -96,8 +96,8 @@ public:
     }
 
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override {
-        if (orientation == Qt::Horizontal && role == Qt::DisplayRole) {
-            switch (section) {
+        if(orientation == Qt::Horizontal && role == Qt::DisplayRole) {
+            switch(section) {
             case 0: return tr("Thread");
             case 1: return tr("Side");
             case 2: return tr("ToolT");
@@ -125,30 +125,30 @@ public:
     // QAbstractItemDelegate interface
 
     QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-        switch (index.column()) {
+        switch(index.column()) {
         case 0: {
             auto cbx = new QComboBox{parent};
-            for (int i{}; auto&& thread: Settings::threads)
+            for(int i{}; auto&& thread: Settings::threads)
                 cbx->addItem(thread.toStr(), i++);
             return cbx;
         }
         case 1: {
             auto cbx = new QComboBox{parent};
-            for (int i{}; auto&& side: side)
+            for(int i{}; auto&& side: side)
                 cbx->addItem(side, i++);
             return cbx;
         }
         case 2: {
             auto cbx = new QComboBox{parent};
-            for (auto&& [id, tool]: App::toolHolder().tools())
-                if (tool.type() == Tool::ThreadMill)
+            for(auto&& [id, tool]: App::toolHolder().tools())
+                if(tool.type() == Tool::ThreadMill)
                     cbx->addItem(tool.name(), tool.id());
             return cbx;
         }
         case 3: {
             auto cbx = new QComboBox{parent};
-            for (auto&& [id, tool]: App::toolHolder().tools())
-                if (tool.type() == Tool::EndMill || tool.type() == Tool::Drill)
+            for(auto&& [id, tool]: App::toolHolder().tools())
+                if(tool.type() == Tool::EndMill || tool.type() == Tool::Drill)
                     cbx->addItem(tool.name(), tool.id());
             return cbx;
         }
@@ -159,15 +159,14 @@ public:
         return nullptr;
     }
     void setEditorData(QWidget* editor, const QModelIndex& index) const override {
-        if (auto* sbx = dynamic_cast<QDoubleSpinBox*>(editor); sbx) {
+        if(auto* sbx = dynamic_cast<QDoubleSpinBox*>(editor); sbx)
             sbx->setDecimals(3);
-        }
         QStyledItemDelegate::setEditorData(editor, index);
     }
     void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
-        if (auto* sbx = dynamic_cast<QDoubleSpinBox*>(editor); sbx)
+        if(auto* sbx = dynamic_cast<QDoubleSpinBox*>(editor); sbx)
             model->setData(index, sbx->value());
-        else if (auto* cbx = dynamic_cast<QComboBox*>(editor); cbx)
+        else if(auto* cbx = dynamic_cast<QComboBox*>(editor); cbx)
             model->setData(index, cbx->currentData());
 
         QStyledItemDelegate::setModelData(editor, model, index);
@@ -383,7 +382,7 @@ void Form::rb_clicked() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if (GiBridge::moveBrPtr)
+    if(GiBridge::moveBrPtr)
         GiBridge::moveBrPtr->setPos(pos);
 }
 

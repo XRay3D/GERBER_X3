@@ -137,7 +137,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         }
         return frames;
     };
-    auto calcZigzag = [hatchStep](const Paths& src) {
+    auto calcZigzag = [hatchStep](const Paths& src) -> std::optional<Path> {
         Clipper clipper;
         clipper.AddClip(src);
         Rect rect(GetBounds(src));
@@ -160,11 +160,12 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                 zigzag.emplace_back(rect.left, start);
             }
         }
-
+        if(zigzag.empty()) return std::nullopt;
         zigzag.front().x -= step;
         zigzag.back().x -= step;
         return zigzag;
     };
+
     auto merge = [](const Paths& scanLines, const Paths& frames) {
         Paths merged;
         merged.reserve(scanLines.size() / 10);
@@ -216,10 +217,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     for(Paths src: groupedPss) {
         {
-            // ClipperOffset offset(uScale);
-            // offset.AddPaths(src, JoinType::Round, EndType::Polygon);
-            // src = offset.Execute(-dOffset);
-            src = InflatePaths(src, -dOffset, JoinType::Round, EndType::Polygon);
+            src = InflateRoundPolygon(src, -dOffset * 2);
             for(auto& path: src)
                 path.push_back(path.front());
             if(prPass)
@@ -232,27 +230,29 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             {
                 for(auto& path: src)
                     RotatePath(path, angle);
-                auto zigzag{calcZigzag(src)};
-                auto scanLines{calcScanLines(src, zigzag)};
-                auto frames{calcFrames(src, zigzag)};
-                if(scanLines.size() && frames.size()) {
-                    auto merged{merge(scanLines, frames)};
-                    for(auto& path: merged)
-                        RotatePath(path, -angle);
-                    returnPs += std::move(merged);
+                if(auto zigzag{calcZigzag(src)}; zigzag) { // NOTE C++23 -> and_then
+                    auto scanLines{calcScanLines(src, *zigzag)};
+                    auto frames{calcFrames(src, *zigzag)};
+                    if(scanLines.size() && frames.size()) {
+                        auto merged{merge(scanLines, frames)};
+                        for(auto& path: merged)
+                            RotatePath(path, -angle);
+                        returnPs += std::move(merged);
+                    }
                 }
             }
             {
                 for(auto& path: src)
                     RotatePath(path, 90);
-                auto zigzag{calcZigzag(src)};
-                auto scanLines{calcScanLines(src, zigzag)};
-                auto frames{calcFrames(src, zigzag)};
-                if(scanLines.size() && frames.size()) {
-                    auto merged{merge(scanLines, frames)};
-                    for(auto& path: merged)
-                        RotatePath(path, -(angle + 90));
-                    returnPs += std::move(merged);
+                if(auto zigzag{calcZigzag(src)}; zigzag) { // NOTE C++23 -> and_then
+                    auto scanLines{calcScanLines(src, *zigzag)};
+                    auto frames{calcFrames(src, *zigzag)};
+                    if(scanLines.size() && frames.size()) {
+                        auto merged{merge(scanLines, frames)};
+                        for(auto& path: merged)
+                            RotatePath(path, -(angle + 90));
+                        returnPs += std::move(merged);
+                    }
                 }
             }
         }
@@ -272,17 +272,15 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     returnPss.clear();
     switch(prPass) {
     case NoProfilePass:
-        returnPss.push_back(returnPs);
+        if(!returnPs.empty()) returnPss.push_back(returnPs);
         break;
     case First:
-        if(!profilePaths.empty())
-            returnPss.push_back(profilePaths);
-        returnPss.push_back(returnPs);
+        if(!profilePaths.empty()) returnPss.push_back(profilePaths);
+        if(!returnPs.empty()) returnPss.push_back(returnPs);
         break;
     case Last:
-        returnPss.push_back(returnPs);
-        if(!profilePaths.empty())
-            returnPss.push_back(profilePaths);
+        if(!returnPs.empty()) returnPss.push_back(returnPs);
+        if(!profilePaths.empty()) returnPss.push_back(profilePaths);
         break;
     default:
         break;
@@ -291,7 +289,6 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-
         file_ = new File{std::move(gcp_), std::move(returnPss), {}};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);

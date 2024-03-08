@@ -1712,7 +1712,7 @@ bool ClipperBase::ExecuteInternal(ClipType ct, FillRule fillrule, bool use_polyt
             ConvertHorzTrialsToJoins();
         bot_y_ = y; // bot_y_ == bottom of scanbeam
         if(!PopScanline(y))
-            break;  // y new top of scanbeam
+            break; // y new top of scanbeam
         DoIntersections(y);
         DoTopOfScanbeam(y);
         while(PopHorz(e))
@@ -2129,7 +2129,7 @@ void ClipperBase::DoTopOfScanbeam(const int_t y) {
                 if(IsHorizontal(*e))
                     PushHorz(*e); // horizontals are processed later
             }
-        } else                    // i.e. not the top of the edge
+        } else // i.e. not the top of the edge
             e->curr_x = TopX(*e, y);
 
         e = e->next_in_ael;

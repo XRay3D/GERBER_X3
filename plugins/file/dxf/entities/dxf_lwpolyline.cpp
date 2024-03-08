@@ -244,7 +244,7 @@ DxfGo LwPolyline::toGo() const {
     // offset.AddPath(Path{p.value(0)}, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
     // Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
     const double offset = constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0);
-    Paths paths = InflatePaths({~p.value(0)}, offset,
+    Paths paths = Inflate({~p.value(0)}, offset,
         JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
     DxfGo go{id, ~p.value(0), paths}; // return {id, ~p.value(0), paths};
 

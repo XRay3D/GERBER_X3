@@ -95,7 +95,9 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
             if(auto it_ = it + 1; *it == "ENDSEC" && (*it_ == "SECTION" || *it_ == "EOF")) {
                 // emit fileProgress(file_->shortName(), 0, progressCtr++);
                 to = it;
-                const auto type = SectionParser::toType(*(from + 1));
+                // const auto type = SectionParser::toType(*(from + 1)); // FIXME
+                auto code = (from + 1)->string();
+                const auto type = SectionParser::toType(code);
                 switch(type) {
                 case SectionParser::HEADER:
                     file_->sections_[type] = new SectionHEADER{file_, from, to};

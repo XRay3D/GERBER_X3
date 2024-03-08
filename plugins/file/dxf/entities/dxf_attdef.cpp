@@ -80,12 +80,12 @@ void AttDef::parse(CodeData& code) {
             break;                            //	Файл DXF: значения Y и Z второй точки выравнивания (в ОСК) (необязательно)
         case SecondAlignmentPointPtZ:         // 31
             break;
-        case ExtrusionDirectionX:             // 210
-            break;                            //	Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
-        case ExtrusionDirectionY:             // 220
-            break;                            //	Файл DXF: значение X; приложение: 3D-вектор
-        case ExtrusionDirectionZ:             // 230
-            break;                            //	Файл DXF: значения Y и Z направления выдавливания
+        case ExtrusionDirectionX: // 210
+            break;                //	Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)
+        case ExtrusionDirectionY: // 220
+            break;                //	Файл DXF: значение X; приложение: 3D-вектор
+        case ExtrusionDirectionZ: // 230
+            break;                //	Файл DXF: значения Y и Z направления выдавливания
             //        case SubclassMarkerAcDbAttributeDefinition: //100
             //            break; //	Маркер подкласса (AcDbAttributeDefinition)
         case VersionNumber:                 // 280
