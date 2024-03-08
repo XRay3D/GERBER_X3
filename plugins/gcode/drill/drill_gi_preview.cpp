@@ -22,7 +22,7 @@ GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const P
     sourceDiameter_ = diameter;
     if(path_.size() > 1) {
         Timer<mS> t{__FUNCTION__};
-        for(auto&& path_: InflatePaths(Paths{path_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale)
+        for(auto&& path_: Inflate(Paths{path_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale)
             /*offset(path_, sourceDiameter_)*/)
             sourcePath_.addPolygon(~path_);
     } else {
@@ -43,7 +43,7 @@ void GiPreview::updateTool() {
                 auto& tool(App::toolHolder().tool(toolId()));
                 const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                for(Path& path_: InflatePaths(Paths{path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
+                for(Path& path_: Inflate(Paths{path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(~path_);
                 }
@@ -112,7 +112,7 @@ int GiPreview::type() const { return int(Gi::Type::Preview) + (path_.size() > 1)
 bool GiPreview::isSlot() const { return path_.size() > 1; }
 
 Paths GiPreview::offset() const {
-    return ~sourcePath_.toSubpathPolygons(); /*InflatePaths(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
+    return ~sourcePath_.toSubpathPolygons(); /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
 }
 
 } // namespace Drilling

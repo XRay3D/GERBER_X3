@@ -77,9 +77,7 @@ public:
                 TypenameTest<T>{}; // static_assert(always_false_v<T>, "non-exhaustive visitor!");
             if(!ok)
                 throw QString("CodeData::operator T(), %1 to %2 from %3")
-                    .arg(typeid(Fr).name())
-                    .arg(typeid(std::decay_t<T>).name())
-                    .arg(strVal);
+                    .arg(typeid(Fr).name(), typeid(std::decay_t<T>).name(), strVal);
             return val;
         },
             varVal);

@@ -132,7 +132,7 @@ void File::statFile() {
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
-        QString str(App::gcSettings().start());      //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().start()); //"G21 G17 G90"); //G17 XY plane
         str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
@@ -148,7 +148,7 @@ void File::endFile() {
     } else {
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
         QPointF home(App::home().pos() - App::zero().pos());
-        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())}));  // HomeXY
+        lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
         lines_.emplace_back(App::gcSettings().end());
     }
     for(size_t i = 0; i < lines_.size(); ++i) // remove epty lines
@@ -539,7 +539,7 @@ void File::createGiPocket() {
         //            offset.AddPaths(pocketPaths_, JoinType::Round, EndType::Polygon);
         //            offset.Execute(pocketPaths_, uScale * gcp_.getToolDiameter() * 0.5);
         //        }
-            item = new Gi::DataFill{pocketPaths_, nullptr};
+        item = new Gi::DataFill{pocketPaths_, nullptr};
         item->setPen(Qt::NoPen);
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setAcceptHoverEvents(false);
@@ -617,7 +617,7 @@ void File::createGiRaster() {
     g0path_.reserve(toolPathss_.size());
 
     if(pocketPaths_.size()) {
-            item = new Gi::DataFill{pocketPaths_, nullptr};
+        item = new Gi::DataFill{pocketPaths_, nullptr};
         item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));

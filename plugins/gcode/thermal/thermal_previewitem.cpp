@@ -210,11 +210,11 @@ void PreviewItem::redraw() {
         // ClipperOffset offset;
         // offset.AddPaths(paths_, JoinType::Round, EndType::Polygon);
         // cashedPath = offset.Execute(diameter * uScale * 0.5); // toolpath
-        cashedPath = InflatePaths(paths_, diameter * uScale * 0.5, JoinType::Round, EndType::Polygon);
+        cashedPath = InflateRoundPolygon(paths_, diameter * uScale /** 0.5*/);
         // offset.Clear();
         // offset.AddPaths(cashedPath, JoinType::Miter, EndType::Round);
         // cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
-        cashedFrame = InflatePaths(cashedPath, diameter * uScale * 0.1, JoinType::Miter, EndType::Round);
+        cashedFrame = Inflate(cashedPath, diameter * uScale * 0.1, JoinType::Miter, EndType::Round);
         for(Path& path: cashedPath)
             path.push_back(path.front());
     }
@@ -236,8 +236,8 @@ void PreviewItem::redraw() {
             // static_cast</*Point::Type*/ int32_t>((sin(angle) * radius) + center.y))},
             // JoinType::Square, EndType::Butt);
             // Paths paths = offset.Execute((node_->tickness() + diameter) * uScale * 0.5);
-            Paths paths = InflatePaths({
-                                           {center, Point{cos(angle) * radius + center.x, sin(angle) * radius + center.y}}
+            Paths paths = Inflate({
+                                      {center, Point{cos(angle) * radius + center.x, sin(angle) * radius + center.y}}
             },
                 (node_->tickness() + diameter) * uScale * 0.5, JoinType::Square, EndType::Butt);
             clipper.AddClip({paths.front()});

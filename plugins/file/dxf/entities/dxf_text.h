@@ -27,9 +27,9 @@ public:
     void read(QDataStream& stream) override;
 
     enum DataEnum {
-        SubclassMarker = 100,       // Маркер подкласса (AcDbText)
-        Thickness = 39,             // Толщина (необязательно; значение по умолчанию = 0)
-        FirstAlignmentPtX = 10,     // Первая точка выравнивания (в ОСК)        //Файл DXF: значение X; приложение: 3D-точка
+        SubclassMarker = 100,   // Маркер подкласса (AcDbText)
+        Thickness = 39,         // Толщина (необязательно; значение по умолчанию = 0)
+        FirstAlignmentPtX = 10, // Первая точка выравнивания (в ОСК)        //Файл DXF: значение X; приложение: 3D-точка
         FirstAlignmentPtY = 20,
         FirstAlignmentPtZ = 30,     // Файл DXF: значения Y и Z первой точки выравнивания (в ОСК)
         TextHeight = 40,            // Высота текста
@@ -46,7 +46,7 @@ public:
         SecondAlignmentPointZ = 31, // Файл DXF: значения Y и Z второй точки выравнивания (в ОСК) (необязательно)
         ExtrusionDirectionX = 210,  // Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)        //Файл DXF: значение X; приложение: 3D-вектор
         ExtrusionDirectionY = 220,
-        ExtrusionDirectionZ = 230,  // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
+        ExtrusionDirectionZ = 230, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         // SubclassMarker = 100, // Маркер подкласса (AcDbText)
         //        https : //help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-62E5383D-8A14-47B4-BFC4-35824CAE8363
     };

@@ -116,7 +116,7 @@ private:
     std::vector<T*> getItemImpl(FilterInt&& et, Args&&... args) const {
         const auto items = (scene()->*Ptr)(std::forward<Args>(args)...); // get all items
         constexpr bool isQGraphicsItem = std::is_same_v<T, QGraphicsItem>;
-        if constexpr(isQGraphicsItem && !FilterInt::value) {             //  вернуть все QGraphicsItem*
+        if constexpr(isQGraphicsItem && !FilterInt::value) { //  вернуть все QGraphicsItem*
             return {items.begin(), items.end()};
         } else {
             // WARNING FilterInt faster than dynamic_cast

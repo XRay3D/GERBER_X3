@@ -97,13 +97,18 @@ constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
 constexpr auto two_pi = std::numbers::pi * 2;
 using std::numbers::pi;
 
+namespace CL2 = Clipper2Lib;
+
 // type
 using Clipper = Clipper2Lib::Clipper64;
-using ClipperOffset = Clipper2Lib::ClipperOffset;
+// using ClipperOffset = Clipper2Lib::ClipperOffset;
+
+using Point = Clipper2Lib::Point64;
+
 using Path = Clipper2Lib::Path64;
 using Paths = Clipper2Lib::Paths64;
 using Pathss = mvector<Paths>;
-using Point = Clipper2Lib::Point64;
+
 using PolyTree = Clipper2Lib::PolyTree64;
 using Rect = Clipper2Lib::Rect64;
 
@@ -127,8 +132,6 @@ using FR = Clipper2Lib::FillRule;
 using JT = Clipper2Lib::JoinType;
 using PT = Clipper2Lib::PathType;
 using PIPResult = Clipper2Lib::PointInPolygonResult;
-
-namespace CL2 = Clipper2Lib;
 
 Q_DECLARE_METATYPE(Point)
 
@@ -156,6 +159,18 @@ Paths& normalize(Paths& paths);
 inline constexpr auto skipFront = std::views::drop(1);
 
 //------------------------------------------------------------------------------
+
+inline Paths Inflate(const Paths& paths, double delta, JoinType jt, EndType et, double miterLimit = 2.0, double arcTolerance = 0.0) {
+    return InflatePaths(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
+};
+
+inline Paths InflateRoundPolygon(const Paths& paths, double delta, double miterLimit = 2.0, double arcTolerance = 0.0) {
+    return InflatePaths(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
+};
+
+inline Paths InflateMiterPolygon(const Paths& paths, double delta, double miterLimit = 2.0, double arcTolerance = 0.0) {
+    return InflatePaths(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
+};
 
 template <typename T>
 inline void CleanPaths(Clipper2Lib::Path<T>& path, double k) {
@@ -213,13 +228,17 @@ inline int indexOf(const Cont& c, const typename Cont::value_type& v) {
 
 auto operator+=(Container auto& c, Container auto&& v) {
     c.reserve(c.size() + v.size());
-    return std::ranges::move(v, std::back_inserter(c)), c;
+    if constexpr(std::is_lvalue_reference_v<decltype(v)>)
+        std::ranges::copy(v, std::back_inserter(c));
+    else
+        std::ranges::move(v, std::back_inserter(c));
+    return c;
 }
 
-auto operator+=(Container auto& c, const Container auto& v) {
-    c.reserve(c.size() + v.size());
-    return std::ranges::copy(v, std::back_inserter(c)), c;
-}
+// auto operator+=(Container auto& c, const Container auto& v) {
+//     c.reserve(c.size() + v.size());
+//     return std::ranges::copy(v, std::back_inserter(c)), c;
+// }
 
 auto operator-=(Container auto& c, size_t index) {
     return c.erase(c.begin() + index), c;

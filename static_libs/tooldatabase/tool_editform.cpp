@@ -240,7 +240,7 @@ void ToolEditForm::setupToolWidgets(int) {
         if(data.set.contains(currType)) {
             data.dsbx[0]->setMaximum(std::visit(value, data.max));
 
-            if(data.lastVal)     // restore last val
+            if(data.lastVal) // restore last val
                 data.dsbx[0]->setValue(data.lastVal.value());
             else if(data.defVal) // set default val
                 data.dsbx[0]->setValue(data.defVal.value());

@@ -28,9 +28,9 @@ public:
     void read(QDataStream& stream) override;
 
     enum DataEnum {
-        SubclassMarker = 100,         //	100	Маркер подкласса (AcDbMText)
-        InsertionPointPointX = 10,    //	10	Точка вставки        //		Файл DXF: значение X; приложение: 3D-точка
-        InsertionPointPointY = 20,    //	20, 30	Файл DXF: значение Y и Z для точки вставки
+        SubclassMarker = 100,      //	100	Маркер подкласса (AcDbMText)
+        InsertionPointPointX = 10, //	10	Точка вставки        //		Файл DXF: значение X; приложение: 3D-точка
+        InsertionPointPointY = 20, //	20, 30	Файл DXF: значение Y и Z для точки вставки
         InsertionPointPointZ = 30,
         NominalTextHeight = 40,       //	40	Номинальная (начальная) высота текста
         ReferenceRectangleWidth = 41, //	41	Ширина ссылочного прямоугольника
@@ -46,7 +46,7 @@ public:
         XAxisDirectionVector = 11, //	11	Вектор направления осиX( в МСК)
         //     Dxf: x value; App: 3dVector		=		,//		Файл DXF: значение X; приложение: 3D-вектор
         //     A GroupCode 50 (rotationAngleInRadians) PassedAsDxfInputIsConvertedToTheEquivalentDirectionVector (ifBothA Code 50 AndCodes 11, 21, 31 ArePassed, TheLastOneWins). ThisIsProvidedAsA ConvenienceForConversionsFromTextObjects		=		,//		Групповой код 50 (угол поворота в радианах), переданный как входные данные DXF, преобразуется в эквивалентный вектор направления (если передаются код 50 и коды 11, 21, 31, последний превалирует). Этот код служит для упрощения преобразования текстовых объектов
-        YAxisDirectionVector = 21,                                   //	21, 31	Файл DXF: значения Y и Z вектора направления оси X (в МСК)
+        YAxisDirectionVector = 21, //	21, 31	Файл DXF: значения Y и Z вектора направления оси X (в МСК)
         ZAxisDirectionVector = 31,
         HorizontalWidthOfTheCharactersThatMakeUpTheMtextEntity = 42, //	42	Горизонтальная ширина символов, образующих объект многострочного текста. Это значение всегда будет меньше либо равно значению группового кода 41 (только для чтения; игнорируется, если указано)
         VerticalHeightOfTheMtextEntity = 43,                         //	43	Вертикальная высота объекта многострочного текста (только для чтения; игнорируется, если указано)

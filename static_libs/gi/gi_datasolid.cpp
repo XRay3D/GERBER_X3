@@ -24,8 +24,8 @@ namespace Gi {
 DataFill::DataFill(Paths& paths, AbstractFile* file)
     : Item(file)
     , paths_{paths} {
-    for (Path path: paths) {
-        if (path.size() && path.back() != path.front())
+    for(Path path: paths) {
+        if(path.size() && path.back() != path.front())
             path.push_back(path.front());
         shape_.addPolygon(~path);
     }
@@ -84,7 +84,7 @@ void DataFill::setPaths(Paths paths, int alternate) {
     t.translate(-x, -y);
 
     shape_ = {};
-    for (auto&& path: paths)
+    for(auto&& path: paths)
         shape_.addPolygon(t.map(~path));
     paths_ = std::move(paths);
 
@@ -99,7 +99,7 @@ void DataFill::changeColor() {
 
     bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         break;
     case Hovered:
@@ -114,7 +114,7 @@ void DataFill::changeColor() {
 
     pathColor_ = colorPtr_ ? *colorPtr_ : color_;
     pathColor_.setAlpha(100);
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         //        pathColor_.setAlpha(100);
         break;

@@ -179,7 +179,7 @@ void File::createGi() {
             }
 
             for(Paths& paths: layer->groupedPaths_) {
-                    auto gItem = new Gi::DataFill{paths, this};
+                auto gItem = new Gi::DataFill{paths, this};
                 gItem->setColorPtr(&layer->colorNorm_);
                 igNorm->push_back(gItem);
             }

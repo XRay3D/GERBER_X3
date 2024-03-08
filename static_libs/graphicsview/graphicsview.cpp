@@ -55,9 +55,11 @@ void setCursor(QWidget* w) {
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
-    , hRuler{new Ruler{Qt::Horizontal, this}}
-    , vRuler{new Ruler{Qt::Vertical, this}}
-    , gridLayout{new QGridLayout{this}} {
+    , hRuler{
+          new Ruler{Qt::Horizontal, this}
+},
+    vRuler{new Ruler{Qt::Vertical, this}},
+    gridLayout{new QGridLayout{this}} {
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);

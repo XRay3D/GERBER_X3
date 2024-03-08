@@ -582,7 +582,7 @@ Paths Parser::createLine() {
             double size = rect->width_ * uScale * state_.scaling();
             if(qFuzzyIsNull(size))
                 return {};
-            solution = Clipper2Lib::InflatePaths({path_}, size, JoinType::Square, EndType::Square);
+            solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
         }
 
         if(state_.imgPolarity() == Negative)
@@ -594,7 +594,7 @@ Paths Parser::createLine() {
         if(Settings::wireMinkowskiSum())
             solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
         else
-            solution = Clipper2Lib::InflatePaths({path_}, size, JoinType::Round, EndType::Round);
+            solution = Inflate({path_}, size, JoinType::Round, EndType::Round);
 
         //        ClipperOffset offset;
         //        offset.AddPath(path_, JoinType::Round, EndType::Round);

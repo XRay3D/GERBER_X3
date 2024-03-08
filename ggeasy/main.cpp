@@ -257,8 +257,7 @@ int main(int argc, char** argv) {
 
     retCode = app.exec();
 
-    for(auto&& loader: loaders)
-        loader->unload();
+    for(auto&& loader: loaders) loader->unload();
 
     return retCode;
 }

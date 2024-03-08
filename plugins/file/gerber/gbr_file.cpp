@@ -112,7 +112,7 @@ Paths File::merge() const {
                 pathList.resize(pathList.size() + 1);
                 for(auto& [aperture, paths]: map) {
                     mergePaths(paths);
-                    ClipperOffset offset;
+                    Clipper2Lib::ClipperOffset offset;
                     for(int i{}; i < paths.size(); ++i) {
                         auto& path = paths[i];
                         if(path.back() == path.front()) {

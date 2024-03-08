@@ -13,8 +13,8 @@
 #include "doublespinbox.h"
 #include "mathparser.h"
 #include <QDebug>
-#include <numbers>
 #include <cmath>
+#include <numbers>
 
 DoubleSpinBox::DoubleSpinBox(QWidget* parent)
     : QDoubleSpinBox(parent) {

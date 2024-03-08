@@ -36,7 +36,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             // ClipperOffset offset;
             // offset.AddPaths(closedSrcPaths, JoinType::Round, EndType::Polygon);
             // returnPs = offset.Execute(dOffset);
-            returnPs = InflatePaths(closedSrcPaths, dOffset, JoinType::Round, EndType::Polygon);
+            returnPs = InflateRoundPolygon(closedSrcPaths, dOffset * 2);
         }
         dbgPaths(returnPs, "returnPs");
 
@@ -60,15 +60,14 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         const auto graphicObjects(file->graphicObjects());
         Clipper clipper;
         {
-            ClipperOffset offset;
-            for(auto go: graphicObjects)
-                if(go->positive())
-                    offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
+            Clipper2Lib::ClipperOffset offset;
+            for(auto go: graphicObjects | std::views::filter([](auto* go) { return go->positive(); }))
+                offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddSubject(framePaths);
         }
         if(!gcp_.params[IgnoreCopper].toInt()) {
-            ClipperOffset offset;
+            Clipper2Lib::ClipperOffset offset;
             for(auto go: graphicObjects) {
                 //                if (go->closed()) {
                 //                    if (go->positive())

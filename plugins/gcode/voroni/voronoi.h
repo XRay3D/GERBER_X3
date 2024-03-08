@@ -22,9 +22,10 @@ class Creator :
     public VoronoiCgal,
 #endif
     public VoronoiJc
-//#if __has_include(<boost/polygon/voronoi.hpp>)
-    ,public VoronoiBoost
-//#endif
+    // #if __has_include(<boost/polygon/voronoi.hpp>)
+    ,
+    public VoronoiBoost
+// #endif
 {
 
 public:
