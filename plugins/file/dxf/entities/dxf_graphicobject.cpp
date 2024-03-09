@@ -60,7 +60,7 @@ void DxfGo::setScale(double scaleX, double scaleY) {
         for(Point& pt: path) {
             const double dAangle = (pi * 2) - angleRadTo(center, pt);
             const double length = distTo(center, pt);
-            pt = Point(static_cast</*Point::Type*/ int32_t>(cos(dAangle) * length * sx), static_cast</*Point::Type*/ int32_t>(sin(dAangle) * length * sy));
+            pt = Point{cos(dAangle) * length * sx, sin(dAangle) * length * sy};
             pt.x += center.x;
             pt.y += center.y;
         }
@@ -68,9 +68,9 @@ void DxfGo::setScale(double scaleX, double scaleY) {
             ReversePath(path);
     };
 
-    scale(path, scaleX_, scaleY_, Point{} /*pos_*/);
+    scale(path, scaleX_, scaleY_ /*, pos_*/);
     for(auto& path: fill)
-        scale(path, scaleX_, scaleY_, Point{} /*pos_*/);
+        scale(path, scaleX_, scaleY_ /*, pos_*/);
 }
 
 std::tuple<double, double> DxfGo::scale() const { return {scaleX_, scaleY_}; }

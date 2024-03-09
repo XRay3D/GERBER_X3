@@ -27,6 +27,7 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
+#include <set>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QTextCodec>
 #endif
@@ -39,7 +40,6 @@
 //     QByteArray localMsg = msg.toUtf8();
 //     const char* file = context.file ? context.file : "";
 //     //    const char* function = context.function ? context.function : "";
-
 //    const char* file_ {file};
 //    while (*file > 0) {
 //        if (*file == '\\')
@@ -47,7 +47,6 @@
 //        ++file;
 //    }
 //    file = file_;
-
 //    switch (type) {
 //    case QtDebugMsg:
 //        fprintf(stdout, "Debug: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
@@ -67,17 +66,50 @@
 //    }
 //}
 
-int main(int argc, char** argv) {
-    //    qInstallMessageHandler(myMessageOutput);
+// int main(int argc, char** argv) {
+//    qInstallMessageHandler(myMessageOutput);
 
-#ifdef LEAK_DETECTOR
-    _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
-#endif
+// #ifdef LEAK_DETECTOR
+//     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
+// #endif
 
-    int retCode{};
+// qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
+// qInstallMessageHandler(myMessageOutput);
 
-    qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
-    // qInstallMessageHandler(myMessageOutput);
+auto messageHandler = qInstallMessageHandler(nullptr);
+void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
+    auto file = context.file;
+    // if(type == QtInfoMsg) return;
+    QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
+    while(file && *file)
+        if(std::set{'/', '\\'}.contains(*file++))
+            context_.file = file;
+
+    // QString data{context_.function};
+    // data.replace(QRegularExpression(R"((\w+\:\:))"), "");
+    // context_.function = data.toUtf8().data();
+    messageHandler(type, context, message);
+}
+
+int main(int argc, char* argv[]) {
+    qInstallMessageHandler(myMessageHandler);
+    qSetMessagePattern(QLatin1String(
+        "%{if-critical}\x1b[38;2;255;0;0m"
+        "C %{endif}"
+        "%{if-debug}\x1b[38;2;196;196;196m"
+        "D %{endif}"
+        "%{if-fatal}\x1b[1;38;2;255;0;0m"
+        "F %{endif}"
+        "%{if-info}\x1b[38;2;128;255;255m"
+        "I %{endif}"
+        "%{if-warning}\x1b[38;2;255;128;0m"
+        "W %{endif}"
+        // "%{time HH:mm:ss.zzz} "
+        // "%{appname} %{pid} %{threadid} "
+        // "%{type} "
+        // "%{file}:%{line} %{function} "
+        "%{if-category}%{category}%{endif}%{message} "
+        "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"));
 
     QApplication::setAttribute(Qt::AA_Use96Dpi);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
@@ -255,7 +287,7 @@ int main(int argc, char** argv) {
     mainWin.show();
     App::splashScreen().finish(&mainWin);
 
-    retCode = app.exec();
+    int retCode = app.exec();
 
     for(auto&& loader: loaders) loader->unload();
 

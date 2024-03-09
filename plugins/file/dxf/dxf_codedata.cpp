@@ -125,44 +125,29 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     else if(1071 == code) //                 32-разрядное целое значение
         type = Integer32;
     else
-        throw QString("Unknown data: code %1, data %2, line %3!").arg(code).arg(value).arg(lineNum);
+        throw QString("Unknown type: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
 
     switch(type) {
-    case Integer16:
-        varVal = int16_t(value.toLongLong(&ok));
-        break;
-    case Integer32:
-        varVal = int32_t(value.toLongLong(&ok));
-        break;
-    case Integer64:
-        varVal = int64_t(value.toLongLong(&ok));
-        break;
-    case Double:
-        varVal = value.toDouble(&ok);
-        break;
-    case String:
-        varVal = value;
+    case Integer16: varVal = int16_t(value.toLongLong(&ok)); break;
+    case Integer32: varVal = int32_t(value.toLongLong(&ok)); break;
+    case Integer64: varVal = int64_t(value.toLongLong(&ok)); break;
+    case Double: varVal = value.toDouble(&ok); break;
+    case String: varVal = value;
     }
-    if(!ok)
+
+    if(!ok) {
         switch(type) {
-        case Integer16:
-            varVal = int16_t(value.toDouble(&ok));
-            break;
-        case Integer32:
-            varVal = int32_t(value.toDouble(&ok));
-            break;
-        case Integer64:
-            varVal = int64_t(value.toDouble(&ok));
-            break;
-        case Double:
-            varVal = value.toDouble(&ok);
-            break;
-        case String:
-            varVal = value;
+        case Integer16: varVal = int16_t(value.toDouble(&ok)); break;
+        case Integer32: varVal = int32_t(value.toDouble(&ok)); break;
+        case Integer64: varVal = int64_t(value.toDouble(&ok)); break;
+        case Double: varVal = value.toDouble(&ok); break;
+        case String: varVal = value;
         }
+        qWarning() << QString("Type missmatch: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
+    }
 
     if(!ok)
-        throw QString("Unknown data: code %1, data %2, line %3!").arg(code).arg(value).arg(lineNum);
+        throw QString("Error value: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
 }
 
 int CodeData::code() const { return code_; }

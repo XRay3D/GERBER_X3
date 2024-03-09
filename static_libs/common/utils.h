@@ -135,6 +135,30 @@ struct Overload : Ts... {
 template <typename... Ts>
 Overload(Ts...) -> Overload<Ts...>;
 
+template <typename... Ts>
+struct Variant : std::variant<Ts...> {
+    using std::variant<Ts...>::variant;
+    using variant = std::variant<Ts...>;
+    template <typename Func>
+    auto visit(Func&& func) {
+        return std::visit(std::forward<Func>(func), *this);
+    }
+    template <typename Func>
+    auto visit(Func&& func) const {
+        return std::visit(std::forward<Func>(func), *this);
+    }
+    template <typename... Funcs>
+    auto visit(Funcs&&... funcs) {
+        return std::visit(Overload{std::forward<Funcs>(funcs)...}, *this);
+    }
+    template <typename... Funcs>
+    auto visit(Funcs&&... funcs) const {
+        return std::visit(Overload{std::forward<Funcs>(funcs)...}, *this);
+    }
+    bool has_value() const { return Variant::index() != std::variant_npos; }
+    operator bool() const { return has_value(); }
+};
+
 template <typename Cap> concept CapContent = requires(Cap a) {
     std::is_pointer_v<decltype(a.data())>;
     { a.size() } -> std::convertible_to<size_t>;
