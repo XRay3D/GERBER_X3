@@ -27,7 +27,7 @@ else()
     set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 endif()
 
-find_package(QT NAMES Qt6 Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(QT NAMES #[[Qt6]] Qt5 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
