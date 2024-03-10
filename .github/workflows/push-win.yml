@@ -53,7 +53,7 @@ jobs:
          cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGIT_REF_NAME=${{github.ref_name}} -DGIT_SHA=${{github.sha}} -B ${{github.workspace}}/build
       - name: Build
         working-directory: "./build"
-        run: cmake --build . --config Release -j %NUMBER_OF_PROCESSORS%
+        run: cmake --build . --config Release -j (Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
 
       - name: Dist
         uses: actions/upload-artifact@v4
