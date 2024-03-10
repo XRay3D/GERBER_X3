@@ -1,6 +1,6 @@
 [submodule "third_party/ctre"]
         path = third_party/ctre
-        url = git@github.com:hanickadot/compile-time-regular-expressions.git
+        url = https://github.com/hanickadot/compile-time-regular-expressions.git
 [submodule "third_party/clipper2"]
         path = third_party/clipper2
-        url = git@github.com:XRay3D/Clipper2.git
+        url = https://github.com/AngusJohnson/Clipper2.git

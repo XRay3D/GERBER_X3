@@ -79,7 +79,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
         QString line;
         while(in.readLineInto(&line)) {
             auto data{toU16StrView(line)};
-            if(*ctre::range<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(data).begin())
+            if(*ctre::search_all<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(data).begin())
                 return true;
         }
     }
