@@ -89,6 +89,15 @@ void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const Q
     // data.replace(QRegularExpression(R"((\w+\:\:))"), "");
     // context_.function = data.toUtf8().data();
     messageHandler(type, context, message);
+    if(App::mainWindowPtr())
+        emit App::mainWindow().logMessage(type, {
+                                                    QString::fromUtf8(context.category),
+                                                    QString::fromUtf8(context.file),
+                                                    QString::fromUtf8(context.function),
+                                                    QString::number(context.line),
+
+                                                },
+            message);
 }
 
 int main(int argc, char* argv[]) {
