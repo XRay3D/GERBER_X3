@@ -32,7 +32,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
 
         toolDiameter = tool.getDiameter(depth);
 
-        const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
+        const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) /** 0.5*/ * uScale;
 
         if(gcp_.side() == GCode::On) {
             if(gcp_.params[TrimmingOpenPaths].toBool())
