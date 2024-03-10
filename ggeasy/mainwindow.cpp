@@ -39,6 +39,10 @@
 
 inline constexpr auto G_CODE_PROPERTIES = md5::hash32("GCodeProperties");
 
+static const int id[]{
+    qRegisterMetaType<QtMsgType>("QtMsgType"),
+};
+
 bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
     return p1.first.hash() < p2.first.hash() || (!(p2.first.hash() < p1.first.hash()) && p1.second < p2.second);
 }
@@ -89,6 +93,8 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
     connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
     connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
+
+    connect(this, &MainWindow::logMessage, this, &MainWindow::messageHandler, Qt::QueuedConnection); // thread safe logging
 }
 
 MainWindow::~MainWindow() {
@@ -775,34 +781,14 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value) {
 }
 
 void MainWindow::fileError(const QString& fileName, const QString& error) {
-    qWarning() << "fileError " << fileName << error;
+    qCritical() << "fileError " << fileName << error;
 
-    static QDialog* fileErrordialog;
-    static QTextBrowser* textBrowser;
-
-    if(!fileErrordialog) {
-        fileErrordialog = new QDialog{this};
-        fileErrordialog->setObjectName(QString::fromUtf8("dialog"));
-        fileErrordialog->setWindowTitle(tr("File open errors"));
-
-        fileErrordialog->resize(600, 600);
-
-        auto verticalLayout = new QVBoxLayout{fileErrordialog};
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-
-        textBrowser = new QTextBrowser{fileErrordialog};
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
-
-        verticalLayout->addWidget(textBrowser);
-        verticalLayout->setContentsMargins(6, 6, 6, 6);
-        verticalLayout->setSpacing(6);
-    }
-    fileErrordialog->show();
-    textBrowser->setTextColor(Qt::black);
-    textBrowser->append(fileName);
-    textBrowser->setTextColor(Qt::darkRed);
-    textBrowser->append(error);
-    textBrowser->append("");
+    ui.loggingDockWidget->show();
+    ui.loggingTextBrowser->setTextColor(Qt::black);
+    ui.loggingTextBrowser->append(fileName);
+    ui.loggingTextBrowser->setTextColor(Qt::darkRed);
+    ui.loggingTextBrowser->append(error);
+    ui.loggingTextBrowser->append("");
 }
 
 void MainWindow::documentWasModified() { setWindowModified(project_->isModified()); }
@@ -910,6 +896,26 @@ QMenu* MainWindow::createPopupMenu() {
 const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
 
 QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
+
+void MainWindow::messageHandler(QtMsgType type, const QStringList& context, const QString& message) {
+    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128});
+    enum {
+        Category,
+        File,
+        Function,
+        Line,
+    };
+    ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].splitRef('(').front()));
+    switch(type) {
+    case QtDebugMsg: /*   */ ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128}); break;
+    case QtWarningMsg: /* */ ui.loggingTextBrowser->setTextColor(QColor{255, 128, 000}); break;
+    case QtCriticalMsg: /**/ ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
+    case QtFatalMsg: /*   */ ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
+    case QtInfoMsg: /*    */ ui.loggingTextBrowser->setTextColor(QColor{128, 128, 255}); break;
+    }
+    ui.loggingTextBrowser->append(message);
+    ui.loggingTextBrowser->append("");
+}
 
 void MainWindow::loadFile(const QString& fileName) {
     if(!QFile(fileName).exists())
@@ -1040,6 +1046,20 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     statusbar = new QStatusBar{MainWindow};
     statusbar->setObjectName(QString::fromUtf8("statusbar"));
     MainWindow->setStatusBar(statusbar);
+
+    loggingDockWidget = new QDockWidget{MainWindow};
+    loggingDockWidget->setObjectName(QString::fromUtf8("loggingDockWidget"));
+    loggingDockWidget->setMinimumSize(QSize(100, 119));
+    loggingDockWidget->setFeatures(QDockWidget::DockWidgetFloatable
+        | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
+    loggingDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
+
+    loggingTextBrowser = new QTextBrowser{loggingDockWidget};
+    loggingTextBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+    loggingDockWidget->setWidget(loggingTextBrowser);
+    loggingDockWidget->setContentsMargins(3, 3, 3, 3);
+    MainWindow->addDockWidget(Qt::RightDockWidgetArea, loggingDockWidget);
+
     treeDockWidget = new QDockWidget{MainWindow};
     treeDockWidget->setObjectName(QString::fromUtf8("treeDockWidget"));
     treeDockWidget->setMinimumSize(QSize(100, 119));
@@ -1067,6 +1087,7 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
 
 void MainWindow::Ui::retranslateUi(QMainWindow* MainWindow) {
     treeDockWidget->setWindowTitle(QCoreApplication::translate("MainWindow", "Files", nullptr));
+    loggingTextBrowser->setWindowTitle(QCoreApplication::translate("MainWindow", "Logging", nullptr));
     (void)MainWindow;
 }
 

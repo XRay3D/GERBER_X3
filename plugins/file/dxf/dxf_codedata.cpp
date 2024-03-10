@@ -143,7 +143,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
         case Double: varVal = value.toDouble(&ok); break;
         case String: varVal = value;
         }
-        qWarning() << QString("Type missmatch: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
+        qWarning().nospace() << "Type missmatch: code " << code << ", type " << type << ", raw " << value << ", line " << lineNum << "!";
     }
 
     if(!ok)
