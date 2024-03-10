@@ -49,7 +49,19 @@ QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
 }
 
 void Shape::redraw() {
-    radius_ = (QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length());
+
+    switch(handlers.indexOf(currentHandler)) {
+    case Center: {
+        auto radLine = QLineF::fromPolar(radius_, 0);
+        radLine.translate(handlers[Center]->pos());
+        handlers[Point1]->setPos(radLine.p2());
+    } break;
+    case Point1: {
+        QLineF radLine{handlers[Center]->pos(), handlers[Point1]->pos()};
+        radius_ = radLine.length();
+    } break;
+    }
+
     const int intSteps = App::settings().clpCircleSegments(radius_);
     const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
     const Point center{~handlers[Center]->pos()};
@@ -68,8 +80,8 @@ void Shape::redraw() {
     setPos({1, 1}); // костыли    //update();
     setPos({0, 0});
 
-    //    if(model)
-    //        model->dataChanged(model->index(Center, 0), model->index(Diameter, 0));
+    if(model)
+        model->dataChanged(model->index(Center, 0), model->index(Diameter, 1));
 }
 
 QString Shape::name() const { return QObject::tr("Shape"); }
@@ -78,6 +90,7 @@ QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 void Shape::setPt(const QPointF& pt) {
     handlers[Point1]->setPos(pt);
+    currentHandler = handlers[Point1].get();
     redraw();
 }
 
