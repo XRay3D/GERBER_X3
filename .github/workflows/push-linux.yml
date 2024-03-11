@@ -1,0 +1,71 @@
+name: Compile-Qt5-linux64
+
+on: push
+
+env:
+  QT_VERSION: "5.15.2"
+  QT_ARCH: "gcc_64"
+  QT_SUBDIR: "gcc_64"
+  BOOST_VERSION: "1.84.0"
+  BUILD_TYPE: "Release"
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          host: linux
+          target: desktop
+          version: ${{env.QT_VERSION}}
+          arch: ${{env.QT_ARCH}}
+          dir: "${{github.workspace}}/qt"
+          install-deps: "true"
+          cache: "true"
+      - name: Add Qt to env
+        run: |
+          QT_DIR="${{github.workspace}}/qt/Qt/${{env.QT_VERSION}}/${{env.QT_SUBDIR}}"
+          echo "Qt dir: $QT_DIR"
+          echo "$QT_DIR/bin" >> ${GITHUB_PATH}
+          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$QT_DIR/lib/cmake/Qt5" >> ${GITHUB_ENV}
+
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.5
+        id: install-boost
+        with:
+          boost_version: ${{ env.BOOST_VERSION }}
+          cache: "true"
+      - name: Add Boost to env
+        run: |
+          BOOST_DIR="${{github.workspace}}/boost/boost"
+          echo "Boost dir: $BOOST_DIR"
+          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$BOOST_DIR" >> ${GITHUB_ENV}
+
+      - name: Install cqtdeployer
+        run: |
+          curl 'https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2351/CQtDeployer_1.6.2351.ec4840f_Linux_x86_64.deb' -L > ./cqtdeployer.deb
+          sudo dpkg -i ./cqtdeployer.deb
+          rm ./cqtdeployer.deb
+          cqtdeployer version
+
+      - name: Configure
+        working-directory: "."
+        run: |
+         cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGIT_REF_NAME=${{github.ref_name}} -DGIT_SHA=${{github.sha}} -B ${{github.workspace}}/build
+      - name: Build
+        working-directory: "./build"
+        run: |
+         cmake --build . --config Release -j $(nproc)
+         cmake --build . --target=deploy
+
+      - name: Dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux_prebuild
+          path: ./bin
