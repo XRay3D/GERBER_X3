@@ -6,6 +6,7 @@
 #include <chrono>
 #include <concepts>
 #include <map>
+#include <variant>
 
 #if defined(_MSC_VER)
 #pragma warning(push)

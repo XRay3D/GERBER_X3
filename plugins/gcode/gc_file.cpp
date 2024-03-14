@@ -200,7 +200,7 @@ void File::startPath(const QPointF& point) {
         //        gCodeText_.push_back(formated({ g1(), speed(spindleSpeed) }));
     } else {
         lines_.emplace_back(formated({g0(), x(point.x()), y(point.y()), speed(spindleSpeed())})); // start xy
-        lines_.emplace_back(formated({g0(), z(App::project().plunge())}));                        // start z
+        lines_.emplace_back(formated({g0(), z(z_ = App::project().plunge())}));                   // start z
         //        lastValues[AlwaysF].clear();
     }
 }
@@ -283,15 +283,32 @@ mvector<double> File::getDepths() {
     return depths;
 }
 
-mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed) {
+mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, double depth) {
     mvector<QString> lines;
     lines.reserve(path.size());
     bool skip = true;
-    for(const QPointF& point: path)
-        if(skip)
-            skip = false;
-        else
-            lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed)}));
+    if(depth) {
+        double zk = depth - z_;
+        double perimetr = QLineF{path.front(), path.back()}.length();
+        for(int i = 1; i < path.size(); ++i)
+            perimetr += QLineF{path[i - 1], path[i - 0]}.length();
+
+        for(QPointF prevPt; const QPointF& point: path)
+            if(skip) {
+                prevPt = point;
+                skip = false;
+            } else {
+                z_ += QLineF{prevPt, point}.length() / perimetr * zk;
+                lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), z(z_), feed(feedRate()), speed(spindleSpeed)}));
+                prevPt = point;
+            }
+    } else {
+        for(const QPointF& point: path)
+            if(skip)
+                skip = false;
+            else
+                lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), feed(feedRate()), speed(spindleSpeed)}));
+    }
     return lines;
 }
 
@@ -435,12 +452,21 @@ void File::saveMillingProfile(const QPointF& offset) {
             for(size_t j = 0; j < paths.size(); ++j) {
                 QPolygonF& path = paths[j];
                 if(path.front() == path.last()) { // make complete depth and remove from worck
+                    // startPath(path.front());
+                    // for (auto&& depth: depths) {
+                    //     lines_.emplace_back(formated({g1(), z(depth), feed(plungeRate())}));
+                    //     auto sp(savePath(path, spindleSpeed(), depth));
+                    //     lines_.append(sp);
+                    // }
+                    // endPath();
+                    // paths.erase(paths.begin() + j--);
                     startPath(path.front());
-                    for(size_t k = 0; k < depths.size(); ++k) {
-                        lines_.emplace_back(formated({g1(), z(depths[k]), feed(plungeRate())}));
-                        auto sp(savePath(path, spindleSpeed()));
+                    for(auto&& depth: depths) {
+                        // lines_.emplace_back(formated({g1(), z(depth), feed(plungeRate())}));
+                        auto sp(savePath(path, spindleSpeed(), depth));
                         lines_.append(sp);
                     }
+                    lines_.append(savePath(path, spindleSpeed()));
                     endPath();
                     paths.erase(paths.begin() + j--);
                 } else {

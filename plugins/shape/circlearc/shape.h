@@ -75,7 +75,7 @@ public:
     Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
         auto shape = new Shape{
             point, point + QPointF{5, 0},
-               point + QPointF{0, 5}
+            point + QPointF{0, 5}
         };
         editor_.addShape(shape);
         return shape;
