@@ -13,9 +13,9 @@
 #include "gi_datapath.h"
 
 #include "abstract_file.h"
+#include "gc_types.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "settings.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -92,12 +92,34 @@ void DataPath::updateSelection() const {
 
 void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     Item::mouseReleaseEvent(event);
-    std::set<void*> set;
-    std::function<void(QGraphicsItem*)> selector = [&](QGraphicsItem* item) {
+    std::map<void*, Path> set;
+    std::function<void(Item*)> selector = [&](Item* item) {
         auto collidingItems = scene()->collidingItems(item, Qt::IntersectsItemShape);
-        for(auto* item: collidingItems) {
-            if(item->type() == int(Type::DataPath) && itemGroup->contains((Item*)item) && set.emplace(item).second) {
-                item->setSelected(true);
+        auto constexpr filter = std::views::filter(
+            [](auto* item) { return item->type() == int(Type::DataPath); });
+        auto constexpr transform = std::views::transform(
+            [](auto* item) { return static_cast<Item*>(item); });
+        auto path1 = item->paths().front();
+        for(auto* item: collidingItems | filter | transform) {
+            auto glue = App::project().glue() * uScale;
+
+            auto path2 = item->paths().front();
+            if(itemGroup->contains(item) && !set.contains(item)) {
+                set.emplace(item, Path{path2.front(), path2.back()});
+
+                double dists[]{
+                    distTo(path1.back(), path2.back()),
+                    distTo(path1.back(), path2.front()),
+                    distTo(path1.front(), path2.back()),
+                    distTo(path1.front(), path2.front()),
+                };
+
+                qInfo() << "distTo(1.back  , 2.back ) " << distTo(path1.back(), path2.back());
+                qInfo() << "distTo(1.back  , 2.front) " << distTo(path1.back(), path2.front());
+                qInfo() << "distTo(1.front , 2.back ) " << distTo(path1.front(), path2.back());
+                qInfo() << "distTo(1.front , 2.front) " << distTo(path1.front(), path2.front());
+                qInfo() << "glue" << glue << std::ranges::min(dists);
+                item->setSelected(qFuzzyIsNull(std::ranges::min(dists)) /*glue > std::ranges::min(dist)*/);
                 selector(item);
             }
         }

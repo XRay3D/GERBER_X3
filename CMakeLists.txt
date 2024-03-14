@@ -10,8 +10,8 @@
 #********************************************************************************/
 cmake_minimum_required(VERSION 3.24)
 
-set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
-set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
+# set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
+# set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
 # Optional IPO. Do not use IPO if it's not supported by compiler.
 #check_ipo_supported(RESULT result OUTPUT output)

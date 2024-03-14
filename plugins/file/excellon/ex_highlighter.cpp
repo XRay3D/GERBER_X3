@@ -34,7 +34,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
 
     std::u16string_view data(reinterpret_cast<const char16_t*>(text.utf16()), text.size());
     static constexpr ctll::fixed_string pattern(R"(([ACGMTXY])([\+\-]?\d+\.?\d*))");
-    for(auto m: ctre::range<pattern>(data)) {
+    for(auto m: ctre::search_all<pattern>(data)) {
         myClassFormat.setForeground(color.at(*m.data()));
         int start = std::distance(data.data(), m.data());
         int count = static_cast<int>(m.size());
