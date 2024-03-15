@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -97,7 +97,7 @@ public:
 
     virtual void parse(CodeData& code);
     virtual Type type() const = 0;
-    virtual GraphicObject toGo() const = 0;
+    virtual DxfGo toGo() const = 0;
 
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);
@@ -105,13 +105,13 @@ public:
     static QString typeName(int key);
     QString name() const;
     QColor color() const;
-    void attachToLayer(GraphicObject&& go) const;
+    void attachToLayer(DxfGo&& go) const;
 
     QString layerName;
     QString handle;
     QString softPointerID;
     int16_t colorNumber = 0;
-    int id {};
+    int32_t id{};
 
 #ifdef QT_DEBUG
     static constexpr double u = 10.;
@@ -234,7 +234,6 @@ public:
         Other6Z = 36,
         Other7Z = 37,
         Other8Z = 38,
-
     };
 };
 

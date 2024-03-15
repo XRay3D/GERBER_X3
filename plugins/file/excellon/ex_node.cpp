@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -16,6 +16,7 @@
 #include "ex_formatdialog.h"
 #include "ex_highlighter.h"
 #include "ft_view.h"
+#include "project.h"
 
 #include <QBoxLayout>
 #include <QIcon>
@@ -25,23 +26,25 @@
 namespace Excellon {
 
 Node::Node(File* file)
-    : FileTree::Node(file->id(), FileTree::File)
+    : FileTree::Node(FileTree::File)
     , file(file) {
 }
 
+Node::~Node() { App::project().deleteFile(file->id()); }
+
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (role) {
+    switch(role) {
     case Qt::CheckStateRole:
         file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
     case Qt::EditRole:
-        if (index.column() == FileTree::Column::Side) {
+        if(index.column() == FileTree::Column::Side) {
             file->setSide(static_cast<Side>(value.toBool()));
             return true;
         }
         break;
     case FileTree::Select:
-        for (auto ig : file->itemGroups())
+        for(auto ig: file->itemGroups())
             ig->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
         return true;
     }
@@ -50,7 +53,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree::Column::Side:
@@ -61,69 +64,69 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 QVariant Node::data(const QModelIndex& index, int role) const {
-    if (file)
-        switch (FileTree::Column(index.column())) {
+    if(file)
+        switch(FileTree::Column(index.column())) {
         case FileTree::Column::NameColorVisible:
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
                 return file->shortName();
             case Qt::ToolTipRole:
-                return file->shortName() + "\n"
-                    + file->name();
+                return file->shortName() + "\n" + file->name();
             case Qt::CheckStateRole:
                 return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
-                return QIcon::fromTheme("drill-path");
+                return file->icon();
             case FileTree::Id:
-                return id_.get();
+                return id();
             default:
-                return QVariant();
+                return {};
             }
         case FileTree::Column::Side:
-            switch (role) {
+            switch(role) {
             case Qt::DisplayRole:
             case Qt::ToolTipRole:
                 return sideStrList[file->side()];
             case Qt::EditRole:
                 return static_cast<bool>(file->side());
             case FileTree::Id:
-                return id_.get();
+                return id();
             default:
-                return QVariant();
+                return {};
             }
         default:
-            return QVariant();
+            return {};
         }
-    return QVariant();
+    return {};
 }
 
-void Node::menu(QMenu& menu, FileTree::View* tv) const {
+void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
         dialog->setObjectName(QString::fromUtf8("dialog"));
         dialog->resize(600, 600);
         // Dialog->resize(400, 300);
-        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+        QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
         verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-        QTextBrowser* textBrowser = new QTextBrowser(dialog);
+        QTextBrowser* textBrowser = new QTextBrowser{dialog};
         textBrowser->setFont(QFont("JetBrains Mono"));
-        new SyntaxHighlighter(textBrowser->document());
+        new SyntaxHighlighter{textBrowser->document()};
         textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
         verticalLayout->addWidget(textBrowser);
-        for (const QString& str : file->lines())
+        for(const QString& str: file->lines())
             textBrowser->append(str);
         dialog->exec();
         delete dialog;
     });
     menu.addSeparator();
-    if (!FormatDialog::showed()) {
+    if(!FormatDialog::showed())
         menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
-            (new FormatDialog(file))->show();
+            (new FormatDialog{file})->show();
         });
-    }
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }
+
+int Node::id() const { return file->id(); }
 
 } // namespace Excellon

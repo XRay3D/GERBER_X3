@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -15,9 +15,9 @@
 
 namespace Shapes {
 class Handle final : public QGraphicsItem {
-    friend class Shape;
-    friend QDataStream& operator<<(QDataStream& stream, const Shapes::Shape& shape);
-    friend QDataStream& operator>>(QDataStream& stream, Shapes::Shape& shape);
+    friend class AbstractShape;
+    friend QDataStream& operator<<(QDataStream& stream, const Shapes::AbstractShape& shape);
+    friend QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape& shape);
 
 public:
     enum Type : int {
@@ -25,23 +25,23 @@ public:
         Center,
         Corner,
     };
-    explicit Handle(Shapes::Shape* shape, Type type = Corner);
+    explicit Handle(Shapes::AbstractShape* shape, Type type = Corner);
     ~Handle();
 
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
-    int type() const override { return GiType::ShHandler; }
+    int type() const override { return Gi::Type::ShHandler; }
 
     Type hType() const;
     void setHType(Type value);
 
 private:
     QRectF rect;
-    Shape* const shape;
+    AbstractShape* const shape;
     Type type_;
     QPointF lastPos;
-    bool pressed {};
+    bool pressed{};
 
 protected:
     // QGraphicsItem interface

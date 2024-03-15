@@ -1,24 +1,33 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
-#include <myclipper.h>
-using namespace ClipperLib;
-
+#include "myclipper.h"
 #include <QAnimationGroup>
 #include <QGraphicsItem>
 #include <QPen>
 #include <QPropertyAnimation>
+#include <qmath.h>
 
-enum /*class*/ GiType : int {
+class AbstractFile;
+namespace Shapes {
+class AbstractShape;
+}
+
+class Project;
+
+namespace Gi {
+
+namespace Type {
+enum /*class*/ Type : int {
     DataPath = QGraphicsItem::UserType,
     DataSolid,
     Drill,
@@ -47,31 +56,29 @@ enum /*class*/ GiType : int {
     ShHandler,
     ShapeEnd
 };
+}; // namespace Type
 
-class FileInterface;
-class GiGroup;
-namespace Shapes {
-class Shape;
-}
+class Group;
 
-class GraphicsItem : public QGraphicsObject {
+class Item : public /*QGraphicsObject*/ QGraphicsItem {
 
-    friend class GiGroup;
-    friend class Project;
+    friend class Group;
+    friend class ::Project;
 
-    Q_OBJECT
-
+    //    Q_OBJECT
+    Q_GADGET
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
 
     inline QColor bodyColor() { return bodyColor_; }
     inline void setBodyColor(const QColor& c) { bodyColor_ = c, colorChanged(); }
 
-signals:
-    void colorChanged();
+    // signals:
+public:
+    void colorChanged() { update(); };
 
 public:
-    explicit GraphicsItem(FileInterface* file = nullptr);
-    ~GraphicsItem() override = default;
+    explicit Item(AbstractFile* file = nullptr);
+    ~Item() override = default;
 
     QColor color() const { return color_; }
     void setColor(const QColor& brush);
@@ -81,18 +88,18 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int alternate = {}) const { return shape_.toSubpathPolygons(transform()); }
+    virtual Paths paths(int alternate = {}) const { return ~shape_.toSubpathPolygons(transform()); }
     virtual void setPaths(Paths paths, int alternate = {}) {
-        auto t { transform() };
-        auto a { qRadiansToDegrees(asin(t.m12())) };
+        auto t{transform()};
+        auto a{qRadiansToDegrees(asin(t.m12()))};
         t = t.rotateRadians(-t.m12());
-        auto x { t.dx() };
-        auto y { t.dy() };
+        auto x{t.dx()};
+        auto y{t.dy()};
         shape_ = {};
         t = {};
         t.translate(-x, -y);
         t.rotate(-a);
-        for (auto&& path : paths)
+        for(auto&& path: ~paths)
             shape_.addPolygon(t.map(path));
         redraw();
     }
@@ -100,14 +107,14 @@ public:
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
-    void setVisible(bool visible);
+    Q_INVOKABLE void setVisible(bool visible);
 
-    const FileInterface* file() const;
+    const AbstractFile* file() const;
     template <typename T>
     const T* typedFile() const { return dynamic_cast<const T* const>(file_); }
 
-    int id() const;
-    void setId(int id);
+    int32_t id() const;
+    void setId(int32_t id);
     virtual void changeColor() = 0;
 
 protected:
@@ -116,8 +123,8 @@ protected:
 
     mutable QRectF boundingRect_;
 
-    const FileInterface* file_;
-    GiGroup* itemGroup = nullptr;
+    const AbstractFile* file_;
+    Group* itemGroup = nullptr;
     QPainterPath shape_;
 
     QPen pen_;
@@ -129,7 +136,7 @@ protected:
     QColor bodyColor_;
     QColor pathColor_;
 
-    int id_ = -1;
+    int32_t id_ = -1;
     double scaleFactor() const;
     enum ColorState {
         Default,
@@ -144,3 +151,5 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
+
+} // namespace Gi

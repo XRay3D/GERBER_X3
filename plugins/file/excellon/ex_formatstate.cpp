@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -17,9 +17,9 @@
 namespace Excellon {
 
 void State::updatePos() {
-    pos = QPointF(Parser::parseNumber(rawPos.X, *this), Parser::parseNumber(rawPos.Y, *this));
-    for (int i = 0; i < rawPosList.size(); ++i)
-        path[i] = QPointF(Parser::parseNumber(rawPosList[i].X, *this), Parser::parseNumber(rawPosList[i].Y, *this));
+    pos = QPointF(Parser::parseNumber(rawPos.x, *this), Parser::parseNumber(rawPos.y, *this));
+    for(int i = 0; i < rawPosList.size(); ++i)
+        path[i] = QPointF(Parser::parseNumber(rawPosList[i].x, *this), Parser::parseNumber(rawPosList[i].y, *this));
 }
 
 double State::currentToolDiameter() const {

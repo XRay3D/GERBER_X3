@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -26,16 +26,7 @@ struct ThParam {
 
 class Model;
 
-struct ThParam2 {
-    bool aperture = false;
-    bool path = false;
-    bool pour = false;
-    double areaMax = 0.0;
-    double areaMin = 0.0;
-};
-
-using PreviewGiMapValVec = mvector<std::pair<Paths, IntPoint>>;
-using PreviewGiMapVal = std::map<QString, PreviewGiMapValVec>;
-using PreviewGiMap = std::map<int, PreviewGiMapVal>;
+using PreviewGiMapValVec = mvector<std::pair<Paths, Point>>;
+using PreviewGiMap = std::map<QString, PreviewGiMapValVec>;
 
 } // namespace Thermal

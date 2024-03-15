@@ -3,32 +3,39 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_error.h"
+#include "gi.h"
+
 #include <QPainter>
 #include <QTime>
 #include <QtMath>
 
-GiError::GiError(const Paths& paths, double area)
+#include <numbers>
+
+namespace Gi {
+
+Error::Error(const Paths& paths, double area)
     : area_(area) {
-    for (auto& path : paths)
-        shape_.addPolygon(path);
+    for(auto& path: paths)
+        shape_.addPolygon(~path);
     setFlag(ItemIsSelectable);
+    setZValue(std::numeric_limits<double>::max());
 }
 
-double GiError::area() const { return area_; }
+double Error::area() const { return area_; }
 
-QRectF GiError::boundingRect() const { return shape_.boundingRect(); }
+QRectF Error::boundingRect() const { return shape_.boundingRect(); }
 
-void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void Error::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
-    if (isSelected()) {
+    if(isSelected()) {
         static QTime t(QTime::currentTime());
         painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * pi * 8)) * 30 + 30, 255, 255, 255));
     } else {
@@ -43,4 +50,8 @@ void GiError::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*
     painter->drawPath(shape_);
 }
 
-QPainterPath GiError::shape() const { return shape_; }
+QPainterPath Error::shape() const { return shape_; }
+
+int Error::type() const { return Gi::Type::Error; }
+
+} // namespace Gi

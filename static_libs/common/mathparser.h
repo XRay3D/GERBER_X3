@@ -1,10 +1,10 @@
 ///********************************************************************************
 // * Author    :  Damir Bakiev                                                    *
 // * Version   :  na                                                              *
-// * Date      :  11 November 2021                                                *
+// * Date      :  March 25, 2023                                                  *
 // * Website   :  na                                                              *
-// * Copyright :  Damir Bakiev 2016-2022                                          *
-// * License:                                                                     *
+// * Copyright :  Damir Bakiev 2016-2023                                          *
+// * License   :                                                                  *
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
 // ********************************************************************************/
@@ -12,11 +12,11 @@
 // * @link   https://habrahabr.ru/post/122397/
 // * @author shurik
 // */
-//#pragma once
+// #pragma once
 
-//#include <QMap>
-//#include <QObject>
-//#include <string_view>
+// #include <QMap>
+// #include <QObject>
+// #include <string_view>
 
 // using VarMap = std::map<QString, double>;
 // using sv = std::u16string_view;
@@ -57,10 +57,10 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -76,8 +76,8 @@ using VarMap = std::map<QString, double>;
 
 class Result {
 public:
-    double acc {};       // Аккамулятор
-    QStringView rest {}; // остаток строки, которую мы еще не обработали
+    double acc{};       // Аккамулятор
+    QStringView rest{}; // остаток строки, которую мы еще не обработали
     //    Result(double v = 0.0, const QStringView& r = {})
     //        : acc(v)
     //        , rest(r) {
@@ -89,9 +89,10 @@ public:
     MathParser(VarMap* variables);
     double getVariable(QStringView variableName);
     double parse(const QString& s = "");
+    double parse(QStringView s = {});
 
 private:
-    VarMap* variables {nullptr};
+    VarMap* variables{nullptr};
     Result plusMinus(QStringView s);
     Result bracket(QStringView s);
     Result functionVariable(QStringView s);

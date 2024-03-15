@@ -3,28 +3,27 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_drill.h"
 
-#include "graphicsview.h"
 #include "myclipper.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
-using namespace ClipperLib;
+namespace Gi {
 
-GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int toolId)
-    : GraphicsItem {file}
-    , diameter_ {diameter}
-    , path_ {path}
-    , toolId_ {toolId} {
+Drill::Drill(const Path& path, double diameter, AbstractFile* file, int toolId)
+    : Item{file}
+    , diameter_{diameter}
+    , path_{path}
+    , toolId_{toolId} {
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolId(toolId_);
@@ -32,9 +31,9 @@ GiDrill::GiDrill(const Path& path, double diameter, FileInterface* file, int too
     changeColor();
 }
 
-void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
-    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+    // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
@@ -49,10 +48,10 @@ void GiDrill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*
     painter->strokePath(shape_, pen_);
 }
 
-bool GiDrill::isSlot() { return path_.size() > 1; }
+bool Drill::isSlot() { return path_.size() > 1; }
 
-void GiDrill::setDiameter(double diameter) {
-    if (diameter_ == diameter)
+void Drill::setDiameter(double diameter) {
+    if(diameter_ == diameter)
         return;
     diameter_ = diameter;
 
@@ -60,21 +59,23 @@ void GiDrill::setDiameter(double diameter) {
     update();
 }
 
-void GiDrill::update(const Path& path, double diameter) {
+void Drill::update(const Path& path, double diameter) {
     diameter_ = diameter;
     path_ = path;
     create();
     update();
 }
 
-Paths GiDrill::paths(int alternate) const {
-    return {transform().map(path_)};
+Paths Drill::paths(int alternate) const {
+    auto path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
+    path = QTransform::fromScale(0.01, 0.01).map(path);
+    return {~transform().map(path)};
 }
 
-void GiDrill::changeColor() {
+void Drill::changeColor() {
     //    animation.setStartValue(bodyColor_);
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         bodyColor_ = QColor(100, 100, 100);
         break;
@@ -90,7 +91,7 @@ void GiDrill::changeColor() {
     }
 
     pathColor_ = bodyColor_;
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         break;
     case Hovered:
@@ -107,30 +108,28 @@ void GiDrill::changeColor() {
     //    animation.start();
 }
 
-void GiDrill::create() {
+void Drill::create() {
     shape_ = QPainterPath();
 
-    if (!path_.size()) {
+    if(!path_.size()) {
         return;
-    } else if (path_.size() == 1) {
+    } else if(path_.size() == 1) {
         //        path_ = CirclePath(double(diameter_ ? diameter_ * uScale : uScale), path_.front());
         //        ReversePath(path_);
         //        path_.push_back(path_.front());
         // shape_.addPolygon(path_);
-        shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
-        path_ = shape_.toFillPolygon();
+        shape_.addEllipse(~path_.front(), diameter_ * 0.5, diameter_ * 0.5);
+        //        path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
-        Paths paths;
-        ClipperOffset offset;
-        offset.AddPath(path_, jtRound, etOpenRound);
-        offset.Execute(paths, diameter_ * 0.5 * uScale);
-        for (Path& path : paths) {
+        for(auto&& path: Inflate(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
             path.push_back(path.front());
-            shape_.addPolygon(path);
+            shape_.addPolygon(~path);
         }
     }
 
-    boundingRect_ = shape_.boundingRect(); // FIXME V519 The 'boundingRect_' variable is assigned values twice successively. Perhaps this is a mistake. Check lines: 121, 132. gi_drill.cpp 132
+    boundingRect_ = shape_.boundingRect();
     fillPolygon = shape_.toFillPolygon();
 }
+
+} // namespace Gi

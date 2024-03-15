@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,7 +24,7 @@ Block::Block(Blocks& blocks, SectionParser* sp)
     parseData(code);
     do {
         code = sp->nextCode();
-    } while (code != "BLOCK" && sp->hasNext());
+    } while(code != "BLOCK" && sp->hasNext());
     code = sp->prevCode();
 }
 
@@ -34,7 +34,7 @@ Block::~Block() {
 void Block::parseHeader(CodeData& code) {
     do { // Block header
         bData.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case EntityType:
         case Handle:
         case StartOfApplication_definedGroup:
@@ -72,20 +72,20 @@ void Block::parseHeader(CodeData& code) {
             break;
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 void Block::parseData(CodeData& code) {
     do {
-        if (code == "ENDBLK")
+        if(code == "ENDBLK")
             break;
         //        sp->prevCode(); // unwind parser
         SectionENTITIES se(blocks, code, sp);
         entities = std::move(se.entities);
-        if (code == "ENDBLK")
+        if(code == "ENDBLK")
             break;
         code = sp->nextCode();
-    } while (code != "ENDBLK");
+    } while(code != "ENDBLK");
 }
 
 } // namespace Dxf

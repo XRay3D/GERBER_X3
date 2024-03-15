@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -19,15 +19,17 @@
 #include <QStyleOptionGraphicsItem>
 
 #define QT_DEBUG
-//#undef QT_DEBUG
+// #undef QT_DEBUG
 
-GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
+namespace Gi {
+
+GcPath::GcPath(const Paths& paths, AbstractFile* file)
     : gcFile_(file) {
-    for (const Path& path : paths)
-        shape_.addPolygon(path);
+    for(const Path& path: paths)
+        shape_.addPolygon(~path);
     double k;
-    if (gcFile_)
-        k = gcFile_->gcp_.getToolDiameter() * 0.5;
+    if(gcFile_)
+        k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
@@ -36,12 +38,12 @@ GiGcPath::GiGcPath(const Paths& paths, GCode::File* file)
 #endif
 }
 
-GiGcPath::GiGcPath(const Path& path, GCode::File* file)
+GcPath::GcPath(const Path& path, AbstractFile* file)
     : gcFile_(file) {
-    shape_.addPolygon(path);
+    shape_.addPolygon(~path);
     double k;
-    if (gcFile_)
-        k = gcFile_->gcp_.getToolDiameter() * 0.5;
+    if(gcFile_)
+        k = 0; // FIXME  gcFile_->gcp_.getToolDiameter() * 0.5;
     else
         k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
@@ -50,24 +52,24 @@ GiGcPath::GiGcPath(const Path& path, GCode::File* file)
 #endif
 }
 
-QRectF GiGcPath::boundingRect() const { return boundingRect_; }
+QRectF GcPath::boundingRect() const { return boundingRect_; }
 
-void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
-    if (pnColorPrt_)
+    if(pnColorPrt_)
         pen_.setColor(*pnColorPrt_);
-    if (colorPtr_)
+    if(colorPtr_)
         color_ = *colorPtr_;
 
-    if (pen_.widthF() == 0) {
+    if(pen_.widthF() == 0) {
         QPen pen(pen_);
         pen.setWidthF(1.5 * scaleFactor());
         painter->setPen(pen);
     } else
         painter->setPen(pen_);
 #ifdef QT_DEBUG
-    if (option->state & QStyle::State_MouseOver) {
+    if(option->state & QStyle::State_MouseOver) {
         QPen pen(pen_);
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
@@ -84,27 +86,27 @@ void GiGcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     ////////////////////////////////////////////////////// for debug cut direction
 #ifdef QT_DEBUG
-    if (sc_ != scaleFactor())
+    if(sc_ != scaleFactor())
         updateArrows();
     painter->drawPath(arrows_);
 #endif
 }
 
-int GiGcPath::type() const { return GiType::Path_; }
+int GcPath::type() const { return Type::Path_; }
 
-Paths GiGcPath::paths(int) const { return {} /*paths_*/; }
+Paths GcPath::paths(int) const { return {} /*paths_*/; }
 #ifdef QT_DEBUG
-void GiGcPath::updateArrows() {
+void GcPath::updateArrows() {
     sc_ = scaleFactor();
     arrows_ = QPainterPath(); //.clear();
-    if (qFuzzyIsNull(pen_.widthF())) {
-        for (const QPolygonF& path : shape_.toSubpathPolygons()) {
-            for (int i = 0; i < path.size() - 1; ++i) {
+    if(qFuzzyIsNull(pen_.widthF())) {
+        for(const QPolygonF& path: shape_.toSubpathPolygons()) {
+            for(int i = 0; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
                 double length = 30 * scaleFactor();
-                if (line.length() < length && i)
+                if(line.length() < length && i)
                     continue;
-                if (length > 0.5)
+                if(length > 0.5)
                     length = 0.5;
                 const double angle = line.angle();
                 line.setLength(length);
@@ -121,3 +123,4 @@ void GiGcPath::updateArrows() {
     }
 }
 #endif
+} // namespace Gi

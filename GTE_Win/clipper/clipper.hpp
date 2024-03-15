@@ -38,16 +38,16 @@
 
 // use_int32: When enabled 32bit ints are used instead of 64bit ints. This
 // improve performance but coordinate values are limited to the range +/- 46340
-//#define use_int32
+// #define use_int32
 
 // use_xyz: adds a Z member to IntPoint. Adds a minor cost to perfomance.
-//#define use_xyz
+// #define use_xyz
 
 // use_lines: Enables line clipping. Adds a very minor cost to performance.
 #define use_lines
 
 // use_deprecated: Enables temporary support for the obsolete functions
-//#define use_deprecated
+// #define use_deprecated
 
 #include <cstdlib>
 #include <cstring>
@@ -65,20 +65,26 @@
 
 namespace ClipperLib {
 
-enum ClipType { ctIntersection,
+enum ClipType {
+    ctIntersection,
     ctUnion,
     ctDifference,
-    ctXor };
-enum PolyType { ptSubject,
-    ptClip };
+    ctXor
+};
+enum PolyType {
+    ptSubject,
+    ptClip
+};
 // By far the most widely used winding rules for polygon filling are
 // EvenOdd & NonZero (GDI, GDI+, XLib, OpenGL, Cairo, AGG, Quartz, SVG, Gr32)
 // Others rules include Positive, Negative and ABS_GTR_EQ_TWO (only in OpenGL)
 // see http://glprogramming.com/red/chapter11.html
-enum PolyFillType { pftEvenOdd,
+enum PolyFillType {
+    pftEvenOdd,
     pftNonZero,
     pftPositive,
-    pftNegative };
+    pftNegative
+};
 
 #ifdef use_int32
 typedef int cInt;
@@ -101,7 +107,7 @@ struct IntPoint {
     IntPoint(cInt x = 0, cInt y = 0, cInt z = 0) F
         : X(x),
           Y(y),
-          Z(z) {};
+          Z(z){};
 #else
     IntPoint(cInt x = 0, cInt y = 0)
         : X(x)
@@ -163,17 +169,23 @@ struct DoublePoint {
 typedef void (*ZFillCallback)(IntPoint& e1bot, IntPoint& e1top, IntPoint& e2bot, IntPoint& e2top, IntPoint& pt);
 #endif
 
-enum InitOptions { ioReverseSolution = 1,
+enum InitOptions {
+    ioReverseSolution = 1,
     ioStrictlySimple = 2,
-    ioPreserveCollinear = 4 };
-enum JoinType { jtSquare,
+    ioPreserveCollinear = 4
+};
+enum JoinType {
+    jtSquare,
     jtRound,
-    jtMiter };
-enum EndType { etClosedPolygon,
+    jtMiter
+};
+enum EndType {
+    etClosedPolygon,
     etClosedLine,
     etOpenButt,
     etOpenSquare,
-    etOpenRound };
+    etOpenRound
+};
 
 class PolyNode;
 typedef QVector<PolyNode*> PolyNodes;

@@ -5,17 +5,17 @@
  * Version   :  na                                                              *
  * Date      :  01 February 2020                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "hpgl_file.h"
 
-//#include "section/dxf_classes.h"
-//#include "section/dxf_objects.h"
-//#include "section/dxf_thumbnailimage.h"
-//#include "gc_creator.h" //////////////////////
+// #include "section/dxf_classes.h"
+// #include "section/dxf_objects.h"
+// #include "section/dxf_thumbnailimage.h"
+// #include "gc_creator.h" //////////////////////
 
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
@@ -29,7 +29,7 @@
 namespace Hpgl {
 
 File::File()
-    : FileInterface() {
+    : AbstractFile() {
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")},
@@ -47,7 +47,7 @@ void File::setItemType(int type) {
 int File::itemsType() const { return m_itemsType; }
 
 Pathss& File::groupedPaths(File::Group group, bool fl) {
-    if (m_groupedPaths.empty()) {
+    if(m_groupedPaths.empty()) {
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
@@ -58,7 +58,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
             IntPoint(r.right + k, r.bottom + k),
             IntPoint(r.right + k, r.top - k),
             IntPoint(r.left - k, r.top - k)};
-        if (fl)
+        if(fl)
             ReversePath(outer);
         clipper.AddPath(outer, ptSubject, true);
         clipper.Execute(ctUnion, polyTree, pftNonZero);
@@ -70,40 +70,38 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
 void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
     Path path;
     Paths paths;
-    switch (group) {
+    switch(group) {
     case CutoffGroup:
-        if (!node->IsHole()) {
+        if(!node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (size_t i = 0; i < node->ChildCount(); ++i) {
+            for(size_t i = 0; i < node->ChildCount(); ++i) {
                 path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (size_t i = 0; i < node->ChildCount(); ++i) {
+        for(size_t i = 0; i < node->ChildCount(); ++i)
             grouping(node->Childs[i], pathss, group);
-        }
         break;
     case CopperGroup:
-        if (node->IsHole()) {
+        if(node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for (size_t i = 0; i < node->ChildCount(); ++i) {
+            for(size_t i = 0; i < node->ChildCount(); ++i) {
                 path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for (size_t i = 0; i < node->ChildCount(); ++i) {
+        for(size_t i = 0; i < node->ChildCount(); ++i)
             grouping(node->Childs[i], pathss, group);
-        }
         break;
     }
 }
 
-void File::initFrom(FileInterface* file) {
-    //    FileInterface::initFrom(file);
+void File::initFrom(AbstractFile* file) {
+    //    AbstractFile::initFrom(file);
     //    static_cast<Node*>(m_node)->file = this;
 }
 
@@ -134,7 +132,7 @@ void File::createGi() {
     //                    clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
 
     //                if (go.path().size() > 1) {
-    //                    auto gItem = new GiDataPath(go.path(), this);
+    //                    auto gItem = new Gi::DataPath(go.path(), this);
     //                    if (go.entity()) {
     //                        gItem->setToolTip(QString("Line %1\n%2")
     //                                              .arg(go.entity()->data[0].line())
@@ -155,7 +153,7 @@ void File::createGi() {
     //            }
 
     //            for (Paths& paths : layer->m_groupedPaths) {
-    //                auto gItem = new GiDataSolid(paths, this);
+    //                auto gItem = new Gi::DataSolid(paths, this);
     //                gItem->setColorPtr(&layer->m_colorNorm);
     //                igNorm->push_back(gItem);
     //            }
@@ -177,7 +175,7 @@ void File::createGi() {
 bool File::isVisible() const { return m_visible; }
 
 void File::setVisible(bool visible) {
-    if (visible == m_visible)
+    if(visible == m_visible)
         return;
     m_visible = visible;
     //    if (m_visible) {

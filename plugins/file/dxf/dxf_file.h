@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,10 +11,10 @@
 #pragma once
 
 // https://help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-235B22E0-A567-4CF6-92D3-38A2306D73F3
+#include "abstract_file.h"
 #include "dxf_block.h"
 #include "dxf_codedata.h"
 #include "dxf_types.h"
-#include "file.h"
 #include "gi_group.h"
 
 #include <QDebug>
@@ -32,7 +32,7 @@ class LayerModel;
 class NodeLayer;
 struct SectionParser;
 
-class File : public FileInterface {
+class File : public AbstractFile {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Plugin;
@@ -44,7 +44,10 @@ public:
     ~File();
     Layer* layer(const QString& name);
     HeaderData& header() { return header_; }
+
+    const Layers& layers() const { return layers_; }
     Layers& layers() { return layers_; }
+
     Blocks& blocks() { return blocks_; }
     Styles& styles() { return styles_; }
     EntitiesUP& entities() { return entities_; }
@@ -67,16 +70,18 @@ private:
         CutoffGroup,
     };
     Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
-    void grouping(PolyNode* node, Pathss* pathss, Group group);
+    void grouping(PolyTree& node, Group group);
 
-    // FileInterface interface
+    // AbstractFile interface
 public:
-    void initFrom(FileInterface* file) override;
+    void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
-    FileType type() const override;
+    uint32_t type() const override;
     void createGi() override;
     bool isVisible() const override;
     void setVisible(bool visible) override;
+    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
+    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
 
 protected:
     void write(QDataStream& stream) const override;

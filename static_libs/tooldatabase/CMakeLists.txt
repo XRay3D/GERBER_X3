@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
@@ -18,22 +18,42 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Gui REQUIRED)
-
-#set(TS_FILES tooldatabase_af_NA.ts)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Widgets Gui LinguistTools REQUIRED)
 
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
-add_library(tooldatabase STATIC
+set(PROJECT_SOURCES
     ${HEADERS}
     ${SOURCES}
     ${UIS}
 )
 
-target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Core)
-target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Gui)
-target_link_libraries(tooldatabase PRIVATE Qt${QT_VERSION_MAJOR}::Widgets)
+add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
-target_compile_definitions(tooldatabase PRIVATE TOOLDATABASE_LIBRARY)
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    Qt${QT_VERSION_MAJOR}::Core
+    Qt${QT_VERSION_MAJOR}::Gui
+    Qt${QT_VERSION_MAJOR}::Widgets
+)
+
+target_compile_definitions(${PROJECT_NAME} PRIVATE TOOLDATABASE_LIBRARY)
+
+set(TS_FILES
+    ${PROJECT_NAME}_ru.ts
+    ${PROJECT_NAME}_en.ts
+)
+
+set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
+
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
+    qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+    qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
+    qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
+else()
+    qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+    qt5_add_translation(${QM_FILES} ${TS_FILES})
+endif()

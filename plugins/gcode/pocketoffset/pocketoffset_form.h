@@ -1,26 +1,32 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "gc_formsutil.h"
+
+#include "gc_baseform.h"
+#include "pocketoffset.h"
+#include "ui_pocketoffsetform.h"
+#include <QToolBar>
 
 namespace Ui {
 class PocketOffsetForm;
 }
 
-class PocketOffsetForm : public GcFormBase {
+namespace PocketOffset {
+
+class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit PocketOffsetForm(GCodePlugin* plugin, QWidget* parent = nullptr);
-    ~PocketOffsetForm() override;
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    ~Form() override;
 
 private slots:
     void onSbxStepsValueChanged(int arg1);
@@ -33,9 +39,9 @@ private:
     void updatePixmap();
     void rb_clicked();
     const QStringList names;
-    static inline const QString pixmaps[] {
-        QStringLiteral("pock_offs_climb"),
-        QStringLiteral("pock_offs_conv"),
+    static inline const QString pixmaps[]{
+        u"pock_offs_climb"_qs,
+        u"pock_offs_conv"_qs,
     };
     // QWidget interface
 protected:
@@ -44,25 +50,26 @@ protected:
 
     // FormsUtil interface
 protected:
-    void createFile() override;
+    void computePaths() override;
     void updateName() override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
-#include "gc_plugin.h"
-#include <QToolBar>
-
-class GCPluginImpl final : public GCodePlugin {
+class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketoffset.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
+    Form form{this};
 
-    // GCodePlugin interface
 public:
+    // GCode::Plugin interface
     QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
-    QWidget* createForm() override { return new PocketOffsetForm(this); };
-    int type() const override { return GCode::Pocket; }
+    QWidget* createForm() override { return &form; };
+    uint32_t type() const override { return POCKET_OFFSET; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
+
+} // namespace PocketOffset

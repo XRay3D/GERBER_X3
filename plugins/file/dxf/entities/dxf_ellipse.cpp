@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -59,7 +59,7 @@ Ellipse::Ellipse(SectionParser* sp)
 //        }
 //        QPointF rad(length, length * ratioOfMinorAxisToMajorAxis);
 //        path.arcTo(QRectF(-rad, +rad), -qRadiansToDegrees(startParameter), -aspan);
-//        //        auto item(new QGraphicsPathItem(path));
+//        //        auto item(new QGraphicsPathItem{path});
 //        //        item->setPen(QPen(color(), 0.0));
 //        //        item->setBrush(Qt::NoBrush);
 //        //        item->setRotation(angle);
@@ -80,7 +80,7 @@ Ellipse::Ellipse(SectionParser* sp)
 void Ellipse::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker: // 100
             break;           //	100	Маркер подкласса (AcDbEllipse)
 
@@ -121,12 +121,12 @@ void Ellipse::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
 
-GraphicObject Ellipse::toGo() const { return {}; }
+DxfGo Ellipse::toGo() const { return {}; }
 
 void Ellipse::write(QDataStream& stream) const {
     stream << startParameter;

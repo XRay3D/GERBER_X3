@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -25,7 +25,7 @@ struct Hatch final : Entity {
     void parse(CodeData& code) override;
     Type type() const override;
     ;
-    GraphicObject toGo() const override;
+    DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
@@ -89,17 +89,17 @@ struct Hatch final : Entity {
 
     // Данные штриховки (DXF)
     enum PatternData {
-        Angle = 53,      //Угол линий штриховки
-        BaseX = 43,      //Базовая точка линий штриховки, компонент X
-        BaseY = 44,      //Базовая точка линий штриховки, компонент Y
-        Offset = 45,     //Смещение линии штриховки, компонент X
-        OffsetY = 46,    //Смещение линии штриховки, компонент Y
-        DashCoount = 79, //Количество элементов длины штриха
-        DashLength = 49, //Длина штриха (несколько записей)
+        Angle = 53,      // Угол линий штриховки
+        BaseX = 43,      // Базовая точка линий штриховки, компонент X
+        BaseY = 44,      // Базовая точка линий штриховки, компонент Y
+        Offset = 45,     // Смещение линии штриховки, компонент X
+        OffsetY = 46,    // Смещение линии штриховки, компонент Y
+        DashCoount = 79, // Количество элементов длины штриха
+        DashLength = 49, // Длина штриха (несколько записей)
     };
     // Данные траекторий контуров (DXF)
 
-    //Групповые коды данных траектории контура штриховки
+    // Групповые коды данных траектории контура штриховки
     enum HatchDataCodes {
         PathTypeFlag = 92, // Флаг типа траектории контура (битовый код):
         // 0 = по умолчанию

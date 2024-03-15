@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -50,7 +50,7 @@ struct Block {
         BlockName = 2,          // Имя блока
         BlockTypeFlags = 70,    // Флаги типа блока (кодовые битовые значения, могут быть скомбинированы):
         BasePointX = 10,        // Базовая точка  Файл DXF: значение X; приложение: 3,//D-точка
-        BasePointY = 20,        //Файл DXF: значение Y и Z базовой точки
+        BasePointY = 20,        // Файл DXF: значение Y и Z базовой точки
         BasePointZ = 30,        //
         BlockName_2 = 3,        // Имя блока
         XrefPathName = 1,       // Имя пути внешней ссылки

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -25,7 +25,7 @@ RadioDelegate::RadioDelegate(QObject* parent)
 }
 
 QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
-    auto* radioButton = new QRadioButton(parent);
+    auto* radioButton = new QRadioButton{parent};
     //    radioButton->addItems({ tr("Top"), tr("Bottom") });
     //        if (index.column() == 1)
     //            comboBox->addItems(IconPreviewArea::iconModeNames());
@@ -38,7 +38,7 @@ QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem
 
 void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
-    if (!radioButton)
+    if(!radioButton)
         return;
     //        int pos = comboBox->findText(index.model()->data(index).toString(),
     //            Qt::MatchExactly);
@@ -47,14 +47,14 @@ void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) con
 
 void RadioDelegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
-    if (!radioButton)
+    if(!radioButton)
         return;
     model->setData(index, bool(radioButton->isChecked()));
 }
 
 void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     QStyledItemDelegate::paint(painter, option, index);
-    if (dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree::Node*>(index.internalPointer()))) {
+    if(dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree::Node*>(index.internalPointer()))) {
 
         //        StarRating starRating = qvariant_cast<StarRating>(index.data());
 

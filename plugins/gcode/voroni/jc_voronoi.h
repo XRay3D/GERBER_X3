@@ -155,6 +155,7 @@ USAGE:
 #include "math.h"
 #include "stddef.h"
 #include "stdlib.h"
+#include <cstdint>
 #include <limits>
 
 #include "assert.h"
@@ -194,7 +195,7 @@ typedef JCV_REAL_TYPE jcv_real;
 typedef struct _jcv_point {
     jcv_real x;
     jcv_real y;
-    int id = -1;
+    int32_t id = -1;
     int id2 = -1;
 } jcv_point;
 
@@ -271,36 +272,36 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 // Copyright (c) 2015-2019 Mathias Westerdahl
 // For LICENSE (MIT), USAGE or HISTORY, see bottom of file
 
-//#pragma once
+// #pragma once
 
-//#ifdef __cplusplus
-// extern "C" {
-//#endif
+// #ifdef __cplusplus
+//  extern "C" {
+// #endif
 
-//#ifndef JCV_REAL_TYPE
-//#define JCV_REAL_TYPE float
-//#endif
+// #ifndef JCV_REAL_TYPE
+// #define JCV_REAL_TYPE float
+// #endif
 
-//#ifndef JCV_ATAN2
-//#define JCV_ATAN2(_Y_, _X_) atan2f(_Y_, _X_)
-//#endif
+// #ifndef JCV_ATAN2
+// #define JCV_ATAN2(_Y_, _X_) atan2f(_Y_, _X_)
+// #endif
 
-//#ifndef JCV_SQRT
-//#define JCV_SQRT(_X_) sqrtf(_X_)
-//#endif
+// #ifndef JCV_SQRT
+// #define JCV_SQRT(_X_) sqrtf(_X_)
+// #endif
 
-//#ifndef JCV_PI
-//#define JCV_PI 3.14159265358979323846264338327950288f
-//#endif
+// #ifndef JCV_PI
+// #define JCV_PI 3.14159265358979323846264338327950288f
+// #endif
 
-//#ifndef JCV_FLT_MAX
-//#define JCV_FLT_MAX 3.402823466e+38F
-//#endif
+// #ifndef JCV_FLT_MAX
+// #define JCV_FLT_MAX 3.402823466e+38F
+// #endif
 
-//#ifndef JCV_EDGE_INTERSECT_THRESHOLD
+// #ifndef JCV_EDGE_INTERSECT_THRESHOLD
 //// Fix for Issue #40
-//#define JCV_EDGE_INTERSECT_THRESHOLD 1.0e-10F
-//#endif
+// #define JCV_EDGE_INTERSECT_THRESHOLD 1.0e-10F
+// #endif
 
 // typedef JCV_REAL_TYPE jcv_real;
 
@@ -358,12 +359,12 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 // extern int jcv_boxshape_clip(const jcv_clipper* clipper, jcv_edge* e);
 // extern void jcv_boxshape_fillgaps(const jcv_clipper* clipper, jcv_context_internal* allocator, jcv_site* s);
 
-//#pragma pack(push, 1)
+// #pragma pack(push, 1)
 
 // struct _jcv_point {
 //     jcv_real x;
 //     jcv_real y;
-//      int id = 0;
+//      int32_t id = 0;
 // };
 
 // struct _jcv_graphedge {
@@ -413,11 +414,11 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 //     jcv_point max;
 // };
 
-//#pragma pack(pop)
+// #pragma pack(pop)
 
-//#ifdef __cplusplus
-//}
-//#endif
+// #ifdef __cplusplus
+// }
+// #endif
 
 ///*
 // ABOUT:

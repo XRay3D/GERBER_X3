@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -14,17 +14,17 @@
 #include "gbr_types.h"
 #include "gbrcomp_onent.h"
 
-class FilePlugin;
+class AbstractFilePlugin;
 
 namespace Gerber {
 
 class ApBlock;
 
 class Parser {
-    FilePlugin* const interface;
+    AbstractFilePlugin* const afp;
 
 public:
-    Parser(FilePlugin* interface);
+    Parser(AbstractFilePlugin* afp);
 
 protected:
     void parseLines(const QString& gerberLines, const QString& fileName);
@@ -32,23 +32,20 @@ protected:
     mvector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
-    bool parseNumber(QString Str, cInt& val, int integer, int decimal);
+    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer, int decimal);
 
     void addPath();
     void addFlash();
 
-    void reset(const QString& fileName);
+    void reset();
     void resetStep();
 
-    IntPoint parsePosition(const QString& xyStr);
-    Path arc(const IntPoint& center, double radius, double start, double stop);
-    Path arc(IntPoint p1, IntPoint p2, IntPoint center);
+    Point parsePosition(const QString& xyStr);
+    Path arc(const Point& center, double radius, double start, double stop);
+    Path arc(Point p1, Point p2, Point center);
 
     Paths createLine();
     Paths createPolygon();
-
-    ClipperLib::Clipper clipper_;
-    ClipperLib::ClipperOffset offset_;
 
     QMap<QString, QString> apertureMacro_;
 
@@ -96,7 +93,7 @@ protected:
     bool parseUnitMode(const QString& gLine);
     void closeStepRepeat();
 
-    ApBlock* apBlock(int id);
+    ApBlock* apBlock(int32_t id);
 
     File* file = nullptr;
 };

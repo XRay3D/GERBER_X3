@@ -1,16 +1,17 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 #include <QPen>
 #include <QWidget>
+#include <utils.h>
 
 class Ruler final : public QWidget {
     Q_OBJECT
@@ -19,7 +20,9 @@ class Ruler final : public QWidget {
     //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
     //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
-    enum { Breadth = 24 };
+    enum {
+        Breadth = 24
+    };
 
     explicit Ruler(Qt::Orientation rulerType, QWidget* parent);
 
@@ -29,7 +32,7 @@ public:
     double zoom() const { return rulerZoom_; }
     QSize minimumSizeHint() const override { return QSize(Ruler::Breadth, Ruler::Breadth); }
 
-    static QString mimeType() { return QStringLiteral("image/x-puzzle-piece"); }
+    static QString mimeType() { return u"image/x-puzzle-piece"_qs; }
 
 public slots:
     void setCursorPos(const QPoint cursorPos_);
@@ -47,7 +50,7 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
 
     //    void dragEnterEvent(QDragEnterEvent* event) override;
-        void dragMoveEvent(QDragMoveEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
     //    void dropEvent(QDropEvent* event) override;
     //    void startDrag(Qt::DropActions supportedActions) override;
 
@@ -56,11 +59,11 @@ private:
     void DrawFromOriginTo(QPainter* painter, QRectF rulerRect, double startMark, double endMark, int startTickNo, double step, double startPosition);
     void DrawMousePosTick(QPainter* painter);
 
-    double gridStep {1.0};
-    double origin_ {};
-    double rulerUnit_ {1.0};
-    double rulerZoom_ {1.0};
-    double tickKoef {1.0};
+    double gridStep{1.0};
+    double origin_{};
+    double rulerUnit_{1.0};
+    double rulerZoom_{1.0};
+    double tickKoef{1.0};
 
     QPoint cursorPos;
 
@@ -68,6 +71,6 @@ private:
 
     const Qt::Orientation orientation_;
 
-    bool drawText {};
-    bool mouseTracking {};
+    bool drawText{};
+    bool mouseTracking{};
 };

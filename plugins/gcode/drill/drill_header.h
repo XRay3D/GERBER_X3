@@ -3,7 +3,7 @@
 #include "drill_form.h"
 #include "qwidget.h"
 
-namespace DrillPlugin {
+namespace Drilling {
 
 class Header : public QHeaderView {
     Q_OBJECT
@@ -11,6 +11,7 @@ class Header : public QHeaderView {
 public:
     Header(Qt::Orientation orientation, QWidget* parent = nullptr);
     ~Header() override;
+    Qt::CheckState checkBoxState;
 
     enum {
         XOffset = 5,
@@ -38,4 +39,4 @@ private:
     Model* model() const;
 };
 
-} // namespace DrillPlugin
+} // namespace Drilling

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -41,7 +41,7 @@ Solid::Solid(SectionParser* sp)
 void Solid::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -93,14 +93,14 @@ void Solid::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Solid::type() const { return Type::SOLID; }
 
-GraphicObject Solid::toGo() const {
+DxfGo Solid::toGo() const {
     QPolygonF poly;
-    if (corners == 15) {
+    if(corners == 15) {
         poly.reserve(5);
         poly << firstCorner;
         poly << secondCorner;
@@ -110,9 +110,10 @@ GraphicObject Solid::toGo() const {
     } else {
         throw DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners);
     }
-    Path path(poly);
+    Path path{~poly};
     ReversePath(path);
-    return {id, path, {path}};
+    DxfGo go{id, path, {path}}; // return {id, path, {path}};
+    return go;
 }
 
 void Solid::write(QDataStream& stream) const {

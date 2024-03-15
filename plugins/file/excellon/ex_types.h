@@ -1,21 +1,27 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 #include "datastream.h"
+#include "md5.h"
 #include <QPolygonF>
+#include <numbers>
 #include <type_traits>
 
-class GiDrill;
+namespace Gi {
+class Drill;
+}
 
 namespace Excellon {
+
+constexpr auto EXCELLON = md5::hash32("Excellon");
 
 using Tools = std::map<int, double>;
 
@@ -166,7 +172,7 @@ class File;
 
 struct Format {
     Format(File* file = nullptr)
-        : file {file} { }
+        : file{file} { }
     ZeroMode zeroMode = LeadingZeros;
     UnitMode unitMode = Millimeters;
     int decimal = 0;
@@ -207,25 +213,25 @@ struct State {
     void updatePos();
 
     struct Pos {
-        QString A;
-        QString X;
-        QString Y;
+        QString a;
+        QString x;
+        QString y;
         friend QDataStream& operator<<(QDataStream& stream, const Pos& p) {
-            stream << p.A;
-            stream << p.X;
-            stream << p.Y;
+            stream << p.a;
+            stream << p.x;
+            stream << p.y;
             return stream;
         }
         friend QDataStream& operator>>(QDataStream& stream, Pos& p) {
-            stream >> p.A;
-            stream >> p.X;
-            stream >> p.Y;
+            stream >> p.a;
+            stream >> p.x;
+            stream >> p.y;
             return stream;
         }
         void clear() {
-            A.clear();
-            X.clear();
-            Y.clear();
+            a.clear();
+            x.clear();
+            y.clear();
         }
     };
 
@@ -277,7 +283,7 @@ public:
     // const File* const file = nullptr;
     File* file = nullptr;
     State state;
-    GiDrill* item = nullptr;
+    Gi::Drill* item = nullptr;
 
     friend QDataStream& operator<<(QDataStream& stream, const Hole& hole) {
         stream << hole.state;

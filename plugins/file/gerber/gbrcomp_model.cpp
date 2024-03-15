@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -26,35 +26,35 @@ namespace Gerber::Comp {
 
 sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel(parent)
-    , rootItem(new sNode("")) {
-    //    auto file = App::project()->file<File>(fileId);
+    , rootItem(new sNode{""}) {
+    //    auto file = App::project().file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))
     //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
 
-    auto file = App::project()->file<Gerber::File>(fileId);
+    auto file = App::project().file<Gerber::File>(fileId);
 
     using pair = std::pair<int, sNode*>;
     std::map<QString, mvector<pair>> map;
 
-    auto unsorted = new sNode(GbrObj::tr("unsorted"));
+    auto unsorted = new sNode{GbrObj::tr("unsorted")};
 
-    for (const auto& component : file->components()) {
+    for(const auto& component: file->components()) {
         static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
 
-        auto data {toU16StrView(component.refdes())};
+        auto data{toU16StrView(component.refdes())};
 
-        if (auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
-            if (map[CtreCapTo(c1)].empty())
-                map[CtreCapTo(c1)].emplace_back(-1, new sNode(CtreCapTo(c1)));
-            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode(component));
+        if(auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
+            if(map[CtreCapTo(c1)].empty())
+                map[CtreCapTo(c1)].emplace_back(-1, new sNode{CtreCapTo{c1}});
+            map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode{component});
         } else {
-            unsorted->append(new sNode(component));
+            unsorted->append(new sNode{component});
         }
     }
 
-    for (auto& [key, value] : map) {
+    for(auto& [key, value]: map) {
         std::sort(value.begin(), value.end(), [](const pair& p1, const pair& p2) { return p1.first < p2.first; });
-        for (size_t i = 1; i < value.size(); ++i)
+        for(size_t i = 1; i < value.size(); ++i)
             value.front().second->append(value[i].second);
         rootItem->append(value.front().second);
     }
@@ -74,7 +74,7 @@ sModel::sModel(int fileId, QObject* parent)
     //        ++it;
     //    }
 
-    if (unsorted->childCount() > 0)
+    if(unsorted->childCount() > 0)
         rootItem->append(unsorted);
     else
         delete unsorted;
@@ -87,23 +87,23 @@ sModel::~sModel() {
 
 QModelIndex sModel::index(int row, int column, const QModelIndex& parent) const {
     sNode* childItem = getItem(parent)->child(row);
-    if (childItem)
+    if(childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
 }
 
 QModelIndex sModel::parent(const QModelIndex& index) const {
-    if (!index.isValid())
+    if(!index.isValid())
         return QModelIndex();
     sNode* parentItem = getItem(index)->parentItem();
-    if (parentItem == rootItem)
+    if(parentItem == rootItem)
         return QModelIndex();
     return createIndex(parentItem->row(), 0, parentItem);
 }
 
 QVariant sModel::data(const QModelIndex& index, int role) const {
-    if (!index.isValid())
-        return QVariant();
+    if(!index.isValid())
+        return {};
     sNode* item = getItem(index);
     return item->data(index, role);
 }
@@ -113,8 +113,8 @@ bool sModel::setData(const QModelIndex& index, const QVariant& value, int role) 
 }
 
 QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) const {
-    if (role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        switch (section) {
+    if(role == Qt::DisplayRole && orientation == Qt::Horizontal)
+        switch(section) {
         case 0: /* <field> Manufacturer. */
             return GbrObj::tr("Ref Des");
         case 1: /* <field> Manufacturer part number. */
@@ -140,24 +140,24 @@ QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) 
         default:
             return QString("");
         }
-    return QVariant();
+    return {};
 }
 
 Qt::ItemFlags sModel::flags(const QModelIndex& index) const {
-    if (!index.isValid())
+    if(!index.isValid())
         return Qt::NoItemFlags;
     return getItem(index)->flags(index);
 }
 
 bool sModel::removeRows(int row, int count, const QModelIndex& parent) {
     sNode* item = nullptr;
-    if (parent.isValid())
+    if(parent.isValid())
         item = static_cast<sNode*>(parent.internalPointer());
     else
         return false;
 
     beginRemoveRows(parent, row, row + count - 1);
-    while (count--)
+    while(count--)
         item->remove(row);
     endRemoveRows();
     resetInternalData();
@@ -169,15 +169,15 @@ int sModel::columnCount(const QModelIndex&) const {
 }
 
 int sModel::rowCount(const QModelIndex& parent) const {
-    if (parent.column() > 0)
+    if(parent.column() > 0)
         return 0;
     return getItem(parent)->childCount();
 }
 
 sNode* sModel::getItem(const QModelIndex& index) const {
-    if (index.isValid()) {
+    if(index.isValid()) {
         auto* item = static_cast<sNode*>(index.internalPointer());
-        if (item)
+        if(item)
             return item;
     }
     return rootItem;

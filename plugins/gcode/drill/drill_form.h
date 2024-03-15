@@ -1,22 +1,18 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "gc_formsutil.h"
+#include "drill_file.h"
+#include "gc_baseform.h"
 #include "gc_plugin.h"
-
-#include <QHeaderView>
-#include <QMenu>
-#include <QToolBar>
-#include <QWidget>
 
 namespace Ui {
 class DrillForm;
@@ -24,24 +20,24 @@ class DrillForm;
 
 class QCheckBox;
 
-namespace DrillPlugin {
+namespace Drilling {
 
-using PosOrPath = std::variant<const QPointF, const QPolygonF>;
-using Key = std::tuple<int, double, bool, QString>;
-struct Val {
-    mvector<PosOrPath> posOrPath;
-    Paths draw;
-};
-using Preview = std::map<Key, Val>;
+// using PosOrPath = std::variant<const QPointF, const QPolygonF>;
+// using Key = std::tuple<int, double, bool, QString>;
+// struct Val {
+//     mvector<PosOrPath> posOrPath;
+//     Paths draw;
+// };
+// using Preview = std::map<Key, Val>;
 
 class Model;
 class Header;
 
-class Form final : public GcFormBase {
+class Form final : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit Form(GCodePlugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
     ~Form() override;
 
     void updateFiles();
@@ -49,18 +45,16 @@ public:
 
 private:
     Ui::DrillForm* ui;
-    Model* model = nullptr;
-    FileInterface* file = nullptr;
-    Header* header;
-    QCheckBox* checkBox;
-    GCodePlugin* plugin;
-    GCode::GCodeType worckType = GCode::Drill;
+    class Model* model = nullptr;
+    class AbstractFile* file = nullptr;
+    class Header* header;
+    class QCheckBox* checkBox;
+    GCType worckType = GCType::Drill;
     GCode::SideOfMilling side = GCode::Inner;
-    QString type_;
 
     void initToolTable();
 
-    void on_cbxFileCurrentIndexChanged(int index);
+    void on_cbxFileCurrentIndexChanged();
     void on_doubleClicked(const QModelIndex& current);
     void on_selectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     void on_customContextMenuRequested(const QPoint& pos);
@@ -75,29 +69,43 @@ private:
 
     inline void zoomToSelected();
 
-    // FormsUtil interface
 protected:
-    void createFile() override;
+    // FormsUtil interface
+    void computePaths() override;
     void updateName() override;
+    // QWidget interface
+    void showEvent(QShowEvent* event) override {
+        updateFiles();
+        event->accept();
+    }
+    void hideEvent(QHideEvent* event) override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
-class Plugin final : public GCodePlugin {
+class Plugin final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "drill.json")
-    Q_INTERFACES(GCodePlugin)
+    Q_INTERFACES(GCode::Plugin)
 
-    // GCodePlugin interface
+    // GCode::Plugin interface
+    Form form{this};
+
 public:
+    QAction* addAction(QMenu* menu, QToolBar* toolbar) override {
+        auto action = GCode::Plugin ::addAction(menu, toolbar);
+        action->setData(true);
+        return action;
+    }
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
-    QWidget* createForm() override { return new Form(this); };
+    QWidget* createForm() override { return &form; };
     bool canToShow() const override { return Form::canToShow(); }
-    int type() const override { return GCode::Drill; }
+    uint32_t type() const override { return DRILLING; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 
-} // namespace DrillPlugin
+} // namespace Drilling
 
 #include "app.h"

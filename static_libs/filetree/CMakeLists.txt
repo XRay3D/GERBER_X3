@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
@@ -20,27 +20,19 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
-add_library(filetree STATIC
-    ft_foldernode.cpp
-    ft_foldernode.h
-    ft_model.cpp
-    ft_model.h
-    ft_node.cpp
-    ft_node.h
-    ft_radiodelegate.cpp
-    ft_radiodelegate.h
-    ft_sidedelegate.cpp
-    ft_sidedelegate.h
-    ft_textdelegate.cpp
-    ft_textdelegate.h
-    ft_typedelegate.cpp
-    ft_typedelegate.h
-    ft_view.cpp
-    ft_view.h
+file(GLOB_RECURSE HEADERS   ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE SOURCES   ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+
+add_library(${PROJECT_NAME} STATIC
+    ${HEADERS}
+    ${SOURCES}
 )
 
-target_link_libraries(filetree PRIVATE
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+
+target_link_libraries(${PROJECT_NAME} PRIVATE
     gi
+
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

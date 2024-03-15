@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -46,8 +46,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex& /*index*/) const override { return Qt::ItemIsEnabled | Qt::ItemIsSelectable; }
 
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
-        if (role == Qt::DisplayRole)
-            switch (index.column()) {
+        if(role == Qt::DisplayRole)
+            switch(index.column()) {
             case LineNum:
                 return index.row() + 1;
             case LineType:
@@ -55,8 +55,8 @@ public:
             case LineData:
                 return lines.at(index.row());
             }
-        else if (role == Qt::TextAlignmentRole)
-            switch (index.column()) {
+        else if(role == Qt::TextAlignmentRole)
+            switch(index.column()) {
             case LineNum:
                 return Qt::AlignCenter;
             case LineType:
@@ -68,8 +68,8 @@ public:
     }
 
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
-        if (orientation == Qt::Horizontal && role == Qt::DisplayRole)
-            switch (section) {
+        if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
+            switch(section) {
             case LineNum:
                 return DxfObj::tr("Line");
             case LineType:

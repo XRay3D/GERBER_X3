@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -14,6 +14,10 @@
 #include "mvector.h"
 #include "tool.h"
 #include <QWidget>
+#include <array>
+#include <optional>
+#include <set>
+#include <variant>
 
 namespace Ui {
 class ToolEditForm;
@@ -33,10 +37,10 @@ public:
     void setTool(const Tool& tool);
     void setDialog();
     enum Feeds {
-        msec_,
-        mmin_,
-        cmin_,
-        min_
+        mmPerSec,
+        mmPerMin,
+        cmPerMin,
+        mPerMin
     };
 
 public slots:
@@ -49,33 +53,44 @@ signals:
 private:
     Ui::ToolEditForm* ui;
 
-    struct State {
-        QMap<DoubleSpinBox*, double> min;
-        QMap<DoubleSpinBox*, double> max;
-        QMap<DoubleSpinBox*, double> val;
-        void save(DoubleSpinBox* dsbx) {
-            min[dsbx] = dsbx->minimum();
-            max[dsbx] = dsbx->maximum();
-            val[dsbx] = dsbx->value();
-        }
-        void restore(DoubleSpinBox* dsbx) {
-            dsbx->setRange(min[dsbx], max[dsbx]);
-            dsbx->setValue(val[dsbx]);
-        }
+    void valueChanged(double value);
+
+    struct Data {
+        DoubleSpinBox* dsbx[2];
+        std::set<Tool::Type> set;
+        std::variant<double, DoubleSpinBox*> max;
+        std::optional<double> defVal;
+        std::optional<double> lastVal;
     };
 
-    QMap<int, State> saveRestoreMap;
+    std::array<Data, 7> dsbxMapdsbxMap;
 
-    void valueChangedSlot(double value);
-
-    ToolItem* item_ = nullptr;
+    ToolItem* item_{nullptr};
     Tool tool_;
-    double feed_ = 1.0;
-    bool dialog_ = true;
+    double feed{1.0};
+    bool dialog_{true};
 
     void updateName();
     void setChanged(bool fl = true);
     void setVisibleToolWidgets(bool visible);
     void setupToolWidgets(int type);
-    mvector<DoubleSpinBox*> dsbx;
+    using Key = decltype(&Tool::angle);
+
+    void updateDsbxAngle(double val);
+    void updateDsbxDiameter(double val);
+    void updateDsbxFeedRate(double val);
+    void updateDsbxOneTurnCut(double val);
+    void updateDsbxPassDepth(double val);
+    void updateDsbxPlungeRate(double val);
+    void updateDsbxSpindleSpeed(double val);
+    void updateDsbxStepover(double val);
+    void updateDsbxLenght(double val);
+    void updateDsbxOneTurnCutPercent(double val);
+    void updateDsbxStepoverPercent(double val);
+
+    std::map<QDoubleSpinBox*, decltype(&ToolEditForm::updateDsbxAngle)> update;
+    std::array<std::pair<DoubleSpinBox*, decltype(&Tool::angle)>, 9> get;
+    std::array<std::pair<DoubleSpinBox*, decltype(&Tool::setAngle)>, 9> set;
+
+    //    mvector<DoubleSpinBox*> update;
 };

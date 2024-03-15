@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -25,7 +25,7 @@
 
 QSizeF GetRealSize() {
     static QSizeF size;
-    if (!size.isEmpty())
+    if(!size.isEmpty())
         return size;
 
 #if 0 // ndef linux
@@ -86,7 +86,7 @@ QSizeF GetRealSize() {
         } // for
     } while (0);
 #endif
-    if (size.isEmpty()) // FIXME current display of graficsview
+    if(size.isEmpty()) // FIXME current display of graficsview
         size = QGuiApplication::screens()[0]->physicalSize();
 
     return size;

@@ -3,22 +3,20 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "hatching.h"
-
-#include "gc_file.h"
+#include "project.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
 #include <execution>
 #endif
-#include "gi_point.h"
 
 #include <algorithm>
 #include <forward_list>
@@ -52,31 +50,29 @@
 //};
 // inline constexpr sort_fn sort {};
 
-namespace GCode {
-HatchingCreator::HatchingCreator() {
-}
+namespace CrossHatch {
 
-void HatchingCreator::create() {
+void Creator::create() {
     createRaster(
         gcp_.tools.front(),
-        gcp_.params[GCodeParams::Depth].toDouble(),
-        gcp_.params[GCodeParams::UseAngle].toDouble(),
-        gcp_.params[GCodeParams::HathStep].toDouble(),
-        gcp_.params[GCodeParams::Pass].toInt());
+        gcp_.params[GCode::Params::Depth].toDouble(),
+        gcp_.params[UseAngle].toDouble(),
+        gcp_.params[HathStep].toDouble(),
+        gcp_.params[Pass].toInt());
 }
 
-void HatchingCreator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
+void Creator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
     QElapsedTimer t;
     t.start();
 
-    switch (gcp_.side()) {
-    case Outer:
-        groupedPaths(CutoffPaths, uScale /*static_cast<cInt>(toolDiameter_ + 5)*/);
+    switch(gcp_.side()) {
+    case GCode::Outer:
+        groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast</*Point::Type * / int32_t > (toolDiameter_ + 5) */);
         break;
-    case Inner:
-        groupedPaths(CopperPaths);
+    case GCode::Inner:
+        groupedPaths(GCode::Grouping::Copper);
         break;
-    case On:
+    case GCode::On:
         emit fileReady(nullptr);
         return;
     }
@@ -91,27 +87,25 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         Paths sl; // Scan Lines
 
         Clipper clipper;
-        clipper.AddPaths(src, ptClip);
-        clipper.AddPath(frame, ptSubject, false);
-        clipper.Execute(ctIntersection, sl);
-        if (!sl.size())
+        clipper.AddClip(src);
+        clipper.AddOpenSubject({frame});
+        clipper.Execute(ClipType::Intersection, FillRule::NonZero, sl, sl);
+        if(!sl.size())
             return sl;
 
-        std::ranges::sort(sl, {}, [](const Path& p) { return p.front().Y; }); // vertical sort
+        std::ranges::sort(sl, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
-        cInt start = sl.front().front().Y;
+        /*Point::Type*/ int32_t start = sl.front().front().y;
         bool fl = {};
-        for (size_t i {}, last {}; i < sl.size(); ++i) {
-            if (auto y = sl[i].front().Y; y != start || i - 1 == sl.size()) {
+        for(size_t i{}, last{}; i < sl.size(); ++i) {
+            if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
 
-                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().X; }) // horizontal sort
-                     :
-                     std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().X; }); // horizontal sort
+                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
+                    std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
 
-                for (size_t k = last; k < i; ++k) { // fix direction
-                    if (fl ^ (sl[k].front().X < sl[k].back().X))
-                        std::swap(sl[k].front().X, sl[k].back().X);
-                }
+                for(size_t k = last; k < i; ++k) // fix direction
+                    if(fl ^ (sl[k].front().x < sl[k].back().x))
+                        std::swap(sl[k].front().x, sl[k].back().x);
 
                 start = y;
                 fl = !fl;
@@ -125,41 +119,40 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         {
             Paths tmp;
             Clipper clipper;
-            clipper.AddPaths(src, ptSubject, false);
-            clipper.AddPath(frame, ptClip);
-            clipper.Execute(ctIntersection, tmp);
-            // dbgPaths(tmp, "ctIntersection");
-            frames.append(tmp);
-            clipper.Execute(ctDifference, tmp);
-            // dbgPaths(tmp, "ctDifference");
-            frames.append(tmp);
+            clipper.AddOpenSubject(src);
+            clipper.AddClip({frame});
+            clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
+            // dbgPaths(tmp, "ClipType::Intersection");
+            frames += std::move(tmp);
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
+            // dbgPaths(tmp, "ClipType::Difference");
+            frames += std::move(tmp);
 
-            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().Y; }); // vertical sort
+            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
-            std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().Y < r.front().Y; }); // vertical sort
-            for (auto& path : frames) {
-                if (path.front().Y > path.back().Y)
+            std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
+            for(auto& path: frames)
+                if(path.front().y > path.back().y)
                     ReversePath(path); // fix vertical direction
-            }
         }
         return frames;
     };
-    auto calcZigzag = [hatchStep](const Paths& src) {
+    auto calcZigzag = [hatchStep](const Paths& src) -> std::optional<Path> {
         Clipper clipper;
-        clipper.AddPaths(src, ptClip, true);
-        IntRect rect(clipper.GetBounds());
-        cInt o = uScale - (rect.height() % static_cast<cInt>(hatchStep * uScale)) / 2;
+        clipper.AddClip(src);
+        Rect rect(GetBounds(src));
+        /*Point::Type*/ int32_t o = uScale - (rect.Height() % static_cast</*Point::Type*/ int32_t>(hatchStep * uScale)) / 2;
         rect.top -= o;
         rect.bottom += o;
         rect.left -= uScale;
         rect.right += uScale;
         Path zigzag;
-        cInt step = hatchStep * uScale;
-        cInt start = rect.top;
-        bool fl {};
+        auto step = hatchStep * uScale;
+        auto start = rect.top;
+        bool fl{};
 
-        for (; start <= rect.bottom || fl; fl = !fl, start += step) {
-            if (!fl) {
+        for(; start <= rect.bottom || fl; fl = !fl, start += step) {
+            if(!fl) {
                 zigzag.emplace_back(rect.left, start);
                 zigzag.emplace_back(rect.right, start);
             } else {
@@ -167,36 +160,38 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
                 zigzag.emplace_back(rect.left, start);
             }
         }
-
-        zigzag.front().X -= step;
-        zigzag.back().X -= step;
+        if(zigzag.empty()) return std::nullopt;
+        zigzag.front().x -= step;
+        zigzag.back().x -= step;
         return zigzag;
     };
+
     auto merge = [](const Paths& scanLines, const Paths& frames) {
         Paths merged;
         merged.reserve(scanLines.size() / 10);
         std::list<Path> bList;
-        for (auto&& path : scanLines)
+        for(auto&& path: scanLines)
             bList.emplace_back(std::move(path));
 
         std::list<Path> fList;
-        for (auto&& path : frames)
+        for(auto&& path: frames)
             fList.emplace_back(std::move(path));
 
         setMax(bList.size());
-        while (bList.begin() != bList.end()) {
+        while(bList.begin() != bList.end()) {
             setCurrent(bList.size());
 
             merged.resize(merged.size() + 1);
             auto& path = merged.back();
-            for (auto bit = bList.begin(); bit != bList.end(); ++bit) {
+            for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
                 ifCancelThenThrow();
-                if (path.empty() || path.back() == bit->front()) {
-                    path.append(path.empty() ? *bit : bit->mid(1));
+                if(path.empty() || path.back() == bit->front()) {
+                    path.empty() ? path += * bit
+                                 : path += *bit | skipFront;
                     bList.erase(bit);
-                    for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                        if (path.back() == fit->front() && fit->front().Y < fit->at(1).Y) {
-                            path.append(fit->mid(1));
+                    for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                        if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
+                            path += *fit | skipFront;
                             fList.erase(fit);
                             bit = bList.begin();
                             break;
@@ -204,12 +199,12 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
                     }
                     bit = bList.begin();
                 }
-                if (bList.begin() == bList.end())
+                if(bList.begin() == bList.end())
                     break;
             }
-            for (auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                if (path.front() == fit->back() && fit->front().Y > fit->at(1).Y) {
-                    fit->append(path.mid(1));
+            for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
+                    *fit += path | skipFront;
                     std::swap(*fit, path);
                     fList.erase(fit);
                     break;
@@ -220,44 +215,44 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
         return merged;
     };
 
-    for (Paths src : groupedPss) {
+    for(Paths src: groupedPss) {
         {
-            ClipperOffset offset(uScale);
-            offset.AddPaths(src, jtRound, etClosedPolygon);
-            offset.Execute(src, -dOffset);
-            for (auto& path : src)
+            src = InflateRoundPolygon(src, -dOffset * 2);
+            for(auto& path: src)
                 path.push_back(path.front());
-            if (prPass)
-                profilePaths.append(src);
+            if(prPass)
+                profilePaths += src;
         }
 
         QElapsedTimer t;
         t.start();
-        if (src.size()) {
+        if(src.size()) {
             {
-                for (auto& path : src)
+                for(auto& path: src)
                     RotatePath(path, angle);
-                auto zigzag {calcZigzag(src)};
-                auto scanLines {calcScanLines(src, zigzag)};
-                auto frames {calcFrames(src, zigzag)};
-                if (scanLines.size() && frames.size()) {
-                    auto merged {merge(scanLines, frames)};
-                    for (auto& path : merged)
-                        RotatePath(path, -angle);
-                    returnPs.append(merged);
+                if(auto zigzag{calcZigzag(src)}; zigzag) { // NOTE C++23 -> and_then
+                    auto scanLines{calcScanLines(src, *zigzag)};
+                    auto frames{calcFrames(src, *zigzag)};
+                    if(scanLines.size() && frames.size()) {
+                        auto merged{merge(scanLines, frames)};
+                        for(auto& path: merged)
+                            RotatePath(path, -angle);
+                        returnPs += std::move(merged);
+                    }
                 }
             }
             {
-                for (auto& path : src)
+                for(auto& path: src)
                     RotatePath(path, 90);
-                auto zigzag {calcZigzag(src)};
-                auto scanLines {calcScanLines(src, zigzag)};
-                auto frames {calcFrames(src, zigzag)};
-                if (scanLines.size() && frames.size()) {
-                    auto merged {merge(scanLines, frames)};
-                    for (auto& path : merged)
-                        RotatePath(path, -(angle + 90));
-                    returnPs.append(merged);
+                if(auto zigzag{calcZigzag(src)}; zigzag) { // NOTE C++23 -> and_then
+                    auto scanLines{calcScanLines(src, *zigzag)};
+                    auto frames{calcFrames(src, *zigzag)};
+                    if(scanLines.size() && frames.size()) {
+                        auto merged{merge(scanLines, frames)};
+                        for(auto& path: merged)
+                            RotatePath(path, -(angle + 90));
+                        returnPs += std::move(merged);
+                    }
                 }
             }
         }
@@ -266,41 +261,75 @@ void HatchingCreator::createRaster(const Tool& tool, const double depth, const d
     mergeSegments(returnPs);
     sortB(returnPs);
 
-    if (!profilePaths.empty() && prPass) {
+    if(!profilePaths.empty() && prPass) {
         sortB(profilePaths);
-        if (gcp_.convent())
+        if(gcp_.convent())
             ReversePaths(profilePaths);
-        for (Path& path : profilePaths)
+        for(Path& path: profilePaths)
             path.push_back(path.front());
     }
 
     returnPss.clear();
-    switch (prPass) {
+    switch(prPass) {
     case NoProfilePass:
-        returnPss.push_back(returnPs);
+        if(!returnPs.empty()) returnPss.push_back(returnPs);
         break;
     case First:
-        if (!profilePaths.empty())
-            returnPss.push_back(profilePaths);
-        returnPss.push_back(returnPs);
+        if(!profilePaths.empty()) returnPss.push_back(profilePaths);
+        if(!returnPs.empty()) returnPss.push_back(returnPs);
         break;
     case Last:
-        returnPss.push_back(returnPs);
-        if (!profilePaths.empty())
-            returnPss.push_back(profilePaths);
+        if(!returnPs.empty()) returnPss.push_back(returnPs);
+        if(!profilePaths.empty()) returnPss.push_back(profilePaths);
         break;
     default:
         break;
     }
 
-    if (returnPss.empty()) {
+    if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        gcp_.gcType = Hatching;
-        file_ = new File(returnPss, std::move(gcp_));
+        file_ = new File{std::move(gcp_), std::move(returnPss), {}};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     }
 }
 
-} // namespace GCode
+/////////////////////////////////////////
+File::File()
+    : GCode::File() { }
+
+File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
+    if(gcp_.tools.front().diameter()) {
+        initSave();
+        addInfo();
+        statFile();
+        genGcodeAndTile();
+        endFile();
+    }
+}
+
+void File::genGcodeAndTile() {
+    const QRectF rect = App::project().worckRect();
+    for(size_t x = 0; x < App::project().stepsX(); ++x) {
+        for(size_t y = 0; y < App::project().stepsY(); ++y) {
+            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
+
+            if(toolType() == Tool::Laser)
+                saveLaserProfile(offset);
+            else
+                saveMillingProfile(offset);
+
+            if(gcp_.params.contains(GCode::Params::NotTile))
+                return;
+        }
+    }
+}
+
+void File::createGi() {
+    createGiRaster();
+    itemGroup()->setVisible(true);
+}
+
+} // namespace CrossHatch

@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,14 +11,18 @@
 #pragma once
 
 #include "entities/dxf_graphicobject.h"
+#include "md5.h"
 
 #include <QColor>
 #include <QVariant>
 
 #include <map>
+#include <numbers>
 #include <vector>
 
 namespace Dxf {
+
+constexpr auto DXF = md5::hash32("Dxf");
 
 class DxfObj : public QObject {
     Q_OBJECT
@@ -49,7 +53,7 @@ struct Block;
 struct SectionParser;
 struct Style;
 
-using GraphicObjects = std::vector<GraphicObject>;
+using GraphicObjects = std::vector<DxfGo>;
 using EntitiesUP = std::vector<std::shared_ptr<Entity>>;
 using Entities = std::vector<Entity*>;
 
@@ -62,10 +66,10 @@ using Tables = std::map<int, QVector<AbstractTable*>>;
 
 class Settings {
 protected:
-    static inline QString defaultFont_ {"Arial"};
-    static inline bool boldFont_ {false};
-    static inline bool italicFont_ {false};
-    static inline bool overrideFonts_ {false};
+    static inline QString defaultFont_{"Arial"};
+    static inline bool boldFont_{false};
+    static inline bool italicFont_{false};
+    static inline bool overrideFonts_{false};
 
 public:
     static QString defaultFont() { return defaultFont_; }

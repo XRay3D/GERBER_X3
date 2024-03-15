@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -13,7 +13,9 @@
 #include "gi.h"
 #include "qparallelanimationgroup.h"
 
-class GiAbstractPreview : public QGraphicsObject {
+namespace Gi {
+
+class AbstractPreview : public QGraphicsObject {
     friend class Node;
 
     Q_OBJECT
@@ -34,8 +36,8 @@ signals:
     void colorChanged();
 
 public:
-    GiAbstractPreview();
-    ~GiAbstractPreview() override = default;
+    AbstractPreview();
+    ~AbstractPreview() override = default;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) override;
@@ -57,8 +59,8 @@ protected:
     QPainterPath sourcePath_;
     QPainterPath toolPath_;
 
-    bool used {};
-    double sourceDiameter_ {};
+    bool used{};
+    double sourceDiameter_{};
 
     QColor bodyColor_;
     QColor pathColor_;
@@ -76,7 +78,7 @@ protected:
 
     static constexpr int dark = 180;
     static constexpr int light = 255;
-    inline static const QColor colors[] {
+    inline static const QColor colors[]{
         QColor(128, 128, 128, dark),  // 0 Default         gray dark
         QColor(255, 255, 255, light), // 1 DefaultHovered  gray light
         QColor(0, 255, 0, dark),      // 2 Selected        green dark
@@ -114,3 +116,5 @@ protected:
     void hoverLeaveEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
+
+} // namespace Gi

@@ -1,22 +1,34 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "abstract_file.h"
+#include "project.h"
+
 #include <QAbstractItemModel>
 
-class FileInterface;
+class AbstractFile;
 namespace Shapes {
-class Shape;
+class AbstractShape;
 }
+
 class Project;
+
+namespace GCode {
+class File;
+} // namespace GCode
+
+namespace Gi {
+class Item;
+} // namespace Gi
 
 namespace FileTree {
 
@@ -25,13 +37,10 @@ class Node;
 class Model : public QAbstractItemModel {
     Q_OBJECT
     Node* rootItem;
-    struct Pair {
-        Node* node;
-        int type;
-    };
-    std::map<int, Pair> mapNode;
+    std::map<int, Node*> fileFolders;
     friend class ::Project;
     friend class Node;
+    friend class View;
 
 signals:
     void updateActions();
@@ -82,9 +91,13 @@ public:
 private:
     const QString mimeType;
 
-    void addFile(FileInterface* file);
-    void addShape(Shapes::Shape* shape);
+    int addFile(Node* item, AbstractFile* file);
+    void addFile(AbstractFile* file);
+    void addShape(Shapes::AbstractShape* shape);
+
+    void addItem(Gi::Item* item);
 };
 
 } // namespace FileTree
+
 #include "app.h"

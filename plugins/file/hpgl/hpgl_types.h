@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     * * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -47,10 +47,10 @@ struct Block;
 struct SectionParser;
 struct Style;
 
-class GraphicObject final : public AbstrGraphicObject {
+class GraphicObject final : public GraphicObject {
     Path m_path;
     Paths m_paths;
-    // AbstrGraphicObject interface
+    // GraphicObject interface
 public:
     Path line() const override {
         return {};
@@ -140,10 +140,10 @@ struct Tables : std::map<int, QVector<AbstractTable*>> {
 
 class Settings {
 protected:
-    static inline QString m_defaultFont {"Arial"};
-    static inline bool m_boldFont {false};
-    static inline bool m_italicFont {false};
-    static inline bool m_overrideFonts {false};
+    static inline QString m_defaultFont{"Arial"};
+    static inline bool m_boldFont{false};
+    static inline bool m_italicFont{false};
+    static inline bool m_overrideFonts{false};
 
 public:
     static QString defaultFont() { return m_defaultFont; }

@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -15,6 +15,7 @@
 
 class QWidget;
 class QIcon;
+class QDataStream;
 
 class Tool {
     friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
@@ -23,28 +24,16 @@ class Tool {
 
 public:
     Tool();
-    Tool(int)
-        : diameter_(0) { }
+    Tool(double diameter)
+        : diameter_(diameter) { }
 
     enum Type {
         Drill,
         EndMill,
         Engraver,
         Laser,
+        ThreadMill,
         Group = 100
-    };
-
-    enum {
-        Angle,
-        Diameter,
-        FeedRate,
-        OneTurnCut,
-        PassDepth,
-        PlungeRate,
-        SpindleSpeed,
-        Stepover,
-        OneTurnCutPercent,
-        StepoverPercent
     };
 
     // name
@@ -64,7 +53,7 @@ public:
     double diameter() const;
     void setDiameter(double diameter);
     // feedRate
-    double feedRate_mm_s() const;
+    double feedRate_mmPerSec() const;
     double feedRate() const;
     void setFeedRate(double feedRate);
     // oneTurnCut
@@ -85,9 +74,12 @@ public:
     // autoName
     bool autoName() const;
     void setAutoName(bool autoName);
+    // lenght
+    double lenght() const;
+    void setLenght(double autoName);
     // id
-    int id() const;
-    void setId(int id);
+    int32_t id() const;
+    void setId(int32_t id);
     // depth_
     static double depth() { return depth_; }
     static void setDepth(double depth) { depth_ = depth; }
@@ -108,36 +100,38 @@ public:
     void updatePath(double depth = 0.0);
 
 private:
-    QString name_ {QObject::tr("Default")};
+    QString name_{QObject::tr("Default")};
     QString note_;
 
-    double angle_ {};
-    double diameter_ {1};
-    double feedRate_ {100};
-    double oneTurnCut_ {0.1};
-    double passDepth_ {2};
-    double plungeRate_ {600};
-    double spindleSpeed_ {12000};
-    double stepover_ {0.5};
+    double angle_{.0};
+    double diameter_{1.};
+    double feedRate_{100.};
+    double oneTurnCut_{0.1};
+    double passDepth_{2.}; // max thread pitch
+    double plungeRate_{600.};
+    double spindleSpeed_{12000.};
+    double stepover_{0.5};
+    double lenght_{1.}; //
+
     static inline double depth_;
 
-    int id_ {-1};
+    int32_t id_{-1};
 
     mutable size_t hash_ = 0;
     mutable size_t hash2_ = 0;
 
-    Type type_ {EndMill};
+    Type type_{EndMill};
 
     QPainterPath path_;
 
-    bool autoName_ {true};
+    bool autoName_{true};
 };
 
 using Tools = std::map<int, Tool, std::greater<int>>;
 
 class ToolHolder {
     friend class ToolItem;
-    friend class FilePlugin;
+    friend class AbstractFilePlugin;
 
     Tools tools_;
     ToolHolder(const ToolHolder&) = delete;
@@ -148,7 +142,7 @@ class ToolHolder {
 public:
     ToolHolder();
 
-    const Tool& tool(int id) { return tools_.at(id); }
+    const Tool& tool(int32_t id) { return tools_.at(id); }
     const Tools& tools() { return tools_; }
     void readTools();
     void readTools(const QJsonObject& json);
@@ -156,3 +150,4 @@ public:
 };
 
 Q_DECLARE_METATYPE(Tool)
+Q_DECLARE_METATYPE(Tool::Type)

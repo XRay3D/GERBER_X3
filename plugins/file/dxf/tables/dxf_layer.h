@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -16,8 +16,9 @@
 #include "entities/dxf_graphicobject.h"
 
 #include "datastream.h"
-
-class GiGroup;
+namespace Gi {
+class Group;
+}
 
 namespace Dxf {
 
@@ -68,9 +69,9 @@ public:
     int colorNumber() const;
 
     const GraphicObjects& graphicObjects() const;
-    void addGraphicObject(GraphicObject&& go);
+    void addGraphicObject(DxfGo&& go);
 
-    GiGroup* itemGroup() const;
+    Gi::Group* itemGroup() const;
     bool isEmpty() const;
 
     ItemsType itemsType() const;
@@ -84,8 +85,8 @@ public:
     void setVisible(bool visible);
 
 private:
-    GiGroup* itemGroupNorm = nullptr;
-    GiGroup* itemGroupPath = nullptr;
+    Gi::Group* itemGroupNorm = nullptr;
+    Gi::Group* itemGroupPath = nullptr;
     //    File* fiGle_ = nullptr;
     Pathss groupedPaths_;
 

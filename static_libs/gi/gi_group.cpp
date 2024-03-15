@@ -3,23 +3,25 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_group.h"
 #include "graphicsview.h"
 
-GiGroup::~GiGroup() {
-    auto scene {App::graphicsView()->scene()};
-    if (scene && scene->items().size())
+namespace Gi {
+
+Group::~Group() {
+    auto scene{App::grView().scene()};
+    if(scene && scene->items().size())
         qDeleteAll(*this);
 }
 
-void GiGroup::push_back(GraphicsItem* item) {
+void Group::push_back(Item* item) {
     item->id_ = mvector::size() ? mvector::back()->id_ + 1 : 0;
     item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->id_));
     item->setVisible(visible_);
@@ -27,56 +29,60 @@ void GiGroup::push_back(GraphicsItem* item) {
     mvector::push_back(item);
 }
 
-void GiGroup::setVisible(bool visible) {
-    if (visible_ != visible) {
+void Group::setVisible(bool visible) {
+    if(visible_ != visible) {
         visible_ = visible;
-        for (GraphicsItem* item : *this)
+        for(Item* item: *this)
             item->setVisible(visible_);
     }
 }
 
-void GiGroup::setSelected(const mvector<int>& ids) {
-    for (GraphicsItem* item : *this)
+void Group::setSelected(const mvector<int>& ids) {
+    for(Item* item: *this)
         item->setSelected(ids.contains(item->id()));
 }
 
-void GiGroup::addToScene(QGraphicsScene* scene) {
-    for (auto item : *this)
-        (scene ? scene : App::graphicsView()->scene())->addItem(item);
+void Group::addToScene(QGraphicsScene* scene) {
+    if(!scene)
+        scene = App::grView().scene();
+    for(auto* item: *this)
+        scene->addItem(item);
 }
 
-void GiGroup::setBrushColor(const QColor& color) {
-    if (brushColor_ != color) {
+void Group::setBrushColor(const QColor& color) {
+    if(brushColor_ != color) {
         brushColor_ = color;
-        for (GraphicsItem* item : *this)
+        for(Item* item: *this)
             item->setColorPtr(&brushColor_);
     }
 }
 
-void GiGroup::setPen(const QPen& pen) {
-    if (pen_ != pen) {
+void Group::setPen(const QPen& pen) {
+    if(pen_ != pen) {
         pen_ = pen;
-        for (GraphicsItem* item : *this)
+        for(Item* item: *this)
             item->setPen(pen_);
     }
 }
 
-void GiGroup::setBrushColorP(QColor* col) {
-    for (GraphicsItem* item : *this)
+void Group::setBrushColorP(QColor* col) {
+    for(Item* item: *this)
         item->setColorPtr(col);
 }
 
-void GiGroup::setPenColor(QColor* col) {
-    for (GraphicsItem* item : *this)
+void Group::setPenColor(QColor* col) {
+    for(Item* item: *this)
         item->setPenColorPtr(col);
 }
 
-void GiGroup::setZValue(double z) {
-    for (GraphicsItem* item : *this)
+void Group::setZValue(double z) {
+    for(Item* item: *this)
         item->setZValue(z);
 }
 
-void GiGroup::setPos(QPointF offset) {
-    for (GraphicsItem* item : *this)
+void Group::setPos(QPointF offset) {
+    for(Item* item: *this)
         item->setPos(offset);
 }
+
+} // namespace Gi

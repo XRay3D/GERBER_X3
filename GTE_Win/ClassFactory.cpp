@@ -44,9 +44,8 @@ ClassFactory::AddRef() {
 IFACEMETHODIMP_(ULONG)
 ClassFactory::Release() {
     ULONG cRef = InterlockedDecrement(&m_cRef);
-    if (0 == cRef) {
+    if(0 == cRef)
         delete this;
-    }
     return cRef;
 }
 
@@ -58,12 +57,12 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, vo
     HRESULT hr = CLASS_E_NOAGGREGATION;
 
     // pUnkOuter is used for aggregation. We do not support it in the sample.
-    if (pUnkOuter == nullptr) {
+    if(pUnkOuter == nullptr) {
         hr = E_OUTOFMEMORY;
 
         // Create the COM component.
-        GerberThumbnailProvider* pExt = new (std::nothrow) GerberThumbnailProvider();
-        if (pExt) {
+        GerberThumbnailProvider* pExt = new(std::nothrow) GerberThumbnailProvider();
+        if(pExt) {
             // Query the specified interface.
             hr = pExt->QueryInterface(riid, ppv);
             pExt->Release();
@@ -74,10 +73,9 @@ IFACEMETHODIMP ClassFactory::CreateInstance(IUnknown* pUnkOuter, REFIID riid, vo
 }
 
 IFACEMETHODIMP ClassFactory::LockServer(BOOL fLock) {
-    if (fLock) {
+    if(fLock)
         InterlockedIncrement(&g_cDllRef);
-    } else {
+    else
         InterlockedDecrement(&g_cDllRef);
-    }
     return S_OK;
 }

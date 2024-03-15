@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -12,15 +12,15 @@
 
 #include "gc_creator.h"
 
-namespace GCode {
+namespace Voronoi {
 
-class VoronoiJc : public virtual Creator {
+class VoronoiJc : public virtual GCode::Creator {
 
 protected:
     struct Pair {
-        IntPoint first;
-        IntPoint second;
-        int id;
+        Point first;
+        Point second;
+        int32_t id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
 
@@ -30,7 +30,7 @@ protected:
     using Pairss = mvector<Pairs>;
     struct OrdPath {
         int count = 1;
-        IntPoint Pt;
+        Point Pt;
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;
@@ -45,7 +45,7 @@ protected:
             rp.reserve(count);
             rp.push_back(Pt);
             OrdPath* next = Next;
-            while (next) {
+            while(next) {
                 rp.push_back(next->Pt);
                 next = next->Next;
             }
@@ -57,4 +57,4 @@ protected:
     Paths toPath(const Pairs& pairs);
 };
 
-} // namespace GCode
+} // namespace Voronoi

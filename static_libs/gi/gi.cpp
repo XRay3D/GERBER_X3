@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  * Attributions:                                                                *
@@ -17,14 +17,16 @@
  ********************************************************************************/
 
 #include "gi.h"
-#include "file.h"
+#include "abstract_file.h"
 #include "gi_group.h"
 #include "graphicsview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
 #include <QTimer>
 
-GraphicsItem::GraphicsItem(FileInterface* file)
+namespace Gi {
+
+Item::Item(AbstractFile* file)
     : //    animation(this, "bodyColor")
       //    , visibleAnim(this, "opacity")     ,
     file_(file)
@@ -32,12 +34,10 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     , colorPtr_(file ? &file->color() : nullptr)
     , color_(Qt::white)
     , bodyColor_(colorPtr_ ? *colorPtr_ : color_)
-    , pathColor_(Qt::transparent)
-
-{
+    , pathColor_(Qt::transparent) {
     //    animation.setDuration(100);
     //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    connect(this, &GraphicsItem::colorChanged, [this] { update(); });
+    //    connect(this, &Item::colorChanged, [this] { update(); });
     //    visibleAnim.setDuration(100);
     //    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    connect(&visibleAnim, &QAbstractAnimation::finished, [this] { QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() > 0.9); });
@@ -46,30 +46,30 @@ GraphicsItem::GraphicsItem(FileInterface* file)
     //    connect(this, &QGraphicsObject::rotationChanged, [] { qDebug("rotationChanged"); });
 }
 
-void GraphicsItem::setColor(const QColor& brush) {
+void Item::setColor(const QColor& brush) {
     bodyColor_ = color_ = brush;
     colorChanged();
 }
 
-void GraphicsItem::setColorPtr(QColor* brushColor) {
-    if (brushColor)
+void Item::setColorPtr(QColor* brushColor) {
+    if(brushColor)
         bodyColor_ = *(colorPtr_ = brushColor);
     pathColor_ = colorPtr_ ? *colorPtr_ : color_;
     colorChanged();
 }
 
-void GraphicsItem::setPen(const QPen& pen) {
+void Item::setPen(const QPen& pen) {
     pen_ = pen;
     colorChanged();
 }
 
-void GraphicsItem::setPenColorPtr(const QColor* penColor) {
-    if (penColor)
+void Item::setPenColorPtr(const QColor* penColor) {
+    if(penColor)
         pnColorPrt_ = penColor;
     colorChanged();
 }
 
-void GraphicsItem::setVisible(bool visible) {
+void Item::setVisible(bool visible) {
     //    if (visible == isVisible() && (visible && opacity() < 1.0))
     //        return;
     //    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
@@ -78,50 +78,56 @@ void GraphicsItem::setVisible(bool visible) {
     //    if (visible) {
     //        setOpacity(0.0);
     setOpacity(1.0 * visible);
-    QGraphicsObject::setVisible(visible);
+    QGraphicsItem /*QGraphicsObject*/ ::setVisible(visible);
     //    }
 }
 
-const FileInterface* GraphicsItem::file() const { return file_; }
+const AbstractFile* Item::file() const { return file_; }
 
-int GraphicsItem::id() const { return id_; }
+int Item::id() const { return id_; }
 
-void GraphicsItem::setId(int id) { id_ = id; }
+void Item::setId(int32_t id) { id_ = id; }
 
-void GraphicsItem::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+void Item::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
 
-void GraphicsItem::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
+void Item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
     changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
 }
 
-QVariant GraphicsItem::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if (change == ItemSelectedChange) {
+QVariant Item::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    if(change == ItemSelectedChange) {
         const bool fl = value.toInt();
         fl ? colorState |= Selected : colorState &= ~Selected;
         changeColor();
-    } else if (change == ItemSceneChange) {
+    } else if(change == ItemSceneChange) {
     }
     return QGraphicsItem::itemChange(change, value);
 }
 
-double GraphicsItem::scaleFactor() const {
-    if (scene() && scene()->views().size())
-        return 1.0 / scene()->views().first()->transform().m11();
-    return 1.0;
+double Item::scaleFactor() const {
+    double scale = 1.0;
+    if(scene() && scene()->views().size()) {
+        scale /= scene()->views().first()->transform().m11();
+        if(file_)
+            scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
+    }
+    return scale;
 };
 
-QRectF GraphicsItem::boundingRect() const {
-    if (App::graphicsView()->boundingRectFl())
+QRectF Item::boundingRect() const {
+    if(App::grView().boundingRectFl())
         return shape_.toFillPolygon(transform()).boundingRect();
     return boundingRect_;
 }
 
-QPainterPath GraphicsItem::shape() const { return shape_; }
+QPainterPath Item::shape() const { return shape_; }
+
+} // namespace Gi
 
 #include "moc_gi.cpp"

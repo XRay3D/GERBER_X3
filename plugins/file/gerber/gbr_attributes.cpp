@@ -5,7 +5,7 @@
  * Version   :  na           *
  * Date      :  01 February 2020              *
  * Website   :  na           *
- * Copyright :  Damir Bakiev 2016-2022        *
+ * Copyright :  Damir Bakiev 2016-2023        *
  * License: *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt       *
@@ -37,12 +37,12 @@ File::Function File::toFunction(const QString& key) {
 }
 
 void File::parse(const QStringList& list) {
-    switch (toStdAttr(list.first())) {
+    switch(toStdAttr(list.first())) {
     case StdAttr::Part:
         part = list.mid(1);
         break;
     case StdAttr::FileFunction:
-        switch (const auto function = toFunction(list[1]); function) {
+        switch(const auto function = toFunction(list[1]); function) {
         case Function::Legend:
             function_ = std::make_shared<struct Legend>(function, list.mid(2));
             break;
@@ -145,7 +145,6 @@ void File::parse(const QStringList& list) {
         break;
     default:;
         custom[list.first()] = list.mid(1);
-        // qDebug() << "custom" << custom;
     }
 }
 ///////////////////////////////////////////////////////////////////////////////////
@@ -164,12 +163,12 @@ Aperture::Function Aperture::toFunction(const QString& key) {
 }
 
 void Aperture::parse(const QStringList& list) {
-    switch (toStdAttr(list.first())) {
+    switch(toStdAttr(list.first())) {
     case StdAttr::AperFunction:
-        // qDebug() << list;
-        if (function_)
+
+        if(function_)
             function_.reset();
-        switch (const auto function = toFunction(list[1]); function) {
+        switch(const auto function = toFunction(list[1]); function) {
         case ViaDrill:
             function_ = std::make_shared<struct ViaDrill>(function, list.mid(2));
             break;
@@ -306,7 +305,7 @@ void Aperture::parse(const QStringList& list) {
          * Size: Not specified
          * Comment: Project identifier
          */
-        qDebug() << (flashText_ = list);
+        flashText_ = list;
         break;
     }
 }

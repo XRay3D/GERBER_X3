@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -25,14 +25,13 @@ void SectionHEADER::parse() {
     QString key;
     do {
         CodeData code(nextCode());
-        if (code == "ENDSEC")
+        if(code == "ENDSEC")
             continue;
-        if (code.type() == CodeData::String && code.string().startsWith('$')) {
+        if(code.type() == CodeData::String && code.string().startsWith('$'))
             key = code.string();
-        } else if (!key.isEmpty()) {
+        else if(!key.isEmpty())
             header[key][code.code()] = code.value();
-        }
-    } while (hasNext());
+    } while(hasNext());
 }
 
 } // namespace Dxf

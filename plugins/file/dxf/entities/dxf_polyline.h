@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -54,7 +54,7 @@ public:
         //        6 = кубическая В-сплайновая поверхность
         //        8 = поверхность Безье
         ExtrusionDirectionX = 210, // Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)        //Файл DXF: значение X; приложение: 3D-вектор
-        ExtrusionDirectionY = 220, //Файл DXF: значения Y и Z для направления выдавливания (необязательно)
+        ExtrusionDirectionY = 220, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         ExtrusionDirectionZ = 230,
     };
 
@@ -79,7 +79,7 @@ public:
 
     QVector<struct Vertex> vertex;
 
-    GraphicObject toGo() const override;
+    DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 

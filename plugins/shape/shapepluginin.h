@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -21,13 +21,13 @@
 #include <atomic>
 namespace Shapes {
 class Node;
-class Shape;
+class AbstractShape;
 
 class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
-    //    std::atomic<Shape*> item {};
-    Shape* item {};
+    //    std::atomic<AbstractShape*> item {};
+    AbstractShape* item{};
 
 public:
     explicit Plugin();
@@ -38,18 +38,20 @@ public:
     void finalizeShape();
 
     virtual QIcon icon() const = 0;
-    [[nodiscard]] virtual Shape* createShape(const QPointF& point = {}) const = 0;
-    virtual int type() const = 0;
+    [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) const = 0;
+    virtual uint32_t type() const = 0;
+    virtual QWidget* editor() = 0;
 
     void createMainMenu(QMenu& menu, FileTree::View* tv);
-
     QString folderName() const;
 
 signals:
     void actionUncheck(bool = false);
 
 protected:
-    enum { IconSize = 24 };
+    enum {
+        IconSize = 24
+    };
 };
 
 } // namespace Shapes

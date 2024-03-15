@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,7 +14,7 @@
 
 namespace Dxf {
 
-const Color dxfColors[] {
+const Color dxfColors[]{
     {0.0000, 0.0000, 0.0000}, // unused
     {1.0000, 0.0000, 0.0000}, // 1
     {1.0000, 1.0000, 0.0000},

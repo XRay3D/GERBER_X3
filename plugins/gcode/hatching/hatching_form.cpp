@@ -3,33 +3,33 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
 #include "hatching_form.h"
-#include "hatching.h"
-#include "ui_hatchingform.h"
-
 #include "graphicsview.h"
 #include "settings.h"
+#include "ui_hatchingform.h"
 #include <QMessageBox>
 
-HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::HatchingCreator, parent)
+namespace CrossHatch {
+
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::HatchingForm)
-    , names {tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
-    , pixmaps {
-          QStringLiteral("pock_rast_climb"),
-          QStringLiteral("pock_rast_conv"),
+    , names{tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
+    , pixmaps{
+          u"pock_rast_climb"_qs,
+          u"pock_rast_conv"_qs,
       } {
     ui->setupUi(content);
 
-    setWindowTitle(tr("Crosshatch Toolpath"));
+    setWindowTitle(tr("CrossHatch Toolpath"));
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -44,19 +44,19 @@ HatchingForm::HatchingForm(GCodePlugin* plugin, QWidget* parent)
 
     rb_clicked();
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &HatchingForm::rb_clicked);
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &Form::rb_clicked);
 
-    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &HatchingForm::updateName);
+    connect(ui->toolHolder, &ToolSelectorForm::updateName, this, &Form::updateName);
 
-    connect(leName, &QLineEdit::textChanged, this, &HatchingForm::onNameTextChanged);
+    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
 
     //
 }
 
-HatchingForm::~HatchingForm() {
+Form::~Form() {
 
     MySettings settings;
     settings.beginGroup("HatchingForm");
@@ -71,81 +71,36 @@ HatchingForm::~HatchingForm() {
     delete ui;
 }
 
-void HatchingForm::createFile() {
-    const auto tool {ui->toolHolder->tool()};
+void Form::computePaths() {
+    const auto tool{ui->toolHolder->tool()};
 
-    if (!tool.isValid()) {
+    if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
-    Paths wPaths;
-    Paths wRawPaths;
-    FileInterface const* file = nullptr;
-    bool skip {true};
-
-    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
-        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
-        case GiType::DataSolid:
-        case GiType::DataPath:
-            if (!file) {
-                file = gi->file();
-                boardSide = file->side();
-            } else if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
-            if (item->type() == GiType::DataSolid)
-                wPaths.append(gi->paths());
-            else
-                wRawPaths.append(gi->paths());
-            break;
-        case GiType::ShCircle:
-        case GiType::ShRectangle:
-        case GiType::ShPolyLine:
-        case GiType::ShCirArc:
-        case GiType::ShText:
-            wRawPaths.append(gi->paths());
-            break;
-        case GiType::Drill:
-            wPaths.append(gi->paths());
-            break;
-        default:
-            break;
-        }
-        addUsedGi(gi);
-    }
-
-    if (wRawPaths.empty() && wPaths.empty()) {
-        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
+    auto gcp = getNewGcp();
+    if(!gcp)
         return;
-    }
 
-    GCode::GCodeParams gcp_;
-    gcp_.setConvent(ui->rbConventional->isChecked());
-    gcp_.setSide(side);
-    gcp_.tools.push_back(tool);
+    gcp->setConvent(ui->rbConventional->isChecked());
+    gcp->setSide(side);
+    gcp->tools.push_back(tool);
 
-    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    gcp_.params[GCode::GCodeParams::HathStep] = ui->dsbxHathStep->value();
-    gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
-    gcp_.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
+    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp->params[Creator::HathStep] = ui->dsbxHathStep->value();
+    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
     //    if (ui->rbFast->isChecked()) {
-    //        gcp_.params[GCode::GCodeParams::Fast] = true;
-    //        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    //        gcp_->params[GCode::Params::Fast] = true;
+    //        gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     //    }
 
-    creator->setGcp(gcp_);
-    creator->addPaths(wPaths);
-    creator->addRawPaths(wRawPaths);
     fileCount = 1;
-    createToolpath();
+    createToolpath(gcp);
 }
 
-void HatchingForm::updateName() {
+void Form::updateName() {
     //    const auto& tool { ui->toolHolder->tool() };
     //    if (tool.type() != Tool::Laser)
     //        ui->rbNormal->setChecked(true);
@@ -154,20 +109,20 @@ void HatchingForm::updateName() {
     leName->setText(names[side]);
 }
 
-void HatchingForm::updatePixmap() {
+void Form::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void HatchingForm::rb_clicked() {
+void Form::rb_clicked() {
 
-    if (ui->rbOutside->isChecked())
+    if(ui->rbOutside->isChecked())
         side = GCode::Outer;
-    else if (ui->rbInside->isChecked())
+    else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    if (ui->rbClimb->isChecked())
+    if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
-    else if (ui->rbConventional->isChecked())
+    else if(ui->rbConventional->isChecked())
         direction = GCode::Conventional;
 
     updateName();
@@ -175,19 +130,20 @@ void HatchingForm::rb_clicked() {
     updateButtonIconSize();
 }
 
-void HatchingForm::resizeEvent(QResizeEvent* event) {
+void Form::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void HatchingForm::showEvent(QShowEvent* event) {
+void Form::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void HatchingForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void HatchingForm::editFile(GCode::File* /*file*/) {
-}
+void Form::editFile(GCode::File* /*file*/) { }
+
+} // namespace CrossHatch
 
 #include "moc_hatching_form.cpp"

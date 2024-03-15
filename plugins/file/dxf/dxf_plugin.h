@@ -1,16 +1,17 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
+#include "dxf_types.h"
 
 #include <QObject>
 #include <QStack>
@@ -19,32 +20,24 @@ namespace Dxf {
 
 class File;
 
-class Plugin : public FilePlugin {
+class Plugin : public AbstractFilePlugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "dxf.json")
-    Q_INTERFACES(FilePlugin)
+    Q_INTERFACES(AbstractFilePlugin)
 
 public:
     explicit Plugin(QObject* parent = nullptr);
 
-    // FilePlugin interface
+    // AbstractFilePlugin interface
     bool thisIsIt(const QString& fileName) override;
-
-    int type() const override;
-    QString folderName() const override;
-
-    FileInterface* createFile() override;
+    uint32_t type() const override;
+    QString folderName() const override { return tr("Dxf Files"); }
+    AbstractFile* loadFile(QDataStream& stream) const override;
     QIcon icon() const override;
-    SettingsTabInterface* createSettingsTab(QWidget* parent) override;
-    void updateFileModel(FileInterface* file) override;
-    // FIXME   DrillPreviewGiMap createDrillPreviewGi(FileInterface* file, mvector<Row>& data) override;
-    // FIXME   void addToGcForm(FileInterface* file, QComboBox* cbx);
-
+    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    void updateFileModel(AbstractFile* file) override;
     // public slots:
-    FileInterface* parseFile(const QString& fileName, int type) override;
-    // FilePlugin interface
-    std::any createPreviewGi(FileInterface* file, GCodePlugin* plugin, std::any param = {}) override;
-    void addToGcForm(FileInterface* file, QComboBox* cbx) override;
+    AbstractFile* parseFile(const QString& fileName, int type) override;
 
 private:
     File* file_ = nullptr;

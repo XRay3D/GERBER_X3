@@ -1,22 +1,28 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "datastream.h"
+#include "md5.h"
 #include "plugintypes.h"
+
 #include <QDebug>
+#include <QObject>
 #include <myclipper.h>
 
 #define DEPRECATED
 
 namespace Gerber {
+
+constexpr auto GERBER = md5::hash32("Gerber");
 
 class GbrObj : public QObject {
     Q_OBJECT
@@ -148,49 +154,47 @@ struct Format {
     int yDecimal = DecimalDefVal;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& format) {
-        stream.writeRawData(reinterpret_cast<const char*>(&format), sizeof(Format));
-        return stream;
+        return ::Block(stream).write(format);
     }
     friend QDataStream& operator>>(QDataStream& stream, Format& format) {
-        stream.readRawData(reinterpret_cast<char*>(&format), sizeof(Format));
-        return stream;
+        return ::Block(stream).read(format);
     }
 };
 
 class State {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const State& state) {
-        stream << state.dCode_;
-        stream << state.gCode_;
-        stream << state.imgPolarity_;
-        stream << state.interpolation_;
-        stream << state.type_;
-        stream << state.quadrant_;
-        stream << state.region_;
-        stream << state.aperture_;
-        stream << state.lineNum_;
-        stream << state.curPos_;
-        stream << state.mirroring_;
-        stream << state.scaling_;
-        stream << state.rotating_;
-        return stream;
+        return ::Block(stream).write(
+            state.dCode_,
+            state.gCode_,
+            state.imgPolarity_,
+            state.interpolation_,
+            state.type_,
+            state.quadrant_,
+            state.region_,
+            state.aperture_,
+            state.lineNum_,
+            state.curPos_,
+            state.mirroring_,
+            state.scaling_,
+            state.rotating_);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, State& state) {
-        stream >> state.dCode_;
-        stream >> state.gCode_;
-        stream >> state.imgPolarity_;
-        stream >> state.interpolation_;
-        stream >> state.type_;
-        stream >> state.quadrant_;
-        stream >> state.region_;
-        stream >> state.aperture_;
-        stream >> state.lineNum_;
-        stream >> state.curPos_;
-        stream >> state.mirroring_;
-        stream >> state.scaling_;
-        stream >> state.rotating_;
-        return stream;
+        return ::Block(stream).read(
+            state.dCode_,
+            state.gCode_,
+            state.imgPolarity_,
+            state.interpolation_,
+            state.type_,
+            state.quadrant_,
+            state.region_,
+            state.aperture_,
+            state.lineNum_,
+            state.curPos_,
+            state.mirroring_,
+            state.scaling_,
+            state.rotating_);
     }
 
     File* file_ = nullptr;
@@ -203,28 +207,14 @@ class State {
     RegionMode region_ = Off;
     int aperture_ = 0;
     int lineNum_ = 0;
-    IntPoint curPos_;
+    Point curPos_;
     Mirroring mirroring_ = NoMirroring;
     double scaling_ = 1.0;
     double rotating_ = 0.0;
 
 public:
     State(File* const file = nullptr)
-        : file_(file)
-        , dCode_(D02)
-        , gCode_(G01)
-        , imgPolarity_(Positive)
-        , interpolation_(Linear)
-        , type_(Aperture)
-        , quadrant_(Undef)
-        , region_(Off)
-        , aperture_(0)
-        , lineNum_(0)
-        , curPos_(IntPoint())
-        , mirroring_(NoMirroring)
-        , scaling_(1.0)
-        , rotating_(0.0) {
-    }
+        : file_(file) { }
 
     inline File* file() const { return file_; }
 
@@ -252,9 +242,9 @@ public:
     inline int aperture() const { return aperture_; }
     inline void setAperture(int aperture) { aperture_ = aperture; }
 
-    inline IntPoint& curPos() { return curPos_; }
-    inline IntPoint curPos() const { return curPos_; }
-    inline void setCurPos(const IntPoint& curPos) { curPos_ = curPos; }
+    inline Point& curPos() { return curPos_; }
+    inline Point curPos() const { return curPos_; }
+    inline void setCurPos(const Point& curPos) { curPos_ = curPos; }
 
     inline Mirroring mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
@@ -266,71 +256,29 @@ public:
     inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 
-class GraphicObject final : public AbstrGraphicObject {
-    friend class File;
-    friend class Plugin;
-    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-        stream << go.path_;
-        stream << go.paths_;
-        stream << go.state_;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-        stream >> go.path_;
-        stream >> go.paths_;
-        stream >> go.state_;
-        return stream;
+struct GrObject : public GraphicObject {
+
+    friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
+        return ::Block(stream).write(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
-    File* gFile_;
-    Path path_;
-    State state_;
-
-public:
-    GraphicObject()
-        : AbstrGraphicObject {{}}
-        , gFile_(nullptr) {
+    friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
+        return ::Block(stream).read(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
-    GraphicObject(
-        int /*id*/,
-        const State& state,
-        const Paths& paths,
-        File* gFile,
-        const Path& path = Path())
-        : AbstrGraphicObject {paths}
-        , gFile_(gFile)
-        , path_(path)
-        , state_(state) {
+
+    File* gFile{nullptr};
+    State state;
+
+    // public:
+    GrObject() { }
+    GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
+        : gFile{gFile}
+        , state{state} {
+        GraphicObject::id = id;
+        GraphicObject::fill = std::move(paths);
+        GraphicObject::path = std::move(path);
+        GraphicObject::type = type;
     }
-    inline File* gFile() const { return gFile_; }
-    inline State state() const { return state_; }
-
-    inline Path& rPath() override { return path_; }
-    inline Paths& rPaths() override { return paths_; }
-
-    const Path& path() const override { return path_; }
-    const Paths& paths() const override { return paths_; }
-
-    Path line() const override { return path_.size() == 2 ? path_ : Path(); }
-    Path lineW() const override { return path_.size() == 2 ? paths_.front() : Path(); } // polygon
-
-    Path polyLine() const override { return closed() ? Path() : path_; }
-    Paths polyLineW() const override { return closed() ? Paths() : paths_; } // closed
-
-    Path elipse() const override;   // { return gFile_.; } // circle
-    Paths elipseW() const override; // { return {}; }
-
-    Path arc() const override { return {}; } // part of elipse
-    Path arcW() const override { return {}; }
-
-    Path polygon() const override { return state_.type() == Region ? path_ : Path(); }
-    Paths polygonWholes() const override { return paths_; }
-
-    Path hole() const override { return !positive() ? path_ : Path(); }
-    Paths holes() const override { return !positive() ? Paths {paths_.front()} : paths_.mid(1); }
-
-    bool positive() const override { return state_.imgPolarity() == Gerber::Positive; }                                                     // not hole
-    bool closed() const override { return path_.size() ? path_.front() == path_.back() : paths_.front().front() == paths_.front().back(); } // front == back
 };
 
 struct StepRepeatStr {
@@ -341,11 +289,11 @@ struct StepRepeatStr {
         j = 0.0;
         storage.clear();
     }
-    int x = 0;
-    int y = 0;
-    double i = 0.0;
-    double j = 0.0;
-    QList<GraphicObject> storage;
+    int x{};
+    int y{};
+    double i{};
+    double j{};
+    QList<GrObject> storage;
 };
 
 class Settings {
@@ -356,12 +304,16 @@ protected:
     static inline bool simplifyRegions_;
     static inline bool skipDuplicates_;
 
+    static inline bool wireMinkowskiSum_;
+
 public:
     static bool cleanPolygons() { return cleanPolygons_; }
     static double cleanPolygonsDist() { return cleanPolygonsDist_; }
 
     static bool simplifyRegions() { return simplifyRegions_; }
     static bool skipDuplicates() { return skipDuplicates_; }
+
+    static bool wireMinkowskiSum() { return wireMinkowskiSum_; }
 };
 
 } // namespace Gerber

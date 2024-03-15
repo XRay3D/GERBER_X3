@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,125 +16,116 @@
 
 namespace Dxf {
 
-QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-    stream << go.path_;
-    stream << go.paths_;
+QDataStream& operator<<(QDataStream& stream, const DxfGo& go) {
+    stream << (GraphicObject&)go;
     stream << go.entityId_;
-
     stream << go.rotationAngle_;
     stream << go.scaleX_;
     stream << go.scaleY_;
-    stream << go.pos_;
-
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-    stream >> go.path_;
-    stream >> go.paths_;
+QDataStream& operator>>(QDataStream& stream, DxfGo& go) {
+    stream >> (GraphicObject&)go;
     stream >> go.entityId_;
-
     stream >> go.rotationAngle_;
     stream >> go.scaleX_;
     stream >> go.scaleY_;
-    stream >> go.pos_;
-
     return stream;
 }
 
-size_t GraphicObject::entityId() const { return entityId_; }
+size_t DxfGo::entityId() const { return entityId_; }
 
-GraphicObject::GraphicObject()
-    : AbstrGraphicObject {{}} { }
+DxfGo::DxfGo() { }
 
-GraphicObject::GraphicObject(int entityId, const Path& path, const Paths& paths)
-    : AbstrGraphicObject(paths)
-    , entityId_(entityId)
-    , path_(path) {
+DxfGo::DxfGo(int entityId, const Path& path, const Paths& paths)
+    : entityId_{entityId} {
+    fill = paths;
+    ::GraphicObject::path = path;
 }
 
-void GraphicObject::setRotation(double rotationAngle) {
+void DxfGo::setRotation(double rotationAngle) {
     rotationAngle_ = rotationAngle;
-    RotatePath(path_, rotationAngle_ /*, pos_*/);
-    for (auto& path : paths_)
+    RotatePath(path, rotationAngle_ /*, pos_*/);
+    for(auto& path: fill)
         RotatePath(path, rotationAngle_ /*, pos_*/);
 }
 
-double GraphicObject::rotationAngle() const { return rotationAngle_; }
+double DxfGo::rotationAngle() const { return rotationAngle_; }
 
-void GraphicObject::setScale(double scaleX, double scaleY) {
+void DxfGo::setScale(double scaleX, double scaleY) {
     scaleX_ = scaleX, scaleY_ = scaleY;
-    auto scale = [](Path& path, double sx, double sy, const IntPoint& center = {}) {
+    auto scale = [](Path& path, double sx, double sy, const Point& center = Point{}) {
         const bool fl = Area(path) < 0;
-        for (IntPoint& pt : path) {
-            const double dAangle = (pi * 2) - center.angleRadTo(pt);
-            const double length = center.distTo(pt);
-            pt = IntPoint(static_cast<cInt>(cos(dAangle) * length * sx), static_cast<cInt>(sin(dAangle) * length * sy));
-            pt.X += center.X;
-            pt.Y += center.Y;
+        for(Point& pt: path) {
+            const double dAangle = (pi * 2) - angleRadTo(center, pt);
+            const double length = distTo(center, pt);
+            pt = Point{cos(dAangle) * length * sx, sin(dAangle) * length * sy};
+            pt.x += center.x;
+            pt.y += center.y;
         }
-        if (fl != (Area(path) < 0))
+        if(fl != (Area(path) < 0))
             ReversePath(path);
     };
 
-    scale(path_, scaleX_, scaleY_, {} /*pos_*/);
-    for (auto& path : paths_)
-        scale(path, scaleX_, scaleY_, {} /*pos_*/);
+    scale(path, scaleX_, scaleY_ /*, pos_*/);
+    for(auto& path: fill)
+        scale(path, scaleX_, scaleY_ /*, pos_*/);
 }
 
-std::tuple<double, double> GraphicObject::scale() const { return {scaleX_, scaleY_}; }
+std::tuple<double, double> DxfGo::scale() const { return {scaleX_, scaleY_}; }
 
-double GraphicObject::scaleX() const { return scaleX_; }
+double DxfGo::scaleX() const { return scaleX_; }
 
-double GraphicObject::scaleY() const { return scaleY_; }
+double DxfGo::scaleY() const { return scaleY_; }
 
-void GraphicObject::setPos(QPointF pos) {
-    pos_ = pos;
-    TranslatePath(path_, pos_);
-    for (auto& path : paths_)
-        TranslatePath(path, pos_);
+void DxfGo::setPos(QPointF pos) {
+    ::GraphicObject::pos = ~pos;
+    TranslatePath(::GraphicObject::path, ~pos);
+    for(auto& path: fill)
+        TranslatePath(path, ::GraphicObject::pos);
 }
 
-QPointF GraphicObject::pos() const { return pos_; }
+QPointF DxfGo::pos() const { return ~::GraphicObject::pos; }
 
-const Entity* GraphicObject::entity() const { return file_ ? file_->entities().at(entityId_).get() : nullptr; }
+const Entity* DxfGo::entity() const { return file_ ? file_->entities().at(entityId_).get() : nullptr; }
 
 // const File* GraphicObject::file() const { return gFile_; }
 
-const Path& GraphicObject::path() const { return path_; }
+// const Path& GraphicObject::path() const { return path; }
 
-const Paths& GraphicObject::paths() const { return paths_; }
+// const Paths& GraphicObject::paths() const { return fill; }
 
-Path GraphicObject::line() const { return {}; }
+// Path GraphicObject::line() const { return {}; }
 
-Path GraphicObject::lineW() const { return {}; }
+// Path GraphicObject::lineW() const { return {}; }
 
-Path GraphicObject::polyLine() const { return {}; }
+// Path GraphicObject::polyLine() const { return {}; }
 
-Paths GraphicObject::polyLineW() const { return {}; }
+// Paths GraphicObject::polyLineW() const { return {}; }
 
-Path GraphicObject::elipse() const { return path_; }
+// Path GraphicObject::elipse() const { return path; }
 
-Paths GraphicObject::elipseW() const { return paths_; }
+// Paths GraphicObject::elipseW() const { return fill; }
 
-Path GraphicObject::arc() const { return {}; }
+// Path GraphicObject::arc() const { return {}; }
 
-Path GraphicObject::arcW() const { return {}; }
+// Path GraphicObject::arcW() const { return {}; }
 
-Path GraphicObject::polygon() const { return {}; }
+// Path GraphicObject::polygon() const { return {}; }
 
-Paths GraphicObject::polygonWholes() const { return {}; }
+// Paths GraphicObject::polygonWholes() const { return {}; }
 
-Path GraphicObject::hole() const { return {}; }
+// Path GraphicObject::hole() const { return {}; }
 
-Paths GraphicObject::holes() const { return {}; }
+// Paths GraphicObject::holes() const { return {}; }
 
-bool GraphicObject::positive() const { return {}; }
+// bool GraphicObject::positive() const { return {}; }
 
-bool GraphicObject::closed() const { return {}; }
+// bool GraphicObject::closed() const { return {}; }
 
-Path& GraphicObject::rPath() { return path_; }
+// Path& GraphicObject::rPath() { return path; }
 
-Paths& GraphicObject::rPaths() { return paths_; }
+// Paths& GraphicObject::rPaths() { return fill; }
 
 } // namespace Dxf

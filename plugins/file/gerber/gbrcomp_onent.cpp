@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -27,7 +27,7 @@ int Component::value2(const QString& key) { return staticMetaObject.enumerator(2
 
 bool Component::setData(int key, const QStringList& data) {
     bool fl = false;
-    switch (key) {
+    switch(key) {
     case Component::Rot:
         rotation_ = data.last().toDouble(&fl);
         return fl;
@@ -74,37 +74,37 @@ QString Component::toolTip() const {
 }
 
 QDataStream& operator<<(QDataStream& stream, const Component& c) {
-    stream << c.rotation_;
-    stream << c.height_;
-    stream << c.mount_;
-    stream << c.footprintName_;
-    stream << c.refdes_;
-    stream << c.value_;
-    stream << c.referencePoint_;
-    stream << c.footprint_;
-    stream << c.library_;
-    stream << c.manufacturer_;
-    stream << c.package_;
-    stream << c.suppliers_;
-    stream << c.pins_;
-    return stream;
+    return ::Block(stream).write(
+        c.rotation_,
+        c.height_,
+        c.mount_,
+        c.footprintName_,
+        c.refdes_,
+        c.value_,
+        c.referencePoint_,
+        c.footprint_,
+        c.library_,
+        c.manufacturer_,
+        c.package_,
+        c.suppliers_,
+        c.pins_);
 }
 
 QDataStream& operator>>(QDataStream& stream, Component& c) {
-    stream >> c.rotation_;
-    stream >> c.height_;
-    stream >> c.mount_;
-    stream >> c.footprintName_;
-    stream >> c.refdes_;
-    stream >> c.value_;
-    stream >> c.referencePoint_;
-    stream >> c.footprint_;
-    stream >> c.library_;
-    stream >> c.manufacturer_;
-    stream >> c.package_;
-    stream >> c.suppliers_;
-    stream >> c.pins_;
-    return stream;
+    return ::Block(stream).read(
+        c.rotation_,
+        c.height_,
+        c.mount_,
+        c.footprintName_,
+        c.refdes_,
+        c.value_,
+        c.referencePoint_,
+        c.footprint_,
+        c.library_,
+        c.manufacturer_,
+        c.package_,
+        c.suppliers_,
+        c.pins_);
 }
 
 } // namespace Gerber::Comp
