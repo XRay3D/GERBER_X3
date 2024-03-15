@@ -47,6 +47,10 @@ jobs:
           echo "Boost dir: $BOOST_DIR"
           echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH:$BOOST_DIR" >> ${GITHUB_ENV}
 
+      - name: Get GoogleTest
+        run: |
+          git clone https://github.com/google/googletest ./third_party/clipper2/CPP/Tests/googletest
+
       - name: Install cqtdeployer
         run: |
           curl 'https://github.com/QuasarApp/CQtDeployer/releases/download/v1.6.2351/CQtDeployer_1.6.2351.ec4840f_Linux_x86_64.deb' -L > ./cqtdeployer.deb
