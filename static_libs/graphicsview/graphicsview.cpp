@@ -257,24 +257,26 @@ void GraphicsView::setScale(double s) noexcept {
 }
 
 void GraphicsView::setOpenGL(bool useOpenGL) {
-    if(useOpenGL) {
+    do {
+        if(useOpenGL) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-        if(dynamic_cast<QGLWidget*>(viewport())) return;
-        auto oglWidget = new QGLWidget{this};
-        QGLFormat format{QGL::SampleBuffers | QGL::DoubleBuffer | QGL::Rgba};
+            if(dynamic_cast<QGLWidget*>(viewport())) break;
+            auto oglWidget = new QGLWidget{this};
+            QGLFormat format{QGL::SampleBuffers | QGL::DoubleBuffer | QGL::Rgba};
 #else
-        if(dynamic_cast<QOpenGLWidget*>(viewport())) return;
-        auto oglw = new QOpenGLWidget{this};
-        QSurfaceFormat sf;
+            if(dynamic_cast<QOpenGLWidget*>(viewport())) break;
+            auto oglw = new QOpenGLWidget{this};
+            QSurfaceFormat sf;
 #endif
-        format.setSamples(8);
-        format.setSampleBuffers(true);
-        oglWidget->setFormat(format);
-        setViewport(oglWidget);
-    } else {
-        if(dynamic_cast<QWidget*>(viewport())) return;
-        setViewport(new QWidget{this});
-    }
+            format.setSamples(8);
+            format.setSampleBuffers(true);
+            oglWidget->setFormat(format);
+            setViewport(oglWidget);
+        } else {
+            if(dynamic_cast<QWidget*>(viewport())) break;
+            setViewport(new QWidget{this});
+        }
+    } while(false);
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
 }
