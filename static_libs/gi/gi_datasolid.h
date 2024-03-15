@@ -29,6 +29,7 @@ public:
     int type() const override;
     // Item interface
     void redraw() override;
+    Paths& getPaths();
     void setPaths(Paths paths, int alternate = {}) override;
     // Item interface
     void changeColor() override;

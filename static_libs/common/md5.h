@@ -215,4 +215,8 @@ constexpr Digest compute(const char* s) noexcept {
 }
 } // namespace md5
 
+constexpr auto operator""_hash32(const char* str, size_t size) {
+    return md5::details::to_uint32(md5::compute(str).data());
+}
+
 #endif

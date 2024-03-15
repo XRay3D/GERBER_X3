@@ -111,6 +111,10 @@ public:
     Gi::Item* Item(int32_t id);
     void deleteItem(int32_t id);
 
+    // Shape
+    int makeShapeCircle(const QPointF& center, const QPointF& rad);
+    int makeShapeRectangle(const QPointF& center, const QPointF& rect);
+
     // Project
     bool save(const QString& fileName);
     bool open(const QString& fileName);

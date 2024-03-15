@@ -240,32 +240,36 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
 }
 
 BaseForm::~BaseForm() {
-    if(errWidget->isVisible())
-        errBreak();
-    thread.quit();
-    thread.wait();
+    if(errWidget->isVisible()) errBreak();
+    if(runer.isRunning()) runer.terminate();
+    // /*thread*/ runer.quit();
+    // /*thread*/ runer.wait();
+    delete creator_;
     qDebug(__FUNCTION__);
 }
 
 void BaseForm::setCreator(Creator* newCreator) {
     qDebug() << __FUNCTION__ << creator_ << newCreator;
-    if(thread.isRunning()) {
-        thread.quit();
-        thread.wait();
+    if(/*thread*/ runer.isRunning()) {
+        runer.terminate();
+        // /*thread*/ runer.quit();
+        // /*thread*/ runer.wait();
     }
     if(creator_ != newCreator && newCreator) {
         qDebug(__FUNCTION__);
+        delete creator_;
         creator_ = newCreator;
-        creator_->moveToThread(&thread);
+        creator_->moveToThread(&/*thread*/ runer);
         // clang-format off
-        connect(&thread,  &QThread::finished,        creator_, &QObject::deleteLater                        );
+        // connect(&/*thread*/runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
         connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress                      );
         connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler                      );
         connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler                       );
-        connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,      Qt::QueuedConnection);
+         // connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,      Qt::QueuedConnection);
+        connect(this,     &BaseForm::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
         connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress                     );
         // clang-format on
-        thread.start(QThread::LowPriority /*HighestPriority*/);
+        // /*thread*/ runer.start(QThread::LowPriority /*HighestPriority*/);
     } else if(creator_ && !newCreator) {
         creator_ = nullptr;
     }
@@ -416,7 +420,10 @@ void BaseForm::addUsedGi(Gi::Item* gi) {
 void BaseForm::cancel() {
     if(creator_ == nullptr)
         return;
-    creator_->continueCalc({});
+    creator_->continueCalc(false);
+    if(runer.isRunning())
+        runer.terminate();
+    // /*thread*/ runer.start(QThread::LowPriority /*HighestPriority*/);
     stopProgress();
 }
 

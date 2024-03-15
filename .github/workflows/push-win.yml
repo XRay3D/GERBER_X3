@@ -1,0 +1,62 @@
+name: Compile-Qt5-win64
+
+on: push
+
+env:
+  QT_VERSION: "5.15.2"
+  QT_ARCH: "win64_msvc2019_64"
+  QT_SUBDIR: "msvc2019_64"
+  BOOST_VERSION: "1.84.0"
+  BUILD_TYPE: "Release"
+
+jobs:
+  build:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v3
+        with:
+          host: windows
+          target: desktop
+          version: ${{env.QT_VERSION}}
+          arch: ${{env.QT_ARCH}}
+          dir: "${{github.workspace}}/qt"
+          install-deps: "true"
+          cache: "true"
+      - name: Add Qt to env
+        run: |
+          $QT_DIR="${{github.workspace}}/qt/Qt/${{env.QT_VERSION}}/${{env.QT_SUBDIR}}"
+          echo "Qt dir: $QT_DIR"
+          echo ";$QT_DIR/bin" > $env:GITHUB_PATH
+          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$QT_DIR/lib/cmake/Qt5" >> $env:GITHUB_ENV
+
+      - name: Install boost
+        uses: MarkusJx/install-boost@v2.4.5
+        id: install-boost
+        with:
+          boost_version: ${{ env.BOOST_VERSION }}
+          cache: "true"
+      - name: Add Boost to env
+        run: |
+          $BOOST_DIR="${{github.workspace}}/boost/boost"
+          echo "Boost dir: $BOOST_DIR"
+          echo "CMAKE_PREFIX_PATH=$CMAKE_PREFIX_PATH;$BOOST_DIR" >> $env:GITHUB_ENV
+
+      - name: Configure
+        working-directory: "."
+        run: |
+         cmake -DCMAKE_BUILD_TYPE=${{env.BUILD_TYPE}} -DGIT_REF_NAME=${{github.ref_name}} -DGIT_SHA=${{github.sha}} -B ${{github.workspace}}/build
+      - name: Build
+        working-directory: "./build"
+        run: cmake --build . --config Release -j (Get-CimInstance -ClassName Win32_Processor | Measure-Object -Property NumberOfLogicalProcessors -Sum).Sum
+
+      - name: Dist
+        uses: actions/upload-artifact@v4
+        with:
+          name: win_prebuild
+          path: ./bin

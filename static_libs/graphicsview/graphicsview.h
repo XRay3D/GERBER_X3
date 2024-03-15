@@ -107,6 +107,7 @@ public:
 
 signals:
     void fileDroped(const QString&);
+    void mouseMove2(const QPointF&, const QPointF&);
     void mouseClickL(const QPointF&);
     void mouseClickR(const QPointF&);
     void mouseMove(const QPointF&);
@@ -150,8 +151,8 @@ private:
     QPointF point, rulPt1, rulPt2;
 
     void drawRuller(QPainter* painter, const QRectF& rect) const;
-
     int timerId{};
+    void GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item);
     // QWidget interface
 protected:
     void dragEnterEvent(QDragEnterEvent* event) override;

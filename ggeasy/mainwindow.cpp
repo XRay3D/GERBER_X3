@@ -59,6 +59,9 @@ MainWindow::MainWindow(QWidget* parent)
     setIconSize({24, 24});
 
     ui.setupUi(this);
+    QFont f{};
+    f.setStyleHint(QFont::Monospace);
+    ui.statusbar->setFont(f);
 
     LayoutFrames* lfp;
     ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Home});
@@ -87,6 +90,19 @@ MainWindow::MainWindow(QWidget* parent)
     connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
 
     parserThread.start(QThread::HighestPriority);
+
+    connect(ui.grView, &GraphicsView::mouseMove2, [this](const QPointF& point, const QPointF& gpoint) {
+        QString str;
+        std::format_to(std::back_inserter(str), "Origin: X{:8.3f}, Y{:8.3f}  |  Zeroed: X{:8.3f},Y{:8.3f}",
+            point.x(), point.y(), gpoint.x(), gpoint.y());
+        // qCritical() << str;
+        ui.statusbar->showMessage(str);
+        // ui.statusbar->showMessage(QString("Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4")
+        //                           .arg(point.x(), 8, 'f', 3)
+        //                           .arg(point.y(), 8, 'f', 3)
+        //                           .arg(gpoint.x(), 8, 'f', 3)
+        //                           .arg(gpoint.y(), 8, 'f', 3));
+    });
 
     ui.treeView->setModel(new FileTree::Model{ui.treeView});
 
