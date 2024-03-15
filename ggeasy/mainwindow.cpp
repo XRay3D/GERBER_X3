@@ -922,15 +922,19 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         Line,
     };
     ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].splitRef('(').front()));
+
     switch(type) {
-    case QtDebugMsg: /*   */ ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128}); break;
-    case QtWarningMsg: /* */ ui.loggingTextBrowser->setTextColor(QColor{255, 128, 000}); break;
-    case QtCriticalMsg: /**/ ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
-    case QtFatalMsg: /*   */ ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
-    case QtInfoMsg: /*    */ ui.loggingTextBrowser->setTextColor(QColor{128, 128, 255}); break;
+        // clang-format off
+    case QtDebugMsg:    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128}); break;
+    case QtWarningMsg:  ui.loggingTextBrowser->setTextColor(QColor{255, 128, 000}); break;
+    case QtCriticalMsg: ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
+    case QtFatalMsg:    ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
+    case QtInfoMsg:     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 255}); break;
+        // clang-format on
     }
     ui.loggingTextBrowser->append(message);
     ui.loggingTextBrowser->append("");
+    ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
 }
 
 void MainWindow::loadFile(const QString& fileName) {
@@ -1072,6 +1076,8 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
 
     loggingTextBrowser = new QTextBrowser{loggingDockWidget};
     loggingTextBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+    loggingTextBrowser->setReadOnly(false);
+    loggingTextBrowser->setWordWrapMode(QTextOption::NoWrap);
     loggingDockWidget->setWidget(loggingTextBrowser);
     loggingDockWidget->setContentsMargins(3, 3, 3, 3);
     MainWindow->addDockWidget(Qt::RightDockWidgetArea, loggingDockWidget);

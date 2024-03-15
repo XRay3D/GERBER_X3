@@ -514,13 +514,14 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
         case 0:
             return nestCtr--;
         case 1:
-            return std::max(nestCtr--, sorter(*polynode.begin()->get()));
+            return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
         default:
             std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
-            for(auto&& node: polynode)
+            for(auto&& node: rwPolyTree(polynode))
                 map[sorter(*node)].emplace_back(std::move(node));
             size_t i = polynode.Count();
-            auto it = polynode.end(); // std::reverse_iterator(polynode);
+            auto it_ = polynode.end();                                         // std::reverse_iterator(polynode);
+            auto it = *reinterpret_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
             for(auto&& [nest, nodes]: map)
                 for(auto&& node: nodes)
                     *(--it) = std::move(node);
