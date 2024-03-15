@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -31,13 +31,13 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     connect(ui->buttonBox, &QDialogButtonBox::rejected, this, &ToolDatabase::reject);
 
     connect(ui->toolEdit, &ToolEditForm::itemChanged, [this](ToolItem* item) {
-        if (item->isTool())
+        if(item->isTool())
             tool_ = item->tool();
         ui->treeView->updateItem();
     });
 
     connect(ui->treeView, &ToolTreeView::itemSelected, [this](ToolItem* item) {
-        if (item->isTool())
+        if(item->isTool())
             tool_ = item->tool();
         ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && types_.contains(item->tool().type())) || types_.empty());
         ui->toolEdit->setItem(item);
@@ -45,8 +45,8 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [this](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-        if ((item->isTool() && types_.contains(item->tool().type()))) {
-            if (item->tool().isValid()) {
+        if((item->isTool() && types_.contains(item->tool().type()))) {
+            if(item->tool().isValid()) {
                 tool_ = item->tool();
                 accept();
             } else {
@@ -70,7 +70,7 @@ ToolDatabase::~ToolDatabase() { delete ui; }
 Tool ToolDatabase::tool() const { return tool_; }
 
 void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
-    if (evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
+    if(evt->key() == Qt::Key_Enter || evt->key() == Qt::Key_Return) {
         ui->toolEdit->on_pbApply_clicked();
         return;
     }

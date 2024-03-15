@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -18,10 +18,10 @@
 
 ToolName::ToolName(QWidget* parent)
     : QWidget(parent) {
-    QHBoxLayout* l = new QHBoxLayout(this);
-    lblPixmap = new QLabel(this);
+    QHBoxLayout* l = new QHBoxLayout{this};
+    lblPixmap = new QLabel{this};
     l->addWidget(lblPixmap);
-    lblName = new QLabel(this);
+    lblName = new QLabel{this};
     lblName->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     l->addWidget(lblName);
     l->setContentsMargins(0, 0, 0, 0);

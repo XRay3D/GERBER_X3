@@ -1,12 +1,12 @@
 #pragma once
 
+#include "abstract_fileplugin.h"
 #include "ex_types.h"
-#include "file_plugin.h"
 #include <QWidget>
 
 namespace Excellon {
 
-class ExSettingsTab : public SettingsTabInterface, Settings {
+class ExSettingsTab : public AbstractFileSettings, Settings {
     friend class ExcellonDialog;
 
     DoubleSpinBox* dsbxX;

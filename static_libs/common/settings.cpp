@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -27,7 +27,7 @@ using std::numbers::pi;
 // AppSettings* AppSettings::ptr() { return settings_; }
 
 /*GUI*/
-QColor& AppSettings::guiColor(int id) { return guiColor_[id]; }
+QColor& AppSettings::guiColor(int32_t id) { return guiColor_[id]; }
 bool AppSettings::animSelection() { return animSelection_; }
 bool AppSettings::guiSmoothScSh() { return guiSmoothScSh_; }
 bool AppSettings::scaleHZMarkers() { return scaleHZMarkers_; }
@@ -39,7 +39,7 @@ int AppSettings::clpCircleSegments(double radius) {
     const double length = clpMinCircleSegmentLength_; // mm
     const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (radius)));
     int intSteps = clpMinCircleSegments_;
-    while (intSteps < destSteps)
+    while(intSteps < destSteps)
         intSteps <<= 1;
     return intSteps;
 }
@@ -57,8 +57,8 @@ bool AppSettings::inch() { return inch_; }
 void AppSettings::setInch(bool val) { inch_ = val; }
 
 QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod) {
-    if ((mod & Qt::ALT) || snap_) {
-        const double gs = AppSettings::gridStep(App::graphicsView()->getScale());
+    if((mod & Qt::ALT) || snap_) {
+        const double gs = AppSettings::gridStep(App::grView().getScale());
         QPointF px(pt / gs);
         px.setX(gs * round(px.x()));
         px.setY(gs * round(px.y()));

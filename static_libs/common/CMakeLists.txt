@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
@@ -31,10 +31,13 @@ add_library(common STATIC
     ${SOURCES}
 )
 
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+
 target_link_libraries(common PRIVATE
     filetree
     shape
     gi
+    graphicsview
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets

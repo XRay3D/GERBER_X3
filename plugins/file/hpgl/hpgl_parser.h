@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     * * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -11,8 +11,8 @@
 
 #include "hpgl_types.h"
 
-class FileInterface;
-class FilePlugin;
+class AbstractFile;
+class AbstractFilePlugin;
 
 namespace Hpgl {
 
@@ -21,11 +21,11 @@ class File;
 class Parser {
     Q_GADGET
 
-    FilePlugin* const interface;
+    AbstractFilePlugin* const interface;
 
 public:
-    Parser(FilePlugin* const interface = nullptr);
-    FileInterface* parseFile(const QString& fileName);
+    Parser(AbstractFilePlugin* const interface = nullptr);
+    AbstractFile* parseFile(const QString& fileName);
 
     enum Cmd {
         /*

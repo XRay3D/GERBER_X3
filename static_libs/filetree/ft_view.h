@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -26,10 +26,13 @@ public:
     void hideOther();
     void closeFile();
     void closeFiles();
+
+    void closeAllFiles(uint32_t type);
+
     void setModel(QAbstractItemModel* model) override;
 
 signals:
-    void saveGCodeFile(int id);
+    void saveGCodeFile(int32_t id);
     void saveGCodeFiles(); // NOTE unused
     void saveSelectedGCodeFiles();
 

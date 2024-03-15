@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -33,7 +33,7 @@ Layer::Layer(SectionParser* sp, const QString& name)
 void Layer::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker:
             break;
         case LayerName:
@@ -61,7 +61,7 @@ void Layer::parse(CodeData& code) {
             break;
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
     setColor(dxfColors[colorNumber_]);
 }
 
@@ -71,7 +71,7 @@ int Layer::colorNumber() const { return colorNumber_; }
 
 const GraphicObjects& Layer::graphicObjects() const { return graphicObjects_; }
 
-void Layer::addGraphicObject(GraphicObject&& go) { graphicObjects_.emplace_back(go); }
+void Layer::addGraphicObject(DxfGo&& go) { graphicObjects_.emplace_back(go); }
 
 QColor Layer::color() const {
     return itemsType_ == ItemsType::Normal ? colorNorm_ : colorPath_;
@@ -87,8 +87,8 @@ bool Layer::isVisible() const { return visible_; }
 
 void Layer::setVisible(bool visible) {
     visible_ = visible;
-    if (itemGroupNorm && itemGroupPath) {
-        switch (itemsType_) {
+    if(itemGroupNorm && itemGroupPath) {
+        switch(itemsType_) {
         case ItemsType::Null:
         case ItemsType::Normal:
             itemGroupNorm->setVisible(visible_);
@@ -106,7 +106,7 @@ void Layer::setVisible(bool visible) {
     }
 }
 
-GiGroup* Layer::itemGroup() const {
+Gi::Group* Layer::itemGroup() const {
     return itemsType_ == ItemsType::Paths ? itemGroupPath : itemGroupNorm;
 }
 
@@ -115,15 +115,15 @@ bool Layer::isEmpty() const { return !(itemGroupNorm && itemGroupPath); }
 ItemsType Layer::itemsType() const { return itemsType_; }
 
 void Layer::setItemsType(ItemsType itemsType) {
-    if (itemsType_ == itemsType)
+    if(itemsType_ == itemsType)
         return;
     itemsType_ = itemsType;
-    if (itemGroupNorm && itemGroupPath) {
-        if (itemGroupNorm->empty())
+    if(itemGroupNorm && itemGroupPath) {
+        if(itemGroupNorm->empty())
             itemsType_ = ItemsType::Paths;
-        else if (itemGroupPath->empty())
+        else if(itemGroupPath->empty())
             itemsType_ = ItemsType::Normal;
-        switch (itemsType_) {
+        switch(itemsType_) {
         case ItemsType::Null:
         case ItemsType::Normal:
             itemGroupNorm->setVisible(visible_);

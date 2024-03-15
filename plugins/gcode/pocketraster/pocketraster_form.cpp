@@ -3,26 +3,27 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
 #include "pocketraster_form.h"
-#include "pocketraster.h"
 #include "ui_pocketrasterform.h"
 
 #include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
 
-PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
-    : GcFormBase(plugin, new GCode::RasterCreator, parent)
+namespace PocketRaster {
+
+Form::Form(GCode::Plugin* plugin, QWidget* parent)
+    : GCode::BaseForm(plugin, new Creator, parent)
     , ui(new Ui::PocketRasterForm)
-    , names {tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
+    , names{tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
 
     setWindowTitle(tr("Pocket Raster Toolpath"));
@@ -42,19 +43,19 @@ PocketRasterForm::PocketRasterForm(GCodePlugin* plugin, QWidget* parent)
 
     rb_clicked();
 
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-    connect(ui->rbInside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
-    connect(ui->rbOutside, &QRadioButton::clicked, this, &PocketRasterForm::rb_clicked);
+    connect(ui->rbClimb, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbConventional, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbInside, &QRadioButton::clicked, this, &Form::rb_clicked);
+    connect(ui->rbOutside, &QRadioButton::clicked, this, &Form::rb_clicked);
 
-    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &PocketRasterForm::updateName);
+    connect(ui->toolHolder1, &ToolSelectorForm::updateName, this, &Form::updateName);
 
-    connect(leName, &QLineEdit::textChanged, this, &PocketRasterForm::onNameTextChanged);
+    connect(leName, &QLineEdit::textChanged, this, &Form::onNameTextChanged);
 
     //
 }
 
-PocketRasterForm::~PocketRasterForm() {
+Form::~Form() {
 
     MySettings settings;
     settings.beginGroup("PocketRasterForm");
@@ -71,102 +72,57 @@ PocketRasterForm::~PocketRasterForm() {
     delete ui;
 }
 
-void PocketRasterForm::createFile() {
-    const auto tool {ui->toolHolder1->tool()};
+void Form::computePaths() {
+    const auto tool{ui->toolHolder1->tool()};
 
-    if (!tool.isValid()) {
+    if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
-    Paths wPaths;
-    Paths wRawPaths;
-    FileInterface const* file = nullptr;
-    bool skip {true};
-
-    for (auto* item : App::graphicsView()->scene()->selectedItems()) {
-        GraphicsItem* gi = dynamic_cast<GraphicsItem*>(item);
-        switch (item->type()) {
-        case GiType::DataSolid:
-        case GiType::DataPath:
-            if (!file) {
-                file = gi->file();
-                boardSide = file->side();
-            } else if (file != gi->file()) {
-                if (skip) {
-                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-                        return;
-                }
-            }
-            if (item->type() == GiType::DataSolid)
-                wPaths.append(gi->paths());
-            else
-                wRawPaths.append(gi->paths());
-            break;
-        case GiType::ShCircle:
-        case GiType::ShRectangle:
-        case GiType::ShPolyLine:
-        case GiType::ShCirArc:
-        case GiType::ShText:
-            wRawPaths.append(gi->paths());
-            break;
-        case GiType::Drill:
-            wPaths.append(gi->paths());
-            break;
-        default:
-            break;
-        }
-        addUsedGi(gi);
-    }
-
-    if (wRawPaths.empty() && wPaths.empty()) {
-        QMessageBox::warning(this, tr("Warning"), tr("No selected items for working..."));
+    auto gcp = getNewGcp();
+    if(!gcp)
         return;
+
+    gcp->setConvent(ui->rbConventional->isChecked());
+    gcp->setSide(side);
+    gcp->tools.push_back(tool);
+
+    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
+    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
+    if(ui->rbFast->isChecked()) {
+        gcp->params[Creator::Fast] = true;
+        gcp->params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
     }
 
-    GCode::GCodeParams gcp_;
-    gcp_.setConvent(ui->rbConventional->isChecked());
-    gcp_.setSide(side);
-    gcp_.tools.push_back(tool);
-
-    gcp_.params[GCode::GCodeParams::UseAngle] = ui->dsbxAngle->value();
-    gcp_.params[GCode::GCodeParams::Depth] = dsbxDepth->value();
-    gcp_.params[GCode::GCodeParams::Pass] = ui->cbxPass->currentIndex();
-    if (ui->rbFast->isChecked()) {
-        gcp_.params[GCode::GCodeParams::Fast] = true;
-        gcp_.params[GCode::GCodeParams::AccDistance] = (tool.feedRate_mm_s() * tool.feedRate_mm_s()) / (2 * ui->dsbxAcc->value());
-    }
-
-    creator->setGcp(gcp_);
-    creator->addPaths(wPaths);
-    creator->addRawPaths(wRawPaths);
     fileCount = 1;
-    createToolpath();
+    createToolpath(gcp);
 }
 
-void PocketRasterForm::updateName() {
-    const auto& tool {ui->toolHolder1->tool()};
-    if (tool.type() != Tool::Laser)
+void Form::updateName() {
+    const auto& tool{ui->toolHolder1->tool()};
+    if(tool.type() != Tool::Laser)
         ui->rbNormal->setChecked(true);
     ui->rbFast->setEnabled(tool.type() == Tool::Laser);
 
     leName->setText(names[side]);
 }
 
-void PocketRasterForm::updatePixmap() {
+void Form::updatePixmap() {
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[direction]).pixmap(QSize(150, 150)));
 }
 
-void PocketRasterForm::rb_clicked() {
+void Form::rb_clicked() {
 
-    if (ui->rbOutside->isChecked())
+    if(ui->rbOutside->isChecked())
         side = GCode::Outer;
-    else if (ui->rbInside->isChecked())
+    else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    if (ui->rbClimb->isChecked())
+    if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
-    else if (ui->rbConventional->isChecked())
+    else if(ui->rbConventional->isChecked())
         direction = GCode::Conventional;
 
     updateName();
@@ -175,19 +131,20 @@ void PocketRasterForm::rb_clicked() {
     updatePixmap();
 }
 
-void PocketRasterForm::resizeEvent(QResizeEvent* event) {
+void Form::resizeEvent(QResizeEvent* event) {
     updatePixmap();
     QWidget::resizeEvent(event);
 }
 
-void PocketRasterForm::showEvent(QShowEvent* event) {
+void Form::showEvent(QShowEvent* event) {
     updatePixmap();
     QWidget::showEvent(event);
 }
 
-void PocketRasterForm::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
+void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void PocketRasterForm::editFile(GCode::File* /*file*/) {
-}
+void Form::editFile(GCode::File* /*file*/) { }
+
+} // namespace PocketRaster
 
 #include "moc_pocketraster_form.cpp"

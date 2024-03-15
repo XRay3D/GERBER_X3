@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -14,22 +14,23 @@
 namespace Ui {
 class ShTextDialog;
 }
-namespace Shapes {
-class Text;
-}
+
+namespace ShTxt {
+
+class Shape;
 
 class ShTextDialog : public QDialog {
     Q_OBJECT
-    friend Shapes::Text;
+    friend Shape;
 
 public:
-    explicit ShTextDialog(QVector<Shapes::Text*> text, QWidget* parent = nullptr);
+    explicit ShTextDialog(QVector<Shape*> text, QWidget* parent = nullptr);
     ~ShTextDialog();
 
 private:
     Ui::ShTextDialog* ui;
 
-    QVector<Shapes::Text*> shapeText;
+    QVector<Shape*> shapeText;
 
     void updateText();
     void updateFont();
@@ -44,3 +45,5 @@ public slots:
     void accept() override;
     void reject() override;
 };
+
+} // namespace ShTxt

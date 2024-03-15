@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -39,7 +39,7 @@ Line::Line(SectionParser* sp)
 void Line::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -71,26 +71,25 @@ void Line::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
-    //    qDebug() << data.size();
-    //    qDebug() << data;
+    } while(code.code() != 0);
 }
 
 Entity::Type Line::type() const { return Type::LINE; }
 
-GraphicObject Line::toGo() const {
+DxfGo Line::toGo() const {
     QPolygonF p;
-    if (p.isEmpty()) {
+    if(p.isEmpty()) {
         p.append(startPoint);
         p.append(endPoint);
     }
 
     Paths paths;
     //    ClipperOffset offset;
-    //    offset.AddPath(p, jtRound, etOpenRound);
-    //    offset.Execute(paths, thickness * uScale);
+    //    offset.AddPath(p, JoinType::Round, EndType::Round);
+    //    paths = offset.Execute(thickness * uScale);
 
-    return {id, p, paths};
+    DxfGo go{id, ~p, paths}; // FIXME return {id, p, paths};
+    return go;
 }
 
 void Line::write(QDataStream& stream) const {

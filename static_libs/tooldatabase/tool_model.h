@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -52,8 +52,8 @@ private:
     void saveTools();
     void loadTools();
     auto* getItem(const QModelIndex& index) const {
-        if (index.isValid()) {
-            if (auto* item = static_cast<ToolItem*>(index.internalPointer()); item)
+        if(index.isValid()) {
+            if(auto* item = static_cast<ToolItem*>(index.internalPointer()); item)
                 return item;
         }
         return rootItem;

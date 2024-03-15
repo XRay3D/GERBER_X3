@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -40,7 +40,7 @@ class Node;
 
 class Node final /*: public NodeI*/ {
 public:
-    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const IntPoint& pos, AbstractThermPrGi* item, Model* model);
+    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const Point& pos, AbstractThermPrGi* item, Model* model);
     explicit Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model);
     explicit Node(Model* model);
 
@@ -67,9 +67,9 @@ public:
     int count() const override;
     ThParam getParam() const;
 
-    IntPoint pos() const;
+    Point pos() const;
     AbstractThermPrGi* item() const;
-    bool createFile() const;
+    bool loadFile(QDataStream& stream) const;
     void disable() override;
     void enable() override;
 
@@ -85,7 +85,7 @@ private:
     const bool container = false;
     const QIcon icon;
     const QString name;
-    const IntPoint pos_;
+    const Point pos_;
 
     ThParam par;
 
@@ -96,7 +96,7 @@ private:
     bool checked_ = false;
 
     Model* const model; // static wrong from anotherr dll
-    static inline const Qt::CheckState chState[] {
+    static inline const Qt::CheckState chState[]{
         Qt::Unchecked,       // index 0
         Qt::Unchecked,       // index 1
         Qt::Checked,         // index 2

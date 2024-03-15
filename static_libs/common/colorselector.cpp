@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -27,7 +27,7 @@ class PushButton : public QPushButton {
         dialog.setOption(QColorDialog::ShowAlphaChannel, true);
         QColor color(color_);
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
-        if (dialog.exec() && color_ != color)
+        if(dialog.exec() && color_ != color)
             color_ = color;
         //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
     }
@@ -71,22 +71,22 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
     : QWidget(parent)
     , color_(color)
     , defaultColor_(defaultColor) {
-    if (objectName().isEmpty())
+    if(objectName().isEmpty())
         setObjectName(QString::fromUtf8("ColorSelector"));
-    auto horizontalLayout = new QHBoxLayout(this);
+    auto horizontalLayout = new QHBoxLayout{this};
     horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
 
-    lineEdit = new QLineEdit(this);
+    lineEdit = new QLineEdit{this};
     lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
     lineEdit->setReadOnly(true);
     horizontalLayout->addWidget(lineEdit);
 
-    pbSelectColor = new PushButton(color, this);
+    pbSelectColor = new PushButton{color, this};
     pbSelectColor->setObjectName(QString::fromUtf8("pbSelectColor"));
     horizontalLayout->addWidget(pbSelectColor);
 
-    pbResetColor = new QPushButton(tr("Reset"), this);
+    pbResetColor = new QPushButton{tr("Reset"), this};
     pbResetColor->setObjectName(QString::fromUtf8("pbResetColor"));
     horizontalLayout->addWidget(pbResetColor);
     horizontalLayout->setStretch(1, 1);

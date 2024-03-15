@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -30,7 +30,7 @@ AttDef::AttDef(SectionParser* sp)
 //             for (int c = 0; c < i->colCount; ++c) {
 //                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //                 QPointF rad(radius, radius);
-//                 auto item = new ArcItem2(this, i->color());
+//                 auto item = new ArcItem2{this, i->color()};
 //                 scene->addItem(item);
 //                 //                item->setToolTip(layerName);
 //                 i->transform(item, tr);
@@ -38,7 +38,7 @@ AttDef::AttDef(SectionParser* sp)
 //             }
 //         }
 //     } else {
-//         auto item = new ArcItem2(this, color());
+//         auto item = new ArcItem2{this, color()};
 //         scene->addItem(item);
 //         attachToLayer(item);
 //     }
@@ -47,7 +47,7 @@ AttDef::AttDef(SectionParser* sp)
 void AttDef::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarkerAcDbText:          // 100
             break;                            //	Маркер подкласса (AcDbText)
         case Thickness:                       // 39
@@ -178,12 +178,12 @@ void AttDef::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type AttDef::type() const { return Type::ATTDEF; }
 
-GraphicObject AttDef::toGo() const { return {}; }
+DxfGo AttDef::toGo() const { return {}; }
 
 void AttDef::write(QDataStream& stream) const { }
 

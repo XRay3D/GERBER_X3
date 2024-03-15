@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -63,13 +63,13 @@ public:
     void setUsed(bool isUsed = true) noexcept { isUsed_ = isUsed; }
 
 protected:
-    double drillDiam_ {};
-    double size_ {};
-    double minSize_ {};
+    double drillDiam_{};
+    double size_{};
+    double minSize_{};
     const File* file_;
     Paths paths_;
-    bool isFlashed_ {};
-    bool isUsed_ {};
+    bool isFlashed_{};
+    bool isUsed_{};
 
     virtual void draw() = 0;
     virtual void read(QDataStream& stream) = 0;
@@ -98,7 +98,7 @@ protected:
     void write(QDataStream& stream) const override;
 
 private:
-    double diam_ {};
+    double diam_{};
 };
 
 /////////////////////////////////////////////////////
@@ -123,8 +123,8 @@ protected:
     void write(QDataStream& stream) const override;
 
 private:
-    double height_ {};
-    double width_ {};
+    double height_{};
+    double width_{};
 };
 
 /////////////////////////////////////////////////////
@@ -147,8 +147,8 @@ protected:
     void write(QDataStream& stream) const override;
 
 private:
-    double height_ {};
-    double width_ {};
+    double height_{};
+    double width_{};
 };
 
 /////////////////////////////////////////////////////
@@ -174,8 +174,8 @@ protected:
     void write(QDataStream& stream) const override;
 
 private:
-    double diam_ {};
-    double rotation_ {};
+    double diam_{};
+    double rotation_{};
     int verticesCount_ = 0;
 };
 
@@ -203,12 +203,12 @@ private:
     QList<QString> modifiers_;
     VarMap coefficients_;
 
-    double Angle(const IntPoint& pt1, const IntPoint& pt2) {
-        const double dx = pt2.X - pt1.X;
-        const double dy = pt2.Y - pt1.Y;
-        const double theta = atan2(-dy, dx) * 360.0 / two_pi;
+    double Angle(const Point& pt1, const Point& pt2) {
+        const double dx = pt2.x - pt1.x;
+        const double dy = pt2.y - pt1.y;
+        const double theta = atan2(-dy, dx) * 360.0 / (2 * pi);
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
-        if (qFuzzyCompare(theta_normalized, double(360)))
+        if(qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;
         else
             return theta_normalized;
@@ -225,7 +225,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The ApBlock class
 ///
-class ApBlock final : public AbstractAperture, public QList<GraphicObject> {
+class ApBlock final : public AbstractAperture, public QVector<GrObject> {
 public:
     ApBlock(const File* file);
     ApBlock(QDataStream& stream, const File* file)

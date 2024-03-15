@@ -1,16 +1,18 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "datastream.h"
 #include "mvector.h"
+#include "utils.h"
 
 #include <QFileSystemWatcher>
 #include <QMutex>
@@ -26,43 +28,55 @@ enum FileVersion {
     ProVer_4,
     ProVer_5,
     ProVer_6,
+    ProVer_7,
+    CurrentVer = ProVer_7,
 };
 
-class FileInterface;
-namespace Shapes {
-class Shape;
+namespace GCode {
+class File;
 }
+
+namespace Gi {
+class Item;
+}
+
+namespace Shapes {
+class AbstractShape;
+}
+
+class AbstractFile;
 class QFile;
 class QFileSystemWatcher;
-enum class FileType;
 
-using FilesMap = std::map<int, std::shared_ptr<FileInterface>>;
-using ShapesMap = std::map<int, std::shared_ptr<Shapes::Shape>>;
+using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
+// using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
+using ShapesMap = std::map<int, Shapes::AbstractShape*>;
+using ItemMap = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<FileInterface>& file);
+    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file);
 
 public:
     explicit Project(QObject* parent = nullptr);
     ~Project();
 
-    // FileInterface
-    template <typename T = FileInterface>
-    T* file(int id) {
-        QMutexLocker locker(&mutex_);
-        if (files_.contains(id))
+    // AbstractFile
+    template <typename T = AbstractFile>
+    T* file(int32_t id) {
+        QMutexLocker locker(&mutex);
+        if(files_.contains(id))
             return static_cast<T*>(files_[id].get());
         return nullptr;
     }
 
-    template <typename T = FileInterface>
+    template <typename T = AbstractFile>
     mvector<T*> files() {
-        QMutexLocker locker(&mutex_);
+        QMutexLocker locker(&mutex);
         mvector<T*> rfiles;
-        for (const auto& [id, sp] : files_) {
+        for(const auto& [id, sp]: files_) {
             T* file = dynamic_cast<T*>(sp.get());
-            if (file)
+            if(file)
                 rfiles.push_back(file);
         }
         return rfiles;
@@ -70,27 +84,32 @@ public:
 
     template <typename T>
     mvector<T*> count() {
-        QMutexLocker locker(&mutex_);
+        QMutexLocker locker(&mutex);
         int count = 0;
-        for (const auto& [id, sp] : files_) {
-            if (dynamic_cast<T*>(sp.get()))
+        for(const auto& [id, sp]: files_)
+            if(dynamic_cast<T*>(sp.get()))
                 ++count;
-        }
         return count;
     }
 
-    int addFile(FileInterface* const file);
-    bool contains(FileInterface* file);
-    mvector<FileInterface*> files(FileType type);
-    mvector<FileInterface*> files(const mvector<FileType> types);
-    void deleteFile(int id);
-    QString fileNames();
+    int addFile(AbstractFile* const file);
+    int addFile(GCode::File* const file);
+    bool contains(AbstractFile* file);
+    mvector<AbstractFile*> files(int type);
+    mvector<AbstractFile*> files(const mvector<int> types);
+    void deleteFile(int32_t id);
+    //    QString fileNames();
     int contains(const QString& name);
 
-    // Shape
-    int addShape(Shapes::Shape* const shape);
-    Shapes::Shape* shape(int id);
-    void deleteShape(int id);
+    // AbstractShape
+    int addShape(Shapes::AbstractShape* const shape);
+    Shapes::AbstractShape* shape(int32_t id);
+    void deleteShape(int32_t id);
+
+    // Item
+    int addItem(Gi::Item* const item);
+    Gi::Item* Item(int32_t id);
+    void deleteItem(int32_t id);
 
     // Project
     bool save(const QString& fileName);
@@ -169,12 +188,12 @@ signals:
     void worckRectChanged(const QRectF&);
     void layoutFrameUpdate(bool = false);
     // need for debuging
-    void addFileDbg(FileInterface* file);
+    void addFileDbg(GCode::File* file);
     // File Watcher
-    void parseFile(const QString& filename, int type);
+    void reloadFile(const QString& filename, int type);
 
 private:
-    bool reload(int id, FileInterface* file);
+    bool reload(int32_t id, AbstractFile* file);
 
     // File Watcher
     QFileSystemWatcher watcher;
@@ -184,28 +203,32 @@ private:
 
     FilesMap files_;
     ShapesMap shapes_;
-    QMutex mutex_;
+    ItemMap items_;
+
+    QMutex mutex;
+
     QString fileName_;
-    QString name_;
     bool isModified_ = false;
     bool isUntitled_ = true;
     bool isPinsPlaced_ = false;
-
+    bool pinsUsed_[4]{true, true, true, true};
+    QPointF pins_[4];
     QPointF home_;
     QPointF zero_;
-    QPointF pins_[4];
-    bool pinsUsed_[4] {true, true, true, true};
     QRectF worckRect_;
 
-    double safeZ_ {};
-    double boardThickness_ {};
-    double copperThickness_ {};
-    double clearence_ {};
-    double plunge_ {};
-    double glue_ {};
+    double safeZ_{};
+    double boardThickness_{};
+    double copperThickness_{};
+    double clearence_{};
+    double plunge_{};
+    double glue_{};
 
-    double spacingX_ {};
-    double spacingY_ {};
-    uint stepsX_ {1};
-    uint stepsY_ {1};
+    struct Tailing {
+        double spacingX{};
+        double spacingY{};
+        uint stepsX{1};
+        uint stepsY{1};
+        SERIALIZE_POD(Tailing)
+    } tailing;
 };

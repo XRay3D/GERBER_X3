@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -15,20 +15,23 @@ namespace Gerber {
 class File;
 }
 
-class GiDataSolid final : public GraphicsItem {
+namespace Gi {
+
+class DataFill final : public Item {
     Paths& paths_;
 
 public:
-    explicit GiDataSolid(Paths& paths_, FileInterface* file);
-    ~GiDataSolid() override;
+    explicit DataFill(Paths& paths_, AbstractFile* file);
+    ~DataFill() override;
 
     // QGraphicsItem interface
-    //   QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    // GraphicsItem interface
+    // Item interface
     void redraw() override;
     void setPaths(Paths paths, int alternate = {}) override;
-    // GraphicsItem interface
+    // Item interface
     void changeColor() override;
 };
+
+} // namespace Gi

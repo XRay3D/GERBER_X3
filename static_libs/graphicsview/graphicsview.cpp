@@ -3,34 +3,28 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-
-// import std;
-
 #include "graphicsview.h"
 #include "edid.h"
-#include "gi.h"
-#include "mainwindow.h"
+#include "gi_point.h"
 #include "myclipper.h"
 #include "project.h"
 #include "ruler.h"
-#include "settings.h"
 #include "utils.h"
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QGLWidget>
-#include <QPropertyAnimation>
-#include <QUndoCommand>
 #else
 #include <QtOpenGLWidgets/QOpenGLWidget>
 #endif
 
+#include <QDrag>
 #include <QDragEnterEvent>
 #include <QGridLayout>
 #include <QGuiApplication>
@@ -38,13 +32,9 @@
 #include <QMouseEvent>
 #include <QPropertyAnimation>
 #include <QPushButton>
-#include <QScreen>
 #include <QScrollBar>
+#include <QUndoCommand>
 #include <cmath>
-
-#include <QDrag>
-#include <QDragEnterEvent>
-#include <QMimeData>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -60,18 +50,20 @@ void setCursor(QWidget* w) {
     p.setPen(QPen(QColor(App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF), 1.0));
     p.drawLine(0, Mid, Size, Mid);
     p.drawLine(Mid, 0, Mid, Size);
-    w->setCursor(QCursor {cursor, Mid, Mid});
+    w->setCursor(QCursor{cursor, Mid, Mid});
 }
 
 GraphicsView::GraphicsView(QWidget* parent)
     : QGraphicsView(parent)
-    , hRuler {new Ruler(Qt::Horizontal, this)}
-    , vRuler {new Ruler(Qt::Vertical, this)}
-    , gridLayout {new QGridLayout(this)} {
+    , hRuler{
+          new Ruler{Qt::Horizontal, this}
+},
+    vRuler{new Ruler{Qt::Vertical, this}},
+    gridLayout{new QGridLayout{this}} {
 
     setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
-        setOptimizationFlag(DontAdjustForAntialiasing);
+    setOptimizationFlag(DontAdjustForAntialiasing);
     setViewportUpdateMode(SmartViewportUpdate);
     setDragMode(RubberBandDrag);
     setInteractive(true);
@@ -80,7 +72,8 @@ GraphicsView::GraphicsView(QWidget* parent)
     setAcceptDrops(true);
 
     ////////////////////////////////////
-    setScene(new QGraphicsScene(this));
+    setScene(new QGraphicsScene{this});
+    App::setGraphicsView(this);
 
     scene()->setSceneRect(-1000, -1000, +2000, +2000);
 
@@ -95,7 +88,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     ::setCursor(vRuler);
 
     // add items to grid layout
-    QPushButton* corner = new QPushButton(App::settings().inch() ? "I" : "M", this);
+    QPushButton* corner = new QPushButton{App::settings().inch() ? "I" : "M", this};
     connect(corner, &QPushButton::clicked, [corner, this](bool fl) {
         corner->setText(fl ? "I" : "M");
         App::settings().setInch(fl);
@@ -123,7 +116,6 @@ GraphicsView::GraphicsView(QWidget* parent)
     connect(verticalScrollBar(), &QScrollBar::valueChanged, this, &GraphicsView::updateRuler);
 
     scale(1.0, -1.0); // flip vertical
-    zoom100();
 
     {
         QSettings settings;
@@ -133,13 +125,14 @@ GraphicsView::GraphicsView(QWidget* parent)
         viewport()->setObjectName("viewport");
         settings.endGroup();
     }
-    //    auto scene_ = new QGraphicsScene(this);
+    //    auto scene_ = new QGraphicsScene{this};
 
-    //    setScene(scene_ = new Scene(this));
+    //    setScene(scene_ = new Scene{this});
     //    connect(this, &GraphicsView::mouseMove, scene_, &Scene::setCross1);
 
     setStyleSheet("QGraphicsView { background: " + App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb) + " }");
-    App::setGraphicsView(this);
+
+    startUpdateTimer(20);
 }
 
 GraphicsView::~GraphicsView() {
@@ -151,15 +144,20 @@ GraphicsView::~GraphicsView() {
 //     updateRuler();
 // }
 
-void GraphicsView::zoomFit() { fitInView(scene()->itemsBoundingRect(), false); }
+void GraphicsView::zoomFit() {
+    auto rect{App::layoutFrames().boundingRect()};
+    auto size{rect.size() * 0.1};
+    rect += QMarginsF(size.width(), size.height(), size.width(), size.height());
+    fitInView(rect /*scene()->itemsBoundingRect()*/, false);
+}
 
 void GraphicsView::zoomToSelected() {
     QRectF rect;
-    for (const QGraphicsItem* item : scene()->selectedItems()) {
+    for(const QGraphicsItem* item: scene()->selectedItems()) {
         const QRectF tmpRect(item->pos().isNull() ? item->boundingRect() : item->boundingRect().translated(item->pos()));
         rect = /*rect.isEmpty() ? tmpRect :*/ rect.united(tmpRect);
     }
-    if (rect.isEmpty())
+    if(rect.isEmpty())
         return;
     fitInView(rect);
 }
@@ -167,7 +165,7 @@ void GraphicsView::zoomToSelected() {
 void GraphicsView::zoom100() {
     double x = 1.0, y = 1.0;
     const double m11 = QGraphicsView::transform().m11(), m22 = QGraphicsView::transform().m22();
-    if (/* DISABLES CODE */ (0)) {
+    if(/* DISABLES CODE */ (0)) {
         x = qAbs(1.0 / m11 / (25.4 / physicalDpiX()));
         y = qAbs(1.0 / m22 / (25.4 / physicalDpiY()));
     } else {
@@ -177,7 +175,7 @@ void GraphicsView::zoom100() {
         y = qAbs(1.0 / m22 / (size.width() / scrGeometry.width()));
     }
 
-    if (0 && App::settings().guiSmoothScSh()) {
+    if(0 && App::settings().guiSmoothScSh()) {
         animate(this, "scale", getScale(), x * zoomFactorAnim);
     } else {
         scale(x, y);
@@ -186,10 +184,10 @@ void GraphicsView::zoom100() {
 }
 
 void GraphicsView::zoomIn() {
-    if (getScale() > 10000.0)
+    if(getScale() > 10000.0)
         return;
 
-    if (App::settings().guiSmoothScSh()) {
+    if(App::settings().guiSmoothScSh()) {
         animate(this, "scale", getScale(), getScale() * zoomFactorAnim);
     } else {
         scale(zoomFactor, zoomFactor);
@@ -198,9 +196,9 @@ void GraphicsView::zoomIn() {
 }
 
 void GraphicsView::zoomOut() {
-    if (getScale() < 1.0)
+    if(getScale() < 1.0)
         return;
-    if (App::settings().guiSmoothScSh()) {
+    if(App::settings().guiSmoothScSh()) {
         animate(this, "scale", getScale(), getScale() * (1.0 / zoomFactorAnim));
     } else {
         scale(1.0 / zoomFactor, 1.0 / zoomFactor);
@@ -209,15 +207,15 @@ void GraphicsView::zoomOut() {
 }
 
 void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
-    if (dstRect.isNull())
+    if(dstRect.isNull())
         return;
-    if (withBorders)
+    if(withBorders)
         dstRect += QMarginsF(dstRect.width() / 5, dstRect.height() / 5, dstRect.width() / 5, dstRect.height() / 5); // 5 mm
     //    const auto r1(getViewRect().toRect());
     //    const auto r2(dstRect.toRect());
     //    if (r1 == r2)
     //        return;
-    if (App::settings().guiSmoothScSh()) {
+    if(App::settings().guiSmoothScSh()) {
         animate(this, "viewRect", getViewRect(), dstRect);
     } else {
         QGraphicsView::fitInView(dstRect, Qt::KeepAspectRatio);
@@ -231,12 +229,8 @@ void GraphicsView::setRuler(bool ruller) {
     scene()->update();
 }
 
-double GraphicsView::scaleFactor() {
-    return 1.0 / getScale();
-}
-
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
-    if (event->modifiers() & Qt::AltModifier || App::settings().snap()) {
+    if(event->modifiers() & Qt::AltModifier || App::settings().snap()) {
         const double gs = App::settings().gridStep(transform().m11());
         QPointF px(mapToScene(event->pos()) / gs);
         px.setX(gs * round(px.x()));
@@ -253,18 +247,25 @@ void GraphicsView::setScale(double s) noexcept {
         /*      */ trf.m31(), trf.m32(), trf.m33()});
 }
 
-double GraphicsView::getScale() noexcept { return transform().m11(); }
-
 void GraphicsView::setOpenGL(bool useOpenGL) {
+    if(useOpenGL) {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    setViewport(useOpenGL ? new QGLWidget(QGLFormat(QGL::SampleBuffers | QGL::AlphaChannel | QGL::Rgba)) : new QWidget());
+        if(dynamic_cast<QGLWidget*>(viewport())) return;
+        auto oglWidget = new QGLWidget{this};
+        QGLFormat format{QGL::SampleBuffers | QGL::DoubleBuffer | QGL::Rgba};
 #else
-    auto oglw = new QOpenGLWidget();
-    QSurfaceFormat sf;
-    sf.setSamples(8);
-    oglw->setFormat(sf);
-    setViewport(useOpenGL ? oglw : new QWidget);
+        if(dynamic_cast<QOpenGLWidget*>(viewport())) return;
+        auto oglw = new QOpenGLWidget{this};
+        QSurfaceFormat sf;
 #endif
+        format.setSamples(8);
+        format.setSampleBuffers(true);
+        oglWidget->setFormat(format);
+        setViewport(oglWidget);
+    } else {
+        if(dynamic_cast<QWidget*>(viewport())) return;
+        setViewport(new QWidget{this});
+    }
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
 }
@@ -274,18 +275,18 @@ void GraphicsView::setViewRect(const QRectF& r) {
 }
 
 QRectF GraphicsView::getViewRect() {
-    QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
-    QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
+    return mapToScene(rect()).boundingRect();
 
-    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
-
-    return visible_scene_rect;
+    //    QPointF topLeft(horizontalScrollBar()->value(), verticalScrollBar()->value());
+    //    QPointF bottomRight(topLeft + viewport()->rect().bottomRight());
+    //    QRectF visible_scene_rect(transform().inverted().mapRect({topLeft, bottomRight}));
+    //    return visible_scene_rect;
 }
 
 QRectF GraphicsView::getSelectedBoundingRect() {
-    auto selectedItems {scene()->selectedItems()};
+    auto selectedItems{scene()->selectedItems()};
 
-    if (selectedItems.isEmpty())
+    if(selectedItems.isEmpty())
         return {};
 
     QRectF rect;
@@ -293,12 +294,12 @@ QRectF GraphicsView::getSelectedBoundingRect() {
     {
         ScopedTrue sTrue(boundingRect_);
         rect = selectedItems.front()->boundingRect();
-        for (auto gi : selectedItems)
+        for(auto gi: selectedItems)
             rect = rect.united(gi->boundingRect());
     }
 
-    if (!rect.isEmpty())
-        App::project()->setWorckRect(rect);
+    if(!rect.isEmpty())
+        App::project().setWorckRect(rect);
 
     return rect;
 }
@@ -309,27 +310,27 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
     const auto pos = event->position().toPoint();
 
     static auto sbUpdate = [&delta, this, scale = 3](QScrollBar* sb) { // Warning if create more GraphicsView`s!!
-        if (App::settings().guiSmoothScSh())
+        if(App::settings().guiSmoothScSh())
             animate(sb, "value", sb->value(), sb->value() - sb->pageStep() / (delta > 0 ? +scale : -scale));
         else
             sb->setValue(sb->value() - delta);
     };
 
-    if (event->buttons() & Qt::RightButton) {
-        if (abs(delta) == 120) {
+    if(event->buttons() & Qt::RightButton) {
+        if(abs(delta) == 120) {
             setInteractive(false);
-            if (delta > 0)
+            if(delta > 0)
                 zoomIn();
             else
                 zoomOut();
             setInteractive(true);
         }
     } else {
-        switch (event->modifiers()) {
+        switch(event->modifiers()) {
         case Qt::ControlModifier:
-            if (abs(delta) == 120) {
+            if(abs(delta) == 120) {
                 setInteractive(false);
-                if (delta > 0)
+                if(delta > 0)
                     zoomIn();
                 else
                     zoomOut();
@@ -337,11 +338,11 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
             }
             break;
         case Qt::ShiftModifier:
-            if (!event->angleDelta().x())
+            if(!event->angleDelta().x())
                 sbUpdate(QAbstractScrollArea::horizontalScrollBar());
             break;
         case Qt::NoModifier:
-            if (!event->angleDelta().x())
+            if(!event->angleDelta().x())
                 sbUpdate(QAbstractScrollArea::verticalScrollBar());
             break;
         default:
@@ -366,43 +367,42 @@ void GraphicsView::updateRuler() {
 
 void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
 
-    QLineF line {rulPt2, rulPt1};
+    QLineF line{rulPt2, rulPt1};
     const double length = line.length();
-    if (qFuzzyIsNull(length))
+    if(qFuzzyIsNull(length))
         return;
     //    const QRectF rect(
     //        QPointF(std::min(rulPt1.x(), rulPt2.x()), std::min(rulPt1.y(), rulPt2.y())),
     //        QPointF(std::max(rulPt1.x(), rulPt2.x()), std::max(rulPt1.y(), rulPt2.y())));
-    const QRectF rect {rulPt1, rulPt2};
+    const QRectF rect{rulPt1, rulPt2};
     const double angle = line.angle();
 
-    const auto text {
-        App::settings().inch() ?
-            QString(" ∆X: %1 in\n"
-                    " ∆Y: %2 in\n"
-                    " ∆/: %3 in\n"
-                    " Area: %4 in²\n"
-                    " Angle: %5°")
-                .arg(rect.width() / 25.4, 4, 'f', 3, '0')
-                .arg(rect.height() / 25.4, 4, 'f', 3, '0')
-                .arg(length / 25.4, 4, 'f', 3, '0')
-                .arg((rect.width() / 25.4) * (rect.height() / 25.4), 4, 'f', 3, '0')
-                .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0') :
-            QString(
-                " ∆X: %1 mm\n"
-                " ∆Y: %2 mm\n"
-                " ∆/: %3 mm\n"
-                " Area: %4 mm²\n"
-                " Angle: %5°")
-                .arg(rect.width(), 4, 'f', 3, '0')
-                .arg(rect.height(), 4, 'f', 3, '0')
-                .arg(length, 4, 'f', 3, '0')
-                .arg(rect.width() * rect.height(), 4, 'f', 3, '0')
-                .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+    const auto text{
+        App::settings().inch() ? QString(" ∆X: %1 in\n"
+                                         " ∆Y: %2 in\n"
+                                         " ∆/: %3 in\n"
+                                         " Area: %4 in²\n"
+                                         " Angle: %5°")
+                                     .arg(rect.width() / 25.4, 4, 'f', 3, '0')
+                                     .arg(rect.height() / 25.4, 4, 'f', 3, '0')
+                                     .arg(length / 25.4, 4, 'f', 3, '0')
+                                     .arg((rect.width() / 25.4) * (rect.height() / 25.4), 4, 'f', 3, '0')
+                                     .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
+                               : QString(
+                                   " ∆X: %1 mm\n"
+                                   " ∆Y: %2 mm\n"
+                                   " ∆/: %3 mm\n"
+                                   " Area: %4 mm²\n"
+                                   " Angle: %5°")
+                                     .arg(rect.width(), 4, 'f', 3, '0')
+                                     .arg(rect.height(), 4, 'f', 3, '0')
+                                     .arg(length, 4, 'f', 3, '0')
+                                     .arg(rect.width() * rect.height(), 4, 'f', 3, '0')
+                                     .arg(360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0), 4, 'f', 3, '0')
 
     };
 
-    const double scaleFactor = App::graphicsView()->scaleFactor();
+    const double scaleFactor = App::grView().scaleFactor();
     const double crossLength = 20.0 * scaleFactor;
 
     painter->setPen(QPen(Qt::green, 0.0));
@@ -428,8 +428,8 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->drawLine(line);
 
     // draw text
-    const auto size {QFontMetrics(font()).size(Qt::AlignLeft | Qt::AlignJustify | Qt::TextDontClip, text)};
-    auto pt {rect.center()};
+    const auto size{QFontMetrics(font()).size(Qt::AlignLeft | Qt::AlignJustify | Qt::TextDontClip, text)};
+    auto pt{rect.center()};
     pt.rx() -= size.width() * 0.5 * scaleFactor;
     pt.ry() += size.height() * 0.5 * scaleFactor;
     pt.rx() = std::clamp(pt.x(), rect_.left(), rect_.right() - size.width() * scaleFactor);
@@ -439,39 +439,38 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->setFont(font());
 
     painter->setRenderHint(QPainter::TextAntialiasing);
-    painter->fillRect(QRect {{}, size}, QColor {0, 0, 0, 127});
+    painter->fillRect(QRect{{}, size}, QColor{0, 0, 0, 127});
     painter->setBrush(Qt::white);
-    painter->drawText(QRect {{}, size}, Qt::AlignLeft, text);
+    painter->drawText(QRect{{}, size}, Qt::AlignLeft, text);
 }
 
-class name : public QGraphicsItem {
+class GiGuide : public QGraphicsItem {
 
     Qt::Orientation orientation;
     double scaleFactor() const {
-        if (scene() && scene()->views().size())
+        if(scene() && scene()->views().size())
             return 1.0 / scene()->views().first()->transform().m11();
         return 1.0;
     };
 
 public:
-    name(QPointF pos, Qt::Orientation orientation)
-        : orientation {orientation} {
+    GiGuide(QPointF pos, Qt::Orientation orientation)
+        : orientation{orientation} {
         setFlags(ItemIsSelectable | ItemIsMovable);
         orientation == Qt::Horizontal ? setPos(0, pos.y()) : setPos(pos.x(), 0);
     }
-    ~name() override = default;
+    ~GiGuide() override = default;
 
 public:
     // QGraphicsItem interface
     QRectF boundingRect() const override {
         qDebug(__FUNCTION__);
-        auto sceneRect {scene()->sceneRect()};
+        auto sceneRect{scene()->sceneRect()};
         auto k = 2 * scaleFactor();
-        if (orientation == Qt::Horizontal) {
+        if(orientation == Qt::Horizontal)
             return {sceneRect.left(), -k, sceneRect.width(), k * 2};
-        } else {
+        else
             return {-k, sceneRect.top(), k * 2, sceneRect.height()};
-        }
     }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override {
         painter->fillRect(boundingRect(), Qt::magenta);
@@ -486,11 +485,11 @@ protected:
 
 void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
     qDebug(__FUNCTION__);
-    auto mimeData {event->mimeData()};
+    auto mimeData{event->mimeData()};
 
-    if (mimeData->hasFormat(Ruler::mimeType()))
+    if(mimeData->hasFormat(Ruler::mimeType()))
         event->acceptProposedAction();
-    else if (mimeData->hasUrls())
+    else if(mimeData->hasUrls())
         event->acceptProposedAction();
     else
         event->ignore();
@@ -500,12 +499,16 @@ void GraphicsView::dragMoveEvent(QDragMoveEvent* event) { event->acceptProposedA
 
 void GraphicsView::dropEvent(QDropEvent* event) {
     qDebug(__FUNCTION__);
-    auto mimeData {event->mimeData()};
-    for (QUrl& var : mimeData->urls())
+    auto mimeData{event->mimeData()};
+    for(QUrl& var: mimeData->urls())
         emit fileDroped(var.path().remove(0, 1));
 
-    if (mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
-        scene()->addItem(new name(mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())));
+    if(mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
+#if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+        scene()->addItem(new GiGuide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()}.data())));
+#else
+        scene()->addItem(new GiGuide{mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())});
+#endif
     }
 
     event->accept();
@@ -517,26 +520,26 @@ void GraphicsView::resizeEvent(QResizeEvent* event) {
 }
 
 void GraphicsView::mousePressEvent(QMouseEvent* event) {
-    if (event->buttons() & Qt::MiddleButton) {
+    if(event->buttons() & Qt::MiddleButton) {
         setInteractive(false);
         // по нажатию средней кнопки мыши создаем событие ее отпускания выставляем моду перетаскивания и создаем событие зажатой левой кнопки мыши
-        //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         //        QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         //        QGraphicsView::mouseReleaseEvent(&releaseEvent);
         //        setDragMode(ScrollHandDrag);
         //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         //        QGraphicsView::mousePressEvent(&fakeEvent);
-        //#else
+        // #else
         QMouseEvent releaseEvent(QEvent::MouseButtonRelease, event->pos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mouseReleaseEvent(&releaseEvent);
         setDragMode(ScrollHandDrag);
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers());
         QGraphicsView::mousePressEvent(&fakeEvent);
-        //#endif
-    } else if (event->button() == Qt::RightButton) {
+        // #endif
+    } else if(event->button() == Qt::RightButton) {
         //        { // удаление мостика
         //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
-        //            if (item && item->type() == GiType::Bridge && !static_cast<BridgeItem*>(item)->ok())
+        //            if (item && item->type() == Gi::Type::Bridge && !static_cast<BridgeItem*>(item)->ok())
         //                delete item;
         //        }
         // это что бы при вызове контекстного меню ничего постороннего не было
@@ -544,56 +547,56 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         setInteractive(false);
         // Ruler
 
-        if (ruler_) {
-            // FIXME           scene_->setDrawRuller(true);
+        if(ruler_) {
             const QPointF point(mappedPos(event));
-            // FIXME           scene_->setCross2(point);
             emit mouseClickR(point);
+            // scene_->setDrawRuller(true);
+            // scene_->setCross2(point);
         }
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
-        if (ruler_ && !(rulerCtr++ & 0x1))
+        if(ruler_ && !(rulerCtr++ & 0x1))
             rulPt1 = mappedPos(event);
 
-        if (auto item {scene()->itemAt(mapToScene(event->pos()), transform())}; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
+        if(auto item{scene()->itemAt(mapToScene(event->pos()), transform())}; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
             QMimeData* mimeData = new QMimeData;
             mimeData->setText(Ruler::mimeType());
             mimeData->setData(Ruler::mimeType(), QByteArray::fromRawData(reinterpret_cast<const char*>(item), sizeof(item)));
 
-            QPixmap pixmapIcon {Ruler::Breadth, Ruler::Breadth};
+            QPixmap pixmapIcon{Ruler::Breadth, Ruler::Breadth};
             pixmapIcon.fill(Qt::magenta);
 
-            QDrag* drag = new QDrag(this);
+            QDrag* drag = new QDrag{this};
             drag->setMimeData(mimeData);
             drag->setPixmap(pixmapIcon);
             drag->setHotSpot(pixmapIcon.rect().center());
 
             Qt::DropAction dropAction = drag->exec(); // Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
 
-            if (dropAction == Qt::MoveAction) {
+            if(dropAction == Qt::MoveAction) {
             }
         }
     }
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
-    if (event->button() == Qt::MiddleButton) {
+    if(event->button() == Qt::MiddleButton) {
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-        //#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+        // #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
         //        QMouseEvent fakeEvent(event->type(), event->localPos(), event->screenPos(), event->windowPos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-        //#else
+        // #else
         QMouseEvent fakeEvent(event->type(), event->pos(), Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers());
-        //#endif
+        // #endif
         QGraphicsView::mouseReleaseEvent(&fakeEvent);
         setDragMode(NoDrag);
         setInteractive(true);
-    } else if (event->button() == Qt::RightButton) {
+    } else if(event->button() == Qt::RightButton) {
         // это что бы при вызове контекстного меню ничего постороннего не было
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         setInteractive(true);
-        // FIXME scene_->setDrawRuller(false);
+        // WTF scene_->setDrawRuller(false);
         emit mouseClickR(mappedPos(event));
         latPos = event->pos();
     } else {
@@ -609,7 +612,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
     hRuler->setCursorPos(event->pos());
     point = mappedPos(event);
     //    if (event->button() == Qt::RightButton)
-    if (ruler_ && rulerCtr & 0x1)
+    if(ruler_ && rulerCtr & 0x1)
         rulPt2 = point;
 
     emit mouseMove(point);
@@ -618,12 +621,12 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     const double scale = App::settings().gridStep(hRuler->zoom());
-    const double lineWidth {0}; //{ 2.0 / transform().m11() };
+    const double lineWidth{0}; //{ 2.0 / transform().m11() };
     static std::unordered_map<int, int> gridLinesX, gridLinesY;
     gridLinesX.clear(), gridLinesY.clear();
     auto draw = [&](const auto sc) {
         double y, x;
-        if (sc >= 1.0) {
+        if(sc >= 1.0) {
             int top = floor(rect.top());
             int left = floor(rect.left());
             y = top - top % int(sc);
@@ -636,14 +639,14 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
             x = (left - left % int(k)) / k;
         }
 
-        for (const auto end_ = rect.bottom(); y < end_; y += sc)
+        for(const auto end_ = rect.bottom(); y < end_; y += sc)
             ++gridLinesY[ceil(y * uScale)];
 
-        for (const auto end_ = rect.right(); x < end_; x += sc)
+        for(const auto end_ = rect.right(); x < end_; x += sc)
             ++gridLinesX[ceil(x * uScale)];
     };
 
-    const QColor color[4] {
+    const QColor color[4]{
         {255, 0, 0, 127}, // рисовние нулей красным
         App::settings().guiColor(GuiColors::Grid01),
         App::settings().guiColor(GuiColors::Grid05),
@@ -658,30 +661,30 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     gridLinesY[0] = 0;
 
     static mvector<QLineF> lines[4];
-    for (auto&& vec : lines)
+    for(auto&& vec: lines)
         vec.clear();
-    double tmp {};
-    for (auto [x, colorIndex] : gridLinesX) {
+    double tmp{};
+    for(auto [x, colorIndex]: gridLinesX) {
         tmp = x * dScale;
         lines[colorIndex].emplace_back(tmp, rect.top(), tmp, rect.bottom());
     }
-    for (auto [y, colorIndex] : gridLinesY) {
+    for(auto [y, colorIndex]: gridLinesY) {
         tmp = y * dScale;
         lines[colorIndex].emplace_back(rect.left(), tmp, rect.right(), tmp);
     }
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
-    for (int colorIndex {}; auto&& vec : lines) {
+    for(int colorIndex{}; auto&& vec: lines) {
         painter->setPen({color[colorIndex++], lineWidth});
         painter->drawLines(vec.data(), vec.size());
     }
 
-    auto k {100 / transform().m11()};
+    auto k{100 / transform().m11()};
     painter->setPen({Qt::red, 0.0 /*2.0 / transform().m11()*/});
-    painter->drawLine(QLineF {point.x() - k, point.y(), point.x() + k, point.y()});
-    painter->drawLine(QLineF {point.x(), point.y() - k, point.x(), point.y() + k});
+    painter->drawLine(QLineF{point.x() - k, point.y(), point.x() + k, point.y()});
+    painter->drawLine(QLineF{point.x(), point.y() - k, point.x(), point.y() + k});
 
-    if (ruler_)
+    if(ruler_)
         drawRuller(painter, rect);
 
     painter->restore();
@@ -691,19 +694,25 @@ void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
     painter->fillRect(rect, Qt::black);
 }
 
+void GraphicsView::timerEvent(QTimerEvent* event) {
+    //    if (event->timerId() == timerId)
+    ++App::dashOffset();
+    scene()->update();
+}
+
 template <class T>
 void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T begin, T end) {
-    auto* animation = new QPropertyAnimation(target, propertyName);
+    auto* animation = new QPropertyAnimation{target, propertyName};
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
         setProperty(propertyName, end);
         updateRuler();
         point = mapToScene(viewport()->mapFromGlobal(QCursor::pos()));
         scene()->update();
     });
-    if constexpr (std::is_same_v<T, QRectF>) {
+    if constexpr(std::is_same_v<T, QRectF>) {
         animation->setEasingCurve(QEasingCurve(QEasingCurve::InOutSine));
         animation->setDuration(200);
-    } else if constexpr (std::is_same_v<decltype(target), QScrollBar>) {
+    } else if constexpr(std::is_same_v<decltype(target), QScrollBar>) {
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(50);
     } else {
@@ -740,7 +749,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 // }
 
 // QRectF Scene::getSelectedBoundingRect() {
-//     auto selectedItems(App::graphicsView()->scene()->selectedItems());
+//     auto selectedItems(App::grView().selectedItems());
 
 //    if (selectedItems.isEmpty())
 //        return {};
@@ -755,7 +764,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    }
 
 //    if (!rect.isEmpty())
-//        App::project()->setWorckRect(rect);
+//        App::project().setWorckRect(rect);
 
 //    return rect;
 //}
@@ -809,7 +818,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    if (qFuzzyIsNull(line.length()))
 //        return;
 
-//    const double scaleFactor = App::graphicsView()->scaleFactor();
+//    const double scaleFactor = App::grView().scaleFactor();
 //    painter->save();
 //    painter->setBrush(QColor(127, 127, 127, 100));
 //    painter->setPen(QPen(Qt::green, 0.0));
@@ -972,7 +981,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //        QList<QGraphicsItem*> items = QGraphicsScene::items(cross1, Qt::IntersectsItemShape, Qt::DescendingOrder, views().first()->transform());
 //        bool fl = false;
 //        for (QGraphicsItem* item : items) {
-//            if (item && item->type() != GiType::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
+//            if (item && item->type() != Gi::Type::Bridge && item->flags() & QGraphicsItem::ItemIsSelectable) {
 //                fl = true;
 //                break;
 //            }
@@ -1008,7 +1017,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    //            painter->setRenderHint(QPainter::Antialiasing, true);
 //    //            QString str(QString("FPS %1").arg(frameCount2_));
 //    //            painter->translate(rect_.center());
-//    //            const double scaleFactor = App::graphicsView()->scaleFactor();
+//    //            const double scaleFactor = App::grView().scaleFactor();
 //    //            painter->scale(scaleFactor, -scaleFactor);
 //    //            QFont f;
 //    //            f.setPixelSize(100);
@@ -1027,7 +1036,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //    { // NOTE FPS counter
 //        painter->setRenderHint(QPainter::Antialiasing, true);
 
-//        const double scaleFactor = App::graphicsView()->scaleFactor();
+//        const double scaleFactor = App::grView().scaleFactor();
 //        painter->translate(rect.bottomLeft());
 //        painter->scale(scaleFactor, -scaleFactor);
 
@@ -1059,3 +1068,4 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 // }
 
 #include "moc_graphicsview.cpp"
+#include "ruler.h"

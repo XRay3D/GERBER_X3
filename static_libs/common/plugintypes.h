@@ -1,15 +1,17 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "datastream.h"
+#include <any>
 #include <myclipper.h>
 
 // struct Circle {
@@ -44,47 +46,119 @@
 //     double angle;
 // };
 
-struct AbstrGraphicObject {
-    Paths paths_;
-    AbstrGraphicObject(const Paths& paths_)
-        : paths_ {paths_} { }
-    virtual ~AbstrGraphicObject() { }
+struct Transform {
+    double angle{};
+    QPointF translate{};
+    QPointF scale{1, 1};
 
-    virtual Path line() const = 0;  //{ return {}; }
-    virtual Path lineW() const = 0; //{ return {}; } // closed
+    friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
+        return Block(stream).write(tr);
+    }
+    friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
+        return Block(stream).read(tr);
+    }
 
-    virtual Path polyLine() const = 0;   //{ return {}; }
-    virtual Paths polyLineW() const = 0; //{ return {}; } // closed
-
-    virtual Path elipse() const = 0;   //{ return {}; } // circle
-    virtual Paths elipseW() const = 0; //{ return {}; }
-
-    virtual Path arc() const = 0;  //{ return {}; } // part of elipse
-    virtual Path arcW() const = 0; //{ return {}; }
-
-    virtual Path polygon() const = 0;        //{ return {}; }
-    virtual Paths polygonWholes() const = 0; //{ return {}; }
-
-    virtual Path hole() const = 0;   //{ return {}; }
-    virtual Paths holes() const = 0; //{ return {}; }
-
-    virtual bool positive() const = 0; //{ return {}; } // not hole
-    virtual bool closed() const = 0;   //{ return {}; } // front == back
-
-    virtual const Path& path() const = 0;   //{ return {}; }
-    virtual const Paths& paths() const = 0; //{ return {}; }
-
-    virtual Path& rPath() = 0;
-    virtual Paths& rPaths() = 0;
+    QTransform toQTransform() const {
+        QTransform t;
+        t.translate(translate.x(), translate.y());
+        t.rotate(angle);
+        t.scale(scale.x(), scale.y());
+        return t;
+    }
+    operator QTransform() const { return toQTransform(); }
 };
 
-enum class FileType {
-    Gerber,
-    Excellon,
-    GCode,
-    Dxf,
-    Hpgl,
-    Shapes = 100
+enum class GCType {
+    Null,
+    Drill,
+    Pocket,
+    Profile,
+    Thermal
+};
+
+struct GraphicObject {
+
+    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
+        return Block(stream).write(go.id, go.type, go.pos, go.path, go.fill, go.name);
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
+        return Block(stream).read(go.id, go.type, go.pos, go.path, go.fill, go.name);
+    }
+
+    // clang-format off
+    enum Type:uint32_t {
+        Null,
+        Arc       , // 1
+        Circle    , // 2
+        Elipse    , // 3
+        Line      , // 4
+        PolyLine  , // 5
+        Polygon   , // 6
+        Rect      , // 7
+        Square    , // 8
+        Text      , // 9
+        Composite , // 10
+        Dummy2    , // 11
+        Dummy3    , // 12
+        Dummy4    , // 13
+        Dummy6    , // 14
+        Dummy7    , // 15
+        FlStamp   = 0b01'0000'0000, // штамп по xy
+        FlDrawn   = 0b10'0000'0000, // рисование по xy ... xNyN
+
+    };
+    // clang-format on
+
+    Paths fill;
+    Path path;
+    Point pos{std::numeric_limits</*Point::Type*/ int32_t>::lowest(), std::numeric_limits</*Point::Type*/ int32_t>::lowest()};
+    QByteArray name;
+    Type type{Null};
+    int32_t id{-1};
+    std::any raw;
+
+    inline bool isType(uint32_t t) const { return (t & 0xFF) ? (type & 0xFF) == (t & 0xFF) : true; }
+    inline bool isFlags(uint32_t f) const { return (f & ~0xFF) ? (type & ~0xFF) & f : true; }
+    inline bool test(uint32_t t) const { return isType(t) && isFlags(t); }
+    inline bool closed() const { return path.size() > 2 && path.front() == path.back(); }
+    bool positive() const { return Clipper2Lib::IsPositive(path); }
+};
+
+inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
+    for(auto& path: go.fill)
+        path = ~t.map(~path);
+    go.path = ~t.map(~go.path);
+    go.pos = ~t.map(~go.pos);
+    return go;
+}
+
+struct Range {
+    double min{-std::numeric_limits<double>::max()};
+    double max{+std::numeric_limits<double>::max()};
+    bool operator()(double val) const { return min <= val && val <= max; }
+    inline bool isNull() const {
+        return min == -std::numeric_limits<double>::max()
+            && max == +std::numeric_limits<double>::max();
+    }
+};
+
+struct Criteria {
+    std::vector<GraphicObject::Type> types;
+    Range area{};
+    Range length{};
+    bool positiveOnly{}; /// NOTE
+    bool test(const GraphicObject& go) const {
+        bool fl{};
+        for(auto type: types)
+            if((fl = go.test(type)))
+                break;
+        if(fl && !length.isNull())
+            fl &= length(Clipper2Lib::Length(go.path));
+        if(fl && !area.isNull())
+            fl &= area(Clipper2Lib::Area(go.fill));
+        return fl;
+    }
 };
 
 enum Side {
@@ -94,10 +168,17 @@ enum Side {
 };
 
 struct LayerType {
-    int id = -1;
+    int32_t id = -1;
     QString actName;
     QString actToolTip;
     QString shortActName() const { return actName; }
+
+    friend QDataStream& operator<<(QDataStream& stream, const LayerType& layer) {
+        return Block(stream).write(layer);
+    }
+    friend QDataStream& operator>>(QDataStream& stream, LayerType& layer) {
+        return Block(stream).read(layer);
+    }
 };
 
 Q_DECLARE_METATYPE(LayerType)

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -28,31 +28,31 @@ sView::sView(QWidget* parent)
 }
 
 sView::~sView() {
-    if (item)
+    if(item)
         item->setSelected(false);
 }
 
 void sView::setFile(int fileId) {
-    setModel(new sModel(fileId, this));
+    setModel(new sModel{fileId, this});
     expandAll();
 
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, [this](const QItemSelection& selected, const QItemSelection& deselected) {
         qDebug() << selected.size() << deselected.size();
         static QColor color;
-        if (!selected.indexes().empty()) {
+        if(!selected.indexes().empty()) {
             auto node = reinterpret_cast<sNode*>(selected.indexes().front().internalPointer());
-            if (node->item) {
+            if(node->item) {
                 color = node->item->brush().color();
                 node->item->setBrush(Qt::white);
                 item = node->component.componentitem();
                 item->setSelected(true);
-                App::graphicsView()->fitInView(node->item->boundingRect());
+                App::grView().fitInView(node->item->boundingRect());
             }
         }
 
-        if (!deselected.indexes().empty()) {
+        if(!deselected.indexes().empty()) {
             auto node = reinterpret_cast<sNode*>(deselected.indexes().front().internalPointer());
-            if (node->item) {
+            if(node->item) {
                 node->item->setBrush(color);
                 node->component.componentitem()->setSelected(false);
             }
@@ -61,7 +61,7 @@ void sView::setFile(int fileId) {
 }
 
 void sView::selectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
-    // qDebug() << selected.value(0) << deselected.value(0);
+
     QTreeView::selectionChanged(selected, deselected);
 }
 

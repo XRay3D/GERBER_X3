@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -15,12 +15,14 @@ namespace Ui {
 class GCodePropertiesForm;
 }
 
-class GCodePropertiesForm : public QWidget {
+namespace GCode {
+
+class PropertiesForm : public QWidget {
     Q_OBJECT
 
 public:
-    explicit GCodePropertiesForm(QWidget* parent = nullptr);
-    ~GCodePropertiesForm() override;
+    explicit PropertiesForm(QWidget* parent = nullptr);
+    ~PropertiesForm() override;
 
     void updatePosDsbxs();
     void updateAll();
@@ -32,3 +34,5 @@ private slots:
 private:
     Ui::GCodePropertiesForm* ui;
 };
+
+} // namespace GCode

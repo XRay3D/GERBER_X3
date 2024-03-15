@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -15,7 +15,7 @@
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"
 
-#include "file.h"
+#include "abstract_file.h"
 #include "gbr_types.h"
 
 #include <QGraphicsScene>
@@ -47,9 +47,9 @@ sNode::~sNode() {
 }
 
 int sNode::row() const {
-    if (parentItem_)
-        for (int i = 0, size = parentItem_->childItems.size(); i < size; ++i)
-            if (parentItem_->childItems[i].data() == this)
+    if(parentItem_)
+        for(int i = 0, size = parentItem_->childItems.size(); i < size; ++i)
+            if(parentItem_->childItems[i].data() == this)
                 return i;
     return 0;
 }
@@ -59,9 +59,9 @@ sNode* sNode::child(int row) { return childItems.value(row).data(); }
 sNode* sNode::parentItem() { return parentItem_; }
 
 void sNode::setChild(int row, sNode* item) {
-    if (item)
+    if(item)
         item->parentItem_ = this;
-    if (row < childItems.size())
+    if(row < childItems.size())
         childItems[row].reset(item);
 }
 
@@ -110,15 +110,15 @@ Qt::ItemFlags sNode::flags(const QModelIndex& /*index*/) const {
 }
 
 QVariant sNode::data(const QModelIndex& index, int role) const {
-    if (!name.isEmpty()) {
-        if (role == Qt::DisplayRole && index.column() == 0)
+    if(!name.isEmpty()) {
+        if(role == Qt::DisplayRole && index.column() == 0)
             return name;
         return {};
     }
 
     static const QStringList mountType(GbrObj::tr("TH|SMD|BGA|Other").split('|'));
-    if (role == Qt::DisplayRole) {
-        switch (index.column()) {
+    if(role == Qt::DisplayRole) {
+        switch(index.column()) {
         case 0: /* <field> Manufacturer. */
             return component.refdes();
         case 1: /* <field> Manufacturer part number. */

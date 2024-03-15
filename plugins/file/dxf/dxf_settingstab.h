@@ -2,7 +2,7 @@
 
 #include "dxf_types.h"
 
-#include "file_plugin.h"
+#include "abstract_fileplugin.h"
 #include <QWidget>
 
 class QCheckBox;
@@ -10,7 +10,7 @@ class QFontComboBox;
 
 namespace Dxf {
 
-class SettingsTab : public SettingsTabInterface, Settings {
+class SettingsTab : public AbstractFileSettings, Settings {
     QCheckBox* chbxBoldFont;
     QCheckBox* chbxItalicFont;
     QCheckBox* chbxOverrideFonts;

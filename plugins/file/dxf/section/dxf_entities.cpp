@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -34,7 +34,7 @@ SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* 
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
         entities.push_back(file->entities_.back().get());
-    } while (code != "ENDBLK");
+    } while(code != "ENDBLK");
 }
 
 SectionENTITIES::~SectionENTITIES() {
@@ -48,8 +48,8 @@ void SectionENTITIES::parse() {
         file->entities_.emplace_back(entityParse(code));
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
-    } while (hasNext());
-    for (auto& e : qAsConst(file->entities_))
+    } while(hasNext());
+    for(auto& e: qAsConst(file->entities_))
         e->draw();
 }
 
@@ -58,7 +58,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
 
     return createEntity(key, blocks, sp);
 
-    switch (key) {
+    switch(key) {
     case Entity::ACAD_PROXY_ENTITY:
         break; // return std::make_shared<ACADProxyEntity>(sp);
     case Entity::ARC:
@@ -118,7 +118,7 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     case Entity::SEQEND:
         return std::make_shared<SeqEnd>(sp);
     case Entity::SHAPE:
-        return std::make_shared<Shape>(sp);
+        return std::make_shared<AbstractShape>(sp);
     case Entity::SOLID:
         return std::make_shared<Solid>(sp);
     case Entity::SPLINE:

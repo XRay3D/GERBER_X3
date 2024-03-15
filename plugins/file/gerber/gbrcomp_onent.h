@@ -1,16 +1,18 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
+
 #include "datastream.h"
 #include "gbr_attributes.h"
+#include "mvector.h"
 #include <QMap>
 #include <QObject>
 #include <QPolygonF>
@@ -26,38 +28,17 @@ class Item;
 struct Library {
     QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
-    friend QDataStream& operator<<(QDataStream& stream, const Library& l) {
-        stream << l.name << l.description;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Library& l) {
-        stream >> l.name >> l.description;
-        return stream;
-    }
+    SERIALIZE_POD(Library)
 };
 struct Manufacturer {
     QString name;       /* <field> Manufacturer. */
     QString partNumber; /* <field> Manufacturer part number. */
-    friend QDataStream& operator<<(QDataStream& stream, const Manufacturer& m) {
-        stream << m.name << m.partNumber;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Manufacturer& m) {
-        stream >> m.name >> m.partNumber;
-        return stream;
-    }
+    SERIALIZE_POD(Manufacturer)
 };
 struct Package {
     QString name;        /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
     QString description; /* <field> Package description. */
-    friend QDataStream& operator<<(QDataStream& stream, const Package& p) {
-        stream << p.name << p.description;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Package& p) {
-        stream >> p.name >> p.description;
-        return stream;
-    }
+    SERIALIZE_POD(Package)
 };
 struct Pin {
     /*
@@ -67,26 +48,12 @@ struct Pin {
     QString number;
     QString description;
     QPointF pos;
-    friend QDataStream& operator<<(QDataStream& stream, const Pin& p) {
-        stream << p.number << p.description << p.pos;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Pin& p) {
-        stream >> p.number >> p.description >> p.pos;
-        return stream;
-    }
+    SERIALIZE_POD(Pin)
 };
 struct Supplier {
     QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
-    friend QDataStream& operator<<(QDataStream& stream, const Supplier& s) {
-        stream << s.name << s.description;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Supplier& s) {
-        stream >> s.name >> s.description;
-        return stream;
-    }
+    SERIALIZE_POD(Supplier)
 };
 
 class Component {
@@ -127,7 +94,7 @@ public:
         bottom side component is the one on the top side,
         mirrored around the X axis.
         The rotation is around the flash point.
-        The component reference designator linked to an object, e.g C2. 5.6.15
+        The component reference designator linked to an object, e.g CL2. 5.6.15
         Graphics Object*/
     };
     Q_ENUM(e1)
@@ -186,8 +153,8 @@ public:
     QPointF referencePoint() const { return referencePoint_; }
     void setReferencePoint(const QPointF& referencePoint) { referencePoint_ = referencePoint; }
 
-    mvector<QPolygonF> footprint() const { return footprint_; }
-    void addFootprint(const QPolygonF& footprint) { footprint_.emplace_back(footprint); }
+    QList<QPolygonF> footprint() const { return footprint_; }
+    void addFootprint(const QPolygonF& footprint) { footprint_.push_back(footprint); }
 
     QString footprintName() const { return footprintName_; }
     void setFootprintName(const QString& footprintName) { footprintName_ = footprintName; }
@@ -217,7 +184,7 @@ private:
     mvector<Pin> pins_;
     mvector<Supplier> suppliers_;
     QPointF referencePoint_;
-    mvector<QPolygonF> footprint_;
+    QList<QPolygonF> footprint_;
     QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
     QString refdes_;
     QString value_; /* <field> E.g. 220nF. */

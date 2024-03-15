@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -25,13 +25,14 @@ class Node : public FileTree::Node {
 
 public:
     explicit Node(File* file);
-    ~Node() override = default;
+    ~Node() override;
 
     // FileTree::Node interface
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree::View* tv) override;
+    int32_t id() const override;
 };
 
 class NodeLayer : public FileTree::Node {
@@ -47,7 +48,8 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    void menu(QMenu& menu, FileTree::View* tv) const override;
+    void menu(QMenu& menu, FileTree::View* tv) override;
+    int32_t id() const override;
 };
 
 } // namespace Dxf

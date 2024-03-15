@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -16,18 +16,20 @@ namespace GCode {
 class File;
 }
 
-class GiGcPath : public GraphicsItem {
+namespace Gi {
+
+class GcPath : public Item {
 public:
-    GiGcPath(const Paths& paths, GCode::File* file = nullptr);
-    GiGcPath(const Path& path, GCode::File* file = nullptr);
-    ~GiGcPath() override = default;
+    GcPath(const Paths& paths, AbstractFile* file = nullptr);
+    GcPath(const Path& path, AbstractFile* file = nullptr);
+    ~GcPath() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths paths(int alternate = {}) const override;
 
 private:
-    GCode::File* gcFile_;
+    AbstractFile* gcFile_;
 #ifdef QT_DEBUG
     QPainterPath arrows_;
     double sc_ = 0;
@@ -37,3 +39,4 @@ protected:
     void changeColor() override { }
 };
 #undef QT_DEBUG
+} // namespace Gi

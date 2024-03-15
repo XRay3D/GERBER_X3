@@ -4,10 +4,10 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -117,7 +117,7 @@ void LwPolyline::parse(CodeData& code) {
     Segment pt;
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMrker:
             break;
         case NumberOfVertices:
@@ -163,20 +163,20 @@ void LwPolyline::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
-GraphicObject LwPolyline::toGo() const {
+DxfGo LwPolyline::toGo() const {
     QPainterPath path;
     const bool dbg = false; // data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
     auto addSeg = [&path, dbg](const Segment& source, const Segment& target) {
-        if (path.isEmpty())
+        if(path.isEmpty())
             path.moveTo(source);
 
-        if (qFuzzyIsNull(source.bulge)) {
+        if(qFuzzyIsNull(source.bulge)) {
             path.lineTo(target);
             return;
         }
@@ -216,7 +216,7 @@ GraphicObject LwPolyline::toGo() const {
         double start_angle = qRadiansToDegrees(atan2(center.y() - source.y(), center.x() - source.x()));
         double end_angle = qRadiansToDegrees(atan2(center.y() - target.y(), center.x() - target.x()));
 
-        if (end_angle <= start_angle)
+        if(end_angle <= start_angle)
             end_angle += 360;
 
         double span = end_angle - start_angle;
@@ -226,26 +226,37 @@ GraphicObject LwPolyline::toGo() const {
         path.arcTo(br, -start_angle, -span);
     };
 
-    for (size_t i = 0, size = poly.size() - 1; i < size; ++i)
+    for(size_t i = 0, size = poly.size() - 1; i < size; ++i)
         addSeg(poly[i], poly[i + 1]);
-    if (polylineFlag == Closed)
+    if(polylineFlag == Closed)
         addSeg(poly.back(), poly.front());
 
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    Paths paths;
-    ClipperOffset offset;
-    offset.AddPath(p.value(0), jtRound, polylineFlag == Closed ? etClosedLine : etOpenRound);
-    offset.Execute(paths, constantWidth * uScale * 0.5);
+    // ClipperOffset offset;
+    // offset.AddPath(Path{p.value(0)}, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    // Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
+    const double offset = constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0);
+    Paths paths = Inflate({~p.value(0)}, offset,
+        JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    DxfGo go{id, ~p.value(0), paths}; // return {id, ~p.value(0), paths};
 
-    return {id, p.value(0), paths};
+    if(polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
+        go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
+        go.GraphicObject::pos = ~QLineF{poly.front(), poly.back()}.center();
+        go.path.clear();
+    } else {
+        go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
+    }
+    go.name = "id|LwPolyline";
+    return go;
 }
 
 void LwPolyline::write(QDataStream& stream) const {

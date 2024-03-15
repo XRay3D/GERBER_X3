@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -26,7 +26,7 @@ MText::MText(SectionParser* sp)
 void MText::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker:                                         // 100
             break;                                                   //	100	Маркер подкласса (AcDbMText)
         case InsertionPointPointX:                                   // 10
@@ -106,14 +106,14 @@ void MText::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type MText::type() const { return Type::MTEXT; }
 
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
-GraphicObject MText::toGo() const {
+DxfGo MText::toGo() const {
     double ascent = {};
     double descent = {};
     double height = {};
@@ -126,10 +126,10 @@ GraphicObject MText::toGo() const {
     QFont font;
     QPointF offset;
     QSizeF size;
-    if (sp->file->styles().contains(textStyleName)) {
+    if(sp->file->styles().contains(textStyleName)) {
         Style* style = sp->file->styles()[textStyleName];
         font = style->font;
-        if (Settings::overrideFonts()) {
+        if(Settings::overrideFonts()) {
             font.setFamily(Settings::defaultFont());
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
@@ -141,16 +141,16 @@ GraphicObject MText::toGo() const {
         height = fm.height();
         size = fm.size(0, text);
         scaleX = scaleY = std::max(style->fixedTextHeight, nominalTextHeight) / fm.height();
-        if (drawingDirection == ByStyle) {
-            if (style->textGenerationFlag & Style::MirroredInX)
+        if(drawingDirection == ByStyle) {
+            if(style->textGenerationFlag & Style::MirroredInX)
                 scaleX = -scaleX;
-            if (style->textGenerationFlag & Style::MirroredInY)
+            if(style->textGenerationFlag & Style::MirroredInY)
                 scaleY = -scaleY;
         }
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
-        if (Settings::overrideFonts()) {
+        if(Settings::overrideFonts()) {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
@@ -164,7 +164,7 @@ GraphicObject MText::toGo() const {
     }
 
     [&] {
-        switch (attachmentPoint) {
+        switch(attachmentPoint) {
         case TopLeft: // вверху слева
             return offset += {0, size.height() - descent};
         case TopCenter: // вверху по центру
@@ -190,9 +190,9 @@ GraphicObject MText::toGo() const {
 
     QPainterPath path;
 
-    for (int i = list.size() - 1; i >= 0; --i) {
+    for(int i = list.size() - 1; i >= 0; --i) {
         double x = {};
-        switch (attachmentPoint) {
+        switch(attachmentPoint) {
         case TopLeft:    // вверху слева
         case MiddleLeft: // посередине слева
         case BottomLeft: // снизу слева;
@@ -215,7 +215,7 @@ GraphicObject MText::toGo() const {
     m.scale(u * scaleX, -u * scaleY);
 
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
 
     QTransform m2;
@@ -224,7 +224,8 @@ GraphicObject MText::toGo() const {
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m2.scale(d, d);
 
-    return {id, {}, path2.toSubpathPolygons(m2)};
+    DxfGo go{id, {}, ~path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
+    return go;
 }
 
 void MText::write(QDataStream& stream) const {

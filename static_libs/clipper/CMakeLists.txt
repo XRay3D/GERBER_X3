@@ -1,10 +1,10 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
@@ -20,17 +20,21 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
 
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include)
+# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include/clipper2)
+
 add_library(clipper STATIC
-    clipper.hpp
-    #    cpline.h
-    myclipper.h
-    clipper.cpp
-    #    cpline.cpp
-    myclipper.cpp
+    ${HEADERS}
+    ${SOURCES}
 )
 
+#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+
 target_link_libraries(clipper PRIVATE
-    gcode
+    Clipper2
     Qt${QT_VERSION_MAJOR}::Core
     Qt${QT_VERSION_MAJOR}::Gui
 )

@@ -1,19 +1,19 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     * * Use, modification & distribution is subject to Boost Software License Ver 1. *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  * * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 #include "dxf_entity.h"
 namespace Dxf {
-struct Shape final : Entity {
-    Shape(SectionParser* sp);
+struct AbstractShape final : Entity {
+    AbstractShape(SectionParser* sp);
     Type type() const override { return Type::SHAPE; }
-    GraphicObject toGo() const override {
+    DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
@@ -23,7 +23,7 @@ struct Shape final : Entity {
         do {
             data.push_back(code);
             code = sp->nextCode();
-        } while (code.code() != 0);
+        } while(code.code() != 0);
     }
 };
 } // namespace Dxf

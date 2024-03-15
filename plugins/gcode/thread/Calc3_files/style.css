@@ -1,0 +1,99 @@
+BODY	{
+	font-family: Georgia, serif;
+	font-size: 10pt;
+	color: #666;
+	}
+TABLE	{
+	font-family: Georgia, serif;
+	font-size: 10pt;
+	border-collapse: collapse;
+	}
+tr.border td {
+	border-bottom:1pt solid black;
+	}
+tr.border th {
+	border-bottom:1pt solid black;
+	}
+
+H1	{ 
+	margin: 0px 0 0 0; /* Отступы */
+	text-align: center;
+	}
+A
+	{
+	color: #666;
+	text-decoration: none;
+	}
+HR	{
+	height:1px;
+	border:none;
+	color:#666;
+	background-color:#666;
+	}
+IMG	{
+	border: 0;
+	}
+INPUT, SELECT	{
+	font-family: Georgia, serif;
+	font-size: 10pt;
+	color: #666;
+	}
+#body {
+	position: relative;
+	width: 1760px;
+	overflow: hidden;
+	margin: auto;
+	}
+#body_mobile {
+	position: relative;
+	width: 820px;
+	overflow: hidden;
+	margin: auto;
+	}
+#page_header {
+	float: left;
+	margin: auto;
+	text-align: center;
+	}
+.header {
+	float: left;
+	margin: auto;
+	padding-left: 30px;
+	text-align: center;
+	}
+#content {
+	float: right; /* Обтекание по левому краю */
+	width: 1500px; /* Ширина слоя */
+	}
+
+.GCODE {
+height:250px; /* высота нашего блока */
+border: 1px solid #C1C1C1; /* размер и цвет границы блока */
+overflow-y: scroll; /* прокрутка по вертикали */
+font-family: Serif;
+}
+
+a.button_color {
+		position: relative;
+		display: inline-block;
+		width: 10em;
+		height: 2em;
+		line-height: 2em;
+		vertical-align: middle;
+		text-align: center;
+		text-decoration: none;
+		color: #666;
+		outline: none;
+		border-radius: 5px;
+		background:  #FFD700 linear-gradient(#fff,  #FFD700 );
+		color: #000000;
+		box-shadow: 0 0 0 1px #ddd inset, 0 1px 1px #fff;
+	}
+a.button_color:hover {
+		background:  #FFD700;
+		box-shadow: 0 0 0 1px #aaa inset, 0 1px 1px #aaa;
+	}
+a.button_color:active {
+		background: #32CD32;
+		box-shadow: 0 0 0 1px #bbb inset, 0 1px 3px rgba(0,0,0,.5) inset, 0 1px 2px #fff;
+	}

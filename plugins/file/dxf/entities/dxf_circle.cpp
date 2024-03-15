@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -41,7 +41,7 @@ Circle::Circle(SectionParser* sp)
 void Circle::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -68,12 +68,12 @@ void Circle::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Circle::type() const { return Type::CIRCLE; }
 
-GraphicObject Circle::toGo() const {
+DxfGo Circle::toGo() const {
     QPainterPath path;
     QPointF r(radius, radius);
     path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
@@ -81,13 +81,23 @@ GraphicObject Circle::toGo() const {
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    return {id, p.value(0), {}};
+    DxfGo go{id, ~p.value(0), {}}; // return {id, ~p.value(0), {}};
+
+    go.raw = radius * 2;
+    go.name = layerName.toUtf8(); // QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
+    go.fill.emplace_back(~p.value(0));
+    go.path.clear();
+
+    go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
+    go.GraphicObject::pos = ~centerPoint;
+
+    return go;
 }
 
 void Circle::write(QDataStream& stream) const {

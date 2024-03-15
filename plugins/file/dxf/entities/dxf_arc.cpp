@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -44,7 +44,7 @@ Arc::Arc(SectionParser* sp)
 void Arc::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (static_cast<DataEnum>(code.code())) {
+        switch(static_cast<DataEnum>(code.code())) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -77,25 +77,25 @@ void Arc::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Arc::type() const { return Type::ARC; }
 
-GraphicObject Arc::toGo() const {
-    if (qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
+DxfGo Arc::toGo() const {
+    if(qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
         return {};
 
     double aspan = endAngle - startAngle;
 
-    if (const bool ccw = endAngle > startAngle;
+    if(const bool ccw = endAngle > startAngle;
         endAngle >= 0 && startAngle >= 0) {
-        if (!ccw)
+        if(!ccw)
             aspan += 360;
     } else {
-        if (aspan < -180 || (qFuzzyCompare(aspan, -180) && !ccw))
+        if(aspan < -180 || (qFuzzyCompare(aspan, -180) && !ccw))
             aspan += 360;
-        else if (aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
+        else if(aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
             aspan -= 360;
     }
 
@@ -107,13 +107,14 @@ GraphicObject Arc::toGo() const {
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2).first());
 
-    return {id, p, {}};
+    DxfGo go{id, ~p, {}}; // return {id, p, {}};
+    return go;
 }
 
 void Arc::write(QDataStream& stream) const {

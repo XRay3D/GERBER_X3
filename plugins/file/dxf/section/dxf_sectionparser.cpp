@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -57,15 +57,9 @@ const CodeData& SectionParser::prevCode() const {
     return *(--it);
 }
 
-bool SectionParser::hasNext() const {
+bool SectionParser::hasNext() const { return std::distance(it, to) > 0; }
 
-    return std::distance(it, to) > 0;
-}
-
-bool SectionParser::hasPrev() const {
-
-    return std::distance(from, it) > 0;
-}
+bool SectionParser::hasPrev() const { return std::distance(from, it) > 0; }
 
 QDebug operator<<(QDebug debug, const SectionParser& c) {
     QDebugStateSaver saver(debug);

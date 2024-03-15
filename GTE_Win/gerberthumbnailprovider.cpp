@@ -62,9 +62,8 @@ GerberThumbnailProvider::AddRef() {
 IFACEMETHODIMP_(ULONG)
 GerberThumbnailProvider::Release() {
     ULONG cRef = InterlockedDecrement(&m_cRef);
-    if (0 == cRef) {
+    if(0 == cRef)
         delete this;
-    }
 
     return cRef;
 }
@@ -82,15 +81,13 @@ IFACEMETHODIMP GerberThumbnailProvider::Initialize(
 
     ULONG len;
     STATSTG stat;
-    if (pStream->Stat(&stat, STATFLAG_DEFAULT) != S_OK) {
+    if(pStream->Stat(&stat, STATFLAG_DEFAULT) != S_OK)
         return S_FALSE;
-    }
 
     char* data = new char[stat.cbSize.QuadPart];
 
-    if (pStream->Read(data, stat.cbSize.QuadPart, &len) != S_OK) {
+    if(pStream->Read(data, stat.cbSize.QuadPart, &len) != S_OK)
         return S_FALSE;
-    }
 
     bytes = QByteArray(data, stat.cbSize.QuadPart);
 
@@ -125,20 +122,20 @@ IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
 
         QPainterPath painterPath;
         Paths paths = Gerber::Parser().parseLines(bytes);
-        if (paths.isEmpty())
+        if(paths.isEmpty())
             throw std::exception("Gerber::Parser().parseLines(bytes) error");
-        for (Path& path : paths) {
-            if (path.size() > 2) {
+        for(Path& path: paths) {
+            if(path.size() > 2) {
                 path.append(path.first());
                 painterPath.addPolygon(toQPolygon(path));
             }
         }
         QRectF rect = painterPath.boundingRect();
         double width, height;
-        if (qFuzzyCompare(rect.width(), rect.height())) {
+        if(qFuzzyCompare(rect.width(), rect.height())) {
             width = cx;
             height = cx;
-        } else if (rect.width() > rect.height()) {
+        } else if(rect.width() > rect.height()) {
             width = cx;
             height = rect.height() * ((double)cx / rect.width());
         } else {
@@ -170,7 +167,7 @@ IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
         painter.end();
         *pdwAlpha = WTSAT_ARGB;
         *phbmp = QtWin::toHBITMAP(pixmap, QtWin::HBitmapAlpha);
-    } catch (const std::exception& e) {
+    } catch(const std::exception& e) {
         QPixmap pixmap(static_cast<int>(cx), static_cast<int>(cx));
         QPainter painter(&pixmap);
         pixmap.fill(Qt::white);
@@ -184,7 +181,7 @@ IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
         *phbmp = QtWin::toHBITMAP(pixmap, QtWin::HBitmapAlpha);
         signal(SIGSEGV, previousHandler);
         return S_FALSE;
-    } catch (char* e) {
+    } catch(char* e) {
         QPixmap pixmap(static_cast<int>(cx), static_cast<int>(cx));
         QPainter painter(&pixmap);
         pixmap.fill(Qt::white);
@@ -198,7 +195,7 @@ IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
         *phbmp = QtWin::toHBITMAP(pixmap, QtWin::HBitmapAlpha);
         signal(SIGSEGV, previousHandler);
         return S_FALSE;
-    } catch (...) {
+    } catch(...) {
         QPixmap pixmap(static_cast<int>(cx), static_cast<int>(cx));
         QPainter painter(&pixmap);
         pixmap.fill(Qt::white);

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -21,7 +21,7 @@ Hatch::Hatch(SectionParser* sp)
 }
 
 Hatch::~Hatch() {
-    for (auto edge : edges)
+    for(auto edge: edges)
         qDeleteAll(edge);
 }
 
@@ -44,7 +44,7 @@ Hatch::~Hatch() {
 void Hatch::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker: // 100
             break;
         case ElevationPointX: // 10
@@ -119,19 +119,19 @@ void Hatch::parse(CodeData& code) {
             edges.resize(pathTypeFlags.size());
             break;
         case NumberOfEdges: // 93
-            if (!edges.size())
+            if(!edges.size())
                 edges.resize(1);
             edges[edges.size() - 1].reserve(int(code));
             break;
         case EdgeType: // 72
             edgeType = code;
-            switch (edgeType) {
+            switch(edgeType) {
             case Line: { // 1
-                auto line = new LineEdge(edgeType);
+                auto line = new LineEdge{edgeType};
                 edges[edges.size() - 1].push_back(line);
-                for (int i = 0; i < 4; ++i) {
+                for(int i = 0; i < 4; ++i) {
                     code = sp->nextCode();
-                    switch (code.code()) {
+                    switch(code.code()) {
                     case PrimaryX:
                         line->p1.setX(code);
                         continue;
@@ -205,19 +205,19 @@ void Hatch::parse(CodeData& code) {
         //        DC	97		I
         //        DC	98		I
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
-GraphicObject Hatch::toGo() const {
+DxfGo Hatch::toGo() const {
     Paths paths(edges.size());
-    for (size_t i = 0; i < edges.size(); ++i)
-        for (auto edge : edges[i])
-            paths[i].append(Path(edge->toPolygon()));
+    for(size_t i = 0; i < edges.size(); ++i)
+        for(auto edge: edges[i])
+            paths[i] += ~edge->toPolygon();
     Clipper clipper;
-    clipper.AddPaths(paths, ptSubject);
-    clipper.Execute(ctUnion, paths, pftEvenOdd);
+    clipper.AddOpenSubject(paths); // FIXME AddSubject???
+    clipper.Execute(ClipType::Union, FillRule::EvenOdd, paths);
     // dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
     return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths};
 }

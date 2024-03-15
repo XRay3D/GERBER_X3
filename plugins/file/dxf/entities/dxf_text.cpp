@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -25,7 +25,7 @@ Text::Text(SectionParser* sp)
 
 void Text::parse(CodeData& code) {
     do {
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker:
             break;
         case Thickness:
@@ -82,7 +82,7 @@ void Text::parse(CodeData& code) {
             Entity::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
+    } while(code.code() != 0);
 }
 
 Entity::Type Text::type() const { return Type::TEXT; }
@@ -110,10 +110,9 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     return debug;
 }
 
-GraphicObject Text::toGo() const {
-    //    qDebug() << data.size();
+DxfGo Text::toGo() const {
+
     //    for (auto& code : data)
-    //        qDebug() << "\t" << DataEnum(code.code()) << code;
 
     double ascent = 0.0;
     double scaleX = 0.0;
@@ -122,10 +121,10 @@ GraphicObject Text::toGo() const {
     QFont font;
     QPointF offset;
     QSizeF size;
-    if (sp->file->styles().contains(textStyleName)) {
+    if(sp->file->styles().contains(textStyleName)) {
         Style* style = sp->file->styles()[textStyleName];
         font = style->font;
-        if (Settings::overrideFonts()) {
+        if(Settings::overrideFonts()) {
             font.setFamily(Settings::defaultFont());
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
@@ -138,7 +137,7 @@ GraphicObject Text::toGo() const {
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
-        if (Settings::overrideFonts()) {
+        if(Settings::overrideFonts()) {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
@@ -149,7 +148,7 @@ GraphicObject Text::toGo() const {
         size = fmf.size(0, text);
     }
     // qDebug("scale X %f Y %f", scaleX, scaleY);
-    switch (horizontalJustType) {
+    switch(horizontalJustType) {
     case Left: // 0
         offset.rx();
         break;
@@ -167,7 +166,7 @@ GraphicObject Text::toGo() const {
         break;
     }
 
-    switch (verticalJustType) {
+    switch(verticalJustType) {
     case Baseline: // 0
         break;
     case Bottom: // 1
@@ -180,9 +179,9 @@ GraphicObject Text::toGo() const {
         break;
     }
 
-    if (textGenerationFlag & MirroredInX)
+    if(textGenerationFlag & MirroredInX)
         scaleX = -scaleX;
-    if (textGenerationFlag & MirroredInY)
+    if(textGenerationFlag & MirroredInY)
         scaleY = -scaleY;
 
     QPainterPath path;
@@ -191,14 +190,15 @@ GraphicObject Text::toGo() const {
     QTransform m;
     m.scale(u * scaleX, -u * scaleY);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.translate(pt2.x(), pt2.y());
     m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m2.scale(d, d);
 
-    return {id, {}, path2.toSubpathPolygons(m2)};
+    DxfGo go{id, {}, ~path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
+    return go;
 }
 
 void Text::write(QDataStream& stream) const {

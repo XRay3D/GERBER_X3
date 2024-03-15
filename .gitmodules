@@ -1,6 +1,6 @@
-[submodule "external_dependencies/compile-time-regular-expressions"]
-	path = external_dependencies/compile-time-regular-expressions
-	url = git@github.com:hanickadot/compile-time-regular-expressions.git
-[submodule "external_dependencies/pfr_non_boost"]
-	path = external_dependencies/pfr_non_boost
-	url = git@github.com:apolukhin/pfr_non_boost.git
+[submodule "third_party/ctre"]
+        path = third_party/ctre
+        url = https://github.com/hanickadot/compile-time-regular-expressions.git
+[submodule "third_party/clipper2"]
+        path = third_party/clipper2
+        url = https://github.com/AngusJohnson/Clipper2.git

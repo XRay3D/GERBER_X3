@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -64,21 +64,21 @@ FormatDialog::~FormatDialog() {
 void FormatDialog::on_pushButton_clicked() {
     QPair<QPointF, QPointF> pair;
     int c = 0;
-    for (QGraphicsItem* item : App::graphicsView()->scene()->selectedItems()) {
-        if (item->type() == GiType::Drill) {
+    for(QGraphicsItem* item: App::grView().selectedItems()) {
+        if(item->type() == Gi::Type::Drill) {
             pair.first = item->boundingRect().center();
             ++c;
         }
-        if (item->type() != GiType::Drill) {
+        if(item->type() != Gi::Type::Drill) {
             pair.second = item->boundingRect().center();
             ++c;
         }
-        if (c == 2) {
+        if(c == 2) {
             QPointF p(pair.second - pair.first);
-            if (QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
+            if(QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
                 return;
 
-            App::graphicsView()->zoomFit();
+            App::grView().zoomFit();
             return;
         }
     }
@@ -92,21 +92,21 @@ void FormatDialog::updateFormat() {
     tmpFormat_.zeroMode = static_cast<ZeroMode>(ui->rbTrailing->isChecked());
 
     file_->setFormat(tmpFormat_);
-    App::graphicsView()->zoomFit();
+    App::grView().zoomFit();
 }
 
 void FormatDialog::acceptFormat() {
     accepted = true;
-    App::graphicsView()->zoomFit();
+    App::grView().zoomFit();
 }
 
 void FormatDialog::rejectFormat() { deleteLater(); }
 
 void FormatDialog::resetFormat() {
-    if (accepted)
+    if(accepted)
         return;
     file_->setFormat(format_);
-    App::graphicsView()->zoomFit();
+    App::grView().zoomFit();
 }
 
 void FormatDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
@@ -132,4 +132,4 @@ void FormatDialog::on_pbSetAsDefault_clicked() {
 
 } // namespace Excellon
 
-#include "moc_ex_formatdialog.cpp"
+// #include "moc_ex_formatdialog.cpp"

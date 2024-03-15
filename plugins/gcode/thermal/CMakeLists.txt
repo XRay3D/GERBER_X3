@@ -1,15 +1,14 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  01 February 2020                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #*******************************************************************************/
 cmake_minimum_required(VERSION 3.20)
-
 
 project(gcthermal LANGUAGES CXX)
 
@@ -28,12 +27,14 @@ file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
 include_directories(${CMAKE_STATIC_LIBS_DIR})
 
-add_library(${PROJECT_NAME} SHARED
+set(PROJECT_SOURCES
     ${HEADERS}
     ${JSONS}
     ${SOURCES}
     ${UIS}
 )
+
+add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper

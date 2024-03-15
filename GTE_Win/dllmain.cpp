@@ -30,7 +30,7 @@ static QApplication* app = nullptr;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/) {
     int c = 0;
-    switch (dwReason) {
+    switch(dwReason) {
     case DLL_PROCESS_ATTACH:
         // Hold the instance of this DLL module, we will use it to get the
         // path of the DLL to register the component.
@@ -42,7 +42,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/) {
     case DLL_THREAD_DETACH:
         break;
     case DLL_PROCESS_DETACH:
-        if (app) {
+        if(app) {
             delete app;
             app = nullptr;
         }
@@ -68,11 +68,11 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/) {
 STDAPI DllGetClassObject(REFCLSID rclsid, REFIID riid, void** ppv) {
     HRESULT hr = CLASS_E_CLASSNOTAVAILABLE;
 
-    if (IsEqualCLSID(CLSID_GerberThumbnailProvider, rclsid)) {
+    if(IsEqualCLSID(CLSID_GerberThumbnailProvider, rclsid)) {
         hr = E_OUTOFMEMORY;
 
         ClassFactory* pClassFactory = new ClassFactory();
-        if (pClassFactory) {
+        if(pClassFactory) {
             hr = pClassFactory->QueryInterface(riid, ppv);
             pClassFactory->Release();
         }
@@ -105,7 +105,7 @@ STDAPI DllRegisterServer(void) {
     HRESULT hr;
 
     wchar_t szModule[MAX_PATH];
-    if (GetModuleFileName(g_hInst, szModule, ARRAYSIZE(szModule)) == 0) {
+    if(GetModuleFileName(g_hInst, szModule, ARRAYSIZE(szModule)) == 0) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         return hr;
     }
@@ -114,13 +114,13 @@ STDAPI DllRegisterServer(void) {
     hr = RegisterInprocServer(szModule, CLSID_GerberThumbnailProvider,
         L"GerberThumbnailExtension.GerberThumbnailProvider Class",
         L"Apartment");
-    if (SUCCEEDED(hr)) {
+    if(SUCCEEDED(hr)) {
         // Register the thumbnail handler. The thumbnail handler is associated
         // with the .gbr file class.
 
-        for (QString& var : fileFormats.split('|')) {
+        for(QString& var: fileFormats.split('|')) {
             hr = RegisterShellExtThumbnailHandler(var.toStdWString().data(), CLSID_GerberThumbnailProvider);
-            if (SUCCEEDED(hr)) {
+            if(SUCCEEDED(hr)) {
                 // This tells the shell to invalidate the thumbnail cache. It is
                 // important because any .gbr files viewed before registering
                 // this handler would otherwise show cached blank thumbnails.
@@ -141,7 +141,7 @@ STDAPI DllUnregisterServer(void) {
     HRESULT hr = S_OK;
 
     wchar_t szModule[MAX_PATH];
-    if (GetModuleFileName(g_hInst, szModule, ARRAYSIZE(szModule)) == 0) {
+    if(GetModuleFileName(g_hInst, szModule, ARRAYSIZE(szModule)) == 0) {
         hr = HRESULT_FROM_WIN32(GetLastError());
         return hr;
     }
@@ -149,11 +149,10 @@ STDAPI DllUnregisterServer(void) {
     // Unregister the component.
     hr = UnregisterInprocServer(CLSID_GerberThumbnailProvider);
 
-    if (SUCCEEDED(hr)) {
+    if(SUCCEEDED(hr)) {
         // Unregister the thumbnail handler.
-        for (QString& var : fileFormats.split('|')) {
+        for(QString& var: fileFormats.split('|'))
             hr = UnregisterShellExtThumbnailHandler(var.toStdWString().data());
-        }
     }
 
     return hr;

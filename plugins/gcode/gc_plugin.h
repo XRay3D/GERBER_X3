@@ -1,34 +1,54 @@
 #pragma once
 
-#include "plugindata.h"
+#include "abstract_fileplugin.h"
 
 class QAction;
 class QMenu;
 class QToolBar;
 class QWidget;
+class AbstractFile;
 
-class GCodePlugin : public QObject, public PluginData {
+namespace GCode {
+
+class Plugin : public AbstractFilePlugin {
     Q_OBJECT
 
 public:
-    explicit GCodePlugin(QObject* parent = nullptr);
-    virtual ~GCodePlugin() = default;
+    explicit Plugin(QObject* parent = nullptr);
+    virtual ~Plugin() = default;
 
-    [[nodiscard]] virtual QIcon icon() const = 0;
+    //    [[nodiscard]] virtual GCode::File* loadFile(QDataStream& stream) const = 0;
+    //    [[nodiscard]] virtual QIcon icon() const = 0;
+    //    [[nodiscard]] virtual uint32_t type() const = 0;
     [[nodiscard]] virtual QKeySequence keySequence() const = 0;
     [[nodiscard]] virtual QWidget* createForm() = 0;
-    [[nodiscard]] virtual bool canToShow() const;
-    [[nodiscard]] virtual int type() const = 0;
+    [[nodiscard]] virtual bool canToShow() const { return true; }
+    [[nodiscard]] virtual QAction* addAction(QMenu* menu, QToolBar* toolbar);
 
-    [[nodiscard]] QAction* addAction(QMenu* menu, QToolBar* toolbar);
+    //////////////////////
+
+    //    AbstractFile* loadFile(QDataStream& stream) constoverride { return nullptr /*new File()*/; }
+    //    QIcon icon() const override { return decoration(Qt::lightGray, 'G'); }
+    //    uint32_t type() const override { return md5::hash32("GCode"); }
+    //    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    QString folderName() const override { return tr("Tool Paths"); }
+    bool thisIsIt(const QString& fileName) override { return false; }
+    void createMainMenu(QMenu& menu, FileTree::View* tv) override;
+
+    AbstractFile* parseFile(const QString& fileName, int type) override { return nullptr; }
+public slots:
 
 signals:
     void setDockWidget(QWidget* w);
 
 protected:
-    enum { IconSize = 24 };
+    enum {
+        IconSize = 24
+    };
 };
 
-#define GCodeInterface_iid "ru.xray3d.XrSoft.GGEasy.GCodePlugin"
+} // namespace GCode
 
-Q_DECLARE_INTERFACE(GCodePlugin, GCodeInterface_iid)
+#define GCodeInterface_iid "ru.xray3d.XrSoft.GGEasy.GCode.Plugin"
+
+Q_DECLARE_INTERFACE(GCode::Plugin, GCodeInterface_iid)

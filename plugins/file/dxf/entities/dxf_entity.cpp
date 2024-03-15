@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,7 +20,7 @@
 namespace Dxf {
 
 std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionParser* sp) {
-    switch (key) {
+    switch(key) {
     case Entity::ACAD_PROXY_ENTITY:
         return std::make_shared<Dummy /*Dimension*/>(sp);
         break; // return std::make_shared<ACADProxyEntity>(sp);
@@ -81,7 +81,7 @@ std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionPa
     case Entity::SEQEND:
         return std::make_shared<SeqEnd>(sp);
     case Entity::SHAPE:
-        return std::make_shared<Shape>(sp);
+        return std::make_shared<AbstractShape>(sp);
     case Entity::SOLID:
         return std::make_shared<Solid>(sp);
     case Entity::SPLINE:
@@ -139,11 +139,11 @@ Entity::Entity(SectionParser* sp)
 Entity::~Entity() { }
 
 void Entity::draw(const InsertEntity* const i) const {
-    if (i) {
-        for (int r {}; r < i->rowCount; ++r) {
-            for (int c {}; c < i->colCount; ++c) {
+    if(i) {
+        for(int r{}; r < i->rowCount; ++r) {
+            for(int c{}; c < i->colCount; ++c) {
                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-                GraphicObject go(toGo());
+                DxfGo go(toGo());
                 i->transform(go, tr);
                 i->attachToLayer(std::move(go));
             }
@@ -154,7 +154,7 @@ void Entity::draw(const InsertEntity* const i) const {
 }
 
 void Entity::parse(CodeData& code) {
-    switch (code.code()) {
+    switch(code.code()) {
         //    case LayerName:
         //        layerName = code.string();
         //        break;
@@ -171,74 +171,74 @@ void Entity::parse(CodeData& code) {
         //        break;
 
     case EntityName: //  -1
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case EntityType: // 0
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case Handle: // 5
         handle = code.string();
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case SoftPointerID: // 330
         softPointerID = code.string();
-        //        qDebug() << DataEnum(code.code()) << code;
+
         break;
     case HardOwnerID: // 360
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case SubclassMarker: // 100
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case E67: // 67
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case E410: // 410
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LayerName: // 8
         layerName = code.string();
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LineType: // 6
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case E347: // 347
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case ColorNumber: // 62
         colorNumber = code;
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LineWeight: // 370
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case LineTypeScale: // 48
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case Visibility: // 60
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case NumberOfBytes: // 92
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case BinaryChunk: // 310
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case A24bitColor: // 420
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case ColorName: // 430
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case TransparencyValue: // 440
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case PlotStyleID: // 390
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     case ShadowMode: // 284
-        // qDebug() << "\n\t" << DataEnum(code.code()) << "\n\t" << code;
+
         break;
     default:
         qDebug() << __FUNCTION__ << "default" << code;
@@ -275,7 +275,7 @@ QString Entity::name() const {
 }
 
 QColor Entity::color() const {
-    if (auto layer = sp->file->layer(layerName); layer != nullptr) {
+    if(auto layer = sp->file->layer(layerName); layer != nullptr) {
         QColor c(dxfColors[layer->colorNumber()]);
         c.setAlpha(200);
         return c;
@@ -284,12 +284,12 @@ QColor Entity::color() const {
     return QColor(255, 0, 255, 100);
 }
 
-void Entity::attachToLayer(GraphicObject&& go) const {
-    if (sp == nullptr)
+void Entity::attachToLayer(DxfGo&& go) const {
+    if(sp == nullptr)
         throw DxfObj::tr("SectionParser is null!");
-    else if (sp->file == nullptr)
+    else if(sp->file == nullptr)
         throw DxfObj::tr("File in SectionParser is null!");
-    else if (sp->file->layer(layerName) == nullptr)
+    else if(sp->file->layer(layerName) == nullptr)
         throw DxfObj::tr("Layer '%1' not found in file!").arg(layerName);
 
     sp->file->layer(layerName)->addGraphicObject(std::move(go));
@@ -328,7 +328,7 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPoi
     double r = signedBulgeRadius(start_point, end_point, bulge);
     double a = angle(start_point, end_point) + (pi / 2.0 - atan(bulge) * 2.0);
     QPointF c = polar(start_point, a, r);
-    if (bulge < 0.0)
+    if(bulge < 0.0)
         return {c, angle(c, end_point), angle(c, start_point), abs(r)};
     else
         return {c, angle(c, start_point), angle(c, end_point), abs(r)};

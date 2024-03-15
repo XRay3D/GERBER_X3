@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -14,29 +14,28 @@
 #include <QAbstractTableModel>
 #include <QIcon>
 
-namespace DrillPlugin {
+namespace Drilling {
 
 class GiPreview;
 
 struct Row {
     //    Row(QString&& name = {},
     //        QIcon&& icon = {},
-    //        int id = {},
+    //        int32_t id = {},
     //        double diameter = {})
     //        : icon(icon)
     //        , name(name)
     //        , diameter(diameter)
-    //        , apertureId(id)
+    //        , rowId(id)
     //        , toolId(-1) {
     //    }
     ~Row() { qDeleteAll(items); }
-    const QIcon icon;
-    const QString name;
-    const double diameter;
-    const int apertureId;
-    const bool isSlot;
-    bool useForCalc {};
-    int toolId {-1};
+    /*const*/ QIcon icon;
+    /*const*/ QStringList name;
+    /*const*/ double diameter;
+    /*const*/ bool isSlot;
+    bool useForCalc{};
+    int toolId{-1};
     mvector<GiPreview*> items;
 };
 
@@ -44,7 +43,6 @@ class Model : public QAbstractTableModel {
     Q_OBJECT
 
     mvector<Row> data_;
-    QString type;
 
     enum {
         Name,
@@ -56,18 +54,17 @@ signals:
     void set(int, bool);
 
 public:
-    explicit Model(QString type, int rowCount, QObject* parent = nullptr);
+    explicit Model(size_t rowCount, QObject* parent = nullptr);
     ~Model() override { qDebug(__FUNCTION__); }
 
     bool isSlot(int row) const { return data_[row].isSlot; }
     bool useForCalc(int row) const { return data_[row].useForCalc; }
 
-    int apertureId(int row) const { return data_[row].apertureId; }
     int toolId(int row) const { return data_[row].toolId; }
 
     void setCreate(bool create);
     void setCreate(int row, bool create);
-    void setToolId(int row, int id);
+    void setToolId(int row, int32_t id);
     //    void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface
@@ -83,4 +80,4 @@ public:
     auto end() { return data_.end(); }
 };
 
-} // namespace DrillPlugin
+} // namespace Drilling

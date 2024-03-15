@@ -3,9 +3,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,14 +23,14 @@ void Dummy::draw(const Dxf::InsertEntity* const) const {
 }
 
 void Dummy::parse(Dxf::CodeData& code) {
-    switch (type_) {
+    switch(type_) {
     case Type::POLYLINE:
         do {
             code = sp->nextCode();
-        } while (code != "SEQEND");
+        } while(code != "SEQEND");
         do {
             code = sp->nextCode();
-        } while (code.code() != 0);
+        } while(code.code() != 0);
         break;
     default:
         do {
@@ -40,7 +40,7 @@ void Dummy::parse(Dxf::CodeData& code) {
             //            Entity::parse(code);
             //        }
             code = sp->nextCode();
-        } while (code.code() != 0);
+        } while(code.code() != 0);
     }
 }
 

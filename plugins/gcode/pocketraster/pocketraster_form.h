@@ -1,26 +1,32 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "gc_formsutil.h"
+
+#include "gc_baseform.h"
+#include "gc_plugin.h"
+#include "pocketraster.h"
+#include <QToolBar>
 
 namespace Ui {
 class PocketRasterForm;
 }
 
-class PocketRasterForm : public GcFormBase {
+namespace PocketRaster {
+
+class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit PocketRasterForm(GCodePlugin* plugin, QWidget* parent = nullptr);
-    ~PocketRasterForm();
+    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    ~Form();
 
 private slots:
     void onNameTextChanged(const QString& arg1);
@@ -32,9 +38,9 @@ private:
     void updatePixmap();
     void rb_clicked();
     const QStringList names;
-    static inline const QString pixmaps[] {
-        QStringLiteral("pock_rast_climb"),
-        QStringLiteral("pock_rast_conv"),
+    static inline const QString pixmaps[]{
+        u"pock_rast_climb"_qs,
+        u"pock_rast_conv"_qs,
     };
     // QWidget interface
 protected:
@@ -43,25 +49,25 @@ protected:
 
     // FormsUtil interface
 protected:
-    void createFile() override;
+    void computePaths() override;
     void updateName() override;
 
 public:
     void editFile(GCode::File* file) override;
 };
 
-#include "gc_plugin.h"
-#include <QToolBar>
-
-class GCPluginImpl final : public GCodePlugin {
+class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketraster.json")
-    Q_INTERFACES(GCodePlugin)
-
-    // GCodePlugin interface
+    Q_INTERFACES(GCode::Plugin)
+    Form form{this};
+    // GCode::Plugin interface
 public:
     QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
     QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
-    QWidget* createForm() override { return new PocketRasterForm(this); };
-    int type() const override { return GCode::Raster; }
+    QWidget* createForm() override { return &form; };
+    uint32_t type() const override { return POCKET_RASTER; }
+    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
+
+} // namespace PocketRaster

@@ -1,10 +1,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -13,29 +13,22 @@
 #include <QTimer>
 #include <cmath>
 
-namespace Gerber {
-class File;
-}
+class MainWindow;
 
-class GiDataPath : public GraphicsItem {
-    //    QRectF boundingRect_;
-    int timerId = 0;
-#ifdef __GNUC__
-    static QTimer timer;
-#else
-    static inline QTimer timer;
-#endif
-    static inline int dashOffset;
+namespace Gi {
+
+class DataPath : public Item {
     mutable QPainterPath selectionShape_;
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;
 
     void redraw() override { update(); }
     void changeColor() override { }
-    friend class MainWindow;
+    friend class ::MainWindow;
 
 public:
-    GiDataPath(const Path& path, FileInterface* file);
+    DataPath(const Path& path, AbstractFile* file);
+    DataPath(const Paths& path, AbstractFile* file);
 
 protected:
     // QGraphicsItem interface
@@ -46,3 +39,5 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
 };
+
+} // namespace Gi

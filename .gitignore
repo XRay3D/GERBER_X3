@@ -107,6 +107,10 @@ libs_*
 # Binaries
 bin/*
 
+# ....
+2geom/*
+style/*
+
 # Idea
 .idea
 

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -15,7 +15,7 @@
 
 #include <QTableView>
 
-namespace DrillPlugin {
+namespace Drilling {
 
 Header::Header(Qt::Orientation orientation, QWidget* parent)
     : QHeaderView(orientation, parent) {
@@ -29,8 +29,8 @@ Header::Header(Qt::Orientation orientation, QWidget* parent)
 Header::~Header() { }
 
 void Header::setAll(bool ch) {
-    for (int i = 0; i < count(); ++i) {
-        if (checked(i) != ch) {
+    for(int i = 0; i < count(); ++i) {
+        if(checked(i) != ch) {
             setChecked(i, ch);
             updateSection(i);
         }
@@ -62,34 +62,34 @@ void Header::mouseMoveEvent(QMouseEvent* event) {
     static int index = 0;
     do {
 
-        if (index == logicalIndexAt(event->pos()))
+        if(index == logicalIndexAt(event->pos()))
             break;
         index = logicalIndexAt(event->pos());
-        if (index < 0)
+        if(index < 0)
             break;
-        if (event->buttons() != Qt::RightButton)
+        if(event->buttons() != Qt::RightButton)
             break;
-        if (orientation() == Qt::Horizontal) {
+        if(orientation() == Qt::Horizontal) {
             // setSingle(index);
         } else
             togle(index);
         event->accept();
         return;
-    } while (0);
+    } while(0);
     QHeaderView::mouseMoveEvent(event);
 }
 
 void Header::mousePressEvent(QMouseEvent* event) {
     int index = logicalIndexAt(event->pos());
     do {
-        if (index < 0)
+        if(index < 0)
             break;
-        if (!checkRect_[index].contains(event->pos()) && event->buttons() != Qt::RightButton)
+        if(!checkRect_[index].contains(event->pos()) && event->buttons() != Qt::RightButton)
             break;
         togle(index);
         event->accept();
         return;
-    } while (0);
+    } while(0);
     QHeaderView::mousePressEvent(event);
 }
 
@@ -113,5 +113,5 @@ bool Header::checked(int index) const { return model()->useForCalc(index); }
 
 Model* Header::model() const { return static_cast<Model*>(static_cast<QTableView*>(parent())->model()); }
 
-} // namespace DrillPlugin
+} // namespace Drilling
 #include "moc_drill_header.cpp"

@@ -1,38 +1,56 @@
 #/*******************************************************************************
 #* Author    :  Damir Bakiev                                                    *
 #* Version   :  na                                                              *
-#* Date      :  11 November 2021                                                *
+#* Date      :  03 October 2022                                                 *
 #* Website   :  na                                                              *
 #* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License:                                                                     *
+#* License   :                                                                  *
 #* Use, modification & distribution is subject to Boost Software License Ver 1. *
 #* http://www.boost.org/LICENSE_1_0.txt                                         *
 #********************************************************************************/
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.24)
 
-set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
-set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
+# set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
+# set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
+
+# Optional IPO. Do not use IPO if it's not supported by compiler.
+#check_ipo_supported(RESULT result OUTPUT output)
+#if(result)
+set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+#else()
+#    message(WARNING "IPO is not supported: ${output}")
+#endif()
 
 project(GERBER_X3)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-add_definitions(
-    -DQT_MESSAGELOGCONTEXT# qDebug()
-    -DCTRE
-    -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
-)
-#add_definitions("-D__cpp_consteval")# source_location
+
+set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+
+include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
+
+add_definitions(
+    -DQT_MESSAGELOGCONTEXT # qDebug()
+    -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
+    -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a, const QStringBuilder<A, B> &b, QChar)
+
+)
 
 if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(
         -Winvalid-pch
-#        -fmodules-ts
+        -pthread
+        #        -fmodules-ts
     )
+    link_directories(tbb/lib)
+## Link against the dependency of Intel TBB (for parallel C++17 algorithms)
+#target_link_libraries(${PROJECT_NAME} tbb)
+
 # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
 # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
 # target_compile_options(example PRIVATE -fmodules-ts)
@@ -42,25 +60,27 @@ elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 # -ltbbD
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+#    add_definitions(-D_USE_MATH_DEFINES=1)
 endif()
 
+# FIND BOOST
 find_package(Boost)
 if (Boost_FOUND)
     include_directories(${Boost_INCLUDE_DIR})
-    message(${Boost_INCLUDE_DIR})
-    add_definitions( "-D_USE_BOOST_" )
 else()
-    message("Boost not found!!!" FATAL_ERROR)
+    message(FATAL_ERROR "Boost not found!!!")
 endif()
 
-include_directories(
-    GGEasy
-    external_dependencies/compile-time-regular-expressions/single-header
-    external_dependencies/pfr_non_boost/include
+set(INC_DIRS
+    third_party/ctre/single-header/
+    third_party/clipper2/CPP/Clipper2Lib/include/
+
+    ggeasy
+
     plugins/file
     plugins/gcode
     plugins/shape
-    plugins/shape/shape
+
     static_libs/clipper
     static_libs/common
     static_libs/filetree
@@ -69,30 +89,26 @@ include_directories(
     static_libs/tooldatabase
 )
 
-include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
+add_subdirectory(third_party/clipper2/CPP)
 
-# plugins
+include_directories(${INC_DIRS})
+
+set(CMAKE_AUTOMOC ON)
+set(CMAKE_AUTORCC ON)
+set(CMAKE_AUTOUIC ON)
+
+# STATIC LIBS
 add_subdirectory(static_libs)
 
-# plugins
+# PLUGINS
 add_subdirectory(plugins)
 
-# main app
-add_subdirectory(GGEasy)
+# MAIN APP
+add_subdirectory(ggeasy)
 
-target_precompile_headers(GGEasy
-    #    PUBLIC
-    #    qt.h
-    PRIVATE
-    #    [["other_header.h"]]
-    <QtWidgets>
-    <QtCore>
-    <forward_list>
-    <list>
-    <map>
-    <ranges>
-    <span>
-    <unordered_map>
-    <vector>
-)
+
+#add_subdirectory(ToolTest)
+
+
+
 

@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
  * Copyright :  Damir Bakiev 2016-2020                                          *
- * License:                                                                     *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
@@ -14,7 +14,8 @@
 #include "ft_view.h"
 #include "qgraphicsscene.h"
 #include "shhandler.h"
-#include "shnode.h"
+
+// #include "mainwindow.h"
 
 #include <QGraphicsSceneMouseEvent>
 #include <QMenu>
@@ -23,8 +24,10 @@
 
 namespace Shapes {
 
-Shape::Shape()
-    : node_(new Node(this)) {
+AbstractShape::AbstractShape()
+    : FileTree::Node(FileTree::AbstractShape)
+//    : node_(new Node{this})
+{
     paths_.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);
@@ -33,54 +36,55 @@ Shape::Shape()
     // setZValue(std::numeric_limits<double>::max());
 }
 
-Shape::~Shape() { }
+AbstractShape::~AbstractShape() {
+    App::project().deleteShape(id_);
+}
 
-void Shape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf()) [[unlikely]] {
-    //        pathColor_ = Qt::black;
-    //        pathColor_.setAlpha(255);
-    //        pen_.setColor(pathColor_);
-    //    } else [[likely]] {
-    pathColor_ = bodyColor_;
-    pathColor_.setAlpha(255);
-    pen_.setColor(pathColor_);
-    //    }
-
+void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
+    if(App::drawPdf()) [[unlikely]] {
+        pathColor_ = Qt::black;
+        pathColor_.setAlpha(255);
+        pen_.setColor(pathColor_);
+    } else [[likely]] {
+        pathColor_ = bodyColor_;
+        pathColor_.setAlpha(255);
+        pen_.setColor(pathColor_);
+    }
     painter->setPen(pen_);
-    painter->setBrush(bodyColor_);
+    painter->setBrush(QGraphicsItem::flags().testFlag(ItemIsSelectable) ? QBrush{bodyColor_} : QBrush{Qt::NoBrush});
     painter->drawPath(shape_);
 }
 
-QRectF Shape::boundingRect() const { return shape_.boundingRect(); }
+QRectF AbstractShape::boundingRect() const { return shape_.boundingRect(); }
 
-QPainterPath Shape::shape() const { return shape_; }
+QPainterPath AbstractShape::shape() const { return shape_; }
 
-Paths Shape::paths(int) const { return paths_; }
+Paths AbstractShape::paths(int) const { return paths_; }
 
-void Shape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
+void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
 {
     QGraphicsItem::mouseMoveEvent(event);
     const auto dp(App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos);
-    for (auto& [shape, hPos] : hInitPos) {
-        for (size_t i = 0, e = hPos.size(); i < e; ++i)
+    for(auto& [shape, hPos]: hInitPos) {
+        for(size_t i = 0, e = hPos.size(); i < e; ++i)
             shape->handlers[i]->setPos(hPos[i] + dp);
         shape->redraw();
     }
 }
 
-void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
+void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
     QGraphicsItem::mousePressEvent(event);
-    if (currentHandler)
+    if(currentHandler)
         return;
     currentHandler = {};
     hInitPos.clear();
     const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
     initPos = event->pos() + p;
-    for (auto item : scene()->selectedItems()) {
-        if (item->type() >= GiType::ShCircle) {
-            auto* shape = static_cast<Shape*>(item);
+    for(auto item: scene()->selectedItems()) {
+        if(item->type() >= Gi::Type::ShCircle) {
+            auto* shape = static_cast<AbstractShape*>(item);
             hInitPos[shape].reserve(shape->handlers.size());
-            for (auto&& h : shape->handlers) {
+            for(auto&& h: shape->handlers) {
                 h->setFlag(ItemSendsScenePositionChanges, false);
                 hInitPos[shape].emplace_back(h->pos());
             }
@@ -88,34 +92,38 @@ void Shape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // группов
     }
 }
 
-void Shape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseDoubleClickEvent(event);
+    // App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
+}
+
+void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu_;
-    menu(menu_, App::fileTreeView());
+    menu(menu_, App::fileTreeViewPtr());
     menu_.exec(event->screenPos());
 }
 
-QVariant Shape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if (change == ItemSelectedChange) {
+QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    if(change == ItemSelectedChange) {
         const bool selected = value.toInt();
-        for (auto& item : handlers)
+        for(auto& item: handlers)
             item->setVisible(selected);
-        if (node_->index().isValid()) {
-            App::fileTreeView()->selectionModel()->select(node_->index(),
+        if(/*node_->*/ index().isValid())
+            App::fileTreeView().selectionModel()->select(/*node_->*/ index(),
                 (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
                     | QItemSelectionModel::Rows);
-        }
-    } else if (change == ItemVisibleChange) {
-        emit App::fileModel()->dataChanged(node_->index(), node_->index(), {Qt::CheckStateRole});
+    } else if(change == ItemVisibleChange) {
+        emit App::fileModel().dataChanged(/*node_->*/ index(), /*node_->*/ index(), {Qt::CheckStateRole});
     }
-    return GraphicsItem::itemChange(change, value);
+    return Gi::Item::itemChange(change, value);
 }
 
-void Shape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(), currentHandler = nullptr; }
+void AbstractShape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(), currentHandler = nullptr; }
 
-void Shape::changeColor() {
+void AbstractShape::changeColor() {
     //    animation.setStartValue(bodyColor_);
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         bodyColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
         bodyColor_.setAlpha(50);
@@ -136,12 +144,12 @@ void Shape::changeColor() {
     //    animation.start();
 }
 
-Node* Shape::node() const { return node_; }
+// Node* AbstractShape::node() const { return node_; }
 
-bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
-    switch (FileTree::Column(index.column())) {
+bool AbstractShape::setData(const QModelIndex& index, const QVariant& value, int role) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         // case Qt::DisplayRole:
         //     return QString("%1 (%2)").arg(name()).arg(giId_);
         case Qt::CheckStateRole:
@@ -163,10 +171,10 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
     }
 }
 
-QVariant Shape::data(const QModelIndex& index, int role) const {
-    switch (FileTree::Column(index.column())) {
+QVariant AbstractShape::data(const QModelIndex& index, int role) const {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-        switch (role) {
+        switch(role) {
         case Qt::DisplayRole:
             return QString("%1 (%2)").arg(name()).arg(id_);
         case Qt::CheckStateRole:
@@ -178,16 +186,16 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
         case FileTree::Select:
             return isSelected();
         default:
-            return QVariant();
+            return {};
         }
     default:
-        return QVariant();
+        return {};
     }
 }
 
-Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
+Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
-    switch (FileTree::Column(index.column())) {
+    switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         return itemFlag | Qt::ItemIsUserCheckable;
     case FileTree::Column::Side:
@@ -197,34 +205,42 @@ Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
     }
 }
 
-void Shape::menu(QMenu& menu, FileTree::View* /*tv*/) const {
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
-        App::fileModel()->removeRow(node_->row(), node_->index().parent());
+void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
+    auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
+        auto r = row();
+        auto p = index().parent();
+        App::fileModel().removeRow(r, p);
     });
-    auto action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), this, &GraphicsItem::setVisible);
+
+    action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { Gi::Item::setVisible(fl); });
     action->setCheckable(true);
     action->setChecked(isVisible());
 
-    action = menu.addAction(QIcon::fromTheme(""), QObject::tr("&Selectable \"%1\"").arg(name()), [item = const_cast<Shape*>(this)](bool fl) {
+    action = menu.addAction(QIcon::fromTheme(""), QObject::tr("&Selectable \"%1\"").arg(name()), [item = const_cast<AbstractShape*>(this)](bool fl) {
         item->setFlag(ItemIsSelectable, fl);
     });
     action->setCheckable(true);
-    action->setChecked(GraphicsItem::flags() & ItemIsSelectable);
+    action->setChecked(Gi::Item::flags() & ItemIsSelectable);
+
+    action = menu.addAction(QIcon::fromTheme("document-edit"), QObject::tr("Edit Selected"), [this] {
+        // App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
+    });
+
     //    action->connect(action, &QAction::toggled );
 }
 
 // write to project
-void Shape::write(QDataStream& stream) const {
-    stream << bool(GraphicsItem::flags() & ItemIsSelectable);
+void AbstractShape::write(QDataStream& stream) const {
+    stream << bool(Gi::Item::flags() & ItemIsSelectable);
     stream << qint32(handlers.size());
-    for (const auto& item : handlers) {
+    for(const auto& item: handlers) {
         stream << item->pos();
         stream << item->type_;
     }
 }
 
 // read from project
-void Shape::read(QDataStream& stream) {
+void AbstractShape::read(QDataStream& stream) {
     stream >> isFinal;
     setFlag(ItemIsSelectable, isFinal);
 
@@ -235,10 +251,10 @@ void Shape::read(QDataStream& stream) {
     handlers.reserve(size);
     QPointF pos;
     Handle::Type type;
-    for (int i {}; i < size; ++i) {
+    for(int i{}; i < size; ++i) {
         stream >> pos;
         stream >> type;
-        if (handlers.size() < size)
+        if(handlers.size() < size)
             handlers.emplace_back(std::make_unique<Handle>(this, type));
         handlers[i]->QGraphicsItem::setPos(pos);
         handlers[i]->setVisible(false);

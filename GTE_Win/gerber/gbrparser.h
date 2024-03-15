@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -84,7 +84,7 @@ private:
     void closeStepRepeat();
 
     QMap<int, QSharedPointer<AbstractAperture>> m_apertures;
-    ApBlock* apBlock(int id) { return static_cast<ApBlock*>(m_apertures[id].data()); }
+    ApBlock* apBlock(int32_t id) { return static_cast<ApBlock*>(m_apertures[id].data()); }
     QList<QString> m_lines;
     Paths m_mergedPaths;
     QList<GraphicObject> m_file;
@@ -94,15 +94,15 @@ private:
     Paths merge() {
         m_mergedPaths.clear();
         int i = 0;
-        while (i < m_file.size()) {
+        while(i < m_file.size()) {
             Clipper clipper;
             clipper.AddPaths(m_mergedPaths, ptSubject, true);
             const auto exp = m_file.at(i).state().imgPolarity();
             do {
                 const GraphicObject& go = m_file.at(i++);
                 clipper.AddPaths(go.paths(), ptClip, true);
-            } while (i < m_file.size() && exp == m_file.at(i).state().imgPolarity());
-            if (m_file.at(i - 1).state().imgPolarity() == Positive)
+            } while(i < m_file.size() && exp == m_file.at(i).state().imgPolarity());
+            if(m_file.at(i - 1).state().imgPolarity() == Positive)
                 clipper.Execute(ctUnion, m_mergedPaths, pftPositive);
             else
                 clipper.Execute(ctDifference, m_mergedPaths, pftNonZero);

@@ -3,41 +3,50 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_datapath.h"
 
-#include "file.h"
+#include "abstract_file.h"
+#include "gc_types.h"
 #include "graphicsview.h"
 #include "project.h"
-#include "settings.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 #include <ranges>
+#include <set>
 
-#ifdef __GNUC__
-QTimer GiDataPath::timer;
-#endif
+namespace Gi {
 
-GiDataPath::GiDataPath(const Path& path, FileInterface* file)
-    : GraphicsItem(file) {
-    shape_.addPolygon(path);
+DataPath::DataPath(const Path& path, AbstractFile* file)
+    : Item{file} {
+    shape_.addPolygon(~path);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
 }
 
-void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if (pnColorPrt_)
+DataPath::DataPath(const Paths& paths, AbstractFile* file)
+    : Item{file} {
+    for(auto&& path: paths)
+        shape_.addPolygon(~path);
+    updateSelection();
+    setAcceptHoverEvents(true);
+    setFlag(ItemIsSelectable, true);
+    setSelected(false);
+}
+
+void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+    if(pnColorPrt_)
         pen_.setColor(*pnColorPrt_);
-    if (colorPtr_)
+    if(colorPtr_)
         color_ = *colorPtr_;
 
     updateSelection();
@@ -46,11 +55,11 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     QPen pen(pen_);
     constexpr double dl = 3;
 
-    if (option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
-        if (option->state & QStyle::State_Selected) {
+    if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
+        if(option->state & QStyle::State_Selected) {
             color.setAlpha(255);
             pen.setColor(color);
-            pen.setDashOffset(dashOffset);
+            pen.setDashOffset(App::dashOffset());
         }
         pen.setWidthF(2.0 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
@@ -63,57 +72,81 @@ void GiDataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option
     painter->drawPath(shape_);
 }
 
-int GiDataPath::type() const { return GiType::DataPath; }
+int DataPath::type() const { return Type::DataPath; }
 
-QPainterPath GiDataPath::shape() const { return selectionShape_; }
+QPainterPath DataPath::shape() const { return selectionShape_; }
 
-void GiDataPath::updateSelection() const {
-    if (const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
+void DataPath::updateSelection() const {
+    if(const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
         scale_ = scale;
         selectionShape_ = QPainterPath();
-        Paths tmpPpath;
-        ClipperOffset offset;
-        offset.AddPath(shape_.toSubpathPolygons().front(), jtSquare, ClipperLib::etOpenSquare);
-        offset.Execute(tmpPpath, 5 * uScale * scale_);
-        for (const Path& path : qAsConst(tmpPpath))
-            selectionShape_.addPolygon(path);
+        // ClipperOffset offset;
+        // offset.AddPath(Path{~shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
+        // auto tmpPpath{offset.Execute(5 * uScale * scale_)};
+        auto tmpPpath = Inflate({~shape_.toSubpathPolygons().front()}, 5 * uScale * scale_, JoinType::Square, EndType::Square);
+        for(auto&& path: tmpPpath)
+            selectionShape_.addPolygon(~path);
         boundingRect_ = selectionShape_.boundingRect();
     }
 }
 
-void GiDataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    GraphicsItem::mouseReleaseEvent(event);
-    std::set<void*> set;
-    std::function<void(QGraphicsItem*)> selector = [&](QGraphicsItem* item) {
+void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    Item::mouseReleaseEvent(event);
+    std::map<void*, Path> set;
+    std::function<void(Item*)> selector = [&](Item* item) {
         auto collidingItems = scene()->collidingItems(item, Qt::IntersectsItemShape);
-        for (auto* item : collidingItems) {
-            if (item->type() == int(GiType::DataPath) && itemGroup->contains((GraphicsItem*)item) && set.emplace(item).second) {
-                item->setSelected(true);
+        auto constexpr filter = std::views::filter(
+            [](auto* item) { return item->type() == int(Type::DataPath); });
+        auto constexpr transform = std::views::transform(
+            [](auto* item) { return static_cast<Item*>(item); });
+        auto path1 = item->paths().front();
+        for(auto* item: collidingItems | filter | transform) {
+            auto glue = App::project().glue() * uScale;
+
+            auto path2 = item->paths().front();
+            if(itemGroup->contains(item) && !set.contains(item)) {
+                set.emplace(item, Path{path2.front(), path2.back()});
+
+                double dists[]{
+                    distTo(path1.back(), path2.back()),
+                    distTo(path1.back(), path2.front()),
+                    distTo(path1.front(), path2.back()),
+                    distTo(path1.front(), path2.front()),
+                };
+
+                qInfo() << "distTo(1.back  , 2.back ) " << distTo(path1.back(), path2.back());
+                qInfo() << "distTo(1.back  , 2.front) " << distTo(path1.back(), path2.front());
+                qInfo() << "distTo(1.front , 2.back ) " << distTo(path1.front(), path2.back());
+                qInfo() << "distTo(1.front , 2.front) " << distTo(path1.front(), path2.front());
+                qInfo() << "glue" << glue << std::ranges::min(dists);
+                item->setSelected(qFuzzyIsNull(std::ranges::min(dists)) /*glue > std::ranges::min(dist)*/);
                 selector(item);
             }
         }
     };
 
-    if (event->modifiers() & Qt::ShiftModifier && itemGroup)
+    if(event->modifiers() & Qt::ShiftModifier && itemGroup)
         selector(this);
 }
 
-QVariant GiDataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if (change == ItemVisibleChange && value.toBool()) {
+QVariant DataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    if(change == ItemVisibleChange && value.toBool()) {
         updateSelection();
-    } else if (change == ItemSelectedChange && App::settings().animSelection()) {
-        if (value.toBool()) {
+    } else if(change == ItemSelectedChange && App::settings().animSelection()) {
+        if(value.toBool()) {
             updateSelection();
-            connect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
+            //  FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
         } else {
-            disconnect(&timer, &QTimer::timeout, this, &GiDataPath::redraw);
+            //   FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
             update();
         }
     }
     return value;
 }
 
-void GiDataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+void DataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     QGraphicsItem::hoverEnterEvent(event);
     updateSelection();
 }
+
+} // namespace Gi

@@ -3,39 +3,41 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_datasolid.h"
 
-#include "file.h"
+#include "abstract_file.h"
 #include "graphicsview.h"
 #include <QElapsedTimer>
 #include <QPainter>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 
-GiDataSolid::GiDataSolid(Paths& paths, FileInterface* file)
-    : GraphicsItem(file)
-    , paths_ {paths} {
-    for (Path path : paths) {
-        if (path.size() && path.back() != path.front())
+namespace Gi {
+
+DataFill::DataFill(Paths& paths, AbstractFile* file)
+    : Item(file)
+    , paths_{paths} {
+    for(Path path: paths) {
+        if(path.size() && path.back() != path.front())
             path.push_back(path.front());
-        shape_.addPolygon(path);
+        shape_.addPolygon(~path);
     }
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
-GiDataSolid::~GiDataSolid() { }
+DataFill::~DataFill() { }
 
-void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    // FIXME   if (App::graphicsView()->scene()->drawPdf()) {
+void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+    // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
@@ -56,9 +58,9 @@ void GiDataSolid::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*opt
     painter->strokePath(shape_, pen_);
 }
 
-int GiDataSolid::type() const { return GiType::DataSolid; }
+int DataFill::type() const { return Type::DataSolid; }
 
-void GiDataSolid::redraw() {
+void DataFill::redraw() {
     //    shape_ = QPainterPath();
     //    for (Path path : qAsConst(paths_)) {
     //        path.push_back(path.front());
@@ -69,41 +71,38 @@ void GiDataSolid::redraw() {
     // update();
 }
 
-void GiDataSolid::setPaths(Paths paths, int alternate) {
-    auto t {transform()};
-    auto a {qRadiansToDegrees(asin(t.m12()))};
+void DataFill::setPaths(Paths paths, int alternate) {
+    auto t{transform()};
+    auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
-    auto x {t.dx()};
-    auto y {t.dy()};
-    shape_ = {};
+    auto x{t.dx()};
+    auto y{t.dy()};
 
     // reverse transform
     t = {};
     t.rotate(-a);
     t.translate(-x, -y);
-    for (auto&& path : paths) {
-        path = t.map(path);
-        shape_.addPolygon(path);
-    }
+
+    shape_ = {};
+    for(auto&& path: paths)
+        shape_.addPolygon(t.map(~path));
     paths_ = std::move(paths);
+
     redraw();
 }
 
-void GiDataSolid::changeColor() {
-    //    auto animation = new QPropertyAnimation(this, "bodyColor");
+void DataFill::changeColor() {
+    //    auto animation = new QPropertyAnimation{this, "bodyColor"};
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);
-
     //    animation.setStartValue(bodyColor_);
 
     bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
 
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         break;
-    case Hovered: // FIXME V1037. Two or more case-branches perform the same actions.
-        bodyColor_.setAlpha(255);
-        break;
+    case Hovered:
     case Selected:
         bodyColor_.setAlpha(255);
         break;
@@ -115,7 +114,7 @@ void GiDataSolid::changeColor() {
 
     pathColor_ = colorPtr_ ? *colorPtr_ : color_;
     pathColor_.setAlpha(100);
-    switch (colorState) {
+    switch(colorState) {
     case Default:
         //        pathColor_.setAlpha(100);
         break;
@@ -135,3 +134,5 @@ void GiDataSolid::changeColor() {
     //    animation.setEndValue(bodyColor_);
     //    animation.start();
 }
+
+} // namespace Gi

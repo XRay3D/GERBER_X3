@@ -1,10 +1,10 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -61,7 +61,7 @@ public:
     Paths bridge() const { return bridge_; }
     virtual bool isValid() const;
 
-    virtual IntPoint pos() const = 0;
+    virtual Point pos() const = 0;
     virtual Paths paths() const = 0;
     virtual void redraw() = 0;
 
@@ -84,7 +84,7 @@ private:
 
     static constexpr int dark = 180;
     static constexpr int light = 255;
-    inline static const QColor colors[] {
+    inline static const QColor colors[]{
         QColor(128, 128, 128, dark),  // Default         dark gray
         QColor(128, 128, 128, light), // DefaultHovered  light gray
         QColor(0x0, 255, 0x0, dark),  // Selected        dark green
@@ -123,19 +123,19 @@ protected:
     Paths cashedPath;
     Paths cashedFrame;
 
-    Node* node_ {nullptr};
+    Node* node_{nullptr};
 
     double diameter;
-    int isEmpty {-1};
+    int isEmpty{-1};
 };
 
 class PreviewItem final : public AbstractThermPrGi {
     const Paths& paths_;
-    const IntPoint pos_;
+    const Point pos_;
 
 public:
-    PreviewItem(const Paths& paths, const IntPoint pos, Tool& tool);
-    IntPoint pos() const override;
+    PreviewItem(const Paths& paths, const Point pos, Tool& tool);
+    Point pos() const override;
     Paths paths() const override;
     void redraw() override;
 

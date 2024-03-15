@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -24,7 +24,7 @@ Style::Style(SectionParser* sp)
 void Style::parse(CodeData& code) {
     do {
         data.push_back(code);
-        switch (code.code()) {
+        switch(code.code()) {
         case SubclassMarker: // 100
             break;
         case StyleName: // 2
@@ -51,28 +51,28 @@ void Style::parse(CodeData& code) {
         case BigfontFileName: // 4
             break;
         case ALongValueWhichContainsATruetypeFontsPitchAndFamily_CharacterSet_AndItalicAndBoldFlags: // 1071
-            if ((int32_t(code) & 0xA) == 0xA) {
+            if((int32_t(code) & 0xA) == 0xA) {
                 font.setBold(false);
                 font.setItalic(false);
             }
-            if ((int32_t(code) & 0x1000020) == 0x1000020)
+            if((int32_t(code) & 0x1000020) == 0x1000020)
                 font.setBold(true);
-            if ((int32_t(code) & 0x2000030) == 0x2000030)
+            if((int32_t(code) & 0x2000030) == 0x2000030)
                 font.setItalic(true);
             break;
         case FontFamily: // 1000
             font.setPointSize(100);
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-            for (auto& family : QFontDatabase().families()) {
+            for(auto& family: QFontDatabase().families()) {
 #else
-            for (auto& family : QFontDatabase::families()) {
+            for(auto& family: QFontDatabase::families()) {
 #endif
-                if (family.contains(code.string(), Qt::CaseInsensitive)) {
+                if(family.contains(code.string(), Qt::CaseInsensitive)) {
                     font.setFamily(code.string());
                     break;
                 }
             }
-            if (font.family() != code) {
+            if(font.family() != code) {
                 qDebug() << font.family();
                 font.setFamily(Settings::defaultFont());
             }
@@ -81,10 +81,9 @@ void Style::parse(CodeData& code) {
             AbstractTable::parse(code);
         }
         code = sp->nextCode();
-    } while (code.code() != 0);
-    //    qDebug() << data.size();
+    } while(code.code() != 0);
+
     //    for (auto& code : data)
-    //        qDebug() << "\t" << code;
 }
 
 } // namespace Dxf

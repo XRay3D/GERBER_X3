@@ -3,10 +3,10 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  01 February 2020                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
- * License:                                                                     *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
+ * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -39,9 +39,9 @@ PolyLine::PolyLine(SectionParser* sp)
 void PolyLine::parse(CodeData& code) {
     do {
         data.push_back(code);
-        if (code != "VERTEX") {
+        if(code != "VERTEX") {
             code = sp->nextCode();
-            switch (code.code()) {
+            switch(code.code()) {
             case StartWidth:
                 startWidth = code;
                 break;
@@ -58,24 +58,22 @@ void PolyLine::parse(CodeData& code) {
             vertex.append(Dxf::Vertex(sp));
             vertex.last().parse(code);
         }
-    } while (code != "SEQEND");
+    } while(code != "SEQEND");
     do {
         code = sp->nextCode();
         Entity::parse(code);
-    } while (code.code() != 0);
-    //    qDebug() << data.size();
-    //    qDebug() << data;
+    } while(code.code() != 0);
 }
 
 Entity::Type PolyLine::type() const { return Type::POLYLINE; }
 
-GraphicObject PolyLine::toGo() const {
+DxfGo PolyLine::toGo() const {
     QPainterPath path;
     auto addSeg = [&path](const Vertex& source, const Vertex& target) {
-        if (path.isEmpty())
+        if(path.isEmpty())
             path.moveTo(source);
 
-        if (source.bulge == 0.0) {
+        if(source.bulge == 0.0) {
             path.lineTo(target);
             return;
         }
@@ -87,7 +85,7 @@ GraphicObject PolyLine::toGo() const {
         double span = end_angle - start_angle;
         if /**/ (span < -180 || (qFuzzyCompare(span, -180) && !(end_angle > start_angle)))
             span += 360;
-        else if (span > 180 || (qFuzzyCompare(span, 180) && (end_angle > start_angle)))
+        else if(span > 180 || (qFuzzyCompare(span, 180) && (end_angle > start_angle)))
             span -= 360;
 
         QPointF pr(radius, radius);
@@ -96,23 +94,22 @@ GraphicObject PolyLine::toGo() const {
             -span);
     };
 
-    for (int i = 0; i < vertex.size() - 1; ++i) {
+    for(int i = 0; i < vertex.size() - 1; ++i)
         addSeg(vertex[i], vertex[i + 1]);
-    }
-    if (polylineFlags & ClosedPolyline) {
+    if(polylineFlags & ClosedPolyline)
         addSeg(vertex.last(), vertex.first());
-    }
 
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
-    for (auto& poly : path.toSubpathPolygons(m))
+    for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    return {id, p.value(0), {}};
+    DxfGo go{id, ~p.value(0), {}}; // return {id, ~p.value(0), {}};
+    return go;
 }
 
 void PolyLine::write(QDataStream& stream) const {

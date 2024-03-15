@@ -1,18 +1,20 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  11 November 2021                                                *
+ * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2023                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
+#include "utils.h"
 #include <QDebug>
 #include <QObject>
 #include <QVariant>
+#include <concepts>
 #include <variant>
 
 namespace Dxf {
@@ -21,16 +23,11 @@ template <typename T>
 struct TypenameTest;
 
 class CodeData;
-using variant = std::variant<int16_t, int32_t, int64_t, double, QString>;
+using variant = Variant<int16_t, int32_t, int64_t, double, QString>;
 using Codes = std::vector<CodeData>;
 
 class CodeData {
     Q_GADGET
-    int lineNum;
-    int code_ = 0;
-    variant varVal;
-    QString strVal;
-
 public:
     CodeData(int code = 0, const QString& val = {}, int lineNum = 0);
 
@@ -54,35 +51,49 @@ public:
 
     template <typename T>
     inline operator T() const {
-        return std::visit([this](auto&& arg) -> std::decay_t<T> {
-            using To = std::decay_t<T>;
-            using Fr = std::decay_t<decltype(arg)>;
-            bool ok = true;
-            T val;
-            /**/ if constexpr (std::is_same_v<Fr, To>)
-                return arg;
-            else if constexpr (std::is_same_v<To, QString> && std::is_integral_v<Fr>)
-                return QString::number(arg);
-            else if constexpr (std::is_same_v<To, QString> && std::is_floating_point_v<Fr>)
-                return QString::number(arg);
-            else if constexpr (std::is_same_v<Fr, QString> && std::is_integral_v<To>)
-                val = T(arg.toLongLong(&ok));
-            else if constexpr (std::is_same_v<Fr, QString> && std::is_floating_point_v<To>)
-                val = T(arg.toDouble(&ok));
-            else if constexpr (std::is_integral_v<To>)
-                return T(arg);
-            else if constexpr (std::is_floating_point_v<To>)
-                return T(arg);
-            else
-                TypenameTest<T> {}; // static_assert(always_false_v<T>, "non-exhaustive visitor!");
-            if (!ok)
-                throw QString("CodeData::operator T(), %1 to %2 from %3")
-                    .arg(typeid(Fr).name())
-                    .arg(typeid(std::decay_t<T>).name())
-                    .arg(strVal);
-            return val;
-        },
-            varVal);
+        using To = std::decay_t<T>;
+        // return std::visit([this](auto&& arg) -> std::decay_t<T> {
+        //     bool ok = true;
+        //     T val;
+        //     /**/ if constexpr(std::is_same_v<Fr, To>)
+        //         return arg;
+        //     else if constexpr(std::is_same_v<To, QString> && std::is_integral_v<Fr>)
+        //         return QString::number(arg);
+        //     else if constexpr(std::is_same_v<To, QString> && std::is_floating_point_v<Fr>)
+        //         return QString::number(arg);
+        //     else if constexpr(std::is_same_v<Fr, QString> && std::is_integral_v<To>)
+        //         val = T(arg.toLongLong(&ok));
+        //     else if constexpr(std::is_same_v<Fr, QString> && std::is_floating_point_v<To>)
+        //         val = T(arg.toDouble(&ok));
+        //     else if constexpr(std::is_integral_v<To>)
+        //         return T(arg);
+        //     else if constexpr(std::is_floating_point_v<To>)
+        //         return T(arg);
+        //     else
+        //         TypenameTest<T>{}; // static_assert(always_false_v<T>, "non-exhaustive visitor!");
+        //     if(!ok)
+        //         throw QString("CodeData::operator T(), %1 to %2 from %3")
+        //             .arg(typeid(Fr).name(), typeid(std::decay_t<T>).name(), strVal);
+        //     return val;
+        // },
+        //     varVal);
+
+        return varVal.visit(
+            [](std::integral auto val) -> To {
+                if constexpr(std::is_same_v<To, QString>)
+                    return QString::number(val);
+                else return val;
+            },
+            [](std::floating_point auto val) -> To {
+                if constexpr(std::is_same_v<To, QString>)
+                    return QString::number(val);
+                else return val;
+            },
+            [](const QString& val) -> To {
+                if constexpr(!std::is_same_v<To, QString>)
+                    return QVariant{val}.value<To>();
+                else return val;
+            });
     }
 
     friend bool operator==(const CodeData& l, const QString& r) { return l.strVal == r; }
@@ -98,6 +109,13 @@ public:
 
     Type type() const;
     QVariant value() const;
+
+private:
+    int lineNum{};
+    int code_{};
+    variant varVal;
+    QString strVal;
+    Type type_{};
 };
 
 } // namespace Dxf
