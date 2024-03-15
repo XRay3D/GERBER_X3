@@ -347,8 +347,12 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
                 //                    for (auto node : nodes)
                 //                        polynode.Childs[--i] = node;
                 //                }
-
-                for(auto&& node: polynode)
+                auto itB = polynode.begin();
+                auto itE = polynode.end();
+                for(auto&& node: std::span{
+                        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itB), // FIXME очеь грязный хак
+                        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очеь грязный хак
+                    })
                     addPolyNodeToPaths(*node, nodetype);
             };
 
