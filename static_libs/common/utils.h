@@ -217,7 +217,9 @@ struct Deleter {
     }
 };
 
-#if QT_VERSION > 0x050000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QString>
+
 template <size_t Size>
 struct String {
     char16_t data[Size]{};
