@@ -16,7 +16,9 @@
 
 namespace Drilling {
 
-class GiPreview;
+namespace Gi {
+class Preview;
+}
 
 struct Row {
     //    Row(QString&& name = {},
@@ -36,7 +38,7 @@ struct Row {
     /*const*/ bool isSlot;
     bool useForCalc{};
     int toolId{-1};
-    mvector<GiPreview*> items;
+    mvector<Gi::Preview*> items;
 };
 
 class Model : public QAbstractTableModel {

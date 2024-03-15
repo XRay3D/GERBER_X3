@@ -22,13 +22,15 @@
 #include <list>
 #include <vector>
 
-GiBridge::GiBridge() {
+namespace Gi {
+
+Bridge::Bridge() {
     pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
 }
 
-void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void Bridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     painter->setBrush(!ok_ ? Qt::red : Qt::green);
     painter->setPen(Qt::NoPen);
     painter->drawPath(pPath);
@@ -45,18 +47,18 @@ void GiBridge::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     }
 }
 
-QVariant GiBridge::itemChange(GraphicsItemChange change, const QVariant& value) {
+QVariant Bridge::itemChange(GraphicsItemChange change, const QVariant& value) {
     if(change == ItemPositionChange)
         return snapedPos(value.toPointF());
     return QGraphicsItem::itemChange(change, value);
 }
 
-void GiBridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
+void Bridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mousePressEvent(event);
     lastPos = pos();
 }
 
-QPointF GiBridge::snapedPos(const QPointF& pos) {
+QPointF Bridge::snapedPos(const QPointF& pos) {
     auto col = scene()->collidingItems(this);
     if(col.isEmpty())
         return pos;
@@ -69,15 +71,15 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
 
     auto filter = [](auto* item) {
         auto ty = item->type();
-        // using enum Gi::Type;
-        return item->isSelected() && (ty >= Gi::Type::ShCircle || ty == Gi::Type::Drill || ty == Gi::Type::DataSolid || ty == Gi::Type::DataPath);
+        // using enum Type;
+        return item->isSelected() && (ty >= Type::ShCircle || ty == Type::Drill || ty == Type::DataSolid || ty == Type::DataPath);
     };
 
-    auto transform = [](auto* item) { return static_cast<Gi::Item*>(item); };
+    auto transform = [](auto* item) { return static_cast<Item*>(item); };
 
-    for(Gi::Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
+    for(Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
         auto paths = gi->paths();
-        if(gi->type() == Gi::Type::DataPath
+        if(gi->type() == Type::DataPath
             && paths.size() == 1
             && paths.front().front() == paths.front().back()
             && IsPositive(paths.front())) // fix direction for drawing
@@ -116,7 +118,7 @@ QPointF GiBridge::snapedPos(const QPointF& pos) {
     return retPos;
 }
 
-void GiBridge::update() {
+void Bridge::update() {
     pPath = QPainterPath();
     pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
 
@@ -165,19 +167,19 @@ void GiBridge::update() {
     QGraphicsItem::update();
 }
 
-bool GiBridge::test(const Path& path) { return pointOnPolygon(testLine(), path, &intersectPoint); }
+bool Bridge::test(const Path& path) { return pointOnPolygon(testLine(), path, &intersectPoint); }
 
-QLineF GiBridge::testLine() const {
+QLineF Bridge::testLine() const {
     QLineF lTool2 = QLineF::fromPolar(toolDiam * 1.2, angle_ - 90);
     return lTool2.translated(pos() - lTool2.center());
 }
 
-bool GiBridge::ok() const { return ok_; }
+bool Bridge::ok() const { return ok_; }
 
-void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseReleaseEvent(event);
     if(ok_ && pos() == lastPos) {
-        moveBrPtr = new GiBridge;
+        moveBrPtr = new Bridge;
         scene()->addItem(moveBrPtr);
         moveBrPtr->setPos(pos());
         moveBrPtr->setVisible(true);
@@ -187,6 +189,8 @@ void GiBridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     }
 }
 
-int GiBridge::type() const { return Gi::Type::Bridge; }
+int Bridge::type() const { return Type::Bridge; }
 
-Paths GiBridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
+Paths Bridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
+
+} // namespace Gi

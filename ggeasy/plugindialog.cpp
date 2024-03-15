@@ -57,17 +57,23 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
     };
 
     if(App::filePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem{treeWidget, {tr("File Plugins"), "", ""}};
+        auto interfaceItem = new QTreeWidgetItem{
+            treeWidget, {tr("File Plugins"), "", ""}
+        };
         addRows(interfaceItem, 'F', App::filePlugins());
     }
 
     if(App::shapePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem{treeWidget, {tr("Shape Plugins"), "", ""}};
+        auto interfaceItem = new QTreeWidgetItem{
+            treeWidget, {tr("Shape Plugins"), "", ""}
+        };
         addRows(interfaceItem, 'S', App::shapePlugins());
     }
 
     if(App::gCodePlugins().size()) {
-        auto interfaceItem = new QTreeWidgetItem{treeWidget, {tr("GCode Plugins"), "", ""}};
+        auto interfaceItem = new QTreeWidgetItem{
+            treeWidget, {tr("GCode Plugins"), "", ""}
+        };
         addRows(interfaceItem, 'G', App::gCodePlugins());
     }
 

@@ -244,7 +244,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.diameter = std::any_cast<double>(val.front()->raw);
             row.isSlot = key.second;
             for(auto* go: val)
-                new GiPreview{
+                new Gi::Preview{
                     (go->path.size() > 1 ? Path{go->path} : Path{go->pos}),
                     row.diameter,
                     data.back().toolId,

@@ -12,7 +12,11 @@
  ********************************************************************************/
 #include "graphicsview.h"
 #include "edid.h"
+#include "gi.h"
+#include "gi_datasolid.h"
+#include "gi_drill.h"
 #include "gi_point.h"
+#include "mainwindow.h"
 #include "myclipper.h"
 #include "project.h"
 #include "ruler.h"
@@ -35,6 +39,11 @@
 #include <QScrollBar>
 #include <QUndoCommand>
 #include <cmath>
+
+#include <QDrag>
+#include <QDragEnterEvent>
+#include <QMenu>
+#include <QMimeData>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -443,8 +452,9 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     painter->setBrush(Qt::white);
     painter->drawText(QRect{{}, size}, Qt::AlignLeft, text);
 }
+namespace Gi {
 
-class GiGuide : public QGraphicsItem {
+class Guide : public QGraphicsItem {
 
     Qt::Orientation orientation;
     double scaleFactor() const {
@@ -454,12 +464,12 @@ class GiGuide : public QGraphicsItem {
     };
 
 public:
-    GiGuide(QPointF pos, Qt::Orientation orientation)
+    Guide(QPointF pos, Qt::Orientation orientation)
         : orientation{orientation} {
         setFlags(ItemIsSelectable | ItemIsMovable);
         orientation == Qt::Horizontal ? setPos(0, pos.y()) : setPos(pos.x(), 0);
     }
-    ~GiGuide() override = default;
+    ~Guide() override = default;
 
 public:
     // QGraphicsItem interface
@@ -483,6 +493,8 @@ protected:
     }
 };
 
+} // namespace Gi
+
 void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
     qDebug(__FUNCTION__);
     auto mimeData{event->mimeData()};
@@ -505,9 +517,9 @@ void GraphicsView::dropEvent(QDropEvent* event) {
 
     if(mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
 #if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-        scene()->addItem(new GiGuide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()}.data())));
+        scene()->addItem(new Gi::Guide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()}.data())));
 #else
-        scene()->addItem(new GiGuide{mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())});
+        scene()->addItem(new Gi::Guide{mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())});
 #endif
     }
 
@@ -553,6 +565,10 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             // scene_->setDrawRuller(true);
             // scene_->setCross2(point);
         }
+
+        QGraphicsItem* item = scene()->itemAt(mapToScene(event->pos()), transform());
+        if(item && (item->type() == Gi::Type::Drill || item->type() == Gi::Type::DataSolid))
+            GiToShapeEvent(event, item);
     } else {
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
@@ -578,6 +594,57 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             }
         }
     }
+}
+
+void GraphicsView::GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item) {
+    QPointF center, radius, rect;
+    qreal maxX = -1000000, maxY = -1000000;
+
+    if(item->type() == Gi::Type::Drill) {
+        Gi::Drill* gitem = dynamic_cast<Gi::Drill*>(item);
+
+        center = item->boundingRect().center();
+        radius = QPointF{gitem->diameter() / 2, 0};
+        rect = QPointF{gitem->diameter() / 2, gitem->diameter() / 2};
+    }
+
+    if(item->type() == Gi::Type::DataSolid) {
+        Gi::DataFill* ditem = dynamic_cast<Gi::DataFill*>(item);
+        qreal distance = 0;
+        center = item->boundingRect().center();
+
+        for(const auto& paths: ditem->getPaths()) {
+            for(const auto& path: paths) {
+                qreal x = path.x * dScale;
+                qreal y = path.y * dScale;
+
+                QPointF poi(x, y);
+                distance = std::max(distance, std::sqrt(std::pow(poi.x() - center.x(), 2) + std::pow(poi.y() - center.y(), 2)));
+                maxX = std::max(maxX, poi.x());
+                maxY = std::max(maxY, poi.y());
+            }
+        }
+
+        radius = QPointF{distance, 0};
+        rect = QPointF(maxX, maxY) - center;
+    }
+
+    QMenu menu;
+    QAction makeCircle(QObject::tr("Circle from Item"), &menu);
+    QAction makeRect(QObject::tr("Rectangle from Item"), &menu);
+    menu.addAction(&makeCircle);
+    menu.addAction(&makeRect);
+
+    QObject::connect(&makeCircle, &QAction::triggered, [&center, &radius]() {
+        App::project().makeShapeCircle(center, center + radius);
+    });
+
+    QObject::connect(&makeRect, &QAction::triggered, [&center, &rect]() {
+        App::project().makeShapeRectangle(center - rect, center + rect);
+    });
+
+    menu.exec(event->globalPos());
+    scene()->update();
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
@@ -615,7 +682,9 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
     if(ruler_ && rulerCtr & 0x1)
         rulPt2 = point;
 
-    emit mouseMove(point);
+    // расчёт смещения для нулевых координат
+    emit mouseMove2(point, point - App::project().zeroPos());
+
     scene()->update();
 }
 

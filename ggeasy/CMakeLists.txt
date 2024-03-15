@@ -34,7 +34,12 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 
 string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S")# [<format string>] [UTC])
-add_definitions(-DBUILD_DATE="${DT}")
+
+add_definitions(
+    -DBUILD_DATE="${DT}"
+    -DGIT_REF_NAME="${GIT_REF_NAME}"
+    -DGIT_SHA="${GIT_SHA}"
+)
 
 find_package(QT NAMES #[[Qt6]] Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
@@ -145,7 +150,7 @@ if(WIN32)
         \"$<TARGET_FILE:${PROJECT_NAME}>\"
         COMMENT "Deploying Qt..."
     )
-elseif (UNIX____)#LINUX
+elseif (UNIX)#LINUX
 
     find_program(Q_MAKE_EXE qmake)
 
@@ -158,20 +163,20 @@ elseif (UNIX____)#LINUX
 
     add_custom_target(
         deploy
-        COMMAND cqtdeployer clear -bin ${CURENT_PROJECT} -qmake ${Q_MAKE_EXE} -libDir ${PROJECT_SOURCE_DIR} -qmlDir ${PROJECT_SOURCE_DIR} -recursiveDepth 5
-        COMMENT "Deploy: cqtdeployer clear -bin ${CURENT_PROJECT} -qmake ${Q_MAKE_EXE} -libDir ${PROJECT_SOURCE_DIR} -qmlDir ${PROJECT_SOURCE_DIR} -recursiveDepth 5"
+        COMMAND cqtdeployer clear -bin "${OUTPUT_DIRECTORY}/${PROJECT_NAME}" -extraData "${OUTPUT_DIRECTORY}/plugins" -extraDataOut /bin -qmake "${Q_MAKE_EXE}" -libDir "${PROJECT_SOURCE_DIR}" -qmlDir "${PROJECT_SOURCE_DIR}" -recursiveDepth 5 -targetDir "${OUTPUT_DIRECTORY}/../cqt-deploy"
+        COMMENT "Deploy app with cqtdeployer"
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR}
     )
 
 
-# add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
-# COMMAND "${CMAKE_COMMAND}" -E
-# env PATH="${_QT_BIN_DIR}" "cqtdeployer"
-# -bin $<TARGET_FILE:${PROJECT_NAME}>
-# -qmake ${QT_QMAKE_EXECUTABLE}
-# qif
-# COMMENT "Deploying Qt..."
-# )
-# cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
+#    add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD
+#        COMMAND "${CMAKE_COMMAND}" -E
+#        env PATH="${_QT_BIN_DIR}" "cqtdeployer"
+#        -bin    $<TARGET_FILE:${PROJECT_NAME}>
+#        -qmake  ${QT_QMAKE_EXECUTABLE}
+#        qif
+#        COMMENT "Deploying Qt..."
+#    )
 
+#    cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir path/to/my/qml/files/dir qif
 endif()

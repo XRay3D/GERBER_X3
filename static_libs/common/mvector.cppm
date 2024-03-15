@@ -35,7 +35,7 @@ struct mvector : std::vector<T> {
 
     bool removeOne(const T& t) {
         auto it = std::find(V::begin(), V::end(), t);
-        if (it == V::end())
+        if(it == V::end())
             return false;
         V::erase(it);
         return true;
@@ -43,13 +43,13 @@ struct mvector : std::vector<T> {
 
     mvector mid(size_t idx, size_t len = 0) const {
         mvector v;
-        if (idx >= V::size())
+        if(idx >= V::size())
             return v;
         typename V::const_iterator end;
         typename V::const_iterator begin = V::cbegin() + idx;
-        if (len == 0)
+        if(len == 0)
             end = V::cend();
-        else if (idx + len > V::size())
+        else if(idx + len > V::size())
             end = begin + (V::size() - idx);
         else
             end = begin + len;
@@ -102,7 +102,7 @@ struct mvector : std::vector<T> {
     }
 
     inline auto indexOf(const T& t) const noexcept {
-        if (auto it = std::find(V::begin(), V::end(), t); it == V::end())
+        if(auto it = std::find(V::begin(), V::end(), t); it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);
@@ -114,7 +114,7 @@ struct mvector : std::vector<T> {
     {
         using CP = const P;
         auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
-        if (it == V::end())
+        if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);
@@ -125,7 +125,7 @@ struct mvector : std::vector<T> {
         requires std::is_base_of_v<T, std::shared_ptr<P>>
     {
         auto it = std::find(V::begin(), V::end(), t /*std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})*/);
-        if (it == V::end())
+        if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
             return std::distance(V::begin(), it);
@@ -133,7 +133,7 @@ struct mvector : std::vector<T> {
 
     inline T takeAt(const T& t) noexcept {
         auto it = std::find(V::begin(), V::end(), t);
-        if (it == V::end())
+        if(it == V::end())
             return {};
         T r(std::move(*it));
         V::erase(it);
@@ -141,7 +141,7 @@ struct mvector : std::vector<T> {
     }
 
     inline T takeAt(size_t idx) noexcept {
-        if (V::begin() + idx >= V::end())
+        if(V::begin() + idx >= V::end())
             return {};
         T r(std::move(*(V::begin() + idx)));
         V::erase(V::begin() + idx);
