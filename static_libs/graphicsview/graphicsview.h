@@ -22,30 +22,30 @@ class Ruler;
 class QGridLayout;
 // class Scene;
 
+template <size_t N>
+struct EnumHelper2 : std::integral_constant<bool, N != 0> {
+    template <typename... Es>
+        requires(std::is_enum_v<Es> && ...) || (sizeof...(Es) == 0)
+    constexpr EnumHelper2(Es... es)
+        : array{es...} { }
+    int array[N];
+    template <size_t... Is>
+    constexpr bool impl(auto* item, std::index_sequence<Is...>) const {
+        return ((item->type() == array[Is]) || ...);
+    }
+    constexpr bool operator()(auto* item) const {
+        return impl(item, std::make_index_sequence<N>{});
+    }
+};
+
+template <typename... Es>
+EnumHelper2(Es...) -> EnumHelper2<sizeof...(Es)>;
+
 class GraphicsView : public QGraphicsView {
     Q_OBJECT
 
     Q_PROPERTY(double scale READ getScale WRITE setScale)
     Q_PROPERTY(QRectF viewRect READ getViewRect WRITE setViewRect)
-
-    template <size_t N>
-    struct EnumHelper : std::integral_constant<bool, N != 0> {
-        template <typename... Es>
-            requires(std::is_enum_v<Es> && ...) || (sizeof...(Es) == 0)
-        constexpr EnumHelper(Es... es)
-            : array{es...} { }
-        int array[N];
-        template <size_t... Is>
-        constexpr bool impl(auto* item, std::index_sequence<Is...>) const {
-            return ((item->type() == array[Is]) || ...);
-        }
-        constexpr bool operator()(auto* item) const {
-            return impl(item, std::make_index_sequence<N>{});
-        }
-    };
-
-    template <typename... Es>
-    EnumHelper(Es...) -> EnumHelper<sizeof...(Es)>;
 
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
@@ -88,12 +88,12 @@ public:
     /////////////////////////////////
     template <typename T = QGraphicsItem, typename... Ts>
     auto items(Ts... ts) const {
-        return getItemImpl<qOverload<Qt::SortOrder>(&QGraphicsScene::items), T>(EnumHelper{ts...}, Qt::DescendingOrder);
+        return getItemImpl<qOverload<Qt::SortOrder>(&QGraphicsScene::items), T>(EnumHelper2{ts...}, Qt::DescendingOrder);
     }
 
     template <typename T = QGraphicsItem, typename... Ts>
     auto selectedItems(Ts... ts) const {
-        return getItemImpl<&QGraphicsScene::selectedItems, T>(EnumHelper{ts...});
+        return getItemImpl<&QGraphicsScene::selectedItems, T>(EnumHelper2{ts...});
     }
 
     template <typename T>
