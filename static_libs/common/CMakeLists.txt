@@ -23,8 +23,8 @@ set(CMAKE_AUTORCC ON)
 
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_library(common STATIC
     ${HEADERS}
@@ -43,6 +43,7 @@ target_link_libraries(common PRIVATE
     Qt${QT_VERSION_MAJOR}::Widgets
 )
 
+add_subdirectory(doublespinbox)
 
 #add_module_library(QT qt.cpp)
 
