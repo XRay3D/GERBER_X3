@@ -10,6 +10,7 @@
  *******************************************************************************/
 #pragma once
 #include "gbr_types.h"
+#define MT 3
 #include "mathparser.h"
 
 #include <QtMath>

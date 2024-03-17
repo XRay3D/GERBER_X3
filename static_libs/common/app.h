@@ -23,10 +23,16 @@
 #include <assert.h>
 #include <map>
 
-namespace Shapes {
-class Plugin;
-class Handle;
-} // namespace Shapes
+class AbstractFilePlugin;
+
+namespace Drilling {
+class Form;
+} // namespace Drilling
+
+namespace FileTree {
+class View;
+class Model;
+} // namespace FileTree
 
 namespace GCode {
 class Plugin;
@@ -34,25 +40,20 @@ class PropertiesForm;
 class Settings;
 } // namespace GCode
 
-class AbstractFilePlugin;
 namespace GCodeShapes {
 class Plugin;
 class Handle;
 } // namespace GCodeShapes
 
-namespace FileTree {
-class View;
-class Model;
-} // namespace FileTree
-
-namespace Drilling {
-class Form;
-} // namespace Drilling
-
 namespace Gi {
 class Marker;
 class Pin;
 } // namespace Gi
+
+namespace Shapes {
+class Plugin;
+class Handle;
+} // namespace Shapes
 
 using Handlers = mvector<Shapes::Handle*>;
 
@@ -85,26 +86,24 @@ class App {
     inline static App* app{};
 
     // clang-format off
-    SINGLETON(Drilling::Form,        setDrillForm,           drillForm       )
-    SINGLETON(FileTree::Model,       setFileModel,           fileModel       )
-    SINGLETON(FileTree::View,        setFileTreeView,        fileTreeView    )
     SINGLETON(GCode::PropertiesForm, setGCodePropertiesForm, gcPropertiesForm)
-    SINGLETON(QUndoStack,            setUndoStack,           undoStack       )
-    SINGLETON(GraphicsView,          setGraphicsView,        grView          )
-    SINGLETON(LayoutFrames,          setLayoutFrames,        layoutFrames    )
-    SINGLETON(MainWindow,            setMainWindow,          mainWindow      )
-    SINGLETON(Project,               setProject,             project         )
-    SINGLETON(QSplashScreen,         setSplashScreen,        splashScreen    )
-    SINGLETON(GCode::Settings,       setGcSettings,          gcSettings      )
+    SINGLETON(Drilling::Form,  setDrillForm,    drillForm    )
+    SINGLETON(FileTree::Model, setFileModel,    fileModel    )
+    SINGLETON(FileTree::View,  setFileTreeView, fileTreeView )
+    SINGLETON(GCode::Settings, setGcSettings,   gcSettings   )
+    SINGLETON(GraphicsView,    setGraphicsView, grView       )
+    SINGLETON(LayoutFrames,    setLayoutFrames, layoutFrames )
+    SINGLETON(MainWindow,      setMainWindow,   mainWindow   )
+    SINGLETON(Project,         setProject,      project      )
+    SINGLETON(QSplashScreen,   setSplashScreen, splashScreen )
+    SINGLETON(QUndoStack,      setUndoStack,    undoStack    )
 
-    SINGLETON(Gi::Marker,            setHome,                home            )
-    SINGLETON(Gi::Marker,            setZero,                zero            )
-
-    SINGLETON(Gi::Pin,               setPin0,                pin0            )
-    SINGLETON(Gi::Pin,               setPin1,                pin1            )
-    SINGLETON(Gi::Pin,               setPin2,                pin2            )
-    SINGLETON(Gi::Pin,               setPin3,                pin3            )
-
+    SINGLETON(Gi::Marker, setHome, home)
+    SINGLETON(Gi::Marker, setZero, zero)
+    SINGLETON(Gi::Pin,    setPin0, pin0)
+    SINGLETON(Gi::Pin,    setPin1, pin1)
+    SINGLETON(Gi::Pin,    setPin2, pin2)
+    SINGLETON(Gi::Pin,    setPin3, pin3)
     // clang-format on
 
     FilePluginMap filePlugins_;
