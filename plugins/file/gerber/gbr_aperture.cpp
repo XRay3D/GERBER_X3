@@ -15,6 +15,8 @@
 
 #include <QDebug>
 #include <QLineF>
+#include <QtQml/QJSEngine>
+#include <QtQml/QJSValue>
 
 namespace Gerber {
 
@@ -394,6 +396,10 @@ void ApMacro::draw() {
     try {
         //        for (int i = 0; i < modifiers_.size(); ++i) {
         //            QString var(modifiers_[i]);
+
+        QJSEngine js;
+        for(auto&& [name, value]: macroCoefficients)
+            js.globalObject().setProperty(name, value);
         for(QString& var: modifiers_) {
             if(var.at(0) == '0') // Skip Comment
                 continue;
@@ -403,12 +409,20 @@ void ApMacro::draw() {
             if(var.contains('=')) {
                 QList<QString> stringList = var.split('=');
                 stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive);
-                macroCoefficients[stringList.first()] = MathParser(&macroCoefficients).parse(stringList.last());
+
+                auto val = js.evaluate(stringList.last());
+                if(val.errorType()) qWarning() << val.toString();
+                js.globalObject().setProperty(stringList.first(), val.toNumber());
                 continue;
             } else {
                 for(auto&& var2: var.split(',')) {
                     var2.replace(QChar('x'), '*', Qt::CaseInsensitive);
-                    mod.push_back(var2.contains('$') ? MathParser(&macroCoefficients).parse(var2) : var2.toDouble());
+                    if(var2.contains('$')) {
+                        auto val = js.evaluate(var2);
+                        if(val.errorType()) qWarning() << val.toString();
+                        mod.push_back(val.toNumber());
+                    } else
+                        mod.push_back(var2.toDouble());
                 }
             }
 
