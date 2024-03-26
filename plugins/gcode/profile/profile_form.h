@@ -19,7 +19,10 @@
 namespace Ui {
 class ProfileForm;
 }
-class GiBridge;
+
+namespace Gi {
+class Bridge;
+}
 
 namespace Profile {
 
@@ -40,7 +43,7 @@ private:
     void rb_clicked();
 
     Ui::ProfileForm* ui;
-    //    GiBridge* brItem = nullptr;
+    //    Gi::Bridge* brItem = nullptr;
 
     const QStringList names{tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps{

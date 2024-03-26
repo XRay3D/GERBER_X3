@@ -61,21 +61,43 @@ set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIR
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
     qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
     qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
-    qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
+    # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 else()
     qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
     qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
+
+if(Enable_Pocketoffset)
 add_subdirectory(pocketoffset)
+endif()
+
+if(Enable_Profile)
 add_subdirectory(profile)
+endif()
+
+if(Enable_Drill)
 add_subdirectory(drill)
+endif()
 
+if(Enable_Hatching)
 add_subdirectory(hatching)
+endif()
+
+if(Enable_Pocketraster)
 add_subdirectory(pocketraster)
+endif()
+
+if(Enable_Voroni)
 add_subdirectory(voroni)
+endif()
 
+if(Enable_Thermal)
 add_subdirectory(thermal)
+endif()
 
+if(Enable_Thread)
 # add_subdirectory(thread)
+endif()
+
 

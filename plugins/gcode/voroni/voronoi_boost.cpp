@@ -13,7 +13,7 @@
 #include "voronoi_boost.h"
 #include "types.h"
 
-#if __has_include(<boost/polygon/voronoi.hpp>)
+#if 0 // __has_include(<boost/polygon/voronoi.hpp>)
 #include "mvector.h"
 
 #include <cstdio>
@@ -90,7 +90,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 
     Path path;
     path.reserve(sampled_edge.size());
-    for(const auto& p: sampled_edge)
+    for (const auto& p: sampled_edge)
         path.emplace_back(static_cast</*Point::Type*/ int32_t>(p.x()), static_cast</*Point::Type*/ int32_t>(p.y()));
     return path;
 }
@@ -110,7 +110,7 @@ void VoronoiBoost::boostVoronoi() {
 
     size_t max{};
 
-    for(const Path& path: std::views::join(groupedPss))
+    for (const Path& path: std::views::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -121,10 +121,10 @@ void VoronoiBoost::boostVoronoi() {
     std::vector<int> vecId;
     srcSegments.reserve(max);
 
-    for(const Paths& paths: groupedPss) {
+    for (const Paths& paths: groupedPss) {
         ++id;
-        for(const Path& path: paths) {
-            for(size_t i = 0; i < path.size(); ++i) {
+        for (const Path& path: paths) {
+            for (size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
                 ifCancelThenThrow();
                 const Point& point = path[i];
@@ -137,10 +137,10 @@ void VoronoiBoost::boostVoronoi() {
                    : srcSegments.emplace_back(
                        point_type{static_cast<coordinate_type>(path[i - 1].x), static_cast<coordinate_type>(path[i - 1].y)},
                        point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)});
-                maxX = std::max(maxX, point.x);
-                maxY = std::max(maxY, point.y);
-                minX = std::min(minX, point.x);
-                minY = std::min(minY, point.y);
+                maxX = std::max<int32_t>(maxX, point.x);
+                maxY = std::max<int32_t>(maxY, point.y);
+                minX = std::min<int32_t>(minX, point.x);
+                minY = std::min<int32_t>(minY, point.y);
             }
         }
     }
@@ -187,7 +187,7 @@ void VoronoiBoost::boostVoronoi() {
 
         std::set<Path> set;
 
-        for(auto& edge: vd.edges()) {
+        for (auto& edge: vd.edges()) {
             auto v0 = edge.vertex0();
             auto v1 = edge.vertex1();
 
@@ -197,12 +197,12 @@ void VoronoiBoost::boostVoronoi() {
             auto color1 = id0(edge);
             auto color2 = id1(edge);
 
-            if(v0 && v1) {
+            if (v0 && v1) {
                 Point p0{static_cast</*Point::Type*/ int32_t>(v0->x()), static_cast</*Point::Type*/ int32_t>(v0->y())};
                 Point p1{static_cast</*Point::Type*/ int32_t>(v1->x()), static_cast</*Point::Type*/ int32_t>(v1->y())};
-                if(color1 != color2 && color1 && color2) {
-                    if(set.emplace(Path{p0, p1}).second && set.emplace(Path{p1, p0}).second) {
-                        if(edge.is_curved() && distTo(p0, p1) < tolerance) {
+                if (color1 != color2 && color1 && color2) {
+                    if (set.emplace(Path{p0, p1}).second && set.emplace(Path{p1, p0}).second) {
+                        if (edge.is_curved() && distTo(p0, p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
                             // segments.emplace_back(Path { p0, p1 });
                         } else {
@@ -232,11 +232,11 @@ void VoronoiBoost::boostVoronoi() {
 
     //    dbgPaths(segments, "segments");
     auto clean = [kAngle = 2.0](Path& path) {
-        for(size_t i = 1; i < path.size() - 1; ++i) {
-            const double a1 = path[i - 1].angleTo(path[i + 0]);
-            const double a2 = path[i + 0].angleTo(path[i + 1]);
-            if(abs(a1 - a2) < kAngle)
-                path.remove(i--);
+        for (size_t i = 1; i < path.size() - 1; ++i) {
+            const double a1 = angleTo(path[i - 1],path[i + 0]);
+            const double a2 = angleTo(path[i + 0],path[i + 1]);
+            if (abs(a1 - a2) < kAngle)
+                path -= i--;
         }
     };
 

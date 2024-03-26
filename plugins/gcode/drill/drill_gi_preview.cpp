@@ -14,8 +14,8 @@
 #include "utils.h"
 
 namespace Drilling {
-
-GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const Paths& draw_)
+namespace Gi {
+Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths& draw_)
     : path_{std::move(path)}
     , row{row}
     , toolId_{toolId} {
@@ -34,7 +34,7 @@ GiPreview::GiPreview(Path&& path, double diameter, int toolId, Row& row, const P
     update();
 }
 
-void GiPreview::updateTool() {
+void Preview::updateTool() {
     if(toolId() > -1) {
         colorState |= Tool;
         if(path_.size() > 1)
@@ -79,23 +79,23 @@ void GiPreview::updateTool() {
     changeColor();
 }
 
-Paths GiPreview::paths() const {
+Paths Preview::paths() const {
     if(path_.size() > 1)
         return {path_};
     else
         return ~sourcePath_.toSubpathPolygons();
 }
 
-bool GiPreview::fit(double depth) const {
+bool Preview::fit(double depth) const {
     const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth);
     return sourceDiameter_ > diameter && !qFuzzyCompare(sourceDiameter_, diameter);
 }
 
-int GiPreview::toolId() const {
+int Preview::toolId() const {
     return toolId_ < 0 ? row.toolId : toolId_;
 }
 
-// Paths GiPreview::offset(const Path& path_, double offset) {
+// Paths Preview::offset(const Path& path_, double offset) {
 ////    ClipperOffset cOffset;
 ////    // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
 ////    cOffset.AddPath(path_, JoinType::Round, EndType::Round);
@@ -107,12 +107,14 @@ int GiPreview::toolId() const {
 //    return {}/*retPaths*/;
 //}
 
-int GiPreview::type() const { return int(Gi::Type::Preview) + (path_.size() > 1); }
+int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1); }
 
-bool GiPreview::isSlot() const { return path_.size() > 1; }
+bool Preview::isSlot() const { return path_.size() > 1; }
 
-Paths GiPreview::offset() const {
+Paths Preview::offset() const {
     return ~sourcePath_.toSubpathPolygons(); /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
 }
 
-} // namespace Drilling
+}
+
+} // namespace Drilling::Gi

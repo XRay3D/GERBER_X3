@@ -6,6 +6,7 @@
 #include <chrono>
 #include <concepts>
 #include <map>
+#include <variant>
 
 #if defined(_MSC_VER)
 #pragma warning(push)
@@ -64,18 +65,12 @@ struct Timer {
     }
 
     constexpr auto format() const noexcept {
-        /**/ if constexpr(std::is_same_v<T, nS>)
-            return ">>> %1.3f (avg %1.3f) nS\t -> %s";
-        else if constexpr(std::is_same_v<T, uS>)
-            return ">>> %1.3f (avg %1.3f) uS\t -> %s";
-        else if constexpr(std::is_same_v<T, mS>)
-            return ">>> %1.3f (avg %1.3f) mS\t -> %s";
-        else if constexpr(std::is_same_v<T, Sec>)
-            return ">>> %1.3f (avg %1.3f) S\t -> %s";
-        else if constexpr(std::is_same_v<T, Mins>)
-            return ">>> %1.3f (avg %1.3f) M\t -> %s";
-        else if constexpr(std::is_same_v<T, Hours>)
-            return ">>> %1.3f (avg %1.3f) H\t -> %s";
+        if constexpr(std::is_same_v<T, nS>) return ">>> %1.3f (avg %1.3f) nS\t -> %s";
+        else if constexpr(std::is_same_v<T, uS>) return ">>> %1.3f (avg %1.3f) uS\t -> %s";
+        else if constexpr(std::is_same_v<T, mS>) return ">>> %1.3f (avg %1.3f) mS\t -> %s";
+        else if constexpr(std::is_same_v<T, Sec>) return ">>> %1.3f (avg %1.3f) S\t -> %s";
+        else if constexpr(std::is_same_v<T, Mins>) return ">>> %1.3f (avg %1.3f) M\t -> %s";
+        else if constexpr(std::is_same_v<T, Hours>) return ">>> %1.3f (avg %1.3f) H\t -> %s";
     }
 };
 template <class T>
@@ -216,7 +211,9 @@ struct Deleter {
     }
 };
 
-#if QT_VERSION > 0x050000
+#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
+#include <QString>
+
 template <size_t Size>
 struct String {
     char16_t data[Size]{};
@@ -312,4 +309,112 @@ template <String Str>
 }
 #else
 using namespace QtLitherals;
+#endif
+
+#if USE_ENUM == 1
+#include <ranges>
+#include <array>
+
+using namespace std::literals;
+template <class Ty>
+inline constexpr bool isEnum = false;
+template <class Ty>
+inline constexpr bool isBitField = false;
+namespace Impl {
+template <class Ty>
+inline constexpr Ty Max = Ty{};
+template <class Ty>
+inline constexpr Ty Tokens = Ty{};
+using sv = std::string_view;
+consteval auto trim(sv str) {
+    auto isSpaceOrSep = [](auto ch) {
+        return ch == ' ' || ch == ','; // || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v';
+    };
+    while(isSpaceOrSep(str.front()))
+        str = str.substr(1);
+    while(isSpaceOrSep(str.back()))
+        str = str.substr(0, str.size() - 1);
+    return str;
+};
+template <class E>
+consteval auto toNum(sv str) {
+    std::underlying_type_t<E> val{};
+    for(auto var: str) {
+        if(var == '-')
+            continue;
+        val *= 10, val += var - '0';
+    }
+    return str.starts_with('-') ? -val : val;
+};
+consteval size_t enumSize(sv enums) {
+    return std::ranges::count(enums, ',') + !enums.ends_with(',');
+}
+template <size_t N, class E>
+consteval auto tokenize(sv base) {
+    size_t count{};
+    std::array<std::pair<sv, E>, N> tokens;
+    std::underlying_type_t<E> val{};
+    sv name;
+    for(auto&& word: std::ranges::views::split(base, ", "sv)) {
+        for(int i{}; auto&& tok: std::ranges::views::split(word, "="sv)) {
+            sv token{tok.begin(), tok.end()};
+            if(i++ == 0)
+                name = trim(token);
+            else if(token.size())
+                val = toNum<E>(trim(token));
+        }
+        tokens[count++] = {name, static_cast<E>(val++)};
+    }
+    return tokens;
+}
+template <size_t N, class E>
+consteval bool isBitField(std::array<std::pair<sv, E>, N> tokens) {
+    std::underlying_type_t<E> checker{};
+    for(auto [name, val]: tokens)
+        checker ^= std::underlying_type_t<E>(val);
+    return checker == (1 << N) - 1;
+}
+} // namespace Impl
+#define ENUM(E, ...)                                                                       \
+    enum class E : int {                                                                   \
+        __VA_ARGS__                                                                        \
+    };                                                                                     \
+    template <>                                                                            \
+    inline constexpr bool isEnum<E> = true;                                                \
+    template <>                                                                            \
+    inline constexpr auto Impl::Max<E> = Impl::enumSize(#__VA_ARGS__);                     \
+    template <>                                                                            \
+    inline constexpr auto Impl::Tokens<E> = Impl::tokenize<Impl::Max<E>, E>(#__VA_ARGS__); \
+    template <>                                                                            \
+    inline constexpr auto isBitField<E> = false; // RImpl::isBitField(Impl::Tokens<E>);
+inline std::string arr;                          //[100] {};
+template <class E>
+    requires isEnum<E>
+constexpr Impl::sv enumToString(E e) {
+    auto it = std::ranges::find(Impl::Tokens<E>, e, &std::pair<Impl::sv, E>::second);
+    if(it != Impl::Tokens<E>.end())
+        return it->first;
+    if constexpr(isBitField<E>) {
+        std::string arr;
+        std::back_insert_iterator bi(arr);
+        using U = std::underlying_type_t<E>;
+        for(auto&& [name, val]: Impl::Tokens<E>) {
+            if(U(val) & U(e)) {
+                if(arr.size())
+                    arr += ", ";
+                arr += name;
+            }
+        }
+        return ::arr = "{ " + arr + " }";
+    }
+    return {};
+}
+template <class E>
+    requires isEnum<E>
+constexpr E stringToEnum(Impl::sv str) {
+    auto it = std::ranges::find(Impl::Tokens<E>, str, &std::pair<Impl::sv, E>::first);
+    return it == Impl::Tokens<E>.end() ? static_cast<E>(
+               std::numeric_limits<std::underlying_type_t<E>>::min())
+                                       : it->second;
+}
 #endif

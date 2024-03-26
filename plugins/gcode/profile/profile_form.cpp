@@ -167,7 +167,7 @@ void Form::showEvent(QShowEvent* event) {
 
 void Form::onAddBridgeClicked() {
     if(sender() == ui->pbClearBridges) {
-        qDeleteAll(App::grView().items<GiBridge>());
+        qDeleteAll(App::grView().items<Gi::Bridge>());
         return;
     }
 
@@ -178,7 +178,7 @@ void Form::onAddBridgeClicked() {
             QPointF intersects;
             if(auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
                 qDebug() << "intersects1" << is << intersects;
-                auto brItem = App::grView().addItem<GiBridge>();
+                auto brItem = App::grView().addItem<Gi::Bridge>();
                 //                brItem->pathHash = pathHash;
                 brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos
                 brItem->setPos(brItem->snapedPos(intersects));
@@ -217,18 +217,18 @@ void Form::onAddBridgeClicked() {
     auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
     switch(at) {
     case Manually: {
-        //        GiBridge::lenght = ui->dsbxBridgeLenght->value();
-        //        GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-        auto brItem = new GiBridge;
+        //        Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
+        //        Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+        auto brItem = new Gi::Bridge;
         App::grView().addItem(brItem);
         brItem->setVisible(true);
         brItem->setOpacity(1.0);
-        GiBridge::moveBrPtr = brItem;
+        Gi::Bridge::moveBrPtr = brItem;
     } break;
     case Horizontally:
     case Vertically:
     case HorizontallyVertically:
-        // qDeleteAll(App::grView().items<GiBridge>());
+        // qDeleteAll(App::grView().items<Gi::Bridge>());
         addHorizontallyVertically(at);
         break;
     case ThroughTheDistance: {
@@ -236,14 +236,14 @@ void Form::onAddBridgeClicked() {
     case EvenlyDround: {
     } break;
     case Split: {
-        // qDeleteAll(App::grView().items<GiBridge>());
+        // qDeleteAll(App::grView().items<Gi::Bridge>());
         std::unordered_set<QPointF> set;
         for(Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
             for(auto&& path: gi->paths()) {
                 if(path.size() != 2) continue;
                 QLineF srcline{~path.front(), ~path.back()};
                 if(!set.emplace(srcline.center()).second) continue;
-                auto brItem = App::grView().addItem<GiBridge>();
+                auto brItem = App::grView().addItem<Gi::Bridge>();
                 brItem->setPos(srcline.center()); // NOTE need to collidingItems in snapedPos
                 brItem->setPos(brItem->snapedPos(srcline.center()));
                 brItem->setVisible(true);
@@ -259,10 +259,10 @@ void Form::onAddBridgeClicked() {
 }
 
 void Form::updateBridges() {
-    GiBridge::lenght = ui->dsbxBridgeLenght->value();
-    GiBridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    GiBridge::side = side;
-    for(GiBridge* item: App::grView().items<GiBridge>())
+    Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
+    Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+    Gi::Bridge::side = side;
+    for(Gi::Bridge* item: App::grView().items<Gi::Bridge>())
         item->update();
 }
 
@@ -298,8 +298,8 @@ void Form::rb_clicked() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if(GiBridge::moveBrPtr)
-        GiBridge::moveBrPtr->setPos(pos);
+    if(Gi::Bridge::moveBrPtr)
+        Gi::Bridge::moveBrPtr->setPos(pos);
 }
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
@@ -363,7 +363,7 @@ void Form::editFile(GCode::File* file) {
     //            //                brItem->lastPos_ = pos;
     //            //            }
     //            updateBridge();
-    //            brItem = new GiBridge{lenght_, size_, side, brItem};
+    //            brItem = new Gi::Bridge{lenght_, size_, side, brItem};
     //            //        delete item;
     //        }
     //    }
