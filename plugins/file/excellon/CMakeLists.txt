@@ -60,7 +60,7 @@ set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIR
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
     qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
     qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
-    qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
+    # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 else()
     qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
     qt5_add_translation(${QM_FILES} ${TS_FILES})

@@ -480,6 +480,30 @@ int Project::addShape(Shapes::AbstractShape* const shape) {
     return newId;
 }
 
+int Project::makeShapeCircle(const QPointF& center, const QPointF& rad) {
+    int type = Gi::Type::ShCircle;
+    if(App::shapePlugins().contains(type)) {
+        Shapes::AbstractShape* item = App::shapePlugin(type)->createShape(center);
+        item->setPt(rad);
+        addShape(item);
+        item->setSelected(true);
+        return 1;
+    }
+    return 0;
+}
+
+int Project::makeShapeRectangle(const QPointF& center, const QPointF& rect) {
+    int type = Gi::Type::ShRectangle;
+    if(App::shapePlugins().contains(type)) {
+        Shapes::AbstractShape* item = App::shapePlugin(type)->createShape(center);
+        item->setPt(rect);
+        addShape(item);
+        item->setSelected(true);
+        return 1;
+    }
+    return 0;
+}
+
 bool Project::contains(AbstractFile* file) {
     for(const auto& [id, sp]: files_)
         if(sp.get() == file)

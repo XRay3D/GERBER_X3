@@ -79,7 +79,7 @@ protected:
     QGridLayout* grid;
 
 private:
-    Creator* creator_{};
+    Creator* creator_{nullptr};
 
     QDialogButtonBox* errBtnBox;
     class TableView* errTable;
@@ -96,7 +96,26 @@ private:
     void startProgress();
     void stopProgress();
 
-    QThread thread;
+    // QThread thread;
+    class Runer : public QThread {
+        // Q_OBJECT
+        BaseForm* const form;
+        Params* gcp{};
+
+    public:
+        Runer(BaseForm* form)
+            : form{form} { }
+        virtual ~Runer() { }
+        void createGc(Params* newGcp) {
+            gcp = newGcp;
+            start();
+        }
+
+        // QThread interface
+    protected:
+        void run() override { form->creator_->createGc(gcp); }
+    } runer{this};
+
     File* file_;
     class ::QProgressDialog* progressDialog;
     int progressTimerId = 0;

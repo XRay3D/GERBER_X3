@@ -190,13 +190,13 @@ void Creator::cornerTrimming() {
 }
 
 void Creator::makeBridges() {
-    auto bridgeItems{App::grView().items<GiBridge>(Gi::Type::Bridge)};
+    auto bridgeItems{App::grView().items<Gi::Bridge>(Gi::Type::Bridge)};
     if(bridgeItems.empty())
         return;
 
     std::for_each(std::execution::par_unseq, returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
         // find Bridges
-        auto biStack = bridgeItems | rviews::filter([&rPaths](GiBridge* bi) { return bi->test(rPaths.front()); });
+        auto biStack = bridgeItems | rviews::filter([&rPaths](Gi::Bridge* bi) { return bi->test(rPaths.front()); });
         if(ranges::empty(biStack))
             return;
         auto isPositive1 = CL2::IsPositive(rPaths.front());
@@ -204,7 +204,7 @@ void Creator::makeBridges() {
         // create frame
         Paths frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JT::Miter, ET::Butt, uScale);
         Paths clip;
-        for(GiBridge* bip: biStack)
+        for(Gi::Bridge* bip: biStack)
             clip += bip->paths();
 
         frame = CL2::Intersect(frame, clip, FR::Positive);
@@ -347,8 +347,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
                 //                    for (auto node : nodes)
                 //                        polynode.Childs[--i] = node;
                 //                }
-
-                for(auto&& node: polynode)
+                for(auto&& node: rwPolyTree(polynode))
                     addPolyNodeToPaths(*node, nodetype);
             };
 

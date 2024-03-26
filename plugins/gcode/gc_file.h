@@ -98,6 +98,7 @@ protected:
     };
 
     Paths g0path_;
+    double z_{};
 
     static inline QString lastDir;
     static inline bool redirected;
@@ -109,7 +110,7 @@ protected:
     QString lastValues[6];
     Code gCode_ = GNull;
 
-    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed);
+    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed, double depth = {});
 
     QString formated(const mvector<QString>& data);
 

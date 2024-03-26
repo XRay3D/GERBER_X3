@@ -236,10 +236,11 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 }
 
 void File::genGcodeAndTile() {
-    const QRectF rect = App::project().worckRect();
-    for(size_t x = 0; x < App::project().stepsX(); ++x) {
-        for(size_t y = 0; y < App::project().stepsY(); ++y) {
-            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
+    auto& proj = App::project();
+    const QRectF rect = proj.worckRect();
+    for(size_t x{}; x < proj.stepsX(); ++x) {
+        for(size_t y{}; y < proj.stepsY(); ++y) {
+            const QPointF offset{(rect.width() + proj.spaceX()) * x, (rect.height() + proj.spaceY()) * y};
             if(toolType() == Tool::Laser)
                 saveLaserPocket(offset);
             else
@@ -265,4 +266,5 @@ void File::createGi() {
 
     itemGroup()->setVisible(true);
 }
+
 } // namespace PocketOffset

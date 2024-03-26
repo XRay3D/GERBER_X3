@@ -234,7 +234,7 @@ bool Parser::parseTCode(const QString& line) {
         static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string("^.+C(\d*\.?\d+).*$");
         if(auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(toU16StrView(line)); whole) {
             state_.toolId = CtreCapTo(tool).toInt();
-            if(auto [whole, diam] = *ctre::range<regex2>(toU16StrView(line)).begin(); whole) {
+            if(auto [whole, diam] = *ctre::search_all<regex2>(toU16StrView(line)).begin(); whole) {
                 file->tools_[state_.toolId] = CtreCapTo(diam).toDouble();
                 return true;
             }

@@ -71,6 +71,10 @@ void DataFill::redraw() {
     // update();
 }
 
+Paths& DataFill::getPaths() {
+    return paths_;
+}
+
 void DataFill::setPaths(Paths paths, int alternate) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};

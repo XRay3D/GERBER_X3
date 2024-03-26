@@ -34,7 +34,7 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 
 bool MainWindow::debug() {
 
-    while(App::isDebug()) { // NOTE need for debug
+    while(App::isDebug() || 1) { // NOTE need for debug
         int time = 100;
         int delay = 100;
 
@@ -66,7 +66,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if(0) {
+        if(1) {
             constexpr auto TYPE = md5::hash32("PocketOffset");
             if(!toolpathActions.contains(TYPE))
                 break;

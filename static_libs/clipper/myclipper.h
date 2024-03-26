@@ -389,3 +389,12 @@ inline constexpr double distToSq(const Point& pt1, const Point& pt2) noexcept {
     double y_ = pt2.y - pt1.y;
     return (x_ * x_ + y_ * y_);
 }
+
+inline auto rwPolyTree(PolyTree& polyTree) {
+    auto itB = polyTree.begin();
+    auto itE = polyTree.end();
+    return std::span{
+        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itB), // FIXME очень грязный хак
+        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очень грязный хак
+    };
+}

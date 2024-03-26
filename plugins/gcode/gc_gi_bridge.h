@@ -13,18 +13,20 @@
 #include "gc_types.h"
 #include "gi.h"
 
-class GiBridge final : public Gi::Item {
+namespace Gi {
+
+class Bridge final : public Item {
 
 public:
-    explicit GiBridge();
-    ~GiBridge() override { moveBrPtr = nullptr; }
+    explicit Bridge();
+    ~Bridge() override { moveBrPtr = nullptr; }
 
     // QGraphicsItem interface
     QRectF boundingRect() const override { return pPath.boundingRect(); }
     QPainterPath shape() const override { return pPath; }
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    // Gi::Item interface
+    // Item interface
     Paths paths(int alternate = {}) const override;
     void changeColor() override { }
 
@@ -33,7 +35,7 @@ public:
     bool test(const Path& path);
     QPointF snapedPos(const QPointF& pos);
 
-    static inline GiBridge* moveBrPtr;         // NOTE приватизировать в будущем??
+    static inline Bridge* moveBrPtr;           // NOTE приватизировать в будущем??
     static inline double lenght{};             //
     static inline double toolDiam{};           //
     static inline GCode::SideOfMilling side{}; //
@@ -56,3 +58,5 @@ private:
 
     bool ok_ = false;
 };
+
+} // namespace Gi

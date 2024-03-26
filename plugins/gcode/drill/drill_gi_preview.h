@@ -6,15 +6,17 @@
 
 namespace Drilling {
 
-class GiPreview final : public Gi::AbstractPreview {
+namespace Gi {
+
+class Preview final : public ::Gi::AbstractPreview {
     Path path_;
     Row& row;
     int toolId_{-1};
 
 public:
-    explicit GiPreview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
+    explicit Preview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
 
-    // Gi::AbstractPreview interface
+    // AbstractPreview interface
     void updateTool() override;
     Paths paths() const override;
     bool fit(double depth) const override;
@@ -33,5 +35,6 @@ public:
     // private:
     //     static Paths offset(const Path& path, double offset);
 };
+}
 
-} // namespace Drilling
+} // namespace Drilling::Gi
