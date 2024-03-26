@@ -10,15 +10,18 @@
  ********************************************************************************/
 #pragma once
 #include <QDoubleSpinBox>
-#include <QKeyEvent>
-#include <QLineEdit>
-#include <QTimer>
+
+class QJSEngine;
 
 class DoubleSpinBox : public QDoubleSpinBox {
     //    Q_OBJECT
     void red();
     void normal();
-    mutable QString str;
+    // mutable QString str;
+    mutable std::optional<double> value_;
+    friend struct Validator;
+    QJSEngine* const jsEngine;
+    void updateToolTip();
 
 public:
     explicit DoubleSpinBox(QWidget* parent = nullptr);
@@ -33,9 +36,8 @@ public:
 public:
     // QAbstractSpinBox interface
     double valueFromText(const QString& text) const override;
-    QString textFromValue(double value) const override;
+    // QString textFromValue(double value) const override;
     QValidator::State validate(QString& input, int& pos) const override;
-    //    void fixup(QString& input) const override;
 
 protected:
     void keyPressEvent(QKeyEvent* event) override;

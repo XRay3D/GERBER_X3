@@ -62,13 +62,28 @@ else()
     qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
-
+if(Enable_Gerber)
 add_subdirectory(gerber)
-add_subdirectory(dxf)
-add_subdirectory(excellon)
-#add_subdirectory(TopoR)
+endif()
 
+if(Enable_Dxf)
+add_subdirectory(dxf)
+endif()
+
+if(Enable_Excellon)
+add_subdirectory(excellon)
+endif()
+
+# if(Enable_TopoR)
+#add_subdirectory(TopoR)
+# endif()
+
+# if(Enable_File)
 #add_subdirectory(file)
+# endif()
+
+# if(Enable_Hpgl)
 #add_subdirectory(hpgl)
+# endif()
 
 

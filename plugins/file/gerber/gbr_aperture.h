@@ -10,8 +10,13 @@
  *******************************************************************************/
 #pragma once
 #include "gbr_types.h"
+<<<<<<< HEAD
 #define MT 3
 #include "mathparser.h"
+=======
+// #define MT 1
+// #include "mathparser.h"
+>>>>>>> refs/heads/dev900b
 
 #include <QtMath>
 #include <numbers>
@@ -183,6 +188,7 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAMacro class
 ///
+using VarMap = std::map<QString, double>;
 class ApMacro final : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* file);

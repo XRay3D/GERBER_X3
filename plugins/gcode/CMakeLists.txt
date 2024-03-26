@@ -67,15 +67,37 @@ else()
     qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
+
+if(Enable_Pocketoffset)
 add_subdirectory(pocketoffset)
+endif()
+
+if(Enable_Profile)
 add_subdirectory(profile)
+endif()
+
+if(Enable_Drill)
 add_subdirectory(drill)
+endif()
 
+if(Enable_Hatching)
 add_subdirectory(hatching)
+endif()
+
+if(Enable_Pocketraster)
 add_subdirectory(pocketraster)
+endif()
+
+if(Enable_Voroni)
 add_subdirectory(voroni)
+endif()
 
+if(Enable_Thermal)
 add_subdirectory(thermal)
+endif()
 
+if(Enable_Thread)
 # add_subdirectory(thread)
+endif()
+
 
