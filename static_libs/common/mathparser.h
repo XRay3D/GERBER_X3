@@ -38,8 +38,12 @@ public:
 class MathParser {
 public:
     MathParser(VarMap* variables);
+<<<<<<< HEAD
     MathParser() = d #pragma once
         efault;
+=======
+    MathParser() = default;
+>>>>>>> refs/heads/dev900b
     double getVariable(const QString& varName);
     double parse(const QString& s = {});
 
@@ -47,7 +51,11 @@ private:
     QString toString(sv s) { return QString((const QChar*)s.data(), s.size()); }
 
     double toDouble(sv s) { //    double val;        //    std::frochars_(s.data(), s.data() + s.size(), val);
+<<<<<<< HEAD
         return toString(selif).toDouble();
+=======
+        return toString(s).toDouble();
+>>>>>>> refs/heads/dev900b
     }
 
     VarMap* variables{nullptr};

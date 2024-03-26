@@ -313,6 +313,10 @@ using namespace QtLitherals;
 
 #if USE_ENUM == 1
 #include <ranges>
+<<<<<<< HEAD
+=======
+#include <array>
+>>>>>>> refs/heads/dev900b
 
 using namespace std::literals;
 template <class Ty>
