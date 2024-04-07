@@ -213,103 +213,9 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
 }
 
 double DoubleSpinBox::valueFromText(const QString& text) const {
-<<<<<<< HEAD
-    // return QDoubleSpinBox::valueFromText(text);
-    str = text.mid(0, text.size() - suffix().size());
-    double val{};
-    try {
-        // static VarMap varmap{
-        //     {         "e",          std::numbers::e},
-        //     {    "egamma",     std::numbers::egamma},
-        //     {    "inv_pi",     std::numbers::inv_pi},
-        //     { "inv_sqrt3",  std::numbers::inv_sqrt3},
-        //     {"inv_sqrtpi", std::numbers::inv_sqrtpi},
-        //     {      "ln10",       std::numbers::ln10},
-        //     {       "ln2",        std::numbers::ln2},
-        //     {    "log10e",     std::numbers::log10e},
-        //     {     "log2e",      std::numbers::log2e},
-        //     {       "phi",        std::numbers::phi},
-        //     {        "pi",         std::numbers::pi},
-        //     {     "sqrt2",      std::numbers::sqrt2},
-        //     {     "sqrt3",      std::numbers::sqrt3},
-        // };
-        // if(str.size())
-        //     val = MathParser(&varmap).parse(str.replace(',', '.'));
 
-        static MathParser parser{
-            {
-             {"e", std::numbers::e},
-             {"egamma", std::numbers::egamma},
-             {"inv_pi", std::numbers::inv_pi},
-             {"inv_sqrt3", std::numbers::inv_sqrt3},
-             {"inv_sqrtpi", std::numbers::inv_sqrtpi},
-             {"ln10", std::numbers::ln10},
-             {"ln2", std::numbers::ln2},
-             {"log10e", std::numbers::log10e},
-             {"log2e", std::numbers::log2e},
-             {"phi", std::numbers::phi},
-             {"pi", std::numbers::pi},
-             {"sqrt2", std::numbers::sqrt2},
-             {"sqrt3", std::numbers::sqrt3},
-             }
-        };
-        if(str.size())
-            val = parser.parse(str.replace(',', '.').toStdString());
-
-        if(std::isnan(val) || std::isinf(val))
-            return value();
-    } catch(...) { } //
-    return val;
-=======
-    // // return QDoubleSpinBox::valueFromText(text);
-    // str = text.mid(0, text.size() - suffix().size());
-    // double val{};
-    // try {
-    //     // static VarMap varmap{
-    //     //     {         "e",          std::numbers::e},
-    //     //     {    "egamma",     std::numbers::egamma},
-    //     //     {    "inv_pi",     std::numbers::inv_pi},
-    //     //     { "inv_sqrt3",  std::numbers::inv_sqrt3},
-    //     //     {"inv_sqrtpi", std::numbers::inv_sqrtpi},
-    //     //     {      "ln10",       std::numbers::ln10},
-    //     //     {       "ln2",        std::numbers::ln2},
-    //     //     {    "log10e",     std::numbers::log10e},
-    //     //     {     "log2e",      std::numbers::log2e},
-    //     //     {       "phi",        std::numbers::phi},
-    //     //     {        "pi",         std::numbers::pi},
-    //     //     {     "sqrt2",      std::numbers::sqrt2},
-    //     //     {     "sqrt3",      std::numbers::sqrt3},
-    //     // };
-    //     // if(str.size())
-    //     //     val = MathParser(&varmap).parse(str.replace(',', '.'));
-
-    //     static MathParser parser{
-    //         {
-    //          {"e", std::numbers::e},
-    //          {"egamma", std::numbers::egamma},
-    //          {"inv_pi", std::numbers::inv_pi},
-    //          {"inv_sqrt3", std::numbers::inv_sqrt3},
-    //          {"inv_sqrtpi", std::numbers::inv_sqrtpi},
-    //          {"ln10", std::numbers::ln10},
-    //          {"ln2", std::numbers::ln2},
-    //          {"log10e", std::numbers::log10e},
-    //          {"log2e", std::numbers::log2e},
-    //          {"phi", std::numbers::phi},
-    //          {"pi", std::numbers::pi},
-    //          {"sqrt2", std::numbers::sqrt2},
-    //          {"sqrt3", std::numbers::sqrt3},
-    //          }
-    //     };
-    //     if(str.size())
-    //         val = parser.parse(str.replace(',', '.').toStdString());
-
-    //     if(std::isnan(val) || std::isinf(val))
-    //         return value();
-    // } catch(...) { } //
-    // return val;
     qWarning() << __FUNCTION__ << (bool)value_ << value_.value_or(value()) << value();
     return value_.value_or(value());
->>>>>>> refs/heads/dev900b
 }
 
 // QString DoubleSpinBox::textFromValue(double value) const {
@@ -317,14 +223,7 @@ double DoubleSpinBox::valueFromText(const QString& text) const {
 // }
 
 QValidator::State DoubleSpinBox::validate(QString& input, int& pos) const {
-<<<<<<< HEAD
-    // bool ok{};
-    // QString{input}.toDouble(&ok);
-    // qInfo() << input << pos;
-    // return ok ? QValidator::Intermediate : QValidator::Acceptable;
-    return QValidator::Acceptable;
-}
-=======
+
     static const std::set<QChar> set{'.', ',', '/', '*', '-', '+'};
     // Invalid      0 Строка явно недействительна.
     // Intermediate 1 Строка является вероятным промежуточным значением.
@@ -401,7 +300,6 @@ QValidator::State DoubleSpinBox::validate(QString& input, int& pos) const {
             R"(.*[\.\,\/\*\-\+]{2,}.*)",
             QRegularExpression::CaseInsensitiveOption};
         if(re.match(input).hasMatch()) return QValidator::Invalid;
->>>>>>> refs/heads/dev900b
 
         // auto ch = input[pos - 1];
         // if(pos > 1 && set.contains(ch) && input[pos - 2] == ch)

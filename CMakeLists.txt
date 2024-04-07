@@ -1,37 +1,27 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#********************************************************************************/
+#[[
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  03 October 2022
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2022
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
+]]
 cmake_minimum_required(VERSION 3.24)
 
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-# Optional IPO. Do not use IPO if it's not supported by compiler.
-#check_ipo_supported(RESULT result OUTPUT output)
-#if(result)
-set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
-#else()
-#    message(WARNING "IPO is not supported: ${output}")
-#endif()
-
 project(GERBER_X3)
 
-
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 
 add_definitions(
     -DQT_MESSAGELOGCONTEXT # qDebug()
@@ -89,8 +79,12 @@ set(INC_DIRS
     static_libs/tooldatabase
 )
 
+# add_library(Qt INTERFACE)
+# target_precompile_headers(Qt INTERFACE qt_pch.h)
+
 add_subdirectory(third_party/clipper2/CPP)
 
+include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 include_directories(${INC_DIRS})
 
 set(CMAKE_AUTOMOC ON)

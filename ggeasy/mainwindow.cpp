@@ -12,6 +12,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                          *
  ********************************************************************************/
 // #include "a_pch.h"
+
 #include "mainwindow.h"
 
 #include "aboutform.h"
@@ -30,10 +31,11 @@
 #include "shapepluginin.h"
 #include "tool_database.h"
 
-#include <QPdfWriter>
+// #include <QPdfWriter>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
-#include <QtWidgets>
+// #include <QtWidgets>
+
 
 // static auto PointConverter = QMetaType::registerConverter(&Point::toString); NOTE
 

@@ -1,13 +1,13 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#[[
+ Author    :  Damir Bakiev                                                    
+ Version   :  na                                                              
+ Date      :  03 October 2022                                                 
+ Website   :  na                                                              
+ Copyright :  Damir Bakiev 2016-2022                                          
+ License   :                                                                  
+ Use, modification & distribution is subject to Boost Software License Ver 1. 
+ http://www.boost.org/LICENSE_1_0.txt                                         
+]]
 cmake_minimum_required(VERSION 3.20)
 
 project(gcpocketoffset LANGUAGES CXX)
