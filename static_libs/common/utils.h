@@ -308,15 +308,12 @@ template <String Str>
     return QString{{qstring_literal.data_ptr()}};
 }
 #else
-using namespace QtLitherals;
+using namespace QtLiterals;
 #endif
 
 #if USE_ENUM == 1
 #include <ranges>
-<<<<<<< HEAD
-=======
 #include <array>
->>>>>>> refs/heads/dev900b
 
 using namespace std::literals;
 template <class Ty>

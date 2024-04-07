@@ -1,16 +1,16 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#********************************************************************************/
+#[[
+ Author    :  Damir Bakiev                                                    
+ Version   :  na                                                              
+ Date      :  03 October 2022                                                 
+ Website   :  na                                                              
+ Copyright :  Damir Bakiev 2016-2022                                          
+ License   :                                                                  
+ Use, modification & distribution is subject to Boost Software License Ver 1. 
+ http://www.boost.org/LICENSE_1_0.txt                                         
+]]
 cmake_minimum_required(VERSION 3.20)
 
-project(GGEasy VERSION 0.8.6.4 LANGUAGES CXX)
+project(GGEasy VERSION 0.9.0.0 LANGUAGES CXX)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
@@ -92,7 +92,7 @@ else()
     qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+# target_precompile_headers(${PROJECT_NAME} PUBLIC a_pch.h)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper

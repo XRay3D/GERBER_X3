@@ -10,13 +10,8 @@
  *******************************************************************************/
 #pragma once
 #include "gbr_types.h"
-<<<<<<< HEAD
-#define MT 3
-#include "mathparser.h"
-=======
 // #define MT 1
 // #include "mathparser.h"
->>>>>>> refs/heads/dev900b
 
 #include <QtMath>
 #include <numbers>

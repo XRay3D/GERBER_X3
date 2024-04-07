@@ -31,6 +31,11 @@
 #include <QtCore>
 #include <QtWidgets>
 
+#include <QPdfWriter>
+#include <QPrintPreviewDialog>
+#include <QPrinter>
+#include <QtWidgets>
+
 // #include "aboutform.h"
 // #include "abstract_file.h"
 // #include "abstract_fileplugin.h"
