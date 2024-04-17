@@ -377,4 +377,4 @@ public:
 };
 
 Q_DECLARE_METATYPE(AbstractFile*)
-Q_DECLARE_METATYPE(mvector<const GraphicObject*>)
+// Q_DECLARE_METATYPE(mvector<const GraphicObject*>)

@@ -22,7 +22,7 @@ class File;
 
 class Plugin : public AbstractFilePlugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "dxf.json")
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "description.json")
     Q_INTERFACES(AbstractFilePlugin)
 
 public:

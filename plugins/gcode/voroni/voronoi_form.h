@@ -48,7 +48,7 @@ public:
 
 class Plugin final : public GCode::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "voronoi.json")
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "description.json")
     Q_INTERFACES(GCode::Plugin)
     Form form{this};
     // GCode::Plugin interface

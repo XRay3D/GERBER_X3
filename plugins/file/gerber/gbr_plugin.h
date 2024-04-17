@@ -21,7 +21,7 @@ namespace Gerber {
 
 class Plugin : public AbstractFilePlugin, Parser {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "gerber.json")
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "description.json")
     Q_INTERFACES(AbstractFilePlugin)
 
 public:

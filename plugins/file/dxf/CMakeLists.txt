@@ -18,6 +18,15 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
+set(PLUG_NAME "DXF")
+set(PLUG_INFO "Opening DXF Files")
+set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
+set(PLUG_LOCAL_VERSION "2")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX
+)
+
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL LinguistTools REQUIRED)
 
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)

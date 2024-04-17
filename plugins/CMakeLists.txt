@@ -13,27 +13,27 @@ cmake_minimum_required(VERSION 3.20)
 set(Enable ON)
 
 # plugins shape
-set(Enable_Circle       ON)
-set(Enable_Circlearc    ON)
-set(Enable_Polyline     ON)
-set(Enable_Rectangle    ON)
-set(Enable_Text         ON)
+set(Enable_Circle       Enable)
+set(Enable_Circlearc    Enable)
+set(Enable_Polyline     Enable)
+set(Enable_Rectangle    Enable)
+set(Enable_Text         Enable)
 add_subdirectory(shape)
 
 # plugins file
-set(Enable_Gerber       ON)
-set(Enable_Dxf          ON)
-set(Enable_Excellon     ON)
+set(Enable_Gerber       Enable)
+set(Enable_Dxf          Enable)
+set(Enable_Excellon     Enable)
 add_subdirectory(file)
 
 # plugins gcode
-set(Enable_Drill        ON)
-set(Enable_Hatching     ON)
-set(Enable_Pocketoffset ON)
-set(Enable_Pocketraster ON)
-set(Enable_Profile      ON)
-set(Enable_Thermal      ON)
-set(Enable_Voroni       ON)
+set(Enable_Drill        Enable)
+set(Enable_Hatching     Enable)
+set(Enable_Pocketoffset Enable)
+set(Enable_Pocketraster Enable)
+set(Enable_Profile      Enable)
+set(Enable_Thermal      Enable)
+set(Enable_Voroni       Enable)
 add_subdirectory(gcode)
 
 

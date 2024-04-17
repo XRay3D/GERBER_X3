@@ -18,7 +18,16 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(QT NAMES #[[Qt6]] Qt5 COMPONENTS Core Gui Widgets REQUIRED)
+set(PLUG_NAME   "Circle  Arc")
+set(PLUG_INFO   "Circle  Arc")
+set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
+set(PLUG_LOCAL_VERSION "1")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX
+)
+
+find_package(QT NAMES Qt5 Qt6 COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)

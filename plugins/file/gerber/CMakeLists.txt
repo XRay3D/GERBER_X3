@@ -18,6 +18,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(PLUG_NAME   "Gerber X3")
+set(PLUG_INFO   "Opening GerberX3 files, with support for all kinds of aperture macros and components.")
+set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
+set(PLUG_LOCAL_VERSION "3")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX
+)
+
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets LinguistTools REQUIRED)
 
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)

@@ -18,6 +18,15 @@ set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
 
+set(PLUG_NAME   "Profile")
+set(PLUG_INFO   "Profile")
+set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
+set(PLUG_LOCAL_VERSION "0")
+configure_file(
+    ${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
+    ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX
+)
+
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
 
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
