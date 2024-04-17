@@ -923,7 +923,7 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         Function,
         Line,
     };
-    ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].splitRef('(').front()));
+    ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].split('(').front()));
 
     switch(type) {
         // clang-format off
