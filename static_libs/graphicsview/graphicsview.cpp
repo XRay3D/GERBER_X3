@@ -263,13 +263,13 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
             if(dynamic_cast<QGLWidget*>(viewport())) break;
             auto oglWidget = new QGLWidget{this};
             QGLFormat format{QGL::SampleBuffers | QGL::DoubleBuffer | QGL::Rgba};
+            format.setSampleBuffers(true);
 #else
             if(dynamic_cast<QOpenGLWidget*>(viewport())) break;
-            auto oglw = new QOpenGLWidget{this};
-            QSurfaceFormat sf;
+            auto oglWidget = new QOpenGLWidget{this};
+            QSurfaceFormat format;
 #endif
             format.setSamples(8);
-            format.setSampleBuffers(true);
             oglWidget->setFormat(format);
             setViewport(oglWidget);
         } else {
@@ -518,10 +518,11 @@ void GraphicsView::dropEvent(QDropEvent* event) {
         emit fileDroped(var.path().remove(0, 1));
 
     if(mimeData->hasFormat(Ruler::mimeType()) && event->source() != this) {
-#if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
-        scene()->addItem(new Gi::Guide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()}.data())));
-#else
+#if(QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
         scene()->addItem(new Gi::Guide{mapToScene(event->pos()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())});
+#else
+        scene()->addItem(new Gi::Guide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType()).data())});
+        // scene()->addItem(new Gi::Guide{mapToScene(event->position().toPoint()), Qt::Orientation(*mimeData->data(Ruler::mimeType())})->data())));
 #endif
     }
 
@@ -644,8 +645,11 @@ void GraphicsView::GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item) {
     QObject::connect(&makeRect, &QAction::triggered, [&center, &rect]() {
         App::project().makeShapeRectangle(center - rect, center + rect);
     });
-
+#if(QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     menu.exec(event->globalPos());
+#else
+    menu.exec(event->globalPosition().toPoint());
+#endif
     scene()->update();
 }
 

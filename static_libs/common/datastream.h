@@ -78,6 +78,10 @@ inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& conta
     stream >> n;
     container.resize(n);
     for(auto& var: container) {
+        // static_assert(std::is_const_v<T>);
+        // if constexpr(std::is_pointer_v<T>)
+        //     stream >> *var;
+        // else
         stream >> var;
         if(stream.status() != QDataStream::Ok)
             return container.clear(), stream;
