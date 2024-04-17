@@ -41,7 +41,7 @@ add_definitions(
     -DGIT_SHA="${GIT_SHA}"
 )
 
-find_package(QT NAMES #[[Qt6]] Qt5 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
+find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core Gui Widgets LinguistTools)
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS
     Core
     Gui
