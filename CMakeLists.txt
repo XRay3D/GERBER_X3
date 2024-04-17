@@ -19,6 +19,9 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
+# SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+# SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
@@ -56,7 +59,11 @@ endif()
 # FIND BOOST
 find_package(Boost)
 if (Boost_FOUND)
+    if(Boost_VERSION_MINOR LESS 84)
+        message(FATAL_ERROR "==> !! Required Boost version is greater than or equal to 1.84.0! Current ${Boost_VERSION}.")
+    endif()
     include_directories(${Boost_INCLUDE_DIR})
+    message(==> "Boost ${Boost_VERSION} found!!!")
 else()
     message(FATAL_ERROR "Boost not found!!!")
 endif()
