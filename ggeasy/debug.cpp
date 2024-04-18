@@ -38,7 +38,7 @@ bool MainWindow::debug() {
         int time = 100;
         int delay = 100;
 
-        if(1) {
+        if(0) {
             // QDir dir(R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)");
             QDir dir(R"(/home/x-ray/Рабочий стол/dxf/)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
@@ -66,7 +66,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if(1) {
+        if(0) {
             constexpr auto TYPE = md5::hash32("PocketOffset");
             if(!toolpathActions.contains(TYPE))
                 break;
@@ -83,9 +83,10 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if(0) {
+        if(1) {
             constexpr auto DRILLING = md5::hash32("Drilling");
             QTimer::singleShot(time += delay, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
+            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
         if(0) {

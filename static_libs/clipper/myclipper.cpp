@@ -328,3 +328,66 @@ Paths& normalize(Paths& paths) {
 
     return paths;
 }
+
+template <typename T>
+struct span {
+    size_t w{}, h{};
+    T& val;
+    span(T& val, size_t w, size_t h)
+        : val{val}
+        , w{w}
+        , h{h} { }
+    auto operator[](size_t i) {
+        return std::span{val.data() + i * h, h};
+    }
+    auto operator[](size_t i) const {
+        return std::span{val.data() + i * h, h};
+    }
+};
+
+void reductionOfDistance(Path& path, Point point) {
+    if(point.x == 0 & point.y == 0) point = path.front();
+    // sort by distance
+
+    std::vector<double> data(path.size() * path.size());
+    span matrix{data, path.size(), path.size()};
+
+    for(int x{}; x < path.size(); ++x)
+        for(int y{x + 1}; y < path.size(); ++y)
+            matrix[x][y] = distTo(path[x], path[y]);
+
+    size_t counter = 0;
+    while(counter < path.size()) {
+        size_t selector = 0;
+        double length = std::numeric_limits<double>::max();
+        for(size_t i = counter, end = path.size(); i < end; ++i) {
+            double length2 = distTo(point, path[i]);
+            if(length > length2) {
+                length = length2;
+                selector = i;
+            }
+        }
+        qSwap(path[counter], path[selector]);
+        point = path[counter++];
+    }
+
+    {
+        double dist{};
+        auto data = path.data();
+        for(int i{1}; i < path.size(); ++i) {
+            double tmp = distTo(*data, *(data + 1));
+            dist += tmp;
+            ++data;
+        }
+
+        data = path.data();
+        for(int i{0}; i < path.size(); ++i) {
+            for(int j{i + 1}; j < path.size(); ++j) {
+                double tmp = distTo(data[i], data[j]) * dScale;
+                qCritical() << "dist" << tmp << i << ~data[i] << j << ~data[j];
+            }
+        }
+
+        qCritical() << "length =" << dist * dScale;
+    }
+}

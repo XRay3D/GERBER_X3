@@ -10,7 +10,7 @@
 ]]
 cmake_minimum_required(VERSION 3.20)
 
-set(Enable ON)
+set(Enable OFF)
 
 # plugins shape
 set(Enable_Circle       Enable)
@@ -27,11 +27,11 @@ set(Enable_Excellon     Enable)
 add_subdirectory(file)
 
 # plugins gcode
-set(Enable_Drill        Enable)
+set(Enable_Pocketoffset ON)
+set(Enable_Profile      ON)
+set(Enable_Drill        ON)
 set(Enable_Hatching     Enable)
-set(Enable_Pocketoffset Enable)
 set(Enable_Pocketraster Enable)
-set(Enable_Profile      Enable)
 set(Enable_Thermal      Enable)
 set(Enable_Voroni       Enable)
 add_subdirectory(gcode)

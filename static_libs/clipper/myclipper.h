@@ -337,6 +337,8 @@ struct LineABC {
     double lenght() const { return sqrt(a * a + b * b); }
 };
 
+void reductionOfDistance(Path& path, Point point = Point{});
+
 inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
     const size_t cnt = path.size();
     if(cnt < 2)

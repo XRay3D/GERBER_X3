@@ -11,13 +11,13 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_form.h"
-#include "gi_point.h"
-#include "tool_database.h"
-#include "ui_drillform.h"
-
 #include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "drill_model.h"
+#include "gi_point.h"
+#include "tool_database.h"
+#include "ui_drillform.h"
+#include <boost/graph/bellman_ford_shortest_paths.hpp>
 
 // #include "file.h"
 // #include "gi_point.h"
@@ -544,23 +544,8 @@ void Form::computePaths() {
 
         for(auto& [toolId, val]: pathsMap) {
             if(val.drillPath.size()) {
-                Point point1{~App::home().pos()};
-                { // sort by distance
-                    size_t counter = 0;
-                    while(counter < val.drillPath.size()) {
-                        size_t selector = 0;
-                        double length = std::numeric_limits<double>::max();
-                        for(size_t i = counter, end = val.drillPath.size(); i < end; ++i) {
-                            double length2 = distTo(point1, val.drillPath[i]);
-                            if(length > length2) {
-                                length = length2;
-                                selector = i;
-                            }
-                        }
-                        qSwap(val.drillPath[counter], val.drillPath[selector]);
-                        point1 = val.drillPath[counter++];
-                    }
-                }
+                reductionOfDistance(val.drillPath, ~App::home().pos());
+
                 GCode::File* gcode = new File{
                     {App::toolHolder().tool(toolId), dsbxDepth->value()},
                     {{val.drillPath}}
