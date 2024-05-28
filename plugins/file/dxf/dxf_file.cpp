@@ -244,7 +244,8 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                         //                            drillDiameter = ap.minSize();
                         drillDiameter = std::min(rect.bottom - rect.top, rect.right - rect.left) * dScale;
                         //                        name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
-                        g.raw = drillDiameter;
+                        g.raw = drillDiameter /** go.scaleX()*/;
+                        g.name = /*"С Ø" +*/ QByteArray::number(drillDiameter);
                     } break;
                     default:
                         break;

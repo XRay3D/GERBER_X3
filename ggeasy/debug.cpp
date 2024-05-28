@@ -83,7 +83,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if(1) {
+        if(0) {
             constexpr auto DRILLING = md5::hash32("Drilling");
             QTimer::singleShot(time += delay, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });

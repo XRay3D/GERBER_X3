@@ -31,8 +31,8 @@ class DxfGo final : public ::GraphicObject {
     //    Path path_;
     File* file_ = nullptr;
     double rotationAngle_{};
-    double scaleX_{};
-    double scaleY_{};
+    double scaleX_{1.0};
+    double scaleY_{1.0};
     //    QPointF pos_;
 
 public:

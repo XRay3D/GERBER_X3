@@ -298,7 +298,8 @@ mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, doub
                 prevPt = point;
                 skip = false;
             } else {
-                z_ += QLineF{prevPt, point}.length() / perimetr * zk;
+                // z_ += QLineF{prevPt, point}.length() / perimetr * zk;
+                z_ = zk;
                 lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), z(z_), feed(feedRate()), speed(spindleSpeed)}));
                 prevPt = point;
             }
@@ -466,7 +467,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                         auto sp(savePath(path, spindleSpeed(), depth));
                         lines_.append(sp);
                     }
-                    lines_.append(savePath(path, spindleSpeed()));
+                    // lines_.append(savePath(path, spindleSpeed()));// Проход без спирали.
                     endPath();
                     paths.erase(paths.begin() + j--);
                 } else {
