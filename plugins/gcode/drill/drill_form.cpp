@@ -228,8 +228,11 @@ void Form::on_cbxFileCurrentIndexChanged() {
         static mvector<GraphicObject> gos;
         gos = file->getDataForGC(criterias, GCType::Drill);
 
-        for(auto& var: gos)
+        for(auto& var: gos) {
+            // if(var.raw.has_value())
+            // qWarning() << std::any_cast<double>(var.raw);
             map[Key{var.name, var.path.size() > 1}].emplace_back(&var);
+        }
 
         model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();

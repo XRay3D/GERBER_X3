@@ -150,13 +150,12 @@ struct Validator : QValidator {
 #endif
 
 DoubleSpinBox::DoubleSpinBox(QWidget* parent)
-    : QDoubleSpinBox(parent)
+    : QDoubleSpinBox{parent}
     , jsEngine{new QJSEngine{this}} {
     lineEdit()->installEventFilter(this);
     lineEdit()->setValidator(nullptr);
     installEventFilter(this);
     setToolTipDuration(0);
-
 }
 
 void DoubleSpinBox::setRange(double min, double max) {
@@ -203,6 +202,7 @@ void DoubleSpinBox::updateToolTip() {
 
 void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
     static const auto decimalPoint = QLocale().decimalPoint();
+    if(event->modifiers().testFlags(Qt::ShiftModifier | Qt::ControlModifier)) setSingleStep(0.01);
 
     if(event->text() == '.' || event->text() == ',') {
         QKeyEvent ke{event->type(), decimalPoint == '.' ? Qt::Key_Period : Qt::Key_Comma, event->modifiers(), decimalPoint};
@@ -210,6 +210,11 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
         event->accept();
     } else
         QDoubleSpinBox::keyPressEvent(event);
+}
+
+void DoubleSpinBox::keyReleaseEvent(QKeyEvent* event) {
+    if(event->modifiers().testAnyFlags(Qt::NoModifier)) setSingleStep(1.0);
+    QDoubleSpinBox::keyPressEvent(event);
 }
 
 double DoubleSpinBox::valueFromText(const QString& text) const {
@@ -233,49 +238,49 @@ QValidator::State DoubleSpinBox::validate(QString& input, int& pos) const {
         timer.start();
         if constexpr(0) {
             static const std::pair<QString, QString> array[]{
-                {"E",       "Math.E"      }, // const
-                {"LN10",    "Math.LN10"   }, // const
-                {"LN2",     "Math.LN2"    }, // const
-                {"LOG10E",  "Math.LOG10E" }, // const
-                {"LOG2E",   "Math.LOG2E"  }, // const
-                {"PI",      "Math.PI"     }, // const
+                {      "E",       "Math.E"}, // const
+                {   "LN10",    "Math.LN10"}, // const
+                {    "LN2",     "Math.LN2"}, // const
+                { "LOG10E",  "Math.LOG10E"}, // const
+                {  "LOG2E",   "Math.LOG2E"}, // const
+                {     "PI",      "Math.PI"}, // const
                 {"SQRT1_2", "Math.SQRT1_2"}, // const
-                {"SQRT2",   "Math.SQRT2"  }, // const
-                {"abs",     "Math.abs"    }, // func
-                {"acos",    "Math.acos"   }, // func
-                {"acosh",   "Math.acosh"  }, // func
-                {"asin",    "Math.asin"   }, // func
-                {"asinh",   "Math.asinh"  }, // func
-                {"atan",    "Math.atan"   }, // func
-                {"atan2",   "Math.atan2"  }, // func
-                {"atanh",   "Math.atanh"  }, // func
-                {"cbrt",    "Math.cbrt"   }, // func
-                {"ceil",    "Math.ceil"   }, // func
-                {"clz32",   "Math.clz32"  }, // func
-                {"cos",     "Math.cos"    }, // func
-                {"cosh",    "Math.cosh"   }, // func
-                {"exp",     "Math.exp"    }, // func
-                {"expm1",   "Math.expm1"  }, // func
-                {"floor",   "Math.floor"  }, // func
-                {"fround",  "Math.fround" }, // func
-                {"hypot",   "Math.hypot"  }, // func
-                {"imul",    "Math.imul"   }, // func
-                {"log",     "Math.log"    }, // func
-                {"log10",   "Math.log10"  }, // func
-                {"log1p",   "Math.log1p"  }, // func
-                {"log2",    "Math.log2"   }, // func
-                {"max",     "Math.max"    }, // func
-                {"min",     "Math.min"    }, // func
-                {"pow",     "Math.pow"    }, // func
-                {"random",  "Math.random" }, // func
-                {"round",   "Math.round"  }, // func
-                {"sign",    "Math.sign"   }, // func
-                {"sin",     "Math.sin"    }, // func
-                {"sinh",    "Math.sinh"   }, // func
-                {"sqrt",    "Math.sqrt"   }, // func
-                {"tan",     "Math.tan"    }, // func
-                {"tanh",    "Math.tanh"   }, // func
-                {"trunc",   "Math.trunc"  }, // func
+                {  "SQRT2",   "Math.SQRT2"}, // const
+                {    "abs",     "Math.abs"}, // func
+                {   "acos",    "Math.acos"}, // func
+                {  "acosh",   "Math.acosh"}, // func
+                {   "asin",    "Math.asin"}, // func
+                {  "asinh",   "Math.asinh"}, // func
+                {   "atan",    "Math.atan"}, // func
+                {  "atan2",   "Math.atan2"}, // func
+                {  "atanh",   "Math.atanh"}, // func
+                {   "cbrt",    "Math.cbrt"}, // func
+                {   "ceil",    "Math.ceil"}, // func
+                {  "clz32",   "Math.clz32"}, // func
+                {    "cos",     "Math.cos"}, // func
+                {   "cosh",    "Math.cosh"}, // func
+                {    "exp",     "Math.exp"}, // func
+                {  "expm1",   "Math.expm1"}, // func
+                {  "floor",   "Math.floor"}, // func
+                { "fround",  "Math.fround"}, // func
+                {  "hypot",   "Math.hypot"}, // func
+                {   "imul",    "Math.imul"}, // func
+                {    "log",     "Math.log"}, // func
+                {  "log10",   "Math.log10"}, // func
+                {  "log1p",   "Math.log1p"}, // func
+                {   "log2",    "Math.log2"}, // func
+                {    "max",     "Math.max"}, // func
+                {    "min",     "Math.min"}, // func
+                {    "pow",     "Math.pow"}, // func
+                { "random",  "Math.random"}, // func
+                {  "round",   "Math.round"}, // func
+                {   "sign",    "Math.sign"}, // func
+                {    "sin",     "Math.sin"}, // func
+                {   "sinh",    "Math.sinh"}, // func
+                {   "sqrt",    "Math.sqrt"}, // func
+                {    "tan",     "Math.tan"}, // func
+                {   "tanh",    "Math.tanh"}, // func
+                {  "trunc",   "Math.trunc"}, // func
             };
             for(auto&& [from, to]: array)
                 str.replace(from, to, Qt::CaseInsensitive);

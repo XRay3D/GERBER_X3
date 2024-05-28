@@ -338,10 +338,10 @@ struct span {
         , w{w}
         , h{h} { }
     auto operator[](size_t i) {
-        return std::span{val.data() + i * h, h};
+        return std::span{val.begin() + i * h, h};
     }
     auto operator[](size_t i) const {
-        return std::span{val.data() + i * h, h};
+        return std::span{val.begin() + i * h, h};
     }
 };
 
