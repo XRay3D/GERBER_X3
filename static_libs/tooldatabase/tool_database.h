@@ -39,4 +39,6 @@ private:
 
 protected:
     void keyPressEvent(QKeyEvent* evt) override;
+    // QWidget interface
+    void showEvent(QShowEvent* event) override;
 };
