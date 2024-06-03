@@ -25,69 +25,69 @@ set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set_property(GLOBAL PROPERTY CXX_STANDARD 20)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
-
 add_definitions(
-    -DQT_MESSAGELOGCONTEXT # qDebug()
-    -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
-    -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a, const QStringBuilder<A, B> &b, QChar)
-
+  -DQT_MESSAGELOGCONTEXT # qDebug()
+  -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
+  -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a,
+                          # const QStringBuilder<A, B> &b, QChar)
 )
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(
-        -Winvalid-pch
-        -pthread
-        #        -fmodules-ts
-    )
-    link_directories(tbb/lib)
-## Link against the dependency of Intel TBB (for parallel C++17 algorithms)
-#target_link_libraries(${PROJECT_NAME} tbb)
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
-# set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
-# set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map} -fmodule-mapper=<MODULE_MAP_FILE>")
-# target_compile_options(example PRIVATE -fmodules-ts)
-# add_compile_options(-H)
-# add_compile_options(-ftime-report)
-# -pthread
-# -ltbbD
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-elseif (CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-#    add_definitions(-D_USE_MATH_DEFINES=1)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(
+    -Winvalid-pch -pthread
+    # -fmodules-ts
+  )
+  link_directories(tbb/lib)
+  # Link against the dependency of Intel TBB (for parallel C++17 algorithms)
+  # target_link_libraries(${PROJECT_NAME} tbb)
+
+  # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
+  # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map}
+  # -fmodule-mapper=<MODULE_MAP_FILE>") target_compile_options(example PRIVATE
+  # -fmodules-ts) add_compile_options(-H) add_compile_options(-ftime-report)
+  # -pthread -ltbbD
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # add_definitions(-D_USE_MATH_DEFINES=1)
 endif()
 
 # FIND BOOST
 find_package(Boost)
-if (Boost_FOUND)
-    if(Boost_VERSION_MINOR LESS 84)
-        message(FATAL_ERROR "==> !! Required Boost version is greater than or equal to 1.84.0! Current ${Boost_VERSION}.")
-    endif()
-    include_directories(${Boost_INCLUDE_DIR})
-    message(==> "Boost ${Boost_VERSION} found!!!")
+if(Boost_FOUND)
+  if(Boost_VERSION_MINOR LESS 84)
+    message(
+      FATAL_ERROR
+        "==> !! Required Boost version is greater than or equal to 1.84.0! Current ${Boost_VERSION}."
+    )
+  endif()
+  include_directories(${Boost_INCLUDE_DIR})
+  message(==> "Boost ${Boost_VERSION} found!!!")
 else()
-    message(FATAL_ERROR "Boost not found!!!")
+  message(FATAL_ERROR "Boost not found!!!")
 endif()
 
 set(INC_DIRS
     third_party/ctre/single-header/
     third_party/clipper2/CPP/Clipper2Lib/include/
-
     ggeasy
-
     plugins/file
     plugins/gcode
     plugins/shape
-
     static_libs/clipper
     static_libs/common
     static_libs/filetree
     static_libs/gi
     static_libs/graphicsview
-    static_libs/tooldatabase
-)
+    static_libs/tooldatabase)
 
-# add_library(Qt INTERFACE)
-# target_precompile_headers(Qt INTERFACE qt_pch.h)
+# add_library(Qt INTERFACE) target_precompile_headers(Qt INTERFACE qt_pch.h)
+
+set(CLIPPER2_UTILS OFF)
+set(CLIPPER2_EXAMPLES OFF)
+set(CLIPPER2_TESTS OFF)
 
 add_subdirectory(third_party/clipper2/CPP)
 

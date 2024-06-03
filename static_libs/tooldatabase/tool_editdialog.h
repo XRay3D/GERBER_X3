@@ -24,8 +24,12 @@ class ToolEditDialog : public QDialog {
 
 public:
     explicit ToolEditDialog(QWidget* parent = nullptr);
-    ~ToolEditDialog() override = default;
+    ~ToolEditDialog() override;
 
     Tool tool() const;
     void setTool(const Tool& tool);
+
+    // QWidget interface
+protected:
+    void showEvent(QShowEvent* event) override;
 };

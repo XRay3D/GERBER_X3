@@ -13,6 +13,7 @@
 #include "tool_editdialog.h"
 
 #include "ui_tooleditdialog.h"
+#include <QSettings>
 
 ToolEditDialog::ToolEditDialog(QWidget* parent)
     : QDialog(parent)
@@ -30,8 +31,25 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
     });
 }
 
+ToolEditDialog::~ToolEditDialog() {
+    QSettings settings;
+    settings.beginGroup("ToolEditDialog");
+    settings.setValue("geometry", saveGeometry());
+    // qWarning() << geometry();
+}
+
 Tool ToolEditDialog::tool() const { return ui->toolEdit->tool_; }
 
 void ToolEditDialog::setTool(const Tool& tool) { ui->toolEdit->setTool(tool); }
 
+void ToolEditDialog::showEvent(QShowEvent* event) {
+    QDialog::showEvent(event);
+    QSettings settings;
+    settings.beginGroup("ToolEditDialog");
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    // qWarning() << geometry();
+}
+
 #include "moc_tool_editdialog.cpp"
+
+#include <QSettings>

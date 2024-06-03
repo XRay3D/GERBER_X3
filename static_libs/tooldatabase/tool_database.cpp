@@ -16,6 +16,7 @@
 
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QSettings>
 
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     : QDialog(parent)
@@ -65,7 +66,13 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     ui->treeView->header()->setStretchLastSection(false);
 }
 
-ToolDatabase::~ToolDatabase() { delete ui; }
+ToolDatabase::~ToolDatabase() {
+    QSettings settings;
+    settings.beginGroup("ToolDatabase");
+    settings.setValue("geometry", saveGeometry());
+    // qWarning() << geometry();
+    delete ui;
+}
 
 Tool ToolDatabase::tool() const { return tool_; }
 
@@ -75,6 +82,14 @@ void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
         return;
     }
     QDialog::keyPressEvent(evt);
+}
+
+void ToolDatabase::showEvent(QShowEvent* event) {
+    QDialog::showEvent(event);
+    QSettings settings;
+    settings.beginGroup("ToolDatabase");
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    // qWarning() << geometry();
 }
 
 #include "moc_tool_database.cpp"
