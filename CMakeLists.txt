@@ -1,9 +1,9 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  03 October 2022
+ Date      :  03 October 2024
  Website   :  na
- Copyright :  Damir Bakiev 2016-2022
+ Copyright :  Damir Bakiev 2016-2024
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
@@ -88,6 +88,7 @@ set(INC_DIRS
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
+set(CLIPPER2_USINGZ OFF)
 
 add_subdirectory(third_party/clipper2/CPP)
 
@@ -107,9 +108,4 @@ add_subdirectory(plugins)
 # MAIN APP
 add_subdirectory(ggeasy)
 
-
-#add_subdirectory(ToolTest)
-
-
-
-
+# add_subdirectory(ToolTest)
