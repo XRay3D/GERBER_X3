@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author : Damir Bakiev *
@@ -21,7 +21,7 @@
 #define TR QCoreApplication::translate
 
 ToolEditForm::ToolEditForm(QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , ui(new Ui::ToolEditForm) {
     ui->setupUi(this);
     // clang-format AlignArrayOfStructures: Left

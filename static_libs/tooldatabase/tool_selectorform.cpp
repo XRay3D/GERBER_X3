@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -23,7 +23,7 @@
 #include <app.h>
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , counter{static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
     , toolFileName_{App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
     setupUi(this);

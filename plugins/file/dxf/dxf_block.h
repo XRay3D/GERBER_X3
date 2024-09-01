@@ -31,7 +31,7 @@ struct Block {
 
     SectionParser* sp;
     Block(Blocks& blocks, SectionParser* sp = nullptr);
-    ~Block();
+    ~Block() = default;
 
     void parseHeader(CodeData& code);
     void parseData(CodeData& code);

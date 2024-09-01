@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -73,10 +73,10 @@ void setCursor(QWidget* w) {
 }
 
 GraphicsView::GraphicsView(QWidget* parent)
-    : QGraphicsView(parent)
-    , hRuler{
-          new Ruler{Qt::Horizontal, this}
-},
+    : QGraphicsView{
+          parent
+}
+    , hRuler{new Ruler{Qt::Horizontal, this}},
     vRuler{new Ruler{Qt::Vertical, this}},
     gridLayout{new QGridLayout{this}} {
 
@@ -145,7 +145,6 @@ GraphicsView::GraphicsView(QWidget* parent)
         settings.endGroup();
     }
     //    auto scene_ = new QGraphicsScene{this};
-
     //    setScene(scene_ = new Scene{this});
     //    connect(this, &GraphicsView::mouseMove, scene_, &Scene::setCross1);
 
@@ -154,14 +153,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     startUpdateTimer(20);
 }
 
-GraphicsView::~GraphicsView() {
-    App::setGraphicsView(nullptr);
-}
-
-// void GraphicsView::setScene(QGraphicsScene* Scene) {
-//     QGraphicsView::setScene(Scene);
-//     updateRuler();
-// }
+GraphicsView::~GraphicsView() { App::setGraphicsView(nullptr); }
 
 void GraphicsView::zoomFit() {
     auto rect{App::layoutFrames().boundingRect()};
@@ -572,7 +564,9 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         if(auto item{scene()->itemAt(mapToScene(event->pos()), transform())}; 0 && item && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
             QMimeData* mimeData = new QMimeData;
             mimeData->setText(Ruler::mimeType());
-            mimeData->setData(Ruler::mimeType(), QByteArray::fromRawData(reinterpret_cast<const char*>(item), sizeof(item)));
+            mimeData->setData(Ruler::mimeType(),
+                QByteArray::fromRawData(reinterpret_cast<const char*>(item),
+                    sizeof(void*)));
 
             QPixmap pixmapIcon{Ruler::Breadth, Ruler::Breadth};
             pixmapIcon.fill(Qt::magenta);
@@ -676,8 +670,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
     hRuler->setCursorPos(event->pos());
     point = mappedPos(event);
     //    if (event->button() == Qt::RightButton)
-    if(ruler_ && rulerCtr & 0x1)
-        rulPt2 = point;
+    if(ruler_ && rulerCtr & 0x1) rulPt2 = point;
 
     // расчёт смещения для нулевых координат
     emit mouseMove2(point, point - App::project().zeroPos());
@@ -686,15 +679,10 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
-    Timer t{_mS};
 #if 1
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
-
-    const auto gridStep = App::settings().gridStep(getScale());
-
-    QPoint p = mapFromScene(QPointF());
 
     int gs{};
     mvector<QLineF> lines[3];
@@ -707,11 +695,10 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         auto fillLines = [&](double start, double end, double step) {
             size[gs][isHor] = abs(ceil((end - start) / step));
             lines[gs].reserve(size[gs][0] + size[gs][1]);
-            for(double current = start; (step < 0 ? current >= end : current <= end); current += step) {
+            for(double current = start; (step < 0 ? current >= end : current <= end); current += step)
                 if(dublicateFilter[isHor].emplace(static_cast<int>(current * (std::numeric_limits<int>::max() / 10000))).second) // filter
                     isHor ? lines[gs].emplace_back(current, rect.top(), current, rect.bottom())
                           : lines[gs].emplace_back(rect.left(), current, rect.right(), current);
-            }
         };
 
         auto borders = [&] {
@@ -741,6 +728,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         isHor = true;
         borders();
     };
+    const auto gridStep = App::settings().gridStep(getScale());
     // drawing a scale of 1.0
     gs = 2;
     calcGrid(gridStep * 10);
@@ -765,13 +753,12 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         painter->drawLines(lines[i].data(), lines[i].size());
     }
 
-    // draw mouse cross
-    {
-        const double k = 100 / getScale(); // 100 px
+    { // draw mouse cross
+        const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k, point.y(),     point.x() + k, point.y()    },
-            {point.x(),     point.y() - k, point.x(),     point.y() + k}
+            {point.x() - k,     point.y(), point.x() + k,     point.y()},
+            {    point.x(), point.y() - k,     point.x(), point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -783,8 +770,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {0,           rect.top(), 0,            rect.bottom()},
-            {rect.left(), 0,          rect.right(), 0            }
+            {          0, rect.top(),            0, rect.bottom()},
+            {rect.left(),          0, rect.right(),             0}
         };
         painter->drawLines(lines, 2);
     }
@@ -906,7 +893,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
 //// int frameCount2_;
 
 // Scene::Scene(QObject* parent)
-//     : QGraphicsScene(parent) {
+//     : QGraphicsScene{parent} {
 //     //  App::setScene(this);
 //     double size = 1000.0; // 4 sqare meters
 //     setSceneRect(-size, -size, +size * 2, +size * 2);

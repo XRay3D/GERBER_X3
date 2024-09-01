@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -58,7 +58,7 @@ void Creator::create() {
             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
             sortBeginEnd(copy);
             for(auto&& p: copy)
-                returnPss.push_back({p});
+                returnPss.emplace_back(Paths{p});
         }
         dbgPaths(returnPs, "создание пермычек");
         { // создание заливки.

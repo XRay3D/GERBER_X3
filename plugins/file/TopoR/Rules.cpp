@@ -1,8 +1,11 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ﻿#include "Rules.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool Rules::WidthOfWires::getEnabledSpecified() const {
+    bool
+    Rules::WidthOfWires::getEnabledSpecified() const {
     return _enabled != Bool::off;
 }
 

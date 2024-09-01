@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -67,8 +67,6 @@ QDebug operator<<(QDebug debug, const Tool& t) {
     debug.nospace() << "Tool(D " << t.diameter_ << ", ID " << t.id_ << ')';
     return debug;
 }
-
-Tool::Tool() { }
 
 QString Tool::nameEnc() const {
     switch(type_) {
@@ -303,8 +301,6 @@ void Tool::updatePath(double depth) {
 ///////////////////////////////////////////////////////
 /// \brief ToolHolder::tools
 ///
-ToolHolder::ToolHolder() { }
-
 void ToolHolder::readTools() {
     QJsonDocument loadDoc;
 
@@ -329,7 +325,7 @@ void ToolHolder::readTools(const QJsonObject& json) {
         tool.read(toolObject);
         tool.setId(toolObject["id"].toInt());
         tool.updatePath();
-        tools_.emplace(tool.id(), tool);
+        tools_.try_emplace(tool.id(), tool);
     }
 }
 

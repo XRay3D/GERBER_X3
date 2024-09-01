@@ -47,10 +47,10 @@ public:
     struct InternalData {
         QString font{};
         QString text{"Shape"};
-        Side side{Top};
         double angle{0.0};
         double height{10.0};
         double xy{100.0};
+        Side side{Top};
         int handleAlign{BotLeft};
     };
 

@@ -126,7 +126,7 @@ class App {
 
 public:
     explicit App() {
-        if(sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
+        if(sharedMemory.create(sizeof(void*), QSharedMemory::ReadWrite))
             app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
         else if(sharedMemory.attach(QSharedMemory::ReadOnly))
             app = *reinterpret_cast<App**>(sharedMemory.data());

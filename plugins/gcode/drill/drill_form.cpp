@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -257,7 +257,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
 
         App::grView().scene()->update();
     } catch(const std::exception& exc) {
-        qDebug("%s: %s", __FUNCTION__, exc.what());
+        qDebug("%s: %s", __FUNCTION__, exc.what()); //-V576
         return;
     } catch(...) {
         exit(-99);

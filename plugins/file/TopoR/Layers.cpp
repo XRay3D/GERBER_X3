@@ -1,8 +1,11 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ﻿#include "Layers.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool Layer::getCompsOutlineSpecified() const { return type == layer_type::Assy; }
+    bool
+    Layer::getCompsOutlineSpecified() const { return type == layer_type::Assy; }
 
 bool Layer::getThicknessSpecified() const { return type != layer_type::Assy; }
 

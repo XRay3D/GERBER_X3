@@ -86,7 +86,7 @@ class ApCircle final : public AbstractAperture {
 public:
     ApCircle(double diam, double drillDiam, const File* file);
     ApCircle(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -111,7 +111,7 @@ class ApRectangle final : public AbstractAperture {
 public:
     ApRectangle(double width, double height, double drillDiam, const File* file);
     ApRectangle(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -135,7 +135,7 @@ class ApObround final : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam, const File* file);
     ApObround(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -159,7 +159,7 @@ class ApPolygon final : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* file);
     ApPolygon(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     double rotation() const;
@@ -188,7 +188,7 @@ class ApMacro final : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* file);
     ApMacro(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -231,7 +231,7 @@ class ApBlock final : public AbstractAperture, public QVector<GrObject> {
 public:
     ApBlock(const File* file);
     ApBlock(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;

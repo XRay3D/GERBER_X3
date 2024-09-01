@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -157,7 +157,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     case FileTree::Column::NameColorVisible:
         if(role == Qt::CheckStateRole) {
             file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-            emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+            emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
             return true;
         }
         return false;
@@ -171,7 +171,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     case FileTree::Column::ItemsType:
         if(role == Qt::EditRole) {
             file->setItemType(value.toInt());
-            emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+            emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
             return true;
         }
         return false;

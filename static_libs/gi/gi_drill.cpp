@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -39,12 +39,13 @@ void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     //        painter->drawPath(shape_);
     //        return;
     //    }
+    // pen_.setWidth(penWidth());
 
-    painter->setBrush(bodyColor_);
+    painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     painter->drawPath(shape_);
 
-    pen_.setColor(pathColor_);
+    pen_.setColor(penColor_);
     painter->strokePath(shape_, pen_);
 }
 
@@ -77,30 +78,30 @@ void Drill::changeColor() {
 
     switch(colorState) {
     case Default:
-        bodyColor_ = QColor(100, 100, 100);
+        brushColor_ = QColor(100, 100, 100);
         break;
     case Hovered:
-        bodyColor_ = QColor(150, 0x0, 150);
+        brushColor_ = QColor(150, 0x0, 150);
         break;
     case Selected:
-        bodyColor_ = QColor(255, 0x0, 255);
+        brushColor_ = QColor(255, 0x0, 255);
         break;
     case Hovered | Selected:
-        bodyColor_ = QColor(127, 0x0, 255);
+        brushColor_ = QColor(127, 0x0, 255);
         break;
     }
 
-    pathColor_ = bodyColor_;
+    penColor_ = brushColor_;
     switch(colorState) {
     case Default:
         break;
     case Hovered:
         break;
     case Selected: // FIXME V1037. Two or more case-branches perform the same actions.
-        pathColor_ = Qt::white;
+        penColor_ = Qt::white;
         break;
     case Hovered | Selected:
-        pathColor_ = Qt::white;
+        penColor_ = Qt::white;
         break;
     }
 
@@ -109,7 +110,7 @@ void Drill::changeColor() {
 }
 
 void Drill::create() {
-    shape_ = QPainterPath();
+    shape_ = QPainterPath{};
 
     if(!path_.size()) {
         return;

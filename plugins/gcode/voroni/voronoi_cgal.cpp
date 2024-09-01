@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -59,7 +59,7 @@ struct Segment {
         , p1(x2, y2) {
     }
     Segment(const Point& p0_, const Point& p1_)
-        : p0(p0_)
+        : p0{p0_}
         , p1(p1_) {
     }
 };

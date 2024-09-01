@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -22,7 +22,7 @@
 #include <QMimeData>
 
 ToolModel::ToolModel(QObject* parent)
-    : QAbstractItemModel(parent)
+    : QAbstractItemModel{parent}
     , rootItem(new ToolItem())
     , mimeType(u"application/ToolItem"_qs) {
     loadTools();

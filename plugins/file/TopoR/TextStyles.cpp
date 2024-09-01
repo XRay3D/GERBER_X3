@@ -1,8 +1,11 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ﻿#include "TextStyles.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool TextStyles::TextStyle::getBoldSpecified() const {
+    bool
+    TextStyles::TextStyle::getBoldSpecified() const {
     return _bold != Bool::off;
 }
 

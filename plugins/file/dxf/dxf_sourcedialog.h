@@ -36,7 +36,7 @@ class Model : public QAbstractTableModel {
 
 public:
     Model(const mvector<QString>& lines, QObject* parent = nullptr)
-        : QAbstractTableModel(parent)
+        : QAbstractTableModel{parent}
         , lines(lines) {
     }
     ~Model() { }

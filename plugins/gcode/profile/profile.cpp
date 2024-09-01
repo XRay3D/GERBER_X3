@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -197,8 +197,7 @@ void Creator::makeBridges() {
     std::for_each(std::execution::par_unseq, returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
         // find Bridges
         auto biStack = bridgeItems | rviews::filter([&rPaths](Gi::Bridge* bi) { return bi->test(rPaths.front()); });
-        if(ranges::empty(biStack))
-            return;
+        if(ranges::empty(biStack)) return;
         auto isPositive1 = CL2::IsPositive(rPaths.front());
 
         // create frame

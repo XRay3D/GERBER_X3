@@ -303,7 +303,7 @@ public:
 
     virtual PolyPath* AddChild(const Path64& path) = 0;
 
-    virtual void Clear(){};
+    virtual void Clear() {};
     virtual size_t Count() const { return 0; }
 
     const PolyPath* Parent() const { return parent_; }

@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -202,8 +202,12 @@ void DoubleSpinBox::updateToolTip() {
 
 void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
     static const auto decimalPoint = QLocale().decimalPoint();
+#if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     if(event->modifiers().testFlags(Qt::ShiftModifier | Qt::ControlModifier)) setSingleStep(0.01);
-
+#else
+    if(event->modifiers().testFlag(Qt::ControlModifier)
+        || event->modifiers().testFlag(Qt::ShiftModifier)) setSingleStep(0.01);
+#endif
     if(event->text() == '.' || event->text() == ',') {
         QKeyEvent ke{event->type(), decimalPoint == '.' ? Qt::Key_Period : Qt::Key_Comma, event->modifiers(), decimalPoint};
         QDoubleSpinBox::keyPressEvent(&ke);
@@ -213,7 +217,11 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
 }
 
 void DoubleSpinBox::keyReleaseEvent(QKeyEvent* event) {
+#if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     if(event->modifiers().testAnyFlags(Qt::NoModifier)) setSingleStep(1.0);
+#else
+    if(!event->modifiers().testFlag(Qt::NoModifier)) setSingleStep(1.0);
+#endif
     QDoubleSpinBox::keyPressEvent(event);
 }
 

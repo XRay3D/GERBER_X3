@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -42,16 +42,16 @@ AbstractShape::~AbstractShape() {
 
 void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
     if(App::drawPdf()) [[unlikely]] {
-        pathColor_ = Qt::black;
-        pathColor_.setAlpha(255);
-        pen_.setColor(pathColor_);
+        penColor_ = Qt::black;
+        penColor_.setAlpha(255);
+        pen_.setColor(penColor_);
     } else [[likely]] {
-        pathColor_ = bodyColor_;
-        pathColor_.setAlpha(255);
-        pen_.setColor(pathColor_);
+        penColor_ = brushColor_;
+        penColor_.setAlpha(255);
+        pen_.setColor(penColor_);
     }
     painter->setPen(pen_);
-    painter->setBrush(QGraphicsItem::flags().testFlag(ItemIsSelectable) ? QBrush{bodyColor_} : QBrush{Qt::NoBrush});
+    painter->setBrush(QGraphicsItem::flags().testFlag(ItemIsSelectable) ? QBrush{brushColor_} : QBrush{Qt::NoBrush});
     painter->drawPath(shape_);
 }
 
@@ -125,18 +125,18 @@ void AbstractShape::changeColor() {
 
     switch(colorState) {
     case Default:
-        bodyColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
-        bodyColor_.setAlpha(50);
+        brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
+        brushColor_.setAlpha(50);
         break;
     case Hovered:
-        bodyColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
-        bodyColor_.setAlpha(100);
+        brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
+        brushColor_.setAlpha(100);
         break;
     case Selected:
-        bodyColor_ = QColor(255, 0x0, 0x0, 100);
+        brushColor_ = QColor(255, 0x0, 0x0, 100);
         break;
     case Hovered | Selected:
-        bodyColor_ = QColor(255, 0x0, 0x0, 150);
+        brushColor_ = QColor(255, 0x0, 0x0, 150);
         break;
     }
 

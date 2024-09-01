@@ -39,7 +39,7 @@ public:
     // QString textFromValue(double value) const override;
     QValidator::State validate(QString& input, int& pos) const override;
 
-           // QWidget interface
+    // QWidget interface
 protected:
     void keyPressEvent(QKeyEvent* event) override;
     void keyReleaseEvent(QKeyEvent* event) override;

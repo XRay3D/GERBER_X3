@@ -23,7 +23,7 @@
 class cancelException : public std::exception {
 public:
     cancelException(const char* description)
-        : m_descr(description) {
+        : m_descr{description} {
     }
     ~cancelException() noexcept override = default;
     const char* what() const noexcept override { return m_descr.c_str(); }
@@ -157,6 +157,7 @@ QIcon drawDrillIcon(QColor color = Qt::black);
 Paths& normalize(Paths& paths);
 
 inline constexpr auto skipFront = std::views::drop(1);
+inline constexpr auto reverse = std::views::reverse;
 
 //------------------------------------------------------------------------------
 

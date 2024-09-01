@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -24,7 +24,7 @@
 namespace Gi {
 
 GcPath::GcPath(const Paths& paths, AbstractFile* file)
-    : gcFile_(file) {
+    : gcFile_{file} {
     for(const Path& path: paths)
         shape_.addPolygon(~path);
     double k;
@@ -39,7 +39,7 @@ GcPath::GcPath(const Paths& paths, AbstractFile* file)
 }
 
 GcPath::GcPath(const Path& path, AbstractFile* file)
-    : gcFile_(file) {
+    : gcFile_{file} {
     shape_.addPolygon(~path);
     double k;
     if(gcFile_)

@@ -77,7 +77,7 @@ class AbstractFile {
         QByteArray data;
         stream >> data;
         QDataStream in(&data, QIODevice::ReadOnly);
-        bool visible;
+        bool visible{};
         Block(in).read(
             file.id_,
             file.date_,
@@ -331,7 +331,7 @@ public:
         dsbx[ScY]->setValue(transform.scale.y());
 
         for(auto* file: files_)
-            backup.emplace(file, file->transform());
+            backup.try_emplace(file, file->transform());
 
         for(auto& dsbx: dsbx)
             connect(dsbx, &QDoubleSpinBox::valueChanged, this, &TransformDialog::setTransform);

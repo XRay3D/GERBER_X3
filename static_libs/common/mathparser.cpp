@@ -1,5 +1,5 @@
-//// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-//// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ///********************************************************************************
 // * Author    :  Damir Bakiev                                                    *
 // * Version   :  na                                                              *
@@ -36,7 +36,7 @@ template <> struct QConcatenable<sv> : private QAbstractConcatenable {
 };
 
 MathParser::MathParser(VarMap* variables)
-    : variables(variables) {
+    : variables{variables} {
 }
 
 double MathParser::getVariable(const QString& varName) {
@@ -231,20 +231,20 @@ class QTreeWidgetItem;
 #endif
 
 // MathParser::Expression::Expression(std::string_view token)
-//     : token(token) { }
+//     : token{token} { }
 // MathParser::Expression::Expression(std::string_view token, Expression a)
-//     : token(token)
+//     : token{token}
 //     , args {a} { }
 // MathParser::Expression::Expression(std::string_view token, Expression a, Expression b)
-//     : token(token)
+//     : token{token}
 //     , args {a, b} { }
 MathParser::MathParser(VarMap&& variables, std::string_view input)
-    : input(input)
+    : input{input}
     , variables{std::move(variables)} { }
 MathParser::MathParser(VarMap&& variables)
     : variables{std::move(variables)} { }
 MathParser::MathParser(std::string_view input)
-    : input(input) { }
+    : input{input} { }
 std::string_view MathParser::parseToken() {
     if(input.empty())
         return {};
@@ -425,7 +425,7 @@ Double MathParser::eval(const Expression& e, QTreeWidgetItem* twi) {
 #include <functional>
 
 MathParser::MathParser(VarMap* variables)
-    : variables(variables) { }
+    : variables{variables} { }
 
 double MathParser::getVariable(QStringView variableName) {
     if(!variables || !variables->contains(variableName.toString())) {

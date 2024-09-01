@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -13,7 +15,7 @@
 #include "gc_types.h"
 
 GCode::Tab::Tab(QWidget* parent)
-    : AbstractFileSettings(parent) {
+    : AbstractFileSettings{parent} {
     setWindowTitle("G-Code");
     setObjectName(QString::fromUtf8("tabGCode"));
 

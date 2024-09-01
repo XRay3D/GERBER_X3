@@ -36,7 +36,7 @@ class DxfGo final : public ::GraphicObject {
     //    QPointF pos_;
 
 public:
-    DxfGo();
+    DxfGo() = default;
     DxfGo(int entityId, const Path& path, const Paths& paths);
 
     void setRotation(double rotationAngle);

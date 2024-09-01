@@ -69,8 +69,8 @@ class Item : public /*QGraphicsObject*/ QGraphicsItem {
     Q_GADGET
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
 
-    inline QColor bodyColor() { return bodyColor_; }
-    inline void setBodyColor(const QColor& c) { bodyColor_ = c, colorChanged(); }
+    inline QColor bodyColor() { return brushColor_; }
+    inline void setBodyColor(const QColor& c) { brushColor_ = c, colorChanged(); }
 
     // signals:
 public:
@@ -133,8 +133,8 @@ protected:
     const QColor* colorPtr_ = nullptr;
 
     QColor color_;
-    QColor bodyColor_;
-    QColor pathColor_;
+    QColor brushColor_;
+    QColor penColor_;
 
     int32_t id_ = -1;
     double scaleFactor() const;

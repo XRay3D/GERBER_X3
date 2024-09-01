@@ -1,5 +1,5 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -14,6 +14,7 @@
 #include "dxf_lwpolyline.h"
 
 #include <QPainterPath>
+#include <qglobal.h>
 
 // QPainterPath construct_path(const Polygon_2& pgn)
 //{
@@ -94,7 +95,7 @@
 namespace Dxf {
 
 LwPolyline::LwPolyline(SectionParser* sp)
-    : Entity(sp) {
+    : Entity{sp} {
 }
 
 // void LwPolyline::draw(const InsertEntity* const i) const
@@ -170,7 +171,7 @@ Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
 DxfGo LwPolyline::toGo() const {
     QPainterPath path;
-    const bool dbg = false; // data.first().line() == 17844; /*|| data.first().line() == 18422;*/
+    const bool dbg = false; // NOTE data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
     auto addSeg = [&path, dbg](const Segment& source, const Segment& target) {
         if(path.isEmpty())
@@ -240,15 +241,20 @@ DxfGo LwPolyline::toGo() const {
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
+    if(p.empty())
+        return {id, {}, {}}; // return {id, ~p.value(0), paths};
+
     // ClipperOffset offset;
     // offset.AddPath(Path{p.value(0)}, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
     // Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
     const double offset = constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0);
-    Paths paths = Inflate({~p.value(0)}, offset,
-        JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
-    DxfGo go{id, ~p.value(0), paths}; // return {id, ~p.value(0), paths};
+    Paths paths = Inflate({~p.front()}, offset, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    DxfGo go{id, ~p.front(), paths}; // return {id, ~p.value(0), paths};
 
-    if(polylineFlag == Closed && poly.size() == 2 && poly.front().bulge == 1 && poly.back().bulge == 1) {
+    if(polylineFlag == Closed
+        && poly.size() == 2
+        && qFuzzyCompare(poly.front().bulge, 1)
+        && qFuzzyCompare(poly.back().bulge, 1)) {
         go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
         go.GraphicObject::pos = ~QLineF{poly.front(), poly.back()}.center();
         go.path.clear();

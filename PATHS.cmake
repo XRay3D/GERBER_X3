@@ -1,7 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-set (CMAKE_PREFIX_PATH "C:/Qt/5.15.2/mingw81_64")# why???
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  set(CMAKE_PREFIX_PATH "C:/Qt/5.15.2/mingw81_64") # why???
 endif()
 
 find_package(QT NAMES Qt5 Qt6 Core)
@@ -11,9 +11,9 @@ set(DIR_NAME
 )
 
 if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-    set(DIR_NAME "${DIR_NAME}_x64")
+  set(DIR_NAME "${DIR_NAME}_x64")
 else()
-    set(DIR_NAME "${DIR_NAME}_x32")
+  set(DIR_NAME "${DIR_NAME}_x32")
 endif()
 
 set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${DIR_NAME}/bin")
@@ -33,5 +33,3 @@ link_directories(STATIC_LIBS_DIR)
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-
-

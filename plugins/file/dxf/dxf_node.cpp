@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -56,7 +56,7 @@ class Dialog : public QDialog {
 public:
     ~Dialog() { fl = true; }
     Dialog(File* file, bool& fl, QWidget* parent = nullptr)
-        : QDialog(parent)
+        : QDialog{parent}
         , fl(fl = false) {
         setupUi(this);
 
@@ -116,7 +116,7 @@ class TreeWidget : public QTreeWidget {
 public:
     ~TreeWidget() { fl = true; }
     TreeWidget(File* file, bool& fl, QWidget* parent = nullptr)
-        : QTreeWidget(nullptr)
+        : QTreeWidget{nullptr}
         , fl(fl = false) {
         setAlternatingRowColors(true);
         setAnimated(true);
@@ -166,22 +166,18 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch(role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-        emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+        emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
         return true;
     case Qt::EditRole:
         switch(FileTree::Column(index.column())) {
         case FileTree::Column::Side:
-            if(role == Qt::EditRole) {
-                file->setSide(static_cast<Side>(value.toBool()));
-                // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
-                return true;
-            }
+            file->setSide(static_cast<Side>(value.toBool()));
+            // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+            return true;
         case FileTree::Column::ItemsType:
-            if(role == Qt::EditRole) {
-                file->setItemType(value.toInt());
-                emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
-                return true;
-            }
+            file->setItemType(value.toInt());
+            emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
+            return true;
         default:
             break;
         }
@@ -308,7 +304,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->file()->layersVisible_[name] = visible;
             if(visible) {
                 layer->file()->visible_ = visible;
-                emit App::fileModel().dataChanged(parent_->index(index.column()), parent_->index(index.column()), {role});
+                emit App::fileModel().dataChanged(parent_ -> index(index.column()), parent_->index(index.column()), {role});
             }
         }
         return true;

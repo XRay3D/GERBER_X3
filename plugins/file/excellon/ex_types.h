@@ -271,9 +271,9 @@ struct State {
 
 class Hole {
 public:
-    Hole() { }
+    Hole() = default;
     Hole(const State& state, File* file)
-        : file(file)
+        : file{file}
         , state(state) {
     }
 

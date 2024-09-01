@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -26,13 +26,13 @@ namespace Gerber::Comp {
 const Component dummy;
 
 sNode::sNode(const QString& name)
-    : component(dummy)
+    : component{dummy}
     , name(name)
     , item(nullptr) {
 }
 
 sNode::sNode(const Component& component)
-    : component(component)
+    : component{component}
     , name("")
     , item(Dialog::scene()->addRect(
           component.componentitem()->boundingRect(),

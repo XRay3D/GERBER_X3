@@ -49,7 +49,7 @@ public:
 class RectClipLines : public RectClip {
 public:
     RectClipLines(const Rect64& rect)
-        : RectClip(rect){};
+        : RectClip(rect) {};
     Paths64 Execute(const Path64& path);
 };
 

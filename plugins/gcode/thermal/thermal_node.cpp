@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -16,7 +16,7 @@
 namespace Thermal {
 
 Node::Node(const QIcon& icon, const QString& name, const ThParam& par, const Point& pos, AbstractThermPrGi* item, Model* model)
-    : container(false)
+    : container{false}
     , icon(icon)
     , name(name)
     , pos_(pos)
@@ -28,7 +28,7 @@ Node::Node(const QIcon& icon, const QString& name, const ThParam& par, const Poi
 }
 
 Node::Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model)
-    : container(true)
+    : container{true}
     , icon(icon)
     , name(name)
     , par(par)
@@ -37,7 +37,7 @@ Node::Node(const QIcon& icon, const QString& name, const ThParam& par, Model* mo
 }
 
 Node::Node(Model* model)
-    : item_(nullptr)
+    : item_{nullptr}
     , model(model) {
 }
 

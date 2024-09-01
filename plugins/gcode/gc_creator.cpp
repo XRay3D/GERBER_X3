@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -360,7 +360,9 @@ void Creator::stacking(Paths& paths) {
 
 void Creator::mergeSegments(Paths& paths, double maxDist) {
     qDebug(__FUNCTION__);
-
+#if 1
+    mergePaths(paths, maxDist);
+#else
     size_t size;
     do {
         size = paths.size();
@@ -430,6 +432,7 @@ void Creator::mergeSegments(Paths& paths, double maxDist) {
             }
         }
     } while(size != paths.size());
+#endif
 }
 
 void Creator::mergePaths(Paths& paths, const double maxDist) {

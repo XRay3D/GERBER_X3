@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -48,11 +48,11 @@ void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen_.setColor(*pnColorPrt_);
     if(colorPtr_)
         color_ = *colorPtr_;
-
+    // pen_.setWidth(penWidth());
     updateSelection();
 
-    QColor color(pen_.color());
-    QPen pen(pen_);
+    QColor color{pen_.color()};
+    QPen pen{pen_};
     constexpr double dl = 3;
 
     if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {

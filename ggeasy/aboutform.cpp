@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -16,7 +16,7 @@
 #include <QDesktopServices>
 
 AboutForm::AboutForm(QWidget* parent)
-    : QDialog(parent)
+    : QDialog{parent}
     , ui(new Ui::AboutForm) {
     ui->setupUi(this);
 #ifdef __MINGW32__

@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -17,7 +17,7 @@
 namespace Dxf {
 
 Block::Block(Blocks& blocks, SectionParser* sp)
-    : sp(sp)
+    : sp{sp}
     , blocks(blocks) {
     CodeData code(*(sp->it - 1));
     parseHeader(code);
@@ -26,9 +26,6 @@ Block::Block(Blocks& blocks, SectionParser* sp)
         code = sp->nextCode();
     } while(code != "BLOCK" && sp->hasNext());
     code = sp->prevCode();
-}
-
-Block::~Block() {
 }
 
 void Block::parseHeader(CodeData& code) {
@@ -40,36 +37,20 @@ void Block::parseHeader(CodeData& code) {
         case StartOfApplication_definedGroup:
             //        case EndOfGroup:
         case SoftPointerID:
-        case SubclassMarker:
-            break;
+        case SubclassMarker: break;
         case LayerName:
             layerName = code.string();
             break;
-            //            case SubclassMarker_2:
-            //                break;
-        case BlockName:
-            blockName = code.string();
-            break;
-        case BlockTypeFlags:
-            flags = code;
-            break;
-        case BasePointX:
-            basePoint.rx() = code;
-            break;
-        case BasePointY:
-            basePoint.ry() = code;
-            break;
-        case BasePointZ:
-            break;
-        case BlockName_2:
-            blockName = code.string();
-            break;
-        case XrefPathName:
-            xrefPathName = code.string();
-            break;
-        case BlockDescription:
-            blockDescription = code.string();
-            break;
+
+            // case SubclassMarker_2: break;
+        case BlockName: blockName = code.string(); break;
+        case BlockTypeFlags: flags = code; break;
+        case BasePointX: basePoint.rx() = code; break;
+        case BasePointY: basePoint.ry() = code; break;
+        case BasePointZ: break;
+        case BlockName_2: blockName = code.string(); break;
+        case XrefPathName: xrefPathName = code.string(); break;
+        case BlockDescription: blockDescription = code.string(); break;
         }
         code = sp->nextCode();
     } while(code.code() != 0);
