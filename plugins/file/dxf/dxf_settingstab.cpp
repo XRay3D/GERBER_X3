@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -18,7 +18,7 @@
 namespace Dxf {
 
 SettingsTab::SettingsTab(QWidget* parent)
-    : AbstractFileSettings(parent) {
+    : AbstractFileSettings{parent} {
     setObjectName(QString::fromUtf8("tabDxf"));
     auto verticalLayout = new QVBoxLayout{this};
     verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));

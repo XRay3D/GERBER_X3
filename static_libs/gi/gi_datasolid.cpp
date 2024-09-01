@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -22,7 +22,7 @@
 namespace Gi {
 
 DataFill::DataFill(Paths& paths, AbstractFile* file)
-    : Item(file)
+    : Item{file}
     , paths_{paths} {
     for(Path path: paths) {
         if(path.size() && path.back() != path.front())
@@ -34,8 +34,6 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
     setFlag(ItemIsSelectable, true);
 }
 
-DataFill::~DataFill() { }
-
 void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
@@ -44,7 +42,9 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     //        return;
     //    }
 
-    painter->setBrush(bodyColor_);
+    // pen_.setWidth(penWidth());
+
+    painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     //    for (auto&& poly : shape_.toFillPolygons())
     //        painter->drawPolygon(poly);
@@ -54,7 +54,7 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     //                || option->state & QStyle::State_MouseOver
     //            ? 2.0 * scaleFactor()
     //            : 0);
-    pen_.setColor(pathColor_);
+    pen_.setColor(penColor_);
     painter->strokePath(shape_, pen_);
 }
 
@@ -101,37 +101,37 @@ void DataFill::changeColor() {
     //    animation.setDuration(100);
     //    animation.setStartValue(bodyColor_);
 
-    bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
+    brushColor_ = colorPtr_ ? *colorPtr_ : color_;
 
     switch(colorState) {
     case Default:
         break;
     case Hovered:
     case Selected:
-        bodyColor_.setAlpha(255);
+        brushColor_.setAlpha(255);
         break;
     case Hovered | Selected:
-        bodyColor_.setAlpha(255);
-        bodyColor_ = bodyColor_.lighter(150);
+        brushColor_.setAlpha(255);
+        brushColor_ = brushColor_.lighter(150);
         break;
     }
 
-    pathColor_ = colorPtr_ ? *colorPtr_ : color_;
-    pathColor_.setAlpha(100);
+    penColor_ = colorPtr_ ? *colorPtr_ : color_;
+    penColor_.setAlpha(100);
     switch(colorState) {
     case Default:
         //        pathColor_.setAlpha(100);
         break;
     case Hovered:
-        pathColor_.setAlpha(255);
+        penColor_.setAlpha(255);
         //        pathColor_ = pathColor_.darker(125);
         break;
     case Selected:
-        pathColor_.setAlpha(150);
+        penColor_.setAlpha(150);
         break;
     case Hovered | Selected:
-        pathColor_.setAlpha(255);
-        pathColor_ = pathColor_.lighter(150);
+        penColor_.setAlpha(255);
+        penColor_ = penColor_.lighter(150);
         break;
     }
 

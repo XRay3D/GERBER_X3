@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -71,7 +71,7 @@ class ErrorModel : public QAbstractTableModel {
 
 public:
     ErrorModel(mvector<Gi::Error*>&& items, QObject* parent = nullptr)
-        : QAbstractTableModel(parent)
+        : QAbstractTableModel{parent}
         , items(std::move(items)) {
     }
     virtual ~ErrorModel() { qDeleteAll(items); }
@@ -128,7 +128,7 @@ class TableView : public QTableView {
     //    Q_OBJECT
 public:
     TableView(QWidget* parent)
-        : QTableView(parent) {
+        : QTableView{parent} {
         horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -157,7 +157,7 @@ protected:
 };
 
 BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , plugin{plugin}
     , progressDialog(new QProgressDialog{this}) {
 

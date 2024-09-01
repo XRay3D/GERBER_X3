@@ -30,7 +30,7 @@ public:
     double acc; // Аккамулятор
     sv rest;    // остаток строки, которую мы еще не обработали
     Result(double v = {}, sv rest = {})
-        : acc(v)
+        : acc{v}
         , rest(rest = {}) {
     }
 };
@@ -132,9 +132,7 @@ public:
     void extracted();
     Double parse(std::string_view input_);
     Double parse();
-    ~MathParser() {
-        // std::cerr << "buffer.size: " << buffer.size() << ", left" << std::ranges::count(buffer, '@') << std::endl;
-    }
+    ~MathParser() = default;
 
 private:
     Expression parseExpression();
@@ -280,7 +278,7 @@ public:
     double acc{};       // Аккамулятор
     QStringView rest{}; // остаток строки, которую мы еще не обработали
     //    Result(double v = 0.0, const QStringView& r = {})
-    //        : acc(v)
+    //        : acc{v}
     //        , rest(r) {
     //    }
 };

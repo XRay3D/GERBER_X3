@@ -1,8 +1,11 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ﻿#include "DisplayControl.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool DisplayControl::Show_DisplayControl::getShowBoardOutlineSpecified() const {
+    bool
+    DisplayControl::Show_DisplayControl::getShowBoardOutlineSpecified() const {
     return _showBoardOutline != Bool::off;
 }
 

@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -87,51 +87,34 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
                 auto data{toU16StrView(gLine)};
                 static constexpr ctll::fixed_string ptrnDummy(R"(^%(.{2})(.+)\*%$)"); // fixed_string("^%(.{2})(.+)\*%$");
                 if(auto [whole, id, par] = ctre::match<ptrnDummy>(data); whole)       ///*regexp.match(gLine)); match.hasMatch()*/) {
-
                     return true;
                 return false;
             };
 
             switch(gerberLine.front().toLatin1()) {
             case '%':
-                if(parseAttributes(gerberLine))
-                    continue;
-                if(parseAperture(gerberLine))
-                    continue;
-                if(parseApertureBlock(gerberLine))
-                    continue;
-                if(parseApertureMacros(gerberLine))
-                    continue;
-                if(parseFormat(gerberLine))
-                    continue;
-                if(parseStepRepeat(gerberLine))
-                    continue;
-                if(parseTransformations(gerberLine))
-                    continue;
-                if(parseUnitMode(gerberLine))
-                    continue;
-                if(parseImagePolarity(gerberLine))
-                    continue;
-                if(parseLoadName(gerberLine))
-                    continue;
-                if(dummy(gerberLine))
-                    continue;
+                if(parseAttributes(gerberLine)) continue;
+                if(parseAperture(gerberLine)) continue;
+                if(parseApertureBlock(gerberLine)) continue;
+                if(parseApertureMacros(gerberLine)) continue;
+                if(parseFormat(gerberLine)) continue;
+                if(parseStepRepeat(gerberLine)) continue;
+                if(parseTransformations(gerberLine)) continue;
+                if(parseUnitMode(gerberLine)) continue;
+                if(parseImagePolarity(gerberLine)) continue;
+                if(parseLoadName(gerberLine)) continue;
+                if(dummy(gerberLine)) continue;
             case 'D':
             case 'G':
-                if(parseDCode(gerberLine))
-                    continue;
-                if(parseGCode(gerberLine))
-                    continue;
+                if(parseDCode(gerberLine)) continue;
+                if(parseGCode(gerberLine)) continue;
             case 'M':
-                if(parseEndOfFile(gerberLine))
-                    continue;
+                if(parseEndOfFile(gerberLine)) continue;
             case 'X':
             case 'Y':
             default:
-                if(parseLineInterpolation(gerberLine))
-                    continue;
-                if(parseCircularInterpolation(gerberLine))
-                    continue;
+                if(parseLineInterpolation(gerberLine)) continue;
+                if(parseCircularInterpolation(gerberLine)) continue;
             }
 
             // Line didn`t match any pattern. Warn user.
@@ -623,7 +606,7 @@ bool Parser::parseAperture(const QString& gLine) {
      *    * Circular  (C)*: size (float)
      *    * Rectangle (R)*: width (float), height (float)
      *    * Obround   (O)*: width (float), height (float).
-     *    * Polygon   (P)*: diameter(float), vertices(int), [rotation(float)]
+     *    * Polygon   (P)*: diameter{float}, vertices(int), [rotation(float)]
      *    * Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
      */
     auto data{toU16StrView(gLine)};
@@ -645,26 +628,26 @@ bool Parser::parseAperture(const QString& gLine) {
                     hole = toDouble(paramList[2]);
                 if(paramList.size() < 2)
                     paramList << paramList[0];
-                apertures.emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
+                apertures.try_emplace(aperture, std::make_shared<ApRectangle>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
                 break;
             case 'O': // Obround
                 if(paramList.size() > 2)
                     hole = toDouble(paramList[2]);
-                apertures.emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
+                apertures.try_emplace(aperture, std::make_shared<ApObround>(toDouble(paramList[0]), toDouble(paramList[1]), hole, file));
                 break;
             case 'P': // Polygon
                 if(paramList.length() > 2)
                     rotation = toDouble(paramList[2], false, false);
                 if(paramList.length() > 3)
                     hole = toDouble(paramList[3]);
-                apertures.emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file));
+                apertures.try_emplace(aperture, std::make_shared<ApPolygon>(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, file));
                 break;
             }
         } else {
             VarMap macroCoeff;
             for(int i = 0; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
-            apertures.emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split('*'), macroCoeff, file));
+            apertures.try_emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split('*'), macroCoeff, file));
         }
         if(attAper.function_)
             aperFunctionMap[aperture] = attAper;
@@ -678,7 +661,7 @@ bool Parser::parseApertureBlock(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnApertureBlock(R"(^%ABD(\d+)\*%$)"); // fixed_string("^%ABD(\d+)\*%$");
     if(auto [whole, id] = ctre::match<ptrnApertureBlock>(data); whole) {
         abSrIdStack_.push({WorkingType::ApertureBlock, int(CtreCapTo(id))});
-        file->apertures_.emplace(abSrIdStack_.top().apertureBlockId, std::make_shared<ApBlock>(file));
+        file->apertures_.try_emplace(abSrIdStack_.top().apertureBlockId, std::make_shared<ApBlock>(file));
         return true;
     }
     if(gLine == "%AB*%") {

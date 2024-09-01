@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
@@ -76,32 +76,37 @@
 // qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
 // qInstallMessageHandler(myMessageOutput);
 
-auto messageHandler = qInstallMessageHandler(nullptr);
-void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-    auto file = context.file;
-    // if(type == QtInfoMsg) return;
-    QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
-    while(file && *file)
-        if(std::set{'/', '\\'}.contains(*file++))
-            context_.file = file;
+// auto messageHandler = qInstallMessageHandler(nullptr);
+// void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
+//     auto file = context.file;
+//     // if(type == QtInfoMsg) return;
+//     QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context); //-V2018
+//     while(file && *file)
+//         if(std::set{'/', '\\'}.contains(*file++))
+//             context_.file = file;
 
-    // QString data{context_.function};
-    // data.replace(QRegularExpression(R"((\w+\:\:))"), "");
-    // context_.function = data.toUtf8().data();
-    messageHandler(type, context, message);
-    if(App::mainWindowPtr())
-        emit App::mainWindow().logMessage(type, {
-                                                    QString::fromUtf8(context.category),
-                                                    QString::fromUtf8(context.file),
-                                                    QString::fromUtf8(context.function),
-                                                    QString::number(context.line),
+//     // QString data{context_.function};
+//     // data.replace(QRegularExpression(R"((\w+\:\:))"), "");
+//     // context_.function = data.toUtf8().data();
+//     messageHandler(type, context, message);
+//     if(App::mainWindowPtr())
+//         emit App::mainWindow().logMessage(type, {
+//                                                     QString::fromUtf8(context.category),
+//                                                     QString::fromUtf8(context.file),
+//                                                     QString::fromUtf8(context.function),
+//                                                     QString::number(context.line),
 
-                                                },
-            message);
-}
+//                                                 },
+//             message);
+// }
+
+#include "stacktrace_and_output.h"
 
 int main(int argc, char* argv[]) {
-    qInstallMessageHandler(myMessageHandler);
+    // qInstallMessageHandler(myMessageHandler);
+
+    stacktraceAndOutput();
+
     qSetMessagePattern(QLatin1String(
         "%{if-critical}\x1b[38;2;255;0;0m"
         "C %{endif}"
@@ -193,8 +198,8 @@ int main(int argc, char* argv[]) {
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true;      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
-            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
-            is_running = false;                   // И определяем, что других экземпляров не запущено
+            sharedMemory.create(sizeof(void*)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
+            is_running = false;                 // И определяем, что других экземпляров не запущено
         }
         semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;
@@ -263,15 +268,15 @@ int main(int argc, char* argv[]) {
             if(auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
                 if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
                     gCode->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::gCodePlugins().emplace(gCode->type(), gCode);
+                    App::gCodePlugins().try_emplace(gCode->type(), gCode);
                     continue;
                 } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
                     file->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::filePlugins().emplace(std::pair{file->type(), file});
+                    App::filePlugins().try_emplace(file->type(), file);
                     continue;
                 } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
                     shape->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::shapePlugins().emplace(shape->type(), shape);
+                    App::shapePlugins().try_emplace(shape->type(), shape);
                     continue;
                 }
             } else {

@@ -82,7 +82,7 @@ public:
         : miter_limit_(miter_limit)
         , arc_tolerance_(arc_tolerance)
         , preserve_collinear_(preserve_collinear)
-        , reverse_solution_(reverse_solution){};
+        , reverse_solution_(reverse_solution) {};
 
     ~ClipperOffset() { Clear(); };
 

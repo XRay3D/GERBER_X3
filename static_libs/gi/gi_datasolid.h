@@ -22,7 +22,7 @@ class DataFill final : public Item {
 
 public:
     explicit DataFill(Paths& paths_, AbstractFile* file);
-    ~DataFill() override;
+    ~DataFill() override = default;
 
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

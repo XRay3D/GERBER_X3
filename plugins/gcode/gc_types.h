@@ -94,7 +94,7 @@ struct Variant : V {
 
     template <class T>
     Variant(const T& val)
-        : V(val) { }
+        : V{val} { }
 
     int toInt() const {
         return std::visit([](auto&& val) -> int {

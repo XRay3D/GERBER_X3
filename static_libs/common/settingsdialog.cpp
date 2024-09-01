@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
@@ -78,7 +78,7 @@ public:
 /// \param tab
 ///
 SettingsDialog::SettingsDialog(QWidget* parent, int tab)
-    : QDialog(parent) {
+    : QDialog{parent} {
     ui.setupUi(this);
 
     ui.chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
@@ -126,15 +126,14 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     //    auto model = new ModelSettings{listView};
     {
         auto tab = new GCode::Tab{this};
-        tabs.push_back(tab);
+        tabs.emplace_back(tab);
         ui.tabwMain->addTab(tab, tab->windowTitle());
         tab->readSettings(settings);
     }
 
     for(auto& [type, ptr]: App::filePlugins()) {
         auto tab = ptr->createSettingsTab(this);
-        if(!tab)
-            continue;
+        if(!tab) continue;
 
         //        model->addWidget(tab);
         //        auto gbx = new QGroupBox{tab->windowTitle(), this};
@@ -142,7 +141,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         //        lay->addWidget(tab);
         //        verticalLayout_3->addWidget(gbx);
 
-        tabs.push_back(tab);
+        tabs.emplace_back(tab);
         ui.tabwMain->addTab(tab, tab->windowTitle());
         tab->readSettings(settings);
     }

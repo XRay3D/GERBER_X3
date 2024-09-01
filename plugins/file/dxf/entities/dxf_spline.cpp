@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -20,6 +20,7 @@
 #include <QPainterPath>
 #include <QPolygonF>
 #include <QtMath>
+#include <qglobal.h>
 
 namespace Dxf {
 QPolygonF interpolate(const QPolygonF& points, int numValues) {
@@ -114,16 +115,16 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
             y += basis * poly.ControlPoints[i].y();
         }
 
-        if(u == 0.0 && x != 0.0 && x != 0.0)
+        if(u == 0.0 && qFuzzyIsNull(x) || qFuzzyIsNull(y))
             path.moveTo(x, y);
-        else if(x != 0.0 && x != 0.0)
+        else if(!qFuzzyIsNull(x) || !qFuzzyIsNull(y))
             path.lineTo(x, y);
         //        putpixel(roundOff(x), roundOff(y), YELLOW);
     }
 }
 
 Spline::Spline(SectionParser* sp)
-    : Entity(sp) {
+    : Entity{sp} {
 }
 
 void Spline::parse(CodeData& code) {

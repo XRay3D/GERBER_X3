@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -39,7 +39,7 @@ void Node::repaint(FileTree::Node* parent) {
             continue;
         const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
         node->file->setColor(QColor::fromHsv(k, 255, 255, 150));
-        emit App::fileModel().dataChanged(node->index(0), node->index(0), {Qt::DecorationRole});
+        emit App::fileModel().dataChanged(node -> index(0), node->index(0), {Qt::DecorationRole});
     }
 }
 
@@ -67,7 +67,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case FileTree::Column::ItemsType:
             qDebug() << role << value;
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
-            emit App::fileModel().dataChanged(this->index(), this->index(), {Qt::DecorationRole});
+            emit App::fileModel().dataChanged(this -> index(), this->index(), {Qt::DecorationRole});
             return true;
         default:
             break;

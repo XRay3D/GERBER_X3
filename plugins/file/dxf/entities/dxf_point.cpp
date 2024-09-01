@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -15,7 +15,7 @@
 namespace Dxf {
 
 Point::Point(SectionParser* sp)
-    : Entity(sp) {
+    : Entity{sp} {
 }
 
 // void Point::draw(const Dxf::InsertEntity* const i) const

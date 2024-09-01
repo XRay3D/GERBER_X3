@@ -35,7 +35,7 @@ public:
     static QString mimeType() { return u"image/x-puzzle-piece"_qs; }
 
 public slots:
-    void setCursorPos(const QPoint cursorPos_);
+    void setCursorPos(const QPoint& cursorPos_);
     void setMouseTrack(const bool track);
     void setOrigin(const double newOrigin);
     void setRulerUnit(const double rulerUnit_);
@@ -67,7 +67,7 @@ private:
 
     QPoint cursorPos;
 
-    QPen meterPen;
+    // QPen meterPen;
 
     const Qt::Orientation orientation_;
 

@@ -6,6 +6,7 @@
 #include <chrono>
 #include <concepts>
 #include <map>
+#include <qglobal.h>
 #include <variant>
 
 #if defined(_MSC_VER)
@@ -28,6 +29,13 @@ using mS = std::milli;
 using Sec = std::ratio<1>;
 using Mins = std::ratio<60>;
 using Hours = std::ratio<3600>;
+
+constexpr std::nano _nS;
+constexpr std::micro _uS;
+constexpr std::milli _mS;
+constexpr std::ratio<1> _Sec;
+constexpr std::ratio<60> _Mins;
+constexpr std::ratio<3600> _Hours;
 
 template <typename... Ts>
 constexpr auto isSame = std::is_same_v<Ts...>;
@@ -61,7 +69,7 @@ struct Timer {
         auto& [ctr, avg] = avgMap[stringView];
         avg += timeout.count();
         ++ctr;
-        qDebug(format(), timeout.count(), avg / ctr, stringView.data());
+        qInfo(format(), timeout.count(), avg / ctr, stringView.data());
     }
 
     constexpr auto format() const noexcept {
@@ -312,8 +320,8 @@ using namespace QtLiterals;
 #endif
 
 #if USE_ENUM == 1
-#include <ranges>
 #include <array>
+#include <ranges>
 
 using namespace std::literals;
 template <class Ty>
@@ -414,7 +422,7 @@ template <class E>
 constexpr E stringToEnum(Impl::sv str) {
     auto it = std::ranges::find(Impl::Tokens<E>, str, &std::pair<Impl::sv, E>::first);
     return it == Impl::Tokens<E>.end() ? static_cast<E>(
-               std::numeric_limits<std::underlying_type_t<E>>::min())
+                                             std::numeric_limits<std::underlying_type_t<E>>::min())
                                        : it->second;
 }
 #endif

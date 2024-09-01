@@ -107,7 +107,7 @@ struct IntPoint {
     IntPoint(cInt x = 0, cInt y = 0, cInt z = 0) F
         : X(x),
           Y(y),
-          Z(z){};
+          Z(z) {};
 #else
     IntPoint(cInt x = 0, cInt y = 0)
         : X(x)

@@ -39,6 +39,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -Winvalid-pch -pthread
     # -fmodules-ts
   )
+  add_compile_options(-rdynamic)
+
   link_directories(tbb/lib)
   # Link against the dependency of Intel TBB (for parallel C++17 algorithms)
   # target_link_libraries(${PROJECT_NAME} tbb)

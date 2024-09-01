@@ -1,5 +1,5 @@
-//// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-//// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ///*******************************************************************************
 // * Author    :  Damir Bakiev                                                    *
 // * Version   :  na                                                              *
@@ -15,7 +15,7 @@
 // namespace Dxf {
 
 // VPort::VPort(SectionParser* sp)
-//     : TableItem(sp) {
+//     : TableItem{sp} {
 // }
 
 // void VPort::parse(CodeData& code) {

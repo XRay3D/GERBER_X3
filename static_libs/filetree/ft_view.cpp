@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -39,7 +39,7 @@
 namespace FileTree {
 
 View::View(QWidget* parent)
-    : QTreeView(parent) {
+    : QTreeView{parent} {
     setAlternatingRowColors(true);
     setAnimated(true);
     setUniformRowHeights(true);

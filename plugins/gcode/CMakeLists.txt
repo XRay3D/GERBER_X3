@@ -1,9 +1,9 @@
 #[[
  Author    :  Damir Bakiev                                                    
  Version   :  na                                                              
- Date      :  03 October 2022                                                 
+ Date      :  03 October 2024                                                 
  Website   :  na                                                              
- Copyright :  Damir Bakiev 2016-2022                                          
+ Copyright :  Damir Bakiev 2016-2024                                          
  License   :                                                                  
  Use, modification & distribution is subject to Boost Software License Ver 1. 
  http://www.boost.org/LICENSE_1_0.txt                                         
@@ -19,7 +19,7 @@ set(CMAKE_AUTOUIC ON)
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 
-find_package(QT NAMES Qt5 Qt6 COMPONENTS Core Gui Widgets REQUIRED)
+find_package(QT NAMES Qt5 #[[Qt6]] COMPONENTS Core Gui Widgets REQUIRED)
 find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets LinguistTools REQUIRED)
 
 #include_directories()

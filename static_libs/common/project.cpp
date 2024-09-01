@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -115,7 +115,7 @@ QDataStream& operator>>(QDataStream& stream, Gi::Item*& shape) {
 }
 
 Project::Project(QObject* parent)
-    : QObject(parent)
+    : QObject{parent}
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
         const int32_t id = files_[contains(path)]->id();
@@ -303,7 +303,7 @@ int Project::addItem(Gi::Item* const item) {
     item->setColor(Qt::white);
     item->setVisible(true);
 
-    items_.emplace(item->id_, item);
+    items_.try_emplace(item->id_, item);
     App::fileModel().addItem(item);
     setChanged();
     return item->id_;
@@ -401,7 +401,7 @@ mvector<AbstractFile*> Project::files(int type) {
     return rfiles;
 }
 
-mvector<AbstractFile*> Project::files(const mvector<int> types) {
+mvector<AbstractFile*> Project::files(const mvector<int>& types) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
@@ -434,7 +434,7 @@ int Project::addFile(AbstractFile* file) {
     } else if(file->id() == -1) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
-        files_.emplace(newId, file);
+        files_.try_emplace(newId, file);
         App::fileModel().addFile(file);
         setChanged();
         watcher.addPath(file->name());
@@ -457,7 +457,7 @@ int Project::addFile(GCode::File* file) {
     } else if(file->id() == -1) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
-        files_.emplace(newId, file);
+        files_.try_emplace(newId, file);
         App::fileModel().addFile(file);
         setChanged();
         watcher.addPath(file->name());
@@ -474,7 +474,7 @@ int Project::addShape(Shapes::AbstractShape* const shape) {
     shape->id_ = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
-    shapes_.emplace(newId, shape); // NOTE destroy on filetree model
+    shapes_.try_emplace(newId, shape); // NOTE destroy on filetree model
     App::fileModel().addShape(shape);
     setChanged();
     return newId;

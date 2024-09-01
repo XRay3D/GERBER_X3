@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -15,7 +15,7 @@
 namespace Dxf {
 
 Dxf::Dummy::Dummy(Dxf::SectionParser* sp, Dxf::Entity::Type type)
-    : Entity(sp)
+    : Entity{sp}
     , type_(type) {
 }
 

@@ -1,8 +1,8 @@
 /*******************************************************************************
  * Author    :  Angus Johnson                                                   *
- * Date      :  21 November 2022                                                *
+ * Date      :  21 November 2024                                                *
  * Website   :  http://www.angusj.com                                           *
- * Copyright :  Angus Johnson 2010-2022                                         *
+ * Copyright :  Angus Johnson 2010-2024                                         *
  * Purpose   :  Core Clipper Library structures and functions                   *
  * License   :  http://www.boost.org/LICENSE_1_0.txt                            *
  *******************************************************************************/
@@ -34,7 +34,7 @@ static constexpr auto dScale{1. / uScale};
 class cancelException : public std::exception {
 public:
     cancelException(const char* description)
-        : m_descr(description) {
+        : m_descr{description} {
     }
     ~cancelException() noexcept override = default;
     const char* what() const noexcept override { return m_descr.c_str(); }
@@ -128,7 +128,7 @@ struct Point {
     }
 
     explicit Point()
-        : x(0)
+        : x{0}
         , y(0)
         , z(0){};
 
@@ -164,7 +164,7 @@ struct Point {
     }
 
     /*explicit*/ Point()
-        : x(0)
+        : x{0}
         , y(0){};
 
     template <typename T2>
@@ -212,13 +212,13 @@ struct Point {
     //    #ifdef use_xyz
     //    T Z;
     //    Point(T x = 0, T y = 0, T z = 0) F
-    //        : X(x),
+    //        : X{x},
     //          Y(y),
     //          Z(z) {};
     //    #else
     //    #endif
     //    constexpr Point(T x = {}, T y = {}) noexcept
-    //        : X(x)
+    //        : X{x}
     //        , Y(y) {
     //    }
 
@@ -401,7 +401,7 @@ struct Paths : mvector<Path<T>> {
     //        : MV(b, e) { }
 
     Paths(const MV& v)
-        : MV(v) { }
+        : MV{v} { }
 
     Paths(MV&& v)
         : MV(std::move(v)) { }

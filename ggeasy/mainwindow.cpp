@@ -1,5 +1,6 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+
 
 /********************************************************************************
  * Author : Damir Bakiev                                                         *
@@ -50,7 +51,7 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 }
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
+    : QMainWindow{parent}
     , recentFiles{this, "recentFiles"}
     , recentProjects{this, "recentProjects"}
     , project_{new Project{this}}
@@ -331,7 +332,7 @@ void MainWindow::createActionsService() {
     connect(action, &QAction::toggled, this, [=, this](bool checked) { if (checked) setDockWidget(new GCode::PropertiesForm); });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     action->setCheckable(true);
-    toolpathActions.emplace(G_CODE_PROPERTIES, action);
+    toolpathActions.try_emplace(G_CODE_PROPERTIES, action);
     actionGroup.addAction(action);
     // Tool Base
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
@@ -444,7 +445,7 @@ void MainWindow::createActionsToolPath() {
         auto action = gCodePlugin->addAction(menu, toolpathToolBar);
         action->setCheckable(true);
         actionGroup.addAction(action);
-        toolpathActions.emplace(type, action);
+        toolpathActions.try_emplace(type, action);
         connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
     }
 }

@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -21,7 +21,7 @@
 /// \param parent
 ///
 RadioDelegate::RadioDelegate(QObject* parent)
-    : QStyledItemDelegate(parent) {
+    : QStyledItemDelegate{parent} {
 }
 
 QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {

@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -30,7 +30,7 @@
 namespace Thermal {
 
 AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
-    : agr(this)
+    : agr{this}
     , pa1(this, "bodyColor")
     , pa2(this, "pathColor")
     , tool(tool)
@@ -191,7 +191,7 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
 }
 
 PreviewItem::PreviewItem(const Paths& paths, const Point pos, Tool& tool)
-    : AbstractThermPrGi(tool)
+    : AbstractThermPrGi{tool}
     , paths_{paths}
     , pos_{pos} {
     for(QPolygonF polygon: ~paths) {

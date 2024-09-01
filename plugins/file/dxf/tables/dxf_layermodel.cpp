@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -31,7 +31,7 @@ QStringList keys(const Layers& layers) {
 }
 
 LayerModel::LayerModel(Layers layers, QObject* parent)
-    : QAbstractTableModel(parent)
+    : QAbstractTableModel{parent}
     , layers(layers)
     , names(keys(layers)) {
 }
@@ -159,7 +159,7 @@ Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const {
 /// \param parent
 ///
 ItemsTypeDelegate::ItemsTypeDelegate(QObject* parent)
-    : QStyledItemDelegate(parent) {
+    : QStyledItemDelegate{parent} {
 }
 
 QWidget* ItemsTypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {

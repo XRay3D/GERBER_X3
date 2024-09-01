@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -53,7 +53,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
 }
 
 AbstractAperture::AbstractAperture(const File* file)
-    : file_(file) { }
+    : file_{file} { }
 
 Paths AbstractAperture::draw(const State& state, bool notApBlock) {
     if(state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
@@ -122,7 +122,7 @@ void AbstractAperture::transform(Path& poligon, const State& state) {
 /// \param format
 ///
 ApCircle::ApCircle(double diam, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     diam_ = diam;
     drillDiam_ = drillDiam;
     // GerberAperture interface
@@ -164,7 +164,7 @@ void ApCircle::draw() {
 /// \param format
 ///
 ApRectangle::ApRectangle(double width, double height, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     width_ = width;
     height_ = height;
     drillDiam_ = drillDiam;
@@ -215,7 +215,7 @@ void ApRectangle::draw() {
 /// \param format
 ///
 ApObround::ApObround(double width, double height, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     width_ = width;
     height_ = height;
     drillDiam_ = drillDiam;
@@ -286,7 +286,7 @@ void ApObround::draw() {
 /// \param format
 ///
 ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     diam_ = diam;
     verticesCount_ = nVertices;
     rotation_ = rotation;
@@ -346,7 +346,7 @@ void ApPolygon::draw() {
 /// \param format
 ///
 ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* format)
-    : AbstractAperture(format)
+    : AbstractAperture{format}
     , macro_(macro)
     , modifiers_(modifiers)
     , coefficients_(coefficients) {
@@ -724,7 +724,7 @@ Path ApMacro::drawVectorLine(const mvector<double>& mod) {
 /// \param format
 ///
 ApBlock::ApBlock(const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
 }
 
 QString ApBlock::name() const { return QString("BLOCK"); }

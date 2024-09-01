@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -19,7 +19,7 @@
 namespace Gerber::Comp {
 
 Dialog::Dialog(QWidget* parent)
-    : QDialog(parent) {
+    : QDialog{parent} {
     setupUi(this);
     grView->setScene(scene_ = new QGraphicsScene{grView});
     grView->scale(+1, -1);

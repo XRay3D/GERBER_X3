@@ -1,9 +1,12 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ﻿#include "Groups.h"
 #include "Commons.h"
 #include <ranges>
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool Groups::LayerGroup::ShouldSerialize_LayerRefs() {
+    bool
+    Groups::LayerGroup::ShouldSerialize_LayerRefs() {
     return _LayerRefs.empty() ? false : _LayerRefs.size() > 0;
 }
 

@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -17,7 +17,7 @@
 namespace ShTxt {
 
 ShTextDialog::ShTextDialog(QVector<Shape*> text, QWidget* parent)
-    : QDialog(parent)
+    : QDialog{parent}
     , ui(new Ui::ShTextDialog)
     , shapeText(text) {
     ui->setupUi(this);

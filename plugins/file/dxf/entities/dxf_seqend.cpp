@@ -1,8 +1,10 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "dxf_seqend.h"
 
 namespace Dxf {
 SeqEnd::SeqEnd(SectionParser* sp)
-    : Entity(sp) {
+    : Entity{sp} {
 }
 
 void SeqEnd::parse(CodeData& code) {

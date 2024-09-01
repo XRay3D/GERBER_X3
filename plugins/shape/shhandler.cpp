@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -55,7 +55,7 @@ void drawPos(QPainter* painter, const QPointF& pt1) {
 }
 
 Handle::Handle(AbstractShape* shape, Type type)
-    : shape(shape)
+    : shape{shape}
     , type_(type) {
     setAcceptHoverEvents(true);
     setFlags(ItemIsMovable);
@@ -193,7 +193,7 @@ static HandlePosN lastHandlePos;
 void Handle::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     lastPos = pos();
     for(auto&& handle: shape->handlers)
-        lastHandlePos.emplace(handle.get(), Data{handle->pos(), handle->type_});
+        lastHandlePos.try_emplace(handle.get(), Data{handle->pos(), handle->type_});
     QGraphicsItem::mousePressEvent(event);
     pressed = true;
 }

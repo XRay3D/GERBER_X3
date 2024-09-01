@@ -157,7 +157,7 @@ struct ArrayDrawing : AbstrFileFunc {
 
 public:
     ArrayDrawing(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function)
+        : AbstrFileFunc{function}
     //, side(toSide(list.value(0)))
     {
     }
@@ -210,7 +210,7 @@ struct Depthrout : AbstrFileFunc {
 
 public:
     Depthrout(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -224,7 +224,7 @@ struct Drillmap : AbstrFileFunc {
 
 public:
     Drillmap(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -238,7 +238,7 @@ struct FabricationDrawing : AbstrFileFunc {
 
 public:
     FabricationDrawing(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -252,7 +252,7 @@ struct Glue : AbstrFileFunc {
 
 public:
     Glue(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -319,7 +319,7 @@ struct Other : AbstrFileFunc {
 
 public:
     Other(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -333,7 +333,7 @@ struct OtherDrawing : AbstrFileFunc {
     // Other files
 public:
     OtherDrawing(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -347,7 +347,7 @@ struct Pads : AbstrFileFunc {
 
 public:
     Pads(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -475,7 +475,7 @@ struct Vcut : AbstrFileFunc {
 
 public:
     Vcut(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -489,7 +489,7 @@ struct Vcutmap : AbstrFileFunc {
 
 public:
     Vcutmap(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 /////////////////////////////////////////////////////
@@ -503,7 +503,7 @@ struct Viafill : AbstrFileFunc {
 
 public:
     Viafill(File::Function function, const QStringList& /*list*/)
-        : AbstrFileFunc(function) {
+        : AbstrFileFunc{function} {
     }
 };
 

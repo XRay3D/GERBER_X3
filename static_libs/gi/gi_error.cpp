@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -22,7 +22,7 @@
 namespace Gi {
 
 Error::Error(const Paths& paths, double area)
-    : area_(area) {
+    : area_{area} {
     for(auto& path: paths)
         shape_.addPolygon(~path);
     setFlag(ItemIsSelectable);

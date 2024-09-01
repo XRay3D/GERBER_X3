@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -19,7 +19,7 @@
 #include <QSettings>
 
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
-    : QDialog(parent)
+    : QDialog{parent}
     , ui(new Ui::ToolDatabase)
     , types_(types) {
 

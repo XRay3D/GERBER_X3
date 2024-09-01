@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -199,7 +199,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 /// \param parent
 ///
 Pin::Pin()
-    : QGraphicsObject(nullptr)
+    : QGraphicsObject{nullptr}
     , index_(ctr_++) {
     setObjectName("Pin");
     setAcceptHoverEvents(true);
@@ -468,7 +468,7 @@ void Pin::setPos(const QPointF& pos) {
 
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
-    : QGraphicsObject(nullptr) {
+    : QGraphicsObject{nullptr} {
     setZValue(-std::numeric_limits<double>::max());
     setFlag(ItemIsSelectable, false);
     App::setLayoutFrames(this);

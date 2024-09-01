@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -19,7 +19,7 @@
 namespace Dxf {
 
 SourceDialog::SourceDialog(int fileId, QWidget* parent)
-    : QDialog(parent) {
+    : QDialog{parent} {
     setObjectName(QString::fromUtf8("this"));
     resize(600, 600);
     // Dialog->resize(400, 300);
@@ -47,7 +47,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //    class ItemDelegate : public QItemDelegate {
     //    public:
     //        ItemDelegate(QObject* parent = nullptr)
-    //            : QItemDelegate(parent) {};
+    //            : QItemDelegate{parent} {};
 
     //        void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
     //        {

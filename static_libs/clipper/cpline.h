@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  11 November 2021                                                *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2022                                          *
+ * Copyright :  Damir Bakiev 2016-2024                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -106,7 +106,7 @@
 // }
 
 // inline IntLine::IntLine(const IntPoint& apt1, const IntPoint& apt2)
-//     : pt1(apt1)
+//     : pt1{apt1}
 //     , pt2(apt2)
 //{
 // }

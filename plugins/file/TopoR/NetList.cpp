@@ -1,10 +1,13 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 ﻿#include "NetList.h"
 #include "Commons.h"
 #include <ranges>
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool NetList::Net::ShouldSerialize_refs() {
+    bool
+    NetList::Net::ShouldSerialize_refs() {
     return _refs.empty() ? false : _refs.size() > 0;
 }
 

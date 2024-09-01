@@ -1,3 +1,5 @@
+// This is a personal academic project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // #include "a_pch.h"
 
 #include "app.h"
@@ -34,13 +36,13 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 
 bool MainWindow::debug() {
 
-    while(App::isDebug() || 1) { // NOTE need for debug
+    while(App::isDebug() || 1) { // FIXME NOTE need for debug
         int time = 100;
-        int delay = 100;
+        int delay = 100; //-V654
 
-        if(0) {
+        if(1) {
             // QDir dir(R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)");
-            QDir dir(R"(/home/x-ray/Рабочий стол/dxf/)");
+            QDir dir(R"(/home/x-ray/projects/dxf/)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");

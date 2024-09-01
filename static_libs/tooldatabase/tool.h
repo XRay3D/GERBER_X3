@@ -23,9 +23,9 @@ class Tool {
     friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
-    Tool();
+    Tool() = default;
     Tool(double diameter)
-        : diameter_(diameter) { }
+        : diameter_{diameter} { }
 
     enum Type {
         Drill,
@@ -140,7 +140,7 @@ class ToolHolder {
     ToolHolder& operator=(ToolHolder&&) = delete;
 
 public:
-    ToolHolder();
+    ToolHolder() = default;
 
     const Tool& tool(int32_t id) { return tools_.at(id); }
     const Tools& tools() { return tools_; }

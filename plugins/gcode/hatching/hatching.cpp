@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -124,7 +124,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, "ClipType::Intersection");
             frames += std::move(tmp);
-            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
             // dbgPaths(tmp, "ClipType::Difference");
             frames += std::move(tmp);
 

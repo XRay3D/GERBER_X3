@@ -214,7 +214,7 @@ class State {
 
 public:
     State(File* const file = nullptr)
-        : file_(file) { }
+        : file_{file} { }
 
     inline File* file() const { return file_; }
 
@@ -270,7 +270,7 @@ struct GrObject : public GraphicObject {
     State state;
 
     // public:
-    GrObject() { }
+    GrObject() = default;
     GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
         : gFile{gFile}
         , state{state} {

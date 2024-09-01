@@ -28,7 +28,7 @@ class AbstractFile;
 class AbstractFileSettings : public QWidget {
 public:
     AbstractFileSettings(QWidget* parent)
-        : QWidget(parent) {
+        : QWidget{parent} {
     }
     virtual ~AbstractFileSettings() = default;
     virtual void readSettings(MySettings& settings) = 0;
@@ -59,7 +59,7 @@ public:
         });
     };
 
-    virtual void updateFileModel([[maybe_unused]] AbstractFile* file){};
+    virtual void updateFileModel([[maybe_unused]] AbstractFile* file) {};
 
 signals:
     void fileError(const QString& fileName, const QString& error);

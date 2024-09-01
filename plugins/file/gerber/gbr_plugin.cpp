@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -29,7 +29,7 @@ namespace Gerber {
 const int id1 = qRegisterMetaType<File*>("G::GFile*");
 
 Plugin::Plugin(QObject* parent)
-    : AbstractFilePlugin(parent)
+    : AbstractFilePlugin{parent}
     , Parser(this) {
 }
 
@@ -102,7 +102,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
     public:
         Tab(QWidget* parent = nullptr)
-            : AbstractFileSettings(parent) {
+            : AbstractFileSettings{parent} {
             setObjectName(QString::fromUtf8("tabGerber"));
 
             auto verticalLayout = new QVBoxLayout{this};

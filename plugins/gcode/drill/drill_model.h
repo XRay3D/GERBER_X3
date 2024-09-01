@@ -25,7 +25,7 @@ struct Row {
     //        QIcon&& icon = {},
     //        int32_t id = {},
     //        double diameter = {})
-    //        : icon(icon)
+    //        : icon{icon}
     //        , name(name)
     //        , diameter(diameter)
     //        , rowId(id)

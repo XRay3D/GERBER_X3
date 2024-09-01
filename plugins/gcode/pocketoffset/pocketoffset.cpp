@@ -1,4 +1,4 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
@@ -189,7 +189,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
                 do {
                     returnPs += std::move(wp);
-                    CleanPaths(wp, uScale * 0.0005);
+                    CleanPaths(wp, uScale * 0.0005); //-V1030
                     wp = Inflate(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
                 } while(wp.size());
                 ++pIdx;
