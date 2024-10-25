@@ -23,6 +23,7 @@
 #include <cmath>
 #include <iterator>
 #include <mutex>
+#include <numbers>
 #include <qglobal.h>
 #include <qline.h>
 #include <qnamespace.h>
@@ -33,6 +34,8 @@
 #include <QDebug>
 #include <QPen>
 #include <qmath.h>
+
+#define _ITERATOR_DEBUG_LEVEL 0
 
 std::tuple<Vec2, Vec2, double> arcToBulge(const Vec2& center, double startAngle, double endAngle, double radius) { // FIXME
 
@@ -100,7 +103,7 @@ Poly RectanglePoly(double width, double height, const Vec2& center) {
         PlineVert{-halfWidth + center.x(), -halfHeight + center.y(), 0.0},
         PlineVert{+halfWidth + center.x(), -halfHeight + center.y(), 0.0},
         PlineVert{+halfWidth + center.x(), +halfHeight + center.y(), 0.0},
-        // PlineVert{-halfWidth + center.x(), +halfHeight + center.y(), 0.0},
+        PlineVert{-halfWidth + center.x(), +halfHeight + center.y(), 0.0},
     };
     poligon.isClosed() = true;
     // if(Area(poligon) < 0.0)
@@ -176,13 +179,15 @@ Poly& CleanPoly(Poly& poly) {
             // ((it + 1)->bulge())
             //     ? (it + 1)->bulge() = it->bulge()
             //     : it->bulge() = (it + 1)->bulge();
-            vertexes.erase(it--);
+            vertexes.erase(it);
+            if(it != vertexes.begin()) --it;
         }
 
     if(it->pos() == vertexes.begin()->pos()) {
         if(qFuzzyIsNull(vertexes.begin()->bulge()) && !qFuzzyIsNull(it->bulge()))
             vertexes.begin()->bulge() = it->bulge();
-        vertexes.erase(it--);
+        vertexes.erase(it);
+        if(it != vertexes.begin()) --it;
     }
 
     return poly;
@@ -254,6 +259,9 @@ Polys OffsetPoly(const Poly& poly, double offset, PolyType line) {
         // std::ranges::move(std::move(offsetIn), std::back_inserter(solution));
         // std::ranges::move(std::move(offsetOut), std::back_inserter(solution));
     }
+
+    if(solution.size() == 1 && Area(solution.front()) < 0)
+        ReversePoly(solution.front());
 
     return solution;
 }

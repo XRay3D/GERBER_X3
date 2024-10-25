@@ -560,7 +560,7 @@ Polys Parser::createLine() {
         // Удаление идущих подряд одинаковых точек.
         CleanPoly(poly_);
         solution = OffsetPoly(poly_, size);
-        TestPoly({poly_}, QColor{0, 255, 0, 64});
+        // TestPoly({poly_}, QColor{0, 255, 0, 64});
         // return {};
 #endif
     }
@@ -576,7 +576,7 @@ Polys Parser::createPolygon() {
         if(state_.imgPolarity() == Positive)
             ReversePoly(poly_);
     }
-    return {poly_};
+    return {/*poly_*/};
 }
 
 bool Parser::parseAperture(const QString& gLine) {

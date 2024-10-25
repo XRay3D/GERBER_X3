@@ -30,7 +30,6 @@
 #include "cavc/plinesegment.hpp"
 #include "cavc/polyline.hpp"
 #include "cavc/polylinecombine.hpp"
-#include "cavc/polylinecombine.hpp"
 #include "cavc/polylineintersects.hpp"
 #include "cavc/polylineoffset.hpp"
 #include "cavc/polylineoffsetislands.hpp"
@@ -57,6 +56,14 @@ using PlineVert = cavc::PlineVertex<double>;
 
 inline QPointF operator~(const Vec2& vec2) { return {vec2.x(), vec2.y()}; }
 inline QPointF operator~(const PlineVert& vec2) { return {vec2.x(), vec2.y()}; }
+inline QRectF operator~(const cavc::AABB<double>& aabb) {
+    return {
+        aabb.xMin,
+        aabb.yMin,
+        aabb.xMax - aabb.xMin,
+        aabb.yMax - aabb.yMin,
+    };
+}
 
 std::tuple<Vec2, Vec2, double> arcToBulge(const Vec2& center, double startAngle, double endAngle, double radius);
 

@@ -42,12 +42,12 @@ bool MainWindow::debug() {
 
         if(0) {
             // QDir dir(R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)");
-            QDir dir(R"(/home/x-ray/projects/dxf/)");
+            QDir dir(R"(C:\Users\bakiev\Junk_Yard\К1948ВК018\К1948ВК018_TEST_V1)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
             // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
             // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
             if(!dir.exists()) break;
-            for(auto&& str: dir.entryList({"*.*"}, QDir::Files)) {
+            for(auto&& str: dir.entryList({"*.gbr"}, QDir::Files)) {
                 str = dir.path() + '/' + str;
                 QTimer::singleShot(time += delay, [this, str] { loadFile(str); });
                 //                break;
@@ -57,6 +57,8 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
 
         if(1) {
+            QTimer::singleShot(time += delay, this, [this] { loadFile(R"(C:\Users\bakiev\Junk_Yard\К1948ВК018\К1948ВК018_TEST_V1\Top.gbr)"); });
+            // QTimer::singleShot(time += delay, this, [this] { loadFile(R"(C:\Users\bakiev\Junk_Yard\К1948ВК018\К1948ВК018_TEST_V1\Bottom.gbr)"); });
             QTimer::singleShot(time += delay, this, [this] { loadFile(R"(/home/x-ray/Загрузки/gerber1.gbr)"); });
             QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
         }

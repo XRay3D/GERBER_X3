@@ -49,9 +49,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
-        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
+        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
+        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
     };
 }
 
@@ -174,27 +174,62 @@ Polys File::merge() const {
         void Execute(cavc::PlineCombineMode mode, Polys& polys) {
             switch(mode) {
             case cavc::PlineCombineMode::Union: {
+
                 auto Union = [&](Polys& polys_) {
                     for(auto it1 = polys_.begin(); it1 < polys_.end(); ++it1)
                         for(auto it2 = it1 + 1; it2 < polys_.end(); ++it2) {
                             if(it1->size() && it2->size()) {
                                 it1->isClosed() = it2->isClosed() = true;
+                                // if(Area(*it1) < 0) break;
+                                // if(Area(*it2) < 0) continue;
+
+                                std::array extents{cavc::getExtents(*it1), cavc::getExtents(*it2)};
+                                // if((~extents.front()).contains(~extents.back())) break;
+                                // if(!(~extents.front()).intersects(~extents.back())) continue;
+
                                 auto result = cavc::combinePolylines(*it1, *it2, mode);
                                 if(result.remaining.size() == 1) {
-                                    qInfo() << "subject" << result.remaining.size() << result.subtracted.size();
-                                    polys.emplace_back(result.remaining.front());
-                                    *it1 = std::move(result.remaining.front());
-                                    it1 = polys_.begin();
+
+                                    qInfo() << "Union"
+                                            << result.remaining.size()
+                                            << result.subtracted.size()
+                                            << std::distance(polys_.begin(), it1)
+                                            << polys_.size();
+
+                                    polys.emplace_back(CleanPoly(result.remaining.front()));
+                                    *it1 = std::move(CleanPoly(result.remaining.front()));
+                                    if(it1 != polys_.begin()) --it1;
                                     polys_.erase(it2);
-                                    break;
+                                    it2 = it1 + 1;
+                                    // it1 = polys_.begin();
                                 }
                             }
                         }
                 };
                 Union(subject);
                 Union(clip);
+
+                polys += subject;
+                polys += clip;
+
+                // for(auto it1 = subject.begin(); it1 < subject.end(); ++it1)
+                //     for(auto it2 = clip.begin(); it2 < clip.end(); ++it2) {
+                //         if(it1->size() && it2->size()) {
+                //             it1->isClosed() = it2->isClosed() = true;
+                //             auto result = cavc::combinePolylines(*it1, *it2, mode);
+                //             if(result.remaining.size() == 1) {
+                //                 qInfo() << "Union" << result.remaining.size() << result.subtracted.size();
+                //                 polys.emplace_back(result.remaining.front());
+                //                 *it1 = std::move(result.remaining.front());
+                //                 it1 = subject.begin();
+                //                 // subject.erase(it2);
+                //                 break;
+                //             }
+                //         }
+                //     }
             }
             case cavc::PlineCombineMode::Exclude: {
+                qInfo() << "Exclude"; // << result.remaining.size() << result.subtracted.size();
             }
             case cavc::PlineCombineMode::Intersect:
             case cavc::PlineCombineMode::XOR:
@@ -376,7 +411,7 @@ void File::read(QDataStream& stream) {
 }
 
 void File::createGi() {
-    if constexpr(1) { // fill copper
+    if constexpr(0) { // fill copper
         for(Polys& paths: groupedPaths()) {
             // Gi::Item* item = new Gi::DataFill{paths, this};
             Gi::Item* item = new Gi::PolyLine{paths, this};
