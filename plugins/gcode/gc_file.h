@@ -11,6 +11,7 @@
 #pragma once
 
 #include "abstract_file.h"
+#include "arc_solver.h"
 #include "gc_types.h"
 
 #include <QList>
@@ -125,7 +126,7 @@ protected:
     QString speed(int val);
     QString format(double val);
 
-    virtual Paths merge() const override { return {}; }
+    Polys merge() const override { return {}; }
 
     // AbstractFile interfaces
     void write(QDataStream& stream) const override;

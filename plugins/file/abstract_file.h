@@ -122,8 +122,8 @@ public:
 
     const mvector<Gi::Group*>& itemGroups() const;
 
-    Paths mergedPaths() const;
-    Pathss groupedPaths() const;
+    Polys mergedPaths() const;
+    Polyss groupedPaths() const;
 
     mvector<QString>& lines();
     const mvector<QString>& lines() const;
@@ -167,11 +167,11 @@ public:
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
-    virtual Paths merge() const = 0;
+    virtual Polys merge() const = 0;
 
     LayerTypes layerTypes_;
     FileTree::Node* node_ = nullptr;
-    Pathss groupedPaths_;
+    Polyss groupedPaths_;
     QColor color_;
     bool colorFlag_{};
     QDateTime date_;
@@ -179,7 +179,7 @@ protected:
     Side side_ = Top;
     int32_t id_ = -1;
     int itemsType_ = -1;
-    mutable Paths mergedPaths_;
+    mutable Polys mergedPaths_;
     mutable bool visible_ = false;
     mvector<Gi::Group*> itemGroups_;
     mvector<QString> lines_;
@@ -219,9 +219,9 @@ inline Gi::Group* AbstractFile::itemGroup(int type) const {
 
 inline const mvector<Gi::Group*>& AbstractFile::itemGroups() const { return itemGroups_; }
 
-inline Paths AbstractFile::mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
+inline Polys AbstractFile::mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
 
-inline Pathss AbstractFile::groupedPaths() const { return groupedPaths_; }
+inline Polyss AbstractFile::groupedPaths() const { return groupedPaths_; }
 
 inline mvector<QString>& AbstractFile::lines() { return lines_; }
 

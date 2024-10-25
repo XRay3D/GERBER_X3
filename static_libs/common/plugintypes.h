@@ -10,9 +10,10 @@
  ********************************************************************************/
 #pragma once
 
+#include "arc_solver.h"
 #include "datastream.h"
 #include <any>
-#include <myclipper.h>
+// #include <myclipper.h>
 
 // struct Circle {
 //     QPointF center;
@@ -110,9 +111,9 @@ struct GraphicObject {
     };
     // clang-format on
 
-    Paths fill;
-    Path path;
-    Point pos{std::numeric_limits</*Point::Type*/ int32_t>::lowest(), std::numeric_limits</*Point::Type*/ int32_t>::lowest()};
+    Polys fill;
+    Poly path;
+    Vec2 pos{std::numeric_limits<double>::lowest(), std::numeric_limits<double>::lowest()};
     QByteArray name;
     Type type{Null};
     int32_t id{-1};
@@ -121,15 +122,15 @@ struct GraphicObject {
     inline bool isType(uint32_t t) const { return (t & 0xFF) ? (type & 0xFF) == (t & 0xFF) : true; }
     inline bool isFlags(uint32_t f) const { return (f & ~0xFF) ? (type & ~0xFF) & f : true; }
     inline bool test(uint32_t t) const { return isType(t) && isFlags(t); }
-    inline bool closed() const { return path.size() > 2 && path.front() == path.back(); }
-    bool positive() const { return Clipper2Lib::IsPositive(path); }
+    // inline bool closed() const { return path.size() > 2 && path.front() == path.back(); }
+    // bool positive() const { return Clipper2Lib::IsPositive(path); }
 };
 
 inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    for(auto& path: go.fill)
-        path = ~t.map(~path);
-    go.path = ~t.map(~go.path);
-    go.pos = ~t.map(~go.pos);
+    // for(auto& path: go.fill)
+    //     path = ~t.map(~path);
+    // go.path = ~t.map(~go.path);
+    // go.pos = ~t.map(~go.pos);
     return go;
 }
 
@@ -154,9 +155,11 @@ struct Criteria {
             if((fl = go.test(type)))
                 break;
         if(fl && !length.isNull())
-            fl &= length(Clipper2Lib::Length(go.path));
+            fl &= length(Length(go.path));
+        // fl &= length(Clipper2Lib::Length(go.path));
         if(fl && !area.isNull())
-            fl &= area(Clipper2Lib::Area(go.fill));
+            fl &= area(Area(go.fill));
+        // fl &= area(Clipper2Lib::Area(go.fill));
         return fl;
     }
 };

@@ -11,11 +11,18 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gbr_file.h"
+#include "arc_solver.h"
+#include "cavc/plinesegment.hpp"
+#include "cavc/polylinecombine.hpp"
+#include "cavc/polylineintersects.hpp"
 #include "gbr_node.h"
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
+#include "gi_poly.h"
+#include <qglobal.h>
+#include <utility>
 
 namespace Gerber {
 
@@ -31,7 +38,7 @@ QDebug operator<<(QDebug debug, const State& state) {
                     << u"Off|On"_qs.split('|').at(state.region()) << ", "
                     << u"NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring"_qs.split('|').at(state.mirroring()) << ", "
                     << u"aperture"_qs << state.aperture() << ", "
-                    << state.curPos() << ", "
+                    << ~state.curPos() << ", "
                     << u"scaling"_qs << state.scaling() << ", "
                     << u"rotating"_qs << state.rotating() << ", "
                     << ')';
@@ -42,9 +49,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -87,16 +94,15 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     return retData;
 }
 
-Paths File::merge() const {
+Polys File::merge() const {
     QElapsedTimer t;
     t.start();
     mergedPaths_.clear();
     size_t i = 0;
-
-    if constexpr(0) { // FIXME fill closed line
-        std::list<Paths> pathList;
+#if 0 // FIXME fill closed line
+        std::list<Polys> pathList;
         {
-            std::list<std::map<int, Paths>> pathListMap;
+            std::list<std::map<int, Polys>> pathListMap;
             int exp = -1;
             for(auto& go: graphicObjects_) {
                 if(exp != go.state.imgPolarity()) {
@@ -151,33 +157,80 @@ Paths File::merge() const {
             else
                 clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
         }
-    } else {
-        while(i < graphicObjects_.size()) {
-            Clipper clipper;
+#else
 
-            clipper.AddSubject(mergedPaths_);
-            const auto exp = graphicObjects_.at(i).state.imgPolarity();
-            do {
-                const GrObject& go = graphicObjects_[i++];
-                clipper.AddClip(go.fill);
-            } while(i < graphicObjects_.size() && exp == graphicObjects_[i].state.imgPolarity());
-            if(graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
-                clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
-            else
-                clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
+    struct Clipper {
+        Polys subject;
+        Polys clip;
+
+        void AddSubject(const Polys& polys) {
+            subject.insert(subject.end(), polys.begin(), polys.end());
         }
-    }
 
-    if(Settings::cleanPolygons())
-        CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
+        void AddClip(const Polys& polys) {
+            clip.insert(clip.end(), polys.begin(), polys.end());
+        }
+
+        void Execute(cavc::PlineCombineMode mode, Polys& polys) {
+            switch(mode) {
+            case cavc::PlineCombineMode::Union: {
+                auto Union = [&](Polys& polys_) {
+                    for(auto it1 = polys_.begin(); it1 < polys_.end(); ++it1)
+                        for(auto it2 = it1 + 1; it2 < polys_.end(); ++it2) {
+                            if(it1->size() && it2->size()) {
+                                it1->isClosed() = it2->isClosed() = true;
+                                auto result = cavc::combinePolylines(*it1, *it2, mode);
+                                if(result.remaining.size() == 1) {
+                                    qInfo() << "subject" << result.remaining.size() << result.subtracted.size();
+                                    polys.emplace_back(result.remaining.front());
+                                    *it1 = std::move(result.remaining.front());
+                                    it1 = polys_.begin();
+                                    polys_.erase(it2);
+                                    break;
+                                }
+                            }
+                        }
+                };
+                Union(subject);
+                Union(clip);
+            }
+            case cavc::PlineCombineMode::Exclude: {
+            }
+            case cavc::PlineCombineMode::Intersect:
+            case cavc::PlineCombineMode::XOR:
+                break;
+            }
+        }
+    };
+    while(i < graphicObjects_.size()) {
+        Clipper clipper;
+        clipper.AddSubject(mergedPaths_);
+        const auto exp = graphicObjects_.at(i).state.imgPolarity();
+        do {
+            const GrObject& go = graphicObjects_[i++];
+            clipper.AddClip(go.fill);
+        } while(i < graphicObjects_.size() && exp == graphicObjects_[i].state.imgPolarity());
+
+        if(graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
+            // clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
+            clipper.Execute(cavc::PlineCombineMode::Union, mergedPaths_);
+        else
+            // clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
+            clipper.Execute(cavc::PlineCombineMode::Exclude, mergedPaths_);
+    }
+#endif
+
+    TestPoly(mergedPaths_);
+
     return mergedPaths_;
 }
 
 const QList<Comp::Component>& File::components() const { return components_; }
 
-void File::grouping(PolyTree& node, Pathss* pathss) {
-    Path path;
-    Paths paths;
+void File::grouping(PolyTree& node, Polyss* pathss) {
+#if 0
+    Poly path;
+    Polys paths;
     switch(group_) {
     case CutoffGroup:
         if(!node.IsHole()) {
@@ -208,16 +261,20 @@ void File::grouping(PolyTree& node, Pathss* pathss) {
 
         break;
     }
+#endif
 }
 
-Pathss& File::groupedPaths(File::Group group, bool fl) {
+Polyss& File::groupedPaths(File::Group group, bool fl) {
     if(groupedPaths_.empty()) {
+#if 0
+
+
         PolyTree polyTree;
         Clipper clipper;
         clipper.AddSubject(mergedPaths());
         auto r{GetBounds(mergedPaths())};
         int k = uScale;
-        Path outer = {
+        Poly outer = {
             Point(r.left - k, r.bottom + k),
             Point(r.right + k, r.bottom + k),
             Point(r.right + k, r.top - k),
@@ -228,6 +285,10 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
         clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
         group_ = group;
         grouping(polyTree, &groupedPaths_);
+#else
+        groupedPaths_.emplace_back(mergedPaths());
+        // cavc::sortAndjoinCoincidentSlices();
+#endif
     }
     return groupedPaths_;
 }
@@ -316,8 +377,9 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     if constexpr(1) { // fill copper
-        for(Paths& paths: groupedPaths()) {
-            Gi::Item* item = new Gi::DataFill{paths, this};
+        for(Polys& paths: groupedPaths()) {
+            // Gi::Item* item = new Gi::DataFill{paths, this};
+            Gi::Item* item = new Gi::PolyLine{paths, this};
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();
@@ -329,9 +391,10 @@ void File::createGi() {
         itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr(1) { // add aperture paths
-        auto contains = [&](const Path& path) -> bool {
+#if 0
+        auto contains = [&](const Poly& path) -> bool {
             constexpr double k = 0.001 * uScale;
-            for(const Path& chPath: checkList) { // find copy
+            for(const Poly& chPath: checkList) { // find copy
                 size_t counter = 0;
                 if(chPath.size() == path.size()) {
                     for(const Point& p1: chPath) {
@@ -349,12 +412,13 @@ void File::createGi() {
             return false;
         };
 
+#endif
         for(const GrObject& go: graphicObjects_) {
-            if(!go.path.empty()) {
-                if(Settings::simplifyRegions() && go.path.front() == go.path.back()) {
-                    Paths paths;
-                    SimplifyPolygon(go.path, paths);
-                    for(Path& path: paths) {
+#if 0
+            if(go.path.size()) {
+                if(Settings::simplifyRegions() && go.path.vertexes().front() == go.path.vertexes().back()) {
+                    Polys paths;
+                    for(Poly& path: paths) {
                         path.push_back(path.front());
                         if(!Settings::skipDuplicates()) {
                             checkList.push_front(path);
@@ -370,11 +434,15 @@ void File::createGi() {
                     itemGroups_[ApPaths]->push_back(new Gi::DataPath{go.path, this});
                     checkList.push_front(go.path);
                 }
-            }
+             itemGroups_[ApPaths]->push_back(new Gi::Polyline{go.path, this});
+    }
+#else
+            itemGroups_[ApPaths]->push_back(new Gi::PolyLine{go.fill, this});
+            itemGroups_[ApPaths]->push_back(new Gi::PolyLine{go.path, this});
+#endif
         }
         itemGroups_[ApPaths]->shrink_to_fit();
     }
-
     bool zeroLine = false;
     for(auto& [dCode, ap]: apertures_)
         if(zeroLine = (qFuzzyIsNull(ap->minSize()) && ap->used()); zeroLine)

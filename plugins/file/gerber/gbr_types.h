@@ -10,13 +10,23 @@
  *******************************************************************************/
 #pragma once
 
+#include "arc_solver.h"
 #include "datastream.h"
+#include "mathparser.h"
 #include "md5.h"
 #include "plugintypes.h"
 
 #include <QDebug>
 #include <QObject>
+#include <algorithm>
+#include <cmath>
 #include <myclipper.h>
+#include <qline.h>
+#include <qmath.h>
+#include <qpoint.h>
+#include <span>
+#include <tuple>
+#include <vector>
 
 #define DEPRECATED
 
@@ -207,7 +217,7 @@ class State {
     RegionMode region_ = Off;
     int aperture_ = 0;
     int lineNum_ = 0;
-    Point curPos_;
+    Vec2 curPos_;
     Mirroring mirroring_ = NoMirroring;
     double scaling_ = 1.0;
     double rotating_ = 0.0;
@@ -242,9 +252,9 @@ public:
     inline int aperture() const { return aperture_; }
     inline void setAperture(int aperture) { aperture_ = aperture; }
 
-    inline Point& curPos() { return curPos_; }
-    inline Point curPos() const { return curPos_; }
-    inline void setCurPos(const Point& curPos) { curPos_ = curPos; }
+    inline Vec2& curPos() { return curPos_; }
+    inline Vec2 curPos() const { return curPos_; }
+    inline void setCurPos(const Vec2& curPos) { curPos_ = curPos; }
 
     inline Mirroring mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
@@ -271,22 +281,29 @@ struct GrObject : public GraphicObject {
 
     // public:
     GrObject() = default;
-    GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
+    // GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
+    //     : gFile{gFile}
+    //     , state{state} {
+    //     GraphicObject::id = id;
+    //     GraphicObject::fill = std::move(paths);
+    //     GraphicObject::path = std::move(path);
+    //     GraphicObject::type = type;
+    // }
+
+    GrObject(int32_t id, const State& state, Polys&& paths, File* gFile, Type type, Poly&& path = {})
         : gFile{gFile}
         , state{state} {
-        GraphicObject::id = id;
         GraphicObject::fill = std::move(paths);
         GraphicObject::path = std::move(path);
+        GraphicObject::id = id;
         GraphicObject::type = type;
     }
 };
 
 struct StepRepeatStr {
     void reset() {
-        x = 0;
-        y = 0;
-        i = 0.0;
-        j = 0.0;
+        x = y = {};
+        i = j = {};
         storage.clear();
     }
     int x{};

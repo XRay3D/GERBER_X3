@@ -1,19 +1,20 @@
 #[[
- Author    :  Damir Bakiev                                                    
- Version   :  na                                                              
- Date      :  03 October 2024                                                 
- Website   :  na                                                              
- Copyright :  Damir Bakiev 2016-2024                                          
- License   :                                                                  
- Use, modification & distribution is subject to Boost Software License Ver 1. 
- http://www.boost.org/LICENSE_1_0.txt                                         
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  03 October 2024
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2024
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 3.20)
 
 # static lib
+add_subdirectory(arc_solver)
 add_subdirectory(clipper)
+add_subdirectory(common)
 add_subdirectory(filetree)
 add_subdirectory(gi)
 add_subdirectory(graphicsview)
-add_subdirectory(common)
 add_subdirectory(tooldatabase)

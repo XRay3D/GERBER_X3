@@ -31,6 +31,7 @@ enum /*class*/ Type : int {
     DataPath = QGraphicsItem::UserType,
     DataSolid,
     Drill,
+    PolyLine,
 
     MarkHome = QGraphicsItem::UserType + 100,
     MarkLayoutFrames,

@@ -10,6 +10,7 @@
  *******************************************************************************/
 #pragma once
 
+#include "cavc/polyline.hpp"
 #include "gbr_attributes.h"
 #include "gbr_types.h"
 #include "gbrcomp_onent.h"
@@ -32,7 +33,7 @@ protected:
     mvector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
-    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer, int decimal);
+    bool parseNumber(QString Str, double& val, int integer, int decimal);
 
     void addPath();
     void addFlash();
@@ -40,12 +41,11 @@ protected:
     void reset();
     void resetStep();
 
-    Point parsePosition(const QString& xyStr);
-    Path arc(const Point& center, double radius, double start, double stop);
-    Path arc(Point p1, Point p2, Point center);
+    Vec2 parsePosition(const QString& xyStr);
+    Poly arc(const Vec2& center, double radius, double start, double stop);
 
-    Paths createLine();
-    Paths createPolygon();
+    Polys createLine();
+    Polys createPolygon();
 
     QMap<QString, QString> apertureMacro_;
 
@@ -61,7 +61,7 @@ protected:
 
     QStack<WorkingType> abSrIdStack_;
 
-    Path path_;
+    Poly poly_;
     State state_;
     QString currentGerbLine_;
 

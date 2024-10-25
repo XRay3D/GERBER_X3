@@ -29,31 +29,29 @@ add_definitions(
   -DQT_MESSAGELOGCONTEXT # qDebug()
   -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
   -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a,
-                          # const QStringBuilder<A, B> &b, QChar)
+  # const QStringBuilder < A, B>& b, QChar)
 )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(
-    -Winvalid-pch -pthread
-    # -fmodules-ts
+  add_compile_options(-Winvalid-pch -pthread # * fmodules - ts
   )
   add_compile_options(-rdynamic)
 
   link_directories(tbb/lib)
-  # Link against the dependency of Intel TBB (for parallel C++17 algorithms)
+  # Link against the dependency of Intel TBB(for parallel C++ 17 algorithms)
   # target_link_libraries(${PROJECT_NAME} tbb)
 
   # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
   # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map}
-  # -fmodule-mapper=<MODULE_MAP_FILE>") target_compile_options(example PRIVATE
-  # -fmodules-ts) add_compile_options(-H) add_compile_options(-ftime-report)
-  # -pthread -ltbbD
+  # - fmodule - mapper =<MODULE_MAP_FILE> ") target_compile_options(example
+  # PRIVATE - fmodules - ts) add_compile_options(- H) add_compile_options(-
+  # ftime - report) - pthread - ltbbD
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # add_definitions(-D_USE_MATH_DEFINES=1)
+  # add_definitions(-D_USE_MATH_DEFINES = 1)
 endif()
 
 # FIND BOOST
@@ -74,10 +72,12 @@ endif()
 set(INC_DIRS
     third_party/ctre/single-header/
     third_party/clipper2/CPP/Clipper2Lib/include/
+    third_party/CavalierContours/include
     ggeasy
     plugins/file
     plugins/gcode
     plugins/shape
+    static_libs/arc_solver
     static_libs/clipper
     static_libs/common
     static_libs/filetree

@@ -40,7 +40,7 @@ bool MainWindow::debug() {
         int time = 100;
         int delay = 100; //-V654
 
-        if(1) {
+        if(0) {
             // QDir dir(R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)");
             QDir dir(R"(/home/x-ray/projects/dxf/)");
             // QDir dir("D:/Gerber Test Files/CopperCAM/");
@@ -53,11 +53,13 @@ bool MainWindow::debug() {
                 //                break;
             }
         }
-        // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
+        // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
 
-        if(0)
-            QTimer::singleShot(time += delay, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
+        if(1) {
+            QTimer::singleShot(time += delay, this, [this] { loadFile(R"(/home/x-ray/Загрузки/gerber1.gbr)"); });
+            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+        }
 
         if(0) {
             constexpr auto TYPE = md5::hash32("PocketRaster");

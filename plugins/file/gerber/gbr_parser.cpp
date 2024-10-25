@@ -13,14 +13,26 @@
 #include "gbr_parser.h"
 
 #include "abstract_fileplugin.h"
+#include "arc_solver.h"
+#include "cavc/vector.hpp"
 #include "gbr_aperture.h"
 #include "gbr_attraperfunction.h"
 #include "gbr_attrfilefunction.h"
 #include "gbr_file.h"
+#include "gbr_types.h"
+#include "gi_poly.h"
+#include "graphicsview.h"
 #include "utils.h"
 #include <QElapsedTimer>
 #include <QMutex>
+#include <algorithm>
+#include <array>
 #include <ctre.hpp>
+#include <qcolor.h>
+#include <qglobal.h>
+#include <qmath.h>
+#include <qnamespace.h>
+#include <span>
 
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side
@@ -287,10 +299,10 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
 
 double Parser::arcAngle(double start, double stop) {
     if(state_.interpolation() == CounterclockwiseCircular && stop <= start)
-        stop += 2.0 * pi;
+        stop += two_pi;
     if(state_.interpolation() == ClockwiseCircular && stop >= start)
-        stop -= 2.0 * pi;
-    return qAbs(stop - start);
+        stop -= two_pi;
+    return std::abs(stop - start);
 }
 
 double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
@@ -299,11 +311,11 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
     if(state_.file()->format().unitMode == Inches && inchControl)
         d *= 25.4;
     if(scale)
-        d *= uScale;
+        d;
     return d;
 }
 
-bool Parser::parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer, int decimal) {
+bool Parser::parseNumber(QString Str, double& val, int integer, int decimal) {
     bool flag = false;
     int sign = 1;
     if(!Str.isEmpty()) {
@@ -340,14 +352,14 @@ bool Parser::parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer,
 #endif
             }
         }
-        val = static_cast</*Point::Type*/ int32_t>(toDouble(Str, true) * pow(10.0, -decimal) * sign);
+        val = (toDouble(Str, true) * pow(10.0, -decimal) * sign);
         return true;
     }
     return flag;
 }
 
 void Parser::addPath() {
-    if(path_.size() < 2) {
+    if(poly_.size() < 2) {
         resetStep();
         return;
     }
@@ -356,7 +368,7 @@ void Parser::addPath() {
 
     if(aperFunctionMap.contains(state_.aperture())
         && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline)
-        components[refDes].addFootprint(~path_);
+        components[refDes].addFootprint(poly_);
 
     switch(state_.region()) {
     case On:
@@ -364,14 +376,14 @@ void Parser::addPath() {
         state_.setType(Region);
         switch(abSrIdStack_.top().workingType) {
         case WorkingType::Normal: {
-            auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
+            auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(poly_)));
             go.name = QString("D%1|Polygon").arg(state_.aperture()).toUtf8();
         } break;
         case WorkingType::StepRepeat:
-            stepRepeat_.storage.append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
+            stepRepeat_.storage.append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(poly_)));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(poly_)));
             break;
         }
         break;
@@ -380,14 +392,14 @@ void Parser::addPath() {
         state_.setType(Line);
         switch(abSrIdStack_.top().workingType) {
         case WorkingType::Normal: {
-            auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(path_)));
+            auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(poly_)));
             go.name = QString("D%1|PolyLine").arg(state_.aperture()).toUtf8();
         } break;
         case WorkingType::StepRepeat:
-            stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
+            stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(poly_)));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), state_, createLine(), file, GrObject::Type(type), std::move(poly_)));
             break;
         }
         break;
@@ -407,50 +419,38 @@ void Parser::addFlash() {
 
     AbstractAperture* ap = file->apertures_[state_.aperture()].get();
     ap->setUsed();
-    Paths paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
+    Polys polys(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if(ap->withHole())
-        paths.emplace_back(ap->drawDrill(state_));
+        polys.emplace_back(ap->drawDrill(state_));
 
     int type = GrObject::FlStamp;
 
     switch(ap->type()) {
-    case Circle:
-        type |= GrObject::Circle;
-        break;
-    case Rectangle:
-        type |= GrObject::Rect;
-        break;
-    case Obround:
-        type |= GrObject::Elipse;
-        break;
-    case Polygon:
-        type |= GrObject::Polygon;
-        break;
-    case Macro:
-        type |= GrObject::Composite;
-        break;
-    case Block:
-        type |= GrObject::Composite;
-        break;
-    default:
-        break;
+    case Circle: type |= GrObject::Circle; break;
+    case Rectangle: type |= GrObject::Rect; break;
+    case Obround: type |= GrObject::Elipse; break;
+    case Polygon: type |= GrObject::Polygon; break;
+    case Macro: type |= GrObject::Composite; break;
+    case Block: type |= GrObject::Composite; break;
+    default: break;
     }
 
     switch(abSrIdStack_.top().workingType) {
     case WorkingType::Normal: {
         auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++,
-            state_, std::move(paths), file, GrObject::Type(type)));
+            state_, std::move(polys), file, GrObject::Type(type)));
         go.name = QString("D%1|%2").arg(state_.aperture()).arg(ap->name()).toUtf8();
         go.pos = state_.curPos();
     } break;
     case WorkingType::StepRepeat:
         stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(),
-            state_, std::move(paths), file, GrObject::Type(type)));
+            state_, std::move(polys), file, GrObject::Type(type)));
         break;
     case WorkingType::ApertureBlock:
-        apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), //
-            state_, std::move(paths), file, GrObject::Type(type)));
+        apBlock(abSrIdStack_.top().apertureBlockId)->append(              //
+            GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->size(), //
+                state_, std::move(polys), file, GrObject::Type(type)));
         break;
     }
     if(aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
@@ -478,7 +478,7 @@ void Parser::reset() {
     apertureMacro_.clear();
     currentGerbLine_.clear();
     goId_ = 0;
-    path_.clear();
+    poly_.vertexes().clear();
     state_ = State(file);
     stepRepeat_.reset();
     refDes.clear();
@@ -486,65 +486,34 @@ void Parser::reset() {
 
 void Parser::resetStep() {
     currentGerbLine_.clear();
-    path_.clear();
-    path_.push_back(state_.curPos());
+    poly_.vertexes().clear();
+    poly_.vertexes().emplace_back(state_.curPos(), 0.0);
 }
 
-Point Parser::parsePosition(const QString& xyStr) {
+Vec2 Parser::parsePosition(const QString& xyStr) {
     auto data{toU16StrView(xyStr)};
     static constexpr ctll::fixed_string ptrnPosition(R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"); // fixed_string("(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+");
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
-        /*Point::Type*/ int32_t tmp = 0;
+        double tmp = 0;
         if(x && parseNumber(CtreCapTo(x), tmp, file->format().xInteger, file->format().xDecimal))
-            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().x = tmp : state_.curPos().x += tmp;
+            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().x() = tmp : state_.curPos().x() += tmp;
         tmp = 0;
         if(y && parseNumber(CtreCapTo(y), tmp, file->format().yInteger, file->format().yDecimal))
-            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().y = tmp : state_.curPos().y += tmp;
+            file->format().coordValueNotation == AbsoluteNotation ? state_.curPos().y() = tmp : state_.curPos().y() += tmp;
     }
 
-    if(2.0e-310 > state_.curPos().x && state_.curPos().x > 0.0)
+    if(2.0e-310 > state_.curPos().x() && state_.curPos().x() > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(lineNum_), QString(currentGerbLine_));
-    if(2.0e-310 > state_.curPos().y && state_.curPos().y > 0.0)
+    if(2.0e-310 > state_.curPos().y() && state_.curPos().y() > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.").arg(QString::number(lineNum_), QString(currentGerbLine_));
 
     return state_.curPos();
 }
 
-Path Parser::arc(const Point& center, double radius, double start, double stop) {
-    const double da_sign[4] = {0, 0, -1.0, +1.0};
-    Path points;
-
-    const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
-
-    if(state_.interpolation() == ClockwiseCircular && stop >= start)
-        stop -= 2.0 * pi;
-    else if(state_.interpolation() == CounterclockwiseCircular && stop <= start)
-        stop += 2.0 * pi;
-
-    double angle = qAbs(stop - start);
-    double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
-    double delta_angle = da_sign[state_.interpolation()] * angle * 1.0 / steps;
-    for(int i = 0; i < steps; i++) {
-        double theta = start + delta_angle * (i + 1);
-        points.emplace_back(Point(
-            static_cast</*Point::Type*/ int32_t>(center.x + radius * cos(theta)),
-            static_cast</*Point::Type*/ int32_t>(center.y + radius * sin(theta))));
-    }
-
-    return points;
-}
-
-Path Parser::arc(Point p1, Point p2, Point center) {
-    double radius = sqrt(pow((center.x - p1.x), 2) + pow((center.y - p1.y), 2));
-    double start = atan2(p1.y - center.y, p1.x - center.x);
-    double stop = atan2(p2.y - center.y, p2.x - center.x);
-    return arc(center, radius, start, stop);
-}
-
-Paths Parser::createLine() {
+Polys Parser::createLine() {
     if(file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
         file->apertures_[state_.aperture()].get()->setUsed();
-    Paths solution;
+    Polys solution;
     if(!file->apertures_.contains(state_.aperture())) {
         QString str;
         for(const auto& [ap, apPtr]: file->apertures_)
@@ -553,50 +522,61 @@ Paths Parser::createLine() {
     }
 
     if(file->apertures_[state_.aperture()]->type() == Rectangle) {
+#if 0
         if(Settings::wireMinkowskiSum())
-            solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
+            solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), poly_, {});
         else {
-            auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
+            auto rect = std::static_Vec2er_cast<ApRectangle>(file->apertures_[state_.aperture()]);
             if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
                 throw GbrObj::tr("Aperture D%1 (%2) not supported!\n"
                                  "Only square Aperture or use Minkowski Sum")
                     .arg(state_.aperture())
                     .arg(rect->name());
-            double size = rect->width_ * uScale * state_.scaling();
+            double size = rect->width_  * state_.scaling();
             if(qFuzzyIsNull(size))
                 return {};
-            solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
+            solution = Inflate({poly_}, size, JoinType::Square, EndType::Square);
         }
 
         if(state_.imgPolarity() == Negative)
-            ReversePaths(solution);
+            ReversePoly(solution);
+#endif
     } else {
-        double size = file->apertures_[state_.aperture()]->apSize() * uScale * state_.scaling();
-        if(qFuzzyIsNull(size))
-            return {};
+        double size = file->apertures_[state_.aperture()]->apSize() * state_.scaling() / 2;
+        // if(qFuzzyIsNull(size)) return {poly_};
+#if 0
         if(Settings::wireMinkowskiSum())
-            solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
+            solution = Clipper2Lib::MinkowskiSum(CirclePath(size), poly_, {});
         else
-            solution = Inflate({path_}, size, JoinType::Round, EndType::Round);
+            solution = Inflate({poly_}, size, JoinType::Round, EndType::Round);
 
         //        ClipperOffset offset;
-        //        offset.AddPath(path_, JoinType::Round, EndType::Round);
+        //        offset.AddPath(poly_, JoinType::Round, EndType::Round);
         //        solution = offset.Execute(size);
         if(state_.imgPolarity() == Negative)
-            ReversePaths(solution);
+            ReversePolys(solution);
+
+#else
+        // Удаление идущих подряд одинаковых точек.
+        CleanPoly(poly_);
+        solution = OffsetPoly(poly_, size);
+        TestPoly({poly_}, QColor{0, 255, 0, 64});
+        // return {};
+#endif
     }
+
     return solution;
 }
 
-Paths Parser::createPolygon() {
-    if(Area(path_) > 0.0) {
+Polys Parser::createPolygon() {
+    if(cavc::getArea(poly_) > 0.0) {
         if(state_.imgPolarity() == Negative)
-            ReversePath(path_);
+            ReversePoly(poly_);
     } else {
         if(state_.imgPolarity() == Positive)
-            ReversePath(path_);
+            ReversePoly(poly_);
     }
-    return {path_};
+    return {poly_};
 }
 
 bool Parser::parseAperture(const QString& gLine) {
@@ -727,8 +707,8 @@ bool Parser::parseStepRepeat(const QString& gLine) {
         stepRepeat_.reset();
         stepRepeat_.x = CtreCapTo(srx);
         stepRepeat_.y = CtreCapTo(sry);
-        stepRepeat_.i = CtreCapTo(sri), stepRepeat_.i *= uScale;
-        stepRepeat_.j = CtreCapTo(srj), stepRepeat_.j *= uScale;
+        stepRepeat_.i = CtreCapTo(sri), stepRepeat_.i;
+        stepRepeat_.j = CtreCapTo(srj), stepRepeat_.j;
         if(file->format().unitMode == Inches) {
             stepRepeat_.i *= 25.4;
             stepRepeat_.j *= 25.4;
@@ -749,24 +729,26 @@ bool Parser::parseStepRepeat(const QString& gLine) {
 }
 
 void Parser::closeStepRepeat() {
+#if 0
     addPath();
     for(int y = 0; y < stepRepeat_.y; ++y) {
         for(int x = 0; x < stepRepeat_.x; ++x) {
-            const Point pt(static_cast</*Point::Type*/ int32_t>(stepRepeat_.i * x), static_cast</*Point::Type*/ int32_t>(stepRepeat_.j * y));
+            const Vec2 pt((stepRepeat_.i * x), (stepRepeat_.j * y));
             for(GrObject& go: stepRepeat_.storage) {
-                Paths paths(go.fill);
-                for(Path& path: paths)
-                    TranslatePath(path, pt);
-                Path path(go.path);
-                TranslatePath(path, pt);
+                Polys polys(go.fill);
+                for(Poly& poly: polys)
+                    TranslatePath(poly, pt);
+                Poly poly(go.poly);
+                TranslatePath(poly, pt);
                 auto state = go.state;
                 state.setCurPos({state.curPos().x + pt.x, state.curPos().y + pt.y});
-                file->graphicObjects_.emplace_back(GrObject(goId_++, state, std::move(paths), go.gFile, go.type, std::move(path)));
+                file->graphicObjects_.emplace_back(GrObject(goId_++, state, std::move(polys), go.gFile, go.type, std::move(poly)));
             }
         }
     }
     stepRepeat_.reset();
     abSrIdStack_.pop();
+#endif
 }
 
 ApBlock* Parser::apBlock(int32_t id) { return static_cast<ApBlock*>(file->apertures_[id].get()); }
@@ -882,7 +864,37 @@ bool Parser::parseAttributes(const QString& gLine) {
     return false;
 }
 
+Poly Parser::arc(const Vec2& center, double radius, double start, double stop) {
+    const double sign = std::array{0.0, 0.0, -1.0, +1.0}[state_.interpolation()];
+    if(state_.interpolation() == ClockwiseCircular && stop >= start)
+        stop -= two_pi;
+    else if(state_.interpolation() == CounterclockwiseCircular && stop <= start)
+        stop += two_pi;
+
+    double angle = std::abs(stop - start);
+
+    Poly points;
+    auto& vertexes = points.vertexes();
+
+    if(angle <= pi) {
+        auto [startPt, stopPt, bulge] = arcToBulge(center, start, stop, radius);
+        vertexes.emplace_back(state_.curPos(), bulge);
+    } else if(qFuzzyCompare(angle, two_pi)) {
+        auto [startPt, stopPt, bulge] = arcToBulge(center, start, start + pi * sign, radius);
+        vertexes.emplace_back(state_.curPos(), sign);
+        vertexes.emplace_back(stopPt, sign);
+    } else {
+        angle /= 2 * sign;
+        auto [startPt, stopPt, bulge] = arcToBulge(center, start, start + angle, radius);
+        vertexes.emplace_back(state_.curPos(), bulge);
+        vertexes.emplace_back(stopPt, bulge);
+    }
+
+    return points;
+}
+
 bool Parser::parseCircularInterpolation(const QString& gLine) {
+
     // G02/G03 - Circular interpolation
     // 2-clockwise, 3-counterclockwise
     if(!(gLine.startsWith('G') || gLine.startsWith('X') || gLine.startsWith('Y')))
@@ -898,9 +910,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     if(auto [whole, cg, cx, cy, ci, cj, cd] = ctre::match<ptrnCircularInterpolation>(data); whole) {
         if(!cg.size() && state_.gCode() != G02 && state_.gCode() != G03)
             return false;
-        /*Point::Type*/ int32_t x = 0, y = 0, i = 0, j = 0;
-        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = state_.curPos().x;
-        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = state_.curPos().y;
+        double x{}, y{}, i{}, j{};
+        cx.size() ? parseNumber(CtreCapTo(cx), x, file->format().xInteger, file->format().xDecimal) : x = state_.curPos().x();
+        cy.size() ? parseNumber(CtreCapTo(cy), y, file->format().yInteger, file->format().yDecimal) : y = state_.curPos().y();
         parseNumber(CtreCapTo(ci), i, file->format().xInteger, file->format().xDecimal);
         parseNumber(CtreCapTo(cj), j, file->format().yInteger, file->format().yDecimal);
         // Set operation code if provided
@@ -947,77 +959,126 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             return true;
         }
 
-        const Point& curPos = state_.curPos();
-
-        const Point centerPos[4] = {
-            {curPos.x + i, curPos.y + j},
-            {curPos.x - i, curPos.y + j},
-            {curPos.x + i, curPos.y - j},
-            {curPos.x - i, curPos.y - j}
+        const std::array centerPos{
+            Vec2{state_.curPos().x() + i, state_.curPos().y() + j},
+            Vec2{state_.curPos().x() - i, state_.curPos().y() + j},
+            Vec2{state_.curPos().x() + i, state_.curPos().y() - j},
+            Vec2{state_.curPos().x() - i, state_.curPos().y() - j}
         };
 
         bool valid = false;
 
-        path_.push_back(state_.curPos());
-        Path arcPolygon;
+        // poly_.vertexes().emplace_back(state_.curPos(), 0.0);
+
         switch(state_.quadrant()) {
         case Multi: // G75
         {
+#if 0
             const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
             const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (state_.curPos() == Point(x, y)) ? start : atan2(-centerPos[0].y + y, -centerPos[0].x + x); // Stop angle
+            const double stop = (state_.curPos() == Vec2{x, y})
+                ? start
+                : atan2(-centerPos.front().y() + y, -centerPos.front().x() + x); // Stop angle
 
-            arcPolygon = arc(Point(centerPos[0].x, centerPos[0].y), radius1, start, stop);
-            // arcPolygon = arc(curPos, Point(x, y), centerPos[0]);
-            //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
-            //  Точной конечной точкой является указанная (x, y). Заменить.
-            state_.curPos() = Point{x, y};
-            if(arcPolygon.size())
-                arcPolygon.back() = state_.curPos();
-            else
-                arcPolygon.push_back(state_.curPos());
+            if(start == stop) {
+                auto [startPoint, endPoint, bulge] = arcToBulge(centerPos.front(), start, start + pi, radius1);
+                qInfo() << "Multi bulge"
+                        << bulge
+                        << qRadiansToDegrees(start)
+                        << qRadiansToDegrees(stop)
+                        << qRadiansToDegrees(start - stop);
+                poly_.lastVertex().bulge() = -1;
+                // state_.setCurPos({endPoint.x(), endPoint.y()} /*{x, y}*/);
+                // poly_.vertexes().emplace_back(Vec2{endPoint.x(), endPoint.y()}, 0.0).bulge() = -1;
+                poly_.vertexes().emplace_back(state_.curPos(), 0.0);
+                Poly testArc;
+                testArc.vertexes() = {
+                    poly_.vertexes().end() - 3,
+                    poly_.vertexes().end(),
+                };
+                TestPoly({std::move(testArc)}, Qt::cyan, "%1\nb%2\ne%3\ns%4"_qs //
+                                                             .arg(bulge)
+                                                             .arg(qRadiansToDegrees(start))
+                                                             .arg(qRadiansToDegrees(stop))
+                                                             .arg(qRadiansToDegrees(start - stop)));
+
+            } else {
+
+                auto [startPoint, endPoint, bulge] = arcToBulge(centerPos.front(), start, stop, radius1);
+                qInfo() << "Multi bulge"
+                        << bulge
+                        << qRadiansToDegrees(start)
+                        << qRadiansToDegrees(stop)
+                        << qRadiansToDegrees(start - stop);
+                poly_.lastVertex().bulge() = bulge;
+                state_.setCurPos({x, y});
+                poly_.vertexes().emplace_back(state_.curPos(), 0.0);
+
+                Poly testArc;
+                testArc.vertexes() = {
+                    poly_.vertexes().end() - 2,
+                    poly_.vertexes().end(),
+                };
+                TestPoly({std::move(testArc)}, Qt::cyan, "%1\nb%2\ne%3\ns%4"_qs //
+                                                             .arg(bulge)
+                                                             .arg(qRadiansToDegrees(start))
+                                                             .arg(qRadiansToDegrees(stop))
+                                                             .arg(qRadiansToDegrees(start - stop)));
+            }
+#else
+            const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
+            const double start = atan2(-j, -i); // Start angle
+            // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
+            // Что должно привести к образованию дуги в 360 градусов.
+            const double stop = (state_.curPos() == Vec2{x, y})
+                ? start
+                : atan2(-centerPos.front().y() + y, -centerPos.front().x() + x); // Stop angle
+
+            auto arcPoly = arc(centerPos.front(), radius1, start, stop).vertexes();
+            poly_.vertexes().insert(poly_.vertexes().end(), arcPoly.begin(), arcPoly.end());
+            state_.setCurPos({x, y});
+            poly_.vertexes().emplace_back(state_.curPos(), 0.0);
+
+#endif
         } break;
         case Single: // G74
-            for(int c = 0; c < 4; ++c) {
-                const double radius1 = sqrt(static_cast<double>(i) * static_cast<double>(i) + static_cast<double>(j) * static_cast<double>(j));
-                const double radius2 = sqrt(pow(centerPos[c].x - x, 2.0) + pow(centerPos[c].y - y, 2.0));
+
+            for(auto&& center: centerPos) {
+                const double radius1 = sqrt(i * i + j * j);
+                const double radius2 = cavc::length(center - Vec2{x, y});
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.
-                if(qAbs(radius2 - radius1) > (5e-4 * uScale)) // Недействительный центр.
+                if(std::abs(radius2 - radius1) > (5e-4)) // Недействительный центр.
                     continue;
                 // Correct i and j and return true; as with multi-quadrant.
-                i = centerPos[c].x - state_.curPos().x;
-                j = centerPos[c].y - state_.curPos().y;
+                i = center.x() - state_.curPos().x();
+                j = center.y() - state_.curPos().y();
                 // Углы
                 const double start = atan2(-j, -i);
-                const double stop = atan2(-centerPos[c].y + y, -centerPos[c].x + x);
+                const double stop = atan2(-center.y() + y, -center.x() + x);
                 const double angle = arcAngle(start, stop);
                 if(angle < (pi + 1e-5) * 0.5) {
-                    arcPolygon = arc(Point(centerPos[c].x, centerPos[c].y), radius1, start, stop);
-                    // Replace with exact values
+                    auto arcPoly = arc(center, radius1, start, stop).vertexes();
+                    poly_.vertexes().insert(poly_.vertexes().end(), arcPoly.begin(), arcPoly.end());
                     state_.setCurPos({x, y});
-                    if(arcPolygon.size())
-                        arcPolygon.back() = state_.curPos();
-                    else
-                        arcPolygon.push_back(state_.curPos());
+                    poly_.vertexes().emplace_back(state_.curPos(), 0.0);
                     valid = true;
                 }
             }
-            if(!valid)
-                qWarning() << QString("Invalid arc in line %1.").arg(lineNum_) << gLine;
+            if(!valid) qWarning() << QString("Invalid arc in line %1.").arg(lineNum_) << gLine;
             break;
         default:
             state_.setCurPos({x, y});
-            path_.push_back(state_.curPos());
+            poly_.vertexes().emplace_back(state_.curPos(), 0.0);
             return true;
             // break;
         }
-        path_ += std::move(arcPolygon);
         return true;
     }
+
     return false;
-}
+} // namespace Gerber
 
 bool Parser::parseEndOfFile(const QString& gLine) {
     auto data{toU16StrView(gLine)};
@@ -1188,7 +1249,7 @@ bool Parser::parseLineInterpolation(const QString& gLine) {
         switch(dcode) {
         case D01: // перемещение в указанную точку x-y с открытым затвором засветки
             state_.setDCode(dcode);
-            path_.push_back(state_.curPos());
+            poly_.vertexes().emplace_back(state_.curPos(), 0.0);
             break;
         case D02: // перемещение в указанную точку x-y с закрытым затвором засветки
             addPath();

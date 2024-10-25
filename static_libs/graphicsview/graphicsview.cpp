@@ -177,13 +177,13 @@ void GraphicsView::zoom100() {
     double x = 1.0, y = 1.0;
     const double m11 = QGraphicsView::transform().m11(), m22 = QGraphicsView::transform().m22();
     if(/* DISABLES CODE */ (0)) {
-        x = qAbs(1.0 / m11 / (25.4 / physicalDpiX()));
-        y = qAbs(1.0 / m22 / (25.4 / physicalDpiY()));
+        x = std::abs(1.0 / m11 / (25.4 / physicalDpiX()));
+        y = std::abs(1.0 / m22 / (25.4 / physicalDpiY()));
     } else {
         const QSizeF size(GetRealSize());                                      // size in mm
         const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
-        x = qAbs(1.0 / m11 / (size.height() / scrGeometry.height()));
-        y = qAbs(1.0 / m22 / (size.width() / scrGeometry.width()));
+        x = std::abs(1.0 / m11 / (size.height() / scrGeometry.height()));
+        y = std::abs(1.0 / m22 / (size.width() / scrGeometry.width()));
     }
 
     if(0 && App::settings().guiSmoothScSh()) {
@@ -374,8 +374,8 @@ void GraphicsView::updateRuler() {
     QPoint p = mapFromScene(QPointF{});
     vRuler->setOrigin(p.y());
     hRuler->setOrigin(p.x());
-    vRuler->setRulerZoom(qAbs(transform().m22() * 0.1));
-    hRuler->setRulerZoom(qAbs(transform().m11() * 0.1));
+    vRuler->setRulerZoom(std::abs(transform().m22() * 0.1));
+    hRuler->setRulerZoom(std::abs(transform().m11() * 0.1));
 }
 
 void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {

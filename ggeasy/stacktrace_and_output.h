@@ -1,8 +1,8 @@
 #pragma once
 
+#include <QDebug>
 #include <csignal>
 #include <string>
-#include <QDebug>
 
 #if __cpp_lib_stacktrace
 #include <QMessageLogContext>
@@ -113,6 +113,9 @@ inline void death_signal(int signum) { // обработка Segfault
 
 inline auto messageHandler = qInstallMessageHandler(nullptr);
 inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
+
+    if(message.contains("QObject::startTimer")) return;
+
     auto file = context.file;
     QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
     while(file && *file)

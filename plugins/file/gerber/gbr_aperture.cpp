@@ -11,12 +11,15 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gbr_aperture.h"
+#include "cavc/polyline.hpp"
 #include "gbr_file.h"
+#include "gbr_types.h"
 
 #include <QDebug>
 #include <QLineF>
 #include <QtQml/QJSEngine>
 #include <QtQml/QJSValue>
+#include <qpoint.h>
 
 namespace Gerber {
 
@@ -55,27 +58,27 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
 AbstractAperture::AbstractAperture(const File* file)
     : file_{file} { }
 
-Paths AbstractAperture::draw(const State& state, bool notApBlock) {
+Polys AbstractAperture::draw(const State& state, bool notApBlock) {
     if(state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
         isFlashed_ = true;
 
     if(paths_.empty())
         draw();
 
-    Paths retPaths(paths_);
+    Polys retPaths{paths_};
 
-    for(Path& path: retPaths) {
+    for(Poly& path: retPaths) {
         if(state.imgPolarity() == Negative)
-            ReversePath(path);
+            ReversePoly(path);
 
         if(file_->format().unitMode == Inches && type() == Macro)
-            for(Point& pt: path)
-                pt *= 25.4;
+            for(auto&& pt: path.vertexes())
+                pt.pos() *= 25.4;
 
         transform(path, state);
 
-        if(state.curPos().x || state.curPos().y) //??????????
-            TranslatePath(path, state.curPos());
+        if(state.curPos().x() || state.curPos().y()) //??????????
+            cavc::translatePolyline(path, state.curPos());
     }
 
     return retPaths;
@@ -87,20 +90,20 @@ double AbstractAperture::apSize() {
     return size_;
 }
 
-Path AbstractAperture::drawDrill(const State& state) {
+Poly AbstractAperture::drawDrill(const State& state) {
     if(qFuzzyIsNull(drillDiam_))
-        return Path();
+        return Poly();
 
-    Path drill = CirclePath(drillDiam_ * uScale);
+    Poly drill = CirclePoly(drillDiam_);
 
     if(state.imgPolarity() == Positive)
-        ReversePath(drill);
+        ReversePoly(drill);
 
-    TranslatePath(drill, state.curPos());
+    cavc::translatePolyline(drill, state.curPos());
     return drill;
 }
 
-void AbstractAperture::transform(Path& poligon, const State& state) {
+void AbstractAperture::transform(Poly& poligon, const State& state) {
     QTransform m;
     if(!qFuzzyIsNull(state.rotating())) m.rotate(state.rotating());
     if(!qFuzzyCompare(state.scaling(), 1.0)) m.scale(state.scaling(), state.scaling());
@@ -108,10 +111,12 @@ void AbstractAperture::transform(Path& poligon, const State& state) {
     if(state.mirroring() & Y_Mirroring) m.scale(+1, -1);
 
     if(!m.isIdentity()) {
-        for(Point& pt: poligon)
-            pt = ~m.map(~pt);
+        for(auto& pt: poligon.vertexes()) {
+            auto maped = m.map(QPointF{pt.x(), pt.y()});
+            pt = {maped.x(), maped.y(), pt.bulge()}; // FIXME  bulge
+        }
         if(m.m11() < 0 ^ m.m22() < 0)
-            ReversePath(poligon);
+            ReversePoly(poligon);
     }
 }
 
@@ -152,7 +157,7 @@ void ApCircle::write(QDataStream& stream) const {
 }
 
 void ApCircle::draw() {
-    paths_.emplace_back(CirclePath(diam_ * uScale));
+    paths_.emplace_back(CirclePoly(diam_));
     minSize_ = size_ = diam_;
 }
 
@@ -202,7 +207,7 @@ void ApRectangle::write(QDataStream& stream) const {
 }
 
 void ApRectangle::draw() {
-    paths_.emplace_back(RectanglePath(width_ * uScale, height_ * uScale));
+    paths_.emplace_back(RectanglePoly(width_, height_));
     size_ = std::sqrt(width_ * width_ + height_ * height_);
     minSize_ = std::min(width_, height_);
 }
@@ -247,34 +252,36 @@ void ApObround::write(QDataStream& stream) const {
 }
 
 void ApObround::draw() {
+#if 0
     Clipper clipper;
-    const /*Point::Type*/ int32_t h = static_cast</*Point::Type*/ int32_t>(height_ * uScale);
-    const /*Point::Type*/ int32_t w = static_cast</*Point::Type*/ int32_t>(width_ * uScale);
+    const double h = static_cast<double>(height_);
+    const double w = static_cast<double>(width_);
     if(qFuzzyCompare(w + 1.0, h + 1.0)) {
-        paths_.emplace_back(CirclePath(w));
+        paths_.emplace_back(CirclePoly(w));
     } else {
         if(w > h) {
             clipper.AddSubject({//
-                CirclePath(h, Point(-(w - h) / 2., 0.)),
-                CirclePath(h, Point((w - h) / 2., 0.)),
-                RectanglePath(w - h, h)});
-            //            clipper.AddPath(CirclePath(h, Point(-(w - h) / 2, 0)), PathType::Clip, true);
+                CirclePoly(h, Vec2(-(w - h) / 2., 0.)),
+                CirclePoly(h, Vec2((w - h) / 2., 0.)),
+                RectanglePoly(w - h, h)});
+            //            clipper.AddPath(CirclePoly(h, Vec2(-(w - h) / 2, 0)), PathType::Clip, true);
             //            clipper.AddPath(c PathType::Clip, true);
-            //            clipper.AddPath(RectanglePath(w - h, h), PathType::Clip, true);
+            //            clipper.AddPath(RectanglePoly(w - h, h), PathType::Clip, true);
         } else if(w < h) {
             clipper.AddSubject({//
-                CirclePath(w, Point(0., -(h - w) / 2.)),
-                CirclePath(w, Point(0., (h - w) / 2.)),
-                RectanglePath(w, h - w)});
-            //            clipper.AddPath(CirclePath(w, Point(0, -(h - w) / 2)), PathType::Clip, true);
-            //            clipper.AddPath(CirclePath(w, Point(0, (h - w) / 2)), PathType::Clip, true);
-            //            clipper.AddPath(RectanglePath(w, h - w), PathType::Clip, true);
+                CirclePoly(w, Vec2(0., -(h - w) / 2.)),
+                CirclePoly(w, Vec2(0., (h - w) / 2.)),
+                RectanglePoly(w, h - w)});
+            //            clipper.AddPath(CirclePoly(w, Vec2(0, -(h - w) / 2)), PathType::Clip, true);
+            //            clipper.AddPath(CirclePoly(w, Vec2(0, (h - w) / 2)), PathType::Clip, true);
+            //            clipper.AddPath(RectanglePoly(w, h - w), PathType::Clip, true);
         }
         // clipper.Execute(ClipType::Union, paths_, FillRule::NonZero, FillRule::NonZero);
         clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
     }
     size_ = std::max(height_, width_);
     minSize_ = std::min(width_, height_);
+#endif
 }
 
 /////////////////////////////////////////////////////
@@ -325,17 +332,19 @@ void ApPolygon::write(QDataStream& stream) const {
 }
 
 void ApPolygon::draw() {
-    Path poligon;
+#if 0
+    Poly poligon;
     const double step = 360.0 / verticesCount_;
-    const double diam = diam_ * uScale;
+    const double diam = diam_;
     for(int i = 0; i < verticesCount_; ++i)
-        poligon.emplace_back(Point(
-            static_cast</*Point::Type*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
-            static_cast</*Point::Type*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
+        poligon.emplace_back(Vec2(
+            static_cast<double>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
+            static_cast<double>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     if(rotation_ > 0.1)
-        RotatePath(poligon, rotation_);
+        RotatePoly(poligon, rotation_);
     paths_.push_back(poligon);
     minSize_ = size_ = diam_;
+#endif
 }
 
 /////////////////////////////////////////////////////
@@ -380,6 +389,7 @@ void ApMacro::write(QDataStream& stream) const {
 }
 
 void ApMacro::draw() {
+#if 0
     enum {
         Comment = 0,
         Circle = 1,
@@ -392,7 +402,7 @@ void ApMacro::draw() {
     };
 
     VarMap macroCoefficients{coefficients_};
-    mvector<QPair<bool, Path>> items;
+    mvector<QPair<bool, Poly>> items;
     try {
         //        for (int i = 0; i < modifiers_.size(); ++i) {
         //            QString var(modifiers_[i]);
@@ -430,7 +440,7 @@ void ApMacro::draw() {
                 continue;
 
             const bool exposure = !qFuzzyIsNull(mod[1]);
-            Path path;
+            Poly path;
 
             switch(static_cast<int>(mod[0])) {
             case Comment:
@@ -460,9 +470,9 @@ void ApMacro::draw() {
 
             const double area = Area(path);
             if(area < 0 && exposure)
-                ReversePath(path);
+                ReversePoly(path);
             else if(area > 0 && !exposure)
-                ReversePath(path);
+                ReversePoly(path);
 
             items.emplace_back(exposure, path);
         }
@@ -487,7 +497,7 @@ void ApMacro::draw() {
     } else
         paths_.push_back(items.front().second);
 
-    /// ReversePaths(paths_);
+    /// ReversePolys(paths_);
     /// normalize(paths_);
 
     {
@@ -499,9 +509,10 @@ void ApMacro::draw() {
         size_ = std::sqrt(x * x + y * y);
         minSize_ = std::min(x, y);
     }
+#endif
 }
 
-Path ApMacro::drawCenterLine(const mvector<double>& mod) {
+Poly ApMacro::drawCenterLine(const mvector<double>& mod) {
     enum {
         Width = 2,
         Height,
@@ -509,20 +520,23 @@ Path ApMacro::drawCenterLine(const mvector<double>& mod) {
         CenterY,
         RotationAngle
     };
+    Poly polygon;
+#if 0
 
-    const Point center(
-        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
+    const Vec2 center(
+        static_cast<double>(mod[CenterX]),
+        static_cast<double>(mod[CenterY]));
 
-    Path polygon = RectanglePath(mod[Width] * uScale, mod[Height] * uScale, center);
+    Poly polygon = RectanglePoly(mod[Width], mod[Height], center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
-
+        cavc::r
+            RotatePoly(polygon, mod[RotationAngle]);
+#endif
     return polygon;
 }
 
-Path ApMacro::drawCircle(const mvector<double>& mod) {
+Poly ApMacro::drawCircle(const mvector<double>& mod) {
     enum {
         Diameter = 2,
         CenterX,
@@ -530,19 +544,20 @@ Path ApMacro::drawCircle(const mvector<double>& mod) {
         RotationAngle
     };
 
-    const Point center(
-        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
+    const Vec2 center(
+        static_cast<double>(mod[CenterX]),
+        static_cast<double>(mod[CenterY]));
 
-    Path polygon = CirclePath(mod[Diameter] * uScale, center);
+    Poly polygon = CirclePoly(mod[Diameter], center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        RotatePoly(polygon, mod[RotationAngle]);
 
     return polygon;
 }
 
 void ApMacro::drawMoire(const mvector<double>& mod) {
+#if 0
     enum {
         CenterX = 1,
         CenterY,
@@ -555,42 +570,43 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
         RotationAngle,
     };
 
-    /*Point::Type*/ int32_t diameter = static_cast</*Point::Type*/ int32_t>(mod[Diameter] * uScale);
-    const /*Point::Type*/ int32_t thickness = static_cast</*Point::Type*/ int32_t>(mod[Thickness] * uScale);
-    const /*Point::Type*/ int32_t gap = static_cast</*Point::Type*/ int32_t>(mod[Gap] * uScale);
-    const /*Point::Type*/ int32_t ct = static_cast</*Point::Type*/ int32_t>(mod[CrossThickness] * uScale);
-    const /*Point::Type*/ int32_t cl = static_cast</*Point::Type*/ int32_t>(mod[CrossLength] * uScale);
+    double diameter = static_cast<double>(mod[Diameter]);
+    const double thickness = static_cast<double>(mod[Thickness]);
+    const double gap = static_cast<double>(mod[Gap]);
+    const double ct = static_cast<double>(mod[CrossThickness]);
+    const double cl = static_cast<double>(mod[CrossLength]);
 
-    const Point center(
-        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
+    const Vec2 center(
+        static_cast<double>(mod[CenterX]),
+        static_cast<double>(mod[CenterY]));
 
     {
         Clipper clipper;
         if(thickness && gap) {
             for(int num = 0; num < mod[NumberOfRings]; ++num) {
-                clipper.AddClip({CirclePath(diameter)});
+                clipper.AddClip({CirclePoly(diameter)});
                 diameter -= thickness * 2;
-                Path polygon(CirclePath(diameter));
-                ReversePath(polygon);
+                Poly polygon(CirclePoly(diameter));
+                ReversePoly(polygon);
                 clipper.AddClip({polygon});
                 diameter -= gap * 2;
             }
         }
         if(cl && ct)
-            clipper.AddClip({RectanglePath(cl, ct), RectanglePath(ct, cl)});
+            clipper.AddClip({RectanglePoly(cl, ct), RectanglePoly(ct, cl)});
         clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
     }
 
-    for(Path& path: paths_)
-        TranslatePath(path, center);
+    for(Poly& path: paths_)
+        cavc::translatePolyline(path, center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        for(Path& path: paths_)
-            RotatePath(path, mod[RotationAngle]);
+        for(Poly& path: paths_)
+            RotatePoly(path, mod[RotationAngle]);
+#endif
 }
 
-Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
+Poly ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         X,
@@ -599,19 +615,20 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
 
     const int num = static_cast<int>(mod[NumberOfVertices]);
 
-    Path polygon;
+    Poly polygon;
+#if 0
     for(int j = 0; j < int(num); ++j)
-        polygon.emplace_back(Point(
-            static_cast</*Point::Type*/ int32_t>(mod[X + j * 2] * uScale),
-            static_cast</*Point::Type*/ int32_t>(mod[Y + j * 2] * uScale)));
+        polygon.emplace_back(Vec2(
+            static_cast<double>(mod[X + j * 2]),
+            static_cast<double>(mod[Y + j * 2])));
 
     if(mod.size() > (num * 2 + 3) && mod.back() > 0)
-        RotatePath(polygon, mod.back());
-
+        RotatePoly(polygon, mod.back());
+#endif
     return polygon;
 }
 
-Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
+Poly ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         CenterX,
@@ -624,29 +641,32 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     if(3 > num || num > 12)
         throw GbrObj::tr("Bad outline (regular polygon) macro!");
 
-    const /*Point::Type*/ int32_t diameter = static_cast</*Point::Type*/ int32_t>(mod[Diameter] * uScale * 0.5);
-    const Point center(
-        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
+    const double diameter = static_cast<double>(mod[Diameter] * 0.5);
+    const Vec2 center(
+        static_cast<double>(mod[CenterX]),
+        static_cast<double>(mod[CenterY]));
 
-    Path polygon;
+    Poly polygon;
+#if 0
     for(int j = 0; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
-        polygon.emplace_back(Point(
-            static_cast</*Point::Type*/ int32_t>(qCos(angle) * diameter),
-            static_cast</*Point::Type*/ int32_t>(qSin(angle) * diameter)));
+        polygon.emplace_back(Vec2(
+            static_cast<double>(qCos(angle) * diameter),
+            static_cast<double>(qSin(angle) * diameter)));
     }
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        RotatePoly(polygon, mod[RotationAngle]);
 
-    TranslatePath(polygon, center);
+    cavc::translatePolyline(polygon, center);
+#endif
 
     return polygon;
 }
 
 void ApMacro::drawThermal(const mvector<double>& mod) {
-    enum {
+#if 0
+enum {
         CenterX = 1,
         CenterY,
         OuterDiameter,
@@ -658,34 +678,35 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
     if(mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
         throw GbrObj::tr("Bad thermal macro!");
 
-    const /*Point::Type*/ int32_t outer = static_cast</*Point::Type*/ int32_t>(mod[OuterDiameter] * uScale);
-    const /*Point::Type*/ int32_t inner = static_cast</*Point::Type*/ int32_t>(mod[InnerDiameter] * uScale);
-    const /*Point::Type*/ int32_t gap = static_cast</*Point::Type*/ int32_t>(mod[GapThickness] * uScale);
+    const double outer = static_cast<double>(mod[OuterDiameter] );
+    const double inner = static_cast<double>(mod[InnerDiameter] );
+    const double gap = static_cast<double>(mod[GapThickness] );
 
-    const Point center(
-        static_cast</*Point::Type*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[CenterY] * uScale));
+    const Vec2 center(
+        static_cast<double>(mod[CenterX] ),
+        static_cast<double>(mod[CenterY] ));
 
     {
         Clipper clipper;
-        clipper.AddSubject({CirclePath(outer)});
-        clipper.AddClip({CirclePath(inner), RectanglePath(gap, outer), RectanglePath(outer, gap)});
-        //        clipper.AddPath(CirclePath(outer), PathType::Subject, true);
-        //        clipper.AddPath(CirclePath(inner), PathType::Clip, true);
-        //        clipper.AddPath(RectanglePath(gap, outer), PathType::Clip, true);
-        //        clipper.AddPath(RectanglePath(outer, gap), PathType::Clip, true);
+        clipper.AddSubject({CirclePoly(outer)});
+        clipper.AddClip({CirclePoly(inner), RectanglePoly(gap, outer), RectanglePoly(outer, gap)});
+        //        clipper.AddPath(CirclePoly(outer), PathType::Subject, true);
+        //        clipper.AddPath(CirclePoly(inner), PathType::Clip, true);
+        //        clipper.AddPath(RectanglePoly(gap, outer), PathType::Clip, true);
+        //        clipper.AddPath(RectanglePoly(outer, gap), PathType::Clip, true);
         clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
     }
 
-    for(Path& path: paths_)
-        TranslatePath(path, center);
+    for(Poly& path: paths_)
+        cavc::translatePolyline(path, center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        for(Path& path: paths_)
-            RotatePath(path, mod[RotationAngle]);
+        for(Poly& path: paths_)
+            RotatePoly(path, mod[RotationAngle]);
+#endif
 }
 
-Path ApMacro::drawVectorLine(const mvector<double>& mod) {
+Poly ApMacro::drawVectorLine(const mvector<double>& mod) {
     enum {
         Width = 2,
         StartX,
@@ -695,23 +716,20 @@ Path ApMacro::drawVectorLine(const mvector<double>& mod) {
         RotationAngle,
     };
 
-    const Point start(
-        static_cast</*Point::Type*/ int32_t>(mod[StartX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[StartY] * uScale));
-    const Point end(
-        static_cast</*Point::Type*/ int32_t>(mod[EndX] * uScale),
-        static_cast</*Point::Type*/ int32_t>(mod[EndY] * uScale));
-    const Point center(
-        static_cast</*Point::Type*/ int32_t>(0.5 * start.x + 0.5 * end.x),
-        static_cast</*Point::Type*/ int32_t>(0.5 * start.y + 0.5 * end.y));
+    const Vec2 start{mod[StartX], mod[StartY]};
+    const Vec2 end{mod[EndX], mod[EndY]};
+    const Vec2 center{0.5 * start.x() + 0.5 * end.x(), 0.5 * start.y() + 0.5 * end.y()};
+    Poly polygon;
+#if 0
 
-    Path polygon = RectanglePath(distTo(start, end), mod[Width] * uScale);
+    Poly polygon = RectanglePoly(distTo(start, end), mod[Width]);
     double angle = 180 - (angleTo(start, end) - 360); // FIXME ???
-    RotatePath(polygon, angle);
-    TranslatePath(polygon, center);
+    RotatePoly(polygon, angle);
+    cavc::translatePolyline(polygon, center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        RotatePoly(polygon, mod[RotationAngle]);
+#endif
 
     return polygon;
 }
@@ -743,6 +761,8 @@ void ApBlock::write(QDataStream& stream) const {
 }
 
 void ApBlock::draw() {
+#if 0
+
     paths_.clear();
     int i = 0;
     while(i < size()) {
@@ -758,7 +778,7 @@ void ApBlock::draw() {
         else
             clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
     }
-    // CleanPaths(paths_, 0.0009 * uScale);
+    // CleanPaths(paths_, 0.0009 );
     {
         Clipper clipperBase;
         clipperBase.AddSubject(paths_);
@@ -770,6 +790,7 @@ void ApBlock::draw() {
         size_ = std::sqrt(x * x + y * y);
         minSize_ = std::min(x, y);
     }
+#endif
 }
 
 } // namespace Gerber

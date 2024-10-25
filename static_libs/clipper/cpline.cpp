@@ -83,7 +83,7 @@
 //    IntLine f(p1(), IntPoint(pt1.X + x / len, pt1.Y + y / len));
 
 // #ifndef QT_NO_DEBUG
-//     if (qAbs(f.length() - 1) >= 0.001)
+//     if (std::abs(f.length() - 1) >= 0.001)
 //         qWarning("QLine::unitVector: New line does not have unit length");
 // #endif
 

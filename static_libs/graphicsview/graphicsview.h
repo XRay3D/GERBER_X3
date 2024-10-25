@@ -76,7 +76,7 @@ public:
     void startUpdateTimer(int timeMs) {
         if(timerId)
             killTimer(timerId);
-        timerId = startTimer(timeMs);
+        // FIXME timerId = startTimer(timeMs);
     }
 
     void stopUpdateTimer() {

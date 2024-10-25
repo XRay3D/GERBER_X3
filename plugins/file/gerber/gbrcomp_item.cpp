@@ -13,6 +13,7 @@
 #include "gbrcomp_item.h"
 
 #include "abstract_file.h"
+#include "arc_solver.h"
 #include "graphicsview.h"
 
 #include <QPainter>
@@ -27,7 +28,7 @@ Item::Item(const Component& component, AbstractFile* file)
     component.setitem(this);
     pathPins.resize(component_.pins().size());
     for(auto&& poly: component_.footprint())
-        shape_.addPolygon(poly);
+        shape_ += polyToPPath(poly);
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setToolTip(component_.toolTip());

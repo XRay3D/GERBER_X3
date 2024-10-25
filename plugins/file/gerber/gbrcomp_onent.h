@@ -10,6 +10,7 @@
  *******************************************************************************/
 #pragma once
 
+#include "arc_solver.h"
 #include "datastream.h"
 #include "gbr_attributes.h"
 #include "mvector.h"
@@ -153,8 +154,8 @@ public:
     QPointF referencePoint() const { return referencePoint_; }
     void setReferencePoint(const QPointF& referencePoint) { referencePoint_ = referencePoint; }
 
-    QList<QPolygonF> footprint() const { return footprint_; }
-    void addFootprint(const QPolygonF& footprint) { footprint_.push_back(footprint); }
+    mvector<Poly> footprint() const { return footprint_; }
+    void addFootprint(const Poly& footprint) { footprint_.emplace_back(footprint); }
 
     QString footprintName() const { return footprintName_; }
     void setFootprintName(const QString& footprintName) { footprintName_ = footprintName; }
@@ -184,7 +185,7 @@ private:
     mvector<Pin> pins_;
     mvector<Supplier> suppliers_;
     QPointF referencePoint_;
-    QList<QPolygonF> footprint_;
+    mvector<Poly> footprint_;
     QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */
     QString refdes_;
     QString value_; /* <field> E.g. 220nF. */
