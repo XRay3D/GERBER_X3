@@ -17,6 +17,126 @@
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 
+//////////////////////////////////////////
+
+#include <CGAL/Point_set_3.h>
+#include <CGAL/Point_set_3/IO.h>
+#include <CGAL/Random.h>
+#include <CGAL/Shape_detection/Region_growing/Point_set.h>
+#include <CGAL/Shape_detection/Region_growing/Region_growing.h>
+#include <CGAL/Simple_cartesian.h>
+#include <boost/iterator/function_output_iterator.hpp>
+
+// #include "include/utils.h"
+
+// Typedefs.
+using Kernel = CGAL::Simple_cartesian<double>;
+using FT = Kernel::FT;
+using Point_2 = Kernel::Point_2;
+using Point_3 = Kernel::Point_3;
+using Vector_2 = Kernel::Vector_2;
+using Vector_3 = Kernel::Vector_3;
+
+using Point_set_2 = CGAL::Point_set_3<Point_2, Vector_2>;
+using Point_set_3 = CGAL::Point_set_3<Point_3, Vector_3>;
+
+using Point_map = Point_set_2::Point_map;
+using Normal_map = Point_set_2::Vector_map;
+
+using Neighbor_query = CGAL::Shape_detection::Point_set::K_neighbor_query_for_point_set<Point_set_2>;
+using Region_type = CGAL::Shape_detection::Point_set::Least_squares_circle_fit_region_for_point_set<Point_set_2>;
+using Sorting = CGAL::Shape_detection::Point_set::Least_squares_circle_fit_sorting_for_point_set<Point_set_2, Neighbor_query>;
+using Region_growing = CGAL::Shape_detection::Region_growing<Neighbor_query, Region_type>;
+
+static void test(const Paths& paths) {
+
+    // Create a 2D point set.
+    Point_set_2 point_set_2;
+    point_set_2.add_normal_map();
+
+    auto join = paths | std::views::join;
+    Path path{join.begin(), join.end()};
+
+    for(auto it = path.begin() + 1; it < path.end() - 1; ++it) {
+
+        QLineF l1{~*it, ~*(it - 1)};
+        QLineF l2{~*it, ~*(it + 1)};
+        auto normal = QLineF::fromPolar(1, l1.angle() + l1.angleTo(l2) * 2).p2();
+
+        point_set_2.insert(
+            Point_2{it->x * dScale, it->y * dScale},
+            Vector_2{normal.x(), normal.y()});
+    }
+
+    // for(auto&& point: paths | std::views::join) {
+    //     // for(const auto& idx: point_set_3) {
+    //     // const Point_3& point = point_set_3.point(idx);
+    //     // const Vector_3& normal = point_set_3.normal(idx);
+    //     point_set_2.insert(
+    //         Point_2(point.x * dScale, point.y * dScale),
+    //         Vector_2(normal.x(), normal.y()));
+    // }
+
+    // Default parameter values for the data file circles.ply.
+    const std::size_t k = 16;
+    const FT max_distance = FT(1) / FT(100);
+    const FT max_angle = FT(10);
+    const std::size_t min_region_size = 1;
+
+    // Create instances of the classes Neighbor_query and Region_type.
+    Neighbor_query neighbor_query = CGAL::Shape_detection::Point_set::make_k_neighbor_query(
+        point_set_2, CGAL::parameters::k_neighbors(k));
+
+    // Region_type region_type = CGAL::Shape_detection::Point_set::make_least_squares_circle_fit_region(
+    // point_set_2,
+    // CGAL::parameters::maximum_distance(max_distance).maximum_angle(max_angle).minimum_region_size(min_region_size));
+    Region_type region_type = CGAL::Shape_detection::Point_set::make_least_squares_circle_fit_region(
+        point_set_2,
+        CGAL::parameters::maximum_distance(max_distance).maximum_angle(max_angle).minimum_region_size(min_region_size));
+
+    // Sort indices.
+    Sorting sorting = CGAL::Shape_detection::Point_set::make_least_squares_circle_fit_sorting(
+        point_set_2, neighbor_query, CGAL::parameters::k_neighbors(k));
+    sorting.sort();
+
+    // Create an instance of the region growing class.
+    Region_growing region_growing(
+        point_set_2, sorting.ordered(), neighbor_query, region_type);
+
+    // Add maps to get a colored output.
+    Point_set_2::Property_map<unsigned char>
+        red = point_set_2.add_property_map<unsigned char>("red", 0).first,
+        green = point_set_2.add_property_map<unsigned char>("green", 0).first,
+        blue = point_set_2.add_property_map<unsigned char>("blue", 0).first;
+
+    // Run the algorithm.
+    CGAL::Random random;
+    std::size_t num_circles = 0;
+    region_growing.detect(
+        boost::make_function_output_iterator(
+            [&](const std::pair<Region_type::Primitive, typename Region_growing::Region>& region) {
+                // Assign a random color to each region.
+                const unsigned char r = static_cast<unsigned char>(random.get_int(64, 192));
+                const unsigned char g = static_cast<unsigned char>(random.get_int(64, 192));
+                const unsigned char b = static_cast<unsigned char>(random.get_int(64, 192));
+                for(auto item: region.second) {
+                    red[item] = r;
+                    green[item] = g;
+                    blue[item] = b;
+                }
+                ++num_circles;
+            }));
+    qInfo() << "* number of found circles: " << num_circles;
+    // assert(!is_default_input || num_circles == 10);
+
+    // Save regions to a file.
+    std::ofstream out("circles_point_set_2.ply");
+    CGAL::IO::set_ascii_mode(out);
+    out << point_set_2;
+}
+
+//////////////////////////////////////////
+
 namespace Gerber {
 
 QDebug operator<<(QDebug debug, const State& state) {
@@ -167,6 +287,8 @@ Paths File::merge() const {
                 clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
         }
     }
+
+    test(mergedPaths_);
 
     if(Settings::cleanPolygons())
         CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);

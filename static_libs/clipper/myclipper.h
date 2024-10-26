@@ -209,6 +209,16 @@ inline QDebug operator<<(QDebug d, const Point& p) {
 template <typename T> concept Container = requires(T c) {
     c.begin();
     c.end();
+    c.reserve(size_t{});
+    // { typename T::value_type{} } -> std::same_as<std::decay_t<decltype(*c.begin())>>;
+    // T::value_type;
+    // { std::is_same<T, QByteArray> } -> std::same_as<std::false_type>;
+    // { std::is_same<T, QString> } -> std::same_as<std::false_type>;
+};
+
+template <typename T> concept Range__ = requires(T c) {
+    c.begin();
+    c.end();
     // { typename T::value_type{} } -> std::same_as<std::decay_t<decltype(*c.begin())>>;
     // T::value_type;
     // { std::is_same<T, QByteArray> } -> std::same_as<std::false_type>;
@@ -227,7 +237,7 @@ inline int indexOf(const Cont& c, const typename Cont::value_type& v) {
     return it == c.end() ? -1 : std::distance(c.begin(), it);
 }
 
-auto operator+=(Container auto& c, Container auto&& v) {
+auto operator+=(Container auto& c, Range__ auto&& v) {
     c.reserve(c.size() + v.size());
     if constexpr(std::is_lvalue_reference_v<decltype(v)>)
         std::ranges::copy(v, std::back_inserter(c));
