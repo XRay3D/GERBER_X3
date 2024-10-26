@@ -39,7 +39,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     -Winvalid-pch -pthread
     # -fmodules-ts
   )
-  add_compile_options(-rdynamic)
+  # add_compile_options(-rdynamic)# unix
 
   link_directories(tbb/lib)
   # Link against the dependency of Intel TBB (for parallel C++17 algorithms)
@@ -69,6 +69,30 @@ if(Boost_FOUND)
   message(==> "Boost ${Boost_VERSION} found!!!")
 else()
   message(FATAL_ERROR "Boost not found!!!")
+endif()
+
+# FIND CGAL
+find_package(CGAL)
+if(CGAL_FOUND)
+  # if(CGAL_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required CGAL
+  # version is greater than or equal to 1.84.0! Current ${CGAL_VERSION}." )
+  # endif()
+  include_directories(${CGAL_INCLUDE_DIR})
+  message(==> "CGAL ${CGAL_VERSION} found!!!")
+else()
+  message(FATAL_ERROR "CGAL not found!!!")
+endif()
+
+# FIND EIGEN3
+find_package(EIGEN3)
+if(EIGEN3_FOUND)
+  # if(eigen_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required eigen
+  # version is greater than or equal to 1.84.0! Current ${eigen_VERSION}." )
+  # endif()
+  include_directories(${EIGEN3_INCLUDE_DIR})
+  message(==> "EIGEN3 ${EIGEN3_VERSION} found!!!")
+else()
+  message(FATAL_ERROR "EIGEN3 not found!!!")
 endif()
 
 set(INC_DIRS
