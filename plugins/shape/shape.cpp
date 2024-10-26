@@ -254,10 +254,10 @@ void AbstractShape::read(QDataStream& stream) {
     for(int i{}; i < size; ++i) {
         stream >> pos;
         stream >> type;
-        if(handlers.size() < size)
-            handlers.emplace_back(std::make_unique<Handle>(this, type));
-        handlers[i]->QGraphicsItem::setPos(pos);
-        handlers[i]->setVisible(false);
+        // if(handlers.size() < size)
+        auto item = handlers.emplace_back(std::make_unique<Handle>(this, type)).get();
+        item->QGraphicsItem::setPos(pos);
+        item->setVisible(false);
     }
     redraw();
 }
