@@ -62,8 +62,7 @@ if(Boost_FOUND)
   if(Boost_VERSION_MINOR LESS 84)
     message(
       FATAL_ERROR
-        "==> !! Required Boost version is greater than or equal to 1.84.0! Current ${Boost_VERSION}."
-    )
+        "==> !! Required Boost version >= 1.84.0! Current ${Boost_VERSION}.")
   endif()
   include_directories(${Boost_INCLUDE_DIR})
   message(==> "Boost ${Boost_VERSION} found!!!")
@@ -71,28 +70,28 @@ else()
   message(FATAL_ERROR "Boost not found!!!")
 endif()
 
-# FIND CGAL
-find_package(CGAL)
+# FIND
+set(CGAL_DIR ../cgal)
+find_package(CGAL 6)
 if(CGAL_FOUND)
+  add_definitions(-DCGAL_VER=${CGAL_VERSION_MAJOR})
   # if(CGAL_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required CGAL
-  # version is greater than or equal to 1.84.0! Current ${CGAL_VERSION}." )
-  # endif()
+  # version >= 1.84.0! Current ${CGAL_VERSION}." ) endif()
   include_directories(${CGAL_INCLUDE_DIR})
   message(==> "CGAL ${CGAL_VERSION} found!!!")
 else()
   message(FATAL_ERROR "CGAL not found!!!")
 endif()
 
-# FIND EIGEN3
-find_package(EIGEN3)
-if(EIGEN3_FOUND)
-  # if(eigen_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required eigen
-  # version is greater than or equal to 1.84.0! Current ${eigen_VERSION}." )
-  # endif()
-  include_directories(${EIGEN3_INCLUDE_DIR})
-  message(==> "EIGEN3 ${EIGEN3_VERSION} found!!!")
+# FIND Eigen3
+find_package(Eigen3)
+if(Eigen3_FOUND)
+  # if(Eigen3_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required
+  # Eigen3 version >= 1.84.0! Current ${Eigen3_VERSION}." ) endif()
+  include_directories(${Eigen3_INCLUDE_DIR} /usr/include/eigen3)
+  message(==> "Eigen3 ${Eigen3_VERSION} found!!!")
 else()
-  message(FATAL_ERROR "EIGEN3 not found!!!")
+  message(FATAL_ERROR "Eigen3 not found!!!")
 endif()
 
 set(INC_DIRS
@@ -103,6 +102,7 @@ set(INC_DIRS
     plugins/gcode
     plugins/shape
     static_libs/clipper
+    static_libs/cgal
     static_libs/common
     static_libs/filetree
     static_libs/gi

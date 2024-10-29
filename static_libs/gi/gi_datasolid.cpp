@@ -34,7 +34,7 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
     setFlag(ItemIsSelectable, true);
 }
 
-void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
@@ -50,10 +50,10 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     //        painter->drawPolygon(poly);
     painter->drawPath(shape_);
 
-    //    pen_.setWidthF(option->state & QStyle::State_Selected
-    //                || option->state & QStyle::State_MouseOver
-    //            ? 2.0 * scaleFactor()
-    //            : 0);
+    pen_.setWidthF((option->state & (QStyle::State_Selected | QStyle::State_MouseOver)
+                           ? 2.0
+                           : 1.0)
+        * scaleFactor());
     pen_.setColor(penColor_);
     painter->strokePath(shape_, pen_);
 }
@@ -71,9 +71,7 @@ void DataFill::redraw() {
     // update();
 }
 
-Paths& DataFill::getPaths() {
-    return paths_;
-}
+Paths& DataFill::getPaths() { return paths_; }
 
 void DataFill::setPaths(Paths paths, int alternate) {
     auto t{transform()};
@@ -88,8 +86,7 @@ void DataFill::setPaths(Paths paths, int alternate) {
     t.translate(-x, -y);
 
     shape_ = {};
-    for(auto&& path: paths)
-        shape_.addPolygon(t.map(~path));
+    for(auto&& path: paths) shape_.addPolygon(t.map(~path));
     paths_ = std::move(paths);
 
     redraw();

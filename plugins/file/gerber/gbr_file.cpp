@@ -16,9 +16,11 @@
 #include "gbrcomp_onent.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
+#include "graphicsview.h"
 
 //////////////////////////////////////////
 
+#if 0
 #include <CGAL/Point_set_3.h>
 #include <CGAL/Point_set_3/IO.h>
 #include <CGAL/Random.h>
@@ -26,9 +28,13 @@
 #include <CGAL/Shape_detection/Region_growing/Region_growing.h>
 #include <CGAL/Simple_cartesian.h>
 #include <boost/iterator/function_output_iterator.hpp>
+#include <limits>
+#include <qglobal.h>
+#include <qnamespace.h>
+#include <qpen.h>
+#include <qpolygon.h>
 
 // #include "include/utils.h"
-
 // Typedefs.
 using Kernel = CGAL::Simple_cartesian<double>;
 using FT = Kernel::FT;
@@ -47,9 +53,10 @@ using Neighbor_query = CGAL::Shape_detection::Point_set::K_neighbor_query_for_po
 using Region_type = CGAL::Shape_detection::Point_set::Least_squares_circle_fit_region_for_point_set<Point_set_2>;
 using Sorting = CGAL::Shape_detection::Point_set::Least_squares_circle_fit_sorting_for_point_set<Point_set_2, Neighbor_query>;
 using Region_growing = CGAL::Shape_detection::Region_growing<Neighbor_query, Region_type>;
+#endif
 
 static void test(const Paths& paths) {
-
+#if 0
     // Create a 2D point set.
     Point_set_2 point_set_2;
     point_set_2.add_normal_map();
@@ -65,7 +72,7 @@ static void test(const Paths& paths) {
 
         point_set_2.insert(
             Point_2{it->x * dScale, it->y * dScale},
-            Vector_2{normal.x(), normal.y()});
+            Vector_2{/*normal.x(), normal.y()*/});
     }
 
     // for(auto&& point: paths | std::views::join) {
@@ -81,7 +88,7 @@ static void test(const Paths& paths) {
     const std::size_t k = 16;
     const FT max_distance = FT(1) / FT(100);
     const FT max_angle = FT(10);
-    const std::size_t min_region_size = 1;
+    const std::size_t min_region_size = 20;
 
     // Create instances of the classes Neighbor_query and Region_type.
     Neighbor_query neighbor_query = CGAL::Shape_detection::Point_set::make_k_neighbor_query(
@@ -90,9 +97,12 @@ static void test(const Paths& paths) {
     // Region_type region_type = CGAL::Shape_detection::Point_set::make_least_squares_circle_fit_region(
     // point_set_2,
     // CGAL::parameters::maximum_distance(max_distance).maximum_angle(max_angle).minimum_region_size(min_region_size));
-    Region_type region_type = CGAL::Shape_detection::Point_set::make_least_squares_circle_fit_region(
-        point_set_2,
-        CGAL::parameters::maximum_distance(max_distance).maximum_angle(max_angle).minimum_region_size(min_region_size));
+    Region_type region_type = CGAL::Shape_detection::Point_set::
+        make_least_squares_circle_fit_region(
+            point_set_2,
+            CGAL::parameters::maximum_distance(max_distance)
+                .maximum_angle(max_angle)
+                .minimum_region_size(min_region_size));
 
     // Sort indices.
     Sorting sorting = CGAL::Shape_detection::Point_set::make_least_squares_circle_fit_sorting(
@@ -124,6 +134,18 @@ static void test(const Paths& paths) {
                     green[item] = g;
                     blue[item] = b;
                 }
+                const auto center = region.first.center;
+                const auto radius = region.first.radius;
+                qWarning() << center.x() << center.y() << radius;
+
+                App::grView().scene()->addEllipse(QRectF{
+                                                      center.x() - radius,
+                                                      center.y() - radius,
+                                                      radius * 2,
+                                                      radius * 2,
+                                                  },
+                                         QPen{Qt::white, 0.0})
+                    ->setZValue(std::numeric_limits<double>::max());
                 ++num_circles;
             }));
     qInfo() << "* number of found circles: " << num_circles;
@@ -133,6 +155,7 @@ static void test(const Paths& paths) {
     std::ofstream out("circles_point_set_2.ply");
     CGAL::IO::set_ascii_mode(out);
     out << point_set_2;
+#endif
 }
 
 //////////////////////////////////////////
@@ -162,9 +185,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 

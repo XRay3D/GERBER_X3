@@ -17,11 +17,17 @@
 #include "gbr_attraperfunction.h"
 #include "gbr_attrfilefunction.h"
 #include "gbr_file.h"
+#include "myclipper.h"
 #include "utils.h"
 #include <QElapsedTimer>
 #include <QMutex>
 #include <ctre.hpp>
+#include <exception>
+#include <qglobal.h>
 
+#include "cgal_solver.h"
+
+Polygon_2 poly;
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side
 .CMP Copper Component side        .STC Solder Stop mask Component side
@@ -479,6 +485,7 @@ void Parser::reset() {
     currentGerbLine_.clear();
     goId_ = 0;
     path_.clear();
+    poly.clear();
     state_ = State(file);
     stepRepeat_.reset();
     refDes.clear();
@@ -487,6 +494,7 @@ void Parser::reset() {
 void Parser::resetStep() {
     currentGerbLine_.clear();
     path_.clear();
+    poly.clear();
     path_.push_back(state_.curPos());
 }
 
@@ -521,7 +529,7 @@ Path Parser::arc(const Point& center, double radius, double start, double stop) 
     else if(state_.interpolation() == CounterclockwiseCircular && stop <= start)
         stop += 2.0 * pi;
 
-    double angle = qAbs(stop - start);
+    double angle = abs(stop - start);
     double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[state_.interpolation()] * angle * 1.0 / steps;
     for(int i = 0; i < steps; i++) {
@@ -529,6 +537,49 @@ Path Parser::arc(const Point& center, double radius, double start, double stop) 
         points.emplace_back(Point(
             static_cast</*Point::Type*/ int32_t>(center.x + radius * cos(theta)),
             static_cast</*Point::Type*/ int32_t>(center.y + radius * sin(theta))));
+    }
+
+    /*
+    double angle = std::abs(stop - start);
+
+    Poly points;
+    auto& vertexes = points.vertexes();
+
+    if(angle <= pi) {
+        auto [startPt, stopPt, bulge] = arcToBulge(center, start, stop, radius);
+        vertexes.emplace_back(state_.curPos(), bulge);
+    } else if(qFuzzyCompare(angle, two_pi)) {
+        auto [startPt, stopPt, bulge] = arcToBulge(center, start, start + pi * sign, radius);
+        vertexes.emplace_back(state_.curPos(), sign);
+        vertexes.emplace_back(stopPt, sign);
+    } else {
+        angle /= 2 * sign;
+        auto [startPt, stopPt, bulge] = arcToBulge(center, start, start + angle, radius);
+        vertexes.emplace_back(state_.curPos(), bulge);
+        vertexes.emplace_back(stopPt, bulge);
+    }
+
+*/
+
+    const auto rad = radius * dScale;
+    const auto cntr = ~center;
+    const double sign = std::array{0.0, 0.0, -1.0, +1.0}[state_.interpolation()];
+
+    if(angle <= pi) {
+        auto [startPt, stopPt, bulge] = arcToBulge(cntr, start, stop, rad);
+        construct_arc(startPt, stopPt, bulge, poly);
+    } else if(qFuzzyCompare(angle, two_pi)) {
+        poly = ConstructPolygon(Circle_2{!cntr, rad * rad});
+    } else {
+        angle /= 2 * sign;
+        {
+            auto [startPt, stopPt, bulge] = arcToBulge(cntr, start, start + angle, rad);
+            construct_arc(startPt, stopPt, bulge, poly);
+        }
+        {
+            auto [startPt, stopPt, bulge] = arcToBulge(cntr, start + angle, stop, rad);
+            construct_arc(startPt, stopPt, bulge, poly);
+        }
     }
 
     return points;
@@ -584,6 +635,8 @@ Paths Parser::createLine() {
         //        solution = offset.Execute(size);
         if(state_.imgPolarity() == Negative)
             ReversePaths(solution);
+        TestPolygon(poly);
+        OffsetPoly(poly, size * dScale);
     }
     return solution;
 }
@@ -933,6 +986,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             return true;
         }
 
+        const auto back = state_.curPos(); // ARC
+
         switch(state_.dCode()) {
         case D01:
             break;
@@ -949,11 +1004,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
 
         const Point& curPos = state_.curPos();
 
-        const Point centerPos[4] = {
-            {curPos.x + i, curPos.y + j},
-            {curPos.x - i, curPos.y + j},
-            {curPos.x + i, curPos.y - j},
-            {curPos.x - i, curPos.y - j}
+        const std::array centerPos{
+            Point{curPos.x + i, curPos.y + j},
+            Point{curPos.x - i, curPos.y + j},
+            Point{curPos.x + i, curPos.y - j},
+            Point{curPos.x - i, curPos.y - j}
         };
 
         bool valid = false;
@@ -967,34 +1022,36 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             const double start = atan2(-j, -i); // Start angle
             // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
             // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (state_.curPos() == Point(x, y)) ? start : atan2(-centerPos[0].y + y, -centerPos[0].x + x); // Stop angle
+            const double stop = (state_.curPos() == Point{x, y})
+                ? start
+                : atan2(-centerPos[0].y + y, -centerPos[0].x + x); // Stop angle
 
-            arcPolygon = arc(Point(centerPos[0].x, centerPos[0].y), radius1, start, stop);
+            arcPolygon = arc(centerPos.front(), radius1, start, stop);
             // arcPolygon = arc(curPos, Point(x, y), centerPos[0]);
             //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
             //  Точной конечной точкой является указанная (x, y). Заменить.
-            state_.curPos() = Point{x, y};
+            state_.setCurPos({x, y});
             if(arcPolygon.size())
                 arcPolygon.back() = state_.curPos();
             else
                 arcPolygon.push_back(state_.curPos());
         } break;
         case Single: // G74
-            for(int c = 0; c < 4; ++c) {
-                const double radius1 = sqrt(static_cast<double>(i) * static_cast<double>(i) + static_cast<double>(j) * static_cast<double>(j));
-                const double radius2 = sqrt(pow(centerPos[c].x - x, 2.0) + pow(centerPos[c].y - y, 2.0));
+            for(auto&& center: centerPos) {
+                const double radius1 = sqrt(static_cast<double>(i) * i + static_cast<double>(j) * j);
+                const double radius2 = sqrt(pow(center.x - x, 2.0) + pow(center.y - y, 2.0));
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.
                 if(qAbs(radius2 - radius1) > (5e-4 * uScale)) // Недействительный центр.
                     continue;
                 // Correct i and j and return true; as with multi-quadrant.
-                i = centerPos[c].x - state_.curPos().x;
-                j = centerPos[c].y - state_.curPos().y;
+                i = center.x - state_.curPos().x;
+                j = center.y - state_.curPos().y;
                 // Углы
                 const double start = atan2(-j, -i);
-                const double stop = atan2(-centerPos[c].y + y, -centerPos[c].x + x);
+                const double stop = atan2(-center.y + y, -center.x + x);
                 const double angle = arcAngle(start, stop);
                 if(angle < (pi + 1e-5) * 0.5) {
-                    arcPolygon = arc(Point(centerPos[c].x, centerPos[c].y), radius1, start, stop);
+                    arcPolygon = arc(center, radius1, start, stop);
                     // Replace with exact values
                     state_.setCurPos({x, y});
                     if(arcPolygon.size())
@@ -1010,9 +1067,22 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         default:
             state_.setCurPos({x, y});
             path_.push_back(state_.curPos());
+            if(back != state_.curPos())
+                poly.push_back(X_monotone_curve_2{
+                    !~back,
+                    !~state_.curPos(),
+                });
+
             return true;
             // break;
         }
+
+        if(back != state_.curPos() && (--poly.curves_end())->is_linear())
+            poly.push_back(X_monotone_curve_2{
+                !~back,
+                !~state_.curPos(),
+            });
+
         path_ += std::move(arcPolygon);
         return true;
     }
@@ -1188,6 +1258,11 @@ bool Parser::parseLineInterpolation(const QString& gLine) {
         switch(dcode) {
         case D01: // перемещение в указанную точку x-y с открытым затвором засветки
             state_.setDCode(dcode);
+            if(path_.size() && path_.back() != state_.curPos())
+                poly.push_back(X_monotone_curve_2{
+                    !~path_.back(),
+                    !~state_.curPos(),
+                });
             path_.push_back(state_.curPos());
             break;
         case D02: // перемещение в указанную точку x-y с закрытым затвором засветки
@@ -1202,7 +1277,7 @@ bool Parser::parseLineInterpolation(const QString& gLine) {
         }
 
         return true;
-    }
+    } // namespace Gerber
     return false;
 }
 

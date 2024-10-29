@@ -16,7 +16,6 @@
 #include <QDebug>
 #include <QIcon>
 #include <QPolygonF>
-#include <concepts>
 #include <numbers>
 #include <ranges>
 

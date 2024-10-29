@@ -19,7 +19,7 @@ set(CMAKE_AUTORCC ON)
 
 find_package(
   Qt${QT_VERSION_MAJOR}
-  COMPONENTS Widgets
+  COMPONENTS Widgets # OpenGL
   REQUIRED)
 
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
@@ -27,5 +27,11 @@ file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 
 add_library(cgal STATIC ${HEADERS} ${SOURCES})
 
-target_link_libraries(cgal PRIVATE graphicsview
-                                         Qt${QT_VERSION_MAJOR}::Widgets)
+# find_package(CGAL REQUIRED OPTIONAL_COMPONENTS Qt5)
+# add_definitions(-DCGAL_USE_BASIC_VIEWER)
+
+target_link_libraries(
+  cgal PRIVATE CGAL graphicsview Qt${QT_VERSION_MAJOR}::Widgets
+               # CGAL::CGAL_Basic_viewer
+)
+# Qt${QT_VERSION_MAJOR}::OpenGL CGAL::CGAL)
