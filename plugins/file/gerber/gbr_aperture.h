@@ -57,7 +57,7 @@ public:
     bool used() const noexcept { return isUsed_; }
     bool withHole() const noexcept { return drillDiam_ > 0.0; }
 
-    double apSize();
+    double size();
     double drillDiameter() const noexcept { return drillDiam_; }
     double minSize() const noexcept { return minSize_; }
 
@@ -76,7 +76,7 @@ protected:
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
 
-    void transform(Path& poligon, const State& state);
+    void transform(Path& polygon, const State& state);
 };
 
 /////////////////////////////////////////////////////

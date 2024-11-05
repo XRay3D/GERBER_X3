@@ -81,26 +81,24 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
     return retPaths;
 }
 
-double AbstractAperture::apSize() {
+double AbstractAperture::size() {
     if(paths_.empty())
         draw();
     return size_;
 }
 
 Path AbstractAperture::drawDrill(const State& state) {
-    if(qFuzzyIsNull(drillDiam_))
-        return Path();
+    if(qFuzzyIsNull(drillDiam_)) return {};
 
     Path drill = CirclePath(drillDiam_ * uScale);
 
-    if(state.imgPolarity() == Positive)
-        ReversePath(drill);
+    if(state.imgPolarity() == Positive) ReversePath(drill);
 
     TranslatePath(drill, state.curPos());
     return drill;
 }
 
-void AbstractAperture::transform(Path& poligon, const State& state) {
+void AbstractAperture::transform(Path& polygon, const State& state) {
     QTransform m;
     if(!qFuzzyIsNull(state.rotating())) m.rotate(state.rotating());
     if(!qFuzzyCompare(state.scaling(), 1.0)) m.scale(state.scaling(), state.scaling());
@@ -108,10 +106,11 @@ void AbstractAperture::transform(Path& poligon, const State& state) {
     if(state.mirroring() & Y_Mirroring) m.scale(+1, -1);
 
     if(!m.isIdentity()) {
-        for(Point& pt: poligon)
+        for(Point& pt: polygon) {
             pt = ~m.map(~pt);
-        if(m.m11() < 0 ^ m.m22() < 0)
-            ReversePath(poligon);
+            SetZf(pt, ~m.map(~GetZ(pt)));
+        }
+        if(m.m11() < 0 ^ m.m22() < 0) ReversePath(polygon);
     }
 }
 
@@ -325,16 +324,16 @@ void ApPolygon::write(QDataStream& stream) const {
 }
 
 void ApPolygon::draw() {
-    Path poligon;
+    Path polygon;
     const double step = 360.0 / verticesCount_;
     const double diam = diam_ * uScale;
     for(int i = 0; i < verticesCount_; ++i)
-        poligon.emplace_back(Point(
+        polygon.emplace_back(Point(
             static_cast</*Point::Type*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast</*Point::Type*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
-    if(rotation_ > 0.1)
-        RotatePath(poligon, rotation_);
-    paths_.push_back(poligon);
+    if(rotation_ > 0.1) RotatePath(polygon, rotation_);
+    std::ranges::for_each(polygon, &SetZs);
+    paths_.push_back(polygon);
     minSize_ = size_ = diam_;
 }
 
@@ -604,7 +603,7 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
         polygon.emplace_back(Point(
             static_cast</*Point::Type*/ int32_t>(mod[X + j * 2] * uScale),
             static_cast</*Point::Type*/ int32_t>(mod[Y + j * 2] * uScale)));
-
+    std::ranges::for_each(polygon, &SetZs);
     if(mod.size() > (num * 2 + 3) && mod.back() > 0)
         RotatePath(polygon, mod.back());
 
@@ -636,6 +635,7 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
             static_cast</*Point::Type*/ int32_t>(qCos(angle) * diameter),
             static_cast</*Point::Type*/ int32_t>(qSin(angle) * diameter)));
     }
+    std::ranges::for_each(polygon, &SetZs);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
@@ -745,14 +745,14 @@ void ApBlock::write(QDataStream& stream) const {
 void ApBlock::draw() {
     paths_.clear();
     int i = 0;
-    while(i < size()) {
+    while(i < QVector::size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddSubject(paths_);
         const int exp = at(i).state.imgPolarity();
         do {
             paths_ += at(i).fill;
             clipper.AddClip(at(i++).fill);
-        } while(i < size() && exp == at(i).state.imgPolarity());
+        } while(i < QVector::size() && exp == at(i).state.imgPolarity());
         if(at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
         else

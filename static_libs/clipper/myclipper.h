@@ -135,13 +135,18 @@ using PIPResult = Clipper2Lib::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point)
 
+Point GetZ(const Point& dst);
+void SetZ(Point& dst, const Point& center);
+void SetZf(Point& dst, const Point& center);
+void SetZs(Point& dst);
+
 double Perimeter(const Path& path);
 
 Path CirclePath(double diametr, const Point& center = Point{});
 
 Path RectanglePath(double width, double height, const Point& center = Point{});
 
-void RotatePath(Path& poligon, double angle, const Point& center = Point{});
+void RotatePath(Path& polygon, double angle, const Point& center = Point{});
 
 Path& TranslatePath(Path& path, const Point& pos);
 Paths& TranslatePaths(Paths& path, const Point& pos);
@@ -411,3 +416,6 @@ inline auto rwPolyTree(PolyTree& polyTree) {
         *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очень грязный хак
     };
 }
+
+Path arc(const Point& center, double radius, double start, double stop, int interpolation);
+Path arc(Point p1, Point p2, Point center, int interpolation);
