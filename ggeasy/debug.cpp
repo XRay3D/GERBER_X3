@@ -40,24 +40,37 @@ bool MainWindow::debug() {
         int time = 100;
         int delay = 100; //-V654
 
-        if(1) {
-            // QDir dir(R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)");
-            QDir dir(R"(/home/x-ray/projects/dxf/)");
-            // QDir dir("D:/Gerber Test Files/CopperCAM/");
-            // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
-            // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
+        if(0) {
+            QDir dir{
+                R"(C:\Users\bakiev\Junk_Yard\SFT\CAM\CopperCAM)"
+                // "C:/Users/X-Ray/Documents/3018/CNC"
+                // "D:/Gerber Test Files/CopperCAM/"
+                // "E:/PRO/Новая папка/en.stm32f 746g-disco_gerber/gerber_B01"
+                // R"(/home/x-ray/projects/dxf/)"
+                // R"(/home/x-ray/projects/qt/AMK-310/AMK_TESTER)"
+                // R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)"
+            };
             if(!dir.exists()) break;
-            for(auto&& str: dir.entryList({"*.*"}, QDir::Files)) {
-                str = dir.path() + '/' + str;
+            for(auto&& str: dir.entryList({"*.gbr"}, QDir::Files)) {
+                str = dir.path() % '/' % str;
                 QTimer::singleShot(time += delay, [this, str] { loadFile(str); });
-                //                break;
+                break;
             }
+            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
         }
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if(0)
-            QTimer::singleShot(time += delay, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
+        if(0) {
+            QTimer::singleShot(time += delay, this, [this] {
+                loadFile(
+                    R"(/home/x-ray/Загрузки/gerber1.gbr)"
+                    // R"(C:\Users\bakiev\Downloads\gerber1.gbr)"
+                    // R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"
+                );
+            });
+            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+        }
 
         if(0) {
             constexpr auto TYPE = md5::hash32("PocketRaster");

@@ -21,13 +21,13 @@ add_subdirectory(shape)
 #[[ plugins file]]
 set(Enable_Gerber ON)
 #[[ set(Enable_Dxf          ON)]]
-#[[ set(Enable_Excellon     ON)]]
+set(Enable_Excellon ON)
 add_subdirectory(file)
 
 #[[ plugins gcode]]
 set(Enable_Pocketoffset ON)
 set(Enable_Profile ON)
-#[[set(Enable_Drill ON)]]
+set(Enable_Drill ON)
 #[[ set(Enable_Hatching     ON)]]
 #[[ set(Enable_Pocketraster ON)]]
 #[[ set(Enable_Thermal      ON)]]
