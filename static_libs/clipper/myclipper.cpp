@@ -26,62 +26,90 @@ QDataStream& operator>>(QDataStream& stream, Point& pt) {
     return stream >> x >> y, pt.Init(x, y), stream;
 }
 
-Path CirclePath(double diametr, const Point& center) {
-    if(diametr == 0.0)
-        return Path();
+Point GetZ(const Point& dst) {
+    int32_t array[2];
+    memcpy(&array, &dst.z, 8);
+    return {array[0], array[1]};
+}
 
+void SetZs(Point& dst) { SetZ(dst, dst); }
+
+void SetZf(Point& dst, const Point& center) {
+    constexpr auto limInt32 = std::numeric_limits<int32_t>{};
+    assert(limInt32.min() < center.x && center.x < limInt32.max());
+    assert(limInt32.min() < center.y && center.y < limInt32.max());
+    const int32_t array[]{static_cast<int32_t>(center.x), static_cast<int32_t>(center.y)};
+    memcpy(&dst.z, array, 8);
+}
+
+void SetZ(Point& dst, const Point& center) {
+    if(!/*~*/ dst.z) {
+        constexpr auto limInt32 = std::numeric_limits<int32_t>{};
+        assert(limInt32.min() < center.x && center.x < limInt32.max());
+        assert(limInt32.min() < center.y && center.y < limInt32.max());
+        const int32_t array[]{static_cast<int32_t>(center.x), static_cast<int32_t>(center.y)};
+        memcpy(&dst.z, array, 8);
+    }
+}
+
+Path CirclePath(double diametr, const Point& center) {
+    if(qFuzzyIsNull(diametr)) return {};
     const double radius = diametr * 0.5;
     const int intSteps = App::settings().clpCircleSegments(radius * dScale);
-    Path poligon(intSteps);
-    for(int i{}; auto&& pt: poligon) {
-        pt = Point{cos(i * 2 * pi / intSteps) * radius, sin(i * 2 * pi / intSteps) * radius}
+    Path polygon(intSteps);
+    for(int i{}; auto&& pt: polygon) {
+        pt = Point{
+                 cos(i * 2 * pi / intSteps) * radius,
+                 sin(i * 2 * pi / intSteps) * radius,
+             }
             + center;
         ++i;
+        SetZ(pt, center);
     };
-    return poligon;
+    return polygon;
 }
 
 Path RectanglePath(double width, double height, const Point& center) {
-
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    Path poligon{
-        Point{-halfWidth + center.x, +halfHeight + center.y},
-        Point{-halfWidth + center.x, -halfHeight + center.y},
-        Point{+halfWidth + center.x, -halfHeight + center.y},
-        Point{+halfWidth + center.x, +halfHeight + center.y},
+    Path polygon{
+        {-halfWidth + center.x, +halfHeight + center.y},
+        {-halfWidth + center.x, -halfHeight + center.y},
+        {+halfWidth + center.x, -halfHeight + center.y},
+        {+halfWidth + center.x, +halfHeight + center.y},
+        // {-halfWidth + center.x, +halfHeight + center.y},
     };
-    if(Area(poligon) < 0.0)
-        ReversePath(poligon);
-
-    return poligon;
+    std::ranges::for_each(polygon, &SetZs);
+    // if(Area(polygon) < 0.0) ReversePath(polygon);
+    return polygon;
 }
 
-void RotatePath(Path& poligon, double angle, const Point& center) {
-    const bool fl = Area(poligon) < 0;
-    for(Point& pt: poligon) {
+void RotatePath(Path& polygon, double angle, const Point& center) {
+    const bool fl = Area(polygon) < 0;
+    for(Point& pt: polygon) {
         const double dAangle = qDegreesToRadians(angle - angleTo(center, pt));
         const double length = distTo(center, pt);
         pt = Point{cos(dAangle) * length, sin(dAangle) * length};
         pt.x += center.x;
         pt.y += center.y;
     }
-    if(fl != (Area(poligon) < 0))
-        ReversePath(poligon);
+    if(fl != (Area(polygon) < 0))
+        ReversePath(polygon);
 }
 
 Path& TranslatePath(Path& path, const Point& pos) {
-    if(pos.x != 0 || pos.y != 0)
+    if(pos.x || pos.y)
         for(auto& pt: path) {
             pt.x += pos.x;
             pt.y += pos.y;
+            SetZf(pt, GetZ(pt) + pos);
         }
     return path;
 }
 
 Paths& TranslatePaths(Paths& paths, const Point& pos) {
-    for(auto&& path: paths)
-        TranslatePath(path, pos);
+    using namespace std::placeholders;
+    std::ranges::for_each(paths, std::bind(&TranslatePath, _1, pos));
     return paths;
 }
 
@@ -101,65 +129,62 @@ void mergeSegments(Paths& paths, double glue) {
     do {
         size = paths.size();
         for(size_t i = 0; i < paths.size(); ++i) {
-            if(i >= paths.size())
-                break;
+            if(i >= paths.size()) break;
+            auto& pi = paths[i];
             for(size_t j = 0; j < paths.size(); ++j) {
-                if(i == j)
-                    continue;
-                if(i >= paths.size())
-                    break;
-                Point pib = paths[i].back();
-                Point pjf = paths[j].front();
+                if(i == j) continue;
+                if(i >= paths.size()) break;
+                auto& pj = paths[j];
+                Point pib = pi.back();
+                Point pjf = pj.front();
                 if(pib == pjf) {
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                Point pif = paths[i].front();
-                Point pjb = paths[j].back();
+                Point pif = pi.front();
+                Point pjb = pj.back();
                 if(pif == pjb) {
-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
+                    pj.insert(pj.end(), pi.begin() + 1, pi.end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
                 if(pib == pjb) {
-                    ReversePath(paths[j]);
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    ReversePath(pj);
+                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
             }
         }
     } while(size != paths.size());
-    if(qFuzzyIsNull(glue))
-        return;
+    if(qFuzzyIsNull(glue)) return;
     do {
         size = paths.size();
         for(size_t i = 0; i < paths.size(); ++i) {
-            if(i >= paths.size())
-                break;
+            if(i >= paths.size()) break;
+            auto& pi = paths[i];
             for(size_t j = 0; j < paths.size(); ++j) {
-                if(i == j)
-                    continue;
-                if(i >= paths.size())
-                    break;
-                Point pib = paths[i].back();
-                Point pjf = paths[j].front();
+                auto& pj = paths[j];
+                if(i == j) continue;
+                if(i >= paths.size()) break;
+                Point pib = pi.back();
+                Point pjf = pj.front();
                 if(distTo(pib, pjf) < glue) {
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                Point pif = paths[i].front();
-                Point pjb = paths[j].back();
+                Point pif = pi.front();
+                Point pjb = pj.back();
                 if(distTo(pif, pjb) < glue) {
-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
+                    pj.insert(pj.end(), pi.begin() + 1, pi.end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
                 if(distTo(pib, pjb) < glue) {
-                    ReversePath(paths[j]);
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[j].end());
+                    ReversePath(pj);
+                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
@@ -177,61 +202,52 @@ void mergePaths(Paths& paths, const double dist) {
             //            setMax(max);
             //            setCurrent(max - paths.size());
             //            ifCancelThenThrow();
-            for(size_t j = 0; j < paths.size(); ++j) {
-                if(i == j)
-                    continue;
-                else if(paths[i].front() == paths[j].front()) {
-                    ReversePath(paths[j]);
-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[j].end()); // paths[j].append(paths[i].mid(1));
-                    paths.erase(paths.begin() + i--);                                      // paths.remove(i--);
+            auto& pi = paths[i];
+            for(size_t j = i + 1; j < paths.size(); ++j) {
+                if(i == j) continue;
+                auto& pj = paths[j];
+                /*  */ if(pi.front() == pj.front()) {
+                    ReversePath(pj);
+                    pj.insert(pj.end(), pi.begin() + 1, pi.end()); // pj.append(pi.mid(1));
+                    paths.erase(paths.begin() + i--);              // paths.remove(i--);
                     break;
-                } else if(paths[i].back() == paths[j].back()) {
-                    ReversePath(paths[j]);
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[i].end()); // paths[i].append(paths[j].mid(1));
-                    paths.erase(paths.begin() + j--);                                      // paths.remove(j--);
+                } else if(pi.back() == pj.back()) {
+                    ReversePath(pj);
+                    pi.insert(pi.end(), pj.begin() + 1, pj.end()); // pi.append(pj.mid(1));
+                    paths.erase(paths.begin() + j--);              // paths.remove(j--);
                     break;
-                } else if(paths[i].front() == paths[j].back()) {
-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[j].end()); // paths[j].append(paths[i].mid(1));
-                    paths.erase(paths.begin() + i--);                                      // paths.remove(i--);
+                } else if(pi.front() == pj.back()) {
+                    pj.insert(pj.end(), pi.begin() + 1, pi.end()); // pj.append(pi.mid(1));
+                    paths.erase(paths.begin() + i--);              // paths.remove(i--);
                     break;
-                } else if(paths[j].front() == paths[i].back()) {
-                    paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[i].end()); // paths[i].append(paths[j].mid(1));
-                    paths.erase(paths.begin() + j--);                                      // paths.remove(j--);
+                } else if(pj.front() == pi.back()) {
+                    pi.insert(pi.end(), pj.begin() + 1, pj.end()); // pi.append(pj.mid(1));
+                    paths.erase(paths.begin() + j--);              // paths.remove(j--);
                     break;
-                }
-            }
-        }
-    } while(max != paths.size());
-    if(dist != 0.0) {
-        do {
-            max = paths.size();
-            for(size_t i = 0; i < paths.size(); ++i) {
-                for(size_t j = 0; j < paths.size(); ++j) {
-                    if(i == j)
-                        continue;
-                    /*  */ if(distTo(paths[i].back(), paths[j].back()) < dist) {
-                        ReversePath(paths[j]);
-                        paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[i].end()); // paths[i].append(paths[j].mid(1));
-                        paths.erase(paths.begin() + j--);                                      // paths.remove(j--);
-                        break;                                                                 //
-                    } else if(distTo(paths[i].back(), paths[j].front()) < dist) {
-                        paths[i].insert(paths[i].end(), paths[j].begin() + 1, paths[i].end()); // paths[i].append(paths[j].mid(1));
-                        paths.erase(paths.begin() + j--);                                      // paths.remove(j--);
-                        break;                                                                 //
-                    } else if(distTo(paths[i].front(), paths[j].back()) < dist) {
-                        paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[j].end()); // paths[j].append(paths[i].mid(1));
-                        paths.erase(paths.begin() + i--);                                      // paths.remove(i--);
+                } else if(dist != 0.0) {
+                    /*  */ if(distTo(pi.back(), pj.back()) < dist) {
+                        ReversePath(pj);
+                        pi.insert(pi.end(), pj.begin() + 1, pi.end()); // pi.append(pj.mid(1));
+                        paths.erase(paths.begin() + j--);              // paths.remove(j--);
+                        break;                                         //
+                    } else if(distTo(pi.back(), pj.front()) < dist) {
+                        pi.insert(pi.end(), pj.begin() + 1, pi.end()); // pi.append(pj.mid(1));
+                        paths.erase(paths.begin() + j--);              // paths.remove(j--);
+                        break;                                         //
+                    } else if(distTo(pi.front(), pj.back()) < dist) {
+                        pj.insert(pj.end(), pi.begin() + 1, pj.end()); // pj.append(pi.mid(1));
+                        paths.erase(paths.begin() + i--);              // paths.remove(i--);
                         break;
-                    } else if(distTo(paths[i].front(), paths[j].front()) < dist) {
-                        ReversePath(paths[j]);
-                        paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[j].end()); // paths[j].append(paths[i].mid(1));
-                        paths.erase(paths.begin() + i--);                                      // paths.remove(i--);
+                    } else if(distTo(pi.front(), pj.front()) < dist) {
+                        ReversePath(pj);
+                        pj.insert(pj.end(), pi.begin() + 1, pj.end()); // pj.append(pi.mid(1));
+                        paths.erase(paths.begin() + i--);              // paths.remove(i--);
                         break;
                     }
                 }
             }
-        } while(max != paths.size());
-    }
+        }
+    } while(max != paths.size());
 }
 
 #include <QMutex>
@@ -390,4 +406,41 @@ void reductionOfDistance(Path& path, Point point) {
 
         qCritical() << "length =" << dist * dScale;
     }
+}
+
+Path arc(const Point& center, double radius, double start, double stop, int interpolation) {
+    enum { // interpolation
+        Linear = 1,
+        ClockwiseCircular = 2,
+        CounterClockwiseCircular = 3
+    };
+    const double da_sign[4] = {0, 0, -1.0, +1.0};
+    Path points;
+
+    const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
+
+    /**/ if(interpolation == ClockwiseCircular && stop >= start)
+        stop -= 2.0 * pi;
+    else if(interpolation == CounterClockwiseCircular && stop <= start)
+        stop += 2.0 * pi;
+
+    double angle = qAbs(stop - start);
+    double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
+    double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
+    for(int i = 0; i < steps; i++) {
+        double theta = start + delta_angle * (i + 1);
+        SetZ(points.emplace_back(
+                 center.x + radius * cos(theta),
+                 center.y + radius * sin(theta)),
+            center);
+    }
+
+    return points;
+}
+
+Path arc(Point p1, Point p2, Point center, int interpolation) {
+    double radius = sqrt(pow((center.x - p1.x), 2) + pow((center.y - p1.y), 2));
+    double start = atan2(p1.y - center.y, p1.x - center.x);
+    double stop = atan2(p2.y - center.y, p2.x - center.x);
+    return arc(center, radius, start, stop, interpolation);
 }

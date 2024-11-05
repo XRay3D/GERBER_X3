@@ -34,14 +34,13 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
     setFlag(ItemIsSelectable, true);
 }
 
-void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
     //        return;
     //    }
-
     // pen_.setWidth(penWidth());
 
     painter->setBrush(brushColor_);
@@ -49,13 +48,12 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option
     //    for (auto&& poly : shape_.toFillPolygons())
     //        painter->drawPolygon(poly);
     painter->drawPath(shape_);
-
-    //    pen_.setWidthF(option->state & QStyle::State_Selected
-    //                || option->state & QStyle::State_MouseOver
-    //            ? 2.0 * scaleFactor()
-    //            : 0);
-    pen_.setColor(penColor_);
-    painter->strokePath(shape_, pen_);
+    bool fl = option->state & (QStyle::State_Selected | QStyle::State_MouseOver);
+    if(fl) {
+        pen_.setWidthF(1.0 * scaleFactor());
+        pen_.setColor(penColor_);
+        painter->strokePath(shape_, pen_);
+    }
 }
 
 int DataFill::type() const { return Type::DataSolid; }

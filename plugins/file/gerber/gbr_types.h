@@ -62,7 +62,7 @@ enum CoordinateValuesNotation {
 enum InterpolationMode {
     Linear = 1,
     ClockwiseCircular = 2,
-    CounterclockwiseCircular = 3
+    CounterClockwiseCircular = 3
 };
 
 enum RegionMode {
@@ -216,43 +216,43 @@ public:
     State(File* const file = nullptr)
         : file_{file} { }
 
-    inline File* file() const { return file_; }
+    inline auto file() const { return file_; }
 
-    inline Operation dCode() const { return dCode_; }
+    inline auto dCode() const { return dCode_; }
     inline void setDCode(Operation dCode) { dCode_ = dCode; }
 
-    inline GCode gCode() const { return gCode_; }
+    inline auto gCode() const { return gCode_; }
     inline void setGCode(GCode gCode) { gCode_ = gCode; }
 
-    inline ImagePolarity imgPolarity() const { return imgPolarity_; }
+    inline auto imgPolarity() const { return imgPolarity_; }
     inline void setImgPolarity(ImagePolarity imgPolarity) { imgPolarity_ = imgPolarity; }
 
-    inline InterpolationMode interpolation() const { return interpolation_; }
+    inline auto interpolation() const { return interpolation_; }
     inline void setInterpolation(InterpolationMode interpolation) { interpolation_ = interpolation; }
 
-    inline PrimitiveType type() const { return type_; }
+    inline auto type() const { return type_; }
     inline void setType(PrimitiveType type) { type_ = type; }
 
-    inline QuadrantMode quadrant() const { return quadrant_; }
+    inline auto quadrant() const { return quadrant_; }
     inline void setQuadrant(QuadrantMode quadrant) { quadrant_ = quadrant; }
 
-    inline RegionMode region() const { return region_; }
+    inline auto region() const { return region_; }
     inline void setRegion(RegionMode region) { region_ = region; }
 
-    inline int aperture() const { return aperture_; }
+    inline auto aperture() const { return aperture_; }
     inline void setAperture(int aperture) { aperture_ = aperture; }
 
-    inline Point& curPos() { return curPos_; }
-    inline Point curPos() const { return curPos_; }
+    inline auto& curPos() { return curPos_; }
+    inline auto curPos() const { return curPos_; }
     inline void setCurPos(const Point& curPos) { curPos_ = curPos; }
 
-    inline Mirroring mirroring() const { return mirroring_; }
+    inline auto mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
 
-    inline double scaling() const { return scaling_; }
+    inline auto scaling() const { return scaling_; }
     inline void setScaling(double scaling) { scaling_ = scaling; }
 
-    inline double rotating() const { return rotating_; }
+    inline auto rotating() const { return rotating_; }
     inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 

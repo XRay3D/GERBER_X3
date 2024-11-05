@@ -71,7 +71,7 @@ else()
   message(FATAL_ERROR "Boost not found!!!")
 endif()
 
-# FIND CGAL
+#[[ FIND CGAL
 find_package(CGAL)
 if(CGAL_FOUND)
   # if(CGAL_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required CGAL
@@ -94,6 +94,7 @@ if(EIGEN3_FOUND)
 else()
   message(FATAL_ERROR "EIGEN3 not found!!!")
 endif()
+]]
 
 set(INC_DIRS
     third_party/ctre/single-header/
@@ -114,7 +115,8 @@ set(INC_DIRS
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ OFF)
+set(CLIPPER2_USINGZ ON)
+add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
