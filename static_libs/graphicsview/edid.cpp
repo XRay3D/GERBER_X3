@@ -11,10 +11,13 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "edid.h"
+#include "app.h"
+#include <QApplication>
 #include <QDebug>
-#include <QGuiApplication>
+#include <QDesktopWidget>
 #include <QScreen>
 
+#if 0
 #ifndef linux
 #include "initguid.h"
 #include "windows.h"
@@ -22,11 +25,10 @@
 #define NAME_SIZE 128
 #pragma comment(lib, "Setupapi")
 #endif
+#endif
 
 QSizeF GetRealSize() {
     static QSizeF size;
-    if(!size.isEmpty())
-        return size;
 
 #if 0 // ndef linux
     GUID GUID_CLASS_MONITOR = { 0x4d36e96e, 0xe325, 0x11ce, { 0xbf, 0xc1, 0x08, 0x00, 0x2b, 0xe1, 0x03, 0x18 } };
@@ -86,8 +88,10 @@ QSizeF GetRealSize() {
         } // for
     } while (0);
 #endif
-    if(size.isEmpty()) // FIXME current display of graficsview
-        size = QGuiApplication::screens()[0]->physicalSize();
 
+    const auto screen = QApplication::desktop()->screenNumber((QWidget*)App::grViewPtr());
+    const auto screens = QApplication::screens();
+    if(/*size.isEmpty() &&*/ -1 < screen && screen < screens.size()) // FIXME current display of graficsview
+        size = screens[screen]->physicalSize();
     return size;
 }
