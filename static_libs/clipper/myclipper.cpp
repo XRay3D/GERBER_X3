@@ -57,9 +57,11 @@ struct std::hash<CenterKey> {
     }
 };
 
-void TestPaths(const Paths& paths) {
+void TestPaths(const Paths& paths_) {
+    Paths paths = paths_;
     std::set<QPointF> set;
     QPainterPath pp;
+    QPainterPath ppr;
     auto scene = App::grView().scene();
     // for(auto&& p: std::views::join(paths)) {
     //     auto ptCenter = ~GetZ(p);
@@ -85,6 +87,21 @@ void TestPaths(const Paths& paths) {
     // // scene->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
     // scene->addPath(pp, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
 
+    // fix single point arc
+    for(auto&& path: paths) {
+        std::unordered_map<Point, std::vector<Path::iterator>> counter;
+        for(auto it = path.begin(); it < path.end(); ++it) counter[GetZ(*it)].emplace_back(it);
+        qCritical() << counter.size();
+        const auto count = std::erase_if(counter, [](const auto& item) {
+            const auto& [key, value] = item;
+            return value.size() > 1;
+        });
+        qCritical() << counter.size() << count;
+        for(auto&& [center, iters]: counter) {
+
+        }
+    }
+
     std::unordered_map<CenterKey, Path> arcs;
     for(auto&& path: paths) {
         if(path.empty()) continue;
@@ -96,36 +113,76 @@ void TestPaths(const Paths& paths) {
                 const double r = QLineF{~center, ~pt}.length();
                 radius += r;
                 if(prevR == 0.0) prevR = r;
-                bool fl = (center == GetZ(pt)) && (abs(prevR - r) < 1e-4);
-                if(fl) qWarning() << prevR << r << (abs(prevR - r));
+                bool fl = (center == GetZ(pt)) && (abs(prevR - r) < 1e-5);
                 prevR = r;
                 return fl;
             });
-        bool isCircle = count == path.size();
-        if(0 && isCircle) {
+        bool isCircle = count == path.size() || (count == path.size() - 1);
+        if(isCircle) {
             qWarning() << count << path.size() << radius << (radius /= path.size());
             auto center = ~GetZ(path.front());
             pp.addEllipse(center, radius, radius);
-        } else
+        } else {
             for(auto it = path.begin(); it < path.end(); ++it) {
                 auto&& p = *it;
-                auto center = GetZ(p);
-                auto ptCenter = ~center;
-                if(ptCenter.isNull()) continue;
-                auto ptRadius = ~p;
-                QLineF lineRadius{ptCenter, ptRadius};
-                auto len = lineRadius.length();
-                arcs[{center, path.data()}].emplace_back(p);
-
-                QRectF ellipseRect{
-                    ptCenter - QPointF{len, len},
-                    ptCenter + QPointF{len, len}
-                };
-                if(set.emplace(ptCenter).second)
-                    pp.addEllipse(ellipseRect);
-                pp.moveTo(ptCenter);
-                pp.lineTo(ptRadius);
+                if(!p.z) continue;
+                ppr.moveTo(~GetZ(p));
+                ppr.lineTo(~p);
             }
+
+            continue;
+
+            Point center, currPt, prewPt, nextPt;
+            double srcA, dstA;
+            radius = 0.0;
+
+            auto addArc = [&]() {
+                if(radius == 0.0) return;
+                QLineF line{~center, ~currPt};
+                radius = line.length();
+                dstA = line.angle();
+                qDebug() << line.angleTo({~center, ~prewPt});
+                QRectF arcRect{
+                    ~center - QPointF{radius, radius},
+                    ~center + QPointF{radius, radius}
+                };
+                pp.arcTo(arcRect, srcA, srcA - dstA);
+            };
+
+            for(int i = 0; i < path.size(); ++i) {
+                currPt = path[i];
+                prewPt = path[(i - 1) % path.size()];
+                nextPt = path[(i + 1) % path.size()];
+                if(!currPt.z) {
+                    !i ? pp.moveTo(~currPt) : pp.lineTo(~currPt);
+                    addArc();
+                    radius = 0.0;
+                    continue;
+                } else if(auto c = GetZ(currPt); center == currPt) {
+                    !i ? pp.moveTo(~currPt) : pp.lineTo(~currPt);
+                    addArc();
+                    radius = 0.0;
+                } else if(center != c) {
+                    !i ? pp.moveTo(~currPt) : pp.lineTo(~currPt);
+                    center = c;
+                    QLineF line{~center, ~currPt};
+                    addArc();
+                    radius = line.length();
+                    srcA = line.angle();
+                }
+
+                // arcs[{center, path.data()}].emplace_back(p);
+                // if(set.emplace(ptCenter).second) {
+                //     QRectF ellipseRect{
+                //         ptCenter - QPointF{len, len},
+                //         ptCenter + QPointF{len, len}
+                //     };
+                //     pp.addEllipse(ellipseRect);
+                // }
+                // pp.moveTo(ptCenter);
+                // pp.lineTo(ptRadius);
+            }
+        }
     }
     // for(auto&& [center, path]: arcs) {
     //     pp.moveTo(~path.front());
@@ -133,6 +190,7 @@ void TestPaths(const Paths& paths) {
     // }
     // scene->addEllipse(r, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
     // scene->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
+    scene->addPath(ppr, {Qt::darkGreen, 0.0})->setZValue(std::numeric_limits<double>::max());
     scene->addPath(pp, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
 }
 
@@ -256,20 +314,20 @@ void mergeSegments(Paths& paths, double glue) {
                 Point pib = pi.back();
                 Point pjf = pj.front();
                 if(pib == pjf) {
-                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
+                    pi.insert(pi.end(), ++pj.begin(), pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
                 Point pif = pi.front();
                 Point pjb = pj.back();
                 if(pif == pjb) {
-                    pj.insert(pj.end(), pi.begin() + 1, pi.end());
+                    pj.insert(pj.end(), ++pi.begin(), pi.end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
                 if(pib == pjb) {
                     ReversePath(pj);
-                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
+                    pi.insert(pi.end(), ++pj.begin(), pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
@@ -289,20 +347,20 @@ void mergeSegments(Paths& paths, double glue) {
                 Point pib = pi.back();
                 Point pjf = pj.front();
                 if(distTo(pib, pjf) < glue) {
-                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
+                    pi.insert(pi.end(), ++pj.begin(), pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
                 Point pif = pi.front();
                 Point pjb = pj.back();
                 if(distTo(pif, pjb) < glue) {
-                    pj.insert(pj.end(), pi.begin() + 1, pi.end());
+                    pj.insert(pj.end(), ++pi.begin(), pi.end());
                     paths.erase(paths.begin() + i--);
                     break;
                 }
                 if(distTo(pib, pjb) < glue) {
                     ReversePath(pj);
-                    pi.insert(pi.end(), pj.begin() + 1, pj.end());
+                    pi.insert(pi.end(), ++pj.begin(), pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
@@ -326,40 +384,40 @@ void mergePaths(Paths& paths, const double dist) {
                 auto& pj = paths[j];
                 /*  */ if(pi.front() == pj.front()) {
                     ReversePath(pj);
-                    pj.insert(pj.end(), pi.begin() + 1, pi.end()); // pj.append(pi.mid(1));
-                    paths.erase(paths.begin() + i--);              // paths.remove(i--);
+                    pj.insert(pj.end(), ++pi.begin(), pi.end()); // pj.append(pi.mid(1));
+                    paths.erase(paths.begin() + i--);            // paths.remove(i--);
                     break;
                 } else if(pi.back() == pj.back()) {
                     ReversePath(pj);
-                    pi.insert(pi.end(), pj.begin() + 1, pj.end()); // pi.append(pj.mid(1));
-                    paths.erase(paths.begin() + j--);              // paths.remove(j--);
+                    pi.insert(pi.end(), ++pj.begin(), pj.end()); // pi.append(pj.mid(1));
+                    paths.erase(paths.begin() + j--);            // paths.remove(j--);
                     break;
                 } else if(pi.front() == pj.back()) {
-                    pj.insert(pj.end(), pi.begin() + 1, pi.end()); // pj.append(pi.mid(1));
-                    paths.erase(paths.begin() + i--);              // paths.remove(i--);
+                    pj.insert(pj.end(), ++pi.begin(), pi.end()); // pj.append(pi.mid(1));
+                    paths.erase(paths.begin() + i--);            // paths.remove(i--);
                     break;
                 } else if(pj.front() == pi.back()) {
-                    pi.insert(pi.end(), pj.begin() + 1, pj.end()); // pi.append(pj.mid(1));
-                    paths.erase(paths.begin() + j--);              // paths.remove(j--);
+                    pi.insert(pi.end(), ++pj.begin(), pj.end()); // pi.append(pj.mid(1));
+                    paths.erase(paths.begin() + j--);            // paths.remove(j--);
                     break;
                 } else if(dist != 0.0) {
                     /*  */ if(distTo(pi.back(), pj.back()) < dist) {
                         ReversePath(pj);
-                        pi.insert(pi.end(), pj.begin() + 1, pi.end()); // pi.append(pj.mid(1));
-                        paths.erase(paths.begin() + j--);              // paths.remove(j--);
-                        break;                                         //
+                        pi.insert(pi.end(), ++pj.begin(), pi.end()); // pi.append(pj.mid(1));
+                        paths.erase(paths.begin() + j--);            // paths.remove(j--);
+                        break;                                       //
                     } else if(distTo(pi.back(), pj.front()) < dist) {
-                        pi.insert(pi.end(), pj.begin() + 1, pi.end()); // pi.append(pj.mid(1));
-                        paths.erase(paths.begin() + j--);              // paths.remove(j--);
-                        break;                                         //
+                        pi.insert(pi.end(), ++pj.begin(), pi.end()); // pi.append(pj.mid(1));
+                        paths.erase(paths.begin() + j--);            // paths.remove(j--);
+                        break;                                       //
                     } else if(distTo(pi.front(), pj.back()) < dist) {
-                        pj.insert(pj.end(), pi.begin() + 1, pj.end()); // pj.append(pi.mid(1));
-                        paths.erase(paths.begin() + i--);              // paths.remove(i--);
+                        pj.insert(pj.end(), ++pi.begin(), pj.end()); // pj.append(pi.mid(1));
+                        paths.erase(paths.begin() + i--);            // paths.remove(i--);
                         break;
                     } else if(distTo(pi.front(), pj.front()) < dist) {
                         ReversePath(pj);
-                        pj.insert(pj.end(), pi.begin() + 1, pj.end()); // pj.append(pi.mid(1));
-                        paths.erase(paths.begin() + i--);              // paths.remove(i--);
+                        pj.insert(pj.end(), ++pi.begin(), pj.end()); // pj.append(pi.mid(1));
+                        paths.erase(paths.begin() + i--);            // paths.remove(i--);
                         break;
                     }
                 }
