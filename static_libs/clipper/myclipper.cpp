@@ -10,12 +10,131 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
+#include "myclipper.h"
+
 #include "app.h"
+#include "graphicsview.h"
+
 #include "qmath.h"
 #include <QElapsedTimer>
+#include <QGraphicsScene>
 #include <QLineF>
-#include <myclipper.h>
-#include <numbers>
+#include <boost/range/combine.hpp>
+#include <set>
+
+using namespace std::placeholders;
+
+bool operator<(const QPointF& r, const QPointF& l) {
+    return r.x() < l.x() && r.y() < l.y();
+}
+
+bool operator<(const Point& r, const Point& l) {
+    return r.x < l.x && r.y < l.y;
+}
+
+template <>
+struct std::hash<Point> {
+    std::size_t operator()(const Point& pt) const noexcept {
+        // const std::pair pair{pt.x, pt.y};
+        // return std::hash<decltype(pair)>{}(pair);
+        std::size_t h1 = std::hash<int64_t>{}(pt.x);
+        std::size_t h2 = std::hash<int64_t>{}(pt.y);
+        return h1 ^ (h2 << 1);
+    }
+};
+
+using CenterKey = std::pair<Point, const void*>;
+
+template <>
+struct std::hash<CenterKey> {
+    std::size_t operator()(const CenterKey& pt) const noexcept {
+        // const std::pair pair{pt.x, pt.y};
+        // return std::hash<decltype(pair)>{}(pair);
+        std::size_t h1 = std::hash<int64_t>{}(pt.first.x);
+        std::size_t h2 = std::hash<int64_t>{}(pt.first.y);
+        std::size_t h3 = std::hash<const void*>{}(pt.second);
+        return h1 ^ (h2 << 1) ^ (h3 << 2);
+    }
+};
+
+void TestPaths(const Paths& paths) {
+    std::set<QPointF> set;
+    QPainterPath pp;
+    auto scene = App::grView().scene();
+    // for(auto&& p: std::views::join(paths)) {
+    //     auto ptCenter = ~GetZ(p);
+    //     if(ptCenter.isNull()) continue;
+    //     auto ptRadius = ~p;
+    //     QLineF lineRadius{ptCenter, ptRadius};
+    //     auto len = lineRadius.length();
+    //     QRectF ellipseRect{
+    //         ptCenter - QPointF{len, len},
+    //         ptCenter + QPointF{len, len}
+    //     };
+    //     // if(set.emplace(ptCenter).second)
+    //     //     scene->addEllipse(ellipseRect, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
+    //     // scene->addLine(lineRadius, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
+    //     // if(set.emplace(p).second)
+    //     // pp.addEllipse(pc, len, len);
+    //     if(set.emplace(ptCenter).second)
+    //         pp.addEllipse(ellipseRect);
+    //     pp.moveTo(ptCenter);
+    //     pp.lineTo(ptRadius);
+    // }
+    // // scene->addEllipse(r, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
+    // // scene->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
+    // scene->addPath(pp, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
+
+    std::unordered_map<CenterKey, Path> arcs;
+    for(auto&& path: paths) {
+        if(path.empty()) continue;
+
+        double radius{};
+
+        auto count = ranges::count_if(path,
+            [prevR = 0.0, center = GetZ(path.front()), &radius](const Point& pt) mutable {
+                const double r = QLineF{~center, ~pt}.length();
+                radius += r;
+                if(prevR == 0.0) prevR = r;
+                bool fl = (center == GetZ(pt)) && (abs(prevR - r) < 1e-4);
+                if(fl) qWarning() << prevR << r << (abs(prevR - r));
+                prevR = r;
+                return fl;
+            });
+        bool isCircle = count == path.size();
+        if(0 && isCircle) {
+            qWarning() << count << path.size() << radius << (radius /= path.size());
+            auto center = ~GetZ(path.front());
+            pp.addEllipse(center, radius, radius);
+        } else
+            for(auto it = path.begin(); it < path.end(); ++it) {
+                auto&& p = *it;
+                auto center = GetZ(p);
+                auto ptCenter = ~center;
+                if(ptCenter.isNull()) continue;
+                auto ptRadius = ~p;
+                QLineF lineRadius{ptCenter, ptRadius};
+                auto len = lineRadius.length();
+                arcs[{center, path.data()}].emplace_back(p);
+
+                QRectF ellipseRect{
+                    ptCenter - QPointF{len, len},
+                    ptCenter + QPointF{len, len}
+                };
+                if(set.emplace(ptCenter).second)
+                    pp.addEllipse(ellipseRect);
+                pp.moveTo(ptCenter);
+                pp.lineTo(ptRadius);
+            }
+    }
+    // for(auto&& [center, path]: arcs) {
+    //     pp.moveTo(~path.front());
+    //     pp.addPolygon(~path);
+    // }
+    // scene->addEllipse(r, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
+    // scene->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
+    scene->addPath(pp, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
+}
 
 QDataStream& operator<<(QDataStream& stream, const Point& pt) {
     return stream << static_cast<int32_t>(pt.x) << static_cast<int32_t>(pt.y);
@@ -64,8 +183,8 @@ Path CirclePath(double diametr, const Point& center) {
              }
             + center;
         ++i;
-        SetZ(pt, center);
     };
+    std::ranges::for_each(polygon, std::bind(&SetZ, _1, center));
     return polygon;
 }
 
@@ -108,7 +227,6 @@ Path& TranslatePath(Path& path, const Point& pos) {
 }
 
 Paths& TranslatePaths(Paths& paths, const Point& pos) {
-    using namespace std::placeholders;
     std::ranges::for_each(paths, std::bind(&TranslatePath, _1, pos));
     return paths;
 }

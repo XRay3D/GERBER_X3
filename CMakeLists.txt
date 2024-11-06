@@ -115,7 +115,7 @@ set(INC_DIRS
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ ON)
+set(CLIPPER2_USINGZ ONLY)
 add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)

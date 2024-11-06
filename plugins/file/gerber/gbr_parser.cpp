@@ -555,8 +555,18 @@ Paths Parser::createLine() {
         // for(auto& pt: path_) SetZ(pt);
         if(Settings::wireMinkowskiSum())
             solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
-        else
-            solution = Inflate({path_}, size, JoinType::Round, EndType::Round);
+        else {
+            // if(path_.front() != path_.back())
+            solution = Inflate({path_}, size, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
+            // else {
+            //     Clipper clipper;
+            //     clipper.AddSubject(
+            //         Inflate({path_}, +size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
+            //     clipper.AddClip(
+            //         Inflate({path_}, -size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
+            //     clipper.Execute(CT::Difference, FR::NonZero, solution);
+            // }
+        }
 
         //        ClipperOffset offset;
         //        offset.AddPath(path_, JoinType::Round, EndType::Round);
@@ -875,126 +885,132 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                                                                   R"(I?([\+\-]?\d+)*)"
                                                                   R"(J?([\+\-]?\d+)*)"
                                                                   R"([^D]*(?:D0?([12]))?\*$)");
-    if(auto [whole, cg, cx, cy, ci, cj, cd] = ctre::match<ptrnCircularInterpolation>(data); whole) {
-        if(!cg && state_.gCode() != G02 && state_.gCode() != G03) return false;
-        int32_t x{}, y{}, i{}, j{};
-        cx ? parseNumber(CtreCapTo(cx), x, FormatDir::X)
-           : x = state_.curPos().x;
-        cy ? parseNumber(CtreCapTo(cy), y, FormatDir::Y)
-           : y = state_.curPos().y;
-        parseNumber(CtreCapTo(ci), i, FormatDir::X);
-        parseNumber(CtreCapTo(cj), j, FormatDir::Y);
-        // Set operation code if provided
-        if(cd)
-            state_.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
-        int gc = cg ? int(CtreCapTo(cg)) : state_.gCode();
-        switch(gc) {
-        case G02:
-            state_.setInterpolation(ClockwiseCircular);
-            state_.setGCode(G02);
-            break;
-        case G03:
-            state_.setInterpolation(CounterClockwiseCircular);
-            state_.setGCode(G03);
-            break;
-        default:
-            if(state_.interpolation() != ClockwiseCircular && state_.interpolation() != CounterClockwiseCircular) {
-                qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(lineNum_);
-                qWarning() << QString(gLine);
-                state_.setCurPos({x, y});
-                state_.setGCode(G01);
-                return false;
-            }
-            break;
-        }
+    auto [whole, cg, cx, cy, ci, cj, cd] = ctre::match<ptrnCircularInterpolation>(data);
+    if(!whole) return false;
 
-        if(state_.quadrant() == Undef) {
-            qWarning() << QString("Found arc without preceding quadrant specification G74 or G75. (%1)").arg(lineNum_);
+    if(!cg && state_.gCode() != G02 && state_.gCode() != G03) return false;
+    int32_t x{}, y{}, i{}, j{};
+    cx ? parseNumber(CtreCapTo(cx), x, FormatDir::X)
+       : x = state_.curPos().x;
+    cy ? parseNumber(CtreCapTo(cy), y, FormatDir::Y)
+       : y = state_.curPos().y;
+    parseNumber(CtreCapTo(ci), i, FormatDir::X);
+    parseNumber(CtreCapTo(cj), j, FormatDir::Y);
+    // Set operation code if provided
+    if(cd)
+        state_.setDCode(static_cast<Operation>(CtreCapTo(cd).toInt()));
+    int gc = cg ? int(CtreCapTo(cg)) : state_.gCode();
+    switch(gc) {
+    case G02:
+        state_.setInterpolation(ClockwiseCircular);
+        state_.setGCode(G02);
+        break;
+    case G03:
+        state_.setInterpolation(CounterClockwiseCircular);
+        state_.setGCode(G03);
+        break;
+    default:
+        if(state_.interpolation() != ClockwiseCircular && state_.interpolation() != CounterClockwiseCircular) {
+            qWarning() << QString("Found arc without circular interpolation mode defined. (%1)").arg(lineNum_);
             qWarning() << QString(gLine);
-            return true;
+            state_.setCurPos({x, y});
+            state_.setGCode(G01);
+            return false;
         }
+        break;
+    }
 
-        switch(state_.dCode()) {
-        case D01:
-            break;
-        case D02: // Nothing created! Pen Up.
-            state_.setDCode(D01);
-            addPath();
-            state_.setCurPos({x, y});
-            return true;
-        case D03: // Flash should not happen here
-            state_.setCurPos({x, y});
-            qWarning() << QString("Trying to flash within arc. (%1)").arg(lineNum_);
-            return true;
-        }
-
-        const Point arcStartPos = state_.curPos();
-
-        const std::array centerPos{
-            Point{arcStartPos.x + i, arcStartPos.y + j},
-            Point{arcStartPos.x - i, arcStartPos.y + j},
-            Point{arcStartPos.x + i, arcStartPos.y - j},
-            Point{arcStartPos.x - i, arcStartPos.y - j}
-        };
-
-        bool valid = false;
-        if(path_.back() != arcStartPos) path_.push_back(arcStartPos);
-
-        Path arcPath;
-        auto constructArc = [this, x, y](Point center, double radius1, double start, double stop) {
-            auto arcPath = arc(center, radius1, start, stop, state_.interpolation());
-            //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
-            //  Точной конечной точкой является указанная (x, y). Замена.
-            state_.setCurPos({x, y});
-            if(arcPath.size()) arcPath.back() = state_.curPos();
-            else arcPath.push_back(state_.curPos());
-            return arcPath;
-        };
-
-        switch(state_.quadrant()) {
-        case Multi: { // G75
-            const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
-            const double start = atan2(-j, -i); // Start angle
-            const auto& center = centerPos.front();
-            // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
-            // Ч­то должно привести к образованию дуги в 360 градусов.
-            const double stop = (arcStartPos == Point(x, y))
-                ? start
-                : atan2(-center.y + y, -center.x + x); // Stop angle
-
-            arcPath = constructArc(center, radius1, start, stop);
-        } break;
-        case Single: // G74
-            for(auto&& center: centerPos) {
-                const double radius1 = sqrt(static_cast<double>(i) * i + static_cast<double>(j) * j);
-                const double radius2 = sqrt(pow(center.x - x, 2.0) + pow(center.y - y, 2.0));
-                // Убеждаемся, что радиус начала совпадает с радиусом конца.
-                if(abs(radius2 - radius1) > (5e-4 * uScale)) continue; // Недействительный центр.
-                // Correct i and j and return true; as with multi-quadrant.
-                i = center.x - arcStartPos.x;
-                j = center.y - arcStartPos.y;
-                // Углы
-                const double start = atan2(-j, -i);
-                const double stop = atan2(-center.y + y, -center.x + x);
-                const double angle = arcAngle(start, stop);
-                if(angle < (pi + 1e-5) * 0.5) {
-                    arcPath = constructArc(center, radius1, start, stop);
-                    break;
-                }
-            }
-            if(!valid)
-                qWarning() << QString("Invalid arc in line %1.").arg(lineNum_) << gLine;
-            break;
-        default:
-            state_.setCurPos({x, y});
-            path_.push_back(state_.curPos());
-            return true;
-            // break;
-        }
-        path_ += std::move(arcPath);
+    if(state_.quadrant() == Undef) {
+        qWarning() << QString("Found arc without preceding quadrant specification G74 or G75. (%1)").arg(lineNum_);
+        qWarning() << QString(gLine);
         return true;
     }
-    return false;
+
+    switch(state_.dCode()) {
+    case D01:
+        break;
+    case D02: // Nothing created! Pen Up.
+        state_.setDCode(D01);
+        addPath();
+        state_.setCurPos({x, y});
+        return true;
+    case D03: // Flash should not happen here
+        state_.setCurPos({x, y});
+        qWarning() << QString("Trying to flash within arc. (%1)").arg(lineNum_);
+        return true;
+    }
+
+    const Point arcStartPos = state_.curPos();
+
+    const std::array centerPos{
+        Point{arcStartPos.x + i, arcStartPos.y + j},
+        Point{arcStartPos.x - i, arcStartPos.y + j},
+        Point{arcStartPos.x + i, arcStartPos.y - j},
+        Point{arcStartPos.x - i, arcStartPos.y - j}
+    };
+
+    bool valid = false;
+
+    auto constructArc = [this, x, y](Point center, double radius, double start, double stop) {
+        auto arcPath = arc(center, radius, start, stop, state_.interpolation());
+        state_.setCurPos({x, y});
+        //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
+        //  Точной конечной точкой является указанная (x, y). Замена.
+        if(arcPath.size()) arcPath.back() = state_.curPos();
+        else arcPath.emplace_back(state_.curPos());
+        SetZ(arcPath.back(), center);
+        return arcPath;
+    };
+
+    Path arcPath;
+    switch(state_.quadrant()) {
+    case Multi: { // G75
+        const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
+        const double start = atan2(-j, -i); // Start angle
+        const auto& center = centerPos.front();
+        // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
+        // Ч­то должно привести к образованию дуги в 360 градусов.
+        const double stop = (arcStartPos == Point{x, y})
+            ? start
+            : atan2(-center.y + y, -center.x + x); // Stop angle
+
+        arcPath = constructArc(center, radius1, start, stop);
+    } break;
+    case Single: // G74
+        for(auto&& center: centerPos) {
+            const double radius1 = sqrt(static_cast<double>(i) * i + static_cast<double>(j) * j);
+            const double radius2 = sqrt(pow(center.x - x, 2.0) + pow(center.y - y, 2.0));
+            // Убеждаемся, что радиус начала совпадает с радиусом конца.
+            if(abs(radius2 - radius1) > (5e-4 * uScale)) continue; // Недействительный центр.
+            // Correct i and j and return true; as with multi-quadrant.
+            i = center.x - arcStartPos.x;
+            j = center.y - arcStartPos.y;
+            // Углы
+            const double start = atan2(-j, -i);
+            const double stop = atan2(-center.y + y, -center.x + x);
+            const double angle = arcAngle(start, stop);
+            if(angle < (pi + 1e-5) * 0.5) {
+                arcPath = constructArc(center, radius1, start, stop);
+                valid = true;
+                break;
+            }
+        }
+        if(valid) break;
+    default:
+        if(path_.size() && path_.back() != arcStartPos || path_.empty())
+            path_.emplace_back(arcStartPos);
+        SetZs(path_.back());
+        state_.setCurPos({x, y});
+        path_.emplace_back(state_.curPos());
+        SetZs(path_.back());
+        qWarning() << QString("Invalid arc in line %1.").arg(lineNum_) << gLine;
+    }
+
+    if(arcPath.size() && path_.size() && path_.back() == arcPath.front())
+        path_.erase(--path_.end());
+    path_ += std::move(arcPath);
+
+    return true;
 }
 
 bool Parser::parseEndOfFile(const QString& gLine) {

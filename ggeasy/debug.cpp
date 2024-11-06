@@ -61,9 +61,11 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
+
         if(1) {
             QTimer::singleShot(time += delay, this, [this] {
                 loadFile(
+                    // R"(/home/x-ray/Загрузки/gerber1.gbr)"
                     R"(C:\Users\bakiev\Downloads\gerber1.gbr)"
                     // R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"
                 );

@@ -16,7 +16,6 @@
 #include <QDebug>
 #include <QIcon>
 #include <QPolygonF>
-#include <concepts>
 #include <numbers>
 #include <ranges>
 
@@ -134,6 +133,8 @@ using PT = Clipper2Lib::PathType;
 using PIPResult = Clipper2Lib::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point)
+
+void TestPaths(const Paths& paths);
 
 Point GetZ(const Point& dst);
 void SetZ(Point& dst, const Point& center);
