@@ -21,7 +21,6 @@
 #include <cassert>
 #include <forward_list>
 #include <qglobal.h>
-#include <set>
 #include <utility>
 
 namespace Gerber {
@@ -49,9 +48,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -181,21 +180,7 @@ Paths File::merge() const {
     if(Settings::cleanPolygons())
         CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
 
-    std::set<QPointF> set;
-    for(auto&& p: std::views::join(mergedPaths_)) {
-        auto pc = ~GetZ(p);
-        if(pc.isNull()) continue;
-        auto pr = ~p;
-        QLineF line{pc, pr};
-        auto len = line.length();
-        QRectF r{
-            pc - QPointF{len, len},
-            pc + QPointF{len, len}
-        };
-        if(set.emplace(pc).second)
-            App::grView().scene()->addEllipse(r, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
-        App::grView().scene()->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
-    }
+    TestPaths(mergedPaths_);
 
     return mergedPaths_;
 }
