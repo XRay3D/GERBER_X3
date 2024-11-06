@@ -958,7 +958,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         //  Точной конечной точкой является указанная (x, y). Замена.
         if(arcPath.size()) arcPath.back() = state_.curPos();
         else arcPath.emplace_back(state_.curPos());
-        SetZ(arcPath.back(), center);
+        // SetZ(arcPath.back(), center);
         return arcPath;
     };
 
