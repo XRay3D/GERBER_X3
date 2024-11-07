@@ -57,49 +57,94 @@ struct std::hash<CenterKey> {
     }
 };
 
+double Length(const Point& A, const Point& B) {
+    return hypot(A.x - B.x, A.y - B.y);
+}
+
+double Angle(double a, double b, double c) {
+    return acos((b * b + c * c - a * a) / (2 * b * c));
+}
+
+// double c = Length(~*it, ~side);
+// double aa = acos((a * a + c * c - b * b) / (2 * a * c)); // Для угла α: cos(α)
+// double ab = acos((a * a + b * b - c * c) / (2 * a * b)); // Для угла β: cos(β)
+// double ac = acos((b * b + c * c - a * a) / (2 * b * c)); // Для угла γ: cos(γ)
+// После нахождения косинусов углов можно получить сами углы
+// путём нахождения арккосинусов соответствующих значений:
+// α = arccos(cos(α)), β = arccos(cos(β)), γ = arccos(cos(γ)).
+// Результаты арккосинусов будут выражены в радианах,
+// их можно перевести в градусы, умножив на (180/pi). 3
+
 void TestPaths(const Paths& paths_) {
     Paths paths = paths_;
     std::set<QPointF> set;
     QPainterPath pp;
     QPainterPath ppr;
     auto scene = App::grView().scene();
-    // for(auto&& p: std::views::join(paths)) {
-    //     auto ptCenter = ~GetZ(p);
-    //     if(ptCenter.isNull()) continue;
-    //     auto ptRadius = ~p;
-    //     QLineF lineRadius{ptCenter, ptRadius};
-    //     auto len = lineRadius.length();
-    //     QRectF ellipseRect{
-    //         ptCenter - QPointF{len, len},
-    //         ptCenter + QPointF{len, len}
-    //     };
-    //     // if(set.emplace(ptCenter).second)
-    //     //     scene->addEllipse(ellipseRect, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
-    //     // scene->addLine(lineRadius, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
-    //     // if(set.emplace(p).second)
-    //     // pp.addEllipse(pc, len, len);
-    //     if(set.emplace(ptCenter).second)
-    //         pp.addEllipse(ellipseRect);
-    //     pp.moveTo(ptCenter);
-    //     pp.lineTo(ptRadius);
-    // }
-    // // scene->addEllipse(r, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
-    // // scene->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
-    // scene->addPath(pp, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
 
-    // fix single point arc
+    // fix single point arc centers
     for(auto&& path: paths) {
         std::unordered_map<Point, std::vector<Path::iterator>> counter;
         for(auto it = path.begin(); it < path.end(); ++it) counter[GetZ(*it)].emplace_back(it);
-        qCritical() << counter.size();
+
         const auto count = std::erase_if(counter, [](const auto& item) {
             const auto& [key, value] = item;
             return value.size() > 1;
         });
-        qCritical() << counter.size() << count;
-        for(auto&& [center, iters]: counter) {
 
+        auto getPrev = [&path](Path::iterator it) {
+            auto pos = std::distance(path.begin(), it);
+            return path[--pos % path.size()];
+            // if(pos == 0) { // first
+            // return path.back();
+            // } else if(pos == path.size() - 1) { // last
+            // return *(it - 1);
+            // } else { // mid
+            // return *(it - 1);
+            // }
+        };
+        auto getNext = [&path](Path::iterator it) {
+            auto pos = std::distance(path.begin(), it);
+            return path[++pos % path.size()];
+            // if(pos == 0) { // first
+            // return *(it + 1);
+            // } else if(pos == path.size() - 1) { // last
+            // return path.front();
+            // } else { // mid
+            // return *(it + 1);
+            // }
+        };
+
+        std::vector<Path::iterator> toErace;
+
+        qCritical() << counter.size() << count;
+        auto test = [&](const Point& side, Path::iterator it) {
+            if(side == *it) { // toErace
+                toErace.emplace_back(it);
+                return false;
+            }
+            Point center = GetZ(side);
+            if(center == side) return false; //"skip side"
+
+            double a = Length(center, side) * dScale;
+            double b = Length(center, *it) * dScale;
+
+            if(abs(a - b) < 1e-3) {
+                qWarning() << "same side" << a << b << abs(a - b);
+                SetZf(*it, center);
+                return true;
+            }
+            return false;
+        };
+
+        for(auto&& [center, iters]: counter) {
+            auto it = iters.front();
+            if(qInfo("getPrev"); !test(getPrev(it), it))
+                if(qInfo("getNext"); !test(getNext(it), it))
+                    continue;
         }
+        if(toErace.size())
+            qCritical() << "toErace" << toErace.size();
     }
 
     std::unordered_map<CenterKey, Path> arcs;
