@@ -1,48 +1,43 @@
 #[[
- Author    :  Damir Bakiev                                                    
- Version   :  na                                                              
- Date      :  03 October 2024                                                 
- Website   :  na                                                              
- Copyright :  Damir Bakiev 2016-2024                                          
- License   :                                                                  
- Use, modification & distribution is subject to Boost Software License Ver 1. 
- http://www.boost.org/LICENSE_1_0.txt                                         
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  03 October 2024
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2024
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 3.20)
 
 project(graphicsview LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets OpenGL REQUIRED)
+find_package(
+  Qt${QT_VERSION_MAJOR}
+  COMPONENTS Widgets OpenGL
+  REQUIRED)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    find_package(Qt${QT_VERSION_MAJOR} COMPONENTS OpenGLWidgets REQUIRED)
+  find_package(
+    Qt${QT_VERSION_MAJOR}
+    COMPONENTS OpenGLWidgets
+    REQUIRED)
 endif()
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
 
-add_library(graphicsview STATIC
-    ${HEADERS}
-    ${SOURCES}
-)
+add_library(graphicsview STATIC ${HEADERS} ${SOURCES})
 
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
-target_link_libraries(graphicsview PRIVATE
-    common
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-    Qt${QT_VERSION_MAJOR}::OpenGL
-)
+target_link_libraries(
+  graphicsview PRIVATE common Qt${QT_VERSION_MAJOR}::Widgets
+                       Qt${QT_VERSION_MAJOR}::OpenGL)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-    target_link_libraries(graphicsview PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+  target_link_libraries(graphicsview
+                        PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
 endif()
 
-##target_compile_definitions(graphicsview PRIVATE GRAPHICSVIEW_LIBRARY)
+# target_compile_definitions(graphicsview PRIVATE GRAPHICSVIEW_LIBRARY)

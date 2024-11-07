@@ -12,15 +12,13 @@ cmake_minimum_required(VERSION 3.20)
 
 project(clipper LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-
 find_package(
   Qt${QT_VERSION_MAJOR}
   COMPONENTS Widgets
   REQUIRED)
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
 
 add_library(clipper STATIC ${HEADERS} ${SOURCES})
 

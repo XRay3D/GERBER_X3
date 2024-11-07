@@ -15,9 +15,7 @@ cmake_minimum_required(VERSION 3.24)
 
 project(GERBER_X3 VERSION 0.9.0)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
+# set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
@@ -120,12 +118,18 @@ add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
+find_package(QT NAMES Qt6 Core)
+
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 include_directories(${INC_DIRS})
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
+
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # STATIC LIBS
 add_subdirectory(static_libs)
