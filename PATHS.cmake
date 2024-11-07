@@ -1,10 +1,7 @@
 cmake_minimum_required(VERSION 3.20)
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  set(CMAKE_PREFIX_PATH "C:/Qt/5.15.2/mingw81_64") # why???
-endif()
-
-find_package(QT NAMES Qt5 Qt6 Core)
+# if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU") set(CMAKE_PREFIX_PATH
+# "C:/Qt/5.15.2/mingw81_64") # why??? endif()
 
 set(DIR_NAME
     "Qt${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}_${CMAKE_CXX_COMPILER_ID}_${CMAKE_BUILD_TYPE}"

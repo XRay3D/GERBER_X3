@@ -11,7 +11,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "graphicsview.h"
-#include "edid.h"
 #include "gi.h"
 #include "gi_datasolid.h"
 #include "gi_drill.h"
@@ -180,7 +179,7 @@ void GraphicsView::zoom100() {
         x = qAbs(1.0 / m11 / (25.4 / physicalDpiX()));
         y = qAbs(1.0 / m22 / (25.4 / physicalDpiY()));
     } else {
-        const QSizeF size(GetRealSize());                                      // size in mm
+        const QSizeF size = screen()->physicalSize();                          // size in mm
         const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
         x = qAbs(1.0 / m11 / (size.height() / scrGeometry.height()));
         y = qAbs(1.0 / m22 / (size.width() / scrGeometry.width()));
@@ -757,8 +756,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k,     point.y(), point.x() + k,     point.y()},
-            {    point.x(), point.y() - k,     point.x(), point.y() + k}
+            {point.x() - k, point.y(),     point.x() + k, point.y()    },
+            {point.x(),     point.y() - k, point.x(),     point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -770,8 +769,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {          0, rect.top(),            0, rect.bottom()},
-            {rect.left(),          0, rect.right(),             0}
+            {0,           rect.top(), 0,            rect.bottom()},
+            {rect.left(), 0,          rect.right(), 0            }
         };
         painter->drawLines(lines, 2);
     }
