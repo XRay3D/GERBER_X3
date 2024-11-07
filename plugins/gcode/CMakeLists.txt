@@ -1,103 +1,83 @@
 #[[
- Author    :  Damir Bakiev                                                    
- Version   :  na                                                              
- Date      :  03 October 2024                                                 
- Website   :  na                                                              
- Copyright :  Damir Bakiev 2016-2024                                          
- License   :                                                                  
- Use, modification & distribution is subject to Boost Software License Ver 1. 
- http://www.boost.org/LICENSE_1_0.txt                                         
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  03 October 2024
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2024
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 3.20)
 
 project(gcode)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(
+  Qt${QT_VERSION_MAJOR}
+  COMPONENTS Widgets LinguistTools
+  REQUIRED)
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+# include_directories()
 
-find_package(QT NAMES Qt5 #[[Qt6]] COMPONENTS Core Gui Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets LinguistTools REQUIRED)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
+file(GLOB UIS *.ui)
 
-#include_directories()
-
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
-
-set(PROJECT_SOURCES
-    ${HEADERS}
-    ${SOURCES}
-    ${UIS}
-)
+set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
-link_directories(
-    ${CMAKE_SOURCE_DIR}/libs${PATHS}
-)
+link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    clipper
-    file_plugins
-    gi
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE clipper file_plugins gi
+                                              Qt${QT_VERSION_MAJOR}::Widgets)
 
-set(TS_FILES
-    ${PROJECT_NAME}_ru.ts
-    ${PROJECT_NAME}_en.ts
-)
+set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 
-set_source_files_properties(${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
+set_source_files_properties(
+  ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
-    qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-    qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
-    # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
+  qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+  qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
+                 ${PROJECT_SOURCES})
+  # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
+  # QM_FILES_OUTPUT_VARIABLE QM_FILES)
 else()
-    qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-    qt5_add_translation(${QM_FILES} ${TS_FILES})
+  qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+  qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
-
 if(Enable_Pocketoffset)
-add_subdirectory(pocketoffset)
+  add_subdirectory(pocketoffset)
 endif()
 
 if(Enable_Profile)
-add_subdirectory(profile)
+  add_subdirectory(profile)
 endif()
 
 if(Enable_Drill)
-add_subdirectory(drill)
+  add_subdirectory(drill)
 endif()
 
 if(Enable_Hatching)
-add_subdirectory(hatching)
+  add_subdirectory(hatching)
 endif()
 
 if(Enable_Pocketraster)
-add_subdirectory(pocketraster)
+  add_subdirectory(pocketraster)
 endif()
 
 if(Enable_Voroni)
-add_subdirectory(voroni)
+  add_subdirectory(voroni)
 endif()
 
 if(Enable_Thermal)
-add_subdirectory(thermal)
+  add_subdirectory(thermal)
 endif()
 
 if(Enable_Thread)
-# add_subdirectory(thread)
+  # add_subdirectory(thread)
 endif()
-
-
