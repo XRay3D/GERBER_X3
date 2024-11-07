@@ -387,7 +387,7 @@ void Parser::addPath() {
             stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             break;
         case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->QVector::size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
+            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             break;
         }
         break;
@@ -449,7 +449,7 @@ void Parser::addFlash() {
             state_, std::move(paths), file, GrObject::Type(type)));
         break;
     case WorkingType::ApertureBlock:
-        apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->QVector::size(), //
+        apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size(), //
             state_, std::move(paths), file, GrObject::Type(type)));
         break;
     }

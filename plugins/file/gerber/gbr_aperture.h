@@ -229,6 +229,7 @@ private:
 ///
 class ApBlock final : public AbstractAperture, public QVector<GrObject> {
 public:
+    using V = QVector<GrObject>;
     ApBlock(const File* file);
     ApBlock(QDataStream& stream, const File* file)
         : AbstractAperture{file} {

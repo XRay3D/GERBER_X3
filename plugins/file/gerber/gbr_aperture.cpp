@@ -745,14 +745,14 @@ void ApBlock::write(QDataStream& stream) const {
 void ApBlock::draw() {
     paths_.clear();
     int i = 0;
-    while(i < QVector::size()) {
+    while(i < V::size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddSubject(paths_);
         const int exp = at(i).state.imgPolarity();
         do {
             paths_ += at(i).fill;
             clipper.AddClip(at(i++).fill);
-        } while(i < QVector::size() && exp == at(i).state.imgPolarity());
+        } while(i < V::size() && exp == at(i).state.imgPolarity());
         if(at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
         else
