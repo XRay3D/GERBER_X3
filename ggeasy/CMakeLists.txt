@@ -35,13 +35,13 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
              COMPONENTS Core Gui LinguistTools OpenGL PrintSupport Widgets)
 
 # WINDOWS APP ICON
-set(APP_ICON_RESOURCE_WINDOWS "${CMAKE_CURRENT_SOURCE_DIR}/myapp.rc")
+set(APP_ICON_RESOURCE_WINDOWS "myapp.rc")
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-file(GLOB_RECURSE QRC_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.qrc)
-file(GLOB_RECURSE TS_FILES ${CMAKE_CURRENT_SOURCE_DIR}/*.ts)
-file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
+file(GLOB_RECURSE QRC_FILES *.qrc)
+file(GLOB TS_FILES *.ts)
+file(GLOB UIS *.ui)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   find_package(
@@ -53,6 +53,7 @@ endif()
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   qt6_add_resources(RESOURCES ${QRC_FILES})
 else()
+  set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
   qt5_add_resources(RESOURCES ${QRC_FILES})
 endif()
 
@@ -72,7 +73,7 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
 else()
   add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
   qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt5_add_translation(${QM_FILES} ${TS_FILES})
+  # qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
 # target_precompile_headers(${PROJECT_NAME} PUBLIC a_pch.h)

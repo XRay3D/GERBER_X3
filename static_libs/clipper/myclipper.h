@@ -1,4 +1,4 @@
-/********************************************************************************
+﻿/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  March 25, 2023                                                  *
@@ -274,11 +274,18 @@ static constexpr auto dScale{1. / uScale};
 inline Point operator~(const QPointF pt) { return Point{pt.x() * uScale, pt.y() * uScale}; }
 inline QPointF operator~(const Point pt) { return {pt.x * dScale, pt.y * dScale}; }
 
+template <typename T>
+struct Caster {
+    const T& val;
+    template <typename To>
+    operator To() const { return static_cast<const To>(val); }
+};
+
 #define TRANSFORM(FROM, TO)                                                    \
     inline TO operator~(const FROM& val) {                                     \
         auto it = std::views::transform(val, [](auto&& val) { return ~val; }); \
         TO ret;                                                                \
-        ret.reserve(val.size());                                               \
+        ret.reserve(Caster{val.size()});                                       \
         std::ranges::move(it, std::back_inserter(ret));                        \
         return ret;                                                            \
     }
@@ -318,14 +325,14 @@ TRANSFORM(Paths, QList<QPolygonF>)
 
 //------------------------------------------------------------------------------
 
-inline void SimplifyPolygon(const Path& in_poly, Paths& out_polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygon(const Path& /*in_poly*/, Paths& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
     //    Clipper c;
     //    c.StrictlySimple(true);
     //    c.AddPath(in_poly, PathType::Subject, true);
     //    c.Execute(ClipType::Union, out_polys, fillType, fillType);
 }
 
-inline void SimplifyPolygons(const Paths& in_polys, Paths& out_polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygons(const Paths& /*in_polys*/, Paths& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
     //    Clipper c;
     //    c.StrictlySimple(true);
     //    c.AddPaths(in_polys, PathType::Subject, true);
@@ -346,7 +353,7 @@ struct LineABC {
         , b{l.p2().x() - l.p1().x()}
         , c{l.p1().x() * l.p2().y() - l.p2().x() * l.p1().y()} { }
     operator bool() const {
-        return !qFuzzyIsNull(a) | !qFuzzyIsNull(b);
+        return !qFuzzyIsNull(a) || !qFuzzyIsNull(b);
     }
     double distance(const QPointF& p) const {
         return abs(a * p.x() + b * p.y() + c) / sqrt(a * a + b * b);

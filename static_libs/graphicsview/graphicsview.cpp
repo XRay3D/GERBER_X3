@@ -15,44 +15,28 @@
 #include "gi_datasolid.h"
 #include "gi_drill.h"
 #include "gi_point.h"
-#include "mainwindow.h"
 #include "myclipper.h"
 #include "project.h"
 #include "ruler.h"
 #include "utils.h"
-#include <format>
-#include <iterator>
-#include <limits>
-#include <qchar.h>
-#include <qcolor.h>
-#include <qglobal.h>
-#include <qnamespace.h>
-#include <qpoint.h>
-#include <unordered_set>
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QGLWidget>
-#else
-#include <QtOpenGLWidgets/QOpenGLWidget>
-#endif
 
 #include <QDrag>
 #include <QDragEnterEvent>
 #include <QGridLayout>
 #include <QGuiApplication>
+#include <QMenu>
 #include <QMimeData>
 #include <QMouseEvent>
+#include <QOpenGLWidget>
 #include <QPropertyAnimation>
 #include <QPushButton>
 #include <QScrollBar>
 #include <QUndoCommand>
-#include <cmath>
 
-#include <QDrag>
-#include <QDragEnterEvent>
-#include <QMenu>
-#include <QMimeData>
+#include <cmath>
 #include <format>
+#include <limits>
+#include <unordered_set>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -260,21 +244,14 @@ void GraphicsView::setScale(double s) noexcept {
 void GraphicsView::setOpenGL(bool useOpenGL) {
     do {
         if(useOpenGL) {
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0) && 0
-            if(dynamic_cast<QGLWidget*>(viewport())) break;
-            auto oglWidget = new QGLWidget{this};
-            QGLFormat format{QGL::SampleBuffers | QGL::DoubleBuffer | QGL::Rgba};
-            format.setSampleBuffers(true);
-#else
-            if(dynamic_cast<QOpenGLWidget*>(viewport())) break;
+            // if(dynamic_cast<QOpenGLWidget*>(viewport())) break;
             auto oglWidget = new QOpenGLWidget{this};
             QSurfaceFormat format;
-#endif
             format.setSamples(8);
             oglWidget->setFormat(format);
             setViewport(oglWidget);
         } else {
-            if(dynamic_cast<QWidget*>(viewport())) break;
+            // if(dynamic_cast<QWidget*>(viewport())) break;
             setViewport(new QWidget{this});
         }
     } while(false);

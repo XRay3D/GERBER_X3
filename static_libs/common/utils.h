@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include <QDebug>
 #include <QMetaEnum>
@@ -88,7 +88,10 @@ template <class T>
 Timer(T) -> Timer<T>;
 
 inline auto toU16StrView(const QString& str) {
-    return std::u16string_view(reinterpret_cast<const char16_t*>(str.utf16()), str.size());
+    return std::u16string_view{
+        reinterpret_cast<const char16_t*>(str.utf16()),
+        static_cast<size_t>(str.size()),
+    };
 }
 
 template <class T>

@@ -67,7 +67,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     switch(gcp_.side()) {
     case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast</*Point::Type * / int32_t > (toolDiameter_ + 5) */);
+        groupedPaths(GCode::Grouping::Cutoff, uScale); // toolDiameter_ + 5
         break;
     case GCode::Inner:
         groupedPaths(GCode::Grouping::Copper);
