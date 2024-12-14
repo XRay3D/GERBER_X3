@@ -1,4 +1,4 @@
-/********************************************************************************
+﻿/********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
  * Date      :  March 25, 2023                                                  *
@@ -41,6 +41,7 @@ enum /*class*/ Type : int {
     Bridge,
 
     Preview = QGraphicsItem::UserType + 300, // Form
+    Debug,
     // PrSlot,                                    // DrillForm
     // PrDrill,                                   // DrillForm
     // PrApetrure,                                // DrillForm
@@ -88,8 +89,8 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int alternate = {}) const { return ~shape_.toSubpathPolygons(transform()); }
-    virtual void setPaths(Paths paths, int alternate = {}) {
+    virtual Paths paths(int /*alternate*/ = {}) const { return ~shape_.toSubpathPolygons(transform()); }
+    virtual void setPaths(Paths paths, int /*alternate*/ = {}) {
         auto t{transform()};
         auto a{qRadiansToDegrees(asin(t.m12()))};
         t = t.rotateRadians(-t.m12());

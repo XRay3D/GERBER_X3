@@ -13,6 +13,7 @@
 #include <QDir>
 #include <QTimer>
 #include <QtWidgets>
+#include <qfileinfo.h>
 
 namespace QtPrivate {
 template <>
@@ -61,16 +62,16 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-
         if(1) {
-            QTimer::singleShot(time += delay, this, [this] {
-                loadFile(
-                    // R"(/home/x-ray/Загрузки/gerber1.gbr)"
-                    R"(C:\Users\bakiev\Downloads\gerber1.gbr)"
-                    // R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"
-                );
-            });
-            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+
+            for(auto* file: {
+                    R"(/home/x-ray/Загрузки/gerber1.gbr)",
+                    R"(C:\Users\bakiev\Downloads\gerber1.gbr)",
+                    R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"}) {
+                if(!QFileInfo::exists(file)) continue;
+                QTimer::singleShot(time += delay, this, [this, file] { loadFile(file); });
+                QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+            }
         }
 
         if(0) {

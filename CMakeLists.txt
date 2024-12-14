@@ -15,7 +15,9 @@ cmake_minimum_required(VERSION 3.24)
 
 project(GERBER_X3 VERSION 0.9.0)
 
-# set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
@@ -34,14 +36,13 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(
-    -Winvalid-pch -pthread
-    # -fmodules-ts
+    # -Winvalid-pch -pthread -Wall -Wextra -Wpedantic -Werror #
+    # -Wsign-conversion -fmodules-ts
   )
   # add_compile_options(-rdynamic)# unix
 
-  link_directories(tbb/lib)
-  # Link against the dependency of Intel TBB (for parallel C++17 algorithms)
-  # target_link_libraries(${PROJECT_NAME} tbb)
+  # link_directories(tbb/lib) Link against the dependency of Intel TBB (for
+  # parallel C++17 algorithms) target_link_libraries(${PROJECT_NAME} tbb)
 
   # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
   # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map}
@@ -94,20 +95,6 @@ else()
 endif()
 ]]
 
-set(INC_DIRS
-    third_party/ctre/single-header/
-    third_party/clipper2/CPP/Clipper2Lib/include/
-    ggeasy
-    plugins/file
-    plugins/gcode
-    plugins/shape
-    static_libs/clipper
-    static_libs/common
-    static_libs/filetree
-    static_libs/gi
-    static_libs/graphicsview
-    static_libs/tooldatabase)
-
 # add_library(Qt INTERFACE) target_precompile_headers(Qt INTERFACE qt_pch.h)
 
 set(CLIPPER2_UTILS OFF)
@@ -118,18 +105,25 @@ add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
-find_package(QT NAMES Qt6 Core)
-
+find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core) # Qt6
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
-include_directories(${INC_DIRS})
+include_directories(
+  ggeasy
+  plugins/file
+  plugins/gcode
+  plugins/shape
+  static_libs/clipper
+  static_libs/common
+  static_libs/filetree
+  static_libs/gi
+  static_libs/graphicsview
+  static_libs/tooldatabase
+  third_party/clipper2/CPP/Clipper2Lib/include
+  third_party/ctre/single-header)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)
 set(CMAKE_AUTOUIC ON)
-
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # STATIC LIBS
 add_subdirectory(static_libs)

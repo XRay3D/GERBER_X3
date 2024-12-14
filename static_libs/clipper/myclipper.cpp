@@ -20,6 +20,7 @@
 #include <QGraphicsScene>
 #include <QLineF>
 #include <boost/range/combine.hpp>
+#include <qglobal.h>
 #include <set>
 
 using namespace std::placeholders;
@@ -76,11 +77,31 @@ double Angle(double a, double b, double c) {
 // их можно перевести в градусы, умножив на (180/pi). 3
 
 void TestPaths(const Paths& paths_) {
+    return;
     Paths paths = paths_;
     std::set<QPointF> set;
     QPainterPath pp;
     QPainterPath ppr;
-    auto scene = App::grView().scene();
+    auto const scene = App::grView().scene();
+
+    auto test = [](auto& toErace, const Point& side, Path::iterator it) {
+        if(side == *it) { // toErace
+            toErace.emplace_back(it);
+            return false;
+        }
+        Point center = GetZ(side);
+        if(center == side) return false; //"skip side"
+
+        double a = Length(center, side) * dScale;
+        double b = Length(center, *it) * dScale;
+
+        if(abs(a - b) < 1e-3) {
+            qWarning() << "same side" << a << b << abs(a - b);
+            SetZf(*it, center);
+            return true;
+        }
+        return false;
+    };
 
     // fix single point arc centers
     for(auto&& path: paths) {
@@ -93,61 +114,38 @@ void TestPaths(const Paths& paths_) {
         });
 
         auto getPrev = [&path](Path::iterator it) {
-            auto pos = std::distance(path.begin(), it);
+            size_t pos = static_cast<size_t>(std::distance(path.begin(), it));
             return path[--pos % path.size()];
-            // if(pos == 0) { // first
-            // return path.back();
-            // } else if(pos == path.size() - 1) { // last
-            // return *(it - 1);
-            // } else { // mid
-            // return *(it - 1);
-            // }
         };
         auto getNext = [&path](Path::iterator it) {
-            auto pos = std::distance(path.begin(), it);
+            size_t pos = static_cast<size_t>(std::distance(path.begin(), it));
             return path[++pos % path.size()];
-            // if(pos == 0) { // first
-            // return *(it + 1);
-            // } else if(pos == path.size() - 1) { // last
-            // return path.front();
-            // } else { // mid
-            // return *(it + 1);
-            // }
         };
 
         std::vector<Path::iterator> toErace;
 
         qCritical() << counter.size() << count;
-        auto test = [&](const Point& side, Path::iterator it) {
-            if(side == *it) { // toErace
-                toErace.emplace_back(it);
-                return false;
-            }
-            Point center = GetZ(side);
-            if(center == side) return false; //"skip side"
 
-            double a = Length(center, side) * dScale;
-            double b = Length(center, *it) * dScale;
-
-            if(abs(a - b) < 1e-3) {
-                qWarning() << "same side" << a << b << abs(a - b);
-                SetZf(*it, center);
-                return true;
-            }
-            return false;
-        };
-
-        for(auto&& [center, iters]: counter) {
-            auto it = iters.front();
-            if(qInfo("getPrev"); !test(getPrev(it), it))
-                if(qInfo("getNext"); !test(getNext(it), it))
-                    continue;
+        for(auto it = path.begin(); it < path.end(); ++it) {
+            if(it->z == 0 || *it == GetZ(*it))
+                if(qInfo("getPrev"); !test(toErace, getPrev(it), it))
+                    if(qInfo("getNext"); !test(toErace, getNext(it), it))
+                        continue;
         }
+
+        // for(auto&& [center, iters]: counter) {
+        //     auto it = iters.front();
+        //     if(qInfo("getPrev"); !test(getPrev(it), it))
+        //         if(qInfo("getNext"); !test(getNext(it), it))
+        //             continue;
+        // }
         if(toErace.size())
             qCritical() << "toErace" << toErace.size();
+
+        // break;
     }
 
-    std::unordered_map<CenterKey, Path> arcs;
+    // std::unordered_map<CenterKey, Path> arcs;
     for(auto&& path: paths) {
         if(path.empty()) continue;
 
@@ -175,68 +173,82 @@ void TestPaths(const Paths& paths_) {
                 ppr.lineTo(~p);
             }
 
-            continue;
+            // continue;
 
-            Point center, currPt, prewPt, nextPt;
+            Point center, currPt, source, target;
             double srcA, dstA;
             radius = 0.0;
 
             auto addArc = [&]() {
-                if(radius == 0.0) return;
-                QLineF line{~center, ~currPt};
-                radius = line.length();
-                dstA = line.angle();
-                qDebug() << line.angleTo({~center, ~prewPt});
+                radius = Length(center, source) * dScale;
+                if(qFuzzyIsNull(radius)) return;
                 QRectF arcRect{
                     ~center - QPointF{radius, radius},
                     ~center + QPointF{radius, radius}
                 };
-                pp.arcTo(arcRect, srcA, srcA - dstA);
+                bool isClockwise{};
+                // angles
+                const double asource = atan2(source.y - center.y, source.x - center.x);
+                const double atarget = atan2(target.y - center.y, target.x - center.x);
+                double aspan = atarget - asource;
+                /**/ if(aspan < -pi || (qFuzzyCompare(aspan, -pi) && !isClockwise))
+                    aspan += 2.0 * pi;
+                else if(aspan > +pi || (qFuzzyCompare(aspan, -pi) && isClockwise))
+                    aspan -= 2.0 * pi;
+                pp.arcTo(arcRect, qRadiansToDegrees(-asource), qRadiansToDegrees(-aspan));
             };
 
-            for(int i = 0; i < path.size(); ++i) {
-                currPt = path[i];
-                prewPt = path[(i - 1) % path.size()];
-                nextPt = path[(i + 1) % path.size()];
-                if(!currPt.z) {
-                    !i ? pp.moveTo(~currPt) : pp.lineTo(~currPt);
-                    addArc();
-                    radius = 0.0;
-                    continue;
-                } else if(auto c = GetZ(currPt); center == currPt) {
-                    !i ? pp.moveTo(~currPt) : pp.lineTo(~currPt);
-                    addArc();
-                    radius = 0.0;
-                } else if(center != c) {
-                    !i ? pp.moveTo(~currPt) : pp.lineTo(~currPt);
-                    center = c;
-                    QLineF line{~center, ~currPt};
-                    addArc();
-                    radius = line.length();
-                    srcA = line.angle();
-                }
+            // enum {
+            //     Inner,
+            //     Corner,
+            //     Source,
+            //     Target,
+            // };
 
-                // arcs[{center, path.data()}].emplace_back(p);
-                // if(set.emplace(ptCenter).second) {
-                //     QRectF ellipseRect{
-                //         ptCenter - QPointF{len, len},
-                //         ptCenter + QPointF{len, len}
-                //     };
-                //     pp.addEllipse(ellipseRect);
-                // }
-                // pp.moveTo(ptCenter);
-                // pp.lineTo(ptRadius);
+            source = path.front();
+            for(int i{}; i < path.size(); ++i) {
+                if(source.z == path[i].z) continue;
+                source = path[i];
+                pp.moveTo(~source);
+                for(int j{}, k; j <= path.size(); ++j) {
+                    currPt = path[i % path.size()];
+                    if(!currPt.z || currPt == GetZ(currPt)) {
+                        if(i - k == 1) {
+                            source = currPt;
+                            pp.lineTo(~source);
+                        } else {
+                            center = GetZ(source);
+                            target = path[(i - 1) % path.size()];
+                            addArc();
+                            source = currPt;
+                        }
+                        k = i;
+                    } else if(source.z != currPt.z) {
+                        qCritical() << "arc" << (i - k);
+                        pp.lineTo(~source);
+                        if(i - k == 1) {
+                            source = currPt;
+                            pp.lineTo(~source);
+                        } else {
+                            center = GetZ(source);
+                            target = path[(i - 1) % path.size()];
+                            addArc();
+                            source = currPt;
+                        }
+                        k = i;
+                    }
+                    ++i;
+                    pp.lineTo(~source);
+                }
+                // break;
             }
         }
+        // break;
     }
-    // for(auto&& [center, path]: arcs) {
-    //     pp.moveTo(~path.front());
-    //     pp.addPolygon(~path);
-    // }
-    // scene->addEllipse(r, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
-    // scene->addLine(line, {Qt::gray, 0.0})->setZValue(std::numeric_limits<double>::max());
+
     scene->addPath(ppr, {Qt::darkGreen, 0.0})->setZValue(std::numeric_limits<double>::max());
     scene->addPath(pp, {Qt::white, 0.0})->setZValue(std::numeric_limits<double>::max());
+    // new Gi::Debug{pp};
 }
 
 QDataStream& operator<<(QDataStream& stream, const Point& pt) {
