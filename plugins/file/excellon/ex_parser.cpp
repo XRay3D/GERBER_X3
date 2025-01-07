@@ -371,8 +371,8 @@ bool Parser::parseRepeat(const QString& line) {
 }
 
 bool Parser::parseFormat(const QString& line) {
-    static const QVector<QString> unitMode({u"INCH"_qs, u"METRIC"_qs});
-    static const QVector<QString> zeroMode({u"LZ"_qs, u"TZ"_qs});
+    static const QVector<QString> unitMode({u"INCH"_s, u"METRIC"_s});
+    static const QVector<QString> zeroMode({u"LZ"_s, u"TZ"_s});
     if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
         if(C1)
             switch(unitMode.indexOf(CtreCapTo(C1))) {

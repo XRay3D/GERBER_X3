@@ -320,7 +320,7 @@ struct Point {
         return (x_ * x_ + y_ * y_);
     }
 
-    QString toString() const { return u"{%1, %2}"_qs.arg(x * dScale).arg(y * dScale); }
+    QString toString() const { return u"{%1, %2}"_s.arg(x * dScale).arg(y * dScale); }
 };
 
 //------------------------------------------------------------------------------

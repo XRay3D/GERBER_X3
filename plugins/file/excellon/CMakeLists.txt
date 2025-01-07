@@ -19,11 +19,6 @@ set(PLUG_LOCAL_VERSION "3")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
 
-find_package(
-  Qt${QT_VERSION_MAJOR}
-  COMPONENTS Widgets LinguistTools
-  REQUIRED)
-
 file(GLOB HEADERS *.h)
 file(GLOB JSONS *.json)
 file(GLOB SOURCES *.cpp)

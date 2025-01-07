@@ -12,12 +12,12 @@ cmake_minimum_required(VERSION 3.20)
 
 project(common LANGUAGES CXX)
 
-set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
-
 find_package(
   Qt${QT_VERSION_MAJOR}
-  COMPONENTS Qml Widgets
+  COMPONENTS Qml
   REQUIRED)
+
+set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)

@@ -31,6 +31,7 @@ class QTabWidget;
 #define varName(val) val, #val
 
 template <typename W> concept IsWidget = std::is_base_of_v<QWidget, W>;
+template <typename T> concept IsArithmetic = std::is_arithmetic_v<T>;
 
 class MySettings : public QSettings {
 public:
@@ -95,7 +96,7 @@ public:
             return widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt()),
                    widget->currentIndex();
         else if constexpr(std::is_same_v<W, QFontComboBox>) //
-            return widget->setCurrentFont(QFont(QSettings::value(name, defaultValue).toString())),
+            return widget->setCurrentFont(QFont{QSettings::value(name, defaultValue).toString()}),
                    widget->currentFont().family();
         else if constexpr(std::is_same_v<W, QLineEdit>)
             return widget->setText(QSettings::value(name, defaultValue).toString()),
@@ -110,32 +111,19 @@ public:
             throw std::logic_error(typeid(W).name());
     }
 
-    template <typename V>
-    auto getValue(V& val, const char* name, V def = {}) const
-        requires std::is_arithmetic_v<V>
-    {
-        if constexpr(std::is_floating_point_v<V>) {
-            val = QSettings::value(name, def).toDouble();
-            return val;
-        } else if constexpr(std::is_integral_v<V>) {
-            val = QSettings::value(name, def).toInt();
-            return val;
-        } else {
-            throw std::logic_error(typeid(V).name());
-        }
+    template <IsArithmetic V>
+    auto getValue(V& val, const char* name, V def = {}) const {
+        return val = QSettings::value(name, def).template value<V>();
     }
 
-    template <typename V>
-    auto setValue(V val, const char* name)
-        requires std::is_arithmetic_v<V>
-    {
-        QSettings::setValue(name, val);
-        return val;
+    template <IsArithmetic V>
+    auto setValue(V val, const char* name) {
+        return QSettings::setValue(name, val), val;
     }
 };
 
 struct GuiColors {
-    enum : int {
+    enum Name : int {
         Background,
         Pin,
         CutArea,
@@ -149,6 +137,8 @@ struct GuiColors {
         G0,
         Count
     };
+    Q_GADGET
+    Q_ENUM(Name)
 };
 
 enum HomePosition : int {

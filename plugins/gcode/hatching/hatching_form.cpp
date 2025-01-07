@@ -24,8 +24,8 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     , ui(new Ui::HatchingForm)
     , names{tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps{
-          u"pock_rast_climb"_qs,
-          u"pock_rast_conv"_qs,
+          u"pock_rast_climb"_s,
+          u"pock_rast_conv"_s,
       } {
     ui->setupUi(content);
 

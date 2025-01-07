@@ -39,8 +39,8 @@ private:
     void rb_clicked();
     const QStringList names;
     static inline const QString pixmaps[]{
-        u"pock_rast_climb"_qs,
-        u"pock_rast_conv"_qs,
+        u"pock_rast_climb"_s,
+        u"pock_rast_conv"_s,
     };
     // QWidget interface
 protected:

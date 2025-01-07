@@ -186,7 +186,7 @@ void MainWindow::createActions() {
     dockWidget_ = new QDockWidget{this};
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     // dockWidget_->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    dockWidget_->setObjectName(u"dwCreatePath"_qs);
+    dockWidget_->setObjectName(u"dwCreatePath"_s);
     dockWidget_->installEventFilter(this);
 
     QFont font;
@@ -213,10 +213,10 @@ void MainWindow::createActions() {
 
 void MainWindow::createActionsFile() {
     fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->setObjectName(u"fileMenu"_qs);
+    fileMenu->setObjectName(u"fileMenu"_s);
 
     fileToolBar = addToolBar(tr("File"));
-    fileToolBar->setObjectName(u"fileToolBar"_qs);
+    fileToolBar->setObjectName(u"fileToolBar"_s);
     fileToolBar->setToolTip(tr("File"));
 
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -287,7 +287,7 @@ void MainWindow::createActionsFile() {
 
 void MainWindow::createActionsEdit() {
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->setObjectName(u"editMenu"_qs);
+    editMenu->setObjectName(u"editMenu"_s);
     QAction* action;
     action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
@@ -387,7 +387,7 @@ void MainWindow::createActionsZoom() {
     vievMenu->setObjectName("vievMenu");
 
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
-    zoomToolBar->setObjectName(u"zoomToolBar"_qs);
+    zoomToolBar->setObjectName(u"zoomToolBar"_s);
     zoomToolBar->setToolTip(tr("Zoom ToolBar"));
 
     zoomToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -436,7 +436,7 @@ void MainWindow::createActionsToolPath() {
     QMenu* menu = menuBar()->addMenu(tr("&Paths"));
 
     toolpathToolBar = addToolBar(tr("Toolpath"));
-    toolpathToolBar->setObjectName(u"toolpathToolBar"_qs);
+    toolpathToolBar->setObjectName(u"toolpathToolBar"_s);
     toolpathToolBar->setToolTip(tr("Toolpath"));
 
     addDockWidget(Qt::RightDockWidgetArea, dockWidget_);

@@ -225,6 +225,60 @@ struct Deleter {
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QString>
 
+template <size_t Len>
+inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
+    std::vector<uint32_t> unicode;
+    size_t i{};
+
+    auto error{"not a UTF-8 string"};
+    while(i < Len) {
+        unsigned long uni;
+        size_t todo;
+        unsigned char ch = utf8[i++];
+
+        if(ch <= 0x7F) { // 0b01111111
+            uni = ch;
+            todo = 0;
+        } else if(ch <= 0xBF) // 0b10111111
+            throw error;
+        else if(ch <= 0xDF) { // 0b11011111
+            uni = ch & 0x1F;  // 0b00011111
+            todo = 1;
+        } else if(ch <= 0xEF) { // 0b11101111
+            uni = ch & 0x0F;    // 0b00001111
+            todo = 2;
+        } else if(ch <= 0xF7) { // 0b11110111
+            uni = ch & 0x07;    // 0b00000111
+            todo = 3;
+        } else
+            throw error;
+
+        for(size_t j{}; j < todo; ++j) {
+            if(i == Len) throw error;
+            unsigned char ch = utf8[i++];
+            if(ch < 0x80 || ch > 0xBF) throw error; // 0b10000000  0b10111111
+            uni <<= 6;
+            uni += ch & 0x3F; // 0b00111111
+        }
+        if(uni >= 0xD800 && uni <= 0xDFFF) throw error; // 0b11011000'00000000 0b11011111'11111111
+        if(uni > 0x10FFFF) throw error;                 // 0b10000'11111111'11111111
+
+        unicode.push_back(uni);
+    }
+    std::u16string utf16;
+    for(size_t i{}; i < unicode.size(); ++i) {
+        unsigned long uni = unicode[i];
+        if(uni <= 0xFFFF) { // 0b11111111'11111111
+            utf16 += (char16_t)uni;
+        } else {
+            uni -= 0x10000;                              // 0b1'00000000'00000000
+            utf16 += (char16_t)((uni >> 10) + 0xD800);   //   0b11011000'00000000
+            utf16 += (char16_t)((uni & 0x3FF) + 0xDC00); // 0b1111111111 0b11011100'00000000
+        }
+    }
+    return utf16;
+}
+
 template <size_t Size>
 struct String {
     char16_t data[Size]{};
@@ -243,60 +297,6 @@ struct String {
 
     constexpr auto staticData() const { return staticData(std::make_index_sequence<Size>{}); };
 
-    template <size_t Len>
-    constexpr std::u16string utf8toUtf16(char const (&utf8)[Len]) {
-        std::vector<uint32_t> unicode;
-        size_t i{};
-
-        auto error{"not a UTF-8 string"};
-        while(i < Len) {
-            unsigned long uni;
-            size_t todo;
-            unsigned char ch = utf8[i++];
-
-            if(ch <= 0x7F) { // 0b01111111
-                uni = ch;
-                todo = 0;
-            } else if(ch <= 0xBF) // 0b10111111
-                throw error;
-            else if(ch <= 0xDF) { // 0b11011111
-                uni = ch & 0x1F;  // 0b00011111
-                todo = 1;
-            } else if(ch <= 0xEF) { // 0b11101111
-                uni = ch & 0x0F;    // 0b00001111
-                todo = 2;
-            } else if(ch <= 0xF7) { // 0b11110111
-                uni = ch & 0x07;    // 0b00000111
-                todo = 3;
-            } else
-                throw error;
-
-            for(size_t j{}; j < todo; ++j) {
-                if(i == Len) throw error;
-                unsigned char ch = utf8[i++];
-                if(ch < 0x80 || ch > 0xBF) throw error; // 0b10000000  0b10111111
-                uni <<= 6;
-                uni += ch & 0x3F; // 0b00111111
-            }
-            if(uni >= 0xD800 && uni <= 0xDFFF) throw error; // 0b11011000'00000000 0b11011111'11111111
-            if(uni > 0x10FFFF) throw error;                 // 0b10000'11111111'11111111
-
-            unicode.push_back(uni);
-        }
-        std::u16string utf16;
-        for(size_t i{}; i < unicode.size(); ++i) {
-            unsigned long uni = unicode[i];
-            if(uni <= 0xFFFF) { // 0b11111111'11111111
-                utf16 += (char16_t)uni;
-            } else {
-                uni -= 0x10000;                              // 0b1'00000000'00000000
-                utf16 += (char16_t)((uni >> 10) + 0xD800);   //   0b11011000'00000000
-                utf16 += (char16_t)((uni & 0x3FF) + 0xDC00); // 0b1111111111 0b11011100'00000000
-            }
-        }
-        return utf16;
-    }
-
 private:
     template <std::size_t... Is>
     constexpr auto staticData(std::index_sequence<Is...>) const {
@@ -314,12 +314,13 @@ private:
 // String(char8_t const (&)[N]) -> String<N>;
 
 template <String Str>
-/*constexpr*/ auto operator"" _qs() noexcept {
+/*constexpr*/ auto operator"" _s() noexcept {
     static const auto qstring_literal{Str.staticData()};
     return QString{{qstring_literal.data_ptr()}};
 }
 #else
 using namespace QtLiterals;
+using namespace Qt::Literals;
 #endif
 
 #if USE_ENUM == 1

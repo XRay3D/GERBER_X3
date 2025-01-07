@@ -12,11 +12,6 @@ cmake_minimum_required(VERSION 3.20)
 
 project(tooldatabase LANGUAGES CXX)
 
-find_package(
-  Qt${QT_VERSION_MAJOR}
-  COMPONENTS Widgets LinguistTools
-  REQUIRED)
-
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
