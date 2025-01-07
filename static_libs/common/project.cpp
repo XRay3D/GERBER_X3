@@ -373,7 +373,7 @@ int Project::contains(const QString& name) {
     for(const auto& [id, sp]: files_) {
         AbstractFile* item = sp.get();
         //        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
-        if(QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
+        if(item && QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
             return item->id();
     }
     return -1;

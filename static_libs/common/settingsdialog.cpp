@@ -169,6 +169,7 @@ SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
 
 void SettingsDialog::readSettings() {
     /*GUI*/
+
     settings.beginGroup("Viewer");
     settings.getValue(ui.chbxAntialiasing);
     settings.getValue(ui.chbxOpenGl);
@@ -181,7 +182,13 @@ void SettingsDialog::readSettings() {
 
     settings.beginGroup("Color");
     for(int i = 0; i < GuiColors::Count; ++i)
-        App::settings().guiColor_[i].setNamedColor(settings.value(QString("%1").arg(i), App::settings().guiColor_[i].name(QColor::HexArgb)).toString());
+#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
+        App::settings().guiColor_[i].fromString
+#else
+        App::settings().guiColor_[i].setNamedColor
+#endif
+            (settings.value(EnumHelper::toString(static_cast<GuiColors::Name>(i)), App::settings().guiColor_[i].name(QColor::HexArgb)).toString());
+
     settings.endGroup();
 
     settings.beginGroup("Application");
@@ -239,7 +246,7 @@ void SettingsDialog::saveSettings() {
 
     settings.beginGroup("Color");
     for(int i = 0; i < GuiColors::Count; ++i)
-        settings.setValue(QString("%1").arg(i), App::settings().guiColor_[i].name(QColor::HexArgb));
+        settings.setValue(EnumHelper::toString(static_cast<GuiColors::Name>(i)), App::settings().guiColor_[i].name(QColor::HexArgb));
     settings.endGroup();
 
     settings.beginGroup("Application");

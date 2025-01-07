@@ -12,11 +12,6 @@ cmake_minimum_required(VERSION 3.20)
 
 project(file_plugins)
 
-find_package(
-  Qt${QT_VERSION_MAJOR}
-  COMPONENTS Widgets LinguistTools
-  REQUIRED)
-
 file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)

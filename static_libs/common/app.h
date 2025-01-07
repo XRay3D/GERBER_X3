@@ -18,7 +18,7 @@
 #include "mvector.h"
 #include "settings.h"
 #include "tool.h"
-#include "utils.h"
+#include "utils.h" //using namespace Qt::Literals;
 
 #include <assert.h>
 #include <map>

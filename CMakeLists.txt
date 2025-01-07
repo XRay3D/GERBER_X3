@@ -58,7 +58,7 @@ endif()
 # FIND BOOST
 find_package(Boost)
 if(Boost_FOUND)
-  if(Boost_VERSION_MINOR LESS 84)
+  if(Boost_VERSION VERSION_LESS 1.84)
     message(
       FATAL_ERROR
         "==> !! Required Boost version is greater than or equal to 1.84.0! Current ${Boost_VERSION}."
@@ -105,8 +105,17 @@ add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
-find_package(QT NAMES Qt5 REQUIRED COMPONENTS Core) # Qt6
+find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core) # Qt6
+
+find_package(
+  Qt${QT_VERSION_MAJOR}
+  COMPONENTS Widgets LinguistTools
+  REQUIRED)
+
+# qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES ru en)
+
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
+
 include_directories(
   ggeasy
   plugins/file

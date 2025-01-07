@@ -19,11 +19,6 @@ set(PLUG_LOCAL_VERSION "2")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
 
-find_package(
-  Qt${QT_VERSION_MAJOR}
-  COMPONENTS Widgets
-  REQUIRED)
-
 file(GLOB PROJECT_SOURCES *.json *.cpp *.h)
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})

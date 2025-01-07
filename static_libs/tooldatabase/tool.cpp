@@ -304,7 +304,7 @@ void Tool::updatePath(double depth) {
 void ToolHolder::readTools() {
     QJsonDocument loadDoc;
 
-    QFile file(App::settingsPath() + u"/tools.json"_qs);
+    QFile file(App::settingsPath() + u"/tools.json"_s);
 
     if(!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json"); // fallback path

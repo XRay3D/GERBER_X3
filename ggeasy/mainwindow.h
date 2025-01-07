@@ -63,6 +63,9 @@ public:
     void messageHandler(QtMsgType type, const QStringList& context, const QString& message);
     void loadFile(const QString& fileName);
     static void updateTheme() {
+
+        static auto palette = qApp->style()->standardPalette();
+
         if(App::settings().theme()) {
 
             static const char* const dwCloseXpm[] = {
@@ -144,31 +147,28 @@ public:
             class Style : public QProxyStyle {
             public:
                 Style()
-                    : QProxyStyle("Fusion") { }
+                    : QProxyStyle{"Fusion"} { }
+
                 QPixmap getPixmap(StandardPixmap standardPixmap) const {
                     switch(standardPixmap) {
-                    case SP_TitleBarNormalButton:
-                        return QPixmap(dwRestoreXpm);
-                    case SP_TitleBarMinButton:
-                        return QPixmap(dwMinimizeXpm);
+                    case SP_TitleBarNormalButton: return QPixmap{dwRestoreXpm};
+                    case SP_TitleBarMinButton: return QPixmap{dwMinimizeXpm};
                     case SP_TitleBarCloseButton:
-                    case SP_DockWidgetCloseButton:
-                        return QPixmap(dwCloseXpm);
-                    default:
-                        return {};
+                    case SP_DockWidgetCloseButton: return QPixmap{dwCloseXpm};
+                    default: return {};
                     }
                 }
 
                 QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption* option, const QWidget* widget) const override {
-                    if(auto pix = getPixmap(standardIcon); !pix.isNull())
-                        return pix;
+                    if(auto pix = getPixmap(standardIcon); !pix.isNull()) return pix;
                     return QProxyStyle::standardIcon(standardIcon, option, widget);
                 }
-                //            QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
-                //                if(auto pix = getPixmap(standardPixmap); !pix.isNull())
-                //                    return pix;
-                //                return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
-                //            }
+
+                // QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
+                //     if(auto pix = getPixmap(standardPixmap); !pix.isNull()) return pix;
+                //     return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+                // }
+
                 void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
                     if(element == QStyle::PE_IndicatorBranch) {
                         auto r = option->rect;
@@ -292,34 +292,10 @@ public:
 
             qApp->setPalette(palette);
         } else {
-#if __has_include("xrstyle.h") && 0
-            QApplication::setStyle(new XrStyle);
-#else
+            // qApp->setStyle(style);
             qApp->setStyle(QStyleFactory::create("Fusion"));
-            qApp->setPalette(QApplication::style()->standardPalette());
-#endif
+            qApp->setPalette(palette); // QApplication::style()->standardPalette());
         }
-
-        // if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
-        // App::mainWindow().setStyleSheet("QGroupBox, .QFrame {"
-        // //"background-color: white;"
-        // "border: 1px solid gray; }"
-        // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-        // "QGroupBox::title {"
-        // "subcontrol-origin: margin;"
-        // "subcontrol-position: top center; }" /* position at the top center */
-        // );
-        // } else {
-        // App::mainWindow().setStyleSheet("QGroupBox, .QFrame {"
-        // //"background-color: white;"
-        // "border: 1px solid gray;"
-        // "border-radius: 3px; }" // Win 7 or other
-        // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-        // "QGroupBox::title {"
-        // "subcontrol-origin: margin;"
-        // "subcontrol-position: top center; }" /* position at the top center */
-        // );
-        // }
 
         QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
         if(App::mainWindowPtr() && App::mainWindow().isVisible())

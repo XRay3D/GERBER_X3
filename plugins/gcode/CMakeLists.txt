@@ -12,11 +12,6 @@ cmake_minimum_required(VERSION 3.20)
 
 project(gcode)
 
-find_package(
-  Qt${QT_VERSION_MAJOR}
-  COMPONENTS Widgets LinguistTools
-  REQUIRED)
-
 # include_directories()
 
 file(GLOB HEADERS *.h)

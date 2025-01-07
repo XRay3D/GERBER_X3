@@ -18,9 +18,9 @@ project(
 # set(CMAKE_CXX_STANDARD 20) set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # if(ANDROID) set(ANDROID_PACKAGE_SOURCE_DIR
-# "${CMAKE_CURRENT_SOURCE_DIR}/android") if (ANDROID_ABI STREQUAL "armeabi-v7a")
-# set(ANDROID_EXTRA_LIBS ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libcrypto.so
-# ${CMAKE_CURRENT_SOURCE_DIR}/path/to/libssl.so) endif() endif()
+# "${CMAKE_CURRENT_SOURCE_DIR}/android") if(ANDROID_ABI STREQUAL "armeabi-v7a")
+# set(ANDROID_EXTRA_LIBS ${CMAKE_CURRENT_SOURCE_DIR} / path / to / libcrypto.so
+# ${CMAKE_CURRENT_SOURCE_DIR } / path / to / libssl.so) endif() endif()
 
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 # set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -38,10 +38,11 @@ find_package(Qt${QT_VERSION_MAJOR} REQUIRED
 set(APP_ICON_RESOURCE_WINDOWS "myapp.rc")
 
 file(GLOB HEADERS *.h)
+file(GLOB QRC_FILES res/*.qrc)
 file(GLOB SOURCES *.cpp)
-file(GLOB_RECURSE QRC_FILES *.qrc)
-file(GLOB TS_FILES *.ts)
 file(GLOB UIS *.ui)
+
+set(TS_FILES ${PROJECT_NAME}_en.ts ${PROJECT_NAME}_ru.ts)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   find_package(
@@ -63,7 +64,7 @@ set(PROJECT_SOURCES ${APP_ICON_RESOURCE_WINDOWS} ${HEADERS} ${QRC_FILES}
 set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
+if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
   qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
   qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
@@ -75,6 +76,8 @@ else()
   qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
   # qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
+
+add_custom_target(translations DEPENDS ${QM_FILES})
 
 # target_precompile_headers(${PROJECT_NAME} PUBLIC a_pch.h)
 
@@ -136,9 +139,6 @@ if(WIN32)
       \"$<TARGET_FILE:${PROJECT_NAME}>\"
     COMMENT "Deploying Qt...")
 elseif(UNIX) # LINUX
-
-  find_program(Q_MAKE_EXE qmake)
-
   find_program(CQT_EXE cqtdeployer)
 
   if(NOT EXISTS ${CQT_EXE})
@@ -152,17 +152,10 @@ elseif(UNIX) # LINUX
     deploy
     COMMAND
       cqtdeployer clear -bin "${OUTPUT_DIRECTORY}/${PROJECT_NAME}" -extraData
-      "${OUTPUT_DIRECTORY}/plugins" -extraDataOut /bin -qmake "${Q_MAKE_EXE}"
-      -libDir "${PROJECT_SOURCE_DIR}" -qmlDir "${PROJECT_SOURCE_DIR}"
-      -recursiveDepth 5 -targetDir "${OUTPUT_DIRECTORY}/../cqt-deploy"
+      "${OUTPUT_DIRECTORY}/plugins" -extraDataOut /bin -qmake
+      "${QT_QMAKE_EXECUTABLE}" -libDir "${PROJECT_SOURCE_DIR}" -qmlDir
+      "${PROJECT_SOURCE_DIR}" -recursiveDepth 5 -targetDir
+      "${OUTPUT_DIRECTORY}/../cqt-deploy"
     COMMENT "Deploy app with cqtdeployer"
     WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
-
-  # add_custom_command(TARGET ${PROJECT_NAME} POST_BUILD COMMAND
-  # "${CMAKE_COMMAND}" -E env PATH="${_QT_BIN_DIR}" "cqtdeployer" -bin
-  # $<TARGET_FILE:${PROJECT_NAME}> -qmake  ${QT_QMAKE_EXECUTABLE} qif COMMENT
-  # "Deploying Qt..." )
-
-  # cqtdeployer -bin myApp -qmake path/to/Qt/5.x.x/build/bin/qmake -qmlDir
-  # path/to/my/qml/files/dir qif
 endif()

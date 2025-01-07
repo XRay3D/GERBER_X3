@@ -47,12 +47,12 @@ private:
 
     const QStringList names{tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps{
-        u"prof_on_climb"_qs,
-        u"prof_out_climb"_qs,
-        u"prof_in_climb"_qs,
-        u"prof_on_conv"_qs,
-        u"prof_out_conv"_qs,
-        u"prof_in_conv"_qs,
+        u"prof_on_climb"_s,
+        u"prof_out_climb"_s,
+        u"prof_in_climb"_s,
+        u"prof_on_conv"_s,
+        u"prof_out_conv"_s,
+        u"prof_in_conv"_s,
     };
 
     enum Trimming {

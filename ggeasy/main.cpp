@@ -128,20 +128,9 @@ int main(int argc, char* argv[]) {
     QApplication::setAttribute(Qt::AA_Use96Dpi);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
 
-    //    Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
-
-    //        QFont f;
-    //        f.setPixelSize(50);
-    //        QApplication::setFont(f);
-
-    //        DoubleSpinBox dsbx;
-    //        dsbx.setRange(-1000, +1000);
-    //        dsbx.setSuffix(" MMM");
-    //        dsbx.show();
-    //        dsbx.flicker();
-    //        return app.exec();
 
     // #ifdef Q_OS_WIN
     //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
@@ -216,7 +205,7 @@ int main(int argc, char* argv[]) {
     }
 
     { // Splash Screen
-        auto splash = new QSplashScreen{QPixmap{u":/256.png"_qs}};
+        auto splash = new QSplashScreen{QPixmap{u":/256.png"_s}};
         splash->setAttribute(Qt::WA_DeleteOnClose);
         splash->show();
         splash->connect(splash, &QObject::destroyed, splash, [] { App::setSplashScreen(nullptr); });
@@ -235,6 +224,7 @@ int main(int argc, char* argv[]) {
     }
 
     MainWindow mainWin;
+    mainWin.setObjectName("MainWindow");
 
     /*
     Platform        Valid suffixes
@@ -251,7 +241,7 @@ int main(int argc, char* argv[]) {
     const QString suffix("*.so");
 #endif
 #elif _WIN32
-    const auto suffix = u"*.dll"_qs;
+    const auto suffix = u"*.dll"_s;
 #else
     static_assert(false, "Select OS");
 #endif
@@ -286,9 +276,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    mainWin.init();
-    mainWin.setObjectName("MainWindow");
-
+    mainWin.init(); // connect plugins
     SettingsDialog().accept();
 
     QCommandLineParser parser;

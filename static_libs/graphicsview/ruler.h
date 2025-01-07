@@ -13,6 +13,7 @@
 #include <QWidget>
 #include <utils.h>
 
+
 class Ruler final : public QWidget {
     Q_OBJECT
     //    Q_ENUMS(RulerType)
@@ -32,7 +33,7 @@ public:
     double zoom() const { return rulerZoom_; }
     QSize minimumSizeHint() const override { return QSize(Ruler::Breadth, Ruler::Breadth); }
 
-    static QString mimeType() { return u"image/x-puzzle-piece"_qs; }
+    static QString mimeType() { return u"image/x-puzzle-piece"_s; }
 
 public slots:
     void setCursorPos(const QPoint& cursorPos_);
