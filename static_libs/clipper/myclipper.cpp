@@ -13,6 +13,7 @@
 #include "myclipper.h"
 
 #include "app.h"
+#include "cancelation.h"
 #include "graphicsview.h"
 
 #include "qmath.h"
@@ -22,6 +23,57 @@
 #include <boost/range/combine.hpp>
 #include <qglobal.h>
 #include <set>
+
+#include <QPainter>
+#include <QPainterPath>
+#include <QPixmap>
+#include <forward_list>
+
+QIcon drawIcon(const Paths& paths, QColor color) {
+    static std::mutex m;
+    std::lock_guard l{m};
+
+    QPainterPath painterPath;
+
+    for(auto&& polygon: paths)
+        painterPath.addPolygon(~polygon);
+
+    const QRectF rect = painterPath.boundingRect();
+
+    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
+
+    double ky = rect.bottom() * scale;
+    double kx = rect.left() * scale;
+    if(rect.width() > rect.height())
+        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
+    else
+        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
+
+    QPixmap pixmap(IconSize, IconSize);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(color);
+    //    painter.translate(tr);
+    painter.translate(-kx, ky);
+    painter.scale(scale, -scale);
+    painter.drawPath(painterPath);
+    return pixmap;
+}
+
+QIcon drawDrillIcon(QColor color) {
+    QPixmap pixmap(IconSize, IconSize);
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    painter.setPen(Qt::NoPen);
+    painter.setBrush(color);
+    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
+    return pixmap;
+}
 
 using namespace std::placeholders;
 
@@ -425,16 +477,16 @@ void mergeSegments(Paths& paths, double glue) {
         }
     } while(size != paths.size());
 }
-
+#if 0
 void mergePaths(Paths& paths, const double dist) {
     //    msg = tr("Merge Paths");
     size_t max;
     do {
         max = paths.size();
         for(size_t i = 0; i < paths.size(); ++i) {
-            //            setMax(max);
-            //            setCurrent(max - paths.size());
-            //            ifCancelThenThrow();
+            ProgressCancel::setMax(max);
+            ProgressCancel::setCurrent(max - paths.size());
+            ifCancelThenThrow();
             auto& pi = paths[i];
             for(size_t j = i + 1; j < paths.size(); ++j) {
                 if(i == j) continue;
@@ -482,57 +534,7 @@ void mergePaths(Paths& paths, const double dist) {
         }
     } while(max != paths.size());
 }
-
-#include <QMutex>
-#include <QPainter>
-#include <QPainterPath>
-#include <QPixmap>
-
-QIcon drawIcon(const Paths& paths, QColor color) {
-    static QMutex m;
-    QMutexLocker l(&m);
-
-    QPainterPath painterPath;
-
-    for(auto&& polygon: paths)
-        painterPath.addPolygon(~polygon);
-
-    const QRectF rect = painterPath.boundingRect();
-
-    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
-
-    double ky = rect.bottom() * scale;
-    double kx = rect.left() * scale;
-    if(rect.width() > rect.height())
-        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
-    else
-        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
-
-    QPixmap pixmap(IconSize, IconSize);
-    pixmap.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(color);
-    //    painter.translate(tr);
-    painter.translate(-kx, ky);
-    painter.scale(scale, -scale);
-    painter.drawPath(painterPath);
-    return pixmap;
-}
-
-QIcon drawDrillIcon(QColor color) {
-    QPixmap pixmap(IconSize, IconSize);
-    pixmap.fill(Qt::transparent);
-    QPainter painter;
-    painter.begin(&pixmap);
-    painter.setRenderHint(QPainter::Antialiasing);
-    painter.setPen(Qt::NoPen);
-    painter.setBrush(color);
-    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
-    return pixmap;
-}
+#endif
 
 Paths& normalize(Paths& paths) {
     PolyTree polyTree;
@@ -676,4 +678,376 @@ Path arc(Point p1, Point p2, Point center, int interpolation) {
     double start = atan2(p1.y - center.y, p1.x - center.x);
     double stop = atan2(p2.y - center.y, p2.x - center.x);
     return arc(center, radius, start, stop, interpolation);
+}
+
+void mergePaths(Paths& paths, const double maxDist) {
+    qDebug(__FUNCTION__);
+
+    size_t max;
+
+    auto append = [&](size_t& i, size_t& j) {
+        paths[i] += paths[j] | skipFront; // paths[i].append(paths[j].mid(1));
+        paths -= j--;                     // paths.remove(j--;
+    };
+
+    do {
+        max = paths.size();
+        for(size_t i{}; i < paths.size(); ++i) {
+            ProgressCancel::setMax(max);
+            ProgressCancel::setCurrent(max - paths.size());
+            ifCancelThenThrow();
+            for(size_t j{}; j < paths.size(); ++j) {
+                if(i == j)
+                    continue;
+                else if(paths[i].front() == paths[j].front()) {
+                    ReversePath(paths[j]);
+                    append(j, i);
+                    break;
+                } else if(paths[i].back() == paths[j].back()) {
+                    ReversePath(paths[j]);
+                    append(i, j);
+                    break;
+                } else if(paths[i].front() == paths[j].back()) {
+                    append(j, i);
+                    break;
+                } else if(paths[j].front() == paths[i].back()) {
+                    append(i, j);
+                    break;
+                } else if(maxDist > 0.0) {
+                    if /*  */ (distTo(paths[i].back(), paths[j].back()) < maxDist) {
+                        ReversePath(paths[j]);
+                        append(i, j);
+                        break; //
+                    } else if(distTo(paths[i].back(), paths[j].front()) < maxDist) {
+                        append(i, j);
+                        break; //
+                    } else if(distTo(paths[i].front(), paths[j].back()) < maxDist) {
+                        append(j, i);
+                        break;
+                    } else if(distTo(paths[i].front(), paths[j].front()) < maxDist) {
+                        ReversePath(paths[j]);
+                        append(j, i);
+                        break;
+                    }
+                }
+            }
+        }
+    } while(max != paths.size());
+}
+#if 0
+void markPolyTreeDByNesting(PolyTree& polynode) {
+    qDebug(__FUNCTION__);
+
+    int nestCtr{};
+    nesting.clear();
+    std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr](PolyTree& polynode) {
+        ++nestCtr;
+        for(auto&& node: polynode)
+            sorter(*node);
+        return nesting[&polynode] = nestCtr--;
+    };
+    sorter(polynode);
+}
+
+void sortPolyTreeByNesting(PolyTree& polynode) {
+    qDebug(__FUNCTION__);
+
+    int nestCtr{};
+    nesting.clear();
+    std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr, this](PolyTree& polynode) {
+        ++nestCtr;
+        nesting[&polynode] = nestCtr;
+        switch(polynode.Count()) {
+        case 0:
+            return nestCtr--;
+        case 1:
+            return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
+        default:
+            std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
+            for(auto&& node: rwPolyTree(polynode))
+                map[sorter(*node)].emplace_back(std::move(node));
+            size_t i = polynode.Count();
+            auto it_ = polynode.end();                                         // std::reverse_iterator(polynode);
+            auto it = *reinterpret_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
+            for(auto&& [nest, nodes]: map)
+                for(auto&& node: nodes)
+                    *(--it) = std::move(node);
+            return std::max(nestCtr--, map.begin()->first);
+        }
+    };
+    sorter(polynode);
+}
+
+Pathss stacking(Paths& paths) {
+    qDebug(__FUNCTION__);
+
+    if(paths.empty()) return {};
+    Timer t("stacking");
+
+    PolyTree polyTree;
+    {
+        Timer t("stacking 1");
+        Clipper clipper;
+        clipper.AddSubject(paths);
+        clipper.AddSubject({boundOfPaths(paths, uScale)});
+        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+        paths.clear();
+    }
+    sortPolyTreeByNesting(polyTree);
+
+    Pathss returnPss;
+    /**************************************************************************************/
+    // повернуть для уменшения дистанции между путями
+    auto rotateDiest = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
+        std::forward_list<size_t> list;
+        list.emplace_front(idx.first);
+        for(size_t i = paths.size() - 1, index = idx.first; i; --i) {
+            double minDist = std::numeric_limits<double>::max();
+            Point point;
+            for(Point pt: paths[i - 1]) {
+                double dist = distTo(pt, paths[i][index]);
+                if(minDist >= dist) {
+                    minDist = dist;
+                    point = pt;
+                }
+            }
+            if(minDist <= toolDiameter) {
+                list.emplace_front(indexOf(paths[i - 1], point));
+                index = list.front();
+            } else
+                return false;
+        }
+        for(size_t i{}; auto it: list)
+            std::rotate(paths[i].begin(), paths[i].begin() + it, paths[i].end()), ++i;
+        std::rotate(path.begin(), path.begin() + idx.second, path.end());
+        return true;
+    };
+
+    std::function<void(PolyTree*, bool)> stacker = [&stacker, &rotateDiest, &returnPss](PolyTree* node, bool newPaths) {
+        if(!returnPss.empty() || newPaths) {
+            Path path(node->Polygon());
+            if(!(gcp_.convent() ^ !node->IsHole()) ^ (gcp_.side() == Outer))
+                ReversePath(path);
+
+            // if(false && App::settings().cleanPolygons())
+            //     CleanPolygon(path, uScale * 0.0005);
+
+            if(returnPss.empty() || newPaths) {
+                returnPss.push_back({std::move(path)});
+            } else {
+                // check distance;
+                std::pair<size_t, size_t> idx;
+                double d = std::numeric_limits<double>::max();
+                //                for(size_t id {}; id < returnPss.back().back().size(); ++id) {
+                //                    const Point& ptd = returnPss.back().back()[id];
+                //                    for(size_t is {}; is < path.size(); ++is) {
+                //                        const Point& pts = path[is];
+                //                        const double l = distTo(ptdpts);
+                //                        if(d >= l) {
+                //                            d = l;
+                //                            idx.first = id;
+                //                            idx.second = is;
+                //                        }
+                //                    }
+                //                }
+
+                for(size_t iDst{}; auto ptd: returnPss.back().back()) {
+                    for(size_t iSrc{}; auto pts: path) {
+                        if(const double l = distTo(ptd, pts); d >= l) {
+                            d = l;
+                            idx.first = iDst;
+                            idx.second = iSrc;
+                        }
+                        ++iSrc;
+                    }
+                    ++iDst;
+                }
+
+                if(d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
+                    returnPss.back().emplace_back(std::move(path)); // append to last Paths
+                else
+                    returnPss.push_back({std::move(path)}); // new Paths
+            }
+
+            for(size_t i{}; auto&& var: *node)
+                stacker(var.get(), static_cast<bool>(i++));
+        } else { // Start from here
+            for(auto&& var: *node)
+                stacker(var.get(), true);
+        }
+    };
+    /**************************************************************************************/
+
+    stacker(polyTree.Count() == 1 ? polyTree[0] : &polyTree, false);
+
+    for(Paths& retPaths: returnPss) {
+        for(size_t i{}; i < retPaths.size(); ++i)
+            if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
+        std::ranges::reverse(retPaths);
+        for(Path& path: retPaths)
+            path.emplace_back(path.front());
+    }
+
+    sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
+}
+
+// Pathss& groupedPaths(Grouping group, int32_t offset, bool skipFrame) {
+//     PolyTree polyTree;
+//     {
+//         Timer t("Union EvenOdd");
+//         Clipper clipper;
+//         clipper.AddSubject(closedSrcPaths);
+//         clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
+//         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+//     }
+//     groupedPss.clear();
+//     {
+//         Timer t("grouping");
+//         grouping(group, polyTree.Count() == 1 ? *polyTree[0] : polyTree);
+//     }
+//     if(skipFrame == false
+//         && group == Grouping::Cutoff
+//         && groupedPss.size() > 2
+//         && groupedPss.front().size() == 2)
+//         groupedPss.erase(groupedPss.begin());
+//     return groupedPss;
+// }
+
+// void grouping(Grouping group, PolyTree& node) {
+
+//     if((group == Grouping::Cutoff) ^ node.IsHole()) {
+//         Paths paths;
+//         paths.reserve(node.Count() + 1);
+//         paths.emplace_back(std::move(node.Polygon()));
+//         for(auto&& child: node)
+//             paths.emplace_back(std::move(child->Polygon()));
+//         groupedPss.emplace_back(std::move(paths));
+//     }
+//     for(auto&& child: node)
+//         grouping(group, *child);
+// }
+
+#endif
+
+Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) {
+    Rect rect(GetBounds(paths));
+    rect.bottom += k;
+    rect.left -= k;
+    rect.right += k;
+    rect.top -= k;
+    // dbgPaths({rect.AsPath()}, "boundOfPaths", Qt::magenta);
+    return rect.AsPath();
+}
+
+Paths& sortB(Paths& src, Point startPt) {
+    qDebug(__FUNCTION__);
+    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+        size_t swapIdx = firstIdx;
+        double destLen = std::numeric_limits<double>::max();
+        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double length = distTo(startPt, src[secondIdx].front());
+            if(destLen > length) {
+                destLen = length;
+                swapIdx = secondIdx;
+            }
+        }
+        startPt = src[swapIdx].back();
+        if(swapIdx != firstIdx)
+            std::swap(src[firstIdx], src[swapIdx]);
+    }
+    return src;
+}
+
+Pathss& sortBeginEnd(Pathss& src, Point startPt) {
+    qDebug(__FUNCTION__);
+
+    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+        size_t swapIdx = firstIdx;
+        double destLen = std::numeric_limits<double>::max();
+        bool reverse = false;
+        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double lenFirst = distTo(startPt, src[secondIdx].front().front());
+            const double lenLast = distTo(startPt, src[secondIdx].back().back());
+            if(lenFirst < lenLast) {
+                if(destLen > lenFirst) {
+                    destLen = lenFirst;
+                    swapIdx = secondIdx;
+                    reverse = false;
+                }
+            } else if(destLen > lenLast) {
+                destLen = lenLast;
+                swapIdx = secondIdx;
+                reverse = true;
+            }
+        }
+        //        if (reverse)
+        //            std::reverse(src[swapIdx].begin(), src[swapIdx].end());
+        //        startPt = src[swapIdx].back().back();
+        if(swapIdx != firstIdx && !reverse) {
+            startPt = src[swapIdx].back().back();
+            std::swap(src[firstIdx], src[swapIdx]);
+        }
+    }
+    return src;
+}
+
+Paths& sortBeginEnd(Paths& src, Point startPt) {
+    qDebug(__FUNCTION__);
+
+    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+
+        size_t swapIdx = firstIdx;
+        double destLen = std::numeric_limits<double>::max();
+        bool reverse = false;
+        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double lenFirst = distTo(startPt, src[secondIdx].front());
+            const double lenLast = distTo(startPt, src[secondIdx].back());
+            if(lenFirst < lenLast) {
+                if(destLen > lenFirst) {
+                    destLen = lenFirst;
+                    swapIdx = secondIdx;
+                    reverse = false;
+                }
+            } else if(destLen > lenLast) {
+                destLen = lenLast;
+                swapIdx = secondIdx;
+                reverse = true;
+            }
+            if(qFuzzyIsNull(destLen))
+                break;
+        }
+        if(reverse)
+            ReversePath(src[swapIdx]);
+        startPt = src[swapIdx].back();
+        if(swapIdx != firstIdx)
+            std::swap(src[firstIdx], src[swapIdx]);
+    }
+    return src;
+}
+
+Pathss& sortB(Pathss& src, Point startPt) {
+    qDebug(__FUNCTION__);
+
+    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    for(size_t i{}; i < src.size(); ++i)
+        if(src[i].empty())
+            src.erase(src.begin() + i--);
+    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+        size_t swapIdx = firstIdx;
+        double destLen = std::numeric_limits<double>::max();
+        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+            const double length = distTo(startPt, src[secondIdx].front().front());
+            if(destLen > length) {
+                destLen = length;
+                swapIdx = secondIdx;
+            }
+        }
+        startPt = src[swapIdx].back().back();
+        if(swapIdx != firstIdx)
+            std::swap(src[firstIdx], src[swapIdx]);
+    }
+    return src;
 }

@@ -318,6 +318,7 @@ public:
         dockWidget_->show();
     }
 
+    void logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message);
 signals:
     void parseFile(const QString& filename, int type);
     void logMessage(QtMsgType type, const QStringList& context, const QString& message);

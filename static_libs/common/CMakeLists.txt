@@ -17,7 +17,7 @@ find_package(
   COMPONENTS Qml
   REQUIRED)
 
-set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
+# set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)

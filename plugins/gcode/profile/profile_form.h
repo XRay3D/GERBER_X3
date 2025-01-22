@@ -112,7 +112,7 @@ public:
                 auto lbl = new QLabel{QApplication::translate("Profile", "Milling sequence:", nullptr), this};
 
                 cbxProfileSort = new QComboBox{this};
-                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
+                cbxProfileSort->setObjectName(u"cbxProfileSort"_s);
                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting"));
                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting depth"));
 

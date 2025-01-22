@@ -151,16 +151,16 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.setToolTipsVisible(true);
     menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
-        dialog->setObjectName(QString::fromUtf8("dialog"));
+        dialog->setObjectName(u"dialog"_s);
         dialog->resize(800, 600);
 
         QTextBrowser* textBrowser = new QTextBrowser{dialog};
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setObjectName(u"textBrowser"_s);
         textBrowser->setFontFamily("JetBrains Mono");
         textBrowser->setLineWrapMode(QTextEdit::NoWrap);
         new SyntaxHighlighter{textBrowser->document()};
         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(u"verticalLayout"_s);
         verticalLayout->setContentsMargins(6, 6, 6, 6);
         verticalLayout->addWidget(textBrowser);
         QString s;

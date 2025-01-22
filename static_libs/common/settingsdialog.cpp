@@ -340,34 +340,34 @@ bool SettingsDialog::eventFilter(QObject* watched, QEvent* event) {
 
 void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     if(SettingsDialog->objectName().isEmpty())
-        SettingsDialog->setObjectName(QString::fromUtf8("SettingsDialog"));
+        SettingsDialog->setObjectName(u"SettingsDialog"_s);
     SettingsDialog->resize(392, 517);
     gridLayout_2 = new QGridLayout{SettingsDialog};
-    gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
+    gridLayout_2->setObjectName(u"gridLayout_2"_s);
     gridLayout_2->setContentsMargins(6, 6, 6, 6);
     buttonBox = new QDialogButtonBox{SettingsDialog};
-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+    buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
     gridLayout_2->addWidget(buttonBox, 1, 1, 1, 1);
 
     tabwMain = new QTabWidget{SettingsDialog};
-    tabwMain->setObjectName(QString::fromUtf8("tabwMain"));
+    tabwMain->setObjectName(u"tabwMain"_s);
     tabGui = new QWidget();
-    tabGui->setObjectName(QString::fromUtf8("tabGui"));
+    tabGui->setObjectName(u"tabGui"_s);
     verticalLayout_8 = new QVBoxLayout{tabGui};
-    verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
+    verticalLayout_8->setObjectName(u"verticalLayout_8"_s);
     verticalLayout_8->setContentsMargins(6, 6, 6, 6);
     groupBox = new QGroupBox{tabGui};
-    groupBox->setObjectName(QString::fromUtf8("groupBox"));
+    groupBox->setObjectName(u"groupBox"_s);
     gridLayout = new QGridLayout{groupBox};
-    gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+    gridLayout->setObjectName(u"gridLayout"_s);
     gridLayout->setContentsMargins(6, 9, 6, 6);
 
     cbxFontSize = new QComboBox{groupBox};
     cbxFontSize->addItems({"7", "8", "9", "10", "11", "12", "13", "14"});
-    cbxFontSize->setObjectName(QString::fromUtf8("cbxFontSize"));
+    cbxFontSize->setObjectName(u"cbxFontSize"_s);
     QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
@@ -377,29 +377,29 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout->addWidget(cbxFontSize, 0, 1, 1, 1);
 
     cbxLanguage = new QComboBox{groupBox};
-    cbxLanguage->setObjectName(QString::fromUtf8("cbxLanguage"));
+    cbxLanguage->setObjectName(u"cbxLanguage"_s);
 
     gridLayout->addWidget(cbxLanguage, 1, 1, 1, 1);
 
     label_17 = new QLabel{groupBox};
-    label_17->setObjectName(QString::fromUtf8("label_17"));
+    label_17->setObjectName(u"label_17"_s);
     label_17->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout->addWidget(label_17, 1, 0, 1, 1);
 
     fontSizeLabel = new QLabel{groupBox};
-    fontSizeLabel->setObjectName(QString::fromUtf8("fontSizeLabel"));
+    fontSizeLabel->setObjectName(u"fontSizeLabel"_s);
     fontSizeLabel->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout->addWidget(fontSizeLabel, 0, 0, 1, 1);
 
     cbxTheme = new QComboBox{groupBox};
-    cbxTheme->setObjectName(QString::fromUtf8("cbxTheme"));
+    cbxTheme->setObjectName(u"cbxTheme"_s);
 
     gridLayout->addWidget(cbxTheme, 2, 1, 1, 1);
 
     label = new QLabel{groupBox};
-    label->setObjectName(QString::fromUtf8("label"));
+    label->setObjectName(u"label"_s);
     label->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout->addWidget(label, 2, 0, 1, 1);
@@ -407,39 +407,39 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     verticalLayout_8->addWidget(groupBox);
 
     gbViewer = new QGroupBox{tabGui};
-    gbViewer->setObjectName(QString::fromUtf8("gbViewer"));
+    gbViewer->setObjectName(u"gbViewer"_s);
     verticalLayout_2 = new QVBoxLayout{gbViewer};
-    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
+    verticalLayout_2->setObjectName(u"verticalLayout_2"_s);
     verticalLayout_2->setContentsMargins(6, 9, 6, 6);
     chbxOpenGl = new QCheckBox{gbViewer};
-    chbxOpenGl->setObjectName(QString::fromUtf8("chbxOpenGl"));
+    chbxOpenGl->setObjectName(u"chbxOpenGl"_s);
 
     verticalLayout_2->addWidget(chbxOpenGl);
 
     chbxAntialiasing = new QCheckBox{gbViewer};
-    chbxAntialiasing->setObjectName(QString::fromUtf8("chbxAntialiasing"));
+    chbxAntialiasing->setObjectName(u"chbxAntialiasing"_s);
 
     verticalLayout_2->addWidget(chbxAntialiasing);
 
     chbxSmoothScSh = new QCheckBox{gbViewer};
-    chbxSmoothScSh->setObjectName(QString::fromUtf8("chbxSmoothScSh"));
+    chbxSmoothScSh->setObjectName(u"chbxSmoothScSh"_s);
 
     verticalLayout_2->addWidget(chbxSmoothScSh);
 
     chbxAnimSelection = new QCheckBox{gbViewer};
-    chbxAnimSelection->setObjectName(QString::fromUtf8("chbxAnimSelection"));
+    chbxAnimSelection->setObjectName(u"chbxAnimSelection"_s);
 
     verticalLayout_2->addWidget(chbxAnimSelection);
 
     gbxColor = new QGroupBox{gbViewer};
-    gbxColor->setObjectName(QString::fromUtf8("gbxColor"));
+    gbxColor->setObjectName(u"gbxColor"_s);
     QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
     sizePolicy1.setHorizontalStretch(0);
     sizePolicy1.setVerticalStretch(0);
     sizePolicy1.setHeightForWidth(gbxColor->sizePolicy().hasHeightForWidth());
     gbxColor->setSizePolicy(sizePolicy1);
     formLayout = new QFormLayout{gbxColor};
-    formLayout->setObjectName(QString::fromUtf8("formLayout"));
+    formLayout->setObjectName(u"formLayout"_s);
     formLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
     formLayout->setContentsMargins(6, 9, 6, 6);
 
@@ -449,40 +449,40 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
 
     tabwMain->addTab(tabGui, QString());
     tabUtils = new QWidget();
-    tabUtils->setObjectName(QString::fromUtf8("tabUtils"));
+    tabUtils->setObjectName(u"tabUtils"_s);
     verticalLayout = new QVBoxLayout{tabUtils};
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setObjectName(u"verticalLayout"_s);
     groupBox_5 = new QGroupBox{tabUtils};
-    groupBox_5->setObjectName(QString::fromUtf8("groupBox_5"));
+    groupBox_5->setObjectName(u"groupBox_5"_s);
     gridLayout_3 = new QGridLayout{groupBox_5};
-    gridLayout_3->setObjectName(QString::fromUtf8("gridLayout_3"));
+    gridLayout_3->setObjectName(u"gridLayout_3"_s);
     gridLayout_3->setContentsMargins(6, 9, 6, 6);
     label_6 = new QLabel{groupBox_5};
-    label_6->setObjectName(QString::fromUtf8("label_6"));
+    label_6->setObjectName(u"label_6"_s);
     label_6->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
 
     gridLayout_3->addWidget(label_6, 0, 1, 1, 1);
 
     label_8 = new QLabel{groupBox_5};
-    label_8->setObjectName(QString::fromUtf8("label_8"));
+    label_8->setObjectName(u"label_8"_s);
     label_8->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
 
     gridLayout_3->addWidget(label_8, 0, 2, 1, 1);
 
     label_9 = new QLabel{groupBox_5};
-    label_9->setObjectName(QString::fromUtf8("label_9"));
+    label_9->setObjectName(u"label_9"_s);
     label_9->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
 
     gridLayout_3->addWidget(label_9, 0, 3, 1, 1);
 
     label_7 = new QLabel{groupBox_5};
-    label_7->setObjectName(QString::fromUtf8("label_7"));
+    label_7->setObjectName(u"label_7"_s);
     label_7->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout_3->addWidget(label_7, 1, 0, 1, 1);
 
     dsbxZeroX = new DoubleSpinBox{groupBox_5};
-    dsbxZeroX->setObjectName(QString::fromUtf8("dsbxZeroX"));
+    dsbxZeroX->setObjectName(u"dsbxZeroX"_s);
     dsbxZeroX->setMinimumSize(QSize(100, 0));
     dsbxZeroX->setDecimals(3);
     dsbxZeroX->setMinimum(-1000.0);
@@ -491,7 +491,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxZeroX, 1, 1, 1, 1);
 
     dsbxZeroY = new DoubleSpinBox{groupBox_5};
-    dsbxZeroY->setObjectName(QString::fromUtf8("dsbxZeroY"));
+    dsbxZeroY->setObjectName(u"dsbxZeroY"_s);
     dsbxZeroY->setMinimumSize(QSize(100, 0));
     dsbxZeroY->setDecimals(3);
     dsbxZeroY->setMinimum(-1000.0);
@@ -500,20 +500,20 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxZeroY, 1, 2, 1, 1);
 
     cbxZeroPos = new QComboBox{groupBox_5};
-    cbxZeroPos->setObjectName(QString::fromUtf8("cbxZeroPos"));
+    cbxZeroPos->setObjectName(u"cbxZeroPos"_s);
     sizePolicy.setHeightForWidth(cbxZeroPos->sizePolicy().hasHeightForWidth());
     cbxZeroPos->setSizePolicy(sizePolicy);
 
     gridLayout_3->addWidget(cbxZeroPos, 1, 3, 1, 1);
 
     label_4 = new QLabel{groupBox_5};
-    label_4->setObjectName(QString::fromUtf8("label_4"));
+    label_4->setObjectName(u"label_4"_s);
     label_4->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout_3->addWidget(label_4, 2, 0, 1, 1);
 
     dsbxHomeX = new DoubleSpinBox{groupBox_5};
-    dsbxHomeX->setObjectName(QString::fromUtf8("dsbxHomeX"));
+    dsbxHomeX->setObjectName(u"dsbxHomeX"_s);
     dsbxHomeX->setMinimumSize(QSize(100, 0));
     dsbxHomeX->setDecimals(3);
     dsbxHomeX->setMinimum(-1000.0);
@@ -522,7 +522,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxHomeX, 2, 1, 1, 1);
 
     dsbxHomeY = new DoubleSpinBox{groupBox_5};
-    dsbxHomeY->setObjectName(QString::fromUtf8("dsbxHomeY"));
+    dsbxHomeY->setObjectName(u"dsbxHomeY"_s);
     dsbxHomeY->setMinimumSize(QSize(100, 0));
     dsbxHomeY->setDecimals(3);
     dsbxHomeY->setMinimum(-1000.0);
@@ -531,20 +531,20 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxHomeY, 2, 2, 1, 1);
 
     cbxHomePos = new QComboBox{groupBox_5};
-    cbxHomePos->setObjectName(QString::fromUtf8("cbxHomePos"));
+    cbxHomePos->setObjectName(u"cbxHomePos"_s);
     sizePolicy.setHeightForWidth(cbxHomePos->sizePolicy().hasHeightForWidth());
     cbxHomePos->setSizePolicy(sizePolicy);
 
     gridLayout_3->addWidget(cbxHomePos, 2, 3, 1, 1);
 
     label_5 = new QLabel{groupBox_5};
-    label_5->setObjectName(QString::fromUtf8("label_5"));
+    label_5->setObjectName(u"label_5"_s);
     label_5->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout_3->addWidget(label_5, 3, 0, 1, 1);
 
     dsbxPinX = new DoubleSpinBox{groupBox_5};
-    dsbxPinX->setObjectName(QString::fromUtf8("dsbxPinX"));
+    dsbxPinX->setObjectName(u"dsbxPinX"_s);
     dsbxPinX->setDecimals(3);
     dsbxPinX->setMinimum(-1000.0);
     dsbxPinX->setMaximum(1000.0);
@@ -552,7 +552,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxPinX, 3, 1, 1, 1);
 
     dsbxPinY = new DoubleSpinBox{groupBox_5};
-    dsbxPinY->setObjectName(QString::fromUtf8("dsbxPinY"));
+    dsbxPinY->setObjectName(u"dsbxPinY"_s);
     dsbxPinY->setDecimals(3);
     dsbxPinY->setMinimum(-1000.0);
     dsbxPinY->setMaximum(1000.0);
@@ -560,47 +560,47 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout_3->addWidget(dsbxPinY, 3, 2, 1, 1);
 
     labelAPIcon = new QLabel{groupBox_5};
-    labelAPIcon->setObjectName(QString::fromUtf8("labelAPIcon"));
+    labelAPIcon->setObjectName(u"labelAPIcon"_s);
 
     gridLayout_3->addWidget(labelAPIcon, 0, 0, 1, 1);
 
     verticalLayout->addWidget(groupBox_5);
 
     chbxScaleHZMarkers = new QCheckBox{tabUtils};
-    chbxScaleHZMarkers->setObjectName(QString::fromUtf8("chbxScaleHZMarkers"));
+    chbxScaleHZMarkers->setObjectName(u"chbxScaleHZMarkers"_s);
 
     verticalLayout->addWidget(chbxScaleHZMarkers);
 
     chbxScalePinMarkers = new QCheckBox{tabUtils};
-    chbxScalePinMarkers->setObjectName(QString::fromUtf8("chbxScalePinMarkers"));
+    chbxScalePinMarkers->setObjectName(u"chbxScalePinMarkers"_s);
 
     verticalLayout->addWidget(chbxScalePinMarkers);
 
     groupBox_4 = new QGroupBox{tabUtils};
-    groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
+    groupBox_4->setObjectName(u"groupBox_4"_s);
     formLayout_3 = new QFormLayout{groupBox_4};
-    formLayout_3->setObjectName(QString::fromUtf8("formLayout_3"));
+    formLayout_3->setObjectName(u"formLayout_3"_s);
     formLayout_3->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
     formLayout_3->setContentsMargins(6, 9, 6, 6);
     minimumCircleSegmentsLabel = new QLabel{groupBox_4};
-    minimumCircleSegmentsLabel->setObjectName(QString::fromUtf8("minimumCircleSegmentsLabel"));
+    minimumCircleSegmentsLabel->setObjectName(u"minimumCircleSegmentsLabel"_s);
 
     formLayout_3->setWidget(0, QFormLayout::LabelRole, minimumCircleSegmentsLabel);
 
     sbxMinCircleSegments = new QSpinBox{groupBox_4};
-    sbxMinCircleSegments->setObjectName(QString::fromUtf8("sbxMinCircleSegments"));
+    sbxMinCircleSegments->setObjectName(u"sbxMinCircleSegments"_s);
     sbxMinCircleSegments->setMinimum(12);
     sbxMinCircleSegments->setMaximum(360);
 
     formLayout_3->setWidget(0, QFormLayout::FieldRole, sbxMinCircleSegments);
 
     minimumCircleSegmentLengthLabel = new QLabel{groupBox_4};
-    minimumCircleSegmentLengthLabel->setObjectName(QString::fromUtf8("minimumCircleSegmentLengthLabel"));
+    minimumCircleSegmentLengthLabel->setObjectName(u"minimumCircleSegmentLengthLabel"_s);
 
     formLayout_3->setWidget(1, QFormLayout::LabelRole, minimumCircleSegmentLengthLabel);
 
     dsbxMinCircleSegmentLength = new DoubleSpinBox{groupBox_4};
-    dsbxMinCircleSegmentLength->setObjectName(QString::fromUtf8("dsbxMinCircleSegmentLength"));
+    dsbxMinCircleSegmentLength->setObjectName(u"dsbxMinCircleSegmentLength"_s);
     dsbxMinCircleSegmentLength->setDecimals(2);
     dsbxMinCircleSegmentLength->setMinimum(0.010000000000000);
     dsbxMinCircleSegmentLength->setMaximum(10.0);

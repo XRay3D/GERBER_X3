@@ -12,6 +12,7 @@
  *******************************************************************************/
 #include "voronoi.h"
 #include "gi_gcpath.h"
+#include "gi_point.h"
 #include "jc_voronoi.h"
 #include "project.h"
 
@@ -43,7 +44,7 @@ void Creator::create() {
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
 
-        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs)}, {}};
+        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))}, {}};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
     } else {
@@ -56,7 +57,7 @@ void Creator::create() {
             clipper.AddClip(openSrcPaths);
             clipper.AddOpenSubject(copy);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
-            sortBeginEnd(copy);
+            sortBeginEnd(copy, ~(App::home().pos() + App::zero().pos()));
             for(auto&& p: copy)
                 returnPss.emplace_back(Paths{p});
         }
@@ -176,8 +177,8 @@ void File::createGi() {
     if(toolPathss_.size() > 1) {
         Gi::Item* item;
         item = new Gi::GcPath{toolPathss_.back().back(), this};
-        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
+        // item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        // item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
         createGiPocket();
     } else

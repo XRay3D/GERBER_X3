@@ -1,7 +1,6 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
-
 /********************************************************************************
  * Author : Damir Bakiev                                                         *
  * Version : na                                                                  *
@@ -36,7 +35,6 @@
 #include <QPrintPreviewDialog>
 #include <QPrinter>
 // #include <QtWidgets>
-
 
 // static auto PointConverter = QMetaType::registerConverter(&Point::toString); NOTE
 
@@ -916,6 +914,10 @@ const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
 
 QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
 
+void MainWindow::logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message) {
+    emit logMessage(type, {context.category, context.file, context.function, QString::number(context.line)}, message);
+}
+
 void MainWindow::messageHandler(QtMsgType type, const QStringList& context, const QString& message) {
     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128});
     enum {
@@ -924,17 +926,17 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         Function,
         Line,
     };
-    ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].split('(').front()));
-
-    switch(type) {
-        // clang-format off
-    case QtDebugMsg:    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128}); break;
-    case QtWarningMsg:  ui.loggingTextBrowser->setTextColor(QColor{255, 128, 000}); break;
-    case QtCriticalMsg: ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
-    case QtFatalMsg:    ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
-    case QtInfoMsg:     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 255}); break;
-        // clang-format on
-    }
+    auto file = context[File].split("/").back();
+    static constexpr QColor color[]{
+        QColor{128, 128, 128}, // gray   QtDebugMsg
+        QColor{255, 128, 000}, // orange QtWarningMsg
+        QColor{255, 000, 000}, // red    QtCriticalMsg
+        QColor{255, 000, 000}, // red    QtFatalMsg
+        QColor{128, 128, 255}, // blue   QtInfoMsg
+    };
+    ui.loggingTextBrowser->setTextColor(*color);
+    ui.loggingTextBrowser->append("%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split('(').front()));
+    ui.loggingTextBrowser->setTextColor(color[type]);
     ui.loggingTextBrowser->append(message);
     ui.loggingTextBrowser->append("");
     ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
@@ -1044,18 +1046,18 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
 
 void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     if(MainWindow->objectName().isEmpty())
-        MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
+        MainWindow->setObjectName(u"MainWindow"_s);
     MainWindow->resize(1600, 1000);
-    MainWindow->setWindowTitle(QString::fromUtf8("[*] GGEasy"));
+    MainWindow->setWindowTitle(u"[*] GGEasy"_s);
     MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
     centralwidget = new QWidget{MainWindow};
-    centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
+    centralwidget->setObjectName(u"centralwidget"_s);
     horizontalLayout = new QHBoxLayout{centralwidget};
     horizontalLayout->setSpacing(0);
-    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalLayout->setObjectName(u"horizontalLayout"_s);
     horizontalLayout->setContentsMargins(3, 3, 3, 3);
     grView = new GraphicsView{centralwidget};
-    grView->setObjectName(QString::fromUtf8("grView"));
+    grView->setObjectName(u"grView"_s);
     grView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     grView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
 
@@ -1063,22 +1065,23 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
 
     MainWindow->setCentralWidget(centralwidget);
     menubar = new QMenuBar{MainWindow};
-    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menubar->setObjectName(u"menubar"_s);
     menubar->setGeometry(QRect(0, 0, 1600, 26));
     MainWindow->setMenuBar(menubar);
     statusbar = new QStatusBar{MainWindow};
-    statusbar->setObjectName(QString::fromUtf8("statusbar"));
+    statusbar->setObjectName(u"statusbar"_s);
     MainWindow->setStatusBar(statusbar);
 
     loggingDockWidget = new QDockWidget{MainWindow};
-    loggingDockWidget->setObjectName(QString::fromUtf8("loggingDockWidget"));
+    loggingDockWidget->setObjectName(u"loggingDockWidget"_s);
+    loggingDockWidget->setWindowTitle(tr("Logging"));
     loggingDockWidget->setMinimumSize(QSize(100, 119));
     loggingDockWidget->setFeatures(QDockWidget::DockWidgetFloatable
         | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
     loggingDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
 
     loggingTextBrowser = new QTextBrowser{loggingDockWidget};
-    loggingTextBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+    loggingTextBrowser->setObjectName(u"loggingTextBrowser"_s);
     loggingTextBrowser->setReadOnly(false);
     loggingTextBrowser->setWordWrapMode(QTextOption::NoWrap);
     loggingDockWidget->setWidget(loggingTextBrowser);
@@ -1086,18 +1089,18 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     MainWindow->addDockWidget(Qt::RightDockWidgetArea, loggingDockWidget);
 
     treeDockWidget = new QDockWidget{MainWindow};
-    treeDockWidget->setObjectName(QString::fromUtf8("treeDockWidget"));
+    treeDockWidget->setObjectName(u"treeDockWidget"_s);
     treeDockWidget->setMinimumSize(QSize(100, 119));
     treeDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     treeDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     widget = new QWidget();
-    widget->setObjectName(QString::fromUtf8("widget"));
+    widget->setObjectName(u"widget"_s);
     verticalLayout = new QVBoxLayout{widget};
     verticalLayout->setSpacing(6);
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(3, 3, 3, 3);
     treeView = new FileTree::View{widget};
-    treeView->setObjectName(QString::fromUtf8("treeView"));
+    treeView->setObjectName(u"treeView"_s);
     treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
     verticalLayout->addWidget(treeView);

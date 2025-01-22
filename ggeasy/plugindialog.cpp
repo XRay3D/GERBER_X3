@@ -84,19 +84,19 @@ DialogAboutPlugins::~DialogAboutPlugins() { }
 
 void DialogAboutPlugins::setupUi(QDialog* Dialog) {
     if(Dialog->objectName().isEmpty())
-        Dialog->setObjectName(QString::fromUtf8("Dialog"));
+        Dialog->setObjectName(u"Dialog"_s);
     Dialog->resize(400, 300);
     verticalLayout = new QVBoxLayout{Dialog};
     verticalLayout->setSpacing(6);
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(6, 6, 6, 6);
 
     treeWidget = new QTreeWidget{Dialog};
-    treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
+    treeWidget->setObjectName(u"treeWidget"_s);
     verticalLayout->addWidget(treeWidget);
 
     buttonBox = new QDialogButtonBox{Dialog};
-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+    buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);
     //    pbInfo = buttonBox->addButton("Info", QDialogButtonBox::HelpRole);

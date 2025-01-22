@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "cancelation.h"
 #include "depthform.h"
 #include "gcode.h"
 
@@ -111,8 +112,8 @@ private:
             start();
         }
 
-        // QThread interface
     protected:
+        // QThread interface
         void run() override { form->creator_->createGc(gcp); }
     } runer{this};
 

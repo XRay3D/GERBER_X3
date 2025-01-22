@@ -15,14 +15,14 @@ cmake_minimum_required(VERSION 3.24)
 
 project(GERBER_X3 VERSION 0.9.0)
 
-set(CMAKE_CXX_STANDARD 20)
+set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 
-set_property(GLOBAL PROPERTY CXX_STANDARD 20)
+set_property(GLOBAL PROPERTY CXX_STANDARD 23)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_definitions(
@@ -35,24 +35,11 @@ add_definitions(
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(
-    # -Winvalid-pch -pthread -Wall -Wextra -Wpedantic -Werror #
-    # -Wsign-conversion -fmodules-ts
-  )
-  # add_compile_options(-rdynamic)# unix
 
-  # link_directories(tbb/lib) Link against the dependency of Intel TBB (for
-  # parallel C++17 algorithms) target_link_libraries(${PROJECT_NAME} tbb)
-
-  # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
-  # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map}
-  # -fmodule-mapper=<MODULE_MAP_FILE>") target_compile_options(example PRIVATE
-  # -fmodules-ts) add_compile_options(-H) add_compile_options(-ftime-report)
-  # -pthread -ltbbD
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-  # add_definitions(-D_USE_MATH_DEFINES=1)
+
 endif()
 
 # FIND BOOST
@@ -97,6 +84,20 @@ endif()
 
 # add_library(Qt INTERFACE) target_precompile_headers(Qt INTERFACE qt_pch.h)
 
+include_directories(
+  ggeasy
+  plugins/file
+  plugins/gcode
+  plugins/shape
+  static_libs/clipper
+  static_libs/common
+  static_libs/filetree
+  static_libs/gi
+  static_libs/graphicsview
+  static_libs/tooldatabase
+  third_party/clipper2/CPP/Clipper2Lib/include
+  third_party/ctre/single-header)
+
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
@@ -115,20 +116,6 @@ find_package(
 # qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES ru en)
 
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
-
-include_directories(
-  ggeasy
-  plugins/file
-  plugins/gcode
-  plugins/shape
-  static_libs/clipper
-  static_libs/common
-  static_libs/filetree
-  static_libs/gi
-  static_libs/graphicsview
-  static_libs/tooldatabase
-  third_party/clipper2/CPP/Clipper2Lib/include
-  third_party/ctre/single-header)
 
 set(CMAKE_AUTOMOC ON)
 set(CMAKE_AUTORCC ON)

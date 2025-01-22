@@ -27,7 +27,7 @@ namespace Gi {
 
 Item::Item(AbstractFile* file)
     : file_{file}
-    , pen_{Qt::white, 1.0 / App::grView().getScale()}
+    , pen_{Qt::white, 0.0}
     , colorPtr_{file ? &file->color() : nullptr}
     , color_{Qt::white}
     , brushColor_{colorPtr_ ? *colorPtr_ : color_}
@@ -113,8 +113,7 @@ double Item::scaleFactor() const {
     double scale = 1.0;
     if(scene() && scene()->views().size()) {
         scale /= scene()->views().front()->transform().m11();
-        if(file_)
-            scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
+        if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
     }
     return scale;
 }
