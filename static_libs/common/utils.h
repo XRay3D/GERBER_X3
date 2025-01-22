@@ -1,4 +1,4 @@
-﻿#pragma once
+#pragma once
 
 #include <QDebug>
 #include <QMetaEnum>
@@ -314,7 +314,7 @@ private:
 // String(char8_t const (&)[N]) -> String<N>;
 
 template <String Str>
-/*constexpr*/ auto operator"" _s() noexcept {
+/*constexpr*/ auto operator""_s() noexcept {
     static const auto qstring_literal{Str.staticData()};
     return QString{{qstring_literal.data_ptr()}};
 }

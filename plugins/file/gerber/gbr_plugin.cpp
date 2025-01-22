@@ -36,11 +36,11 @@ Plugin::Plugin(QObject* parent)
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if(type_ != type())
         return nullptr;
-    QFile file_(fileName);
+    QFile file_{fileName};
     if(!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
-    QTextStream in(&file_);
+    QTextStream in{&file_};
     in.setAutoDetectUnicode(true);
     parseLines(in.readAll(), fileName);
     return file;
