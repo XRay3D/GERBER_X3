@@ -102,11 +102,11 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    inline static const mvector<QChar> cmdList{'G', 'X', 'Y', 'Z', 'F', 'S'};
+    static inline const mvector<QChar> cmdList{'G', 'X', 'Y', 'Z', 'F', 'S'};
 
     mvector<double> getDepths();
 
-    bool formatFlags[Size];
+    bool formatFlags[Size]{};
     QString lastValues[6];
     Code gCode_ = GNull;
 

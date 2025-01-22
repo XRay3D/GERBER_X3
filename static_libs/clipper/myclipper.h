@@ -19,75 +19,6 @@
 #include <numbers>
 #include <ranges>
 
-class cancelException : public std::exception {
-public:
-    cancelException(const char* description)
-        : m_descr{description} {
-    }
-    ~cancelException() noexcept override = default;
-    const char* what() const noexcept override { return m_descr.c_str(); }
-
-private:
-    std::string m_descr;
-};
-
-class ProgressCancel {
-    static inline int max_;
-    static inline int current_;
-    static inline bool cancel_;
-
-public:
-    static void reset() {
-        current_ = 0;
-        max_ = 0;
-        cancel_ = 0;
-    }
-
-    /////////////////
-    /// \brief Progress max
-    /// \return
-    ///
-    static int max() { return max_; }
-    /////////////////
-    /// \brief Progress setMax
-    /// \param max
-    ///
-    static void setMax(int max) { max_ = max; }
-
-    /////////////////
-    /// \brief Progress current
-    /// \return
-    ///
-    static int current() { return current_; }
-    /////////////////
-    /// \brief Progress setCurrent
-    /// \param current
-    ///
-    static void setCurrent(int current = 0) { current_ = current; }
-    /////////////////
-    /// \brief Progress incCurrent
-    ///
-    static void incCurrent() { ++current_; }
-    static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
-        ++current_;
-        if(cancel_) [[unlikely]] {
-            //            static std::stringstream ss;
-            //            ss.clear();
-            //            ss << "file: "
-            //               << location.file_name() << "("
-            //               << location.line() << ":"
-            //               << location.column() << ") `"
-            //               << location.function_name();
-            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
-            throw cancelException(__FUNCTION__);
-        }
-    }
-    static void setCancel(bool cancel) { cancel_ = cancel; }
-};
-
-inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
-
 enum {
     IconSize = 24
 };
@@ -154,6 +85,10 @@ Paths& TranslatePaths(Paths& path, const Point& pos);
 
 void mergeSegments(Paths& paths, double glue = 0.0);
 
+/////////////////////////////////////////////////
+/// \brief склеивает пути при совпадении конечных точек
+/// \param paths - пути
+/// \param maxDist - максимальное расстояние между конечными точками
 void mergePaths(Paths& paths, const double dist = 0.0);
 
 QIcon drawIcon(const Paths& paths, QColor color = Qt::black);
@@ -427,3 +362,14 @@ inline auto rwPolyTree(PolyTree& polyTree) {
 
 Path arc(const Point& center, double radius, double start, double stop, int interpolation);
 Path arc(Point p1, Point p2, Point center, int interpolation);
+
+void markPolyTreeDByNesting(PolyTree& polynode);
+void sortPolyTreeByNesting(PolyTree& polynode);
+Pathss stacking(Paths& paths);
+
+Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k);
+
+Paths& sortB(Paths& src, Point startPt);
+Paths& sortBeginEnd(Paths& src, Point startPt);
+Pathss& sortB(Pathss& src, Point startPt);
+Pathss& sortBeginEnd(Pathss& src, Point startPt);

@@ -15,8 +15,6 @@ project(
   VERSION 0.9.0.0
   LANGUAGES CXX)
 
-# set(CMAKE_CXX_STANDARD 20) set(CMAKE_CXX_STANDARD_REQUIRED ON)
-
 # if(ANDROID) set(ANDROID_PACKAGE_SOURCE_DIR
 # "${CMAKE_CURRENT_SOURCE_DIR}/android") if(ANDROID_ABI STREQUAL "armeabi-v7a")
 # set(ANDROID_EXTRA_LIBS ${CMAKE_CURRENT_SOURCE_DIR} / path / to / libcrypto.so
@@ -51,12 +49,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     REQUIRED)
 endif()
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  qt6_add_resources(RESOURCES ${QRC_FILES})
-else()
-  set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
-  qt5_add_resources(RESOURCES ${QRC_FILES})
-endif()
+# if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) qt6_add_resources(RESOURCES
+# ${QRC_FILES}) else() set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
+# qt5_add_resources(RESOURCES ${QRC_FILES}) endif()
 
 set(PROJECT_SOURCES ${APP_ICON_RESOURCE_WINDOWS} ${HEADERS} ${QRC_FILES}
                     ${RESOURCES} ${SOURCES} ${UIS})
@@ -65,21 +60,18 @@ set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
+  # qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
   qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
-                 ${PROJECT_SOURCES})
-  # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
+  # qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
+  # ${PROJECT_SOURCES}) qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
   # QM_FILES_OUTPUT_VARIABLE QM_FILES)
 else()
   add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-  qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+  # qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
   # qt5_add_translation(${QM_FILES} ${TS_FILES})
 endif()
 
-add_custom_target(translations DEPENDS ${QM_FILES})
-
-# target_precompile_headers(${PROJECT_NAME} PUBLIC a_pch.h)
+# add_translation(${PROJECT_NAME})
 
 target_link_libraries(
   ${PROJECT_NAME}

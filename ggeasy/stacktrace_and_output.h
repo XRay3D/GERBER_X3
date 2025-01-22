@@ -1,8 +1,11 @@
 #pragma once
 
+#include "mainwindow.h"
+
+#include <QDebug>
+#include <app.h>
 #include <csignal>
 #include <string>
-#include <QDebug>
 
 #if __cpp_lib_stacktrace
 #include <QMessageLogContext>
@@ -118,6 +121,9 @@ inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, 
     while(file && *file)
         if(*file++ == '\\')
             context_.file = file;
+
+    if(App::mainWindowPtr())
+        App::mainWindow().logMessage2(type, context, message);
     messageHandler(type, context, message);
 }
 

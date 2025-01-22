@@ -12,6 +12,7 @@
  *******************************************************************************/
 #include "gbrcomp_dialog.h"
 #include "gbrcomp_view.h"
+#include "utils.h"
 
 #include <QSettings>
 #include <QtWidgets>
@@ -44,29 +45,29 @@ void Dialog::setFile(int fileId) { componentsView->setFile(fileId); }
 
 void Dialog::setupUi(QDialog* dialog) {
     if(dialog->objectName().isEmpty())
-        dialog->setObjectName(QString::fromUtf8("Dialog"));
+        dialog->setObjectName(u"dialog"_s);
     dialog->resize(800, 600);
 
     splitter = new QSplitter{dialog};
-    splitter->setObjectName(QString::fromUtf8("splitter"));
+    splitter->setObjectName(u"splitter"_s);
     splitter->setOrientation(Qt::Horizontal);
 
     componentsView = new sView{splitter};
-    componentsView->setObjectName(QString::fromUtf8("componentsView"));
+    componentsView->setObjectName(u"componentsView"_s);
 
     grView = new QGraphicsView{splitter};
-    grView->setObjectName(QString::fromUtf8("grView"));
+    grView->setObjectName(u"grView"_s);
 
     splitter->addWidget(componentsView);
     splitter->addWidget(grView);
 
     auto buttonBox = new QDialogButtonBox{dialog};
-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+    buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
     auto verticalLayout = new QVBoxLayout{dialog};
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(6, 6, 6, 6);
     verticalLayout->addWidget(splitter);
     verticalLayout->addWidget(buttonBox);

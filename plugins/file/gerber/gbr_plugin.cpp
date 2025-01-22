@@ -103,30 +103,30 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     public:
         Tab(QWidget* parent = nullptr)
             : AbstractFileSettings{parent} {
-            setObjectName(QString::fromUtf8("tabGerber"));
+            setObjectName(u"tabGerber"_s);
 
             auto verticalLayout = new QVBoxLayout{this};
-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+            verticalLayout->setObjectName(u"verticalLayout"_s);
             verticalLayout->setContentsMargins(6, 6, 6, 6);
 
             {
                 auto groupBox1 = new QGroupBox{this};
-                groupBox1->setObjectName(QString::fromUtf8("groupBox1"));
+                groupBox1->setObjectName(u"groupBox1"_s);
                 groupBox1->setTitle(QApplication::translate("SettingsDialog", "Gerber", nullptr));
                 verticalLayout->addWidget(groupBox1);
 
                 chbxCleanPolygons = new QCheckBox{groupBox1};
-                chbxCleanPolygons->setObjectName(QString::fromUtf8("chbxCleanPolygons"));
+                chbxCleanPolygons->setObjectName(u"chbxCleanPolygons"_s);
 
                 chbxSimplifyRegions = new QCheckBox{groupBox1};
-                chbxSimplifyRegions->setObjectName(QString::fromUtf8("chbxSimplifyRegions"));
+                chbxSimplifyRegions->setObjectName(u"chbxSimplifyRegions"_s);
 
                 chbxSkipDuplicates = new QCheckBox{groupBox1};
-                chbxSkipDuplicates->setObjectName(QString::fromUtf8("chbxSkipDuplicates"));
+                chbxSkipDuplicates->setObjectName(u"chbxSkipDuplicates"_s);
 
                 dsbxCleanPolygonsDist = new DoubleSpinBox{groupBox1};
                 dsbxCleanPolygonsDist->setDecimals(4);
-                dsbxCleanPolygonsDist->setObjectName(QString::fromUtf8("dsbxCleanPolygonsDist"));
+                dsbxCleanPolygonsDist->setObjectName(u"dsbxCleanPolygonsDist"_s);
                 dsbxCleanPolygonsDist->setRange(0.0001, 1.0);
                 dsbxCleanPolygonsDist->setSingleStep(0.001);
 
@@ -140,15 +140,15 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
             {
                 auto groupBox2 = new QGroupBox{this};
-                groupBox2->setObjectName(QString::fromUtf8("groupBox2"));
+                groupBox2->setObjectName(u"groupBox2"_s);
                 groupBox2->setTitle(QApplication::translate("SettingsDialog", "Wire Creation Method", nullptr));
                 verticalLayout->addWidget(groupBox2);
 
                 rbClipperOffset = new QRadioButton{groupBox2};
-                rbClipperOffset->setObjectName(QString::fromUtf8("rbClipperOffset"));
+                rbClipperOffset->setObjectName(u"rbClipperOffset"_s);
 
                 rbMinkowskiSum = new QRadioButton{groupBox2};
-                rbMinkowskiSum->setObjectName(QString::fromUtf8("rbMinkowskiSum"));
+                rbMinkowskiSum->setObjectName(u"rbMinkowskiSum"_s);
                 auto vBoxLayout = new QVBoxLayout{groupBox2};
                 vBoxLayout->setContentsMargins(6, 9, 6, 6);
                 vBoxLayout->addWidget(rbClipperOffset);

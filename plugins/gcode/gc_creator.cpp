@@ -50,16 +50,15 @@ public:
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
     uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
-        Gi::Item* item;
-        item = new Gi::GcPath{pocketPaths_, this};
-        item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        item->setPenColorPtr(&color);
+        Gi::Item* item = new Gi::GcPath{pocketPaths_, this};
+        // item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        // item->setPenColorPtr(&color);
         itemGroup()->push_back(item);
-        for(int i{}; i < pocketPaths_.size() - 1; ++i)
-            g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
-        item = new Gi::GcPath{g0path_};
-        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
-        itemGroup()->push_back(item);
+        // for(int i{}; i < pocketPaths_.size() - 1; ++i)
+        // g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
+        // item = new Gi::GcPath{g0path_};
+        // item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
+        // itemGroup()->push_back(item);
         itemGroup()->setVisible(true);
     }
     void genGcodeAndTile() override { } // saveLaserProfile({});
@@ -171,7 +170,7 @@ void Creator::addRawPaths(Paths&& rawPaths) {
         }
     }
 
-    mergeSegments(rawPaths, mergDist);
+    mergePaths(rawPaths, mergDist);
 
     for(Path& path: rawPaths) {
         Point& pf = path.front();
@@ -215,7 +214,7 @@ void Creator::createGc(Params* gcp) {
             try {
                 checkMillingFl = true;
                 checkMilling(gcp_.side());
-            } catch(const cancelException& e) {
+            } catch(const Cancel& e) {
                 ProgressCancel::reset();
                 qWarning() << "checkMilling canceled:" << e.what();
             } catch(...) {
@@ -229,7 +228,7 @@ void Creator::createGc(Params* gcp) {
             create();
         }
         qWarning() << "Creator::createGc() finish";
-    } catch(const cancelException& e) {
+    } catch(const Cancel& e) {
         qWarning() << "Creator::createGc() canceled:" << e.what();
     } catch(const std::exception& e) {
         qWarning() << "Creator::createGc() exeption:" << e.what();
@@ -355,86 +354,10 @@ void Creator::stacking(Paths& paths) {
             path.emplace_back(path.front());
     }
 
-    sortB(returnPss);
+    sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
 }
 
-void Creator::mergeSegments(Paths& paths, double maxDist) {
-    qDebug(__FUNCTION__);
-#if 1
-    mergePaths(paths, maxDist);
-#else
-    size_t size;
-    do {
-        size = paths.size();
-        for(size_t i{}; i < paths.size(); ++i) {
-            if(i >= paths.size())
-                break;
-            for(size_t j{}; j < paths.size(); ++j) {
-                if(i == j)
-                    continue;
-                if(i >= paths.size())
-                    break;
-                Point pib = paths[i].back();
-                Point pjf = paths[j].front();
-                if(pib == pjf) {
-                    paths[i] += paths[j] | skipFront;
-                    paths -= j--;
-                    continue;
-                }
-                Point pif = paths[i].front();
-                Point pjb = paths[j].back();
-                if(pif == pjb) {
-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
-                    paths -= i--;
-                    break;
-                }
-                if(pib == pjb) {
-                    ReversePath(paths[j]);
-                    paths[i] += paths[j] | skipFront;
-                    paths -= j--;
-                    continue;
-                }
-            }
-        }
-    } while(size != paths.size());
-    if(qFuzzyIsNull(maxDist))
-        return;
-    do {
-        size = paths.size();
-        for(size_t i{}; i < paths.size(); ++i) {
-            if(i >= paths.size())
-                break;
-            for(size_t j{}; j < paths.size(); ++j) {
-                if(i == j)
-                    continue;
-                if(i >= paths.size())
-                    break;
-                Point pib = paths[i].back();
-                Point pjf = paths[j].front();
-                if(distTo(pib, pjf) < maxDist) {
-                    paths[i] += paths[j] | skipFront;
-                    paths -= j--;
-                    continue;
-                }
-                Point pif = paths[i].front();
-                Point pjb = paths[j].back();
-                if(distTo(pif, pjb) < maxDist) {
-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
-                    paths -= i--;
-                    break;
-                }
-                if(distTo(pib, pjb) < maxDist) {
-                    ReversePath(paths[j]);
-                    paths[i] += paths[j] | skipFront;
-                    paths -= j--;
-                    continue;
-                }
-            }
-        }
-    } while(size != paths.size());
-#endif
-}
-
+#if 0
 void Creator::mergePaths(Paths& paths, const double maxDist) {
     qDebug(__FUNCTION__);
 
@@ -490,6 +413,7 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
         }
     } while(max != paths.size());
 }
+#endif
 
 void Creator::markPolyTreeDByNesting(PolyTree& polynode) {
     qDebug(__FUNCTION__);
@@ -752,120 +676,6 @@ Params Creator::getGcp() const { return gcp_; }
 void Creator::setGcp(const Params& gcp) {
     gcp_ = gcp;
     reset();
-}
-
-Paths& Creator::sortB(Paths& src) {
-    qDebug(__FUNCTION__);
-
-    Point startPt{~(App::home().pos() + App::zero().pos())};
-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
-        size_t swapIdx = firstIdx;
-        double destLen = std::numeric_limits<double>::max();
-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = distTo(startPt, src[secondIdx].front());
-            if(destLen > length) {
-                destLen = length;
-                swapIdx = secondIdx;
-            }
-        }
-        startPt = src[swapIdx].back();
-        if(swapIdx != firstIdx)
-            std::swap(src[firstIdx], src[swapIdx]);
-    }
-    return src;
-}
-
-Paths& Creator::sortBeginEnd(Paths& src) {
-    qDebug(__FUNCTION__);
-
-    Point startPt{~(App::home().pos() + App::zero().pos())};
-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
-
-        size_t swapIdx = firstIdx;
-        double destLen = std::numeric_limits<double>::max();
-        bool reverse = false;
-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = distTo(startPt, src[secondIdx].front());
-            const double lenLast = distTo(startPt, src[secondIdx].back());
-            if(lenFirst < lenLast) {
-                if(destLen > lenFirst) {
-                    destLen = lenFirst;
-                    swapIdx = secondIdx;
-                    reverse = false;
-                }
-            } else if(destLen > lenLast) {
-                destLen = lenLast;
-                swapIdx = secondIdx;
-                reverse = true;
-            }
-            if(qFuzzyIsNull(destLen))
-                break;
-        }
-        if(reverse)
-            ReversePath(src[swapIdx]);
-        startPt = src[swapIdx].back();
-        if(swapIdx != firstIdx)
-            std::swap(src[firstIdx], src[swapIdx]);
-    }
-    return src;
-}
-
-Pathss& Creator::sortB(Pathss& src) {
-    qDebug(__FUNCTION__);
-
-    Point startPt{~(App::home().pos() + App::zero().pos())};
-    for(size_t i{}; i < src.size(); ++i)
-        if(src[i].empty())
-            src.erase(src.begin() + i--);
-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
-        size_t swapIdx = firstIdx;
-        double destLen = std::numeric_limits<double>::max();
-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double length = distTo(startPt, src[secondIdx].front().front());
-            if(destLen > length) {
-                destLen = length;
-                swapIdx = secondIdx;
-            }
-        }
-        startPt = src[swapIdx].back().back();
-        if(swapIdx != firstIdx)
-            std::swap(src[firstIdx], src[swapIdx]);
-    }
-    return src;
-}
-
-Pathss& Creator::sortBeginEnd(Pathss& src) {
-    qDebug(__FUNCTION__);
-
-    Point startPt{~(App::home().pos() + App::zero().pos())};
-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
-        size_t swapIdx = firstIdx;
-        double destLen = std::numeric_limits<double>::max();
-        bool reverse = false;
-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
-            const double lenFirst = distTo(startPt, src[secondIdx].front().front());
-            const double lenLast = distTo(startPt, src[secondIdx].back().back());
-            if(lenFirst < lenLast) {
-                if(destLen > lenFirst) {
-                    destLen = lenFirst;
-                    swapIdx = secondIdx;
-                    reverse = false;
-                }
-            } else if(destLen > lenLast) {
-                destLen = lenLast;
-                swapIdx = secondIdx;
-                reverse = true;
-            }
-        }
-        //        if (reverse)
-        //            std::reverse(src[swapIdx].begin(), src[swapIdx].end());
-        //        startPt = src[swapIdx].back().back();
-        if(swapIdx != firstIdx && !reverse) {
-            startPt = src[swapIdx].back().back();
-            std::swap(src[firstIdx], src[swapIdx]);
-        }
-    }
-    return src;
 }
 
 } // namespace GCode

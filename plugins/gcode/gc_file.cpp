@@ -28,7 +28,7 @@
 
 namespace GCode {
 
-void calcArcs(Path path);
+void findArcs(Path path);
 
 File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     : gcp_(std::move(gcp))
@@ -36,7 +36,7 @@ File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
     , toolPathss_(std::move(toolPathss)) {
     for(auto&& paths: toolPathss_)
         for(auto&& path: paths)
-            calcArcs(path);
+            findArcs(path);
 
     feedRate_ = gcp_.getTool().feedRate();
     plungeRate_ = gcp_.getTool().plungeRate();
@@ -581,11 +581,7 @@ void File::createGiPocket() {
 
         for(const Path& path: paths) {
             item = new Gi::GcPath{path, this};
-#ifdef QT_DEBUG
-            item->setPenColorPtr(debugColor.back().data());
-#else
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
-#endif
             itemGroup()->push_back(item);
         }
 
@@ -594,12 +590,7 @@ void File::createGiPocket() {
             for(size_t j = 0; j < paths.size() - 1; ++j)
                 g1path.push_back({paths[j].back(), paths[j + 1].front()});
             item = new Gi::GcPath{g1path};
-#ifdef QT_DEBUG
-            debugColor.push_back(QSharedPointer<QColor>(new QColor{0, 0, 255}));
-            item->setPenColorPtr(debugColor.back().data());
-#else
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
-#endif
             itemGroup()->push_back(item);
         }
 
@@ -725,7 +716,7 @@ void File::createGiLaser() {
 
 /////////////////////////////////////////////////////////////
 
-void calcArcs(Path path) {
+void findArcs(Path path) {
     return;
     //    if (!App::isDebug())
     //        return;

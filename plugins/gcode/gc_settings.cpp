@@ -17,7 +17,7 @@
 GCode::Tab::Tab(QWidget* parent)
     : AbstractFileSettings{parent} {
     setWindowTitle("G-Code");
-    setObjectName(QString::fromUtf8("tabGCode"));
+    setObjectName(u"tabGCode"_s);
 
     tabWidget = new QTabWidget{this};
     { // рамещение tabWidget
@@ -33,13 +33,13 @@ GCode::Tab::Tab(QWidget* parent)
     vLayout->setContentsMargins(6, 6, 6, 6);
     // Папка
     chbxSameGFolder = new QCheckBox{tabCommon};
-    chbxSameGFolder->setObjectName(QString::fromUtf8("chbxSameGFolder"));
+    chbxSameGFolder->setObjectName(u"chbxSameGFolder"_s);
     chbxSameGFolder->setText(QApplication::translate("GCodeSettings", "Save the G-Code to the project folder.", nullptr));
     vLayout->addWidget(chbxSameGFolder);
 
     // Инфо в УП
     chbxInfo = new QCheckBox{tabCommon};
-    chbxInfo->setObjectName(QString::fromUtf8("chbxInfo"));
+    chbxInfo->setObjectName(u"chbxInfo"_s);
     chbxInfo->setText(QApplication::translate("GCodeSettings", "Add a comment with the parameters G-\320\241ode", nullptr));
     vLayout->addWidget(chbxInfo);
 
@@ -47,7 +47,7 @@ GCode::Tab::Tab(QWidget* parent)
     auto lbl = new QLabel{QApplication::translate("GCodeSettings", "File Extension:", nullptr), tabCommon};
     vLayout->addWidget(lbl);
     leFileExtension = new QLineEdit{tabCommon};
-    leFileExtension->setObjectName(QString::fromUtf8("leFileExtension"));
+    leFileExtension->setObjectName(u"leFileExtension"_s);
     vLayout->addWidget(leFileExtension);
     {
         auto tabWidget = new QTabWidget{this};
@@ -60,19 +60,19 @@ GCode::Tab::Tab(QWidget* parent)
             lbl = new QLabel{QApplication::translate("GCodeSettings", "Start with:", nullptr), tab};
             verticalLayoutM->addWidget(lbl);
             pteStart = new QPlainTextEdit{tab};
-            pteStart->setObjectName(QString::fromUtf8("pteStart"));
+            pteStart->setObjectName(u"pteStart"_s);
             verticalLayoutM->addWidget(pteStart);
 
             lbl = new QLabel{QApplication::translate("GCodeSettings", "Finish with:", nullptr), tab};
             verticalLayoutM->addWidget(lbl);
             pteEnd = new QPlainTextEdit{tab};
-            pteEnd->setObjectName(QString::fromUtf8("pteEnd"));
+            pteEnd->setObjectName(u"pteEnd"_s);
             verticalLayoutM->addWidget(pteEnd);
 
             lbl = new QLabel{QApplication::translate("GCodeSettings", "The format of the line with the coordinates:", nullptr), tab};
             verticalLayoutM->addWidget(lbl);
             leFormatMilling = new QLineEdit{tab};
-            leFormatMilling->setObjectName(QString::fromUtf8("leFormatMilling"));
+            leFormatMilling->setObjectName(u"leFormatMilling"_s);
             leFormatMilling->setToolTip(QApplication::translate("GCodeSettings", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
             verticalLayoutM->addWidget(leFormatMilling);
             tabWidget->addTab(tab, QApplication::translate("GCodeSettings", "Milling", nullptr));
@@ -85,19 +85,19 @@ GCode::Tab::Tab(QWidget* parent)
             lbl = new QLabel{QApplication::translate("GCodeSettings", "Start with:", nullptr), tab};
             verticalLayoutL->addWidget(lbl);
             pteLaserStart = new QPlainTextEdit{tab};
-            pteLaserStart->setObjectName(QString::fromUtf8("pteLaserStart"));
+            pteLaserStart->setObjectName(u"pteLaserStart"_s);
             verticalLayoutL->addWidget(pteLaserStart);
 
             lbl = new QLabel{QApplication::translate("GCodeSettings", "Finish with:", nullptr), tab};
             verticalLayoutL->addWidget(lbl);
             pteLaserEnd = new QPlainTextEdit{tab};
-            pteLaserEnd->setObjectName(QString::fromUtf8("pteLaserEnd"));
+            pteLaserEnd->setObjectName(u"pteLaserEnd"_s);
             verticalLayoutL->addWidget(pteLaserEnd);
 
             lbl = new QLabel{QApplication::translate("GCodeSettings", "The format of the line with the coordinates:", nullptr), tab};
             verticalLayoutL->addWidget(lbl);
             leFormatLaser = new QLineEdit{tab};
-            leFormatLaser->setObjectName(QString::fromUtf8("leFormatLaser"));
+            leFormatLaser->setObjectName(u"leFormatLaser"_s);
             leFormatLaser->setToolTip(QApplication::translate("GCodeSettings", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
             verticalLayoutL->addWidget(leFormatLaser);
 
@@ -108,19 +108,19 @@ GCode::Tab::Tab(QWidget* parent)
 
     //    { // Tab HLDI
     //        auto tabHldi = new QWidget();
-    //        tabHldi->setObjectName(QString::fromUtf8("tabHldi"));
+    //        tabHldi->setObjectName(u"tabHldi"_s);
     //        chbxSimplifyHldi = new QCheckBox{QApplication::translate("GCodeSettings", "Simplify Hldi", nullptr), tabHldi);
-    //        chbxSimplifyHldi->setObjectName(QString::fromUtf8("chbxSimplifyHldi"));
+    //        chbxSimplifyHldi->setObjectName(u"chbxSimplifyHldi"_s);
     //        auto verticalLayoutPS = new QVBoxLayout{tabHldi};
-    //        verticalLayoutPS->setObjectName(QString::fromUtf8("verticalLayoutPS"));
+    //        verticalLayoutPS->setObjectName(u"verticalLayoutPS"_s);
     //        verticalLayoutPS->setContentsMargins(6, 6, 6, 6);
     //        verticalLayoutPS->addWidget(chbxSimplifyHldi);
     //        //                lbl = new QLabel{tabHldi};
-    //        //                lbl->setObjectName(QString::fromUtf8("lbl"));
+    //        //                lbl->setObjectName(u"lbl"_s);
     //        //                lbl->setText(QApplication::translate("GCodeSettings", "Milling sequence:", nullptr));
     //        //                verticalLayoutPS->addWidget(lbl);
     //        //                cbxProfileSort = new QComboBox{tabHldi};
-    //        //                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
+    //        //                cbxProfileSort->setObjectName(u"cbxProfileSort"_s);
     //        //                cbxProfileSort->addItem("Grouping by nesting");
     //        //                cbxProfileSort->addItem("Grouping by nesting depth");
     //        //                verticalLayoutPS->addWidget(cbxProfileSort);
@@ -136,22 +136,22 @@ GCode::Tab::Tab(QWidget* parent)
 
     lbl = new QLabel{QApplication::translate("GCodeSettings", "Spindle On:", nullptr), grbxSpindle};
     leSpindleCC = new QLineEdit{grbxSpindle};
-    leSpindleCC->setObjectName(QString::fromUtf8("leSpindleCC"));
+    leSpindleCC->setObjectName(u"leSpindleCC"_s);
     formLayout->addRow(lbl, leSpindleCC);
 
     lbl = new QLabel{QApplication::translate("GCodeSettings", "Constant Laser Power Mode On:", nullptr), grbxSpindle};
     leLaserCPC = new QLineEdit{grbxSpindle};
-    leLaserCPC->setObjectName(QString::fromUtf8("leLaserCPC"));
+    leLaserCPC->setObjectName(u"leLaserCPC"_s);
     formLayout->addRow(lbl, leLaserCPC);
 
     lbl = new QLabel{QApplication::translate("GCodeSettings", "Dynamic Laser Power Mode On:", nullptr), grbxSpindle};
     leLaserDPC = new QLineEdit{grbxSpindle};
-    leLaserDPC->setObjectName(QString::fromUtf8("leLaserDPC"));
+    leLaserDPC->setObjectName(u"leLaserDPC"_s);
     formLayout->addRow(lbl, leLaserDPC);
 
     lbl = new QLabel{QApplication::translate("GCodeSettings", "Spindle/Laser Off:", nullptr), grbxSpindle};
     leSpindleLaserOff = new QLineEdit{grbxSpindle};
-    leSpindleLaserOff->setObjectName(QString::fromUtf8("leSpindleLaserOff"));
+    leSpindleLaserOff->setObjectName(u"leSpindleLaserOff"_s);
     formLayout->addRow(lbl, leSpindleLaserOff);
 
     vLayout->addWidget(grbxSpindle);

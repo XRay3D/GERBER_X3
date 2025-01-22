@@ -34,19 +34,19 @@ class Dialog : public QDialog {
     QTableView* tableView;
     void setupUi(QDialog* dialog) {
         if(dialog->objectName().isEmpty())
-            dialog->setObjectName(QString::fromUtf8("Dialog"));
+            dialog->setObjectName(u"dialog"_s);
         verticalLayout = new QVBoxLayout{dialog};
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(u"verticalLayout"_s);
         verticalLayout->setContentsMargins(6, 6, 6, 6);
 
         pushButtonColorize = new QPushButton{dialog};
-        pushButtonColorize->setObjectName(QString::fromUtf8("pushButtonColorize"));
+        pushButtonColorize->setObjectName(u"pushButtonColorize"_s);
         pushButtonColorize->setText(DxfObj::tr("Colorize"));
         pushButtonColorize->setIcon(QIcon::fromTheme("color-management"));
         verticalLayout->addWidget(pushButtonColorize);
 
         tableView = new QTableView{dialog};
-        tableView->setObjectName(QString::fromUtf8("tableView"));
+        tableView->setObjectName(u"tableView"_s);
         verticalLayout->addWidget(tableView);
 
         QMetaObject::connectSlotsByName(dialog);

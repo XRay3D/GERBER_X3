@@ -14,6 +14,7 @@
 #include "app.h"
 #include "gc_gi_bridge.h"
 #include "gi_gcpath.h"
+#include "gi_point.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "utils.h"
@@ -65,7 +66,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
         if(gcp_.side() == GCode::On && openSrcPaths.size()) {
             returnPss.reserve(returnPss.size() + openSrcPaths.size());
             mergePaths(openSrcPaths);
-            sortBeginEnd(openSrcPaths);
+            sortBeginEnd(openSrcPaths, ~(App::home().pos() + App::zero().pos()));
             for(auto&& path: openSrcPaths)
                 returnPss.push_back({std::move(path)});
         }
@@ -218,8 +219,8 @@ void Creator::makeBridges() {
         if(rPaths.empty())
             return;
 
-        mergeSegments(rPaths);
-        sortBeginEnd(rPaths);
+        mergePaths(rPaths);
+        sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
 
         auto IsPositive = [](Paths paths) {
             for(auto&& path: paths | std::views::drop(1))
@@ -318,7 +319,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         for(auto& [nest, paths]: pathsMap) {
             qDebug() << "nest" << nest << paths.size();
             if(paths.size() > 1)
-                sortB(paths);
+                sortB(paths, ~(App::home().pos() + App::zero().pos()));
             rpaths += std::move(paths); // NOTE move?
         }
     } else { // Grouping by nesting depth

@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "colorselector.h"
+#include "utils.h"
 
 #include <QColorDialog>
 #include <QHBoxLayout>
@@ -72,22 +73,22 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
     , color_(color)
     , defaultColor_(defaultColor) {
     if(objectName().isEmpty())
-        setObjectName(QString::fromUtf8("ColorSelector"));
+        setObjectName(u"ColorSelector"_s);
     auto horizontalLayout = new QHBoxLayout{this};
-    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalLayout->setObjectName(u"horizontalLayout"_s);
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
 
     lineEdit = new QLineEdit{this};
-    lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
+    lineEdit->setObjectName(u"lineEdit"_s);
     lineEdit->setReadOnly(true);
     horizontalLayout->addWidget(lineEdit);
 
     pbSelectColor = new PushButton{color, this};
-    pbSelectColor->setObjectName(QString::fromUtf8("pbSelectColor"));
+    pbSelectColor->setObjectName(u"pbSelectColor"_s);
     horizontalLayout->addWidget(pbSelectColor);
 
     pbResetColor = new QPushButton{tr("Reset"), this};
-    pbResetColor->setObjectName(QString::fromUtf8("pbResetColor"));
+    pbResetColor->setObjectName(u"pbResetColor"_s);
     horizontalLayout->addWidget(pbResetColor);
     horizontalLayout->setStretch(1, 1);
     horizontalLayout->setStretch(2, 1);

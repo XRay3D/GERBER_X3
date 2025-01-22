@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketraster.h"
+#include "gi_point.h"
 #include "project.h"
 #include <QElapsedTimer>
 #include <execution>
@@ -79,11 +80,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         }
     }
 
-    mergeSegments(returnPs);
+    mergePaths(returnPs);
 
-    sortB(returnPs);
+    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
     if(!profilePaths.empty() && prPass) {
-        sortB(profilePaths);
+        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
         if(gcp_.convent())
             ReversePaths(profilePaths);
         for(Path& path: profilePaths)
@@ -206,7 +207,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     if(!profilePaths.empty() && prPass != NoProfilePass) {
         for(auto& p: profilePaths)
             p.push_back(p.front());
-        returnPss.push_back(sortB(profilePaths));
+        returnPss.push_back(sortB(profilePaths, ~(App::home().pos() + App::zero().pos())));
     }
 
     if(returnPss.empty()) {

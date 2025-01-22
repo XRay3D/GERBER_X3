@@ -11,6 +11,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal.h"
+#include "gi_point.h"
 #include "project.h"
 
 namespace Thermal {
@@ -92,16 +93,16 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         clipper.AddOpenSubject(returnPs);
         clipper.AddClip(framePaths);
         clipper.Execute(ClipType::Difference, FillRule::Positive, framePaths, returnPs);
-        sortBeginEnd(returnPs);
+        sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()));
     }
 
     if(returnPs.size())
-        returnPss.push_back(sortB(returnPs));
+        returnPss.push_back(sortB(returnPs, ~(App::home().pos() + App::zero().pos())));
 
     if(returnPss.empty()) {
         emit fileReady(nullptr);
     } else {
-        sortB(returnPss);
+        sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
         file_ = new File{std::move(gcp_), std::move(returnPss)};
         file_->setFileName(tool.nameEnc());
         emit fileReady(file_);
