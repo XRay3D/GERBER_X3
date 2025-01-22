@@ -19,7 +19,10 @@
 #include "project.h"
 #include "utils.h"
 
+#undef emit
 #include <execution>
+#define emit
+
 
 namespace Profile {
 

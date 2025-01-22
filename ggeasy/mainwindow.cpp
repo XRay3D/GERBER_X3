@@ -186,6 +186,7 @@ void MainWindow::createActions() {
     // dockWidget_->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
     dockWidget_->setObjectName(u"dwCreatePath"_s);
     dockWidget_->installEventFilter(this);
+    addDockWidget(Qt::RightDockWidgetArea, dockWidget_);
 
     QFont font;
     font.setBold(true);
@@ -943,8 +944,7 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
 }
 
 void MainWindow::loadFile(const QString& fileName) {
-    if(!QFile(fileName).exists())
-        return;
+    if(!QFileInfo::exists(fileName)) return;
     lastPath = QFileInfo(fileName).absolutePath();
     if(fileName.endsWith(".g2g")) {
         if(closeProject()) {
@@ -954,8 +954,9 @@ void MainWindow::loadFile(const QString& fileName) {
             return;
         }
     } else {
-        if(project_->contains(fileName) > -1 && QMessageBox::question(this, tr("Warning"), //
-                                                    tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
+        if(project_->contains(fileName) > -1
+            && QMessageBox::question(this, tr("Warning"), //
+                   tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
                 == QMessageBox::Cancel)
             return;
         for(auto& [type, ptr]: App::filePlugins()) {
@@ -1050,20 +1051,15 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     MainWindow->resize(1600, 1000);
     MainWindow->setWindowTitle(u"[*] GGEasy"_s);
     MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
-    centralwidget = new QWidget{MainWindow};
-    centralwidget->setObjectName(u"centralwidget"_s);
-    horizontalLayout = new QHBoxLayout{centralwidget};
-    horizontalLayout->setSpacing(0);
-    horizontalLayout->setObjectName(u"horizontalLayout"_s);
-    horizontalLayout->setContentsMargins(3, 3, 3, 3);
-    grView = new GraphicsView{centralwidget};
+
+    grView = new GraphicsView{MainWindow};
     grView->setObjectName(u"grView"_s);
     grView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     grView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
 
-    horizontalLayout->addWidget(grView);
+    // horizontalLayout->addWidget(grView);
 
-    MainWindow->setCentralWidget(centralwidget);
+    MainWindow->setCentralWidget(grView);
     menubar = new QMenuBar{MainWindow};
     menubar->setObjectName(u"menubar"_s);
     menubar->setGeometry(QRect(0, 0, 1600, 26));
@@ -1093,20 +1089,16 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     treeDockWidget->setMinimumSize(QSize(100, 119));
     treeDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     treeDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    widget = new QWidget();
-    widget->setObjectName(u"widget"_s);
-    verticalLayout = new QVBoxLayout{widget};
-    verticalLayout->setSpacing(6);
-    verticalLayout->setObjectName(u"verticalLayout"_s);
-    verticalLayout->setContentsMargins(3, 3, 3, 3);
-    treeView = new FileTree::View{widget};
+
+    treeView = new FileTree::View{treeDockWidget};
     treeView->setObjectName(u"treeView"_s);
     treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    verticalLayout->addWidget(treeView);
+    // verticalLayout->addWidget(treeView);
 
-    treeDockWidget->setWidget(widget);
+    treeDockWidget->setWidget(treeView);
     MainWindow->addDockWidget(Qt::LeftDockWidgetArea, treeDockWidget);
+    MainWindow->addDockWidget(Qt::LeftDockWidgetArea, loggingDockWidget);
 
     retranslateUi(MainWindow);
 

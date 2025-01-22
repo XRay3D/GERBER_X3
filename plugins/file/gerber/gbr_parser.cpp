@@ -23,6 +23,9 @@
 #include <QMutex>
 #include <algorithm>
 #include <ctre.hpp>
+// #include <st acktrace>
+#include <boost/stacktrace.hpp>
+
 
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side
@@ -60,8 +63,8 @@ Parser::Parser(AbstractFilePlugin* afp)
 }
 
 void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
-    static QMutex mutex;
-    mutex.lock();
+    static std::mutex mutex;
+    std::lock_guard lock{mutex};
     try {
 
         file = new File;
@@ -159,15 +162,24 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         emit afp->fileError("", file->shortName() + "\n" + errStr);
         emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
+    } catch(const std::exception& e) {
+        std::stringstream ss;
+        auto trace = boost::stacktrace::stacktrace::from_current_exception();
+        ss << trace;
+        // ss << std::stacktrace::current();
+        qWarning() << ss.str().c_str();
+        qWarning() << "exeption E:" << e.what();
+        emit afp->fileError("", file->shortName() + "\n" + e.what());
+        emit afp->fileProgress(file->shortName(), 1, 1);
+        delete file;
     } catch(...) {
-        //        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
-        //        qWarning() << "exeption S:" << errStr;
-        //        emit afp->fileError("", file->shortName() + "\n" + errStr);
-        //        emit afp->fileProgress(file->shortName(), 1, 1);
+        QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
+        qWarning() << "exeption S:" << errStr;
+        emit afp->fileError("", file->shortName() + "\n" + errStr);
+        emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     }
     reset(); // clear parser data
-    mutex.unlock();
 }
 
 mvector<QString> Parser::cleanAndFormatFile(QString data) {
@@ -482,6 +494,7 @@ void Parser::reset() {
     state_ = State(file);
     stepRepeat_.reset();
     refDes.clear();
+    ProgressCancel::reset();
 }
 
 void Parser::resetStep() {

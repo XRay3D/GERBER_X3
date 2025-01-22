@@ -60,8 +60,8 @@ set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  # qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
-  qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+  qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
+  # qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
   # qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
   # ${PROJECT_SOURCES}) qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
   # QM_FILES_OUTPUT_VARIABLE QM_FILES)
@@ -83,7 +83,6 @@ target_link_libraries(
           graphicsview
           shape
           tooldatabase
-          Qt${QT_VERSION_MAJOR}::OpenGL
           Qt${QT_VERSION_MAJOR}::PrintSupport
           Qt${QT_VERSION_MAJOR}::Widgets)
 

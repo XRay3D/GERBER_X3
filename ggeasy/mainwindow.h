@@ -430,8 +430,6 @@ public:
 
 private:
     struct Ui {
-        class QWidget* centralwidget;
-        class QHBoxLayout* horizontalLayout;
         class GraphicsView* grView;
         class QMenuBar* menubar;
         class QStatusBar* statusbar;
@@ -440,8 +438,6 @@ private:
         class QDockWidget* loggingDockWidget;
         class QTextBrowser* loggingTextBrowser{};
 
-        class QWidget* widget;
-        class QVBoxLayout* verticalLayout;
         FileTree::View* treeView;
         void setupUi(QMainWindow* MainWindow);       // setupUi
         void retranslateUi(QMainWindow* MainWindow); // retranslateUi

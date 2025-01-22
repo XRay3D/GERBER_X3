@@ -16,7 +16,10 @@
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
+#undef emit
 #include <execution>
+#define emit
+
 #endif
 
 #include <algorithm>

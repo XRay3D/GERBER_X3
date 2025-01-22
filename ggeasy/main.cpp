@@ -1,6 +1,5 @@
 // This is a personal academic project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -11,102 +10,26 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-// #include "a_pch.h"
-
-// #include "gc_fileplugin.h"
-// #include "gc_plugin.h"
 #include "abstract_fileplugin.h"
 #include "gc_plugin.h"
 #include "gc_types.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
+#include "stacktrace_and_output.h"
 #include "version.h"
+
 #include <QCommandLineParser>
 #include <QDir>
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
-#include <set>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QTextCodec>
 #endif
 
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
-
-// void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-//     QByteArray localMsg = msg.toUtf8();
-//     const char* file = context.file ? context.file : "";
-//     //    const char* function = context.function ? context.function : "";
-//    const char* file_ {file};
-//    while (*file > 0) {
-//        if (*file == '\\')
-//            file_ = file + 1;
-//        ++file;
-//    }
-//    file = file_;
-//    switch (type) {
-//    case QtDebugMsg:
-//        fprintf(stdout, "Debug: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtInfoMsg:
-//        fprintf(stdout, "Info: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtWarningMsg:
-//        fprintf(stderr, "Warning:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtCriticalMsg:
-//        fprintf(stderr, "Critical:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtFatalMsg:
-//        fprintf(stderr, "Fatal:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    }
-//}
-
-// int main(int argc, char** argv) {
-//    qInstallMessageHandler(myMessageOutput);
-
-// #ifdef LEAK_DETECTOR
-//     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
-// #endif
-
-// qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
-// qInstallMessageHandler(myMessageOutput);
-
-// auto messageHandler = qInstallMessageHandler(nullptr);
-// void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-//     auto file = context.file;
-//     // if(type == QtInfoMsg) return;
-//     QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context); //-V2018
-//     while(file && *file)
-//         if(std::set{'/', '\\'}.contains(*file++))
-//             context_.file = file;
-
-//     // QString data{context_.function};
-//     // data.replace(QRegularExpression(R"((\w+\:\:))"), "");
-//     // context_.function = data.toUtf8().data();
-//     messageHandler(type, context, message);
-//     if(App::mainWindowPtr())
-//         emit App::mainWindow().logMessage(type, {
-//                                                     QString::fromUtf8(context.category),
-//                                                     QString::fromUtf8(context.file),
-//                                                     QString::fromUtf8(context.function),
-//                                                     QString::number(context.line),
-
-//                                                 },
-//             message);
-// }
-
-#include "stacktrace_and_output.h"
-
 int main(int argc, char* argv[]) {
-    // qInstallMessageHandler(myMessageHandler);
-
     stacktraceAndOutput();
-
     qSetMessagePattern(QLatin1String(
         "%{if-critical}\x1b[38;2;255;0;0m"
         "C %{endif}"
@@ -142,9 +65,11 @@ int main(int argc, char* argv[]) {
 #ifdef linux
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
-    QSharedMemory nixFixSharedMemory("AppSettings");
-    if(nixFixSharedMemory.attach())
-        nixFixSharedMemory.detach();
+    {
+        QSharedMemory nixFixSharedMemory{"AppSettings"};
+        if(nixFixSharedMemory.attach())
+            nixFixSharedMemory.detach();
+    }
 #endif
     QApplication::setApplicationName("GGEasy");
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);

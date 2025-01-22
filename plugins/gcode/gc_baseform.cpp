@@ -27,11 +27,14 @@
 #include <QTableView>
 #include <QtWidgets>
 
-#include <condition_variable>
+#undef emit
 #include <execution>
-#include <mutex>
-#include <ranges>
-#include <sstream>
+#define emit
+
+// #include <condition_variable>
+// #include <mutex>
+// #include <ranges>
+// #include <sstream>
 
 // static const int id1 = qRegisterMetaType<GCode::Params>("GCode::Params");
 // static const int id2 = qRegisterMetaType<GCode::Params&>("GCode::Params&");

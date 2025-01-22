@@ -26,7 +26,10 @@
 #include "project.h"
 #include "utils.h"
 
-#include <execution> //std::execution::parallel_policy
+#undef emit
+#include <execution>
+#define emit
+ //std::execution::parallel_policy
 #include <forward_list>
 #include <set>
 #include <stdexcept>

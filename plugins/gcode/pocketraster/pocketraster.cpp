@@ -14,7 +14,10 @@
 #include "gi_point.h"
 #include "project.h"
 #include <QElapsedTimer>
+#undef emit
 #include <execution>
+#define emit
+
 
 namespace PocketRaster {
 
