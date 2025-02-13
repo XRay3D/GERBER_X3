@@ -47,6 +47,9 @@ public:
         Height,          // model
     };
     Model* model{};
+
+protected:
+    void init() override { redraw(); } // FIXME init()
 };
 
 class Plugin final : public Shapes::Plugin {

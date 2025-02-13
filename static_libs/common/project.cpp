@@ -80,7 +80,7 @@ QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     stream >> type;
     stream >> loadErrorMessage;
     if(App::shapePlugins().contains(type)) {
-        shape = App::shapePlugin(type)->createShape();
+        shape = App::shapePlugin(type)->createShape({std::nan("read"), std::nan("read")});
         stream >> *shape;
         App::grView().addItem(shape);
     } else {

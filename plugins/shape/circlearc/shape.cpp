@@ -213,6 +213,11 @@ void Shape::setAngle(int i, double radius) {
     redraw();
 }
 
+void Shape::init() {
+    currentHandler = handlers[Point1].get();
+    redraw();
+}
+
 } // namespace ShArc
 
 #include "moc_shape.cpp"
