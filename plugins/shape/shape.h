@@ -97,6 +97,7 @@ protected:
     virtual void updateOtherHandlers(Handle* handler, int mode = {});
     virtual void write(QDataStream& stream) const;
     virtual void read(QDataStream& stream);
+    virtual void init() = 0;
 };
 
 } // namespace Shapes

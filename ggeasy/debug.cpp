@@ -68,7 +68,7 @@ bool MainWindow::debug() {
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if(1) {
+        if(0) {
 
             for(auto* file: {
                     R"(/home/x-ray/Загрузки/gerber1.gbr)",
@@ -117,7 +117,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
         }
 
-        if(1) {
+        if(0) {
             constexpr auto PROFILE = md5::hash32("Profile");
             delay_ms(1000);
             QTimer::singleShot(time += delay, this, [this] { selectAll(); });

@@ -24,15 +24,17 @@ Shape::Shape(QPointF center, QPointF pt)
     : radius_(QLineF(center, pt).length()) {
     paths_.resize(1);
 
-    handlers.reserve(PtCount);
+    if(!std ::isnan(center.x())) {
+        handlers.reserve(PtCount);
 
-    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-    handlers.emplace_back(std::make_unique<Handle>(this));
+        handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
+        handlers.emplace_back(std::make_unique<Handle>(this));
 
-    handlers[Center]->setPos(center);
-    handlers[Point1]->setPos(pt);
+        handlers[Center]->setPos(center);
+        handlers[Point1]->setPos(pt);
 
-    redraw();
+        redraw();
+    }
 
     App::grView().addItem(this);
 }
@@ -102,6 +104,11 @@ void Shape::setRadius(double radius) {
     QLineF line(handlers[Center]->pos(), handlers[Point1]->pos());
     line.setLength(radius);
     handlers[Point1]->setPos(line.p2());
+    currentHandler = handlers[Point1].get();
+    redraw();
+}
+
+void Shape::init() {
     currentHandler = handlers[Point1].get();
     redraw();
 }

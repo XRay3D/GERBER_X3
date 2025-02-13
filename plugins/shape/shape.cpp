@@ -259,7 +259,7 @@ void AbstractShape::read(QDataStream& stream) {
         item->QGraphicsItem::setPos(pos);
         item->setVisible(false);
     }
-    redraw();
+    init();
 }
 
 } // namespace Shapes

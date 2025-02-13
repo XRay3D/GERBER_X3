@@ -56,6 +56,9 @@ public:
     };
     Model* model{};
 
+protected:
+    void init() override;
+
 private:
     mutable double radius_{};
     int ptCtr{};

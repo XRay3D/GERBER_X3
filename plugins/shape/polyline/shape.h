@@ -40,6 +40,9 @@ public:
     bool closed() const;
     Model* model{};
 
+protected:
+    void init() override { redraw(); } // FIXME init()
+
 private:
     QPointF centroid();
     QPointF centroidFast(); //??????
