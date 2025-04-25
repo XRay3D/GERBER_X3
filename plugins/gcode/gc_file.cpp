@@ -1,11 +1,9 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -290,16 +288,16 @@ mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, doub
     if(depth) {
         double zk = depth - z_;
         double perimetr = QLineF{path.front(), path.back()}.length();
-        for(int i = 1; i < path.size(); ++i)
-            perimetr += QLineF{path[i - 1], path[i - 0]}.length();
+        for(auto&& r: std::ranges::slide_view(path, 2))
+            perimetr += QLineF{r.front(), r.back()}.length();
 
         for(QPointF prevPt; const QPointF& point: path)
             if(skip) {
                 prevPt = point;
                 skip = false;
             } else {
-                // z_ += QLineF{prevPt, point}.length() / perimetr * zk;
-                z_ = zk;
+                z_ += QLineF{prevPt, point}.length() / perimetr * zk;
+                // z_ = zk;
                 lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), z(z_), feed(feedRate()), speed(spindleSpeed)}));
                 prevPt = point;
             }
@@ -467,7 +465,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                         auto sp(savePath(path, spindleSpeed(), depth));
                         lines_.append(sp);
                     }
-                    // lines_.append(savePath(path, spindleSpeed()));// Проход без спирали.
+                    lines_.append(savePath(path, spindleSpeed())); // Проход без спирали.
                     endPath();
                     paths.erase(paths.begin() + j--);
                 } else {

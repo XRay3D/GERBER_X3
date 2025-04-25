@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,12 +13,12 @@
 #include "datastream.h"
 #include "md5.h"
 #include "myclipper.h"
+
 #include "tool.h"
 
 #include <QColor>
 #include <QDebug>
 #include <QVariant>
-#include <clipper_types.h>
 #include <variant>
 
 constexpr auto G_CODE = md5::hash32("GCode");

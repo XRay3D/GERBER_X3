@@ -1,12 +1,10 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
  * Author : Damir Bakiev                                                         *
  * Version : na                                                                  *
  * Date : 11 November 2021                                                       *
  * Website : na                                                                  *
- * Copyright : Damir Bakiev 2016-2023                                            *
+ * Copyright : Damir Bakiev 2016-2025                                            *
  * License:                                                                      *
  * Use, modification & distribution is subject to Boost Software License Ver 1.  *
  * http://www.boost.org/LICENSE_1_0.txt                                          *
@@ -134,7 +132,7 @@ void MainWindow::init() {
 
     initWidgets();
 
-    GCode::PropertiesForm(); // init default vars;
+    // FIXME GCode::PropertiesForm(); // init default vars;
 
     setCurrentFile(QString());
     readSettings();
@@ -328,7 +326,13 @@ void MainWindow::createActionsService() {
     serviceMenu->addSeparator();
     // G-Code Properties
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
-    connect(action, &QAction::toggled, this, [=, this](bool checked) { if (checked) setDockWidget(new GCode::PropertiesForm); });
+    connect(action, &QAction::toggled, this, [pf = GCode::PropertiesForm::create(this), this](bool checked) {
+        if(checked) setDockWidget(pf);
+        // connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
+    });
+    // connect(action, &QAction::toggled, this, [=, this](bool checked) {
+    //     if(checked) setDockWidget(new GCode::PropertiesForm);
+    // });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     action->setCheckable(true);
     toolpathActions.try_emplace(G_CODE_PROPERTIES, action);

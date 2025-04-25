@@ -1,19 +1,19 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  03 October 2024
+ Date      :  ХХ ХХХ 2025
  Website   :  na
- Copyright :  Damir Bakiev 2016-2024
+ Copyright :  Damir Bakiev 2016-2025
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 project(
   GGEasy
   VERSION 0.9.0.0
-  LANGUAGES CXX)
+  LANGUAGES C CXX)
 
 # if(ANDROID) set(ANDROID_PACKAGE_SOURCE_DIR
 # "${CMAKE_CURRENT_SOURCE_DIR}/android") if(ANDROID_ABI STREQUAL "armeabi-v7a")
@@ -32,8 +32,7 @@ add_definitions(-DBUILD_DATE="${DT}" -DGIT_REF_NAME="${GIT_REF_NAME}"
 find_package(Qt${QT_VERSION_MAJOR} REQUIRED
              COMPONENTS Core Gui LinguistTools OpenGL PrintSupport Widgets)
 
-# WINDOWS APP ICON
-set(APP_ICON_RESOURCE_WINDOWS "myapp.rc")
+set(APP_ICON_RESOURCE_WINDOWS "myapp.rc") # WINDOWS APP ICON
 
 file(GLOB HEADERS *.h)
 file(GLOB QRC_FILES res/*.qrc)

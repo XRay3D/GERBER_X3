@@ -1,14 +1,14 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  03 October 2024
+ Date      :  ХХ ХХХ 2025
  Website   :  na
- Copyright :  Damir Bakiev 2016-2024
+ Copyright :  Damir Bakiev 2016-2025
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.24)
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")

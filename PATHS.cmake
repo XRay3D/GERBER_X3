@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 set(DIR_NAME
     "Qt${QT_VERSION_MAJOR}.${QT_VERSION_MINOR}_${CMAKE_CXX_COMPILER_ID}_${CMAKE_BUILD_TYPE}"

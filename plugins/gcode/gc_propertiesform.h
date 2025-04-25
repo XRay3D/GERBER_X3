@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,12 +20,20 @@ namespace GCode {
 class PropertiesForm : public QWidget {
     Q_OBJECT
 
-public:
     explicit PropertiesForm(QWidget* parent = nullptr);
+
+public:
+    static auto create(QWidget* parent = nullptr) {
+        return new PropertiesForm();
+    }
+
     ~PropertiesForm() override;
 
     void updatePosDsbxs();
     void updateAll();
+
+    void load();
+    void save();
 
 private slots:
     void on_pbResetHome_clicked();

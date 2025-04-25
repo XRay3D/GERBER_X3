@@ -1,15 +1,15 @@
-// This is a personal academic project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
+// module;
+
 #include "myclipper.h"
 
 #include "app.h"
@@ -28,6 +28,10 @@
 #include <QPainterPath>
 #include <QPixmap>
 #include <forward_list>
+
+// export module myclipper;
+
+// export namespace MC {
 
 QIcon drawIcon(const Paths& paths, QColor color) {
     static std::mutex m;
@@ -1051,3 +1055,5 @@ Pathss& sortB(Pathss& src, Point startPt) {
     }
     return src;
 }
+
+// } // namespace MC

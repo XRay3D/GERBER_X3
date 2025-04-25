@@ -1,14 +1,14 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  03 October 2024
+ Date      :  ХХ ХХХ 2025
  Website   :  na
- Copyright :  Damir Bakiev 2016-2024
+ Copyright :  Damir Bakiev 2016-2025
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 project(filetree LANGUAGES CXX)
 
