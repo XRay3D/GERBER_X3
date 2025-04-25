@@ -1170,9 +1170,10 @@
 //}
 
 #include "jc_voronoi.h"
-#include "clipper_types.h"
+// #include "clipper_types.h"
 #include "memory.h"
 #include "myclipper.h" // NOTE ???
+
 
 #include <cancelation.h>
 
