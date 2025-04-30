@@ -24,7 +24,7 @@ link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
 target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-  PUBLIC tbb12)
+  PUBLIC #[[tbb12]] tbb)
 
 if(Enable_Circle)
   add_subdirectory(circle)

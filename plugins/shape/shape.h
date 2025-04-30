@@ -28,7 +28,8 @@ class AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-        Block(out).write(
+        stream << shape.type() << shape.name();
+        Block{out}.write(
             shape.id_,
             shape.isVisible());
         shape.write(out);
@@ -40,7 +41,7 @@ class AbstractShape : public Gi::Item, public ::FileTree::Node {
         stream >> data;
         QDataStream in(&data, QIODevice::ReadOnly);
         bool visible;
-        Block(in).read(
+        Block{in}.read(
             shape.id_,
             visible);
         shape.read(in);

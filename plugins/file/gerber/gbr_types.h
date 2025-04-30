@@ -154,17 +154,17 @@ struct Format {
     int yDecimal = DecimalDefVal;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& format) {
-        return ::Block(stream).write(format);
+        return ::Block{stream}.write(format);
     }
     friend QDataStream& operator>>(QDataStream& stream, Format& format) {
-        return ::Block(stream).read(format);
+        return ::Block{stream}.read(format);
     }
 };
 
 class State {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const State& state) {
-        return ::Block(stream).write(
+        return ::Block{stream}.write(
             state.dCode_,
             state.gCode_,
             state.imgPolarity_,
@@ -181,7 +181,7 @@ class State {
     }
 
     friend QDataStream& operator>>(QDataStream& stream, State& state) {
-        return ::Block(stream).read(
+        return ::Block{stream}.read(
             state.dCode_,
             state.gCode_,
             state.imgPolarity_,
@@ -259,11 +259,11 @@ public:
 struct GrObject : public GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        return ::Block(stream).write(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        return ::Block{stream}.write(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        return ::Block(stream).read(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        return ::Block{stream}.read(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
     File* gFile{nullptr};

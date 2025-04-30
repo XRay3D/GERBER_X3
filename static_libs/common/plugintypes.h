@@ -52,10 +52,10 @@ struct Transform {
     QPointF scale{1, 1};
 
     friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
-        return Block(stream).write(tr);
+        return Block{stream}.write(tr);
     }
     friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
-        return Block(stream).read(tr);
+        return Block{stream}.read(tr);
     }
 
     QTransform toQTransform() const {
@@ -79,11 +79,11 @@ enum class GCType {
 struct GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-        return Block(stream).write(go.id, go.type, go.pos, go.path, go.fill, go.name);
+        return Block{stream}.write(go.id, go.type, go.pos, go.path, go.fill, go.name);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-        return Block(stream).read(go.id, go.type, go.pos, go.path, go.fill, go.name);
+        return Block{stream}.read(go.id, go.type, go.pos, go.path, go.fill, go.name);
     }
 
     // clang-format off
@@ -174,10 +174,10 @@ struct LayerType {
     QString shortActName() const { return actName; }
 
     friend QDataStream& operator<<(QDataStream& stream, const LayerType& layer) {
-        return Block(stream).write(layer);
+        return Block{stream}.write(layer);
     }
     friend QDataStream& operator>>(QDataStream& stream, LayerType& layer) {
-        return Block(stream).read(layer);
+        return Block{stream}.read(layer);
     }
 };
 

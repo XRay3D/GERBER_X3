@@ -32,7 +32,7 @@ public:
     static void setCurrent(int current = 0) { current_ = current; }
     static void incCurrent() { ++current_; }
     static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow() {
+    static void throwIfCancel() {
         ++current_;
         if(cancel_) [[unlikely]]
             throw Cancel{__FUNCTION__};
@@ -41,4 +41,4 @@ public:
     static void cancel() { cancel_ = true; }
 };
 
-inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
+inline void throwIfCancel() { ProgressCancel::throwIfCancel(); }

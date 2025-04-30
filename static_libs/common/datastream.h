@@ -208,8 +208,8 @@ public:
 
 #define SERIALIZE_POD(TYPE)                                              \
     friend QDataStream& operator<<(QDataStream& stream, const TYPE& p) { \
-        return ::Block(stream).write(p);                                 \
+        return ::Block{stream}.write(p);                                 \
     }                                                                    \
     friend QDataStream& operator>>(QDataStream& stream, TYPE& p) {       \
-        return ::Block(stream).read(p);                                  \
+        return ::Block{stream}.read(p);                                  \
     }

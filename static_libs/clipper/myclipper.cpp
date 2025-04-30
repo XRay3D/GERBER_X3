@@ -490,7 +490,7 @@ void mergePaths(Paths& paths, const double dist) {
         for(size_t i = 0; i < paths.size(); ++i) {
             ProgressCancel::setMax(max);
             ProgressCancel::setCurrent(max - paths.size());
-            ifCancelThenThrow();
+            throwIfCancel();
             auto& pi = paths[i];
             for(size_t j = i + 1; j < paths.size(); ++j) {
                 if(i == j) continue;
@@ -699,7 +699,7 @@ void mergePaths(Paths& paths, const double maxDist) {
         for(size_t i{}; i < paths.size(); ++i) {
             ProgressCancel::setMax(max);
             ProgressCancel::setCurrent(max - paths.size());
-            ifCancelThenThrow();
+            throwIfCancel();
             for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j)
                     continue;

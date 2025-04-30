@@ -66,8 +66,6 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
 }
 
 QDataStream& operator<<(QDataStream& stream, Shapes::AbstractShape* shape) {
-    stream << shape->type();
-    stream << shape->name();
     stream << *shape;
     return stream;
 }
@@ -145,7 +143,7 @@ bool Project::save(const QString& fileName) {
     QDataStream out(&file);
     try {
         out << (ver_ = CurrentVer);
-        Block(out).write(
+        Block{out}.write(
             isPinsPlaced_,
             tailing,
             home_,
@@ -203,7 +201,7 @@ bool Project::open(const QString& fileName) {
             return false;
         }
         QRectF sceneRect;
-        Block(in).read(
+        Block{in}.read(
             isPinsPlaced_,
             tailing,
             home_,

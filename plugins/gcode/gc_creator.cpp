@@ -376,7 +376,7 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
         for(size_t i{}; i < paths.size(); ++i) {
             setMax(max);
             setCurrent(max - paths.size());
-            ifCancelThenThrow();
+            throwIfCancel();
             for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j)
                     continue;

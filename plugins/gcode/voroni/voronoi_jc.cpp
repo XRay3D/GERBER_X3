@@ -133,7 +133,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     for(int i = 0; i < merge.size(); ++i) {
         setMax(max);
         setCurrent(max - merge.size());
-        ifCancelThenThrow();
+        throwIfCancel();
         for(int j = 0; j < merge.size(); ++j) {
             if(i == j)
                 continue;

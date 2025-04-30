@@ -299,7 +299,7 @@ void File::setItemType(int type) {
 int File::itemsType() const { return itemsType_; }
 
 void File::write(QDataStream& stream) const {
-    ::Block(stream).write(
+    ::Block{stream}.write(
         graphicObjects_,
         apertures_,
         format_,
@@ -310,7 +310,7 @@ void File::write(QDataStream& stream) const {
 
 void File::read(QDataStream& stream) {
     crutch = this; // NOTE
-    ::Block(stream).read(
+    ::Block{stream}.read(
         graphicObjects_,
         apertures_,
         format_,

@@ -27,7 +27,7 @@ link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
 target_link_libraries(
   ${PROJECT_NAME}
   PRIVATE Qt${QT_VERSION_MAJOR}::Widgets
-  PUBLIC tbb12)
+  PUBLIC #[[tbb12]] tbb)
 
 set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 
@@ -56,9 +56,3 @@ endif()
 if(Enable_Excellon)
   add_subdirectory(excellon)
 endif()
-
-# if(Enable_TopoR) add_subdirectory(TopoR) endif()
-
-# if(Enable_File) add_subdirectory(file) endif()
-
-# if(Enable_Hpgl) add_subdirectory(hpgl) endif()
