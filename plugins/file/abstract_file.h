@@ -56,7 +56,7 @@ class AbstractFile {
     friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file) {
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-        Block(out).write(
+        Block{out}.write(
             file.id_,
             file.date_,
             file.groupedPaths_,
@@ -78,7 +78,7 @@ class AbstractFile {
         stream >> data;
         QDataStream in(&data, QIODevice::ReadOnly);
         bool visible{};
-        Block(in).read(
+        Block{in}.read(
             file.id_,
             file.date_,
             file.groupedPaths_,

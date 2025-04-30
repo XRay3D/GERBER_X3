@@ -420,7 +420,7 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
         merged.resize(merged.size() + 1);
         auto& path = merged.back();
         for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
-            ifCancelThenThrow();
+            throwIfCancel();
             if(path.empty() || path.back() == bit->front()) {
                 path.empty() ? path += * bit
                              : path += *bit | skipFront;

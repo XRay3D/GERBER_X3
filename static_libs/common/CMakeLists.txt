@@ -30,7 +30,7 @@ target_link_libraries(
   common
   PRIVATE filetree shape gi graphicsview Qt${QT_VERSION_MAJOR}::Qml
           Qt${QT_VERSION_MAJOR}::Widgets
-  PUBLIC tbb12)
+  PUBLIC #[[tbb12]] tbb)
 
 # add_subdirectory(doublespinbox)
 

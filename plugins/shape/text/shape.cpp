@@ -207,12 +207,12 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
 // }
 
 void Shape::write(QDataStream& stream) const {
-    Block(stream).write(iData);
+    Block{stream}.write(iData);
     Shapes::AbstractShape::write(stream);
 }
 
 void Shape::read(QDataStream& stream) {
-    Block(stream).read(iData);
+    Block{stream}.read(iData);
     Shapes::AbstractShape::read(stream);
 }
 

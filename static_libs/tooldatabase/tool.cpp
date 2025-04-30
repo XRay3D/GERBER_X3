@@ -25,7 +25,7 @@
 int toolId = qRegisterMetaType<Tool>("Tool");
 
 QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
-    return Block(stream).write(
+    return Block{stream}.write(
         tool.id_,
         tool.type_,
         tool.angle_,
@@ -43,7 +43,7 @@ QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
 }
 
 QDataStream& operator>>(QDataStream& stream, Tool& tool) {
-    return Block(stream).read(
+    return Block{stream}.read(
         tool.id_,
         tool.type_,
         tool.angle_,

@@ -124,7 +124,7 @@ void VoronoiBoost::boostVoronoi() {
         for (const Path& path: paths) {
             for (size_t i = 0; i < path.size(); ++i) {
                 incCurrent();
-                ifCancelThenThrow();
+                throwIfCancel();
                 const Point& point = path[i];
                 vecId.emplace_back(id);
                 //                !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
