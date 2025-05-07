@@ -9,10 +9,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_dbg.h"
-
-#include "gcode.h"
-
-#include "graphicsview.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
@@ -21,19 +17,17 @@
 
 namespace Gi {
 
-Debug::Debug(const Paths& paths, const QPen& pen) {
-    for(const Path& path: paths)
-        shape_.addPolygon(~path);
+Debug::Debug(const Paths& paths, const QPen& /*pen*/) {
+    for(const Path& path: paths) shape_.addPolygon(~path);
     boundingRect_ = shape_.boundingRect(); // + QMarginsF(k, k, k, k);
 }
 
-Debug::Debug(const Path& path, const QPen& pen) {
+Debug::Debug(const Path& path, const QPen& /*pen*/) {
     shape_.addPolygon(~path);
     boundingRect_ = shape_.boundingRect(); // + QMarginsF(k, k, k, k);
 }
 
-Debug::Debug(const QPainterPath& path, const QPen& pen) {
-}
+Debug::Debug(const QPainterPath& /*path*/, const QPen& /*pen*/) { }
 
 QRectF Debug::boundingRect() const { return boundingRect_; }
 

@@ -28,7 +28,7 @@
 #undef emit
 #include <execution>
 #define emit
- //std::execution::parallel_policy
+// std::execution::parallel_policy
 #include <forward_list>
 #include <set>
 #include <stdexcept>
@@ -46,9 +46,9 @@ public:
         genGcodeAndTile();
         endFile();
     }
-    void write(QDataStream& stream) const override { }
-    void read(QDataStream& stream) override { }
-    void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
+    void write(QDataStream& stream [[maybe_unused]]) const override { }
+    void read(QDataStream& stream [[maybe_unused]]) override { }
+    void initFrom(AbstractFile* file [[maybe_unused]]) override { qWarning(__FUNCTION__); }
     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
     uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
@@ -448,7 +448,7 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
             std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
             for(auto&& node: rwPolyTree(polynode))
                 map[sorter(*node)].emplace_back(std::move(node));
-            size_t i = polynode.Count();
+            // auto i = polynode.Count();
             auto it_ = polynode.end();                                         // std::reverse_iterator(polynode);
             auto it = *reinterpret_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
             for(auto&& [nest, nodes]: map)

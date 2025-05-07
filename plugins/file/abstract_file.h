@@ -140,7 +140,9 @@ public:
     void setSide(Side side);
 
     virtual mvector<GraphicObject> getDataForGC(
-        std::span<Criteria> criterias, GCType gcType, bool test = {}) const { return {}; };
+        std::span<Criteria> criterias [[maybe_unused]],
+        GCType gcType [[maybe_unused]],
+        bool test [[maybe_unused]] = {}) const { return {}; };
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
     virtual void createGi() = 0;
@@ -251,7 +253,7 @@ inline void AbstractFile::initFrom(AbstractFile* file) {
 
 inline const LayerTypes& AbstractFile::displayedTypes() const { return layerTypes_; }
 
-inline void AbstractFile::setItemType(int type) { }
+inline void AbstractFile::setItemType(int type [[maybe_unused]]) { }
 
 inline int AbstractFile::itemsType() const { return itemsType_; }
 

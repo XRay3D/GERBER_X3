@@ -66,24 +66,33 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
 }
 
 QDataStream& operator<<(QDataStream& stream, Shapes::AbstractShape* shape) {
+    stream << shape->type();
+    stream << shape->name();
     stream << *shape;
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     uint32_t type;
-    QString loadErrorMessage;
+    QString name;
     stream >> type;
-    stream >> loadErrorMessage;
-    if(App::shapePlugins().contains(type)) {
-        shape = App::shapePlugin(type)->createShape({std::nan("read"), std::nan("read")});
-        stream >> *shape;
-        App::grView().addItem(shape);
-    } else {
-        QByteArray data;
-        stream >> data;
-        qDebug() << type << loadErrorMessage << data;
+    stream >> name;
+    try {
+        if(App::shapePlugins().contains(type)) {
+            shape = App::shapePlugin(type)->createShape({std::nan("read"), std::nan("read")});
+            stream >> *shape;
+            shape->name() = name;
+        } else { // skip shape data
+            QByteArray data;
+            stream >> data;
+            qDebug() << type << name << data;
+        }
+    } catch(const std::exception& ex) {
+        qCritical() << type << name << ex.what();
+    } catch(...) {
+        qCritical();
     }
+
     return stream;
 }
 
@@ -93,7 +102,7 @@ QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, Gi::Item*& shape) {
+QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
     uint32_t type;
     Paths paths;
     stream >> type;
@@ -386,7 +395,7 @@ bool Project::reload(int32_t id, AbstractFile* file) {
     return false;
 }
 
-mvector<AbstractFile*> Project::files(int type) {
+mvector<AbstractFile*> Project::files(uint32_t type) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
@@ -397,7 +406,7 @@ mvector<AbstractFile*> Project::files(int type) {
     return rfiles;
 }
 
-mvector<AbstractFile*> Project::files(const mvector<int>& types) {
+mvector<AbstractFile*> Project::files(const mvector<uint32_t>& types) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());

@@ -147,7 +147,7 @@ void PropertiesForm::save() {
     settings.setValue(ui->dsbxCopperThickness);
     settings.setValue(ui->dsbxGlue);
     settings.endGroup();
-
+    if(!App::projectPtr()) return;
     App::project().setSafeZ(ui->dsbxSafeZ->value());
     App::project().setBoardThickness(ui->dsbxThickness->value());
     App::project().setCopperThickness(ui->dsbxCopperThickness->value());

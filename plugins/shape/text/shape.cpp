@@ -11,9 +11,10 @@
 #include "shape.h"
 #include "graphicsview.h"
 #include "math.h"
-#include "shhandler.h"
+
 #include <QIcon>
 #include <assert.h>
+#include <boost/pfr.hpp>
 
 using Shapes::Handle;
 
@@ -22,13 +23,17 @@ namespace ShTxt {
 Shape::Shape(QPointF pt1) {
     loadIData();
     paths_.resize(1);
-    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-    handlers.front()->setPos(pt1);
-    redraw();
+    if(!std::isnan(pt1.x())) {
+        handles = {
+            Handle{pt1, Handle::Center}
+        };
+        redraw();
+    }
     App::grView().addItem(this);
 }
 
 Shape::~Shape() {
+    // scene()->removeItem(this);
     std::erase(editor->shapes, this);
     editor->reset();
 }
@@ -46,7 +51,7 @@ void Shape::redraw() {
     QFontMetrics fm(font);
     const double capHeight = fm.capHeight();
     const double scale = iData.height / capHeight;
-    const double xyScale = 100.0 / iData.xy;
+    // const double xyScale = 100.0 / iData.xy;
 
     QPointF handlePt;
 
@@ -63,8 +68,8 @@ void Shape::redraw() {
         case TopLeft:     return {0,         capHeight    };
         case TopRight:    return {width,     capHeight    };
         default:          return {                        };
-            // clang-format on
         }
+        // clang-format on
     }(iData.handleAlign);
 
     QTransform transform;
@@ -91,7 +96,7 @@ void Shape::redraw() {
         painterPath = std::move(tmpPainterPath);
     }
     transform.reset();
-    transform.translate(handlers.front()->pos().x(), handlers.front()->pos().y());
+    transform.translate(handles.front().x(), handles.front().y());
     transform.rotate(iData.angle - 360);
 
     paths_.clear();
@@ -110,9 +115,7 @@ void Shape::redraw() {
         shape_.addPolygon(~sp);
     }
 
-    setPos({1, 1}); // костыли
-    setPos({0, 0});
-    //    update();
+    assert(handles.size() == 1);
 }
 
 QString Shape::text() const { return iData.text; }
@@ -130,7 +133,7 @@ void Shape::setSide(const Side& side) {
 }
 
 void Shape::setPt(const QPointF& point) {
-    handlers.front()->setPos(point);
+    handles.front().setPos(point);
     redraw();
 }
 
@@ -211,33 +214,26 @@ void Shape::write(QDataStream& stream) const {
     Shapes::AbstractShape::write(stream);
 }
 
-void Shape::read(QDataStream& stream) {
+void Shape::readAndInit(QDataStream& stream) {
     Block{stream}.read(iData);
-    Shapes::AbstractShape::read(stream);
+    Shapes::AbstractShape::readAndInit(stream);
+    redraw();
 }
 
 void Shape::saveIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
-    settings.setValue("font", iData.font);
-    settings.setValue("text", iData.text);
-    settings.setValue("side", iData.side);
-    settings.setValue("angle", iData.angle);
-    settings.setValue("height", iData.height);
-    settings.setValue("xy", iData.xy);
-    settings.setValue("handleAlign", iData.handleAlign);
+    boost::pfr::for_each_field(iData, [&settings](auto& field, auto index) { // TODO for_each_field_name
+        settings.setValue(boost::pfr::get_name<index, InternalData>(), field);
+    });
 }
 
 Shape::InternalData Shape::loadIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
-    iData.font = settings.value("font").toString();
-    iData.text = settings.value("text", QObject::tr("Shape")).toString();
-    iData.side = static_cast<Side>(settings.value("side", Side::Top).toInt());
-    iData.angle = settings.value("angle", 0.0).toDouble();
-    iData.height = settings.value("height", 10.0).toDouble();
-    iData.xy = settings.value("xy", 10.0).toDouble();
-    iData.handleAlign = settings.value("handleAlign", BotLeft).toInt();
+    boost::pfr::for_each_field(iData, [&settings]<typename Ty>(Ty& field, auto index) { // TODO for_each_field_name
+        field = settings.value(boost::pfr::get_name<index, InternalData>()).template value<Ty>();
+    });
     return iData;
 }
 
@@ -245,27 +241,19 @@ void Shape::save() { iDataCopy = iData; }
 
 void Shape::restore() {
     iData = std::move(iDataCopy);
-    redraw();
+    AbstractShape::redraw();
 }
 
 void Shape::ok() { saveIData(); }
 
-// void Shape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
-//     QGraphicsItem::mouseDoubleClickEvent(event);
-//     ShTextDialog dlg({this}, nullptr);
-//     dlg.exec();
-//     redraw();
-// }
-
 QPainterPath Shape::shape() const { return shape_; }
 
 QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == GraphicsItemChange::ItemSelectedChange)
-        editor->reset();
-    return Shapes::AbstractShape::itemChange(change, value);
+    if(change == GraphicsItemChange::ItemSelectedChange) editor->reset();
+    return AbstractShape::itemChange(change, value);
 }
 
-QString Shape::name() const { return QObject::tr("Shape"); }
+QString Shape::name() const { return QObject::tr("Text"); }
 
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-text"); }
 

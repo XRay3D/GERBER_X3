@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 project(common LANGUAGES CXX)
 
 find_package(
-  Qt${QT_VERSION_MAJOR}
+  Qt6
   COMPONENTS Qml
   REQUIRED)
 
@@ -28,9 +28,8 @@ add_library(common STATIC ${HEADERS} ${SOURCES})
 
 target_link_libraries(
   common
-  PRIVATE filetree shape gi graphicsview Qt${QT_VERSION_MAJOR}::Qml
-          Qt${QT_VERSION_MAJOR}::Widgets
-  PUBLIC #[[tbb12]] tbb)
+  PRIVATE filetree shape gi graphicsview Qt6::Widgets
+  PUBLIC #[[tbb12]] tbb Qt6::Qml)
 
 # add_subdirectory(doublespinbox)
 

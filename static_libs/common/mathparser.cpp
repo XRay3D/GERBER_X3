@@ -385,7 +385,7 @@ Double MathParser::eval(const Expression& e, QTreeWidgetItem* twi) {
     if(auto it = variables.find(e.token); it != variables.end())
         return addChild(twi, e, it->second);
 #else
-    auto addChild = [](QTreeWidgetItem* twi, const auto& e, Double val) -> Double {
+    auto addChild = [](QTreeWidgetItem* /*twi*/, const auto& /*e*/, Double val) -> Double {
         return val;
     };
 #endif

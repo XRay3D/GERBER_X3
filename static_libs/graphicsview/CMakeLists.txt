@@ -13,13 +13,13 @@ cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 project(graphicsview LANGUAGES CXX)
 
 find_package(
-  Qt${QT_VERSION_MAJOR}
+  Qt6
   COMPONENTS OpenGL
   REQUIRED)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   find_package(
-    Qt${QT_VERSION_MAJOR}
+    Qt6
     COMPONENTS OpenGLWidgets
     REQUIRED)
 endif()
@@ -32,12 +32,12 @@ add_library(graphicsview STATIC ${HEADERS} ${SOURCES})
 # target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(
-  graphicsview PRIVATE common Qt${QT_VERSION_MAJOR}::Widgets
-                       Qt${QT_VERSION_MAJOR}::OpenGL)
+  graphicsview PRIVATE common Qt6::Widgets
+                       Qt6::OpenGL)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   target_link_libraries(graphicsview
-                        PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+                        PRIVATE Qt6::OpenGLWidgets)
 endif()
 
 # target_compile_definitions(graphicsview PRIVATE GRAPHICSVIEW_LIBRARY)

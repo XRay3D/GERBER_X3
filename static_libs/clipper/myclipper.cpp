@@ -207,7 +207,7 @@ void TestPaths(const Paths& paths_) {
 
         double radius{};
 
-        auto count = ranges::count_if(path,
+        size_t count = ranges::count_if(path,
             [prevR = 0.0, center = GetZ(path.front()), &radius](const Point& pt) mutable {
                 const double r = QLineF{~center, ~pt}.length();
                 radius += r;
@@ -218,7 +218,8 @@ void TestPaths(const Paths& paths_) {
             });
         bool isCircle = count == path.size() || (count == path.size() - 1);
         if(isCircle) {
-            qWarning() << count << path.size() << radius << (radius /= path.size());
+            radius /= path.size();
+            qWarning() << count << path.size() << radius << radius;
             auto center = ~GetZ(path.front());
             pp.addEllipse(center, radius, radius);
         } else {
@@ -232,9 +233,7 @@ void TestPaths(const Paths& paths_) {
             // continue;
 
             Point center, currPt, source, target;
-            double srcA, dstA;
-            radius = 0.0;
-
+            double radius{};
             auto addArc = [&]() {
                 radius = Length(center, source) * dScale;
                 if(qFuzzyIsNull(radius)) return;
@@ -262,11 +261,11 @@ void TestPaths(const Paths& paths_) {
             // };
 
             source = path.front();
-            for(int i{}; i < path.size(); ++i) {
+            for(size_t i{}; i < path.size(); ++i) {
                 if(source.z == path[i].z) continue;
                 source = path[i];
                 pp.moveTo(~source);
-                for(int j{}, k; j <= path.size(); ++j) {
+                for(size_t j{}, k; j <= path.size(); ++j) {
                     currPt = path[i % path.size()];
                     if(!currPt.z || currPt == GetZ(currPt)) {
                         if(i - k == 1) {
@@ -589,9 +588,9 @@ struct span {
     size_t w{}, h{};
     T& val;
     span(T& val, size_t w, size_t h)
-        : val{val}
-        , w{w}
-        , h{h} { }
+        : w{w}
+        , h{h}
+        , val{val} { }
     auto operator[](size_t i) {
         return std::span{val.begin() + i * h, h};
     }
@@ -601,14 +600,14 @@ struct span {
 };
 
 void reductionOfDistance(Path& path, Point point) {
-    if(point.x == 0 & point.y == 0) point = path.front();
+    if(point.x == 0 && point.y == 0) point = path.front();
     // sort by distance
 
     std::vector<double> data(path.size() * path.size());
     span matrix{data, path.size(), path.size()};
 
-    for(int x{}; x < path.size(); ++x)
-        for(int y{x + 1}; y < path.size(); ++y)
+    for(size_t x{}; x < path.size(); ++x)
+        for(size_t y{x + 1}; y < path.size(); ++y)
             matrix[x][y] = distTo(path[x], path[y]);
 
     size_t counter = 0;
@@ -629,15 +628,15 @@ void reductionOfDistance(Path& path, Point point) {
     {
         double dist{};
         auto data = path.data();
-        for(int i{1}; i < path.size(); ++i) {
+        for(size_t i{1}; i < path.size(); ++i) {
             double tmp = distTo(*data, *(data + 1));
             dist += tmp;
             ++data;
         }
 
         data = path.data();
-        for(int i{0}; i < path.size(); ++i) {
-            for(int j{i + 1}; j < path.size(); ++j) {
+        for(size_t i{0}; i < path.size(); ++i) {
+            for(size_t j{i + 1}; j < path.size(); ++j) {
                 double tmp = distTo(data[i], data[j]) * dScale;
                 qCritical() << "dist" << tmp << i << ~data[i] << j << ~data[j];
             }
@@ -663,7 +662,7 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
     else if(interpolation == CounterClockwiseCircular && stop <= start)
         stop += 2.0 * pi;
 
-    double angle = qAbs(stop - start);
+    double angle = std::abs(stop - start);
     double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
     for(int i = 0; i < steps; i++) {

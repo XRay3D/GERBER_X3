@@ -99,13 +99,13 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
     // using std::views::filter;
     // using std::views::transform;
-    auto constexpr filter = std::views::filter([](auto* item) {
-        return item->type() == int(Type::DataPath);
-    });
+    // auto constexpr filter = std::views::filter([](auto* item) {
+    //     return item->type() == int(Type::DataPath);
+    // });
 
-    auto constexpr transform = std::views::transform([](auto* item) {
-        return static_cast<Item*>(item);
-    });
+    // auto constexpr transform = std::views::transform([](auto* item) {
+    //     return static_cast<Item*>(item);
+    // });
 
     const auto glue = App::project().glue() /** uScale*/;
 

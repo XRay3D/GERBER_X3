@@ -27,28 +27,49 @@ set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_definitions(
   -DQT_MESSAGELOGCONTEXT # qDebug()
-  -DQT_DISABLE_DEPRECATED_BEFORE=0x060000
+  -DQT_DISABLE_DEPRECATED_BEFORE=0x060400
   -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a,
-                          # const QStringBuilder<A, B> &b, QChar)
+  # const QStringBuilder < A, B>& b, QChar)
 )
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-
+  add_compile_options(
+    -fPIC -Wall #[[-Wconversion]] -Werror -Wextra -Wpedantic
+    # -ffast-math
+    -march=native)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-
+  add_compile_options(
+    -fPIC -Wall #[[-Wconversion]] -Werror -Wextra -Wpedantic
+    # -ffast-math
+    -march=native)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
 
+# add_compile_options( #
+# $<IF:$OR<$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>, -fPIC -Wpedantic #
+# -Wall -Wextra -Wconversion -Werror> #
+# $<IF:$<AND:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>, -fPIC #
+# -Wpedantic -Wall -Wextra -Wconversion -Werror>
+# $<$<AND:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fPIC -Wpedantic
+# -Wall -Wextra -Wconversion -Werror> #
+# $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Od> #
+# $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/O2>) ) #
+# target_compile_options(my_target PRIVATE $ < $ < AND : $ < CXX_COMPILER_ID : #
+# GNU>, $ < CONFIG : Debug>> : -Og> $ < $ < AND : $ < CXX_COMPILER_ID : GNU>, $
+# # < CONFIG : Release>> : -O2> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < #
+# CONFIG : Debug>> : / Od> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < CONFIG
+# # : Release>> : / O2>)
+
 # FIND BOOST
 find_package(Boost)
 if(Boost_FOUND)
-  if(Boost_VERSION VERSION_LESS 1.84)
+  if(Boost_VERSION VERSION_LESS 1.85)
     message(
       FATAL_ERROR
-        "==> !! Required Boost version is greater than or equal to 1.84.0! Current ${Boost_VERSION}."
+        "==> !! Required Boost version is greater than or equal to 1.85.0! Current ${Boost_VERSION}."
     )
   endif()
   include_directories(${Boost_INCLUDE_DIR})
@@ -57,24 +78,24 @@ else()
   message(FATAL_ERROR "Boost not found!!!")
 endif()
 
-#[[ FIND CGAL
+#[[FIND CGAL
 find_package(CGAL)
 if(CGAL_FOUND)
-  # if(CGAL_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required CGAL
-  # version is greater than or equal to 1.84.0! Current ${CGAL_VERSION}." )
-  # endif()
+#if (CGAL_VERSION_MINOR LESS 84) message(FATAL_ERROR "==> !! Required CGAL
+#version is greater than or equal to 1.84.0 !Current ${CGAL_VERSION }." )
+#endif()
   include_directories(${CGAL_INCLUDE_DIR})
   message(==> "CGAL ${CGAL_VERSION} found!!!")
 else()
   message(FATAL_ERROR "CGAL not found!!!")
 endif()
 
-# FIND EIGEN3
+#FIND EIGEN3
 find_package(EIGEN3)
 if(EIGEN3_FOUND)
-  # if(eigen_VERSION_MINOR LESS 84) message( FATAL_ERROR "==> !! Required eigen
-  # version is greater than or equal to 1.84.0! Current ${eigen_VERSION}." )
-  # endif()
+#if (eigen_VERSION_MINOR LESS 84) message(FATAL_ERROR "==> !! Required eigen
+#version is greater than or equal to 1.84.0 !Current ${eigen_VERSION }." )
+#endif()
   include_directories(${EIGEN3_INCLUDE_DIR})
   message(==> "EIGEN3 ${EIGEN3_VERSION} found!!!")
 else()
@@ -101,15 +122,17 @@ include_directories(
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ ONLY)
+set(CLIPPER2_USINGZ "ONLY")
 add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
-find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Core) # Qt6
+# target_compile_options(Clipper2Z PUBLIC - fPIC)
+
+find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core) # Qt6
 
 find_package(
-  Qt${QT_VERSION_MAJOR}
+  Qt6
   COMPONENTS Widgets LinguistTools
   REQUIRED)
 

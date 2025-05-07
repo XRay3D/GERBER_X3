@@ -52,10 +52,10 @@ class Pin;
 
 namespace Shapes {
 class Plugin;
-class Handle;
+// class Handle;
 } // namespace Shapes
 
-using Handlers = mvector<Shapes::Handle*>;
+// using handles = mvector<Shapes::Handle*>;
 
 using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
@@ -70,14 +70,14 @@ public:                                           \
         assert(app->NAME##_);                     \
         return *app->NAME##_;                     \
     }                                             \
-    static auto NAME##Ptr() {                     \
+    static auto* NAME##Ptr() {                    \
         /*assert(app->NAME##_);*/                 \
         return app->NAME##_;                      \
     }                                             \
     static void SET(TYPE* NAME) {                 \
         if(app->NAME##_ && NAME)                  \
             throw std::logic_error(__FUNCTION__); \
-        qInfo() << #NAME << NAME;                 \
+        /*qInfo() << #NAME << NAME;*/             \
         app->NAME##_ = NAME;                      \
     }
 
@@ -112,7 +112,7 @@ class App {
 
     AppSettings appSettings_;
 
-    Handlers handlers_;
+    // handles handles_;
     //    QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
@@ -153,7 +153,7 @@ public:
     static Shapes::Plugin* shapePlugin(int type) { return app->shapePlugin_.contains(type) ? app->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app->shapePlugin_; }
 
-    static auto& shapeHandlers() { return app->handlers_; }
+    // static auto& shapehandles() { return app->handles_; }
 
     static auto& settings() { return app->appSettings_; }
 

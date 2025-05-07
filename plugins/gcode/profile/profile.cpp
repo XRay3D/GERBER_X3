@@ -135,7 +135,7 @@ void Creator::trimmingOpenPaths(Paths& paths) {
 }
 
 void Creator::cornerTrimming() {
-    Timer<mS> t{};
+    Timer_mS t{};
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;

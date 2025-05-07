@@ -11,7 +11,6 @@
 #include "shape.h"
 #include "ft_view.h"
 #include "qgraphicsscene.h"
-#include "shhandler.h"
 
 // #include "mainwindow.h"
 
@@ -22,10 +21,51 @@
 
 namespace Shapes {
 
+static constexpr int HandleSize = 20;
+
+QDataStream& operator<<(QDataStream& stream, const Handle& handle) {
+    return stream << handle.pos_ << handle.type_;
+}
+
+QDataStream& operator>>(QDataStream& stream, Handle& handle) {
+    return stream >> handle.pos_ >> handle.type_;
+}
+
+QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
+    QByteArray data;
+    QDataStream out{&data, QIODevice::WriteOnly};
+    Block{out}.write(shape.id_, shape.isVisible());
+    out << bool(shape.QGraphicsItem::flags() & QGraphicsItem::ItemIsMovable);
+    out << shape.handles;
+    shape.write(out);
+    return stream << data;
+}
+
+QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
+    QByteArray data;
+    stream >> data;
+    QDataStream in{&data, QIODevice::ReadOnly};
+    bool visible;
+    Block{in}.read(shape.id_, visible);
+
+    shape.setZValue(shape.id_);
+    shape.setVisible(visible);
+    shape.setToolTip(shape.name() % QString::number(shape.id_));
+
+    in >> shape.isFinal;
+    shape.setFlag(QGraphicsItem::ItemIsMovable, shape.isFinal);
+    shape.isFinal = true;
+
+    in >> shape.handles;
+    assert(shape.handles.size());
+
+    shape.readAndInit(in);
+
+    return stream;
+}
+
 AbstractShape::AbstractShape()
-    : FileTree::Node(FileTree::AbstractShape)
-//    : node_(new Node{this})
-{
+    : FileTree::Node{FileTree::AbstractShape} {
     paths_.resize(1);
     changeColor();
     setFlags(ItemIsSelectable);
@@ -35,7 +75,9 @@ AbstractShape::AbstractShape()
 }
 
 AbstractShape::~AbstractShape() {
-    App::project().deleteShape(id_);
+    if(App::projectPtr()) App::project().deleteShape(id_);
+    // std::erase(model->shapes, this);
+    // qobject_cast<QTableView*>(model->parent())->reset();
 }
 
 void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget*) {
@@ -51,72 +93,38 @@ void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     painter->setPen(pen_);
     painter->setBrush(QGraphicsItem::flags().testFlag(ItemIsSelectable) ? QBrush{brushColor_} : QBrush{Qt::NoBrush});
     painter->drawPath(shape_);
+
+    if(!isSelected() || !isEditable()) return;
+
+    painter->setPen({Qt::red, 1.0 * scale()});
+    painter->setBrush(Qt::NoBrush);
+    painter->drawRect(pPathHandle.boundingRect());
+
+    painter->setPen(Qt::NoPen);
+    const auto hs = HandleSize * 0.5 * scale();
+
+    painter->setPen(QPen(Qt::black, 0.0));
+
+    for(auto&& var: handles) {
+        auto color = var.color();
+        if(&var == curHandle.base()) color = Qt::magenta;
+        color.setAlpha(100);
+        painter->setBrush(color);
+        painter->drawEllipse(var, hs, hs);
+    }
 }
 
-QRectF AbstractShape::boundingRect() const { return shape_.boundingRect(); }
+QRectF AbstractShape::boundingRect() const {
+    if(isSelected()) return pPathHandle.boundingRect();
+    return shape_.boundingRect();
+}
 
-QPainterPath AbstractShape::shape() const { return shape_; }
+QPainterPath AbstractShape::shape() const {
+    if(isSelected()) return pPathHandle + shape_;
+    return shape_;
+}
 
 Paths AbstractShape::paths(int) const { return paths_; }
-
-void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) // групповое перемещение
-{
-    QGraphicsItem::mouseMoveEvent(event);
-    const auto dp(App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos);
-    for(auto& [shape, hPos]: hInitPos) {
-        for(size_t i = 0, e = hPos.size(); i < e; ++i)
-            shape->handlers[i]->setPos(hPos[i] + dp);
-        shape->redraw();
-    }
-}
-
-void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
-    QGraphicsItem::mousePressEvent(event);
-    if(currentHandler)
-        return;
-    currentHandler = {};
-    hInitPos.clear();
-    const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
-    initPos = event->pos() + p;
-    for(auto item: scene()->selectedItems()) {
-        if(item->type() >= Gi::Type::ShCircle) {
-            auto* shape = static_cast<AbstractShape*>(item);
-            hInitPos[shape].reserve(shape->handlers.size());
-            for(auto&& h: shape->handlers) {
-                h->setFlag(ItemSendsScenePositionChanges, false);
-                hInitPos[shape].emplace_back(h->pos());
-            }
-        }
-    }
-}
-
-void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
-    QGraphicsItem::mouseDoubleClickEvent(event);
-    // App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
-}
-
-void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
-    QMenu menu_;
-    menu(menu_, App::fileTreeViewPtr());
-    menu_.exec(event->screenPos());
-}
-
-QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if(change == ItemSelectedChange) {
-        const bool selected = value.toInt();
-        for(auto& item: handlers)
-            item->setVisible(selected);
-        if(/*node_->*/ index().isValid())
-            App::fileTreeView().selectionModel()->select(/*node_->*/ index(),
-                (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect)
-                    | QItemSelectionModel::Rows);
-    } else if(change == ItemVisibleChange) {
-        emit App::fileModel().dataChanged(/*node_->*/ index(), /*node_->*/ index(), {Qt::CheckStateRole});
-    }
-    return Gi::Item::itemChange(change, value);
-}
-
-void AbstractShape::updateOtherHandlers(Handle* h, int mode) { currentHandler = h, redraw(), currentHandler = nullptr; }
 
 void AbstractShape::changeColor() {
     //    animation.setStartValue(bodyColor_);
@@ -142,7 +150,25 @@ void AbstractShape::changeColor() {
     //    animation.start();
 }
 
-// Node* AbstractShape::node() const { return node_; }
+void AbstractShape::redraw() {
+    // static bool unloop;
+    // if(unloop) return unloop = false, void();
+
+    pPathHandle = {}; //.clear();
+    if(!isSelected()) return;
+
+    // unloop = true;
+    redraw();
+    // unloop = false;
+
+    const auto hs = HandleSize * 0.5 * scale();
+
+    std::ranges::for_each(handles,
+        std::bind(qOverload<const QPointF&, qreal, qreal>(&QPainterPath::addEllipse),
+            &pPathHandle, _1, hs, hs));
+
+    setPos(1, 1), setPos(0, 0); // NOTE needed to update internal BSP etc, calling update() has no effect.
+}
 
 bool AbstractShape::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch(FileTree::Column(index.column())) {
@@ -169,28 +195,6 @@ bool AbstractShape::setData(const QModelIndex& index, const QVariant& value, int
     }
 }
 
-QVariant AbstractShape::data(const QModelIndex& index, int role) const {
-    switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        switch(role) {
-        case Qt::DisplayRole:
-            return QString("%1 (%2)").arg(name()).arg(id_);
-        case Qt::CheckStateRole:
-            return isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole:
-            return icon();
-        case FileTree::Id:
-            return id_;
-        case FileTree::Select:
-            return isSelected();
-        default:
-            return {};
-        }
-    default:
-        return {};
-    }
-}
-
 Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch(FileTree::Column(index.column())) {
@@ -203,61 +207,197 @@ Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
     }
 }
 
-void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
-    auto action = menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete object \"%1\"").arg(name()), [this] {
-        auto r = row();
-        auto p = index().parent();
-        App::fileModel().removeRow(r, p);
-    });
+QVariant AbstractShape::data(const QModelIndex& index, int role) const {
+    switch(FileTree::Column(index.column())) {
+    case FileTree::Column::NameColorVisible:
+        switch(role) {
+        case Qt::DisplayRole: /*   */ return QString("%1 (%2)").arg(name()).arg(id_);
+        case Qt::CheckStateRole: /**/ return isVisible() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DecorationRole: /**/ return icon();
+        case FileTree::Id: /*      */ return id_;
+        case FileTree::Select: /*  */ return isSelected();
+        default: /*                */ return {};
+        }
+    default:
+        return {};
+    }
+}
 
-    action = menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Visible \"%1\"").arg(name()), [this](bool fl) { Gi::Item::setVisible(fl); });
+void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
+    auto action = menu.addAction(
+        QIcon::fromTheme("edit-delete"),
+        QObject::tr("&Delete object \"%1\"").arg(name()),
+        [this] { App::fileModel().removeRow(row(), index().parent()); });
+
+    action = menu.addAction(
+        QIcon::fromTheme("hint"),
+        QObject::tr("&Visible \"%1\"").arg(name()),
+        [this](bool fl) { Gi::Item::setVisible(fl); });
     action->setCheckable(true);
     action->setChecked(isVisible());
 
-    action = menu.addAction(QIcon::fromTheme(""), QObject::tr("&Selectable \"%1\"").arg(name()), [item = const_cast<AbstractShape*>(this)](bool fl) {
-        item->setFlag(ItemIsSelectable, fl);
-    });
+    action = menu.addAction(
+        QIcon::fromTheme(""),
+        QObject::tr("&Editable \"%1\"").arg(name()),
+        [this](bool fl) { setEditable(fl); });
     action->setCheckable(true);
-    action->setChecked(Gi::Item::flags() & ItemIsSelectable);
+    action->setChecked(isEditable());
 
-    action = menu.addAction(QIcon::fromTheme("document-edit"), QObject::tr("Edit Selected"), [this] {
-        // App::mainWindow().setDockWidget(App::shapePlugin(type())->editor());
-    });
-
-    //    action->connect(action, &QAction::toggled );
+    action = menu.addAction(
+        QIcon::fromTheme("document-edit"),
+        QObject::tr("Edit Selected"), [this] { App::shapePlugin(type())->requestEditor(); });
 }
 
-// write to project
-void AbstractShape::write(QDataStream& stream) const {
-    stream << bool(Gi::Item::flags() & ItemIsSelectable);
-    stream << qint32(handlers.size());
-    for(const auto& item: handlers) {
-        stream << item->pos();
-        stream << item->type_;
+void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
+    event->setPos(App::settings().getSnappedPos(event->pos(), event->modifiers()));
+    QGraphicsItem::mouseMoveEvent(event);
+    if(curHandle.base()) {
+        curHandle->setPos(event->pos());
+        AbstractShape::redraw();
+    }
+    return;
+    // const auto dp = App::settings().getSnappedPos(event->pos(), event->modifiers()) - initPos;
+    // for(auto& [shape, hPos]: hInitPos) {
+    //     for(auto&& [handler, pos]: std::ranges::zip_view(shape->handles, hPos))
+    //         handler->setPos(pos + dp);
+    //     shape->redraw();
+    // }
+}
+
+void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
+    event->setPos(App::settings().getSnappedPos(event->pos(), event->modifiers()));
+    if(isEditable()) {
+        if(bool fl{}; scale(&fl) && fl) AbstractShape::redraw();
+        initPos = event->pos();
+        test(event->pos());
+        qInfo() << event;
+    }
+    QGraphicsItem::mousePressEvent(event);
+    // if(curHandle) return;
+    // curHandle = &{};
+    // hInitPos.clear();
+    // const auto p(App::settings().getSnappedPos(event->pos(), event->modifiers()) - event->pos());
+    // initPos = event->pos() + p;
+    // for(auto item: scene()->selectedItems()) {
+    //     if(item->type() >= Gi::Type::ShCircle) {
+    //         auto* shape = static_cast<AbstractShape*>(item);
+    //         hInitPos[shape].reserve(shape->handles.size());
+    //         for(auto&& h: shape->handles) {
+    //             h->setFlag(ItemSendsScenePositionChanges, false);
+    //             hInitPos[shape].emplace_back(h->pos());
+    //         }
+    //     }
+    // }
+}
+
+void AbstractShape::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    event->setPos(App::settings().getSnappedPos(event->pos(), event->modifiers()));
+    qInfo() << event;
+    QGraphicsItem::mouseReleaseEvent(event);
+    if(isEditable()) {
+        if(!curHandle.base() && !pos().isNull())
+            for(auto&& h: handles) h.setPos(h.pos() + pos());
+        curHandle = {};
+    }
+    AbstractShape::redraw();
+}
+
+// Node* AbstractShape::node() const { return node_; }
+
+void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseDoubleClickEvent(event);
+    App::shapePlugin(type())->requestEditor();
+}
+
+void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
+    class Dialog final : public QDialog {
+        AbstractShape* as;
+
+    public:
+        Dialog(AbstractShape* as_)
+            : as{as_} {
+            setWindowFlags(Qt::Popup);
+            setModal(false);
+            auto dsbx = [this](auto get, auto set) {
+                auto ds = new DoubleSpinBox{this};
+                ds->setDecimals(3);
+                ds->setRange(-1000, +1000);
+                ds->setSuffix(QObject::tr(" mm"));
+                ds->setValue((*as->curHandle.*get)());
+                connect(ds, &QDoubleSpinBox::valueChanged, [this, set](auto val) {
+                    (*as->curHandle.*set)(val);
+                    as->AbstractShape::redraw();
+                });
+                return ds;
+            };
+            auto gl = new QFormLayout{this};
+            gl->addRow(new QLabel{"X:", this}, dsbx(&Handle::x, &Handle::setX));
+            gl->addRow(new QLabel{"Y:", this}, dsbx(&Handle::y, &Handle::setY));
+            gl->setContentsMargins(6, 6, 6, 6);
+        }
+        ~Dialog() override = default;
+        void leaveEvent(QEvent* event) override {
+            event->accept(), reject();
+        };
+    };
+    qInfo() << event;
+    if(isEditable() && test(event->pos())) {
+        Dialog dialog{this};
+        dialog.move(event->screenPos());
+        dialog.exec();
+    } else {
+        QMenu menu;
+        AbstractShape::menu(menu, App::fileTreeViewPtr());
+        menu.exec(event->screenPos());
     }
 }
 
-// read from project
-void AbstractShape::read(QDataStream& stream) {
-    stream >> isFinal;
-    setFlag(ItemIsSelectable, isFinal);
+QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    return Gi::Item::itemChange(change, value);
+    // if(change == ItemFlagsChange) {
+    //     const bool selected = isSelected() && (QGraphicsItem::flags() & QGraphicsItem::ItemIsMovable);
+    //     for(auto& item: handles) item->setVisible(selected);
+    // } else if(change == ItemSelectedChange) {
+    //     const bool selected = value.toInt() && (QGraphicsItem::flags() & QGraphicsItem::ItemIsMovable);
+    //     for(auto& item: handles) item->setVisible(selected);
+    //     if(index().isValid()) {
+    //         auto flags = (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect) | QItemSelectionModel::Rows;
+    //         App::fileTreeView().selectionModel()->select(index(), flags);
+    //     }
+    // } else if(change == ItemVisibleChange) {
+    //     emit App::fileModel().dataChanged(index(), index(), {Qt::CheckStateRole});
+    // }
+}
 
-    isFinal = true;
+void AbstractShape::updateOtherhandles(Handle* h, int mode [[maybe_unused]]) {
+    qInfo();
+    setSelected(true);
+    curHandle = HIter{h};
+    AbstractShape::redraw();
+    curHandle = {};
+}
 
-    qint32 size;
-    stream >> size;
-    handlers.reserve(size);
-    QPointF pos;
-    Handle::Type type;
-    for(int i{}; i < size; ++i) {
-        stream >> pos;
-        stream >> type;
-        // if(handlers.size() < size)
-        auto item = handlers.emplace_back(std::make_unique<Handle>(this, type)).get();
-        item->QGraphicsItem::setPos(pos);
-        item->setVisible(false);
+double AbstractShape::scale(bool* hasUpdate) const {
+    static double scale_ = 1.0;
+    if(auto views = scene()->views(); views.empty()) return scale_ = 1.0;
+    else if(const auto scale = 1.0 / views[0]->transform().m11(); scale != scale_) {
+        scale_ = scale;
+        if(hasUpdate) *hasUpdate = true;
     }
-    init();
+    return scale_;
+}
+
+bool AbstractShape::test(const QPointF& point) {
+    curHandle = {};
+    const auto hSize = HandleSize * 0.5 * scale();
+    for(auto&& var: handles) {
+        QLineF line{point, var};
+        if(line.length() < hSize) {
+            curHandle = HIter{&var};
+            return true;
+        }
+    }
+    return curHandle.base();
 }
 
 } // namespace Shapes

@@ -130,7 +130,7 @@ protected:
     // AbstractFile interfaces
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
+    void initFrom(AbstractFile* /*file*/) override { qWarning(__FUNCTION__); }
     //    FileTree::Node* node() override;
 
     /////////////////////////////////////////////////////////////

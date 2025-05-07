@@ -24,7 +24,7 @@ class PropertiesForm : public QWidget {
 
 public:
     static auto create(QWidget* parent = nullptr) {
-        return new PropertiesForm();
+        return std::unique_ptr<PropertiesForm>(new PropertiesForm{parent});
     }
 
     ~PropertiesForm() override;

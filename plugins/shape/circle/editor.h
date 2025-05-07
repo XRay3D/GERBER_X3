@@ -38,7 +38,7 @@ public:
     int columnCount(const QModelIndex& = {}) const override { return 2; }
     QVariant data(const QModelIndex& index, int role) const override;
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
-    Qt::ItemFlags flags(const QModelIndex& index) const override { return Qt::ItemIsEditable | Qt::ItemIsEnabled; }
+    Qt::ItemFlags flags(const QModelIndex& /*index*/) const override { return Qt::ItemIsEditable | Qt::ItemIsEnabled; }
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
 
     std::vector<Shape*> shapes;

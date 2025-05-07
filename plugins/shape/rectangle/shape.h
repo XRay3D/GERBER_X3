@@ -49,7 +49,7 @@ public:
     Model* model{};
 
 protected:
-    void init() override { redraw(); } // FIXME init()
+    void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
 };
 
 class Plugin final : public Shapes::Plugin {

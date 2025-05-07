@@ -98,7 +98,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             case '%':
                 if(parseAttributes(gerberLine)) continue;
                 if(parseAperture(gerberLine)) continue;
-                if(parseApertureBlock{gerberLine}) continue;
+                if(parseApertureBlock(gerberLine)) continue;
                 if(parseApertureMacros(gerberLine)) continue;
                 if(parseFormat(gerberLine)) continue;
                 if(parseStepRepeat(gerberLine)) continue;

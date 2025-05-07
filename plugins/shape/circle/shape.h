@@ -49,7 +49,7 @@ public:
     Model* model{};
 
 protected:
-    void init() override; // FIXME init()
+    void readAndInit(QDataStream& stream) override; // FIXME init()
 
 private:
     double radius_;

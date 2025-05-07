@@ -29,7 +29,7 @@ string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S") # [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}" -DGIT_REF_NAME="${GIT_REF_NAME}"
                 -DGIT_SHA="${GIT_SHA}")
 
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED
+find_package(Qt6 REQUIRED
              COMPONENTS Core Gui LinguistTools OpenGL PrintSupport Widgets)
 
 set(APP_ICON_RESOURCE_WINDOWS "myapp.rc") # WINDOWS APP ICON
@@ -43,7 +43,7 @@ set(TS_FILES ${PROJECT_NAME}_en.ts ${PROJECT_NAME}_ru.ts)
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   find_package(
-    Qt${QT_VERSION_MAJOR}
+    Qt6
     COMPONENTS OpenGLWidgets
     REQUIRED)
 endif()
@@ -82,16 +82,24 @@ target_link_libraries(
           graphicsview
           shape
           tooldatabase
-          Qt${QT_VERSION_MAJOR}::PrintSupport
-          Qt${QT_VERSION_MAJOR}::Widgets)
+          Qt6::PrintSupport
+          Qt6::Widgets)
 
 if(EXISTS XrStyle)
   target_link_libraries(${PROJECT_NAME} PRIVATE XrStyle)
 endif()
 
+#[[
+if(CMAKE_CXX_COMPILER_VERSION VERSION_GREATER_EQUAL 14)
+  target_link_libraries(${PROJECT_NAME} PRIVATE stdc++exp)
+else()
+  target_link_libraries(${PROJECT_NAME} PRIVATE stdc++_libbacktrace)
+endif()
+]]
+
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
   target_link_libraries(${PROJECT_NAME}
-                        PRIVATE Qt${QT_VERSION_MAJOR}::OpenGLWidgets)
+                        PRIVATE Qt6::OpenGLWidgets)
 endif()
 
 set_target_properties(
@@ -116,7 +124,7 @@ if(WIN32)
   target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
   # windeployqt
   set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-  get_target_property(_QMAKE_EXECUTABLE Qt${QT_VERSION_MAJOR}::qmake
+  get_target_property(_QMAKE_EXECUTABLE Qt6::qmake
                       IMPORTED_LOCATION)
   get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
   find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")

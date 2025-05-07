@@ -14,20 +14,16 @@
 #include "plugindata.h"
 #include "shape.h"
 
-#include <QJsonObject>
-#include <QMenu>
-#include <QMessageBox>
-#include <QObject>
-#include <atomic>
 namespace Shapes {
 class Node;
-class AbstractShape;
 
 class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
     //    std::atomic<AbstractShape*> item {};
+    friend class AbstractShape;
     AbstractShape* item{};
+    void requestEditor() { emit showEditor(editor()); }
 
 public:
     explicit Plugin();
@@ -47,6 +43,7 @@ public:
 
 signals:
     void actionUncheck(bool = false);
+    void showEditor(QWidget*);
 
 protected:
     enum {

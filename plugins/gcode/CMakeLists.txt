@@ -28,7 +28,7 @@ link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
 
 target_link_libraries(
   ${PROJECT_NAME}
-  PRIVATE clipper file_plugins gi Qt${QT_VERSION_MAJOR}::Widgets
+  PRIVATE clipper file_plugins gi Qt6::Widgets
   PUBLIC #[[tbb12]] tbb)
 
 set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)

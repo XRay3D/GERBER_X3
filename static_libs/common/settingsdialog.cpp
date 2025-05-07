@@ -216,7 +216,7 @@ void SettingsDialog::readSettings() {
     settings.getValue(ui.cbxZeroPos, HomePosition::TopLeft);
     settings.endGroup();
     /*Other*/
-    settings.getValue(App::settings().inch_, "inch", false);
+    settings.getValue(App::settings().banana_, "inch", false);
     settings.getValue(App::settings().snap_, "snap", false);
     for(auto tab: tabs)
         tab->readSettings(settings);
@@ -267,7 +267,7 @@ void SettingsDialog::saveSettings() {
     settings.endGroup();
 
     /*Other*/
-    settings.setValue(App::settings().inch_, "inch");
+    settings.setValue(App::settings().banana_, "inch");
     settings.setValue(App::settings().snap_, "snap");
     for(auto tab: tabs)
         tab->writeSettings(settings);

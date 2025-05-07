@@ -150,7 +150,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
     Pathss fillPaths;
     fillPaths.resize(tools.size());
 
-    for(int tIdx{}, size = tools.size(); const auto& tool: tools) {
+    for(size_t tIdx{}, size = tools.size(); const auto& tool: tools) {
         returnPs.clear();
         toolDiameter = tool.getDiameter(depth) * uScale;
         dOffset = toolDiameter / 2;

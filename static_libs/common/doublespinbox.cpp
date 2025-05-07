@@ -223,7 +223,7 @@ void DoubleSpinBox::keyReleaseEvent(QKeyEvent* event) {
     QDoubleSpinBox::keyPressEvent(event);
 }
 
-double DoubleSpinBox::valueFromText(const QString& text) const {
+double DoubleSpinBox::valueFromText(const QString& /*text*/) const {
 
     qWarning() << __FUNCTION__ << (bool)value_ << value_.value_or(value()) << value();
     return value_.value_or(value());

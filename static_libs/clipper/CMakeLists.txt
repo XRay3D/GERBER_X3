@@ -19,4 +19,4 @@ add_library(clipper STATIC ${HEADERS} ${SOURCES})
 # add_library(clipper) target_sources(clipper PUBLIC FILE_SET CXX_MODULES FILES
 # ${SOURCES})
 
-target_link_libraries(clipper PRIVATE Clipper2Z Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(clipper PRIVATE Clipper2Z Qt6::Widgets)

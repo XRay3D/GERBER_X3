@@ -120,10 +120,10 @@ bool ItemNode::setData(const QModelIndex& index, const QVariant& value, int role
     }
 }
 
-Qt::ItemFlags ItemNode::flags(const QModelIndex& index) const {
+Qt::ItemFlags ItemNode::flags(const QModelIndex& /*index*/) const {
     return Qt::ItemIsEnabled /*| Qt::ItemIsDropEnabled*/;
 }
 
-void ItemNode::menu(QMenu& menu, View* tv) { }
+void ItemNode::menu(QMenu& /*menu*/, View* /*tv*/) { }
 
 } // namespace FileTree

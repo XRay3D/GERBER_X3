@@ -19,6 +19,6 @@ add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
 # target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gi Qt${QT_VERSION_MAJOR}::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE gi Qt6::Widgets)
 
 # target_compile_definitions(filetree PRIVATE FILETREE_LIBRARY)

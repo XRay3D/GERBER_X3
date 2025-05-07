@@ -12,19 +12,19 @@
 #include "ruler.h"
 #include "app.h"
 
-#include <QDebug>
+// #include <QDebug>
 #include <QDrag>
 #include <QDragEnterEvent>
 #include <QLabel>
 #include <QMimeData>
-#include <QMouseEvent>
+// #include <QMouseEvent>
 #include <QPainter>
-#include <QTextDocument>
-#include <QTextFormat>
-#include <QWindow>
-#include <QtMath>
-#include <cstring>
-
+// #include <QTextDocument>
+// #include <QTextFormat>
+// #include <QWindow>
+// #include <QtMath>
+// #include <cstring>
+#if 0
 static QLabel* createDragLabel(const QString& text, QWidget* parent) {
     QLabel* label = new QLabel{text, parent};
     label->setAutoFillBackground(true);
@@ -34,16 +34,25 @@ static QLabel* createDragLabel(const QString& text, QWidget* parent) {
 }
 
 static QString hotSpotMimeDataKey() { return u"application/x-hotspot"_s; }
-
+#endif
 Ruler::Ruler(Qt::Orientation rulerType, QWidget* parent)
     : QWidget{parent}
     , orientation_{rulerType} {
     setMouseTracking(mouseTracking);
     setAcceptDrops(true);
+}
 
-    // QFont txtFont("Vrinda");
-    // txtFont.setStyleHint(QFont::TypeWriter, QFont::PreferOutline);
-    // setFont(txtFont);
+void Ruler::setCursorPos(const QPoint& newCursorPos) {
+    cursorPos = newCursorPos;
+    update();
+}
+
+void Ruler::setMouseTrack(const bool track) {
+    if(mouseTracking != track) {
+        mouseTracking = track;
+        setMouseTracking(mouseTracking);
+        update();
+    }
 }
 
 void Ruler::setOrigin(const double newOrigin) {
@@ -67,18 +76,91 @@ void Ruler::setRulerZoom(const double newRulerZoom) {
     }
 }
 
-void Ruler::setCursorPos(const QPoint& newCursorPos) {
-    cursorPos = newCursorPos; // this->mapFromGlobal(cursorPos_);
-    // cursorPos += QPoint(RulerBreadth, RulerBreadth);
-    update();
+void Ruler::dragEnterEvent(QDragEnterEvent* event) {
+    //    if (event->mimeData()->hasText()) {
+    //        if (event->source() == this) {
+    //            event->setDropAction(Qt::MoveAction);
+    //            event->accept();
+    //        } else {
+    //            event->acceptProposedAction();
+    //        }
+    //    } else {
+    //        event->ignore();
+    //    }
+
+    //    auto mimeData {event->mimeData()};
+    //    if (mimeData->hasText() && mimeData->text() == Ruler::MimeType)
+    if(event->mimeData()->hasFormat(MimeType))
+        event->acceptProposedAction(); // event->accept();
+    else
+        event->ignore();
 }
 
-void Ruler::setMouseTrack(const bool track) {
-    if(mouseTracking != track) {
-        mouseTracking = track;
-        setMouseTracking(mouseTracking);
-        update();
+void Ruler::dragMoveEvent(QDragMoveEvent* event) {
+    event->acceptProposedAction();
+    //    if (event->mimeData()->hasFormat(MimeType)) {
+    //        event->setDropAction(Qt::MoveAction);
+    //        event->accept();
+    //    } else {
+    //        event->ignore();
+    //    }
+}
+
+void Ruler::dropEvent(QDropEvent* event) {
+    //    if (event->mimeData()->hasFormat(MimeType)) {
+    //        QByteArray pieceData = event->mimeData()->data(MimeType);
+    //        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
+    //        QPixmap pixmap;
+    //        QPoint location;
+    //        dataStream >> pixmap >> location;
+
+    //        //        addPiece(pixmap, location);
+
+    //        event->setDropAction(Qt::MoveAction);
+    //        event->accept();
+    //    } else {
+    //        event->ignore();
+    //    }
+    auto mimeData{event->mimeData()};
+    if(mimeData->hasText() && mimeData->data(MimeType).size() == sizeof(void*)) {
+        void* ptr{};
+        std::memcpy(&ptr, mimeData->data(MimeType).data(), sizeof(nullptr));
+        qDebug() << __FUNCTION__ << mimeData->data(MimeType) << ptr;
+        //        delete ptr;
+
+        //        const QMimeData* mime = event->mimeData();
+        //        QStringList pieces {}; // = mime->text().split(QRegularExpression(u"\\s+"_s), Qt::SkipEmptyParts);
+        //        QPoint position = event->pos();
+        //        QPoint hotSpot;
+
+        //        QByteArrayList hotSpotPos = mime->data(hotSpotMimeDataKey()).split(' ');
+        //        if (hotSpotPos.size() == 2) {
+        //            hotSpot.setX(hotSpotPos.first().toInt());
+        //            hotSpot.setY(hotSpotPos.last().toInt());
+        //        }
+
+        //        for (const QString& piece : pieces) {
+        //            QLabel* newLabel = createDragLabel(piece, this);
+        //            newLabel->move(position - hotSpot);
+        //            newLabel->show();
+        //            newLabel->setAttribute(Qt::WA_DeleteOnClose);
+
+        //            position += QPoint(newLabel->width(), 0);
+        //        }
+
+        //        if (event->source() == this) {
+        //            event->setDropAction(Qt::MoveAction);
+        //            event->accept();
+        //        } else {
+        event->acceptProposedAction();
+        //        }
+    } else {
+        event->ignore();
     }
+    //    for (QWidget* widget : findChildren<QWidget*>()) {
+    //        if (!widget->isVisible())
+    //            widget->deleteLater();
+    //    }
 }
 
 void Ruler::mouseMoveEvent(QMouseEvent* event) {
@@ -87,8 +169,26 @@ void Ruler::mouseMoveEvent(QMouseEvent* event) {
     update();
 }
 
-void Ruler::paintEvent(QPaintEvent* event) {
-    Q_UNUSED(event)
+void Ruler::mousePressEvent(QMouseEvent* /*event*/) {
+    QMimeData* mimeData = new QMimeData;
+    mimeData->setText(MimeType);
+    mimeData->setData(MimeType, QByteArray{1, static_cast<char>(orientation_)});
+
+    QPixmap pixmapIcon{Breadth, Breadth};
+    pixmapIcon.fill(Qt::Horizontal == orientation_ ? Qt::red : Qt::green);
+
+    QDrag* drag = new QDrag{this};
+    drag->setMimeData(mimeData);
+    drag->setPixmap(pixmapIcon);
+    drag->setHotSpot(pixmapIcon.rect().center());
+
+    Qt::DropAction dropAction = drag->exec(); // Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
+
+    if(dropAction == Qt::MoveAction) {
+    }
+}
+
+void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
     QPainter painter{this};
 
     painter.setRenderHint(QPainter::Antialiasing, false);
@@ -138,112 +238,6 @@ void Ruler::paintEvent(QPaintEvent* event) {
     }
 }
 
-void Ruler::dragEnterEvent(QDragEnterEvent* event) {
-    //    if (event->mimeData()->hasText()) {
-    //        if (event->source() == this) {
-    //            event->setDropAction(Qt::MoveAction);
-    //            event->accept();
-    //        } else {
-    //            event->acceptProposedAction();
-    //        }
-    //    } else {
-    //        event->ignore();
-    //    }
-
-    //    auto mimeData {event->mimeData()};
-    //    if (mimeData->hasText() && mimeData->text() == Ruler::mimeType())
-    if(event->mimeData()->hasFormat(mimeType()))
-        event->acceptProposedAction(); // event->accept();
-    else
-        event->ignore();
-}
-
-void Ruler::dragMoveEvent(QDragMoveEvent* event) {
-    event->acceptProposedAction();
-    //    if (event->mimeData()->hasFormat(mimeType())) {
-    //        event->setDropAction(Qt::MoveAction);
-    //        event->accept();
-    //    } else {
-    //        event->ignore();
-    //    }
-}
-
-void Ruler::dropEvent(QDropEvent* event) {
-    //    if (event->mimeData()->hasFormat(mimeType())) {
-    //        QByteArray pieceData = event->mimeData()->data(mimeType());
-    //        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
-    //        QPixmap pixmap;
-    //        QPoint location;
-    //        dataStream >> pixmap >> location;
-
-    //        //        addPiece(pixmap, location);
-
-    //        event->setDropAction(Qt::MoveAction);
-    //        event->accept();
-    //    } else {
-    //        event->ignore();
-    //    }
-    auto mimeData{event->mimeData()};
-    if(mimeData->hasText() && mimeData->data(mimeType()).size() == sizeof(void*)) {
-        void* ptr{};
-        std::memcpy(&ptr, mimeData->data(mimeType()).data(), sizeof(void*));
-        qDebug() << __FUNCTION__ << mimeData->data(mimeType()) << ptr;
-        //        delete ptr;
-
-        //        const QMimeData* mime = event->mimeData();
-        //        QStringList pieces {}; // = mime->text().split(QRegularExpression(u"\\s+"_s), Qt::SkipEmptyParts);
-        //        QPoint position = event->pos();
-        //        QPoint hotSpot;
-
-        //        QByteArrayList hotSpotPos = mime->data(hotSpotMimeDataKey()).split(' ');
-        //        if (hotSpotPos.size() == 2) {
-        //            hotSpot.setX(hotSpotPos.first().toInt());
-        //            hotSpot.setY(hotSpotPos.last().toInt());
-        //        }
-
-        //        for (const QString& piece : pieces) {
-        //            QLabel* newLabel = createDragLabel(piece, this);
-        //            newLabel->move(position - hotSpot);
-        //            newLabel->show();
-        //            newLabel->setAttribute(Qt::WA_DeleteOnClose);
-
-        //            position += QPoint(newLabel->width(), 0);
-        //        }
-
-        //        if (event->source() == this) {
-        //            event->setDropAction(Qt::MoveAction);
-        //            event->accept();
-        //        } else {
-        event->acceptProposedAction();
-        //        }
-    } else {
-        event->ignore();
-    }
-    //    for (QWidget* widget : findChildren<QWidget*>()) {
-    //        if (!widget->isVisible())
-    //            widget->deleteLater();
-    //    }
-}
-
-void Ruler::mousePressEvent(QMouseEvent* event) {
-    QMimeData* mimeData = new QMimeData;
-    mimeData->setText(mimeType());
-    mimeData->setData(mimeType(), QByteArray{1, static_cast<char>(orientation_)});
-
-    QPixmap pixmapIcon{Breadth, Breadth};
-    pixmapIcon.fill(Qt::Horizontal == orientation_ ? Qt::red : Qt::green);
-
-    QDrag* drag = new QDrag{this};
-    drag->setMimeData(mimeData);
-    drag->setPixmap(pixmapIcon);
-    drag->setHotSpot(pixmapIcon.rect().center());
-
-    Qt::DropAction dropAction = drag->exec(); // Qt::CopyAction | Qt::MoveAction, Qt::CopyAction);
-
-    if(dropAction == Qt::MoveAction) {
-    }
-}
-
 void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin) {
     // Flagging whether we are horizontal or vertical only to reduce
     // to cheching many times
@@ -276,7 +270,7 @@ void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMet
 
 void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, double endMark, int startTickNo, double step, double startPosition) {
     const auto isHorzRuler = (Qt::Horizontal == orientation_);
-    const auto K = gridStep * tickKoef * (App::settings().inch() ? 1.0 / 25.4 : 1.0);
+    const auto K = gridStep * tickKoef * (1.0 / App::settings().lenUnit());
 
     painter->setFont(font());
 
@@ -294,7 +288,7 @@ void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, d
             /*y2*/ isHorzRuler ? rect.bottom() - startPosition : current);
         if(drawText) [[unlikely]] {
             painter->save();
-            QColor color(0xFFFFFFFF - App::settings().guiColor(GuiColors::Background).rgb());
+            QColor color{0xFFFFFF ^ App::settings().guiColor(GuiColors::Background).rgb()};
             painter->setPen({color, 0.0});
             auto number{QString::number(startTickNo * K)};
 

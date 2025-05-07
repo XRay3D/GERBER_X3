@@ -118,7 +118,7 @@ void View::closeFiles() {
     model_->removeRows(0, childCount_, menuIndex_);
 }
 
-void View::closeAllFiles(uint32_t type) {
+void View::closeAllFiles(uint32_t /*type*/) {
     // WARNING   model_->createIndex(0, 0, &model_->fileFolders[type]);
     model_->removeRows(0, childCount_, menuIndex_);
 }
@@ -146,7 +146,7 @@ void View::setModel(QAbstractItemModel* model) {
     setItemDelegateForColumn(1, new SideDelegate{this});
     setItemDelegateForColumn(2, new TypeDelegate{this});
 
-    setIconSize(QSize(24, 24));
+    setIconSize(QSize{24, 24});
 }
 
 void View::showExcellonDialog() { }

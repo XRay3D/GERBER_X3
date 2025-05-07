@@ -66,7 +66,7 @@ void Drill::update(const Path& path, double diameter) {
     update();
 }
 
-Paths Drill::paths(int alternate) const {
+Paths Drill::paths(int /*alternate*/) const {
     auto path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
     path = QTransform::fromScale(0.01, 0.01).map(path);
     return {~transform().map(path)};
