@@ -1,7 +1,6 @@
 #pragma once
 
 #include <algorithm>
-#include <functional>
 #include <memory>
 #include <span>
 #include <vector>
@@ -10,38 +9,35 @@ template <class T>
 struct mvector : std::vector<T> {
     using V = std::vector<T>;
     using M = mvector<T>;
+
     using V::V;
 
-    inline void append(const V& vec) {
-        V::insert(V::end(), vec.begin(), vec.end());
-    }
-    inline void append(const std::span<T>& vec) {
-        V::insert(V::end(), vec.begin(), vec.end());
+    using V::insert;
+
+    template <typename Range>
+        requires requires(Range r) {std::begin(r); std::end(r); }
+    inline void insert(V::const_iterator pos, const Range& r) {
+        V::insert(pos, std::begin(r), std::end(r));
     }
 
-    using V::insert;
-    inline void insert(V::const_iterator pos, const V& vec) {
-        V::insert(pos, vec.begin(), vec.end());
-    }
-    inline void insert(V::const_iterator pos, const std::span<T>& vec) {
-        V::insert(pos, vec.begin(), vec.end());
+    template <typename Range>
+        requires requires(Range r) {std::begin(r); std::end(r); }
+    inline void append(const Range& r) {
+        V::insert(V::end(), std::begin(r), std::end(r));
     }
 
     inline void append(V&& vec) {
-        if(vec.empty())
-            return;
+        if(vec.empty()) return;
         if(V::capacity() - V::size() < vec.size())
             V::reserve(V::size() + vec.size());
-        for(auto&& var: vec)
-            V::emplace_back(std::move(var));
+        std::ranges::move(vec, std::back_insert_iterator{*this});
     }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
     bool removeOne(const T& t) {
         auto it = std::find(V::begin(), V::end(), t);
-        if(it == V::end())
-            return false;
+        if(it == V::end()) return false;
         V::erase(it);
         return true;
     }

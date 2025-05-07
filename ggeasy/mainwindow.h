@@ -68,7 +68,7 @@ public:
 
         if(App::settings().theme()) {
 
-            static const char* const dwCloseXpm[] = {
+            static const char* const dwCloseXpm[]{
                 "11 13 3 1",
                 "  c None",
                 "@ c #6C6A67",
@@ -88,7 +88,7 @@ public:
                 "           ",
             };
 
-            static const char* const dwRestoreXpm[] = {
+            static const char* const dwRestoreXpm[]{
                 "11 13 3 1",
                 "  c None",
                 "@ c #6C6A67",
@@ -108,7 +108,7 @@ public:
                 "           ",
             };
 
-            static const char* const dwMinimizeXpm[] = {
+            static const char* const dwMinimizeXpm[]{
                 "11 13 2 1",
                 "  c None",
                 "@ c #6C6A67",
@@ -127,7 +127,7 @@ public:
                 "           ",
             };
 
-            static const char* const qtTitlebarContextHelp[] = {
+            static const char* const qtTitlebarContextHelp [[maybe_unused]][]{
                 "10 10 3 1",
                 "  c None",
                 "# c #000000",
@@ -371,7 +371,8 @@ private:
     void printDialog();
     void renderPdf();
 
-    void readSettings();
+    void loadSettings();
+    void saveSettings();
 
     void resetToolPathsActions() {
         if(auto widget = dockWidget_->widget(); widget) {
@@ -385,8 +386,6 @@ private:
 
     void selectAll();
     void deSelectAll();
-
-    void writeSettings();
 
     // create actions
     void createActions();

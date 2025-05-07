@@ -41,9 +41,9 @@ target_link_libraries(
           gi
           graphicsview
           tooldatabase
-          Qt${QT_VERSION_MAJOR}::Widgets)
+          Qt6::Widgets)
 
 add_library(gc_profile STATIC profile.cpp profile.h)
 
 target_link_libraries(gc_profile PRIVATE clipper gcode common filetree
-                                         Qt${QT_VERSION_MAJOR}::Widgets)
+                                         Qt6::Widgets)

@@ -29,9 +29,10 @@ namespace GCode {
 void findArcs(Path path);
 
 File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : gcp_(std::move(gcp))
-    , pocketPaths_(std::move(pocketPaths))
-    , toolPathss_(std::move(toolPathss)) {
+    : pocketPaths_{std::move(pocketPaths)}
+    , toolPathss_{std::move(toolPathss)}
+    , gcp_{std::move(gcp)} {
+
     for(auto&& paths: toolPathss_)
         for(auto&& path: paths)
             findArcs(path);
@@ -447,8 +448,8 @@ void File::saveMillingProfile(const QPointF& offset) {
     const mvector<double> depths(getDepths());
 
     for(auto& paths: pathss) {
-        for(size_t i = 0; i < depths.size(); ++i) {
-            for(size_t j = 0; j < paths.size(); ++j) {
+        for(size_t i{}; i < depths.size(); ++i) {
+            for(qsizetype j{}; j < paths.size(); ++j) {
                 QPolygonF& path = paths[j];
                 if(path.front() == path.last()) { // make complete depth and remove from worck
                     // startPath(path.front());
@@ -714,7 +715,7 @@ void File::createGiLaser() {
 
 /////////////////////////////////////////////////////////////
 
-void findArcs(Path path) {
+void findArcs(Path /*path*/) {
     return;
     //    if (!App::isDebug())
     //        return;

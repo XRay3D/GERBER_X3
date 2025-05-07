@@ -24,17 +24,13 @@ class QGridLayout;
 
 template <size_t N>
 struct EnumHelper2 : std::integral_constant<bool, N != 0> {
-    template <typename... Es>
-        requires(std::is_enum_v<Es> && ...) || (sizeof...(Es) == 0)
-    constexpr EnumHelper2(Es... es)
-        : array{es...} { }
-    int array[N];
-    template <size_t... Is>
-    constexpr bool impl(auto* item, std::index_sequence<Is...>) const {
-        return ((item->type() == array[Is]) || ...);
-    }
+    template <typename... Enums>
+        requires std::conjunction_v<std::is_enum<Enums>...> || (sizeof...(Enums) == 0)
+    constexpr EnumHelper2(Enums... e)
+        : array{e...} { }
+    std::array<int, N> array;
     constexpr bool operator()(auto* item) const {
-        return impl(item, std::make_index_sequence<N>{});
+        return ranges::contains(array, item->type());
     }
 };
 
@@ -65,6 +61,7 @@ public:
 
     void setScale(double s) noexcept;
     double getScale() const noexcept { return transform().m11(); }
+    void scale(double sx, double sy);
 
     void setOpenGL(bool useOpenGL);
 
@@ -164,6 +161,7 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
+    void mouseDoubleClickEvent(QMouseEvent* event) override;
 
     void drawForeground(QPainter* painter, const QRectF& rect) override;
     void drawBackground(QPainter* painter, const QRectF& rect) override;

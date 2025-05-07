@@ -185,16 +185,17 @@ public:
     int clpCircleSegments(double radius);
 
     /*Markers*/
-    QPointF mkrHomeOffset();
-    int mkrHomePos();
     QPointF mkrPinOffset();
+    QPointF mkrHomeOffset();
+    uint mkrHomePos();
     QPointF mkrZeroOffset();
-    int mkrZeroPos();
+    uint mkrZeroPos();
 
     /*Other*/
     double gridStep(double scale);
-    bool inch();
-    void setInch(bool val);
+    bool isBanana();
+    double lenUnit();
+    void setBanana(bool val);
     QPointF getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod = Qt::NoModifier);
     void setSnap(bool val);
     bool snap();
@@ -233,10 +234,10 @@ private:
     QPointF mrkHomeOffset_;
     QPointF mrkPinOffset_;
     QPointF mrkZeroOffset_;
-    int mrkHomePos_{Qt::BottomLeftCorner};
-    int mrkZeroPos_{Qt::BottomLeftCorner};
+    uint mrkHomePos_{Qt::BottomLeftCorner};
+    uint mrkZeroPos_{Qt::BottomLeftCorner};
 
     /*Other*/
-    bool inch_ = false;
+    bool banana_ = false;
     bool snap_ = false;
 };

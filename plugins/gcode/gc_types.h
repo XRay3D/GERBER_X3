@@ -66,7 +66,7 @@ enum class Grouping {
 };
 
 using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
-using V = std::variant<int, double, UsedItems>;
+using V = std::variant<int, double, UsedItems, size_t>;
 
 struct Variant : V {
     using V::V;
@@ -76,9 +76,10 @@ struct Variant : V {
         stream >> index;
         using Init = V& (*)(V&);
         static std::unordered_map<uint8_t, Init> map{
-            {0,       [](V& v) -> V& { return v = int{}; }},
-            {1,    [](V& v) -> V& { return v = double{}; }},
+            {0, [](V& v) -> V& { return v = int{}; }      },
+            {1, [](V& v) -> V& { return v = double{}; }   },
             {2, [](V& v) -> V& { return v = UsedItems{}; }},
+            {2, [](V& v) -> V& { return v = size_t{}; }     },
         };
         std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
         return stream;
@@ -101,8 +102,17 @@ struct Variant : V {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, UsedItems>)
                 return int{};
-             else
+            else
                 return int(val); }, (V&)*this);
+    }
+
+    size_t toUsize_t() const {
+        return std::visit([](auto&& val) -> size_t {
+            using T = std::decay_t<decltype(val)>;
+            if constexpr (std::is_same_v<T, UsedItems>)
+                return size_t{};
+            else
+                return size_t(val); }, (V&)*this);
     }
 
     bool toBool() const {

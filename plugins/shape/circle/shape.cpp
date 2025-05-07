@@ -11,7 +11,7 @@
 #include "shape.h"
 #include "graphicsview.h"
 #include "math.h"
-#include "shhandler.h"
+
 #include <QIcon>
 
 using Shapes::Handle;
@@ -19,18 +19,14 @@ using Shapes::Handle;
 namespace ShCirc {
 
 Shape::Shape(QPointF center, QPointF pt)
-    : radius_(QLineF(center, pt).length()) {
+    : radius_(QLineF{center, pt}.length()) {
     paths_.resize(1);
 
-    if(!std ::isnan(center.x())) {
-        handlers.reserve(PtCount);
-
-        handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-        handlers.emplace_back(std::make_unique<Handle>(this));
-
-        handlers[Center]->setPos(center);
-        handlers[Point1]->setPos(pt);
-
+    if(!std::isnan(center.x())) {
+        handles = {
+            Handle{center, Handle::Center},
+            Handle{pt}
+        };
         redraw();
     }
 
@@ -50,21 +46,21 @@ QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
 
 void Shape::redraw() {
 
-    switch(handlers.indexOf(currentHandler)) {
+    switch(std::distance(handles.begin(), curHandle)) {
     case Center: {
         auto radLine = QLineF::fromPolar(radius_, 0);
-        radLine.translate(handlers[Center]->pos());
-        handlers[Point1]->setPos(radLine.p2());
+        radLine.translate(handles[Center]);
+        handles[Point1].setPos(radLine.p2());
     } break;
     case Point1: {
-        QLineF radLine{handlers[Center]->pos(), handlers[Point1]->pos()};
+        QLineF radLine{handles[Center], handles[Point1]};
         radius_ = radLine.length();
     } break;
     }
 
     const int intSteps = App::settings().clpCircleSegments(radius_);
     const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
-    const Point center{~handlers[Center]->pos()};
+    const Point center = ~handles[Center].pos();
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
@@ -75,23 +71,25 @@ void Shape::redraw() {
             radius * sin(theta) + center.y,
         });
     }
+
     shape_ = QPainterPath();
     shape_.addPolygon(~path);
-    setPos({1, 1}); // костыли    //update();
-    setPos({0, 0});
 
     if(model)
-        model->dataChanged(model->index(Center, 0), model->index(Diameter, 1));
+        emit model->dataChanged(model->index(Center, 0), model->index(Diameter, 1));
+
+    assert(handles.size() == PtCount);
+    assert(paths_.size() == 1);
 }
 
-QString Shape::name() const { return QObject::tr("Shape"); }
+QString Shape::name() const { return QObject::tr("Circle"); }
 
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 void Shape::setPt(const QPointF& pt) {
-    handlers[Point1]->setPos(pt);
-    currentHandler = handlers[Point1].get();
-    redraw();
+    handles[Point1].setPos(pt);
+    curHandle = handles.begin() + Point1;
+    AbstractShape::redraw();
 }
 
 double Shape::radius() const { return radius_; }
@@ -99,16 +97,16 @@ double Shape::radius() const { return radius_; }
 void Shape::setRadius(double radius) {
     if(qFuzzyIsNull(radius) || qFuzzyCompare(radius_, radius))
         return;
-    QLineF line(handlers[Center]->pos(), handlers[Point1]->pos());
+    QLineF line(handles[Center].pos(), handles[Point1].pos());
     line.setLength(radius);
-    handlers[Point1]->setPos(line.p2());
-    currentHandler = handlers[Point1].get();
-    redraw();
+    handles[Point1].setPos(line.p2());
+    curHandle = handles.begin() + Point1;
+    AbstractShape::redraw();
 }
 
-void Shape::init() {
-    currentHandler = handlers[Point1].get();
-    redraw();
+void Shape::readAndInit(QDataStream& /*stream*/) {
+    curHandle = handles.begin() + Point1;
+    AbstractShape::redraw();
 }
 
 } // namespace ShCirc

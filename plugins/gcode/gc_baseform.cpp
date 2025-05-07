@@ -355,8 +355,8 @@ Params* BaseForm::getNewGcp() {
     }
     */
 
-    AbstractFile const* file = nullptr;
-    bool skip{true};
+    // AbstractFile const* file = nullptr;
+    // bool skip{true};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         qDebug() << gi << gi->file();
         //        switch(gi->type()) {

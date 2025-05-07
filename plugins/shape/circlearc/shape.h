@@ -57,7 +57,7 @@ public:
     Model* model{};
 
 protected:
-    void init() override;
+    void readAndInit(QDataStream& stream) override;
 
 private:
     mutable double radius_{};

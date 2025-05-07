@@ -71,7 +71,7 @@ Paths& DataFill::getPaths() {
     return paths_;
 }
 
-void DataFill::setPaths(Paths paths, int alternate) {
+void DataFill::setPaths(Paths paths, int /*alternate*/) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());

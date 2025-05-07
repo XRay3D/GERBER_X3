@@ -103,7 +103,7 @@ int main(int argc, char* argv[]) {
         if(nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
 #endif
-        MainWindow* mainWin = nullptr;
+        // MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running = false;    // переменную для проверки ууже запущенного приложения

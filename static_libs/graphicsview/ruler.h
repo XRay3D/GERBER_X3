@@ -13,7 +13,6 @@
 #include <QWidget>
 #include <utils.h>
 
-
 class Ruler final : public QWidget {
     Q_OBJECT
     //    Q_ENUMS(RulerType)
@@ -21,9 +20,7 @@ class Ruler final : public QWidget {
     //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
     //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
-    enum {
-        Breadth = 24
-    };
+    static constexpr int Breadth = 24;
 
     explicit Ruler(Qt::Orientation rulerType, QWidget* parent);
 
@@ -31,9 +28,9 @@ public:
     double origin() const { return origin_; }
     double unit() const { return rulerUnit_; }
     double zoom() const { return rulerZoom_; }
-    QSize minimumSizeHint() const override { return QSize(Ruler::Breadth, Ruler::Breadth); }
+    QSize minimumSizeHint() const override { return {Breadth, Breadth}; }
 
-    static QString mimeType() { return u"image/x-puzzle-piece"_s; }
+    static constexpr auto MimeType = "image/x-puzzle-piece";
 
 public slots:
     void setCursorPos(const QPoint& cursorPos_);
@@ -43,17 +40,14 @@ public slots:
     void setRulerZoom(const double rulerZoom_);
 
 protected:
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void paintEvent(QPaintEvent* event) override;
-
     void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+
+    void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
 
-    //    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dragMoveEvent(QDragMoveEvent* event) override;
-    //    void dropEvent(QDropEvent* event) override;
-    //    void startDrag(Qt::DropActions supportedActions) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     void DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin);

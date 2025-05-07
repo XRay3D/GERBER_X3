@@ -208,7 +208,7 @@ static constexpr auto uScale{100'000};
 static constexpr auto dScale{1. / uScale};
 
 inline Point operator~(const QPointF pt) { return Point{pt.x() * uScale, pt.y() * uScale}; }
-inline QPointF operator~(const Point pt) { return {pt.x * dScale, pt.y * dScale}; }
+inline QPointF operator~(const Point pt) { return {static_cast<double>(pt.x) * dScale, static_cast<double>(pt.y) * dScale}; }
 
 template <typename T>
 struct Caster {
@@ -318,8 +318,8 @@ inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
 }
 
 inline /*constexpr*/ double angleTo(const Point& pt1, const Point& pt2) noexcept {
-    const double dx = pt2.x - pt1.x;
-    const double dy = pt2.y - pt1.y;
+    const double dx = static_cast<double>(pt2.x - pt1.x);
+    const double dy = static_cast<double>(pt2.y - pt1.y);
     const double theta = atan2(-dy, dx) * 360.0 / (pi * 2);
     const double theta_normalized = theta < 0 ? theta + 360 : theta;
     if(qFuzzyCompare(theta_normalized, double(360)))
@@ -329,8 +329,8 @@ inline /*constexpr*/ double angleTo(const Point& pt1, const Point& pt2) noexcept
 }
 
 inline /*constexpr*/ double angleRadTo(const Point& pt1, const Point& pt2) noexcept {
-    const double dx = pt2.x - pt1.x;
-    const double dy = pt2.y - pt1.y;
+    const double dx = static_cast<double>(pt2.x - pt1.x);
+    const double dy = static_cast<double>(pt2.y - pt1.y);
     const double theta = atan2(-dy, dx);
     return theta;
     const double theta_normalized = theta < 0 ? theta + (pi * 2) : theta; // NOTE theta_normalized
@@ -341,14 +341,14 @@ inline /*constexpr*/ double angleRadTo(const Point& pt1, const Point& pt2) noexc
 }
 
 inline /*constexpr*/ double distTo(const Point& pt1, const Point& pt2) noexcept {
-    double x_ = pt2.x - pt1.x;
-    double y_ = pt2.y - pt1.y;
+    double x_ = static_cast<double>(pt2.x - pt1.x);
+    double y_ = static_cast<double>(pt2.y - pt1.y);
     return sqrt(x_ * x_ + y_ * y_);
 }
 
 inline constexpr double distToSq(const Point& pt1, const Point& pt2) noexcept {
-    double x_ = pt2.x - pt1.x;
-    double y_ = pt2.y - pt1.y;
+    double x_ = static_cast<double>(pt2.x - pt1.x);
+    double y_ = static_cast<double>(pt2.y - pt1.y);
     return (x_ * x_ + y_ * y_);
 }
 

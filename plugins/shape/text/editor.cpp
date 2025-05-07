@@ -11,7 +11,7 @@
 #include "editor.h"
 #include "doublespinbox.h"
 #include "shape.h"
-#include "shhandler.h"
+
 
 #include <QtWidgets>
 #include <array>

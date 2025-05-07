@@ -202,7 +202,7 @@ void Form::onAddBridgeClicked() {
                 };
                 for(auto&& path: gi->paths()) {
                     // auto pathHash = path.hash();
-                    for(int i{}; i < path.size(); ++i) {
+                    for(size_t i{}; i < path.size(); ++i) {
                         QLineF srcline{~path[i], ~path[(i + 1) % path.size()]};
                         if(align & Horizontally) testAndAdd(testLineH, srcline);
                         if(align & Vertically) testAndAdd(testLineV, srcline);
@@ -302,7 +302,7 @@ void Form::updateBridgePos(QPointF pos) {
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void Form::editFile(GCode::File* file) {
+void Form::editFile(GCode::File* /*file*/) {
 
     //    GCode::Params gcp_ {file->gcp()};
 

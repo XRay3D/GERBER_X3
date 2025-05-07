@@ -32,4 +32,4 @@ target_link_libraries(
           graphicsview
           shape
           tooldatabase
-          Qt${QT_VERSION_MAJOR}::Widgets)
+          Qt6::Widgets)

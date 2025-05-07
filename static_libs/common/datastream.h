@@ -19,53 +19,29 @@
 
 namespace pfr = boost::pfr;
 
-// #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-//  template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
-//  inline QDataStream& operator>>(QDataStream& s, E& e) {
-//     qint32 i;
-//     s >> i;
-//     e = static_cast<E>(i);
-//     return s;
-// }
-
-// template <typename E, typename = std::enable_if_t<std::is_enuv_<E>>>
-// inline QDataStream& operator<<(QDataStream& s, E e) {
-//     s << static_cast<qint32>(e);
-//     return s;
-// }
-// #endif
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-
-template <class T1, class T2>
-inline QDataStream& operator>>(QDataStream& s, std::pair<T1, T2>& p) {
-    s >> p.first >> p.second;
-    return s;
-}
-
-template <class T1, class T2>
-inline QDataStream& operator<<(QDataStream& s, const std::pair<T1, T2>& p) {
-    s << p.first << p.second;
-    return s;
-}
-
-#endif
-
 template <class T, size_t N>
 inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
     uint32_t n;
     s >> n;
-    n = std::min<uint32_t>(n, N);
-    for(int i{}; i < n; ++i)
-        s >> p[i];
+    for(auto&& val: p | std::views::take(std::min<uint32_t>(n, N)))
+        s >> val;
     return s;
 }
 
 template <class T, size_t N>
 inline QDataStream& operator<<(QDataStream& s, const T (&p)[N]) {
     s << uint32_t(N);
-    for(auto& var: p)
-        s << var;
+    for(auto& var: p) s << var;
+    return s;
+}
+
+inline QDataStream& operator>>(QDataStream& s, size_t& val) {
+    s.readRawData(reinterpret_cast<char*>(&val), sizeof(val));
+    return s;
+}
+
+inline QDataStream& operator<<(QDataStream& s, size_t val) {
+    s.writeRawData(reinterpret_cast<char*>(&val), sizeof(val));
     return s;
 }
 
@@ -78,10 +54,6 @@ inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& conta
     stream >> n;
     container.resize(n);
     for(auto& var: container) {
-        // static_assert(std::is_const_v<T>);
-        // if constexpr(std::is_pointer_v<T>)
-        //     stream >> *var;
-        // else
         stream >> var;
         if(stream.status() != QDataStream::Ok)
             return container.clear(), stream;
@@ -92,8 +64,7 @@ inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& conta
 template <typename T, class Alloc>
 inline QDataStream& operator<<(QDataStream& stream, const std::vector<T, Alloc>& container) {
     stream << uint32_t(container.size());
-    for(const auto& var: container)
-        stream << var;
+    for(const auto& var: container) stream << var;
     return stream;
 }
 
@@ -139,7 +110,7 @@ class Block {
 public:
     explicit Block(QDataStream& stream)
         : stream{stream} { }
-#if 1
+
     template <typename T>
         requires(pfr::detail::fields_count<T>() > 1)
     QDataStream& read(T& val) {
@@ -160,9 +131,9 @@ public:
     template <typename... Args>
     QDataStream& read(Args&... args) {
         stream >> count;
+        assert(count <= sizeof...(Args));
         count = std::min<uint32_t>(count, sizeof...(Args));
-        ((count ? --count, stream >> args : stream), ...);
-        return stream;
+        return ((count ? --count, stream >> args : stream), ...);
     }
 
     template <typename... Args>
@@ -171,31 +142,6 @@ public:
         ((stream << args), ...);
         return stream;
     }
-
-#else
-    template <typename... Args>
-    QDataStream& read(Args&... args) {
-        uint32_t count;
-        stream >> count;
-        if constexpr(requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); })
-            pfr::for_each_field(args..., [this, &count](auto& field) { count-- ? stream >> field : stream; });
-        else
-            ((count-- ? stream >> args : stream), ...);
-        return stream;
-    }
-
-    template <typename... Args>
-    QDataStream& write(const Args&... args) {
-        if constexpr(requires { sizeof...(Args) == 1; (pfr::detail::fields_count<Args>(),...); ((pfr::tuple_size_v<Args> >= 1), ...); }) {
-            ((stream << uint32_t(pfr::tuple_size_v<Args>)), ...);
-            pfr::for_each_field(args..., [this](const auto& field) { stream << field; });
-        } else {
-            stream << uint32_t(sizeof...(Args));
-            ((stream << args), ...);
-        }
-        return stream;
-    }
-#endif
 
     template <typename... Args>
     QDataStream& rw(Args&... args) {

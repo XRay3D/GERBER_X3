@@ -11,7 +11,6 @@
 #include "editor.h"
 #include "doublespinbox.h"
 #include "shape.h"
-#include "shhandler.h"
 
 #include <array>
 #include <set>
@@ -29,7 +28,7 @@ Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array getter{&QGraphicsItem::x, &QGraphicsItem::y};
+    static const std::array getter{&Shapes::Handle::x, &Shapes::Handle::y};
 
     auto set = [&] {
         std::set<double> set;
@@ -38,7 +37,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         case Shape::Center:
         case Shape::Point1:
             for(auto* shape: sh) {
-                auto tmp = (*shape->handlers[index.row()].*getter[index.column()])();
+                auto tmp = (shape->handles[index.row()].*getter[index.column()])();
                 set.emplace(tmp);
             }
             return set;
@@ -87,7 +86,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array setter{&QGraphicsItem::setX, &QGraphicsItem::setY};
+    static const std::array setter{&Shapes::Handle::setX, &Shapes::Handle::setY};
 
     if(role == Qt::EditRole) {
         if(std::ranges::empty(sh)) return {};
@@ -98,8 +97,8 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Shape::Center:
         case Shape::Point1:
             for(auto* shape: sh) {
-                (*shape->handlers[index.row()].*setter[index.column()])(val);
-                shape->currentHandler = shape->handlers[index.row()].get();
+                (shape->handles[index.row()].*setter[index.column()])(val);
+                shape->curHandle = shape->handles.begin() + index.row();
                 shape->redraw();
             }
             break;
@@ -127,7 +126,7 @@ public:
     ~Delegate() override = default;
 
     // QAbstractItemDelegate interface
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const override {
         qDebug(__FUNCTION__);
         dsbx = new QDoubleSpinBox{parent};
         index.row() >= Shape::PtCount
@@ -194,7 +193,7 @@ Editor::Editor(Plugin* plugin)
     pushButton->setObjectName("pbAddNew");
     pushButton->setIcon(QIcon::fromTheme("list-add"));
     vLayout->addWidget(pushButton);
-    connect(pushButton, &QPushButton::clicked, this, [plugin, this] {
+    connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });

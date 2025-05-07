@@ -189,6 +189,6 @@ void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 int Bridge::type() const { return Type::Bridge; }
 
-Paths Bridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
+Paths Bridge::paths(int /*alternate*/) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
 
 } // namespace Gi

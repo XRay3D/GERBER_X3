@@ -83,8 +83,7 @@ public:
 protected:
     // AbstractShape interface
     void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
-    void init() override { redraw(); } // FIXME init()
+    void readAndInit(QDataStream& stream) override;
 
 private:
     InternalData iData;

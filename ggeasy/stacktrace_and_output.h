@@ -7,7 +7,7 @@
 #include <csignal>
 #include <string>
 
-#if __cpp_lib_stacktrace
+#if __cpp_lib_stacktrace_
 #include <QMessageLogContext>
 #include <stacktrace>
 #define STACKTRACE std::to_string(std::stacktrace::current())
@@ -116,11 +116,15 @@ inline void death_signal(int signum) { // обработка Segfault
 
 inline auto messageHandler = qInstallMessageHandler(nullptr);
 inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-    auto file = context.file;
     QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
-    while(file && *file)
-        if(*file++ == '\\')
-            context_.file = file;
+
+    if(context.file) {
+        std::string_view file{context.file};
+        static constexpr auto delim = R"(\/)"sv;
+        if(auto last = file.find_last_of(delim); last != std::string_view::npos)
+            if(last = file.find_last_of(delim, last - 1); last != std::string_view::npos)
+                context_.file = file.data() + last;
+    }
 
     if(App::mainWindowPtr())
         App::mainWindow().logMessage2(type, context, message);
