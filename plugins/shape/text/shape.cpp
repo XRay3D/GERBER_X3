@@ -103,17 +103,14 @@ void Shape::redraw() {
     shape_ = {};
 
     Clipper clipper;
-    // for(auto& sp: painterPath.toSubpathPolygons(transform)) {
-    //     clipper.AddClip({sp});
-    //     //        paths_.push_back(sp);
-    //     //        shape_.addPolygon(sp);
-    // }
     clipper.AddClip(~painterPath.toSubpathPolygons(transform));
     clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
     for(auto& sp: paths_) {
         sp.emplace_back(sp.front());
         shape_.addPolygon(~sp);
     }
+
+    setPos(1, 1), setPos(0, 0);
 
     assert(handles.size() == 1);
 }
@@ -201,22 +198,14 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     }
 }
 
-// void Shape::menu(QMenu& menu, FileTree::View* tv) {
-//     AbstractShape::menu(menu, tv);
-//     menu.addAction(QIcon::fromTheme("draw-text"), QObject::tr("&Edit Shape"), [this, tv] {
-//         ShTextDialog dlg({const_cast<Shape*>(this)}, tv);
-//         dlg.exec();
-//     });
-// }
-
 void Shape::write(QDataStream& stream) const {
     Block{stream}.write(iData);
-    Shapes::AbstractShape::write(stream);
+    // AbstractShape::write(stream);
 }
 
 void Shape::readAndInit(QDataStream& stream) {
     Block{stream}.read(iData);
-    Shapes::AbstractShape::readAndInit(stream);
+    // AbstractShape::readAndInit(stream);
     redraw();
 }
 

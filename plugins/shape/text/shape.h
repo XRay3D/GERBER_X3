@@ -69,6 +69,7 @@ public:
 
     QString text() const;
     void setText(const QString& value);
+
     Side side() const;
     void setSide(const Side& side);
 
@@ -76,7 +77,6 @@ public:
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
-    //    void menu(QMenu& menu, FileTree::View* tv) override;
 
     Editor* editor{};
 

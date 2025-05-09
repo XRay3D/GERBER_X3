@@ -37,6 +37,7 @@ struct Handle final {
         };
         return colors[type_];
     };
+
     operator QPointF() const noexcept { return pos_; }
     operator bool() const noexcept { return type_ != Null; }
 
@@ -110,8 +111,6 @@ protected:
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
-
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     // AbstractShape interface
     virtual void updateOtherhandles(Handle* handle = nullptr, int mode = {});

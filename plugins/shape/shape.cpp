@@ -35,7 +35,7 @@ QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
     QByteArray data;
     QDataStream out{&data, QIODevice::WriteOnly};
     Block{out}.write(shape.id_, shape.isVisible());
-    out << bool(shape.QGraphicsItem::flags() & QGraphicsItem::ItemIsMovable);
+    out << shape.isEditable();
     out << shape.handles;
     shape.write(out);
     return stream << data;
@@ -45,15 +45,15 @@ QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
     QByteArray data;
     stream >> data;
     QDataStream in{&data, QIODevice::ReadOnly};
-    bool visible;
-    Block{in}.read(shape.id_, visible);
+    bool bFlag;
+    Block{in}.read(shape.id_, bFlag);
 
     shape.setZValue(shape.id_);
-    shape.setVisible(visible);
+    shape.setVisible(bFlag);
     shape.setToolTip(shape.name() % QString::number(shape.id_));
 
-    in >> shape.isFinal;
-    shape.setFlag(QGraphicsItem::ItemIsMovable, shape.isFinal);
+    in >> bFlag;
+    shape.setEditable(bFlag);
     shape.isFinal = true;
 
     in >> shape.handles;
@@ -226,26 +226,27 @@ QVariant AbstractShape::data(const QModelIndex& index, int role) const {
 void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
     auto action = menu.addAction(
         QIcon::fromTheme("edit-delete"),
-        QObject::tr("&Delete object \"%1\"").arg(name()),
+        QObject::tr("&Delete object \"%1\"").arg(name()), &menu,
         [this] { App::fileModel().removeRow(row(), index().parent()); });
 
     action = menu.addAction(
         QIcon::fromTheme("hint"),
-        QObject::tr("&Visible \"%1\"").arg(name()),
+        QObject::tr("&Visible \"%1\"").arg(name()), &menu,
         [this](bool fl) { Gi::Item::setVisible(fl); });
     action->setCheckable(true);
     action->setChecked(isVisible());
 
     action = menu.addAction(
         QIcon::fromTheme(""),
-        QObject::tr("&Editable \"%1\"").arg(name()),
+        QObject::tr("&Editable \"%1\"").arg(name()), &menu,
         [this](bool fl) { setEditable(fl); });
     action->setCheckable(true);
     action->setChecked(isEditable());
 
     action = menu.addAction(
         QIcon::fromTheme("document-edit"),
-        QObject::tr("Edit Selected"), [this] { App::shapePlugin(type())->requestEditor(); });
+        QObject::tr("Edit Selected"), &menu,
+        [this] { App::shapePlugin(type())->requestEditor(); });
 }
 
 void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
@@ -350,23 +351,6 @@ void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
         AbstractShape::menu(menu, App::fileTreeViewPtr());
         menu.exec(event->screenPos());
     }
-}
-
-QVariant AbstractShape::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    return Gi::Item::itemChange(change, value);
-    // if(change == ItemFlagsChange) {
-    //     const bool selected = isSelected() && (QGraphicsItem::flags() & QGraphicsItem::ItemIsMovable);
-    //     for(auto& item: handles) item->setVisible(selected);
-    // } else if(change == ItemSelectedChange) {
-    //     const bool selected = value.toInt() && (QGraphicsItem::flags() & QGraphicsItem::ItemIsMovable);
-    //     for(auto& item: handles) item->setVisible(selected);
-    //     if(index().isValid()) {
-    //         auto flags = (selected ? QItemSelectionModel::Select : QItemSelectionModel::Deselect) | QItemSelectionModel::Rows;
-    //         App::fileTreeView().selectionModel()->select(index(), flags);
-    //     }
-    // } else if(change == ItemVisibleChange) {
-    //     emit App::fileModel().dataChanged(index(), index(), {Qt::CheckStateRole});
-    // }
 }
 
 void AbstractShape::updateOtherhandles(Handle* h, int mode [[maybe_unused]]) {
