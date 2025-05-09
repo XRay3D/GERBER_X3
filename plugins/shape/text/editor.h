@@ -34,6 +34,8 @@ class Editor : public QWidget {
     DoubleSpinBox* dsbxAngle;
     DoubleSpinBox* dsbxHeight;
     DoubleSpinBox* dsbxXY;
+    DoubleSpinBox* dsbxX;
+    DoubleSpinBox* dsbxY;
     QCheckBox* chbxBold;
     QCheckBox* chbxItalic;
     QComboBox* cbxSide;

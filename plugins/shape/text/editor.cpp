@@ -12,7 +12,6 @@
 #include "doublespinbox.h"
 #include "shape.h"
 
-
 #include <QtWidgets>
 #include <array>
 #include <set>
@@ -63,6 +62,8 @@ void Editor::setupUi() {
     formLayout->addRow(new QLabel{TR("TextEditor", "Angle:", nullptr), this}, dsbxAngle = new DoubleSpinBox{this});
     formLayout->addRow(new QLabel{TR("TextEditor", "Height:", nullptr), this}, dsbxHeight = new DoubleSpinBox{this});
     formLayout->addRow(new QLabel{TR("TextEditor", "X/Y:", nullptr), this}, dsbxXY = new DoubleSpinBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Pos. X:", nullptr), this}, dsbxX = new DoubleSpinBox{this});
+    formLayout->addRow(new QLabel{TR("TextEditor", "Pos. Y:", nullptr), this}, dsbxY = new DoubleSpinBox{this});
     formLayout->addRow(new QLabel{TR("TextEditor", "Side:", nullptr), this}, cbxSide = new QComboBox{this});
 
     cbxSide->addItems(TR("TextEditor", "Top|Bottom").split('|'));
@@ -75,10 +76,19 @@ void Editor::setupUi() {
     dsbxHeight->setSuffix(TR("TextEditor", " mm", nullptr));
 
     dsbxXY->setDecimals(3);
-    dsbxXY->setMaximum(1000.0);
-    dsbxXY->setMinimum(0.001);
+    dsbxXY->setRange(0.001, 1000.0);
     dsbxXY->setSuffix(TR("TextEditor", " %", nullptr));
     dsbxXY->setValue(100.0);
+
+    dsbxX->setDecimals(3);
+    dsbxX->setRange(-1000.0, +1000.0);
+    dsbxX->setSuffix(TR("TextEditor", " mm", nullptr));
+    dsbxX->setValue(100.0);
+
+    dsbxY->setDecimals(3);
+    dsbxY->setRange(-1000.0, +1000.0);
+    dsbxY->setSuffix(TR("TextEditor", " mm", nullptr));
+    dsbxY->setValue(100.0);
 
     // Apply
     auto pushButton = new QPushButton{TR("TextEditor", "Apply"), this};
@@ -160,25 +170,18 @@ void Editor::updateXY() {
 void Editor::updateCenterAlign() {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
 
-    int handleAlign;
-    if(rb_bc->isChecked())
-        handleAlign = Shape::BotCenter;
-    else if(rb_bl->isChecked())
-        handleAlign = Shape::BotLeft;
-    else if(rb_br->isChecked())
-        handleAlign = Shape::BotRight;
-    else if(rb_cc->isChecked())
-        handleAlign = Shape::Center;
-    else if(rb_lc->isChecked())
-        handleAlign = Shape::CenterLeft;
-    else if(rb_rc->isChecked())
-        handleAlign = Shape::CenterRight;
-    else if(rb_tc->isChecked())
-        handleAlign = Shape::TopCenter;
-    else if(rb_tl->isChecked())
-        handleAlign = Shape::TopLeft;
-    else if(rb_tr->isChecked())
-        handleAlign = Shape::TopRight;
+    int handleAlign{};
+
+    if(rb_bc->isChecked()) handleAlign = Shape::BotCenter;
+    else if(rb_bl->isChecked()) handleAlign = Shape::BotLeft;
+    else if(rb_br->isChecked()) handleAlign = Shape::BotRight;
+    else if(rb_cc->isChecked()) handleAlign = Shape::Center;
+    else if(rb_lc->isChecked()) handleAlign = Shape::CenterLeft;
+    else if(rb_rc->isChecked()) handleAlign = Shape::CenterRight;
+    else if(rb_tc->isChecked()) handleAlign = Shape::TopCenter;
+    else if(rb_tl->isChecked()) handleAlign = Shape::TopLeft;
+    else if(rb_tr->isChecked()) handleAlign = Shape::TopRight;
+
     for(auto text: sh) {
         text->iData.handleAlign = handleAlign;
         text->redraw();
@@ -232,8 +235,7 @@ void Editor::reset() {
     disconnect(chbxItalic, &QCheckBox::toggled,             this, &Editor::updateFont);
     // clang-format on
 
-    for(auto text: shapes)
-        text->save();
+    for(auto text: shapes) text->save();
 
     //    plainTextEdit->setStyleSheet("QPlainTextEdit { font-size: 32pt }");
 
@@ -296,8 +298,7 @@ void Editor::reset() {
 
 void Editor::hideEvent(QHideEvent* event) {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    for(auto text: sh)
-        text->restore();
+    for(auto text: sh) text->restore();
     QWidget::hideEvent(event);
 }
 
