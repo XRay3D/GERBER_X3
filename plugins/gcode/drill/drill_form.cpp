@@ -1,23 +1,21 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_form.h"
-#include "gi_point.h"
-#include "tool_database.h"
-#include "ui_drillform.h"
-
 #include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "drill_model.h"
+#include "gi_point.h"
+#include "tool_database.h"
+#include "ui_drillform.h"
+#include <boost/graph/bellman_ford_shortest_paths.hpp>
 
 // #include "file.h"
 // #include "gi_point.h"
@@ -191,7 +189,7 @@ void Form::initToolTable() {
             header->setAll(!checkBox->checkState());
         }
     });
-    connect(header, &Header::onChecked, [this](int idx) {
+    connect(header, &Header::onChecked, [this](int /*idx*/) {
         if(model) {
             int fl{};
             for(int i{}; i < model->rowCount(); ++i)
@@ -228,8 +226,11 @@ void Form::on_cbxFileCurrentIndexChanged() {
         static mvector<GraphicObject> gos;
         gos = file->getDataForGC(criterias, GCType::Drill);
 
-        for(auto& var: gos)
+        for(auto& var: gos) {
+            // if(var.raw.has_value())
+            // qWarning() << std::any_cast<double>(var.raw);
             map[Key{var.name, var.path.size() > 1}].emplace_back(&var);
+        }
 
         model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
@@ -254,7 +255,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
 
         App::grView().scene()->update();
     } catch(const std::exception& exc) {
-        qDebug("%s: %s", __FUNCTION__, exc.what());
+        qDebug("%s: %s", __FUNCTION__, exc.what()); //-V576
         return;
     } catch(...) {
         exit(-99);
@@ -427,7 +428,7 @@ void Form::updateState() {
 }
 
 void Form::errorOccurred() {
-    auto tpc = (GCode::Creator*)sender();
+    [[maybe_unused]] auto tpc = (GCode::Creator*)sender();
     // tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }
 
@@ -544,23 +545,8 @@ void Form::computePaths() {
 
         for(auto& [toolId, val]: pathsMap) {
             if(val.drillPath.size()) {
-                Point point1{~App::home().pos()};
-                { // sort by distance
-                    size_t counter = 0;
-                    while(counter < val.drillPath.size()) {
-                        size_t selector = 0;
-                        double length = std::numeric_limits<double>::max();
-                        for(size_t i = counter, end = val.drillPath.size(); i < end; ++i) {
-                            double length2 = distTo(point1, val.drillPath[i]);
-                            if(length > length2) {
-                                length = length2;
-                                selector = i;
-                            }
-                        }
-                        qSwap(val.drillPath[counter], val.drillPath[selector]);
-                        point1 = val.drillPath[counter++];
-                    }
-                }
+                reductionOfDistance(val.drillPath, ~App::home().pos());
+
                 GCode::File* gcode = new File{
                     {App::toolHolder().tool(toolId), dsbxDepth->value()},
                     {{val.drillPath}}
@@ -605,12 +591,13 @@ void Form::computePaths() {
 
 void Form::updateName() { }
 
-void Form::hideEvent(QHideEvent* event) {
+void Form::hideEvent(QHideEvent* event) { // NOTE clean and hide pr gi
     delete ui->toolTable->model();
+    model = nullptr;
     event->accept();
 }
 
-void Form::editFile(GCode::File* file) { }
+void Form::editFile(GCode::File* /*file*/) { }
 
 } // namespace Drilling
 

@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,15 +18,21 @@
 #include "mvector.h"
 #include "settings.h"
 #include "tool.h"
-#include "utils.h"
+#include "utils.h" //using namespace Qt::Literals;
 
 #include <assert.h>
 #include <map>
 
-namespace Shapes {
-class Plugin;
-class Handle;
-} // namespace Shapes
+class AbstractFilePlugin;
+
+namespace Drilling {
+class Form;
+} // namespace Drilling
+
+namespace FileTree {
+class View;
+class Model;
+} // namespace FileTree
 
 namespace GCode {
 class Plugin;
@@ -34,27 +40,22 @@ class PropertiesForm;
 class Settings;
 } // namespace GCode
 
-class AbstractFilePlugin;
 namespace GCodeShapes {
 class Plugin;
 class Handle;
 } // namespace GCodeShapes
-
-namespace FileTree {
-class View;
-class Model;
-} // namespace FileTree
-
-namespace Drilling {
-class Form;
-} // namespace Drilling
 
 namespace Gi {
 class Marker;
 class Pin;
 } // namespace Gi
 
-using Handlers = mvector<Shapes::Handle*>;
+namespace Shapes {
+class Plugin;
+// class Handle;
+} // namespace Shapes
+
+// using handles = mvector<Shapes::Handle*>;
 
 using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
@@ -66,18 +67,18 @@ private:                                          \
                                                   \
 public:                                           \
     static auto& NAME() {                         \
-        /* assert(app->NAME##_); */               \
+        assert(app->NAME##_);                     \
         return *app->NAME##_;                     \
     }                                             \
-    static auto NAME##Ptr() {                     \
-        /* assert(app->NAME##_); */               \
+    static auto* NAME##Ptr() {                    \
+        /*assert(app->NAME##_);*/                 \
         return app->NAME##_;                      \
     }                                             \
     static void SET(TYPE* NAME) {                 \
         if(app->NAME##_ && NAME)                  \
             throw std::logic_error(__FUNCTION__); \
-        else                                      \
-            app->NAME##_ = NAME;                  \
+        /*qInfo() << #NAME << NAME;*/             \
+        app->NAME##_ = NAME;                      \
     }
 
 class App {
@@ -85,26 +86,24 @@ class App {
     inline static App* app{};
 
     // clang-format off
-    SINGLETON(Drilling::Form,        setDrillForm,           drillForm       )
-    SINGLETON(FileTree::Model,       setFileModel,           fileModel       )
-    SINGLETON(FileTree::View,        setFileTreeView,        fileTreeView    )
     SINGLETON(GCode::PropertiesForm, setGCodePropertiesForm, gcPropertiesForm)
-    SINGLETON(QUndoStack,            setUndoStack,           undoStack       )
-    SINGLETON(GraphicsView,          setGraphicsView,        grView          )
-    SINGLETON(LayoutFrames,          setLayoutFrames,        layoutFrames    )
-    SINGLETON(MainWindow,            setMainWindow,          mainWindow      )
-    SINGLETON(Project,               setProject,             project         )
-    SINGLETON(QSplashScreen,         setSplashScreen,        splashScreen    )
-    SINGLETON(GCode::Settings,       setGcSettings,          gcSettings      )
+    SINGLETON(Drilling::Form,  setDrillForm,    drillForm    )
+    SINGLETON(FileTree::Model, setFileModel,    fileModel    )
+    SINGLETON(FileTree::View,  setFileTreeView, fileTreeView )
+    SINGLETON(GCode::Settings, setGcSettings,   gcSettings   )
+    SINGLETON(GraphicsView,    setGraphicsView, grView       )
+    SINGLETON(LayoutFrames,    setLayoutFrames, layoutFrames )
+    SINGLETON(MainWindow,      setMainWindow,   mainWindow   )
+    SINGLETON(Project,         setProject,      project      )
+    SINGLETON(QSplashScreen,   setSplashScreen, splashScreen )
+    SINGLETON(QUndoStack,      setUndoStack,    undoStack    )
 
-    SINGLETON(Gi::Marker,            setHome,                home            )
-    SINGLETON(Gi::Marker,            setZero,                zero            )
-
-    SINGLETON(Gi::Pin,               setPin0,                pin0            )
-    SINGLETON(Gi::Pin,               setPin1,                pin1            )
-    SINGLETON(Gi::Pin,               setPin2,                pin2            )
-    SINGLETON(Gi::Pin,               setPin3,                pin3            )
-
+    SINGLETON(Gi::Marker, setHome, home)
+    SINGLETON(Gi::Marker, setZero, zero)
+    SINGLETON(Gi::Pin,    setPin0, pin0)
+    SINGLETON(Gi::Pin,    setPin1, pin1)
+    SINGLETON(Gi::Pin,    setPin2, pin2)
+    SINGLETON(Gi::Pin,    setPin3, pin3)
     // clang-format on
 
     FilePluginMap filePlugins_;
@@ -113,7 +112,7 @@ class App {
 
     AppSettings appSettings_;
 
-    Handlers handlers_;
+    // handles handles_;
     //    QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
@@ -127,7 +126,7 @@ class App {
 
 public:
     explicit App() {
-        if(sharedMemory.create(sizeof(nullptr), QSharedMemory::ReadWrite))
+        if(sharedMemory.create(sizeof(void*), QSharedMemory::ReadWrite))
             app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
         else if(sharedMemory.attach(QSharedMemory::ReadOnly))
             app = *reinterpret_cast<App**>(sharedMemory.data());
@@ -154,7 +153,7 @@ public:
     static Shapes::Plugin* shapePlugin(int type) { return app->shapePlugin_.contains(type) ? app->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app->shapePlugin_; }
 
-    static auto& shapeHandlers() { return app->handlers_; }
+    // static auto& shapehandles() { return app->handles_; }
 
     static auto& settings() { return app->appSettings_; }
 

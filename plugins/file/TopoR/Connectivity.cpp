@@ -1,8 +1,9 @@
 ﻿#include "Connectivity.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool Connectivity::Via::getFixedSpecified() const {
+    bool
+    Connectivity::Via::getFixedSpecified() const {
     return _fixed != Bool::off;
 }
 

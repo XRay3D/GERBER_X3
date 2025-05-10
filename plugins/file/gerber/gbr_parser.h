@@ -32,7 +32,12 @@ protected:
     mvector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
-    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, int integer, int decimal);
+
+    enum class FormatDir {
+        X,
+        Y
+    };
+    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, FormatDir dir);
 
     void addPath();
     void addFlash();
@@ -41,8 +46,6 @@ protected:
     void resetStep();
 
     Point parsePosition(const QString& xyStr);
-    Path arc(const Point& center, double radius, double start, double stop);
-    Path arc(Point p1, Point p2, Point center);
 
     Paths createLine();
     Paths createPolygon();

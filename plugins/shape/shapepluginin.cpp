@@ -3,21 +3,27 @@
 #include "project.h"
 
 namespace Shapes {
+
 void Plugin::addPoint(const QPointF& point) {
-    if(item == nullptr)
-        item = createShape(point), App::project().addShape(item);
-    else if(!item->addPt(point))
-        item->setSelected(true), item = nullptr;
+    if(item == nullptr) {
+        item = createShape(point);
+        App::project().addShape(item);
+    } else if(!item->addPt(point)) {
+        item->setSelected(true);
+        item = nullptr;
+    }
 }
 
 void Plugin::updPoint(const QPointF& point) {
-    if(item)
-        item->setPt(point);
+    if(item) item->setPt(point);
 }
 
 void Plugin::finalizeShape() {
-    if(item)
-        item->setSelected(true), item = nullptr;
+    if(item) {
+        item->addPt({std::nan("fin"), std::nan("fin")});
+        item->setSelected(true);
+        item = nullptr;
+    }
     emit actionUncheck();
 }
 

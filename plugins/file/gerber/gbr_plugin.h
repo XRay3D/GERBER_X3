@@ -21,7 +21,7 @@ namespace Gerber {
 
 class Plugin : public AbstractFilePlugin, Parser {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "gerber.json")
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "description.json")
     Q_INTERFACES(AbstractFilePlugin)
 
 public:
@@ -36,7 +36,7 @@ public:
     [[nodiscard]] uint32_t type() const override { return GERBER; }
 
     // public slots:
-    [[nodiscard]] AbstractFile* parseFile(const QString& fileName, int type) override;
+    [[nodiscard]] AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
 };
 
 } // namespace Gerber

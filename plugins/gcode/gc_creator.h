@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,18 +16,9 @@
 
 #include <QObject>
 
+#include <cancelation.h>
 #include <condition_variable>
 #include <mutex>
-#include <ranges>
-#include <sstream>
-
-// #if __has_include(<source_location>)
-//     #include <source_location>
-// using sl = std::source_location;
-// #else
-//     #include <experimental/source_location>
-// using sl = std::experimental::source_location;
-// #endif
 
 namespace ranges = std::ranges;
 namespace rviews = std::ranges::views;
@@ -68,12 +59,6 @@ public:
 
     Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const;
 
-    /*static*/ Paths& sortB(Paths& src);
-    /*static*/ Paths& sortBeginEnd(Paths& src);
-
-    /*static*/ Pathss& sortB(Pathss& src);
-    /*static*/ Pathss& sortBeginEnd(Pathss& src);
-
     void createGc(Params* gcp);
 
     void continueCalc(bool fl = true);
@@ -108,9 +93,7 @@ protected:
     /// \brief склеивает пути при совпадении конечных точек
     /// \param paths - пути
     /// \param maxDist - максимальное расстояние между конечными точками
-    void mergeSegments(Paths& paths, double maxDist = 0.0);
-
-    void mergePaths(Paths& paths, const double maxDist = 0.0);
+    // void mergePaths(Paths& paths, const double maxDist = 0.0);
 
     void markPolyTreeDByNesting(PolyTree& polynode);
     void sortPolyTreeByNesting(PolyTree& polynode);

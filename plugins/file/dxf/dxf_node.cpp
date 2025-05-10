@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -34,19 +32,19 @@ class Dialog : public QDialog {
     QTableView* tableView;
     void setupUi(QDialog* dialog) {
         if(dialog->objectName().isEmpty())
-            dialog->setObjectName(QString::fromUtf8("Dialog"));
+            dialog->setObjectName(u"dialog"_s);
         verticalLayout = new QVBoxLayout{dialog};
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(u"verticalLayout"_s);
         verticalLayout->setContentsMargins(6, 6, 6, 6);
 
         pushButtonColorize = new QPushButton{dialog};
-        pushButtonColorize->setObjectName(QString::fromUtf8("pushButtonColorize"));
+        pushButtonColorize->setObjectName(u"pushButtonColorize"_s);
         pushButtonColorize->setText(DxfObj::tr("Colorize"));
         pushButtonColorize->setIcon(QIcon::fromTheme("color-management"));
         verticalLayout->addWidget(pushButtonColorize);
 
         tableView = new QTableView{dialog};
-        tableView->setObjectName(QString::fromUtf8("tableView"));
+        tableView->setObjectName(u"tableView"_s);
         verticalLayout->addWidget(tableView);
 
         QMetaObject::connectSlotsByName(dialog);
@@ -56,7 +54,7 @@ class Dialog : public QDialog {
 public:
     ~Dialog() { fl = true; }
     Dialog(File* file, bool& fl, QWidget* parent = nullptr)
-        : QDialog(parent)
+        : QDialog{parent}
         , fl(fl = false) {
         setupUi(this);
 
@@ -116,7 +114,7 @@ class TreeWidget : public QTreeWidget {
 public:
     ~TreeWidget() { fl = true; }
     TreeWidget(File* file, bool& fl, QWidget* parent = nullptr)
-        : QTreeWidget(nullptr)
+        : QTreeWidget{nullptr}
         , fl(fl = false) {
         setAlternatingRowColors(true);
         setAnimated(true);
@@ -166,22 +164,18 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch(role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-        emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
+        emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
         return true;
     case Qt::EditRole:
         switch(FileTree::Column(index.column())) {
         case FileTree::Column::Side:
-            if(role == Qt::EditRole) {
-                file->setSide(static_cast<Side>(value.toBool()));
-                // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
-                return true;
-            }
+            file->setSide(static_cast<Side>(value.toBool()));
+            // emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), { role });
+            return true;
         case FileTree::Column::ItemsType:
-            if(role == Qt::EditRole) {
-                file->setItemType(value.toInt());
-                emit App::fileModel().dataChanged(childs.front()->index(index.column()), childs.back()->index(index.column()), {role});
-                return true;
-            }
+            file->setItemType(value.toInt());
+            emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
+            return true;
         default:
             break;
         }
@@ -308,7 +302,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->file()->layersVisible_[name] = visible;
             if(visible) {
                 layer->file()->visible_ = visible;
-                emit App::fileModel().dataChanged(parent_->index(index.column()), parent_->index(index.column()), {role});
+                emit App::fileModel().dataChanged(parent_ -> index(index.column()), parent_->index(index.column()), {role});
             }
         }
         return true;

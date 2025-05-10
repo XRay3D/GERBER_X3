@@ -2,7 +2,7 @@
 
 namespace Dxf {
 SeqEnd::SeqEnd(SectionParser* sp)
-    : Entity(sp) {
+    : Entity{sp} {
 }
 
 void SeqEnd::parse(CodeData& code) {

@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -70,9 +70,9 @@ public:
     void addChild(Node* item, Deleter::Polycy delPolycy = Deleter::Delete);
     void remove(int row);
 
+    virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
-    virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual void menu(QMenu& menu, View* tv) = 0;
 
     virtual int32_t id() const { return id__; }

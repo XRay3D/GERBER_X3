@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -191,6 +189,6 @@ void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 int Bridge::type() const { return Type::Bridge; }
 
-Paths Bridge::paths(int alternate) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
+Paths Bridge::paths(int /*alternate*/) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
 
 } // namespace Gi

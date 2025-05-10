@@ -11,6 +11,13 @@
 #include <QDir>
 #include <QTimer>
 #include <QtWidgets>
+#include <qfileinfo.h>
+
+void delay_ms(int ms) {
+    QEventLoop loop;
+    QTimer::singleShot(ms, [&loop] { loop.exit(); });
+    loop.exec();
+}
 
 namespace QtPrivate {
 template <>
@@ -34,28 +41,42 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 
 bool MainWindow::debug() {
 
-    while(App::isDebug() || 1) { // NOTE need for debug
+    while(App::isDebug() || 1) { // FIXME NOTE need for debug
         int time = 100;
-        int delay = 100;
+        int delay = 100; //-V654
 
-        if(1) {
-            // QDir dir(R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)");
-            QDir dir(R"(/home/x-ray/Рабочий стол/dxf/)");
-            // QDir dir("D:/Gerber Test Files/CopperCAM/");
-            // QDir dir("C:/Users/X-Ray/Documents/3018/CNC");
-            // QDir dir("E:/PRO/Новая папка/en.stm32f746g-disco_gerber/gerber_B01");
+        if(0) {
+            QDir dir{
+                R"(C:\Users\bakiev\Junk_Yard\SFT\CAM\CopperCAM)"
+                // "C:/Users/X-Ray/Documents/3018/CNC"
+                // "D:/Gerber Test Files/CopperCAM/"
+                // "E:/PRO/Новая папка/en.stm32f 746g-disco_gerber/gerber_B01"
+                // R"(/home/x-ray/projects/dxf/)"
+                // R"(/home/x-ray/projects/qt/AMK-310/AMK_TESTER)"
+                // R"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)"
+            };
             if(!dir.exists()) break;
-            for(auto&& str: dir.entryList({"*.*"}, QDir::Files)) {
-                str = dir.path() + '/' + str;
+            for(auto&& str: dir.entryList({"*.gbr"}, QDir::Files)) {
+                str = dir.path() % '/' % str;
                 QTimer::singleShot(time += delay, [this, str] { loadFile(str); });
-                //                break;
+                break;
             }
+            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
         }
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
 
-        if(0)
-            QTimer::singleShot(time += delay, this, [this] { loadFile(R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"); });
+        if(0) {
+
+            for(auto* file: {
+                    R"(/home/x-ray/Загрузки/gerber1.gbr)",
+                    R"(C:\Users\bakiev\Downloads\gerber1.gbr)",
+                    R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"}) {
+                if(!QFileInfo::exists(file)) continue;
+                QTimer::singleShot(time += delay, this, [this, file] { loadFile(file); });
+                QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+            }
+        }
 
         if(0) {
             constexpr auto TYPE = md5::hash32("PocketRaster");
@@ -66,7 +87,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
-        if(1) {
+        if(0) {
             constexpr auto TYPE = md5::hash32("PocketOffset");
             if(!toolpathActions.contains(TYPE))
                 break;
@@ -86,6 +107,7 @@ bool MainWindow::debug() {
         if(0) {
             constexpr auto DRILLING = md5::hash32("Drilling");
             QTimer::singleShot(time += delay, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
+            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
         }
 
         if(0) {
@@ -95,11 +117,11 @@ bool MainWindow::debug() {
 
         if(0) {
             constexpr auto PROFILE = md5::hash32("Profile");
-
+            delay_ms(1000);
             QTimer::singleShot(time += delay, this, [this] { selectAll(); });
             QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
-            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
             QTimer::singleShot(time += delay, this, [this] { App::grView().zoomFit(); });
         }
 
@@ -107,11 +129,11 @@ bool MainWindow::debug() {
             constexpr auto THREAD = md5::hash32("Thread");
             QTimer::singleShot(time += delay, this, [this, THREAD] { toolpathActions[THREAD]->toggle(); });
 
-            //            QTimer::singleShot(i += k, this, [this] { selectAll(); });
-            //            QTimer::singleShot(i += k, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
-            //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-            //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            //            QTimer::singleShot(i += k, this, [this] { App::grView().zoomFit(); });
+            //            QTimer::singleShot(time += delay, this, [this] { selectAll(); });
+            //            QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
+            //            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+            //            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+            //            QTimer::singleShot(time += delay, this, [this] { App::grView().zoomFit(); });
         }
 
         if(0) {
@@ -140,14 +162,14 @@ bool MainWindow::debug() {
 
         //        if (0) {
         //            i = 1000;
-        //            QTimer::singleShot(i += k, this,[this] { selectAll(); });
-        //            QTimer::singleShot(i += k, this,[this] { toolpathActions[GCode::Pocket]->toggle(); });
-        //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
-        //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-        //            QTimer::singleShot(i += k, this,[this] { App::grView().zoomFit(); });
+        //            QTimer::singleShot(time += delay, this,[this] { selectAll(); });
+        //            QTimer::singleShot(time += delay, this,[this] { toolpathActions[GCode::Pocket]->toggle(); });
+        //            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+        //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+        //            QTimer::singleShot(time += delay, this,[this] { App::grView().zoomFit(); });
         //        }
         //        if (0)
-        //            QTimer::singleShot(i += k, this,[this] { toolpathActions[GCode::Drill]->toggle(); });
+        //            QTimer::singleShot(time += delay, this,[this] { toolpathActions[GCode::Drill]->toggle(); });
         break;
     }
     return {};

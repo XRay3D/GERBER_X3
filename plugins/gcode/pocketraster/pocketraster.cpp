@@ -1,19 +1,20 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketraster.h"
+#include "gi_point.h"
 #include "project.h"
 #include <QElapsedTimer>
+#undef emit
 #include <execution>
+#define emit
 
 namespace PocketRaster {
 
@@ -79,11 +80,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         }
     }
 
-    mergeSegments(returnPs);
+    mergePaths(returnPs);
 
-    sortB(returnPs);
+    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
     if(!profilePaths.empty() && prPass) {
-        sortB(profilePaths);
+        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
         if(gcp_.convent())
             ReversePaths(profilePaths);
         for(Path& path: profilePaths)
@@ -206,7 +207,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     if(!profilePaths.empty() && prPass != NoProfilePass) {
         for(auto& p: profilePaths)
             p.push_back(p.front());
-        returnPss.push_back(sortB(profilePaths));
+        returnPss.push_back(sortB(profilePaths, ~(App::home().pos() + App::zero().pos())));
     }
 
     if(returnPss.empty()) {
@@ -418,7 +419,7 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
         merged.resize(merged.size() + 1);
         auto& path = merged.back();
         for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
-            ifCancelThenThrow();
+            throwIfCancel();
             if(path.empty() || path.back() == bit->front()) {
                 path.empty() ? path += * bit
                              : path += *bit | skipFront;

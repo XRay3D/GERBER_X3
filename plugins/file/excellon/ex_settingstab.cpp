@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -16,8 +14,8 @@
 
 namespace Excellon {
 ExSettingsTab::ExSettingsTab(QWidget* parent)
-    : AbstractFileSettings(parent) {
-    setObjectName(QString::fromUtf8("tabExcellon"));
+    : AbstractFileSettings{parent} {
+    setObjectName(u"tabExcellon"_s);
 
     auto vlayTab = new QVBoxLayout{this};
     vlayTab->setContentsMargins(6, 6, 6, 6);
@@ -30,10 +28,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         {
             grbxUnits->setTitle(QApplication::translate("ExcellonDialog", "Units", nullptr));
             rbInches = new QRadioButton{grbxUnits};
-            rbInches->setObjectName(QString::fromUtf8("rbInches"));
+            rbInches->setObjectName(u"rbInches"_s);
 
             rbMillimeters = new QRadioButton{grbxUnits};
-            rbMillimeters->setObjectName(QString::fromUtf8("rbMillimeters"));
+            rbMillimeters->setObjectName(u"rbMillimeters"_s);
 
             auto vlay = new QVBoxLayout{grbxUnits};
             vlay->setContentsMargins(6, 6, 6, 6);
@@ -45,10 +43,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             grbxZeroes->setTitle(QApplication::translate("ExcellonDialog", "Zeroes", nullptr));
 
             rbLeading = new QRadioButton{grbxZeroes};
-            rbLeading->setObjectName(QString::fromUtf8("rbLeading"));
+            rbLeading->setObjectName(u"rbLeading"_s);
 
             rbTrailing = new QRadioButton{grbxZeroes};
-            rbTrailing->setObjectName(QString::fromUtf8("rbTrailing"));
+            rbTrailing->setObjectName(u"rbTrailing"_s);
 
             auto vlay = new QVBoxLayout{grbxZeroes};
             vlay->setContentsMargins(6, 6, 6, 6);
@@ -60,7 +58,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             grbxFormat->setTitle(QApplication::translate("ExcellonDialog", "Format", nullptr));
 
             sbxInteger = new QSpinBox{grbxFormat};
-            sbxInteger->setObjectName(QString::fromUtf8("sbxInteger"));
+            sbxInteger->setObjectName(u"sbxInteger"_s);
             sbxInteger->setWrapping(false);
             sbxInteger->setAlignment(Qt::AlignCenter);
             sbxInteger->setProperty("showGroupSeparator", QVariant(false));
@@ -68,7 +66,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             sbxInteger->setMaximum(8);
 
             sbxDecimal = new QSpinBox{grbxFormat};
-            sbxDecimal->setObjectName(QString::fromUtf8("sbxDecimal"));
+            sbxDecimal->setObjectName(u"sbxDecimal"_s);
             sbxDecimal->setAlignment(Qt::AlignCenter);
             sbxDecimal->setMinimum(1);
             sbxDecimal->setMaximum(8);
@@ -88,14 +86,14 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             grbxOffset->setTitle(QApplication::translate("ExcellonDialog", "Offset", nullptr));
 
             dsbxX = new DoubleSpinBox{grbxOffset};
-            dsbxX->setObjectName(QString::fromUtf8("dsbxX"));
+            dsbxX->setObjectName(u"dsbxX"_s);
             dsbxX->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
             dsbxX->setDecimals(4);
             dsbxX->setMinimum(-1000.0);
             dsbxX->setMaximum(1000.0);
 
             dsbxY = new DoubleSpinBox{grbxOffset};
-            dsbxY->setObjectName(QString::fromUtf8("dsbxY"));
+            dsbxY->setObjectName(u"dsbxY"_s);
             dsbxY->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
             dsbxY->setDecimals(4);
             dsbxY->setMinimum(-1000.0);
@@ -121,13 +119,13 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         grbxParse->setTitle(QApplication::translate("ExcellonDialog", "Parse Reg.Expr.", nullptr));
 
         leParseZero = new QLineEdit{this};
-        leParseZero->setObjectName(QString::fromUtf8("leParseZero"));
+        leParseZero->setObjectName(u"leParseZero"_s);
 
         leParseUnit = new QLineEdit{this};
-        leParseUnit->setObjectName(QString::fromUtf8("leParseUnit"));
+        leParseUnit->setObjectName(u"leParseUnit"_s);
 
         leParseDecimalAndInteger = new QLineEdit{this};
-        leParseDecimalAndInteger->setObjectName(QString::fromUtf8("leParseDecimalAndInteger"));
+        leParseDecimalAndInteger->setObjectName(u"leParseDecimalAndInteger"_s);
 
         auto leTestParseZero = new QLineEdit{this};
         auto leTestParseUnit = new QLineEdit{this};
@@ -140,7 +138,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             if(re.isValid()) {
                 auto match = re.match(leTestParseZero->text());
                 for(int ctr{}; QString & string: match.capturedTexts())
-                    text.append(uR"(%1:("%2"), )"_qs.arg(ctr++).arg(string));
+                    text.append(uR"(%1:("%2"), )"_s.arg(ctr++).arg(string));
                 if(!match.hasMatch())
                     text = "No captured texts";
             } else {
@@ -157,7 +155,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             if(re.isValid()) {
                 auto match = re.match(leTestParseUnit->text());
                 for(int ctr{}; QString & string: match.capturedTexts())
-                    text.append(uR"(%1:("%2"), )"_qs.arg(ctr++).arg(string));
+                    text.append(uR"(%1:("%2"), )"_s.arg(ctr++).arg(string));
                 if(!match.hasMatch())
                     text = "No captured texts";
             } else {
@@ -174,7 +172,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             if(re.isValid()) {
                 auto match = re.match(leTestParseDecimalAndInteger->text());
                 for(int ctr{}; QString & string: match.capturedTexts())
-                    text.append(uR"(%1:("%2"), )"_qs.arg(ctr++).arg(string));
+                    text.append(uR"(%1:("%2"), )"_s.arg(ctr++).arg(string));
                 if(!match.hasMatch())
                     text = "No captured texts";
             } else {

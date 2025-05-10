@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2020                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,7 +11,7 @@
 #include "editor.h"
 #include "doublespinbox.h"
 #include "shape.h"
-#include "shhandler.h"
+//
 
 #include <array>
 #include <set>
@@ -31,7 +29,7 @@ Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array getter{&QGraphicsItem::x, &QGraphicsItem::y};
+    static const std::array getter{&QPointF::x, &QPointF::y};
     if(std::ranges::empty(sh)) return {};
 
     auto set = [index, &sh] {
@@ -42,7 +40,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         case Shape::Point2:
         case Shape::Center:
             for(auto* shape: sh) {
-                auto tmp = (*shape->handlers[index.row()].*getter[index.column()])();
+                auto tmp = (shape->handles[index.row()].*getter[index.column()])();
                 set.emplace(tmp);
             }
             return set;
@@ -98,7 +96,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array setter{&QGraphicsItem::setX, &QGraphicsItem::setY};
+    static const std::array setter{&Shapes::Handle::setX, &Shapes::Handle::setY};
 
     if(role == Qt::EditRole) {
         if(std::ranges::empty(sh)) return {};
@@ -110,23 +108,20 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Shape::Point2:
         case Shape::Center:
             for(auto* shape: sh) {
-                (*shape->handlers[index.row()].*setter[index.column()])(val);
-                shape->currentHandler = shape->handlers[index.row()].get();
+                (shape->handles[index.row()].*setter[index.column()])(val);
+                shape->curHandle = shape->handles.begin() + index.row();
                 shape->redraw();
             }
             break;
         case Shape::Radius:
-            for(auto* shape: sh)
-                shape->setRadius(val);
+            for(auto* shape: sh) shape->setRadius(val);
             break;
         case Shape::Diameter:
-            for(auto* shape: sh)
-                shape->setRadius(val / 2);
+            for(auto* shape: sh) shape->setRadius(val / 2);
             break;
         case Shape::Angle1:
         case Shape::Angle2:
-            for(auto* shape: sh)
-                shape->setAngle(index.row() - Shape::Angle1, val);
+            for(auto* shape: sh) shape->setAngle(index.row() - Shape::Angle1, val);
             break;
         }
         return true;
@@ -144,7 +139,7 @@ public:
     ~Delegate() override = default;
 
     // QAbstractItemDelegate interface
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& index) const override {
         qDebug(__FUNCTION__);
         dsbx = new QDoubleSpinBox{parent};
 
@@ -188,7 +183,7 @@ public:
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
-Editor::Editor(Plugin* plugin)
+Editor::Editor(Shapes::Plugin* plugin)
     : /* QWidget {parent}*/ view{new QTableView{this}}
     , model{new Model{view}}
     , plugin{plugin} {
@@ -226,7 +221,7 @@ Editor::Editor(Plugin* plugin)
     pushButton->setObjectName("pbAddNew");
     pushButton->setIcon(QIcon::fromTheme("list-add"));
     vLayout->addWidget(pushButton);
-    connect(pushButton, &QPushButton::clicked, this, [plugin, this] {
+    connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
@@ -253,9 +248,13 @@ Editor::Editor(Plugin* plugin)
     //      });
 }
 
-void Editor::addShape(Shape* shape) {
-    model->shapes.emplace_back(shape);
-    shape->model = model;
+void Editor::add(Shapes::AbstractShape* shape) {
+    model->shapes.emplace_back(static_cast<Shape*>(shape));
+    view->reset();
+}
+
+void Editor::remove(Shapes::AbstractShape* shape) {
+    std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
 }
 

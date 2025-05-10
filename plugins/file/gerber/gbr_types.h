@@ -62,7 +62,7 @@ enum CoordinateValuesNotation {
 enum InterpolationMode {
     Linear = 1,
     ClockwiseCircular = 2,
-    CounterclockwiseCircular = 3
+    CounterClockwiseCircular = 3
 };
 
 enum RegionMode {
@@ -154,17 +154,17 @@ struct Format {
     int yDecimal = DecimalDefVal;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& format) {
-        return ::Block(stream).write(format);
+        return ::Block{stream}.write(format);
     }
     friend QDataStream& operator>>(QDataStream& stream, Format& format) {
-        return ::Block(stream).read(format);
+        return ::Block{stream}.read(format);
     }
 };
 
 class State {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const State& state) {
-        return ::Block(stream).write(
+        return ::Block{stream}.write(
             state.dCode_,
             state.gCode_,
             state.imgPolarity_,
@@ -181,7 +181,7 @@ class State {
     }
 
     friend QDataStream& operator>>(QDataStream& stream, State& state) {
-        return ::Block(stream).read(
+        return ::Block{stream}.read(
             state.dCode_,
             state.gCode_,
             state.imgPolarity_,
@@ -214,63 +214,63 @@ class State {
 
 public:
     State(File* const file = nullptr)
-        : file_(file) { }
+        : file_{file} { }
 
-    inline File* file() const { return file_; }
+    inline auto file() const { return file_; }
 
-    inline Operation dCode() const { return dCode_; }
+    inline auto dCode() const { return dCode_; }
     inline void setDCode(Operation dCode) { dCode_ = dCode; }
 
-    inline GCode gCode() const { return gCode_; }
+    inline auto gCode() const { return gCode_; }
     inline void setGCode(GCode gCode) { gCode_ = gCode; }
 
-    inline ImagePolarity imgPolarity() const { return imgPolarity_; }
+    inline auto imgPolarity() const { return imgPolarity_; }
     inline void setImgPolarity(ImagePolarity imgPolarity) { imgPolarity_ = imgPolarity; }
 
-    inline InterpolationMode interpolation() const { return interpolation_; }
+    inline auto interpolation() const { return interpolation_; }
     inline void setInterpolation(InterpolationMode interpolation) { interpolation_ = interpolation; }
 
-    inline PrimitiveType type() const { return type_; }
+    inline auto type() const { return type_; }
     inline void setType(PrimitiveType type) { type_ = type; }
 
-    inline QuadrantMode quadrant() const { return quadrant_; }
+    inline auto quadrant() const { return quadrant_; }
     inline void setQuadrant(QuadrantMode quadrant) { quadrant_ = quadrant; }
 
-    inline RegionMode region() const { return region_; }
+    inline auto region() const { return region_; }
     inline void setRegion(RegionMode region) { region_ = region; }
 
-    inline int aperture() const { return aperture_; }
+    inline auto aperture() const { return aperture_; }
     inline void setAperture(int aperture) { aperture_ = aperture; }
 
-    inline Point& curPos() { return curPos_; }
-    inline Point curPos() const { return curPos_; }
+    inline auto& curPos() { return curPos_; }
+    inline auto curPos() const { return curPos_; }
     inline void setCurPos(const Point& curPos) { curPos_ = curPos; }
 
-    inline Mirroring mirroring() const { return mirroring_; }
+    inline auto mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
 
-    inline double scaling() const { return scaling_; }
+    inline auto scaling() const { return scaling_; }
     inline void setScaling(double scaling) { scaling_ = scaling; }
 
-    inline double rotating() const { return rotating_; }
+    inline auto rotating() const { return rotating_; }
     inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 
 struct GrObject : public GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        return ::Block(stream).write(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        return ::Block{stream}.write(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        return ::Block(stream).read(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        return ::Block{stream}.read(go.path, go.fill, go.state, go.type, go.name, go.pos);
     }
 
     File* gFile{nullptr};
     State state;
 
     // public:
-    GrObject() { }
+    GrObject() = default;
     GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
         : gFile{gFile}
         , state{state} {

@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -74,7 +72,7 @@ QString Component::toolTip() const {
 }
 
 QDataStream& operator<<(QDataStream& stream, const Component& c) {
-    return ::Block(stream).write(
+    return ::Block{stream}.write(
         c.rotation_,
         c.height_,
         c.mount_,
@@ -91,7 +89,7 @@ QDataStream& operator<<(QDataStream& stream, const Component& c) {
 }
 
 QDataStream& operator>>(QDataStream& stream, Component& c) {
-    return ::Block(stream).read(
+    return ::Block{stream}.read(
         c.rotation_,
         c.height_,
         c.mount_,

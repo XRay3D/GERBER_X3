@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,9 +14,10 @@
 
 #include <QKeyEvent>
 #include <QMessageBox>
+#include <QSettings>
 
 ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
-    : QDialog(parent)
+    : QDialog{parent}
     , ui(new Ui::ToolDatabase)
     , types_(types) {
 
@@ -65,7 +64,13 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     ui->treeView->header()->setStretchLastSection(false);
 }
 
-ToolDatabase::~ToolDatabase() { delete ui; }
+ToolDatabase::~ToolDatabase() {
+    QSettings settings;
+    settings.beginGroup("ToolDatabase");
+    settings.setValue("geometry", saveGeometry());
+    // qWarning() << geometry();
+    delete ui;
+}
 
 Tool ToolDatabase::tool() const { return tool_; }
 
@@ -75,6 +80,14 @@ void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
         return;
     }
     QDialog::keyPressEvent(evt);
+}
+
+void ToolDatabase::showEvent(QShowEvent* event) {
+    QDialog::showEvent(event);
+    QSettings settings;
+    settings.beginGroup("ToolDatabase");
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    // qWarning() << geometry();
 }
 
 #include "moc_tool_database.cpp"

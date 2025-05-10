@@ -1,41 +1,22 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#********************************************************************************/
-cmake_minimum_required(VERSION 3.20)
-
+#[[
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  ХХ ХХХ 2025
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2025
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
+]]
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 project(clipper LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui REQUIRED)
+add_library(clipper STATIC ${HEADERS} ${SOURCES})
+# add_library(clipper) target_sources(clipper PUBLIC FILE_SET CXX_MODULES FILES
+# ${SOURCES})
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include)
-# include_directories(${CMAKE_CURRENT_SOURCE_DIR}/Clipper2Lib/include/clipper2)
-
-add_library(clipper STATIC
-    ${HEADERS}
-    ${SOURCES}
-)
-
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
-
-target_link_libraries(clipper PRIVATE
-    Clipper2
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-)
-
+target_link_libraries(clipper PRIVATE Clipper2Z Qt6::Widgets)

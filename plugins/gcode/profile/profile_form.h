@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -47,12 +47,12 @@ private:
 
     const QStringList names{tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps{
-        u"prof_on_climb"_qs,
-        u"prof_out_climb"_qs,
-        u"prof_in_climb"_qs,
-        u"prof_on_conv"_qs,
-        u"prof_out_conv"_qs,
-        u"prof_in_conv"_qs,
+        u"prof_on_climb"_s,
+        u"prof_out_climb"_s,
+        u"prof_in_climb"_s,
+        u"prof_on_conv"_s,
+        u"prof_out_conv"_s,
+        u"prof_in_conv"_s,
     };
 
     enum Trimming {
@@ -88,7 +88,7 @@ public:
 
 class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "profile.json")
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "description.json")
     Q_INTERFACES(GCode::Plugin)
     Form form{this};
 
@@ -112,7 +112,7 @@ public:
                 auto lbl = new QLabel{QApplication::translate("Profile", "Milling sequence:", nullptr), this};
 
                 cbxProfileSort = new QComboBox{this};
-                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
+                cbxProfileSort->setObjectName(u"cbxProfileSort"_s);
                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting"));
                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting depth"));
 

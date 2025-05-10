@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author : Damir Bakiev *
  * Version : na *
@@ -17,7 +15,7 @@
 namespace Gerber {
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
-    : QSyntaxHighlighter(parent) {
+    : QSyntaxHighlighter{parent} {
 }
 
 void SyntaxHighlighter::highlightBlock(const QString& text) {

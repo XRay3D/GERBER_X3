@@ -1,24 +1,18 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#*******************************************************************************/
+#[[
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  03 October 2022
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2022
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
+]]
 cmake_minimum_required(VERSION 3.20)
-
 
 project(file LANGUAGES CXX)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
-
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets Xml REQUIRED)
+find_package(Qt${QT_VERSION_MAJOR} COMPONENTS   Widgets Xml REQUIRED)
 
 file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
 file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
@@ -45,8 +39,6 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     graphicsview
     tooldatabase
     file_plugins
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
     Qt${QT_VERSION_MAJOR}::Widgets
     Qt${QT_VERSION_MAJOR}::Xml
 )

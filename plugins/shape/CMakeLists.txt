@@ -1,58 +1,47 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#********************************************************************************/
-cmake_minimum_required(VERSION 3.20)
-
+#[[
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  ХХ ХХХ 2025
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2025
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
+]]
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 project(shape)
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
+# file(GLOB UIS *.ui)
 
-set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
-if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-else()
-    set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
+add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES} # ${UIS}
+)
+
+link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
+
+target_link_libraries(
+  ${PROJECT_NAME}
+  PRIVATE Qt6::Widgets
+  PUBLIC #[[tbb12]] tbb)
+
+if(Enable_Circle)
+  add_subdirectory(circle)
 endif()
 
-find_package(QT NAMES #[[Qt6]] Qt5 COMPONENTS Core Gui Widgets REQUIRED)
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
+if(Enable_Circlearc)
+  add_subdirectory(circlearc)
+endif()
 
-file(GLOB HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
-#file(GLOB UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
+if(Enable_Polyline)
+  add_subdirectory(polyline)
+endif()
 
-add_library(${PROJECT_NAME} STATIC
-    ${HEADERS}
-    ${SOURCES}
-    #    ${UIS}
-)
+if(Enable_Rectangle)
+  add_subdirectory(rectangle)
+endif()
 
-link_directories(
-    ${CMAKE_SOURCE_DIR}/libs${PATHS}
-)
-
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-)
-
-add_subdirectory(circle)
-add_subdirectory(circlearc)
-add_subdirectory(polyline)
-add_subdirectory(rectangle)
-add_subdirectory(text)
-
+if(Enable_Text)
+  add_subdirectory(text)
+endif()

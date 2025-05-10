@@ -1,8 +1,9 @@
 ﻿#include "Commons.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-void base_coordinat::Shift(float x, float y) {
+    void
+    base_coordinat::Shift(float x, float y) {
     _x += x;
     _y += y;
 }

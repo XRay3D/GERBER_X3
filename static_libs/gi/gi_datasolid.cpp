@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -22,7 +20,7 @@
 namespace Gi {
 
 DataFill::DataFill(Paths& paths, AbstractFile* file)
-    : Item(file)
+    : Item{file}
     , paths_{paths} {
     for(Path path: paths) {
         if(path.size() && path.back() != path.front())
@@ -34,35 +32,33 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
     setFlag(ItemIsSelectable, true);
 }
 
-DataFill::~DataFill() { }
-
-void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
     //        return;
     //    }
+    // pen_.setWidth(penWidth());
 
-    painter->setBrush(bodyColor_);
+    painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     //    for (auto&& poly : shape_.toFillPolygons())
     //        painter->drawPolygon(poly);
     painter->drawPath(shape_);
-
-    //    pen_.setWidthF(option->state & QStyle::State_Selected
-    //                || option->state & QStyle::State_MouseOver
-    //            ? 2.0 * scaleFactor()
-    //            : 0);
-    pen_.setColor(pathColor_);
-    painter->strokePath(shape_, pen_);
+    bool fl = option->state & (QStyle::State_Selected | QStyle::State_MouseOver);
+    if(fl) {
+        pen_.setWidthF(1.0 * scaleFactor());
+        pen_.setColor(penColor_);
+        painter->strokePath(shape_, pen_);
+    }
 }
 
 int DataFill::type() const { return Type::DataSolid; }
 
 void DataFill::redraw() {
     //    shape_ = QPainterPath();
-    //    for (Path path : qAsConst(paths_)) {
+    //    for (Path path :  std::as_const(paths_)) {
     //        path.push_back(path.front());
     //        shape_.addPolygon(path);
     //    }
@@ -75,7 +71,7 @@ Paths& DataFill::getPaths() {
     return paths_;
 }
 
-void DataFill::setPaths(Paths paths, int alternate) {
+void DataFill::setPaths(Paths paths, int /*alternate*/) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
@@ -101,37 +97,37 @@ void DataFill::changeColor() {
     //    animation.setDuration(100);
     //    animation.setStartValue(bodyColor_);
 
-    bodyColor_ = colorPtr_ ? *colorPtr_ : color_;
+    brushColor_ = colorPtr_ ? *colorPtr_ : color_;
 
     switch(colorState) {
     case Default:
         break;
     case Hovered:
     case Selected:
-        bodyColor_.setAlpha(255);
+        brushColor_.setAlpha(255);
         break;
     case Hovered | Selected:
-        bodyColor_.setAlpha(255);
-        bodyColor_ = bodyColor_.lighter(150);
+        brushColor_.setAlpha(255);
+        brushColor_ = brushColor_.lighter(150);
         break;
     }
 
-    pathColor_ = colorPtr_ ? *colorPtr_ : color_;
-    pathColor_.setAlpha(100);
+    penColor_ = colorPtr_ ? *colorPtr_ : color_;
+    penColor_.setAlpha(100);
     switch(colorState) {
     case Default:
         //        pathColor_.setAlpha(100);
         break;
     case Hovered:
-        pathColor_.setAlpha(255);
+        penColor_.setAlpha(255);
         //        pathColor_ = pathColor_.darker(125);
         break;
     case Selected:
-        pathColor_.setAlpha(150);
+        penColor_.setAlpha(150);
         break;
     case Hovered | Selected:
-        pathColor_.setAlpha(255);
-        pathColor_ = pathColor_.lighter(150);
+        penColor_.setAlpha(255);
+        penColor_ = penColor_.lighter(150);
         break;
     }
 

@@ -1,18 +1,16 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2020                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shape.h"
 #include "graphicsview.h"
-#include "shhandler.h"
+
 #include <QIcon>
 #include <QTableView>
 #include <array>
@@ -22,85 +20,65 @@ using Shapes::Handle;
 
 namespace ShRect {
 
-Shape::Shape(QPointF pt1, QPointF pt2) {
+Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
+    : AbstractShape{plugin} {
     paths_.resize(1);
     paths_.front().resize(5);
-    handlers.reserve(PtCount);
-
-    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-
-    handlers[Point1]->setPos(pt1);
-    handlers[Point3]->setPos(pt2);
-    currentHandler = handlers[Point1].get();
-    redraw();
+    if(!std::isnan(pt1.x())) {
+        handles = {
+            Handle{{}, Handle::Center},
+            Handle{pt1},
+            Handle{},
+            Handle{pt2},
+            Handle{}
+        };
+        curHandle = handles.begin() + Point3;
+        redraw();
+    }
 
     App::grView().addItem(this);
 }
 
-Shape::~Shape() {
-    std::erase(model->shapes, this);
-    qobject_cast<QTableView*>(model->parent())->reset();
-}
-
-QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == GraphicsItemChange::ItemSelectedChange)
-        qobject_cast<QTableView*>(model->parent())->reset();
-    return Shapes::AbstractShape::itemChange(change, value);
-}
-
 void Shape::redraw() {
 
-    auto updCenter = [this] { handlers[Center]->setPos(QLineF(handlers[Point1]->pos(), handlers[Point3]->pos()).center()); };
+    auto updCenter = [this] { handles[Center] = QLineF{handles[Point1], handles[Point3]}.center(); };
     auto updCorner = [this](int src, int p1, int p2) {
-        handlers[p1]->setPos(handlers[src]->x(), currentHandler->y());
-        handlers[p2]->setPos(currentHandler->x(), handlers[src]->y());
+        handles[p1] = {handles[src].x(), curHandle->y()};
+        handles[p2] = {curHandle->x(), handles[src].y()};
     };
 
-    switch(handlers.indexOf(currentHandler)) {
+    switch(std::distance(handles.begin(), curHandle)) {
     case Center: {
-        QRectF rect(handlers[Point1]->pos(), handlers[Point3]->pos());
-        rect.moveCenter(handlers[Center]->pos());
-        auto center{handlers[Center]->pos()};
-        handlers[Point1]->setPos(rect.topLeft());
-        handlers[Point2]->setPos(rect.topRight());
-        handlers[Point3]->setPos(rect.bottomRight());
-        handlers[Point4]->setPos(rect.bottomLeft());
+        QRectF rect{handles[Point1], handles[Point3]};
+        rect.moveCenter(handles[Center]);
+        // auto center{handles[Center] };
+        handles[Point1] = rect.topLeft();
+        handles[Point2] = rect.topRight();
+        handles[Point3] = rect.bottomRight();
+        handles[Point4] = rect.bottomLeft();
     } break;
-    case Point1:
-        updCorner(Point3, Point2, Point4), updCenter();
-        break;
-    case Point2:
-        updCorner(Point4, Point1, Point3), updCenter();
-        break;
-    case Point3:
-        updCorner(Point1, Point2, Point4), updCenter();
-        break;
-    case Point4:
-        updCorner(Point2, Point1, Point3), updCenter();
-        break;
+    case Point1: updCorner(Point3, Point2, Point4), updCenter(); break;
+    case Point2: updCorner(Point4, Point1, Point3), updCenter(); break;
+    case Point3: updCorner(Point1, Point2, Point4), updCenter(); break;
+    case Point4: updCorner(Point2, Point1, Point3), updCenter(); break;
     }
 
     paths_.front() = {
-        ~handlers[Point1]->pos(),
-        ~handlers[Point2]->pos(),
-        ~handlers[Point3]->pos(),
-        ~handlers[Point4]->pos(),
-        ~handlers[Point1]->pos(),
+        ~handles[Point1],
+        ~handles[Point2],
+        ~handles[Point3],
+        ~handles[Point4],
+        ~handles[Point1],
     };
 
     if(Area(paths_.front()) < 0)
         ReversePath(paths_.front());
     shape_ = QPainterPath();
     shape_.addPolygon(~paths_.front());
-    setPos({1, 1}); // костыли    //update();
-    setPos({0, 0});
 
-    if(model)
-        model->dataChanged(model->index(Center, 0), model->index(Height, 0));
+    assert(handles.size() == PtCount);
+    assert(paths_.size() == 1);
+    assert(paths_.front().size() == 5);
 }
 
 QString Shape::name() const { return QObject::tr("Rectangle"); }
@@ -108,8 +86,8 @@ QString Shape::name() const { return QObject::tr("Rectangle"); }
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-rectangle"); }
 
 void Shape::setPt(const QPointF& pt) {
-    handlers[Point3]->setPos(pt);
-    updateOtherHandlers(handlers[Point3].get());
+    *curHandle = pt;
+    redraw();
 }
 
 } // namespace ShRect

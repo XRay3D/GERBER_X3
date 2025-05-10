@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,9 +20,7 @@ class Ruler final : public QWidget {
     //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
     //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
-    enum {
-        Breadth = 24
-    };
+    static constexpr int Breadth = 24;
 
     explicit Ruler(Qt::Orientation rulerType, QWidget* parent);
 
@@ -30,29 +28,26 @@ public:
     double origin() const { return origin_; }
     double unit() const { return rulerUnit_; }
     double zoom() const { return rulerZoom_; }
-    QSize minimumSizeHint() const override { return QSize(Ruler::Breadth, Ruler::Breadth); }
+    QSize minimumSizeHint() const override { return {Breadth, Breadth}; }
 
-    static QString mimeType() { return u"image/x-puzzle-piece"_qs; }
+    static constexpr auto MimeType = "image/x-puzzle-piece";
 
 public slots:
-    void setCursorPos(const QPoint cursorPos_);
+    void setCursorPos(const QPoint& cursorPos_);
     void setMouseTrack(const bool track);
     void setOrigin(const double newOrigin);
     void setRulerUnit(const double rulerUnit_);
     void setRulerZoom(const double rulerZoom_);
 
 protected:
-    void mouseMoveEvent(QMouseEvent* event) override;
-    void paintEvent(QPaintEvent* event) override;
-
     void dragEnterEvent(QDragEnterEvent* event) override;
+    void dragMoveEvent(QDragMoveEvent* event) override;
     void dropEvent(QDropEvent* event) override;
+
+    void mouseMoveEvent(QMouseEvent* event) override;
     void mousePressEvent(QMouseEvent* event) override;
 
-    //    void dragEnterEvent(QDragEnterEvent* event) override;
-    void dragMoveEvent(QDragMoveEvent* event) override;
-    //    void dropEvent(QDropEvent* event) override;
-    //    void startDrag(Qt::DropActions supportedActions) override;
+    void paintEvent(QPaintEvent* event) override;
 
 private:
     void DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin);
@@ -67,7 +62,7 @@ private:
 
     QPoint cursorPos;
 
-    QPen meterPen;
+    // QPen meterPen;
 
     const Qt::Orientation orientation_;
 

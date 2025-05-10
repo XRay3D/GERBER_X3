@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -16,6 +14,12 @@
 #include "gbrcomp_onent.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
+#include "graphicsview.h"
+#include <algorithm>
+#include <cassert>
+#include <forward_list>
+#include <qglobal.h>
+#include <utility>
 
 namespace Gerber {
 
@@ -24,16 +28,16 @@ QDebug operator<<(QDebug debug, const State& state) {
     debug.nospace() << "State("
                     << "D0" << state.dCode() << ", "
                     << "G0" << state.gCode() << ", "
-                    << u"Positive|Negative"_qs.split('|').at(state.imgPolarity()) << ", "
-                    << u"Linear|ClockwiseCircular|CounterclockwiseCircular"_qs.split('|').at(state.interpolation() - 1) << ", "
-                    << u"Aperture|Line|Region"_qs.split('|').at(state.type()) << ", "
-                    << u"Undef|Single|Multi"_qs.split('|').at(state.quadrant()) << ", "
-                    << u"Off|On"_qs.split('|').at(state.region()) << ", "
-                    << u"NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring"_qs.split('|').at(state.mirroring()) << ", "
-                    << u"aperture"_qs << state.aperture() << ", "
+                    << u"Positive|Negative"_s.split('|').at(state.imgPolarity()) << ", "
+                    << u"Linear|ClockwiseCircular|CounterClockwiseCircular"_s.split('|').at(state.interpolation() - 1) << ", "
+                    << u"Aperture|Line|Region"_s.split('|').at(state.type()) << ", "
+                    << u"Undef|Single|Multi"_s.split('|').at(state.quadrant()) << ", "
+                    << u"Off|On"_s.split('|').at(state.region()) << ", "
+                    << u"NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring"_s.split('|').at(state.mirroring()) << ", "
+                    << u"aperture"_s << state.aperture() << ", "
                     << state.curPos() << ", "
-                    << u"scaling"_qs << state.scaling() << ", "
-                    << u"rotating"_qs << state.rotating() << ", "
+                    << u"scaling"_s << state.scaling() << ", "
+                    << u"rotating"_s << state.rotating() << ", "
                     << ')';
     return debug;
 }
@@ -88,88 +92,94 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
 }
 
 Paths File::merge() const {
-    QElapsedTimer t;
-    t.start();
+    Timer t;
     mergedPaths_.clear();
     size_t i = 0;
 
-    if constexpr(0) { // FIXME fill closed line
-        std::list<Paths> pathList;
-        {
-            std::list<std::map<int, Paths>> pathListMap;
-            int exp = -1;
-            for(auto& go: graphicObjects_) {
-                if(exp != go.state.imgPolarity()) {
-                    exp = go.state.imgPolarity();
-                    pathListMap.resize(pathListMap.size() + 1);
-                }
-                if(go.state.type() == Line) {
-                    auto& paths = pathListMap.back();
-                    paths[go.state.aperture()].push_back(go.path);
-                }
-            }
-            for(auto& map: pathListMap) {
-                pathList.resize(pathList.size() + 1);
-                for(auto& [aperture, paths]: map) {
-                    mergePaths(paths);
-                    Clipper2Lib::ClipperOffset offset;
-                    for(int i{}; i < paths.size(); ++i) {
-                        auto& path = paths[i];
-                        if(path.back() == path.front()) {
-                            offset.AddPath(paths[i], JoinType::Round, EndType::Polygon);
-                            paths.erase(paths.begin() + i--);
-                        }
-                    }
-                    offset.AddPaths(paths, JoinType::Round, EndType::Round);
-                    offset.Execute(apertures_.at(aperture)->apSize() * uScale * 0.5, paths);
-                    // pathList.back().append(std::move(paths));
-                    pathList.back() += paths; // NOTE maybe move
-                }
-            }
+#if 0 // FIXME fill closed line
+    std::list<Paths> pathList;
+
+    using Map = std::map<int, Paths>;
+    std::list<Map> pathListMap;
+    int exp = -1;
+    auto& back = pathListMap.emplace_back(Map{});
+    for(auto& go: graphicObjects_) {
+        if(exp != go.state.imgPolarity()) {
+            exp = go.state.imgPolarity();
+            back = pathListMap.emplace_back(Map{});
         }
-
-        while(i < graphicObjects_.size()) {
-            Clipper clipper;
-            clipper.AddSubject(mergedPaths_);
-            const auto exp = graphicObjects_.at(i).state.imgPolarity();
-            do {
-                if(graphicObjects_[i].state.type() == Line) {
-                    ++i;
-                } else {
-                    const GrObject& go = graphicObjects_.at(i++);
-                    clipper.AddClip(go.fill);
-                }
-            } while(i < graphicObjects_.size() && exp == graphicObjects_.at(i).state.imgPolarity());
-
-            if(exp)
-                ReversePaths(pathList.front());
-            clipper.AddClip(pathList.front());
-            pathList.pop_front();
-
-            if(graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
-                clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
-            else
-                clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
-        }
-    } else {
-        while(i < graphicObjects_.size()) {
-            Clipper clipper;
-
-            clipper.AddSubject(mergedPaths_);
-            const auto exp = graphicObjects_.at(i).state.imgPolarity();
-            do {
-                const GrObject& go = graphicObjects_[i++];
-                clipper.AddClip(go.fill);
-            } while(i < graphicObjects_.size() && exp == graphicObjects_[i].state.imgPolarity());
-            if(graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
-                clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
-            else
-                clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
-        }
+        if(go.state.type() == Line)
+            back[go.state.aperture()].emplace_back(go.path);
     }
+    qWarning() << name_;
+    for(auto& map: pathListMap) {
+        auto& back = pathList.emplace_back(Paths{});
+        for(auto& [aperture, paths]: map) {
+            if(paths.empty()) continue;
+            qWarning() << "1" << aperture << paths.size();
+            mergePaths(paths);
+            qWarning() << "2" << aperture << paths.size();
+            CL2::ClipperOffset offset;
+            // for(int i{}; i < paths.size(); ++i) {
+            //     auto& path = paths[i];
+            //     if(path.back() == path.front()) {
+            //         offset.AddPath(paths[i], JoinType::Round, EndType::Polygon);
+            //         paths.erase(paths.begin() + i--);
+            //     }
+            // }
+            offset.AddPaths(paths, JoinType::Round, EndType::Round);
+            offset.Execute(apertures_.at(aperture)->size() * uScale * 0.5, paths);
+            // pathList.back().append(std::move(paths));
+            qWarning() << "3" << aperture << paths.size();
+            // assert(paths.size());
+            back += std::move(paths); // NOTE maybe move
+        }
+        qWarning() << "4" << back.size();
+    }
+    // pathList.reverse();
+
+    while(i < graphicObjects_.size()) {
+        Clipper clipper;
+        clipper.AddSubject(mergedPaths_);
+        const auto exp = graphicObjects_.at(i).state.imgPolarity();
+        do {
+            if(graphicObjects_[i].state.type() == Line) {
+                ++i;
+            } else {
+                const GrObject& go = graphicObjects_.at(i++);
+                clipper.AddClip(go.fill);
+            }
+        } while(i < graphicObjects_.size() && exp == graphicObjects_.at(i).state.imgPolarity());
+
+        if(exp) ReversePaths(pathList.front());
+        clipper.AddClip(pathList.front());
+        pathList.pop_front();
+
+        if(graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
+            clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
+        else
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
+    }
+#else
+    while(i < graphicObjects_.size()) {
+        Clipper clipper;
+        clipper.AddSubject(mergedPaths_);
+        const auto exp = graphicObjects_[i].state.imgPolarity();
+        do {
+            clipper.AddClip(graphicObjects_[i++].fill);
+        } while(i < graphicObjects_.size() && exp == graphicObjects_[i].state.imgPolarity());
+        if(graphicObjects_.at(i - 1).state.imgPolarity() == Positive)
+            clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
+        else
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
+    }
+#endif
 
     if(Settings::cleanPolygons())
         CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
+
+    TestPaths(mergedPaths_);
+
     return mergedPaths_;
 }
 
@@ -289,7 +299,7 @@ void File::setItemType(int type) {
 int File::itemsType() const { return itemsType_; }
 
 void File::write(QDataStream& stream) const {
-    ::Block(stream).write(
+    ::Block{stream}.write(
         graphicObjects_,
         apertures_,
         format_,
@@ -300,7 +310,7 @@ void File::write(QDataStream& stream) const {
 
 void File::read(QDataStream& stream) {
     crutch = this; // NOTE
-    ::Block(stream).read(
+    ::Block{stream}.read(
         graphicObjects_,
         apertures_,
         format_,
@@ -323,7 +333,7 @@ void File::createGi() {
         itemGroups_[Normal]->shrink_to_fit();
     }
     if constexpr(1) { // add components
-        for(const Comp::Component& component: qAsConst(components_))
+        for(const Comp::Component& component:  std::as_const(components_))
             if(!component.referencePoint().isNull())
                 itemGroups_[Components]->push_back(new Comp::Item{component, this});
         itemGroups_[Components]->shrink_to_fit();

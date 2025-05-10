@@ -1,19 +1,19 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
+#include "shapepluginin.h"
 #include <QAbstractTableModel>
 #include <QActionGroup>
 #include <QTableView>
-#include <QWidget>
 
 class DoubleSpinBox;
 class QCheckBox;
@@ -26,7 +26,7 @@ namespace ShTxt {
 
 class Shape;
 
-class Editor : public QWidget {
+class Editor : public Shapes::Editor {
     Q_OBJECT
     friend class Shape;
     std::vector<Shape*> shapes;
@@ -34,6 +34,8 @@ class Editor : public QWidget {
     DoubleSpinBox* dsbxAngle;
     DoubleSpinBox* dsbxHeight;
     DoubleSpinBox* dsbxXY;
+    DoubleSpinBox* dsbxX;
+    DoubleSpinBox* dsbxY;
     QCheckBox* chbxBold;
     QCheckBox* chbxItalic;
     QComboBox* cbxSide;
@@ -56,23 +58,29 @@ class Editor : public QWidget {
     void updateAngle();
     void updateHeight();
     void updateXY();
+    void updateX();
+    void updateY();
     void updateCenterAlign();
     void updateSide();
+    bool resetFl{};
 
 public:
-    Editor(class Plugin* plugin);
+    Editor(Shapes::Plugin* plugin);
 
-    void addShape(Shape* shape);
+    void add(Shapes::AbstractShape* shape) override;
+    void remove(Shapes::AbstractShape* shape) override;
+    void updateData() override { reset(); }
 
     void reset();
 
     ~Editor() override = default;
     //    Model* model;
-    class Plugin* plugin;
+    Shapes::Plugin* plugin;
 
     // QWidget interface
 protected:
     void hideEvent(QHideEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 };
 
 } // namespace ShTxt

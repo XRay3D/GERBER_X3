@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author : Damir Bakiev *
  * Version : na *
- * Date : March 25, 2023 *
+ * Date : XXXXX XX, 2025 *
  * Website : na *
- * Copyright : Damir Bakiev 2016-2023 *
+ * Copyright : Damir Bakiev 2016-2025 *
  * License : *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt *
@@ -21,7 +19,7 @@
 #define TR QCoreApplication::translate
 
 ToolEditForm::ToolEditForm(QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , ui(new Ui::ToolEditForm) {
     ui->setupUi(this);
     // clang-format AlignArrayOfStructures: Left
@@ -65,13 +63,13 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     dsbxMapdsbxMap = {
         // clang-format off
-        Data {{ui->dsbxAngle},                                 {Tool::Drill, Tool::Engraver},                                  180.0, 120.0    },
-        Data {{ui->dsbxFeedRate},                              {Tool::Laser, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         },
-        Data {{ui->dsbxLenght},                                {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         },
-        Data {{ui->dsbxOneTurnCut, ui->dsbxOneTurnCutPercent}, {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, ui->dsbxDiameter},
-        Data {{ui->dsbxPassDepth},                             {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100.0           },
-        Data {{ui->dsbxPlungeRate},                            {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         }, // ThreadMill?
-        Data {{ui->dsbxStepover, ui->dsbxStepoverPercent},     {Tool::Laser, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, ui->dsbxDiameter},
+        Data {{ui->dsbxAngle},                                 {Tool::Drill, Tool::Engraver},                                  180.0, 120.0    ,std::nullopt},
+        Data {{ui->dsbxFeedRate},                              {Tool::Laser, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         ,std::nullopt,std::nullopt},
+        Data {{ui->dsbxLenght},                                {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         ,std::nullopt,std::nullopt},
+        Data {{ui->dsbxOneTurnCut, ui->dsbxOneTurnCutPercent}, {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, ui->dsbxDiameter,std::nullopt,std::nullopt},
+        Data {{ui->dsbxPassDepth},                             {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100.0           ,std::nullopt,std::nullopt},
+        Data {{ui->dsbxPlungeRate},                            {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         ,std::nullopt,std::nullopt}, // ThreadMill?
+        Data {{ui->dsbxStepover, ui->dsbxStepoverPercent},     {Tool::Laser, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, ui->dsbxDiameter,std::nullopt,std::nullopt},
     }; // clang-format on
 
     for(auto [dsbx, _]: update)
@@ -224,7 +222,7 @@ void ToolEditForm::setVisibleToolWidgets(bool visible) {
 // }
 
 void ToolEditForm::setupToolWidgets(int) {
-    const auto lastType = tool_.type();
+    [[maybe_unused]] const auto lastType = tool_.type();
 
     auto currType = ui->cbxToolType->currentData().value<Tool::Type>();
     tool_.setType(currType);

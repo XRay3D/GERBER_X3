@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -28,15 +26,16 @@
 
 namespace GCode {
 
-void calcArcs(Path path);
+void findArcs(Path path);
 
 File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : gcp_(std::move(gcp))
-    , pocketPaths_(std::move(pocketPaths))
-    , toolPathss_(std::move(toolPathss)) {
+    : pocketPaths_{std::move(pocketPaths)}
+    , toolPathss_{std::move(toolPathss)}
+    , gcp_{std::move(gcp)} {
+
     for(auto&& paths: toolPathss_)
         for(auto&& path: paths)
-            calcArcs(path);
+            findArcs(path);
 
     feedRate_ = gcp_.getTool().feedRate();
     plungeRate_ = gcp_.getTool().plungeRate();
@@ -290,8 +289,8 @@ mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, doub
     if(depth) {
         double zk = depth - z_;
         double perimetr = QLineF{path.front(), path.back()}.length();
-        for(int i = 1; i < path.size(); ++i)
-            perimetr += QLineF{path[i - 1], path[i - 0]}.length();
+        for(auto&& r: std::ranges::slide_view(path, 2))
+            perimetr += QLineF{r.front(), r.back()}.length();
 
         for(QPointF prevPt; const QPointF& point: path)
             if(skip) {
@@ -299,6 +298,7 @@ mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, doub
                 skip = false;
             } else {
                 z_ += QLineF{prevPt, point}.length() / perimetr * zk;
+                // z_ = zk;
                 lines.emplace_back(formated({g1(), x(point.x()), y(point.y()), z(z_), feed(feedRate()), speed(spindleSpeed)}));
                 prevPt = point;
             }
@@ -448,8 +448,8 @@ void File::saveMillingProfile(const QPointF& offset) {
     const mvector<double> depths(getDepths());
 
     for(auto& paths: pathss) {
-        for(size_t i = 0; i < depths.size(); ++i) {
-            for(size_t j = 0; j < paths.size(); ++j) {
+        for(size_t i{}; i < depths.size(); ++i) {
+            for(qsizetype j{}; j < paths.size(); ++j) {
                 QPolygonF& path = paths[j];
                 if(path.front() == path.last()) { // make complete depth and remove from worck
                     // startPath(path.front());
@@ -466,7 +466,7 @@ void File::saveMillingProfile(const QPointF& offset) {
                         auto sp(savePath(path, spindleSpeed(), depth));
                         lines_.append(sp);
                     }
-                    lines_.append(savePath(path, spindleSpeed()));
+                    lines_.append(savePath(path, spindleSpeed())); // Проход без спирали.
                     endPath();
                     paths.erase(paths.begin() + j--);
                 } else {
@@ -580,11 +580,7 @@ void File::createGiPocket() {
 
         for(const Path& path: paths) {
             item = new Gi::GcPath{path, this};
-#ifdef QT_DEBUG
-            item->setPenColorPtr(debugColor.back().data());
-#else
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
-#endif
             itemGroup()->push_back(item);
         }
 
@@ -593,12 +589,7 @@ void File::createGiPocket() {
             for(size_t j = 0; j < paths.size() - 1; ++j)
                 g1path.push_back({paths[j].back(), paths[j + 1].front()});
             item = new Gi::GcPath{g1path};
-#ifdef QT_DEBUG
-            debugColor.push_back(QSharedPointer<QColor>(new QColor{0, 0, 255}));
-            item->setPenColorPtr(debugColor.back().data());
-#else
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
-#endif
             itemGroup()->push_back(item);
         }
 
@@ -724,7 +715,7 @@ void File::createGiLaser() {
 
 /////////////////////////////////////////////////////////////
 
-void calcArcs(Path path) {
+void findArcs(Path /*path*/) {
     return;
     //    if (!App::isDebug())
     //        return;

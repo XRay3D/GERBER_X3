@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -158,6 +156,13 @@ void Form::updateName() {
     redraw();
 }
 
+void Form::hideEvent(QHideEvent* event) { // NOTE clean and hide pr gi
+    delete ui->treeView->model();
+    model = nullptr;
+    items_.clear();
+    event->accept();
+}
+
 void Form::updateThermalGi() {
     auto file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
     if(!file)
@@ -258,8 +263,7 @@ void Form::updateCriterias() {
 }
 
 void Form::redraw() {
-    for(auto item: items_)
-        item->redraw();
+    for(auto item: items_) item->redraw();
 }
 
 void Form::onDsbxDepthValueChanged(double arg1) {

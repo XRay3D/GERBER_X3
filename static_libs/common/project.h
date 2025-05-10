@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -95,8 +95,8 @@ public:
     int addFile(AbstractFile* const file);
     int addFile(GCode::File* const file);
     bool contains(AbstractFile* file);
-    mvector<AbstractFile*> files(int type);
-    mvector<AbstractFile*> files(const mvector<int> types);
+    mvector<AbstractFile*> files(uint32_t type);
+    mvector<AbstractFile*> files(const mvector<uint32_t>& types);
     void deleteFile(int32_t id);
     //    QString fileNames();
     int contains(const QString& name);

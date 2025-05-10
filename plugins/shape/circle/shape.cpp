@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2020                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,58 +11,47 @@
 #include "shape.h"
 #include "graphicsview.h"
 #include "math.h"
-#include "shhandler.h"
+
 #include <QIcon>
 
 using Shapes::Handle;
 
 namespace ShCirc {
 
-Shape::Shape(QPointF center, QPointF pt)
-    : radius_(QLineF(center, pt).length()) {
+Shape::Shape(Shapes::Plugin* plugin, QPointF center, QPointF pt)
+    : AbstractShape{plugin}
+    , radius_(QLineF{center, pt}.length()) {
     paths_.resize(1);
 
-    handlers.reserve(PtCount);
-
-    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-
-    handlers[Center]->setPos(center);
-    handlers[Point1]->setPos(pt);
-
-    redraw();
+    if(!std::isnan(center.x())) {
+        handles = {
+            Handle{center, Handle::Center},
+            Handle{pt}
+        };
+        curHandle = handles.begin() + Point1;
+        redraw();
+    }
 
     App::grView().addItem(this);
 }
 
-Shape::~Shape() {
-    std::erase(model->shapes, this);
-    qobject_cast<QTableView*>(model->parent())->reset();
-}
-
-QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == GraphicsItemChange::ItemSelectedChange)
-        qobject_cast<QTableView*>(model->parent())->reset();
-    return Shapes::AbstractShape::itemChange(change, value);
-}
-
 void Shape::redraw() {
 
-    switch(handlers.indexOf(currentHandler)) {
+    switch(std::distance(handles.begin(), curHandle)) {
     case Center: {
         auto radLine = QLineF::fromPolar(radius_, 0);
-        radLine.translate(handlers[Center]->pos());
-        handlers[Point1]->setPos(radLine.p2());
+        radLine.translate(handles[Center]);
+        handles[Point1] = radLine.p2();
     } break;
     case Point1: {
-        QLineF radLine{handlers[Center]->pos(), handlers[Point1]->pos()};
+        QLineF radLine{handles[Center], handles[Point1]};
         radius_ = radLine.length();
     } break;
     }
 
     const int intSteps = App::settings().clpCircleSegments(radius_);
     const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
-    const Point center{~handlers[Center]->pos()};
+    const Point center = ~handles[Center];
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
@@ -75,22 +62,20 @@ void Shape::redraw() {
             radius * sin(theta) + center.y,
         });
     }
+
     shape_ = QPainterPath();
     shape_.addPolygon(~path);
-    setPos({1, 1}); // костыли    //update();
-    setPos({0, 0});
 
-    if(model)
-        model->dataChanged(model->index(Center, 0), model->index(Diameter, 1));
+    assert(handles.size() == PtCount);
+    assert(paths_.size() == 1);
 }
 
-QString Shape::name() const { return QObject::tr("Shape"); }
+QString Shape::name() const { return QObject::tr("Circle"); }
 
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 void Shape::setPt(const QPointF& pt) {
-    handlers[Point1]->setPos(pt);
-    currentHandler = handlers[Point1].get();
+    if(curHandle.base()) *curHandle = pt;
     redraw();
 }
 
@@ -99,11 +84,17 @@ double Shape::radius() const { return radius_; }
 void Shape::setRadius(double radius) {
     if(qFuzzyIsNull(radius) || qFuzzyCompare(radius_, radius))
         return;
-    QLineF line(handlers[Center]->pos(), handlers[Point1]->pos());
+    QLineF line{handles[Center], handles[Point1]};
     line.setLength(radius);
-    handlers[Point1]->setPos(line.p2());
-    currentHandler = handlers[Point1].get();
-    redraw();
+    handles[Point1] = line.p2();
+    curHandle = handles.begin() + Point1;
+    AbstractShape::redraw();
+}
+
+void Shape::readAndInit(QDataStream& /*stream*/) {
+    radius_ = QLineF{handles.front(), handles.back()}.length();
+    curHandle = handles.begin();
+    AbstractShape::redraw();
 }
 
 } // namespace ShCirc

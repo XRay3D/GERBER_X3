@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -29,18 +27,19 @@ namespace Gerber {
 const int id1 = qRegisterMetaType<File*>("G::GFile*");
 
 Plugin::Plugin(QObject* parent)
-    : AbstractFilePlugin(parent)
+    : AbstractFilePlugin{parent}
     , Parser(this) {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if(type_ != type())
+AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
+    if(type_ != type()) return nullptr;
+    QFile file_{fileName};
+    if(!file_.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning() << file_.errorString();
         return nullptr;
-    QFile file_(fileName);
-    if(!file_.open(QFile::ReadOnly | QFile::Text))
-        return nullptr;
+    }
 
-    QTextStream in(&file_);
+    QTextStream in{&file_};
     in.setAutoDetectUnicode(true);
     parseLines(in.readAll(), fileName);
     return file;
@@ -102,31 +101,31 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
     public:
         Tab(QWidget* parent = nullptr)
-            : AbstractFileSettings(parent) {
-            setObjectName(QString::fromUtf8("tabGerber"));
+            : AbstractFileSettings{parent} {
+            setObjectName(u"tabGerber"_s);
 
             auto verticalLayout = new QVBoxLayout{this};
-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+            verticalLayout->setObjectName(u"verticalLayout"_s);
             verticalLayout->setContentsMargins(6, 6, 6, 6);
 
             {
                 auto groupBox1 = new QGroupBox{this};
-                groupBox1->setObjectName(QString::fromUtf8("groupBox1"));
+                groupBox1->setObjectName(u"groupBox1"_s);
                 groupBox1->setTitle(QApplication::translate("SettingsDialog", "Gerber", nullptr));
                 verticalLayout->addWidget(groupBox1);
 
                 chbxCleanPolygons = new QCheckBox{groupBox1};
-                chbxCleanPolygons->setObjectName(QString::fromUtf8("chbxCleanPolygons"));
+                chbxCleanPolygons->setObjectName(u"chbxCleanPolygons"_s);
 
                 chbxSimplifyRegions = new QCheckBox{groupBox1};
-                chbxSimplifyRegions->setObjectName(QString::fromUtf8("chbxSimplifyRegions"));
+                chbxSimplifyRegions->setObjectName(u"chbxSimplifyRegions"_s);
 
                 chbxSkipDuplicates = new QCheckBox{groupBox1};
-                chbxSkipDuplicates->setObjectName(QString::fromUtf8("chbxSkipDuplicates"));
+                chbxSkipDuplicates->setObjectName(u"chbxSkipDuplicates"_s);
 
                 dsbxCleanPolygonsDist = new DoubleSpinBox{groupBox1};
                 dsbxCleanPolygonsDist->setDecimals(4);
-                dsbxCleanPolygonsDist->setObjectName(QString::fromUtf8("dsbxCleanPolygonsDist"));
+                dsbxCleanPolygonsDist->setObjectName(u"dsbxCleanPolygonsDist"_s);
                 dsbxCleanPolygonsDist->setRange(0.0001, 1.0);
                 dsbxCleanPolygonsDist->setSingleStep(0.001);
 
@@ -140,15 +139,15 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
             {
                 auto groupBox2 = new QGroupBox{this};
-                groupBox2->setObjectName(QString::fromUtf8("groupBox2"));
+                groupBox2->setObjectName(u"groupBox2"_s);
                 groupBox2->setTitle(QApplication::translate("SettingsDialog", "Wire Creation Method", nullptr));
                 verticalLayout->addWidget(groupBox2);
 
                 rbClipperOffset = new QRadioButton{groupBox2};
-                rbClipperOffset->setObjectName(QString::fromUtf8("rbClipperOffset"));
+                rbClipperOffset->setObjectName(u"rbClipperOffset"_s);
 
                 rbMinkowskiSum = new QRadioButton{groupBox2};
-                rbMinkowskiSum->setObjectName(QString::fromUtf8("rbMinkowskiSum"));
+                rbMinkowskiSum->setObjectName(u"rbMinkowskiSum"_s);
                 auto vBoxLayout = new QVBoxLayout{groupBox2};
                 vBoxLayout->setContentsMargins(6, 9, 6, 6);
                 vBoxLayout->addWidget(rbClipperOffset);

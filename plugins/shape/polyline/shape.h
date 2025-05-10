@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -21,12 +21,11 @@ class Shape final : public Shapes::AbstractShape {
     friend class Model;
 
 public:
-    explicit Shape(QPointF pt1 = {}, QPointF pt2 = {});
-    ~Shape() override;
+    explicit Shape(Shapes::Plugin* plugin, QPointF pt1 = {}, QPointF pt2 = {});
+    ~Shape() override = default;
 
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShPolyLine; }
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     // Gi::Item interface
     void redraw() override;
@@ -38,7 +37,9 @@ public:
     bool addPt(const QPointF& pt) override;
 
     bool closed() const;
-    Model* model{};
+
+protected:
+    void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
 
 private:
     QPointF centroid();
@@ -47,22 +48,23 @@ private:
 
 class Plugin : public Shapes::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "polyline.json")
+    Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "description.json")
     Q_INTERFACES(Shapes::Plugin)
-    mutable Editor editor_{this};
+    Editor editor_{this};
 
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShPolyLine; }
     QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
-    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
-            point, point + QPointF{5, 5}
+            this,
+            point, point + QPointF{1, 1}
         };
-        editor_.addShape(shape);
+        editor_.add(shape);
         return shape;
     }
-    QWidget* editor() override { return &editor_; }
+    Editor* editor() override { return &editor_; }
 };
 
 } // namespace ShPoly

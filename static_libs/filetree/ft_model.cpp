@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,9 +25,9 @@ namespace FileTree {
 using TreeItem = Node;
 
 Model::Model(QObject* parent)
-    : QAbstractItemModel(parent)
+    : QAbstractItemModel{parent}
     , rootItem(new FolderNode{"rootItem"})
-    , mimeType(u"application/GCodeItem"_qs) {
+    , mimeType(u"application/GCodeItem"_s) {
     App::setFileModel(this);
 }
 
@@ -273,8 +271,7 @@ int Model::rowCount(const QModelIndex& parent) const {
 Node* Model::getItem(const QModelIndex& index) const {
     if(index.isValid()) {
         auto* item = static_cast<Node*>(index.internalPointer());
-        if(item)
-            return item;
+        if(item) return item;
     }
     return rootItem;
 }

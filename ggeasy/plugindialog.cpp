@@ -1,12 +1,10 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,7 +25,7 @@
 // #include "a_pch.h"
 
 DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
-    : QDialog(parent) {
+    : QDialog{parent} {
     setupUi(this);
     retranslateUi(this);
 
@@ -84,19 +82,19 @@ DialogAboutPlugins::~DialogAboutPlugins() { }
 
 void DialogAboutPlugins::setupUi(QDialog* Dialog) {
     if(Dialog->objectName().isEmpty())
-        Dialog->setObjectName(QString::fromUtf8("Dialog"));
+        Dialog->setObjectName(u"Dialog"_s);
     Dialog->resize(400, 300);
     verticalLayout = new QVBoxLayout{Dialog};
     verticalLayout->setSpacing(6);
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(6, 6, 6, 6);
 
     treeWidget = new QTreeWidget{Dialog};
-    treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
+    treeWidget->setObjectName(u"treeWidget"_s);
     verticalLayout->addWidget(treeWidget);
 
     buttonBox = new QDialogButtonBox{Dialog};
-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+    buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);
     //    pbInfo = buttonBox->addButton("Info", QDialogButtonBox::HelpRole);

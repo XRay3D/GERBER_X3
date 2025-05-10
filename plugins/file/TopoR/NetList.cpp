@@ -2,9 +2,10 @@
 #include "Commons.h"
 #include <ranges>
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool NetList::Net::ShouldSerialize_refs() {
+    bool
+    NetList::Net::ShouldSerialize_refs() {
     return _refs.empty() ? false : _refs.size() > 0;
 }
 

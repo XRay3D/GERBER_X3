@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -39,12 +37,13 @@ void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     //        painter->drawPath(shape_);
     //        return;
     //    }
+    // pen_.setWidth(penWidth());
 
-    painter->setBrush(bodyColor_);
+    painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     painter->drawPath(shape_);
 
-    pen_.setColor(pathColor_);
+    pen_.setColor(penColor_);
     painter->strokePath(shape_, pen_);
 }
 
@@ -66,7 +65,7 @@ void Drill::update(const Path& path, double diameter) {
     update();
 }
 
-Paths Drill::paths(int alternate) const {
+Paths Drill::paths(int /*alternate*/) const {
     auto path{shape_.toFillPolygon(QTransform::fromScale(100, 100))};
     path = QTransform::fromScale(0.01, 0.01).map(path);
     return {~transform().map(path)};
@@ -77,30 +76,30 @@ void Drill::changeColor() {
 
     switch(colorState) {
     case Default:
-        bodyColor_ = QColor(100, 100, 100);
+        brushColor_ = QColor(100, 100, 100);
         break;
     case Hovered:
-        bodyColor_ = QColor(150, 0x0, 150);
+        brushColor_ = QColor(150, 0x0, 150);
         break;
     case Selected:
-        bodyColor_ = QColor(255, 0x0, 255);
+        brushColor_ = QColor(255, 0x0, 255);
         break;
     case Hovered | Selected:
-        bodyColor_ = QColor(127, 0x0, 255);
+        brushColor_ = QColor(127, 0x0, 255);
         break;
     }
 
-    pathColor_ = bodyColor_;
+    penColor_ = brushColor_;
     switch(colorState) {
     case Default:
         break;
     case Hovered:
         break;
     case Selected: // FIXME V1037. Two or more case-branches perform the same actions.
-        pathColor_ = Qt::white;
+        penColor_ = Qt::white;
         break;
     case Hovered | Selected:
-        pathColor_ = Qt::white;
+        penColor_ = Qt::white;
         break;
     }
 
@@ -109,7 +108,7 @@ void Drill::changeColor() {
 }
 
 void Drill::create() {
-    shape_ = QPainterPath();
+    shape_ = QPainterPath{};
 
     if(!path_.size()) {
         return;

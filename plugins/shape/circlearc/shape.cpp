@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2020                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,59 +11,44 @@
 #include "shape.h"
 #include "graphicsview.h"
 #include "math.h"
-#include "shhandler.h"
+
 #include <QIcon>
 #include <assert.h>
 
 using Shapes::Handle;
 
 namespace ShArc {
-
-Shape::Shape(QPointF center, QPointF pt1, QPointF pt2)
-    : radius_(QLineF(center, pt1).length()) {
+// clang-format off
+Shape::Shape(Shapes::Plugin* plugin,QPointF center, QPointF pt1, QPointF pt2)
+    : AbstractShape{plugin}
+    , radius_{QLineF{center, pt1}.length()} {
     paths_.resize(1);
-
-    handlers.reserve(PtCount);
-
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.emplace_back(std::make_unique<Handle>(this));
-    handlers.emplace_back(std::make_unique<Handle>(this, Handle::Center));
-
-    handlers[Point1]->setPos(pt1);
-    handlers[Point2]->setPos(pt2);
-    handlers[Center]->setPos(center);
-
-    redraw();
-
+    // clang-format on
+    if(!std::isnan(center.x())) {
+        handles = {
+            Handle{pt1},
+            Handle{pt2},
+            Handle{center, Handle::Center}
+        };
+        curHandle = ++handles.begin();
+        redraw();
+    }
     App::grView().addItem(this);
-}
-
-Shape::~Shape() {
-    std::erase(model->shapes, this);
-    qobject_cast<QTableView*>(model->parent())->reset();
-}
-
-QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == GraphicsItemChange::ItemSelectedChange)
-        qobject_cast<QTableView*>(model->parent())->reset();
-    return Shapes::AbstractShape::itemChange(change, value);
 }
 
 constexpr auto dot(auto u, auto v) { return u.x() * v.x() + u.y() * v.y(); }
 constexpr auto norm(auto v) { return sqrt(dot(v, v)); } // norm = length of vector
 constexpr auto d(auto u, auto v) { return norm(u - v); }
 
-double distancePointToLine(const QPointF& pt, const QLineF& line) {
-    QPointF v{line.p1() - line.p2()};
-    QPointF w{pt - line.p2()};
+constexpr double distancePointToLine(const QPointF& pt, const QLineF& line) {
+    QPointF v = line.p1() - line.p2();
+    QPointF w = pt - line.p2();
 
     double c1 = dot(w, v);
-    if(c1 <= 0.0)
-        return d(pt, line.p2());
+    if(c1 <= 0.0) return d(pt, line.p2());
 
     double c2 = dot(v, v);
-    if(c2 <= c1)
-        return d(pt, line.p1());
+    if(c2 <= c1) return d(pt, line.p1());
 
     double b = c1 / c2;
     QPointF Pb = line.p2() + b * v;
@@ -73,15 +56,15 @@ double distancePointToLine(const QPointF& pt, const QLineF& line) {
 }
 
 void Shape::redraw() {
-    shape_ = QPainterPath();
+    shape_.clear();
 
-    if(currentHandler) {
-        Timer t{"redraw", uS{}};
+    if(curHandle.base()) {
+        Timer_uS t{"redraw"};
         auto updateCenter = [this](bool isCenter = {}) {
-            QLineF line{handlers[Point1]->pos(), handlers[Point2]->pos()};
+            QLineF line{handles[Point1], handles[Point2]};
             const auto angle{line.angle()};
             const auto center{line.center()};
-            const auto hCenter{handlers[Center]->pos()};
+            const auto hCenter{handles[Center]};
 
             auto tmp = line.angleTo({line.p1(), hCenter}) < 180 ? -1 : 1;
             double length{};
@@ -94,12 +77,12 @@ void Shape::redraw() {
                 else
                     length = sqrt(radius_ * radius_ - length * length);
             }
-            handlers[Center]->setPos(length ? QLineF::fromPolar(length * tmp, angle - 90).translated(center).p2() : center);
+            handles[Center] = length ? QLineF::fromPolar(length * tmp, angle - 90).translated(center).p2() : center;
             if(isCenter)
-                radius_ = QLineF(handlers[Center]->pos(), handlers[Point1]->pos()).length();
+                radius_ = QLineF{handles[Center], handles[Point1]}.length();
         };
 
-        switch(handlers.indexOf(currentHandler)) {
+        switch(std::distance(handles.begin(), curHandle)) {
         case Center:
             updateCenter(true);
             break;
@@ -117,66 +100,62 @@ void Shape::redraw() {
         shape_.moveTo(p + QPointF{0, +k});
         shape_.lineTo(p + QPointF{0, -k});
     };
-    test(handlers[Center]->pos());
+    test(handles[Center]);
 
-    const QLineF l1(handlers[Center]->pos(), handlers[Point1]->pos());
-    const QLineF l2(handlers[Center]->pos(), handlers[Point2]->pos());
-    //    radius_ = l1.length();
+    const QLineF l1{handles[Center], handles[Point1]};
+    const QLineF l2{handles[Center], handles[Point2]};
+
     double angle1 = two_pi - qDegreesToRadians(l1.angle());
     double angle2 = two_pi - qDegreesToRadians(l2.angle());
 
-    if(qFuzzyCompare(angle1, two_pi))
-        angle1 = 0.0;
+    if(qFuzzyCompare(angle1, two_pi)) angle1 = 0.0;
     double angle = angle2 - angle1;
-    if(angle < 0.0)
-        angle = two_pi + angle;
+    if(angle < 0.0) angle = two_pi + angle;
 
-    int intSteps = App::settings().clpCircleSegments(radius_);
+    size_t intSteps = App::settings().clpCircleSegments(radius_);
     const double stepAngle = two_pi / intSteps;
     const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
-    const Point center{~handlers[Center]->pos()};
+    const Point center = ~handles[Center];
     intSteps *= angle / two_pi;
 
     Path& path = paths_.front();
     path.clear();
     path.reserve(intSteps);
 
-    for(int i{}; i <= intSteps; i++) {
+    for(size_t i{}; i <= intSteps; i++) {
         const double angle = angle1 + stepAngle * i;
         path.emplace_back(
-            static_cast</*Point::Type*/ int32_t>(radius * cos(angle)) + center.x,
-            static_cast</*Point::Type*/ int32_t>(radius * sin(angle)) + center.y);
+            static_cast<int32_t>(radius * cos(angle)) + center.x,
+            static_cast<int32_t>(radius * sin(angle)) + center.y);
     }
 
     path.back() = Point{
-        static_cast</*Point::Type*/ int32_t>(radius * cos(angle2)) + center.x,
-        static_cast</*Point::Type*/ int32_t>(radius * sin(angle2)) + center.y};
+        static_cast<int32_t>(radius * cos(angle2)) + center.x,
+        static_cast<int32_t>(radius * sin(angle2)) + center.y,
+    };
 
     shape_.addPolygon(~path);
 
-    setPos({1, 1}); // костыли    //update();
-    setPos({0, 0});
-
-    //    if(model)
-    //        model->dataChanged(model->index(Center, 0), model->index(Angle2, 0));
+    assert(handles.size() == PtCount);
+    assert(paths_.size() == 1);
 }
 
-QString Shape::name() const { return QObject::tr("Shape"); }
+QString Shape::name() const { return QObject::tr("CircleArc"); }
 
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
 
 bool Shape::addPt(const QPointF& pt) {
-    if(!ptCtr++) {
-        handlers[Point2 + ptCtr].get()->setPos(pt);
-        updateOtherHandlers(handlers[Point2 + ptCtr].get());
+    if(!std::isnan(pt.x()) && ++curHandle < handles.end()) {
+        *curHandle = pt;
+        redraw();
         return true;
     }
-    return currentHandler = nullptr, false;
+    return curHandle = {}, false;
 }
 
 void Shape::setPt(const QPointF& pt) {
-    handlers[Point2 + ptCtr].get()->setPos(pt);
-    updateOtherHandlers(handlers[Point2 + ptCtr].get());
+    if(curHandle.base()) *curHandle = pt;
+    redraw();
 }
 
 double Shape::radius() const { return radius_; }
@@ -186,30 +165,36 @@ void Shape::setRadius(double radius) {
         return;
     radius_ = radius;
     {
-        QLineF line(handlers[Center]->pos(), handlers[Point1]->pos());
+        QLineF line{handles[Center], handles[Point1]};
         line.setLength(radius);
-        handlers[Point1]->setPos(line.p2());
+        handles[Point1] = line.p2();
     }
     {
-        QLineF line(handlers[Center]->pos(), handlers[Point2]->pos());
+        QLineF line{handles[Center], handles[Point2]};
         line.setLength(radius);
-        handlers[Point2]->setPos(line.p2());
+        handles[Point2] = line.p2();
     }
-    currentHandler = handlers[Point2].get();
+    curHandle = handles.begin() + Point2;
     redraw();
 }
 
 double Shape::angle(int i) const {
     assert(i < 2);
-    return QLineF(handlers[Center]->pos(), handlers[i]->pos()).angle();
+    return QLineF{handles[Center], handles[i]}.angle();
 }
 
 void Shape::setAngle(int i, double radius) {
     assert(i < 2);
-    QLineF line(handlers[Center]->pos(), handlers[i]->pos());
+    QLineF line{handles[Center], handles[i]};
     line.setAngle(radius);
-    handlers[i]->setPos(line.p2());
-    currentHandler = handlers[i].get();
+    handles[i] = line.p2();
+    curHandle = handles.begin() + i;
+    redraw();
+}
+
+void Shape::readAndInit(QDataStream& stream [[maybe_unused]]) {
+    curHandle = handles.begin() + Center;
+    radius_ = QLineF{handles[Center], handles[Point1]}.length();
     redraw();
 }
 

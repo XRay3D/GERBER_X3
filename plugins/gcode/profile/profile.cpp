@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,11 +12,14 @@
 #include "app.h"
 #include "gc_gi_bridge.h"
 #include "gi_gcpath.h"
+#include "gi_point.h"
 #include "graphicsview.h"
 #include "project.h"
 #include "utils.h"
 
+#undef emit
 #include <execution>
+#define emit
 
 namespace Profile {
 
@@ -65,7 +66,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
         if(gcp_.side() == GCode::On && openSrcPaths.size()) {
             returnPss.reserve(returnPss.size() + openSrcPaths.size());
             mergePaths(openSrcPaths);
-            sortBeginEnd(openSrcPaths);
+            sortBeginEnd(openSrcPaths, ~(App::home().pos() + App::zero().pos()));
             for(auto&& path: openSrcPaths)
                 returnPss.push_back({std::move(path)});
         }
@@ -133,7 +134,7 @@ void Creator::trimmingOpenPaths(Paths& paths) {
 }
 
 void Creator::cornerTrimming() {
-    Timer<mS> t{};
+    Timer_mS t{};
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
     const double testAngle = gcp_.convent() ? 90.0 : 270.0;
@@ -197,8 +198,7 @@ void Creator::makeBridges() {
     std::for_each(std::execution::par_unseq, returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
         // find Bridges
         auto biStack = bridgeItems | rviews::filter([&rPaths](Gi::Bridge* bi) { return bi->test(rPaths.front()); });
-        if(ranges::empty(biStack))
-            return;
+        if(ranges::empty(biStack)) return;
         auto isPositive1 = CL2::IsPositive(rPaths.front());
 
         // create frame
@@ -219,8 +219,8 @@ void Creator::makeBridges() {
         if(rPaths.empty())
             return;
 
-        mergeSegments(rPaths);
-        sortBeginEnd(rPaths);
+        mergePaths(rPaths);
+        sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
 
         auto IsPositive = [](Paths paths) {
             for(auto&& path: paths | std::views::drop(1))
@@ -319,7 +319,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         for(auto& [nest, paths]: pathsMap) {
             qDebug() << "nest" << nest << paths.size();
             if(paths.size() > 1)
-                sortB(paths);
+                sortB(paths, ~(App::home().pos() + App::zero().pos()));
             rpaths += std::move(paths); // NOTE move?
         }
     } else { // Grouping by nesting depth

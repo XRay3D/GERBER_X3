@@ -1,8 +1,9 @@
 ﻿#include "Constructive.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-void Constructive::BoardOutline::Shape_Contour::Shift(float x, float y) {
+    void
+    Constructive::BoardOutline::Shape_Contour::Shift(float x, float y) {
     if(_NonfilledFigure.index() != std::variant_npos)
         std::visit([&](auto&& f) { f.Shift(x, y); }, _NonfilledFigure);
 }

@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,7 +14,7 @@
 namespace Dxf {
 
 AbstractTable::AbstractTable(SectionParser* sp)
-    : sp(sp) {
+    : sp{sp} {
 }
 
 void AbstractTable::parse(CodeData& code) {
@@ -56,8 +54,8 @@ void AbstractTable::parse(CodeData& code) {
 
 AbstractTable::Type AbstractTable::toType(const QString& key) {
     return static_cast<Type>(staticMetaObject
-                                 .enumerator(0)
-                                 .keyToValue(key.toUtf8().toUpper().data()));
+            .enumerator(0)
+            .keyToValue(key.toUtf8().toUpper().data()));
 }
 
 } // namespace Dxf

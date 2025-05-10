@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -103,15 +101,15 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
-        dialog->setObjectName(QString::fromUtf8("dialog"));
+        dialog->setObjectName(u"dialog"_s);
         dialog->resize(600, 600);
         // Dialog->resize(400, 300);
         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(u"verticalLayout"_s);
         QTextBrowser* textBrowser = new QTextBrowser{dialog};
         textBrowser->setFont(QFont("JetBrains Mono"));
         new SyntaxHighlighter{textBrowser->document()};
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setObjectName(u"textBrowser"_s);
         verticalLayout->addWidget(textBrowser);
         for(const QString& str: file->lines())
             textBrowser->append(str);

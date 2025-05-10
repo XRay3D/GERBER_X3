@@ -1,107 +1,33 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-// #include "a_pch.h"
-
-// #include "gc_fileplugin.h"
-// #include "gc_plugin.h"
 #include "abstract_fileplugin.h"
 #include "gc_plugin.h"
 #include "gc_types.h"
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
+#include "stacktrace_and_output.h"
 #include "version.h"
+
 #include <QCommandLineParser>
 #include <QDir>
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
-#include <set>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QTextCodec>
 #endif
 
-#include <algorithm>
-#include <stdio.h>
-#include <stdlib.h>
-
-// void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-//     QByteArray localMsg = msg.toUtf8();
-//     const char* file = context.file ? context.file : "";
-//     //    const char* function = context.function ? context.function : "";
-//    const char* file_ {file};
-//    while (*file > 0) {
-//        if (*file == '\\')
-//            file_ = file + 1;
-//        ++file;
-//    }
-//    file = file_;
-//    switch (type) {
-//    case QtDebugMsg:
-//        fprintf(stdout, "Debug: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtInfoMsg:
-//        fprintf(stdout, "Info: %s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtWarningMsg:
-//        fprintf(stderr, "Warning:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtCriticalMsg:
-//        fprintf(stderr, "Critical:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    case QtFatalMsg:
-//        fprintf(stderr, "Fatal:%s\n\t%s : %u\n", localMsg.constData(), file, context.line /*, function*/);
-//        break;
-//    }
-//}
-
-// int main(int argc, char** argv) {
-//    qInstallMessageHandler(myMessageOutput);
-
-// #ifdef LEAK_DETECTOR
-//     _CrtSetDbgFlag(_CrtSetDbgFlag(_CRTDBG_REPORT_FLAG) | _CRTDBG_LEAK_CHECK_DF);
-// #endif
-
-// qSetMessagePattern("[%{type}] - %{message}\t\t%{function} (%{file}:%{line})");
-// qInstallMessageHandler(myMessageOutput);
-
-auto messageHandler = qInstallMessageHandler(nullptr);
-void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-    auto file = context.file;
-    // if(type == QtInfoMsg) return;
-    QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
-    while(file && *file)
-        if(std::set{'/', '\\'}.contains(*file++))
-            context_.file = file;
-
-    // QString data{context_.function};
-    // data.replace(QRegularExpression(R"((\w+\:\:))"), "");
-    // context_.function = data.toUtf8().data();
-    messageHandler(type, context, message);
-    if(App::mainWindowPtr())
-        emit App::mainWindow().logMessage(type, {
-                                                    QString::fromUtf8(context.category),
-                                                    QString::fromUtf8(context.file),
-                                                    QString::fromUtf8(context.function),
-                                                    QString::number(context.line),
-
-                                                },
-            message);
-}
-
 int main(int argc, char* argv[]) {
-    qInstallMessageHandler(myMessageHandler);
+    stacktraceAndOutput();
     qSetMessagePattern(QLatin1String(
         "%{if-critical}\x1b[38;2;255;0;0m"
         "C %{endif}"
@@ -123,20 +49,9 @@ int main(int argc, char* argv[]) {
     QApplication::setAttribute(Qt::AA_Use96Dpi);
     qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
 
-    //    Q_INIT_RESOURCE(resources);
+    Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
-
-    //        QFont f;
-    //        f.setPixelSize(50);
-    //        QApplication::setFont(f);
-
-    //        DoubleSpinBox dsbx;
-    //        dsbx.setRange(-1000, +1000);
-    //        dsbx.setSuffix(" MMM");
-    //        dsbx.show();
-    //        dsbx.flicker();
-    //        return app.exec();
 
     // #ifdef Q_OS_WIN
     //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
@@ -148,9 +63,11 @@ int main(int argc, char* argv[]) {
 #ifdef linux
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
-    QSharedMemory nixFixSharedMemory("AppSettings");
-    if(nixFixSharedMemory.attach())
-        nixFixSharedMemory.detach();
+    {
+        QSharedMemory nixFixSharedMemory{"AppSettings"};
+        if(nixFixSharedMemory.attach())
+            nixFixSharedMemory.detach();
+    }
 #endif
     QApplication::setApplicationName("GGEasy");
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
@@ -186,15 +103,15 @@ int main(int argc, char* argv[]) {
         if(nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
 #endif
-        MainWindow* mainWin = nullptr;
+        // MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running = false;    // переменную для проверки ууже запущенного приложения
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true;      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
-            sharedMemory.create(sizeof(mainWin)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
-            is_running = false;                   // И определяем, что других экземпляров не запущено
+            sharedMemory.create(sizeof(void*)); // В противном случае выделяем размером с указатель кусок памяти   xxx1 байт памяти
+            is_running = false;                 // И определяем, что других экземпляров не запущено
         }
         semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;
@@ -211,7 +128,7 @@ int main(int argc, char* argv[]) {
     }
 
     { // Splash Screen
-        auto splash = new QSplashScreen{QPixmap{u":/256.png"_qs}};
+        auto splash = new QSplashScreen{QPixmap{u":/256.png"_s}};
         splash->setAttribute(Qt::WA_DeleteOnClose);
         splash->show();
         splash->connect(splash, &QObject::destroyed, splash, [] { App::setSplashScreen(nullptr); });
@@ -230,6 +147,7 @@ int main(int argc, char* argv[]) {
     }
 
     MainWindow mainWin;
+    mainWin.setObjectName("MainWindow");
 
     /*
     Platform        Valid suffixes
@@ -246,7 +164,7 @@ int main(int argc, char* argv[]) {
     const QString suffix("*.so");
 #endif
 #elif _WIN32
-    const auto suffix = u"*.dll"_qs;
+    const auto suffix = u"*.dll"_s;
 #else
     static_assert(false, "Select OS");
 #endif
@@ -263,15 +181,15 @@ int main(int argc, char* argv[]) {
             if(auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
                 if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
                     gCode->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::gCodePlugins().emplace(gCode->type(), gCode);
+                    App::gCodePlugins().try_emplace(gCode->type(), gCode);
                     continue;
                 } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
                     file->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::filePlugins().emplace(std::pair{file->type(), file});
+                    App::filePlugins().try_emplace(file->type(), file);
                     continue;
                 } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
                     shape->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::shapePlugins().emplace(shape->type(), shape);
+                    App::shapePlugins().try_emplace(shape->type(), shape);
                     continue;
                 }
             } else {
@@ -281,9 +199,7 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    mainWin.init();
-    mainWin.setObjectName("MainWindow");
-
+    mainWin.init(); // connect plugins
     SettingsDialog().accept();
 
     QCommandLineParser parser;

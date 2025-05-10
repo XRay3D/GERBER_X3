@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -152,7 +150,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
     Pathss fillPaths;
     fillPaths.resize(tools.size());
 
-    for(int tIdx{}, size = tools.size(); const auto& tool: tools) {
+    for(size_t tIdx{}, size = tools.size(); const auto& tool: tools) {
         returnPs.clear();
         toolDiameter = tool.getDiameter(depth) * uScale;
         dOffset = toolDiameter / 2;
@@ -189,7 +187,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
                 do {
                     returnPs += std::move(wp);
-                    CleanPaths(wp, uScale * 0.0005);
+                    CleanPaths(wp, uScale * 0.0005); //-V1030
                     wp = Inflate(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
                 } while(wp.size());
                 ++pIdx;
@@ -236,10 +234,11 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 }
 
 void File::genGcodeAndTile() {
-    const QRectF rect = App::project().worckRect();
-    for(size_t x = 0; x < App::project().stepsX(); ++x) {
-        for(size_t y = 0; y < App::project().stepsY(); ++y) {
-            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
+    auto& proj = App::project();
+    const QRectF rect = proj.worckRect();
+    for(size_t x{}; x < proj.stepsX(); ++x) {
+        for(size_t y{}; y < proj.stepsY(); ++y) {
+            const QPointF offset{(rect.width() + proj.spaceX()) * x, (rect.height() + proj.spaceY()) * y};
             if(toolType() == Tool::Laser)
                 saveLaserPocket(offset);
             else
@@ -265,4 +264,5 @@ void File::createGi() {
 
     itemGroup()->setVisible(true);
 }
+
 } // namespace PocketOffset

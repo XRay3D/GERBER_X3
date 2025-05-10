@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,6 +15,7 @@
 // #include "settings.h"
 // #include "app.h"
 // #include "myclipper.h"
+
 // #include "tool.h"
 
 #include <QJsonObject>
@@ -28,7 +29,7 @@ class AbstractFile;
 class AbstractFileSettings : public QWidget {
 public:
     AbstractFileSettings(QWidget* parent)
-        : QWidget(parent) {
+        : QWidget{parent} {
     }
     virtual ~AbstractFileSettings() = default;
     virtual void readSettings(MySettings& settings) = 0;
@@ -59,7 +60,7 @@ public:
         });
     };
 
-    virtual void updateFileModel([[maybe_unused]] AbstractFile* file){};
+    virtual void updateFileModel([[maybe_unused]] AbstractFile* file) { };
 
 signals:
     void fileError(const QString& fileName, const QString& error);
@@ -68,7 +69,7 @@ signals:
     void fileReady(AbstractFile* file);
 
 public slots:
-    virtual AbstractFile* parseFile(const QString& fileName, int type) = 0;
+    virtual AbstractFile* parseFile(const QString& fileName, uint32_t type) = 0;
 };
 
 #define ParserInterface_iid "ru.xray3d.XrSoft.GGEasy.AbstractFilePlugin"
