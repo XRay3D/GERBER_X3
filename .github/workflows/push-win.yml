@@ -11,7 +11,7 @@ on:
     - 'master'
 
 env:
-  QT_VERSION: "5.15.2"
+  QT_VERSION: "6.8.2"
   QT_ARCH: "win64_msvc2019_64"
   QT_SUBDIR: "msvc2019_64"
   BOOST_VERSION: "1.84.0"
