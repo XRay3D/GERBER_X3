@@ -36,7 +36,7 @@ public:
     [[nodiscard]] uint32_t type() const override { return GERBER; }
 
     // public slots:
-    [[nodiscard]] AbstractFile* parseFile(const QString& fileName, int type) override;
+    [[nodiscard]] AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
 };
 
 } // namespace Gerber

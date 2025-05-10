@@ -333,7 +333,7 @@ void File::createGi() {
         itemGroups_[Normal]->shrink_to_fit();
     }
     if constexpr(1) { // add components
-        for(const Comp::Component& component: qAsConst(components_))
+        for(const Comp::Component& component:  std::as_const(components_))
             if(!component.referencePoint().isNull())
                 itemGroups_[Components]->push_back(new Comp::Item{component, this});
         itemGroups_[Components]->shrink_to_fit();

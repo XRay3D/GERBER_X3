@@ -33,12 +33,13 @@ Plugin::Plugin(QObject* parent)
     , Parser(this) {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if(type_ != type())
+AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
+    if(type_ != type()) return nullptr;
+    QFile file{fileName};
+    if(!file.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning() << file.errorString();
         return nullptr;
-    QFile file(fileName);
-    if(!file.open(QFile::ReadOnly | QFile::Text))
-        return nullptr;
+    }
 
     QTextStream in(&file);
     Parser::parseFile(fileName);

@@ -31,12 +31,13 @@ Plugin::Plugin(QObject* parent)
     : AbstractFilePlugin{parent} {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if(type_ != type())
+AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
+    if(type_ != type()) return nullptr;
+    QFile file{fileName};
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << file.errorString();
         return nullptr;
-    QFile file(fileName);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return nullptr;
+    }
 
     file_ = new File;
     file_->setFileName(fileName);

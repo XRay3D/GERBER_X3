@@ -133,8 +133,8 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
             case Tool:;
                 return tr("Tool");
             }
-        } else
-            return data_[section].name.value(0);
+        }
+        return data_[section].name.value(0);
     case Qt::SizeHintRole:
         if(orientation == Qt::Vertical)
             return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);

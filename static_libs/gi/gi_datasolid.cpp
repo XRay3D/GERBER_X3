@@ -58,7 +58,7 @@ int DataFill::type() const { return Type::DataSolid; }
 
 void DataFill::redraw() {
     //    shape_ = QPainterPath();
-    //    for (Path path : qAsConst(paths_)) {
+    //    for (Path path :  std::as_const(paths_)) {
     //        path.push_back(path.front());
     //        shape_.addPolygon(path);
     //    }

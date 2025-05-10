@@ -189,7 +189,7 @@ void Form::initToolTable() {
             header->setAll(!checkBox->checkState());
         }
     });
-    connect(header, &Header::onChecked, [this](int idx) {
+    connect(header, &Header::onChecked, [this](int /*idx*/) {
         if(model) {
             int fl{};
             for(int i{}; i < model->rowCount(); ++i)
@@ -428,7 +428,7 @@ void Form::updateState() {
 }
 
 void Form::errorOccurred() {
-    auto tpc = (GCode::Creator*)sender();
+    [[maybe_unused]] auto tpc = (GCode::Creator*)sender();
     // tpc->continueCalc(ErrorDialog(std::move(tpc->items), this).exec());
 }
 
@@ -597,7 +597,7 @@ void Form::hideEvent(QHideEvent* event) { // NOTE clean and hide pr gi
     event->accept();
 }
 
-void Form::editFile(GCode::File* file) { }
+void Form::editFile(GCode::File* /*file*/) { }
 
 } // namespace Drilling
 

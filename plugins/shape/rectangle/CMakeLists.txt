@@ -15,7 +15,7 @@ project(shrectangle LANGUAGES CXX)
 set(PLUG_NAME "Rectangle")
 set(PLUG_INFO "Rectangle")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
-set(PLUG_LOCAL_VERSION "1")
+set(PLUG_LOCAL_VERSION "3")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
 

@@ -26,8 +26,8 @@ public:
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
-    void write(QDataStream& stream) const override { }
-    void read(QDataStream& stream) override { }
+    void write(QDataStream& /*stream*/) const override { }
+    void read(QDataStream& /*stream*/) override { }
 
     void transform(DxfGo& item, QPointF tr) const;
 
