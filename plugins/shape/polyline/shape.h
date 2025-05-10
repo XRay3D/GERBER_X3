@@ -21,12 +21,11 @@ class Shape final : public Shapes::AbstractShape {
     friend class Model;
 
 public:
-    explicit Shape(QPointF pt1 = {}, QPointF pt2 = {});
-    ~Shape() override;
+    explicit Shape(Shapes::Plugin* plugin, QPointF pt1 = {}, QPointF pt2 = {});
+    ~Shape() override = default;
 
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShPolyLine; }
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     // Gi::Item interface
     void redraw() override;
@@ -38,7 +37,6 @@ public:
     bool addPt(const QPointF& pt) override;
 
     bool closed() const;
-    Model* model{};
 
 protected:
     void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
@@ -52,20 +50,21 @@ class Plugin : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "description.json")
     Q_INTERFACES(Shapes::Plugin)
-    mutable Editor editor_{this};
+    Editor editor_{this};
 
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShPolyLine; }
     QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
-    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
-            point, point + QPointF{5, 5}
+            this,
+            point, point + QPointF{1, 1}
         };
-        editor_.addShape(shape);
+        editor_.add(shape);
         return shape;
     }
-    QWidget* editor() override { return &editor_; }
+    Editor* editor() override { return &editor_; }
 };
 
 } // namespace ShPoly

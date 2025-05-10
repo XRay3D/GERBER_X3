@@ -25,8 +25,8 @@ class Shape final : public Shapes::AbstractShape {
     friend class Editor;
 
 public:
-    explicit Shape(QPointF pt1 = {});
-    ~Shape() override;
+    explicit Shape(Shapes::Plugin* plugin, QPointF pt1 = {});
+    ~Shape() override = default;
 
     enum {
         // clang-format off
@@ -44,8 +44,8 @@ public:
         // clang-format on
     };
 
-    struct InternalData {
-        QString font{};
+    struct ShapeData {
+        QFont font{};
         QString text{"Shape"};
         double angle{0.0};
         double height{10.0};
@@ -56,10 +56,6 @@ public:
 
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShText; }
-    //    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    QPainterPath shape() const override; // AbstractShape interface
-
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 
     // AbstractShape interface
     void redraw() override;
@@ -78,18 +74,16 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
-    Editor* editor{};
-
 protected:
     // AbstractShape interface
     void write(QDataStream& stream) const override;
     void readAndInit(QDataStream& stream) override;
 
 private:
-    InternalData iData;
-    InternalData iDataCopy;
+    ShapeData iData;
+    ShapeData iDataCopy;
     void saveIData();
-    InternalData loadIData();
+    ShapeData loadIData();
 
     void save();
     void restore();
@@ -100,18 +94,18 @@ class Plugin : public Shapes::Plugin {
     Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "description.json")
     Q_INTERFACES(Shapes::Plugin)
-    mutable Editor editor_{this};
+    Editor editor_{this};
 
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShText; }
     QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
-    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
-        auto shape = new Shape{point};
-        editor_.addShape(shape);
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
+        auto shape = new Shape{this, point};
+        editor_.add(shape);
         return shape;
     }
-    QWidget* editor() override { return &editor_; };
+    Editor* editor() override { return &editor_; };
 };
 
 } // namespace ShTxt

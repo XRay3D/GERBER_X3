@@ -22,6 +22,12 @@
 
 namespace Gi {
 
+QColor Item::bodyColor() { return brushColor_; }
+
+void Item::setBodyColor(const QColor& c) { brushColor_ = c, colorChanged(); }
+
+void Item::colorChanged() { update(); }
+
 Item::Item(AbstractFile* file)
     : file_{file}
     , pen_{Qt::white, 0.0}
@@ -43,6 +49,16 @@ Item::Item(AbstractFile* file)
     //    qDebug("rotationChanged"); });
 }
 
+bool Item::isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }
+
+void Item::setEditable(bool fl) {
+    setZValue(id_ + (fl * std::numeric_limits<double>::max() * 0.5));
+    if(fl) setSelected(true);
+    setFlag(ItemIsMovable, fl);
+}
+
+QColor Item::color() const { return color_; }
+
 void Item::setColor(const QColor& color) {
     brushColor_ = color_ = color;
     colorChanged();
@@ -54,6 +70,8 @@ void Item::setColorPtr(QColor* colorPtr) {
     colorChanged();
 }
 
+QPen Item::pen() const { return pen_; }
+
 void Item::setPen(const QPen& pen) {
     pen_ = pen;
     colorChanged();
@@ -63,6 +81,33 @@ void Item::setPenColorPtr(const QColor* penColor) {
     if(penColor) pnColorPrt_ = penColor;
     colorChanged();
 }
+
+Paths Item::paths(int) const { return ~shape_.toSubpathPolygons(transform()); }
+
+void Item::setPaths(Paths paths, int) {
+    auto t{transform()};
+    auto a{qRadiansToDegrees(asin(t.m12()))};
+    t = t.rotateRadians(-t.m12());
+    auto x{t.dx()};
+    auto y{t.dy()};
+    shape_ = {};
+    t = {};
+    t.translate(-x, -y);
+    t.rotate(-a);
+    for(auto&& path: ~paths)
+        shape_.addPolygon(t.map(path));
+    redraw();
+}
+
+void Item::redraw() { }
+
+QRectF Item::boundingRect() const {
+    if(App::grView().boundingRectFl())
+        return shape_.toFillPolygon(transform()).boundingRect();
+    return boundingRect_;
+}
+
+QPainterPath Item::shape() const { return shape_; }
 
 void Item::setVisible(bool visible) {
     //    if (visible == isVisible() && (visible && opacity() < 1.0))
@@ -83,11 +128,26 @@ int Item::id() const { return id_; }
 
 void Item::setId(int32_t id) { id_ = id; }
 
+double Item::scaleFactor() const {
+    double scale = 1.0;
+    if(scene() && scene()->views().size()) {
+        scale /= scene()->views().front()->transform().m11();
+        if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
+    }
+    return scale;
+}
+
 void Item::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
     QGraphicsItem::hoverEnterEvent(event);
 }
+
+// double Item::penWidth(double w) const {
+//     if(scene() && scene()->views().size())
+//         w /= scene()->views().front()->transform().m11();
+//     return w;
+// };
 
 void Item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
     colorState &= ~Hovered;
@@ -105,29 +165,6 @@ QVariant Item::itemChange(QGraphicsItem::GraphicsItemChange change,
     }
     return QGraphicsItem::itemChange(change, value);
 }
-
-double Item::scaleFactor() const {
-    double scale = 1.0;
-    if(scene() && scene()->views().size()) {
-        scale /= scene()->views().front()->transform().m11();
-        if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
-    }
-    return scale;
-}
-
-// double Item::penWidth(double w) const {
-//     if(scene() && scene()->views().size())
-//         w /= scene()->views().front()->transform().m11();
-//     return w;
-// };
-
-QRectF Item::boundingRect() const {
-    if(App::grView().boundingRectFl())
-        return shape_.toFillPolygon(transform()).boundingRect();
-    return boundingRect_;
-}
-
-QPainterPath Item::shape() const { return shape_; }
 
 } // namespace Gi
 

@@ -12,6 +12,7 @@
 
 #include <boost/pfr.hpp>
 
+#include <QByteArray>
 #include <QDataStream>
 #include <map>
 #include <ranges>
@@ -102,7 +103,7 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
 }
 
 // порционное сохранение для гибкости.
-class Block {
+class Block final {
     QDataStream& stream;
     //    QByteArray data;
     uint32_t count{};
@@ -149,6 +150,47 @@ public:
             return write(args...);
         else
             return read(args...);
+    }
+};
+
+template <typename... Args>
+class BlockRead final : QByteArray, std::tuple<Args&...> {
+    QDataStream stream{this, QDataStream::ReadOnly};
+    using tuple = std::tuple<Args&...>;
+
+public:
+    BlockRead(Args&... args)
+        : tuple{args...} { }
+    operator QDataStream&() & { return stream; }
+
+    friend QDataStream& operator>>(QDataStream& stream, BlockRead<Args...>&& br) {
+        return stream >> br;
+    }
+
+    friend QDataStream& operator>>(QDataStream& stream, BlockRead<Args...>& br) {
+        stream >> static_cast<QByteArray&>(br);
+        [&br]<size_t... Is>(std::index_sequence<Is...>) {
+            Block{br.stream}.read(std::get<Is>(br)...);
+        }(std::make_index_sequence<sizeof...(Args)>{});
+        return br.stream;
+    }
+};
+
+class BlockWrite final : QByteArray {
+    QDataStream stream{this, QDataStream::WriteOnly};
+
+public:
+    template <typename... Args>
+    BlockWrite(const Args&... args) {
+        Block{stream}.write(args...);
+    }
+    operator QDataStream&() & { return stream; }
+
+    friend QDataStream& operator<<(QDataStream& stream, BlockWrite&& br) {
+        return stream << br;
+    }
+    friend QDataStream& operator<<(QDataStream& stream, BlockWrite& br) {
+        return stream << static_cast<QByteArray&>(br);
     }
 };
 

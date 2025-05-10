@@ -100,7 +100,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         for(auto* shape: sh) {
             if(shape->handles.size() <= size_t(index.row())) continue;
             (shape->handles[index.row()].*setter[index.column()])(val);
-            shape->curHandle = shape->handles.begin() + index.row();
+            // shape->curHandle = shape->handles.begin() + index.row();
             shape->redraw();
         }
 
@@ -144,7 +144,7 @@ public:
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
-Editor::Editor(Plugin* plugin)
+Editor::Editor(Shapes::Plugin* plugin)
     : /* QWidget {parent}*/ view{new QTableView{this}}
     , model{new Model{view}}
     , plugin{plugin} {
@@ -205,9 +205,13 @@ Editor::Editor(Plugin* plugin)
     //    });
 }
 
-void Editor::addShape(Shape* shape) {
-    model->shapes.emplace_back(shape);
-    shape->model = model;
+void Editor::add(Shapes::AbstractShape* shape) {
+    model->shapes.emplace_back(static_cast<Shape*>(shape));
+    view->reset();
+}
+
+void Editor::remove(Shapes::AbstractShape* shape) {
+    std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
 }
 

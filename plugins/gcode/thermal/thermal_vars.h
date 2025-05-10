@@ -12,7 +12,6 @@
 
 #include "myclipper.h"
 
-
 #include <QString>
 #include <map>
 #include <utility>

@@ -200,7 +200,7 @@ void DoubleSpinBox::updateToolTip() {
 
 void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
     static const auto decimalPoint = QLocale().decimalPoint();
-#if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     if(event->modifiers().testFlags(Qt::ShiftModifier | Qt::ControlModifier)) setSingleStep(0.01);
 #else
     if(event->modifiers().testFlag(Qt::ControlModifier)
@@ -215,7 +215,7 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
 }
 
 void DoubleSpinBox::keyReleaseEvent(QKeyEvent* event) {
-#if(QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
+#if (QT_VERSION >= QT_VERSION_CHECK(6, 0, 0))
     if(event->modifiers().testAnyFlags(Qt::NoModifier)) setSingleStep(1.0);
 #else
     if(!event->modifiers().testFlag(Qt::NoModifier)) setSingleStep(1.0);

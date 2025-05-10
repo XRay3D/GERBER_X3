@@ -452,9 +452,9 @@ void Pin::setPos(const QPointF pos[]) {
 void Pin::updateToolTip() {
     const QPointF p(pos() - App::zero().pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3")
-                   .arg(index_ + 1)
-                   .arg(p.x())
-                   .arg(p.y()));
+            .arg(index_ + 1)
+            .arg(p.x())
+            .arg(p.y()));
 }
 
 void Pin::setPos(const QPointF& pos) {

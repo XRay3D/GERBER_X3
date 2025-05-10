@@ -155,8 +155,8 @@ public:
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
-Editor::Editor(Plugin* plugin)
-    : /* QWidget {parent}*/ view{new QTableView{this}}
+Editor::Editor(Shapes::Plugin* plugin)
+    : /* Shapes::Editor{parent}*/ view{new QTableView{this}}
     , model{new Model{view}}
     , plugin{plugin} {
     setWindowTitle(plugin->name());
@@ -218,9 +218,13 @@ Editor::Editor(Plugin* plugin)
     //      });
 }
 
-void Editor::addShape(Shape* shape) {
-    model->shapes.emplace_back(shape);
-    shape->model = model;
+void Editor::add(Shapes::AbstractShape* shape) {
+    model->shapes.emplace_back(static_cast<Shape*>(shape));
+    view->reset();
+}
+
+void Editor::remove(Shapes::AbstractShape* shape) {
+    std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
 }
 

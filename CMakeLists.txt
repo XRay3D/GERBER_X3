@@ -32,22 +32,6 @@ add_definitions(
   # const QStringBuilder < A, B>& b, QChar)
 )
 
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options(
-    -fPIC -Wall #[[-Wconversion]] -Werror -Wextra -Wpedantic
-    # -ffast-math
-    -march=native)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(
-    -fPIC -Wall #[[-Wconversion]] -Werror -Wextra -Wpedantic
-    # -ffast-math
-    -march=native)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-endif()
-
 # add_compile_options( #
 # $<IF:$OR<$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>, -fPIC -Wpedantic #
 # -Wall -Wextra -Wconversion -Werror> #
@@ -126,6 +110,27 @@ set(CLIPPER2_USINGZ "ONLY")
 add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
+
+set(COMMON_COMPILE_OPTIONS
+    -fPIC
+    # -ffast-math
+    -march=native
+    -Wall
+    # -Wconversion
+    -Werror
+    -Wextra
+    -Wimplicit-fallthrough
+    -Wpedantic)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options(${COMMON_COMPILE_OPTIONS})
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  add_compile_options(${COMMON_COMPILE_OPTIONS})
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+
+endif()
 
 # target_compile_options(Clipper2Z PUBLIC - fPIC)
 

@@ -47,7 +47,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     codes.reserve(10000);
 
     QTextStream in(&file);
-#if(QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     in.setCodec("Windows-1251");
 #endif
     //    in.setAutoDetectUnicode(true);

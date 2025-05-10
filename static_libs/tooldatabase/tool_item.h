@@ -19,8 +19,8 @@ public:
     ToolItem(const ToolItem& item);
     ~ToolItem();
 
-    int row() const;
-    int childCount() const;
+    qsizetype row() const;
+    qsizetype childCount() const;
     ToolItem* child(int row) const;
     ToolItem* lastChild() const;
     ToolItem* takeChild(int row);

@@ -17,6 +17,12 @@
 namespace Shapes {
 class Node;
 
+struct Editor : QWidget {
+    virtual void add(class AbstractShape* shape) = 0;
+    virtual void remove(class AbstractShape* shape) = 0;
+    virtual void updateData() = 0;
+};
+
 class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
@@ -34,9 +40,9 @@ public:
     void finalizeShape();
 
     virtual QIcon icon() const = 0;
-    [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) const = 0;
+    [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) = 0;
     virtual uint32_t type() const = 0;
-    virtual QWidget* editor() = 0;
+    virtual Editor* editor() = 0;
 
     void createMainMenu(QMenu& menu, FileTree::View* tv);
     QString folderName() const;

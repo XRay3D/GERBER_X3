@@ -12,7 +12,6 @@
 
 #include "myclipper.h"
 
-
 #include <QGraphicsItem>
 
 namespace Gi {

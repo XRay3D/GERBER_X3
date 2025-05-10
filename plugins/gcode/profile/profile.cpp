@@ -21,7 +21,6 @@
 #include <execution>
 #define emit
 
-
 namespace Profile {
 
 void Creator::create() {

@@ -24,7 +24,6 @@
 // #include <st acktrace>
 #include <boost/stacktrace.hpp>
 
-
 /*
 .WHL Aperture Wheel File.PLC Silk Screen Component side
 .CMP Copper Component side        .STC Solder Stop mask Component side

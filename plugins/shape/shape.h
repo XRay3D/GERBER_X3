@@ -19,14 +19,22 @@ using namespace std::placeholders;
 
 namespace Shapes {
 
-struct Handle final {
-    QPointF pos_;
+struct Handle final : QPointF {
     enum Type : int {
         Adder,
         Center,
         Corner,
         Null
-    } type_{Corner};
+    } type_{Null};
+
+    using QPointF::operator=;
+
+    Handle(const QPointF& p, Type t)
+        : QPointF{p}, type_{t} { }
+    Handle(const QPointF& p)
+        : Handle{p, Corner} { }
+    Handle()
+        : Handle{{}, Corner} { }
 
     QColor color() const noexcept {
         static const QColor colors[]{
@@ -38,16 +46,7 @@ struct Handle final {
         return colors[type_];
     };
 
-    operator QPointF() const noexcept { return pos_; }
     operator bool() const noexcept { return type_ != Null; }
-
-    QPointF pos() const noexcept { return pos_; }
-    double x() const noexcept { return pos_.x(); }
-    double y() const noexcept { return pos_.y(); }
-
-    void setPos(const QPointF& pos) noexcept { pos_ = pos; }
-    void setX(double x) noexcept { pos_.setX(x); }
-    void setY(double y) noexcept { pos_.setY(y); }
 
     void setType(Type type) noexcept { type_ = type; }
     Type type() const noexcept { return type_; }
@@ -61,7 +60,7 @@ class AbstractShape : public Gi::Item, public ::FileTree::Node {
     QPainterPath pPathHandle;
 
 public:
-    AbstractShape();
+    AbstractShape(Plugin* plugin);
     ~AbstractShape() override;
 
     // QGraphicsItem interface
@@ -80,21 +79,20 @@ public:
     virtual bool addPt(const QPointF& point [[maybe_unused]]) { return curHandle = {}, false; };
     virtual void setPt(const QPointF& point [[maybe_unused]]) = 0;
     Node* node() const;
-    void finalize() { isFinal = true; }
 
-    //::FileTree::Node interface
+    QVariant data(const QModelIndex& index, int role) const override;
     bool setData(const QModelIndex& index, const QVariant& value, int role) override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
-    QVariant data(const QModelIndex& index, int role) const override;
     void menu(QMenu& menu, FileTree::View* tv) override;
-    int32_t id() const override { return id_; };
+
+    int32_t id() const override { return Item::id(); }
+    void setId(int32_t id) override { Item::setId(id); }
 
 protected:
     double scale(bool* hasUpdate = nullptr) const;
     bool test(const QPointF& point);
-    bool isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }
-    void setEditable(bool fl) { setFlag(ItemIsMovable, fl); }
 
+    Plugin* const plugin;
     mutable mvector<Handle> handles;
     using HIter = mvector<Handle>::iterator;
     HIter curHandle{};
@@ -102,20 +100,19 @@ protected:
     Paths paths_;
     std::unordered_map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos;                                               // групповое перемещение
-    bool isFinal{};                                                // флаг окончагия ввода
 
     // QGraphicsItem interface
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
     // AbstractShape interface
-    virtual void updateOtherhandles(Handle* handle = nullptr, int mode = {});
-    virtual void write(QDataStream& stream [[maybe_unused]]) const { }; // write to project
-    virtual void readAndInit(QDataStream& stream [[maybe_unused]]) { }; // read from project
+    virtual void write(QDataStream& stream [[maybe_unused]]) const { };                          // write to project
+    virtual void readAndInit(QDataStream& stream [[maybe_unused]]) { AbstractShape::redraw(); }; // read from project
 };
 
 } // namespace Shapes

@@ -10,10 +10,10 @@
  *******************************************************************************/
 #pragma once
 
+#include "shapepluginin.h"
 #include <QAbstractTableModel>
 #include <QActionGroup>
 #include <QTableView>
-#include <QWidget>
 
 namespace ShArc {
 
@@ -47,20 +47,22 @@ public:
     std::vector<Shape*> shapes;
 };
 
-class Editor : public QWidget {
+class Editor : public Shapes::Editor {
     Q_OBJECT
 
     QTableView* view;
     QActionGroup actionGroup{this};
 
 public:
-    Editor(class Plugin* plugin);
+    Editor(class Shapes::Plugin* plugin);
 
-    void addShape(Shape* shape);
+    void add(Shapes::AbstractShape* shape) override;
+    void remove(Shapes::AbstractShape* shape) override;
+    void updateData() override { view->reset(); }
 
     ~Editor() override = default;
     Model* model;
-    class Plugin* plugin;
+    Shapes::Plugin* plugin;
 };
 
 } // namespace ShArc

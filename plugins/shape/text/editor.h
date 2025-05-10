@@ -10,10 +10,10 @@
  *******************************************************************************/
 #pragma once
 
+#include "shapepluginin.h"
 #include <QAbstractTableModel>
 #include <QActionGroup>
 #include <QTableView>
-#include <QWidget>
 
 class DoubleSpinBox;
 class QCheckBox;
@@ -26,7 +26,7 @@ namespace ShTxt {
 
 class Shape;
 
-class Editor : public QWidget {
+class Editor : public Shapes::Editor {
     Q_OBJECT
     friend class Shape;
     std::vector<Shape*> shapes;
@@ -58,23 +58,29 @@ class Editor : public QWidget {
     void updateAngle();
     void updateHeight();
     void updateXY();
+    void updateX();
+    void updateY();
     void updateCenterAlign();
     void updateSide();
+    bool resetFl{};
 
 public:
-    Editor(class Plugin* plugin);
+    Editor(Shapes::Plugin* plugin);
 
-    void addShape(Shape* shape);
+    void add(Shapes::AbstractShape* shape) override;
+    void remove(Shapes::AbstractShape* shape) override;
+    void updateData() override { reset(); }
 
     void reset();
 
     ~Editor() override = default;
     //    Model* model;
-    class Plugin* plugin;
+    Shapes::Plugin* plugin;
 
     // QWidget interface
 protected:
     void hideEvent(QHideEvent* event) override;
+    void showEvent(QShowEvent* event) override;
 };
 
 } // namespace ShTxt

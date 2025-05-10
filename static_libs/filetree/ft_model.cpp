@@ -271,8 +271,7 @@ int Model::rowCount(const QModelIndex& parent) const {
 Node* Model::getItem(const QModelIndex& index) const {
     if(index.isValid()) {
         auto* item = static_cast<Node*>(index.internalPointer());
-        if(item)
-            return item;
+        if(item) return item;
     }
     return rootItem;
 }
