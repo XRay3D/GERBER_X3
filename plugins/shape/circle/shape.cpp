@@ -18,8 +18,9 @@ using Shapes::Handle;
 
 namespace ShCirc {
 
-Shape::Shape(QPointF center, QPointF pt)
-    : radius_(QLineF{center, pt}.length()) {
+Shape::Shape(Shapes::Plugin* plugin, QPointF center, QPointF pt)
+    : AbstractShape{plugin}
+    , radius_(QLineF{center, pt}.length()) {
     paths_.resize(1);
 
     if(!std::isnan(center.x())) {
@@ -27,21 +28,11 @@ Shape::Shape(QPointF center, QPointF pt)
             Handle{center, Handle::Center},
             Handle{pt}
         };
+        curHandle = handles.begin() + Point1;
         redraw();
     }
 
     App::grView().addItem(this);
-}
-
-Shape::~Shape() {
-    std::erase(model->shapes, this);
-    qobject_cast<QTableView*>(model->parent())->reset();
-}
-
-QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == GraphicsItemChange::ItemSelectedChange)
-        qobject_cast<QTableView*>(model->parent())->reset();
-    return Shapes::AbstractShape::itemChange(change, value);
 }
 
 void Shape::redraw() {
@@ -50,7 +41,7 @@ void Shape::redraw() {
     case Center: {
         auto radLine = QLineF::fromPolar(radius_, 0);
         radLine.translate(handles[Center]);
-        handles[Point1].setPos(radLine.p2());
+        handles[Point1] = radLine.p2();
     } break;
     case Point1: {
         QLineF radLine{handles[Center], handles[Point1]};
@@ -60,7 +51,7 @@ void Shape::redraw() {
 
     const int intSteps = App::settings().clpCircleSegments(radius_);
     const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
-    const Point center = ~handles[Center].pos();
+    const Point center = ~handles[Center];
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
@@ -75,9 +66,6 @@ void Shape::redraw() {
     shape_ = QPainterPath();
     shape_.addPolygon(~path);
 
-    if(model)
-        emit model->dataChanged(model->index(Center, 0), model->index(Diameter, 1));
-
     assert(handles.size() == PtCount);
     assert(paths_.size() == 1);
 }
@@ -87,9 +75,8 @@ QString Shape::name() const { return QObject::tr("Circle"); }
 QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse"); }
 
 void Shape::setPt(const QPointF& pt) {
-    handles[Point1].setPos(pt);
-    curHandle = handles.begin() + Point1;
-    AbstractShape::redraw();
+    if(curHandle.base()) *curHandle = pt;
+    redraw();
 }
 
 double Shape::radius() const { return radius_; }
@@ -97,15 +84,16 @@ double Shape::radius() const { return radius_; }
 void Shape::setRadius(double radius) {
     if(qFuzzyIsNull(radius) || qFuzzyCompare(radius_, radius))
         return;
-    QLineF line(handles[Center].pos(), handles[Point1].pos());
+    QLineF line{handles[Center], handles[Point1]};
     line.setLength(radius);
-    handles[Point1].setPos(line.p2());
+    handles[Point1] = line.p2();
     curHandle = handles.begin() + Point1;
     AbstractShape::redraw();
 }
 
 void Shape::readAndInit(QDataStream& /*stream*/) {
-    curHandle = handles.begin() + Point1;
+    radius_ = QLineF{handles.front(), handles.back()}.length();
+    curHandle = handles.begin();
     AbstractShape::redraw();
 }
 

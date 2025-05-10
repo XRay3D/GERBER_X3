@@ -13,7 +13,6 @@
 #include "shape.h"
 
 #include <QtWidgets>
-#include <array>
 #include <set>
 
 Q_DECLARE_METATYPE(std::set<double>)
@@ -21,6 +20,12 @@ Q_DECLARE_METATYPE(std::set<double>)
 #define TR QCoreApplication::translate
 
 namespace ShTxt {
+
+auto filter = std::views::filter([](Shape* shape) {
+    return shape->isSelected()
+        // && shape->isEditable()
+        ;
+});
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
@@ -90,15 +95,40 @@ void Editor::setupUi() {
     dsbxY->setSuffix(TR("TextEditor", " mm", nullptr));
     dsbxY->setValue(100.0);
 
+    // clang-format off
+    connect(plainTextEdit, &QPlainTextEdit::textChanged, this, &Editor::updateText);
+    connect(dsbxAngle, &QDoubleSpinBox::valueChanged,    this, &Editor::updateAngle);
+    connect(dsbxHeight, &QDoubleSpinBox::valueChanged,   this, &Editor::updateHeight);
+    connect(dsbxXY, &QDoubleSpinBox::valueChanged,       this, &Editor::updateXY);
+    connect(dsbxX, &QDoubleSpinBox::valueChanged,        this, &Editor::updateX);
+    connect(dsbxY, &QDoubleSpinBox::valueChanged,        this, &Editor::updateY);
+    connect(cbxFont, &QFontComboBox::currentFontChanged, this, &Editor::updateFont);
+    connect(cbxSide, &QComboBox::currentIndexChanged,    this, &Editor::updateSide);
+
+    connect(rb_bc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_bl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_br, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_cc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_lc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_rc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_tc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_tl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+    connect(rb_tr, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
+
+    connect(chbxBold, &QCheckBox::toggled,               this, &Editor::updateFont);
+    connect(chbxItalic, &QCheckBox::toggled,             this, &Editor::updateFont);
+    // clang-format on
+
     // Apply
     auto pushButton = new QPushButton{TR("TextEditor", "Apply"), this};
     pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
     formLayout->addRow(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
     connect(pushButton, &QPushButton::clicked, this, [this] {
-        auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-        for(auto text: sh)
-            text->iDataCopy = text->iData;
+        for(auto* shape: shapes | filter) {
+            shape->iDataCopy = shape->iData;
+            shape->ok();
+        }
     });
 
     // Add New
@@ -118,57 +148,68 @@ void Editor::setupUi() {
 }
 
 void Editor::updateText() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    QString text_(plainTextEdit->toPlainText());
-    for(auto text: sh) {
-        text->iData.text = text_;
-        text->redraw();
+    if(resetFl) return;
+    QString text = plainTextEdit->toPlainText();
+    for(auto* shape: shapes | filter) {
+        shape->iData.text = text;
+        shape->redraw();
     }
 }
 
 void Editor::updateFont() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-
+    if(resetFl) return;
     auto font{cbxFont->currentFont()};
     font.setBold(chbxBold->isChecked());
     font.setItalic(chbxItalic->isChecked());
     plainTextEdit->setFont(font);
-    auto strFont(font.toString());
-    for(auto text: sh) {
-        text->iData.font = strFont;
-        text->redraw();
+    for(auto* shape: shapes | filter) {
+        shape->iData.font = font;
+        shape->redraw();
     }
 }
 
 void Editor::updateAngle() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-
-    for(auto text: sh) {
-        text->iData.angle = dsbxAngle->value();
-        text->redraw();
+    if(resetFl) return;
+    for(auto* shape: shapes | filter) {
+        shape->iData.angle = dsbxAngle->value();
+        shape->redraw();
     }
 }
 
 void Editor::updateHeight() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-
-    for(auto text: sh) {
-        text->iData.height = dsbxHeight->value();
-        text->redraw();
+    if(resetFl) return;
+    for(auto* shape: shapes | filter) {
+        shape->iData.height = dsbxHeight->value();
+        shape->redraw();
     }
 }
 
 void Editor::updateXY() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    if(resetFl) return;
+    for(auto* shape: shapes | filter) {
+        shape->iData.xy = dsbxXY->value();
+        shape->redraw();
+    }
+}
 
-    for(auto text: sh) {
-        text->iData.xy = dsbxXY->value();
-        text->redraw();
+void Editor::updateX() {
+    if(resetFl) return;
+    for(auto* shape: shapes | filter) {
+        shape->handles.front().setX(dsbxX->value());
+        shape->redraw();
+    }
+}
+
+void Editor::updateY() {
+    if(resetFl) return;
+    for(auto* shape: shapes | filter) {
+        shape->handles.front().setY(dsbxY->value());
+        shape->redraw();
     }
 }
 
 void Editor::updateCenterAlign() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    if(resetFl) return;
 
     int handleAlign{};
 
@@ -182,62 +223,43 @@ void Editor::updateCenterAlign() {
     else if(rb_tl->isChecked()) handleAlign = Shape::TopLeft;
     else if(rb_tr->isChecked()) handleAlign = Shape::TopRight;
 
-    for(auto text: sh) {
-        text->iData.handleAlign = handleAlign;
-        text->redraw();
+    for(auto* shape: shapes | filter) {
+        shape->iData.handleAlign = handleAlign;
+        shape->redraw();
     }
 }
 
 void Editor::updateSide() {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    if(resetFl) return;
 
-    for(auto text: sh) {
-        text->iData.side = static_cast<Side>(cbxSide->currentIndex());
-        text->redraw();
+    for(auto* shape: shapes | filter) {
+        shape->iData.side = static_cast<Side>(cbxSide->currentIndex());
+        shape->redraw();
     }
 }
 
-Editor::Editor(Plugin* plugin)
+Editor::Editor(Shapes::Plugin* plugin)
     : plugin{plugin} {
     setWindowTitle(plugin->name());
 
     setupUi();
 }
 
-void Editor::addShape(Shape* shape) {
-    shapes.emplace_back(shape);
-    shape->editor = this;
+void Editor::add(Shapes::AbstractShape* shape) {
+    shapes.emplace_back(static_cast<Shape*>(shape));
     reset();
 }
 
+void Editor::remove(Shapes::AbstractShape* shape) {
+    std::erase(shapes, static_cast<Shape*>(shape));
+    // view->reset();
+}
+
 void Editor::reset() {
-    if(!isVisible()) return;
+    if(!isVisible() || shapes.empty()) return;
+    resetFl = true;
 
-    // clang-format off
-    disconnect(plainTextEdit, &QPlainTextEdit::textChanged, this, &Editor::updateText);
-    disconnect(dsbxAngle, &QDoubleSpinBox::valueChanged,    this, &Editor::updateAngle);
-    disconnect(dsbxHeight, &QDoubleSpinBox::valueChanged,   this, &Editor::updateHeight);
-    disconnect(dsbxXY, &QDoubleSpinBox::valueChanged,       this, &Editor::updateXY);
-    disconnect(cbxFont, &QFontComboBox::currentFontChanged, this, &Editor::updateFont);
-    disconnect(cbxSide, &QComboBox::currentIndexChanged,    this, &Editor::updateSide);
-
-    disconnect(rb_bc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_bl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_br, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_cc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_lc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_rc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_tc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_tl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    disconnect(rb_tr, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-
-    disconnect(chbxBold, &QCheckBox::toggled,               this, &Editor::updateFont);
-    disconnect(chbxItalic, &QCheckBox::toggled,             this, &Editor::updateFont);
-    // clang-format on
-
-    for(auto text: shapes) text->save();
-
-    //    plainTextEdit->setStyleSheet("QPlainTextEdit { font-size: 32pt }");
+    for(auto* shape: shapes) shape->save();
 
     cbxFont->setFontFilters(
         QFontComboBox::ScalableFonts
@@ -245,23 +267,30 @@ void Editor::reset() {
         | QFontComboBox::MonospacedFonts
         | QFontComboBox::ProportionalFonts);
 
+    auto filtered = shapes | filter;
+    auto& first = filtered.empty()
+        ? shapes.front()->iData
+        : filtered.front()->iData;
+
+    if(qFuzzyIsNull(first.height)) first.height = 10.0;
+    if(qFuzzyIsNull(first.xy)) first.xy = 100.0;
+
     {
-        QFont font;
-        font.fromString(shapes.front()->iData.font);
+        QFont font = first.font.family();
         cbxFont->setCurrentFont(font);
         plainTextEdit->setFont(font);
         chbxBold->setChecked(font.bold());
         chbxItalic->setChecked(font.italic());
     }
 
-    cbxSide->setCurrentIndex(static_cast<int>(shapes.front()->iData.side));
-    plainTextEdit->setPlainText(shapes.front()->iData.text);
-    dsbxAngle->setValue(shapes.front()->iData.angle);
-    dsbxHeight->setValue(shapes.front()->iData.height);
-    dsbxXY->setValue(shapes.front()->iData.xy);
+    cbxSide->setCurrentIndex(static_cast<int>(first.side));
+    plainTextEdit->setPlainText(first.text);
+    dsbxAngle->setValue(first.angle);
+    dsbxHeight->setValue(first.height);
+    dsbxXY->setValue(first.xy);
 
-    // clang-format off
-    switch(shapes.front()->iData.handleAlign) {
+    switch(first.handleAlign) {
+        // clang-format off
     case Shape::BotCenter:   rb_bc->setChecked(true); break;
     case Shape::BotLeft:     rb_bl->setChecked(true); break;
     case Shape::BotRight:    rb_br->setChecked(true); break;
@@ -271,35 +300,19 @@ void Editor::reset() {
     case Shape::TopCenter:   rb_tc->setChecked(true); break;
     case Shape::TopLeft:     rb_tl->setChecked(true); break;
     case Shape::TopRight:    rb_tr->setChecked(true); break;
+        // clang-format on
     }
-
-    // clang-format off
-    connect(plainTextEdit, &QPlainTextEdit::textChanged, this, &Editor::updateText);
-    connect(dsbxAngle, &QDoubleSpinBox::valueChanged,    this, &Editor::updateAngle);
-    connect(dsbxHeight, &QDoubleSpinBox::valueChanged,   this, &Editor::updateHeight);
-    connect(dsbxXY, &QDoubleSpinBox::valueChanged,       this, &Editor::updateXY);
-    connect(cbxFont, &QFontComboBox::currentFontChanged, this, &Editor::updateFont);
-    connect(cbxSide, &QComboBox::currentIndexChanged,    this, &Editor::updateSide);
-
-    connect(rb_bc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_bl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_br, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_cc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_lc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_rc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_tc, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_tl, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-    connect(rb_tr, &QRadioButton::toggled,               this, &Editor::updateCenterAlign);
-
-    connect(chbxBold, &QCheckBox::toggled,               this, &Editor::updateFont);
-    connect(chbxItalic, &QCheckBox::toggled,             this, &Editor::updateFont);
-    // clang-format on
+    resetFl = false;
 }
 
 void Editor::hideEvent(QHideEvent* event) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    for(auto text: sh) text->restore();
+    for(auto* shape: shapes | filter) shape->restore();
     QWidget::hideEvent(event);
+}
+
+void Editor::showEvent(QShowEvent* event) {
+    QWidget::showEvent(event);
+    reset();
 }
 
 } // namespace ShTxt

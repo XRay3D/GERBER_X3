@@ -20,7 +20,8 @@ using Shapes::Handle;
 
 namespace ShTxt {
 
-Shape::Shape(QPointF pt1) {
+Shape::Shape(Shapes::Plugin* plugin, QPointF pt1)
+    : AbstractShape{plugin} {
     loadIData();
     paths_.resize(1);
     if(!std::isnan(pt1.x())) {
@@ -32,30 +33,20 @@ Shape::Shape(QPointF pt1) {
     App::grView().addItem(this);
 }
 
-Shape::~Shape() {
-    // scene()->removeItem(this);
-    std::erase(editor->shapes, this);
-    editor->reset();
-}
-
 void Shape::redraw() {
     QPainterPath painterPath;
 
-    QFont font;
-    font.fromString(iData.font);
-    font.setPixelSize(1000);
+    iData.font.setPixelSize(1000);
 
-    painterPath.addText(QPointF(), font, iData.text);
+    painterPath.addText({}, iData.font, iData.text);
     auto bRect = painterPath.boundingRect();
 
-    QFontMetrics fm(font);
+    QFontMetrics fm{iData.font};
     const double capHeight = fm.capHeight();
     const double scale = iData.height / capHeight;
     // const double xyScale = 100.0 / iData.xy;
 
-    QPointF handlePt;
-
-    handlePt -= [width = bRect.width(), capHeight](auto handleAlign) -> QPointF {
+    QPointF handlePt = [width = bRect.width(), capHeight](auto handleAlign) -> QPointF {
         // clang-format off
         switch(handleAlign) {
         case BotCenter:   return {width / 2, 0            };
@@ -70,37 +61,36 @@ void Shape::redraw() {
         default:          return {                        };
         }
         // clang-format on
-    }(iData.handleAlign);
+    }(iData.handleAlign)
+        * -1;
 
     QTransform transform;
     transform.translate(-bRect.left() * scale, 0);
     transform.translate(handlePt.x() * scale, handlePt.y() * scale);
     if(iData.side == Bottom) {
         transform.translate((bRect.right() + bRect.left()) * scale, 0);
-        //        matrix.scale(
-        //            -scale * iData.xy > 0.0 ? 1 * iData.xy : 1,
-        //            -scale * iData.xy < 0.0 ? 1 / iData.xy : 1);
-        transform.scale(-scale * (100 / iData.xy), -scale);
+        transform.scale(-scale * (iData.xy / 100.), -scale);
     } else {
-        // matrix.scale(+scale * xyScale, -scale);
-        transform.scale(+scale * (100 / iData.xy), -scale);
+        transform.scale(+scale * (iData.xy / 100.), -scale);
     }
+
     {
-        QPainterPath tmpPainterPath;
-        for(auto& polygon: painterPath.toSubpathPolygons()) // text to polygons
-            tmpPainterPath.addPolygon(polygon);
-        painterPath = std::move(tmpPainterPath);
-        tmpPainterPath = QPainterPath();
-        for(auto& polygon: painterPath.toSubpathPolygons(transform)) // transform polygons with matrix
-            tmpPainterPath.addPolygon(polygon);
-        painterPath = std::move(tmpPainterPath);
+        // text to polygons
+        shape_.clear();
+        for(auto& polygon: painterPath.toSubpathPolygons())
+            shape_.addPolygon(polygon);
+        painterPath.clear();
+        for(auto& polygon: shape_.toSubpathPolygons(transform)) // transform polygons with matrix
+            painterPath.addPolygon(polygon);
     }
+
+    // reverse
     transform.reset();
     transform.translate(handles.front().x(), handles.front().y());
     transform.rotate(iData.angle - 360);
 
     paths_.clear();
-    shape_ = {};
+    shape_.clear();
 
     Clipper clipper;
     clipper.AddClip(~painterPath.toSubpathPolygons(transform));
@@ -130,7 +120,7 @@ void Shape::setSide(const Side& side) {
 }
 
 void Shape::setPt(const QPointF& point) {
-    handles.front().setPos(point);
+    handles.front() = point;
     redraw();
 }
 
@@ -174,10 +164,7 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     case FileTree::Column::NameColorVisible:
         switch(role) {
         case Qt::DisplayRole:
-            return QString("%1 (%2, %3)")
-                .arg(name())
-                //                .arg(giId_)
-                .arg(text());
+            return u"%1 (ID: %2)"_s.arg(text()).arg(id());
         case Qt::EditRole:
             return text();
         default:
@@ -205,23 +192,28 @@ void Shape::write(QDataStream& stream) const {
 
 void Shape::readAndInit(QDataStream& stream) {
     Block{stream}.read(iData);
-    // AbstractShape::readAndInit(stream);
-    redraw();
+    AbstractShape::redraw();
 }
 
 void Shape::saveIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
     boost::pfr::for_each_field(iData, [&settings](auto& field, auto index) { // TODO for_each_field_name
-        settings.setValue(boost::pfr::get_name<index, InternalData>(), field);
+                                                                             // if constexpr(requires { field.family(); })
+                                                                             //     settings.setValue(boost::pfr::get_name<index, ShapeData>(), field.toString());
+                                                                             // else
+        settings.setValue(boost::pfr::get_name<index, ShapeData>(), field);
     });
 }
 
-Shape::InternalData Shape::loadIData() {
+Shape::ShapeData Shape::loadIData() {
     QSettings settings;
     settings.beginGroup("ShapeText");
     boost::pfr::for_each_field(iData, [&settings]<typename Ty>(Ty& field, auto index) { // TODO for_each_field_name
-        field = settings.value(boost::pfr::get_name<index, InternalData>()).template value<Ty>();
+                                                                                        // if constexpr(requires { field.family(); })
+                                                                                        //     field.fromString(settings.value(boost::pfr::get_name<index, ShapeData>()).toString());
+                                                                                        // else
+        field = settings.value(boost::pfr::get_name<index, ShapeData>()).template value<Ty>();
     });
     return iData;
 }
@@ -234,13 +226,6 @@ void Shape::restore() {
 }
 
 void Shape::ok() { saveIData(); }
-
-QPainterPath Shape::shape() const { return shape_; }
-
-QVariant Shape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    if(change == GraphicsItemChange::ItemSelectedChange) editor->reset();
-    return AbstractShape::itemChange(change, value);
-}
 
 QString Shape::name() const { return QObject::tr("Text"); }
 

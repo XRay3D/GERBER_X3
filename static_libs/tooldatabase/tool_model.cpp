@@ -87,16 +87,13 @@ bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int cou
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const { return 3; }
 
 int ToolModel::rowCount(const QModelIndex& parent) const {
-    ToolItem* parentItem;
-    if(parent.column() > 0)
-        return 0;
+    if(parent.column() > 0) return 0;
 
-    if(!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<ToolItem*>(parent.internalPointer());
+    auto parentItem = !parent.isValid()
+        ? rootItem
+        : static_cast<ToolItem*>(parent.internalPointer());
 
-    return parentItem->childCount();
+    return static_cast<int>(parentItem->childCount());
 }
 
 QModelIndex ToolModel::index(int row, int column, const QModelIndex& parent) const {

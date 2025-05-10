@@ -20,6 +20,7 @@ void Plugin::updPoint(const QPointF& point) {
 
 void Plugin::finalizeShape() {
     if(item) {
+        item->addPt({std::nan("fin"), std::nan("fin")});
         item->setSelected(true);
         item = nullptr;
     }

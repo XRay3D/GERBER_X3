@@ -96,7 +96,7 @@ public:
     int addFile(GCode::File* const file);
     bool contains(AbstractFile* file);
     mvector<AbstractFile*> files(uint32_t type);
-    mvector<AbstractFile*> files(const mvector<uint32_t> &types);
+    mvector<AbstractFile*> files(const mvector<uint32_t>& types);
     void deleteFile(int32_t id);
     //    QString fileNames();
     int contains(const QString& name);

@@ -495,12 +495,11 @@ void GraphicsView::dropEvent(QDropEvent* event) {
     for(QUrl& var: mimeData->urls())
         emit fileDroped(var.path().remove(0, 1));
 
-    if(mimeData->hasFormat(Ruler::MimeType) && event->source() != this) {
+    if(mimeData->hasFormat(Ruler::MimeType) && event->source() != this)
         scene()->addItem(new Gi::Guide{
             mapToScene(event->position().toPoint()),
             Qt::Orientation(*mimeData->data(Ruler::MimeType).data()),
         });
-    }
 
     event->accept();
 }
@@ -750,8 +749,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k, point.y(),     point.x() + k, point.y()    },
-            {point.x(),     point.y() - k, point.x(),     point.y() + k}
+            {point.x() - k,     point.y(), point.x() + k,     point.y()},
+            {    point.x(), point.y() - k,     point.x(), point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -763,8 +762,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {0,           rect.top(), 0,            rect.bottom()},
-            {rect.left(), 0,          rect.right(), 0            }
+            {          0, rect.top(),            0, rect.bottom()},
+            {rect.left(),          0, rect.right(),             0}
         };
         painter->drawLines(lines, 2);
     }

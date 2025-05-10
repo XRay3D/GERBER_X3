@@ -38,13 +38,13 @@ ToolItem::~ToolItem() {
     qDeleteAll(childItems);
 }
 
-int ToolItem::row() const {
+qsizetype ToolItem::row() const {
     if(parentItem != nullptr)
         return parentItem->childItems.indexOf(const_cast<ToolItem*>(this));
     return 0;
 }
 
-int ToolItem::childCount() const { return childItems.size(); }
+qsizetype ToolItem::childCount() const { return childItems.size(); }
 
 ToolItem* ToolItem::child(int row) const { return childItems.at(row); }
 

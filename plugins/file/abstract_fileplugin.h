@@ -60,7 +60,7 @@ public:
         });
     };
 
-    virtual void updateFileModel([[maybe_unused]] AbstractFile* file) {};
+    virtual void updateFileModel([[maybe_unused]] AbstractFile* file) { };
 
 signals:
     void fileError(const QString& fileName, const QString& error);

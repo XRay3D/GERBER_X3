@@ -14,7 +14,6 @@
 #include "gi_error.h"
 #include "myclipper.h"
 
-
 #include <QObject>
 
 #include <cancelation.h>

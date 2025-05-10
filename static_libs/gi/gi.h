@@ -70,42 +70,32 @@ class Item : public /*QGraphicsObject*/ QGraphicsItem {
     //    Q_OBJECT
     Q_GADGET
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
+    Q_PROPERTY(bool editable READ isEditable WRITE setEditable FINAL)
+    Q_PROPERTY(bool visible READ isVisible WRITE setVisible FINAL)
+    QColor bodyColor();
+    void setBodyColor(const QColor& c);
 
-    inline QColor bodyColor() { return brushColor_; }
-    inline void setBodyColor(const QColor& c) { brushColor_ = c, colorChanged(); }
-
+public:
     // signals:
-public:
-    void colorChanged() { update(); };
+    void colorChanged();
 
-public:
     explicit Item(AbstractFile* file = nullptr);
     ~Item() override = default;
 
-    QColor color() const { return color_; }
+    bool isEditable() const;
+    void setEditable(bool fl);
+
+    QColor color() const;
     void setColor(const QColor& brush);
     void setColorPtr(QColor* brushColor);
 
-    QPen pen() const { return pen_; }
+    QPen pen() const;
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int /*alternate*/ = {}) const { return ~shape_.toSubpathPolygons(transform()); }
-    virtual void setPaths(Paths paths, int /*alternate*/ = {}) {
-        auto t{transform()};
-        auto a{qRadiansToDegrees(asin(t.m12()))};
-        t = t.rotateRadians(-t.m12());
-        auto x{t.dx()};
-        auto y{t.dy()};
-        shape_ = {};
-        t = {};
-        t.translate(-x, -y);
-        t.rotate(-a);
-        for(auto&& path: ~paths)
-            shape_.addPolygon(t.map(path));
-        redraw();
-    }
-    virtual void redraw() { }
+    virtual Paths paths(int /*alternate*/ = {}) const;
+    virtual void setPaths(Paths paths, int /*alternate*/ = {});
+    virtual void redraw();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
     QPainterPath shape() const override;

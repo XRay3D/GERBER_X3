@@ -16,7 +16,6 @@
 #include <execution>
 #define emit
 
-
 namespace PocketRaster {
 
 void Creator::create() {

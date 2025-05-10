@@ -46,9 +46,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
-        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
+        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
+        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
     };
 }
 

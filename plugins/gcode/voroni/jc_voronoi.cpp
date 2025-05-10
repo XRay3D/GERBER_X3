@@ -1174,7 +1174,6 @@
 #include "memory.h"
 #include "myclipper.h" // NOTE ???
 
-
 #include <cancelation.h>
 
 // INTERNAL FUNCTIONS

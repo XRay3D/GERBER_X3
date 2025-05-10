@@ -21,12 +21,11 @@ class Shape final : public Shapes::AbstractShape {
     friend class Model;
 
 public:
-    explicit Shape(QPointF center = {}, QPointF pt = {});
-    ~Shape() override;
+    explicit Shape(Shapes::Plugin* plugin, QPointF center = {}, QPointF pt = {});
+    ~Shape() override = default;
 
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShCircle; }
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     // Gi::Item interface
     void redraw() override;
@@ -46,7 +45,6 @@ public:
         Radius = PtCount, // model
         Diameter,         // model
     };
-    Model* model{};
 
 protected:
     void readAndInit(QDataStream& stream) override; // FIXME init()
@@ -60,20 +58,21 @@ class Plugin final : public Shapes::Plugin {
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "description.json")
     Q_INTERFACES(Shapes::Plugin)
 
-    mutable Editor editor_{this};
+    Editor editor_{this};
 
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShCircle; }
     QIcon icon() const override { return QIcon::fromTheme("draw-ellipse"); }
-    Shapes::AbstractShape* createShape(const QPointF& point = {}) const override {
+    Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
-            point, point + QPointF{5, 0}
+            this,
+            point, point + QPointF{1, 0}
         };
-        editor_.addShape(shape);
+        editor_.add(shape);
         return shape;
     }
-    QWidget* editor() override { return &editor_; }
+    Editor* editor() override { return &editor_; }
 };
 
 } // namespace ShCirc

@@ -40,7 +40,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         case Shape::Point2:
         case Shape::Center:
             for(auto* shape: sh) {
-                auto tmp = (shape->handles[index.row()].pos().*getter[index.column()])();
+                auto tmp = (shape->handles[index.row()].*getter[index.column()])();
                 set.emplace(tmp);
             }
             return set;
@@ -183,7 +183,7 @@ public:
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
-Editor::Editor(Plugin* plugin)
+Editor::Editor(Shapes::Plugin* plugin)
     : /* QWidget {parent}*/ view{new QTableView{this}}
     , model{new Model{view}}
     , plugin{plugin} {
@@ -248,9 +248,13 @@ Editor::Editor(Plugin* plugin)
     //      });
 }
 
-void Editor::addShape(Shape* shape) {
-    model->shapes.emplace_back(shape);
-    shape->model = model;
+void Editor::add(Shapes::AbstractShape* shape) {
+    model->shapes.emplace_back(static_cast<Shape*>(shape));
+    view->reset();
+}
+
+void Editor::remove(Shapes::AbstractShape* shape) {
+    std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
 }
 
