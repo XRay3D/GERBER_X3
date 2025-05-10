@@ -31,12 +31,13 @@ Plugin::Plugin(QObject* parent)
     , Parser(this) {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if(type_ != type())
-        return nullptr;
+AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
+    if(type_ != type()) return nullptr;
     QFile file_{fileName};
-    if(!file_.open(QFile::ReadOnly | QFile::Text))
+    if(!file_.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning() << file_.errorString();
         return nullptr;
+    }
 
     QTextStream in{&file_};
     in.setAutoDetectUnicode(true);

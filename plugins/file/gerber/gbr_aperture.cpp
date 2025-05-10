@@ -108,7 +108,7 @@ void AbstractAperture::transform(Path& polygon, const State& state) {
             pt = ~m.map(~pt);
             SetZf(pt, ~m.map(~GetZ(pt)));
         }
-        if(m.m11() < 0 ^ m.m22() < 0) ReversePath(polygon);
+        if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(polygon);
     }
 }
 
@@ -470,7 +470,7 @@ void ApMacro::draw() {
 
     if(items.size() > 1) {
         Clipper clipper;
-        for(int i = 0; i < items.size();) {
+        for(size_t i{}; i < items.size();) {
             clipper.Clear();
             clipper.AddSubject(paths_);
             bool exp = items[i].first;
@@ -594,15 +594,15 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
         Y,
     };
 
-    const int num = static_cast<int>(mod[NumberOfVertices]);
+    const size_t num = mod[NumberOfVertices];
 
     Path polygon;
-    for(int j = 0; j < int(num); ++j)
+    for(size_t j{}; j < num; ++j)
         polygon.emplace_back(Point(
             static_cast</*Point::Type*/ int32_t>(mod[X + j * 2] * uScale),
             static_cast</*Point::Type*/ int32_t>(mod[Y + j * 2] * uScale)));
     std::ranges::for_each(polygon, &SetZs);
-    if(mod.size() > (num * 2 + 3) && mod.back() > 0)
+    if(mod.size() > (num * 2u + 3u) && mod.back() > 0)
         RotatePath(polygon, mod.back());
 
     return polygon;

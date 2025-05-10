@@ -24,18 +24,18 @@ namespace Gerber::Comp {
 const Component dummy;
 
 sNode::sNode(const QString& name)
-    : component{dummy}
-    , name(name)
-    , item(nullptr) {
+    : item(nullptr)
+    , component{dummy}
+    , name(name) {
 }
 
 sNode::sNode(const Component& component)
-    : component{component}
-    , name("")
-    , item(Dialog::scene()->addRect(
+    : item(Dialog::scene()->addRect(
           component.componentitem()->boundingRect(),
           Qt::NoPen,
           component.componentitem()->file()->color()))
+    , component{component}
+    , name("")
 
 {
 }

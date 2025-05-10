@@ -35,9 +35,9 @@ File::File()
     : AbstractFile() {
     itemsType_ = int(ItemsType::Normal);
     layerTypes_ = {
-        {int(ItemsType::Normal), DxfObj::tr("Normal"),    DxfObj::tr("Displays paths with pen width and fill.")},
-        { int(ItemsType::Paths),  DxfObj::tr("Paths"),          DxfObj::tr("Displays paths without pen width.")},
-        {  int(ItemsType::Both),   DxfObj::tr("Both"), DxfObj::tr("Displays paths without and with pen width.")},
+        {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")   },
+        {int(ItemsType::Paths),  DxfObj::tr("Paths"),  DxfObj::tr("Displays paths without pen width.")         },
+        {int(ItemsType::Both),   DxfObj::tr("Both"),   DxfObj::tr("Displays paths without and with pen width.")},
     };
 }
 
@@ -221,7 +221,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     mvector<GraphicObject> retData;
     auto t = transform_.toQTransform(); // cached  QTransform
     for(auto&& criterion: criterias) {
-        for(int ctr{}; auto&& [name, layer]: layers())
+        for(auto&& [name, layer]: layers())
             for(const auto& go: layer->graphicObjects()) {
                 auto transformedGo = go * t; // return copy
                 if(criterion.test(transformedGo)) {

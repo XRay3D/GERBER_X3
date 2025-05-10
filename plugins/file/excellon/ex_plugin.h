@@ -37,7 +37,7 @@ public:
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
 
     // public slots:
-    AbstractFile* parseFile(const QString& fileName, int type) override;
+    AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
 };
 
 } // namespace Excellon

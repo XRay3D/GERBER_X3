@@ -71,7 +71,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             if(container && childItems.empty())
                 childItems = parent_->childs.mid(1);
             updateGuard = true;
-            for(auto node: qAsConst(childItems))
+            for(auto node: std::as_const(childItems))
                 node->setData(index, value, role);
             if(childItems.size())
                 emit model->dataChanged(childItems.front()->index(), childItems.back()->index(), {role});
@@ -93,17 +93,17 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
                 return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
-                for(auto node: qAsConst(childItems))
+                for(auto node: std::as_const(childItems))
                     node->setData(index, value, role);
                 return true;
             case Model::apThickness:
                 par.tickness = value.toDouble();
-                for(auto node: qAsConst(childItems))
+                for(auto node: std::as_const(childItems))
                     node->setData(index, value, role);
                 return true;
             case Model::GapCount:
                 par.count = value.toInt();
-                for(auto node: qAsConst(childItems))
+                for(auto node: std::as_const(childItems))
                     node->setData(index, value, role);
                 return true;
             }
@@ -147,6 +147,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Model::GapCount:
             return par.count;
         }
+        return {};
     case Qt::DecorationRole:
         if(!index.column()) {
             if(icon.isNull()) {
@@ -167,8 +168,8 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             for(const auto& node: childs)
                 val |= node->checked_ ? 2 : 1;
             return chState[val];
-        } else
-            return checked_ ? Qt::Checked : Qt::Unchecked;
+        }
+        return checked_ ? Qt::Checked : Qt::Unchecked;
     case Qt::TextAlignmentRole:
         if(index.column())
             return Qt::AlignCenter;
@@ -203,7 +204,7 @@ Point Node::pos() const { return pos_; }
 
 AbstractThermPrGi* Node::item() const { return item_; }
 
-bool Node::loadFile(QDataStream& stream) const { return checked_ && item_; }
+bool Node::loadFile(QDataStream& /*stream*/) const { return checked_ && item_; }
 
 void Node::disable() {
     checked_ = false;

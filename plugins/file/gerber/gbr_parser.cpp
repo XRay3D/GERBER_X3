@@ -106,13 +106,16 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
                 if(parseImagePolarity(gerberLine)) continue;
                 if(parseLoadName(gerberLine)) continue;
                 if(dummy(gerberLine)) continue;
-            case 'D':
+                [[fallthrough]];
+            case 'D': [[fallthrough]];
             case 'G':
                 if(parseDCode(gerberLine)) continue;
                 if(parseGCode(gerberLine)) continue;
+                [[fallthrough]];
             case 'M':
                 if(parseEndOfFile(gerberLine)) continue;
-            case 'X':
+                [[fallthrough]];
+            case 'X': [[fallthrough]];
             case 'Y':
             default:
                 if(parseLineInterpolation(gerberLine)) continue;
@@ -1006,8 +1009,9 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             }
         }
         if(valid) break;
+        [[fallthrough]];
     default:
-        if(path_.size() && path_.back() != arcStartPos || path_.empty())
+        if((path_.size() && (path_.back() != arcStartPos)) || path_.empty())
             path_.emplace_back(arcStartPos);
         SetZs(path_.back());
         state_.setCurPos({x, y});

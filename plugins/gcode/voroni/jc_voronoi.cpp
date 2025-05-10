@@ -2087,8 +2087,10 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     tmp.charp = mem;
     internal->eventmem = tmp.voidpp;
 
+#ifdef _MSVC_LANG
 #pragma warning(push)
 #pragma warning(disable : 4267) // possible loss of data
+#endif
     jcv_pq_create(internal->eventqueue, max_nuevents_, (void**)internal->eventmem);
 
     jcv_site* sites = internal->sites;
@@ -2142,7 +2144,9 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     internal->numsites_sqrt = (int)(JCV_SQRT((jcv_real)nupoints_));
     internal->currentsite = 0;
 
+#ifdef _MSVC_LANG
 #pragma warning(pop)
+#endif
 
     internal->bottomsite = jcv_nextsite(internal);
 

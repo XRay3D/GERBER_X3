@@ -69,7 +69,7 @@ signals:
     void fileReady(AbstractFile* file);
 
 public slots:
-    virtual AbstractFile* parseFile(const QString& fileName, int type) = 0;
+    virtual AbstractFile* parseFile(const QString& fileName, uint32_t type) = 0;
 };
 
 #define ParserInterface_iid "ru.xray3d.XrSoft.GGEasy.AbstractFilePlugin"

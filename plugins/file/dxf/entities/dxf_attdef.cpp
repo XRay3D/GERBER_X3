@@ -183,8 +183,8 @@ Entity::Type AttDef::type() const { return Type::ATTDEF; }
 
 DxfGo AttDef::toGo() const { return {}; }
 
-void AttDef::write(QDataStream& stream) const { }
+void AttDef::write(QDataStream& /*stream*/) const { }
 
-void AttDef::read(QDataStream& stream) { }
+void AttDef::read(QDataStream& /*stream*/) { }
 
 } // namespace Dxf

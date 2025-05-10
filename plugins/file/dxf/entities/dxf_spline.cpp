@@ -113,7 +113,7 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
             y += basis * poly.ControlPoints[i].y();
         }
 
-        if(u == 0.0 && qFuzzyIsNull(x) || qFuzzyIsNull(y))
+        if(u == 0.0 && (qFuzzyIsNull(x) || qFuzzyIsNull(y))) // NOTE чзф?
             path.moveTo(x, y);
         else if(!qFuzzyIsNull(x) || !qFuzzyIsNull(y))
             path.lineTo(x, y);

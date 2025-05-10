@@ -107,9 +107,9 @@ void FormatDialog::resetFormat() {
     App::grView().zoomFit();
 }
 
-void FormatDialog::closeEvent(QCloseEvent* event) { deleteLater(); }
+void FormatDialog::closeEvent(QCloseEvent* /*event*/) { deleteLater(); }
 
-void FormatDialog::hideEvent(QHideEvent* event) { deleteLater(); }
+void FormatDialog::hideEvent(QHideEvent* /*event*/) { deleteLater(); }
 
 void FormatDialog::on_pbSetAsDefault_clicked() {
     QSettings settings;

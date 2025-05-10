@@ -112,7 +112,7 @@ Entity::Type MText::type() const { return Type::MTEXT; }
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 DxfGo MText::toGo() const {
-    double ascent = {};
+    // double ascent = {};
     double descent = {};
     double height = {};
     double scaleX = {};
@@ -134,7 +134,7 @@ DxfGo MText::toGo() const {
         }
         QFontMetricsF fm(font);
         // offset.ry() -= fmf.descent();
-        ascent = fm.ascent();
+        // ascent = fm.ascent();
         descent = fm.descent();
         height = fm.height();
         size = fm.size(0, text);
@@ -154,7 +154,7 @@ DxfGo MText::toGo() const {
         }
         QFontMetricsF fm(font);
         // offset.ry() -= fmf.descent();
-        ascent = fm.ascent();
+        // ascent = fm.ascent();
         descent = fm.descent();
         height = fm.height();
         size = fm.size(0, text);

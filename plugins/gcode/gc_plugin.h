@@ -35,7 +35,7 @@ public:
     bool thisIsIt(const QString& /*fileName*/) override { return false; }
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;
 
-    AbstractFile* parseFile(const QString& /*fileName*/, int /*type*/) override { return nullptr; }
+    AbstractFile* parseFile(const QString& /*fileName*/, uint32_t /*type*/) override { return nullptr; }
 public slots:
 
 signals:

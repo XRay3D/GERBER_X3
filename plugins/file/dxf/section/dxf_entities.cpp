@@ -47,7 +47,7 @@ void SectionENTITIES::parse() {
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
     } while(hasNext());
-    for(auto& e: qAsConst(file->entities_))
+    for(auto& e:  std::as_const(file->entities_))
         e->draw();
 }
 

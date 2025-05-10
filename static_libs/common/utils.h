@@ -98,7 +98,7 @@ struct CtreCapTo {
         // qDebug("QString  D%d S%d", cap.data(), cap.size());
         return QString{
             reinterpret_cast<const QChar*>(cap.data()),
-            static_cast<size_t>(cap.size()),
+            static_cast<qsizetype>(cap.size()),
         };
     }
 
