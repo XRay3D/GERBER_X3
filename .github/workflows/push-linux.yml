@@ -11,7 +11,7 @@ on:
     - 'master'
 
 env:
-  QT_VERSION: "6.8.2"
+  QT_VERSION: "6.8.0"
   QT_ARCH: "gcc_64"
   QT_SUBDIR: "gcc_64"
   BOOST_VERSION: "1.86.0"
