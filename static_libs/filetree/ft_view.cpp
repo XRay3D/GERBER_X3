@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -39,7 +37,7 @@
 namespace FileTree {
 
 View::View(QWidget* parent)
-    : QTreeView(parent) {
+    : QTreeView{parent} {
     setAlternatingRowColors(true);
     setAnimated(true);
     setUniformRowHeights(true);
@@ -120,7 +118,7 @@ void View::closeFiles() {
     model_->removeRows(0, childCount_, menuIndex_);
 }
 
-void View::closeAllFiles(uint32_t type) {
+void View::closeAllFiles(uint32_t /*type*/) {
     // WARNING   model_->createIndex(0, 0, &model_->fileFolders[type]);
     model_->removeRows(0, childCount_, menuIndex_);
 }
@@ -148,7 +146,7 @@ void View::setModel(QAbstractItemModel* model) {
     setItemDelegateForColumn(1, new SideDelegate{this});
     setItemDelegateForColumn(2, new TypeDelegate{this});
 
-    setIconSize(QSize(24, 24));
+    setIconSize(QSize{24, 24});
 }
 
 void View::showExcellonDialog() { }

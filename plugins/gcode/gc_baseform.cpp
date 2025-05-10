@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,11 +25,14 @@
 #include <QTableView>
 #include <QtWidgets>
 
-#include <condition_variable>
+#undef emit
 #include <execution>
-#include <mutex>
-#include <ranges>
-#include <sstream>
+#define emit
+
+// #include <condition_variable>
+// #include <mutex>
+// #include <ranges>
+// #include <sstream>
 
 // static const int id1 = qRegisterMetaType<GCode::Params>("GCode::Params");
 // static const int id2 = qRegisterMetaType<GCode::Params&>("GCode::Params&");
@@ -71,7 +72,7 @@ class ErrorModel : public QAbstractTableModel {
 
 public:
     ErrorModel(mvector<Gi::Error*>&& items, QObject* parent = nullptr)
-        : QAbstractTableModel(parent)
+        : QAbstractTableModel{parent}
         , items(std::move(items)) {
     }
     virtual ~ErrorModel() { qDeleteAll(items); }
@@ -128,7 +129,7 @@ class TableView : public QTableView {
     //    Q_OBJECT
 public:
     TableView(QWidget* parent)
-        : QTableView(parent) {
+        : QTableView{parent} {
         horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
         verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
         setSelectionBehavior(QAbstractItemView::SelectRows);
@@ -157,7 +158,7 @@ protected:
 };
 
 BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , plugin{plugin}
     , progressDialog(new QProgressDialog{this}) {
 
@@ -215,7 +216,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
         grid->addWidget(errTable = new TableView{errWidget});
         grid->addWidget(errBtnBox = new QDialogButtonBox{errWidget});
 
-        errBtnBox->setObjectName(QString::fromUtf8("errBtnBox"));
+        errBtnBox->setObjectName(u"errBtnBox"_s);
         errBtnBox->setOrientation(Qt::Horizontal);
         errBtnBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
 
@@ -241,27 +242,31 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
 
 BaseForm::~BaseForm() {
     if(errWidget->isVisible()) errBreak();
-    if(runer.isRunning()) runer.terminate();
-    // /*thread*/ runer.quit();
-    // /*thread*/ runer.wait();
+    ProgressCancel::cancel();
+    if(runer.isRunning())
+        // runer.terminate();
+        //  runer.quit();
+        runer.wait();
     delete creator_;
     qDebug(__FUNCTION__);
 }
 
 void BaseForm::setCreator(Creator* newCreator) {
     qDebug() << __FUNCTION__ << creator_ << newCreator;
-    if(/*thread*/ runer.isRunning()) {
-        runer.terminate();
-        // /*thread*/ runer.quit();
-        // /*thread*/ runer.wait();
+    ProgressCancel::cancel();
+    if(runer.isRunning()) {
+        // runer.terminate();
+        //  runer.quit();
+        runer.wait();
     }
+    ProgressCancel::reset();
     if(creator_ != newCreator && newCreator) {
         qDebug(__FUNCTION__);
         delete creator_;
         creator_ = newCreator;
-        creator_->moveToThread(&/*thread*/ runer);
+        creator_->moveToThread(&runer);
         // clang-format off
-        // connect(&/*thread*/runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
+        // connect(&runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
         connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress                      );
         connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler                      );
         connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler                       );
@@ -269,7 +274,7 @@ void BaseForm::setCreator(Creator* newCreator) {
         connect(this,     &BaseForm::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
         connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress                     );
         // clang-format on
-        // /*thread*/ runer.start(QThread::LowPriority /*HighestPriority*/);
+        //  runer.start(QThread::LowPriority /*HighestPriority*/);
     } else if(creator_ && !newCreator) {
         creator_ = nullptr;
     }
@@ -350,8 +355,8 @@ Params* BaseForm::getNewGcp() {
     }
     */
 
-    AbstractFile const* file = nullptr;
-    bool skip{true};
+    // AbstractFile const* file = nullptr;
+    // bool skip{true};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         qDebug() << gi << gi->file();
         //        switch(gi->type()) {
@@ -421,9 +426,13 @@ void BaseForm::cancel() {
     if(creator_ == nullptr)
         return;
     creator_->continueCalc(false);
-    if(runer.isRunning())
-        runer.terminate();
-    // /*thread*/ runer.start(QThread::LowPriority /*HighestPriority*/);
+    ProgressCancel::cancel();
+    if(runer.isRunning()) {
+        // runer.quit();
+        runer.wait();
+        // runer.terminate();
+    }
+    //  runer.start(QThread::LowPriority /*HighestPriority*/);
     stopProgress();
 }
 

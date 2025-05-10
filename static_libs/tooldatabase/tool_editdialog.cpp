@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,9 +11,10 @@
 #include "tool_editdialog.h"
 
 #include "ui_tooleditdialog.h"
+#include <QSettings>
 
 ToolEditDialog::ToolEditDialog(QWidget* parent)
-    : QDialog(parent)
+    : QDialog{parent}
     , ui(new Ui::ToolEditDialog) {
     ui->setupUi(this);
     ui->toolEdit->setDialog();
@@ -30,8 +29,25 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
     });
 }
 
+ToolEditDialog::~ToolEditDialog() {
+    QSettings settings;
+    settings.beginGroup("ToolEditDialog");
+    settings.setValue("geometry", saveGeometry());
+    // qWarning() << geometry();
+}
+
 Tool ToolEditDialog::tool() const { return ui->toolEdit->tool_; }
 
 void ToolEditDialog::setTool(const Tool& tool) { ui->toolEdit->setTool(tool); }
 
+void ToolEditDialog::showEvent(QShowEvent* event) {
+    QDialog::showEvent(event);
+    QSettings settings;
+    settings.beginGroup("ToolEditDialog");
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    // qWarning() << geometry();
+}
+
 #include "moc_tool_editdialog.cpp"
+
+#include <QSettings>

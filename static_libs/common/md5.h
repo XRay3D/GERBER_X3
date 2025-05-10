@@ -142,7 +142,7 @@ struct Context {
             buffer[k++] = static_cast<unsigned char>(static_cast<int16_t>(*ptr) + UCHAR_MAX + 1);
             if(k == 0x40) {
                 auto j = 0;
-                for(auto i = 0; i < LBLOCK; ++i) {
+                for(uint32_t i = 0; i < LBLOCK; ++i) {
                     input[i] = to_uint32(&buffer[j]);
                     j += 4;
                 }
@@ -159,7 +159,7 @@ struct Context {
             const auto s = S + r * 4;
             const auto k = K + r * LBLOCK;
 
-            for(auto i = 0; i < input.size(); ++i) {
+            for(size_t i = 0; i < input.size(); ++i) {
                 const auto new_b = t(F[r], a, b, c, d, input[g[i]], s[i % 4], k[i]);
                 a = d;
                 d = c;
@@ -215,7 +215,7 @@ constexpr Digest compute(const char* s) noexcept {
 }
 } // namespace md5
 
-constexpr auto operator""_hash32(const char* str, size_t size) {
+constexpr auto operator""_hash32(const char* str, size_t size [[maybe_unused]]) {
     return md5::details::to_uint32(md5::compute(str).data());
 }
 

@@ -1,8 +1,9 @@
 ﻿#include "ComponentsOnBoard.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool ComponentsOnBoard::CompInstance::CompInstance_Pin::ShouldSerialize_PadstackRef() {
+    bool
+    ComponentsOnBoard::CompInstance::CompInstance_Pin::ShouldSerialize_PadstackRef() {
     return _PadstackRef != nullptr;
 }
 

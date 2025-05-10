@@ -1,8 +1,10 @@
 ﻿#include "Settings.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool App::gcSettings().Autoroute::getTeardropsSpecified() const {
+    bool
+    App::gcSettings()
+        .Autoroute::getTeardropsSpecified() const {
     return _teardrops != Bool::off;
 }
 

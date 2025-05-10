@@ -1,0 +1,3045 @@
+
+
+diff --git a/CMakeLists.txt b/CMakeLists.txt
+index 7d79e8fb..75c168a8 100644
+--- a/CMakeLists.txt
++++ b/CMakeLists.txt
+@@ -15,14 +15,14 @@ cmake_minimum_required(VERSION 3.24)
+ 
+ project(GERBER_X3 VERSION 0.9.0)
+ 
+-set(CMAKE_CXX_STANDARD 20)
++set(CMAKE_CXX_STANDARD 23)
+ set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ set(CMAKE_INCLUDE_CURRENT_DIR ON)
+ 
+ # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
+ # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
+ 
+-set_property(GLOBAL PROPERTY CXX_STANDARD 20)
++set_property(GLOBAL PROPERTY CXX_STANDARD 23)
+ set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+ 
+ add_definitions(
+@@ -35,24 +35,11 @@ add_definitions(
+ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+ 
+ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+-  add_compile_options(
+-    # -Winvalid-pch -pthread -Wall -Wextra -Wpedantic -Werror #
+-    # -Wsign-conversion -fmodules-ts
+-  )
+-  # add_compile_options(-rdynamic)# unix
+-
+-  # link_directories(tbb/lib) Link against the dependency of Intel TBB (for
+-  # parallel C++17 algorithms) target_link_libraries(${PROJECT_NAME} tbb)
+-
+-  # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FORMAT "gcc")
+-  # set(CMAKE_EXPERIMENTAL_CXX_MODULE_MAP_FLAG "${compiler_flags_for_module_map}
+-  # -fmodule-mapper=<MODULE_MAP_FILE>") target_compile_options(example PRIVATE
+-  # -fmodules-ts) add_compile_options(-H) add_compile_options(-ftime-report)
+-  # -pthread -ltbbD
++
+ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+ 
+ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+-  # add_definitions(-D_USE_MATH_DEFINES=1)
++
+ endif()
+ 
+ # FIND BOOST
+@@ -97,6 +84,20 @@ endif()
+ 
+ # add_library(Qt INTERFACE) target_precompile_headers(Qt INTERFACE qt_pch.h)
+ 
++include_directories(
++  ggeasy
++  plugins/file
++  plugins/gcode
++  plugins/shape
++  static_libs/clipper
++  static_libs/common
++  static_libs/filetree
++  static_libs/gi
++  static_libs/graphicsview
++  static_libs/tooldatabase
++  third_party/clipper2/CPP/Clipper2Lib/include
++  third_party/ctre/single-header)
++
+ set(CLIPPER2_UTILS OFF)
+ set(CLIPPER2_EXAMPLES OFF)
+ set(CLIPPER2_TESTS OFF)
+@@ -116,20 +117,6 @@ find_package(
+ 
+ include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
+ 
+-include_directories(
+-  ggeasy
+-  plugins/file
+-  plugins/gcode
+-  plugins/shape
+-  static_libs/clipper
+-  static_libs/common
+-  static_libs/filetree
+-  static_libs/gi
+-  static_libs/graphicsview
+-  static_libs/tooldatabase
+-  third_party/clipper2/CPP/Clipper2Lib/include
+-  third_party/ctre/single-header)
+-
+ set(CMAKE_AUTOMOC ON)
+ set(CMAKE_AUTORCC ON)
+ set(CMAKE_AUTOUIC ON)
+diff --git a/PATHS.cmake b/PATHS.cmake
+index 780e79c0..fc22c9db 100644
+--- a/PATHS.cmake
++++ b/PATHS.cmake
+@@ -34,3 +34,33 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
+ # qt5_add_translation(TRANSLATION_QM ${TRANSLATION_FILES})
+ # endif(UPDATE_TRANSLATION_SOURCES) add_custom_target(translations DEPENDS
+ # ${TRANSLATION_QM})
++
++function(add_translation TARGET)
++  if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
++    set(TRANSLATIONS ${TARGET}_ru.ts ${TARGET}_en.ts)
++    # qt_add_translations(TARGETS ${TARGET} TS_FILES ${TARGET}_ru.ts TS_FILES
++    # ${TARGET}_en.ts)
++
++    qt_create_translation(QM_FILES ${TRANSLATIONS})
++
++    # qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
++    # qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
++    # qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
++    # ${PROJECT_SOURCES}) qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
++    # QM_FILES_OUTPUT_VARIABLE QM_FILES)
++  else()
++    # add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
++    qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
++  endif()
++  message(==> ${QM_FILES})
++  add_custom_target(${TARGET}_translations DEPENDS ${QM_FILES})
++  add_dependencies(${TARGET} ${TARGET}_translations)
++  set_source_files_properties(
++    ${QM_FILES} PROPERTIES OUTPUT_LOCATION ${OUTPUT_DIRECTORY}/translations)
++
++endfunction()
++
++# set(QT_TRANSLATION_DIR "${Qt6_DIR}/../../../translations") file(GLOB
++# QT_TRANSLATIONS ${QT_TRANSLATION_DIR}/*.qm)
++# qt_add_resources(ex-texteditor-cmake "qt-translations" PREFIX "/translations"
++# BASE ${QT_TRANSLATION_DIR} FILES ${QT_TRANSLATIONS})
+diff --git a/ggeasy/CMakeLists.txt b/ggeasy/CMakeLists.txt
+index 3322ee4c..8ada8a04 100644
+--- a/ggeasy/CMakeLists.txt
++++ b/ggeasy/CMakeLists.txt
+@@ -15,8 +15,6 @@ project(
+   VERSION 0.9.0.0
+   LANGUAGES CXX)
+ 
+-# set(CMAKE_CXX_STANDARD 20) set(CMAKE_CXX_STANDARD_REQUIRED ON)
+-
+ # if(ANDROID) set(ANDROID_PACKAGE_SOURCE_DIR
+ # "${CMAKE_CURRENT_SOURCE_DIR}/android") if(ANDROID_ABI STREQUAL "armeabi-v7a")
+ # set(ANDROID_EXTRA_LIBS ${CMAKE_CURRENT_SOURCE_DIR} / path / to / libcrypto.so
+@@ -51,12 +49,9 @@ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+     REQUIRED)
+ endif()
+ 
+-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+-  qt6_add_resources(RESOURCES ${QRC_FILES})
+-else()
+-  set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
+-  qt5_add_resources(RESOURCES ${QRC_FILES})
+-endif()
++# if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) qt6_add_resources(RESOURCES
++# ${QRC_FILES}) else() set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
++# qt5_add_resources(RESOURCES ${QRC_FILES}) endif()
+ 
+ set(PROJECT_SOURCES ${APP_ICON_RESOURCE_WINDOWS} ${HEADERS} ${QRC_FILES}
+                     ${RESOURCES} ${SOURCES} ${UIS})
+@@ -65,21 +60,18 @@ set_source_files_properties(
+   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
+ 
+ if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+-  qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
++  # qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
+   qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+-  qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
+-                 ${PROJECT_SOURCES})
+-  # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
++  # qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
++  # ${PROJECT_SOURCES}) qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
+   # QM_FILES_OUTPUT_VARIABLE QM_FILES)
+ else()
+   add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
+-  qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
++  # qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+   # qt5_add_translation(${QM_FILES} ${TS_FILES})
+ endif()
+ 
+-add_custom_target(translations DEPENDS ${QM_FILES})
+-
+-# target_precompile_headers(${PROJECT_NAME} PUBLIC a_pch.h)
++# add_translation(${PROJECT_NAME})
+ 
+ target_link_libraries(
+   ${PROJECT_NAME}
+diff --git a/ggeasy/debug.cpp b/ggeasy/debug.cpp
+index 60f113b7..a6fef1d5 100644
+--- a/ggeasy/debug.cpp
++++ b/ggeasy/debug.cpp
+@@ -15,6 +15,12 @@
+ #include <QtWidgets>
+ #include <qfileinfo.h>
+ 
++void delay_ms(int ms) {
++    QEventLoop loop;
++    QTimer::singleShot(ms, [&loop] { loop.exit(); });
++    loop.exec();
++}
++
+ namespace QtPrivate {
+ template <>
+ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QList<QAction*>& c) {
+@@ -111,13 +117,13 @@ bool MainWindow::debug() {
+             QTimer::singleShot(time += delay, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
+         }
+ 
+-        if(0) {
++        if(1) {
+             constexpr auto PROFILE = md5::hash32("Profile");
+-
++            delay_ms(1000);
+             QTimer::singleShot(time += delay, this, [this] { selectAll(); });
+             QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
+-            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+-            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
++            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
++            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+             QTimer::singleShot(time += delay, this, [this] { App::grView().zoomFit(); });
+         }
+ 
+@@ -125,11 +131,11 @@ bool MainWindow::debug() {
+             constexpr auto THREAD = md5::hash32("Thread");
+             QTimer::singleShot(time += delay, this, [this, THREAD] { toolpathActions[THREAD]->toggle(); });
+ 
+-            //            QTimer::singleShot(i += k, this, [this] { selectAll(); });
+-            //            QTimer::singleShot(i += k, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
+-            //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+-            //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+-            //            QTimer::singleShot(i += k, this, [this] { App::grView().zoomFit(); });
++            //            QTimer::singleShot(time += delay, this, [this] { selectAll(); });
++            //            QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
++            //            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
++            //            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
++            //            QTimer::singleShot(time += delay, this, [this] { App::grView().zoomFit(); });
+         }
+ 
+         if(0) {
+@@ -158,14 +164,14 @@ bool MainWindow::debug() {
+ 
+         //        if (0) {
+         //            i = 1000;
+-        //            QTimer::singleShot(i += k, this,[this] { selectAll(); });
+-        //            QTimer::singleShot(i += k, this,[this] { toolpathActions[GCode::Pocket]->toggle(); });
+-        //            //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
+-        //            QTimer::singleShot(i += k, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
+-        //            QTimer::singleShot(i += k, this,[this] { App::grView().zoomFit(); });
++        //            QTimer::singleShot(time += delay, this,[this] { selectAll(); });
++        //            QTimer::singleShot(time += delay, this,[this] { toolpathActions[GCode::Pocket]->toggle(); });
++        //            //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
++        //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
++        //            QTimer::singleShot(time += delay, this,[this] { App::grView().zoomFit(); });
+         //        }
+         //        if (0)
+-        //            QTimer::singleShot(i += k, this,[this] { toolpathActions[GCode::Drill]->toggle(); });
++        //            QTimer::singleShot(time += delay, this,[this] { toolpathActions[GCode::Drill]->toggle(); });
+         break;
+     }
+     return {};
+diff --git a/ggeasy/mainwindow.cpp b/ggeasy/mainwindow.cpp
+index b93ef99c..dbd91dfc 100644
+--- a/ggeasy/mainwindow.cpp
++++ b/ggeasy/mainwindow.cpp
+@@ -1,7 +1,6 @@
+ // This is a personal academic project. Dear PVS-Studio, please check it.
+ // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+ 
+-
+ /********************************************************************************
+  * Author : Damir Bakiev                                                         *
+  * Version : na                                                                  *
+@@ -37,7 +36,6 @@
+ #include <QPrinter>
+ // #include <QtWidgets>
+ 
+-
+ // static auto PointConverter = QMetaType::registerConverter(&Point::toString); NOTE
+ 
+ inline constexpr auto G_CODE_PROPERTIES = md5::hash32("GCodeProperties");
+@@ -916,6 +914,10 @@ const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
+ 
+ QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
+ 
++void MainWindow::logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message) {
++    emit logMessage(type, {context.category, context.file, context.function, QString::number(context.line)}, message);
++}
++
+ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, const QString& message) {
+     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128});
+     enum {
+@@ -924,17 +926,17 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
+         Function,
+         Line,
+     };
+-    ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].split('(').front()));
+-
+-    switch(type) {
+-        // clang-format off
+-    case QtDebugMsg:    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128}); break;
+-    case QtWarningMsg:  ui.loggingTextBrowser->setTextColor(QColor{255, 128, 000}); break;
+-    case QtCriticalMsg: ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
+-    case QtFatalMsg:    ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
+-    case QtInfoMsg:     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 255}); break;
+-        // clang-format on
+-    }
++    auto file = context[File].split("/").back();
++    static constexpr QColor color[]{
++        QColor{128, 128, 128}, // gray   QtDebugMsg
++        QColor{255, 128, 000}, // orange QtWarningMsg
++        QColor{255, 000, 000}, // red    QtCriticalMsg
++        QColor{255, 000, 000}, // red    QtFatalMsg
++        QColor{128, 128, 255}, // blue   QtInfoMsg
++    };
++    ui.loggingTextBrowser->setTextColor(*color);
++    ui.loggingTextBrowser->append("%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split('(').front()));
++    ui.loggingTextBrowser->setTextColor(color[type]);
+     ui.loggingTextBrowser->append(message);
+     ui.loggingTextBrowser->append("");
+     ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
+diff --git a/ggeasy/mainwindow.h b/ggeasy/mainwindow.h
+index f2a5f21d..a237eb58 100644
+--- a/ggeasy/mainwindow.h
++++ b/ggeasy/mainwindow.h
+@@ -318,6 +318,7 @@ public:
+         dockWidget_->show();
+     }
+ 
++    void logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message);
+ signals:
+     void parseFile(const QString& filename, int type);
+     void logMessage(QtMsgType type, const QStringList& context, const QString& message);
+diff --git a/ggeasy/plugindialog.cpp b/ggeasy/plugindialog.cpp
+index 54d3d079..29836ddb 100644
+--- a/ggeasy/plugindialog.cpp
++++ b/ggeasy/plugindialog.cpp
+@@ -84,19 +84,19 @@ DialogAboutPlugins::~DialogAboutPlugins() { }
+ 
+ void DialogAboutPlugins::setupUi(QDialog* Dialog) {
+     if(Dialog->objectName().isEmpty())
+-        Dialog->setObjectName(QString::fromUtf8("Dialog"));
++        Dialog->setObjectName(u""_s);
+     Dialog->resize(400, 300);
+     verticalLayout = new QVBoxLayout{Dialog};
+     verticalLayout->setSpacing(6);
+-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++    verticalLayout->setObjectName(u""_s);
+     verticalLayout->setContentsMargins(6, 6, 6, 6);
+ 
+     treeWidget = new QTreeWidget{Dialog};
+-    treeWidget->setObjectName(QString::fromUtf8("treeWidget"));
++    treeWidget->setObjectName(u""_s);
+     verticalLayout->addWidget(treeWidget);
+ 
+     buttonBox = new QDialogButtonBox{Dialog};
+-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
++    buttonBox->setObjectName(u""_s);
+     buttonBox->setOrientation(Qt::Horizontal);
+     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);
+     //    pbInfo = buttonBox->addButton("Info", QDialogButtonBox::HelpRole);
+diff --git a/ggeasy/stacktrace_and_output.h b/ggeasy/stacktrace_and_output.h
+index 5d0889ee..3e25892c 100644
+--- a/ggeasy/stacktrace_and_output.h
++++ b/ggeasy/stacktrace_and_output.h
+@@ -1,8 +1,11 @@
+ #pragma once
+ 
++#include "mainwindow.h"
++
++#include <QDebug>
++#include <app.h>
+ #include <csignal>
+ #include <string>
+-#include <QDebug>
+ 
+ #if __cpp_lib_stacktrace
+ #include <QMessageLogContext>
+@@ -118,6 +121,9 @@ inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context,
+     while(file && *file)
+         if(*file++ == '\\')
+             context_.file = file;
++
++    if(App::mainWindowPtr())
++        App::mainWindow().logMessage2(type, context, message);
+     messageHandler(type, context, message);
+ }
+ 
+diff --git a/plugins/file/abstract_file.h b/plugins/file/abstract_file.h
+index b5a0d9c7..62d43200 100644
+--- a/plugins/file/abstract_file.h
++++ b/plugins/file/abstract_file.h
+@@ -337,7 +337,7 @@ public:
+             connect(dsbx, &QDoubleSpinBox::valueChanged, this, &TransformDialog::setTransform);
+ 
+         auto buttonBox = new QDialogButtonBox{this};
+-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
++        buttonBox->setObjectName(u""_s);
+         buttonBox->setGeometry(QRect(30, 240, 341, 32));
+         buttonBox->setOrientation(Qt::Horizontal);
+         buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+diff --git a/plugins/file/dxf/dxf_node.cpp b/plugins/file/dxf/dxf_node.cpp
+index 79ebbc48..1e6967d3 100644
+--- a/plugins/file/dxf/dxf_node.cpp
++++ b/plugins/file/dxf/dxf_node.cpp
+@@ -34,19 +34,19 @@ class Dialog : public QDialog {
+     QTableView* tableView;
+     void setupUi(QDialog* dialog) {
+         if(dialog->objectName().isEmpty())
+-            dialog->setObjectName(QString::fromUtf8("Dialog"));
++            dialog->setObjectName(u""_s);
+         verticalLayout = new QVBoxLayout{dialog};
+-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++        verticalLayout->setObjectName(u""_s);
+         verticalLayout->setContentsMargins(6, 6, 6, 6);
+ 
+         pushButtonColorize = new QPushButton{dialog};
+-        pushButtonColorize->setObjectName(QString::fromUtf8("pushButtonColorize"));
++        pushButtonColorize->setObjectName(u""_s);
+         pushButtonColorize->setText(DxfObj::tr("Colorize"));
+         pushButtonColorize->setIcon(QIcon::fromTheme("color-management"));
+         verticalLayout->addWidget(pushButtonColorize);
+ 
+         tableView = new QTableView{dialog};
+-        tableView->setObjectName(QString::fromUtf8("tableView"));
++        tableView->setObjectName(u""_s);
+         verticalLayout->addWidget(tableView);
+ 
+         QMetaObject::connectSlotsByName(dialog);
+diff --git a/plugins/file/dxf/dxf_settingstab.cpp b/plugins/file/dxf/dxf_settingstab.cpp
+index ba721f91..ee7e8b91 100644
+--- a/plugins/file/dxf/dxf_settingstab.cpp
++++ b/plugins/file/dxf/dxf_settingstab.cpp
+@@ -19,49 +19,49 @@ namespace Dxf {
+ 
+ SettingsTab::SettingsTab(QWidget* parent)
+     : AbstractFileSettings{parent} {
+-    setObjectName(QString::fromUtf8("tabDxf"));
++    setObjectName(u""_s);
+     auto verticalLayout = new QVBoxLayout{this};
+-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
++    verticalLayout->setObjectName(u""_s);
+     verticalLayout->setContentsMargins(6, 6, 6, 6);
+ 
+     auto groupBox = new QGroupBox{this};
+-    groupBox->setObjectName(QString::fromUtf8("groupBox_3"));
++    groupBox->setObjectName(u""_s);
+ 
+     auto formLayout = new QFormLayout{groupBox};
+-    formLayout->setObjectName(QString::fromUtf8("formLayout_4"));
++    formLayout->setObjectName(u""_s);
+     formLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+     formLayout->setContentsMargins(6, 6, 6, 6);
+     // DefaultFont
+     auto labelDefaultFont = new QLabel{groupBox};
+-    labelDefaultFont->setObjectName(QString::fromUtf8("labelDefaultFont"));
++    labelDefaultFont->setObjectName(u""_s);
+     formLayout->setWidget(0, QFormLayout::LabelRole, labelDefaultFont);
+ 
+     fcbxDxfDefaultFont = new QFontComboBox{groupBox};
+-    fcbxDxfDefaultFont->setObjectName(QString::fromUtf8("fcbxDxfDefaultFont"));
++    fcbxDxfDefaultFont->setObjectName(u""_s);
+     formLayout->setWidget(0, QFormLayout::FieldRole, fcbxDxfDefaultFont);
+     // Bold Font
+     auto labelBoldFont = new QLabel{groupBox};
+-    labelBoldFont->setObjectName(QString::fromUtf8("labelBoldFont"));
++    labelBoldFont->setObjectName(u""_s);
+     formLayout->setWidget(1, QFormLayout::LabelRole, labelBoldFont);
+ 
+     chbxBoldFont = new QCheckBox{" ", groupBox};
+-    chbxBoldFont->setObjectName(QString::fromUtf8("chbxDxfBoldFont"));
++    chbxBoldFont->setObjectName(u""_s);
+     formLayout->setWidget(1, QFormLayout::FieldRole, chbxBoldFont);
+     // Italic Font
+     auto labelItalicFont = new QLabel{groupBox};
+-    labelItalicFont->setObjectName(QString::fromUtf8("labelItalicFont"));
++    labelItalicFont->setObjectName(u""_s);
+     formLayout->setWidget(2, QFormLayout::LabelRole, labelItalicFont);
+ 
+     chbxItalicFont = new QCheckBox{" ", groupBox};
+-    chbxItalicFont->setObjectName(QString::fromUtf8("chbxDxfItalicFont"));
++    chbxItalicFont->setObjectName(u""_s);
+     formLayout->setWidget(2, QFormLayout::FieldRole, chbxItalicFont);
+     // Override Fonts
+     auto labelOverrideFonts = new QLabel{groupBox};
+-    labelOverrideFonts->setObjectName(QString::fromUtf8("labelOverrideFonts"));
++    labelOverrideFonts->setObjectName(u""_s);
+     formLayout->setWidget(3, QFormLayout::LabelRole, labelOverrideFonts);
+ 
+     chbxOverrideFonts = new QCheckBox{" ", groupBox};
+-    chbxOverrideFonts->setObjectName(QString::fromUtf8("chbxDxfOverrideFonts"));
++    chbxOverrideFonts->setObjectName(u""_s);
+     formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
+ 
+     verticalLayout->addWidget(groupBox);
+diff --git a/plugins/file/dxf/dxf_sourcedialog.cpp b/plugins/file/dxf/dxf_sourcedialog.cpp
+index 40ea9733..e1b4aa8d 100644
+--- a/plugins/file/dxf/dxf_sourcedialog.cpp
++++ b/plugins/file/dxf/dxf_sourcedialog.cpp
+@@ -20,17 +20,17 @@ namespace Dxf {
+ 
+ SourceDialog::SourceDialog(int fileId, QWidget* parent)
+     : QDialog{parent} {
+-    setObjectName(QString::fromUtf8("this"));
++    setObjectName(u""_s);
+     resize(600, 600);
+     // Dialog->resize(400, 300);
+     auto verticalLayout = new QVBoxLayout{this};
+-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++    verticalLayout->setObjectName(u""_s);
+     // tableView
+     auto tableView = new QTableView{this};
+     QFont f(font());
+     f.setFamily("Consolas");
+     tableView->setFont(f);
+-    tableView->setObjectName(QString::fromUtf8("tableView"));
++    tableView->setObjectName(u""_s);
+ 
+     tableView->setModel(new Model{App::project().file(fileId)->lines()});
+     // horizontal Header
+@@ -73,14 +73,14 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
+ 
+     {
+         auto spinBox = new QSpinBox{this};
+-        spinBox->setObjectName(QString::fromUtf8("spinBox"));
++        spinBox->setObjectName(u""_s);
+         spinBox->setRange(0, tableView->model()->rowCount());
+         connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), tableView, &QTableView::selectRow);
+         verticalLayout->addWidget(spinBox);
+     }
+     // leFind
+     auto leFind = new QLineEdit{this};
+-    leFind->setObjectName(QString::fromUtf8("lineEdit"));
++    leFind->setObjectName(u""_s);
+     connect(leFind, &QLineEdit::textChanged, [tableView](const QString& text) {
+         for(int row = 0; row < tableView->model()->rowCount(); ++row)
+             if(tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(text, Qt::CaseInsensitive)) {
+@@ -91,7 +91,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
+     verticalLayout->addWidget(leFind);
+     // pbNext
+     auto pbNext = new QPushButton{this};
+-    pbNext->setObjectName(QString::fromUtf8("pbNext"));
++    pbNext->setObjectName(u""_s);
+     pbNext->setText(DxfObj::tr("Next"));
+     connect(pbNext, &QPushButton::clicked, [tableView, leFind] {
+         for(int row = tableView->currentIndex().row() + 1; row < tableView->model()->rowCount(); ++row)
+@@ -103,7 +103,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
+     verticalLayout->addWidget(pbNext);
+     // pbPrev
+     auto pbPrev = new QPushButton{this};
+-    pbPrev->setObjectName(QString::fromUtf8("pbPrev"));
++    pbPrev->setObjectName(u""_s);
+     pbPrev->setText(DxfObj::tr("Prev"));
+     connect(pbPrev, &QPushButton::clicked, [tableView, leFind] {
+         for(int row = tableView->currentIndex().row() - 1; row >= 0; --row)
+diff --git a/plugins/file/excellon/ex_node.cpp b/plugins/file/excellon/ex_node.cpp
+index 091e0dd3..553d7cb8 100644
+--- a/plugins/file/excellon/ex_node.cpp
++++ b/plugins/file/excellon/ex_node.cpp
+@@ -103,15 +103,15 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
+     menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
+     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
+         QDialog* dialog = new QDialog;
+-        dialog->setObjectName(QString::fromUtf8("dialog"));
++        dialog->setObjectName(u""_s);
+         dialog->resize(600, 600);
+         // Dialog->resize(400, 300);
+         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
+-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++        verticalLayout->setObjectName(u""_s);
+         QTextBrowser* textBrowser = new QTextBrowser{dialog};
+         textBrowser->setFont(QFont("JetBrains Mono"));
+         new SyntaxHighlighter{textBrowser->document()};
+-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
++        textBrowser->setObjectName(u""_s);
+         verticalLayout->addWidget(textBrowser);
+         for(const QString& str: file->lines())
+             textBrowser->append(str);
+diff --git a/plugins/file/excellon/ex_settingstab.cpp b/plugins/file/excellon/ex_settingstab.cpp
+index 3d9ecb00..b38aef5f 100644
+--- a/plugins/file/excellon/ex_settingstab.cpp
++++ b/plugins/file/excellon/ex_settingstab.cpp
+@@ -17,7 +17,7 @@
+ namespace Excellon {
+ ExSettingsTab::ExSettingsTab(QWidget* parent)
+     : AbstractFileSettings{parent} {
+-    setObjectName(QString::fromUtf8("tabExcellon"));
++    setObjectName(u""_s);
+ 
+     auto vlayTab = new QVBoxLayout{this};
+     vlayTab->setContentsMargins(6, 6, 6, 6);
+@@ -30,10 +30,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
+         {
+             grbxUnits->setTitle(QApplication::translate("ExcellonDialog", "Units", nullptr));
+             rbInches = new QRadioButton{grbxUnits};
+-            rbInches->setObjectName(QString::fromUtf8("rbInches"));
++            rbInches->setObjectName(u""_s);
+ 
+             rbMillimeters = new QRadioButton{grbxUnits};
+-            rbMillimeters->setObjectName(QString::fromUtf8("rbMillimeters"));
++            rbMillimeters->setObjectName(u""_s);
+ 
+             auto vlay = new QVBoxLayout{grbxUnits};
+             vlay->setContentsMargins(6, 6, 6, 6);
+@@ -45,10 +45,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
+             grbxZeroes->setTitle(QApplication::translate("ExcellonDialog", "Zeroes", nullptr));
+ 
+             rbLeading = new QRadioButton{grbxZeroes};
+-            rbLeading->setObjectName(QString::fromUtf8("rbLeading"));
++            rbLeading->setObjectName(u""_s);
+ 
+             rbTrailing = new QRadioButton{grbxZeroes};
+-            rbTrailing->setObjectName(QString::fromUtf8("rbTrailing"));
++            rbTrailing->setObjectName(u""_s);
+ 
+             auto vlay = new QVBoxLayout{grbxZeroes};
+             vlay->setContentsMargins(6, 6, 6, 6);
+@@ -60,7 +60,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
+             grbxFormat->setTitle(QApplication::translate("ExcellonDialog", "Format", nullptr));
+ 
+             sbxInteger = new QSpinBox{grbxFormat};
+-            sbxInteger->setObjectName(QString::fromUtf8("sbxInteger"));
++            sbxInteger->setObjectName(u""_s);
+             sbxInteger->setWrapping(false);
+             sbxInteger->setAlignment(Qt::AlignCenter);
+             sbxInteger->setProperty("showGroupSeparator", QVariant(false));
+@@ -68,7 +68,7 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
+             sbxInteger->setMaximum(8);
+ 
+             sbxDecimal = new QSpinBox{grbxFormat};
+-            sbxDecimal->setObjectName(QString::fromUtf8("sbxDecimal"));
++            sbxDecimal->setObjectName(u""_s);
+             sbxDecimal->setAlignment(Qt::AlignCenter);
+             sbxDecimal->setMinimum(1);
+             sbxDecimal->setMaximum(8);
+@@ -88,14 +88,14 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
+             grbxOffset->setTitle(QApplication::translate("ExcellonDialog", "Offset", nullptr));
+ 
+             dsbxX = new DoubleSpinBox{grbxOffset};
+-            dsbxX->setObjectName(QString::fromUtf8("dsbxX"));
++            dsbxX->setObjectName(u""_s);
+             dsbxX->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
+             dsbxX->setDecimals(4);
+             dsbxX->setMinimum(-1000.0);
+             dsbxX->setMaximum(1000.0);
+ 
+             dsbxY = new DoubleSpinBox{grbxOffset};
+-            dsbxY->setObjectName(QString::fromUtf8("dsbxY"));
++            dsbxY->setObjectName(u""_s);
+             dsbxY->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
+             dsbxY->setDecimals(4);
+             dsbxY->setMinimum(-1000.0);
+@@ -121,13 +121,13 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
+         grbxParse->setTitle(QApplication::translate("ExcellonDialog", "Parse Reg.Expr.", nullptr));
+ 
+         leParseZero = new QLineEdit{this};
+-        leParseZero->setObjectName(QString::fromUtf8("leParseZero"));
++        leParseZero->setObjectName(u""_s);
+ 
+         leParseUnit = new QLineEdit{this};
+-        leParseUnit->setObjectName(QString::fromUtf8("leParseUnit"));
++        leParseUnit->setObjectName(u""_s);
+ 
+         leParseDecimalAndInteger = new QLineEdit{this};
+-        leParseDecimalAndInteger->setObjectName(QString::fromUtf8("leParseDecimalAndInteger"));
++        leParseDecimalAndInteger->setObjectName(u""_s);
+ 
+         auto leTestParseZero = new QLineEdit{this};
+         auto leTestParseUnit = new QLineEdit{this};
+diff --git a/plugins/file/gerber/gbr_node.cpp b/plugins/file/gerber/gbr_node.cpp
+index b7ea7ffd..b9be7708 100644
+--- a/plugins/file/gerber/gbr_node.cpp
++++ b/plugins/file/gerber/gbr_node.cpp
+@@ -151,16 +151,16 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
+     menu.setToolTipsVisible(true);
+     menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
+         QDialog* dialog = new QDialog;
+-        dialog->setObjectName(QString::fromUtf8("dialog"));
++        dialog->setObjectName(u""_s);
+         dialog->resize(800, 600);
+ 
+         QTextBrowser* textBrowser = new QTextBrowser{dialog};
+-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
++        textBrowser->setObjectName(u""_s);
+         textBrowser->setFontFamily("JetBrains Mono");
+         textBrowser->setLineWrapMode(QTextEdit::NoWrap);
+         new SyntaxHighlighter{textBrowser->document()};
+         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
+-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++        verticalLayout->setObjectName(u""_s);
+         verticalLayout->setContentsMargins(6, 6, 6, 6);
+         verticalLayout->addWidget(textBrowser);
+         QString s;
+diff --git a/plugins/file/gerber/gbr_plugin.cpp b/plugins/file/gerber/gbr_plugin.cpp
+index 1da33969..a978816f 100644
+--- a/plugins/file/gerber/gbr_plugin.cpp
++++ b/plugins/file/gerber/gbr_plugin.cpp
+@@ -103,30 +103,30 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
+     public:
+         Tab(QWidget* parent = nullptr)
+             : AbstractFileSettings{parent} {
+-            setObjectName(QString::fromUtf8("tabGerber"));
++            setObjectName(u""_s);
+ 
+             auto verticalLayout = new QVBoxLayout{this};
+-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++            verticalLayout->setObjectName(u""_s);
+             verticalLayout->setContentsMargins(6, 6, 6, 6);
+ 
+             {
+                 auto groupBox1 = new QGroupBox{this};
+-                groupBox1->setObjectName(QString::fromUtf8("groupBox1"));
++                groupBox1->setObjectName(u""_s);
+                 groupBox1->setTitle(QApplication::translate("SettingsDialog", "Gerber", nullptr));
+                 verticalLayout->addWidget(groupBox1);
+ 
+                 chbxCleanPolygons = new QCheckBox{groupBox1};
+-                chbxCleanPolygons->setObjectName(QString::fromUtf8("chbxCleanPolygons"));
++                chbxCleanPolygons->setObjectName(u""_s);
+ 
+                 chbxSimplifyRegions = new QCheckBox{groupBox1};
+-                chbxSimplifyRegions->setObjectName(QString::fromUtf8("chbxSimplifyRegions"));
++                chbxSimplifyRegions->setObjectName(u""_s);
+ 
+                 chbxSkipDuplicates = new QCheckBox{groupBox1};
+-                chbxSkipDuplicates->setObjectName(QString::fromUtf8("chbxSkipDuplicates"));
++                chbxSkipDuplicates->setObjectName(u""_s);
+ 
+                 dsbxCleanPolygonsDist = new DoubleSpinBox{groupBox1};
+                 dsbxCleanPolygonsDist->setDecimals(4);
+-                dsbxCleanPolygonsDist->setObjectName(QString::fromUtf8("dsbxCleanPolygonsDist"));
++                dsbxCleanPolygonsDist->setObjectName(u""_s);
+                 dsbxCleanPolygonsDist->setRange(0.0001, 1.0);
+                 dsbxCleanPolygonsDist->setSingleStep(0.001);
+ 
+@@ -140,15 +140,15 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
+ 
+             {
+                 auto groupBox2 = new QGroupBox{this};
+-                groupBox2->setObjectName(QString::fromUtf8("groupBox2"));
++                groupBox2->setObjectName(u""_s);
+                 groupBox2->setTitle(QApplication::translate("SettingsDialog", "Wire Creation Method", nullptr));
+                 verticalLayout->addWidget(groupBox2);
+ 
+                 rbClipperOffset = new QRadioButton{groupBox2};
+-                rbClipperOffset->setObjectName(QString::fromUtf8("rbClipperOffset"));
++                rbClipperOffset->setObjectName(u""_s);
+ 
+                 rbMinkowskiSum = new QRadioButton{groupBox2};
+-                rbMinkowskiSum->setObjectName(QString::fromUtf8("rbMinkowskiSum"));
++                rbMinkowskiSum->setObjectName(u""_s);
+                 auto vBoxLayout = new QVBoxLayout{groupBox2};
+                 vBoxLayout->setContentsMargins(6, 9, 6, 6);
+                 vBoxLayout->addWidget(rbClipperOffset);
+diff --git a/plugins/file/gerber/gbrcomp_dialog.cpp b/plugins/file/gerber/gbrcomp_dialog.cpp
+index decdaf3c..a172a140 100644
+--- a/plugins/file/gerber/gbrcomp_dialog.cpp
++++ b/plugins/file/gerber/gbrcomp_dialog.cpp
+@@ -44,29 +44,29 @@ void Dialog::setFile(int fileId) { componentsView->setFile(fileId); }
+ 
+ void Dialog::setupUi(QDialog* dialog) {
+     if(dialog->objectName().isEmpty())
+-        dialog->setObjectName(QString::fromUtf8("Dialog"));
++        dialog->setObjectName(u""_s);
+     dialog->resize(800, 600);
+ 
+     splitter = new QSplitter{dialog};
+-    splitter->setObjectName(QString::fromUtf8("splitter"));
++    splitter->setObjectName(u""_s);
+     splitter->setOrientation(Qt::Horizontal);
+ 
+     componentsView = new sView{splitter};
+-    componentsView->setObjectName(QString::fromUtf8("componentsView"));
++    componentsView->setObjectName(u""_s);
+ 
+     grView = new QGraphicsView{splitter};
+-    grView->setObjectName(QString::fromUtf8("grView"));
++    grView->setObjectName(u""_s);
+ 
+     splitter->addWidget(componentsView);
+     splitter->addWidget(grView);
+ 
+     auto buttonBox = new QDialogButtonBox{dialog};
+-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
++    buttonBox->setObjectName(u""_s);
+     buttonBox->setOrientation(Qt::Horizontal);
+     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+ 
+     auto verticalLayout = new QVBoxLayout{dialog};
+-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++    verticalLayout->setObjectName(u""_s);
+     verticalLayout->setContentsMargins(6, 6, 6, 6);
+     verticalLayout->addWidget(splitter);
+     verticalLayout->addWidget(buttonBox);
+diff --git a/plugins/gcode/gc_baseform.cpp b/plugins/gcode/gc_baseform.cpp
+index 44bc06b5..078f20d4 100644
+--- a/plugins/gcode/gc_baseform.cpp
++++ b/plugins/gcode/gc_baseform.cpp
+@@ -215,7 +215,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
+         grid->addWidget(errTable = new TableView{errWidget});
+         grid->addWidget(errBtnBox = new QDialogButtonBox{errWidget});
+ 
+-        errBtnBox->setObjectName(QString::fromUtf8("errBtnBox"));
++        errBtnBox->setObjectName(u""_s);
+         errBtnBox->setOrientation(Qt::Horizontal);
+         errBtnBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+ 
+@@ -241,27 +241,30 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
+ 
+ BaseForm::~BaseForm() {
+     if(errWidget->isVisible()) errBreak();
+-    if(runer.isRunning()) runer.terminate();
+-    // /*thread*/ runer.quit();
+-    // /*thread*/ runer.wait();
++    ProgressCancel::cancel();
++    if(runer.isRunning())
++        // runer.terminate();
++        //  runer.quit();
++        runer.wait();
+     delete creator_;
+     qDebug(__FUNCTION__);
+ }
+ 
+ void BaseForm::setCreator(Creator* newCreator) {
+     qDebug() << __FUNCTION__ << creator_ << newCreator;
+-    if(/*thread*/ runer.isRunning()) {
+-        runer.terminate();
+-        // /*thread*/ runer.quit();
+-        // /*thread*/ runer.wait();
++    ProgressCancel::cancel();
++    if(runer.isRunning()) {
++        // runer.terminate();
++        //  runer.quit();
++        runer.wait();
+     }
+     if(creator_ != newCreator && newCreator) {
+         qDebug(__FUNCTION__);
+         delete creator_;
+         creator_ = newCreator;
+-        creator_->moveToThread(&/*thread*/ runer);
++        creator_->moveToThread(&runer);
+         // clang-format off
+-        // connect(&/*thread*/runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
++        // connect(&runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
+         connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress                      );
+         connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler                      );
+         connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler                       );
+@@ -269,7 +272,7 @@ void BaseForm::setCreator(Creator* newCreator) {
+         connect(this,     &BaseForm::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
+         connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress                     );
+         // clang-format on
+-        // /*thread*/ runer.start(QThread::LowPriority /*HighestPriority*/);
++        //  runer.start(QThread::LowPriority /*HighestPriority*/);
+     } else if(creator_ && !newCreator) {
+         creator_ = nullptr;
+     }
+@@ -421,9 +424,13 @@ void BaseForm::cancel() {
+     if(creator_ == nullptr)
+         return;
+     creator_->continueCalc(false);
+-    if(runer.isRunning())
+-        runer.terminate();
+-    // /*thread*/ runer.start(QThread::LowPriority /*HighestPriority*/);
++    ProgressCancel::cancel();
++    if(runer.isRunning()) {
++        // runer.quit();
++        runer.wait();
++        // runer.terminate();
++    }
++    //  runer.start(QThread::LowPriority /*HighestPriority*/);
+     stopProgress();
+ }
+ 
+diff --git a/plugins/gcode/gc_baseform.h b/plugins/gcode/gc_baseform.h
+index 2e523519..2ad6bdb8 100644
+--- a/plugins/gcode/gc_baseform.h
++++ b/plugins/gcode/gc_baseform.h
+@@ -10,6 +10,7 @@
+  ********************************************************************************/
+ #pragma once
+ 
++#include "cancelation.h"
+ #include "depthform.h"
+ #include "gcode.h"
+ 
+@@ -111,8 +112,8 @@ private:
+             start();
+         }
+ 
+-        // QThread interface
+     protected:
++        // QThread interface
+         void run() override { form->creator_->createGc(gcp); }
+     } runer{this};
+ 
+diff --git a/plugins/gcode/gc_creator.cpp b/plugins/gcode/gc_creator.cpp
+index c4a7542b..fe59b1fe 100644
+--- a/plugins/gcode/gc_creator.cpp
++++ b/plugins/gcode/gc_creator.cpp
+@@ -50,16 +50,15 @@ public:
+     QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
+     uint32_t type() const override { return GC_DBG_FILE; }
+     void createGi() override {
+-        Gi::Item* item;
+-        item = new Gi::GcPath{pocketPaths_, this};
+-        item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+-        item->setPenColorPtr(&color);
+-        itemGroup()->push_back(item);
+-        for(int i{}; i < pocketPaths_.size() - 1; ++i)
+-            g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
+-        item = new Gi::GcPath{g0path_};
+-        item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
++        Gi::Item* item = new Gi::GcPath{pocketPaths_, this};
++        // item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
++        // item->setPenColorPtr(&color);
+         itemGroup()->push_back(item);
++        // for(int i{}; i < pocketPaths_.size() - 1; ++i)
++        // g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
++        // item = new Gi::GcPath{g0path_};
++        // item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
++        // itemGroup()->push_back(item);
+         itemGroup()->setVisible(true);
+     }
+     void genGcodeAndTile() override { } // saveLaserProfile({});
+@@ -171,7 +170,7 @@ void Creator::addRawPaths(Paths&& rawPaths) {
+         }
+     }
+ 
+-    mergeSegments(rawPaths, mergDist);
++    mergePaths(rawPaths, mergDist);
+ 
+     for(Path& path: rawPaths) {
+         Point& pf = path.front();
+@@ -215,7 +214,7 @@ void Creator::createGc(Params* gcp) {
+             try {
+                 checkMillingFl = true;
+                 checkMilling(gcp_.side());
+-            } catch(const cancelException& e) {
++            } catch(const Cancel& e) {
+                 ProgressCancel::reset();
+                 qWarning() << "checkMilling canceled:" << e.what();
+             } catch(...) {
+@@ -229,7 +228,7 @@ void Creator::createGc(Params* gcp) {
+             create();
+         }
+         qWarning() << "Creator::createGc() finish";
+-    } catch(const cancelException& e) {
++    } catch(const Cancel& e) {
+         qWarning() << "Creator::createGc() canceled:" << e.what();
+     } catch(const std::exception& e) {
+         qWarning() << "Creator::createGc() exeption:" << e.what();
+@@ -355,86 +354,10 @@ void Creator::stacking(Paths& paths) {
+             path.emplace_back(path.front());
+     }
+ 
+-    sortB(returnPss);
+-}
+-
+-void Creator::mergeSegments(Paths& paths, double maxDist) {
+-    qDebug(__FUNCTION__);
+-#if 1
+-    mergePaths(paths, maxDist);
+-#else
+-    size_t size;
+-    do {
+-        size = paths.size();
+-        for(size_t i{}; i < paths.size(); ++i) {
+-            if(i >= paths.size())
+-                break;
+-            for(size_t j{}; j < paths.size(); ++j) {
+-                if(i == j)
+-                    continue;
+-                if(i >= paths.size())
+-                    break;
+-                Point pib = paths[i].back();
+-                Point pjf = paths[j].front();
+-                if(pib == pjf) {
+-                    paths[i] += paths[j] | skipFront;
+-                    paths -= j--;
+-                    continue;
+-                }
+-                Point pif = paths[i].front();
+-                Point pjb = paths[j].back();
+-                if(pif == pjb) {
+-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
+-                    paths -= i--;
+-                    break;
+-                }
+-                if(pib == pjb) {
+-                    ReversePath(paths[j]);
+-                    paths[i] += paths[j] | skipFront;
+-                    paths -= j--;
+-                    continue;
+-                }
+-            }
+-        }
+-    } while(size != paths.size());
+-    if(qFuzzyIsNull(maxDist))
+-        return;
+-    do {
+-        size = paths.size();
+-        for(size_t i{}; i < paths.size(); ++i) {
+-            if(i >= paths.size())
+-                break;
+-            for(size_t j{}; j < paths.size(); ++j) {
+-                if(i == j)
+-                    continue;
+-                if(i >= paths.size())
+-                    break;
+-                Point pib = paths[i].back();
+-                Point pjf = paths[j].front();
+-                if(distTo(pib, pjf) < maxDist) {
+-                    paths[i] += paths[j] | skipFront;
+-                    paths -= j--;
+-                    continue;
+-                }
+-                Point pif = paths[i].front();
+-                Point pjb = paths[j].back();
+-                if(distTo(pif, pjb) < maxDist) {
+-                    paths[j].insert(paths[j].end(), paths[i].begin() + 1, paths[i].end());
+-                    paths -= i--;
+-                    break;
+-                }
+-                if(distTo(pib, pjb) < maxDist) {
+-                    ReversePath(paths[j]);
+-                    paths[i] += paths[j] | skipFront;
+-                    paths -= j--;
+-                    continue;
+-                }
+-            }
+-        }
+-    } while(size != paths.size());
+-#endif
++    sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
+ }
+ 
++#if 0
+ void Creator::mergePaths(Paths& paths, const double maxDist) {
+     qDebug(__FUNCTION__);
+ 
+@@ -490,6 +413,7 @@ void Creator::mergePaths(Paths& paths, const double maxDist) {
+         }
+     } while(max != paths.size());
+ }
++#endif
+ 
+ void Creator::markPolyTreeDByNesting(PolyTree& polynode) {
+     qDebug(__FUNCTION__);
+@@ -754,120 +678,6 @@ void Creator::setGcp(const Params& gcp) {
+     reset();
+ }
+ 
+-Paths& Creator::sortB(Paths& src) {
+-    qDebug(__FUNCTION__);
+-
+-    Point startPt{~(App::home().pos() + App::zero().pos())};
+-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+-        size_t swapIdx = firstIdx;
+-        double destLen = std::numeric_limits<double>::max();
+-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+-            const double length = distTo(startPt, src[secondIdx].front());
+-            if(destLen > length) {
+-                destLen = length;
+-                swapIdx = secondIdx;
+-            }
+-        }
+-        startPt = src[swapIdx].back();
+-        if(swapIdx != firstIdx)
+-            std::swap(src[firstIdx], src[swapIdx]);
+-    }
+-    return src;
+-}
+-
+-Paths& Creator::sortBeginEnd(Paths& src) {
+-    qDebug(__FUNCTION__);
+-
+-    Point startPt{~(App::home().pos() + App::zero().pos())};
+-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+-
+-        size_t swapIdx = firstIdx;
+-        double destLen = std::numeric_limits<double>::max();
+-        bool reverse = false;
+-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+-            const double lenFirst = distTo(startPt, src[secondIdx].front());
+-            const double lenLast = distTo(startPt, src[secondIdx].back());
+-            if(lenFirst < lenLast) {
+-                if(destLen > lenFirst) {
+-                    destLen = lenFirst;
+-                    swapIdx = secondIdx;
+-                    reverse = false;
+-                }
+-            } else if(destLen > lenLast) {
+-                destLen = lenLast;
+-                swapIdx = secondIdx;
+-                reverse = true;
+-            }
+-            if(qFuzzyIsNull(destLen))
+-                break;
+-        }
+-        if(reverse)
+-            ReversePath(src[swapIdx]);
+-        startPt = src[swapIdx].back();
+-        if(swapIdx != firstIdx)
+-            std::swap(src[firstIdx], src[swapIdx]);
+-    }
+-    return src;
+-}
+-
+-Pathss& Creator::sortB(Pathss& src) {
+-    qDebug(__FUNCTION__);
+-
+-    Point startPt{~(App::home().pos() + App::zero().pos())};
+-    for(size_t i{}; i < src.size(); ++i)
+-        if(src[i].empty())
+-            src.erase(src.begin() + i--);
+-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+-        size_t swapIdx = firstIdx;
+-        double destLen = std::numeric_limits<double>::max();
+-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+-            const double length = distTo(startPt, src[secondIdx].front().front());
+-            if(destLen > length) {
+-                destLen = length;
+-                swapIdx = secondIdx;
+-            }
+-        }
+-        startPt = src[swapIdx].back().back();
+-        if(swapIdx != firstIdx)
+-            std::swap(src[firstIdx], src[swapIdx]);
+-    }
+-    return src;
+-}
+-
+-Pathss& Creator::sortBeginEnd(Pathss& src) {
+-    qDebug(__FUNCTION__);
+-
+-    Point startPt{~(App::home().pos() + App::zero().pos())};
+-    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
+-        size_t swapIdx = firstIdx;
+-        double destLen = std::numeric_limits<double>::max();
+-        bool reverse = false;
+-        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
+-            const double lenFirst = distTo(startPt, src[secondIdx].front().front());
+-            const double lenLast = distTo(startPt, src[secondIdx].back().back());
+-            if(lenFirst < lenLast) {
+-                if(destLen > lenFirst) {
+-                    destLen = lenFirst;
+-                    swapIdx = secondIdx;
+-                    reverse = false;
+-                }
+-            } else if(destLen > lenLast) {
+-                destLen = lenLast;
+-                swapIdx = secondIdx;
+-                reverse = true;
+-            }
+-        }
+-        //        if (reverse)
+-        //            std::reverse(src[swapIdx].begin(), src[swapIdx].end());
+-        //        startPt = src[swapIdx].back().back();
+-        if(swapIdx != firstIdx && !reverse) {
+-            startPt = src[swapIdx].back().back();
+-            std::swap(src[firstIdx], src[swapIdx]);
+-        }
+-    }
+-    return src;
+-}
+-
+ } // namespace GCode
+ 
+ #include "moc_gc_creator.cpp"
+diff --git a/plugins/gcode/gc_creator.h b/plugins/gcode/gc_creator.h
+index b0b2f8de..e655f912 100644
+--- a/plugins/gcode/gc_creator.h
++++ b/plugins/gcode/gc_creator.h
+@@ -16,18 +16,9 @@
+ 
+ #include <QObject>
+ 
++#include <cancelation.h>
+ #include <condition_variable>
+ #include <mutex>
+-#include <ranges>
+-#include <sstream>
+-
+-// #if __has_include(<source_location>)
+-//     #include <source_location>
+-// using sl = std::source_location;
+-// #else
+-//     #include <experimental/source_location>
+-// using sl = std::experimental::source_location;
+-// #endif
+ 
+ namespace ranges = std::ranges;
+ namespace rviews = std::ranges::views;
+@@ -68,12 +59,6 @@ public:
+ 
+     Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const;
+ 
+-    /*static*/ Paths& sortB(Paths& src);
+-    /*static*/ Paths& sortBeginEnd(Paths& src);
+-
+-    /*static*/ Pathss& sortB(Pathss& src);
+-    /*static*/ Pathss& sortBeginEnd(Pathss& src);
+-
+     void createGc(Params* gcp);
+ 
+     void continueCalc(bool fl = true);
+@@ -108,9 +93,7 @@ protected:
+     /// \brief склеивает пути при совпадении конечных точек
+     /// \param paths - пути
+     /// \param maxDist - максимальное расстояние между конечными точками
+-    void mergeSegments(Paths& paths, double maxDist = 0.0);
+-
+-    void mergePaths(Paths& paths, const double maxDist = 0.0);
++    // void mergePaths(Paths& paths, const double maxDist = 0.0);
+ 
+     void markPolyTreeDByNesting(PolyTree& polynode);
+     void sortPolyTreeByNesting(PolyTree& polynode);
+diff --git a/plugins/gcode/gc_file.cpp b/plugins/gcode/gc_file.cpp
+index edca46d3..fb1f1a5b 100644
+--- a/plugins/gcode/gc_file.cpp
++++ b/plugins/gcode/gc_file.cpp
+@@ -28,7 +28,7 @@
+ 
+ namespace GCode {
+ 
+-void calcArcs(Path path);
++void findArcs(Path path);
+ 
+ File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+     : gcp_(std::move(gcp))
+@@ -36,7 +36,7 @@ File::File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
+     , toolPathss_(std::move(toolPathss)) {
+     for(auto&& paths: toolPathss_)
+         for(auto&& path: paths)
+-            calcArcs(path);
++            findArcs(path);
+ 
+     feedRate_ = gcp_.getTool().feedRate();
+     plungeRate_ = gcp_.getTool().plungeRate();
+@@ -581,11 +581,7 @@ void File::createGiPocket() {
+ 
+         for(const Path& path: paths) {
+             item = new Gi::GcPath{path, this};
+-#ifdef QT_DEBUG
+-            item->setPenColorPtr(debugColor.back().data());
+-#else
+             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+-#endif
+             itemGroup()->push_back(item);
+         }
+ 
+@@ -594,12 +590,7 @@ void File::createGiPocket() {
+             for(size_t j = 0; j < paths.size() - 1; ++j)
+                 g1path.push_back({paths[j].back(), paths[j + 1].front()});
+             item = new Gi::GcPath{g1path};
+-#ifdef QT_DEBUG
+-            debugColor.push_back(QSharedPointer<QColor>(new QColor{0, 0, 255}));
+-            item->setPenColorPtr(debugColor.back().data());
+-#else
+             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+-#endif
+             itemGroup()->push_back(item);
+         }
+ 
+@@ -725,7 +716,7 @@ void File::createGiLaser() {
+ 
+ /////////////////////////////////////////////////////////////
+ 
+-void calcArcs(Path path) {
++void findArcs(Path path) {
+     return;
+     //    if (!App::isDebug())
+     //        return;
+diff --git a/plugins/gcode/gc_file.h b/plugins/gcode/gc_file.h
+index 101c44ec..2e870ea4 100644
+--- a/plugins/gcode/gc_file.h
++++ b/plugins/gcode/gc_file.h
+@@ -102,11 +102,11 @@ protected:
+ 
+     static inline QString lastDir;
+     static inline bool redirected;
+-    inline static const mvector<QChar> cmdList{'G', 'X', 'Y', 'Z', 'F', 'S'};
++    static inline const mvector<QChar> cmdList{'G', 'X', 'Y', 'Z', 'F', 'S'};
+ 
+     mvector<double> getDepths();
+ 
+-    bool formatFlags[Size];
++    bool formatFlags[Size]{};
+     QString lastValues[6];
+     Code gCode_ = GNull;
+ 
+diff --git a/plugins/gcode/gc_settings.cpp b/plugins/gcode/gc_settings.cpp
+index 87536e5e..9bfaff94 100644
+--- a/plugins/gcode/gc_settings.cpp
++++ b/plugins/gcode/gc_settings.cpp
+@@ -17,7 +17,7 @@
+ GCode::Tab::Tab(QWidget* parent)
+     : AbstractFileSettings{parent} {
+     setWindowTitle("G-Code");
+-    setObjectName(QString::fromUtf8("tabGCode"));
++    setObjectName(u""_s);
+ 
+     tabWidget = new QTabWidget{this};
+     { // рамещение tabWidget
+@@ -33,13 +33,13 @@ GCode::Tab::Tab(QWidget* parent)
+     vLayout->setContentsMargins(6, 6, 6, 6);
+     // Папка
+     chbxSameGFolder = new QCheckBox{tabCommon};
+-    chbxSameGFolder->setObjectName(QString::fromUtf8("chbxSameGFolder"));
++    chbxSameGFolder->setObjectName(u""_s);
+     chbxSameGFolder->setText(QApplication::translate("GCodeSettings", "Save the G-Code to the project folder.", nullptr));
+     vLayout->addWidget(chbxSameGFolder);
+ 
+     // Инфо в УП
+     chbxInfo = new QCheckBox{tabCommon};
+-    chbxInfo->setObjectName(QString::fromUtf8("chbxInfo"));
++    chbxInfo->setObjectName(u""_s);
+     chbxInfo->setText(QApplication::translate("GCodeSettings", "Add a comment with the parameters G-\320\241ode", nullptr));
+     vLayout->addWidget(chbxInfo);
+ 
+@@ -47,7 +47,7 @@ GCode::Tab::Tab(QWidget* parent)
+     auto lbl = new QLabel{QApplication::translate("GCodeSettings", "File Extension:", nullptr), tabCommon};
+     vLayout->addWidget(lbl);
+     leFileExtension = new QLineEdit{tabCommon};
+-    leFileExtension->setObjectName(QString::fromUtf8("leFileExtension"));
++    leFileExtension->setObjectName(u""_s);
+     vLayout->addWidget(leFileExtension);
+     {
+         auto tabWidget = new QTabWidget{this};
+@@ -60,19 +60,19 @@ GCode::Tab::Tab(QWidget* parent)
+             lbl = new QLabel{QApplication::translate("GCodeSettings", "Start with:", nullptr), tab};
+             verticalLayoutM->addWidget(lbl);
+             pteStart = new QPlainTextEdit{tab};
+-            pteStart->setObjectName(QString::fromUtf8("pteStart"));
++            pteStart->setObjectName(u""_s);
+             verticalLayoutM->addWidget(pteStart);
+ 
+             lbl = new QLabel{QApplication::translate("GCodeSettings", "Finish with:", nullptr), tab};
+             verticalLayoutM->addWidget(lbl);
+             pteEnd = new QPlainTextEdit{tab};
+-            pteEnd->setObjectName(QString::fromUtf8("pteEnd"));
++            pteEnd->setObjectName(u""_s);
+             verticalLayoutM->addWidget(pteEnd);
+ 
+             lbl = new QLabel{QApplication::translate("GCodeSettings", "The format of the line with the coordinates:", nullptr), tab};
+             verticalLayoutM->addWidget(lbl);
+             leFormatMilling = new QLineEdit{tab};
+-            leFormatMilling->setObjectName(QString::fromUtf8("leFormatMilling"));
++            leFormatMilling->setObjectName(u""_s);
+             leFormatMilling->setToolTip(QApplication::translate("GCodeSettings", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
+             verticalLayoutM->addWidget(leFormatMilling);
+             tabWidget->addTab(tab, QApplication::translate("GCodeSettings", "Milling", nullptr));
+@@ -85,19 +85,19 @@ GCode::Tab::Tab(QWidget* parent)
+             lbl = new QLabel{QApplication::translate("GCodeSettings", "Start with:", nullptr), tab};
+             verticalLayoutL->addWidget(lbl);
+             pteLaserStart = new QPlainTextEdit{tab};
+-            pteLaserStart->setObjectName(QString::fromUtf8("pteLaserStart"));
++            pteLaserStart->setObjectName(u""_s);
+             verticalLayoutL->addWidget(pteLaserStart);
+ 
+             lbl = new QLabel{QApplication::translate("GCodeSettings", "Finish with:", nullptr), tab};
+             verticalLayoutL->addWidget(lbl);
+             pteLaserEnd = new QPlainTextEdit{tab};
+-            pteLaserEnd->setObjectName(QString::fromUtf8("pteLaserEnd"));
++            pteLaserEnd->setObjectName(u""_s);
+             verticalLayoutL->addWidget(pteLaserEnd);
+ 
+             lbl = new QLabel{QApplication::translate("GCodeSettings", "The format of the line with the coordinates:", nullptr), tab};
+             verticalLayoutL->addWidget(lbl);
+             leFormatLaser = new QLineEdit{tab};
+-            leFormatLaser->setObjectName(QString::fromUtf8("leFormatLaser"));
++            leFormatLaser->setObjectName(u""_s);
+             leFormatLaser->setToolTip(QApplication::translate("GCodeSettings", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
+             verticalLayoutL->addWidget(leFormatLaser);
+ 
+@@ -108,19 +108,19 @@ GCode::Tab::Tab(QWidget* parent)
+ 
+     //    { // Tab HLDI
+     //        auto tabHldi = new QWidget();
+-    //        tabHldi->setObjectName(QString::fromUtf8("tabHldi"));
++    //        tabHldi->setObjectName(u""_s);
+     //        chbxSimplifyHldi = new QCheckBox{QApplication::translate("GCodeSettings", "Simplify Hldi", nullptr), tabHldi);
+-    //        chbxSimplifyHldi->setObjectName(QString::fromUtf8("chbxSimplifyHldi"));
++    //        chbxSimplifyHldi->setObjectName(u""_s);
+     //        auto verticalLayoutPS = new QVBoxLayout{tabHldi};
+-    //        verticalLayoutPS->setObjectName(QString::fromUtf8("verticalLayoutPS"));
++    //        verticalLayoutPS->setObjectName(u""_s);
+     //        verticalLayoutPS->setContentsMargins(6, 6, 6, 6);
+     //        verticalLayoutPS->addWidget(chbxSimplifyHldi);
+     //        //                lbl = new QLabel{tabHldi};
+-    //        //                lbl->setObjectName(QString::fromUtf8("lbl"));
++    //        //                lbl->setObjectName(u""_s);
+     //        //                lbl->setText(QApplication::translate("GCodeSettings", "Milling sequence:", nullptr));
+     //        //                verticalLayoutPS->addWidget(lbl);
+     //        //                cbxProfileSort = new QComboBox{tabHldi};
+-    //        //                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
++    //        //                cbxProfileSort->setObjectName(u""_s);
+     //        //                cbxProfileSort->addItem("Grouping by nesting");
+     //        //                cbxProfileSort->addItem("Grouping by nesting depth");
+     //        //                verticalLayoutPS->addWidget(cbxProfileSort);
+@@ -136,22 +136,22 @@ GCode::Tab::Tab(QWidget* parent)
+ 
+     lbl = new QLabel{QApplication::translate("GCodeSettings", "Spindle On:", nullptr), grbxSpindle};
+     leSpindleCC = new QLineEdit{grbxSpindle};
+-    leSpindleCC->setObjectName(QString::fromUtf8("leSpindleCC"));
++    leSpindleCC->setObjectName(u""_s);
+     formLayout->addRow(lbl, leSpindleCC);
+ 
+     lbl = new QLabel{QApplication::translate("GCodeSettings", "Constant Laser Power Mode On:", nullptr), grbxSpindle};
+     leLaserCPC = new QLineEdit{grbxSpindle};
+-    leLaserCPC->setObjectName(QString::fromUtf8("leLaserCPC"));
++    leLaserCPC->setObjectName(u""_s);
+     formLayout->addRow(lbl, leLaserCPC);
+ 
+     lbl = new QLabel{QApplication::translate("GCodeSettings", "Dynamic Laser Power Mode On:", nullptr), grbxSpindle};
+     leLaserDPC = new QLineEdit{grbxSpindle};
+-    leLaserDPC->setObjectName(QString::fromUtf8("leLaserDPC"));
++    leLaserDPC->setObjectName(u""_s);
+     formLayout->addRow(lbl, leLaserDPC);
+ 
+     lbl = new QLabel{QApplication::translate("GCodeSettings", "Spindle/Laser Off:", nullptr), grbxSpindle};
+     leSpindleLaserOff = new QLineEdit{grbxSpindle};
+-    leSpindleLaserOff->setObjectName(QString::fromUtf8("leSpindleLaserOff"));
++    leSpindleLaserOff->setObjectName(u""_s);
+     formLayout->addRow(lbl, leSpindleLaserOff);
+ 
+     vLayout->addWidget(grbxSpindle);
+diff --git a/plugins/gcode/hatching/hatching.cpp b/plugins/gcode/hatching/hatching.cpp
+index ac207cb0..76cc7d26 100644
+--- a/plugins/gcode/hatching/hatching.cpp
++++ b/plugins/gcode/hatching/hatching.cpp
+@@ -11,6 +11,7 @@
+  * http://www.boost.org/LICENSE_1_0.txt                                         *
+  *******************************************************************************/
+ #include "hatching.h"
++#include "gi_point.h"
+ #include "project.h"
+ 
+ #include <QElapsedTimer>
+@@ -258,11 +259,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
+         }
+     }
+ 
+-    mergeSegments(returnPs);
+-    sortB(returnPs);
++    mergePaths(returnPs);
++    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
+ 
+     if(!profilePaths.empty() && prPass) {
+-        sortB(profilePaths);
++        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
+         if(gcp_.convent())
+             ReversePaths(profilePaths);
+         for(Path& path: profilePaths)
+diff --git a/plugins/gcode/pocketraster/pocketraster.cpp b/plugins/gcode/pocketraster/pocketraster.cpp
+index a794cdf4..d39b9b36 100644
+--- a/plugins/gcode/pocketraster/pocketraster.cpp
++++ b/plugins/gcode/pocketraster/pocketraster.cpp
+@@ -11,6 +11,7 @@
+  * http://www.boost.org/LICENSE_1_0.txt                                         *
+  *******************************************************************************/
+ #include "pocketraster.h"
++#include "gi_point.h"
+ #include "project.h"
+ #include <QElapsedTimer>
+ #include <execution>
+@@ -79,11 +80,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
+         }
+     }
+ 
+-    mergeSegments(returnPs);
++    mergePaths(returnPs);
+ 
+-    sortB(returnPs);
++    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
+     if(!profilePaths.empty() && prPass) {
+-        sortB(profilePaths);
++        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
+         if(gcp_.convent())
+             ReversePaths(profilePaths);
+         for(Path& path: profilePaths)
+@@ -206,7 +207,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
+     if(!profilePaths.empty() && prPass != NoProfilePass) {
+         for(auto& p: profilePaths)
+             p.push_back(p.front());
+-        returnPss.push_back(sortB(profilePaths));
++        returnPss.push_back(sortB(profilePaths, ~(App::home().pos() + App::zero().pos())));
+     }
+ 
+     if(returnPss.empty()) {
+diff --git a/plugins/gcode/profile/profile.cpp b/plugins/gcode/profile/profile.cpp
+index 842b5bc9..bfc15662 100644
+--- a/plugins/gcode/profile/profile.cpp
++++ b/plugins/gcode/profile/profile.cpp
+@@ -14,6 +14,7 @@
+ #include "app.h"
+ #include "gc_gi_bridge.h"
+ #include "gi_gcpath.h"
++#include "gi_point.h"
+ #include "graphicsview.h"
+ #include "project.h"
+ #include "utils.h"
+@@ -65,7 +66,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
+         if(gcp_.side() == GCode::On && openSrcPaths.size()) {
+             returnPss.reserve(returnPss.size() + openSrcPaths.size());
+             mergePaths(openSrcPaths);
+-            sortBeginEnd(openSrcPaths);
++            sortBeginEnd(openSrcPaths, ~(App::home().pos() + App::zero().pos()));
+             for(auto&& path: openSrcPaths)
+                 returnPss.push_back({std::move(path)});
+         }
+@@ -218,8 +219,8 @@ void Creator::makeBridges() {
+         if(rPaths.empty())
+             return;
+ 
+-        mergeSegments(rPaths);
+-        sortBeginEnd(rPaths);
++        mergePaths(rPaths);
++        sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
+ 
+         auto IsPositive = [](Paths paths) {
+             for(auto&& path: paths | std::views::drop(1))
+@@ -318,7 +319,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
+         for(auto& [nest, paths]: pathsMap) {
+             qDebug() << "nest" << nest << paths.size();
+             if(paths.size() > 1)
+-                sortB(paths);
++                sortB(paths, ~(App::home().pos() + App::zero().pos()));
+             rpaths += std::move(paths); // NOTE move?
+         }
+     } else { // Grouping by nesting depth
+diff --git a/plugins/gcode/profile/profile_form.h b/plugins/gcode/profile/profile_form.h
+index c8ae3680..08ba734c 100644
+--- a/plugins/gcode/profile/profile_form.h
++++ b/plugins/gcode/profile/profile_form.h
+@@ -112,7 +112,7 @@ public:
+                 auto lbl = new QLabel{QApplication::translate("Profile", "Milling sequence:", nullptr), this};
+ 
+                 cbxProfileSort = new QComboBox{this};
+-                cbxProfileSort->setObjectName(QString::fromUtf8("cbxProfileSort"));
++                cbxProfileSort->setObjectName(u""_s);
+                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting"));
+                 cbxProfileSort->addItem(QApplication::translate("Profile", "Grouping by nesting depth"));
+ 
+diff --git a/plugins/gcode/thermal/thermal.cpp b/plugins/gcode/thermal/thermal.cpp
+index b7ff4595..4a48fdae 100644
+--- a/plugins/gcode/thermal/thermal.cpp
++++ b/plugins/gcode/thermal/thermal.cpp
+@@ -11,6 +11,7 @@
+  * http://www.boost.org/LICENSE_1_0.txt                                         *
+  *******************************************************************************/
+ #include "thermal.h"
++#include "gi_point.h"
+ #include "project.h"
+ 
+ namespace Thermal {
+@@ -92,16 +93,16 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
+         clipper.AddOpenSubject(returnPs);
+         clipper.AddClip(framePaths);
+         clipper.Execute(ClipType::Difference, FillRule::Positive, framePaths, returnPs);
+-        sortBeginEnd(returnPs);
++        sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()));
+     }
+ 
+     if(returnPs.size())
+-        returnPss.push_back(sortB(returnPs));
++        returnPss.push_back(sortB(returnPs, ~(App::home().pos() + App::zero().pos())));
+ 
+     if(returnPss.empty()) {
+         emit fileReady(nullptr);
+     } else {
+-        sortB(returnPss);
++        sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
+         file_ = new File{std::move(gcp_), std::move(returnPss)};
+         file_->setFileName(tool.nameEnc());
+         emit fileReady(file_);
+diff --git a/plugins/gcode/voroni/jc_voronoi.cpp b/plugins/gcode/voroni/jc_voronoi.cpp
+index 78e32ae3..d0119096 100644
+--- a/plugins/gcode/voroni/jc_voronoi.cpp
++++ b/plugins/gcode/voroni/jc_voronoi.cpp
+@@ -1,15 +1,3 @@
+-// This is a personal academic project. Dear PVS-Studio, please check it.
+-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+-/********************************************************************************
+- * Author    :  Damir Bakiev                                                    *
+- * Version   :  na                                                              *
+- * Date      :  March 25, 2023                                                  *
+- * Website   :  na                                                              *
+- * Copyright :  Damir Bakiev 2016-2023                                          *
+- * License   :                                                                  *
+- * Use, modification & distribution is subject to Boost Software License Ver 1. *
+- * http://www.boost.org/LICENSE_1_0.txt                                         *
+- *******************************************************************************/
+ //// INTERNAL FUNCTIONS
+ 
+ // #if defined(_MSC_VER) && !defined(__cplusplus)
+@@ -1186,6 +1174,8 @@
+ #include "memory.h"
+ #include "myclipper.h" // NOTE ???
+ 
++#include <cancelation.h>
++
+ // INTERNAL FUNCTIONS
+ 
+ #if defined(_MSC_VER) && !defined(__cplusplus)
+diff --git a/plugins/gcode/voroni/voronoi.cpp b/plugins/gcode/voroni/voronoi.cpp
+index d95e1b94..66cca3fe 100644
+--- a/plugins/gcode/voroni/voronoi.cpp
++++ b/plugins/gcode/voroni/voronoi.cpp
+@@ -12,6 +12,7 @@
+  *******************************************************************************/
+ #include "voronoi.h"
+ #include "gi_gcpath.h"
++#include "gi_point.h"
+ #include "jc_voronoi.h"
+ #include "project.h"
+ 
+@@ -43,7 +44,7 @@ void Creator::create() {
+     if(width < tool.getDiameter(depth)) {
+         returnPs.resize(returnPs.size() - 1); // remove frame
+ 
+-        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs)}, {}};
++        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))}, {}};
+         file_->setFileName(tool.nameEnc());
+         emit fileReady(file_);
+     } else {
+@@ -56,7 +57,7 @@ void Creator::create() {
+             clipper.AddClip(openSrcPaths);
+             clipper.AddOpenSubject(copy);
+             clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
+-            sortBeginEnd(copy);
++            sortBeginEnd(copy, ~(App::home().pos() + App::zero().pos()));
+             for(auto&& p: copy)
+                 returnPss.emplace_back(Paths{p});
+         }
+@@ -176,8 +177,8 @@ void File::createGi() {
+     if(toolPathss_.size() > 1) {
+         Gi::Item* item;
+         item = new Gi::GcPath{toolPathss_.back().back(), this};
+-        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+-        item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
++        // item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
++        // item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
+         itemGroup()->push_back(item);
+         createGiPocket();
+     } else
+diff --git a/plugins/shape/CMakeLists.txt b/plugins/shape/CMakeLists.txt
+index 43b4c44e..0e8f7318 100644
+--- a/plugins/shape/CMakeLists.txt
++++ b/plugins/shape/CMakeLists.txt
+@@ -11,7 +11,6 @@
+ cmake_minimum_required(VERSION 3.20)
+ 
+ project(shape)
+-# set(CMAKE_CXX_STANDARD 20) set(CMAKE_CXX_STANDARD_REQUIRED ON)
+ 
+ file(GLOB HEADERS *.h)
+ file(GLOB SOURCES *.cpp)
+diff --git a/static_libs/clipper/myclipper.cpp b/static_libs/clipper/myclipper.cpp
+index 609f3e68..eb5d167a 100644
+--- a/static_libs/clipper/myclipper.cpp
++++ b/static_libs/clipper/myclipper.cpp
+@@ -13,6 +13,7 @@
+ #include "myclipper.h"
+ 
+ #include "app.h"
++#include "cancelation.h"
+ #include "graphicsview.h"
+ 
+ #include "qmath.h"
+@@ -23,6 +24,57 @@
+ #include <qglobal.h>
+ #include <set>
+ 
++#include <QPainter>
++#include <QPainterPath>
++#include <QPixmap>
++#include <forward_list>
++
++QIcon drawIcon(const Paths& paths, QColor color) {
++    static std::mutex m;
++    std::lock_guard l{m};
++
++    QPainterPath painterPath;
++
++    for(auto&& polygon: paths)
++        painterPath.addPolygon(~polygon);
++
++    const QRectF rect = painterPath.boundingRect();
++
++    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
++
++    double ky = rect.bottom() * scale;
++    double kx = rect.left() * scale;
++    if(rect.width() > rect.height())
++        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
++    else
++        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
++
++    QPixmap pixmap(IconSize, IconSize);
++    pixmap.fill(Qt::transparent);
++    QPainter painter;
++    painter.begin(&pixmap);
++    painter.setRenderHint(QPainter::Antialiasing);
++    painter.setPen(Qt::NoPen);
++    painter.setBrush(color);
++    //    painter.translate(tr);
++    painter.translate(-kx, ky);
++    painter.scale(scale, -scale);
++    painter.drawPath(painterPath);
++    return pixmap;
++}
++
++QIcon drawDrillIcon(QColor color) {
++    QPixmap pixmap(IconSize, IconSize);
++    pixmap.fill(Qt::transparent);
++    QPainter painter;
++    painter.begin(&pixmap);
++    painter.setRenderHint(QPainter::Antialiasing);
++    painter.setPen(Qt::NoPen);
++    painter.setBrush(color);
++    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
++    return pixmap;
++}
++
+ using namespace std::placeholders;
+ 
+ bool operator<(const QPointF& r, const QPointF& l) {
+@@ -425,16 +477,16 @@ void mergeSegments(Paths& paths, double glue) {
+         }
+     } while(size != paths.size());
+ }
+-
++#if 0
+ void mergePaths(Paths& paths, const double dist) {
+     //    msg = tr("Merge Paths");
+     size_t max;
+     do {
+         max = paths.size();
+         for(size_t i = 0; i < paths.size(); ++i) {
+-            //            setMax(max);
+-            //            setCurrent(max - paths.size());
+-            //            ifCancelThenThrow();
++            ProgressCancel::setMax(max);
++            ProgressCancel::setCurrent(max - paths.size());
++            ifCancelThenThrow();
+             auto& pi = paths[i];
+             for(size_t j = i + 1; j < paths.size(); ++j) {
+                 if(i == j) continue;
+@@ -482,57 +534,7 @@ void mergePaths(Paths& paths, const double dist) {
+         }
+     } while(max != paths.size());
+ }
+-
+-#include <QMutex>
+-#include <QPainter>
+-#include <QPainterPath>
+-#include <QPixmap>
+-
+-QIcon drawIcon(const Paths& paths, QColor color) {
+-    static QMutex m;
+-    QMutexLocker l(&m);
+-
+-    QPainterPath painterPath;
+-
+-    for(auto&& polygon: paths)
+-        painterPath.addPolygon(~polygon);
+-
+-    const QRectF rect = painterPath.boundingRect();
+-
+-    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
+-
+-    double ky = rect.bottom() * scale;
+-    double kx = rect.left() * scale;
+-    if(rect.width() > rect.height())
+-        ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
+-    else
+-        kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
+-
+-    QPixmap pixmap(IconSize, IconSize);
+-    pixmap.fill(Qt::transparent);
+-    QPainter painter;
+-    painter.begin(&pixmap);
+-    painter.setRenderHint(QPainter::Antialiasing);
+-    painter.setPen(Qt::NoPen);
+-    painter.setBrush(color);
+-    //    painter.translate(tr);
+-    painter.translate(-kx, ky);
+-    painter.scale(scale, -scale);
+-    painter.drawPath(painterPath);
+-    return pixmap;
+-}
+-
+-QIcon drawDrillIcon(QColor color) {
+-    QPixmap pixmap(IconSize, IconSize);
+-    pixmap.fill(Qt::transparent);
+-    QPainter painter;
+-    painter.begin(&pixmap);
+-    painter.setRenderHint(QPainter::Antialiasing);
+-    painter.setPen(Qt::NoPen);
+-    painter.setBrush(color);
+-    painter.drawEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
+-    return pixmap;
+-}
++#endif
+ 
+ Paths& normalize(Paths& paths) {
+     PolyTree polyTree;
+@@ -677,3 +679,375 @@ Path arc(Point p1, Point p2, Point center, int interpolation) {
+     double stop = atan2(p2.y - center.y, p2.x - center.x);
+     return arc(center, radius, start, stop, interpolation);
+ }
++
++void mergePaths(Paths& paths, const double maxDist) {
++    qDebug(__FUNCTION__);
++
++    size_t max;
++
++    auto append = [&](size_t& i, size_t& j) {
++        paths[i] += paths[j] | skipFront; // paths[i].append(paths[j].mid(1));
++        paths -= j--;                     // paths.remove(j--;
++    };
++
++    do {
++        max = paths.size();
++        for(size_t i{}; i < paths.size(); ++i) {
++            ProgressCancel::setMax(max);
++            ProgressCancel::setCurrent(max - paths.size());
++            ifCancelThenThrow();
++            for(size_t j{}; j < paths.size(); ++j) {
++                if(i == j)
++                    continue;
++                else if(paths[i].front() == paths[j].front()) {
++                    ReversePath(paths[j]);
++                    append(j, i);
++                    break;
++                } else if(paths[i].back() == paths[j].back()) {
++                    ReversePath(paths[j]);
++                    append(i, j);
++                    break;
++                } else if(paths[i].front() == paths[j].back()) {
++                    append(j, i);
++                    break;
++                } else if(paths[j].front() == paths[i].back()) {
++                    append(i, j);
++                    break;
++                } else if(maxDist > 0.0) {
++                    if /*  */ (distTo(paths[i].back(), paths[j].back()) < maxDist) {
++                        ReversePath(paths[j]);
++                        append(i, j);
++                        break; //
++                    } else if(distTo(paths[i].back(), paths[j].front()) < maxDist) {
++                        append(i, j);
++                        break; //
++                    } else if(distTo(paths[i].front(), paths[j].back()) < maxDist) {
++                        append(j, i);
++                        break;
++                    } else if(distTo(paths[i].front(), paths[j].front()) < maxDist) {
++                        ReversePath(paths[j]);
++                        append(j, i);
++                        break;
++                    }
++                }
++            }
++        }
++    } while(max != paths.size());
++}
++#if 0
++void markPolyTreeDByNesting(PolyTree& polynode) {
++    qDebug(__FUNCTION__);
++
++    int nestCtr{};
++    nesting.clear();
++    std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr](PolyTree& polynode) {
++        ++nestCtr;
++        for(auto&& node: polynode)
++            sorter(*node);
++        return nesting[&polynode] = nestCtr--;
++    };
++    sorter(polynode);
++}
++
++void sortPolyTreeByNesting(PolyTree& polynode) {
++    qDebug(__FUNCTION__);
++
++    int nestCtr{};
++    nesting.clear();
++    std::function<int(PolyTree&)> sorter = [&sorter, &nestCtr, this](PolyTree& polynode) {
++        ++nestCtr;
++        nesting[&polynode] = nestCtr;
++        switch(polynode.Count()) {
++        case 0:
++            return nestCtr--;
++        case 1:
++            return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
++        default:
++            std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
++            for(auto&& node: rwPolyTree(polynode))
++                map[sorter(*node)].emplace_back(std::move(node));
++            size_t i = polynode.Count();
++            auto it_ = polynode.end();                                         // std::reverse_iterator(polynode);
++            auto it = *reinterpret_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
++            for(auto&& [nest, nodes]: map)
++                for(auto&& node: nodes)
++                    *(--it) = std::move(node);
++            return std::max(nestCtr--, map.begin()->first);
++        }
++    };
++    sorter(polynode);
++}
++
++Pathss stacking(Paths& paths) {
++    qDebug(__FUNCTION__);
++
++    if(paths.empty()) return {};
++    Timer t("stacking");
++
++    PolyTree polyTree;
++    {
++        Timer t("stacking 1");
++        Clipper clipper;
++        clipper.AddSubject(paths);
++        clipper.AddSubject({boundOfPaths(paths, uScale)});
++        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
++        paths.clear();
++    }
++    sortPolyTreeByNesting(polyTree);
++
++    Pathss returnPss;
++    /**************************************************************************************/
++    // повернуть для уменшения дистанции между путями
++    auto rotateDiest = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
++        std::forward_list<size_t> list;
++        list.emplace_front(idx.first);
++        for(size_t i = paths.size() - 1, index = idx.first; i; --i) {
++            double minDist = std::numeric_limits<double>::max();
++            Point point;
++            for(Point pt: paths[i - 1]) {
++                double dist = distTo(pt, paths[i][index]);
++                if(minDist >= dist) {
++                    minDist = dist;
++                    point = pt;
++                }
++            }
++            if(minDist <= toolDiameter) {
++                list.emplace_front(indexOf(paths[i - 1], point));
++                index = list.front();
++            } else
++                return false;
++        }
++        for(size_t i{}; auto it: list)
++            std::rotate(paths[i].begin(), paths[i].begin() + it, paths[i].end()), ++i;
++        std::rotate(path.begin(), path.begin() + idx.second, path.end());
++        return true;
++    };
++
++    std::function<void(PolyTree*, bool)> stacker = [&stacker, &rotateDiest, &returnPss](PolyTree* node, bool newPaths) {
++        if(!returnPss.empty() || newPaths) {
++            Path path(node->Polygon());
++            if(!(gcp_.convent() ^ !node->IsHole()) ^ (gcp_.side() == Outer))
++                ReversePath(path);
++
++            // if(false && App::settings().cleanPolygons())
++            //     CleanPolygon(path, uScale * 0.0005);
++
++            if(returnPss.empty() || newPaths) {
++                returnPss.push_back({std::move(path)});
++            } else {
++                // check distance;
++                std::pair<size_t, size_t> idx;
++                double d = std::numeric_limits<double>::max();
++                //                for(size_t id {}; id < returnPss.back().back().size(); ++id) {
++                //                    const Point& ptd = returnPss.back().back()[id];
++                //                    for(size_t is {}; is < path.size(); ++is) {
++                //                        const Point& pts = path[is];
++                //                        const double l = distTo(ptdpts);
++                //                        if(d >= l) {
++                //                            d = l;
++                //                            idx.first = id;
++                //                            idx.second = is;
++                //                        }
++                //                    }
++                //                }
++
++                for(size_t iDst{}; auto ptd: returnPss.back().back()) {
++                    for(size_t iSrc{}; auto pts: path) {
++                        if(const double l = distTo(ptd, pts); d >= l) {
++                            d = l;
++                            idx.first = iDst;
++                            idx.second = iSrc;
++                        }
++                        ++iSrc;
++                    }
++                    ++iDst;
++                }
++
++                if(d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
++                    returnPss.back().emplace_back(std::move(path)); // append to last Paths
++                else
++                    returnPss.push_back({std::move(path)}); // new Paths
++            }
++
++            for(size_t i{}; auto&& var: *node)
++                stacker(var.get(), static_cast<bool>(i++));
++        } else { // Start from here
++            for(auto&& var: *node)
++                stacker(var.get(), true);
++        }
++    };
++    /**************************************************************************************/
++
++    stacker(polyTree.Count() == 1 ? polyTree[0] : &polyTree, false);
++
++    for(Paths& retPaths: returnPss) {
++        for(size_t i{}; i < retPaths.size(); ++i)
++            if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
++        std::ranges::reverse(retPaths);
++        for(Path& path: retPaths)
++            path.emplace_back(path.front());
++    }
++
++    sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
++}
++
++// Pathss& groupedPaths(Grouping group, int32_t offset, bool skipFrame) {
++//     PolyTree polyTree;
++//     {
++//         Timer t("Union EvenOdd");
++//         Clipper clipper;
++//         clipper.AddSubject(closedSrcPaths);
++//         clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
++//         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
++//     }
++//     groupedPss.clear();
++//     {
++//         Timer t("grouping");
++//         grouping(group, polyTree.Count() == 1 ? *polyTree[0] : polyTree);
++//     }
++//     if(skipFrame == false
++//         && group == Grouping::Cutoff
++//         && groupedPss.size() > 2
++//         && groupedPss.front().size() == 2)
++//         groupedPss.erase(groupedPss.begin());
++//     return groupedPss;
++// }
++
++// void grouping(Grouping group, PolyTree& node) {
++
++//     if((group == Grouping::Cutoff) ^ node.IsHole()) {
++//         Paths paths;
++//         paths.reserve(node.Count() + 1);
++//         paths.emplace_back(std::move(node.Polygon()));
++//         for(auto&& child: node)
++//             paths.emplace_back(std::move(child->Polygon()));
++//         groupedPss.emplace_back(std::move(paths));
++//     }
++//     for(auto&& child: node)
++//         grouping(group, *child);
++// }
++
++#endif
++
++Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) {
++    Rect rect(GetBounds(paths));
++    rect.bottom += k;
++    rect.left -= k;
++    rect.right += k;
++    rect.top -= k;
++    // dbgPaths({rect.AsPath()}, "boundOfPaths", Qt::magenta);
++    return rect.AsPath();
++}
++
++Paths& sortB(Paths& src, Point startPt) {
++    qDebug(__FUNCTION__);
++    // Point startPt{~(App::home().pos() + App::zero().pos())};
++    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
++        size_t swapIdx = firstIdx;
++        double destLen = std::numeric_limits<double>::max();
++        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
++            const double length = distTo(startPt, src[secondIdx].front());
++            if(destLen > length) {
++                destLen = length;
++                swapIdx = secondIdx;
++            }
++        }
++        startPt = src[swapIdx].back();
++        if(swapIdx != firstIdx)
++            std::swap(src[firstIdx], src[swapIdx]);
++    }
++    return src;
++}
++
++Pathss& sortBeginEnd(Pathss& src, Point startPt) {
++    qDebug(__FUNCTION__);
++
++    // Point startPt{~(App::home().pos() + App::zero().pos())};
++    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
++        size_t swapIdx = firstIdx;
++        double destLen = std::numeric_limits<double>::max();
++        bool reverse = false;
++        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
++            const double lenFirst = distTo(startPt, src[secondIdx].front().front());
++            const double lenLast = distTo(startPt, src[secondIdx].back().back());
++            if(lenFirst < lenLast) {
++                if(destLen > lenFirst) {
++                    destLen = lenFirst;
++                    swapIdx = secondIdx;
++                    reverse = false;
++                }
++            } else if(destLen > lenLast) {
++                destLen = lenLast;
++                swapIdx = secondIdx;
++                reverse = true;
++            }
++        }
++        //        if (reverse)
++        //            std::reverse(src[swapIdx].begin(), src[swapIdx].end());
++        //        startPt = src[swapIdx].back().back();
++        if(swapIdx != firstIdx && !reverse) {
++            startPt = src[swapIdx].back().back();
++            std::swap(src[firstIdx], src[swapIdx]);
++        }
++    }
++    return src;
++}
++
++Paths& sortBeginEnd(Paths& src, Point startPt) {
++    qDebug(__FUNCTION__);
++
++    // Point startPt{~(App::home().pos() + App::zero().pos())};
++    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
++
++        size_t swapIdx = firstIdx;
++        double destLen = std::numeric_limits<double>::max();
++        bool reverse = false;
++        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
++            const double lenFirst = distTo(startPt, src[secondIdx].front());
++            const double lenLast = distTo(startPt, src[secondIdx].back());
++            if(lenFirst < lenLast) {
++                if(destLen > lenFirst) {
++                    destLen = lenFirst;
++                    swapIdx = secondIdx;
++                    reverse = false;
++                }
++            } else if(destLen > lenLast) {
++                destLen = lenLast;
++                swapIdx = secondIdx;
++                reverse = true;
++            }
++            if(qFuzzyIsNull(destLen))
++                break;
++        }
++        if(reverse)
++            ReversePath(src[swapIdx]);
++        startPt = src[swapIdx].back();
++        if(swapIdx != firstIdx)
++            std::swap(src[firstIdx], src[swapIdx]);
++    }
++    return src;
++}
++
++Pathss& sortB(Pathss& src, Point startPt) {
++    qDebug(__FUNCTION__);
++
++    // Point startPt{~(App::home().pos() + App::zero().pos())};
++    for(size_t i{}; i < src.size(); ++i)
++        if(src[i].empty())
++            src.erase(src.begin() + i--);
++    for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
++        size_t swapIdx = firstIdx;
++        double destLen = std::numeric_limits<double>::max();
++        for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
++            const double length = distTo(startPt, src[secondIdx].front().front());
++            if(destLen > length) {
++                destLen = length;
++                swapIdx = secondIdx;
++            }
++        }
++        startPt = src[swapIdx].back().back();
++        if(swapIdx != firstIdx)
++            std::swap(src[firstIdx], src[swapIdx]);
++    }
++    return src;
++}
+diff --git a/static_libs/clipper/myclipper.h b/static_libs/clipper/myclipper.h
+index 58ef9499..37ec8415 100644
+--- a/static_libs/clipper/myclipper.h
++++ b/static_libs/clipper/myclipper.h
+@@ -19,75 +19,6 @@
+ #include <numbers>
+ #include <ranges>
+ 
+-class cancelException : public std::exception {
+-public:
+-    cancelException(const char* description)
+-        : m_descr{description} {
+-    }
+-    ~cancelException() noexcept override = default;
+-    const char* what() const noexcept override { return m_descr.c_str(); }
+-
+-private:
+-    std::string m_descr;
+-};
+-
+-class ProgressCancel {
+-    static inline int max_;
+-    static inline int current_;
+-    static inline bool cancel_;
+-
+-public:
+-    static void reset() {
+-        current_ = 0;
+-        max_ = 0;
+-        cancel_ = 0;
+-    }
+-
+-    /////////////////
+-    /// \brief Progress max
+-    /// \return
+-    ///
+-    static int max() { return max_; }
+-    /////////////////
+-    /// \brief Progress setMax
+-    /// \param max
+-    ///
+-    static void setMax(int max) { max_ = max; }
+-
+-    /////////////////
+-    /// \brief Progress current
+-    /// \return
+-    ///
+-    static int current() { return current_; }
+-    /////////////////
+-    /// \brief Progress setCurrent
+-    /// \param current
+-    ///
+-    static void setCurrent(int current = 0) { current_ = current; }
+-    /////////////////
+-    /// \brief Progress incCurrent
+-    ///
+-    static void incCurrent() { ++current_; }
+-    static bool isCancel() { return cancel_; }
+-    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
+-        ++current_;
+-        if(cancel_) [[unlikely]] {
+-            //            static std::stringstream ss;
+-            //            ss.clear();
+-            //            ss << "file: "
+-            //               << location.file_name() << "("
+-            //               << location.line() << ":"
+-            //               << location.column() << ") `"
+-            //               << location.function_name();
+-            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
+-            throw cancelException(__FUNCTION__);
+-        }
+-    }
+-    static void setCancel(bool cancel) { cancel_ = cancel; }
+-};
+-
+-inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
+-
+ enum {
+     IconSize = 24
+ };
+@@ -154,6 +85,10 @@ Paths& TranslatePaths(Paths& path, const Point& pos);
+ 
+ void mergeSegments(Paths& paths, double glue = 0.0);
+ 
++/////////////////////////////////////////////////
++/// \brief склеивает пути при совпадении конечных точек
++/// \param paths - пути
++/// \param maxDist - максимальное расстояние между конечными точками
+ void mergePaths(Paths& paths, const double dist = 0.0);
+ 
+ QIcon drawIcon(const Paths& paths, QColor color = Qt::black);
+@@ -427,3 +362,14 @@ inline auto rwPolyTree(PolyTree& polyTree) {
+ 
+ Path arc(const Point& center, double radius, double start, double stop, int interpolation);
+ Path arc(Point p1, Point p2, Point center, int interpolation);
++
++void markPolyTreeDByNesting(PolyTree& polynode);
++void sortPolyTreeByNesting(PolyTree& polynode);
++Pathss stacking(Paths& paths);
++
++Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k);
++
++Paths& sortB(Paths& src, Point startPt);
++Paths& sortBeginEnd(Paths& src, Point startPt);
++Pathss& sortB(Pathss& src, Point startPt);
++Pathss& sortBeginEnd(Pathss& src, Point startPt);
+diff --git a/static_libs/common/CMakeLists.txt b/static_libs/common/CMakeLists.txt
+index 2dede4d9..638b3e05 100644
+--- a/static_libs/common/CMakeLists.txt
++++ b/static_libs/common/CMakeLists.txt
+@@ -17,7 +17,7 @@ find_package(
+   COMPONENTS Qml
+   REQUIRED)
+ 
+-set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
++# set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
+ 
+ file(GLOB HEADERS *.h)
+ file(GLOB SOURCES *.cpp)
+diff --git a/static_libs/common/cancelation.h b/static_libs/common/cancelation.h
+new file mode 100644
+index 00000000..da82242b
+--- /dev/null
++++ b/static_libs/common/cancelation.h
+@@ -0,0 +1,45 @@
++#pragma once
++
++#include <exception>
++#include <string>
++
++class Cancel : public std::exception {
++    std::string m_descr;
++
++public:
++    Cancel(const char* description)
++        : m_descr{description} {
++    }
++    ~Cancel() noexcept override = default;
++    const char* what() const noexcept override { return m_descr.c_str(); }
++};
++
++class ProgressCancel {
++    /*thread_local*/ static inline int max_;
++    /*thread_local*/ static inline int current_;
++    /*thread_local*/ static inline bool cancel_;
++
++public:
++    static void reset() {
++        current_ = 0;
++        max_ = 0;
++        cancel_ = 0;
++    }
++
++    static int max() { return max_; }
++    static void setMax(int max) { max_ = max; }
++    static int current() { return current_; }
++    static void setCurrent(int current = 0) { current_ = current; }
++    static void incCurrent() { ++current_; }
++    static bool isCancel() { return cancel_; }
++    static void ifCancelThenThrow() {
++        ++current_;
++        if(cancel_) [[unlikely]]
++            throw Cancel{__FUNCTION__};
++    }
++    static void setCancel(bool cancel) { cancel_ = cancel; }
++    static void cancel() { cancel_ = true; }
++};
++
++inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
++
+diff --git a/static_libs/common/colorselector.cpp b/static_libs/common/colorselector.cpp
+index 6fd66c10..d416ffff 100644
+--- a/static_libs/common/colorselector.cpp
++++ b/static_libs/common/colorselector.cpp
+@@ -72,22 +72,22 @@ ColorSelector::ColorSelector(QColor& color, const QColor& defaultColor, QWidget*
+     , color_(color)
+     , defaultColor_(defaultColor) {
+     if(objectName().isEmpty())
+-        setObjectName(QString::fromUtf8("ColorSelector"));
++        setObjectName(u""_s);
+     auto horizontalLayout = new QHBoxLayout{this};
+-    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
++    horizontalLayout->setObjectName(u""_s);
+     horizontalLayout->setContentsMargins(0, 0, 0, 0);
+ 
+     lineEdit = new QLineEdit{this};
+-    lineEdit->setObjectName(QString::fromUtf8("lineEdit"));
++    lineEdit->setObjectName(u""_s);
+     lineEdit->setReadOnly(true);
+     horizontalLayout->addWidget(lineEdit);
+ 
+     pbSelectColor = new PushButton{color, this};
+-    pbSelectColor->setObjectName(QString::fromUtf8("pbSelectColor"));
++    pbSelectColor->setObjectName(u""_s);
+     horizontalLayout->addWidget(pbSelectColor);
+ 
+     pbResetColor = new QPushButton{tr("Reset"), this};
+-    pbResetColor->setObjectName(QString::fromUtf8("pbResetColor"));
++    pbResetColor->setObjectName(u""_s);
+     horizontalLayout->addWidget(pbResetColor);
+     horizontalLayout->setStretch(1, 1);
+     horizontalLayout->setStretch(2, 1);
+diff --git a/static_libs/common/depthform.cpp b/static_libs/common/depthform.cpp
+index 9a2b08dc..f91d6f76 100644
+--- a/static_libs/common/depthform.cpp
++++ b/static_libs/common/depthform.cpp
+@@ -75,16 +75,16 @@ void DepthForm::setValue(double value) {
+ 
+ void DepthForm::setupUi(QWidget* Form) {
+     if(Form->objectName().isEmpty())
+-        Form->setObjectName(QString::fromUtf8("DepthForm"));
++        Form->setObjectName(u""_s);
+ 
+     QHBoxLayout* horizontalLayout = new QHBoxLayout{Form};
+-    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
++    horizontalLayout->setObjectName(u""_s);
+     horizontalLayout->setContentsMargins(0, 0, 0, 0);
+     horizontalLayout->setSpacing(2);
+ 
+     {
+         label = new QLabel{Form};
+-        label->setObjectName(QString::fromUtf8("label"));
++        label->setObjectName(u""_s);
+ 
+         QFontMetrics fm(font());
+         label->setMinimumWidth(std::max(
+@@ -102,19 +102,19 @@ void DepthForm::setupUi(QWidget* Form) {
+         sizePolicy.setVerticalStretch(0);
+ 
+         rbCopper = new QRadioButton{Form};
+-        rbCopper->setObjectName(QString::fromUtf8("rbCopper"));
++        rbCopper->setObjectName(u""_s);
+         sizePolicy.setHeightForWidth(rbCopper->sizePolicy().hasHeightForWidth());
+         rbCopper->setSizePolicy(sizePolicy);
+         horizontalLayout->addWidget(rbCopper);
+ 
+         rbBoard = new QRadioButton{Form};
+-        rbBoard->setObjectName(QString::fromUtf8("rbBoard"));
++        rbBoard->setObjectName(u""_s);
+         sizePolicy.setHeightForWidth(rbBoard->sizePolicy().hasHeightForWidth());
+         rbBoard->setSizePolicy(sizePolicy);
+         horizontalLayout->addWidget(rbBoard);
+ 
+         rbCustom = new QRadioButton{Form};
+-        rbCustom->setObjectName(QString::fromUtf8("rbCustom"));
++        rbCustom->setObjectName(u""_s);
+         sizePolicy.setHeightForWidth(rbCustom->sizePolicy().hasHeightForWidth());
+         rbCustom->setSizePolicy(sizePolicy);
+         horizontalLayout->addWidget(rbCustom);
+@@ -122,7 +122,7 @@ void DepthForm::setupUi(QWidget* Form) {
+ 
+     {
+         dsbx = new DoubleSpinBox{Form};
+-        dsbx->setObjectName(QString::fromUtf8("dsbx"));
++        dsbx->setObjectName(u""_s);
+         dsbx->setDecimals(3);
+         dsbx->setMaximum(100.0);
+         dsbx->setSingleStep(0.005);
+diff --git a/static_libs/common/settingsdialog.cpp b/static_libs/common/settingsdialog.cpp
+index 5e7e7443..2f955d1c 100644
+--- a/static_libs/common/settingsdialog.cpp
++++ b/static_libs/common/settingsdialog.cpp
+@@ -340,34 +340,34 @@ bool SettingsDialog::eventFilter(QObject* watched, QEvent* event) {
+ 
+ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     if(SettingsDialog->objectName().isEmpty())
+-        SettingsDialog->setObjectName(QString::fromUtf8("SettingsDialog"));
++        SettingsDialog->setObjectName(u""_s);
+     SettingsDialog->resize(392, 517);
+     gridLayout_2 = new QGridLayout{SettingsDialog};
+-    gridLayout_2->setObjectName(QString::fromUtf8("gridLayout_2"));
++    gridLayout_2->setObjectName(u""_s);
+     gridLayout_2->setContentsMargins(6, 6, 6, 6);
+     buttonBox = new QDialogButtonBox{SettingsDialog};
+-    buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
++    buttonBox->setObjectName(u""_s);
+     buttonBox->setOrientation(Qt::Horizontal);
+     buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
+ 
+     gridLayout_2->addWidget(buttonBox, 1, 1, 1, 1);
+ 
+     tabwMain = new QTabWidget{SettingsDialog};
+-    tabwMain->setObjectName(QString::fromUtf8("tabwMain"));
++    tabwMain->setObjectName(u""_s);
+     tabGui = new QWidget();
+-    tabGui->setObjectName(QString::fromUtf8("tabGui"));
++    tabGui->setObjectName(u""_s);
+     verticalLayout_8 = new QVBoxLayout{tabGui};
+-    verticalLayout_8->setObjectName(QString::fromUtf8("verticalLayout_8"));
++    verticalLayout_8->setObjectName(u""_s);
+     verticalLayout_8->setContentsMargins(6, 6, 6, 6);
+     groupBox = new QGroupBox{tabGui};
+-    groupBox->setObjectName(QString::fromUtf8("groupBox"));
++    groupBox->setObjectName(u""_s);
+     gridLayout = new QGridLayout{groupBox};
+-    gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
++    gridLayout->setObjectName(u""_s);
+     gridLayout->setContentsMargins(6, 9, 6, 6);
+ 
+     cbxFontSize = new QComboBox{groupBox};
+     cbxFontSize->addItems({"7", "8", "9", "10", "11", "12", "13", "14"});
+-    cbxFontSize->setObjectName(QString::fromUtf8("cbxFontSize"));
++    cbxFontSize->setObjectName(u""_s);
+     QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+     sizePolicy.setHorizontalStretch(0);
+     sizePolicy.setVerticalStretch(0);
+@@ -377,29 +377,29 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout->addWidget(cbxFontSize, 0, 1, 1, 1);
+ 
+     cbxLanguage = new QComboBox{groupBox};
+-    cbxLanguage->setObjectName(QString::fromUtf8("cbxLanguage"));
++    cbxLanguage->setObjectName(u""_s);
+ 
+     gridLayout->addWidget(cbxLanguage, 1, 1, 1, 1);
+ 
+     label_17 = new QLabel{groupBox};
+-    label_17->setObjectName(QString::fromUtf8("label_17"));
++    label_17->setObjectName(u""_s);
+     label_17->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+ 
+     gridLayout->addWidget(label_17, 1, 0, 1, 1);
+ 
+     fontSizeLabel = new QLabel{groupBox};
+-    fontSizeLabel->setObjectName(QString::fromUtf8("fontSizeLabel"));
++    fontSizeLabel->setObjectName(u""_s);
+     fontSizeLabel->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+ 
+     gridLayout->addWidget(fontSizeLabel, 0, 0, 1, 1);
+ 
+     cbxTheme = new QComboBox{groupBox};
+-    cbxTheme->setObjectName(QString::fromUtf8("cbxTheme"));
++    cbxTheme->setObjectName(u""_s);
+ 
+     gridLayout->addWidget(cbxTheme, 2, 1, 1, 1);
+ 
+     label = new QLabel{groupBox};
+-    label->setObjectName(QString::fromUtf8("label"));
++    label->setObjectName(u""_s);
+     label->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+ 
+     gridLayout->addWidget(label, 2, 0, 1, 1);
+@@ -407,39 +407,39 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     verticalLayout_8->addWidget(groupBox);
+ 
+     gbViewer = new QGroupBox{tabGui};
+-    gbViewer->setObjectName(QString::fromUtf8("gbViewer"));
++    gbViewer->setObjectName(u""_s);
+     verticalLayout_2 = new QVBoxLayout{gbViewer};
+-    verticalLayout_2->setObjectName(QString::fromUtf8("verticalLayout_2"));
++    verticalLayout_2->setObjectName(u""_s);
+     verticalLayout_2->setContentsMargins(6, 9, 6, 6);
+     chbxOpenGl = new QCheckBox{gbViewer};
+-    chbxOpenGl->setObjectName(QString::fromUtf8("chbxOpenGl"));
++    chbxOpenGl->setObjectName(u""_s);
+ 
+     verticalLayout_2->addWidget(chbxOpenGl);
+ 
+     chbxAntialiasing = new QCheckBox{gbViewer};
+-    chbxAntialiasing->setObjectName(QString::fromUtf8("chbxAntialiasing"));
++    chbxAntialiasing->setObjectName(u""_s);
+ 
+     verticalLayout_2->addWidget(chbxAntialiasing);
+ 
+     chbxSmoothScSh = new QCheckBox{gbViewer};
+-    chbxSmoothScSh->setObjectName(QString::fromUtf8("chbxSmoothScSh"));
++    chbxSmoothScSh->setObjectName(u""_s);
+ 
+     verticalLayout_2->addWidget(chbxSmoothScSh);
+ 
+     chbxAnimSelection = new QCheckBox{gbViewer};
+-    chbxAnimSelection->setObjectName(QString::fromUtf8("chbxAnimSelection"));
++    chbxAnimSelection->setObjectName(u""_s);
+ 
+     verticalLayout_2->addWidget(chbxAnimSelection);
+ 
+     gbxColor = new QGroupBox{gbViewer};
+-    gbxColor->setObjectName(QString::fromUtf8("gbxColor"));
++    gbxColor->setObjectName(u""_s);
+     QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+     sizePolicy1.setHorizontalStretch(0);
+     sizePolicy1.setVerticalStretch(0);
+     sizePolicy1.setHeightForWidth(gbxColor->sizePolicy().hasHeightForWidth());
+     gbxColor->setSizePolicy(sizePolicy1);
+     formLayout = new QFormLayout{gbxColor};
+-    formLayout->setObjectName(QString::fromUtf8("formLayout"));
++    formLayout->setObjectName(u""_s);
+     formLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+     formLayout->setContentsMargins(6, 9, 6, 6);
+ 
+@@ -449,40 +449,40 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+ 
+     tabwMain->addTab(tabGui, QString());
+     tabUtils = new QWidget();
+-    tabUtils->setObjectName(QString::fromUtf8("tabUtils"));
++    tabUtils->setObjectName(u""_s);
+     verticalLayout = new QVBoxLayout{tabUtils};
+-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
++    verticalLayout->setObjectName(u""_s);
+     groupBox_5 = new QGroupBox{tabUtils};
+-    groupBox_5->setObjectName(QString::fromUtf8("groupBox_5"));
++    groupBox_5->setObjectName(u""_s);
+     gridLayout_3 = new QGridLayout{groupBox_5};
+-    gridLayout_3->setObjectName(QString::fromUtf8("gridLayout_3"));
++    gridLayout_3->setObjectName(u""_s);
+     gridLayout_3->setContentsMargins(6, 9, 6, 6);
+     label_6 = new QLabel{groupBox_5};
+-    label_6->setObjectName(QString::fromUtf8("label_6"));
++    label_6->setObjectName(u""_s);
+     label_6->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+ 
+     gridLayout_3->addWidget(label_6, 0, 1, 1, 1);
+ 
+     label_8 = new QLabel{groupBox_5};
+-    label_8->setObjectName(QString::fromUtf8("label_8"));
++    label_8->setObjectName(u""_s);
+     label_8->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+ 
+     gridLayout_3->addWidget(label_8, 0, 2, 1, 1);
+ 
+     label_9 = new QLabel{groupBox_5};
+-    label_9->setObjectName(QString::fromUtf8("label_9"));
++    label_9->setObjectName(u""_s);
+     label_9->setAlignment(Qt::AlignBottom | Qt::AlignHCenter);
+ 
+     gridLayout_3->addWidget(label_9, 0, 3, 1, 1);
+ 
+     label_7 = new QLabel{groupBox_5};
+-    label_7->setObjectName(QString::fromUtf8("label_7"));
++    label_7->setObjectName(u""_s);
+     label_7->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+ 
+     gridLayout_3->addWidget(label_7, 1, 0, 1, 1);
+ 
+     dsbxZeroX = new DoubleSpinBox{groupBox_5};
+-    dsbxZeroX->setObjectName(QString::fromUtf8("dsbxZeroX"));
++    dsbxZeroX->setObjectName(u""_s);
+     dsbxZeroX->setMinimumSize(QSize(100, 0));
+     dsbxZeroX->setDecimals(3);
+     dsbxZeroX->setMinimum(-1000.0);
+@@ -491,7 +491,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout_3->addWidget(dsbxZeroX, 1, 1, 1, 1);
+ 
+     dsbxZeroY = new DoubleSpinBox{groupBox_5};
+-    dsbxZeroY->setObjectName(QString::fromUtf8("dsbxZeroY"));
++    dsbxZeroY->setObjectName(u""_s);
+     dsbxZeroY->setMinimumSize(QSize(100, 0));
+     dsbxZeroY->setDecimals(3);
+     dsbxZeroY->setMinimum(-1000.0);
+@@ -500,20 +500,20 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout_3->addWidget(dsbxZeroY, 1, 2, 1, 1);
+ 
+     cbxZeroPos = new QComboBox{groupBox_5};
+-    cbxZeroPos->setObjectName(QString::fromUtf8("cbxZeroPos"));
++    cbxZeroPos->setObjectName(u""_s);
+     sizePolicy.setHeightForWidth(cbxZeroPos->sizePolicy().hasHeightForWidth());
+     cbxZeroPos->setSizePolicy(sizePolicy);
+ 
+     gridLayout_3->addWidget(cbxZeroPos, 1, 3, 1, 1);
+ 
+     label_4 = new QLabel{groupBox_5};
+-    label_4->setObjectName(QString::fromUtf8("label_4"));
++    label_4->setObjectName(u""_s);
+     label_4->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+ 
+     gridLayout_3->addWidget(label_4, 2, 0, 1, 1);
+ 
+     dsbxHomeX = new DoubleSpinBox{groupBox_5};
+-    dsbxHomeX->setObjectName(QString::fromUtf8("dsbxHomeX"));
++    dsbxHomeX->setObjectName(u""_s);
+     dsbxHomeX->setMinimumSize(QSize(100, 0));
+     dsbxHomeX->setDecimals(3);
+     dsbxHomeX->setMinimum(-1000.0);
+@@ -522,7 +522,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout_3->addWidget(dsbxHomeX, 2, 1, 1, 1);
+ 
+     dsbxHomeY = new DoubleSpinBox{groupBox_5};
+-    dsbxHomeY->setObjectName(QString::fromUtf8("dsbxHomeY"));
++    dsbxHomeY->setObjectName(u""_s);
+     dsbxHomeY->setMinimumSize(QSize(100, 0));
+     dsbxHomeY->setDecimals(3);
+     dsbxHomeY->setMinimum(-1000.0);
+@@ -531,20 +531,20 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout_3->addWidget(dsbxHomeY, 2, 2, 1, 1);
+ 
+     cbxHomePos = new QComboBox{groupBox_5};
+-    cbxHomePos->setObjectName(QString::fromUtf8("cbxHomePos"));
++    cbxHomePos->setObjectName(u""_s);
+     sizePolicy.setHeightForWidth(cbxHomePos->sizePolicy().hasHeightForWidth());
+     cbxHomePos->setSizePolicy(sizePolicy);
+ 
+     gridLayout_3->addWidget(cbxHomePos, 2, 3, 1, 1);
+ 
+     label_5 = new QLabel{groupBox_5};
+-    label_5->setObjectName(QString::fromUtf8("label_5"));
++    label_5->setObjectName(u""_s);
+     label_5->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+ 
+     gridLayout_3->addWidget(label_5, 3, 0, 1, 1);
+ 
+     dsbxPinX = new DoubleSpinBox{groupBox_5};
+-    dsbxPinX->setObjectName(QString::fromUtf8("dsbxPinX"));
++    dsbxPinX->setObjectName(u""_s);
+     dsbxPinX->setDecimals(3);
+     dsbxPinX->setMinimum(-1000.0);
+     dsbxPinX->setMaximum(1000.0);
+@@ -552,7 +552,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout_3->addWidget(dsbxPinX, 3, 1, 1, 1);
+ 
+     dsbxPinY = new DoubleSpinBox{groupBox_5};
+-    dsbxPinY->setObjectName(QString::fromUtf8("dsbxPinY"));
++    dsbxPinY->setObjectName(u""_s);
+     dsbxPinY->setDecimals(3);
+     dsbxPinY->setMinimum(-1000.0);
+     dsbxPinY->setMaximum(1000.0);
+@@ -560,47 +560,47 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
+     gridLayout_3->addWidget(dsbxPinY, 3, 2, 1, 1);
+ 
+     labelAPIcon = new QLabel{groupBox_5};
+-    labelAPIcon->setObjectName(QString::fromUtf8("labelAPIcon"));
++    labelAPIcon->setObjectName(u""_s);
+ 
+     gridLayout_3->addWidget(labelAPIcon, 0, 0, 1, 1);
+ 
+     verticalLayout->addWidget(groupBox_5);
+ 
+     chbxScaleHZMarkers = new QCheckBox{tabUtils};
+-    chbxScaleHZMarkers->setObjectName(QString::fromUtf8("chbxScaleHZMarkers"));
++    chbxScaleHZMarkers->setObjectName(u""_s);
+ 
+     verticalLayout->addWidget(chbxScaleHZMarkers);
+ 
+     chbxScalePinMarkers = new QCheckBox{tabUtils};
+-    chbxScalePinMarkers->setObjectName(QString::fromUtf8("chbxScalePinMarkers"));
++    chbxScalePinMarkers->setObjectName(u""_s);
+ 
+     verticalLayout->addWidget(chbxScalePinMarkers);
+ 
+     groupBox_4 = new QGroupBox{tabUtils};
+-    groupBox_4->setObjectName(QString::fromUtf8("groupBox_4"));
++    groupBox_4->setObjectName(u""_s);
+     formLayout_3 = new QFormLayout{groupBox_4};
+-    formLayout_3->setObjectName(QString::fromUtf8("formLayout_3"));
++    formLayout_3->setObjectName(u""_s);
+     formLayout_3->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+     formLayout_3->setContentsMargins(6, 9, 6, 6);
+     minimumCircleSegmentsLabel = new QLabel{groupBox_4};
+-    minimumCircleSegmentsLabel->setObjectName(QString::fromUtf8("minimumCircleSegmentsLabel"));
++    minimumCircleSegmentsLabel->setObjectName(u""_s);
+ 
+     formLayout_3->setWidget(0, QFormLayout::LabelRole, minimumCircleSegmentsLabel);
+ 
+     sbxMinCircleSegments = new QSpinBox{groupBox_4};
+-    sbxMinCircleSegments->setObjectName(QString::fromUtf8("sbxMinCircleSegments"));
++    sbxMinCircleSegments->setObjectName(u""_s);
+     sbxMinCircleSegments->setMinimum(12);
+     sbxMinCircleSegments->setMaximum(360);
+ 
+     formLayout_3->setWidget(0, QFormLayout::FieldRole, sbxMinCircleSegments);
+ 
+     minimumCircleSegmentLengthLabel = new QLabel{groupBox_4};
+-    minimumCircleSegmentLengthLabel->setObjectName(QString::fromUtf8("minimumCircleSegmentLengthLabel"));
++    minimumCircleSegmentLengthLabel->setObjectName(u""_s);
+ 
+     formLayout_3->setWidget(1, QFormLayout::LabelRole, minimumCircleSegmentLengthLabel);
+ 
+     dsbxMinCircleSegmentLength = new DoubleSpinBox{groupBox_4};
+-    dsbxMinCircleSegmentLength->setObjectName(QString::fromUtf8("dsbxMinCircleSegmentLength"));
++    dsbxMinCircleSegmentLength->setObjectName(u""_s);
+     dsbxMinCircleSegmentLength->setDecimals(2);
+     dsbxMinCircleSegmentLength->setMinimum(0.010000000000000);
+     dsbxMinCircleSegmentLength->setMaximum(10.0);
+diff --git a/static_libs/gi/gi.cpp b/static_libs/gi/gi.cpp
+index ddea87de..0f591301 100644
+--- a/static_libs/gi/gi.cpp
++++ b/static_libs/gi/gi.cpp
+@@ -27,7 +27,7 @@ namespace Gi {
+ 
+ Item::Item(AbstractFile* file)
+     : file_{file}
+-    , pen_{Qt::white, 1.0 / App::grView().getScale()}
++    , pen_{Qt::white, 0.0}
+     , colorPtr_{file ? &file->color() : nullptr}
+     , color_{Qt::white}
+     , brushColor_{colorPtr_ ? *colorPtr_ : color_}
+@@ -113,8 +113,7 @@ double Item::scaleFactor() const {
+     double scale = 1.0;
+     if(scene() && scene()->views().size()) {
+         scale /= scene()->views().front()->transform().m11();
+-        if(file_)
+-            scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
++        if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
+     }
+     return scale;
+ }
+diff --git a/static_libs/gi/gi_gcpath.cpp b/static_libs/gi/gi_gcpath.cpp
+index d3e6937e..04395688 100644
+--- a/static_libs/gi/gi_gcpath.cpp
++++ b/static_libs/gi/gi_gcpath.cpp
+@@ -11,116 +11,68 @@
+  * http://www.boost.org/LICENSE_1_0.txt                                         *
+  ********************************************************************************/
+ #include "gi_gcpath.h"
+-
+-#include "gcode.h"
+-
+-#include "graphicsview.h"
+ #include <QPainter>
+-#include <QStyleOptionGraphicsItem>
+-
+-#define QT_DEBUG
+-// #undef QT_DEBUG
++#include <ranges>
+ 
+ namespace Gi {
+ 
++GcPath::GcPath(const Path& path, AbstractFile* file)
++    : GcPath{Paths{path}, file} { }
++
+ GcPath::GcPath(const Paths& paths, AbstractFile* file)
+     : gcFile_{file} {
+-    for(const Path& path: paths)
+-        shape_.addPolygon(~path);
++    for(const Path& path: paths) shape_.addPolygon(~path);
+     double k;
+-    if(gcFile_)
+-        k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
+-    else
+-        k = pen_.widthF() * 0.5;
+-    boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
+-#ifdef QT_DEBUG
+-    // setAcceptHoverEvents(true);
+-#endif
+-}
++    // if(gcFile_)
++    //     k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
++    // else
++    k = pen_.widthF() * 0.5;
++    boundingRect_ = shape_.boundingRect() + QMarginsF{k, k, k, k};
+ 
+-GcPath::GcPath(const Path& path, AbstractFile* file)
+-    : gcFile_{file} {
+-    shape_.addPolygon(~path);
+-    double k;
+-    if(gcFile_)
+-        k = 0; // FIXME  gcFile_->gcp_.getToolDiameter() * 0.5;
+-    else
+-        k = pen_.widthF() * 0.5;
+-    boundingRect_ = shape_.boundingRect() + QMarginsF(k, k, k, k);
+-#ifdef QT_DEBUG
+     // setAcceptHoverEvents(true);
+-#endif
+ }
+ 
+ QRectF GcPath::boundingRect() const { return boundingRect_; }
+ 
+-void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+-    Q_UNUSED(option)
++void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
++    if(pnColorPrt_) pen_.setColor(*pnColorPrt_);
++    if(colorPtr_) color_ = *colorPtr_;
+ 
+-    if(pnColorPrt_)
+-        pen_.setColor(*pnColorPrt_);
+-    if(colorPtr_)
+-        color_ = *colorPtr_;
++    painter->setBrush(Qt::NoBrush);
++    painter->setPen(Qt::NoPen);
+ 
+-    if(pen_.widthF() == 0) {
+-        QPen pen(pen_);
++    QPen pen{pen_};
++    if(qFuzzyIsNull(pen_.widthF())) {
+         pen.setWidthF(1.5 * scaleFactor());
+-        painter->setPen(pen);
+-    } else
+-        painter->setPen(pen_);
+-#ifdef QT_DEBUG
+-    if(option->state & QStyle::State_MouseOver) {
+-        QPen pen(pen_);
+-        pen.setWidthF(2.0 * scaleFactor());
+-        pen.setStyle(Qt::CustomDashLine);
+-        pen.setCapStyle(Qt::FlatCap);
+-        pen.setDashPattern({2.0, 2.0});
+-        painter->setPen(pen);
++        updateArrows(); // for cut direction
++        painter->strokePath(arrows_, pen);
+     }
+-#endif
+-    painter->setBrush(QBrush(Qt::NoBrush));
+-    painter->drawPath(shape_);
+-
+-    //    painter->setPen(QPen(Qt::magenta, 0.0));
+-    //    painter->drawRect(rect_);
+-
+-    ////////////////////////////////////////////////////// for debug cut direction
+-#ifdef QT_DEBUG
+-    if(sc_ != scaleFactor())
+-        updateArrows();
+-    painter->drawPath(arrows_);
+-#endif
++    painter->strokePath(shape_, pen);
+ }
+ 
+ int GcPath::type() const { return Type::Path_; }
+ 
+ Paths GcPath::paths(int) const { return {} /*paths_*/; }
+-#ifdef QT_DEBUG
++
+ void GcPath::updateArrows() {
++    if(sc_ == scaleFactor()) return;
+     sc_ = scaleFactor();
+-    arrows_ = QPainterPath(); //.clear();
+-    if(qFuzzyIsNull(pen_.widthF())) {
+-        for(const QPolygonF& path: shape_.toSubpathPolygons()) {
+-            for(int i = 0; i < path.size() - 1; ++i) {
+-                QLineF line(path[i + 1], path[i]);
+-                double length = 30 * scaleFactor();
+-                if(line.length() < length && i)
+-                    continue;
+-                if(length > 0.5)
+-                    length = 0.5;
+-                const double angle = line.angle();
+-                line.setLength(length);
+-                line.setAngle(angle + 10);
+-                arrows_.moveTo(line.p1());
+-                arrows_.lineTo(line.p2());
+-                // painter->drawLine(line);
+-                line.setAngle(angle - 10);
+-                arrows_.moveTo(line.p1());
+-                arrows_.lineTo(line.p2());
+-                // painter->drawLine(line);
+-            }
++    arrows_.clear();
++
++    const double length = std::clamp(30 * scaleFactor(), 0.0, 0.5);
++    for(const QPolygonF& path: shape_.toSubpathPolygons()) {
++        for(auto&& r: std::ranges::slide_view(path, 2)) {
++            QLineF line{r.back(), r.front()};
++            if(line.length() < length) continue;
++            const double angle = line.angle();
++            line.setLength(length);
++            line.setAngle(angle + 10);
++            arrows_.moveTo(line.p2());
++            line.setAngle(angle - 10);
++            arrows_.lineTo(line.p1());
++            arrows_.lineTo(line.p2());
+         }
+     }
+ }
+-#endif
++
+ } // namespace Gi
+diff --git a/static_libs/gi/gi_gcpath.h b/static_libs/gi/gi_gcpath.h
+index 40690081..572026fb 100644
+--- a/static_libs/gi/gi_gcpath.h
++++ b/static_libs/gi/gi_gcpath.h
+@@ -11,7 +11,6 @@
+ #pragma once
+ 
+ #include "gi.h"
+-#define QT_DEBUG
+ namespace GCode {
+ class File;
+ }
+@@ -20,8 +19,8 @@ namespace Gi {
+ 
+ class GcPath : public Item {
+ public:
+-    GcPath(const Paths& paths, AbstractFile* file = nullptr);
+     GcPath(const Path& path, AbstractFile* file = nullptr);
++    GcPath(const Paths& paths, AbstractFile* file = nullptr);
+     ~GcPath() override = default;
+     QRectF boundingRect() const override;
+     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+@@ -30,13 +29,11 @@ public:
+ 
+ private:
+     AbstractFile* gcFile_;
+-#ifdef QT_DEBUG
+     QPainterPath arrows_;
+-    double sc_ = 0;
++    double sc_{};
+     void updateArrows();
+-#endif
++
+ protected:
+     void changeColor() override { }
+ };
+-#undef QT_DEBUG
+ } // namespace Gi
+diff --git a/static_libs/tooldatabase/tool_selectorform.cpp b/static_libs/tooldatabase/tool_selectorform.cpp
+index 6be950c2..bc33a5f2 100644
+--- a/static_libs/tooldatabase/tool_selectorform.cpp
++++ b/static_libs/tooldatabase/tool_selectorform.cpp
+@@ -89,16 +89,16 @@ QLabel* ToolSelectorForm::label() const {
+ 
+ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
+     if(ToolSelectorForm->objectName().isEmpty())
+-        ToolSelectorForm->setObjectName(QString::fromUtf8("ToolSelectorForm"));
++        ToolSelectorForm->setObjectName(u""_s);
+     ToolSelectorForm->resize(236, 180);
+ 
+     auto gridLayout = new QGridLayout{ToolSelectorForm};
+-    gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
++    gridLayout->setObjectName(u""_s);
+     gridLayout->setContentsMargins(0, 0, 0, 0);
+ 
+     {
+         label_ = new QLabel{ToolSelectorForm};
+-        label_->setObjectName(QString::fromUtf8("label"));
++        label_->setObjectName(u""_s);
+ 
+         {
+             QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+@@ -118,14 +118,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
+ 
+     {
+         auto horizontalLayout = new QHBoxLayout();
+-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
++        horizontalLayout->setObjectName(u""_s);
+ 
+         lblPixmap = new QLabel{ToolSelectorForm};
+-        lblPixmap->setObjectName(QString::fromUtf8("lblPixmap"));
++        lblPixmap->setObjectName(u""_s);
+         horizontalLayout->addWidget(lblPixmap);
+ 
+         lblName = new QLabel{ToolSelectorForm};
+-        lblName->setObjectName(QString::fromUtf8("lblName"));
++        lblName->setObjectName(u""_s);
+         horizontalLayout->addWidget(lblName);
+ 
+         horizontalLayout->setStretch(1, 1);
+@@ -133,14 +133,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
+     }
+     {
+         pbSelect = new QPushButton{ToolSelectorForm};
+-        pbSelect->setObjectName(QString::fromUtf8("pbSelect"));
++        pbSelect->setObjectName(u""_s);
+         pbSelect->setIcon(QIcon::fromTheme("view-form"));
+         gridLayout->addWidget(pbSelect, 1, 1, 1, 1);
+     }
+ 
+     {
+         pbEdit = new QPushButton{ToolSelectorForm};
+-        pbEdit->setObjectName(QString::fromUtf8("pbEdit"));
++        pbEdit->setObjectName(u""_s);
+         pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+         gridLayout->addWidget(pbEdit, 1, 2, 1, 1);
+     }
+diff --git a/third_party/clipper2 b/third_party/clipper2
+index 20bd6947..4ab4da0f 100644
+--- a/third_party/clipper2
++++ b/third_party/clipper2
+@@ -1,1 +1,1 @@
+-Subproject commit 20bd69475f48f55730df09c4ce2dfa5051f6fe02
++Subproject commit 4ab4da0f98d02b86fcc841af348dcddcea45775d-dirty
+diff --git a/third_party/ctre b/third_party/ctre
+index 626313dd..6de31ef4 100644
+--- a/third_party/ctre
++++ b/third_party/ctre
+@@ -1,1 +1,1 @@
+-Subproject commit 626313dd1563e6f3a02e35427052d808df636cd8
++Subproject commit 6de31ef412e23f8e58b1449b06072a3c6e2a75ca

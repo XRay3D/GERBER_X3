@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -76,18 +74,25 @@ QDataStream& operator<<(QDataStream& stream, Shapes::AbstractShape* shape) {
 
 QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     uint32_t type;
-    QString loadErrorMessage;
+    QString name;
     stream >> type;
-    stream >> loadErrorMessage;
-    if(App::shapePlugins().contains(type)) {
-        shape = App::shapePlugin(type)->createShape();
-        stream >> *shape;
-        App::grView().addItem(shape);
-    } else {
-        QByteArray data;
-        stream >> data;
-        qDebug() << type << loadErrorMessage << data;
+    stream >> name;
+    try {
+        if(App::shapePlugins().contains(type)) {
+            shape = App::shapePlugin(type)->createShape({std::nan("read"), std::nan("read")});
+            stream >> *shape;
+            shape->name() = name;
+        } else { // skip shape data
+            QByteArray data;
+            stream >> data;
+            qDebug() << type << name << data;
+        }
+    } catch(const std::exception& ex) {
+        qCritical() << type << name << ex.what();
+    } catch(...) {
+        qCritical();
     }
+
     return stream;
 }
 
@@ -97,7 +102,7 @@ QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
     return stream;
 }
 
-QDataStream& operator>>(QDataStream& stream, Gi::Item*& shape) {
+QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
     uint32_t type;
     Paths paths;
     stream >> type;
@@ -115,7 +120,7 @@ QDataStream& operator>>(QDataStream& stream, Gi::Item*& shape) {
 }
 
 Project::Project(QObject* parent)
-    : QObject(parent)
+    : QObject{parent}
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
         const int32_t id = files_[contains(path)]->id();
@@ -147,7 +152,7 @@ bool Project::save(const QString& fileName) {
     QDataStream out(&file);
     try {
         out << (ver_ = CurrentVer);
-        Block(out).write(
+        Block{out}.write(
             isPinsPlaced_,
             tailing,
             home_,
@@ -205,7 +210,7 @@ bool Project::open(const QString& fileName) {
             return false;
         }
         QRectF sceneRect;
-        Block(in).read(
+        Block{in}.read(
             isPinsPlaced_,
             tailing,
             home_,
@@ -303,7 +308,7 @@ int Project::addItem(Gi::Item* const item) {
     item->setColor(Qt::white);
     item->setVisible(true);
 
-    items_.emplace(item->id_, item);
+    items_.try_emplace(item->id_, item);
     App::fileModel().addItem(item);
     setChanged();
     return item->id_;
@@ -373,7 +378,7 @@ int Project::contains(const QString& name) {
     for(const auto& [id, sp]: files_) {
         AbstractFile* item = sp.get();
         //        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
-        if(QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
+        if(item && QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
             return item->id();
     }
     return -1;
@@ -390,7 +395,7 @@ bool Project::reload(int32_t id, AbstractFile* file) {
     return false;
 }
 
-mvector<AbstractFile*> Project::files(int type) {
+mvector<AbstractFile*> Project::files(uint32_t type) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
@@ -401,7 +406,7 @@ mvector<AbstractFile*> Project::files(int type) {
     return rfiles;
 }
 
-mvector<AbstractFile*> Project::files(const mvector<int> types) {
+mvector<AbstractFile*> Project::files(const mvector<uint32_t>& types) {
     QMutexLocker locker(&mutex);
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
@@ -434,7 +439,7 @@ int Project::addFile(AbstractFile* file) {
     } else if(file->id() == -1) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
-        files_.emplace(newId, file);
+        files_.try_emplace(newId, file);
         App::fileModel().addFile(file);
         setChanged();
         watcher.addPath(file->name());
@@ -457,7 +462,7 @@ int Project::addFile(GCode::File* file) {
     } else if(file->id() == -1) {
         const int newId = files_.size() ? (--files_.end())->first + 1 : 0;
         file->setId(newId);
-        files_.emplace(newId, file);
+        files_.try_emplace(newId, file);
         App::fileModel().addFile(file);
         setChanged();
         watcher.addPath(file->name());
@@ -474,7 +479,7 @@ int Project::addShape(Shapes::AbstractShape* const shape) {
     shape->id_ = newId;
     shape->setToolTip(QString::number(newId));
     shape->setZValue(newId);
-    shapes_.emplace(newId, shape); // NOTE destroy on filetree model
+    shapes_.try_emplace(newId, shape); // NOTE destroy on filetree model
     App::fileModel().addShape(shape);
     setChanged();
     return newId;

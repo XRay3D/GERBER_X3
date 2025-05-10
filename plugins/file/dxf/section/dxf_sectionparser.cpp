@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -39,8 +37,8 @@ SectionParser::SectionParser(Codes::iterator from, Codes::iterator to, File* fil
 
 SectionParser::SectionType SectionParser::toType(const QString& key) {
     return static_cast<SectionType>(staticMetaObject
-                                        .enumerator(0)
-                                        .keysToValue(key.toUtf8().data()));
+            .enumerator(0)
+            .keysToValue(key.toUtf8().data()));
 }
 
 const CodeData& SectionParser::nextCode() const {

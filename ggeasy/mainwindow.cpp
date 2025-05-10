@@ -1,17 +1,16 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 
 /********************************************************************************
  * Author : Damir Bakiev                                                         *
  * Version : na                                                                  *
  * Date : 11 November 2021                                                       *
  * Website : na                                                                  *
- * Copyright : Damir Bakiev 2016-2023                                            *
+ * Copyright : Damir Bakiev 2016-2025                                            *
  * License:                                                                      *
  * Use, modification & distribution is subject to Boost Software License Ver 1.  *
  * http://www.boost.org/LICENSE_1_0.txt                                          *
  ********************************************************************************/
 // #include "a_pch.h"
+
 #include "mainwindow.h"
 
 #include "aboutform.h"
@@ -30,10 +29,10 @@
 #include "shapepluginin.h"
 #include "tool_database.h"
 
-#include <QPdfWriter>
+// #include <QPdfWriter>
 #include <QPrintPreviewDialog>
 #include <QPrinter>
-#include <QtWidgets>
+// #include <QtWidgets>
 
 // static auto PointConverter = QMetaType::registerConverter(&Point::toString); NOTE
 
@@ -48,7 +47,7 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 }
 
 MainWindow::MainWindow(QWidget* parent)
-    : QMainWindow(parent)
+    : QMainWindow{parent}
     , recentFiles{this, "recentFiles"}
     , recentProjects{this, "recentProjects"}
     , project_{new Project{this}}
@@ -116,6 +115,7 @@ MainWindow::MainWindow(QWidget* parent)
 MainWindow::~MainWindow() {
     parserThread.quit();
     parserThread.wait();
+    // App::project().close();
     App::setMainWindow(nullptr);
     qDebug(__FUNCTION__);
 }
@@ -133,10 +133,10 @@ void MainWindow::init() {
 
     initWidgets();
 
-    GCode::PropertiesForm(); // init default vars;
+    // FIXME GCode::PropertiesForm(); // init default vars;
 
     setCurrentFile(QString());
-    readSettings();
+    loadSettings();
     menuBar()->installEventFilter(this);
 
     toolpathActions[G_CODE_PROPERTIES]->triggered();
@@ -144,17 +144,156 @@ void MainWindow::init() {
     debug();
 }
 
-void MainWindow::closeEvent(QCloseEvent* event) {
-    if(App::isDebug() || maybeSave()) {
-        resetToolPathsActions();
-        delete dockWidget_;
+QMenu* MainWindow::createPopupMenu() {
+    QMenu* menu = QMainWindow::createPopupMenu();
+    menu->removeAction(dockWidget_->toggleViewAction());
+    menu->removeAction(toolpathToolBar->toggleViewAction());
+    menu->removeAction(ui.treeDockWidget->toggleViewAction());
 
-        writeSettings();
-        App::fileModel().closeProject();
-        event->accept();
+    menu->addAction(tr("Icon size = 24"), this, [this]() { setIconSize(QSize(24, 24)); });
+    menu->addAction(tr("Icon size = 48"), this, [this]() { setIconSize(QSize(48, 48)); });
+    menu->addAction(tr("Icon size = 72"), this, [this]() { setIconSize(QSize(72, 72)); });
+
+    qDebug() << menu->parent();
+
+    return menu;
+}
+
+const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
+
+QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
+
+void MainWindow::messageHandler(QtMsgType type, const QStringList& context, const QString& message) {
+    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128});
+    enum {
+        Category,
+        File,
+        Function,
+        Line,
+    };
+    auto file = context[File].split("/").back();
+    static constexpr QColor color[]{
+        QColor{128, 128, 128}, // gray   QtDebugMsg
+        QColor{255, 128, 000}, // orange QtWarningMsg
+        QColor{255, 000, 000}, // red    QtCriticalMsg
+        QColor{255, 000, 000}, // red    QtFatalMsg
+        QColor{128, 128, 255}, // blue   QtInfoMsg
+    };
+    ui.loggingTextBrowser->setTextColor(*color);
+    ui.loggingTextBrowser->append(u"%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split('(').front()));
+    ui.loggingTextBrowser->setTextColor(color[type]);
+    ui.loggingTextBrowser->append(message);
+    ui.loggingTextBrowser->append("");
+    ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
+}
+
+void MainWindow::loadFile(const QString& fileName) {
+    if(!QFileInfo::exists(fileName)) return;
+    lastPath = QFileInfo(fileName).absolutePath();
+    if(fileName.endsWith(".g2g")) {
+        if(closeProject()) {
+            project_->open(fileName);
+            setCurrentFile(fileName);
+            ui.treeView->selectionModel()->select(ui.treeView->model()->index(0, 0), QItemSelectionModel::Select);
+            return;
+        }
     } else {
-        event->ignore();
+        if(project_->contains(fileName) > -1
+            && QMessageBox::question(this, tr("Warning"), //
+                   tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
+                == QMessageBox::Cancel)
+            return;
+        for(auto& [type, ptr]: App::filePlugins()) {
+            if(ptr->thisIsIt(fileName)) {
+                emit parseFile(fileName, int(type));
+                return;
+            }
+        }
     }
+    qDebug() << fileName;
+}
+
+void MainWindow::logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message) {
+    emit logMessage(type, {context.category, context.file, context.function, QString::number(context.line)}, message);
+}
+
+void MainWindow::fileError(const QString& fileName, const QString& error) {
+    qCritical() << "fileError " << fileName << error;
+
+    ui.loggingDockWidget->show();
+    ui.loggingTextBrowser->setTextColor(Qt::black);
+    ui.loggingTextBrowser->append(fileName);
+    ui.loggingTextBrowser->setTextColor(Qt::darkRed);
+    ui.loggingTextBrowser->append(error);
+    ui.loggingTextBrowser->append("");
+}
+
+void MainWindow::fileProgress(const QString& fileName, int max, int value) {
+    if(max && !value) {
+        QProgressDialog* pd = new QProgressDialog{this};
+        pd->setCancelButton(nullptr);
+        pd->setLabelText(fileName);
+        pd->setMaximum(max);
+        // pd->setModal(true);
+        // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
+        pd->show();
+        progressDialogs_[fileName] = pd;
+    } else if(max == 1 && value == 1) {
+        progressDialogs_[fileName]->hide();
+        progressDialogs_[fileName]->deleteLater();
+        progressDialogs_.remove(fileName);
+    } else
+        progressDialogs_[fileName]->setValue(value);
+}
+
+void MainWindow::addFileToPro(AbstractFile* file) {
+    if(project_->isUntitled()) {
+        QString name(QFileInfo(file->name()).path());
+        setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
+    }
+    project_->addFile(file);
+    recentFiles.prependToRecentFiles(file->name());
+    //    ui.grView->zoomFit();
+}
+
+void MainWindow::open() {
+    QStringList files(QFileDialog::getOpenFileNames(
+        this,
+        tr("Open File"),
+        lastPath,
+        tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)")));
+    if(files.isEmpty())
+        return;
+
+    if(files.filter(QRegularExpression(".+g2g$")).size()) {
+        loadFile(files.at(files.indexOf(QRegularExpression(".+g2g$"))));
+        return;
+    } else {
+        for(QString& fileName: files)
+            loadFile(fileName);
+    }
+    // QString name(QFileInfo(files.first()).path());
+    // setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
+}
+
+bool MainWindow::save() {
+    if(project_->isUntitled())
+        return saveAs();
+    else
+        return saveFile(project_->name());
+}
+
+bool MainWindow::saveAs() {
+    QString file(
+        QFileDialog::getSaveFileName(this, tr("Open File"), project_->name(), tr("Project (*.g2g)")));
+    if(file.isEmpty())
+        return false;
+    return saveFile(file);
+}
+
+void MainWindow::about() {
+    AboutForm a(this);
+    a.exec();
 }
 
 bool MainWindow::closeProject() {
@@ -169,22 +308,146 @@ bool MainWindow::closeProject() {
     return false;
 }
 
-void MainWindow::about() {
-    AboutForm a(this);
-    a.exec();
-}
-
 void MainWindow::initWidgets() {
     createActions();
     setUnifiedTitleAndToolBarOnMac(true);
+}
+
+void MainWindow::printDialog() {
+    QPrinter printer(QPrinter::HighResolution);
+    QPrintPreviewDialog preview(&printer, this);
+    connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
+        // ScopedTrue sTrue(App::app_->drawPdf_);
+        // NOTE App::setDrawPdf(true);
+        QRectF rect;
+        for(QGraphicsItem* item: App::grView().items())
+            if(item->isVisible() && !item->boundingRect().isNull())
+                rect |= item->boundingRect();
+        QSizeF size(rect.size());
+
+        QMarginsF margins(10, 10, 10, 10);
+        QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
+        pPrinter->setPageMargins(margins);
+        pPrinter->setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
+        pPrinter->setResolution(4800);
+        QPainter painter(pPrinter);
+        painter.setRenderHint(QPainter::Antialiasing);
+        painter.setTransform(QTransform().scale(1.0, -1.0));
+        painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
+        App::grView().scene()->render(&painter,
+            QRectF(0, 0, pPrinter->width(), pPrinter->height()),
+            rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
+        // NOTE App::setDrawPdf(false);
+    });
+    preview.exec();
+}
+
+void MainWindow::renderPdf() {
+    QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), lastPath, tr("File(*.pdf)"));
+    if(curFile.isEmpty())
+        return;
+
+    App::setDrawPdf(true);
+
+    QRectF rect;
+    for(QGraphicsItem* item: ui.grView->scene()->items())
+        if(item->isVisible() && !item->boundingRect().isNull())
+            rect |= item->boundingRect();
+
+    //    QRectF rect(ui.grView->scene()->itemsBoundingRect());
+    //    QRectF rect {App::layoutFrames().boundingRect()};
+
+    QSizeF size(rect.size());
+
+    QPdfWriter pdfWriter(curFile);
+    //    pdfWriter.setPageSizeMM(size);
+    //    pdfWriter.setMargins({0, 0, 0, 0});
+    //    pdfWriter.setResolution(1000000);
+    QMarginsF margins(10, 10, 10, 10);
+    QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
+    pdfWriter.setPageMargins(margins);
+    pdfWriter.setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
+    pdfWriter.setResolution(4800);
+
+    QPainter painter(&pdfWriter);
+    painter.setTransform(QTransform().scale(1.0, -1.0));
+    painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
+    ui.grView->scene()->render(&painter,
+        QRectF(0, 0, pdfWriter.width(), pdfWriter.height()),
+        rect, Qt::IgnoreAspectRatio);
+
+    App::setDrawPdf(false);
+}
+
+void MainWindow::loadSettings() {
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    restoreState(settings.value("state", QByteArray()).toByteArray());
+    lastPath = settings.value("lastPath").toString();
+
+    for(auto toolBar: findChildren<QToolBar*>()) {
+        settings.beginReadArray(toolBar->objectName());
+        int ctr = 0;
+        for(auto action: toolBar->actions()) {
+            settings.setArrayIndex(ctr++);
+            action->setVisible(settings.value("actionIsVisible", true).toBool());
+        }
+        settings.endArray();
+    }
+
+    if(App::isDebug())
+        loadFile(settings.value("project").toString());
+
+    settings.endGroup();
+}
+
+void MainWindow::saveSettings() {
+    QSettings settings;
+    settings.beginGroup("MainWindow");
+    settings.setValue("geometry", saveGeometry());
+    settings.setValue("state", saveState());
+    settings.setValue("lastPath", lastPath);
+    settings.setValue("project", project_->name());
+    // toolBar actions visible
+    for(auto toolBar: findChildren<QToolBar*>()) {
+        settings.beginWriteArray(toolBar->objectName());
+        int ctr = 0;
+        for(auto action: toolBar->actions()) {
+            settings.setArrayIndex(ctr++);
+            settings.setValue("actionIsVisible", action->isVisible());
+        }
+        settings.endArray();
+    }
+    settings.endGroup();
+}
+
+void MainWindow::selectAll() {
+    auto data{actionGroup.checkedAction() ? actionGroup.checkedAction()->data() : QVariant{}};
+    if(!data.isNull() && data.toBool()) {
+        for(QGraphicsItem* item: App::grView().items(Gi::Type::Preview))
+            item->setSelected(true);
+    } else {
+        for(QGraphicsItem* item: App::grView().items())
+            if(item->isVisible() && item->opacity() > 0)
+                item->setSelected(true);
+    }
+}
+
+void MainWindow::deSelectAll() {
+    if(dockWidget_->isVisible()) return;
+    for(QGraphicsItem* item: App::grView().items())
+        if(item->isVisible())
+            item->setSelected(false);
 }
 
 void MainWindow::createActions() {
     dockWidget_ = new QDockWidget{this};
     dockWidget_->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
     // dockWidget_->setFeatures(QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetFloatable);
-    dockWidget_->setObjectName(u"dwCreatePath"_qs);
+    dockWidget_->setObjectName(u"dwCreatePath"_s);
     dockWidget_->installEventFilter(this);
+    addDockWidget(Qt::RightDockWidgetArea, dockWidget_);
 
     QFont font;
     font.setBold(true);
@@ -210,10 +473,10 @@ void MainWindow::createActions() {
 
 void MainWindow::createActionsFile() {
     fileMenu = menuBar()->addMenu(tr("&File"));
-    fileMenu->setObjectName(u"fileMenu"_qs);
+    fileMenu->setObjectName(u"fileMenu"_s);
 
     fileToolBar = addToolBar(tr("File"));
-    fileToolBar->setObjectName(u"fileToolBar"_qs);
+    fileToolBar->setObjectName(u"fileToolBar"_s);
     fileToolBar->setToolTip(tr("File"));
 
     fileToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -284,7 +547,7 @@ void MainWindow::createActionsFile() {
 
 void MainWindow::createActionsEdit() {
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
-    editMenu->setObjectName(u"editMenu"_qs);
+    editMenu->setObjectName(u"editMenu"_s);
     QAction* action;
     action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
@@ -326,10 +589,16 @@ void MainWindow::createActionsService() {
     serviceMenu->addSeparator();
     // G-Code Properties
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
-    connect(action, &QAction::toggled, this, [=, this](bool checked) { if (checked) setDockWidget(new GCode::PropertiesForm); });
+    connect(action, &QAction::toggled, this, [pf = GCode::PropertiesForm::create(nullptr/*this*/), this](bool checked) {
+        if(checked) setDockWidget(pf.get());
+        // connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
+    });
+    // connect(action, &QAction::toggled, this, [=, this](bool checked) {
+    //     if(checked) setDockWidget(new GCode::PropertiesForm);
+    // });
     action->setShortcut(QKeySequence("Ctrl+Shift+G"));
     action->setCheckable(true);
-    toolpathActions.emplace(G_CODE_PROPERTIES, action);
+    toolpathActions.try_emplace(G_CODE_PROPERTIES, action);
     actionGroup.addAction(action);
     // Tool Base
     serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
@@ -384,7 +653,7 @@ void MainWindow::createActionsZoom() {
     vievMenu->setObjectName("vievMenu");
 
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
-    zoomToolBar->setObjectName(u"zoomToolBar"_qs);
+    zoomToolBar->setObjectName(u"zoomToolBar"_s);
     zoomToolBar->setToolTip(tr("Zoom ToolBar"));
 
     zoomToolBar->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -433,7 +702,7 @@ void MainWindow::createActionsToolPath() {
     QMenu* menu = menuBar()->addMenu(tr("&Paths"));
 
     toolpathToolBar = addToolBar(tr("Toolpath"));
-    toolpathToolBar->setObjectName(u"toolpathToolBar"_qs);
+    toolpathToolBar->setObjectName(u"toolpathToolBar"_s);
     toolpathToolBar->setToolTip(tr("Toolpath"));
 
     addDockWidget(Qt::RightDockWidgetArea, dockWidget_);
@@ -442,7 +711,7 @@ void MainWindow::createActionsToolPath() {
         auto action = gCodePlugin->addAction(menu, toolpathToolBar);
         action->setCheckable(true);
         actionGroup.addAction(action);
-        toolpathActions.emplace(type, action);
+        toolpathActions.try_emplace(type, action);
         connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
     }
 }
@@ -471,17 +740,18 @@ void MainWindow::createActionsShape() {
         action->setCheckable(true);
         actionGroup.addAction(action);
         connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
+        connect(shPlugin, &Shapes::Plugin::showEditor, this, &MainWindow::setDockWidget);
         connect(action, &QAction::toggled, [shPlugin = shPlugin, this](bool checked) {
             if(checked) {
-                connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
-                connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
                 connect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+                connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
                 setDockWidget(shPlugin->editor());
             } else {
                 shPlugin->finalizeShape();
-                disconnect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
-                disconnect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
                 disconnect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+                disconnect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                disconnect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
             }
         });
     }
@@ -524,7 +794,7 @@ void MainWindow::createActionsShape() {
 
     toolBar->addSeparator();
 
-    toolBar->addAction(QIcon::fromTheme(""), tr("Create Group"), this, [this] {
+    toolBar->addAction(QIcon::fromTheme(""), tr("Create Group"), this, [] {
         Paths p{CirclePath(100 * uScale, {100 * uScale, 100 * uScale})};
         App::project().addItem(new Gi::DataPath{p, nullptr});
     });
@@ -645,166 +915,13 @@ void MainWindow::saveSelectedGCodeFiles() {
         QMessageBox::information(nullptr, "", QObject::tr("No selected toolpath files."));
 }
 
+QString MainWindow::strippedName(const QString& fullFileName) {
+    return QFileInfo(fullFileName).fileName();
+}
+
 void MainWindow::newFile() {
     if(closeProject())
         setCurrentFile(QString());
-}
-
-void MainWindow::readSettings() {
-    QSettings settings;
-    settings.beginGroup("MainWindow");
-    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
-    restoreState(settings.value("state", QByteArray()).toByteArray());
-    lastPath = settings.value("lastPath").toString();
-
-    for(auto toolBar: findChildren<QToolBar*>()) {
-        settings.beginReadArray(toolBar->objectName());
-        int ctr = 0;
-        for(auto action: toolBar->actions()) {
-            settings.setArrayIndex(ctr++);
-            action->setVisible(settings.value("actionIsVisible", true).toBool());
-        }
-        settings.endArray();
-    }
-
-    if(App::isDebug())
-        loadFile(settings.value("project").toString());
-
-    settings.endGroup();
-}
-
-void MainWindow::writeSettings() {
-    QSettings settings;
-    settings.beginGroup("MainWindow");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("state", saveState());
-    settings.setValue("lastPath", lastPath);
-    settings.setValue("project", project_->name());
-    // toolBar actions visible
-    for(auto toolBar: findChildren<QToolBar*>()) {
-        settings.beginWriteArray(toolBar->objectName());
-        int ctr = 0;
-        for(auto action: toolBar->actions()) {
-            settings.setArrayIndex(ctr++);
-            settings.setValue("actionIsVisible", action->isVisible());
-        }
-        settings.endArray();
-    }
-    settings.endGroup();
-}
-
-void MainWindow::selectAll() {
-    auto data{actionGroup.checkedAction() ? actionGroup.checkedAction()->data() : QVariant{}};
-    if(!data.isNull() && data.toBool()) {
-        for(QGraphicsItem* item: App::grView().items(Gi::Type::Preview))
-            item->setSelected(true);
-    } else {
-        for(QGraphicsItem* item: App::grView().items())
-            if(item->isVisible() && item->opacity() > 0)
-                item->setSelected(true);
-    }
-}
-
-void MainWindow::deSelectAll() {
-    if(dockWidget_->isVisible()) return;
-    for(QGraphicsItem* item: App::grView().items())
-        if(item->isVisible())
-            item->setSelected(false);
-}
-
-void MainWindow::printDialog() {
-    QPrinter printer(QPrinter::HighResolution);
-    QPrintPreviewDialog preview(&printer, this);
-    connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
-        // ScopedTrue sTrue(App::app_->drawPdf_);
-        // NOTE App::setDrawPdf(true);
-        QRectF rect;
-        for(QGraphicsItem* item: App::grView().items())
-            if(item->isVisible() && !item->boundingRect().isNull())
-                rect |= item->boundingRect();
-        QSizeF size(rect.size());
-
-        QMarginsF margins(10, 10, 10, 10);
-        QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
-        pPrinter->setPageMargins(margins);
-        pPrinter->setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
-        pPrinter->setResolution(4800);
-        QPainter painter(pPrinter);
-        painter.setRenderHint(QPainter::Antialiasing);
-        painter.setTransform(QTransform().scale(1.0, -1.0));
-        painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
-        App::grView().scene()->render(&painter,
-            QRectF(0, 0, pPrinter->width(), pPrinter->height()),
-            rect, Qt::KeepAspectRatio /*IgnoreAspectRatio*/);
-        // NOTE App::setDrawPdf(false);
-    });
-    preview.exec();
-}
-
-void MainWindow::renderPdf() {
-    QString curFile = QFileDialog::getSaveFileName(nullptr, tr("Save PDF file"), lastPath, tr("File(*.pdf)"));
-    if(curFile.isEmpty())
-        return;
-
-    App::setDrawPdf(true);
-
-    QRectF rect;
-    for(QGraphicsItem* item: ui.grView->scene()->items())
-        if(item->isVisible() && !item->boundingRect().isNull())
-            rect |= item->boundingRect();
-
-    //    QRectF rect(ui.grView->scene()->itemsBoundingRect());
-    //    QRectF rect {App::layoutFrames().boundingRect()};
-
-    QSizeF size(rect.size());
-
-    QPdfWriter pdfWriter(curFile);
-    //    pdfWriter.setPageSizeMM(size);
-    //    pdfWriter.setMargins({0, 0, 0, 0});
-    //    pdfWriter.setResolution(1000000);
-    QMarginsF margins(10, 10, 10, 10);
-    QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
-    pdfWriter.setPageMargins(margins);
-    pdfWriter.setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
-    pdfWriter.setResolution(4800);
-
-    QPainter painter(&pdfWriter);
-    painter.setTransform(QTransform().scale(1.0, -1.0));
-    painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
-    ui.grView->scene()->render(&painter,
-        QRectF(0, 0, pdfWriter.width(), pdfWriter.height()),
-        rect, Qt::IgnoreAspectRatio);
-
-    App::setDrawPdf(false);
-}
-
-void MainWindow::fileProgress(const QString& fileName, int max, int value) {
-    if(max && !value) {
-        QProgressDialog* pd = new QProgressDialog{this};
-        pd->setCancelButton(nullptr);
-        pd->setLabelText(fileName);
-        pd->setMaximum(max);
-        // pd->setModal(true);
-        // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
-        pd->show();
-        progressDialogs_[fileName] = pd;
-    } else if(max == 1 && value == 1) {
-        progressDialogs_[fileName]->hide();
-        progressDialogs_[fileName]->deleteLater();
-        progressDialogs_.remove(fileName);
-    } else
-        progressDialogs_[fileName]->setValue(value);
-}
-
-void MainWindow::fileError(const QString& fileName, const QString& error) {
-    qCritical() << "fileError " << fileName << error;
-
-    ui.loggingDockWidget->show();
-    ui.loggingTextBrowser->setTextColor(Qt::black);
-    ui.loggingTextBrowser->append(fileName);
-    ui.loggingTextBrowser->setTextColor(Qt::darkRed);
-    ui.loggingTextBrowser->append(error);
-    ui.loggingTextBrowser->append("");
 }
 
 void MainWindow::documentWasModified() { setWindowModified(project_->isModified()); }
@@ -830,7 +947,7 @@ bool MainWindow::maybeSave() {
     return true;
 }
 
-void MainWindow::editGcFile(GCode::File* file) { // TODO editGcFile
+void MainWindow::editGcFile(GCode::File* /*file*/) { // TODO editGcFile
     qWarning(__FUNCTION__);
     // TODO   switch (file->gtype()) {
     //    case GCode::Null:
@@ -849,6 +966,10 @@ void MainWindow::editGcFile(GCode::File* file) { // TODO editGcFile
     //        break;
     //    }
 }
+
+#if __has_include("xrstyle.h") && 0
+#include "xrstyle.h"
+#endif
 
 bool MainWindow::saveFile(const QString& fileName) {
     bool ok;
@@ -880,126 +1001,18 @@ void MainWindow::setCurrentFile(const QString& fileName) {
     setWindowFilePath(project_->name());
 }
 
-void MainWindow::addFileToPro(AbstractFile* file) {
-    if(project_->isUntitled()) {
-        QString name(QFileInfo(file->name()).path());
-        setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
-    }
-    project_->addFile(file);
-    recentFiles.prependToRecentFiles(file->name());
-    //    ui.grView->zoomFit();
-}
+void MainWindow::closeEvent(QCloseEvent* event) {
 
-QString MainWindow::strippedName(const QString& fullFileName) {
-    return QFileInfo(fullFileName).fileName();
-}
+    saveSettings();
 
-QMenu* MainWindow::createPopupMenu() {
-    QMenu* menu = QMainWindow::createPopupMenu();
-    menu->removeAction(dockWidget_->toggleViewAction());
-    menu->removeAction(toolpathToolBar->toggleViewAction());
-    menu->removeAction(ui.treeDockWidget->toggleViewAction());
-
-    menu->addAction(tr("Icon size = 24"), this, [this]() { setIconSize(QSize(24, 24)); });
-    menu->addAction(tr("Icon size = 48"), this, [this]() { setIconSize(QSize(48, 48)); });
-    menu->addAction(tr("Icon size = 72"), this, [this]() { setIconSize(QSize(72, 72)); });
-
-    qDebug() << menu->parent();
-
-    return menu;
-}
-
-const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
-
-QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
-
-void MainWindow::messageHandler(QtMsgType type, const QStringList& context, const QString& message) {
-    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128});
-    enum {
-        Category,
-        File,
-        Function,
-        Line,
-    };
-    ui.loggingTextBrowser->append(QString{"%1: %2 '%3'"}.arg(context[File], context[Line], context[Function].splitRef('(').front()));
-
-    switch(type) {
-        // clang-format off
-    case QtDebugMsg:    ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128}); break;
-    case QtWarningMsg:  ui.loggingTextBrowser->setTextColor(QColor{255, 128, 000}); break;
-    case QtCriticalMsg: ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
-    case QtFatalMsg:    ui.loggingTextBrowser->setTextColor(QColor{255, 000, 000}); break;
-    case QtInfoMsg:     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 255}); break;
-        // clang-format on
-    }
-    ui.loggingTextBrowser->append(message);
-    ui.loggingTextBrowser->append("");
-    ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
-}
-
-void MainWindow::loadFile(const QString& fileName) {
-    if(!QFile(fileName).exists())
-        return;
-    lastPath = QFileInfo(fileName).absolutePath();
-    if(fileName.endsWith(".g2g")) {
-        if(closeProject()) {
-            project_->open(fileName);
-            setCurrentFile(fileName);
-            ui.treeView->selectionModel()->select(ui.treeView->model()->index(0, 0), QItemSelectionModel::Select);
-            return;
-        }
+    if(App::isDebug() || maybeSave()) {
+        resetToolPathsActions();
+        delete dockWidget_;
+        App::fileModel().closeProject();
+        event->accept();
     } else {
-        if(project_->contains(fileName) > -1 && QMessageBox::question(this, tr("Warning"), //
-                                                    tr("Do you want to reload file %1?").arg(QFileInfo(fileName).fileName()), QMessageBox::Ok | QMessageBox::Cancel)
-                == QMessageBox::Cancel)
-            return;
-        for(auto& [type, ptr]: App::filePlugins()) {
-            if(ptr->thisIsIt(fileName)) {
-                emit parseFile(fileName, int(type));
-                return;
-            }
-        }
+        event->ignore();
     }
-    qDebug() << fileName;
-}
-
-#if __has_include("xrstyle.h") && 0
-#include "xrstyle.h"
-#endif
-
-void MainWindow::open() {
-    QStringList files(QFileDialog::getOpenFileNames(
-        this,
-        tr("Open File"),
-        lastPath,
-        tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)")));
-    if(files.isEmpty())
-        return;
-
-    if(files.filter(QRegularExpression(".+g2g$")).size()) {
-        loadFile(files.at(files.indexOf(QRegularExpression(".+g2g$"))));
-        return;
-    } else {
-        for(QString& fileName: files)
-            loadFile(fileName);
-    }
-    // QString name(QFileInfo(files.first()).path());
-    // setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
-}
-
-bool MainWindow::save() {
-    if(project_->isUntitled())
-        return saveAs();
-    else
-        return saveFile(project_->name());
-}
-
-bool MainWindow::saveAs() {
-    QString file(
-        QFileDialog::getSaveFileName(this, tr("Open File"), project_->name(), tr("Project (*.g2g)")));
-    if(file.isEmpty())
-        return false;
-    return saveFile(file);
 }
 
 void MainWindow::showEvent(QShowEvent* event) {
@@ -1041,41 +1054,37 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
 
 void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     if(MainWindow->objectName().isEmpty())
-        MainWindow->setObjectName(QString::fromUtf8("MainWindow"));
+        MainWindow->setObjectName(u"MainWindow"_s);
     MainWindow->resize(1600, 1000);
-    MainWindow->setWindowTitle(QString::fromUtf8("[*] GGEasy"));
+    MainWindow->setWindowTitle(u"[*] GGEasy"_s);
     MainWindow->setDockOptions(QMainWindow::AllowTabbedDocks);
-    centralwidget = new QWidget{MainWindow};
-    centralwidget->setObjectName(QString::fromUtf8("centralwidget"));
-    horizontalLayout = new QHBoxLayout{centralwidget};
-    horizontalLayout->setSpacing(0);
-    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
-    horizontalLayout->setContentsMargins(3, 3, 3, 3);
-    grView = new GraphicsView{centralwidget};
-    grView->setObjectName(QString::fromUtf8("grView"));
+
+    grView = new GraphicsView{MainWindow};
+    grView->setObjectName(u"grView"_s);
     grView->setTransformationAnchor(QGraphicsView::AnchorUnderMouse);
     grView->setResizeAnchor(QGraphicsView::AnchorUnderMouse);
 
-    horizontalLayout->addWidget(grView);
+    // horizontalLayout->addWidget(grView);
 
-    MainWindow->setCentralWidget(centralwidget);
+    MainWindow->setCentralWidget(grView);
     menubar = new QMenuBar{MainWindow};
-    menubar->setObjectName(QString::fromUtf8("menubar"));
+    menubar->setObjectName(u"menubar"_s);
     menubar->setGeometry(QRect(0, 0, 1600, 26));
     MainWindow->setMenuBar(menubar);
     statusbar = new QStatusBar{MainWindow};
-    statusbar->setObjectName(QString::fromUtf8("statusbar"));
+    statusbar->setObjectName(u"statusbar"_s);
     MainWindow->setStatusBar(statusbar);
 
     loggingDockWidget = new QDockWidget{MainWindow};
-    loggingDockWidget->setObjectName(QString::fromUtf8("loggingDockWidget"));
+    loggingDockWidget->setObjectName(u"loggingDockWidget"_s);
+    loggingDockWidget->setWindowTitle(tr("Logging"));
     loggingDockWidget->setMinimumSize(QSize(100, 119));
     loggingDockWidget->setFeatures(QDockWidget::DockWidgetFloatable
         | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
     loggingDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
 
     loggingTextBrowser = new QTextBrowser{loggingDockWidget};
-    loggingTextBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+    loggingTextBrowser->setObjectName(u"loggingTextBrowser"_s);
     loggingTextBrowser->setReadOnly(false);
     loggingTextBrowser->setWordWrapMode(QTextOption::NoWrap);
     loggingDockWidget->setWidget(loggingTextBrowser);
@@ -1083,24 +1092,20 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     MainWindow->addDockWidget(Qt::RightDockWidgetArea, loggingDockWidget);
 
     treeDockWidget = new QDockWidget{MainWindow};
-    treeDockWidget->setObjectName(QString::fromUtf8("treeDockWidget"));
+    treeDockWidget->setObjectName(u"treeDockWidget"_s);
     treeDockWidget->setMinimumSize(QSize(100, 119));
     treeDockWidget->setFeatures(QDockWidget::DockWidgetFloatable | QDockWidget::DockWidgetMovable);
     treeDockWidget->setAllowedAreas(Qt::LeftDockWidgetArea | Qt::RightDockWidgetArea);
-    widget = new QWidget();
-    widget->setObjectName(QString::fromUtf8("widget"));
-    verticalLayout = new QVBoxLayout{widget};
-    verticalLayout->setSpacing(6);
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
-    verticalLayout->setContentsMargins(3, 3, 3, 3);
-    treeView = new FileTree::View{widget};
-    treeView->setObjectName(QString::fromUtf8("treeView"));
+
+    treeView = new FileTree::View{treeDockWidget};
+    treeView->setObjectName(u"treeView"_s);
     treeView->setSelectionMode(QAbstractItemView::ExtendedSelection);
 
-    verticalLayout->addWidget(treeView);
+    // verticalLayout->addWidget(treeView);
 
-    treeDockWidget->setWidget(widget);
+    treeDockWidget->setWidget(treeView);
     MainWindow->addDockWidget(Qt::LeftDockWidgetArea, treeDockWidget);
+    MainWindow->addDockWidget(Qt::LeftDockWidgetArea, loggingDockWidget);
 
     retranslateUi(MainWindow);
 

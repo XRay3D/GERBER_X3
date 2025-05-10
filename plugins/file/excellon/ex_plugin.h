@@ -21,7 +21,7 @@ namespace Excellon {
 
 class Plugin : public AbstractFilePlugin, Parser {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "excellon.json")
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "description.json")
     Q_INTERFACES(AbstractFilePlugin)
 
 public:
@@ -37,7 +37,7 @@ public:
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
 
     // public slots:
-    AbstractFile* parseFile(const QString& fileName, int type) override;
+    AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
 };
 
 } // namespace Excellon

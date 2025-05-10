@@ -32,10 +32,10 @@ public:
     //    uint32_t type() const override { return md5::hash32("GCode"); }
     //    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     QString folderName() const override { return tr("Tool Paths"); }
-    bool thisIsIt(const QString& fileName) override { return false; }
+    bool thisIsIt(const QString& /*fileName*/) override { return false; }
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;
 
-    AbstractFile* parseFile(const QString& fileName, int type) override { return nullptr; }
+    AbstractFile* parseFile(const QString& /*fileName*/, uint32_t /*type*/) override { return nullptr; }
 public slots:
 
 signals:

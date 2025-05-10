@@ -1,17 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
-/********************************************************************************
- * Author    :  Damir Bakiev                                                    *
- * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
- * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
- * License   :                                                                  *
- * Use, modification & distribution is subject to Boost Software License Ver 1. *
- * http://www.boost.org/LICENSE_1_0.txt                                         *
- *******************************************************************************/
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 //// INTERNAL FUNCTIONS
 
 // #if defined(_MSC_VER) && !defined(__cplusplus)
@@ -1184,9 +1170,11 @@
 //}
 
 #include "jc_voronoi.h"
-#include "clipper_types.h"
+// #include "clipper_types.h"
 #include "memory.h"
 #include "myclipper.h" // NOTE ???
+
+#include <cancelation.h>
 
 // INTERNAL FUNCTIONS
 
@@ -2099,8 +2087,10 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     tmp.charp = mem;
     internal->eventmem = tmp.voidpp;
 
+#ifdef _MSVC_LANG
 #pragma warning(push)
 #pragma warning(disable : 4267) // possible loss of data
+#endif
     jcv_pq_create(internal->eventqueue, max_nuevents_, (void**)internal->eventmem);
 
     jcv_site* sites = internal->sites;
@@ -2154,7 +2144,9 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     internal->numsites_sqrt = (int)(JCV_SQRT((jcv_real)nupoints_));
     internal->currentsite = 0;
 
+#ifdef _MSVC_LANG
 #pragma warning(pop)
+#endif
 
     internal->bottomsite = jcv_nextsite(internal);
 

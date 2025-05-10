@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -22,7 +22,7 @@ class File;
 
 class Plugin : public AbstractFilePlugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "dxf.json")
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "description.json")
     Q_INTERFACES(AbstractFilePlugin)
 
 public:
@@ -37,7 +37,7 @@ public:
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     void updateFileModel(AbstractFile* file) override;
     // public slots:
-    AbstractFile* parseFile(const QString& fileName, int type) override;
+    AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
 
 private:
     File* file_ = nullptr;

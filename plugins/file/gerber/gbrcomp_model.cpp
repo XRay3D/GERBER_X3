@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -25,7 +23,7 @@
 namespace Gerber::Comp {
 
 sModel::sModel(int fileId, QObject* parent)
-    : QAbstractItemModel(parent)
+    : QAbstractItemModel{parent}
     , rootItem(new sNode{""}) {
     //    auto file = App::project().file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))

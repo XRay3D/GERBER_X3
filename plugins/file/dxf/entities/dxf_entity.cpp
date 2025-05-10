@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -134,7 +132,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity) {
 }
 
 Entity::Entity(SectionParser* sp)
-    : sp(sp) { }
+    : sp{sp} { }
 
 Entity::~Entity() { }
 
@@ -266,16 +264,12 @@ Entity::Type Entity::toType(const QString& key) {
     return Type(staticMetaObject.enumerator(0).keyToValue(key.toUtf8().toUpper().data()));
 }
 
-QString Entity::typeName(int key) {
-    return staticMetaObject.enumerator(0).valueToKey(key);
-}
+QString Entity::typeName(int key) { return staticMetaObject.enumerator(0).valueToKey(key); }
 
-QString Entity::name() const {
-    return staticMetaObject.enumerator(0).valueToKey(type());
-}
+QString Entity::name() const { return staticMetaObject.enumerator(0).valueToKey(type()); }
 
 QColor Entity::color() const {
-    if(auto layer = sp->file->layer(layerName); layer != nullptr) {
+    if(auto layer = sp->file->layer(layerName); layer != nullptr) { //-V2006
         QColor c(dxfColors[layer->colorNumber()]);
         c.setAlpha(200);
         return c;

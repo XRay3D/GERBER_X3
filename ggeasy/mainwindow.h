@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -63,9 +63,12 @@ public:
     void messageHandler(QtMsgType type, const QStringList& context, const QString& message);
     void loadFile(const QString& fileName);
     static void updateTheme() {
+
+        static auto palette = qApp->style()->standardPalette();
+
         if(App::settings().theme()) {
 
-            static const char* const dwCloseXpm[] = {
+            static const char* const dwCloseXpm[]{
                 "11 13 3 1",
                 "  c None",
                 "@ c #6C6A67",
@@ -85,7 +88,7 @@ public:
                 "           ",
             };
 
-            static const char* const dwRestoreXpm[] = {
+            static const char* const dwRestoreXpm[]{
                 "11 13 3 1",
                 "  c None",
                 "@ c #6C6A67",
@@ -105,7 +108,7 @@ public:
                 "           ",
             };
 
-            static const char* const dwMinimizeXpm[] = {
+            static const char* const dwMinimizeXpm[]{
                 "11 13 2 1",
                 "  c None",
                 "@ c #6C6A67",
@@ -124,7 +127,7 @@ public:
                 "           ",
             };
 
-            static const char* const qtTitlebarContextHelp[] = {
+            static const char* const qtTitlebarContextHelp [[maybe_unused]][]{
                 "10 10 3 1",
                 "  c None",
                 "# c #000000",
@@ -144,31 +147,28 @@ public:
             class Style : public QProxyStyle {
             public:
                 Style()
-                    : QProxyStyle("Fusion") { }
+                    : QProxyStyle{"Fusion"} { }
+
                 QPixmap getPixmap(StandardPixmap standardPixmap) const {
                     switch(standardPixmap) {
-                    case SP_TitleBarNormalButton:
-                        return QPixmap(dwRestoreXpm);
-                    case SP_TitleBarMinButton:
-                        return QPixmap(dwMinimizeXpm);
+                    case SP_TitleBarNormalButton: return QPixmap{dwRestoreXpm};
+                    case SP_TitleBarMinButton: return QPixmap{dwMinimizeXpm};
                     case SP_TitleBarCloseButton:
-                    case SP_DockWidgetCloseButton:
-                        return QPixmap(dwCloseXpm);
-                    default:
-                        return {};
+                    case SP_DockWidgetCloseButton: return QPixmap{dwCloseXpm};
+                    default: return {};
                     }
                 }
 
                 QIcon standardIcon(StandardPixmap standardIcon, const QStyleOption* option, const QWidget* widget) const override {
-                    if(auto pix = getPixmap(standardIcon); !pix.isNull())
-                        return pix;
+                    if(auto pix = getPixmap(standardIcon); !pix.isNull()) return pix;
                     return QProxyStyle::standardIcon(standardIcon, option, widget);
                 }
-                //            QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
-                //                if(auto pix = getPixmap(standardPixmap); !pix.isNull())
-                //                    return pix;
-                //                return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
-                //            }
+
+                // QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
+                //     if(auto pix = getPixmap(standardPixmap); !pix.isNull()) return pix;
+                //     return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+                // }
+
                 void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
                     if(element == QStyle::PE_IndicatorBranch) {
                         auto r = option->rect;
@@ -216,109 +216,86 @@ public:
 
             qApp->setStyle(new Style);
 
-            QColor baseColor;
-            QColor disabledColor;
-            QColor highlightColor;
-            QColor linkColor;
-            QColor windowColor;
-            QColor windowTextColor;
-
+            struct Color {
+                QColor base;
+                QColor disabled;
+                QColor highlight;
+                QColor link;
+                QColor window;
+                QColor windowText;
+            } const color = []() noexcept -> Color {
             switch(App::settings().theme()) {
-            case LightBlue:
-                baseColor = QColor(230, 230, 230);
-                disabledColor = QColor(127, 127, 127);
-                highlightColor = QColor(61, 174, 233);
-                linkColor = QColor(61, 174, 233);
-                windowColor = QColor(200, 200, 200);
-                windowTextColor = QColor(0, 0, 0);
-                break;
-            case LightRed:
-                baseColor = QColor(230, 230, 230);
-                disabledColor = QColor(127, 127, 127);
-                highlightColor = QColor(218, 68, 83);
-                linkColor = QColor(61, 174, 233);
-                windowColor = QColor(200, 200, 200);
-                windowTextColor = QColor(0, 0, 0);
-                break;
-            case DarkBlue:
-                baseColor = QColor(20, 20, 20);
-                disabledColor = QColor(80, 80, 80);
-                highlightColor = QColor(61, 174, 233);
-                linkColor = QColor(61, 174, 233);
-                windowColor = QColor(30, 30, 30);
-                windowTextColor = QColor(220, 220, 220);
-                break;
-            case DarkRed:
-                baseColor = QColor(20, 20, 20);
-                disabledColor = QColor(80, 80, 80);
-                highlightColor = QColor(218, 68, 83);
-                linkColor = QColor(61, 174, 233);
-                windowColor = QColor(30, 30, 30);
-                windowTextColor = QColor(220, 220, 220);
-                break;
-            }
+            case LightBlue: return {
+                    {230, 230, 230}, // base
+                    {127, 127, 127}, // disabled
+                    { 61, 174, 233}, // highlight
+                    { 61, 174, 233}, // link
+                    {200, 200, 200}, // window
+                    {  0,   0,   0}  // windowText
+                };
+            case LightRed: return {
+                    {230, 230, 230}, // base
+                    {127, 127, 127}, // disabled
+                    {218,  68,  83}, // highlight
+                    { 61, 174, 233}, // link
+                    {200, 200, 200}, // window
+                    {  0,   0,   0}  // windowText
+                };
+            case DarkBlue: return {
+                    { 20,  20,  20}, // base
+                    { 80,  80,  80}, // disabled
+                    { 61, 174, 233}, // highlight
+                    { 61, 174, 233}, // link
+                    { 30,  30,  30}, // window
+                    {220, 220, 220}  // windowText
+                };
+            case DarkRed: default: return {
+                    { 20,  20,  20}, // base
+                    { 80,  80,  80}, // disabled
+                    {218,  68,  83}, // highlight
+                    { 61, 174, 233}, // link
+                    { 30,  30,  30}, // window
+                    {220, 220, 220}  // windowText
+                };
+            } }();
 
             QPalette palette;
 
-            palette.setBrush(QPalette::Text, windowTextColor);
-            palette.setBrush(QPalette::ToolTipText, windowTextColor);
-            palette.setBrush(QPalette::WindowText, windowTextColor);
-            palette.setBrush(QPalette::ButtonText, windowTextColor);
+            palette.setBrush(QPalette::Text, color.windowText);
+            palette.setBrush(QPalette::ToolTipText, color.windowText);
+            palette.setBrush(QPalette::WindowText, color.windowText);
+            palette.setBrush(QPalette::ButtonText, color.windowText);
             palette.setBrush(QPalette::HighlightedText, Qt::black);
             palette.setBrush(QPalette::BrightText, Qt::red);
 
-            palette.setBrush(QPalette::Link, linkColor);
-            palette.setBrush(QPalette::LinkVisited, highlightColor);
+            palette.setBrush(QPalette::Link, color.link);
+            palette.setBrush(QPalette::LinkVisited, color.highlight);
 
-            palette.setBrush(QPalette::AlternateBase, windowColor);
-            palette.setBrush(QPalette::Base, baseColor);
-            palette.setBrush(QPalette::Button, windowColor);
+            palette.setBrush(QPalette::AlternateBase, color.window);
+            palette.setBrush(QPalette::Base, color.base);
+            palette.setBrush(QPalette::Button, color.window);
 
-            palette.setBrush(QPalette::Highlight, highlightColor);
+            palette.setBrush(QPalette::Highlight, color.highlight);
 
-            palette.setBrush(QPalette::ToolTipBase, windowTextColor);
-            palette.setBrush(QPalette::Window, windowColor);
+            palette.setBrush(QPalette::ToolTipBase, color.window);
+            palette.setBrush(QPalette::Window, color.window);
 
-            palette.setBrush(QPalette::Disabled, QPalette::ButtonText, disabledColor);
-            palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, disabledColor);
-            palette.setBrush(QPalette::Disabled, QPalette::Text, disabledColor);
-            palette.setBrush(QPalette::Disabled, QPalette::Shadow, disabledColor);
+            palette.setBrush(QPalette::Disabled, QPalette::ButtonText, color.disabled);
+            palette.setBrush(QPalette::Disabled, QPalette::HighlightedText, color.disabled);
+            palette.setBrush(QPalette::Disabled, QPalette::Text, color.disabled);
+            palette.setBrush(QPalette::Disabled, QPalette::Shadow, color.disabled);
 
-            //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText, disabledColor);
-            //        palette.setBrush(QPalette::Inactive, QPalette::HighlightedText, disabledColor);
-            //        palette.setBrush(QPalette::Inactive, QPalette::Text, disabledColor);
-            //        palette.setBrush(QPalette::Inactive, QPalette::Shadow, disabledColor);
+            //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText,color. disabled);
+            //        palette.setBrush(QPalette::Inactive, QPalette::HighlightedText,color. disabled);
+            //        palette.setBrush(QPalette::Inactive, QPalette::Text,color. disabled);
+            //        palette.setBrush(QPalette::Inactive, QPalette::Shadow,color. disabled);
 
             qApp->setPalette(palette);
         } else {
-#if __has_include("xrstyle.h") && 0
-            QApplication::setStyle(new XrStyle);
-#else
+            // qApp->setStyle(style);
             qApp->setStyle(QStyleFactory::create("Fusion"));
-            qApp->setPalette(QApplication::style()->standardPalette());
-#endif
+            qApp->setPalette(palette); // QApplication::style()->standardPalette());
         }
-
-        // if (QOperatingSystemVersion::currentType() == QOperatingSystemVersion::Windows && QOperatingSystemVersion::current().majorVersion() > 7) {
-        // App::mainWindow().setStyleSheet("QGroupBox, .QFrame {"
-        // //"background-color: white;"
-        // "border: 1px solid gray; }"
-        // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-        // "QGroupBox::title {"
-        // "subcontrol-origin: margin;"
-        // "subcontrol-position: top center; }" /* position at the top center */
-        // );
-        // } else {
-        // App::mainWindow().setStyleSheet("QGroupBox, .QFrame {"
-        // //"background-color: white;"
-        // "border: 1px solid gray;"
-        // "border-radius: 3px; }" // Win 7 or other
-        // "QGroupBox { margin-top: 3ex; }" /* leave space at the top for the title */
-        // "QGroupBox::title {"
-        // "subcontrol-origin: margin;"
-        // "subcontrol-position: top center; }" /* position at the top center */
-        // );
-        // }
 
         QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
         if(App::mainWindowPtr() && App::mainWindow().isVisible())
@@ -341,6 +318,7 @@ public:
         dockWidget_->show();
     }
 
+    void logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message);
 signals:
     void parseFile(const QString& filename, int type);
     void logMessage(QtMsgType type, const QStringList& context, const QString& message);
@@ -393,7 +371,8 @@ private:
     void printDialog();
     void renderPdf();
 
-    void readSettings();
+    void loadSettings();
+    void saveSettings();
 
     void resetToolPathsActions() {
         if(auto widget = dockWidget_->widget(); widget) {
@@ -407,8 +386,6 @@ private:
 
     void selectAll();
     void deSelectAll();
-
-    void writeSettings();
 
     // create actions
     void createActions();
@@ -452,8 +429,6 @@ public:
 
 private:
     struct Ui {
-        class QWidget* centralwidget;
-        class QHBoxLayout* horizontalLayout;
         class GraphicsView* grView;
         class QMenuBar* menubar;
         class QStatusBar* statusbar;
@@ -462,8 +437,6 @@ private:
         class QDockWidget* loggingDockWidget;
         class QTextBrowser* loggingTextBrowser{};
 
-        class QWidget* widget;
-        class QVBoxLayout* verticalLayout;
         FileTree::View* treeView;
         void setupUi(QMainWindow* MainWindow);       // setupUi
         void retranslateUi(QMainWindow* MainWindow); // retranslateUi

@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -194,7 +194,7 @@ struct Hatch final : Entity {
 
     struct Edge {
         Edge(int type)
-            : type(type) {
+            : type{type} {
         }
         virtual ~Edge() = default;
         virtual QPolygonF toPolygon() const = 0;
@@ -202,7 +202,7 @@ struct Hatch final : Entity {
     };
     struct LineEdge : Edge {
         LineEdge(int type)
-            : Edge(type) {
+            : Edge{type} {
         }
         QPointF p1;
         QPointF p2;
@@ -215,7 +215,7 @@ struct Hatch final : Entity {
     };
     struct CircularArcEdge : Edge {
         CircularArcEdge(int type)
-            : Edge(type) {
+            : Edge{type} {
         }
         QPolygonF toPolygon() const override {
             QPolygonF p;
@@ -224,7 +224,7 @@ struct Hatch final : Entity {
     };
     struct EllipticArcEdge : Edge {
         EllipticArcEdge(int type)
-            : Edge(type) {
+            : Edge{type} {
         }
         QPolygonF toPolygon() const override {
             QPolygonF p;
@@ -233,7 +233,7 @@ struct Hatch final : Entity {
     };
     struct SplineEdge : Edge {
         SplineEdge(int type)
-            : Edge(type) {
+            : Edge{type} {
         }
         QPolygonF toPolygon() const override {
             QPolygonF p;

@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,20 +14,22 @@
 #include "plugindata.h"
 #include "shape.h"
 
-#include <QJsonObject>
-#include <QMenu>
-#include <QMessageBox>
-#include <QObject>
-#include <atomic>
 namespace Shapes {
 class Node;
-class AbstractShape;
+
+struct Editor : QWidget {
+    virtual void add(class AbstractShape* shape) = 0;
+    virtual void remove(class AbstractShape* shape) = 0;
+    virtual void updateData() = 0;
+};
 
 class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
     //    std::atomic<AbstractShape*> item {};
+    friend class AbstractShape;
     AbstractShape* item{};
+    void requestEditor() { emit showEditor(editor()); }
 
 public:
     explicit Plugin();
@@ -38,15 +40,16 @@ public:
     void finalizeShape();
 
     virtual QIcon icon() const = 0;
-    [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) const = 0;
+    [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) = 0;
     virtual uint32_t type() const = 0;
-    virtual QWidget* editor() = 0;
+    virtual Editor* editor() = 0;
 
     void createMainMenu(QMenu& menu, FileTree::View* tv);
     QString folderName() const;
 
 signals:
     void actionUncheck(bool = false);
+    void showEditor(QWidget*);
 
 protected:
     enum {

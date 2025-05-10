@@ -1,8 +1,9 @@
 ﻿#include "DialogSettings.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool DialogSettings::DRCSettings::getCreateLogSpecified() const {
+    bool
+    DialogSettings::DRCSettings::getCreateLogSpecified() const {
     return _createLog != Bool::off;
 }
 

@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -39,7 +37,7 @@ void Node::repaint(FileTree::Node* parent) {
             continue;
         const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * i : 0);
         node->file->setColor(QColor::fromHsv(k, 255, 255, 150));
-        emit App::fileModel().dataChanged(node->index(0), node->index(0), {Qt::DecorationRole});
+        emit App::fileModel().dataChanged(node -> index(0), node->index(0), {Qt::DecorationRole});
     }
 }
 
@@ -67,7 +65,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case FileTree::Column::ItemsType:
             qDebug() << role << value;
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
-            emit App::fileModel().dataChanged(this->index(), this->index(), {Qt::DecorationRole});
+            emit App::fileModel().dataChanged(this -> index(), this->index(), {Qt::DecorationRole});
             return true;
         default:
             break;
@@ -151,16 +149,16 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.setToolTipsVisible(true);
     menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
-        dialog->setObjectName(QString::fromUtf8("dialog"));
+        dialog->setObjectName(u"dialog"_s);
         dialog->resize(800, 600);
 
         QTextBrowser* textBrowser = new QTextBrowser{dialog};
-        textBrowser->setObjectName(QString::fromUtf8("textBrowser"));
+        textBrowser->setObjectName(u"textBrowser"_s);
         textBrowser->setFontFamily("JetBrains Mono");
         textBrowser->setLineWrapMode(QTextEdit::NoWrap);
         new SyntaxHighlighter{textBrowser->document()};
         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(u"verticalLayout"_s);
         verticalLayout->setContentsMargins(6, 6, 6, 6);
         verticalLayout->addWidget(textBrowser);
         QString s;

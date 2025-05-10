@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -48,7 +48,7 @@ public:
 
 class Plugin final : public GCode::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "voronoi.json")
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "description.json")
     Q_INTERFACES(GCode::Plugin)
     Form form{this};
     // GCode::Plugin interface

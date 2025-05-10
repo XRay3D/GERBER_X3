@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -30,15 +28,16 @@
 namespace Dxf {
 
 Plugin::Plugin(QObject* parent)
-    : AbstractFilePlugin(parent) {
+    : AbstractFilePlugin{parent} {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
-    if(type_ != type())
+AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
+    if(type_ != type()) return nullptr;
+    QFile file{fileName};
+    if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << file.errorString();
         return nullptr;
-    QFile file(fileName);
-    if(!file.open(QIODevice::ReadOnly | QIODevice::Text))
-        return nullptr;
+    }
 
     file_ = new File;
     file_->setFileName(fileName);
@@ -49,7 +48,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     codes.reserve(10000);
 
     QTextStream in(&file);
-#if(QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
+#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     in.setCodec("Windows-1251");
 #endif
     //    in.setAutoDetectUnicode(true);

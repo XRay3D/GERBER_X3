@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,7 +21,7 @@
 #include <app.h>
 
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , counter{static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
     , toolFileName_{App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
     setupUi(this);
@@ -89,16 +87,16 @@ QLabel* ToolSelectorForm::label() const {
 
 void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
     if(ToolSelectorForm->objectName().isEmpty())
-        ToolSelectorForm->setObjectName(QString::fromUtf8("ToolSelectorForm"));
+        ToolSelectorForm->setObjectName(u"ToolSelectorForm"_s);
     ToolSelectorForm->resize(236, 180);
 
     auto gridLayout = new QGridLayout{ToolSelectorForm};
-    gridLayout->setObjectName(QString::fromUtf8("gridLayout"));
+    gridLayout->setObjectName(u"gridLayout"_s);
     gridLayout->setContentsMargins(0, 0, 0, 0);
 
     {
         label_ = new QLabel{ToolSelectorForm};
-        label_->setObjectName(QString::fromUtf8("label"));
+        label_->setObjectName(u"label_"_s);
 
         {
             QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
@@ -118,14 +116,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
 
     {
         auto horizontalLayout = new QHBoxLayout();
-        horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+        horizontalLayout->setObjectName(u"horizontalLayout"_s);
 
         lblPixmap = new QLabel{ToolSelectorForm};
-        lblPixmap->setObjectName(QString::fromUtf8("lblPixmap"));
+        lblPixmap->setObjectName(u"lblPixmap"_s);
         horizontalLayout->addWidget(lblPixmap);
 
         lblName = new QLabel{ToolSelectorForm};
-        lblName->setObjectName(QString::fromUtf8("lblName"));
+        lblName->setObjectName(u"lblName"_s);
         horizontalLayout->addWidget(lblName);
 
         horizontalLayout->setStretch(1, 1);
@@ -133,14 +131,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
     }
     {
         pbSelect = new QPushButton{ToolSelectorForm};
-        pbSelect->setObjectName(QString::fromUtf8("pbSelect"));
+        pbSelect->setObjectName(u"pbSelect"_s);
         pbSelect->setIcon(QIcon::fromTheme("view-form"));
         gridLayout->addWidget(pbSelect, 1, 1, 1, 1);
     }
 
     {
         pbEdit = new QPushButton{ToolSelectorForm};
-        pbEdit->setObjectName(QString::fromUtf8("pbEdit"));
+        pbEdit->setObjectName(u"pbEdit"_s);
         pbEdit->setIcon(QIcon::fromTheme("document-edit"));
         gridLayout->addWidget(pbEdit, 1, 2, 1, 1);
     }

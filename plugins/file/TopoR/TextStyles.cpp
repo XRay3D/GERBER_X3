@@ -1,8 +1,9 @@
 ﻿#include "TextStyles.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool TextStyles::TextStyle::getBoldSpecified() const {
+    bool
+    TextStyles::TextStyle::getBoldSpecified() const {
     return _bold != Bool::off;
 }
 

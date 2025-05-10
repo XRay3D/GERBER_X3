@@ -1,9 +1,10 @@
 ﻿#include "Groups.h"
 #include "Commons.h"
 #include <ranges>
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool Groups::LayerGroup::ShouldSerialize_LayerRefs() {
+    bool
+    Groups::LayerGroup::ShouldSerialize_LayerRefs() {
     return _LayerRefs.empty() ? false : _LayerRefs.size() > 0;
 }
 

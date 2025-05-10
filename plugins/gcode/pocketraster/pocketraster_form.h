@@ -1,9 +1,9 @@
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -39,8 +39,8 @@ private:
     void rb_clicked();
     const QStringList names;
     static inline const QString pixmaps[]{
-        u"pock_rast_climb"_qs,
-        u"pock_rast_conv"_qs,
+        u"pock_rast_climb"_s,
+        u"pock_rast_conv"_s,
     };
     // QWidget interface
 protected:
@@ -58,7 +58,7 @@ public:
 
 class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "pocketraster.json")
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "description.json")
     Q_INTERFACES(GCode::Plugin)
     Form form{this};
     // GCode::Plugin interface

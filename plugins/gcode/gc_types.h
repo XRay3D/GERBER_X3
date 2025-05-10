@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,12 +13,12 @@
 #include "datastream.h"
 #include "md5.h"
 #include "myclipper.h"
+
 #include "tool.h"
 
 #include <QColor>
 #include <QDebug>
 #include <QVariant>
-#include <clipper_types.h>
 #include <variant>
 
 constexpr auto G_CODE = md5::hash32("GCode");
@@ -66,7 +66,7 @@ enum class Grouping {
 };
 
 using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
-using V = std::variant<int, double, UsedItems>;
+using V = std::variant<int, double, UsedItems, size_t>;
 
 struct Variant : V {
     using V::V;
@@ -79,6 +79,7 @@ struct Variant : V {
             {0,       [](V& v) -> V& { return v = int{}; }},
             {1,    [](V& v) -> V& { return v = double{}; }},
             {2, [](V& v) -> V& { return v = UsedItems{}; }},
+            {2,    [](V& v) -> V& { return v = size_t{}; }},
         };
         std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
         return stream;
@@ -94,15 +95,24 @@ struct Variant : V {
 
     template <class T>
     Variant(const T& val)
-        : V(val) { }
+        : V{val} { }
 
     int toInt() const {
         return std::visit([](auto&& val) -> int {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, UsedItems>)
                 return int{};
-             else
+            else
                 return int(val); }, (V&)*this);
+    }
+
+    size_t toUsize_t() const {
+        return std::visit([](auto&& val) -> size_t {
+            using T = std::decay_t<decltype(val)>;
+            if constexpr (std::is_same_v<T, UsedItems>)
+                return size_t{};
+            else
+                return size_t(val); }, (V&)*this);
     }
 
     bool toBool() const {

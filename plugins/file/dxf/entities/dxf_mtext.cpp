@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,7 +18,7 @@
 namespace Dxf {
 
 MText::MText(SectionParser* sp)
-    : Entity(sp) {
+    : Entity{sp} {
 }
 
 void MText::parse(CodeData& code) {
@@ -114,7 +112,7 @@ Entity::Type MText::type() const { return Type::MTEXT; }
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 DxfGo MText::toGo() const {
-    double ascent = {};
+    // double ascent = {};
     double descent = {};
     double height = {};
     double scaleX = {};
@@ -136,7 +134,7 @@ DxfGo MText::toGo() const {
         }
         QFontMetricsF fm(font);
         // offset.ry() -= fmf.descent();
-        ascent = fm.ascent();
+        // ascent = fm.ascent();
         descent = fm.descent();
         height = fm.height();
         size = fm.size(0, text);
@@ -156,7 +154,7 @@ DxfGo MText::toGo() const {
         }
         QFontMetricsF fm(font);
         // offset.ry() -= fmf.descent();
-        ascent = fm.ascent();
+        // ascent = fm.ascent();
         descent = fm.descent();
         height = fm.height();
         size = fm.size(0, text);

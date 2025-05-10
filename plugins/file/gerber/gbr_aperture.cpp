@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -15,6 +13,8 @@
 
 #include <QDebug>
 #include <QLineF>
+#include <QtQml/QJSEngine>
+#include <QtQml/QJSValue>
 
 namespace Gerber {
 
@@ -51,7 +51,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
 }
 
 AbstractAperture::AbstractAperture(const File* file)
-    : file_(file) { }
+    : file_{file} { }
 
 Paths AbstractAperture::draw(const State& state, bool notApBlock) {
     if(state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
@@ -79,26 +79,24 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
     return retPaths;
 }
 
-double AbstractAperture::apSize() {
+double AbstractAperture::size() {
     if(paths_.empty())
         draw();
     return size_;
 }
 
 Path AbstractAperture::drawDrill(const State& state) {
-    if(qFuzzyIsNull(drillDiam_))
-        return Path();
+    if(qFuzzyIsNull(drillDiam_)) return {};
 
     Path drill = CirclePath(drillDiam_ * uScale);
 
-    if(state.imgPolarity() == Positive)
-        ReversePath(drill);
+    if(state.imgPolarity() == Positive) ReversePath(drill);
 
     TranslatePath(drill, state.curPos());
     return drill;
 }
 
-void AbstractAperture::transform(Path& poligon, const State& state) {
+void AbstractAperture::transform(Path& polygon, const State& state) {
     QTransform m;
     if(!qFuzzyIsNull(state.rotating())) m.rotate(state.rotating());
     if(!qFuzzyCompare(state.scaling(), 1.0)) m.scale(state.scaling(), state.scaling());
@@ -106,10 +104,11 @@ void AbstractAperture::transform(Path& poligon, const State& state) {
     if(state.mirroring() & Y_Mirroring) m.scale(+1, -1);
 
     if(!m.isIdentity()) {
-        for(Point& pt: poligon)
+        for(Point& pt: polygon) {
             pt = ~m.map(~pt);
-        if(m.m11() < 0 ^ m.m22() < 0)
-            ReversePath(poligon);
+            SetZf(pt, ~m.map(~GetZ(pt)));
+        }
+        if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(polygon);
     }
 }
 
@@ -120,7 +119,7 @@ void AbstractAperture::transform(Path& poligon, const State& state) {
 /// \param format
 ///
 ApCircle::ApCircle(double diam, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     diam_ = diam;
     drillDiam_ = drillDiam;
     // GerberAperture interface
@@ -133,7 +132,7 @@ ApertureType ApCircle::type() const { return Circle; }
 bool ApCircle::fit(double toolDiam) const { return diam_ > toolDiam; }
 
 void ApCircle::read(QDataStream& stream) {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         diam_,
         drillDiam_,
         isFlashed_,
@@ -142,7 +141,7 @@ void ApCircle::read(QDataStream& stream) {
 }
 
 void ApCircle::write(QDataStream& stream) const {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         diam_,
         drillDiam_,
         isFlashed_,
@@ -162,7 +161,7 @@ void ApCircle::draw() {
 /// \param format
 ///
 ApRectangle::ApRectangle(double width, double height, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     width_ = width;
     height_ = height;
     drillDiam_ = drillDiam;
@@ -181,7 +180,7 @@ ApertureType ApRectangle::type() const { return Rectangle; }
 bool ApRectangle::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
 void ApRectangle::read(QDataStream& stream) {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         height_,
         width_,
         drillDiam_,
@@ -191,7 +190,7 @@ void ApRectangle::read(QDataStream& stream) {
 }
 
 void ApRectangle::write(QDataStream& stream) const {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         height_,
         width_,
         drillDiam_,
@@ -213,7 +212,7 @@ void ApRectangle::draw() {
 /// \param format
 ///
 ApObround::ApObround(double width, double height, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     width_ = width;
     height_ = height;
     drillDiam_ = drillDiam;
@@ -226,7 +225,7 @@ ApertureType ApObround::type() const { return Obround; }
 bool ApObround::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
 void ApObround::read(QDataStream& stream) {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         height_,
         width_,
         drillDiam_,
@@ -236,7 +235,7 @@ void ApObround::read(QDataStream& stream) {
 }
 
 void ApObround::write(QDataStream& stream) const {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         height_,
         width_,
         drillDiam_,
@@ -284,7 +283,7 @@ void ApObround::draw() {
 /// \param format
 ///
 ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
     diam_ = diam;
     verticesCount_ = nVertices;
     rotation_ = rotation;
@@ -302,7 +301,7 @@ ApertureType ApPolygon::type() const { return Polygon; }
 bool ApPolygon::fit(double toolDiam) const { return diam_ * cos(pi / verticesCount_) > toolDiam; }
 
 void ApPolygon::read(QDataStream& stream) {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         diam_,
         rotation_,
         verticesCount_,
@@ -313,7 +312,7 @@ void ApPolygon::read(QDataStream& stream) {
 }
 
 void ApPolygon::write(QDataStream& stream) const {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         diam_,
         rotation_,
         verticesCount_,
@@ -323,16 +322,16 @@ void ApPolygon::write(QDataStream& stream) const {
 }
 
 void ApPolygon::draw() {
-    Path poligon;
+    Path polygon;
     const double step = 360.0 / verticesCount_;
     const double diam = diam_ * uScale;
     for(int i = 0; i < verticesCount_; ++i)
-        poligon.emplace_back(Point(
+        polygon.emplace_back(Point(
             static_cast</*Point::Type*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast</*Point::Type*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
-    if(rotation_ > 0.1)
-        RotatePath(poligon, rotation_);
-    paths_.push_back(poligon);
+    if(rotation_ > 0.1) RotatePath(polygon, rotation_);
+    std::ranges::for_each(polygon, &SetZs);
+    paths_.push_back(polygon);
     minSize_ = size_ = diam_;
 }
 
@@ -344,7 +343,7 @@ void ApPolygon::draw() {
 /// \param format
 ///
 ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* format)
-    : AbstractAperture(format)
+    : AbstractAperture{format}
     , macro_(macro)
     , modifiers_(modifiers)
     , coefficients_(coefficients) {
@@ -359,7 +358,7 @@ ApertureType ApMacro::type() const { return Macro; }
 bool ApMacro::fit(double) const { return true; }
 
 void ApMacro::read(QDataStream& stream) {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         modifiers_,
         coefficients_,
         macro_,
@@ -369,7 +368,7 @@ void ApMacro::read(QDataStream& stream) {
 }
 
 void ApMacro::write(QDataStream& stream) const {
-    ::Block(stream).rw(
+    ::Block{stream}.rw(
         modifiers_,
         coefficients_,
         macro_,
@@ -394,6 +393,10 @@ void ApMacro::draw() {
     try {
         //        for (int i = 0; i < modifiers_.size(); ++i) {
         //            QString var(modifiers_[i]);
+
+        QJSEngine js;
+        for(auto&& [name, value]: macroCoefficients)
+            js.globalObject().setProperty(name, value);
         for(QString& var: modifiers_) {
             if(var.at(0) == '0') // Skip Comment
                 continue;
@@ -403,12 +406,20 @@ void ApMacro::draw() {
             if(var.contains('=')) {
                 QList<QString> stringList = var.split('=');
                 stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive);
-                macroCoefficients[stringList.first()] = MathParser(&macroCoefficients).parse(stringList.last());
+
+                auto val = js.evaluate(stringList.last());
+                if(val.errorType()) qWarning() << val.toString();
+                js.globalObject().setProperty(stringList.first(), val.toNumber());
                 continue;
             } else {
                 for(auto&& var2: var.split(',')) {
                     var2.replace(QChar('x'), '*', Qt::CaseInsensitive);
-                    mod.push_back(var2.contains('$') ? MathParser(&macroCoefficients).parse(var2) : var2.toDouble());
+                    if(var2.contains('$')) {
+                        auto val = js.evaluate(var2);
+                        if(val.errorType()) qWarning() << val.toString();
+                        mod.push_back(val.toNumber());
+                    } else
+                        mod.push_back(var2.toDouble());
                 }
             }
 
@@ -459,7 +470,7 @@ void ApMacro::draw() {
 
     if(items.size() > 1) {
         Clipper clipper;
-        for(int i = 0; i < items.size();) {
+        for(size_t i{}; i < items.size();) {
             clipper.Clear();
             clipper.AddSubject(paths_);
             bool exp = items[i].first;
@@ -583,15 +594,15 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
         Y,
     };
 
-    const int num = static_cast<int>(mod[NumberOfVertices]);
+    const size_t num = mod[NumberOfVertices];
 
     Path polygon;
-    for(int j = 0; j < int(num); ++j)
+    for(size_t j{}; j < num; ++j)
         polygon.emplace_back(Point(
             static_cast</*Point::Type*/ int32_t>(mod[X + j * 2] * uScale),
             static_cast</*Point::Type*/ int32_t>(mod[Y + j * 2] * uScale)));
-
-    if(mod.size() > (num * 2 + 3) && mod.back() > 0)
+    std::ranges::for_each(polygon, &SetZs);
+    if(mod.size() > (num * 2u + 3u) && mod.back() > 0)
         RotatePath(polygon, mod.back());
 
     return polygon;
@@ -622,6 +633,7 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
             static_cast</*Point::Type*/ int32_t>(qCos(angle) * diameter),
             static_cast</*Point::Type*/ int32_t>(qSin(angle) * diameter)));
     }
+    std::ranges::for_each(polygon, &SetZs);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
@@ -710,7 +722,7 @@ Path ApMacro::drawVectorLine(const mvector<double>& mod) {
 /// \param format
 ///
 ApBlock::ApBlock(const File* format)
-    : AbstractAperture(format) {
+    : AbstractAperture{format} {
 }
 
 QString ApBlock::name() const { return QString("BLOCK"); }
@@ -720,25 +732,25 @@ ApertureType ApBlock::type() const { return Block; }
 bool ApBlock::fit(double) const { return true; }
 
 void ApBlock::read(QDataStream& stream) {
-    ::Block(stream).rw(*this, isFlashed_, size_);
+    ::Block{stream}.rw(*this, isFlashed_, size_);
     draw();
 }
 
 void ApBlock::write(QDataStream& stream) const {
-    ::Block(stream).rw(*this, isFlashed_, size_);
+    ::Block{stream}.rw(*this, isFlashed_, size_);
 }
 
 void ApBlock::draw() {
     paths_.clear();
     int i = 0;
-    while(i < size()) {
+    while(i < V::size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddSubject(paths_);
         const int exp = at(i).state.imgPolarity();
         do {
             paths_ += at(i).fill;
             clipper.AddClip(at(i++).fill);
-        } while(i < size() && exp == at(i).state.imgPolarity());
+        } while(i < V::size() && exp == at(i).state.imgPolarity());
         if(at(i - 1).state.imgPolarity() == Positive)
             clipper.Execute(ClipType::Union, FillRule::Positive, paths_);
         else

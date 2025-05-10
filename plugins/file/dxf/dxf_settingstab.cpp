@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,50 +16,50 @@
 namespace Dxf {
 
 SettingsTab::SettingsTab(QWidget* parent)
-    : AbstractFileSettings(parent) {
-    setObjectName(QString::fromUtf8("tabDxf"));
+    : AbstractFileSettings{parent} {
+    setObjectName(u"tabDxf"_s);
     auto verticalLayout = new QVBoxLayout{this};
-    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
+    verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(6, 6, 6, 6);
 
     auto groupBox = new QGroupBox{this};
-    groupBox->setObjectName(QString::fromUtf8("groupBox_3"));
+    groupBox->setObjectName(u"groupBox"_s);
 
     auto formLayout = new QFormLayout{groupBox};
-    formLayout->setObjectName(QString::fromUtf8("formLayout_4"));
+    formLayout->setObjectName(u"formLayout"_s);
     formLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
     formLayout->setContentsMargins(6, 6, 6, 6);
     // DefaultFont
     auto labelDefaultFont = new QLabel{groupBox};
-    labelDefaultFont->setObjectName(QString::fromUtf8("labelDefaultFont"));
+    labelDefaultFont->setObjectName(u"labelDefaultFont"_s);
     formLayout->setWidget(0, QFormLayout::LabelRole, labelDefaultFont);
 
     fcbxDxfDefaultFont = new QFontComboBox{groupBox};
-    fcbxDxfDefaultFont->setObjectName(QString::fromUtf8("fcbxDxfDefaultFont"));
+    fcbxDxfDefaultFont->setObjectName(u"fcbxDxfDefaultFont"_s);
     formLayout->setWidget(0, QFormLayout::FieldRole, fcbxDxfDefaultFont);
     // Bold Font
     auto labelBoldFont = new QLabel{groupBox};
-    labelBoldFont->setObjectName(QString::fromUtf8("labelBoldFont"));
+    labelBoldFont->setObjectName(u"labelBoldFont"_s);
     formLayout->setWidget(1, QFormLayout::LabelRole, labelBoldFont);
 
     chbxBoldFont = new QCheckBox{" ", groupBox};
-    chbxBoldFont->setObjectName(QString::fromUtf8("chbxDxfBoldFont"));
+    chbxBoldFont->setObjectName(u"chbxBoldFont"_s);
     formLayout->setWidget(1, QFormLayout::FieldRole, chbxBoldFont);
     // Italic Font
     auto labelItalicFont = new QLabel{groupBox};
-    labelItalicFont->setObjectName(QString::fromUtf8("labelItalicFont"));
+    labelItalicFont->setObjectName(u"labelItalicFont"_s);
     formLayout->setWidget(2, QFormLayout::LabelRole, labelItalicFont);
 
     chbxItalicFont = new QCheckBox{" ", groupBox};
-    chbxItalicFont->setObjectName(QString::fromUtf8("chbxDxfItalicFont"));
+    chbxItalicFont->setObjectName(u"chbxItalicFont"_s);
     formLayout->setWidget(2, QFormLayout::FieldRole, chbxItalicFont);
     // Override Fonts
     auto labelOverrideFonts = new QLabel{groupBox};
-    labelOverrideFonts->setObjectName(QString::fromUtf8("labelOverrideFonts"));
+    labelOverrideFonts->setObjectName(u"labelOverrideFonts"_s);
     formLayout->setWidget(3, QFormLayout::LabelRole, labelOverrideFonts);
 
     chbxOverrideFonts = new QCheckBox{" ", groupBox};
-    chbxOverrideFonts->setObjectName(QString::fromUtf8("chbxDxfOverrideFonts"));
+    chbxOverrideFonts->setObjectName(u"chbxOverrideFonts"_s);
     formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
 
     verticalLayout->addWidget(groupBox);

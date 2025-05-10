@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,9 +23,9 @@ class Tool {
     friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
-    Tool();
+    Tool() = default;
     Tool(double diameter)
-        : diameter_(diameter) { }
+        : diameter_{diameter} { }
 
     enum Type {
         Drill,
@@ -140,7 +140,7 @@ class ToolHolder {
     ToolHolder& operator=(ToolHolder&&) = delete;
 
 public:
-    ToolHolder();
+    ToolHolder() = default;
 
     const Tool& tool(int32_t id) { return tools_.at(id); }
     const Tools& tools() { return tools_; }

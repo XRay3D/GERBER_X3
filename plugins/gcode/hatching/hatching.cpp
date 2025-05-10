@@ -1,21 +1,23 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "hatching.h"
+#include "gi_point.h"
 #include "project.h"
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
+#undef emit
 #include <execution>
+#define emit
+
 #endif
 
 #include <algorithm>
@@ -67,7 +69,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     switch(gcp_.side()) {
     case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, uScale /*static_cast</*Point::Type * / int32_t > (toolDiameter_ + 5) */);
+        groupedPaths(GCode::Grouping::Cutoff, uScale); // toolDiameter_ + 5
         break;
     case GCode::Inner:
         groupedPaths(GCode::Grouping::Copper);
@@ -124,7 +126,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, "ClipType::Intersection");
             frames += std::move(tmp);
-            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
+            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
             // dbgPaths(tmp, "ClipType::Difference");
             frames += std::move(tmp);
 
@@ -184,7 +186,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             merged.resize(merged.size() + 1);
             auto& path = merged.back();
             for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
-                ifCancelThenThrow();
+                throwIfCancel();
                 if(path.empty() || path.back() == bit->front()) {
                     path.empty() ? path += * bit
                                  : path += *bit | skipFront;
@@ -258,11 +260,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         }
     }
 
-    mergeSegments(returnPs);
-    sortB(returnPs);
+    mergePaths(returnPs);
+    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
 
     if(!profilePaths.empty() && prPass) {
-        sortB(profilePaths);
+        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
         if(gcp_.convent())
             ReversePaths(profilePaths);
         for(Path& path: profilePaths)

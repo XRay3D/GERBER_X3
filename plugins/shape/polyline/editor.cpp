@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2020                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,7 +11,6 @@
 #include "editor.h"
 #include "doublespinbox.h"
 #include "shape.h"
-#include "shhandler.h"
 
 #include <array>
 #include <set>
@@ -33,20 +30,20 @@ Model::~Model() { }
 int Model::rowCount(const QModelIndex&) const {
     size_t sise{};
     for(auto&& shape: shapes)
-        sise = std::max(sise, shape->handlers.size());
+        sise = std::max(sise, shape->handles.size());
     return sise;
 }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array getter{&QGraphicsItem::x, &QGraphicsItem::y};
+    static const std::array getter{&Handle::x, &Handle::y};
 
     auto set = [&] {
         std::set<double> set;
         for(auto* shape: sh) {
-            if(shape->handlers.size() <= index.row())
+            if(shape->handles.size() <= size_t(index.row()))
                 continue;
-            auto tmp = (*shape->handlers[index.row()].*getter[index.column()])();
+            auto tmp = (shape->handles[index.row()].*getter[index.column()])();
             set.emplace(tmp);
         }
         return set;
@@ -82,9 +79,9 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
     if(std::ranges::empty(sh)) return {};
     for(auto* shape: sh) {
-        if(shape->handlers.size() <= index.row())
+        if(shape->handles.size() <= size_t(index.row()))
             continue;
-        if(shape->handlers[index.row()]->hType() == Handle::Corner)
+        if(shape->handles[index.row()].type() == Handle::Corner)
             flags = Qt::ItemIsEnabled | Qt::ItemIsEditable;
         break;
     }
@@ -93,7 +90,7 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    static const std::array setter{&QGraphicsItem::setX, &QGraphicsItem::setY};
+    static const std::array setter{&Handle::setX, &Handle::setY};
 
     if(role == Qt::EditRole) {
         if(std::ranges::empty(sh)) return {};
@@ -101,10 +98,9 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         double val = value.toDouble();
 
         for(auto* shape: sh) {
-            if(shape->handlers.size() <= index.row())
-                continue;
-            (*shape->handlers[index.row()].*setter[index.column()])(val);
-            shape->currentHandler = shape->handlers[index.row()].get();
+            if(shape->handles.size() <= size_t(index.row())) continue;
+            (shape->handles[index.row()].*setter[index.column()])(val);
+            // shape->curHandle = shape->handles.begin() + index.row();
             shape->redraw();
         }
 
@@ -123,7 +119,7 @@ public:
     ~Delegate() override = default;
 
     // QAbstractItemDelegate interface
-    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
+    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const override {
         qDebug(__FUNCTION__);
         dsbx = new DoubleSpinBox{parent};
         connect(dsbx, &DoubleSpinBox::valueChanged, this, &Delegate::emitCommitData);
@@ -138,7 +134,7 @@ public:
         if(set.size()) dsbx->setValue(last = *set.begin());
     }
 
-    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
+    void setModelData(QWidget* /*editor*/, QAbstractItemModel* model, const QModelIndex& index) const override {
         if(qFuzzyCompare(last, dsbx->value())) return;
         model->setData(index, dsbx->value());
     }
@@ -148,7 +144,7 @@ public:
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
-Editor::Editor(Plugin* plugin)
+Editor::Editor(Shapes::Plugin* plugin)
     : /* QWidget {parent}*/ view{new QTableView{this}}
     , model{new Model{view}}
     , plugin{plugin} {
@@ -186,7 +182,7 @@ Editor::Editor(Plugin* plugin)
     pushButton->setObjectName("pbAddNew");
     pushButton->setIcon(QIcon::fromTheme("list-add"));
     vLayout->addWidget(pushButton);
-    connect(pushButton, &QPushButton::clicked, this, [plugin, this] {
+    connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
@@ -209,9 +205,13 @@ Editor::Editor(Plugin* plugin)
     //    });
 }
 
-void Editor::addShape(Shape* shape) {
-    model->shapes.emplace_back(shape);
-    shape->model = model;
+void Editor::add(Shapes::AbstractShape* shape) {
+    model->shapes.emplace_back(static_cast<Shape*>(shape));
+    view->reset();
+}
+
+void Editor::remove(Shapes::AbstractShape* shape) {
+    std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
 }
 

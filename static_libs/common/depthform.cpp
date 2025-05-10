@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,7 +16,7 @@
 #include <QtWidgets>
 
 DepthForm::DepthForm(QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , parentName_(parent->objectName()) {
     setupUi(this);
     retranslateUi(this);
@@ -75,16 +73,16 @@ void DepthForm::setValue(double value) {
 
 void DepthForm::setupUi(QWidget* Form) {
     if(Form->objectName().isEmpty())
-        Form->setObjectName(QString::fromUtf8("DepthForm"));
+        Form->setObjectName(u"Form"_s);
 
     QHBoxLayout* horizontalLayout = new QHBoxLayout{Form};
-    horizontalLayout->setObjectName(QString::fromUtf8("horizontalLayout"));
+    horizontalLayout->setObjectName(u"horizontalLayout"_s);
     horizontalLayout->setContentsMargins(0, 0, 0, 0);
     horizontalLayout->setSpacing(2);
 
     {
         label = new QLabel{Form};
-        label->setObjectName(QString::fromUtf8("label"));
+        label->setObjectName(u"label"_s);
 
         QFontMetrics fm(font());
         label->setMinimumWidth(std::max(
@@ -102,19 +100,19 @@ void DepthForm::setupUi(QWidget* Form) {
         sizePolicy.setVerticalStretch(0);
 
         rbCopper = new QRadioButton{Form};
-        rbCopper->setObjectName(QString::fromUtf8("rbCopper"));
+        rbCopper->setObjectName(u"rbCopper"_s);
         sizePolicy.setHeightForWidth(rbCopper->sizePolicy().hasHeightForWidth());
         rbCopper->setSizePolicy(sizePolicy);
         horizontalLayout->addWidget(rbCopper);
 
         rbBoard = new QRadioButton{Form};
-        rbBoard->setObjectName(QString::fromUtf8("rbBoard"));
+        rbBoard->setObjectName(u"rbBoard"_s);
         sizePolicy.setHeightForWidth(rbBoard->sizePolicy().hasHeightForWidth());
         rbBoard->setSizePolicy(sizePolicy);
         horizontalLayout->addWidget(rbBoard);
 
         rbCustom = new QRadioButton{Form};
-        rbCustom->setObjectName(QString::fromUtf8("rbCustom"));
+        rbCustom->setObjectName(u"rbCustom"_s);
         sizePolicy.setHeightForWidth(rbCustom->sizePolicy().hasHeightForWidth());
         rbCustom->setSizePolicy(sizePolicy);
         horizontalLayout->addWidget(rbCustom);
@@ -122,7 +120,7 @@ void DepthForm::setupUi(QWidget* Form) {
 
     {
         dsbx = new DoubleSpinBox{Form};
-        dsbx->setObjectName(QString::fromUtf8("dsbx"));
+        dsbx->setObjectName(u"dsbx"_s);
         dsbx->setDecimals(3);
         dsbx->setMaximum(100.0);
         dsbx->setSingleStep(0.005);

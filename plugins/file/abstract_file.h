@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -56,7 +56,7 @@ class AbstractFile {
     friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file) {
         QByteArray data;
         QDataStream out(&data, QIODevice::WriteOnly);
-        Block(out).write(
+        Block{out}.write(
             file.id_,
             file.date_,
             file.groupedPaths_,
@@ -77,8 +77,8 @@ class AbstractFile {
         QByteArray data;
         stream >> data;
         QDataStream in(&data, QIODevice::ReadOnly);
-        bool visible;
-        Block(in).read(
+        bool visible{};
+        Block{in}.read(
             file.id_,
             file.date_,
             file.groupedPaths_,
@@ -140,7 +140,9 @@ public:
     void setSide(Side side);
 
     virtual mvector<GraphicObject> getDataForGC(
-        std::span<Criteria> criterias, GCType gcType, bool test = {}) const { return {}; };
+        std::span<Criteria> criterias [[maybe_unused]],
+        GCType gcType [[maybe_unused]],
+        bool test [[maybe_unused]] = {}) const { return {}; };
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
     virtual void createGi() = 0;
@@ -251,7 +253,7 @@ inline void AbstractFile::initFrom(AbstractFile* file) {
 
 inline const LayerTypes& AbstractFile::displayedTypes() const { return layerTypes_; }
 
-inline void AbstractFile::setItemType(int type) { }
+inline void AbstractFile::setItemType(int type [[maybe_unused]]) { }
 
 inline int AbstractFile::itemsType() const { return itemsType_; }
 
@@ -331,13 +333,13 @@ public:
         dsbx[ScY]->setValue(transform.scale.y());
 
         for(auto* file: files_)
-            backup.emplace(file, file->transform());
+            backup.try_emplace(file, file->transform());
 
         for(auto& dsbx: dsbx)
             connect(dsbx, &QDoubleSpinBox::valueChanged, this, &TransformDialog::setTransform);
 
         auto buttonBox = new QDialogButtonBox{this};
-        buttonBox->setObjectName(QString::fromUtf8("buttonBox"));
+        buttonBox->setObjectName(u"buttonBox"_s);
         buttonBox->setGeometry(QRect(30, 240, 341, 32));
         buttonBox->setOrientation(Qt::Horizontal);
         buttonBox->setStandardButtons(QDialogButtonBox::Cancel | QDialogButtonBox::Ok);
@@ -377,4 +379,4 @@ public:
 };
 
 Q_DECLARE_METATYPE(AbstractFile*)
-Q_DECLARE_METATYPE(mvector<const GraphicObject*>)
+// Q_DECLARE_METATYPE(mvector<const GraphicObject*>)

@@ -1,93 +1,24 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "cancelation.h"
 #include "mvector.h"
 #include <clipper2/clipper.h>
 // #include "clipper.hpp"
 #include <QDebug>
 #include <QIcon>
 #include <QPolygonF>
-#include <concepts>
 #include <numbers>
 #include <ranges>
-
-class cancelException : public std::exception {
-public:
-    cancelException(const char* description)
-        : m_descr(description) {
-    }
-    ~cancelException() noexcept override = default;
-    const char* what() const noexcept override { return m_descr.c_str(); }
-
-private:
-    std::string m_descr;
-};
-
-class ProgressCancel {
-    static inline int max_;
-    static inline int current_;
-    static inline bool cancel_;
-
-public:
-    static void reset() {
-        current_ = 0;
-        max_ = 0;
-        cancel_ = 0;
-    }
-
-    /////////////////
-    /// \brief Progress max
-    /// \return
-    ///
-    static int max() { return max_; }
-    /////////////////
-    /// \brief Progress setMax
-    /// \param max
-    ///
-    static void setMax(int max) { max_ = max; }
-
-    /////////////////
-    /// \brief Progress current
-    /// \return
-    ///
-    static int current() { return current_; }
-    /////////////////
-    /// \brief Progress setCurrent
-    /// \param current
-    ///
-    static void setCurrent(int current = 0) { current_ = current; }
-    /////////////////
-    /// \brief Progress incCurrent
-    ///
-    static void incCurrent() { ++current_; }
-    static bool isCancel() { return cancel_; }
-    static void ifCancelThenThrow(/*const sl location = sl::current()*/) {
-        ++current_;
-        if(cancel_) [[unlikely]] {
-            //            static std::stringstream ss;
-            //            ss.clear();
-            //            ss << "file: "
-            //               << location.file_name() << "("
-            //               << location.line() << ":"
-            //               << location.column() << ") `"
-            //               << location.function_name();
-            //            throw cancelException(ss.str().data() /*__FUNCTION__*/);
-            throw cancelException(__FUNCTION__);
-        }
-    }
-    static void setCancel(bool cancel) { cancel_ = cancel; }
-};
-
-inline void ifCancelThenThrow() { ProgressCancel::ifCancelThenThrow(); }
 
 enum {
     IconSize = 24
@@ -135,19 +66,30 @@ using PIPResult = Clipper2Lib::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point)
 
+void TestPaths(const Paths& paths);
+
+Point GetZ(const Point& dst);
+void SetZ(Point& dst, const Point& center);
+void SetZf(Point& dst, const Point& center);
+void SetZs(Point& dst);
+
 double Perimeter(const Path& path);
 
 Path CirclePath(double diametr, const Point& center = Point{});
 
 Path RectanglePath(double width, double height, const Point& center = Point{});
 
-void RotatePath(Path& poligon, double angle, const Point& center = Point{});
+void RotatePath(Path& polygon, double angle, const Point& center = Point{});
 
 Path& TranslatePath(Path& path, const Point& pos);
 Paths& TranslatePaths(Paths& path, const Point& pos);
 
 void mergeSegments(Paths& paths, double glue = 0.0);
 
+/////////////////////////////////////////////////
+/// \brief склеивает пути при совпадении конечных точек
+/// \param paths - пути
+/// \param maxDist - максимальное расстояние между конечными точками
 void mergePaths(Paths& paths, const double dist = 0.0);
 
 QIcon drawIcon(const Paths& paths, QColor color = Qt::black);
@@ -157,6 +99,7 @@ QIcon drawDrillIcon(QColor color = Qt::black);
 Paths& normalize(Paths& paths);
 
 inline constexpr auto skipFront = std::views::drop(1);
+inline constexpr auto reverse = std::views::reverse;
 
 //------------------------------------------------------------------------------
 
@@ -208,6 +151,16 @@ inline QDebug operator<<(QDebug d, const Point& p) {
 template <typename T> concept Container = requires(T c) {
     c.begin();
     c.end();
+    c.reserve(size_t{});
+    // { typename T::value_type{} } -> std::same_as<std::decay_t<decltype(*c.begin())>>;
+    // T::value_type;
+    // { std::is_same<T, QByteArray> } -> std::same_as<std::false_type>;
+    // { std::is_same<T, QString> } -> std::same_as<std::false_type>;
+};
+
+template <typename T> concept Range__ = requires(T c) {
+    c.begin();
+    c.end();
     // { typename T::value_type{} } -> std::same_as<std::decay_t<decltype(*c.begin())>>;
     // T::value_type;
     // { std::is_same<T, QByteArray> } -> std::same_as<std::false_type>;
@@ -226,7 +179,7 @@ inline int indexOf(const Cont& c, const typename Cont::value_type& v) {
     return it == c.end() ? -1 : std::distance(c.begin(), it);
 }
 
-auto operator+=(Container auto& c, Container auto&& v) {
+auto operator+=(Container auto& c, Range__ auto&& v) {
     c.reserve(c.size() + v.size());
     if constexpr(std::is_lvalue_reference_v<decltype(v)>)
         std::ranges::copy(v, std::back_inserter(c));
@@ -255,13 +208,20 @@ static constexpr auto uScale{100'000};
 static constexpr auto dScale{1. / uScale};
 
 inline Point operator~(const QPointF pt) { return Point{pt.x() * uScale, pt.y() * uScale}; }
-inline QPointF operator~(const Point pt) { return {pt.x * dScale, pt.y * dScale}; }
+inline QPointF operator~(const Point pt) { return {static_cast<double>(pt.x) * dScale, static_cast<double>(pt.y) * dScale}; }
+
+template <typename T>
+struct Caster {
+    const T& val;
+    template <typename To>
+    operator To() const { return static_cast<const To>(val); }
+};
 
 #define TRANSFORM(FROM, TO)                                                    \
     inline TO operator~(const FROM& val) {                                     \
         auto it = std::views::transform(val, [](auto&& val) { return ~val; }); \
         TO ret;                                                                \
-        ret.reserve(val.size());                                               \
+        ret.reserve(Caster{val.size()});                                       \
         std::ranges::move(it, std::back_inserter(ret));                        \
         return ret;                                                            \
     }
@@ -301,14 +261,14 @@ TRANSFORM(Paths, QList<QPolygonF>)
 
 //------------------------------------------------------------------------------
 
-inline void SimplifyPolygon(const Path& in_poly, Paths& out_polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygon(const Path& /*in_poly*/, Paths& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
     //    Clipper c;
     //    c.StrictlySimple(true);
     //    c.AddPath(in_poly, PathType::Subject, true);
     //    c.Execute(ClipType::Union, out_polys, fillType, fillType);
 }
 
-inline void SimplifyPolygons(const Paths& in_polys, Paths& out_polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygons(const Paths& /*in_polys*/, Paths& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
     //    Clipper c;
     //    c.StrictlySimple(true);
     //    c.AddPaths(in_polys, PathType::Subject, true);
@@ -329,13 +289,15 @@ struct LineABC {
         , b{l.p2().x() - l.p1().x()}
         , c{l.p1().x() * l.p2().y() - l.p2().x() * l.p1().y()} { }
     operator bool() const {
-        return !qFuzzyIsNull(a) | !qFuzzyIsNull(b);
+        return !qFuzzyIsNull(a) || !qFuzzyIsNull(b);
     }
     double distance(const QPointF& p) const {
         return abs(a * p.x() + b * p.y() + c) / sqrt(a * a + b * b);
     }
     double lenght() const { return sqrt(a * a + b * b); }
 };
+
+void reductionOfDistance(Path& path, Point point = Point{});
 
 inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
     const size_t cnt = path.size();
@@ -356,8 +318,8 @@ inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
 }
 
 inline /*constexpr*/ double angleTo(const Point& pt1, const Point& pt2) noexcept {
-    const double dx = pt2.x - pt1.x;
-    const double dy = pt2.y - pt1.y;
+    const double dx = static_cast<double>(pt2.x - pt1.x);
+    const double dy = static_cast<double>(pt2.y - pt1.y);
     const double theta = atan2(-dy, dx) * 360.0 / (pi * 2);
     const double theta_normalized = theta < 0 ? theta + 360 : theta;
     if(qFuzzyCompare(theta_normalized, double(360)))
@@ -367,8 +329,8 @@ inline /*constexpr*/ double angleTo(const Point& pt1, const Point& pt2) noexcept
 }
 
 inline /*constexpr*/ double angleRadTo(const Point& pt1, const Point& pt2) noexcept {
-    const double dx = pt2.x - pt1.x;
-    const double dy = pt2.y - pt1.y;
+    const double dx = static_cast<double>(pt2.x - pt1.x);
+    const double dy = static_cast<double>(pt2.y - pt1.y);
     const double theta = atan2(-dy, dx);
     return theta;
     const double theta_normalized = theta < 0 ? theta + (pi * 2) : theta; // NOTE theta_normalized
@@ -379,14 +341,14 @@ inline /*constexpr*/ double angleRadTo(const Point& pt1, const Point& pt2) noexc
 }
 
 inline /*constexpr*/ double distTo(const Point& pt1, const Point& pt2) noexcept {
-    double x_ = pt2.x - pt1.x;
-    double y_ = pt2.y - pt1.y;
+    double x_ = static_cast<double>(pt2.x - pt1.x);
+    double y_ = static_cast<double>(pt2.y - pt1.y);
     return sqrt(x_ * x_ + y_ * y_);
 }
 
 inline constexpr double distToSq(const Point& pt1, const Point& pt2) noexcept {
-    double x_ = pt2.x - pt1.x;
-    double y_ = pt2.y - pt1.y;
+    double x_ = static_cast<double>(pt2.x - pt1.x);
+    double y_ = static_cast<double>(pt2.y - pt1.y);
     return (x_ * x_ + y_ * y_);
 }
 
@@ -398,3 +360,17 @@ inline auto rwPolyTree(PolyTree& polyTree) {
         *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очень грязный хак
     };
 }
+
+Path arc(const Point& center, double radius, double start, double stop, int interpolation);
+Path arc(Point p1, Point p2, Point center, int interpolation);
+
+void markPolyTreeDByNesting(PolyTree& polynode);
+void sortPolyTreeByNesting(PolyTree& polynode);
+Pathss stacking(Paths& paths);
+
+Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k);
+
+Paths& sortB(Paths& src, Point startPt);
+Paths& sortBeginEnd(Paths& src, Point startPt);
+Pathss& sortB(Pathss& src, Point startPt);
+Pathss& sortBeginEnd(Pathss& src, Point startPt);

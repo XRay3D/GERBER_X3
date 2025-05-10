@@ -1,49 +1,38 @@
-#/*******************************************************************************
-#* Author    :  Damir Bakiev                                                    *
-#* Version   :  na                                                              *
-#* Date      :  03 October 2022                                                 *
-#* Website   :  na                                                              *
-#* Copyright :  Damir Bakiev 2016-2022                                          *
-#* License   :                                                                  *
-#* Use, modification & distribution is subject to Boost Software License Ver 1. *
-#* http://www.boost.org/LICENSE_1_0.txt                                         *
-#********************************************************************************/
-cmake_minimum_required(VERSION 3.20)
-
+#[[
+ Author    :  Damir Bakiev
+ Version   :  na
+ Date      :  ХХ ХХХ 2025
+ Website   :  na
+ Copyright :  Damir Bakiev 2016-2025
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
+]]
+cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 project(common LANGUAGES CXX)
 
-set(CMAKE_CXX_STANDARD 20)
-set(CMAKE_CXX_STANDARD_REQUIRED ON)
+find_package(
+  Qt6
+  COMPONENTS Qml
+  REQUIRED)
 
-set(CMAKE_INCLUDE_CURRENT_DIR ON)
-set(CMAKE_AUTOUIC ON)
-set(CMAKE_AUTOMOC ON)
-set(CMAKE_AUTORCC ON)
+# set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS Core Gui Widgets REQUIRED)
+file(GLOB HEADERS *.h)
+file(GLOB SOURCES *.cpp)
 
-file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
-file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+add_library(common STATIC ${HEADERS} ${SOURCES})
 
-add_library(common STATIC
-    ${HEADERS}
-    ${SOURCES}
-)
+# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_link_libraries(
+  common
+  PRIVATE filetree shape gi graphicsview Qt6::Widgets
+  PUBLIC #[[tbb12]] tbb Qt6::Qml)
 
-target_link_libraries(common PRIVATE
-    filetree
-    shape
-    gi
-    graphicsview
-    Qt${QT_VERSION_MAJOR}::Core
-    Qt${QT_VERSION_MAJOR}::Gui
-    Qt${QT_VERSION_MAJOR}::Widgets
-)
+# add_subdirectory(doublespinbox)
 
+# add_module_library(QT qt.cpp)
 
-#add_module_library(QT qt.cpp)
-
-#target_compile_definitions(common PRIVATE COMMON_LIBRARY)
+# target_compile_definitions(common PRIVATE COMMON_LIBRARY)

@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -48,11 +46,11 @@ void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen_.setColor(*pnColorPrt_);
     if(colorPtr_)
         color_ = *colorPtr_;
-
+    // pen_.setWidth(penWidth());
     updateSelection();
 
-    QColor color(pen_.color());
-    QPen pen(pen_);
+    QColor color{pen_.color()};
+    QPen pen{pen_};
     constexpr double dl = 3;
 
     if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
@@ -101,13 +99,13 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
     // using std::views::filter;
     // using std::views::transform;
-    auto constexpr filter = std::views::filter([](auto* item) {
-        return item->type() == int(Type::DataPath);
-    });
+    // auto constexpr filter = std::views::filter([](auto* item) {
+    //     return item->type() == int(Type::DataPath);
+    // });
 
-    auto constexpr transform = std::views::transform([](auto* item) {
-        return static_cast<Item*>(item);
-    });
+    // auto constexpr transform = std::views::transform([](auto* item) {
+    //     return static_cast<Item*>(item);
+    // });
 
     const auto glue = App::project().glue() /** uScale*/;
 

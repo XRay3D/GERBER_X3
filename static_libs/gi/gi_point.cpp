@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -199,7 +197,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 /// \param parent
 ///
 Pin::Pin()
-    : QGraphicsObject(nullptr)
+    : QGraphicsObject{nullptr}
     , index_(ctr_++) {
     setObjectName("Pin");
     setAcceptHoverEvents(true);
@@ -454,9 +452,9 @@ void Pin::setPos(const QPointF pos[]) {
 void Pin::updateToolTip() {
     const QPointF p(pos() - App::zero().pos());
     setToolTip(QObject::tr("Pin %1\nX %2:Y %3")
-                   .arg(index_ + 1)
-                   .arg(p.x())
-                   .arg(p.y()));
+            .arg(index_ + 1)
+            .arg(p.x())
+            .arg(p.y()));
 }
 
 void Pin::setPos(const QPointF& pos) {
@@ -468,7 +466,7 @@ void Pin::setPos(const QPointF& pos) {
 
 ////////////////////////////////////////////////
 LayoutFrames::LayoutFrames()
-    : QGraphicsObject(nullptr) {
+    : QGraphicsObject{nullptr} {
     setZValue(-std::numeric_limits<double>::max());
     setFlag(ItemIsSelectable, false);
     App::setLayoutFrames(this);

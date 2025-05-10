@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,7 +25,7 @@
 int toolId = qRegisterMetaType<Tool>("Tool");
 
 QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
-    return Block(stream).write(
+    return Block{stream}.write(
         tool.id_,
         tool.type_,
         tool.angle_,
@@ -45,7 +43,7 @@ QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
 }
 
 QDataStream& operator>>(QDataStream& stream, Tool& tool) {
-    return Block(stream).read(
+    return Block{stream}.read(
         tool.id_,
         tool.type_,
         tool.angle_,
@@ -67,8 +65,6 @@ QDebug operator<<(QDebug debug, const Tool& t) {
     debug.nospace() << "Tool(D " << t.diameter_ << ", ID " << t.id_ << ')';
     return debug;
 }
-
-Tool::Tool() { }
 
 QString Tool::nameEnc() const {
     switch(type_) {
@@ -303,12 +299,10 @@ void Tool::updatePath(double depth) {
 ///////////////////////////////////////////////////////
 /// \brief ToolHolder::tools
 ///
-ToolHolder::ToolHolder() { }
-
 void ToolHolder::readTools() {
     QJsonDocument loadDoc;
 
-    QFile file(App::settingsPath() + u"/tools.json"_qs);
+    QFile file(App::settingsPath() + u"/tools.json"_s);
 
     if(!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json"); // fallback path
@@ -329,7 +323,7 @@ void ToolHolder::readTools(const QJsonObject& json) {
         tool.read(toolObject);
         tool.setId(toolObject["id"].toInt());
         tool.updatePath();
-        tools_.emplace(tool.id(), tool);
+        tools_.try_emplace(tool.id(), tool);
     }
 }
 

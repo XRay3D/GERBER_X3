@@ -10,7 +10,8 @@
  *******************************************************************************/
 #pragma once
 #include "gbr_types.h"
-#include "mathparser.h"
+// #define MT 1
+// #include "mathparser.h"
 
 #include <QtMath>
 #include <numbers>
@@ -56,7 +57,7 @@ public:
     bool used() const noexcept { return isUsed_; }
     bool withHole() const noexcept { return drillDiam_ > 0.0; }
 
-    double apSize();
+    double size();
     double drillDiameter() const noexcept { return drillDiam_; }
     double minSize() const noexcept { return minSize_; }
 
@@ -75,7 +76,7 @@ protected:
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
 
-    void transform(Path& poligon, const State& state);
+    void transform(Path& polygon, const State& state);
 };
 
 /////////////////////////////////////////////////////
@@ -85,7 +86,7 @@ class ApCircle final : public AbstractAperture {
 public:
     ApCircle(double diam, double drillDiam, const File* file);
     ApCircle(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -110,7 +111,7 @@ class ApRectangle final : public AbstractAperture {
 public:
     ApRectangle(double width, double height, double drillDiam, const File* file);
     ApRectangle(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -134,7 +135,7 @@ class ApObround final : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam, const File* file);
     ApObround(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -158,7 +159,7 @@ class ApPolygon final : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* file);
     ApPolygon(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     double rotation() const;
@@ -182,11 +183,12 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAMacro class
 ///
+using VarMap = std::map<QString, double>;
 class ApMacro final : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* file);
     ApMacro(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;
@@ -227,9 +229,10 @@ private:
 ///
 class ApBlock final : public AbstractAperture, public QVector<GrObject> {
 public:
+    using V = QVector<GrObject>;
     ApBlock(const File* file);
     ApBlock(QDataStream& stream, const File* file)
-        : AbstractAperture(file) {
+        : AbstractAperture{file} {
         read(stream);
     }
     ApertureType type() const override;

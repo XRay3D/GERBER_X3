@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -22,9 +20,9 @@
 #include <QMimeData>
 
 ToolModel::ToolModel(QObject* parent)
-    : QAbstractItemModel(parent)
+    : QAbstractItemModel{parent}
     , rootItem(new ToolItem())
-    , mimeType(u"application/ToolItem"_qs) {
+    , mimeType(u"application/ToolItem"_s) {
     loadTools();
 }
 
@@ -89,16 +87,13 @@ bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int cou
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const { return 3; }
 
 int ToolModel::rowCount(const QModelIndex& parent) const {
-    ToolItem* parentItem;
-    if(parent.column() > 0)
-        return 0;
+    if(parent.column() > 0) return 0;
 
-    if(!parent.isValid())
-        parentItem = rootItem;
-    else
-        parentItem = static_cast<ToolItem*>(parent.internalPointer());
+    auto parentItem = !parent.isValid()
+        ? rootItem
+        : static_cast<ToolItem*>(parent.internalPointer());
 
-    return parentItem->childCount();
+    return static_cast<int>(parentItem->childCount());
 }
 
 QModelIndex ToolModel::index(int row, int column, const QModelIndex& parent) const {
@@ -218,7 +213,7 @@ Qt::DropActions ToolModel::supportedDragActions() const { return Qt::MoveAction 
 Qt::DropActions ToolModel::supportedDropActions() const { return Qt::MoveAction | Qt::TargetMoveAction; }
 
 void ToolModel::saveTools() {
-    QFile file(App::settingsPath() + u"/tools.json"_qs);
+    QFile file(App::settingsPath() + u"/tools.json"_s);
     if(!file.open(QIODevice::WriteOnly)) {
         qDebug() << __FUNCTION__ << file.errorString();
         return;
@@ -274,7 +269,7 @@ void ToolModel::saveTools() {
 void ToolModel::loadTools() {
     QJsonDocument loadDoc;
 
-    QFile file(App::settingsPath() + u"/tools.json"_qs);
+    QFile file(App::settingsPath() + u"/tools.json"_s);
 
     if(!file.exists())
         file.setFileName(qApp->applicationDirPath() + "/tools.json");

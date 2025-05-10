@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -21,7 +19,7 @@
 namespace GCode {
 
 PropertiesForm::PropertiesForm(QWidget* parent)
-    : QWidget(parent)
+    : QWidget{parent}
     , ui(new Ui::GCodePropertiesForm) {
     ui->setupUi(this);
 
@@ -49,10 +47,6 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     connect(ui->dsbxSpaceY, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSpaceY);
     connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsX);
     connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsY);
-    ui->dsbxSpaceX->setValue(App::project().spaceX());
-    ui->dsbxSpaceY->setValue(App::project().spaceY());
-    ui->sbxStepsX->setValue(App::project().stepsX());
-    ui->sbxStepsY->setValue(App::project().stepsY());
 
     connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, [this](double value) {
         ui->dsbxSafeZ->setValue(value);
@@ -62,6 +56,60 @@ PropertiesForm::PropertiesForm(QWidget* parent)
         if(value < ui->dsbxPlunge->value())
             ui->dsbxPlunge->setValue(value);
     });
+
+    load();
+
+    connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
+        if(parent
+            && ui->dsbxThickness->value() > 0.0
+            && ui->dsbxCopperThickness->value() > 0.0
+            && ui->dsbxClearence->value() > 0.0
+            && ui->dsbxSafeZ->value() > 0.0) {
+
+            parent->close();
+            return;
+        }
+        if(ui->dsbxCopperThickness->value() == 0.0) ui->dsbxCopperThickness->flicker();
+        if(ui->dsbxThickness->value() == 0.0) ui->dsbxThickness->flicker();
+        if(ui->dsbxClearence->value() == 0.0) ui->dsbxClearence->flicker();
+    });
+
+    ui->pbOk->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+
+    if(parent != nullptr)
+        setWindowTitle(ui->label->text());
+
+    for(auto* button: findChildren<QPushButton*>())
+        button->setIconSize({16, 16});
+
+    App::setGCodePropertiesForm(this);
+}
+
+PropertiesForm::~PropertiesForm() {
+    App::setGCodePropertiesForm(nullptr);
+    save();
+    delete ui;
+}
+
+void PropertiesForm::updatePosDsbxs() {
+    ui->dsbxHomeX->setValue(App::home().pos().x());
+    ui->dsbxHomeY->setValue(App::home().pos().y());
+    ui->dsbxZeroX->setValue(App::zero().pos().x());
+    ui->dsbxZeroY->setValue(App::zero().pos().y());
+}
+
+void PropertiesForm::updateAll() {
+    // ui->dsbxSpaceX;
+    // ui->dsbxSpaceY;
+    // ui->sbxStepsX;
+    // ui->sbxStepsY;
+}
+
+void PropertiesForm::load() {
+    ui->dsbxSpaceX->setValue(App::project().spaceX());
+    ui->dsbxSpaceY->setValue(App::project().spaceY());
+    ui->sbxStepsX->setValue(App::project().stepsX());
+    ui->sbxStepsY->setValue(App::project().stepsY());
 
     MySettings settings;
     settings.beginGroup("PropertiesForm");
@@ -84,43 +132,11 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     App::project().setCopperThickness(ui->dsbxCopperThickness->value());
     App::project().setClearence(ui->dsbxClearence->value());
     App::project().setPlunge(ui->dsbxPlunge->value());
-
-    connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
-        if(parent
-            && ui->dsbxThickness->value() > 0.0
-            && ui->dsbxCopperThickness->value() > 0.0
-            && ui->dsbxClearence->value() > 0.0
-            && ui->dsbxSafeZ->value() > 0.0) {
-
-            parent->close();
-            return;
-        }
-        if(ui->dsbxCopperThickness->value() == 0.0)
-            ui->dsbxCopperThickness->flicker();
-        if(ui->dsbxThickness->value() == 0.0)
-            ui->dsbxThickness->flicker();
-        if(ui->dsbxClearence->value() == 0.0)
-            ui->dsbxClearence->flicker();
-    });
-
-    ui->pbOk->setIcon(QIcon::fromTheme("dialog-ok-apply"));
-
-    if(parent != nullptr)
-        setWindowTitle(ui->label->text());
-
-    for(auto* button: findChildren<QPushButton*>())
-        button->setIconSize({16, 16});
-
-    App::setGCodePropertiesForm(this);
 }
 
-PropertiesForm::~PropertiesForm() {
-    App::setGCodePropertiesForm(nullptr);
-
-    if(App::homePtr())
-        App::home().setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
-    if(App::zeroPtr())
-        App::zero().setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
+void PropertiesForm::save() {
+    if(App::homePtr()) App::home().setPos(QPointF(ui->dsbxHomeX->value(), ui->dsbxHomeY->value()));
+    if(App::zeroPtr()) App::zero().setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     MySettings settings;
     settings.beginGroup("PropertiesForm");
@@ -131,28 +147,12 @@ PropertiesForm::~PropertiesForm() {
     settings.setValue(ui->dsbxCopperThickness);
     settings.setValue(ui->dsbxGlue);
     settings.endGroup();
-
+    if(!App::projectPtr()) return;
     App::project().setSafeZ(ui->dsbxSafeZ->value());
     App::project().setBoardThickness(ui->dsbxThickness->value());
     App::project().setCopperThickness(ui->dsbxCopperThickness->value());
     App::project().setClearence(ui->dsbxClearence->value());
     App::project().setPlunge(ui->dsbxPlunge->value());
-
-    delete ui;
-}
-
-void PropertiesForm::updatePosDsbxs() {
-    ui->dsbxHomeX->setValue(App::home().pos().x());
-    ui->dsbxHomeY->setValue(App::home().pos().y());
-    ui->dsbxZeroX->setValue(App::zero().pos().x());
-    ui->dsbxZeroY->setValue(App::zero().pos().y());
-}
-
-void PropertiesForm::updateAll() {
-    // ui->dsbxSpaceX;
-    // ui->dsbxSpaceY;
-    // ui->sbxStepsX;
-    // ui->sbxStepsY;
 }
 
 void PropertiesForm::on_pbResetHome_clicked() {

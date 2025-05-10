@@ -1,24 +1,28 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 #include <QDoubleSpinBox>
-#include <QKeyEvent>
-#include <QLineEdit>
-#include <QTimer>
+#include <optional>
+
+class QJSEngine;
 
 class DoubleSpinBox : public QDoubleSpinBox {
     //    Q_OBJECT
     void red();
     void normal();
-    mutable QString str;
+    // mutable QString str;
+    mutable std::optional<double> value_;
+    friend struct Validator;
+    QJSEngine* const jsEngine;
+    void updateToolTip();
 
 public:
     explicit DoubleSpinBox(QWidget* parent = nullptr);
@@ -33,10 +37,11 @@ public:
 public:
     // QAbstractSpinBox interface
     double valueFromText(const QString& text) const override;
-    QString textFromValue(double value) const override;
+    // QString textFromValue(double value) const override;
     QValidator::State validate(QString& input, int& pos) const override;
-    //    void fixup(QString& input) const override;
 
+    // QWidget interface
 protected:
     void keyPressEvent(QKeyEvent* event) override;
+    void keyReleaseEvent(QKeyEvent* event) override;
 };

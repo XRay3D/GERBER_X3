@@ -26,7 +26,7 @@ struct AbstrAperFunc {
 public:
     virtual ~AbstrAperFunc() = default;
     AbstrAperFunc(Aperture::Function function)
-        : function(function) {
+        : function{function} {
     }
     const Aperture::Function function;
 };
@@ -44,7 +44,7 @@ struct ViaDrill : AbstrAperFunc {
     в соответствии с IPC-4761.*/
 public:
     ViaDrill(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct BackDrill : AbstrAperFunc {
@@ -55,7 +55,7 @@ struct BackDrill : AbstrAperFunc {
    путем просверливания этого подпролетного участка большего диаметра.*/
 public:
     BackDrill(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Drill : AbstrAperFunc {
@@ -72,7 +72,7 @@ struct Drill : AbstrAperFunc {
     См. Также Pad.*/
 public:
     Drill(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct MechanicalDrill : AbstrAperFunc {
@@ -87,7 +87,7 @@ struct MechanicalDrill : AbstrAperFunc {
     используемый при разводке с разрывом.*/
 public:
     MechanicalDrill(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct CastellatedDrill : AbstrAperFunc {
@@ -98,7 +98,7 @@ struct CastellatedDrill : AbstrAperFunc {
    используется для соединения печатных плат.*/
 public:
     CastellatedDrill(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct OtherDrill : AbstrAperFunc {
@@ -109,7 +109,7 @@ struct OtherDrill : AbstrAperFunc {
    Обязательное поле неформально описывает тип.*/
 public:
     OtherDrill(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Pad : AbstrAperFunc {
@@ -120,7 +120,7 @@ struct Pad : AbstrAperFunc {
    См. Также Drill.*/
 public:
     Pad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct SMDPad : AbstrAperFunc {
@@ -134,7 +134,7 @@ struct SMDPad : AbstrAperFunc {
 
 public:
     SMDPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct BGAPad : AbstrAperFunc {
@@ -148,7 +148,7 @@ struct BGAPad : AbstrAperFunc {
 
 public:
     BGAPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct ConnectorPad : AbstrAperFunc {
@@ -158,7 +158,7 @@ struct ConnectorPad : AbstrAperFunc {
    Применимо только для внешних слоев.*/
 public:
     ConnectorPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct HeatsinkPad : AbstrAperFunc {
@@ -167,7 +167,7 @@ struct HeatsinkPad : AbstrAperFunc {
     /*Радиатор или термопрокладка, обычно для SMD*/
 public:
     HeatsinkPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct ViaPad : AbstrAperFunc {
@@ -182,7 +182,7 @@ struct ViaPad : AbstrAperFunc {
     аналогично для тестовых площадок, переходное отверстие в BGA и т. д.*/
 public:
     ViaPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct TestPad : AbstrAperFunc {
@@ -193,7 +193,7 @@ struct TestPad : AbstrAperFunc {
 
 public:
     TestPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct CastellatedPad : AbstrAperFunc {
@@ -203,7 +203,7 @@ struct CastellatedPad : AbstrAperFunc {
 
 public:
     CastellatedPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct FiducialPad : AbstrAperFunc {
@@ -215,7 +215,7 @@ struct FiducialPad : AbstrAperFunc {
 
 public:
     FiducialPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct ReliefPad : AbstrAperFunc {
@@ -225,7 +225,7 @@ struct ReliefPad : AbstrAperFunc {
 
 public:
     ReliefPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct WasherPad : AbstrAperFunc {
@@ -235,7 +235,7 @@ struct WasherPad : AbstrAperFunc {
 
 public:
     WasherPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct AntiPad : AbstrAperFunc {
@@ -245,7 +245,7 @@ struct AntiPad : AbstrAperFunc {
 
 public:
     AntiPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct OtherPad : AbstrAperFunc {
@@ -256,7 +256,7 @@ struct OtherPad : AbstrAperFunc {
 
 public:
     OtherPad(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Conductor : AbstrAperFunc {
@@ -267,7 +267,7 @@ struct Conductor : AbstrAperFunc {
 
 public:
     Conductor(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct EtchedComponent : AbstrAperFunc {
@@ -278,7 +278,7 @@ struct EtchedComponent : AbstrAperFunc {
 
 public:
     EtchedComponent(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct NonConductor : AbstrAperFunc {
@@ -288,7 +288,7 @@ struct NonConductor : AbstrAperFunc {
 
 public:
     NonConductor(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct CopperBalancing : AbstrAperFunc {
@@ -298,7 +298,7 @@ struct CopperBalancing : AbstrAperFunc {
 
 public:
     CopperBalancing(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Border : AbstrAperFunc {
@@ -307,7 +307,7 @@ struct Border : AbstrAperFunc {
     /*Медный бордюр производственной панели.*/
 public:
     Border(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct OtherCopper : AbstrAperFunc {
@@ -318,7 +318,7 @@ struct OtherCopper : AbstrAperFunc {
 
 public:
     OtherCopper(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Main : AbstrAperFunc {
@@ -334,7 +334,7 @@ struct Main : AbstrAperFunc {
     */
 public:
     Main(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Outline : AbstrAperFunc {
@@ -349,7 +349,7 @@ struct Outline : AbstrAperFunc {
    %ADDnnC,0.004*% (in)*/
 public:
     Outline(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Pin : AbstrAperFunc {
@@ -368,7 +368,7 @@ struct Pin : AbstrAperFunc {
 
 public:
     Pin(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct ProfileA : AbstrAperFunc {
@@ -378,7 +378,7 @@ struct ProfileA : AbstrAperFunc {
 
 public:
     ProfileA(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct NonMaterial : AbstrAperFunc {
@@ -388,7 +388,7 @@ struct NonMaterial : AbstrAperFunc {
 
 public:
     NonMaterial(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct Material : AbstrAperFunc {
@@ -400,7 +400,7 @@ struct Material : AbstrAperFunc {
 
 public:
     Material(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 struct OtherA : AbstrAperFunc {
@@ -412,7 +412,7 @@ struct OtherA : AbstrAperFunc {
 
 public:
     OtherA(Aperture::Function function, const QStringList& /*list*/)
-        : AbstrAperFunc(function) {
+        : AbstrAperFunc{function} {
     }
 };
 

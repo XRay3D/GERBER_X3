@@ -1,5 +1,3 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
@@ -18,7 +16,7 @@ namespace Gerber::Attr {
 /// \param function
 ///
 AbstrFileFunc::AbstrFileFunc(File::Function function)
-    : function(function) {
+    : function{function} {
 }
 /////////////////////////////////////////////////////
 /// \brief Copper::Copper
@@ -26,7 +24,7 @@ AbstrFileFunc::AbstrFileFunc(File::Function function)
 /// \param list
 ///
 Copper::Copper(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1)))
     , type(toType(list.value(2))) {
@@ -41,7 +39,7 @@ Copper::Copper(File::Function function, const QStringList& list)
 /// \param list
 ///
 Plated::Plated(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , layerFrom(list.value(0).toInt())
     , layerTo(list.value(1).toInt())
     , type(toType(list.value(2)))
@@ -58,7 +56,7 @@ Plated::Plated(File::Function function, const QStringList& list)
 /// \param list
 ///
 NonPlated::NonPlated(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , layerFrom(list.value(0).toInt())
     , layerTo(list.value(1).toInt())
     , type(toType(list.value(2)))
@@ -75,7 +73,7 @@ NonPlated::NonPlated(File::Function function, const QStringList& list)
 /// \param list
 ///
 Legend::Legend(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1) {
     //    qDebug()
@@ -88,7 +86,7 @@ Legend::Legend(File::Function function, const QStringList& list)
 /// \param list
 ///
 Mask::Mask(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1)
     , type(toType(function)) {
@@ -103,7 +101,7 @@ Mask::Mask(File::Function function, const QStringList& list)
 /// \param list
 ///
 Profile::Profile(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , plated(toEdgePlated(list.value(0))) {
     //    qDebug()
     //        << "\n\t" << plated;
@@ -114,7 +112,7 @@ Profile::Profile(File::Function function, const QStringList& list)
 /// \param list
 ///
 Paste::Paste(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , side(toSide(list.value(0))) {
     //    qDebug()
     //        << "\n\t" << side;
@@ -125,7 +123,7 @@ Paste::Paste(File::Function function, const QStringList& list)
 /// \param list
 ///
 AssemblyDrawing::AssemblyDrawing(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , side(toSide(list.value(0))) {
     //    qDebug()
     //        << "\n\t" << side;
@@ -136,7 +134,7 @@ AssemblyDrawing::AssemblyDrawing(File::Function function, const QStringList& lis
 /// \param list
 ///
 Component::Component(File::Function function, const QStringList& list)
-    : AbstrFileFunc(function)
+    : AbstrFileFunc{function}
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1))) {
     //    qDebug()

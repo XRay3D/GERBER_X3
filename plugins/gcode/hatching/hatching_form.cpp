@@ -1,11 +1,9 @@
-// This is an open source non-commercial project. Dear PVS-Studio, please check it.
-// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 /*******************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  March 25, 2023                                                  *
+ * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2025                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,8 +22,8 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     , ui(new Ui::HatchingForm)
     , names{tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps{
-          u"pock_rast_climb"_qs,
-          u"pock_rast_conv"_qs,
+          u"pock_rast_climb"_s,
+          u"pock_rast_conv"_s,
       } {
     ui->setupUi(content);
 

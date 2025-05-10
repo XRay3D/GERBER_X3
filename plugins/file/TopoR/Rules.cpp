@@ -1,8 +1,9 @@
 ﻿#include "Rules.h"
 
-// namespace TopoR_PCB_Classes {
+    // namespace TopoR_PCB_Classes {
 
-bool Rules::WidthOfWires::getEnabledSpecified() const {
+    bool
+    Rules::WidthOfWires::getEnabledSpecified() const {
     return _enabled != Bool::off;
 }
 

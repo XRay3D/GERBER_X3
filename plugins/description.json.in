@@ -1,0 +1,6 @@
+{
+    "Name" : "@PLUG_NAME@",
+    "Version" : "@CMAKE_PROJECT_VERSION@.@PLUG_LOCAL_VERSION@",
+    "VendorAuthor" : "@PLUG_AUTHOR@",
+    "Info" : "@PLUG_INFO@"
+}
