@@ -63,19 +63,22 @@ MainWindow::MainWindow(QWidget* parent)
     ui.statusbar->setFont(f);
 
     LayoutFrames* lfp;
-    ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Home});
-    ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Zero});
+    {
+        auto scene = ui.grView->scene();
+        scene->addItem(new Gi::Marker{Gi::Marker::Home});
+        scene->addItem(new Gi::Marker{Gi::Marker::Zero});
 
-    App::setPin0(new Gi::Pin);
-    App::setPin1(new Gi::Pin);
-    App::setPin2(new Gi::Pin);
-    App::setPin3(new Gi::Pin);
+        App::setPin0(new Gi::Pin);
+        App::setPin1(new Gi::Pin);
+        App::setPin2(new Gi::Pin);
+        App::setPin3(new Gi::Pin);
 
-    ui.grView->scene()->addItem(&App::pin0());
-    ui.grView->scene()->addItem(&App::pin1());
-    ui.grView->scene()->addItem(&App::pin2());
-    ui.grView->scene()->addItem(&App::pin3());
-    ui.grView->scene()->addItem(lfp = new LayoutFrames());
+        scene->addItem(&App::pin0());
+        scene->addItem(&App::pin1());
+        scene->addItem(&App::pin2());
+        scene->addItem(&App::pin3());
+        scene->addItem(lfp = new LayoutFrames);
+    }
 
     connect(ui.grView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(ui.grView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
@@ -589,7 +592,7 @@ void MainWindow::createActionsService() {
     serviceMenu->addSeparator();
     // G-Code Properties
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
-    connect(action, &QAction::toggled, this, [pf = GCode::PropertiesForm::create(nullptr/*this*/), this](bool checked) {
+    connect(action, &QAction::toggled, this, [pf = GCode::PropertiesForm::create(nullptr /*this*/), this](bool checked) {
         if(checked) setDockWidget(pf.get());
         // connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
     });

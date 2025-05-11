@@ -247,6 +247,8 @@ BaseForm::~BaseForm() {
         // runer.terminate();
         //  runer.quit();
         runer.wait();
+    ProgressCancel::reset();
+
     delete creator_;
     qDebug(__FUNCTION__);
 }
@@ -259,6 +261,8 @@ void BaseForm::setCreator(Creator* newCreator) {
         //  runer.quit();
         runer.wait();
     }
+    ProgressCancel::reset();
+
     ProgressCancel::reset();
     if(creator_ != newCreator && newCreator) {
         qDebug(__FUNCTION__);
@@ -432,6 +436,8 @@ void BaseForm::cancel() {
         runer.wait();
         // runer.terminate();
     }
+    ProgressCancel::reset();
+
     //  runer.start(QThread::LowPriority /*HighestPriority*/);
     stopProgress();
 }

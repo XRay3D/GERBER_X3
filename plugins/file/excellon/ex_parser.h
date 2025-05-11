@@ -18,7 +18,7 @@ class AbstractFilePlugin;
 namespace Excellon {
 
 class Parser {
-    class AbstractFilePlugin* const afp;
+    class AbstractFilePlugin* const filePlugin;
 
 public:
     explicit Parser(class AbstractFilePlugin* const afp);
@@ -34,7 +34,7 @@ private:
     bool parseSlot(const QString& line);
     bool parseRepeat(const QString& line);
     bool parseFormat(const QString& line);
-    bool parseNumber(QString Str, double& val);
+    bool parseNumber(QStringView str, double& val);
 
     void circularRout();
 

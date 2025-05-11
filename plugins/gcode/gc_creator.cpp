@@ -449,8 +449,8 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
             for(auto&& node: rwPolyTree(polynode))
                 map[sorter(*node)].emplace_back(std::move(node));
             // auto i = polynode.Count();
-            auto it_ = polynode.end();                                         // std::reverse_iterator(polynode);
-            auto it = *reinterpret_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
+            auto it_ = polynode.end();                                      // std::reverse_iterator(polynode);
+            auto it = *std::bit_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
             for(auto&& [nest, nodes]: map)
                 for(auto&& node: nodes)
                     *(--it) = std::move(node);

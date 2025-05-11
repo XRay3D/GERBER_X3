@@ -97,7 +97,7 @@ protected:
     void closeStepRepeat();
 
     ApBlock* apBlock(int32_t id);
-
+    Format format;
     File* file = nullptr;
 };
 

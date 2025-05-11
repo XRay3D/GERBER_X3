@@ -43,7 +43,7 @@ target_link_libraries(
           graphicsview
           tooldatabase
           file_plugins
-          Qt${QT_VERSION_MAJOR}::Widgets)
+          Qt6::Widgets)
 
 set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 

@@ -44,7 +44,7 @@ Paths offset(const Path& path, double offset, bool fl = false) {
     // ClipperOffset cpOffset;
     // cpOffset.AddPath(path, JT::Round, fl ? ET::Round : ET::Round);
     // Paths tmpPpaths = cpOffset.Execute(offset * uScale);
-    Paths tmpPpaths = Inflate({path}, offset * uScale, JT::Round, fl ? ET::Round : ET::Round);
+    Paths tmpPpaths = Inflate({path}, offset * uScale, JT::Round, fl ? ET::Round : ET::Round); // FIXME fl ? ET::Round : ET::Round ??
     for(Path& tmpPath: tmpPpaths)
         tmpPath.push_back(tmpPath.front());
     return tmpPpaths;

@@ -23,7 +23,6 @@ file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
 add_library(common STATIC ${HEADERS} ${SOURCES})
-
 # target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
 target_link_libraries(

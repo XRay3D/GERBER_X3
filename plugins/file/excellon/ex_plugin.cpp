@@ -60,7 +60,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     static constexpr ctll::fixed_string regex2(R"(^.*Holesize.*$)"); // fixed_string(".*Holesize.*");
 
     while(in.readLineInto(&line)) {
-        auto data{toU16StrView(line)};
+        auto data{std::u16string_view{line}};
         if(ctre::match<regex1>(data))
             return true;
         if(ctre::match<regex2>(data))

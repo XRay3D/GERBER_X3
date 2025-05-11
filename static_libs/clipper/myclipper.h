@@ -207,8 +207,13 @@ inline Point& operator*=(Point& pt, Arithmetic auto v) {
 static constexpr auto uScale{100'000};
 static constexpr auto dScale{1. / uScale};
 
-inline Point operator~(const QPointF pt) { return Point{pt.x() * uScale, pt.y() * uScale}; }
-inline QPointF operator~(const Point pt) { return {static_cast<double>(pt.x) * dScale, static_cast<double>(pt.y) * dScale}; }
+inline constexpr Point operator~(const QPointF& pt) noexcept {
+    return {pt.x() * uScale, pt.y() * uScale};
+}
+
+inline constexpr QPointF operator~(const Point& pt) noexcept {
+    return {static_cast<double>(pt.x) * dScale, static_cast<double>(pt.y) * dScale};
+}
 
 template <typename T>
 struct Caster {
@@ -356,8 +361,10 @@ inline auto rwPolyTree(PolyTree& polyTree) {
     auto itB = polyTree.begin();
     auto itE = polyTree.end();
     return std::span{
-        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itB), // FIXME очень грязный хак
-        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очень грязный хак
+        *std::bit_cast<CL2::PolyPath64List::iterator*>(&itB),
+        *std::bit_cast<CL2::PolyPath64List::iterator*>(&itE),
+        // *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itB), // FIXME очень грязный хак
+        // *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очень грязный хак
     };
 }
 

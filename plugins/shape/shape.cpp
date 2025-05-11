@@ -22,11 +22,11 @@ namespace Shapes {
 static constexpr int HandleSize = 20;
 
 QDataStream& operator<<(QDataStream& stream, const Handle& handle) {
-    return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_};
+    return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_}, stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, Handle& handle) {
-    return stream >> BlockRead{static_cast<QPointF&>(handle), handle.type_};
+    return stream >> BlockRead{static_cast<QPointF&>(handle), handle.type_}, stream;
 }
 
 QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {

@@ -50,8 +50,11 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin);
-    void DrawFromOriginTo(QPainter* painter, QRectF rulerRect, double startMark, double endMark, int startTickNo, double step, double startPosition);
+    void DrawAScaleMeter(QPainter* painter, const QRectF& rulerRect,
+        double scaleMeter, double startPositoin);
+    void DrawFromOriginTo(QPainter* painter, const QRectF& rulerRect,
+        double startMark, double endMark,
+        int startTickNo, double step, double startPosition);
     void DrawMousePosTick(QPainter* painter);
 
     double gridStep{1.0};

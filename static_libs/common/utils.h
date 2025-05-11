@@ -79,28 +79,13 @@ using TimerHour = Timer<Hour>;
 
 ////////////////////////////////////////////////////////////////////////////////
 
-inline auto toU16StrView(const QString& str) {
-    return std::u16string_view{
-        reinterpret_cast<const char16_t*>(str.utf16()),
-        static_cast<size_t>(str.size()),
-    };
-}
-
 template <class T>
 struct CtreCapTo {
     T& cap;
-    constexpr CtreCapTo(T& cap)
-        : cap{cap} { }
 
+    auto toString() const { return QString::fromUtf16(cap.data(), cap.size()); }
     auto toDouble() const { return toString().toDouble(); }
     auto toInt() const { return toString().toInt(); }
-    auto toString() const {
-        // qDebug("QString  D%d S%d", cap.data(), cap.size());
-        return QString{
-            reinterpret_cast<const QChar*>(cap.data()),
-            static_cast<qsizetype>(cap.size()),
-        };
-    }
 
     operator QString() const { return toString(); }
     operator double() const { return toDouble(); }

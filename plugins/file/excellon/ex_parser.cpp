@@ -9,91 +9,70 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "ex_parser.h"
+#include "abstract_fileplugin.h"
 #include "ex_file.h"
-
-#include <ctre.hpp>
-
+#include "utils.h"
 #include <QFile>
 #include <cmath>
-
-#include "abstract_fileplugin.h"
-#include "utils.h"
+#include <ctre.hpp>
 
 namespace Excellon {
 
-Parser::Parser(AbstractFilePlugin* const afp)
-    : afp{afp} {
-}
+Parser::Parser(AbstractFilePlugin* const filePlugin)
+    : filePlugin{filePlugin} { }
 
-AbstractFile* Parser::parseFile(const QString& fileName) {
-    QFile file_(fileName);
-    if(!file_.open(QFile::ReadOnly | QFile::Text))
+AbstractFile* Parser::parseFile(const QString& fileName) try {
+    QFile exFile{fileName};
+    if(!exFile.open(QFile::ReadOnly | QFile::Text)) {
+        qWarning() << exFile.errorString();
         return nullptr;
+    }
 
     file = new File;
     toolIt = file->tools_.end();
     file->setFileName(fileName);
     state_.reset(&file->format_);
 
-    QTextStream in(&file_);
+    QTextStream in{&exFile};
     in.setAutoDetectUnicode(true);
 
     QString line;
     while(in.readLineInto(&line)) {
         file->lines().push_back(line);
-        try {
-            if(line == "%")
-                continue;
-
-            if(parseComment(line))
-                continue;
-
-            if(parseFormat(line))
-                continue;
-
-            if(parseTCode(line))
-                continue;
-
-            if(parseGCode(line))
-                continue;
-
-            if(parseMCode(line))
-                continue;
-
-            if(parseRepeat(line))
-                continue;
-
-            if(parseSlot(line))
-                continue;
-
-            if(parsePos(line))
-                continue;
-            qWarning() << "Excellon unparsed:" << line;
-        } catch(const QString& errStr) {
-            qWarning() << "exeption Q:" << errStr;
-            emit afp->fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
-            delete file;
-            return nullptr;
-        } catch(...) {
-            qWarning() << "exeption S:" << errno;
-            emit afp->fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
-            delete file;
-            return nullptr;
-        }
+        if(line == "%") continue;
+        if(parseComment(line)) continue;
+        if(parseFormat(line)) continue;
+        if(parseTCode(line)) continue;
+        if(parseGCode(line)) continue;
+        if(parseMCode(line)) continue;
+        if(parseRepeat(line)) continue;
+        if(parseSlot(line)) continue;
+        if(parsePos(line)) continue;
+        qWarning() << "Excellon unparsed:" << line;
     }
-    if(this->file->isEmpty()) {
+    if(file->isEmpty()) {
         delete file;
         file = nullptr;
     } else {
-        emit afp->fileReady(this->file);
+        emit filePlugin->fileReady(file);
     }
     return file;
+} catch(const std::exception& ex) {
+    qCritical() << "exeption S:" << errno;
+    emit filePlugin->fileError(QFileInfo{fileName}.fileName(), ex.what());
+    delete file;
+    return file = nullptr;
+} catch(...) {
+    qCritical() << "exeption S:" << errno;
+    emit filePlugin->fileError(QFileInfo{fileName}.fileName(), "Unknown Error!");
+    delete file;
+    return file = nullptr;
 }
 
 bool Parser::parseComment(QString line) {
     if(line.startsWith(';')) {
         line = line.toUpper();
-        if(auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) { // regexComment
+        if(auto [match, comment] = ctre::match<R"(^;(.*)$)">(std::u16string_view{line}); match) { // regexComment
 
             if(auto [matchTool, tool, diam] = ctre::match<R"(\s*(?:HOLESIZE)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)">(comment); matchTool) { // tool
                 qDebug() << __FUNCTION__ << tool << diam;
@@ -125,7 +104,7 @@ bool Parser::parseComment(QString line) {
 bool Parser::parseGCode(const QString& line) {
     if(line.startsWith('G')) {
         static constexpr ctll::fixed_string regex(R"(^G([0]?[0-9]{2}).*$)"); // fixed_string("^G([0]?[0-9]{2}).*$");
-        if(auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
+        if(auto [whole, c1] = ctre::match<regex>(std::u16string_view{line}); whole) {
             switch(CtreCapTo(c1).toInt()) {
             case G00:
                 state_.gCode = G00;
@@ -165,7 +144,7 @@ bool Parser::parseMCode(const QString& line) {
     if(line.startsWith('M')) {
         static constexpr ctll::fixed_string regex(R"(^M([0]?[0-9]{2})$)"); // fixed_string("^M([0]?[0-9]{2})$");
 
-        if(auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
+        if(auto [whole, c1] = ctre::match<regex>(std::u16string_view{line}); whole) {
             switch(CtreCapTo(c1).toInt()) {
             case M00: {
                 //                auto tools = file->tools_;
@@ -230,9 +209,9 @@ bool Parser::parseTCode(const QString& line) {
                                                   R"((?:([CFS])(\d*\.?\d+))?)"
                                                   R"(.*$)");
         static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string("^.+C(\d*\.?\d+).*$");
-        if(auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(toU16StrView(line)); whole) {
+        if(auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(std::u16string_view{line}); whole) {
             state_.toolId = CtreCapTo(tool).toInt();
-            if(auto [whole, diam] = *ctre::search_all<regex2>(toU16StrView(line)).begin(); whole) {
+            if(auto [whole, diam] = *ctre::search_all<regex2>(std::u16string_view{line}).begin(); whole) {
                 file->tools_[state_.toolId] = CtreCapTo(diam).toDouble();
                 return true;
             }
@@ -257,17 +236,17 @@ bool Parser::parsePos(const QString& line) {
                                               R"((?:A([\+\-]?\d*\.?\d*))?)"
                                               R"(.*$)");
 
-    if(auto [whole, G, X, Y, A] = ctre::match<regex>(toU16StrView(line)); whole) {
+    if(auto [whole, G, X, Y, A] = ctre::match<regex>(std::u16string_view{line}); whole) {
         if(!X && !Y)
             return false;
 
         if(X) {
             state_.rawPos.x = CtreCapTo(X).toString();
-            parseNumber(CtreCapTo(X), state_.pos.rx());
+            parseNumber(X, state_.pos.rx());
         }
         if(Y) {
             state_.rawPos.y = CtreCapTo(Y).toString();
-            parseNumber(CtreCapTo(Y), state_.pos.ry());
+            parseNumber(Y, state_.pos.ry());
         }
         if(A)
             state_.rawPos.a = CtreCapTo(A).toString();
@@ -308,19 +287,19 @@ bool Parser::parseSlot(const QString& line) {
                                               R"(G85)"
                                               R"((?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"(.*$)");
-    if(auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(toU16StrView(line)); whole) {
+    if(auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(std::u16string_view{line}); whole) {
         state_.gCode = G85;
         state_.path.clear();
         state_.rawPosList.clear();
 
         if(X1) {
             state_.rawPos.x = QString{CtreCapTo(X1)};
-            parseNumber(CtreCapTo(X1), state_.pos.rx());
+            parseNumber(X1, state_.pos.rx());
         }
 
         if(Y1) {
             state_.rawPos.y = QString{CtreCapTo(Y1)};
-            parseNumber(CtreCapTo(Y1), state_.pos.ry());
+            parseNumber(Y1, state_.pos.ry());
         }
 
         state_.rawPosList.append(state_.rawPos);
@@ -328,12 +307,12 @@ bool Parser::parseSlot(const QString& line) {
 
         if(X2) {
             state_.rawPos.x = QString{CtreCapTo(X2)};
-            parseNumber(CtreCapTo(X2), state_.pos.rx());
+            parseNumber(X2, state_.pos.rx());
         }
 
         if(Y2) {
             state_.rawPos.y = QString{CtreCapTo(Y2)};
-            parseNumber(CtreCapTo(Y2), state_.pos.ry());
+            parseNumber(Y2, state_.pos.ry());
         }
 
         state_.rawPosList.append(state_.rawPos);
@@ -354,11 +333,11 @@ bool Parser::parseRepeat(const QString& line) {
                                               R"((?:X([\+\-]?\d*\.?\d+))?)"
                                               R"((?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"($)");
-    if(auto [whole, C1, CL2, C3] = ctre::match<regex>(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2, C3] = ctre::match<regex>(std::u16string_view{line}); whole) {
         int count = CtreCapTo(C1).toInt();
         QPointF p;
-        parseNumber(CtreCapTo(CL2), p.rx());
-        parseNumber(CtreCapTo(C3), p.ry());
+        parseNumber(CL2, p.rx());
+        parseNumber(C3, p.ry());
         for(int i = 0; i < count; ++i) {
             state_.pos += p;
             file->append(Hole(state_, file));
@@ -371,7 +350,7 @@ bool Parser::parseRepeat(const QString& line) {
 bool Parser::parseFormat(const QString& line) {
     static const QVector<QString> unitMode({u"INCH"_s, u"METRIC"_s});
     static const QVector<QString> zeroMode({u"LZ"_s, u"TZ"_s});
-    if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(std::u16string_view{line}); whole) {
         if(C1)
             switch(unitMode.indexOf(CtreCapTo(C1))) {
             case Inches:
@@ -397,7 +376,7 @@ bool Parser::parseFormat(const QString& line) {
         return true;
     }
     static constexpr ctll::fixed_string regex2(R"(^(FMAT).*(2)?$)"); // fixed_string("^(FMAT).*(2)?$");
-    if(auto [whole, C1, CL2] = ctre::match<regex2>(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2] = ctre::match<regex2>(std::u16string_view{line}); whole) {
         file->format_.unitMode = Inches;
         file->format_.zeroMode = LeadingZeros;
         return true;
@@ -405,35 +384,34 @@ bool Parser::parseFormat(const QString& line) {
     return false;
 }
 
-bool Parser::parseNumber(QString Str, double& val) {
+bool Parser::parseNumber(QStringView str, double& val) {
     bool flag = false;
     int sign = +1;
-    if(!Str.isEmpty()) {
-        if(Str.contains('.')) {
-            val = Str.toDouble();
+    if(!str.isEmpty()) {
+        if(str.contains('.')) {
+            val = str.toDouble();
         } else {
-
-            if(Str.startsWith('+')) {
-                Str.remove(0, 1);
+            if(str.startsWith('+')) {
+                str.slice(1);
                 sign = +1;
-            } else if(Str.startsWith('-')) {
-                Str.remove(0, 1);
+            } else if(str.startsWith('-')) {
+                str.slice(1);
                 sign = -1;
             }
-            if(Str.length() < file->format_.integer + file->format_.decimal) {
+            QString strVal;
+            if(str.length() < file->format_.integer + file->format_.decimal) {
                 switch(file->format_.zeroMode) {
                 case LeadingZeros:
-                    Str = Str + QString(file->format_.integer + file->format_.decimal - Str.length(), '0');
+                    strVal = str % QString{file->format_.integer + file->format_.decimal - str.length(), '0'};
                     break;
                 case TrailingZeros:
-                    Str = QString(file->format_.integer + file->format_.decimal - Str.length(), '0') + Str;
+                    strVal = QString{file->format_.integer + file->format_.decimal - str.length(), '0'} % str;
                     break;
                 }
             }
-            val = Str.toDouble() * pow(10.0, -file->format_.decimal) * sign;
+            val = strVal.toDouble() * pow(10.0, -file->format_.decimal) * sign;
         }
-        if(file->format_.unitMode == Inches)
-            val *= 25.4;
+        if(file->format_.unitMode == Inches) val *= 25.4;
 
         val = std::clamp(val, -1000.0, +1000.0); // one meter
 

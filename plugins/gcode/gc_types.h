@@ -79,7 +79,7 @@ struct Variant : V {
             {0,       [](V& v) -> V& { return v = int{}; }},
             {1,    [](V& v) -> V& { return v = double{}; }},
             {2, [](V& v) -> V& { return v = UsedItems{}; }},
-            {2,    [](V& v) -> V& { return v = size_t{}; }},
+            {3,    [](V& v) -> V& { return v = size_t{}; }},
         };
         std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
         return stream;

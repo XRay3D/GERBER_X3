@@ -348,7 +348,7 @@ Double MathParser::parse(std::string_view input_) {
         qCritical() << ex.what();
         auto e = stringToEnum<ParseError>(ex.what());
         auto ret = std::nan("");
-        *(uint64_t*)(&ret) |= int(e);
+        *std::bit_cast<uint64_t*>(&ret) |= int(e);
         return ret;
         //        static std::array<char, 8> arr {};
         //        std::fill_n(std::begin(arr), std::size(arr) - 1, '\0');
@@ -584,10 +584,10 @@ Result MathParser::processFunction(QStringView func, Result r) {
 
     using F = double (*)(double);
     static std::unordered_map<QStringView, F> funcMap{
-        { u"cos",  [](double val) { return cos(val); }},
-        { u"sin",  [](double val) { return sin(val); }},
+        {u"cos",  [](double val) { return cos(val); } },
+        {u"sin",  [](double val) { return sin(val); } },
         {u"sqrt", [](double val) { return sqrt(val); }},
-        { u"tan",  [](double val) { return tan(val); }},
+        {u"tan",  [](double val) { return tan(val); } },
     };
 
     if(funcMap.contains(func))
