@@ -41,4 +41,4 @@ target_link_libraries(
           gi
           graphicsview
           tooldatabase
-          Qt${QT_VERSION_MAJOR}::Widgets)
+          Qt6::Widgets)

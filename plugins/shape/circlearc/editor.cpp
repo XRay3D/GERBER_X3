@@ -131,7 +131,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 
 class Delegate : public QStyledItemDelegate {
     mutable QDoubleSpinBox* dsbx{};
-    mutable double last;
+    mutable double last{};
 
 public:
     Delegate(QObject* parent)

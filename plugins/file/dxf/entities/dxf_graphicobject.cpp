@@ -15,7 +15,7 @@
 namespace Dxf {
 
 QDataStream& operator<<(QDataStream& stream, const DxfGo& go) {
-    stream << (GraphicObject&)go;
+    stream << static_cast<const GraphicObject&>(go);
     stream << go.entityId_;
     stream << go.rotationAngle_;
     stream << go.scaleX_;
@@ -24,7 +24,7 @@ QDataStream& operator<<(QDataStream& stream, const DxfGo& go) {
 }
 
 QDataStream& operator>>(QDataStream& stream, DxfGo& go) {
-    stream >> (GraphicObject&)go;
+    stream >> static_cast<GraphicObject&>(go);
     stream >> go.entityId_;
     stream >> go.rotationAngle_;
     stream >> go.scaleX_;

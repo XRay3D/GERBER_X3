@@ -186,8 +186,8 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 cutAreaPaths += wp;
 
                 do {
-                    returnPs += std::move(wp);
                     CleanPaths(wp, uScale * 0.0005); //-V1030
+                    returnPs += wp;
                     wp = Inflate(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
                 } while(wp.size());
                 ++pIdx;

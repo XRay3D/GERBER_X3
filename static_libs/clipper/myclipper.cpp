@@ -323,8 +323,9 @@ Point GetZ(const Point& dst) {
 
 void SetZs(Point& dst) { SetZ(dst, dst); }
 
+using limInt32 = std::numeric_limits<int32_t>;
+
 void SetZf(Point& dst, const Point& center) {
-    constexpr auto limInt32 = std::numeric_limits<int32_t>{};
     assert(limInt32.min() < center.x && center.x < limInt32.max());
     assert(limInt32.min() < center.y && center.y < limInt32.max());
     const int32_t array[]{static_cast<int32_t>(center.x), static_cast<int32_t>(center.y)};
@@ -333,7 +334,6 @@ void SetZf(Point& dst, const Point& center) {
 
 void SetZ(Point& dst, const Point& center) {
     if(!/*~*/ dst.z) {
-        constexpr auto limInt32 = std::numeric_limits<int32_t>{};
         assert(limInt32.min() < center.x && center.x < limInt32.max());
         assert(limInt32.min() < center.y && center.y < limInt32.max());
         const int32_t array[]{static_cast<int32_t>(center.x), static_cast<int32_t>(center.y)};

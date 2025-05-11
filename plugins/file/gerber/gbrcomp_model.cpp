@@ -39,9 +39,7 @@ sModel::sModel(int fileId, QObject* parent)
     for(const auto& component: file->components()) {
         static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
 
-        auto data{toU16StrView(component.refdes())};
-
-        if(auto [whole, c1, c2] = ctre::match<pattern>(data); whole) {
+        if(auto [whole, c1, c2] = ctre::match<pattern>(std::u16string_view{component.refdes()}); whole) {
             if(map[CtreCapTo(c1)].empty())
                 map[CtreCapTo(c1)].emplace_back(-1, new sNode{CtreCapTo{c1}});
             map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode{component});

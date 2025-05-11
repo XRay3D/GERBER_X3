@@ -126,7 +126,7 @@ void Bridge::update() {
         return;
 
     QLineF lTool, lCenter = QLineF::fromPolar(toolDiam + lenght, angle_);
-    double start, span = 180;
+    double start{}, span{180};
     switch(side) {
     case GCode::On:
         lCenter.translate(-lCenter.center());

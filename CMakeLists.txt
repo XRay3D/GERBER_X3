@@ -15,9 +15,11 @@ cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 
 project(GERBER_X3 VERSION 0.9.1)
 
+# set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_STANDARD 23)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
@@ -103,6 +105,9 @@ include_directories(
   third_party/clipper2/CPP/Clipper2Lib/include
   third_party/ctre/single-header)
 
+# add_library(std MODULE) target_sources(std PUBLIC FILE_SET all_my_modules TYPE
+# CXX_MODULES FILES static_libs/common/std.cppm)
+
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
@@ -111,10 +116,14 @@ add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
+set(CTRE_MODULE ON)
+add_subdirectory(third_party/ctre)
+
 set(COMMON_COMPILE_OPTIONS
     -fPIC
     # -ffast-math
     -march=native
+    # -xc++-system-header iostream
     -Wall
     # -Wconversion
     -Werror
@@ -132,6 +141,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
 
+# add_library(ctre) # third_party/ctre/ctre.cppm) target_sources(ctre PUBLIC
+# FILE_SET cxx_modules TYPE CXX_MODULES FILES third_party/ctre/ctre.cppm)
 # target_compile_options(Clipper2Z PUBLIC - fPIC)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core) # Qt6

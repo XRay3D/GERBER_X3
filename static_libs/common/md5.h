@@ -39,8 +39,8 @@ constexpr size_t const_strlen(const char* str) {
 
 constexpr Digest make_digest(const std::array<uint32_t, 4>& input) noexcept {
     Digest digest{};
-    for(size_t i = 0; i < input.size(); ++i) {
-        digest[i * 4] = static_cast<unsigned char>((input[i]) & 0xff);
+    for(size_t i{}; i < input.size(); ++i) {
+        digest[i * 4 + 0] = static_cast<unsigned char>((input[i] >> 0) & 0xff);
         digest[i * 4 + 1] = static_cast<unsigned char>((input[i] >> 8) & 0xff);
         digest[i * 4 + 2] = static_cast<unsigned char>((input[i] >> 16) & 0xff);
         digest[i * 4 + 3] = static_cast<unsigned char>((input[i] >> 24) & 0xff);
@@ -116,7 +116,10 @@ constexpr uint32_t t(Fn f, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint3
 }
 
 constexpr uint32_t to_uint32(const unsigned char* data) noexcept {
-    return (static_cast<uint32_t>(data[3]) << 24) | (static_cast<uint32_t>(data[2]) << 16) | (static_cast<uint32_t>(data[1]) << 8) | (static_cast<uint32_t>(data[0]));
+    return (static_cast<uint32_t>(data[3]) << 24)
+        | (static_cast<uint32_t>(data[2]) << 16)
+        | (static_cast<uint32_t>(data[1]) << 8)
+        | (static_cast<uint32_t>(data[0]) << 0);
 }
 
 struct Context {

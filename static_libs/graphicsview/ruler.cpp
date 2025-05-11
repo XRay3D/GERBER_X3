@@ -238,7 +238,7 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
     }
 }
 
-void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin) {
+void Ruler::DrawAScaleMeter(QPainter* painter, const QRectF& rulerRect, double scaleMeter, double startPositoin) {
     // Flagging whether we are horizontal or vertical only to reduce
     // to cheching many times
     bool isHorzRuler = Qt::Horizontal == orientation_;
@@ -268,7 +268,10 @@ void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMet
     }
 }
 
-void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, double endMark, int startTickNo, double step, double startPosition) {
+void Ruler::DrawFromOriginTo(QPainter* painter, const QRectF& rect,
+    double startMark, double endMark,
+    int startTickNo, double step, double startPosition) {
+
     const auto isHorzRuler = (Qt::Horizontal == orientation_);
     const auto K = gridStep * tickKoef * (1.0 / App::settings().lenUnit());
 

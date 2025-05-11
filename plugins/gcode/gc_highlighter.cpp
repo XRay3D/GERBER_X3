@@ -40,7 +40,7 @@ void Highlighter::highlightBlock(const QString& text) {
 
     using namespace std::string_view_literals;
     static constexpr ctll::fixed_string pattern(R"(([GXYZFSM])([\+\-]?\d+\.?\d*))");
-    auto data{toU16StrView(text)};
+    auto data{std::u16string_view{text}};
     for(auto [whole, code, number]: ctre::search_all<pattern>(data)) {
         { // code
             QTextCharFormat myClassFormat;
