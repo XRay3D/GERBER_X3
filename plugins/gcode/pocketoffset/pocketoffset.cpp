@@ -168,7 +168,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
         {
             Timer t{"groupedPss"};
-            for(size_t pIdx{}; const Paths& paths: groupedPss) {
+            for([[maybe_unused]] size_t pIdx{}; const Paths& paths: groupedPss) {
                 Paths wp = Inflate(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
                 if(tIdx) // обрезка текущего пути предыдущим

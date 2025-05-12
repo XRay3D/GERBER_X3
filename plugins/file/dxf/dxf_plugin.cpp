@@ -76,7 +76,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     };
 
     try {
-        int progress = 0;
+        [[maybe_unused]] int progress{};
         // int progressCtr = 0;
         do {
             if(auto code = getCode(); code.code() == 0 && code == "SECTION")

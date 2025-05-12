@@ -169,9 +169,8 @@ Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
 DxfGo LwPolyline::toGo() const {
     QPainterPath path;
-    const bool dbg = false; // NOTE data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
-    auto addSeg = [&path, dbg](const Segment& source, const Segment& target) {
+    auto addSeg = [&path](const Segment& source, const Segment& target) {
         if(path.isEmpty())
             path.moveTo(source);
 

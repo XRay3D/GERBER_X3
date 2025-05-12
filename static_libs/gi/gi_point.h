@@ -63,11 +63,9 @@ public:
     QPainterPath shape() const override;
     int type() const override;
 
-    static void setPinsPos(QPointF pos[4]);
-
-    static double minX() { return qMin(App::pin0().x(), App::pin1().x()); }
-    static double maxX() { return std::max(App::pin0().x(), App::pin1().x()); }
-    static double minY() { return qMin(App::pin0().y(), App::pin2().y()); }
+    static double minX() { return std::min(App::pin0().x(), App::pin2().x()); }
+    static double maxX() { return std::max(App::pin0().x(), App::pin2().x()); }
+    static double minY() { return std::min(App::pin0().y(), App::pin2().y()); }
     static double maxY() { return std::max(App::pin0().y(), App::pin2().y()); }
 
     static void resetPos(bool fl = true);

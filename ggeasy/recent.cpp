@@ -97,7 +97,7 @@ void Recent::updateRecentFileActions() {
     QSettings settings;
 
     const QStringList recentFiles = readRecentFiles(settings);
-    const int count = qMin(int(MaxRecentFiles), recentFiles.size());
+    const int count = std::min<int>(MaxRecentFiles, recentFiles.size());
     int i = 0;
     for(; i < count; ++i) {
         const QString fileName = mainWindow->strippedName(recentFiles.at(i));

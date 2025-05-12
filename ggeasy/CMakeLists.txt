@@ -29,8 +29,8 @@ string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S") # [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}" -DGIT_REF_NAME="${GIT_REF_NAME}"
                 -DGIT_SHA="${GIT_SHA}")
 
-find_package(Qt6 REQUIRED
-             COMPONENTS Core Gui LinguistTools OpenGL PrintSupport Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Core Gui LinguistTools OpenGL PrintSupport
+                                     Widgets)
 
 set(APP_ICON_RESOURCE_WINDOWS "myapp.rc") # WINDOWS APP ICON
 
@@ -98,8 +98,7 @@ endif()
 ]]
 
 if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  target_link_libraries(${PROJECT_NAME}
-                        PRIVATE Qt6::OpenGLWidgets)
+  target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::OpenGLWidgets)
 endif()
 
 set_target_properties(
@@ -120,12 +119,11 @@ if(QT_VERSION_MAJOR EQUAL 6)
   qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(WIN32)
+if(WIN32_)
   target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
   # windeployqt
   set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-  get_target_property(_QMAKE_EXECUTABLE Qt6::qmake
-                      IMPORTED_LOCATION)
+  get_target_property(_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
   get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
   find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
   add_custom_command(

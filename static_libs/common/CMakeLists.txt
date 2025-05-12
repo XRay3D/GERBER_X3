@@ -25,10 +25,16 @@ file(GLOB SOURCES *.cpp)
 add_library(common STATIC ${HEADERS} ${SOURCES})
 # target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
+if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
+  set(EXECUTION tbb)
+else()
+  set(EXECUTION tbb12)
+endif()
+
 target_link_libraries(
   common
   PRIVATE filetree shape gi graphicsview Qt6::Widgets
-  PUBLIC #[[tbb12]] tbb Qt6::Qml)
+  PUBLIC #[[tbb12]] ${EXECUTION} Qt6::Qml)
 
 # add_subdirectory(doublespinbox)
 

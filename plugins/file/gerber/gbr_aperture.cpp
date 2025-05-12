@@ -177,7 +177,7 @@ QString ApRectangle::name() const // RECTANGLE
 
 ApertureType ApRectangle::type() const { return Rectangle; }
 
-bool ApRectangle::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
+bool ApRectangle::fit(double toolDiam) const { return std::min(height_, width_) > toolDiam; }
 
 void ApRectangle::read(QDataStream& stream) {
     ::Block{stream}.rw(
@@ -222,7 +222,7 @@ QString ApObround::name() const { return QString("O(%1 x %2)").arg(width_).arg(h
 
 ApertureType ApObround::type() const { return Obround; }
 
-bool ApObround::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
+bool ApObround::fit(double toolDiam) const { return std::min(height_, width_) > toolDiam; }
 
 void ApObround::read(QDataStream& stream) {
     ::Block{stream}.rw(

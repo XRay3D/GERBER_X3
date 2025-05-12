@@ -38,7 +38,6 @@ public:
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
     mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
-    ;
 
     QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
 

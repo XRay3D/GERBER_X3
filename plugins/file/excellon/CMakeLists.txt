@@ -30,12 +30,9 @@ set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${SOURCE} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
-target_compile_options(
-  ${PROJECT_NAME}
-  PRIVATE
-    -fmodules-ts
-    -fmodule-mapper=${CMAKE_BINARY_DIR}/CMakeFiles/ctre.dir/third_party/ctre/ctre.cppm.o.modmap
-)
+# target_compile_options( ${PROJECT_NAME} PRIVATE -fmodules-ts
+# -fmodule-mapper=${CMAKE_BINARY_DIR}/CMakeFiles/ctre.dir/third_party/ctre/ctre.cppm.o.modmap
+# )
 
 target_link_libraries(
   ${PROJECT_NAME}

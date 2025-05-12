@@ -24,10 +24,7 @@ add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
 link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE Qt6::Widgets
-  PUBLIC #[[tbb12]] tbb)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
 
 set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 
