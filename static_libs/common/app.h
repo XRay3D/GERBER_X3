@@ -144,14 +144,26 @@ public:
 
     static auto& settingsPath() { return app->settingsPath_; }
 
-    static AbstractFilePlugin* filePlugin(uint32_t type) { return app->filePlugins_.contains(type) ? app->filePlugins_[type] : nullptr; }
     static auto& filePlugins() { return app->filePlugins_; }
+    static AbstractFilePlugin* filePlugin(uint32_t type) {
+        if(auto it = app->filePlugins_.find(type); it != app->filePlugins_.end())
+            return it->second;
+        return nullptr;
+    }
 
-    static GCode::Plugin* gCodePlugin(uint32_t type) { return app->gCodePlugin_.contains(type) ? app->gCodePlugin_[type] : nullptr; }
     static auto& gCodePlugins() { return app->gCodePlugin_; }
+    static GCode::Plugin* gCodePlugin(uint32_t type) {
+        if(auto it = app->gCodePlugin_.find(type); it != app->gCodePlugin_.end())
+            return it->second;
+        return nullptr;
+    }
 
-    static Shapes::Plugin* shapePlugin(int type) { return app->shapePlugin_.contains(type) ? app->shapePlugin_[type] : nullptr; }
     static auto& shapePlugins() { return app->shapePlugin_; }
+    static Shapes::Plugin* shapePlugin(int type) {
+        if(auto it = app->shapePlugin_.find(type); it != app->shapePlugin_.end())
+            return it->second;
+        return nullptr;
+    }
 
     // static auto& shapehandles() { return app->handles_; }
 

@@ -144,9 +144,9 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     case Entity::XLINE:
         return std::make_shared<XLine>(sp);
     default:
-        throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+        throw Exception{DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString())};
     }
-    throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
+    throw Exception{DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString())};
 }
 
 } // namespace Dxf

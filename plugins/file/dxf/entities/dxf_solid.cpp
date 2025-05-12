@@ -106,7 +106,7 @@ DxfGo Solid::toGo() const {
         poly << thirdCorner;
         poly << firstCorner;
     } else {
-        throw DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners);
+        throw Exception{DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners)};
     }
     Path path{~poly};
     ReversePath(path);

@@ -60,7 +60,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         bool ok;
         auto code(strCode.toInt(&ok));
         if(!ok)
-            throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
+            throw Exception{QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line)};
         // Value
         QString strValue(in.readLine());
         file_->lines().push_back(strValue);
@@ -120,7 +120,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
                     // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE{dxfFile(), from, to};
                     continue;
                 default:
-                    throw QString("Unknowh Section!");
+                    throw Exception{QString("Unknowh Section!")};
                 }
             }
         }
@@ -128,25 +128,19 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
             delete file_;
             file_ = nullptr;
         } else {
-            // emit fileProgress(file_->shortName(), 1, 1);
+            emit fileProgress(file_->shortName(), 1, 1);
             emit fileReady(file_);
         }
-    } catch(const QString& wath) {
-        qWarning() << "exeption QString:" << wath;
-        // emit fileProgress(file_->shortName(), 1, 1);
-        emit fileError(QFileInfo(fileName).fileName(), wath);
-        delete file_;
-        return nullptr;
     } catch(const std::exception& e) {
         qWarning() << "exeption:" << e.what();
         // emit fileProgress(file_->shortName(), 1, 1);
-        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
+        emit fileError(file_->shortName(), "Unknown Error! " + QString(e.what()));
         delete file_;
         return nullptr;
     } catch(...) {
         qWarning() << "exeption:" << errno;
         // emit fileProgress(file_->shortName(), 1, 1);
-        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
+        emit fileError(file_->shortName(), "Unknown Error! " + QString::number(errno));
         delete file_;
         return nullptr;
     }

@@ -107,11 +107,10 @@ std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionPa
     case Entity::XLINE:
         return std::make_shared<XLine>(sp);
     default:
-
-        throw std::logic_error(__FUNCTION__);
-        //        throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+        throw std::logic_error{__FUNCTION__};
+        //        throw Exception{DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString())};
     }
-    //    throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
+    //    throw Exception{DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString())};
 }
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& entity) {
@@ -169,74 +168,52 @@ void Entity::parse(CodeData& code) {
         //        break;
 
     case EntityName: //  -1
-
         break;
     case EntityType: // 0
-
         break;
     case Handle: // 5
         handle = code.string();
-
         break;
     case SoftPointerID: // 330
         softPointerID = code.string();
-
         break;
     case HardOwnerID: // 360
-
         break;
     case SubclassMarker: // 100
-
         break;
     case E67: // 67
-
         break;
     case E410: // 410
-
         break;
     case LayerName: // 8
         layerName = code.string();
-
         break;
     case LineType: // 6
-
         break;
     case E347: // 347
-
         break;
     case ColorNumber: // 62
         colorNumber = code;
-
         break;
     case LineWeight: // 370
-
         break;
     case LineTypeScale: // 48
-
         break;
     case Visibility: // 60
-
         break;
     case NumberOfBytes: // 92
-
         break;
     case BinaryChunk: // 310
-
         break;
     case A24bitColor: // 420
-
         break;
     case ColorName: // 430
-
         break;
     case TransparencyValue: // 440
-
         break;
     case PlotStyleID: // 390
-
         break;
     case ShadowMode: // 284
-
         break;
     default:
         qDebug() << __FUNCTION__ << "default" << code;
@@ -280,11 +257,11 @@ QColor Entity::color() const {
 
 void Entity::attachToLayer(DxfGo&& go) const {
     if(sp == nullptr)
-        throw DxfObj::tr("SectionParser is null!");
+        throw Exception{DxfObj::tr("SectionParser is null!")};
     else if(sp->file == nullptr)
-        throw DxfObj::tr("File in SectionParser is null!");
+        throw Exception{DxfObj::tr("File in SectionParser is null!")};
     else if(sp->file->layer(layerName) == nullptr)
-        throw DxfObj::tr("Layer '%1' not found in file!").arg(layerName);
+        throw Exception{DxfObj::tr("Layer '%1' not found in file!").arg(layerName)};
 
     sp->file->layer(layerName)->addGraphicObject(std::move(go));
 }

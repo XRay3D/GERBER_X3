@@ -151,9 +151,9 @@ void Hatch::parse(CodeData& code) {
                               // break;
             case Spline:      // 4
                 // break;
-                throw DxfObj::tr("Unimplemented edge type in HATCH: %1").arg(edgeType);
+                throw Exception{DxfObj::tr("Unimplemented edge type in HATCH: %1").arg(edgeType)};
             default:
-                throw DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType);
+                throw Exception{DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType)};
             }
             break;
         case NumberOfSourceBoundaryObjects: // 97
