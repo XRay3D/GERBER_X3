@@ -24,6 +24,8 @@
 #include <QMessageBox>
 #include <QStyleOptionGraphicsItem>
 
+constexpr QRectF ARC_RECT{-3, -3, 6, 6};
+
 bool updateRect() {
     QRectF rect(App::grView().getSelectedBoundingRect());
     if(rect.isEmpty()) {
@@ -46,16 +48,16 @@ Marker::Marker(Type type)
     setAcceptHoverEvents(true);
     if(type_ == Home) {
         App::setHome(this);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
+        path_.arcTo(ARC_RECT, 0, 90);
+        path_.arcTo(ARC_RECT, 270, -90);
         setToolTip(QObject::tr("G-Code Home Point"));
     } else {
         App::setZero(this);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
+        path_.arcTo(ARC_RECT, 90, 90);
+        path_.arcTo(ARC_RECT, 360, -90);
         setToolTip(QObject::tr("G-Code Zero Point"));
     }
-    shape_.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
+    shape_.addEllipse(ARC_RECT);
     rect_ = path_.boundingRect();
 }
 
@@ -163,8 +165,6 @@ void Marker::updateGCPForm() {
 
 void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
-    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
-
     updateGCPForm();
 }
 
@@ -203,13 +203,13 @@ Pin::Pin()
     setAcceptHoverEvents(true);
 
     if(index_ % 2) {
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
+        path_.arcTo(ARC_RECT, 0, 90);
+        path_.arcTo(ARC_RECT, 270, -90);
     } else {
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
+        path_.arcTo(ARC_RECT, 90, 90);
+        path_.arcTo(ARC_RECT, 360, -90);
     }
-    shape_.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
+    shape_.addEllipse(ARC_RECT);
     rect_ = path_.boundingRect();
 
     setZValue(std::numeric_limits<double>::max() - index_);
@@ -251,73 +251,71 @@ QPainterPath Pin::shape() const {
     return shape_;
 }
 
+void fixXY(QPointF& pt, const QPointF& center, auto cmpX, auto cmpY) {
+    if(cmpX(pt.x(), center.x())) pt.setX(center.x());
+    if(cmpY(pt.y(), center.y())) pt.setY(center.y());
+}
+
 void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
-    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
-
-    QPointF pt[4]{
+    std::array pt{
         App::pin0().pos(),
         App::pin1().pos(),
         App::pin2().pos(),
-        App::pin3().pos()};
+        App::pin3().pos(),
+    };
 
     const QPointF center(App::layoutFrames().boundingRect().center());
     // const QPointF center(App::project().worckRect().center());
 
     switch(index_) {
     case 0:
-        if(pt[0].x() > center.x()) pt[0].rx() = center.x();
-        if(pt[0].y() > center.y()) pt[0].ry() = center.y();
-        pt[2] = App::pin2().lastPos_ - (pt[0] - lastPos_);
-        pt[1].rx() = pt[2].x();
-        pt[1].ry() = pt[0].y();
-        pt[3].rx() = pt[0].x();
-        pt[3].ry() = pt[2].y();
+        fixXY(pt[0], center, std::greater{}, std::greater{});
+        pt[2] = App::pin2().lastPos - (pt[0] - lastPos);
+        pt[1].setX(pt[2].x());
+        pt[1].setY(pt[0].y());
+        pt[3].setX(pt[0].x());
+        pt[3].setY(pt[2].y());
         break;
     case 1:
-        if(pt[1].x() < center.x()) pt[1].rx() = center.x();
-        if(pt[1].y() > center.y()) pt[1].ry() = center.y();
-        pt[3] = App::pin3().lastPos_ - (pt[1] - lastPos_);
-        pt[0].rx() = pt[3].x();
-        pt[0].ry() = pt[1].y();
-        pt[2].rx() = pt[1].x();
-        pt[2].ry() = pt[3].y();
+        fixXY(pt[1], center, std::less{}, std::greater{});
+        pt[3] = App::pin3().lastPos - (pt[1] - lastPos);
+        pt[0].setX(pt[3].x());
+        pt[0].setY(pt[1].y());
+        pt[2].setX(pt[1].x());
+        pt[2].setY(pt[3].y());
         break;
     case 2:
-        if(pt[2].x() < center.x()) pt[2].rx() = center.x();
-        if(pt[2].y() < center.y()) pt[2].ry() = center.y();
-        pt[0] = App::pin0().lastPos_ - (pt[2] - lastPos_);
-        pt[1].rx() = pt[2].x();
-        pt[1].ry() = pt[0].y();
-        pt[3].rx() = pt[0].x();
-        pt[3].ry() = pt[2].y();
+        fixXY(pt[2], center, std::less{}, std::less{});
+        pt[0] = App::pin0().lastPos - (pt[2] - lastPos);
+        pt[1].setX(pt[2].x());
+        pt[1].setY(pt[0].y());
+        pt[3].setX(pt[0].x());
+        pt[3].setY(pt[2].y());
         break;
     case 3:
-        if(pt[3].x() > center.x()) pt[3].rx() = center.x();
-        if(pt[3].y() < center.y()) pt[3].ry() = center.y();
-        pt[1] = App::pin1().lastPos_ - (pt[3] - lastPos_);
-        pt[0].rx() = pt[3].x();
-        pt[0].ry() = pt[1].y();
-        pt[2].rx() = pt[1].x();
-        pt[2].ry() = pt[3].y();
+        fixXY(pt[3], center, std::greater{}, std::less{});
+        pt[1] = App::pin1().lastPos - (pt[3] - lastPos);
+        pt[0].setX(pt[3].x());
+        pt[0].setY(pt[1].y());
+        pt[2].setX(pt[1].x());
+        pt[2].setY(pt[3].y());
         break;
     }
 
-    for(int i{}; i < 4; ++i)
-        App::pins()[i]->setPos(pt[i]);
-    App::project().setPinsPos(pt);
+    setPos(pt.data());
+    App::project().setPinsPos(pt.data());
 }
 
 void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
-    if(!(flags() & QGraphicsItem::ItemIsMovable))
-        return;
+    if(!(flags() & QGraphicsItem::ItemIsMovable)) return;
     resetPos();
     QGraphicsItem::mouseDoubleClickEvent(event);
 }
 
 void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     for(int i = 0; i < 4; ++i)
-        App::pins()[i]->lastPos_ = App::pins()[i]->pos();
+        App::pins()[i]->lastPos = App::pins()[i]->pos();
     QGraphicsItem::mousePressEvent(event);
 }
 void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
@@ -408,15 +406,11 @@ void Pin::resetPos(bool fl) {
             + rect.bottomLeft(),
     };
 
-    auto fixXY = [center = rect.center()](QPointF& pt, auto cmpX, auto cmpY) {
-        if(cmpX(pt.x(), center.x())) pt.setX(center.x());
-        if(cmpY(pt.y(), center.y())) pt.setY(center.y());
-    };
-
-    fixXY(pt[0], std::greater{}, std::greater{});
-    fixXY(pt[1], std::less{}, std::greater{});
-    fixXY(pt[2], std::less{}, std::less{});
-    fixXY(pt[3], std::greater{}, std::less{});
+    const auto center = rect.center();
+    fixXY(pt[0], center, std::greater{}, std::greater{});
+    fixXY(pt[1], center, std::less{}, std::greater{});
+    fixXY(pt[2], center, std::less{}, std::less{});
+    fixXY(pt[3], center, std::greater{}, std::less{});
 
     setPos(pt.data());
     App::project().setPinsPos(pt.data());
@@ -472,14 +466,13 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     pen.setJoinStyle(Qt::MiterJoin);
     painter->setPen(pen);
 
-    painter->drawPath(path_);
+    painter->drawPath(path);
     painter->restore();
 }
 
 void LayoutFrames::updateRect(bool fl) {
-    QPainterPath path;
-    QRectF rect(App::project().worckRect());
-    rect_ = rect;
+    path.clear();
+    const QRectF rect = rect_ = App::project().worckRect();
 
     const int stepsY(App::project().stepsY()), stepsX(App::project().stepsX());
     const double spaceY_(App::project().spaceY()), spaceX_(App::project().spaceX());
@@ -497,59 +490,58 @@ void LayoutFrames::updateRect(bool fl) {
                 const double spaceX = qFuzzyIsNull(spaceX_) ? 2 : spaceX_ * 0.5;
                 const double spaceY = qFuzzyIsNull(spaceY_) ? 2 : spaceY_ * 0.5;
 
-                path.moveTo(rect.bottomLeft() + QPointF(-spaceX, 0));
+                path.moveTo(rect.bottomLeft() + QPointF{-spaceX, 0});
                 path.lineTo(rect.bottomLeft());
-                path.lineTo(rect.bottomLeft() + QPointF(0, +spaceY));
+                path.lineTo(rect.bottomLeft() + QPointF{0, +spaceY});
 
-                path.moveTo(rect.bottomRight() + QPointF(+spaceX, 0));
+                path.moveTo(rect.bottomRight() + QPointF{+spaceX, 0});
                 path.lineTo(rect.bottomRight());
-                path.lineTo(rect.bottomRight() + QPointF(0, +spaceY));
+                path.lineTo(rect.bottomRight() + QPointF{0, +spaceY});
 
-                path.moveTo(rect.topLeft() + QPointF(-spaceX, 0));
+                path.moveTo(rect.topLeft() + QPointF{-spaceX, 0});
                 path.lineTo(rect.topLeft());
-                path.lineTo(rect.topLeft() + QPointF(0, -spaceY));
+                path.lineTo(rect.topLeft() + QPointF{0, -spaceY});
 
-                path.moveTo(rect.topRight() + QPointF(+spaceX, 0));
+                path.moveTo(rect.topRight() + QPointF{+spaceX, 0});
                 path.lineTo(rect.topRight());
-                path.lineTo(rect.topRight() + QPointF(0, -spaceY));
+                path.lineTo(rect.topRight() + QPointF{0, -spaceY});
 
                 {
                     const double mid = rect.height() / 2;
                     const double len = rect.height() / 20;
 
-                    path.moveTo(rect.topLeft() + QPointF(0, mid - len));
-                    path.lineTo(rect.topLeft() + QPointF(0, mid + len));
+                    path.moveTo(rect.topLeft() + QPointF{0, mid - len});
+                    path.lineTo(rect.topLeft() + QPointF{0, mid + len});
 
-                    path.moveTo(rect.topRight() + QPointF(0, mid - len));
-                    path.lineTo(rect.topRight() + QPointF(0, mid + len));
+                    path.moveTo(rect.topRight() + QPointF{0, mid - len});
+                    path.lineTo(rect.topRight() + QPointF{0, mid + len});
 
-                    path.moveTo(rect.topLeft() + QPointF(0, mid));
-                    path.lineTo(rect.topLeft() + QPointF(-spaceX, mid));
+                    path.moveTo(rect.topLeft() + QPointF{0, mid});
+                    path.lineTo(rect.topLeft() + QPointF{-spaceX, mid});
 
-                    path.moveTo(rect.topRight() + QPointF(0, mid));
-                    path.lineTo(rect.topRight() + QPointF(+spaceX, mid));
+                    path.moveTo(rect.topRight() + QPointF{0, mid});
+                    path.lineTo(rect.topRight() + QPointF{+spaceX, mid});
                 }
 
                 {
                     const double mid = rect.width() / 2;
                     const double len = rect.width() / 20;
 
-                    path.moveTo(rect.bottomLeft() + QPointF(mid - len, 0));
-                    path.lineTo(rect.bottomLeft() + QPointF(mid + len, 0));
+                    path.moveTo(rect.bottomLeft() + QPointF{mid - len, 0});
+                    path.lineTo(rect.bottomLeft() + QPointF{mid + len, 0});
 
-                    path.moveTo(rect.topLeft() + QPointF(mid - len, 0));
-                    path.lineTo(rect.topLeft() + QPointF(mid + len, 0));
+                    path.moveTo(rect.topLeft() + QPointF{mid - len, 0});
+                    path.lineTo(rect.topLeft() + QPointF{mid + len, 0});
 
-                    path.moveTo(rect.bottomLeft() + QPointF(mid, 0));
-                    path.lineTo(rect.bottomLeft() + QPointF(mid, +spaceY));
+                    path.moveTo(rect.bottomLeft() + QPointF{mid, 0});
+                    path.lineTo(rect.bottomLeft() + QPointF{mid, +spaceY});
 
-                    path.moveTo(rect.topLeft() + QPointF(mid, 0));
-                    path.lineTo(rect.topLeft() + QPointF(mid, -spaceY));
+                    path.moveTo(rect.topLeft() + QPointF{mid, 0});
+                    path.lineTo(rect.topLeft() + QPointF{mid, -spaceY});
                 }
             }
         }
     }
-    path_ = std::move(path);
     QGraphicsItem::update();
     if(fl) {
         App::home().resetPos(false);

@@ -65,6 +65,8 @@ public:
 
     void setOpenGL(bool useOpenGL);
 
+    double gridStep() const;
+
     void setViewRect(const QRectF& r);
     QRectF getViewRect();
     QRectF getSelectedBoundingRect();
@@ -138,6 +140,7 @@ private:
     Ruler* const vRuler;
     QGridLayout* const gridLayout;
     //    Scene* scene_;
+    double gridStep_{1};
     bool ruler_{};
     int rulerCtr{};
     bool boundingRect_{};
@@ -161,7 +164,6 @@ protected:
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
-    void mouseDoubleClickEvent(QMouseEvent* event) override;
 
     void drawForeground(QPainter* painter, const QRectF& rect) override;
     void drawBackground(QPainter* painter, const QRectF& rect) override;

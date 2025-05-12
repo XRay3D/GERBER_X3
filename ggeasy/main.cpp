@@ -22,14 +22,15 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
+#include <vector>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
 #include <QTextCodec>
 #endif
 
 int main(int argc, char* argv[]) {
     stacktraceAndOutput();
-    qSetMessagePattern(QLatin1String(
-        "%{if-critical}\x1b[38;2;255;0;0m"
+    qSetMessagePattern(
+        u"%{if-critical}\x1b[38;2;255;0;0m"
         "C %{endif}"
         "%{if-debug}\x1b[38;2;196;196;196m"
         "D %{endif}"
@@ -44,10 +45,12 @@ int main(int argc, char* argv[]) {
         // "%{type} "
         // "%{file}:%{line} %{function} "
         "%{if-category}%{category}%{endif}%{message} "
-        "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"));
+        "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"_s);
+
+    qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
+    qputenv("QT_QPA_PLATFORM", "windows:darkmode=2"); //"windows:darkmode=[1|2]"
 
     QApplication::setAttribute(Qt::AA_Use96Dpi);
-    qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
 
     Q_INIT_RESOURCE(resources);
 

@@ -19,7 +19,7 @@
 
 namespace Shapes {
 
-static constexpr int HandleSize = 20;
+static constexpr int HandleR = 10; // R pix
 
 QDataStream& operator<<(QDataStream& stream, const Handle& handle) {
     return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_}, stream;
@@ -102,6 +102,7 @@ double AbstractShape::scale(bool* hasUpdate) const {
     if(static auto views = scene()->views(); views.empty()) return scale_ = 1.0;
     else if(const auto scale = 1.0 / views[0]->transform().m11(); scale != scale_) {
         scale_ = scale;
+        hSize = std::pow(HandleR * scale, 2);
         if(hasUpdate) *hasUpdate = true;
     }
     return scale_;
@@ -109,10 +110,10 @@ double AbstractShape::scale(bool* hasUpdate) const {
 
 bool AbstractShape::test(const QPointF& point) {
     curHandle = {};
-    const auto hSize = HandleSize * 0.5 * scale();
     for(auto&& var: handles) {
-        QLineF line{point, var};
-        if(line.length() < hSize) {
+        const auto pt = var - point;
+        const auto length = pt.x() * pt.x() + pt.y() * pt.y();
+        if(length <= hSize) {
             curHandle = HIter{&var};
             return true;
         }
@@ -143,7 +144,9 @@ void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
 #endif
 
     painter->setPen(Qt::NoPen);
-    const auto hs = HandleSize * 0.5 * scale();
+    bool fl{};
+    const auto hs = HandleR * scale(&fl);
+    if(fl) AbstractShape::redraw();
 
     painter->setPen(QPen(Qt::black, 0.0));
 
@@ -167,7 +170,7 @@ QRectF AbstractShape::boundingRect() const {
 
 QPainterPath AbstractShape::shape() const {
     if(isSelected()) [[unlikely]]
-        return pPathHandle + shape_;
+        return pPathHandle | shape_;
     return shape_;
 }
 
@@ -200,10 +203,10 @@ void AbstractShape::changeColor() {
 void AbstractShape::redraw() {
     if(static int fl; !fl) ++fl, redraw(), --fl; // call child overload once
 
-    pPathHandle = {}; //.clear();
+    pPathHandle.clear();
     if(!isEditable()) return;
 
-    const auto hs = HandleSize * 0.5 * scale();
+    const auto hs = HandleR * scale();
 
     std::ranges::for_each(handles,
         std::bind(qOverload<const QPointF&, qreal, qreal>(&QPainterPath::addEllipse),
@@ -299,17 +302,16 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
 // QGraphicsItem interface /////////////////////////////////////////////////////
 
 void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
-    event->setPos(App::settings().getSnappedPos(event->pos(), event->modifiers()));
-    QGraphicsItem::mouseMoveEvent(event);
-    if(curHandle.base() && isEditable()) {
+    if(isEditable() && curHandle.base()) {
         *curHandle = event->pos();
         AbstractShape::redraw();
+        event->accept();
+        return;
     }
-    return;
+    QGraphicsItem::mouseMoveEvent(event);
 }
 
 void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
-    event->setPos(App::settings().getSnappedPos(event->pos(), event->modifiers()));
     if(isEditable()) {
         if(bool fl{}; scale(&fl) && fl) AbstractShape::redraw();
         initPos = event->pos();
@@ -320,15 +322,13 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
 }
 
 void AbstractShape::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
-    event->setPos(App::settings().getSnappedPos(event->pos(), event->modifiers()));
-    qInfo() << event;
-    QGraphicsItem::mouseReleaseEvent(event);
     if(isEditable()) {
         if(!curHandle.base() && !pos().isNull())
             for(auto&& h: handles) h += pos();
         curHandle = {};
     }
     AbstractShape::redraw();
+    QGraphicsItem::mouseReleaseEvent(event);
 }
 
 void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {

@@ -64,9 +64,9 @@ public:
     ~AbstractShape() override;
 
     // QGraphicsItem interface
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
-    QRectF boundingRect() const override;
-    QPainterPath shape() const override;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) final;
+    QRectF boundingRect() const final;
+    QPainterPath shape() const final;
 
     // Gi::Item interface
     Paths paths(int alternate = {}) const override;
@@ -85,8 +85,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     void menu(QMenu& menu, FileTree::View* tv) override;
 
-    int32_t id() const override { return Item::id(); }
-    void setId(int32_t id) override { Item::setId(id); }
+    int32_t id() const final { return Item::id(); }
+    void setId(int32_t id) final { Item::setId(id); }
 
 protected:
     double scale(bool* hasUpdate = nullptr) const;
@@ -96,19 +96,19 @@ protected:
     mutable mvector<Handle> handles;
     using HIter = mvector<Handle>::iterator;
     HIter curHandle{};
+    mutable double hSize{1};
 
     Paths paths_;
     std::unordered_map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
     QPointF initPos;                                               // групповое перемещение
 
     // QGraphicsItem interface
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
-    void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
-
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) final;
+    void mousePressEvent(QGraphicsSceneMouseEvent* event) final;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) final;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) final;
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) final;
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) final;
 
     // AbstractShape interface
     virtual void write(QDataStream& stream [[maybe_unused]]) const { };                          // write to project

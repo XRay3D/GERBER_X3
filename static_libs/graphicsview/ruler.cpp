@@ -11,6 +11,7 @@
 // https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "ruler.h"
 #include "app.h"
+#include "graphicsview.h"
 
 // #include <QDebug>
 #include <QDrag>
@@ -201,7 +202,7 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
     if(qFuzzyIsNull(rulerZoom_))
         return;
 
-    gridStep = App::settings().gridStep(rulerZoom_);
+    gridStep = App::grView().gridStep();
 
     // drawing a scale of 0.1
     if((gridStep * rulerZoom_) > 35) {
