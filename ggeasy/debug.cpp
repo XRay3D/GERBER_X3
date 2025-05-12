@@ -61,7 +61,7 @@ bool MainWindow::debug() {
                 QTimer::singleShot(time += delay, [this, str] { loadFile(str); });
                 break;
             }
-            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+            QTimer::singleShot(time += delay * 5, this, [] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
         }
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_1.dxf
         // file:///C:/Users/X-Ray/YandexDisk/Табуретка2/Фрагмент3_2.dxf
@@ -74,7 +74,7 @@ bool MainWindow::debug() {
                     R"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"}) {
                 if(!QFileInfo::exists(file)) continue;
                 QTimer::singleShot(time += delay, this, [this, file] { loadFile(file); });
-                QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+                QTimer::singleShot(time += delay * 5, this, [] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
             }
         }
 
@@ -122,7 +122,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
             //            QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>("pbAddBridge")->click(); });
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>("pbCreate")->click(); });
-            QTimer::singleShot(time += delay, this, [this] { App::grView().zoomFit(); });
+            QTimer::singleShot(time += delay, this, [] { App::grView().zoomFit(); });
         }
 
         if(0) {
@@ -156,7 +156,7 @@ bool MainWindow::debug() {
 
             for(auto* action: actionGroup.actions())
                 if(action->text() == "Text")
-                    QTimer::singleShot(time += delay, this, [this, action] { action->toggle(); });
+                    QTimer::singleShot(time += delay, this, [action] { action->toggle(); });
             QTimer::singleShot(time += delay, this, [this] { selectAll(); });
         }
 

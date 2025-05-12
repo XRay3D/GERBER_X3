@@ -22,16 +22,15 @@ Q_DECLARE_METATYPE(std::set<double>)
 namespace ShTxt {
 
 auto filter = std::views::filter([](Shape* shape) {
-    return shape->isSelected()
-        // && shape->isEditable()
-        ;
+    return shape->isSelected();
+    // && shape->isEditable();
 });
 
 //////////////////////////////////////////
 /// \brief Editor::Editor
 void Editor::setupUi() {
 
-    QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    QSizePolicy sizePolicy{QSizePolicy::Preferred, QSizePolicy::Fixed};
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());

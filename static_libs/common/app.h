@@ -136,7 +136,7 @@ public:
     static auto& dashOffset() { return app->dashOffset_; }
 
     static auto pins() {
-        static std::vector pins{&App::pin0(), &App::pin1(), &App::pin2(), &App::pin3()};
+        static std::array pins{&App::pin0(), &App::pin1(), &App::pin2(), &App::pin3()};
         return pins;
     }
 

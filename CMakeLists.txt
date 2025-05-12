@@ -116,7 +116,7 @@ add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
-set(CTRE_MODULE ON)
+# set(CTRE_MODULE ON)
 add_subdirectory(third_party/ctre)
 
 set(COMMON_COMPILE_OPTIONS

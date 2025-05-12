@@ -41,6 +41,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         default:;
         }
+        return false;
     case FileTree::Column::Side:
         switch(role) {
         case Qt::EditRole:
@@ -48,6 +49,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         default:;
         }
+        return false;
     default:
         if(role == FileTree::Select) {
             file->itemGroup()->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);

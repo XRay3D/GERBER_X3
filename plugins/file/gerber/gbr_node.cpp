@@ -49,7 +49,7 @@ Node::Node(File* file)
 
 Node::~Node() {
     App::project().deleteFile(file->id());
-    QTimer::singleShot(500, [parent = parent(), this] { repaint(parent); });
+    QTimer::singleShot(500, [parent = parent()] { repaint(parent); });
 }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {

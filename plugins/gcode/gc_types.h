@@ -66,7 +66,7 @@ enum class Grouping {
 };
 
 using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
-using V = std::variant<int, double, UsedItems, size_t>;
+using V = std::variant<int, double, UsedItems, quint64>;
 
 struct Variant : V {
     using V::V;
@@ -79,15 +79,27 @@ struct Variant : V {
             {0,       [](V& v) -> V& { return v = int{}; }},
             {1,    [](V& v) -> V& { return v = double{}; }},
             {2, [](V& v) -> V& { return v = UsedItems{}; }},
-            {3,    [](V& v) -> V& { return v = size_t{}; }},
+            {3,   [](V& v) -> V& { return v = quint64{}; }},
         };
-        std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
+        std::visit([&stream]<typename T>(T& val) {
+            if constexpr(std::is_same_v<UsedItems, T>)
+                stream >> val;
+            else
+                stream.readRawData(reinterpret_cast<char*>(&val), sizeof(T));
+        },
+            map[index](v));
         return stream;
     }
 
     friend QDataStream& operator<<(QDataStream& stream, const V& v) {
         stream << uint8_t(v.index());
-        std::visit([&stream](auto&& val) { stream << val; }, v);
+        std::visit([&stream]<typename T>(const T& val) {
+            if constexpr(std::is_same_v<UsedItems, T>)
+                stream << val;
+            else
+                stream.writeRawData(reinterpret_cast<const char*>(&val), sizeof(T));
+        },
+            v);
         return stream;
     }
 
@@ -106,13 +118,13 @@ struct Variant : V {
                 return int(val); }, (V&)*this);
     }
 
-    size_t toUsize_t() const {
-        return std::visit([](auto&& val) -> size_t {
+    quint64 toUquint64() const {
+        return std::visit([](auto&& val) -> quint64 {
             using T = std::decay_t<decltype(val)>;
             if constexpr (std::is_same_v<T, UsedItems>)
-                return size_t{};
+                return quint64{};
             else
-                return size_t(val); }, (V&)*this);
+                return quint64(val); }, (V&)*this);
     }
 
     bool toBool() const {

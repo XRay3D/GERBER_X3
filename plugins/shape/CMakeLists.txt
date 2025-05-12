@@ -21,10 +21,7 @@ add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES} # ${UIS}
 
 link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE Qt6::Widgets
-  PUBLIC #[[tbb12]] tbb)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
 
 if(Enable_Circle)
   add_subdirectory(circle)

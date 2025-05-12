@@ -820,7 +820,7 @@ bool Parser::parseAttributes(const QString& gLine) {
             //                case Attr::Aperture::DrillTolerance:
             //                case Attr::Aperture::FlashText:
             //                default:
-            //                    ;
+            //                
             //                }
             //                //apertureAttributesStrings.append(matchAttr.cap(2));
             //            }
