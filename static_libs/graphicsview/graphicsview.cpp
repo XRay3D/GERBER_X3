@@ -220,7 +220,14 @@ void GraphicsView::setRuler(bool ruller) {
 }
 
 QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
-    return App::settings().getSnappedPos(mapToScene(event->position().toPoint()), event->modifiers());
+    QPointF ret = mapToScene(event->position().toPoint());
+    if((event->modifiers() & Qt::ALT) || App::settings().snap()) {
+        const double scale = gridStep();
+        const auto px = ret / scale;
+        ret = {scale * std::round(px.x()), scale * std::round(px.y())};
+    }
+    // qWarning() << ret << event->position() << event->scenePosition() << event->globalPosition();
+    return ret;
 }
 
 void GraphicsView::setScale(double s) noexcept {
@@ -251,6 +258,11 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
     // } while(false);
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
+}
+
+double GraphicsView::gridStep() const {
+    if(App::settings().isBanana()) return pow(10.0, ceil(log10(10.0 / 25.4 / getScale()))) * 25.4;
+    else [[likely]] return pow(10.0, ceil(log10(10.0 / getScale())));
 }
 
 void GraphicsView::setViewRect(const QRectF& r) {
@@ -317,20 +329,20 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     const QRectF rect{rulPt1, rulPt2};
     const double angle = line.angle();
     const auto sz = QPointF{rect.width(), rect.height()} /= App::settings().lenUnit();
-    QString text;
-    std::format_to(std::back_insert_iterator(text),
-        " ∆X: {0:.3f} {5}\n"
-        " ∆Y: {1:.3f} {5}\n"
-        " ∆/: {2:.3f} {5}\n"
-        " Area: {3:.3f} {5}²\n"
-        " Angle: {4:.3f}°",
-        sz.x(),                                  // 0
-        sz.y(),                                  // 1
-        line.length(),                           // 2
-        std::abs(sz.x() * sz.y()),               // 3
-        normalizeAngleDegrees(angle),            // 4
-        App::settings().isBanana() ? "in" : "mm" // 5
-    );
+    const auto text = QString::fromStdString(
+        std::format(
+            " ∆X: {0:.3f} {5}\n"
+            " ∆Y: {1:.3f} {5}\n"
+            " ∆/: {2:.3f} {5}\n"
+            " Area: {3:.3f} {5}²\n"
+            " Angle: {4:.3f}°",
+            sz.x(),                                  // 0
+            sz.y(),                                  // 1
+            line.length(),                           // 2
+            std::abs(sz.x() * sz.y()),               // 3
+            normalizeAngleDegrees(angle),            // 4
+            App::settings().isBanana() ? "in" : "mm" // 5
+            ));
 
     const double scaleFactor = App::grView().scaleFactor();
     const double crossLength = 20.0 * scaleFactor;
@@ -542,30 +554,23 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
 }
 
 void GraphicsView::mousePressEvent(QMouseEvent* event) {
+    point = mappedPos(event);
+    QMouseEvent fakeEvent{event->type(),
+        mapFromScene(point), event->scenePosition(), event->globalPosition(),
+        event->button(), event->buttons(), event->modifiers()};
+    event = &fakeEvent;
     // QGraphicsView::mousePressEvent(event);
     if(event->buttons() & Qt::MiddleButton) {
         qInfo("MiddleButton");
-        QMouseEvent releaseEvent{
-            QEvent::MouseButtonRelease,
-            event->position(),
-            event->scenePosition(),
-            event->globalPosition(),
-            Qt::LeftButton,
-            event->buttons() | Qt::LeftButton,
-            event->modifiers(),
-        };
+        QMouseEvent releaseEvent{QEvent::MouseButtonRelease,
+            event->position(), event->scenePosition(), event->globalPosition(),
+            Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers()};
         QGraphicsView::mouseReleaseEvent(&releaseEvent);
         setDragMode(ScrollHandDrag);
         setInteractive(false);
-        QMouseEvent fakeEvent{
-            event->type(),
-            event->position(),
-            event->scenePosition(),
-            event->globalPosition(),
-            Qt::LeftButton,
-            event->buttons() | Qt::LeftButton,
-            event->modifiers(),
-        };
+        QMouseEvent fakeEvent{event->type(),
+            event->position(), event->scenePosition(), event->globalPosition(),
+            Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers()};
         QGraphicsView::mousePressEvent(&fakeEvent);
     } else if(event->button() == Qt::RightButton) {
         qInfo("RightButton");
@@ -621,19 +626,18 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
+    point = mappedPos(event);
+    QMouseEvent fakeEvent{event->type(),
+        mapFromScene(point), event->scenePosition(), event->globalPosition(),
+        event->button(), event->buttons(), event->modifiers()};
+    event = &fakeEvent;
     // QGraphicsView::mousePressEvent(event);
     if(event->button() == Qt::MiddleButton) {
         qInfo("MiddleButton");
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-        QMouseEvent fakeEvent{
-            event->type(),
-            event->position(),
-            event->scenePosition(),
-            event->globalPosition(),
-            Qt::LeftButton,
-            event->buttons() & ~Qt::LeftButton,
-            event->modifiers(),
-        };
+        QMouseEvent fakeEvent{event->type(),
+            event->position(), event->scenePosition(), event->globalPosition(),
+            Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers()};
         QGraphicsView::mouseReleaseEvent(&fakeEvent);
         setDragMode(RubberBandDrag);
         setInteractive(true);
@@ -652,22 +656,19 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
-    emit mouseMove(mapToScene(event->position().toPoint()));
-    QGraphicsView::mouseMoveEvent(event);
+    point = mappedPos(event);
+    QMouseEvent fakeEvent{event->type(),
+        mapFromScene(point), event->scenePosition(), event->globalPosition(),
+        event->button(), event->buttons(), event->modifiers()};
+    event = &fakeEvent;
 
     vRuler->setCursorPos(event->position().toPoint());
     hRuler->setCursorPos(event->position().toPoint());
-    point = mappedPos(event);
     if(ruler_ && rulerCtr & 0x1) rulPt2 = point;
-
+    emit mouseMove(point);
     // расчёт смещения для нулевых координат
     emit mouseMove2(point, point - App::project().zeroPos());
-
-    scene()->update();
-}
-
-void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) {
-    QGraphicsView::mouseDoubleClickEvent(event);
+    QGraphicsView::mouseMoveEvent(event);
 }
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
@@ -720,18 +721,18 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         isHor = true;
         borders();
     };
-    const auto gridStep = App::settings().gridStep(getScale());
+    const auto gStep = gridStep();
     // drawing a scale of 1.0
     gs = 2;
-    calcGrid(gridStep * 10);
+    calcGrid(gStep * 10);
 
     // drawing a scale of 0.2
     gs = 1;
-    calcGrid(gridStep * 5);
+    calcGrid(gStep * 5);
 
     // drawing a scale of 0.1
     gs = 0;
-    calcGrid(gridStep * 1);
+    calcGrid(gStep * 1);
 
     const QColor color[3]{
         App::settings().guiColor(GuiColors::Grid01),

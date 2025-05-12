@@ -68,6 +68,8 @@ public:
 
         if(App::settings().theme()) {
 
+            if(!App::settings().theme()) return;
+
             static const char* const dwCloseXpm[]{
                 "11 13 3 1",
                 "  c None",

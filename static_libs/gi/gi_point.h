@@ -77,7 +77,7 @@ private:
     QPainterPath path_;
     QPainterPath shape_;
     QRectF rect_;
-    QPointF lastPos_;
+    QPointF lastPos;
     const uint index_;
     static inline int ctr_;
 
@@ -92,7 +92,7 @@ protected:
 
 class LayoutFrames : public QGraphicsObject {
     Q_OBJECT
-    QPainterPath path_;
+    QPainterPath path;
     QRectF rect_;
 
 public:
