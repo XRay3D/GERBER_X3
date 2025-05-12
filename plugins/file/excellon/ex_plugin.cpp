@@ -56,8 +56,8 @@ bool Plugin::thisIsIt(const QString& fileName) {
     QTextStream in(&file);
     QString line;
 
-    static constexpr ctll::fixed_string regex1(R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)");
-    static constexpr ctll::fixed_string regex2(R"(^.*Holesize.*$)"); // fixed_string(".*Holesize.*");
+    static constexpr ctll::fixed_string regex1{R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)"};
+    static constexpr ctll::fixed_string regex2{R"(^.*Holesize.*$)"};
 
     while(in.readLineInto(&line)) {
         auto data{std::u16string_view{line}};

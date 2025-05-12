@@ -39,7 +39,7 @@ void Highlighter::highlightBlock(const QString& text) {
     };
 
     using namespace std::string_view_literals;
-    static constexpr ctll::fixed_string pattern(R"(([GXYZFSM])([\+\-]?\d+\.?\d*))");
+    static constexpr ctll::fixed_string pattern{R"(([GXYZFSM])([\+\-]?\d+\.?\d*))"};
     auto data{std::u16string_view{text}};
     for(auto [whole, code, number]: ctre::search_all<pattern>(data)) {
         { // code

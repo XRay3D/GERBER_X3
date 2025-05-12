@@ -48,7 +48,10 @@ int main(int argc, char* argv[]) {
         "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"_s);
 
     qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
+
+#ifdef Q_OS_WIN32
     qputenv("QT_QPA_PLATFORM", "windows:darkmode=2"); //"windows:darkmode=[1|2]"
+#endif
 
     QApplication::setAttribute(Qt::AA_Use96Dpi);
 

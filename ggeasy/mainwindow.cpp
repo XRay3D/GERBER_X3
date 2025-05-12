@@ -116,10 +116,10 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 MainWindow::~MainWindow() {
+    App::setMainWindow(nullptr);
     parserThread.quit();
     parserThread.wait();
     // App::project().close();
-    App::setMainWindow(nullptr);
     qDebug(__FUNCTION__);
 }
 

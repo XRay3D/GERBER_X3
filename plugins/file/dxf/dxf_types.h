@@ -22,6 +22,17 @@
 
 namespace Dxf {
 
+struct Exception final : std::exception {
+    std::string str;
+    Exception(QString&& str)
+        : str{str.toStdString()} { }
+    explicit Exception(std::string&& str)
+        : str{std::move(str)} { }
+    ~Exception() noexcept override = default;
+    // exception interface
+    const char* what() const noexcept override { return str.c_str(); }
+};
+
 constexpr auto DXF = md5::hash32("Dxf");
 
 class DxfObj : public QObject {

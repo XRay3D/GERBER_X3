@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "dxf_codedata.h"
+#include "dxf_types.h"
 
 namespace Dxf {
 
@@ -84,7 +85,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     else if(1010 <= code && code <= 1059) type = Double;    // Значение с плавающей запятой двойной точности
     else if(1060 <= code && code <= 1070) type = Integer16; // 16-разрядное целое значение
     else if(1071 == code) type = Integer32;                 // 32-разрядное целое значение
-    else throw QString("Unknown type: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
+    else throw Exception{std::format("Unknown type: code {}, raw {}, line {}!", code, value.toStdString(), lineNum)};
 #else
 
     if(0 <= code && code <= 9) type = String;                         // String
@@ -152,7 +153,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     }
 
     if(!ok)
-        throw QString("Error value: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
+        throw Exception{QString("Error value: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum)};
 }
 
 int CodeData::code() const { return code_; }

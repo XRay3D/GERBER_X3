@@ -37,7 +37,7 @@ sModel::sModel(int fileId, QObject* parent)
     auto unsorted = new sNode{GbrObj::tr("unsorted")};
 
     for(const auto& component: file->components()) {
-        static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
+        static constexpr ctll::fixed_string pattern{R"((\D+)(\d+).*)"};
 
         if(auto [whole, c1, c2] = ctre::match<pattern>(std::u16string_view{component.refdes()}); whole) {
             if(map[CtreCapTo(c1)].empty())
