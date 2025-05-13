@@ -8,23 +8,16 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-// https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
+// Based https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "ruler.h"
-#include "app.h"
 #include "graphicsview.h"
 
-// #include <QDebug>
 #include <QDrag>
 #include <QDragEnterEvent>
 #include <QLabel>
 #include <QMimeData>
-// #include <QMouseEvent>
 #include <QPainter>
-// #include <QTextDocument>
-// #include <QTextFormat>
-// #include <QWindow>
-// #include <QtMath>
-// #include <cstring>
+
 #if 0
 static QLabel* createDragLabel(const QString& text, QWidget* parent) {
     QLabel* label = new QLabel{text, parent};
@@ -210,7 +203,7 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
         drawText = true;
     }
     painter.setPen({Qt::darkGray, 1.0}); // BUG when 0.0 random brightness
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 1, static_cast<double>(Ruler::Breadth) * 0.6);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, static_cast<double>(Ruler::Breadth) * 0.6);
     drawText = false;
 
     // drawing a scale of 0.2
@@ -219,12 +212,12 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
         drawText = true;
     }
     painter.setPen({Qt::green, 1.0}); // BUG when 0.0 random brightness
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 5, static_cast<double>(Ruler::Breadth) * 0.3);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 50, static_cast<double>(Ruler::Breadth) * 0.3);
     drawText = false;
 
     // drawing a scale of 1.0
     painter.setPen({Qt::red, 1.0}); // BUG when 0.0 random brightness
-    DrawAScaleMeter(&painter, rulerRect, gridStep * 10, static_cast<double>(Ruler::Breadth) * 0);
+    DrawAScaleMeter(&painter, rulerRect, gridStep * 100, static_cast<double>(Ruler::Breadth) * 0);
 
     // drawing the current mouse position indicator
     if(mouseTracking)
