@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gbr_file.h"
+#include "abstract_fileplugin.h"
 #include "gbr_node.h"
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"
@@ -46,9 +47,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -161,6 +162,8 @@ Paths File::merge() const {
             clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
     }
 #else
+    emit App::filePlugin(type())->fileProgress(shortName(), graphicObjects_.size(), 0);
+
     while(i < graphicObjects_.size()) {
         Clipper clipper;
         clipper.AddSubject(mergedPaths_);
@@ -172,6 +175,7 @@ Paths File::merge() const {
             clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
         else
             clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
+        emit App::filePlugin(type())->fileProgress(shortName(), 0, i);
     }
 #endif
 
@@ -333,7 +337,7 @@ void File::createGi() {
         itemGroups_[Normal]->shrink_to_fit();
     }
     if constexpr(1) { // add components
-        for(const Comp::Component& component:  std::as_const(components_))
+        for(const Comp::Component& component: std::as_const(components_))
             if(!component.referencePoint().isNull())
                 itemGroups_[Components]->push_back(new Comp::Item{component, this});
         itemGroups_[Components]->shrink_to_fit();
