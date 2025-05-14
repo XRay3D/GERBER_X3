@@ -22,6 +22,7 @@ add_subdirectory(shape)
 set(Enable_Gerber ON)
 set(Enable_Dxf ON)
 set(Enable_Excellon ON)
+# set(Enable_TopoR ON)
 add_subdirectory(file)
 
 # plugins gcode

@@ -17,7 +17,7 @@ find_package(
   COMPONENTS OpenGL
   REQUIRED)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(6 GREATER_EQUAL 6)
   find_package(
     Qt6
     COMPONENTS OpenGLWidgets
@@ -35,7 +35,7 @@ target_link_libraries(
   graphicsview PRIVATE common Qt6::Widgets
                        Qt6::OpenGL)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(6 GREATER_EQUAL 6)
   target_link_libraries(graphicsview
                         PRIVATE Qt6::OpenGLWidgets)
 endif()

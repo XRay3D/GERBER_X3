@@ -70,7 +70,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-uint32_t Plugin::type() const { return int(EXCELLON); }
+uint32_t Plugin::type() const { return EXCELLON; }
 
 QString Plugin::folderName() const { return tr("Excellon"); }
 

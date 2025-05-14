@@ -30,25 +30,24 @@ set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_definitions(
   -DQT_MESSAGELOGCONTEXT # qDebug()
-  -DQT_DISABLE_DEPRECATED_BEFORE=0x060400
+  -DQT_DISABLE_DEPRECATED_BEFORE=0x060800
   -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a,
   # const QStringBuilder < A, B>& b, QChar)
 )
 
-# add_compile_options( #
-# $<IF:$OR<$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>, -fPIC -Wpedantic #
-# -Wall -Wextra -Wconversion -Werror> #
-# $<IF:$<AND:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>, -fPIC #
-# -Wpedantic -Wall -Wextra -Wconversion -Werror>
-# $<$<AND:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fPIC -Wpedantic
-# -Wall -Wextra -Wconversion -Werror> #
-# $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Od> #
-# $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/O2>) ) #
+# add_compile_options(# $ < IF : $OR < $ < CXX_COMPILER_ID : Clang>, $ <
+# CXX_COMPILER_ID : GNU>, -fPIC - Wpedantic # - Wall - Wextra - Wconversion -
+# Werror> # $ < IF : $ < AND : $ < CXX_COMPILER_ID : Clang>, $ < CXX_COMPILER_ID
+# : GNU>>, -fPIC # - Wpedantic - Wall - Wextra - Wconversion - Werror> $ < $ <
+# AND : $ < CXX_COMPILER_ID : GNU>, $ < CXX_COMPILER_ID : Clang>> : -fPIC -
+# Wpedantic - Wall - Wextra - Wconversion - Werror> # $ < $ < AND : $ <
+# CXX_COMPILER_ID : MSVC>, $ < CONFIG : Debug>> : / Od> # $ < $ < AND : $ <
+# CXX_COMPILER_ID : MSVC>, $ < CONFIG : Release>> : / O2>)) #
 # target_compile_options(my_target PRIVATE $ < $ < AND : $ < CXX_COMPILER_ID : #
 # GNU>, $ < CONFIG : Debug>> : -Og> $ < $ < AND : $ < CXX_COMPILER_ID : GNU>, $
-# # < CONFIG : Release>> : -O2> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < #
-# CONFIG : Debug>> : / Od> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < CONFIG
-# # : Release>> : / O2>)
+# #<CONFIG : Release>> : - O2> $<$<AND : $<CXX_COMPILER_ID : MSVC>, $<# CONFIG :
+# Debug>> : / Od> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < CONFIG # :
+# Release>> : / O2>)
 
 # FIND BOOST
 find_package(Boost)
@@ -64,6 +63,22 @@ if(Boost_FOUND)
 else()
   message(FATAL_ERROR "Boost not found!!!")
 endif()
+
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
+
+FetchContent_Declare(
+  pfr
+  # GIT_REPOSITORY https://github.com/boostorg/pfr.git
+  GIT_REPOSITORY https://github.com/apolukhin/pfr_non_boost.git
+  GIT_TAG master)
+FetchContent_Declare(
+  ctre
+  GIT_REPOSITORY
+    "https://github.com/hanickadot/compile-time-regular-expressions.git"
+  GIT_TAG main)
+FetchContent_MakeAvailable(pfr)
+FetchContent_MakeAvailable(ctre)
 
 #[[FIND CGAL
 find_package(CGAL)
@@ -103,11 +118,12 @@ include_directories(
   static_libs/gi
   static_libs/graphicsview
   static_libs/tooldatabase
-  third_party/clipper2/CPP/Clipper2Lib/include
-  third_party/ctre/single-header)
+  third_party/clipper2/CPP/Clipper2Lib/include #
+  third_party/pfr-src/include
+  third_party/ctre-src/single-header)
 
 # add_library(std MODULE) target_sources(std PUBLIC FILE_SET all_my_modules TYPE
-# CXX_MODULES FILES static_libs/common/std.cppm)
+# CXX_MODULES FILES static_libs / common / std.cppm)
 
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
@@ -117,16 +133,15 @@ add_definitions(-DUSINGZ=1)
 
 add_subdirectory(third_party/clipper2/CPP)
 
-# set(CTRE_MODULE ON)
-add_subdirectory(third_party/ctre)
+# set(CTRE_MODULE ON) add_subdirectory(third_party/ctre)
 
 set(COMMON_COMPILE_OPTIONS
     -fPIC
-    # -ffast-math
+    # * ffast - math
     -march=native
-    # -xc++-system-header iostream
+    # * xc ++ - system - header iostream
     -Wall
-    # -Wconversion
+    # * Wconversion
     -Werror
     -Wextra
     -Wimplicit-fallthrough
@@ -142,8 +157,8 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
 
-# add_library(ctre) # third_party/ctre/ctre.cppm) target_sources(ctre PUBLIC
-# FILE_SET cxx_modules TYPE CXX_MODULES FILES third_party/ctre/ctre.cppm)
+# add_library(ctre) #third_party / ctre / ctre.cppm) target_sources(ctre PUBLIC
+# FILE_SET cxx_modules TYPE CXX_MODULES FILES third_party / ctre / ctre.cppm)
 # target_compile_options(Clipper2Z PUBLIC - fPIC)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core) # Qt6
