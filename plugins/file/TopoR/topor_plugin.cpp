@@ -29,7 +29,7 @@ Plugin::Plugin(QObject* parent)
     , Parser(this) {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
+AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     if(type_ != type())
         return nullptr;
     if(!QFile(fileName).exists())
@@ -78,11 +78,11 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-int Plugin::type() const { return int(FileType::TopoR); }
+uint32_t Plugin::type() const { return md5::hash32("TopoR"); }
 
 QString Plugin::folderName() const { return tr("TopoR"); }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
+AbstractFile* Plugin::loadFile(QDataStream& /*stream*/) const { return nullptr; }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'T'); }
 
@@ -92,11 +92,11 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     return tab;
 }
 
-void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
-    cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
-    cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
-    cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
-}
+// void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
+//     cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+//     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
+//     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
+// }
 
 } // namespace TopoR
 

@@ -41,14 +41,14 @@ file(GLOB UIS *.ui)
 
 set(TS_FILES ${PROJECT_NAME}_en.ts ${PROJECT_NAME}_ru.ts)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(6 GREATER_EQUAL 6)
   find_package(
     Qt6
     COMPONENTS OpenGLWidgets
     REQUIRED)
 endif()
 
-# if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) qt6_add_resources(RESOURCES
+# if(6 GREATER_EQUAL 6) qt6_add_resources(RESOURCES
 # ${QRC_FILES}) else() set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
 # qt5_add_resources(RESOURCES ${QRC_FILES}) endif()
 
@@ -58,7 +58,7 @@ set(PROJECT_SOURCES ${APP_ICON_RESOURCE_WINDOWS} ${HEADERS} ${QRC_FILES}
 set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(6 GREATER_EQUAL 6)
   qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
   # qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
   # qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
@@ -97,7 +97,7 @@ else()
 endif()
 ]]
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+if(6 GREATER_EQUAL 6)
   target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::OpenGLWidgets)
 endif()
 

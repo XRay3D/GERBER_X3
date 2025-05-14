@@ -36,7 +36,7 @@ set(CMAKE_MODULE_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 # ${TRANSLATION_QM})
 
 function(add_translation TARGET)
-  if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
+  if(6 GREATER_EQUAL 6)
     set(TRANSLATIONS ${TARGET}_ru.ts ${TARGET}_en.ts)
     # qt_add_translations(TARGETS ${TARGET} TS_FILES ${TARGET}_ru.ts TS_FILES
     # ${TARGET}_en.ts)

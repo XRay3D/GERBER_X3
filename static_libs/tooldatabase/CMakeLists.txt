@@ -31,7 +31,7 @@ set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) # Android
+if(6 GREATER_EQUAL 6) # Android
   qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
   qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
                  ${PROJECT_SOURCES})
