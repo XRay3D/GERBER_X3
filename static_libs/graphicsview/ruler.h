@@ -8,7 +8,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-// Based https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
+// Based on https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #pragma once
 #include <QPen>
 #include <QWidget>

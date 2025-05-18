@@ -241,11 +241,11 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value) {
         // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
         progressDialogs_[fileName] = pd;
-    } else if(max == 1 && value == 1) {
+    } else if(progressDialogs_.contains(fileName) && max == 1 && value == 1) {
         progressDialogs_[fileName]->hide();
         progressDialogs_[fileName]->deleteLater();
         progressDialogs_.remove(fileName);
-    } else
+    } else if(progressDialogs_.contains(fileName))
         progressDialogs_[fileName]->setValue(value);
 }
 

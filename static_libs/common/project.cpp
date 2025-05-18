@@ -185,10 +185,11 @@ bool Project::open(const QString& fileName) {
         qDebug() << file.errorString();
         return false;
     }
-    QDataStream in(&file);
+    QDataStream in{&file};
     try {
         in >> ver_;
-        if(ver_ < CurrentVer) {
+
+        if(ver_ < CurrentVer && ver_ != ProVer_7) {
             auto message = tr("Unable to load project version %1 in\n"
                               "the current version(%3) of the program.\n"
                               "Use version %2.");
@@ -204,6 +205,7 @@ bool Project::open(const QString& fileName) {
             case ProVer_5:
             case ProVer_6:
             case ProVer_7:
+            case ProVer_8:
                 QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
                 break;
             }

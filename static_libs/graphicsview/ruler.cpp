@@ -8,7 +8,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-// Based https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
+// Based on https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "ruler.h"
 #include "graphicsview.h"
 
@@ -199,7 +199,7 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
 
     // drawing a scale of 0.1
     if((gridStep * rulerZoom_) > 35) {
-        tickKoef = 0.1;
+        tickKoef = 10;
         drawText = true;
     }
     painter.setPen({Qt::darkGray, 1.0}); // BUG when 0.0 random brightness
@@ -208,7 +208,7 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
 
     // drawing a scale of 0.2
     if((gridStep * rulerZoom_) <= 35) {
-        tickKoef = 0.5;
+        tickKoef = 5;
         drawText = true;
     }
     painter.setPen({Qt::green, 1.0}); // BUG when 0.0 random brightness
@@ -220,13 +220,12 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
     DrawAScaleMeter(&painter, rulerRect, gridStep * 100, static_cast<double>(Ruler::Breadth) * 0);
 
     // drawing the current mouse position indicator
-    if(mouseTracking)
-        DrawMousePosTick(&painter);
+    if(mouseTracking) DrawMousePosTick(&painter);
 
     // drawing no man's land between the ruler & view
     if(/* NOTE DISABLES CODE */ (0)) {
-        QPointF starPt((Qt::Horizontal == orientation_) ? rulerRect.bottomLeft() : rulerRect.topRight());
-        QPointF endPt((Qt::Horizontal == orientation_) ? rulerRect.bottomRight() : rulerRect.bottomRight()); // WTF same branches!!!!!!
+        QPointF starPt{(Qt::Horizontal == orientation_) ? rulerRect.bottomLeft() : rulerRect.topRight()};
+        QPointF endPt{(Qt::Horizontal == orientation_) ? rulerRect.bottomRight() : rulerRect.bottomRight()}; // WTF same branches!!!!!!
         painter.setPen({Qt::red, 2});
         painter.drawLine(starPt, endPt);
     }
@@ -292,7 +291,7 @@ void Ruler::DrawFromOriginTo(QPainter* painter, const QRectF& rect,
             if(startTickNo) [[likely]]
                 number = ((isHorzRuler ^ (step > 0.0)) ? "-" : "+") + number;
 
-            QRectF textRect(QFontMetricsF(font()).boundingRect(number));
+            QRectF textRect{QFontMetricsF{font()}.boundingRect(number)};
             textRect.setWidth(textRect.width() + 1);
             if(isHorzRuler) {
                 painter->translate(x1 + padding, textRect.height());
@@ -314,13 +313,11 @@ void Ruler::DrawMousePosTick(QPainter* painter) {
     QPoint starPt = cursorPos;
     QPoint endPt;
     if(Qt::Horizontal == orientation_) {
-        starPt.setY(this->rect().top());
-        endPt.setX(starPt.x());
-        endPt.setY(this->rect().bottom());
+        starPt.setY(rect().top());
+        endPt = {starPt.x(), rect().bottom()};
     } else {
-        starPt.setX(this->rect().left());
-        endPt.setX(this->rect().right());
-        endPt.setY(starPt.y());
+        starPt.setX(rect().left());
+        endPt = {rect().right(), starPt.y()};
     }
     painter->drawLine(starPt, endPt);
 }

@@ -96,6 +96,7 @@ protected:
     mutable mvector<Handle> handles;
     using HIter = mvector<Handle>::iterator;
     HIter curHandle{};
+    QPointF curHandlePos;
     mutable double hSize{1};
 
     Paths paths_;
@@ -103,12 +104,12 @@ protected:
     QPointF initPos;                                               // групповое перемещение
 
     // QGraphicsItem interface
+    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) final;
+    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) final;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) final;
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) final;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) final;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) final;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) final;
-    QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) final;
-    void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) final;
 
     // AbstractShape interface
     virtual void write(QDataStream& stream [[maybe_unused]]) const { };                          // write to project
