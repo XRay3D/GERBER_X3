@@ -35,15 +35,49 @@ QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
     return stream << write;
 }
 
+#if 0
+template <typename T, auto Get, auto Set>
+struct RWS {
+    T* obj;
+    using Arg = std::remove_cvref_t<decltype((obj->*Get)())>;
+    operator Arg() const { (obj->*Get)(); }
+    auto& operator=(const Arg& val) { return (obj->*Set)(val), *obj; }
+    template <typename Stream>
+    Stream& operator>>(Stream& stream) {
+        Arg arg;
+        stream >> arg;
+        (obj->*Set)(arg);
+        return stream;
+    }
+    template <typename Stream>
+    Stream& operator<<(Stream& stream) const {
+        return stream << (obj->*Get)();
+    }
+};
+
+using setVisible = RWS<AbstractShape*, &AbstractShape::isVisible, &AbstractShape::setVisible>;
+using setEditable = RWS<AbstractShape*, &AbstractShape::isEditable, &AbstractShape::setEditable>;
+#endif
+
 QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
     bool bFlag[2];
-    shape.readAndInit(stream >> BlockRead{shape.id_, bFlag[0], bFlag[1], shape.handles});
-    assert(shape.handles.size());
+    if(App::project().ver() == ProVer_7) { // Load Prewios
+        BlockRead in{shape.id_, bFlag[0]};
+        stream >> in;
+        uint32_t size;
+        in >> bFlag[1] >> size;
+        shape.handles.resize(size);
+        for(auto&& handle: shape.handles)
+            in >> static_cast<QPointF&>(handle) >> handle.type_;
+        shape.readAndInit(in);
+    } else {
+        bool bFlag[2];
+        shape.readAndInit(stream >> BlockRead{shape.id_, bFlag[0], bFlag[1], shape.handles});
+    }
     shape.setVisible(bFlag[0]);
     shape.setEditable(bFlag[1]);
     shape.setToolTip(shape.name() % QString::number(shape.id_));
     shape.setZValue(shape.id_);
-
     return stream;
 }
 
@@ -115,6 +149,7 @@ bool AbstractShape::test(const QPointF& point) {
         const auto length = pt.x() * pt.x() + pt.y() * pt.y();
         if(length <= hSize) {
             curHandle = HIter{&var};
+            curHandlePos = *curHandle;
             return true;
         }
     }
@@ -189,10 +224,10 @@ void AbstractShape::changeColor() {
         brushColor_.setAlpha(100);
         break;
     case Selected:
-        brushColor_ = QColor(255, 0x0, 0x0, 100);
+        brushColor_ = QColor{255, 0x0, 0x0, 100};
         break;
     case Hovered | Selected:
-        brushColor_ = QColor(255, 0x0, 0x0, 150);
+        brushColor_ = QColor{255, 0x0, 0x0, 150};
         break;
     }
 
@@ -301,6 +336,21 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
 
 // QGraphicsItem interface /////////////////////////////////////////////////////
 
+static std::set<AbstractShape*> set;
+
+QVariant AbstractShape::itemChange(GraphicsItemChange change, const QVariant& value) {
+    auto value_ = Gi::Item::itemChange(change, value);
+    if(change == ItemSelectedHasChanged) // && value.toBool())
+    {
+        if(value.toBool())
+            set.insert(this);
+        else
+            set.erase(this);
+        plugin->editor()->updateData();
+    }
+    return value_;
+}
+
 void AbstractShape::mouseMoveEvent(QGraphicsSceneMouseEvent* event) { // групповое перемещение
     if(isEditable() && curHandle.base()) {
         *curHandle = event->pos();
@@ -323,9 +373,57 @@ void AbstractShape::mousePressEvent(QGraphicsSceneMouseEvent* event) { // гру
 
 void AbstractShape::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     if(isEditable()) {
-        if(!curHandle.base() && !pos().isNull())
-            for(auto&& h: handles) h += pos();
-        curHandle = {};
+        class ShapeMoveCommand : public QUndoCommand {
+            AbstractShape* const shape;
+            // ssize_t curHandle{};
+            QPointF pos;
+            // mvector<Handle> handles;
+
+        public:
+            ShapeMoveCommand(AbstractShape* shape, QUndoCommand* parent = nullptr)
+                : QUndoCommand{parent}
+                , shape{shape}
+                , pos{shape->pos()} {
+                // , curHandle{std::distance(shape->handles.begin(), shape->curHandle)}
+                // , handles{shape->handles} {
+                setText("AbstractShape Handle Moved");
+            }
+
+            ~ShapeMoveCommand() override = default;
+
+            void undo() override {
+                // shape->handles = handles;
+                // if(-1 < curHandle && curHandle < static_cast<ssize_t>(shape->handles.size())) {
+                //     shape->handles[curHandle] = shape->curHandlePos;
+                //     shape->curHandle = shape->handles.begin() + curHandle;
+                // }
+                // shape->AbstractShape::redraw();
+                // shape->curHandle = {};
+                if(pos.isNull())
+                    for(auto* shape: set)
+                        if(!shape->curHandle.base() && !shape->pos().isNull()) {
+                            for(auto pos = shape->pos(); auto&& h: shape->handles) h -= pos;
+                            shape->curHandle = {};
+                            shape->AbstractShape::redraw();
+                        }
+            }
+
+            void redo() override {
+                if(pos.isNull())
+                    for(auto* shape: set)
+                        if(!shape->curHandle.base() && !shape->pos().isNull()) {
+                            for(auto pos = shape->pos(); auto&& h: shape->handles) h += pos;
+                            shape->curHandle = {};
+                            shape->AbstractShape::redraw();
+                        }
+            }
+        };
+        // App::undoStack().push(new ShapeMoveCommand{this});
+        if(!curHandle.base() && !pos().isNull()) {
+            for(auto pos_ = pos(); auto&& h: handles) h += pos_;
+            curHandle = {};
+            AbstractShape::redraw();
+        }
     }
     AbstractShape::redraw();
     QGraphicsItem::mouseReleaseEvent(event);
@@ -378,13 +476,6 @@ void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
         AbstractShape::menu(menu, App::fileTreeViewPtr());
         menu.exec(event->screenPos());
     }
-}
-
-QVariant AbstractShape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    auto value_ = Gi::Item::itemChange(change, value);
-    if(change == ItemSelectedHasChanged && value.toBool())
-        plugin->editor()->updateData();
-    return value_;
 }
 
 } // namespace Shapes

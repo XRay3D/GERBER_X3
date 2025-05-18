@@ -29,7 +29,8 @@ enum FileVersion {
     ProVer_5,
     ProVer_6,
     ProVer_7,
-    CurrentVer = ProVer_7,
+    ProVer_8,
+    CurrentVer = ProVer_8,
 };
 
 namespace GCode {
