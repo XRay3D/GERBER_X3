@@ -356,6 +356,7 @@ void File::write(QDataStream& stream) const {
 void File::read(QDataStream& stream) {
     auto& gcp = *const_cast<Params*>(&gcp_);
     switch(App::project().ver()) {
+    case ProVer_8:
     case ProVer_7:
     case ProVer_6:
     case ProVer_5:
