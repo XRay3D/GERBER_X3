@@ -189,7 +189,7 @@ bool Project::open(const QString& fileName) {
     try {
         in >> ver_;
 
-        if(ver_ < CurrentVer && ver_ != ProVer_7) {
+        if(ver_ < CurrentVer && ver_ != Ver_7) {
             auto message = tr("Unable to load project version %1 in\n"
                               "the current version(%3) of the program.\n"
                               "Use version %2.");
@@ -198,14 +198,14 @@ bool Project::open(const QString& fileName) {
                 return false;
             }
             switch(ver_) {
-            case ProVer_1:
-            case ProVer_2:
-            case ProVer_3:
-            case ProVer_4:
-            case ProVer_5:
-            case ProVer_6:
-            case ProVer_7:
-            case ProVer_8:
+            case Ver_1:
+            case Ver_2:
+            case Ver_3:
+            case Ver_4:
+            case Ver_5:
+            case Ver_6:
+            case Ver_7:
+            case Ver_8:
                 QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
                 break;
             }
@@ -629,7 +629,7 @@ void Project::setPinUsed(bool used, int idx) {
     setChanged();
 }
 
-int Project::ver() const { return ver_; }
+Project::Version Project::ver() const { return ver_; }
 
 double Project::safeZ() const { return safeZ_; }
 void Project::setSafeZ(double safeZ) {
