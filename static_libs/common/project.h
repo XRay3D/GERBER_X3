@@ -21,18 +21,6 @@
 #include <QRectF>
 #include <memory>
 
-enum FileVersion {
-    ProVer_1 = 1,
-    ProVer_2,
-    ProVer_3,
-    ProVer_4,
-    ProVer_5,
-    ProVer_6,
-    ProVer_7,
-    ProVer_8,
-    CurrentVer = ProVer_8,
-};
-
 namespace GCode {
 class File;
 }
@@ -59,6 +47,18 @@ class Project : public QObject {
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file);
 
 public:
+    enum Version : int {
+        Ver_1 = 1,
+        Ver_2,
+        Ver_3,
+        Ver_4,
+        Ver_5,
+        Ver_6,
+        Ver_7,
+        Ver_8,
+        CurrentVer = Ver_8,
+    };
+
     explicit Project(QObject* parent = nullptr);
     ~Project();
 
@@ -121,7 +121,7 @@ public:
     bool open(const QString& fileName);
     void close();
 
-    int ver() const;
+    Version ver() const;
 
     int size();
 
@@ -204,7 +204,7 @@ private:
     QFileSystemWatcher watcher;
     bool reloadFile_ = false;
 
-    int ver_;
+    Version ver_;
 
     FilesMap files_;
     ShapesMap shapes_;

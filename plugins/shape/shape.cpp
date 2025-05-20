@@ -16,6 +16,7 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
+#include <set>
 
 namespace Shapes {
 
@@ -61,7 +62,7 @@ using setEditable = RWS<AbstractShape*, &AbstractShape::isEditable, &AbstractSha
 
 QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
     bool bFlag[2];
-    if(App::project().ver() == ProVer_7) { // Load Prewios
+    if(App::project().ver() == Project::Ver_7) { // Load Prewios
         BlockRead in{shape.id_, bFlag[0]};
         stream >> in;
         uint32_t size;

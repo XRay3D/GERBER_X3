@@ -356,16 +356,16 @@ void File::write(QDataStream& stream) const {
 void File::read(QDataStream& stream) {
     auto& gcp = *const_cast<Params*>(&gcp_);
     switch(App::project().ver()) {
-    case ProVer_8:
-    case ProVer_7:
-    case ProVer_6:
-    case ProVer_5:
-    case ProVer_4:
+    case Project::Ver_8:
+    case Project::Ver_7:
+    case Project::Ver_6:
+    case Project::Ver_5:
+    case Project::Ver_4:
         stream >> gcp;
         stream >> pocketPaths_;
         stream >> toolPathss_;
         break;
-    case ProVer_3: {
+    case Project::Ver_3: {
         //        stream >> pocketPaths_;
         //        stream >> gcp.gcType;
         //        stream >> toolPathss_;
@@ -376,9 +376,9 @@ void File::read(QDataStream& stream) {
         //        gcp.params[Params::Depth] = depth;
     }
         [[fallthrough]];
-    case ProVer_2:
+    case Project::Ver_2:
         [[fallthrough]];
-    case ProVer_1:;
+    case Project::Ver_1:;
     }
     //    stream >> *static_cast<AbstractFile*>(this);
     // _read(stream);
