@@ -127,10 +127,6 @@ GraphicsView::GraphicsView(QWidget* parent)
         settings.endGroup();
     }
 
-    setStyleSheet("QGraphicsView { background: "
-        % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
-        % " }");
-
     startUpdateTimer(20);
 
     scale(1.0, -1.0); // flip vertical
@@ -139,15 +135,16 @@ GraphicsView::GraphicsView(QWidget* parent)
 GraphicsView::~GraphicsView() { App::setGraphicsView(nullptr); }
 
 void GraphicsView::zoom100() {
-    double x = 1.0, y = 1.0;
-
-    const double m11 = QGraphicsView::transform().m11(), m22 = QGraphicsView::transform().m22();
+    double x = 1.0,
+           y = 1.0;
+    const double m11 = QGraphicsView::transform().m11(),
+                 m22 = QGraphicsView::transform().m22();
     if(/* DISABLES CODE */ (0)) {
         x = std::abs(1.0 / m11 / (25.4 / physicalDpiX()));
         y = std::abs(1.0 / m22 / (25.4 / physicalDpiY()));
-    } else {
-        const QSizeF size = screen()->physicalSize();                          // size in mm
-        const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
+    } else if(auto ps = QGuiApplication::primaryScreen(); ps) {
+        const QSizeF size = screen()->physicalSize(); // size in mm
+        const QSize scrGeometry = ps->size();         // size in pix
         x = std::abs(1.0 / m11 / (size.height() / scrGeometry.height()));
         y = std::abs(1.0 / m22 / (size.width() / scrGeometry.width()));
     }
@@ -231,10 +228,11 @@ QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
 }
 
 void GraphicsView::setScale(double s) noexcept {
-    const auto trf(transform());
-    setTransform({+s /*11*/, trf.m12(), trf.m13(),
-        /*      */ trf.m21(), -s /*22*/, trf.m23(),
-        /*      */ trf.m31(), trf.m32(), trf.m33()});
+    const auto trans = transform();
+    setTransform({//
+        +s /* 11 */, trans.m12(), trans.m13(),
+        trans.m21(), -s /* 22 */, trans.m23(),
+        trans.m31(), trans.m32(), trans.m33()});
 }
 
 void GraphicsView::scale(double sx, double sy) {
@@ -258,11 +256,17 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
     // } while(false);
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
+
+    setStyleSheet("QGraphicsView { background: "
+        % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
+        % " }");
 }
 
 double GraphicsView::gridStep() const {
-    if(App::settings().isBanana()) return pow(10.0, ceil(log10(10.0 / 25.4 / getScale()))) * 25.4;
-    else [[likely]] return pow(10.0, ceil(log10(10.0 / getScale())));
+    if(App::settings().isBanana())
+        return pow(10.0, ceil(log10(10.0 / 25.4 / getScale()))) * 25.4;
+    else [[likely]]
+        return pow(10.0, ceil(log10(10.0 / getScale())));
 }
 
 void GraphicsView::setViewRect(const QRectF& r) {
@@ -675,7 +679,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
 #if 1
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
-    painter->setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
+    painter->setRenderHint(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
 
     int gs{};
     mvector<QLineF> lines[3];
@@ -750,8 +754,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k,     point.y(), point.x() + k,     point.y()},
-            {    point.x(), point.y() - k,     point.x(), point.y() + k}
+            {point.x() - k, point.y(),     point.x() + k, point.y()    },
+            {point.x(),     point.y() - k, point.x(),     point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -763,8 +767,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {          0, rect.top(),            0, rect.bottom()},
-            {rect.left(),          0, rect.right(),             0}
+            {0,           rect.top(), 0,            rect.bottom()},
+            {rect.left(), 0,          rect.right(), 0            }
         };
         painter->drawLines(lines, 2);
     }
