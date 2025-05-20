@@ -195,7 +195,7 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
     if(qFuzzyIsNull(rulerZoom_))
         return;
 
-    gridStep = App::grView().gridStep() * 10;
+    gridStep = App::grView().gridStep();
 
     // drawing a scale of 0.1
     if((gridStep * rulerZoom_) > 35) {
