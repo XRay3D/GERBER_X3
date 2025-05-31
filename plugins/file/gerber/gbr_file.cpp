@@ -162,7 +162,7 @@ Paths File::merge() const {
             clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
     }
 #else
-    emit App::filePlugin(type())->fileProgress(shortName(), graphicObjects_.size(), 0);
+    emit App::filePlugin(type())->updateProgressMax(shortName(), graphicObjects_.size());
 
     while(i < graphicObjects_.size()) {
         Clipper clipper;
@@ -175,7 +175,7 @@ Paths File::merge() const {
             clipper.Execute(ClipType::Union, FillRule::Positive, mergedPaths_);
         else
             clipper.Execute(ClipType::Difference, FillRule::NonZero, mergedPaths_);
-        emit App::filePlugin(type())->fileProgress(shortName(), 0, i);
+        emit App::filePlugin(type())->updateProgressVal(shortName(), i);
     }
 #endif
 

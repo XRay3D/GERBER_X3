@@ -358,7 +358,7 @@ private:
     std::map<uint32_t, QAction*> toolpathActions;
     QActionGroup actionGroup;
 
-    QMap<QString, class QProgressDialog*> progressDialogs_;
+    std::unordered_map<QString, std::unique_ptr<class QProgressDialog>> progressDialogs_;
     QMessageBox reloadQuestion;
 
     void open();
