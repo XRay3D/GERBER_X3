@@ -616,10 +616,10 @@ void Project::setZeroPos(const QPointF& pos) {
 
 const QPointF* Project::pinsPos() const { return pins_; }
 void Project::setPinsPos(const QPointF pos[4]) {
-    pins_[0] = pos[0];
-    pins_[1] = pos[1];
-    pins_[2] = pos[2];
-    pins_[3] = pos[3];
+    pins_[0] = *pos++;
+    pins_[1] = *pos++;
+    pins_[2] = *pos++;
+    pins_[3] = *pos++;
     setChanged();
 }
 

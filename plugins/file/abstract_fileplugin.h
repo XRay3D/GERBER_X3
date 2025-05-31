@@ -62,10 +62,15 @@ public:
 
     virtual void updateFileModel([[maybe_unused]] AbstractFile* file) { };
 
+    void createProgress(const QString& fileName, int max) { emit fileProgress_(fileName, max, 0); }
+    void updateProgressVal(const QString& fileName, int value) { emit fileProgress_(fileName, 0, value); }
+    void updateProgressMax(const QString& fileName, int max) { emit fileProgress_(fileName, max, 1); }
+    void closeProgress(const QString& fileName) { emit fileProgress_(fileName, 0, 0); }
+
 signals:
     void fileError(const QString& fileName, const QString& error);
-    void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning);
-    void fileProgress(const QString& fileName, int max, int value);
+    void fileWarning(const QString& fileName, const QString& warning);
+    void fileProgress_(const QString& fileName, int max, int value);
     void fileReady(AbstractFile* file);
 
 public slots:

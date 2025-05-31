@@ -514,7 +514,11 @@ void GraphicsView::dropEvent(QDropEvent* event) {
     qDebug(__FUNCTION__);
     auto mimeData{event->mimeData()};
     for(QUrl& var: mimeData->urls())
-        emit fileDroped(var.path().remove(0, 1));
+        emit fileDroped(var.path()
+#ifndef Q_OS_LINUX
+                .remove(0, 1)
+#endif
+        );
 
     if(mimeData->hasFormat(Ruler::MimeType) && event->source() != this)
         scene()->addItem(new Gi::Guide{
@@ -570,7 +574,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
     event = &fakeEvent;
     // QGraphicsView::mousePressEvent(event);
     if(event->buttons() & Qt::MiddleButton) {
-        qInfo("MiddleButton");
+        // qInfo("MiddleButton");
         QMouseEvent releaseEvent{QEvent::MouseButtonRelease,
             event->position(), event->scenePosition(), event->globalPosition(),
             Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers()};
@@ -582,7 +586,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers()};
         QGraphicsView::mousePressEvent(&fakeEvent);
     } else if(event->button() == Qt::RightButton) {
-        qInfo("RightButton");
+        // qInfo("RightButton");
         //        { // удаление мостика
         //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->position().toPoint()), transform());
         //            if (item && item->type() == Gi::Type::Bridge && !static_cast<BridgeItem*>(item)->ok())
@@ -606,7 +610,7 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
             GiToShapeEvent(event, item);
         QGraphicsView::mousePressEvent(event);
     } else {
-        qInfo("else");
+        // qInfo("else");
         setDragMode(RubberBandDrag);
         // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
@@ -642,7 +646,7 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
     event = &fakeEvent;
     // QGraphicsView::mousePressEvent(event);
     if(event->button() == Qt::MiddleButton) {
-        qInfo("MiddleButton");
+        // qInfo("MiddleButton");
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
         QMouseEvent fakeEvent{event->type(),
             event->position(), event->scenePosition(), event->globalPosition(),
@@ -651,14 +655,14 @@ void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
         setDragMode(RubberBandDrag);
         setInteractive(true);
     } else if(event->button() == Qt::RightButton) {
-        qInfo("RightButton");
+        // qInfo("RightButton");
         // это что бы при вызове контекстного меню ничего постороннего не было
         QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
         // WTF scene_->setDrawRuller(false);
         latPos = event->position().toPoint();
     } else {
-        qInfo("else");
+        // qInfo("else");
         QGraphicsView::mouseReleaseEvent(event);
         emit mouseClickL(mappedPos(event));
     }

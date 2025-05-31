@@ -84,7 +84,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         if(file->lines().empty())
             emit afp->fileError("", file->shortName() + "\n" + "Incorrect File!");
 
-        emit afp->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
+        emit afp->createProgress(file->shortName(), static_cast<int>(file->lines().size()));
 
         lineNum_ = 0;
 
@@ -95,7 +95,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             currentGerbLine_ = gerberLine;
             ++lineNum_;
             if(!(lineNum_ % 1000))
-                emit afp->fileProgress(file->shortName(), 0, lineNum_);
+                emit afp->updateProgressVal(file->shortName(),  lineNum_);
             auto dummy = [](const QString& gLine) -> bool {
                 auto data{std::u16string_view{gLine}};
                 static constexpr ctll::fixed_string ptrnDummy{R"(^%(.{2})(.+)\*%$)"};
@@ -160,7 +160,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             file->groupedPaths();
             file->graphicObjects_.shrink_to_fit();
             emit afp->fileReady(file);
-            emit afp->fileProgress(file->shortName(), 1, 1);
         }
     } catch(const std::exception& e) {
         std::stringstream ss;
@@ -170,13 +169,11 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         qWarning() << ss.str().c_str();
         qWarning() << "exeption:" << e.what();
         emit afp->fileError(file->shortName(), e.what());
-        emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch(...) {
         QString errStr(QString("%1: %2").arg(errno).arg(strerror(errno)));
         qWarning() << "exeption ...:" << errStr;
         emit afp->fileError(file->shortName(), errStr);
-        emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     }
     reset(); // clear parser data

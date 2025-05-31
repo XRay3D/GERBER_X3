@@ -128,7 +128,7 @@ void MainWindow::init() {
     for(auto& [type, ptr]: App::filePlugins()) { // connect plugins
         ptr->moveToThread(&parserThread);
         connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
-        connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+        connect(ptr, &AbstractFilePlugin::fileProgress_, this, &MainWindow::fileProgress, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
         connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
         connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
@@ -222,6 +222,7 @@ void MainWindow::logMessage2(QtMsgType type, const QMessageLogContext& context, 
 
 void MainWindow::fileError(const QString& fileName, const QString& error) {
     qCritical() << "fileError " << fileName << error;
+    progressDialogs_.erase(fileName);
 
     ui.loggingDockWidget->show();
     ui.loggingTextBrowser->setTextColor(Qt::black);
@@ -233,23 +234,25 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value) {
     if(max && !value) {
-        QProgressDialog* pd = new QProgressDialog{this};
+        auto pd = std::make_unique<QProgressDialog>(this);
         pd->setCancelButton(nullptr);
         pd->setLabelText(fileName);
         pd->setMaximum(max);
         // pd->setModal(true);
         // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
-        progressDialogs_[fileName] = pd;
-    } else if(progressDialogs_.contains(fileName) && max == 1 && value == 1) {
-        progressDialogs_[fileName]->hide();
-        progressDialogs_[fileName]->deleteLater();
-        progressDialogs_.remove(fileName);
+        progressDialogs_.emplace(fileName, std::move(pd));
+    } else if(progressDialogs_.contains(fileName) && !max && !value) {
+        progressDialogs_.erase(fileName);
+    } else if(progressDialogs_.contains(fileName) && max && value) {
+        progressDialogs_[fileName]->setMaximum(max);
+        progressDialogs_[fileName]->setValue(0);
     } else if(progressDialogs_.contains(fileName))
         progressDialogs_[fileName]->setValue(value);
 }
 
 void MainWindow::addFileToPro(AbstractFile* file) {
+    progressDialogs_.erase(file->shortName());
     if(project_->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
         setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
