@@ -51,7 +51,7 @@ void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 
     QColor color{pen_.color()};
     QPen pen{pen_};
-    constexpr double dl = 3;
+    constexpr double dl = 4;
 
     if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
         if(option->state & QStyle::State_Selected) {

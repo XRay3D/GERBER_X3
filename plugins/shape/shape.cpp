@@ -240,6 +240,9 @@ void AbstractShape::redraw() {
     if(static int fl; !fl) ++fl, redraw(), --fl; // call child overload once
 
     pPathHandle.clear();
+
+    setPos(1, 1), setPos(0, 0); // NOTE needed to update internal data (BSP etc),
+                                // calling update() has no effect.
     if(!isEditable()) return;
 
     const auto hs = HandleR * scale();
@@ -247,9 +250,6 @@ void AbstractShape::redraw() {
     std::ranges::for_each(handles,
         std::bind(qOverload<const QPointF&, qreal, qreal>(&QPainterPath::addEllipse),
             &pPathHandle, _1, hs, hs));
-
-    setPos(1, 1), setPos(0, 0); // NOTE needed to update internal data (BSP etc),
-                                // calling update() has no effect.
 }
 
 // FileTree::Node interface ////////////////////////////////////////////////////
