@@ -116,7 +116,7 @@ class App {
     //    QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
-    int dashOffset_{};
+    double dashOffset_{};
 
     QSharedMemory sharedMemory{"AppSettings"};
 

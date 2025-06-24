@@ -253,6 +253,11 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
         // if(dynamic_cast<QWidget*>(viewport())) break;
         setViewport(new QWidget{this});
     }
+
+    setStyleSheet("QGraphicsView { background: "
+        % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
+        % " }");
+
     // } while(false);
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
@@ -676,6 +681,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
+
 #if 1
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
@@ -754,8 +760,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k, point.y(),     point.x() + k, point.y()    },
-            {point.x(),     point.y() - k, point.x(),     point.y() + k}
+            {point.x() - k,     point.y(), point.x() + k,     point.y()},
+            {    point.x(), point.y() - k,     point.x(), point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -767,8 +773,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {0,           rect.top(), 0,            rect.bottom()},
-            {rect.left(), 0,          rect.right(), 0            }
+            {          0, rect.top(),            0, rect.bottom()},
+            {rect.left(),          0, rect.right(),             0}
         };
         painter->drawLines(lines, 2);
     }
@@ -848,15 +854,22 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
 
     painter->restore();
 #endif
+    {
+        auto time = std::chrono::system_clock::now();
+        static auto last_time = time - std::chrono::milliseconds{1};
+        App::dashOffset() += 20. / std::chrono::duration_cast<std::chrono::milliseconds>(time - last_time).count();
+        last_time = time;
+        // qWarning() << App::dashOffset();
+    }
 }
 
 void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
-    painter->fillRect(rect, Qt::black);
+    painter->fillRect(rect, App::settings().guiColor(GuiColors::Background));
 }
 
 void GraphicsView::timerEvent(QTimerEvent* /*event*/) {
     //    if (event->timerId() == timerId)
-    ++App::dashOffset();
+    // ++App::dashOffset();
     scene()->update();
 }
 
