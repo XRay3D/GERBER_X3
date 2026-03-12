@@ -49,7 +49,7 @@ public:
     void write(QDataStream& stream [[maybe_unused]]) const override { }
     void read(QDataStream& stream [[maybe_unused]]) override { }
     void initFrom(AbstractFile* file [[maybe_unused]]) override { qWarning(__FUNCTION__); }
-    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
     uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
         Gi::Item* item = new Gi::GcPath{pocketPaths_, this};
@@ -105,7 +105,7 @@ Creator::~Creator() { ProgressCancel::reset(); }
 Pathss& Creator::groupedPaths(Grouping group, /*Point::Type*/ int32_t offset, bool skipFrame) {
     PolyTree polyTree;
     {
-        Timer t("Union EvenOdd");
+        Timer t{"Union EvenOdd"};
         Clipper clipper;
         clipper.AddSubject(closedSrcPaths);
         clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
@@ -113,7 +113,7 @@ Pathss& Creator::groupedPaths(Grouping group, /*Point::Type*/ int32_t offset, bo
     }
     groupedPss.clear();
     {
-        Timer t("grouping");
+        Timer t{"grouping"};
         grouping(group, polyTree.Count() == 1 ? *polyTree[0] : polyTree);
     }
     if(skipFrame == false
@@ -144,7 +144,7 @@ Path Creator::boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const 
     rect.left -= k;
     rect.right += k;
     rect.top -= k;
-    // dbgPaths({rect.AsPath()}, "boundOfPaths", Qt::magenta);
+    // dbgPaths({rect.AsPath()}, u"boundOfPaths"_s, Qt::magenta);
     return rect.AsPath();
 }
 
@@ -201,12 +201,12 @@ void Creator::createGc(Params* gcp) {
     if(gcp->supportPathss.size())
         supportPss.append(std::move(gcp->supportPathss));
 
-    // dbgPaths(closedSrcPaths, "closedPaths");
-    // dbgPaths(openSrcPaths, "openPaths");
+    // dbgPaths(closedSrcPaths, u"closedPaths"_s);
+    // dbgPaths(openSrcPaths, u"openPaths"_s);
 
-    //    dbgPaths(closedSrcPaths, "closedSrcPaths");
-    //    dbgPaths(supportPss, "supportPathss");
-    //    dbgPaths(openSrcPaths, "openPaths");
+    //    dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
+    //    dbgPaths(supportPss, u"supportPathss"_s);
+    //    dbgPaths(openSrcPaths, u"openPaths"_s);
 
     gcp_ = std::move(*gcp);
     //    gcp_ = *gcp;
@@ -218,7 +218,7 @@ void Creator::createGc(Params* gcp) {
                 checkMilling(gcp_.side());
             } catch(const Cancel& e) {
                 ProgressCancel::reset();
-                qWarning() << "checkMilling canceled:" << e.what();
+                qWarning() << u"checkMilling canceled:"_s << e.what();
             } catch(...) {
                 throw;
             }
@@ -226,16 +226,16 @@ void Creator::createGc(Params* gcp) {
         if(!isCancel()) {
             checkMillingFl = false;
             msg = tr("createGc");
-            Timer t("createGc");
+            Timer t{"createGc"};
             create();
         }
-        qWarning() << "Creator::createGc() finish";
+        qWarning() << u"Creator::createGc() finish"_s;
     } catch(const Cancel& e) {
-        qWarning() << "Creator::createGc() canceled:" << e.what();
+        qWarning() << u"Creator::createGc() canceled:"_s << e.what();
     } catch(const std::exception& e) {
-        qWarning() << "Creator::createGc() exeption:" << e.what();
+        qWarning() << u"Creator::createGc() exeption:"_s << e.what();
     } catch(...) {
-        qWarning() << "Creator::createGc() exeption:" << errno;
+        qWarning() << u"Creator::createGc() exeption:"_s << errno;
     }
     delete gcp;
 }
@@ -251,11 +251,11 @@ void Creator::stacking(Paths& paths) {
 
     if(paths.empty())
         return;
-    Timer t("stacking");
+    Timer t{"stacking"};
 
     PolyTree polyTree;
     {
-        Timer t("stacking 1");
+        Timer t{"stacking 1"};
         Clipper clipper;
         clipper.AddSubject(paths);
         clipper.AddSubject({boundOfPaths(paths, uScale)});
@@ -494,12 +494,12 @@ bool Creator::checkMilling(SideOfMilling side) {
     };
 
     auto testFrame = [](Paths& frames, Paths& sources, bool intersect = {}) {
-        // Timer t("testFrame");
+        // Timer t{"testFrame"};
         std::unordered_map<Path*, std::set<void*>> checker;
         std::mutex m;
 
-        // dbgPaths(frames, "F", Qt::green, true);
-        // dbgPaths(sources, "S", Qt::yellow, true);
+        // dbgPaths(frames, u"F"_s, Qt::green, true);
+        // dbgPaths(sources, u"S"_s, Qt::yellow, true);
         setMax(frames.size());
         setCurrent();
 
@@ -536,14 +536,14 @@ bool Creator::checkMilling(SideOfMilling side) {
 
     switch(side) {
     case Outer: {
-        Timer t("Outer");
+        Timer t{"Outer"};
         if constexpr(1) {
             Paths nonCutPaths;
             constexpr auto k = 1;
             groupedPaths(Grouping::Copper);
 
             auto mill = [](Paths& paths, double offset1, double offset2) {
-                Timer t("mill");
+                Timer t{"mill"};
                 Paths retPaths;
                 ReversePaths(paths);
                 retPaths = InflateRoundPolygon(paths, offset1);
@@ -552,7 +552,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             };
 
             auto nonCuts = [](const Paths& subject, const Paths& clip) {
-                Timer t("nonCuts");
+                Timer t{"nonCuts"};
                 Paths retPaths;
                 retPaths = Clipper2Lib::Difference(subject, clip, FillRule::Positive);
                 retPaths = InflateMiterPolygon(retPaths, k);
@@ -641,7 +641,7 @@ bool Creator::checkMilling(SideOfMilling side) {
         }
     } break;
     case Inner: {
-        Timer t("Inner");
+        Timer t{"Inner"};
         groupedPaths(Grouping::Copper);
         std::mutex m;
         std::for_each(std::execution::par, std::begin(groupedPss), std::end(groupedPss), [&](auto&& srcPaths) {

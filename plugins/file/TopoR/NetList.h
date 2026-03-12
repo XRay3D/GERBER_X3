@@ -6,7 +6,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -27,7 +27,7 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
@@ -35,7 +35,7 @@ public:
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("PinRef", typeof(PinRef)), XmlElement("PadRef", typeof(PadRef))] public List<Object> _refs;+
+        // ORIGINAL LINE: [XmlElement(u"PinRef"_s, typeof(PinRef)), XmlElement(u"PadRef"_s, typeof(PadRef))] public List<Object> _refs;+
 
         std::vector<std::variant<PinRef, PadRef>> _refs;
         bool ShouldSerialize_refs();
@@ -45,14 +45,14 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Описания цепей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Net")] public List<Net> _Nets;
+    // ORIGINAL LINE: [XmlElement(u"Net"_s)] public List<Net> _Nets;
     std::vector<Net*> _Nets;
     bool ShouldSerialize_Nets();
 
@@ -64,8 +64,8 @@ public:
     /// <summary>
     /// Переименование ссылок на компонент, если его имя изменилось
     /// </summary>
-    /// <param name="oldname">старое имя компонента</param>
-    /// <param name="newname">новое имя компонента</param>
+    /// <param name=u"oldname"_s>старое имя компонента</param>
+    /// <param name=u"newname"_s>новое имя компонента</param>
     void Rename_compName(const QString& oldname, const QString& newname);
     /*******************************************************************/
 };

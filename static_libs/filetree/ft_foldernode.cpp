@@ -37,7 +37,7 @@ QVariant FolderNode::data(const QModelIndex& index, int role) const {
         case Qt::DisplayRole:
             return name;
         case Qt::DecorationRole:
-            return QIcon::fromTheme("folder");
+            return QIcon::fromTheme(u"folder"_s);
         default:
             break;
         }
@@ -88,7 +88,7 @@ QVariant ItemNode::data(const QModelIndex& index, int role) const {
     if(!index.column()) {
         switch(role) {
         case Qt::DisplayRole:
-            return "name";
+            return u"name"_s;
         case Qt::DecorationRole:
             return drawIcon(item->paths(), item->color());
         default:

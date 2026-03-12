@@ -47,7 +47,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    if(fileName.endsWith(".dxf", Qt::CaseInsensitive))
+    if(fileName.endsWith(u".dxf"_s, Qt::CaseInsensitive))
         return false;
     QFile file(fileName);
     if(!file.open(QFile::ReadOnly | QFile::Text))
@@ -56,8 +56,8 @@ bool Plugin::thisIsIt(const QString& fileName) {
     QTextStream in(&file);
     QString line;
 
-    static constexpr ctll::fixed_string regex1(R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)");
-    static constexpr ctll::fixed_string regex2(R"(^.*Holesize.*$)"); // fixed_string(".*Holesize.*");
+    static constexpr ctll::fixed_string regex1{R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)"};
+    static constexpr ctll::fixed_string regex2{R"(^.*Holesize.*$)"}; // fixed_string{".*Holesize.*"};
 
     while(in.readLineInto(&line)) {
         auto data{toU16StrView(line)};
@@ -76,11 +76,11 @@ QString Plugin::folderName() const { return tr("Excellon"); }
 
 AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
-QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'E'); }
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'E'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     auto tab = new ExSettingsTab{parent};
-    tab->setWindowTitle("Excellon");
+    tab->setWindowTitle(u"Excellon"_s);
     return tab;
 }
 

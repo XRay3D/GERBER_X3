@@ -34,24 +34,24 @@ struct Thread_ {
 
     auto toObj() const {
         QJsonObject obj;
-        obj["D"] = D;   // Номинальный диаметр резьбы D, наружный диаметр резьбы d
-        obj["P"] = P;   // ШагР
-        obj["D1"] = D1; // Внутренний диаметр D1, d1
-        obj["D2"] = D2; // Средний диаметр D2, d2
-        obj["D3"] = D3; // Внутренний диаметр по дну впадины D3, d3
+        obj[u"D"_s] = D;   // Номинальный диаметр резьбы D, наружный диаметр резьбы d
+        obj[u"P"_s] = P;   // ШагР
+        obj[u"D1"_s] = D1; // Внутренний диаметр D1, d1
+        obj[u"D2"_s] = D2; // Средний диаметр D2, d2
+        obj[u"D3"_s] = D3; // Внутренний диаметр по дну впадины D3, d3
         return obj;
     }
 
     auto toStr() const {
-        return QString("M%1x%2").arg(D).arg(P);
+        return QString(u"M%1x%2"_s).arg(D).arg(P);
     }
 
     auto& operator=(const QJsonObject& obj) {
-        D = obj["D"].toDouble();   // Номинальный диаметр резьбы D, наружный диаметр резьбы d
-        P = obj["P"].toDouble();   // ШагР
-        D1 = obj["D1"].toDouble(); // Внутренний диаметр D1, d1
-        D2 = obj["D2"].toDouble(); // Средний диаметр D2, d2
-        D3 = obj["D3"].toDouble(); // Внутренний диаметр по дну впадины D3, d3
+        D = obj[u"D"_s].toDouble();   // Номинальный диаметр резьбы D, наружный диаметр резьбы d
+        P = obj[u"P"_s].toDouble();   // ШагР
+        D1 = obj[u"D1"_s].toDouble(); // Внутренний диаметр D1, d1
+        D2 = obj[u"D2"_s].toDouble(); // Средний диаметр D2, d2
+        D3 = obj[u"D3"_s].toDouble(); // Внутренний диаметр по дну впадины D3, d3
         return *this;
     }
 
@@ -63,7 +63,7 @@ struct Settings {
 
         //  Номинальный   |   Шаг Р. мм   |   Диаметры резьбы. мм||   |
         //  диаметр резьбы||||   |
-        //  d. мм|   |   d = D   |   d2 = D2   |   d1 = D1   |   d3
+        //  d. мм|   |   d = D   |   d2 = D2   |   d1 = D1   |   d3
 
         //        {0.25, 0.075,  0.201,  0.169,  0.158},
         //        {0.30,  0.08,  0.248,  0.213,  0.202},
@@ -319,7 +319,7 @@ class File final : public GCode::File {
 public:
     explicit File();
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
-    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); } // FIXME
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); } // FIXME
     uint32_t type() const override { return THREAD; }
     void createGi() override;
     void genGcodeAndTile() override;

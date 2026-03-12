@@ -52,8 +52,8 @@ public:
     static void translate(const QString& locale) {
         static std::vector<std::unique_ptr<QTranslator>> translators;
         translators.clear();
-        QDir dir(qApp->applicationDirPath() + "/translations");
-        for(auto&& str: dir.entryList(QStringList{"*" + locale + ".qm"}, QDir::Files)) {
+        QDir dir(qApp->applicationDirPath() + u"/translations"_s);
+        for(auto&& str: dir.entryList(QStringList{u"*"_s + locale + u".qm"_s}, QDir::Files)) {
             translators.emplace_back(std::make_unique<QTranslator>());
             if(translators.back()->load(str, dir.path()))
                 qApp->installTranslator(translators.back().get());
@@ -147,7 +147,7 @@ public:
             class Style : public QProxyStyle {
             public:
                 Style()
-                    : QProxyStyle{"Fusion"} { }
+                    : QProxyStyle{u"Fusion"_s} { }
 
                 QPixmap getPixmap(StandardPixmap standardPixmap) const {
                     switch(standardPixmap) {
@@ -293,11 +293,11 @@ public:
             qApp->setPalette(palette);
         } else {
             // qApp->setStyle(style);
-            qApp->setStyle(QStyleFactory::create("Fusion"));
+            qApp->setStyle(QStyleFactory::create(u"Fusion"_s));
             qApp->setPalette(palette); // QApplication::style()->standardPalette());
         }
 
-        QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
+        QIcon::setThemeName(App::settings().theme() < DarkBlue ? u"ggeasy-light"_s : u"ggeasy-dark"_s);
         if(App::mainWindowPtr() && App::mainWindow().isVisible())
             SettingsDialog().show();
     }
@@ -313,7 +313,7 @@ public:
         } else
             dockWidget_->setWidget(dwContent);
         dockWidget_->setWindowTitle(dwContent->windowTitle());
-        if(auto pbClose{dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
+        if(auto pbClose{dwContent->findChild<QPushButton*>(u"pbClose"_s)}; pbClose)
             connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
         dockWidget_->show();
     }

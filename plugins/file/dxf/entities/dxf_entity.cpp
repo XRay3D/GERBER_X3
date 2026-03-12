@@ -239,7 +239,7 @@ void Entity::parse(CodeData& code) {
 
         break;
     default:
-        qDebug() << __FUNCTION__ << "default" << code;
+        qDebug() << __FUNCTION__ << u"default"_s << code;
         break;
     }
 }
@@ -264,9 +264,9 @@ Entity::Type Entity::toType(const QString& key) {
     return Type(staticMetaObject.enumerator(0).keyToValue(key.toUtf8().toUpper().data()));
 }
 
-QString Entity::typeName(int key) { return staticMetaObject.enumerator(0).valueToKey(key); }
+QString Entity::typeName(int key) { return QString::fromUtf8(staticMetaObject.enumerator(0).valueToKey(key)); }
 
-QString Entity::name() const { return staticMetaObject.enumerator(0).valueToKey(type()); }
+QString Entity::name() const { return QString::fromUtf8(staticMetaObject.enumerator(0).valueToKey(type())); }
 
 QColor Entity::color() const {
     if(auto layer = sp->file->layer(layerName); layer != nullptr) { //-V2006

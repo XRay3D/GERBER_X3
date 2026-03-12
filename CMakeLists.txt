@@ -8,44 +8,39 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.00 FATAL_ERROR)
 
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
 project(GERBER_X3 VERSION 0.9.1)
 
-set(CMAKE_CXX_STANDARD 23)
+# set(CMAKE_CXX_MODULE_STD ON)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
+set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
+set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
+
+set(CMAKE_UNITY_BUILD ON)
+set_source_files_properties(PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 
-set_property(GLOBAL PROPERTY CXX_STANDARD 23)
+set_property(GLOBAL PROPERTY CXX_STANDARD 26)
 set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_definitions(
-  -DQT_MESSAGELOGCONTEXT # qDebug()
-  -DQT_DISABLE_DEPRECATED_BEFORE=0x060400
-  -DQT_NO_CAST_TO_ASCII=1 # ERORR QByteArray &appendToByteArray(QByteArray &a,
-  # const QStringBuilder < A, B>& b, QChar)
-)
-
-# add_compile_options( #
-# $<IF:$OR<$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>, -fPIC -Wpedantic #
-# -Wall -Wextra -Wconversion -Werror> #
-# $<IF:$<AND:$<CXX_COMPILER_ID:Clang>,$<CXX_COMPILER_ID:GNU>>, -fPIC #
-# -Wpedantic -Wall -Wextra -Wconversion -Werror>
-# $<$<AND:$<CXX_COMPILER_ID:GNU>,$<CXX_COMPILER_ID:Clang>>:-fPIC -Wpedantic
-# -Wall -Wextra -Wconversion -Werror> #
-# $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Debug>>:/Od> #
-# $<$<AND:$<CXX_COMPILER_ID:MSVC>,$<CONFIG:Release>>:/O2>) ) #
-# target_compile_options(my_target PRIVATE $ < $ < AND : $ < CXX_COMPILER_ID : #
-# GNU>, $ < CONFIG : Debug>> : -Og> $ < $ < AND : $ < CXX_COMPILER_ID : GNU>, $
-# # < CONFIG : Release>> : -O2> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < #
-# CONFIG : Debug>> : / Od> $ < $ < AND : $ < CXX_COMPILER_ID : MSVC>, $ < CONFIG
-# # : Release>> : / O2>)
+  -DQT_MESSAGELOGCONTEXT
+  -DQT_NO_CAST_TO_ASCII
+  -DQT_NO_CAST_FROM_ASCII
+  -DQT_NO_URL_CAST_FROM_STRING
+  -DQT_NO_CAST_FROM_BYTEARRAY
+  -DQT_USE_QSTRINGBUILDER
+  # * DQT_NO_KEYWORDS QT_NO_SIGNALS_SLOTS_KEYWORDS
+  -DQT_USE_FAST_OPERATOR_PLUS
+  -DQT_DISABLE_DEPRECATED_BEFORE=0x070000)
 
 # FIND BOOST
 find_package(Boost)
@@ -61,6 +56,25 @@ if(Boost_FOUND)
 else()
   message(FATAL_ERROR "Boost not found!!!")
 endif()
+
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
+
+FetchContent_Declare(
+  pfr
+  # GIT_REPOSITORY https: // github.com/boostorg/pfr.git
+  GIT_REPOSITORY https://github.com/apolukhin/pfr_non_boost.git
+  GIT_TAG master)
+FetchContent_Declare(
+  ctre
+  GIT_REPOSITORY
+    "https://github.com/hanickadot/compile-time-regular-expressions.git"
+  GIT_TAG main)
+FetchContent_Declare(
+  clipper2
+  GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
+  GIT_TAG main)
+FetchContent_MakeAvailable(pfr ctre clipper2)
 
 #[[FIND CGAL
 find_package(CGAL)
@@ -87,37 +101,28 @@ else()
 endif()
 ]]
 
-# add_library(Qt INTERFACE) target_precompile_headers(Qt INTERFACE qt_pch.h)
+include_directories(ggeasy)
 
-include_directories(
-  ggeasy
-  plugins/file
-  plugins/gcode
-  plugins/shape
-  static_libs/clipper
-  static_libs/common
-  static_libs/filetree
-  static_libs/gi
-  static_libs/graphicsview
-  static_libs/tooldatabase
-  third_party/clipper2/CPP/Clipper2Lib/include
-  third_party/ctre/single-header)
+# CXX_MODULES FILES static_libs / common / std.cppm)
 
 set(CLIPPER2_UTILS OFF)
 set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
 set(CLIPPER2_USINGZ "ONLY")
 add_definitions(-DUSINGZ=1)
+add_subdirectory(third_party/clipper2-src/CPP)
 
-add_subdirectory(third_party/clipper2/CPP)
+# add_subdirectory(third_party / clipper2 / CPP)
+
+# set(CTRE_MODULE ON) add_subdirectory(third_party / ctre)
 
 set(COMMON_COMPILE_OPTIONS
     -fPIC
-    # -ffast-math
+    # * ffast - math
     -march=native
+    # * xc ++ - system - header iostream
     -Wall
-    # -Wconversion
-    -Werror
+    # * Wconversion - Werror
     -Wextra
     -Wimplicit-fallthrough
     -Wpedantic)
@@ -126,12 +131,14 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(${COMMON_COMPILE_OPTIONS})
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(${COMMON_COMPILE_OPTIONS})
+  link_libraries(stdc++exp)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
 
+# FILE_SET cxx_modules TYPE CXX_MODULES FILES third_party / ctre / ctre.cppm)
 # target_compile_options(Clipper2Z PUBLIC - fPIC)
 
 find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core) # Qt6

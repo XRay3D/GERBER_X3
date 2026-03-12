@@ -83,22 +83,22 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     for(int i = 0; i < GuiColors::Count; ++i) {
         ui.formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector{App::settings().guiColor_[i], defaultColor[i], ui.gbxColor});
-        ui.formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel{colorName[i] + ":", ui.gbxColor});
+        ui.formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel{colorName[i] + u":"_s, ui.gbxColor});
     }
 
     connect(ui.cbxFontSize, &QComboBox::currentTextChanged, [](const QString& fontSize) {
-        qApp->setStyleSheet(QString(qApp->styleSheet()).replace(QRegularExpression(R"(font-size:\s*\d+)"), "font-size: " + fontSize));
+        qApp->setStyleSheet(qApp->styleSheet().replace(QRegularExpression(uR"(font-size:\s*\d+)"_s), u"font-size: "_s + fontSize));
         QFont f;
         f.setPointSize(fontSize.toInt());
         qApp->setFont(f);
     });
 
     // Language
-    ui.cbxLanguage->addItem("English", "en");
-    ui.cbxLanguage->addItem("Русский", "ru");
+    ui.cbxLanguage->addItem(u"English"_s, u"en"_s);
+    ui.cbxLanguage->addItem(u"Русский"_s, u"ru"_s);
 
-    settings.beginGroup("MainWindow");
-    QString locale(settings.value("locale").toString());
+    settings.beginGroup(u"MainWindow"_s);
+    QString locale(settings.value(u"locale"_s).toString());
     settings.endGroup();
 
     for(int i = 0; i < ui.cbxLanguage->count(); ++i) {
@@ -112,12 +112,12 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     connect(ui.cbxLanguage, qOverload<int>(&QComboBox::currentIndexChanged), [this](int index) {
         const QString locale(ui.cbxLanguage->itemData(index).toString());
         MainWindow::translate(locale);
-        settings.beginGroup("MainWindow");
-        settings.setValue("locale", locale);
+        settings.beginGroup(u"MainWindow"_s);
+        settings.setValue(u"locale"_s, locale);
         settings.endGroup();
     });
 
-    ui.labelAPIcon->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(ui.labelAPIcon->size()));
+    ui.labelAPIcon->setPixmap(QIcon::fromTheme(u"snap-nodes-cusp"_s).pixmap(ui.labelAPIcon->size()));
 
     tabs.reserve(App::filePlugins().size() + 1); // NOTE +1 for GCode
 
@@ -153,14 +153,14 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     { // Open Settings Folder
         button = new QPushButton{tr("Open Settings Folder"), ui.buttonBox};
-        button->setIcon(QIcon::fromTheme("folder"));
+        button->setIcon(QIcon::fromTheme(u"folder"_s));
         button->setMinimumWidth(QFontMetrics(font()).boundingRect(button->text()).width() + 32);
         ui.buttonBox->addButton(button, QDialogButtonBox::ResetRole);
         connect(button, &QPushButton::clicked, [] { QDesktopServices::openUrl(QUrl(App::settingsPath(), QUrl::TolerantMode)); });
     }
 
-    ui.buttonBox->button(QDialogButtonBox::Ok)->setIcon(QIcon::fromTheme("dialog-ok-apply"));
-    ui.buttonBox->button(QDialogButtonBox::Cancel)->setIcon(QIcon::fromTheme("dialog-cancel"));
+    ui.buttonBox->button(QDialogButtonBox::Ok)->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
+    ui.buttonBox->button(QDialogButtonBox::Cancel)->setIcon(QIcon::fromTheme(u"dialog-cancel"_s));
 }
 
 SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
@@ -168,7 +168,7 @@ SettingsDialog::~SettingsDialog() { saveSettingsDialog(); }
 void SettingsDialog::readSettings() {
     /*GUI*/
 
-    settings.beginGroup("Viewer");
+    settings.beginGroup(u"Viewer"_s);
     settings.getValue(ui.chbxAntialiasing);
     settings.getValue(ui.chbxOpenGl);
     settings.getValue(ui.chbxScaleHZMarkers, App::settings().scaleHZMarkers_);
@@ -178,7 +178,7 @@ void SettingsDialog::readSettings() {
     settings.getValue(ui.cbxTheme, App::settings().theme_);
     settings.endGroup();
 
-    settings.beginGroup("Color");
+    settings.beginGroup(u"Color"_s);
     for(int i = 0; i < GuiColors::Count; ++i)
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         App::settings().guiColor_[i].fromString
@@ -189,23 +189,23 @@ void SettingsDialog::readSettings() {
 
     settings.endGroup();
 
-    settings.beginGroup("Application");
-    const QString fontSize(settings.value("FontSize", "8").toString());
-    qApp->setStyleSheet("QWidget {font-size: " + fontSize + "pt}");
+    settings.beginGroup(u"Application"_s);
+    const QString fontSize(settings.value(u"FontSize"_s, u"8"_s).toString());
+    qApp->setStyleSheet(u"QWidget {font-size: "_s + fontSize + u"pt}"_s);
     ui.cbxFontSize->setCurrentText(fontSize);
     settings.endGroup();
 
     /*Clipper*/
-    settings.beginGroup("Clipper");
+    settings.beginGroup(u"Clipper"_s);
     settings.getValue(ui.dsbxMinCircleSegmentLength, App::settings().clpMinCircleSegmentLength_);
     settings.getValue(ui.sbxMinCircleSegments, App::settings().clpMinCircleSegments_);
     settings.endGroup();
 
     /*Markers*/
-    settings.beginGroup("Home");
-    settings.getValue("homeOffset", App::settings().mrkHomeOffset_);
-    settings.getValue("pinOffset", App::settings().mrkPinOffset_, QPointF(6, 6));
-    settings.getValue("zeroOffset", App::settings().mrkZeroOffset_);
+    settings.beginGroup(u"Home"_s);
+    settings.getValue(u"homeOffset"_s, App::settings().mrkHomeOffset_);
+    settings.getValue(u"pinOffset"_s, App::settings().mrkPinOffset_, QPointF(6, 6));
+    settings.getValue(u"zeroOffset"_s, App::settings().mrkZeroOffset_);
     ui.dsbxHomeX->setValue(App::settings().mrkHomeOffset_.x());
     ui.dsbxHomeY->setValue(App::settings().mrkHomeOffset_.y());
     ui.dsbxPinX->setValue(App::settings().mrkPinOffset_.x());
@@ -224,14 +224,14 @@ void SettingsDialog::readSettings() {
 
 void SettingsDialog::saveSettings() {
     /*GUI*/
-    settings.beginGroup("Viewer");
-    if(settings.value("chbxOpenGl").toBool() != ui.chbxOpenGl->isChecked()) {
+    settings.beginGroup(u"Viewer"_s);
+    if(settings.value(u"chbxOpenGl"_s).toBool() != ui.chbxOpenGl->isChecked()) {
         App::grView().setOpenGL(ui.chbxOpenGl->isChecked());
-        App::grView().viewport()->setObjectName("viewport");
+        App::grView().viewport()->setObjectName(u"viewport"_s);
         App::grView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
         settings.setValue(ui.chbxOpenGl);
     }
-    if(settings.value("chbxAntialiasing").toBool() != ui.chbxAntialiasing->isChecked()) {
+    if(settings.value(u"chbxAntialiasing"_s).toBool() != ui.chbxAntialiasing->isChecked()) {
         App::grView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
         settings.setValue(ui.chbxAntialiasing);
     }
@@ -242,27 +242,27 @@ void SettingsDialog::saveSettings() {
     App::settings().theme_ = settings.setValue(ui.cbxTheme);
     settings.endGroup();
 
-    settings.beginGroup("Color");
+    settings.beginGroup(u"Color"_s);
     for(int i = 0; i < GuiColors::Count; ++i)
         settings.setValue(EnumHelper::toString(static_cast<GuiColors::Name>(i)), App::settings().guiColor_[i].name(QColor::HexArgb));
     settings.endGroup();
 
-    settings.beginGroup("Application");
-    settings.setValue("FontSize", ui.cbxFontSize->currentText());
+    settings.beginGroup(u"Application"_s);
+    settings.setValue(u"FontSize"_s, ui.cbxFontSize->currentText());
     settings.endGroup();
 
     /*Clipper*/
-    settings.beginGroup("Clipper");
+    settings.beginGroup(u"Clipper"_s);
     App::settings().clpMinCircleSegmentLength_ = settings.setValue(ui.dsbxMinCircleSegmentLength);
     App::settings().clpMinCircleSegments_ = settings.setValue(ui.sbxMinCircleSegments);
     settings.endGroup();
 
     /*Markers*/
-    settings.beginGroup("Home");
-    App::settings().mrkHomeOffset_ = settings.setValue("homeOffset", QPointF(ui.dsbxHomeX->value(), ui.dsbxHomeY->value()));
+    settings.beginGroup(u"Home"_s);
+    App::settings().mrkHomeOffset_ = settings.setValue(u"homeOffset"_s, QPointF(ui.dsbxHomeX->value(), ui.dsbxHomeY->value()));
     App::settings().mrkHomePos_ = settings.setValue(ui.cbxHomePos);
-    App::settings().mrkPinOffset_ = settings.setValue("pinOffset", QPointF(ui.dsbxPinX->value(), ui.dsbxPinY->value()));
-    App::settings().mrkZeroOffset_ = settings.setValue("zeroOffset", QPointF(ui.dsbxZeroX->value(), ui.dsbxZeroY->value()));
+    App::settings().mrkPinOffset_ = settings.setValue(u"pinOffset"_s, QPointF(ui.dsbxPinX->value(), ui.dsbxPinY->value()));
+    App::settings().mrkZeroOffset_ = settings.setValue(u"zeroOffset"_s, QPointF(ui.dsbxZeroX->value(), ui.dsbxZeroY->value()));
     App::settings().mrkZeroPos_ = settings.setValue(ui.cbxZeroPos);
     settings.endGroup();
 
@@ -274,16 +274,16 @@ void SettingsDialog::saveSettings() {
 }
 
 void SettingsDialog::readSettingsDialog() {
-    settings.beginGroup("SettingsDialog");
-    if(auto geometry{settings.value("geometry").toByteArray()}; geometry.size())
+    settings.beginGroup(u"SettingsDialog"_s);
+    if(auto geometry{settings.value(u"geometry"_s).toByteArray()}; geometry.size())
         restoreGeometry(geometry);
     settings.getValue(ui.tabwMain);
     settings.endGroup();
 }
 
 void SettingsDialog::saveSettingsDialog() {
-    settings.beginGroup("SettingsDialog");
-    settings.setValue("geometry", saveGeometry());
+    settings.beginGroup(u"SettingsDialog"_s);
+    settings.setValue(u"geometry"_s, saveGeometry());
     settings.setValue(ui.tabwMain);
     settings.endGroup();
 }
@@ -314,7 +314,7 @@ void SettingsDialog::accept() {
     saveSettings();
 
     if(langIndex != ui.cbxLanguage->currentIndex())
-        QMessageBox::information(this, "", tr("The complete translation of the application will take\n"
+        QMessageBox::information(this, {}, tr("The complete translation of the application will take\n"
                                               "effect after restarting the application."));
     MainWindow::updateTheme();
     QDialog::accept();
@@ -364,7 +364,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     gridLayout->setContentsMargins(6, 9, 6, 6);
 
     cbxFontSize = new QComboBox{groupBox};
-    cbxFontSize->addItems({"7", "8", "9", "10", "11", "12", "13", "14"});
+    cbxFontSize->addItems({u"7"_s, u"8"_s, u"9"_s, u"10"_s, u"11"_s, u"12"_s, u"13"_s, u"14"_s});
     cbxFontSize->setObjectName(u"cbxFontSize"_s);
     QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
     sizePolicy.setHorizontalStretch(0);

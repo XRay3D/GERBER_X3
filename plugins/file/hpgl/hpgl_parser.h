@@ -97,7 +97,7 @@ public:
         SL, //         SL Set Character Slant 33
         UC, //         UC User-defined Character 34
         //        Revision C 29.10.99
-        //        Chapter 9 "HP-GL" 3
+        //        Chapter 9 u"HP-GL"_s 3
         //        Dual Context Extensions
         //        Instruction Function page
         //        EscCRRO Set HRC Off 35

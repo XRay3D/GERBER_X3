@@ -47,7 +47,7 @@ DepthForm::DepthForm(QWidget* parent)
 
     MySettings settings;
     settings.beginGroup(parentName_);
-    settings.getValue("dsbxDepth", value_);
+    settings.getValue(u"dsbxDepth"_s, value_);
     settings.getValue(rbBoard);
     settings.getValue(rbCopper);
     settings.getValue(rbCustom, true);
@@ -57,7 +57,7 @@ DepthForm::DepthForm(QWidget* parent)
 DepthForm::~DepthForm() {
     MySettings settings;
     settings.beginGroup(parentName_);
-    settings.setValue("dsbxDepth", value_);
+    settings.setValue(u"dsbxDepth"_s, value_);
     settings.setValue(rbBoard);
     settings.setValue(rbCopper);
     settings.setValue(rbCustom);
@@ -124,7 +124,7 @@ void DepthForm::setupUi(QWidget* Form) {
         dsbx->setDecimals(3);
         dsbx->setMaximum(100.0);
         dsbx->setSingleStep(0.005);
-        dsbx->setMinimumWidth(QFontMetrics(font()).boundingRect("10.000 mmm").width());
+        dsbx->setMinimumWidth(QFontMetrics(font()).boundingRect(u"10.000 mmm"_s).width());
         horizontalLayout->addWidget(dsbx);
         horizontalLayout->setStretchFactor(dsbx, 1);
     }

@@ -281,7 +281,7 @@ void Spline::read(QDataStream& stream) {
 
 /*!
   \brief Compare 2 values, relative to an interval
-  Values are "equal", when :
+  Values are u"equal"_s, when :
   \f$\cdot value2 - value1 <= abs(intervalSize * 10e^{-6})\f$
   \param value1 First value to compare
   \param value2 Second value to compare

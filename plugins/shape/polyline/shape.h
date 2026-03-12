@@ -55,7 +55,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShPolyLine; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-line"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
             this,

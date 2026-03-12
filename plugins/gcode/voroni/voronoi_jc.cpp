@@ -12,11 +12,9 @@
 #include "jc_voronoi.h"
 #include "types.h"
 
-inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
+size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
 
 namespace Voronoi {
-
-inline size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y); }
 
 void VoronoiJc::jcVoronoi() {
     const auto tolerance = gcp_.params[Tolerance].toDouble();
@@ -71,7 +69,7 @@ void VoronoiJc::jcVoronoi() {
     {
         const /*Point::Type*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
-            { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
+            {static_cast<jcv_real>(r.left - fo),  static_cast<jcv_real>(r.top - fo)   },
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
         };
         jcv_diagram diagram;

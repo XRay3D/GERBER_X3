@@ -16,7 +16,7 @@
 namespace TmpFile {
 ExSettingsTab::ExSettingsTab(QWidget* parent)
     : AbstractFileSettings(parent) {
-    setObjectName(QString::fromUtf8("tabExcellon"));
+    setObjectName(QString::fromUtf8(u"tabExcellon"_s));
 
     auto vlayTab = new QVBoxLayout(this);
     vlayTab->setContentsMargins(6, 6, 6, 6);
@@ -29,10 +29,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         {
             grbxUnits->setTitle(QApplication::translate("ExcellonDialog", "Units", nullptr));
             rbInches = new QRadioButton(grbxUnits);
-            rbInches->setObjectName(QString::fromUtf8("rbInches"));
+            rbInches->setObjectName(QString::fromUtf8(u"rbInches"_s));
 
             rbMillimeters = new QRadioButton(grbxUnits);
-            rbMillimeters->setObjectName(QString::fromUtf8("rbMillimeters"));
+            rbMillimeters->setObjectName(QString::fromUtf8(u"rbMillimeters"_s));
 
             auto vlay = new QVBoxLayout(grbxUnits);
             vlay->setContentsMargins(6, 6, 6, 6);
@@ -44,10 +44,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             grbxZeroes->setTitle(QApplication::translate("ExcellonDialog", "Zeroes", nullptr));
 
             rbLeading = new QRadioButton(grbxZeroes);
-            rbLeading->setObjectName(QString::fromUtf8("rbLeading"));
+            rbLeading->setObjectName(QString::fromUtf8(u"rbLeading"_s));
 
             rbTrailing = new QRadioButton(grbxZeroes);
-            rbTrailing->setObjectName(QString::fromUtf8("rbTrailing"));
+            rbTrailing->setObjectName(QString::fromUtf8(u"rbTrailing"_s));
 
             auto vlay = new QVBoxLayout(grbxZeroes);
             vlay->setContentsMargins(6, 6, 6, 6);
@@ -59,15 +59,15 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             grbxFormat->setTitle(QApplication::translate("ExcellonDialog", "Format", nullptr));
 
             sbxInteger = new QSpinBox(grbxFormat);
-            sbxInteger->setObjectName(QString::fromUtf8("sbxInteger"));
+            sbxInteger->setObjectName(QString::fromUtf8(u"sbxInteger"_s));
             sbxInteger->setWrapping(false);
             sbxInteger->setAlignment(Qt::AlignCenter);
-            sbxInteger->setProperty("showGroupSeparator", QVariant(false));
+            sbxInteger->setProperty(u"showGroupSeparator"_s, QVariant(false));
             sbxInteger->setMinimum(1);
             sbxInteger->setMaximum(8);
 
             sbxDecimal = new QSpinBox(grbxFormat);
-            sbxDecimal->setObjectName(QString::fromUtf8("sbxDecimal"));
+            sbxDecimal->setObjectName(QString::fromUtf8(u"sbxDecimal"_s));
             sbxDecimal->setAlignment(Qt::AlignCenter);
             sbxDecimal->setMinimum(1);
             sbxDecimal->setMaximum(8);
@@ -87,14 +87,14 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             grbxOffset->setTitle(QApplication::translate("ExcellonDialog", "Offset", nullptr));
 
             dsbxX = new DoubleSpinBox(grbxOffset);
-            dsbxX->setObjectName(QString::fromUtf8("dsbxX"));
+            dsbxX->setObjectName(QString::fromUtf8(u"dsbxX"_s));
             dsbxX->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
             dsbxX->setDecimals(4);
             dsbxX->setMinimum(-1000.0);
             dsbxX->setMaximum(1000.0);
 
             dsbxY = new DoubleSpinBox(grbxOffset);
-            dsbxY->setObjectName(QString::fromUtf8("dsbxY"));
+            dsbxY->setObjectName(QString::fromUtf8(u"dsbxY"_s));
             dsbxY->setAlignment(Qt::AlignLeading | Qt::AlignLeft | Qt::AlignVCenter);
             dsbxY->setDecimals(4);
             dsbxY->setMinimum(-1000.0);
@@ -125,13 +125,13 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
 ExSettingsTab::~ExSettingsTab() { }
 
 void ExSettingsTab::readSettings(MySettings& settings) {
-    settings.beginGroup("Excellon");
+    settings.beginGroup(u"Excellon"_s);
 
     settings.endGroup();
 }
 
 void ExSettingsTab::writeSettings(MySettings& settings) {
-    settings.beginGroup("Excellon");
+    settings.beginGroup(u"Excellon"_s);
 
     settings.setValue(rbInches);
 

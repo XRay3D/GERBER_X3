@@ -19,8 +19,8 @@ namespace Gi {
 
 AbstractPreview::AbstractPreview()
     : propAnimGr{this}
-    , propAnimBr(this, "bodyColor")
-    , propAnimPn(this, "pathColor")
+    , propAnimBr(this, "bodyColor"_ba)
+    , propAnimPn(this, "pathColor"_ba)
     , bodyColor_(colors[(int)Colors::Default])
     , pathColor_(colors[(int)Colors::UnUsed]) {
     propAnimGr.addAnimation(&propAnimBr);
@@ -112,7 +112,7 @@ QVariant AbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change, c
             colorState &= ~Used;
         changeColor();
     } else if(change == ItemVisibleChange) {
-        auto animation = new QPropertyAnimation{this, "opacity"};
+        auto animation = new QPropertyAnimation{this, "opacity"_ba};
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(100);
         animation->setStartValue(0.0);

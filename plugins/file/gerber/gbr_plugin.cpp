@@ -87,7 +87,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
 
 AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
-QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'G'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     class Tab : public AbstractFileSettings, Settings {
@@ -166,7 +166,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
         }
         virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override {
-            settings.beginGroup("Gerber");
+            settings.beginGroup(u"Gerber"_s);
             cleanPolygons_ = settings.getValue(chbxCleanPolygons, cleanPolygons_);
             cleanPolygonsDist_ = settings.getValue(dsbxCleanPolygonsDist, cleanPolygonsDist_);
             simplifyRegions_ = settings.getValue(chbxSimplifyRegions, simplifyRegions_);
@@ -177,7 +177,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override {
-            settings.beginGroup("Gerber");
+            settings.beginGroup(u"Gerber"_s);
             cleanPolygons_ = settings.setValue(chbxCleanPolygons);
             cleanPolygonsDist_ = settings.setValue(dsbxCleanPolygonsDist);
             simplifyRegions_ = settings.setValue(chbxSimplifyRegions);
@@ -188,7 +188,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
         }
     };
     auto tab = new Tab{parent};
-    tab->setWindowTitle("Gerber X3");
+    tab->setWindowTitle(u"Gerber X3"_s);
     return tab;
 }
 

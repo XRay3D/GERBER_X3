@@ -27,7 +27,7 @@
 bool updateRect() {
     QRectF rect(App::grView().getSelectedBoundingRect());
     if(rect.isEmpty()) {
-        if(QMessageBox::question(nullptr, "",
+        if(QMessageBox::question(nullptr, {},
                QObject::tr("There are no selected items to define the border.\n"
                            "The old border will be used."),
                QMessageBox::No, QMessageBox::Yes)
@@ -186,7 +186,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
-    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    action = menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Settings"), [] {
         SettingsDialog(nullptr, SettingsDialog::Utils).exec();
     });
     menu.exec(event->screenPos());
@@ -199,7 +199,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 Pin::Pin()
     : QGraphicsObject{nullptr}
     , index_(ctr_++) {
-    setObjectName("Pin");
+    setObjectName(u"Pin"_s);
     setAcceptHoverEvents(true);
 
     if(index_ % 2) {
@@ -331,7 +331,7 @@ void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
 void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
-    auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
+    auto action = menu.addAction(QIcon::fromTheme(u"drill-path"_s), tr("&Create path for Pins"), [] {
         ToolDatabase tdb(App::grViewPtr(), {Tool::Drill, Tool::EndMill});
         if(tdb.exec()) {
             Tool tool(tdb.tool());
@@ -348,19 +348,19 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             }
 
             QSettings settings;
-            settings.beginGroup("Pin");
+            settings.beginGroup(u"Pin"_s);
             bool ok;
             double depth = QInputDialog::getDouble(
-                nullptr,                            // parent
-                "",                                 // title
-                tr("Set Depth"),                    // label
-                settings.value("depth").toDouble(), // value
-                0,                                  // minValue
-                20,                                 // maxValue
-                1,                                  // decimals
-                &ok,                                // ok
-                Qt::WindowFlags(),                  // flags
-                1                                   // step
+                nullptr,                               // parent
+                {},                                    // title
+                tr("Set Depth"),                       // label
+                settings.value(u"depth"_s).toDouble(), // value
+                0,                                     // minValue
+                20,                                    // maxValue
+                1,                                     // decimals
+                &ok,                                   // ok
+                Qt::WindowFlags(),                     // flags
+                1                                      // step
             );
             if(!ok)
                 return;
@@ -368,7 +368,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             if(depth == 0.0)
                 return;
 
-            settings.setValue("depth", depth);
+            settings.setValue(u"depth"_s, depth);
             settings.endGroup();
 
             GCode::Params gcp_{tool, depth};
@@ -391,7 +391,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(App::project().pinUsed(index_));
 
     menu.addSeparator();
-    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    action = menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Settings"), [] {
         SettingsDialog(nullptr, SettingsDialog::Utils).exec();
     });
     menu.exec(event->screenPos());

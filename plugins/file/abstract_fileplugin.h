@@ -54,8 +54,8 @@ public:
     virtual void createMainMenu(
         [[maybe_unused]] QMenu& menu,
         [[maybe_unused]] FileTree::View* tv) {
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close All Files"), [tv] {
-            if(QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+        menu.addAction(QIcon::fromTheme(u"document-close"_s), tr("&Close All Files"), [tv] {
+            if(QMessageBox::question(tv, {}, tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 tv->closeFiles();
         });
     };

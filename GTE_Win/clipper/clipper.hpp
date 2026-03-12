@@ -129,7 +129,7 @@ struct IntPoint {
         return stream;
     }
     friend QDebug operator<<(QDebug d, const IntPoint& p) {
-        d << "IntPoint(" << p.X << ", " << p.Y << ")";
+        d << "IntPoint(" << p.X << ", " << p.Y << u")"_s;
         return d;
     }
 };

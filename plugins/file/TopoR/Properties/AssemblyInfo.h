@@ -4,17 +4,17 @@
 // набора атрибутов. Измените значения этих атрибутов для изменения сведений,
 // связанные со сборкой.
 
-// ORIGINAL LINE: [assembly: AssemblyTitle("TopoR_PCB_Classes")]
+// ORIGINAL LINE: [assembly: AssemblyTitle(u"TopoR_PCB_Classes"_s)]
 
-// ORIGINAL LINE: [assembly: AssemblyDescription("Eremex TopoR file structure")]
+// ORIGINAL LINE: [assembly: AssemblyDescription(u"Eremex TopoR file structure"_s)]
 
 // ORIGINAL LINE: [assembly: AssemblyConfiguration("")]
 
-// ORIGINAL LINE: [assembly: AssemblyCompany("BlackKilkennyCat")]
+// ORIGINAL LINE: [assembly: AssemblyCompany(u"BlackKilkennyCat"_s)]
 
-// ORIGINAL LINE: [assembly: AssemblyProduct("TopoR_PCB_Classes")]
+// ORIGINAL LINE: [assembly: AssemblyProduct(u"TopoR_PCB_Classes"_s)]
 
-// ORIGINAL LINE: [assembly: AssemblyCopyright("Copyright © BlackKilkennyCat 2020")]
+// ORIGINAL LINE: [assembly: AssemblyCopyright(u"Copyright © BlackKilkennyCat 2020"_s)]
 
 // ORIGINAL LINE: [assembly: AssemblyTrademark("")]
 
@@ -28,7 +28,7 @@
 
 // Следующий GUID служит для идентификации библиотеки типов, если этот проект будет видимым для COM
 
-// ORIGINAL LINE: [assembly: Guid("b30c6b5a-7d20-49de-b46a-458d50146c23")]
+// ORIGINAL LINE: [assembly: Guid(u"b30c6b5a-7d20-49de-b46a-458d50146c23"_s)]
 
 // Сведения о версии сборки состоят из указанных ниже четырех значений:
 //
@@ -38,9 +38,9 @@
 //      Редакция
 //
 // Можно задать все значения или принять номера сборки и редакции по умолчанию
-// используя "*", как показано ниже:
-// [assembly: AssemblyVersion("1.0.*")]
+// используя u"*"_s, как показано ниже:
+// [assembly: AssemblyVersion(u"1.0.*"_s)]
 
-// ORIGINAL LINE: [assembly: AssemblyVersion("1.1.09.21")]
+// ORIGINAL LINE: [assembly: AssemblyVersion(u"1.1.09.21"_s)]
 
-// ORIGINAL LINE: [assembly: AssemblyFileVersion("1.1.09.21")]
+// ORIGINAL LINE: [assembly: AssemblyFileVersion(u"1.1.09.21"_s)]

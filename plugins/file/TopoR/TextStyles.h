@@ -5,7 +5,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -26,28 +26,28 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
         /// Параметр стиля надписей: название шрифта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("fontName")] public string _fontName;
+        // ORIGINAL LINE: [XmlAttribute(u"fontName"_s)] public string _fontName;
         QString _fontName;
 
         /// <summary>
         /// Параметр стиля надписей: высота символов в текущих единицах.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("height", DataType = "float")] public float _height;
+        // ORIGINAL LINE: [XmlAttribute(u"height"_s, DataType = u"float"_s)] public float _height;
         float _height = 0.0F;
 
         /// <summary>
         /// Параметр стиля надписей: жирность шрифта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("bold")] public Bool _bold;
+        // ORIGINAL LINE: [XmlAttribute(u"bold"_s)] public Bool _bold;
         Bool _bold = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _boldSpecified
@@ -57,7 +57,7 @@ public:
         /// Параметр стиля надписей: курсив.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("italic")] public Bool _italic;
+        // ORIGINAL LINE: [XmlAttribute(u"italic"_s)] public Bool _italic;
         Bool _italic = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _italicSpecified
@@ -68,14 +68,14 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Стили надписей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("TextStyle")] public List<TextStyle> _TextStyles;
+    // ORIGINAL LINE: [XmlElement(u"TextStyle"_s)] public List<TextStyle> _TextStyles;
     std::vector<TextStyle*> _TextStyles;
     bool ShouldSerialize_TextStyles();
 

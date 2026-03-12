@@ -30,7 +30,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     setWindowTitle(tr("CrossHatch Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("HatchingForm");
+    settings.beginGroup(u"HatchingForm"_s);
     settings.getValue(ui->cbxPass);
     settings.getValue(ui->dsbxAngle);
     settings.getValue(ui->dsbxHathStep);
@@ -57,7 +57,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 Form::~Form() {
 
     MySettings settings;
-    settings.beginGroup("HatchingForm");
+    settings.beginGroup(u"HatchingForm"_s);
     settings.setValue(ui->cbxPass);
     settings.setValue(ui->dsbxAngle);
     settings.setValue(ui->dsbxHathStep);

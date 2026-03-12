@@ -35,10 +35,10 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     grid->setRowStretch(7, 0);
 
     MySettings settings;
-    settings.beginGroup("Thermal");
-    settings.getValue(par.angle, "angle", 0.0);
-    settings.getValue(par.count, "count", 4);
-    settings.getValue(par.tickness, "tickness", 0.5);
+    settings.beginGroup(u"Thermal"_s);
+    settings.getValue(par.angle, u"angle"_s, 0.0);
+    settings.getValue(par.count, u"count"_s, 4);
+    settings.getValue(par.tickness, u"tickness"_s, 0.5);
     lastMax = settings.getValue(ui->dsbxAreaMax, 10.0);
     lastMin = settings.getValue(ui->dsbxAreaMin);
     settings.getValue(ui->chbxIgnoreCopper);
@@ -62,7 +62,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     updateButtonIconSize();
 
     if(0) {
-        chbx = new QCheckBox{"", ui->treeView};
+        chbx = new QCheckBox{{}, ui->treeView};
         chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
         chbx->setEnabled(false);
         auto lay = new QGridLayout{ui->treeView->header()};
@@ -86,7 +86,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("Thermal");
+    settings.beginGroup(u"Thermal"_s);
     if(model && model->data_.size()) {
         settings.setValue(model->thParam().angle, "angle");
         settings.setValue(model->thParam().count, "count");
@@ -183,7 +183,7 @@ void Form::updateThermalGi() {
     int count = std::accumulate(thPaths.begin(), thPaths.end(),
         0, [](int i, auto& val) { return i + int(val.second.size()); });
 
-    QProgressDialog pd("create th", "", 0, count, this);
+    QProgressDialog pd(u"create th"_s, {}, 0, count, this);
     pd.setCancelButton(nullptr);
     count = 0;
     { // create Preview Items
@@ -198,7 +198,7 @@ void Form::updateThermalGi() {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
-                node->append(new Node{drawIcon(paths), "", par, pos, tprItem.get(), model});
+                node->append(new Node{drawIcon(paths), {}, par, pos, tprItem.get(), model});
             }
             qApp->processEvents();
             pd.setValue(++count);

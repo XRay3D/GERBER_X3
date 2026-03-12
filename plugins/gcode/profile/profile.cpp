@@ -317,7 +317,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         pathsMap.extract(pathsMap.begin());
 
         for(auto& [nest, paths]: pathsMap) {
-            qDebug() << "nest" << nest << paths.size();
+            qDebug() << u"nest"_s << nest << paths.size();
             if(paths.size() > 1)
                 sortB(paths, ~(App::home().pos() + App::zero().pos()));
             rpaths += std::move(paths); // NOTE move?

@@ -23,9 +23,9 @@ void SectionHEADER::parse() {
     QString key;
     do {
         CodeData code(nextCode());
-        if(code == "ENDSEC")
+        if(code == u"ENDSEC"_s)
             continue;
-        if(code.type() == CodeData::String && code.string().startsWith('$'))
+        if(code.type() == CodeData::String && code.string().startsWith(u'$'))
             key = code.string();
         else if(!key.isEmpty())
             header[key][code.code()] = code.value();

@@ -80,7 +80,7 @@ public:
 
     QModelIndex index(int column = 0) const;
 
-    const QStringList sideStrList{QObject::tr("Top|Bottom").split('|')};
+    const QStringList sideStrList{QObject::tr("Top|Bottom").split(u'|')};
     const Type type_;
 
 protected:

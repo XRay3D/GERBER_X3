@@ -28,19 +28,19 @@ class Dialog : public QDialog {
     QTableView* tableView;
     void setupUi(QDialog* dialog) {
         if(dialog->objectName().isEmpty())
-            dialog->setObjectName(QString::fromUtf8("Dialog"));
+            dialog->setObjectName(QString::fromUtf8(u"Dialog"_s));
         verticalLayout = new QVBoxLayout(dialog);
-        verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+        verticalLayout->setObjectName(QString::fromUtf8(u"verticalLayout"_s));
         verticalLayout->setContentsMargins(6, 6, 6, 6);
 
         pushButtonColorize = new QPushButton(dialog);
-        pushButtonColorize->setObjectName(QString::fromUtf8("pushButtonColorize"));
+        pushButtonColorize->setObjectName(QString::fromUtf8(u"pushButtonColorize"_s));
         pushButtonColorize->setText(DxfObj::tr("Colorize"));
-        pushButtonColorize->setIcon(QIcon::fromTheme("color-management"));
+        pushButtonColorize->setIcon(QIcon::fromTheme(u"color-management"_s));
         verticalLayout->addWidget(pushButtonColorize);
 
         tableView = new QTableView(dialog);
-        tableView->setObjectName(QString::fromUtf8("tableView"));
+        tableView->setObjectName(QString::fromUtf8(u"tableView"_s));
         verticalLayout->addWidget(tableView);
 
         QMetaObject::connectSlotsByName(dialog);
@@ -199,11 +199,11 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::DisplayRole:
             return file->shortName();
         case Qt::ToolTipRole:
-            return file->shortName() + "\n" + file->name();
+            return file->shortName() + u'\n' + file->name();
         case Qt::CheckStateRole:
             return file->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
-            return QIcon::fromTheme("crosshairs");
+            return QIcon::fromTheme(u"crosshairs"_s);
         }
         break;
     case FileTree::Column::Side:
@@ -238,14 +238,14 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
-    //    menu.addAction(QIcon::fromTheme("hint"), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
+    //    menu.addAction(QIcon::fromTheme(u"hint"_s), DxfObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     //    menu.addAction(QIcon(), DxfObj::tr("&Show source"), [tv, this] {
     //        auto dialog = new SourceDialog(*m_id, tv);
     //        dialog->exec();
     //        delete dialog;
     //    });
     //    menu.addSeparator();
-    //    menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Colorize"), [this] {
+    //    menu.addAction(QIcon::fromTheme(u"color-management"_s), DxfObj::tr("Colorize"), [this] {
     //        const int count = childCount();
     //        for (int row = 0; row < count; ++row) {
     //            const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
@@ -258,18 +258,18 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
 
     //    menu.addSeparator();
     //    if (layer)
-    //        menu.addAction(QIcon::fromTheme("layer-visible-on"), DxfObj::tr("&Layers"), [tv, this] {
+    //        menu.addAction(QIcon::fromTheme(u"layer-visible-on"_s), DxfObj::tr("&Layers"), [tv, this] {
     //            auto dialog = new Dialog(static_cast<File*>(file), layer, tv);
     //            dialog->show();
     //        });
     //    if (header)
-    //        menu.addAction(QIcon::fromTheme("/*document-close*/"), DxfObj::tr("Header"), [tv, this] {
+    //        menu.addAction(QIcon::fromTheme(u"/*document-close*/"_s), DxfObj::tr("Header"), [tv, this] {
     //            auto tw = new TreeWidget(static_cast<File*>(file), header, tv);
     //            tw->show();
     //        });
 
     //    menu.addSeparator();
-    //    menu.addAction(QIcon::fromTheme("document-close"), DxfObj::tr("&Close"), tv, &FileTree::View::closeFile);
+    //    menu.addAction(QIcon::fromTheme(u"document-close"_s), DxfObj::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
 ///////////////////////////////////
@@ -361,7 +361,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
 }
 
 void NodeLayer::menu(QMenu& menu, FileTree::View* tv) {
-    //    menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Change color"), [tv, this] {
+    //    menu.addAction(QIcon::fromTheme(u"color-management"_s), DxfObj::tr("Change color"), [tv, this] {
     //        QColorDialog cd(tv);
     //        cd.setCurrentColor(layer->color());
     //        if (cd.exec()) {

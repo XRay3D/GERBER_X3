@@ -118,9 +118,9 @@ class App {
     ToolHolder toolHolder_;
     int dashOffset_{};
 
-    QSharedMemory sharedMemory{"AppSettings"};
+    QSharedMemory sharedMemory{u"AppSettings"_s};
 
-    const bool isDebug_{QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
+    const bool isDebug_{QCoreApplication::applicationDirPath().contains(u"GERBER_X3/bin"_s)};
 
     bool drawPdf_{};
 
@@ -131,7 +131,7 @@ public:
         else if(sharedMemory.attach(QSharedMemory::ReadOnly))
             app = *reinterpret_cast<App**>(sharedMemory.data());
         else
-            qDebug() << "App" << app << sharedMemory.errorString();
+            qDebug() << u"App"_s << app << sharedMemory.errorString();
     }
     static auto& dashOffset() { return app->dashOffset_; }
 

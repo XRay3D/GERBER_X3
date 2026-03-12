@@ -26,7 +26,7 @@ using TreeItem = Node;
 
 Model::Model(QObject* parent)
     : QAbstractItemModel{parent}
-    , rootItem(new FolderNode{"rootItem"})
+    , rootItem(new FolderNode{u"rootItem"_s})
     , mimeType(u"application/GCodeItem"_s) {
     App::setFileModel(this);
 }
@@ -81,7 +81,7 @@ void Model::addFile(AbstractFile* file) {
             QModelIndex index = createIndex(0, 0, rootItem);
             int rowCount = rootItem->childCount();
             beginInsertRows(index, rowCount, rowCount);
-            itemFolder = new FolderNode{"GCode Debug", static_cast<int32_t>(type)};
+            itemFolder = new FolderNode{u"GCode Debug"_s, static_cast<int32_t>(type)};
             rootItem->addChild(itemFolder);
             endInsertRows();
         }
@@ -214,17 +214,10 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    if((role == Qt::DisplayRole || role == Qt::ToolTipRole) && orientation == Qt::Horizontal)
-        switch(section) {
-        case 0:
-            return tr("Name");
-        case 1:
-            return tr("Side");
-        case 2:
-            return tr("Type");
-        default:
-            return QString("");
-        }
+    if((role == Qt::DisplayRole || role == Qt::ToolTipRole) && orientation == Qt::Horizontal) {
+        static const QStringList names{tr("Name"), tr("Side"), tr("Type")};
+        return names[section];
+    }
     return {};
 }
 

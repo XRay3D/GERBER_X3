@@ -28,15 +28,15 @@ class PushButton : public QPushButton {
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
         if(dialog.exec() && color_ != color)
             color_ = color;
-        //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
+        //        setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
     }
 
 public:
     PushButton(QColor& color, QWidget* parent = nullptr)
-        : QPushButton("", parent)
+        : QPushButton({}, parent)
         , color_(color) {
         connect(this, &QPushButton::clicked, this, &PushButton::selectColor);
-        //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
+        //        setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
     }
     virtual ~PushButton() { }
 

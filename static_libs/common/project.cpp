@@ -34,11 +34,11 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>
         uint32_t type = file->type();
         stream << type;
         if(App::gCodePlugins().contains(type))
-            stream << App::gCodePlugin(type)->info()["Name"].toString();
+            stream << App::gCodePlugin(type)->info()[u"Name"_s].toString();
         else if(App::filePlugins().contains(type))
-            stream << App::filePlugin(type)->info()["Name"].toString();
+            stream << App::filePlugin(type)->info()[u"Name"_s].toString();
         else
-            stream << QString("QString");
+            stream << QString(u"QString"_s);
         stream << *file;
     }
     return stream;
@@ -49,7 +49,7 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file
     QString loadErrorMessage;
     stream >> type;
     stream >> loadErrorMessage;
-    qDebug() << __FUNCTION__ << "type" << type << loadErrorMessage;
+    qDebug() << __FUNCTION__ << u"type"_s << type << loadErrorMessage;
     if(App::gCodePlugins().contains(type))
         file.reset(App::gCodePlugin(type)->loadFile(stream));
     else if(App::filePlugins().contains(type)) {
@@ -79,7 +79,7 @@ QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
     stream >> name;
     try {
         if(App::shapePlugins().contains(type)) {
-            shape = App::shapePlugin(type)->createShape({std::nan("read"), std::nan("read")});
+            shape = App::shapePlugin(type)->createShape({std::nan(""), std::nan("")});
             stream >> *shape;
             shape->name() = name;
         } else { // skip shape data
@@ -126,7 +126,7 @@ Project::Project(QObject* parent)
         const int32_t id = files_[contains(path)]->id();
         if(id > -1
             && QFileInfo::exists(path)
-            && QMessageBox::question(nullptr, "", tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
+            && QMessageBox::question(nullptr, {}, tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
                    QMessageBox::Ok, QMessageBox::Cancel)
                 == QMessageBox::Ok) {
             reloadFile_ = true;
@@ -193,7 +193,7 @@ bool Project::open(const QString& fileName) {
                               "the current version(%3) of the program.\n"
                               "Use version %2.");
             if(App::isDebug()) {
-                qWarning() << message.arg(ver_).arg("???", "VERSION_STR");
+                qWarning() << message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s);
                 return false;
             }
             switch(ver_) {
@@ -204,7 +204,7 @@ bool Project::open(const QString& fileName) {
             case ProVer_5:
             case ProVer_6:
             case ProVer_7:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg("???", "VERSION_STR"));
+                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s));
                 break;
             }
             return false;
@@ -277,7 +277,7 @@ void Project::deleteFile(int32_t id) {
         files_.erase(id);
         setChanged();
     } else
-        qWarning() << "Error id" << id << "File not found";
+        qWarning() << u"Error id"_s << id << u"File not found"_s;
     isPinsPlaced_ = false;
 }
 
@@ -288,7 +288,7 @@ void Project::deleteShape(int32_t id) {
             shapes_.erase(id);
             setChanged();
         } else
-            qWarning() << "Error id" << id << "AbstractShape not found";
+            qWarning() << u"Error id"_s << id << u"AbstractShape not found"_s;
     } catch(const std::exception& ex) {
         qWarning() << ex.what();
     }
@@ -326,7 +326,7 @@ void Project::deleteItem(int32_t id) {
             items_.erase(id);
             setChanged();
         } else
-            qWarning() << "Error id" << id << "Gi::Item not found";
+            qWarning() << u"Error id"_s << id << u"Gi::Item not found"_s;
     } catch(const std::exception& ex) {
         qWarning() << ex.what();
     }
@@ -366,7 +366,7 @@ QRectF Project::getBoundingRect() {
 //     for (const auto& [id, sp] : files_) {
 //         AbstractFile* item = sp.get();
 //         if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
-//             fileNames.append(item->name()).push_back('|');
+//             fileNames.append(item->name()).push_back(u'|');
 //     }
 //     return fileNames;
 // }
@@ -521,7 +521,7 @@ QString Project::name() { return fileName_; }
 void Project::setName(const QString& name) {
     setUntitled(name.isEmpty());
     if(isUntitled_)
-        fileName_ = QObject::tr("Untitled") + ".g2g";
+        fileName_ = QObject::tr("Untitled") + u".g2g"_s;
     else
         fileName_ = name;
 }
@@ -535,7 +535,7 @@ bool Project::pinsPlacedMessage() {
 
     if(isPinsPlaced_ == false) {
         QMessageBox msgbx(QMessageBox::Information,
-            "",
+            {},
             QObject::tr("Board dimensions may have changed.\n"
                         "It is advisable to perform automatic placement of the pins\n"
                         "by selecting the necessary work items.\n\n"
@@ -543,7 +543,7 @@ bool Project::pinsPlacedMessage() {
             QMessageBox::Yes | QMessageBox::No, nullptr);
         {
             auto label(msgbx.findChild<QLabel*>());
-            label->setPixmap(QIcon::fromTheme("snap-nodes-cusp").pixmap(label->size()));
+            label->setPixmap(QIcon::fromTheme(u"snap-nodes-cusp"_s).pixmap(label->size()));
         }
         return msgbx.exec() == QMessageBox::No;
     }

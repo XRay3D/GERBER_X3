@@ -20,9 +20,9 @@
 
 namespace Voronoi {
 
-inline size_t qHash(const Creator::Pair& tag, uint = 0) {
-    return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
-}
+// inline size_t qHash(const Creator::Pair& tag, uint = 0) {
+//     return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
+// }
 
 void Creator::create() {
     const auto& tool = gcp_.tools.front();
@@ -59,7 +59,7 @@ void Creator::create() {
             for(auto&& p: copy)
                 returnPss.emplace_back(Paths{p});
         }
-        dbgPaths(returnPs, "создание пермычек");
+        dbgPaths(returnPs, u"создание пермычек"_s);
         { // создание заливки.
             Clipper2Lib::ClipperOffset offset(uScale);
             offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Polygon);

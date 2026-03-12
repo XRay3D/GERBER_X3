@@ -21,7 +21,7 @@ class File final : public GCode::File {
 public:
     explicit File();
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
-    QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"pocket-path"_s); }
     uint32_t type() const override { return POCKET_OFFSET; }
     void createGi() override;
     void genGcodeAndTile() override;

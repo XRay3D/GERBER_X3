@@ -28,7 +28,7 @@ public:
     //////////////////////
 
     //    AbstractFile* loadFile(QDataStream& stream) constoverride { return nullptr /*new File()*/; }
-    //    QIcon icon() const override { return decoration(Qt::lightGray, 'G'); }
+    //    QIcon icon() const override { return decoration(Qt::lightGray, u'G'); }
     //    uint32_t type() const override { return md5::hash32("GCode"); }
     //    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     QString folderName() const override { return tr("Tool Paths"); }

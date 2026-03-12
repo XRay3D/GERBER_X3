@@ -158,7 +158,7 @@ void File::createGi() {
                 if(go.path.size() > 1) {
                     auto gItem = new Gi::DataPath{go.path, this};
                     if(go.entity()) {
-                        //                        gItem->setToolTip(QString("Line %1\n%2")
+                        //                        gItem->setToolTip(QString(u"Line %1\n%2"_s)
                         //                                              .arg(go.entity()->data[0].line())
                         //                                              .arg(go.entity()->name()));
                         gItem->setToolTip(go.entity()->name());
@@ -243,7 +243,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                         drillDiameter = std::min(rect.bottom - rect.top, rect.right - rect.left) * dScale;
                         //                        name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
                         g.raw = drillDiameter /** go.scaleX()*/;
-                        g.name = /*"С Ø" +*/ QByteArray::number(drillDiameter);
+                        g.name = /*u"С Ø"_s +*/ QString::number(drillDiameter);
                     } break;
                     default:
                         break;
@@ -262,7 +262,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     //         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
     //             for (auto&& go : layer->graphicObjects())
     //                 if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
-    //                     retData[{ctr, circle->radius * 2, false, name + ": CIRCLE"}].posOrPath.emplace_back(t.map(circle->centerPoint));
+    //                     retData[{ctr, circle->radius * 2, false, name + u": CIRCLE"_s}].posOrPath.emplace_back(t.map(circle->centerPoint));
     //             ctr++;
     //         }
     //         return retData;

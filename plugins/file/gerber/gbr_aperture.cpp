@@ -28,24 +28,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
     int type;
     stream >> type;
     switch(type) {
-    case Circle:
-        aperture = std::make_shared<ApCircle>(stream, File::crutch);
-        break;
-    case Rectangle:
-        aperture = std::make_shared<ApRectangle>(stream, File::crutch);
-        break;
-    case Obround:
-        aperture = std::make_shared<ApObround>(stream, File::crutch);
-        break;
-    case Polygon:
-        aperture = std::make_shared<ApPolygon>(stream, File::crutch);
-        break;
-    case Macro:
-        aperture = std::make_shared<ApMacro>(stream, File::crutch);
-        break;
-    case Block:
-        aperture = std::make_shared<ApBlock>(stream, File::crutch);
-        break;
+    case Circle: aperture = std::make_shared<ApCircle>(stream, File::crutch); break;
+    case Rectangle: aperture = std::make_shared<ApRectangle>(stream, File::crutch); break;
+    case Obround: aperture = std::make_shared<ApObround>(stream, File::crutch); break;
+    case Polygon: aperture = std::make_shared<ApPolygon>(stream, File::crutch); break;
+    case Macro: aperture = std::make_shared<ApMacro>(stream, File::crutch); break;
+    case Block: aperture = std::make_shared<ApBlock>(stream, File::crutch); break;
     }
     return stream;
 }
@@ -125,7 +113,7 @@ ApCircle::ApCircle(double diam, double drillDiam, const File* format)
     // GerberAperture interface
 }
 
-QString ApCircle::name() const { return QString("C(Ø%1)").arg(diam_); } // CIRCLE
+QString ApCircle::name() const { return QString(u"C(Ø%1)"_s).arg(diam_); } // CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
@@ -170,9 +158,9 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fi
 QString ApRectangle::name() const // RECTANGLE
 {
     if(qFuzzyCompare(width_, height_))
-        return QString("R(SQ %1)").arg(width_);
+        return QString(u"R(SQ %1)"_s).arg(width_);
     else
-        return QString("R(%1 x %2)").arg(width_).arg(height_);
+        return QString(u"R(%1 x %2)"_s).arg(width_).arg(height_);
 }
 
 ApertureType ApRectangle::type() const { return Rectangle; }
@@ -218,7 +206,7 @@ ApObround::ApObround(double width, double height, double drillDiam, const File* 
     drillDiam_ = drillDiam;
 }
 
-QString ApObround::name() const { return QString("O(%1 x %2)").arg(width_).arg(height_); } // OBROUND
+QString ApObround::name() const { return QString(u"O(%1 x %2)"_s).arg(width_).arg(height_); } // OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 
@@ -294,7 +282,7 @@ double ApPolygon::rotation() const { return rotation_; }
 
 int ApPolygon::verticesCount() const { return verticesCount_; }
 
-QString ApPolygon::name() const { return QString("P(Ø%1, N%2)").arg(diam_).arg(verticesCount_); } // POLYGON
+QString ApPolygon::name() const { return QString(u"P(Ø%1, N%2)"_s).arg(diam_).arg(verticesCount_); } // POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
@@ -342,7 +330,7 @@ void ApPolygon::draw() {
 /// \param coefficients
 /// \param format
 ///
-ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* format)
+ApMacro::ApMacro(const QString& macro, const QStringList& modifiers, const VarMap& coefficients, const File* format)
     : AbstractAperture{format}
     , macro_(macro)
     , modifiers_(modifiers)
@@ -351,7 +339,7 @@ ApMacro::ApMacro(const QString& macro, const QList<QString>& modifiers, const Va
         modifiers_.removeLast();
 }
 
-QString ApMacro::name() const { return QString("M(%1)").arg(macro_); } // MACRO
+QString ApMacro::name() const { return QString(u"M(%1)"_s).arg(macro_); } // MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
 
@@ -398,23 +386,23 @@ void ApMacro::draw() {
         for(auto&& [name, value]: macroCoefficients)
             js.globalObject().setProperty(name, value);
         for(QString& var: modifiers_) {
-            if(var.at(0) == '0') // Skip Comment
+            if(var.at(0) == u'0') // Skip Comment
                 continue;
 
             mvector<double> mod;
 
-            if(var.contains('=')) {
-                QList<QString> stringList = var.split('=');
-                stringList.last().replace(QChar('x'), '*', Qt::CaseInsensitive);
+            if(var.contains(u'=')) {
+                QStringList stringList = var.split(u'=');
+                stringList.last().replace(u'x', u'*', Qt::CaseInsensitive);
 
                 auto val = js.evaluate(stringList.last());
                 if(val.errorType()) qWarning() << val.toString();
                 js.globalObject().setProperty(stringList.first(), val.toNumber());
                 continue;
             } else {
-                for(auto&& var2: var.split(',')) {
-                    var2.replace(QChar('x'), '*', Qt::CaseInsensitive);
-                    if(var2.contains('$')) {
+                for(auto&& var2: var.split(u',')) {
+                    var2.replace(u'x', u'*', Qt::CaseInsensitive);
+                    if(var2.contains(u'$')) {
                         auto val = js.evaluate(var2);
                         if(val.errorType()) qWarning() << val.toString();
                         mod.push_back(val.toNumber());
@@ -464,8 +452,8 @@ void ApMacro::draw() {
             items.emplace_back(exposure, path);
         }
     } catch(...) {
-        qWarning() << "Macro draw error";
-        throw QString("Macro draw error");
+        qWarning() << u"Macro draw error"_s;
+        throw QString(u"Macro draw error"_s);
     }
 
     if(items.size() > 1) {
@@ -725,7 +713,7 @@ ApBlock::ApBlock(const File* format)
     : AbstractAperture{format} {
 }
 
-QString ApBlock::name() const { return QString("BLOCK"); }
+QString ApBlock::name() const { return QString(u"BLOCK"_s); }
 
 ApertureType ApBlock::type() const { return Block; }
 

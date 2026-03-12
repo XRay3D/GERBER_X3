@@ -22,7 +22,7 @@ class Shift;
 //}// namespace TopoR_PCB_Classes
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -39,55 +39,55 @@ enum class align {
     /// по центру
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("CM")] CM,
+    // ORIGINAL LINE: [XmlEnum(u"CM"_s)] CM,
     CM,
     /// <summary>
     /// по левому верхнему углу
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("LT")] LT,
+    // ORIGINAL LINE: [XmlEnum(u"LT"_s)] LT,
     LT,
     /// <summary>
     /// по верхнему краю
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("CT")] CT,
+    // ORIGINAL LINE: [XmlEnum(u"CT"_s)] CT,
     CT,
     /// <summary>
     /// по правому верхнему углу
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("RT")] RT,
+    // ORIGINAL LINE: [XmlEnum(u"RT"_s)] RT,
     RT,
     /// <summary>
     /// по левому краю
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("LM")] LM,
+    // ORIGINAL LINE: [XmlEnum(u"LM"_s)] LM,
     LM,
     /// <summary>
     /// по правому краю
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("RM")] RM,
+    // ORIGINAL LINE: [XmlEnum(u"RM"_s)] RM,
     RM,
     /// <summary>
     /// по левому нижнему углу
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("LB")] LB,
+    // ORIGINAL LINE: [XmlEnum(u"LB"_s)] LB,
     LB,
     /// <summary>
     /// по нижнему краю
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("CB")] CB,
+    // ORIGINAL LINE: [XmlEnum(u"CB"_s)] CB,
     CB,
     /// <summary>
     /// по правому нижнему углу
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("RB")] RB
+    // ORIGINAL LINE: [XmlEnum(u"RB"_s)] RB
     RB
 };
 
@@ -102,25 +102,25 @@ enum class autoEqu {
     /// не использовать функциональную эквивалентность
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("None")] None,
+    // ORIGINAL LINE: [XmlEnum(u"None"_s)] None,
     None,
     /// <summary>
     /// переназначать выводы компонента
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Pins")] Pins,
+    // ORIGINAL LINE: [XmlEnum(u"Pins"_s)] Pins,
     Pins,
     /// <summary>
     /// переназначать вентили компонентов (не поддерживается)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Gates")] Gates,
+    // ORIGINAL LINE: [XmlEnum(u"Gates"_s)] Gates,
     Gates,
     /// <summary>
     /// разрешить все переназначения (не поддерживается)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Full")] Full
+    // ORIGINAL LINE: [XmlEnum(u"Full"_s)] Full
     Full
 };
 
@@ -135,19 +135,19 @@ enum class automove {
     /// двигаются только переходы
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("MoveVias")] MoveVias,
+    // ORIGINAL LINE: [XmlEnum(u"MoveVias"_s)] MoveVias,
     MoveVias,
     /// <summary>
     /// двигаются только переходы; в процессе движения выполняется перекладка проводников
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("MoveViasWithRefine")] MoveViasWithRefine,
+    // ORIGINAL LINE: [XmlEnum(u"MoveViasWithRefine"_s)] MoveViasWithRefine,
     MoveViasWithRefine,
     /// <summary>
     /// двигаются компоненты и переходы; в процессе движения выполняется перекладка проводников
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("MoveCompsWithRefine")] MoveCompsWithRefine
+    // ORIGINAL LINE: [XmlEnum(u"MoveCompsWithRefine"_s)] MoveCompsWithRefine
     MoveCompsWithRefine
 };
 
@@ -159,10 +159,10 @@ Q_DECLARE_FLAGS(automoves, automove)
 /// </summary>
 enum class Bool {
 
-    // ORIGINAL LINE: [XmlEnum("off")] off,
+    // ORIGINAL LINE: [XmlEnum(u"off"_s)] off,
     off,
 
-    // ORIGINAL LINE: [XmlEnum("on")] on
+    // ORIGINAL LINE: [XmlEnum(u"on"_s)] on
     on
 };
 
@@ -177,13 +177,13 @@ enum class connectPad {
     /// прямое подключение
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Direct")] Direct,
+    // ORIGINAL LINE: [XmlEnum(u"Direct"_s)] Direct,
     Direct,
     /// <summary>
     /// подключение с помощью термобарьера
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Thermal")] Thermal
+    // ORIGINAL LINE: [XmlEnum(u"Thermal"_s)] Thermal
     Thermal
 };
 
@@ -198,13 +198,13 @@ enum class connectVia {
     /// прямое подключение
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Direct")] Direct,
+    // ORIGINAL LINE: [XmlEnum(u"Direct"_s)] Direct,
     Direct,
     /// <summary>
     /// подключение с помощью термобарьера
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Thermal")] Thermal
+    // ORIGINAL LINE: [XmlEnum(u"Thermal"_s)] Thermal
     Thermal
 };
 
@@ -219,43 +219,43 @@ enum class dist_ {
     /// миллиметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mm")] mm,
+    // ORIGINAL LINE: [XmlEnum(u"mm"_s)] mm,
     mm,
     /// <summary>
     /// микрометр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mkm")] mkm,
+    // ORIGINAL LINE: [XmlEnum(u"mkm"_s)] mkm,
     mkm,
     /// <summary>
     /// сантиметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("cm")] cm,
+    // ORIGINAL LINE: [XmlEnum(u"cm"_s)] cm,
     cm,
     /// <summary>
     /// дециметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("dm")] dm,
+    // ORIGINAL LINE: [XmlEnum(u"dm"_s)] dm,
     dm,
     /// <summary>
     /// метр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("m")] m,
+    // ORIGINAL LINE: [XmlEnum(u"m"_s)] m,
     m,
     /// <summary>
     /// мил(тысячная дюйма)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mil")] mil,
+    // ORIGINAL LINE: [XmlEnum(u"mil"_s)] mil,
     mil,
     /// <summary>
     /// дюйм
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("inch")] inch
+    // ORIGINAL LINE: [XmlEnum(u"inch"_s)] inch
     inch
 };
 
@@ -270,19 +270,19 @@ enum class fillType {
     /// сплошная заливка
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Solid")] Solid,
+    // ORIGINAL LINE: [XmlEnum(u"Solid"_s)] Solid,
     Solid,
     /// <summary>
     /// штриховка сеткой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Hatched")] Hatched,
+    // ORIGINAL LINE: [XmlEnum(u"Hatched"_s)] Hatched,
     Hatched,
     /// <summary>
     /// диагональная штриховка сеткой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("CRHatched")] CRHatched
+    // ORIGINAL LINE: [XmlEnum(u"CRHatched"_s)] CRHatched
     CRHatched
 };
 
@@ -294,10 +294,10 @@ Q_DECLARE_FLAGS(fillTypes, fillType)
 /// </summary>
 enum class gridKind {
 
-    // ORIGINAL LINE: [XmlEnum("Dots")] Dots,
+    // ORIGINAL LINE: [XmlEnum(u"Dots"_s)] Dots,
     Dots,
 
-    // ORIGINAL LINE: [XmlEnum("Lines")] Lines
+    // ORIGINAL LINE: [XmlEnum(u"Lines"_s)] Lines
     Lines
 };
 
@@ -312,55 +312,55 @@ enum class layer_type {
     /// сигнальный слой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Signal")] Signal,
+    // ORIGINAL LINE: [XmlEnum(u"Signal"_s)] Signal,
     Signal,
     /// <summary>
     /// сборочный слой (слой очертаний компонентов)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Assy")] Assy,
+    // ORIGINAL LINE: [XmlEnum(u"Assy"_s)] Assy,
     Assy,
     /// <summary>
     /// слой паяльной пасты
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Paste")] Paste,
+    // ORIGINAL LINE: [XmlEnum(u"Paste"_s)] Paste,
     Paste,
     /// <summary>
     /// слой шелкографии
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Silk")] Silk,
+    // ORIGINAL LINE: [XmlEnum(u"Silk"_s)] Silk,
     Silk,
     /// <summary>
     /// слой маски
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Mask")] Mask,
+    // ORIGINAL LINE: [XmlEnum(u"Mask"_s)] Mask,
     Mask,
     /// <summary>
     /// опорный слой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Plane")] Plane,
+    // ORIGINAL LINE: [XmlEnum(u"Plane"_s)] Plane,
     Plane,
     /// <summary>
     /// механический слой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Mechanical")] Mechanical,
+    // ORIGINAL LINE: [XmlEnum(u"Mechanical"_s)] Mechanical,
     Mechanical,
     /// <summary>
     /// документирующий слой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Doc")] Doc,
+    // ORIGINAL LINE: [XmlEnum(u"Doc"_s)] Doc,
     Doc,
     /// <summary>
     /// диэлектрический слой
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Dielectric")] Dielectric
+    // ORIGINAL LINE: [XmlEnum(u"Dielectric"_s)] Dielectric
     Dielectric
 };
 
@@ -375,19 +375,19 @@ enum class mode_Autoroute {
     /// многослойная трассировка
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Multilayer")] Multilayer,
+    // ORIGINAL LINE: [XmlEnum(u"Multilayer"_s)] Multilayer,
     Multilayer,
     /// <summary>
     /// однослойная трассировка на верхнем слое
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("SinglelayerTop")] SinglelayerTop,
+    // ORIGINAL LINE: [XmlEnum(u"SinglelayerTop"_s)] SinglelayerTop,
     SinglelayerTop,
     /// <summary>
     /// однослойная трассировка на нижнем слое
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("SinglelayerBottom")] SinglelayerBottom
+    // ORIGINAL LINE: [XmlEnum(u"SinglelayerBottom"_s)] SinglelayerBottom
     SinglelayerBottom
 };
 
@@ -402,13 +402,13 @@ enum class mode_PadConnectSettings {
     /// возможность подключения к углам КП определяется автоматически.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("AutoConnect")] AutoConnect,
+    // ORIGINAL LINE: [XmlEnum(u"AutoConnect"_s)] AutoConnect,
     AutoConnect,
     /// <summary>
     /// разрешено подключаться к углам всех КП
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("AllPads")] AllPads
+    // ORIGINAL LINE: [XmlEnum(u"AllPads"_s)] AllPads
     AllPads
 };
 
@@ -423,19 +423,19 @@ enum class precision {
     /// средняя точность
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Med")] Med,
+    // ORIGINAL LINE: [XmlEnum(u"Med"_s)] Med,
     Med,
     /// <summary>
     /// низкая точность
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Low")] Low,
+    // ORIGINAL LINE: [XmlEnum(u"Low"_s)] Low,
     Low,
     /// <summary>
     /// высокая точность
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("High")] High
+    // ORIGINAL LINE: [XmlEnum(u"High"_s)] High
     High
 };
 
@@ -450,55 +450,55 @@ enum class preference {
     /// метрические (конкретные единицы выбираются в зависимости от параметра)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Metric")] Metric,
+    // ORIGINAL LINE: [XmlEnum(u"Metric"_s)] Metric,
     Metric,
     /// <summary>
     /// микрометр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mkm")] mkm,
+    // ORIGINAL LINE: [XmlEnum(u"mkm"_s)] mkm,
     mkm,
     /// <summary>
     /// миллиметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mm")] mm,
+    // ORIGINAL LINE: [XmlEnum(u"mm"_s)] mm,
     mm,
     /// <summary>
     /// сантиметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("cm")] cm,
+    // ORIGINAL LINE: [XmlEnum(u"cm"_s)] cm,
     cm,
     /// <summary>
     /// дециметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("dm")] dm,
+    // ORIGINAL LINE: [XmlEnum(u"dm"_s)] dm,
     dm,
     /// <summary>
     /// метр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("m")] m,
+    // ORIGINAL LINE: [XmlEnum(u"m"_s)] m,
     m,
     /// <summary>
     /// английские (конкретные единицы выбираются в зависимости от параметра)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Imperial")] Imperial,
+    // ORIGINAL LINE: [XmlEnum(u"Imperial"_s)] Imperial,
     Imperial,
     /// <summary>
     /// мил(тысячная дюйма)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mil")] mil,
+    // ORIGINAL LINE: [XmlEnum(u"mil"_s)] mil,
     mil,
     /// <summary>
     /// дюйм
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("inch")] inch
+    // ORIGINAL LINE: [XmlEnum(u"inch"_s)] inch
     inch
 };
 
@@ -513,13 +513,13 @@ enum class refine {
     /// разрешён перенос проводников на другой слой.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("ChangeLayer")] ChangeLayer,
+    // ORIGINAL LINE: [XmlEnum(u"ChangeLayer"_s)] ChangeLayer,
     ChangeLayer,
     /// <summary>
     /// без переноса проводников на другой слой.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("NoChangeLayer")] NoChangeLayer
+    // ORIGINAL LINE: [XmlEnum(u"NoChangeLayer"_s)] NoChangeLayer
     NoChangeLayer
 };
 
@@ -534,19 +534,19 @@ enum class role {
     /// запрет проводников
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Wires")] Wires,
+    // ORIGINAL LINE: [XmlEnum(u"Wires"_s)] Wires,
     Wires,
     /// <summary>
     /// запрет переходных отверстий
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Vias")] Vias,
+    // ORIGINAL LINE: [XmlEnum(u"Vias"_s)] Vias,
     Vias,
     /// <summary>
     /// запрет проводников и переходных отверстий
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Wires and Vias")] WiresАndVias
+    // ORIGINAL LINE: [XmlEnum(u"Wires and Vias"_s)] WiresАndVias
     // WiresАndVias, FIXME
 };
 
@@ -561,19 +561,19 @@ enum class showWarnings {
     /// показывать только отмеченные предупреждения
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("ShowChecked")] ShowChecked,
+    // ORIGINAL LINE: [XmlEnum(u"ShowChecked"_s)] ShowChecked,
     ShowChecked,
     /// <summary>
     /// показывать все предупреждения
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("ShowAll")] ShowAll,
+    // ORIGINAL LINE: [XmlEnum(u"ShowAll"_s)] ShowAll,
     ShowAll,
     /// <summary>
     /// ничего не показывать
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("ShowNothing")] ShowNothing
+    // ORIGINAL LINE: [XmlEnum(u"ShowNothing"_s)] ShowNothing
     ShowNothing
 };
 
@@ -589,19 +589,19 @@ enum class side {
     /// верх
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Top")] Top,
+    // ORIGINAL LINE: [XmlEnum(u"Top"_s)] Top,
     Top,
     /// <summary>
     /// низ
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Bottom")] Bottom,
+    // ORIGINAL LINE: [XmlEnum(u"Bottom"_s)] Bottom,
     Bottom,
     /// <summary>
     /// обе стороны
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Both")] Both
+    // ORIGINAL LINE: [XmlEnum(u"Both"_s)] Both
     Both
 };
 
@@ -616,19 +616,19 @@ enum class state {
     /// незалитая
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Unpoured")] Unpoured,
+    // ORIGINAL LINE: [XmlEnum(u"Unpoured"_s)] Unpoured,
     Unpoured,
     /// <summary>
     /// залитая
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Poured")] Poured,
+    // ORIGINAL LINE: [XmlEnum(u"Poured"_s)] Poured,
     Poured,
     /// <summary>
     /// залитая и зафиксированная
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Locked")] Locked
+    // ORIGINAL LINE: [XmlEnum(u"Locked"_s)] Locked
     Locked
 };
 
@@ -643,25 +643,25 @@ enum class time_ {
     /// пикосекунда
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("ps")] ps,
+    // ORIGINAL LINE: [XmlEnum(u"ps"_s)] ps,
     ps,
     /// <summary>
     /// фемтосекунда
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("fs")] fs,
+    // ORIGINAL LINE: [XmlEnum(u"fs"_s)] fs,
     fs,
     /// <summary>
     /// наносекунда
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("ns")] ns,
+    // ORIGINAL LINE: [XmlEnum(u"ns"_s)] ns,
     ns,
     /// <summary>
     /// микросекунда
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("us")] us
+    // ORIGINAL LINE: [XmlEnum(u"us"_s)] us
     us
 };
 
@@ -676,13 +676,13 @@ enum class type {
     /// позиционное обозначение
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("RefDes")] RefDes,
+    // ORIGINAL LINE: [XmlEnum(u"RefDes"_s)] RefDes,
     RefDes,
     /// <summary>
     /// PartName
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("PartName")] PartName
+    // ORIGINAL LINE: [XmlEnum(u"PartName"_s)] PartName
     PartName
 };
 
@@ -697,19 +697,19 @@ enum class type_connectToCopper {
     /// тип подключения не задан(используются настройки полигона)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("NoneConnect")] NoneConnect,
+    // ORIGINAL LINE: [XmlEnum(u"NoneConnect"_s)] NoneConnect,
     NoneConnect,
     /// <summary>
     /// прямое подключение
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Direct")] Direct,
+    // ORIGINAL LINE: [XmlEnum(u"Direct"_s)] Direct,
     Direct,
     /// <summary>
     /// подключение с помощью термобарьера
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Thermal")] Thermal
+    // ORIGINAL LINE: [XmlEnum(u"Thermal"_s)] Thermal
     Thermal
 };
 
@@ -724,19 +724,19 @@ enum class type_handling {
     /// без обработки
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("None")] None,
+    // ORIGINAL LINE: [XmlEnum(u"None"_s)] None,
     None,
     /// <summary>
     /// скругление
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Rounding")] Rounding,
+    // ORIGINAL LINE: [XmlEnum(u"Rounding"_s)] Rounding,
     Rounding,
     /// <summary>
     /// срез
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Chamfer")] Chamfer
+    // ORIGINAL LINE: [XmlEnum(u"Chamfer"_s)] Chamfer
     Chamfer
 };
 
@@ -751,19 +751,19 @@ enum class type_padstack {
     /// сквозной
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Through")] Through,
+    // ORIGINAL LINE: [XmlEnum(u"Through"_s)] Through,
     Through,
     /// <summary>
     /// планарный
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("SMD")] SMD,
+    // ORIGINAL LINE: [XmlEnum(u"SMD"_s)] SMD,
     SMD,
     /// <summary>
     /// монтажное отверстие
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("MountHole")] MountHole
+    // ORIGINAL LINE: [XmlEnum(u"MountHole"_s)] MountHole
     MountHole
 };
 
@@ -778,13 +778,13 @@ enum class units {
     /// миллиметр
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mm")] mm,
+    // ORIGINAL LINE: [XmlEnum(u"mm"_s)] mm,
     mm,
     /// <summary>
     /// мил (тысячная дюйма)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("mil")] mil
+    // ORIGINAL LINE: [XmlEnum(u"mil"_s)] mil
     mil
 };
 
@@ -799,13 +799,13 @@ enum class valueType {
     /// длина
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Dist")] Dist,
+    // ORIGINAL LINE: [XmlEnum(u"Dist"_s)] Dist,
     Dist,
     /// <summary>
     /// время
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Time")] Time
+    // ORIGINAL LINE: [XmlEnum(u"Time"_s)] Time
     Time
 };
 
@@ -820,13 +820,13 @@ enum class wireShape {
     /// Polyline
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Polyline")] Polyline,
+    // ORIGINAL LINE: [XmlEnum(u"Polyline"_s)] Polyline,
     Polyline,
     /// <summary>
     /// Arcs
     /// </summary>
 
-    // ORIGINAL LINE: [XmlEnum("Arcs")] Arcs
+    // ORIGINAL LINE: [XmlEnum(u"Arcs"_s)] Arcs
     Arcs
 };
 
@@ -844,7 +844,7 @@ class BaseRef {
     /// Имя объекта или ссылка на именованный объект.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("name")] public string _ReferenceName;
+    // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _ReferenceName;
     QString _ReferenceName;
 };
 
@@ -862,7 +862,7 @@ class LayerTypeRef {
     /// Тип слоя.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("type")] public layer_type _type;
+    // ORIGINAL LINE: [XmlAttribute(u"type"_s)] public layer_type _type;
     layer_type _type = static_cast<layer_type>(0);
 };
 
@@ -882,7 +882,7 @@ class LayerRef : public BaseRef {
     /// </summary>
     /// <remarks>В документации сказано ещё и про возможность установки типа, если имя слоя неуникально, в данный момент это отключено</remarks>
     // TODO:
-    //   XmlAttribute("type", typeof(type_layer)),
+    //   XmlAttribute(u"type"_s, typeof(type_layer)),
 };
 
 /// <summary>
@@ -947,14 +947,14 @@ class PinRef {
     /// Имя компонента, используется для ссылки на компонент.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("compName")] public string _compName;
+    // ORIGINAL LINE: [XmlAttribute(u"compName"_s)] public string _compName;
     QString _compName;
 
     /// <summary>
     /// Имя контакта компонента, используется для ссылки.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("pinName")] public string _pinName;
+    // ORIGINAL LINE: [XmlAttribute(u"pinName"_s)] public string _pinName;
     QString _pinName;
 };
 
@@ -1002,14 +1002,14 @@ class PadRef {
     /// Ссылка на имя компонента
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("compName")] public string _compName;
+    // ORIGINAL LINE: [XmlAttribute(u"compName"_s)] public string _compName;
     QString _compName;
 
     /// <summary>
     /// Номер контактной площадки (вывода) посадочного места.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("padNum", DataType = "int")] public int _padNum;
+    // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
     int _padNum = 0;
 };
 //	#endregion Reference Type
@@ -1018,10 +1018,10 @@ public:
 
 class base_coordinat {
 public:
-    // ORIGINAL LINE: [XmlAttribute("x", DataType = "float")] public float _x;
+    // ORIGINAL LINE: [XmlAttribute(u"x"_s, DataType = u"float"_s)] public float _x;
     float _x = 0.0F;
 
-    // ORIGINAL LINE: [XmlAttribute("y", DataType = "float")] public float _y;
+    // ORIGINAL LINE: [XmlAttribute(u"y"_s, DataType = u"float"_s)] public float _y;
     float _y = 0.0F;
 
     void Shift(float x, float y);
@@ -1094,7 +1094,7 @@ class SegmentLine : public IBaseSegment {
     /// Конечная точка линии, дуги.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("End")] public End _End;
+    // ORIGINAL LINE: [XmlElement(u"End"_s)] public End _End;
     End* _End;
 
     virtual ~SegmentLine() {
@@ -1115,7 +1115,7 @@ class SegmentArcCCW : public SegmentLine {
     /// Центр круга (окружности), овала.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Center")] public Center _Center;
+    // ORIGINAL LINE: [XmlElement(u"Center"_s)] public Center _Center;
     Center* _Center;
 
     virtual ~SegmentArcCCW() {
@@ -1143,7 +1143,7 @@ class SegmentArcByAngle : public SegmentLine {
     /// Задаёт угол в градусах c точностью до тысячных долей.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+    // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
     float _angle = 0.0F;
 };
 
@@ -1156,7 +1156,7 @@ class SegmentArcByMiddle : public SegmentLine {
     /// Конечная точка линии, дуги.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Middle")] public Middle _Middle;
+    // ORIGINAL LINE: [XmlElement(u"Middle"_s)] public Middle _Middle;
     Middle* _Middle;
 
     virtual ~SegmentArcByMiddle() {
@@ -1187,21 +1187,21 @@ class ArcCCW : public IBaseFigure {
     /// Центр круга (окружности), овала.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Center")] public Center _Center;
+    // ORIGINAL LINE: [XmlElement(u"Center"_s)] public Center _Center;
     Center* _Center;
 
     /// <summary>
     /// Начальная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Start")] public Start _Start;
+    // ORIGINAL LINE: [XmlElement(u"Start"_s)] public Start _Start;
     Start* _Start;
 
     /// <summary>
     /// Конечная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("End")] public End _End;
+    // ORIGINAL LINE: [XmlElement(u"End"_s)] public End _End;
     End* _End;
 
     virtual ~ArcCCW() {
@@ -1229,21 +1229,21 @@ class ArcByAngle : public IBaseFigure {
     /// Задаёт угол в градусах c точностью до тысячных долей.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+    // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
     float _angle = 0.0F;
 
     /// <summary>
     /// Начальная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Start")] public Start _Start;
+    // ORIGINAL LINE: [XmlElement(u"Start"_s)] public Start _Start;
     Start* _Start;
 
     /// <summary>
     /// Конечная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("End")] public End _End;
+    // ORIGINAL LINE: [XmlElement(u"End"_s)] public End _End;
     End* _End;
 
     virtual ~ArcByAngle() {
@@ -1264,21 +1264,21 @@ class ArcByMiddle : public IBaseFigure {
     /// Начальная точка линии, дуги.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Start")] public Start _Start;
+    // ORIGINAL LINE: [XmlElement(u"Start"_s)] public Start _Start;
     Start* _Start;
 
     /// <summary>
     /// Конечная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Middle")] public Middle _Middle;
+    // ORIGINAL LINE: [XmlElement(u"Middle"_s)] public Middle _Middle;
     Middle* _Middle;
 
     /// <summary>
     /// Конечная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("End")] public End _End;
+    // ORIGINAL LINE: [XmlElement(u"End"_s)] public End _End;
     End* _End;
 
     virtual ~ArcByMiddle() {
@@ -1300,14 +1300,14 @@ class Circle : public IBaseFigure {
     /// Диаметр окружности, круга, овала.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("diameter", DataType = "float")] public float _diameter;
+    // ORIGINAL LINE: [XmlAttribute(u"diameter"_s, DataType = u"float"_s)] public float _diameter;
     float _diameter = 0.0F;
 
     /// <summary>
     /// Центр круга (окружности), овала.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Center")] public Center _Center;
+    // ORIGINAL LINE: [XmlElement(u"Center"_s)] public Center _Center;
     Center* _Center;
 
     virtual ~Circle() {
@@ -1327,7 +1327,7 @@ class Line : public IBaseFigure {
     /// Массив координат точек, вершин.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Dot")] public List<Dot> _Dots;
+    // ORIGINAL LINE: [XmlElement(u"Dot"_s)] public List<Dot> _Dots;
     std::vector<Dot*> _Dots;
     bool ShouldSerialize_Dots();
 
@@ -1344,7 +1344,7 @@ class Polyline : public IBaseFigure {
     /// Начальная точка линии, дуги.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Start")] public Start _Start;
+    // ORIGINAL LINE: [XmlElement(u"Start"_s)] public Start _Start;
     Start* _Start;
 
     /// <summary>
@@ -1352,7 +1352,7 @@ public:
     /// </summary>
     // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-    // ORIGINAL LINE: [XmlElement("SegmentLine", typeof(SegmentLine)), XmlElement("SegmentArcByAngle", typeof(SegmentArcByAngle)), XmlElement("SegmentArcCCW", typeof(SegmentArcCCW)), XmlElement("SegmentArcCW", typeof(SegmentArcCW)), XmlElement("SegmentArcByMiddle", typeof(SegmentArcByMiddle))] public List<Object> _Segments;
+    // ORIGINAL LINE: [XmlElement(u"SegmentLine"_s, typeof(SegmentLine)), XmlElement(u"SegmentArcByAngle"_s, typeof(SegmentArcByAngle)), XmlElement(u"SegmentArcCCW"_s, typeof(SegmentArcCCW)), XmlElement(u"SegmentArcCW"_s, typeof(SegmentArcCW)), XmlElement(u"SegmentArcByMiddle"_s, typeof(SegmentArcByMiddle))] public List<Object> _Segments;
 
     std::vector<std::variant<SegmentLine, SegmentArcByAngle, SegmentArcCCW, SegmentArcCW, SegmentArcByMiddle>> _Segments;
     virtual ~Polyline() {
@@ -1412,21 +1412,21 @@ class TrackArcCW : public IBaseFigure {
     /// Центр круга (окружности), овала.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("Center")] public Center _Center;
+    // ORIGINAL LINE: [XmlElement(u"Center"_s)] public Center _Center;
     Center* _Center;
 
     /// <summary>
     /// Конечная точка линии, дуги.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("End")] public End _End;
+    // ORIGINAL LINE: [XmlElement(u"End"_s)] public End _End;
     End* _End;
 
     /// <summary>
     /// Ссылка на змейку. Строка должна содержать идентификатор описанной змейки Serpent.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("serpRef")] public string _serpRef;
+    // ORIGINAL LINE: [XmlAttribute(u"serpRef"_s)] public string _serpRef;
     QString _serpRef;
 
     virtual ~TrackArcCW() {
@@ -1454,14 +1454,14 @@ class TrackLine : public IBaseFigure {
     /// Конечная точка линии, дуги.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlElement("End")] public End _End;
+    // ORIGINAL LINE: [XmlElement(u"End"_s)] public End _End;
     End* _End;
 
     /// <summary>
     /// Ссылка на змейку. Строка должна содержать идентификатор описанной змейки Serpent.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("serpRef")] public string _serpRef;
+    // ORIGINAL LINE: [XmlAttribute(u"serpRef"_s)] public string _serpRef;
     QString _serpRef;
 
     virtual ~TrackLine() {
@@ -1481,7 +1481,7 @@ public:
 /// </summary>
 class AllLayers {
 public:
-    // ORIGINAL LINE: [XmlElement("AllLayers")] public string _AllLayers;
+    // ORIGINAL LINE: [XmlElement(u"AllLayers"_s)] public string _AllLayers;
     QString _AllLayers;
 };
 
@@ -1490,7 +1490,7 @@ public:
 /// </summary>
 class AllComps {
 public:
-    // ORIGINAL LINE: [XmlElement("AllComps")] public string _AllComps;
+    // ORIGINAL LINE: [XmlElement(u"AllComps"_s)] public string _AllComps;
     QString _AllComps;
 };
 
@@ -1499,7 +1499,7 @@ public:
 /// </summary>
 class AllNets {
 public:
-    // ORIGINAL LINE: [XmlElement("AllNets")] public string _AllNets;
+    // ORIGINAL LINE: [XmlElement(u"AllNets"_s)] public string _AllNets;
     QString _AllNets;
 };
 /// <summary>
@@ -1507,7 +1507,7 @@ public:
 /// </summary>
 class AllLayersInner {
 public:
-    // ORIGINAL LINE: [XmlElement("AllLayersInner")] public string _AllLayersInner;
+    // ORIGINAL LINE: [XmlElement(u"AllLayersInner"_s)] public string _AllLayersInner;
     QString _AllLayersInner;
 };
 
@@ -1516,7 +1516,7 @@ public:
 /// </summary>
 class AllLayersInnerSignal {
 public:
-    // ORIGINAL LINE: [XmlElement("AllLayersInnerSignal")] public string _AllLayersInnerSignal;
+    // ORIGINAL LINE: [XmlElement(u"AllLayersInnerSignal"_s)] public string _AllLayersInnerSignal;
     QString _AllLayersInnerSignal;
 };
 
@@ -1525,7 +1525,7 @@ public:
 /// </summary>
 class AllLayersSignal {
 public:
-    // ORIGINAL LINE: [XmlElement("AllLayersSignal")] public string _AllLayersSignal;
+    // ORIGINAL LINE: [XmlElement(u"AllLayersSignal"_s)] public string _AllLayersSignal;
     QString _AllLayersSignal;
 };
 
@@ -1534,7 +1534,7 @@ public:
 /// </summary>
 class AllLayersOuter {
 public:
-    // ORIGINAL LINE: [XmlElement("AllLayersOuter")] public string _AllLayersOuter;
+    // ORIGINAL LINE: [XmlElement(u"AllLayersOuter"_s)] public string _AllLayersOuter;
     QString _AllLayersOuter;
 };
 
@@ -1543,7 +1543,7 @@ public:
 /// </summary>
 class AllViastacks {
 public:
-    // ORIGINAL LINE: [XmlElement("AllViastacks")] public string _AllViastacks;
+    // ORIGINAL LINE: [XmlElement(u"AllViastacks"_s)] public string _AllViastacks;
     QString _AllViastacks;
 };
 
@@ -1552,7 +1552,7 @@ public:
 /// </summary>
 class AllViastacksThrough {
 public:
-    // ORIGINAL LINE: [XmlElement("AllViastacksThrough")] public string _AllViastacksThrough;
+    // ORIGINAL LINE: [XmlElement(u"AllViastacksThrough"_s)] public string _AllViastacksThrough;
     QString _AllViastacksThrough;
 };
 
@@ -1561,7 +1561,7 @@ public:
 /// </summary>
 class AllViastacksNotThrough {
 public:
-    // ORIGINAL LINE: [XmlElement("AllViastacksNotThrough")] public string _AllViastacksNotThrough;
+    // ORIGINAL LINE: [XmlElement(u"AllViastacksNotThrough"_s)] public string _AllViastacksNotThrough;
     QString _AllViastacksNotThrough;
 };
 //	#endregion Rules area
@@ -1576,35 +1576,35 @@ class Thermal {
     /// Параметр термобарьера: число спиц.! В TopoR поддерживается только одно значение – 4.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("spokeNum", DataType = "int")] public int _spokeNum;
+    // ORIGINAL LINE: [XmlAttribute(u"spokeNum"_s, DataType = u"int"_s)] public int _spokeNum;
     int _spokeNum = 0;
 
     /// <summary>
     /// Параметр термобарьера: минимальное число спиц.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("minSpokeNum", DataType = "int")] public int _minSpokeNum;
+    // ORIGINAL LINE: [XmlAttribute(u"minSpokeNum"_s, DataType = u"int"_s)] public int _minSpokeNum;
     int _minSpokeNum = 0;
 
     /// <summary>
     /// Задаёт угол в градусах c точностью до тысячных долей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+    // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
     float _angle = 0.0F;
 
     /// <summary>
     /// Параметр термобарьера: ширина спицы.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("spokeWidth", DataType = "float")] public float _spokeWidth;
+    // ORIGINAL LINE: [XmlAttribute(u"spokeWidth"_s, DataType = u"float"_s)] public float _spokeWidth;
     float _spokeWidth = 0.0F;
 
     /// <summary>
     /// Параметр термобарьера: зазор между контактной площадкой и областью металлизации.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("backoff", DataType = "float")] public float _backoff;
+    // ORIGINAL LINE: [XmlAttribute(u"backoff"_s, DataType = u"float"_s)] public float _backoff;
     float _backoff = 0.0F;
 
     void UnitsConvert(dist_ in_units, dist_ out_units);
@@ -1618,14 +1618,14 @@ class Detail {
     /// Толщина линии.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+    // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
     float _lineWidth = 0.0F;
 
     /// <summary>
     /// Ссылка на слой.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+    // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
     LayerRef* _LayerRef;
 
     /// <summary>
@@ -1633,7 +1633,7 @@ public:
     /// </summary>
     // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-    // ORIGINAL LINE: [XmlElement("ArcCCW", typeof(ArcCCW)), XmlElement("ArcCW", typeof(ArcCW)), XmlElement("ArcByAngle", typeof(ArcByAngle)), XmlElement("ArcByMiddle", typeof(ArcByMiddle)), XmlElement("Line", typeof(Line)), XmlElement("Circle", typeof(Circle)), XmlElement("Rect", typeof(Rect)), XmlElement("FilledCircle", typeof(FilledCircle)), XmlElement("FilledRect", typeof(FilledRect)), XmlElement("Polygon", typeof(Polygon)), XmlElement("Polyline", typeof(Polyline)), XmlElement("FilledContour", typeof(FilledContour))] public Object _Figure;
+    // ORIGINAL LINE: [XmlElement(u"ArcCCW"_s, typeof(ArcCCW)), XmlElement(u"ArcCW"_s, typeof(ArcCW)), XmlElement(u"ArcByAngle"_s, typeof(ArcByAngle)), XmlElement(u"ArcByMiddle"_s, typeof(ArcByMiddle)), XmlElement(u"Line"_s, typeof(Line)), XmlElement(u"Circle"_s, typeof(Circle)), XmlElement(u"Rect"_s, typeof(Rect)), XmlElement(u"FilledCircle"_s, typeof(FilledCircle)), XmlElement(u"FilledRect"_s, typeof(FilledRect)), XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"Polyline"_s, typeof(Polyline)), XmlElement(u"FilledContour"_s, typeof(FilledContour))] public Object _Figure;
 
     std::variant<
         ArcByAngle,
@@ -1668,28 +1668,28 @@ class Text {
     /// Параметр надписи: текст надписи.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("text")] public string _text;
+    // ORIGINAL LINE: [XmlAttribute(u"text"_s)] public string _text;
     QString _text;
 
     /// <summary>
     /// Параметр надписей (ярлыков): способ выравнивания текста.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("align")] public align _align;
+    // ORIGINAL LINE: [XmlAttribute(u"align"_s)] public align _align;
     align _align = static_cast<align>(0);
 
     /// <summary>
     /// Задаёт угол в градусах c точностью до тысячных долей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+    // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
     float _angle = 0.0F;
 
     /// <summary>
     /// Параметр надписей и ярлыков: зеркальность отображения.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlAttribute("mirror")] public Bool _mirror;
+    // ORIGINAL LINE: [XmlAttribute(u"mirror"_s)] public Bool _mirror;
     Bool _mirror = static_cast<Bool>(0);
     virtual ~Text() {
         delete _LayerRef;
@@ -1704,29 +1704,29 @@ public:
     /// Ссылка на слой.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+    // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
     LayerRef* _LayerRef;
 
     /// <summary>
     /// Ссылка на стиль надписей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("TextStyleRef")] public TextStyleRef _TextStyleRef;
+    // ORIGINAL LINE: [XmlElement(u"TextStyleRef"_s)] public TextStyleRef _TextStyleRef;
     TextStyleRef* _TextStyleRef;
 
     /// <summary>
     /// Точка привязки объекта.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+    // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
     Org* _Org;
 
     void Shift(float x, float y);
     /// <summary>
     /// TODO: конвертировать текстовые стили по ссылке
     /// </summary>
-    /// <param name="in_units"></param>
-    /// <param name="out_units"></param>
+    /// <param name=u"in_units"_s></param>
+    /// <param name=u"out_units"_s></param>
     void UnitsConvert(dist_ in_units, dist_ out_units);
 };
 
@@ -1737,7 +1737,7 @@ class ObjectSignal {
 public:
     // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-    // ORIGINAL LINE: [XmlElement("SignalRef", typeof(SignalRef)), XmlElement("DiffSignalRef", typeof(DiffSignalRef)), XmlElement("SignalGroupRef", typeof(SignalGroupRef)),] public Object _Refs;
+    // ORIGINAL LINE: [XmlElement(u"SignalRef"_s, typeof(SignalRef)), XmlElement(u"DiffSignalRef"_s, typeof(DiffSignalRef)), XmlElement(u"SignalGroupRef"_s, typeof(SignalGroupRef)),] public Object _Refs;
     std::variant<SignalRef, DiffSignalRef, SignalGroupRef> _Refs;
 };
 //	#endregion
@@ -1749,9 +1749,9 @@ class Ut final {
     /// <summary>
     /// Конвертация единиц измерения
     /// </summary>
-    /// <param name="value">значение</param>
-    /// <param name="in_units">текущие единицы измерения</param>
-    /// <param name="out_units">выходные единицы измерения</param>
+    /// <param name=u"value"_s>значение</param>
+    /// <param name=u"in_units"_s>текущие единицы измерения</param>
+    /// <param name=u"out_units"_s>выходные единицы измерения</param>
     /// <returns>Возвращает сконвертированное значение</returns>
 public:
     static float UnitsConvert(float value, dist_ in_units, dist_ out_units);

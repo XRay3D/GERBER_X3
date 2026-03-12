@@ -101,7 +101,7 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     setWindowTitle(windowTitle);
 
     auto textBrowser = new QTextBrowser{this};
-    textBrowser->setFontFamily("JetBrains Mono");
+    textBrowser->setFontFamily(u"JetBrains Mono"_s);
     textBrowser->setFontPointSize(16);
     new Highlighter{textBrowser->document()};
     textBrowser->setPlainText(text);

@@ -27,7 +27,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     setWindowTitle(tr("Pocket Raster Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("PocketRasterForm");
+    settings.beginGroup(u"PocketRasterForm"_s);
     settings.getValue(ui->cbxPass);
     settings.getValue(ui->dsbxAcc);
     settings.getValue(ui->dsbxAngle);
@@ -56,7 +56,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 Form::~Form() {
 
     MySettings settings;
-    settings.beginGroup("PocketRasterForm");
+    settings.beginGroup(u"PocketRasterForm"_s);
     settings.setValue(ui->cbxPass);
     settings.setValue(ui->dsbxAcc);
     settings.setValue(ui->dsbxAngle);

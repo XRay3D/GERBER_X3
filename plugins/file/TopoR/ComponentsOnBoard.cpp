@@ -57,7 +57,7 @@ QString ComponentsOnBoard::AddComponent(const QString& name, units units, const 
         return "";
     auto name_{name};
     while(ComponentIndexOf(name_) >= 0) // проверка на уникальность имени и добавление префикса
-        name_ += "_";
+        name_ += u"_"_s;
     for(int i = _Components.size(); i > 0; i--) // вычисление максимально возможных координат
     {
         x = std::max(x, _Components[i - 1]->_Org->_x);
@@ -112,7 +112,7 @@ int ComponentsOnBoard::RenameComponent(const QString& oldname, const QString& ne
 }
 
 QString ComponentsOnBoard::UniqueId() {
-    QString ABC{"ABCDEFGHIJKLMNOPQRSTUVWXYZ"};
+    QString ABC{u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"_s};
     QString uniqueId{""};
     for(int i = 0; i < 8; i++)
         uniqueId += ABC[rand() % 26];

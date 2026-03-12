@@ -63,11 +63,11 @@ bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
 
 bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) {
 
-    qDebug() << "sourceParent" << sourceParent;
-    qDebug() << "sourceRow" << sourceRow;
-    qDebug() << "count" << count;
-    qDebug() << "destinationParen" << destinationParent;
-    qDebug() << "destinationChild" << destinationChild;
+    qDebug() << u"sourceParent"_s << sourceParent;
+    qDebug() << u"sourceRow"_s << sourceRow;
+    qDebug() << u"count"_s << count;
+    qDebug() << u"destinationParen"_s << destinationParent;
+    qDebug() << u"destinationChild"_s << destinationChild;
 
     return false;
     //     beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
@@ -141,7 +141,7 @@ QVariant ToolModel::data(const QModelIndex& index, int role) const {
 
 QVariant ToolModel::headerData(int section, Qt::Orientation orientation, int role) const {
     if(role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        return tr("Name|Note|Id").split('|')[section];
+        return tr("Name|Note|Id").split(u'|')[section];
     if(role == Qt::TextAlignmentRole && orientation == Qt::Horizontal)
         return Qt::AlignHCenter;
     return {};
@@ -162,7 +162,7 @@ QMimeData* ToolModel::mimeData(const QModelIndexList& indexes) const {
             noCopy = index.row();
             if(index.isValid()) {
                 encodedData.push_back(QString().setNum((quint64)index.internalPointer()).toUtf8());
-                encodedData.push_back("|");
+                encodedData.push_back(u'|');
             }
         }
     }
@@ -189,8 +189,8 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
     else
         beginRow = rowCount(QModelIndex());
 
-    QString encodedData = data->data(mimeType);
-    QList<QString> list = encodedData.split('|', Qt::SkipEmptyParts);
+    QString encodedData = QString::fromUtf8(data->data(mimeType)); // FIXME
+    QStringList list = encodedData.split(u'|', Qt::SkipEmptyParts);
     for(QString& item: list) {
         ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
         ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
@@ -245,13 +245,13 @@ void ToolModel::saveTools() {
             item = stack.last()->child(row.last());
             QJsonObject treeNode;
             if(item->isTool()) {
-                treeNode["id"] = item->toolId();
+                treeNode[u"id"_s] = item->toolId();
             } else {
-                treeNode["name"] = item->name();
-                treeNode["note"] = item->note();
+                treeNode[u"name"_s] = item->name();
+                treeNode[u"note"_s] = item->note();
             }
-            treeNode["tool"] = item->isTool();
-            treeNode["tab"] = row.size() - 1;
+            treeNode[u"tool"_s] = item->isTool();
+            treeNode[u"tab"_s] = row.size() - 1;
             treeArray.push_back(treeNode);
             if(item->childCount()) {
                 stack.push_back(item);
@@ -261,7 +261,7 @@ void ToolModel::saveTools() {
             ++row.last();
         }
     }
-    jsonObject["tree"] = QJsonValue{treeArray};
+    jsonObject[u"tree"_s] = QJsonValue{treeArray};
     QJsonDocument saveDoc(jsonObject);
     file.write(saveDoc.toJson());
 }
@@ -272,7 +272,7 @@ void ToolModel::loadTools() {
     QFile file(App::settingsPath() + u"/tools.json"_s);
 
     if(!file.exists())
-        file.setFileName(qApp->applicationDirPath() + "/tools.json");
+        file.setFileName(qApp->applicationDirPath() + u"/tools.json"_s);
     if(file.exists() && file.open(QIODevice::ReadOnly))
         loadDoc = QJsonDocument::fromJson(file.readAll());
     else {
@@ -287,11 +287,11 @@ void ToolModel::loadTools() {
     parentsStack << rootItem;
     nestingStack << 0;
 
-    QJsonArray treeArray = loadDoc.object()["tree"].toArray();
+    QJsonArray treeArray = loadDoc.object()[u"tree"_s].toArray();
     for(int treelIndex = 0; treelIndex < treeArray.size(); ++treelIndex) {
 
         QJsonObject json = treeArray[treelIndex].toObject();
-        int nesting = json["tab"].toInt();
+        int nesting = json[u"tab"_s].toInt();
 
         if(nesting > nestingStack.last()) {
             // The last child of the current parent is now the new parent unless the current parent has no children.
@@ -309,12 +309,12 @@ void ToolModel::loadTools() {
         // Append a new item to the current parent's list of children.
         ToolItem* parent = parentsStack.last();
         ToolItem* item;
-        if(json["tool"].toBool())
-            item = new ToolItem{json["id"].toInt()};
+        if(json[u"tool"_s].toBool())
+            item = new ToolItem{json[u"id"_s].toInt()};
         else {
             item = new ToolItem();
-            item->setName(json["name"].toString());
-            item->setNote(json["note"].toString());
+            item->setName(json[u"name"_s].toString());
+            item->setNote(json[u"note"_s].toString());
         }
         parent->insertChild(parent->childCount(), item);
     }

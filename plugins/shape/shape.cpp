@@ -54,7 +54,7 @@ void drawPos(QPainter* painter, const QPointF& pos, double scale) {
         pos.y() / App::settings().lenUnit(),
         App::settings().isBanana() ? "in" : "mm");
 
-    const QRectF textRect = QFontMetricsF{painter->font()}.boundingRect(QRectF{}, Qt::AlignLeft, text.data());
+    const QRectF textRect = QFontMetricsF{painter->font()}.boundingRect(QRectF{}, Qt::AlignLeft, QString::fromStdString(text)); // FIXME
 
     painter->save();
     painter->translate(pos);
@@ -219,7 +219,7 @@ QVariant AbstractShape::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole: /*   */ return QString("%1 (%2)").arg(name()).arg(id_);
+        case Qt::DisplayRole: /*   */ return QString(u"%1 (%2)"_s).arg(name()).arg(id_);
         case Qt::CheckStateRole: /**/ return isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole: /**/ return icon();
         case FileTree::Id: /*      */ return id_;
@@ -280,19 +280,19 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
     };
 
     addAction(
-        "edit-delete", QObject::tr(R"(&Delete object "%1")").arg(name()), {},
+        u"edit-delete"_s, QObject::tr(R"(&Delete object "% 1")").arg(name()), {},
         [this] { App::fileModel().removeRow(row(), index().parent()); });
 
     addAction(
-        "hint", QObject::tr(R"(&Visible "%1")").arg(name()), {},
+        u"hint"_s, QObject::tr(R"(&Visible "%1")").arg(name()), {},
         [this](bool fl) { setVisible(fl); }, isVisible());
 
     addAction(
-        "", QObject::tr(R"(&Editable "%1")").arg(name()), {},
+        {}, QObject::tr(R"(&Editable "%1")").arg(name()), {},
         [this](bool fl) { setEditable(fl), AbstractShape::redraw(); }, isEditable());
 
     addAction(
-        "document-edit", QObject::tr("Edit Selected"), {},
+        u"document-edit"_s, QObject::tr("Edit Selected"), {},
         [this] { App::shapePlugin(type())->requestEditor(); });
 }
 
@@ -360,8 +360,8 @@ void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 return ds;
             };
             auto gl = new QFormLayout{this};
-            gl->addRow(new QLabel{"X:", this}, dsbx(&Handle::x, &Handle::setX));
-            gl->addRow(new QLabel{"Y:", this}, dsbx(&Handle::y, &Handle::setY));
+            gl->addRow(new QLabel{u"X:"_s, this}, dsbx(&Handle::x, &Handle::setX));
+            gl->addRow(new QLabel{u"Y:"_s, this}, dsbx(&Handle::y, &Handle::setY));
             gl->setContentsMargins(6, 6, 6, 6);
         }
         ~Dialog() override = default;

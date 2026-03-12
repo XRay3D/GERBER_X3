@@ -31,7 +31,7 @@ void InsertEntity::draw(const InsertEntity* const i) const {
     for(auto entity: blocks[blockName]->entities) {
         if(i) {
             InsertEntity copy(*this);
-            if(layerName == "0")
+            if(layerName == u"0"_s)
                 copy.layerName = i->layerName;
             if(insPos.isNull())
                 copy.insPos = i->insPos;
@@ -40,13 +40,13 @@ void InsertEntity::draw(const InsertEntity* const i) const {
                 copy.rotationAngle = i->rotationAngle;
 
             if(entity->type() != INSERT) {
-                if(copy.layerName == "0")
+                if(copy.layerName == u"0"_s)
                     copy.layerName = entity->layerName;
             }
             entity->draw(&copy);
         } else if(entity->type() != INSERT) {
             InsertEntity copy(*this);
-            if(copy.layerName == "0")
+            if(copy.layerName == u"0"_s)
                 copy.layerName = entity->layerName;
             entity->draw(&copy);
         } else {

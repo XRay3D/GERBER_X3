@@ -14,21 +14,21 @@ namespace Dxf {
 
 QDebug operator<<(QDebug debug, const CodeData& c) {
     QDebugStateSaver saver(debug);
-    //      debug.nospace() << QString("DC(%1, ").arg(c.code_, 5).toUtf8().data();
+    //      debug.nospace() << QString(u"DC(%1, "_s).arg(c.code_, 5).toUtf8().data();
     //      debug.nospace() << '\n';
-    debug.nospace() << QString("DC(%1, ").arg(c.code_).toUtf8().data();
+    debug.nospace() << QString(u"DC(%1, "_s).arg(c.code_).toUtf8().data();
     std::visit([&debug](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr /*  */ (std::is_same_v<T, double>)
-            debug << "F64 ";
+            debug << u"F64 "_s;
         else if constexpr(std::is_same_v<T, int16_t>)
-            debug << "I16 ";
+            debug << u"I16 "_s;
         else if constexpr(std::is_same_v<T, int32_t>)
-            debug << "I32 ";
+            debug << u"I32 "_s;
         else if constexpr(std::is_same_v<T, int64_t>)
-            debug << "I64 ";
+            debug << u"I64 "_s;
         else if constexpr(std::is_same_v<T, QString>)
-            debug << "Str ";
+            debug << u"Str "_s;
         debug << arg;
     },
         c.varVal);
@@ -84,7 +84,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     else if(1010 <= code && code <= 1059) type = Double;    // Значение с плавающей запятой двойной точности
     else if(1060 <= code && code <= 1070) type = Integer16; // 16-разрядное целое значение
     else if(1071 == code) type = Integer32;                 // 32-разрядное целое значение
-    else throw QString("Unknown type: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
+    else throw QString(u"Unknown type: code %1, raw %2, line %3!"_s).arg(code).arg(value).arg(lineNum);
 #else
 
     if(0 <= code && code <= 9) type = String;                         // String
@@ -148,11 +148,11 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
         case Double: varVal = value.toDouble(&ok); break;
         case String: varVal = value;
         }
-        qWarning().nospace() << "Type missmatch: code " << code << ", type " << type << ", raw " << value << ", line " << lineNum << "!";
+        qWarning().nospace() << u"Type missmatch: code "_s << code << u", type "_s << type << u", raw "_s << value << u", line "_s << lineNum << u"!"_s;
     }
 
     if(!ok)
-        throw QString("Error value: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum);
+        throw QString(u"Error value: code %1, raw %2, line %3!"_s).arg(code).arg(value).arg(lineNum);
 }
 
 int CodeData::code() const { return code_; }

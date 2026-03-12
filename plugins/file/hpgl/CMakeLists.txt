@@ -8,14 +8,14 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.16)
+cmake_minimum_required(VERSION 4.00)
 
 project(hpgl LANGUAGES CXX)
 
 
 
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS   Widgets REQUIRED)
+find_package(Qt6 COMPONENTS   Widgets REQUIRED)
 
 #add_subdirectory(entities)
 #add_subdirectory(section)
@@ -47,7 +47,7 @@ target_link_libraries(hpgl PRIVATE
     gi
     graphicsview
     tooldatabase
-    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt6::Widgets
 )
 
-#target_compile_definitions(hpgl PRIVATE HPGL_LIBRARY)
+

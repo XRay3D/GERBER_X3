@@ -36,7 +36,7 @@ public:
         //        2 = PeriodicSpline		=		,//		2 = периодический сплайн
         //        4 = RationalSpline		=		,//		4 = рациональный сплайн
         //        8 = Planar		=		,//		8 = плоский
-        //        16 = Linear (planarBitIsAlsoSet)		=		,//		16 = линейный (также задается бит 8 — "плоский")
+        //        16 = Linear (planarBitIsAlsoSet)		=		,//		16 = линейный (также задается бит 8 — u"плоский"_s)
 
         DegreeOfTheSplineCurve = 71, //	71	Степень кривой сплайна
         NumberOfKnots = 72,          //	72	Число узлов

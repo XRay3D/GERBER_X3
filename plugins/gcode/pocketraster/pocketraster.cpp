@@ -174,7 +174,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     rect.right += uScale;
 
     Path zPath;
-    { // create "snake"
+    { // create u"snake"_s
         auto y = rect.top;
         while(y < rect.bottom) {
             zPath += Path{
@@ -360,10 +360,10 @@ Paths Creator::calcFrames(const Paths& src, const Path& frame) {
         clipper.AddOpenSubject(src);
         clipper.AddClip({frame});
         clipper.Execute(ClipType::Intersection, FillRule::Positive, tmp, tmp); // FillRule::Positive
-        // dbgPaths(tmp, "ClipType::Intersection");
+        // dbgPaths(tmp, u"ClipType::Intersection"_s);
         frames += std::move(tmp);
         clipper.Execute(ClipType::Difference, FillRule::Positive, tmp, tmp); // FillRule::Positive
-        // dbgPaths(tmp, "ClipType::Difference");
+        // dbgPaths(tmp, u"ClipType::Difference"_s);
         frames += std::move(tmp);
         std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
         for(auto& path: frames)

@@ -289,12 +289,12 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
         if(!integer)
             integer = m_state.format()->xInteger;
 
-        if(Str.indexOf("+") == 0) {
+        if(Str.indexOf(u"+"_s) == 0) {
             Str.remove(0, 1);
             sign = 1;
         }
 
-        if(Str.indexOf("-") == 0) {
+        if(Str.indexOf(u"-"_s) == 0) {
             Str.remove(0, 1);
             sign = -1;
         }
@@ -306,12 +306,12 @@ bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
             switch(m_state.format()->zeroOmisMode) {
             case OmitLeadingZeros:
                 Str = QString(integer + decimal - Str.length(), '0') + Str;
-                // Str = "0" + Str;
+                // Str = u"0"_s + Str;
                 break;
 #ifdef DEPRECATED
             case OmitTrailingZeros:
                 Str += QString(integer + decimal - Str.length(), '0');
-                // Str += "0";
+                // Str += u"0"_s;
                 break;
 #endif
             }
@@ -494,7 +494,7 @@ Paths Parser::createPolygon() {
 
 bool Parser::parseAperture(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%ADD(\\d\\d+)([a-zA-Z_$\\.][a-zA-Z0-9_$\\.\\-]*)(?:,(.*))?\\*%$"));
-    static const QList<QString> slApertureType({"C", "R", "O", "P", "M"});
+    static const QList<QString> slApertureType({u"C"_s, u"R"_s, u"O"_s, u"P"_s, u"M"_s});
     if(match.exactMatch(gLine)) {
         int aperture = /*state().aperture =*/match.cap(1).toInt();
         QString apType = match.cap(2);
@@ -508,7 +508,7 @@ bool Parser::parseAperture(const QString& gLine) {
         // * Polygon (P)*: diameter(float), vertices(int), [rotation(float)]
         // * Aperture Macro (AM)*: macro (ApertureMacro), modifiers (list)
 
-        QList<QString> paramList = apParameters.split("X");
+        QList<QString> paramList = apParameters.split(u"X"_s);
         double hole = 0.0, rotation = 0.0;
         switch(slApertureType.indexOf(apType)) {
         case Circle:
@@ -568,9 +568,9 @@ bool Parser::parseTransformations(const QString& gLine) {
         trRotate,
         trScale,
     };
-    static const QStringList slTransformations{"P", "M", "R", "S"};
-    static const QStringList slLevelPolarity{"D", "C"};
-    static const QStringList slLoadMirroring{"N", "X", "Y", "XY"};
+    static const QStringList slTransformations{u"P"_s, u"M"_s, u"R"_s, u"S"_s};
+    static const QStringList slLevelPolarity{u"D"_s, u"C"_s};
+    static const QStringList slLoadMirroring{u"N"_s, u"X"_s, u"Y"_s, "XY"};
     static const QRegExp match(QStringLiteral("^%L([PMRS])(.+)\\*%$"));
     if(match.exactMatch(gLine)) {
         switch(slTransformations.indexOf(match.cap(1))) {
@@ -667,7 +667,7 @@ bool Parser::parseApertureMacros(const QString& gLine) {
 bool Parser::parseAttributes(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%T(F|A|O|D)(.*)\\*%$"));
     if(match.exactMatch(gLine)) {
-        // const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split("|"));
+        // const QList<QString> slAttributeType(QString("TF|TA|TO|TD").split(u"|"_s));
         //  switch (slAttributeType.indexOf(match.cap(1))) {
         //  case ATTRIBUTE:
         //  //FileFunction
@@ -854,8 +854,8 @@ bool Parser::parseEndOfFile(const QString& gLine) {
 }
 
 bool Parser::parseFormat(const QString& gLine) {
-    const QStringList zeroOmissionModeList = QString("L|T").split("|");
-    const QStringList coordinateValuesNotationList = QString("A|I").split("|");
+    const QStringList zeroOmissionModeList = QString("L|T").split(u"|"_s);
+    const QStringList coordinateValuesNotationList = QString("A|I").split(u"|"_s);
     static const QRegExp match(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
     if(match.exactMatch(gLine)) {
         switch(zeroOmissionModeList.indexOf(match.cap(1))) {
@@ -974,7 +974,7 @@ bool Parser::parseGCode(const QString& gLine) {
 
 bool Parser::parseImagePolarity(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%IP(POS|NEG)\\*%$"));
-    static const QList<QString> slImagePolarity(QString("POS|NEG").split("|"));
+    static const QList<QString> slImagePolarity(QString("POS|NEG").split(u"|"_s));
     if(match.exactMatch(gLine)) {
         switch(slImagePolarity.indexOf(match.cap(1))) {
         case Positive:
@@ -1054,7 +1054,7 @@ bool Parser::parseDCode(const QString& gLine) {
 
 bool Parser::parseUnitMode(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%MO(IN|MM)\\*%$"));
-    static const QList<QString> slUnitType(QString("IN|MM").split("|"));
+    static const QList<QString> slUnitType(QString("IN|MM").split(u"|"_s));
     if(match.exactMatch(gLine)) {
         switch(slUnitType.indexOf(match.cap(1))) {
         case Inches:

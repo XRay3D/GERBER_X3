@@ -51,12 +51,12 @@ double DxfGo::rotationAngle() const { return rotationAngle_; }
 
 void DxfGo::setScale(double scaleX, double scaleY) {
     scaleX_ = scaleX, scaleY_ = scaleY;
-    auto scale = [](Path& path, double sx, double sy, const Point& center = Point{}) {
+    auto scale = [](Path& path, double sx, double sy, const ::Point& center = ::Point{}) {
         const bool fl = Area(path) < 0;
-        for(Point& pt: path) {
+        for(auto&& pt: path) {
             const double dAangle = (pi * 2) - angleRadTo(center, pt);
             const double length = distTo(center, pt);
-            pt = Point{cos(dAangle) * length * sx, sin(dAangle) * length * sy};
+            pt = ::Point{cos(dAangle) * length * sx, sin(dAangle) * length * sy};
             pt.x += center.x;
             pt.y += center.y;
         }

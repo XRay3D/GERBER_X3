@@ -37,7 +37,7 @@ PolyLine::PolyLine(SectionParser* sp)
 void PolyLine::parse(CodeData& code) {
     do {
         data.push_back(code);
-        if(code != "VERTEX") {
+        if(code != u"VERTEX"_s) {
             code = sp->nextCode();
             switch(code.code()) {
             case StartWidth:
@@ -56,7 +56,7 @@ void PolyLine::parse(CodeData& code) {
             vertex.append(Dxf::Vertex(sp));
             vertex.last().parse(code);
         }
-    } while(code != "SEQEND");
+    } while(code != u"SEQEND"_s);
     do {
         code = sp->nextCode();
         Entity::parse(code);

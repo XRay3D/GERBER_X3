@@ -13,6 +13,8 @@
 
 using namespace std::literals;
 
+using namespace Qt::Literals;
+
 template <typename... Ts>
 struct Overload : Ts... {
     using Ts::operator()...;
@@ -95,7 +97,7 @@ struct CtreCapTo {
     auto toDouble() const { return toString().toDouble(); }
     auto toInt() const { return toString().toInt(); }
     auto toString() const {
-        // qDebug("QString  D%d S%d", cap.data(), cap.size());
+        // qDebug(u"QString  D%d S%d"_s, cap.data(), cap.size());
         return QString{
             reinterpret_cast<const QChar*>(cap.data()),
             static_cast<qsizetype>(cap.size()),
@@ -220,7 +222,7 @@ inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
     std::vector<uint32_t> unicode;
     size_t i{};
 
-    auto error{"not a UTF-8 string"};
+    auto error{u"not a UTF-8 string"_s};
     while(i < Len) {
         unsigned long uni;
         size_t todo;
@@ -357,8 +359,8 @@ consteval auto tokenize(sv base) {
     std::array<std::pair<sv, E>, N> tokens;
     std::underlying_type_t<E> val{};
     sv name;
-    for(auto&& word: std::ranges::views::split(base, ", "sv)) {
-        for(int i{}; auto&& tok: std::ranges::views::split(word, "="sv)) {
+    for(auto&& word: std::ranges::views::split(base, u", "_ssv)) {
+        for(int i{}; auto&& tok: std::ranges::views::split(word, uu "="_ssv)) {
             sv token{tok.begin(), tok.end()};
             if(i++ == 0)
                 name = trim(token);
@@ -403,11 +405,11 @@ constexpr Impl::sv enumToString(E e) {
         for(auto&& [name, val]: Impl::Tokens<E>) {
             if(U(val) & U(e)) {
                 if(arr.size())
-                    arr += ", ";
+                    arr += u", "_s;
                 arr += name;
             }
         }
-        return ::arr = "{ " + arr + " }";
+        return ::arr = u"{ "_s + arr + u" }"_s;
     }
     return {};
 }

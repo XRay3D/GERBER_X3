@@ -40,7 +40,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
         return false;
     QTextStream in(&file);
     QString line(in.readLine());
-    if(line.startsWith("IN;") && fileName.endsWith(".plt", Qt::CaseInsensitive))
+    if(line.startsWith(u"IN;"_s) && fileName.endsWith(u".plt"_s, Qt::CaseInsensitive))
         return true;
     return false;
 }
@@ -53,10 +53,10 @@ AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
 
 QJsonObject Plugin::info() const {
     return QJsonObject{
-        {        "Name",                   "HPGL"},
-        {     "Version",                    "1.0"},
-        {"VendorAuthor", "X-Ray aka Bakiev Damir"},
-        {        "Info",     "Opening HPGL Files"}
+        {        u"Name"_s,                   u"HPGL"_s},
+        {     u"Version"_s,                    u"1.0"_s},
+        {u"VendorAuthor"_s, u"X-Ray aka Bakiev Damir"_s},
+        {        u"Info"_s,     u"Opening HPGL Files"_s}
     };
 }
 
@@ -70,49 +70,49 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     public:
         Tab(QWidget* parent = nullptr)
             : AbstractFileSettings(parent) {
-            setObjectName(QString::fromUtf8("tabDxf"));
+            setObjectName(QString::fromUtf8(u"tabDxf"_s));
             auto verticalLayout = new QVBoxLayout(this);
-            verticalLayout->setObjectName(QString::fromUtf8("verticalLayout_9"));
+            verticalLayout->setObjectName(QString::fromUtf8(u"verticalLayout_9"_s));
             verticalLayout->setContentsMargins(6, 6, 6, 6);
 
             auto groupBox = new QGroupBox(this);
-            groupBox->setObjectName(QString::fromUtf8("groupBox_3"));
+            groupBox->setObjectName(QString::fromUtf8(u"groupBox_3"_s));
 
             auto formLayout = new QFormLayout(groupBox);
-            formLayout->setObjectName(QString::fromUtf8("formLayout_4"));
+            formLayout->setObjectName(QString::fromUtf8(u"formLayout_4"_s));
             formLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
             formLayout->setContentsMargins(6, 6, 6, 6);
             // DefaultFont
             auto labelDefaultFont = new QLabel(groupBox);
-            labelDefaultFont->setObjectName(QString::fromUtf8("labelDefaultFont"));
+            labelDefaultFont->setObjectName(QString::fromUtf8(u"labelDefaultFont"_s));
             formLayout->setWidget(0, QFormLayout::LabelRole, labelDefaultFont);
 
             fcbxDxfDefaultFont = new QFontComboBox(groupBox);
-            fcbxDxfDefaultFont->setObjectName(QString::fromUtf8("fcbxDxfDefaultFont"));
+            fcbxDxfDefaultFont->setObjectName(QString::fromUtf8(u"fcbxDxfDefaultFont"_s));
             formLayout->setWidget(0, QFormLayout::FieldRole, fcbxDxfDefaultFont);
             // Bold Font
             auto labelBoldFont = new QLabel(groupBox);
-            labelBoldFont->setObjectName(QString::fromUtf8("labelBoldFont"));
+            labelBoldFont->setObjectName(QString::fromUtf8(u"labelBoldFont"_s));
             formLayout->setWidget(1, QFormLayout::LabelRole, labelBoldFont);
 
-            chbxBoldFont = new QCheckBox(" ", groupBox);
-            chbxBoldFont->setObjectName(QString::fromUtf8("chbxDxfBoldFont"));
+            chbxBoldFont = new QCheckBox(u" "_s, groupBox);
+            chbxBoldFont->setObjectName(QString::fromUtf8(u"chbxDxfBoldFont"_s));
             formLayout->setWidget(1, QFormLayout::FieldRole, chbxBoldFont);
             // Italic Font
             auto labelItalicFont = new QLabel(groupBox);
-            labelItalicFont->setObjectName(QString::fromUtf8("labelItalicFont"));
+            labelItalicFont->setObjectName(QString::fromUtf8(u"labelItalicFont"_s));
             formLayout->setWidget(2, QFormLayout::LabelRole, labelItalicFont);
 
-            chbxItalicFont = new QCheckBox(" ", groupBox);
-            chbxItalicFont->setObjectName(QString::fromUtf8("chbxDxfItalicFont"));
+            chbxItalicFont = new QCheckBox(u" "_s, groupBox);
+            chbxItalicFont->setObjectName(QString::fromUtf8(u"chbxDxfItalicFont"_s));
             formLayout->setWidget(2, QFormLayout::FieldRole, chbxItalicFont);
             // Override Fonts
             auto labelOverrideFonts = new QLabel(groupBox);
-            labelOverrideFonts->setObjectName(QString::fromUtf8("labelOverrideFonts"));
+            labelOverrideFonts->setObjectName(QString::fromUtf8(u"labelOverrideFonts"_s));
             formLayout->setWidget(3, QFormLayout::LabelRole, labelOverrideFonts);
 
-            chbxOverrideFonts = new QCheckBox(" ", groupBox);
-            chbxOverrideFonts->setObjectName(QString::fromUtf8("chbxDxfOverrideFonts"));
+            chbxOverrideFonts = new QCheckBox(u" "_s, groupBox);
+            chbxOverrideFonts->setObjectName(QString::fromUtf8(u"chbxDxfOverrideFonts"_s));
             formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
 
             verticalLayout->addWidget(groupBox);
@@ -132,15 +132,15 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
         }
         virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override {
-            settings.beginGroup("Dxf");
-            m_defaultFont = settings.getValue(fcbxDxfDefaultFont, "Arial");
+            settings.beginGroup(u"Dxf"_s);
+            m_defaultFont = settings.getValue(fcbxDxfDefaultFont, u"Arial"_s);
             m_boldFont = settings.getValue(chbxBoldFont, false);
             m_italicFont = settings.getValue(chbxItalicFont, false);
             m_overrideFonts = settings.getValue(chbxOverrideFonts, false);
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override {
-            settings.beginGroup("Dxf");
+            settings.beginGroup(u"Dxf"_s);
             m_defaultFont = settings.setValue(fcbxDxfDefaultFont);
             m_boldFont = settings.setValue(chbxBoldFont);
             m_italicFont = settings.setValue(chbxItalicFont);
@@ -149,7 +149,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
         }
     };
     //    auto tab = new Tab(parent);
-    //    tab->setWindowTitle("HPGL");
+    //    tab->setWindowTitle(u"HPGL"_s);
     return nullptr;
 }
 

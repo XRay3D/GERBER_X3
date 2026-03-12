@@ -26,7 +26,7 @@ const Component dummy;
 sNode::sNode(const QString& name)
     : item(nullptr)
     , component{dummy}
-    , name(name) {
+    , name{name} {
 }
 
 sNode::sNode(const Component& component)
@@ -35,9 +35,7 @@ sNode::sNode(const Component& component)
           Qt::NoPen,
           component.componentitem()->file()->color()))
     , component{component}
-    , name("")
-
-{
+    , name{} {
 }
 
 sNode::~sNode() {
@@ -114,7 +112,7 @@ QVariant sNode::data(const QModelIndex& index, int role) const {
         return {};
     }
 
-    static const QStringList mountType(GbrObj::tr("TH|SMD|BGA|Other").split('|'));
+    static const QStringList mountType(GbrObj::tr("TH|SMD|BGA|Other").split(u'|'));
     if(role == Qt::DisplayRole) {
         switch(index.column()) {
         case 0: /* <field> Manufacturer. */

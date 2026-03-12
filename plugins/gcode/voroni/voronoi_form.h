@@ -55,8 +55,8 @@ class Plugin final : public GCode::Plugin {
 public:
     uint32_t type() const override { return VORONOI; }
     QWidget* createForm() override { return &form; };
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+V"}; }
-    QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+V"_s}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"voronoi-path"_s); }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 

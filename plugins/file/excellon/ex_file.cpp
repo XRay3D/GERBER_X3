@@ -135,10 +135,10 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
             // go.pos = go.path.front();
             go.fill = Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
         }
-        go.name = QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
-        go.type = GraphicObject::FlStamp;                                                               // type{},//{Null};
-                                                                                                        // go.id = int32_t {};                                                                             // id {-1};
-        go.raw = tools_.at(hole.state.toolId);                                                          // raw;
+        go.name = QString(u"T%1|Ø%2"_s).arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)); // name;
+        go.type = GraphicObject::FlStamp;                                                         // type{},//{Null};
+                                                                                                  // go.id = int32_t {};                                                                             // id {-1};
+        go.raw = tools_.at(hole.state.toolId);                                                    // raw;
         retData.emplace_back(go * transform_);
 
         //        if (bool slot = hole.state.path.size(); slot)

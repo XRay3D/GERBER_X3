@@ -65,11 +65,14 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             //            if (file->shortName().endsWith(App::gcSettings().fileExtension()))
             //                return file->shortName();
             //            else
-            return file->shortName() + QStringList({"_TS", "_BS"})[file->side()];
+            return {
+                file->shortName() + QStringList{u"_TS"_s, u"_BS"_s}
+                  [file->side()]
+            };
         case Qt::EditRole:
             return file->shortName();
         case Qt::ToolTipRole:
-            return file->shortName() + "\n" + file->name();
+            return {file->shortName() + u'\n' + file->name()};
         case Qt::CheckStateRole:
             return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
@@ -113,11 +116,11 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
     static std::unordered_map<int, Dialog*> dialog;
-    menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
+    menu.addAction(QIcon::fromTheme(u"document-save"_s), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(id());
     });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
+    menu.addAction(QIcon::fromTheme(u"hint"_s), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
     if(!dialog[id()])
         menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
@@ -130,7 +133,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
             dialog[id()]->show();
         });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme(u"edit-delete"_s), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }
 
 int Node::id() const { return file->id(); }

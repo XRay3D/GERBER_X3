@@ -278,8 +278,8 @@ public:
     }
 
     // QList<T>::node_construct() -> *reinterpret_cast<T*>(n) = t; uses operator=(const Hole&),
-    // but it's deleted, because field "file" is "const",
-    // so, remove "const"
+    // but it's deleted, because field u"file"_s is u"const"_s,
+    // so, remove u"const"_s
     // const File* const file = nullptr;
     File* file = nullptr;
     State state;

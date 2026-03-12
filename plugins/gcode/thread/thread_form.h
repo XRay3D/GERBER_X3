@@ -42,12 +42,12 @@ private:
 
     const QStringList names{tr("Thread On"), tr("Thread Outside"), tr("Thread Inside")};
     static inline const std::array pixmaps{
-        u"prof_on_climb"_qs,
-        u"prof_out_climb"_qs,
-        u"prof_in_climb"_qs,
-        u"prof_on_conv"_qs,
-        u"prof_out_conv"_qs,
-        u"prof_in_conv"_qs,
+        u"prof_on_climb"_s_qs,
+        u"prof_out_climb"_s_qs,
+        u"prof_in_climb"_s_qs,
+        u"prof_on_conv"_s_qs,
+        u"prof_out_conv"_s_qs,
+        u"prof_in_conv"_s_qs,
     };
 
     enum Trimming {
@@ -88,8 +88,8 @@ class GCPluginImpl final : public GCode::Plugin {
 
 public:
     // GCode::Plugin interface
-    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); } // FIXME
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); } // FIXME
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
     QWidget* createForm() override { return &form; };
     uint32_t type() const override { return THREAD; }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
@@ -221,7 +221,7 @@ public:
 
             void readSettings(MySettings& settings) override {
                 // settings.sort = settings.getValue(cbxThreadSort, settings.sort);
-                QFile file{App::settingsPath() + "/threads.json"};
+                QFile file{App::settingsPath() + u"/threads.json"_s};
                 if(file.open(QFile::ReadOnly | QFile::Text)) {
                     auto array = QJsonDocument::fromJson(file.readAll()).array();
                     Settings::threads.clear();
@@ -242,7 +242,7 @@ public:
                     };
             }
             void writeSettings(MySettings& settings) override {
-                QFile file{App::settingsPath() + "/threads.json"};
+                QFile file{App::settingsPath() + u"/threads.json"_s};
                 if(file.open(QFile::WriteOnly | QFile::Text)) {
                     QJsonArray arr;
                     for(auto& thread: Settings::threads)

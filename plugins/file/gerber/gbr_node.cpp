@@ -100,7 +100,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         case Qt::DisplayRole:
             return file->shortName();
         case Qt::ToolTipRole:
-            return file->shortName() + "\n" + file->name();
+            return {file->shortName() + u'\n' + file->name()};
         case Qt::CheckStateRole:
             return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole:
@@ -144,7 +144,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 int Node::id() const { return file->id(); }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
-    menu.addAction(QIcon::fromTheme("hint"), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
+    menu.addAction(QIcon::fromTheme(u"hint"_s), GbrObj::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.setToolTipDuration(0);
     menu.setToolTipsVisible(true);
     menu.addAction(QIcon(), GbrObj::tr("&Show source"), [this] {
@@ -154,7 +154,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
 
         QTextBrowser* textBrowser = new QTextBrowser{dialog};
         textBrowser->setObjectName(u"textBrowser"_s);
-        textBrowser->setFontFamily("JetBrains Mono");
+        textBrowser->setFontFamily(u"JetBrains Mono"_s);
         textBrowser->setLineWrapMode(QTextEdit::NoWrap);
         new SyntaxHighlighter{textBrowser->document()};
         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
@@ -164,7 +164,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         QString s;
         s.reserve(1000000);
         for(const QString& str: file->lines())
-            s += str + '\n';
+            s += str + u'\n';
         textBrowser->setPlainText(s);
         dialog->exec();
         delete dialog;
@@ -176,7 +176,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
             dialog.exec();
         });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("color-management"), GbrObj::tr("Change color"), [tv, this] {
+    menu.addAction(QIcon::fromTheme(u"color-management"_s), GbrObj::tr("Change color"), [tv, this] {
         QColorDialog cd(tv);
         cd.setCurrentColor(file->color());
         if(cd.exec()) {
@@ -187,7 +187,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         }
     });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("document-close"), GbrObj::tr("&Close"), tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme(u"document-close"_s), GbrObj::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
 } // namespace Gerber

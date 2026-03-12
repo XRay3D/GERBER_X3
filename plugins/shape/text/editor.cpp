@@ -71,7 +71,7 @@ void Editor::setupUi() {
     formLayout->addRow(new QLabel{TR("TextEditor", "Pos. Y:", nullptr), this}, dsbxY = new DoubleSpinBox{this});
     formLayout->addRow(new QLabel{TR("TextEditor", "Side:", nullptr), this}, cbxSide = new QComboBox{this});
 
-    cbxSide->addItems(TR("TextEditor", "Top|Bottom").split('|'));
+    cbxSide->addItems(TR("TextEditor", "Top|Bottom").split(u'|'));
 
     dsbxAngle->setDecimals(0);
     dsbxAngle->setMaximum(360.0);
@@ -121,7 +121,7 @@ void Editor::setupUi() {
 
     // Apply
     auto pushButton = new QPushButton{TR("TextEditor", "Apply"), this};
-    pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    pushButton->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
     formLayout->addRow(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
     connect(pushButton, &QPushButton::clicked, this, [this] {
@@ -133,7 +133,7 @@ void Editor::setupUi() {
 
     // Add New
     pushButton = new QPushButton{TR("TextEditor", "Add New"), this};
-    pushButton->setIcon(QIcon::fromTheme("list-add"));
+    pushButton->setIcon(QIcon::fromTheme(u"list-add"_s));
     formLayout->addRow(pushButton);
     connect(pushButton, &QPushButton::clicked, this, [this] {
         plugin->finalizeShape();
@@ -141,9 +141,9 @@ void Editor::setupUi() {
     });
 
     // Close
-    pushButton = new QPushButton{"Close", this};
-    pushButton->setObjectName("pbClose");
-    pushButton->setIcon(QIcon::fromTheme("window-close"));
+    pushButton = new QPushButton{u"Close"_s, this};
+    pushButton->setObjectName(u"pbClose"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"window-close"_s));
     formLayout->addRow(pushButton);
 }
 

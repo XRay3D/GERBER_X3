@@ -88,7 +88,7 @@ DxfGo Circle::toGo() const {
     DxfGo go{id, ~p.value(0), {}}; // return {id, ~p.value(0), {}};
 
     go.raw = radius * 2;
-    go.name = layerName.toUtf8(); // QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
+    go.name = layerName; // QString(u"T%1|Ø%2"_s).arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
     go.fill.emplace_back(~p.value(0));
     go.path.clear();
 

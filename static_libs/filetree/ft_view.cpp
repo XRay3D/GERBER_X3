@@ -139,7 +139,7 @@ void View::setModel(QAbstractItemModel* model) {
 
     header()->setStretchLastSection(false);
     header()->setSectionResizeMode(QHeaderView::Fixed);
-    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, "123456789").width()); // ~6 символов и ...
+    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, u"123456789"_s).width()); // ~6 символов и ...
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
     setItemDelegateForColumn(0, new TextDelegate{this});
@@ -174,7 +174,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         if(auto selectedRows{selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
             menu.addSeparator();
             // TODO rename Action in future.
-            menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
+            menu.addAction(QIcon::fromTheme(u"edit-delete"_s), tr("Delete Selected"), [selectedRows, this]() mutable {
                 std::ranges::sort(selectedRows, std::greater{}, &QModelIndex::row);
                 for(auto&& index: selectedRows)
                     model_->removeRow(index.row(), index.parent());
@@ -187,7 +187,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             auto file = App::project().file(selectedRows.front().data(FileTree::Id).toInt());
             if(file) {
                 menu.addSeparator();
-                menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
+                menu.addAction(QIcon::fromTheme({}), tr("Transform"), [selectedRows, this]() mutable {
                     auto files = selectedRows
                         | std::views::transform(
                             [](auto&& index) { return App::project().file(index.data(FileTree::Id).toInt()); })

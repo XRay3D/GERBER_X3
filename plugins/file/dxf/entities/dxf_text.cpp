@@ -88,22 +88,22 @@ Entity::Type Text::type() const { return Type::TEXT; }
 QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     return debug; // NOTE QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "FM(";
-    debug.nospace() << "\n\tascent: " << fm.ascent();
-    debug.nospace() << "\n\taverageCharWidth: " << fm.averageCharWidth();
-    debug.nospace() << "\n\tcapHeight: " << fm.capHeight();
-    debug.nospace() << "\n\tdescent: " << fm.descent();
-    debug.nospace() << "\n\theight: " << fm.height();
-    debug.nospace() << "\n\tleading: " << fm.leading();
-    debug.nospace() << "\n\tlineSpacing: " << fm.lineSpacing();
-    debug.nospace() << "\n\tlineWidth: " << fm.lineWidth();
-    debug.nospace() << "\n\tmaxWidth: " << fm.maxWidth();
-    debug.nospace() << "\n\tminLeftBearing: " << fm.minLeftBearing();
-    debug.nospace() << "\n\tminRightBearing: " << fm.minRightBearing();
-    debug.nospace() << "\n\toverlinePos: " << fm.overlinePos();
-    debug.nospace() << "\n\tstrikeOutPos: " << fm.strikeOutPos();
-    debug.nospace() << "\n\tunderlinePos: " << fm.underlinePos();
-    debug.nospace() << "\n\txHeight: " << fm.xHeight();
+    debug.nospace() << u"FM("_s;
+    debug.nospace() << u"\n\tascent: "_s << fm.ascent();
+    debug.nospace() << u"\n\taverageCharWidth: "_s << fm.averageCharWidth();
+    debug.nospace() << u"\n\tcapHeight: "_s << fm.capHeight();
+    debug.nospace() << u"\n\tdescent: "_s << fm.descent();
+    debug.nospace() << u"\n\theight: "_s << fm.height();
+    debug.nospace() << u"\n\tleading: "_s << fm.leading();
+    debug.nospace() << u"\n\tlineSpacing: "_s << fm.lineSpacing();
+    debug.nospace() << u"\n\tlineWidth: "_s << fm.lineWidth();
+    debug.nospace() << u"\n\tmaxWidth: "_s << fm.maxWidth();
+    debug.nospace() << u"\n\tminLeftBearing: "_s << fm.minLeftBearing();
+    debug.nospace() << u"\n\tminRightBearing: "_s << fm.minRightBearing();
+    debug.nospace() << u"\n\toverlinePos: "_s << fm.overlinePos();
+    debug.nospace() << u"\n\tstrikeOutPos: "_s << fm.strikeOutPos();
+    debug.nospace() << u"\n\tunderlinePos: "_s << fm.underlinePos();
+    debug.nospace() << u"\n\txHeight: "_s << fm.xHeight();
     debug.nospace() << ')';
     return debug;
 }
@@ -145,7 +145,7 @@ DxfGo Text::toGo() const {
         ascent = fmf.ascent();
         size = fmf.size(0, text);
     }
-    // qDebug("scale X %f Y %f", scaleX, scaleY);
+    // qDebug(u"scale X %f Y %f"_s, scaleX, scaleY);
     switch(horizontalJustType) {
     case Left: // 0
         offset.rx();

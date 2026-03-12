@@ -79,7 +79,7 @@ public:
     Q_ENUM(VerticalJustTypeE)
 
     QString text;
-    QString textStyleName = "STANDARD";
+    QString textStyleName = u"STANDARD"_s;
 
     QPointF pt1;
     QPointF pt2;

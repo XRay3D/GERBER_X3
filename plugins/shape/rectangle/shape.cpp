@@ -83,7 +83,7 @@ void Shape::redraw() {
 
 QString Shape::name() const { return QObject::tr("Rectangle"); }
 
-QIcon Shape::icon() const { return QIcon::fromTheme("draw-rectangle"); }
+QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-rectangle"_s); }
 
 void Shape::setPt(const QPointF& pt) {
     *curHandle = pt;

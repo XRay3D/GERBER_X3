@@ -12,52 +12,52 @@
 // #include "a_pch.h"
 #include <QMessageLogContext>
 
-#define ATTRIBUTES_OFF() "\033[m"
+#define ATTRIBUTES_OFF() u"\033[m"_s
 
-#define SET_FOREGROUND_COLOR(R, G, B) "\033[38;2" \
-                                      ";" #R      \
-                                      ";" #G      \
-                                      ";" #B "m"
+#define SET_FOREGROUND_COLOR(R, G, B) u"\033[38;2"_s \
+                                      u";"_s #R      \
+                                      u";"_s #G      \
+                                      u";"_s #B u"m"_s
 
-#define SET_BACKGROUND_COLOR(R, G, B) "\033[48;2" \
-                                      ";" #R      \
-                                      ";" #G      \
-                                      ";" #B "m"
+#define SET_BACKGROUND_COLOR(R, G, B) u"\033[48;2"_s \
+                                      u";"_s #R      \
+                                      u";"_s #G      \
+                                      u";"_s #B u"m"_s
 
 //    ANSI escape color codes :
-#define BG_BLACK()   "\033[40m"
-#define BG_BLUE()    "\033[44m"
-#define BG_CYAN()    "\033[46m"
-#define BG_GREEN()   "\033[42m"
-#define BG_MAGENTA() "\033[45m"
-#define BG_RED()     "\033[41m"
-#define BG_WHITE()   "\033[47m"
-#define BG_YELLOW()  "\033[43m"
-#define FG_BLACK()   "\033[30m"
-#define FG_BLUE()    "\033[34m"
-#define FG_CYAN()    "\033[36m"
-#define FG_GREEN()   "\033[32m"
-#define FG_MAGENTA() "\033[35m"
-#define FG_RED()     "\033[31m"
-#define FG_WHITE()   "\033[37m"
-#define FG_YELLOW()  "\033[33m"
+#define BG_BLACK()   u"\033[40m"_s
+#define BG_BLUE()    u"\033[44m"_s
+#define BG_CYAN()    u"\033[46m"_s
+#define BG_GREEN()   u"\033[42m"_s
+#define BG_MAGENTA() u"\033[45m"_s
+#define BG_RED()     u"\033[41m"_s
+#define BG_WHITE()   u"\033[47m"_s
+#define BG_YELLOW()  u"\033[43m"_s
+#define FG_BLACK()   u"\033[30m"_s
+#define FG_BLUE()    u"\033[34m"_s
+#define FG_CYAN()    u"\033[36m"_s
+#define FG_GREEN()   u"\033[32m"_s
+#define FG_MAGENTA() u"\033[35m"_s
+#define FG_RED()     u"\033[31m"_s
+#define FG_WHITE()   u"\033[37m"_s
+#define FG_YELLOW()  u"\033[33m"_s
 
-#define BG_BRIGHT_BLACK()   "\033[100m"
-#define BG_BRIGHT_BLUE()    "\033[104m"
-#define BG_BRIGHT_CYAN()    "\033[106m"
-#define BG_BRIGHT_GREEN()   "\033[102m"
-#define BG_BRIGHT_MAGENTA() "\033[105m"
-#define BG_BRIGHT_RED()     "\033[101m"
-#define BG_BRIGHT_WHITE()   "\033[107m"
-#define BG_BRIGHT_YELLOW()  "\033[103m"
-#define FG_BRIGHT_BLACK()   "\033[90m"
-#define FG_BRIGHT_BLUE()    "\033[94m"
-#define FG_BRIGHT_CYAN()    "\033[96m"
-#define FG_BRIGHT_GREEN()   "\033[92m"
-#define FG_BRIGHT_MAGENTA() "\033[95m"
-#define FG_BRIGHT_RED()     "\033[91m"
-#define FG_BRIGHT_WHITE()   "\033[97m"
-#define FG_BRIGHT_YELLOW()  "\033[93m"
+#define BG_BRIGHT_BLACK()   u"\033[100m"_s
+#define BG_BRIGHT_BLUE()    u"\033[104m"_s
+#define BG_BRIGHT_CYAN()    u"\033[106m"_s
+#define BG_BRIGHT_GREEN()   u"\033[102m"_s
+#define BG_BRIGHT_MAGENTA() u"\033[105m"_s
+#define BG_BRIGHT_RED()     u"\033[101m"_s
+#define BG_BRIGHT_WHITE()   u"\033[107m"_s
+#define BG_BRIGHT_YELLOW()  u"\033[103m"_s
+#define FG_BRIGHT_BLACK()   u"\033[90m"_s
+#define FG_BRIGHT_BLUE()    u"\033[94m"_s
+#define FG_BRIGHT_CYAN()    u"\033[96m"_s
+#define FG_BRIGHT_GREEN()   u"\033[92m"_s
+#define FG_BRIGHT_MAGENTA() u"\033[95m"_s
+#define FG_BRIGHT_RED()     u"\033[91m"_s
+#define FG_BRIGHT_WHITE()   u"\033[97m"_s
+#define FG_BRIGHT_YELLOW()  u"\033[93m"_s
 
 inline void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
     //    ANSI escape color codes :
@@ -84,28 +84,28 @@ inline void myMessageOutput(QtMsgType type, const QMessageLogContext& context, c
     const char* function = context.function ? context.function : "";
     switch(type) {
     case QtDebugMsg:
-        fprintf(stderr, SET_BACKGROUND_COLOR(127, 255, 255) FG_BLACK() "Debug" ATTRIBUTES_OFF() ": %s" //
-            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+        fprintf(stderr, SET_BACKGROUND_COLOR(127, 255, 255) FG_BLACK() u"Debug"_s ATTRIBUTES_OFF() u": %s"_s //
+            SET_FOREGROUND_COLOR(127, 127, 127) u"\n\t(%s:%u, %s)\n"_s ATTRIBUTES_OFF(),
             localMsg.constData(), file, context.line, function);
         break;
     case QtInfoMsg:
-        fprintf(stderr, SET_BACKGROUND_COLOR(255, 255, 0) FG_BLACK() "Info" ATTRIBUTES_OFF() ": %s" //
-            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 255, 0) FG_BLACK() u"Info"_s ATTRIBUTES_OFF() u": %s"_s //
+            SET_FOREGROUND_COLOR(127, 127, 127) u"\n\t(%s:%u, %s)\n"_s ATTRIBUTES_OFF(),
             localMsg.constData(), file, context.line, function);
         break;
     case QtWarningMsg:
-        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 255) FG_BLACK() "Warning" ATTRIBUTES_OFF() ": %s" //
-            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 255) FG_BLACK() u"Warning"_s ATTRIBUTES_OFF() u": %s"_s //
+            SET_FOREGROUND_COLOR(127, 127, 127) u"\n\t(%s:%u, %s)\n"_s ATTRIBUTES_OFF(),
             localMsg.constData(), file, context.line, function);
         break;
     case QtCriticalMsg:
-        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 0) FG_BLACK() "Critical" ATTRIBUTES_OFF() ": %s" //
-            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 0) FG_BLACK() u"Critical"_s ATTRIBUTES_OFF() u": %s"_s //
+            SET_FOREGROUND_COLOR(127, 127, 127) u"\n\t(%s:%u, %s)\n"_s ATTRIBUTES_OFF(),
             localMsg.constData(), file, context.line, function);
         break;
     case QtFatalMsg:
-        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 0) FG_BLACK() "Fatal" ATTRIBUTES_OFF() ": %s" //
-            SET_FOREGROUND_COLOR(127, 127, 127) "\n\t(%s:%u, %s)\n" ATTRIBUTES_OFF(),
+        fprintf(stderr, SET_BACKGROUND_COLOR(255, 0, 0) FG_BLACK() u"Fatal"_s ATTRIBUTES_OFF() u": %s"_s //
+            SET_FOREGROUND_COLOR(127, 127, 127) u"\n\t(%s:%u, %s)\n"_s ATTRIBUTES_OFF(),
             localMsg.constData(), file, context.line, function);
         break;
     }

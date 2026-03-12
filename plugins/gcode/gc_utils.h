@@ -77,12 +77,12 @@
 
 //    inline QString g0() {
 //        gCode_ = G00;
-//        return "G0";
+//        return u"G0"_s;
 //    }
 
 //    inline QString g1() {
 //        gCode_ = G01;
-//        return "G1";
+//        return u"G1"_s;
 //    }
 
 //    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed) {
@@ -105,7 +105,7 @@
 //            if (index != -1) {
 //                if (formatFlags[AlwaysG + index] || lastValues[index] != str) {
 //                    lastValues[index] = str;
-//                    ret += str + (formatFlags[SpaceG + index] ? " " : "");
+//                    ret += str + (formatFlags[SpaceG + index] ? u" "_s : "");
 //                }
 //            }
 //        }
@@ -119,7 +119,7 @@
 //    inline QString speed(int val) { return 'S' + QString::number(val); }
 //    inline QString format(double val) {
 //        QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
-//        if (str.contains('e'))
+//        if (str.contains(u'e'))
 //            return QString::number(val, 'f', 3);
 //        return str;
 //    }

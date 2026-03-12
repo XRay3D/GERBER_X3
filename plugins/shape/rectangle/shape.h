@@ -60,7 +60,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface *
     uint32_t type() const override { return Gi::Type::ShRectangle; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-rectangle"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-rectangle"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
             this,

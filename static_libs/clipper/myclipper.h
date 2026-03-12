@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "cancelation.h"
+// #include "cancelation.h"
 #include "mvector.h"
 #include <clipper2/clipper.h>
 // #include "clipper.hpp"
@@ -19,6 +19,8 @@
 #include <QPolygonF>
 #include <numbers>
 #include <ranges>
+
+using namespace Qt::Literals;
 
 enum {
     IconSize = 24
@@ -143,7 +145,7 @@ inline Clipper2Lib::Paths<T>& ReversePaths(Clipper2Lib::Paths<T>& paths) {
 QDataStream& operator<<(QDataStream& stream, const Point& pt);
 QDataStream& operator>>(QDataStream& stream, Point& pt);
 inline QDebug operator<<(QDebug d, const Point& p) {
-    return d << "Point(" << p.x << ", " << p.y << ")";
+    return d << "Point(" << p.x << ", " << p.y << ')';
 }
 
 //----Container helpers----------------------------------------------------------------

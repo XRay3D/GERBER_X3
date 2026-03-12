@@ -119,8 +119,8 @@ DxfGo MText::toGo() const {
     double scaleY = {};
 
     QString text(textString);
-    text.replace("\\P", "\n");
-    QStringList list(text.split(';').back().split('\n'));
+    text.replace(u"\\P"_s, u"\n"_s);
+    QStringList list(text.split(u';').back().split(u'\n'));
     QFont font;
     QPointF offset;
     QSizeF size;

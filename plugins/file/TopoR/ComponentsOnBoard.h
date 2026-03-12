@@ -5,7 +5,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -34,14 +34,14 @@ public:
             /// Номер контакта компонента.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("padNum", DataType = "int")] public int _padNum;
+            // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
             int _padNum = 0;
 
             /// <summary>
             /// Ссылка на стек контактных площадок.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("PadstackRef")] public PadstackRef _PadstackRef;
+            // ORIGINAL LINE: [XmlElement(u"PadstackRef"_s)] public PadstackRef _PadstackRef;
             PadstackRef* _PadstackRef;
             virtual ~CompInstance_Pin() {
                 delete _PadstackRef;
@@ -53,7 +53,7 @@ public:
             /// Точка привязки объекта.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+            // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
             Org* _Org;
         };
 
@@ -66,28 +66,28 @@ public:
             /// Ссылка на монтажное отверстие в посадочном месте.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("mntholeRef")] public string _mntholeRef;
+            // ORIGINAL LINE: [XmlAttribute(u"mntholeRef"_s)] public string _mntholeRef;
             QString _mntholeRef;
 
             /// <summary>
             /// Задаёт угол в градусах c точностью до тысячных долей.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+            // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
             float _angle = 0.0F;
 
             /// <summary>
             /// Ссылка на стек контактных площадок.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("PadstackRef")] public PadstackRef _PadstackRef;
+            // ORIGINAL LINE: [XmlElement(u"PadstackRef"_s)] public PadstackRef _PadstackRef;
             PadstackRef* _PadstackRef;
 
             /// <summary>
             /// Cсылка на цепь.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+            // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
             NetRef* _NetRef;
             virtual ~CompInstance_Mnthole() {
                 delete _PadstackRef;
@@ -109,14 +109,14 @@ public:
                 /// Задаёт угол в градусах c точностью до тысячных долей.
                 /// </summary>
             public:
-                // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+                // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
                 float _angle = 0.0F;
 
                 /// <summary>
                 /// Параметр надписей и ярлыков: зеркальность отображения.
                 /// </summary>
 
-                // ORIGINAL LINE: [XmlAttribute("mirror")] public Bool _mirror;
+                // ORIGINAL LINE: [XmlAttribute(u"mirror"_s)] public Bool _mirror;
                 Bool _mirror = static_cast<Bool>(0);
                 virtual ~CompInstance_Attribute_Label() {
                     delete _LayerRef;
@@ -131,14 +131,14 @@ public:
                 /// Параметр надписей (ярлыков): способ выравнивания текста.
                 /// </summary>
 
-                // ORIGINAL LINE: [XmlAttribute("align")] public align _align;
+                // ORIGINAL LINE: [XmlAttribute(u"align"_s)] public align _align;
                 align _align = static_cast<align>(0);
 
                 /// <summary>
                 /// Флаг видимости.
                 /// </summary>
 
-                // ORIGINAL LINE: [XmlAttribute("visible")] public Bool _visible;
+                // ORIGINAL LINE: [XmlAttribute(u"visible"_s)] public Bool _visible;
                 Bool _visible = static_cast<Bool>(0);
 
                 // ORIGINAL LINE: [XmlIgnore] public bool _visibleSpecified
@@ -148,21 +148,21 @@ public:
                 /// Ссылка на слой.
                 /// </summary>
 
-                // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+                // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
                 LayerRef* _LayerRef;
 
                 /// <summary>
                 /// Ссылка на стиль надписей.
                 /// </summary>
 
-                // ORIGINAL LINE: [XmlElement("TextStyleRef")] public TextStyleRef _TextStyleRef;
+                // ORIGINAL LINE: [XmlElement(u"TextStyleRef"_s)] public TextStyleRef _TextStyleRef;
                 TextStyleRef* _TextStyleRef;
 
                 /// <summary>
                 /// Точка привязки объекта.
                 /// </summary>
 
-                // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+                // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
                 Org* _Org;
             };
 
@@ -170,28 +170,28 @@ public:
             /// Тип предопределённого атрибута компонента.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("type")] public type _type;
+            // ORIGINAL LINE: [XmlAttribute(u"type"_s)] public type _type;
             type _type = static_cast<type>(0);
 
             /// <summary>
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+            // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
             QString _name;
 
             /// <summary>
             /// Значение атрибута.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("value")] public string _value;
+            // ORIGINAL LINE: [XmlAttribute(u"value"_s)] public string _value;
             QString _value;
 
             /// <summary>
             /// Ярлыки.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Label")] public List<CompInstance_Attribute_Label> _Labels;
+            // ORIGINAL LINE: [XmlElement(u"Label"_s)] public List<CompInstance_Attribute_Label> _Labels;
             std::vector<CompInstance_Attribute_Label*> _Labels;
             bool ShouldSerialize_Labels();
         };
@@ -200,7 +200,7 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
@@ -208,7 +208,7 @@ public:
         /// Если не задан, то будет создан при импорте файла.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("uniqueId")] public string _uniqueId;
+        // ORIGINAL LINE: [XmlAttribute(u"uniqueId"_s)] public string _uniqueId;
         QString _uniqueId;
 
         /// <summary>
@@ -216,21 +216,21 @@ public:
         /// </summary>
         /// <remarks>!Значение Both возможно только при описании запретов размещения.</remarks>
 
-        // ORIGINAL LINE: [XmlAttribute("side")] public side _side;
+        // ORIGINAL LINE: [XmlAttribute(u"side"_s)] public side _side;
         side _side = static_cast<side>(0);
 
         /// <summary>
         /// Задаёт угол в градусах c точностью до тысячных долей.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+        // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
         float _angle = 0.0F;
 
         /// <summary>
         /// Признак фиксации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("fixed")] public Bool _fixed;
+        // ORIGINAL LINE: [XmlAttribute(u"fixed"_s)] public Bool _fixed;
         Bool _fixed = static_cast<Bool>(0);
         virtual ~CompInstance() {
             delete _ComponentRef;
@@ -245,42 +245,42 @@ public:
         /// Ссылка на схемный компонент.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("ComponentRef")] public ComponentRef _ComponentRef;
+        // ORIGINAL LINE: [XmlElement(u"ComponentRef"_s)] public ComponentRef _ComponentRef;
         ComponentRef* _ComponentRef;
 
         /// <summary>
         /// Ссылка на посадочное место.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("FootprintRef")] public FootprintRef _FootprintRef;
+        // ORIGINAL LINE: [XmlElement(u"FootprintRef"_s)] public FootprintRef _FootprintRef;
         FootprintRef* _FootprintRef;
 
         /// <summary>
         /// Точка привязки объекта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+        // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
         Org* _Org;
 
         /// <summary>
         /// Контакты компонента на плате.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Pins")][XmlArrayItem("Pin")] public List<CompInstance_Pin> _Pins;
+        // ORIGINAL LINE: [XmlArray(u"Pins"_s)][XmlArrayItem(u"Pin"_s)] public List<CompInstance_Pin> _Pins;
         std::vector<CompInstance_Pin*> _Pins;
         bool ShouldSerialize_Pins();
         /// <summary>
         /// Монтажные отверстия.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Mntholes")][XmlArrayItem("Mnthole")] public List<CompInstance_Mnthole> _Mntholes;
+        // ORIGINAL LINE: [XmlArray(u"Mntholes"_s)][XmlArrayItem(u"Mnthole"_s)] public List<CompInstance_Mnthole> _Mntholes;
         std::vector<CompInstance_Mnthole*> _Mntholes;
         bool ShouldSerialize_Mntholes();
         /// <summary>
         /// Атрибуты компонента.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Attributes")][XmlArrayItem("Attribute")] public List<CompInstance_Attribute> _Attributes;
+        // ORIGINAL LINE: [XmlArray(u"Attributes"_s)][XmlArrayItem(u"Attribute"_s)] public List<CompInstance_Attribute> _Attributes;
         std::vector<CompInstance_Attribute*> _Attributes;
         bool ShouldSerialize_Attributes();
 
@@ -305,21 +305,21 @@ public:
         /// Сторона объекта.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("side")] public side _side;
+        // ORIGINAL LINE: [XmlAttribute(u"side"_s)] public side _side;
         side _side = static_cast<side>(0);
 
         /// <summary>
         /// Задаёт угол в градусах c точностью до тысячных долей.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+        // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
         float _angle = 0.0F;
 
         /// <summary>
         /// Признак фиксации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("fixed")] public Bool _fixed;
+        // ORIGINAL LINE: [XmlAttribute(u"fixed"_s)] public Bool _fixed;
         Bool _fixed = static_cast<Bool>(0);
         virtual ~FreePad() {
             delete _PadstackRef;
@@ -334,21 +334,21 @@ public:
         /// Ссылка на стек контактных площадок.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("PadstackRef")] public PadstackRef _PadstackRef;
+        // ORIGINAL LINE: [XmlElement(u"PadstackRef"_s)] public PadstackRef _PadstackRef;
         PadstackRef* _PadstackRef;
 
         /// <summary>
         /// Cсылка на цепь.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
         NetRef* _NetRef;
 
         /// <summary>
         /// Точка привязки объекта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+        // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
         Org* _Org;
     };
 
@@ -356,21 +356,21 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Описание компонентов на плате (инстанции компонентов)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Components")][XmlArrayItem("CompInstance")] public List<CompInstance> _Components;
+    // ORIGINAL LINE: [XmlArray(u"Components"_s)][XmlArrayItem(u"CompInstance"_s)] public List<CompInstance> _Components;
     std::vector<CompInstance*> _Components;
     bool ShouldSerialize_Components();
     /// <summary>
     /// Описание одиночных контактов.(инстанции компонентов)
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("FreePads")][XmlArrayItem("FreePad")] public List<FreePad> _FreePads;
+    // ORIGINAL LINE: [XmlArray(u"FreePads"_s)][XmlArrayItem(u"FreePad"_s)] public List<FreePad> _FreePads;
     std::vector<FreePad*> _FreePads;
     bool ShouldSerialize_FreePads();
 
@@ -382,37 +382,37 @@ public:
     /// <summary>
     /// Добавление компонента
     /// </summary>
-    /// <param name="name">Имя нового компонента. Если имя неуникально, будет добавлен префикс _</param>
-    /// <param name="units">текущие единицы измерения</param>
-    /// <param name="componentRef">ссылка на библиотеку компонентов</param>
-    /// <param name="footprintRef">ссылка на библиотеку посадочных мест</param>
+    /// <param name=u"name"_s>Имя нового компонента. Если имя неуникально, будет добавлен префикс _</param>
+    /// <param name=u"units"_s>текущие единицы измерения</param>
+    /// <param name=u"componentRef"_s>ссылка на библиотеку компонентов</param>
+    /// <param name=u"footprintRef"_s>ссылка на библиотеку посадочных мест</param>
     /// <returns>Имя нового компонента</returns>
     QString AddComponent(const QString& name, units units, const QString& componentRef, const QString& footprintRef);
     /// <summary>
     /// Удаление компонента по имени
     /// </summary>
-    /// <param name="name">уникальный имя компонента</param>
+    /// <param name=u"name"_s>уникальный имя компонента</param>
     /// <returns>true - если было произведено удаление, иначе (компонент не найден) - false</returns>
     bool RemoveComponent(const QString& name);
     /// <summary>
     /// Индекс компонента
     /// </summary>
-    /// <param name="name">уникальное имя компонента</param>
+    /// <param name=u"name"_s>уникальное имя компонента</param>
     /// <returns>индекс компонента или -1, если компонент отсутствует</returns>
     int ComponentIndexOf(const QString& name);
 
     /// <summary>
     /// Переименование компонента
     /// </summary>
-    /// <param name="oldname">старое имя компонента</param>
-    /// <param name="newname">новое имя компонента</param>
+    /// <param name=u"oldname"_s>старое имя компонента</param>
+    /// <param name=u"newname"_s>новое имя компонента</param>
     /// <returns>индекс компонента, если было произведено переименование, -1, если компонент не найден</returns>
     int RenameComponent(const QString& oldname, const QString& newname);
 
     /// <summary>
     /// Генерация уникального идентификатора
     /// </summary>
-    /// <returns>string like "ABCDEFGH"</returns>
+    /// <returns>string like u"ABCDEFGH"_s</returns>
     QString UniqueId();
 
     /*************************************************************************************/

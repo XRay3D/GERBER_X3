@@ -5,7 +5,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -26,7 +26,7 @@ public:
         /// Настройка DRC: выводить отчёт в указанный файл.
         /// </summary
     public:
-        // ORIGINAL LINE: [XmlAttribute("createLog")] public Bool _createLog;
+        // ORIGINAL LINE: [XmlAttribute(u"createLog"_s)] public Bool _createLog;
         Bool _createLog = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _createLogSpecified
@@ -36,28 +36,28 @@ public:
         /// Настройка DRC: файл для вывода отчета.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("logFileName")] public string _logFileName;
+        // ORIGINAL LINE: [XmlAttribute(u"logFileName"_s)] public string _logFileName;
         QString _logFileName;
 
         /// <summary>
         /// Настройка DRC: максимальное количество сообщений.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("messageLimit", DataType = "int")] public int _messageLimit;
+        // ORIGINAL LINE: [XmlAttribute(u"messageLimit"_s, DataType = u"int"_s)] public int _messageLimit;
         int _messageLimit = 0;
 
         /// <summary>
         /// Настройка DRC: допуск.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("tolerance", DataType = "float")] public float _tolerance;
+        // ORIGINAL LINE: [XmlAttribute(u"tolerance"_s, DataType = u"float"_s)] public float _tolerance;
         float _tolerance = 0.0F;
 
         /// <summary>
         /// Настройка DRC: проверка целостности цепей.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("checkNetIntegrity")] public Bool _checkNetIntegrity;
+        // ORIGINAL LINE: [XmlAttribute(u"checkNetIntegrity"_s)] public Bool _checkNetIntegrity;
         Bool _checkNetIntegrity = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _checkNetIntegritySpecified
@@ -67,7 +67,7 @@ public:
         /// Настройка DRC: проверка ширины проводников.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("checkNetWidth")] public Bool _checkNetWidth;
+        // ORIGINAL LINE: [XmlAttribute(u"checkNetWidth"_s)] public Bool _checkNetWidth;
         Bool _checkNetWidth = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _checkNetWidthSpecified
@@ -77,7 +77,7 @@ public:
         /// Настройка DRC: проверка зазоров.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("checkClearances")] public Bool _checkClearances;
+        // ORIGINAL LINE: [XmlAttribute(u"checkClearances"_s)] public Bool _checkClearances;
         Bool _checkClearances = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _checkClearancesSpecified
@@ -87,7 +87,7 @@ public:
         /// Настройка DRC: проверять зазоры между надписями и областями металлизации (полигонами).
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("textToCopper")] public Bool _textToCopper;
+        // ORIGINAL LINE: [XmlAttribute(u"textToCopper"_s)] public Bool _textToCopper;
         Bool _textToCopper = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _textToCopperSpecified
@@ -97,7 +97,7 @@ public:
         /// Настройка DRC: проверять зазоры между надписями и запретами.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("textToKeepout")] public Bool _textToKeepout;
+        // ORIGINAL LINE: [XmlAttribute(u"textToKeepout"_s)] public Bool _textToKeepout;
         Bool _textToKeepout = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _textToKeepoutSpecified
@@ -107,7 +107,7 @@ public:
         /// Настройка DRC: проверять зазоры между надписями и переходными отверстиями.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("textToVia")] public Bool _textToVia;
+        // ORIGINAL LINE: [XmlAttribute(u"textToVia"_s)] public Bool _textToVia;
         Bool _textToVia = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _textToViaSpecified
@@ -117,7 +117,7 @@ public:
         /// Настройка DRC: проверять зазоры между надписями и проводниками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("textToWire")] public Bool _textToWire;
+        // ORIGINAL LINE: [XmlAttribute(u"textToWire"_s)] public Bool _textToWire;
         Bool _textToWire = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _textToWireSpecified
@@ -127,7 +127,7 @@ public:
         /// Настройка DRC: проверять зазоры между надписями и контактными площадками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("textToPad")] public Bool _textToPad;
+        // ORIGINAL LINE: [XmlAttribute(u"textToPad"_s)] public Bool _textToPad;
         Bool _textToPad = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _textToPadSpecified
@@ -137,7 +137,7 @@ public:
         /// Настройка DRC: проверять зазоры от надписей до края платы.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("textToBoard")] public Bool _textToBoard;
+        // ORIGINAL LINE: [XmlAttribute(u"textToBoard"_s)] public Bool _textToBoard;
         Bool _textToBoard = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _textToBoardSpecified
@@ -147,7 +147,7 @@ public:
         /// Настройка DRC: проверять зазор между полигонами.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("copperToCopper")] public Bool _copperToCopper;
+        // ORIGINAL LINE: [XmlAttribute(u"copperToCopper"_s)] public Bool _copperToCopper;
         Bool _copperToCopper = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _copperToCopperSpecified
@@ -157,7 +157,7 @@ public:
         /// Настройка DRC: проверять зазор между полигонами и запретами.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("copperToKeepout")] public Bool _copperToKeepout;
+        // ORIGINAL LINE: [XmlAttribute(u"copperToKeepout"_s)] public Bool _copperToKeepout;
         Bool _copperToKeepout = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _copperToKeepoutSpecified
@@ -167,7 +167,7 @@ public:
         /// Настройка DRC: проверять зазор между полигонами и проводниками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("copperToWire")] public Bool _copperToWire;
+        // ORIGINAL LINE: [XmlAttribute(u"copperToWire"_s)] public Bool _copperToWire;
         Bool _copperToWire = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _copperToWireSpecified
@@ -177,7 +177,7 @@ public:
         /// Настройка DRC: проверять зазор между полигонами и переходными отверстиями.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("copperToVia")] public Bool _copperToVia;
+        // ORIGINAL LINE: [XmlAttribute(u"copperToVia"_s)] public Bool _copperToVia;
         Bool _copperToVia = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _copperToViaSpecified
@@ -187,7 +187,7 @@ public:
         /// Настройка DRC: проверять зазор между полигонами и контактными площадками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("copperToPad")] public Bool _copperToPad;
+        // ORIGINAL LINE: [XmlAttribute(u"copperToPad"_s)] public Bool _copperToPad;
         Bool _copperToPad = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _copperToPadSpecified
@@ -197,7 +197,7 @@ public:
         /// Настройка DRC: проверять зазор между полигонами и краем платы.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("copperToBoard")] public Bool _copperToBoard;
+        // ORIGINAL LINE: [XmlAttribute(u"copperToBoard"_s)] public Bool _copperToBoard;
         Bool _copperToBoard = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _copperToBoardSpecified
@@ -207,7 +207,7 @@ public:
         /// Настройка DRC: проверять зазоры между проводниками и запретами.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("wireToKeepout")] public Bool _wireToKeepout;
+        // ORIGINAL LINE: [XmlAttribute(u"wireToKeepout"_s)] public Bool _wireToKeepout;
         Bool _wireToKeepout = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _wireToKeepoutSpecified
@@ -217,7 +217,7 @@ public:
         /// Настройка DRC: проверять зазоры между переходными отверстиями и запретами.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("viaToKeepout")] public Bool _viaToKeepout;
+        // ORIGINAL LINE: [XmlAttribute(u"viaToKeepout"_s)] public Bool _viaToKeepout;
         Bool _viaToKeepout = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _viaToKeepoutSpecified
@@ -227,7 +227,7 @@ public:
         /// Настройка DRC: проверка зазоров между контактными площадками и запретами.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("padToKeepout")] public Bool _padToKeepout;
+        // ORIGINAL LINE: [XmlAttribute(u"padToKeepout"_s)] public Bool _padToKeepout;
         Bool _padToKeepout = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _padToKeepoutSpecified
@@ -237,7 +237,7 @@ public:
         /// Настройка DRC: проверять зазоры между проводниками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("wireToWire")] public Bool _wireToWire;
+        // ORIGINAL LINE: [XmlAttribute(u"wireToWire"_s)] public Bool _wireToWire;
         Bool _wireToWire = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _wireToWireSpecified
@@ -247,7 +247,7 @@ public:
         /// Настройка DRC: проверять зазоры между проводниками и переходными отверстиями.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("wireToVia")] public Bool _wireToVia;
+        // ORIGINAL LINE: [XmlAttribute(u"wireToVia"_s)] public Bool _wireToVia;
         Bool _wireToVia = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _wireToViaSpecified
@@ -257,7 +257,7 @@ public:
         /// Настройка DRC: проверять зазоры между проводниками и контактными площадками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("wireToPad")] public Bool _wireToPad;
+        // ORIGINAL LINE: [XmlAttribute(u"wireToPad"_s)] public Bool _wireToPad;
         Bool _wireToPad = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _wireToPadSpecified
@@ -267,7 +267,7 @@ public:
         /// Настройка DRC: проверять зазоры от проводников до края платы.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("wireToBoard")] public Bool _wireToBoard;
+        // ORIGINAL LINE: [XmlAttribute(u"wireToBoard"_s)] public Bool _wireToBoard;
         Bool _wireToBoard = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _wireToBoardSpecified
@@ -277,7 +277,7 @@ public:
         /// Настройка DRC: проверять зазоры между переходными отверстиями.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("viaToVia")] public Bool _viaToVia;
+        // ORIGINAL LINE: [XmlAttribute(u"viaToVia"_s)] public Bool _viaToVia;
         Bool _viaToVia = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _viaToViaSpecified
@@ -287,7 +287,7 @@ public:
         /// Настройка DRC: проверять зазоры между переходными отверстиями и контактными площадками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("viaToPad")] public Bool _viaToPad;
+        // ORIGINAL LINE: [XmlAttribute(u"viaToPad"_s)] public Bool _viaToPad;
         Bool _viaToPad = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _viaToPadSpecified
@@ -297,7 +297,7 @@ public:
         /// Настройка DRC: проверять зазоры от переходных отверстий до края платы.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("viaToBoard")] public Bool _viaToBoard;
+        // ORIGINAL LINE: [XmlAttribute(u"viaToBoard"_s)] public Bool _viaToBoard;
         Bool _viaToBoard = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _viaToBoardSpecified
@@ -307,7 +307,7 @@ public:
         /// Настройка DRC: проверка зазоров между контактными площадками.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("padToPad")] public Bool _padToPad;
+        // ORIGINAL LINE: [XmlAttribute(u"padToPad"_s)] public Bool _padToPad;
         Bool _padToPad = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _padToPadSpecified
@@ -317,7 +317,7 @@ public:
         /// Настройка DRC: проверка зазоров между контактными площадками и краем платы.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("padToBoard")] public Bool _padToBoard;
+        // ORIGINAL LINE: [XmlAttribute(u"padToBoard"_s)] public Bool _padToBoard;
         Bool _padToBoard = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _padToBoardSpecified
@@ -343,56 +343,56 @@ public:
                 /// Настройка вывода файла Gerber: выводить контур платы.
                 /// </summary
             public:
-                // ORIGINAL LINE: [XmlAttribute("board")] public Bool _board;
+                // ORIGINAL LINE: [XmlAttribute(u"board"_s)] public Bool _board;
                 Bool _board = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Geber, DXF: выводить проводники.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("wires")] public Bool _wires;
+                // ORIGINAL LINE: [XmlAttribute(u"wires"_s)] public Bool _wires;
                 Bool _wires = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить области металлизации (полигоны).
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("coppers")] public Bool _coppers;
+                // ORIGINAL LINE: [XmlAttribute(u"coppers"_s)] public Bool _coppers;
                 Bool _coppers = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить контактные площадки.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("padstacks")] public Bool _padstacks;
+                // ORIGINAL LINE: [XmlAttribute(u"padstacks"_s)] public Bool _padstacks;
                 Bool _padstacks = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить переходные отверстия.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("vias")] public Bool _vias;
+                // ORIGINAL LINE: [XmlAttribute(u"vias"_s)] public Bool _vias;
                 Bool _vias = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber и DXF: выводить надписи.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("texts")] public Bool _texts;
+                // ORIGINAL LINE: [XmlAttribute(u"texts"_s)] public Bool _texts;
                 Bool _texts = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить ярлыки.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("labels")] public Bool _labels;
+                // ORIGINAL LINE: [XmlAttribute(u"labels"_s)] public Bool _labels;
                 Bool _labels = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber: выводить детали на механических слоях.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("details")] public Bool _details;
+                // ORIGINAL LINE: [XmlAttribute(u"details"_s)] public Bool _details;
                 Bool _details = static_cast<Bool>(0);
 
                 /// <summary>
@@ -400,7 +400,7 @@ public:
                 /// </summary
                 /// <remarks>! В TopoR реперные знаки не поддерживаются.</remarks>
 
-                // ORIGINAL LINE: [XmlAttribute("fiducials")] public Bool _fiducials;
+                // ORIGINAL LINE: [XmlAttribute(u"fiducials"_s)] public Bool _fiducials;
                 Bool _fiducials = static_cast<Bool>(0);
             };
 
@@ -409,49 +409,49 @@ public:
             /// </summary
             /// <remarks>! Имя не должно содержать путь к файлу.</remarks>
         public:
-            // ORIGINAL LINE: [XmlAttribute("fileName")] public string _fileName;
+            // ORIGINAL LINE: [XmlAttribute(u"fileName"_s)] public string _fileName;
             QString _fileName;
 
             /// <summary>
             /// Настройка вывода файла Gerber: выводить файл.
             /// </summary
 
-            // ORIGINAL LINE: [XmlAttribute("output")] public Bool _output;
+            // ORIGINAL LINE: [XmlAttribute(u"output"_s)] public Bool _output;
             Bool _output = static_cast<Bool>(0);
 
             /// <summary>
             /// Настройка вывода файла Gerber: вывод слоя в зеркальном отображении.
             /// </summary
 
-            // ORIGINAL LINE: [XmlAttribute("mirror")] public Bool _mirror;
+            // ORIGINAL LINE: [XmlAttribute(u"mirror"_s)] public Bool _mirror;
             Bool _mirror = static_cast<Bool>(0);
 
             /// <summary>
             /// Настройка вывода файлов Gerber: инверсный вывод слоя.
             /// </summary
 
-            // ORIGINAL LINE: [XmlAttribute("negative")] public Bool _negative;
+            // ORIGINAL LINE: [XmlAttribute(u"negative"_s)] public Bool _negative;
             Bool _negative = static_cast<Bool>(0);
 
             /// <summary>
             /// Ссылка на слой.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+            // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
             LayerRef* _LayerRef;
 
             /// <summary>
             /// Настройка экспорта Gerber файлов: список экспортируемых объектов для слоя.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("ExportObjects")] public ExportObjects_ExportFile _ExportObjects;
+            // ORIGINAL LINE: [XmlElement(u"ExportObjects"_s)] public ExportObjects_ExportFile _ExportObjects;
             ExportObjects_ExportFile* _ExportObjects;
 
             /// <summary>
             /// Настройка вывода файла Gerber: смещение объектов по осям x и y.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Shift")] public Shift _Shift;
+            // ORIGINAL LINE: [XmlElement(u"Shift"_s)] public Shift _Shift;
             Shift* _Shift;
             virtual ~ExportFile_GerberSettings() {
                 delete _LayerRef;
@@ -464,35 +464,35 @@ public:
         /// Каталог для выходных файлов (Gerber, Drill).
         /// </summary
     public:
-        // ORIGINAL LINE: [XmlAttribute("outPath")] public string _outPath;
+        // ORIGINAL LINE: [XmlAttribute(u"outPath"_s)] public string _outPath;
         QString _outPath;
 
         /// <summary>
         /// Настройка вывода файлов Gerber, DXF, Drill: единицы измерения.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("units")] public units _units;
+        // ORIGINAL LINE: [XmlAttribute(u"units"_s)] public units _units;
         units _units = static_cast<units>(0);
 
         /// <summary>
         /// Настройка вывода чисел в файлы Gerber, Drill: количество цифр перед запятой.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("intNums", DataType = "int")] public int _intNums;
+        // ORIGINAL LINE: [XmlAttribute(u"intNums"_s, DataType = u"int"_s)] public int _intNums;
         int _intNums = 0;
 
         /// <summary>
         /// Настройка вывода чисел в файлы Gerber, Drill: количество цифр после запятой.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("fractNums", DataType = "int")] public int _fractNums;
+        // ORIGINAL LINE: [XmlAttribute(u"fractNums"_s, DataType = u"int"_s)] public int _fractNums;
         int _fractNums = 0;
 
         /// <summary>
         /// Настройки вывода файлов Gerber.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("ExportFile")] public List<ExportFile_GerberSettings> _ExportFiles;
+        // ORIGINAL LINE: [XmlElement(u"ExportFile"_s)] public List<ExportFile_GerberSettings> _ExportFiles;
         std::vector<ExportFile_GerberSettings*> _ExportFiles;
         bool ShouldSerialize_ExportFiles();
     };
@@ -517,56 +517,56 @@ public:
                 /// Настройка вывода файлов Geber, DXF: выводить проводники.
                 /// </summary
             public:
-                // ORIGINAL LINE: [XmlAttribute("wires")] public Bool _wires;
+                // ORIGINAL LINE: [XmlAttribute(u"wires"_s)] public Bool _wires;
                 Bool _wires = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить области металлизации (полигоны).
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("coppers")] public Bool _coppers;
+                // ORIGINAL LINE: [XmlAttribute(u"coppers"_s)] public Bool _coppers;
                 Bool _coppers = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить контактные площадки.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("padstacks")] public Bool _padstacks;
+                // ORIGINAL LINE: [XmlAttribute(u"padstacks"_s)] public Bool _padstacks;
                 Bool _padstacks = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить переходные отверстия.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("vias")] public Bool _vias;
+                // ORIGINAL LINE: [XmlAttribute(u"vias"_s)] public Bool _vias;
                 Bool _vias = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber и DXF: выводить надписи.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("texts")] public Bool _texts;
+                // ORIGINAL LINE: [XmlAttribute(u"texts"_s)] public Bool _texts;
                 Bool _texts = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber, DXF: выводить ярлыки.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("labels")] public Bool _labels;
+                // ORIGINAL LINE: [XmlAttribute(u"labels"_s)] public Bool _labels;
                 Bool _labels = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода файлов Gerber: выводить детали на механических слоях.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("details")] public Bool _details;
+                // ORIGINAL LINE: [XmlAttribute(u"details"_s)] public Bool _details;
                 Bool _details = static_cast<Bool>(0);
 
                 /// <summary>
                 /// Настройка вывода слоя в файл DXF: выводить очертания компонентов.
                 /// </summary
 
-                // ORIGINAL LINE: [XmlAttribute("compsOutline")] public Bool _compsOutline;
+                // ORIGINAL LINE: [XmlAttribute(u"compsOutline"_s)] public Bool _compsOutline;
                 Bool _compsOutline = static_cast<Bool>(0);
 
                 /// <summary>
@@ -574,7 +574,7 @@ public:
                 /// </summary
                 /// <remarks>! В TopoR реперные знаки не поддерживаются.</remarks>
 
-                // ORIGINAL LINE: [XmlAttribute("fiducials")] public Bool _fiducials;
+                // ORIGINAL LINE: [XmlAttribute(u"fiducials"_s)] public Bool _fiducials;
                 Bool _fiducials = static_cast<Bool>(0);
             };
 
@@ -582,21 +582,21 @@ public:
             /// Настройка вывода слоя в файл DXF: выводить слой.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("output")] public Bool _output;
+            // ORIGINAL LINE: [XmlAttribute(u"output"_s)] public Bool _output;
             Bool _output = static_cast<Bool>(0);
 
             /// <summary>
             /// Ссылка на слой.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+            // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
             LayerRef* _LayerRef;
 
             /// <summary>
             /// Настройка экспорта слоя в файл DXF: список экспортируемых объектов для слоя.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("ExportObjects")] public ExportObjects_ExportLayer _ExportObjects;
+            // ORIGINAL LINE: [XmlElement(u"ExportObjects"_s)] public ExportObjects_ExportLayer _ExportObjects;
             ExportObjects_ExportLayer* _ExportObjects;
 
             virtual ~ExportLayer() {
@@ -609,21 +609,21 @@ public:
         /// Имя выходного файла (ВОМ, DXF).
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("outFile")] public string _outFile;
+        // ORIGINAL LINE: [XmlAttribute(u"outFile"_s)] public string _outFile;
         QString _outFile;
 
         /// <summary>
         /// Настройка вывода файлов Gerber, DXF, Drill: единицы измерения.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("units")] public units _units;
+        // ORIGINAL LINE: [XmlAttribute(u"units"_s)] public units _units;
         units _units = static_cast<units>(0);
 
         /// <summary>
         /// Настройка вывода файла DXF: выводить слой с контуром платы.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("outputBoardLayer")] public Bool _outputBoardLayer;
+        // ORIGINAL LINE: [XmlAttribute(u"outputBoardLayer"_s)] public Bool _outputBoardLayer;
         Bool _outputBoardLayer = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _outputBoardLayerSpecified
@@ -633,7 +633,7 @@ public:
         /// Настройка вывода файла DXF: выводить слой отверстий.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("outputDrillLayer")] public Bool _outputDrillLayer;
+        // ORIGINAL LINE: [XmlAttribute(u"outputDrillLayer"_s)] public Bool _outputDrillLayer;
         Bool _outputDrillLayer = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _outputDrillLayerSpecified
@@ -643,7 +643,7 @@ public:
         /// Настройки вывода слоя в файл DXF.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("ExportLayer")] public List<ExportLayer> _ExportLayers;
+        // ORIGINAL LINE: [XmlElement(u"ExportLayer"_s)] public List<ExportLayer> _ExportLayers;
         std::vector<ExportLayer*> _ExportLayers;
         bool ShouldSerialize_ExportLayers();
     };
@@ -663,7 +663,7 @@ public:
             /// </summary
             /// <remarks>! Имя не должно содержать путь к файлу.</remarks>
         public:
-            // ORIGINAL LINE: [XmlAttribute("fileName")] public string _fileName;
+            // ORIGINAL LINE: [XmlAttribute(u"fileName"_s)] public string _fileName;
             QString _fileName;
         };
 
@@ -671,35 +671,35 @@ public:
         /// Каталог для выходных файлов (Gerber, Drill).
         /// </summary
     public:
-        // ORIGINAL LINE: [XmlAttribute("outPath")] public string _outPath;
+        // ORIGINAL LINE: [XmlAttribute(u"outPath"_s)] public string _outPath;
         QString _outPath;
 
         /// <summary>
         /// Настройка вывода файлов Gerber, DXF, Drill: единицы измерения.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("units")] public units _units;
+        // ORIGINAL LINE: [XmlAttribute(u"units"_s)] public units _units;
         units _units = static_cast<units>(0);
 
         /// <summary>
         /// Настройка вывода чисел в файлы Gerber, Drill: количество цифр перед запятой.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("intNums", DataType = "int")] public int _intNums;
+        // ORIGINAL LINE: [XmlAttribute(u"intNums"_s, DataType = u"int"_s)] public int _intNums;
         int _intNums = 0;
 
         /// <summary>
         /// Настройка вывода чисел в файлы Gerber, Drill: количество цифр после запятой.
         /// </summary
 
-        // ORIGINAL LINE: [XmlAttribute("fractNums", DataType = "int")] public int _fractNums;
+        // ORIGINAL LINE: [XmlAttribute(u"fractNums"_s, DataType = u"int"_s)] public int _fractNums;
         int _fractNums = 0;
 
         /// <summary>
         /// Настройки вывода файлов Gerber.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("ExportFile")] public List<ExportFile_DrillSettings> _ExportFiles;
+        // ORIGINAL LINE: [XmlElement(u"ExportFile"_s)] public List<ExportFile_DrillSettings> _ExportFiles;
         std::vector<ExportFile_DrillSettings*> _ExportFiles;
         bool ShouldSerialize_ExportFiles();
     };
@@ -713,14 +713,14 @@ public:
         /// Имя выходного файла (ВОМ, DXF).
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("outFile")] public string _outFile;
+        // ORIGINAL LINE: [XmlAttribute(u"outFile"_s)] public string _outFile;
         QString _outFile;
 
         /// <summary>
         /// Настройка диалога вывода BOM файла: выводить количество компонентов.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("count")] public Bool _count;
+        // ORIGINAL LINE: [XmlAttribute(u"count"_s)] public Bool _count;
         Bool _count = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _countSpecified
@@ -730,7 +730,7 @@ public:
         /// Настройка вывода BOM файла: выводить наименование компонентов.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("partName")] public Bool _partName;
+        // ORIGINAL LINE: [XmlAttribute(u"partName"_s)] public Bool _partName;
         Bool _partName = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _partNameSpecified
@@ -740,7 +740,7 @@ public:
         /// Настройка вывода BOM файла: выводить наименование посадочных мест.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("footprint")] public Bool _footprint;
+        // ORIGINAL LINE: [XmlAttribute(u"footprint"_s)] public Bool _footprint;
         Bool _footprint = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _footprintSpecified
@@ -750,7 +750,7 @@ public:
         /// Настройка вывода BOM файла: выводить позиционные обозначения компонентов.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("refDes")] public Bool _refDes;
+        // ORIGINAL LINE: [XmlAttribute(u"refDes"_s)] public Bool _refDes;
         Bool _refDes = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _refDesSpecified
@@ -760,7 +760,7 @@ public:
         /// Ссылка на атрибут.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("AttributeRef")] public List<AttributeRef> _AttributeRefs;
+        // ORIGINAL LINE: [XmlElement(u"AttributeRef"_s)] public List<AttributeRef> _AttributeRefs;
         std::vector<AttributeRef*> _AttributeRefs;
         bool ShouldSerialize_AttributeRefs();
     };
@@ -774,14 +774,14 @@ public:
         /// Настройка фильтра сообщений: режим показа предупреждений.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("showWarnings")] public showWarnings _showWarnings;
+        // ORIGINAL LINE: [XmlAttribute(u"showWarnings"_s)] public showWarnings _showWarnings;
         showWarnings _showWarnings = static_cast<showWarnings>(0);
 
         /// <summary>
         /// Настройка фильтра сообщений: выводить сообщение 5003.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5003")] public Bool _W5003;
+        // ORIGINAL LINE: [XmlAttribute(u"W5003"_s)] public Bool _W5003;
         Bool _W5003 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5003Specified
@@ -791,7 +791,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5012.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5012")] public Bool _W5012;
+        // ORIGINAL LINE: [XmlAttribute(u"W5012"_s)] public Bool _W5012;
         Bool _W5012 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5012Specified
@@ -801,7 +801,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5013.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5013")] public Bool _W5013;
+        // ORIGINAL LINE: [XmlAttribute(u"W5013"_s)] public Bool _W5013;
         Bool _W5013 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5013Specified
@@ -811,7 +811,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5014.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5014")] public Bool _W5014;
+        // ORIGINAL LINE: [XmlAttribute(u"W5014"_s)] public Bool _W5014;
         Bool _W5014 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5014Specified
@@ -821,7 +821,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5015.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5015")] public Bool _W5015;
+        // ORIGINAL LINE: [XmlAttribute(u"W5015"_s)] public Bool _W5015;
         Bool _W5015 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5015Specified
@@ -831,7 +831,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5016.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5016")] public Bool _W5016;
+        // ORIGINAL LINE: [XmlAttribute(u"W5016"_s)] public Bool _W5016;
         Bool _W5016 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5016Specified
@@ -841,7 +841,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5017.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5017")] public Bool _W5017;
+        // ORIGINAL LINE: [XmlAttribute(u"W5017"_s)] public Bool _W5017;
         Bool _W5017 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5017Specified
@@ -851,7 +851,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5018.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5018")] public Bool _W5018;
+        // ORIGINAL LINE: [XmlAttribute(u"W5018"_s)] public Bool _W5018;
         Bool _W5018 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5018Specified
@@ -861,7 +861,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5023.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5023")] public Bool _W5023;
+        // ORIGINAL LINE: [XmlAttribute(u"W5023"_s)] public Bool _W5023;
         Bool _W5023 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5023Specified
@@ -871,7 +871,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5024.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5024")] public Bool _W5024;
+        // ORIGINAL LINE: [XmlAttribute(u"W5024"_s)] public Bool _W5024;
         Bool _W5024 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5024Specified
@@ -881,7 +881,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5026.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5026")] public Bool _W5026;
+        // ORIGINAL LINE: [XmlAttribute(u"W5026"_s)] public Bool _W5026;
         Bool _W5026 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5026Specified
@@ -891,7 +891,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5034.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5034")] public Bool _W5034;
+        // ORIGINAL LINE: [XmlAttribute(u"W5034"_s)] public Bool _W5034;
         Bool _W5034 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5034Specified
@@ -901,7 +901,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5036.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5036")] public Bool _W5036;
+        // ORIGINAL LINE: [XmlAttribute(u"W5036"_s)] public Bool _W5036;
         Bool _W5036 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5036Specified
@@ -911,7 +911,7 @@ public:
         /// Настройка фильтра сообщений: выводить сообщение 5037.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("W5037")] public Bool _W5037;
+        // ORIGINAL LINE: [XmlAttribute(u"W5037"_s)] public Bool _W5037;
         Bool _W5037 = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _W5037Specified
@@ -921,7 +921,7 @@ public:
         /// Настройка фильтра сообщений: быстрая проверка зазоров между компонентами.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("WClrnBtwComps")] public Bool _WClrnBtwComps;
+        // ORIGINAL LINE: [XmlAttribute(u"WClrnBtwComps"_s)] public Bool _WClrnBtwComps;
         Bool _WClrnBtwComps = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _WClrnBtwCompsSpecified
@@ -931,7 +931,7 @@ public:
         /// Настройка фильтра сообщений: быстрая проверка зазоров между объектами одной цепи.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("WClrnBtwObjSameNet")] public Bool _WClrnBtwObjSameNet;
+        // ORIGINAL LINE: [XmlAttribute(u"WClrnBtwObjSameNet"_s)] public Bool _WClrnBtwObjSameNet;
         Bool _WClrnBtwObjSameNet = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _WClrnBtwObjSameNetSpecified
@@ -942,49 +942,49 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Настройки DRC.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("DRCSettings")] public DRCSettings _DRCSettings;
+    // ORIGINAL LINE: [XmlElement(u"DRCSettings"_s)] public DRCSettings _DRCSettings;
     DRCSettings* _DRCSettings;
 
     /// <summary>
     /// Настройки вывода файлов Gerber.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("GerberSettings")] public GerberSettings _GerberSettings;
+    // ORIGINAL LINE: [XmlElement(u"GerberSettings"_s)] public GerberSettings _GerberSettings;
     GerberSettings* _GerberSettings;
 
     /// <summary>
     /// Настройки вывода файла DXF.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("DXFSettings")] public DXFSettings _DXFSettings;
+    // ORIGINAL LINE: [XmlElement(u"DXFSettings"_s)] public DXFSettings _DXFSettings;
     DXFSettings* _DXFSettings;
 
     /// <summary>
     /// Настройки вывода файлов Drill.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("DrillSettings")] public DrillSettings _DrillSettings;
+    // ORIGINAL LINE: [XmlElement(u"DrillSettings"_s)] public DrillSettings _DrillSettings;
     DrillSettings* _DrillSettings;
 
     /// <summary>
     /// Настройки вывода BOM файла.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("BOMSettings")] public BOMSettings _BOMSettings;
+    // ORIGINAL LINE: [XmlElement(u"BOMSettings"_s)] public BOMSettings _BOMSettings;
     BOMSettings* _BOMSettings;
 
     /// <summary>
     /// Настройка фильтра сообщений.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("MessagesFilter")] public MessagesFilter _MessagesFilter;
+    // ORIGINAL LINE: [XmlElement(u"MessagesFilter"_s)] public MessagesFilter _MessagesFilter;
     MessagesFilter* _MessagesFilter;
 
     /**************************************************************************
