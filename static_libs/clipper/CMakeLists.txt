@@ -15,8 +15,8 @@ project(clipper LANGUAGES CXX)
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
-add_library(clipper STATIC ${HEADERS} ${SOURCES})
-# add_library(clipper) target_sources(clipper PUBLIC FILE_SET CXX_MODULES FILES
-# ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
-target_link_libraries(clipper PUBLIC Clipper2Z Qt6::Widgets)
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets Clipper2Z common)

@@ -1,3 +1,0 @@
-[submodule "third_party/clipper2"]
-        path = third_party/clipper2
-        url = https://github.com/AngusJohnson/Clipper2.git

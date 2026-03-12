@@ -22,19 +22,27 @@ find_package(
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
-add_library(common STATIC ${HEADERS} ${SOURCES})
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
-if(${CMAKE_HOST_SYSTEM_NAME} STREQUAL Linux)
-  set(EXECUTION tbb)
-else()
-  set(EXECUTION tbb12)
-endif()
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(
-  common
-  PRIVATE filetree shape gi graphicsview Qt6::Widgets
-  PUBLIC #[[tbb12]] ${EXECUTION} Qt6::Qml)
+  ${PROJECT_NAME}
+  PUBLIC filetree
+         shape
+         gi
+         graphicsview
+         tooldatabase
+         Qt6::Widgets
+         ${EXECUTION}
+         Qt6::Qml
+         $<$<PLATFORM_ID:Linux>:
+         # qcustomplot-qt6
+         tbb
+         >
+         $<$<PLATFORM_ID:Windows>:
+         # tbb12.dll QCustomPlot
+         >)
 
 # add_subdirectory(doublespinbox)
 

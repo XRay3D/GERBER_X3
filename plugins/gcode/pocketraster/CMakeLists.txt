@@ -24,7 +24,7 @@ file(GLOB JSONS *.json)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
 
-include_directories(${CMAKE_STATIC_LIBS_DIR})
+
 
 set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 

@@ -39,7 +39,7 @@ add_library(hpgl SHARED
     ${SOURCE}
 )
 
-link_directories(../../libs${SUFFIX})
+
 target_link_libraries(hpgl PRIVATE
     clipper
     common
