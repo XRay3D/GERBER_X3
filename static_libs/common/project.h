@@ -86,7 +86,7 @@ public:
     template <typename T>
     mvector<T*> count() {
         QMutexLocker locker(&mutex);
-        int count = 0;
+        int count{};
         for(const auto& [id, sp]: files_)
             if(dynamic_cast<T*>(sp.get()))
                 ++count;

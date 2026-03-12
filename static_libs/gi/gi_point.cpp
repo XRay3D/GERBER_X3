@@ -314,7 +314,7 @@ void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 }
 
 void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    for(int i = 0; i < 4; ++i)
+    for(int i{}; i < 4; ++i)
         App::pins()[i]->lastPos = App::pins()[i]->pos();
     QGraphicsItem::mousePressEvent(event);
 }
@@ -480,8 +480,8 @@ void LayoutFrames::updateRect(bool fl) {
     rect_.setHeight(rect_.height() * stepsY + spaceY_ * (stepsY - 1));
     rect_.setWidth(rect_.width() * stepsX + spaceX_ * (stepsX - 1));
 
-    for(int x = 0; x < stepsX; ++x) {
-        for(int y = 0; y < stepsY; ++y) {
+    for(int x{}; x < stepsX; ++x) {
+        for(int y{}; y < stepsY; ++y) {
             if(x || y) {
                 path.addRect(rect.translated(
                     (rect.width() + spaceX_) * x,

@@ -85,26 +85,26 @@ void File::grouping(PolyTree& node, File::Group group) {
         if(!node.IsHole()) {
             path = node.Polygon();
             paths.push_back(path);
-            for(size_t i = 0; i < node.Count(); ++i) {
+            for(size_t i{}; i < node.Count(); ++i) {
                 path = node[i]->Polygon();
                 paths.push_back(path);
             }
             groupedPaths_.push_back(paths);
         }
-        for(size_t i = 0; i < node.Count(); ++i)
+        for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
         break;
     case CopperGroup:
         if(node.IsHole()) {
             path = node.Polygon();
             paths.push_back(path);
-            for(size_t i = 0; i < node.Count(); ++i) {
+            for(size_t i{}; i < node.Count(); ++i) {
                 path = node[i]->Polygon();
                 paths.push_back(path);
             }
             groupedPaths_.push_back(paths);
         }
-        for(size_t i = 0; i < node.Count(); ++i)
+        for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
         break;
     }
@@ -140,7 +140,7 @@ void File::createGi() {
     Gi::Group* igPath = new Gi::Group;
     itemGroups_.push_back(igPath);
 
-    int i = 0;
+    int i{};
 
     for(auto& [name, layer]: layers_) {
         if(layer->graphicObjects_.size()) {

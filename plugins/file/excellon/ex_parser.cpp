@@ -338,7 +338,7 @@ bool Parser::parseRepeat(const QString& line) {
         QPointF p;
         parseNumber(CL2, p.rx());
         parseNumber(C3, p.ry());
-        for(int i = 0; i < count; ++i) {
+        for(int i{}; i < count; ++i) {
             state_.pos += p;
             file->append(Hole(state_, file));
         }
@@ -463,7 +463,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
         double angle = qAbs(stop - start);
         double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
         double delta_angle = da_sign[state_.gCode] * angle * 1.0 / steps;
-        for(int i = 0; i < steps; i++) {
+        for(int i{}; i < steps; i++) {
             double theta = start + delta_angle * (i + 1);
             points.push_back(QPointF(
                 center.x() + radius * cos(theta),

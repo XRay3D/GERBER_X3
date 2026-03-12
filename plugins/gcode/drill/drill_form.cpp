@@ -383,7 +383,7 @@ void Form::customContextMenuRequested(const QPoint& pos) {
         ui->toolTable->selectAll();
         for(QModelIndex current: selectedIndexes())
             model->setToolId(current.row(), -1);
-        for(int i = 0; i < model->rowCount(); ++i)
+        for(int i{}; i < model->rowCount(); ++i)
             if(model->toolId(i) != -1)
                 return;
     });
@@ -394,7 +394,7 @@ void Form::pickUpTool() {
     if(!model)
         return;
     const double k = 0.05; // 5%
-    int ctr = 0;
+    int ctr{};
     for(const auto& row: model->data()) {
         // model->setToolId(ctr++, 3);
         // continue;

@@ -76,7 +76,7 @@ void Debug::updateArrows() {
     arrows_ = QPainterPath(); //.clear();
     if(qFuzzyIsNull(pen_.widthF())) {
         for(const QPolygonF& path: shape_.toSubpathPolygons()) {
-            for(int i = 0; i < path.size() - 1; ++i) {
+            for(int i{}; i < path.size() - 1; ++i) {
                 QLineF line(path[i + 1], path[i]);
                 double length = 30 * scaleFactor();
                 if(line.length() < length && i)

@@ -23,7 +23,9 @@
 template <>
 struct std::hash<QPointF> {
     size_t operator()(QPointF const& p) const noexcept {
-        size_t h = (size_t)p.x() ^ (size_t)p.y();
+        size_t h
+            = std::bit_cast<size_t>(p.x())
+            ^ std::bit_cast<size_t>(p.y());
         return h;
     }
 };

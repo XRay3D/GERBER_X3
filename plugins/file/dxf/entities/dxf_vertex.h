@@ -71,7 +71,7 @@ public:
         PolyfaceMeshVertex = 128,                // вершина многогранной сети
     };
     operator QPointF() const { return {x, y}; };
-    int vertexFlags = 0;
+    int vertexFlags{};
     double x = 0.0;
     double y = 0.0;
     double bulge = 0.0;

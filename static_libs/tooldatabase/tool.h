@@ -117,8 +117,8 @@ private:
 
     int32_t id_{-1};
 
-    mutable size_t hash_ = 0;
-    mutable size_t hash2_ = 0;
+    mutable size_t hash_{};
+    mutable size_t hash2_{};
 
     Type type_{EndMill};
 

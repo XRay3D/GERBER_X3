@@ -177,7 +177,7 @@ protected:
 private:
     double diam_{};
     double rotation_{};
-    int verticesCount_ = 0;
+    int verticesCount_{};
 };
 
 /////////////////////////////////////////////////////

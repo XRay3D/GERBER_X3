@@ -119,7 +119,7 @@ private:
 
     File* file_;
     class ::QProgressDialog* progressDialog;
-    int progressTimerId = 0;
+    int progressTimerId{};
 };
 
 } // namespace GCode

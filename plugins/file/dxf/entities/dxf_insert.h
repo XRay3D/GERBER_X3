@@ -59,11 +59,11 @@ public:
     mutable QPointF basePoint;
     double scaleX = 1; // Масштабный коэффициент по оси X(необязательно; значение по умолчанию = 1)
     double scaleY = 1; // Масштабный коэффициент по оси Y (необязательно; значение по умолчанию = 1)
-    double rotationAngle = 0;
+    double rotationAngle{};
     int colCount = 1;      // Column count (optional; default = 1)
     int rowCount = 1;      // Row count (optional; default = 1)
-    double colSpacing = 0; // Column spacing (optional; default = 0)
-    double rowSpacing = 0; // Row spacing (optional; default = 0)
+    double colSpacing{}; // Column spacing (optional; default = 0)
+    double rowSpacing{}; // Row spacing (optional; default = 0)
 };
 
 } // namespace Dxf

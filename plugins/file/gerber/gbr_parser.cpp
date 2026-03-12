@@ -494,7 +494,7 @@ void Parser::reset() {
     state_ = State(file);
     stepRepeat_.reset();
     refDes.clear();
-    ProgressCancel::reset();
+    // ProgressCancel::reset();
 }
 
 void Parser::resetStep() {
@@ -507,7 +507,7 @@ Point Parser::parsePosition(const QString& xyStr) {
     auto data{std::u16string_view{xyStr}};
     static constexpr ctll::fixed_string ptrnPosition{R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"};
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
-        /*Point::Type*/ int32_t tmp = 0;
+        /*Point::Type*/ int32_t tmp{};
         if(x && parseNumber(CtreCapTo(x), tmp, FormatDir::X))
             format.coordValueNotation == AbsoluteNotation
                 ? state_.curPos().x = tmp
@@ -648,7 +648,7 @@ bool Parser::parseAperture(const QString& gLine) {
             }
         } else {
             VarMap macroCoeff;
-            for(int i = 0; i < paramList.size(); ++i)
+            for(int i{}; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString("$%1").arg(i + 1), toDouble(paramList[i], false, false));
             apertures.try_emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split('*'), macroCoeff, file));
         }
@@ -752,8 +752,8 @@ bool Parser::parseStepRepeat(const QString& gLine) {
 
 void Parser::closeStepRepeat() {
     addPath();
-    for(int y = 0; y < stepRepeat_.y; ++y) {
-        for(int x = 0; x < stepRepeat_.x; ++x) {
+    for(int y{}; y < stepRepeat_.y; ++y) {
+        for(int x{}; x < stepRepeat_.x; ++x) {
             const Point pt(static_cast</*Point::Type*/ int32_t>(stepRepeat_.i * x), static_cast</*Point::Type*/ int32_t>(stepRepeat_.j * y));
             for(GrObject& go: stepRepeat_.storage) {
                 Paths paths(go.fill);
@@ -850,7 +850,7 @@ bool Parser::parseAttributes(const QString& gLine) {
                     break;
                 default:
                     //                    static const QRegularExpression rx("(\\[0-9a-fA-F]{4})");
-                    //                    int pos = 0;
+                    //                    int pos{};
                     //                    auto match(rx.match(sl.last(), pos));
                     //                    while (match.hasMatch()) { //(pos = rx.indexIn(sl.last(), pos)) != -1) {
                     //                        sl.last().replace(pos++, 5, QChar(match.captured(1).right(4).toUShort(nullptr, 16)));

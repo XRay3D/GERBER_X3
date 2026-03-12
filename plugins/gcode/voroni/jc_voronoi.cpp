@@ -98,7 +98,7 @@
 
 // #pragma pack(pop)
 
-// static const int JCV_DIRECTION_LEFT = 0;
+// static const int JCV_DIRECTION_LEFT{};
 // static const int JCV_DIRECTION_RIGHT = 1;
 // static const jcv_real JCV_INVALID_VALUE = (jcv_real)-JCV_FLT_MAX;
 
@@ -425,7 +425,7 @@
 //    if (e->a == (jcv_real)1) {
 //        dyp = p->y - topsite->p.y;
 //        dxp = p->x - topsite->p.x;
-//        int fast = 0;
+//        int fast{};
 //        if ((!right_of_site & (e->b < (jcv_real)0)) | (right_of_site & (e->b >= (jcv_real)0))) {
 //            above = dyp >= e->b * dxp;
 //            fast = above;
@@ -716,7 +716,7 @@
 //    // Make sure the graph edges are CCW
 //    int flip = jcv_determinant(&e->sites[0]->p, &e->pos[0], &e->pos[1]) > (jcv_real)0 ? 0 : 1;
 
-//    for (int i = 0; i < 2; ++i) {
+//    for (int i{}; i < 2; ++i) {
 //        jcv_graphedge* ge = jcv_alloc_graphedge(internal);
 
 //        ge->edge = e;
@@ -857,7 +857,7 @@
 //     if (!internal->clipper.fill_fn)
 //         return;
 
-//    for (int i = 0; i < internal->numsites; ++i) {
+//    for (int i{}; i < internal->numsites; ++i) {
 //        jcv_site* site = &internal->sites[i];
 //        internal->clipper.fill_fn(&internal->clipper, internal, site);
 //    }
@@ -980,9 +980,9 @@
 //    r.min.x = r.min.y = JCV_FLT_MAX;
 //    r.max.x = r.max.y = -JCV_FLT_MAX;
 
-//    int offset = 0;
+//    int offset{};
 //    // Prune duplicates first
-//    for (int i = 0; i < nusites_; i++) {
+//    for (int i{}; i < nusites_; i++) {
 //        const jcv_site* s = &sites[i];
 //        // Remove duplicates, to avoid anomalies
 //        if (i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {
@@ -1010,8 +1010,8 @@
 //    r.min.x = r.min.y = JCV_FLT_MAX;
 //    r.max.x = r.max.y = -JCV_FLT_MAX;
 
-//    int offset = 0;
-//    for (int i = 0; i < nusites_; i++) {
+//    int offset{};
+//    for (int i{}; i < nusites_; i++) {
 //        const jcv_site* s = &sites[i];
 
 //        if (!internal->clipper.test_fn(&internal->clipper, s->p)) {
@@ -1089,7 +1089,7 @@
 //    internal->numsites = nupoints_;
 //    jcv_site* sites = internal->sites;
 
-//    for (int i = 0; i < nupoints_; ++i) {
+//    for (int i{}; i < nupoints_; ++i) {
 //        sites[i].p = points[i];
 //        sites[i].edges = 0;
 //        sites[i].index = i;
@@ -1143,7 +1143,7 @@
 //    jcv_priorityqueue* pq = internal->eventqueue;
 //    jcv_site* site = jcv_nextsite(internal);
 
-//    int finished = 0;
+//    int finished{};
 //    while (!finished) {
 //        jcv_point lowest_pq_point;
 //        if (!jcv_pq_empty(pq)) {
@@ -1271,7 +1271,7 @@ typedef struct _jcv_context_internal {
 
 #pragma pack(pop)
 
-static const int JCV_DIRECTION_LEFT = 0;
+static const int JCV_DIRECTION_LEFT{};
 static const int JCV_DIRECTION_RIGHT = 1;
 static const jcv_real JCV_INVALID_VALUE = (jcv_real)-JCV_FLT_MAX;
 
@@ -1552,7 +1552,7 @@ static int jcv_halfedge_rightof(const jcv_halfedge* he, const jcv_point* p) {
     if(e->a == (jcv_real)1) {
         dyp = p->y - topsite->p.y;
         dxp = p->x - topsite->p.x;
-        int fast = 0;
+        int fast{};
         if((!right_of_site & (e->b < (jcv_real)0)) | (right_of_site & (e->b >= (jcv_real)0))) {
             above = dyp >= e->b * dxp;
             fast = above;
@@ -1819,7 +1819,7 @@ static void jcv_finishline(jcv_context_internal* internal, jcv_edge* e) {
     // Make sure the graph edges are CCW
     int flip = jcv_determinant(&e->sites[0]->p, &e->pos[0], &e->pos[1]) > (jcv_real)0 ? 0 : 1;
 
-    for(int i = 0; i < 2; ++i) {
+    for(int i{}; i < 2; ++i) {
         jcv_graphedge* ge = jcv_alloc_graphedge(internal);
 
         ge->edge = e;
@@ -1884,7 +1884,7 @@ static jcv_edge* jcv_create_gap_edge(jcv_context_internal* internal, jcv_site* s
 // Since the algorithm leaves gaps at the borders/corner, we want to fill them
 static void jcv_fillgaps(jcv_diagram* diagram) {
     jcv_context_internal* internal = diagram->internal;
-    for(int i = 0; i < internal->numsites; ++i) {
+    for(int i{}; i < internal->numsites; ++i) {
         ProgressCancel::incCurrent();
         jcv_site* site = &internal->sites[i];
 
@@ -2095,7 +2095,7 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
 
     jcv_site* sites = internal->sites;
 
-    for(size_t i = 0; i < nupoints_; ++i) {
+    for(size_t i{}; i < nupoints_; ++i) {
         sites[i].p = points[i];
         sites[i].edges = 0;
         sites[i].index = i;
@@ -2103,8 +2103,8 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
 
     qsort(sites, (size_t)nupoints_, sizeof(jcv_site), jcv_point_cmp);
 
-    int offset = 0;
-    for(size_t i = 0; i < nupoints_; i++) {
+    int offset{};
+    for(size_t i{}; i < nupoints_; i++) {
         const jcv_site* s = &sites[i];
         // Remove duplicates, to avoid anomalies
         if(i > 0 && jcv_point_eq(&s->p, &sites[i - 1].p)) {
@@ -2153,7 +2153,7 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     jcv_priorityqueue* pq = internal->eventqueue;
     jcv_site* site = jcv_nextsite(internal);
 
-    int finished = 0;
+    int finished{};
     while(!finished) {
         ProgressCancel::incCurrent();
         jcv_point lowest_pq_point;

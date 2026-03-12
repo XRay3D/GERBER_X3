@@ -157,7 +157,7 @@ Editor::Editor(Shapes::Plugin* plugin)
         auto hLayout = new QHBoxLayout;
         hLayout->setContentsMargins(0, 0, 0, 0);
         hLayout->setSpacing(6);
-        for(int i = 0; i < 6; ++i) {
+        for(int i{}; i < 6; ++i) {
             auto action = new QAction{this};
             action->setIcon(plugin->icon());
             action->setCheckable(true);

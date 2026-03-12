@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "cancelation.h"
+// #include "cancelation.h"
 #include "clipper2/clipper.h"
 #include "mvector.h"
 // #include "clipper.hpp"
@@ -35,6 +35,8 @@ using Clipper = Clipper2Lib::Clipper64;
 // using ClipperOffset = Clipper2Lib::ClipperOffset;
 
 using Point = Clipper2Lib::Point64;
+
+inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
 
 using Path = Clipper2Lib::Path64;
 using Paths = Clipper2Lib::Paths64;
@@ -309,7 +311,7 @@ inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
     if(cnt < 2)
         return false;
     QPointF p;
-    for(size_t i = 0; i < cnt; ++i) {
+    for(size_t i{}; i < cnt; ++i) {
         const Point& pt1 = path[(i + 1) % cnt];
         const Point& pt2 = path[i];
         QLineF l1(~pt1, ~pt2);

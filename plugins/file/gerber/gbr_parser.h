@@ -59,7 +59,7 @@ protected:
             ApertureBlock,
         };
         eWT workingType = Normal;
-        int apertureBlockId = 0;
+        int apertureBlockId{};
     };
 
     QStack<WorkingType> abSrIdStack_;
@@ -68,8 +68,8 @@ protected:
     State state_;
     QString currentGerbLine_;
 
-    int lineNum_ = 0;
-    int goId_ = 0;
+    int lineNum_{};
+    int goId_{};
 
     StepRepeatStr stepRepeat_;
     QMap<QString, Comp::Component> components;

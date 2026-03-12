@@ -27,7 +27,7 @@ Header::Header(Qt::Orientation orientation, QWidget* parent)
 Header::~Header() { }
 
 void Header::setAll(bool ch) {
-    for(int i = 0; i < count(); ++i) {
+    for(int i{}; i < count(); ++i) {
         if(checked(i) != ch) {
             setChecked(i, ch);
             updateSection(i);
@@ -57,7 +57,7 @@ QRect Header::getRect(const QRect& rect) {
 }
 
 void Header::mouseMoveEvent(QMouseEvent* event) {
-    static int index = 0;
+    static int index{};
     do {
 
         if(index == logicalIndexAt(event->pos()))

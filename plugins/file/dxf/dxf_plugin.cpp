@@ -64,7 +64,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         // Value
         QString strValue(in.readLine());
         file_->lines().push_back(strValue);
-        int multi = 0;
+        int multi{};
         while(strValue.endsWith("\\P")) {
             file_->lines().emplace_back(in.readLine());
             strValue.append("\n" + file_->lines().back());
@@ -77,7 +77,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
 
     try {
         [[maybe_unused]] int progress{};
-        // int progressCtr = 0;
+        // int progressCtr{};
         do {
             if(auto code = getCode(); code.code() == 0 && code == "SECTION")
                 ++progress;

@@ -37,7 +37,7 @@ public:
     };
 
     QPointF point;
-    double thickness = 0;
+    double thickness{};
 };
 
 } // namespace Dxf

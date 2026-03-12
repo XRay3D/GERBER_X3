@@ -14,13 +14,9 @@
 #include "jc_voronoi.h"
 #include "project.h"
 
-// namespace ClipperLib {
-// inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
-// } // namespace ClipperLib
-
 namespace Voronoi {
 
-inline size_t qHash(const Creator::Pair& tag, uint = 0) {
+/*inline*/ size_t qHash(const Creator::Pair& tag, uint = 0) {
     return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
 }
 
@@ -151,8 +147,8 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 
 void File::genGcodeAndTile() {
     const QRectF rect = App::project().worckRect();
-    for(size_t x = 0; x < App::project().stepsX(); ++x) {
-        for(size_t y = 0; y < App::project().stepsY(); ++y) {
+    for(size_t x{}; x < App::project().stepsX(); ++x) {
+        for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
             if(toolType() == Tool::Laser)

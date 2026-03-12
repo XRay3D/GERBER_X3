@@ -77,7 +77,7 @@ bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int cou
     //         srcItem = rootItem;
     //     if (!dstItem)
     //         dstItem = rootItem;
-    //     for (int r = 0; r < count; ++r) {
+    //     for (int r{}; r < count; ++r) {
     //         dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
     //     }
     //     endMoveRows();
@@ -288,7 +288,7 @@ void ToolModel::loadTools() {
     nestingStack << 0;
 
     QJsonArray treeArray = loadDoc.object()["tree"].toArray();
-    for(int treelIndex = 0; treelIndex < treeArray.size(); ++treelIndex) {
+    for(int treelIndex{}; treelIndex < treeArray.size(); ++treelIndex) {
 
         QJsonObject json = treeArray[treelIndex].toObject();
         int nesting = json["tab"].toInt();
