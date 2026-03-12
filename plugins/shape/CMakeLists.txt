@@ -14,14 +14,13 @@ project(shape)
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
-# file(GLOB UIS *.ui)
+file(GLOB UIS *.ui)
 
-add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES} # ${UIS}
-)
+add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES} ${UIS})
 
-link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets filetree gi)
 
 if(Enable_Circle)
   add_subdirectory(circle)

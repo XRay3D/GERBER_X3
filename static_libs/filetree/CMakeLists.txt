@@ -17,8 +17,6 @@ file(GLOB SOURCES *.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gi Qt6::Widgets)
-
-# target_compile_definitions(filetree PRIVATE FILETREE_LIBRARY)
+target_link_libraries(${PROJECT_NAME} PUBLIC gi file_plugins Qt6::Widgets)

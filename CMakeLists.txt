@@ -16,17 +16,25 @@ cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
 project(GERBER_X3 VERSION 0.9.1)
 
 # set(CMAKE_CXX_MODULE_STD ON)
-set(CMAKE_CXX_STANDARD 23)
+set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_INCLUDE_CURRENT_DIR ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
+set(CMAKE_UNITY_BUILD ON)
+set_source_files_properties(
+  # ${CMAKE_CURRENT_LIST_DIR}/plugins/gcode/profile/profile.cpp
+  # ${CMAKE_CURRENT_LIST_DIR}/plugins/gcode/profile/profile_form.cpp
+  # ${CMAKE_CURRENT_LIST_DIR}/plugins/gcode/voroni/voronoi_jc.cpp
+  PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+add_compile_options(-Wno-free-nonheap-object) # WTF
+
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 
-set_property(GLOBAL PROPERTY CXX_STANDARD 23)
-set_property(GLOBAL PROPERTY INTERPROCEDURAL_OPTIMIZATION TRUE)
+# set_property(GLOBAL PROPERTY CXX_STANDARD 23) set_property(GLOBAL PROPERTY
+# INTERPROCEDURAL_OPTIMIZATION TRUE)
 
 add_definitions(
   -DQT_MESSAGELOGCONTEXT # qDebug()
@@ -77,8 +85,11 @@ FetchContent_Declare(
   GIT_REPOSITORY
     "https://github.com/hanickadot/compile-time-regular-expressions.git"
   GIT_TAG main)
-FetchContent_MakeAvailable(pfr)
-FetchContent_MakeAvailable(ctre)
+FetchContent_Declare(
+  clipper2
+  GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
+  GIT_TAG main)
+FetchContent_MakeAvailable(pfr ctre clipper2)
 
 #[[FIND CGAL
 find_package(CGAL)
@@ -107,20 +118,7 @@ endif()
 
 # add_library(Qt INTERFACE) target_precompile_headers(Qt INTERFACE qt_pch.h)
 
-include_directories(
-  ggeasy
-  plugins/file
-  plugins/gcode
-  plugins/shape
-  static_libs/clipper
-  static_libs/common
-  static_libs/filetree
-  static_libs/gi
-  static_libs/graphicsview
-  static_libs/tooldatabase
-  third_party/clipper2/CPP/Clipper2Lib/include #
-  third_party/pfr-src/include
-  third_party/ctre-src/single-header)
+include_directories(ggeasy)
 
 # add_library(std MODULE) target_sources(std PUBLIC FILE_SET all_my_modules TYPE
 # CXX_MODULES FILES static_libs / common / std.cppm)
@@ -131,7 +129,7 @@ set(CLIPPER2_TESTS OFF)
 set(CLIPPER2_USINGZ "ONLY")
 add_definitions(-DUSINGZ=1)
 
-add_subdirectory(third_party/clipper2/CPP)
+add_subdirectory(third_party/clipper2-src/CPP)
 
 # set(CTRE_MODULE ON) add_subdirectory(third_party/ctre)
 

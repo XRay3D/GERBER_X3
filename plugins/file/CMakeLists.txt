@@ -20,27 +20,19 @@ set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-link_directories(${CMAKE_SOURCE_DIR}/libs${PATHS})
-
-target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets common)
 
 set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 
 set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
-if(6 GREATER_EQUAL 6) # Android
-  qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
-                 ${PROJECT_SOURCES})
-  # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
-  # QM_FILES_OUTPUT_VARIABLE QM_FILES)
-else()
-  qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt5_add_translation(${QM_FILES} ${TS_FILES})
-endif()
+qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
+# qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE
+# QM_FILES)
 
 if(Enable_Gerber)
   add_subdirectory(gerber)
