@@ -158,8 +158,8 @@ Result MathParser::mulDiv(sv s) // throws Exception
 Result MathParser::num(sv s) // throws Exception
 {
 
-    int i = 0;
-    int dot_cnt = 0;
+    int i{};
+    int dot_cnt{};
     bool negative = false;
     // число также может начинаться с минуса
     if(s.at(0) == '-') {
@@ -498,7 +498,7 @@ Result MathParser::bracket(QStringView s) // throws Exception
 Result MathParser::functionVariable(QStringView s) // throws Exception
 {
     QStringView f;
-    int i = 0;
+    int i{};
     int sign = +1;
     if(s.startsWith('-')) {
         sign = -1;
@@ -554,8 +554,8 @@ Result MathParser::mulDiv(QStringView s) // throws Exception
 
 Result MathParser::num(QStringView s) // throws Exception
 {
-    int i = 0;
-    int dot_cnt = 0;
+    int i{};
+    int dot_cnt{};
     bool negative = false;
     // число также может начинаться с минуса
     if(s.at(0) == '-') {
