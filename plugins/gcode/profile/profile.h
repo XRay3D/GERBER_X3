@@ -30,7 +30,7 @@ class File final : public GCode::File {
 public:
     explicit File();
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
-    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
     uint32_t type() const override { return PROFILE; }
     void createGi() override;
     void genGcodeAndTile() override;

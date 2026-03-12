@@ -132,7 +132,7 @@ void File::createGi() {
     //                if (go.path().size() > 1) {
     //                    auto gItem = new Gi::DataPath(go.path(), this);
     //                    if (go.entity()) {
-    //                        gItem->setToolTip(QString("Line %1\n%2")
+    //                        gItem->setToolTip(QString(u"Line %1\n%2"_s)
     //                                              .arg(go.entity()->data[0].line())
     //                                              .arg(go.entity()->name()));
     //                    }
@@ -143,7 +143,7 @@ void File::createGi() {
 
     //            if (layer->m_groupedPaths.empty()) {
     //                clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
-    //                //                dbgPaths(m_mergedPaths, "m_mergedPaths", true);
+    //                //                dbgPaths(m_mergedPaths, u"m_mergedPaths"_s, true);
     //                layer->m_groupedPaths = std::move(groupedPaths());
     //                for (auto& paths : layer->m_groupedPaths)
     //                    CleanPolygons(paths, uScale * 0.0005);

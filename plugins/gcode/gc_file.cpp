@@ -74,12 +74,12 @@ QString File::getLastDir() {
         lastDir = QFileInfo(App::project().name()).absolutePath();
     else if(lastDir.isEmpty()) {
         QSettings settings;
-        lastDir = settings.value("LastGCodeDir").toString();
+        lastDir = settings.value(u"LastGCodeDir"_s).toString();
         if(lastDir.isEmpty())
             lastDir = QFileInfo(App::project().name()).absolutePath();
-        settings.setValue("LastGCodeDir", lastDir);
+        settings.setValue(u"LastGCodeDir"_s, lastDir);
     }
-    return lastDir += '/';
+    return lastDir += u'/';
 }
 
 void File::setLastDir(QString dirPath) {
@@ -92,7 +92,7 @@ void File::setLastDir(QString dirPath) {
     if(lastDir != dirPath) {
         lastDir = dirPath;
         QSettings settings;
-        settings.setValue("LastGCodeDir", lastDir);
+        settings.setValue(u"LastGCodeDir"_s, lastDir);
     }
 }
 
@@ -115,8 +115,8 @@ bool File::save(const QString& name) {
         for(QString& s: lines_) {
             if(!s.isEmpty())
                 str.push_back(s);
-            if(!str.endsWith('\n'))
-                str.push_back("\n");
+            if(!str.endsWith(u'\n'))
+                str.push_back(u'\n');
         }
         out << str;
     } else
@@ -127,12 +127,12 @@ bool File::save(const QString& name) {
 
 void File::statFile() {
     if(toolType() == Tool::Laser) {
-        QString str(App::gcSettings().laserStart()); //"G21 G17 G90"); //G17 XY plane
+        QString str(App::gcSettings().laserStart()); // u"G21 G17 G90"_s); //G17 XY plane
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
     } else {
-        QString str(App::gcSettings().start()); //"G21 G17 G90"); //G17 XY plane
-        str.replace(QRegularExpression("S\\?"), formated({speed(spindleSpeed())}));
+        QString str(App::gcSettings().start()); // u"G21 G17 G90"_s); //G17 XY plane
+        str.replace(QRegularExpression(u"S\\?"_s), formated({speed(spindleSpeed())}));
         lines_.emplace_back(str);
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
     }
@@ -156,7 +156,7 @@ void File::endFile() {
 }
 
 void File::addInfo() {
-    const static auto side_{QObject::tr("Top|Bottom").split('|')};
+    const static auto side_{QObject::tr("Top|Bottom").split(u'|')};
     if(App::gcSettings().info()) {
         lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
         lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp_.getTool().name()));
@@ -178,9 +178,9 @@ void File::initSave() {
     for(size_t i = 0; i < cmdList.size(); ++i) {
         const int index = format.indexOf(cmdList[i], 0, Qt::CaseInsensitive);
         if(index != -1) {
-            formatFlags[i + AlwaysG] = format[index + 1] == '+';
+            formatFlags[i + AlwaysG] = format[index + 1] == u'+';
             if((index + 2) < format.size())
-                formatFlags[i + SpaceG] = format[index + 2] == ' ';
+                formatFlags[i + SpaceG] = format[index + 2] == u' ';
         }
     }
 
@@ -319,30 +319,30 @@ QString File::formated(const mvector<QString>& data) {
         if(index != -1) {
             if(formatFlags[AlwaysG + index] || lastValues[index] != str) {
                 lastValues[index] = str;
-                ret += str + (formatFlags[SpaceG + index] ? " " : "");
+                ret += str + (formatFlags[SpaceG + index] ? u" " : u"");
             }
         }
     }
     return ret.trimmed();
 }
 
-QString File::g0() { return gCode_ = G00, "G0"; }
+QString File::g0() { return gCode_ = G00, u"G0"_s; }
 
-QString File::g1() { return gCode_ = G01, "G1"; }
+QString File::g1() { return gCode_ = G01, u"G1"_s; }
 
-QString File::x(double val) { return 'X' + format(val); }
+QString File::x(double val) { return u'X' + format(val); }
 
-QString File::y(double val) { return 'Y' + format(val); }
+QString File::y(double val) { return u'Y' + format(val); }
 
-QString File::z(double val) { return 'Z' + format(val); }
+QString File::z(double val) { return u'Z' + format(val); }
 
-QString File::feed(double val) { return 'F' + format(val); }
+QString File::feed(double val) { return u'F' + format(val); }
 
-QString File::speed(int val) { return 'S' + QString::number(val); }
+QString File::speed(int val) { return u'S' + QString::number(val); }
 
 QString File::format(double val) {
     QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
-    if(str.contains('e'))
+    if(str.contains(u'e'))
         return QString::number(val, 'f', 3);
     return str;
 }

@@ -142,7 +142,7 @@ void Shape::redraw() {
 
 QString Shape::name() const { return QObject::tr("CircleArc"); }
 
-QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse-arc"); }
+QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-ellipse-arc"_s); }
 
 bool Shape::addPt(const QPointF& pt) {
     if(!std::isnan(pt.x()) && ++curHandle < handles.end()) {

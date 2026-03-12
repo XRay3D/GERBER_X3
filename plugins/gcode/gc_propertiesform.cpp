@@ -74,7 +74,7 @@ PropertiesForm::PropertiesForm(QWidget* parent)
         if(ui->dsbxClearence->value() == 0.0) ui->dsbxClearence->flicker();
     });
 
-    ui->pbOk->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    ui->pbOk->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
 
     if(parent != nullptr)
         setWindowTitle(ui->label->text());
@@ -112,7 +112,7 @@ void PropertiesForm::load() {
     ui->sbxStepsY->setValue(App::project().stepsY());
 
     MySettings settings;
-    settings.beginGroup("PropertiesForm");
+    settings.beginGroup(u"PropertiesForm"_s);
     settings.getValue(ui->dsbxSafeZ, 20);
     settings.getValue(ui->dsbxClearence, 10);
     settings.getValue(ui->dsbxPlunge, 2);
@@ -139,7 +139,7 @@ void PropertiesForm::save() {
     if(App::zeroPtr()) App::zero().setPos(QPointF(ui->dsbxZeroX->value(), ui->dsbxZeroY->value()));
 
     MySettings settings;
-    settings.beginGroup("PropertiesForm");
+    settings.beginGroup(u"PropertiesForm"_s);
     settings.setValue(ui->dsbxSafeZ);
     settings.setValue(ui->dsbxClearence);
     settings.setValue(ui->dsbxPlunge);

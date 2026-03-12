@@ -112,12 +112,12 @@ public:
     }
 
     template <IsArithmetic V>
-    auto getValue(V& val, const char* name, V def = {}) const {
+    auto getValue(V& val, QAnyStringView name, V def = {}) const {
         return val = QSettings::value(name, def).template value<V>();
     }
 
     template <IsArithmetic V>
-    auto setValue(V val, const char* name) {
+    auto setValue(V val, QAnyStringView name) {
         return QSettings::setValue(name, val), val;
     }
 };

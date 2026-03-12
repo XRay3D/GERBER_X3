@@ -23,10 +23,10 @@
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget{parent}
     , counter{static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
-    , toolFileName_{App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
+    , toolFileName_{App::settingsPath() + u'/' + parent->objectName() + QString::number(counter) + u".json"_s} {
     setupUi(this);
     readTool();
-    label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");
+    label_->setStyleSheet(tool_.id() < 0 ? u"QLabel { color: red }"_s : QString{});
 }
 
 ToolSelectorForm::~ToolSelectorForm() {
@@ -35,7 +35,7 @@ ToolSelectorForm::~ToolSelectorForm() {
 
 void ToolSelectorForm::setTool(const Tool& tool) {
     tool_ = tool;
-    label_->setStyleSheet(tool.id() < 0 ? "QLabel { color: red }" : "");
+    label_->setStyleSheet(tool.id() < 0 ? u"QLabel { color: red }"_s : QString{});
     updateForm();
 }
 
@@ -132,14 +132,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
     {
         pbSelect = new QPushButton{ToolSelectorForm};
         pbSelect->setObjectName(u"pbSelect"_s);
-        pbSelect->setIcon(QIcon::fromTheme("view-form"));
+        pbSelect->setIcon(QIcon::fromTheme(u"view-form"_s));
         gridLayout->addWidget(pbSelect, 1, 1, 1, 1);
     }
 
     {
         pbEdit = new QPushButton{ToolSelectorForm};
         pbEdit->setObjectName(u"pbEdit"_s);
-        pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+        pbEdit->setIcon(QIcon::fromTheme(u"document-edit"_s));
         gridLayout->addWidget(pbEdit, 1, 2, 1, 1);
     }
 

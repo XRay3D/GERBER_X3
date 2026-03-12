@@ -133,7 +133,7 @@ void Ruler::dropEvent(QDropEvent* event) {
         //        QPoint position = event->pos();
         //        QPoint hotSpot;
 
-        //        QByteArrayList hotSpotPos = mime->data(hotSpotMimeDataKey()).split(' ');
+        //        QByteArrayList hotSpotPos = mime->data(hotSpotMimeDataKey()).split(u' ');
         //        if (hotSpotPos.size() == 2) {
         //            hotSpot.setX(hotSpotPos.first().toInt());
         //            hotSpot.setY(hotSpotPos.last().toInt());
@@ -293,7 +293,7 @@ void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, d
             auto number{QString::number(startTickNo * K)};
 
             if(startTickNo) [[likely]]
-                number = ((isHorzRuler ^ (step > 0.0)) ? "-" : "+") + number;
+                number = ((isHorzRuler ^ (step > 0.0)) ? u"-"_s : u"+"_s) + number;
 
             QRectF textRect(QFontMetricsF(font()).boundingRect(number));
             textRect.setWidth(textRect.width() + 1);

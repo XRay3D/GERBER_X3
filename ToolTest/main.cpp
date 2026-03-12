@@ -8,7 +8,7 @@
 int main(int argc, char* argv[]) {
     QApplication a(argc, argv);
 
-    QApplication::setApplicationName("GGEasy");
+    QApplication::setApplicationName(u"GGEasy"_s);
     //    QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     //    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
@@ -18,7 +18,7 @@ int main(int argc, char* argv[]) {
     ToolDatabase w;
     w.show();
 
-    emit w.findChild<QPushButton*>("pbNew")->clicked();
+    emit w.findChild<QPushButton*>(u"pbNew"_s)->clicked();
 
     return a.exec();
 }

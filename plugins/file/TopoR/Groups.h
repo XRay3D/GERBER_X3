@@ -7,7 +7,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -28,7 +28,7 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
@@ -36,7 +36,7 @@ public:
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("LayerRef", typeof(LayerRef)), XmlElement("LayerGroupRef", typeof(LayerGroupRef))] public List<Object> _LayerRefs;
+        // ORIGINAL LINE: [XmlElement(u"LayerRef"_s, typeof(LayerRef)), XmlElement(u"LayerGroupRef"_s, typeof(LayerGroupRef))] public List<Object> _LayerRefs;
         std::vector<std::variant<LayerRef, LayerGroupRef>> _LayerRefs;
         bool ShouldSerialize_LayerRefs();
         /**********************************************************************
@@ -56,7 +56,7 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
@@ -64,7 +64,7 @@ public:
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("NetRef", typeof(NetRef)), XmlElement("NetGroupRef", typeof(NetGroupRef))] public List<Object> _NetRefs;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s, typeof(NetRef)), XmlElement(u"NetGroupRef"_s, typeof(NetGroupRef))] public List<Object> _NetRefs;
         std::vector<std::variant<NetRef, NetGroupRef>> _NetRefs;
         bool ShouldSerialize_NetRefs();
     };
@@ -78,7 +78,7 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
@@ -86,7 +86,7 @@ public:
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("CompInstanceRef", typeof(CompInstanceRef)), XmlElement("CompGroupRef", typeof(CompGroupRef))] public List<Object> _CompRefs;
+        // ORIGINAL LINE: [XmlElement(u"CompInstanceRef"_s, typeof(CompInstanceRef)), XmlElement(u"CompGroupRef"_s, typeof(CompGroupRef))] public List<Object> _CompRefs;
         std::vector<std::variant<CompInstanceRef, CompGroupRef>> _CompRefs;
         bool ShouldSerialize_CompRefs();
     };
@@ -95,28 +95,28 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Группы слоёв.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("LayerGroups")][XmlArrayItem("LayerGroup")] public List<LayerGroup> _LayerGroups;
+    // ORIGINAL LINE: [XmlArray(u"LayerGroups"_s)][XmlArrayItem(u"LayerGroup"_s)] public List<LayerGroup> _LayerGroups;
     std::vector<LayerGroup*> _LayerGroups;
     bool ShouldSerialize_LayerGroups();
     /// <summary>
     /// Группы цепей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("NetGroups")][XmlArrayItem("NetGroup")] public List<NetGroup> _NetGroups;
+    // ORIGINAL LINE: [XmlArray(u"NetGroups"_s)][XmlArrayItem(u"NetGroup"_s)] public List<NetGroup> _NetGroups;
     std::vector<NetGroup*> _NetGroups;
     bool ShouldSerialize_NetGroups();
     /// <summary>
     /// Группы компонентов.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("CompGroups")][XmlArrayItem("CompGroup")] public List<CompGroup> _CompGroups;
+    // ORIGINAL LINE: [XmlArray(u"CompGroups"_s)][XmlArrayItem(u"CompGroup"_s)] public List<CompGroup> _CompGroups;
     std::vector<CompGroup*> _CompGroups;
     bool ShouldSerialize_CompGroups();
 
@@ -128,8 +128,8 @@ public:
     /// <summary>
     /// Переименование ссылок на компонент, если его имя изменилось
     /// </summary>
-    /// <param name="oldname">старое имя компонента</param>
-    /// <param name="newname">новое имя компонента</param>
+    /// <param name=u"oldname"_s>старое имя компонента</param>
+    /// <param name=u"newname"_s>новое имя компонента</param>
     void Rename_compName(const QString& oldname, const QString& newname);
     /******************************************************************/
 };

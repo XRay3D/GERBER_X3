@@ -29,8 +29,8 @@ namespace Thermal {
 
 AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     : agr{this}
-    , pa1(this, "bodyColor")
-    , pa2(this, "pathColor")
+    , pa1{this, "bodyColor"_ba}
+    , pa2{this, "pathColor"_ba}
     , tool(tool)
     , bodyColor_(colors[(int)Colors::Default])
     , pathColor_(colors[(int)Colors::UnUsed])
@@ -126,7 +126,7 @@ void AbstractThermPrGi::changeColor() {
 void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
     if(node_->isChecked())
-        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
+        menu.addAction(QIcon::fromTheme(u"list-remove"_s), QObject::tr("Exclude from the calculation"), [this] {
             for(auto item: thpi)
                 if((item == this || item->isSelected()) && item->node_->isChecked()) {
                     item->node_->disable();
@@ -135,7 +135,7 @@ void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) 
                 }
         });
     else
-        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
+        menu.addAction(QIcon::fromTheme(u"list-add"_s), QObject::tr("Include in the calculation"), [this] {
             for(auto item: thpi)
                 if((item == this || item->isSelected()) && !item->node_->isChecked()) {
                     item->node_->enable();
@@ -178,7 +178,7 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
         }
         changeColor();
     } else if(change == ItemVisibleChange) {
-        auto animation = new QPropertyAnimation{this, "opacity"};
+        auto animation = new QPropertyAnimation{this, "opacity"_ba};
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(200);
         animation->setStartValue(0.0);

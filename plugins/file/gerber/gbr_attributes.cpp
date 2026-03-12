@@ -120,7 +120,7 @@ void File::parse(const QStringList& list) {
             function_ = std::make_shared<struct Viafill>(function, list.mid(2));
             break;
         default:;
-            throw QString("Unknownwn File: %1").arg(list.first());
+            throw u"Unknownwn File: %1"_s.arg(list.first());
         }
         break;
     case StdAttr::FilePolarity:

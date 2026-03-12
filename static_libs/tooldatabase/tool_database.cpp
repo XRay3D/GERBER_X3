@@ -54,10 +54,10 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
         }
     });
 
-    ui->pbCopy->setIcon(QIcon::fromTheme("edit-copy"));
-    ui->pbDelete->setIcon(QIcon::fromTheme("edit-delete"));
-    ui->pbNew->setIcon(QIcon::fromTheme("list-add"));
-    ui->pbNewGroup->setIcon(QIcon::fromTheme("folder-add"));
+    ui->pbCopy->setIcon(QIcon::fromTheme(u"edit-copy"_s));
+    ui->pbDelete->setIcon(QIcon::fromTheme(u"edit-delete"_s));
+    ui->pbNew->setIcon(QIcon::fromTheme(u"list-add"_s));
+    ui->pbNewGroup->setIcon(QIcon::fromTheme(u"folder-add"_s));
 
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -66,8 +66,8 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
 
 ToolDatabase::~ToolDatabase() {
     QSettings settings;
-    settings.beginGroup("ToolDatabase");
-    settings.setValue("geometry", saveGeometry());
+    settings.beginGroup(u"ToolDatabase"_s);
+    settings.setValue(u"geometry"_s, saveGeometry());
     // qWarning() << geometry();
     delete ui;
 }
@@ -85,8 +85,8 @@ void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
 void ToolDatabase::showEvent(QShowEvent* event) {
     QDialog::showEvent(event);
     QSettings settings;
-    settings.beginGroup("ToolDatabase");
-    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    settings.beginGroup(u"ToolDatabase"_s);
+    restoreGeometry(settings.value(u"geometry"_s, QByteArray()).toByteArray());
     // qWarning() << geometry();
 }
 

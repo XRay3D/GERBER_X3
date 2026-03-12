@@ -25,7 +25,7 @@ void Dummy::parse(Dxf::CodeData& code) {
     case Type::POLYLINE:
         do {
             code = sp->nextCode();
-        } while(code != "SEQEND");
+        } while(code != u"SEQEND"_s);
         do {
             code = sp->nextCode();
         } while(code.code() != 0);

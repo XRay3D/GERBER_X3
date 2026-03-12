@@ -57,7 +57,7 @@
 //         Q_ASSERT(pgn.orientation() == CGAL::CLOCKWISE || pgn.orientation() == CGAL::COUNTERCLOCKWISE);
 //         // Degenerate polygon, ring.size() < 3
 //         if (pgn.orientation() == CGAL::ZERO) {
-//             qWarning() << "construct_path: Ignoring degenerated polygon";
+//             qWarning() << u"construct_path: Ignoring degenerated polygon"_s;
 //             return result;
 //         }
 //         const bool isClockwise = pgn.orientation() == CGAL::CLOCKWISE;
@@ -259,7 +259,7 @@ DxfGo LwPolyline::toGo() const {
     } else {
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
     }
-    go.name = "id|LwPolyline";
+    go.name = u"id|LwPolyline"_s;
     return go;
 }
 

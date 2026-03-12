@@ -69,9 +69,9 @@ void AttDef::parse(CodeData& code) {
         case TextStyleName:                   // 7
             break;                            //	Имя стиля текста (необязательно; значение по умолчанию = STANDARD)
         case TextGenerationFlags:             // 71
-            break;                            // see_TEXT_groupCodes	Флаги создания текста (необязательно; значение по умолчанию = 0); см. "Групповые коды TEXT"
+            break;                            // see_TEXT_groupCodes	Флаги создания текста (необязательно; значение по умолчанию = 0); см. u"Групповые коды TEXT"_s
         case HorizontalTextJustificationType: // 72
-            break;                            // see_TEXT_groupCodes	Тип выравнивания текста по горизонтали (необязательно; значение по умолчанию = 0); см. "Групповые коды TEXT"
+            break;                            // see_TEXT_groupCodes	Тип выравнивания текста по горизонтали (необязательно; значение по умолчанию = 0); см. u"Групповые коды TEXT"_s
         case SecondAlignmentPointPtX:         // 11
             break;                            //	Вторая точка выравнивания (в ОСК) (необязательно)
         case SecondAlignmentPointPtY:         // 21

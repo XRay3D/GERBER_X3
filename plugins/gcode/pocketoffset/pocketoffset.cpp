@@ -14,7 +14,7 @@
 
 namespace PocketOffset {
 
-// //dbgPaths(clipFrame, QString("clipFrame %1").arg(tIdx), Qt::red);
+// //dbgPaths(clipFrame, QString(u"clipFrame %1"_s).arg(tIdx), Qt::red);
 
 void Creator::create() {
     setMax(10000);
@@ -99,7 +99,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
-    // dbgPaths(groupedPss, "groupedPss", Qt::red);
+    // dbgPaths(groupedPss, u"groupedPss"_s, Qt::red);
 
     setCurrent(0);
 
@@ -156,9 +156,9 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         dOffset = toolDiameter / 2;
         stepOver = tool.stepover() * uScale;
 
-        Paths clipFrame; // "обтравочная" рамка
+        Paths clipFrame; // u"обтравочная"_s рамка
         for(size_t i{}; tIdx && i <= tIdx; ++i) {
-            // "обтравочная" рамка для текущего инструмента и предыдущих УП
+            // u"обтравочная"_s рамка для текущего инструмента и предыдущих УП
             Paths tmp = Inflate(fillPaths[i], -dOffset + uScale * 0.001, JT::Round, ET::Polygon, uScale);
             // объединение рамок
             clipFrame = CL2::Union(clipFrame, tmp, FR::EvenOdd);
@@ -179,7 +179,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 else if(tIdx /*+ 1 != size*/)
                     removeSmall(wp, dOffset * 2.0); // остальные
 
-                // //dbgPaths(wp, QString("wp %1").arg(pIdx), Qt::red);
+                // //dbgPaths(wp, QString(u"wp %1"_s).arg(pIdx), Qt::red);
 
                 fillPaths[tIdx] += wp;
 
@@ -201,7 +201,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
         // make a fill box for the toolpath and create a file
         Timer t{"cutAreaPaths"};
-        // //dbgPaths(cutAreaPaths, "cutAreaPaths", Qt::green);
+        // //dbgPaths(cutAreaPaths, u"cutAreaPaths"_s, Qt::green);
         cutAreaPaths = Inflate(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
 
         stacking(returnPs);

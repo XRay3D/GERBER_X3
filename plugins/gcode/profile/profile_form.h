@@ -94,8 +94,8 @@ class GCPluginImpl final : public GCode::Plugin {
 
 public:
     // GCode::Plugin interface
-    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+F"_s}; }
     QWidget* createForm() override { return &form; }
     uint32_t type() const override { return md5::hash32("Profile"); }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

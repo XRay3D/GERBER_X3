@@ -64,7 +64,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         if(std::ranges::empty(sh)) return {};
         QString ret;
         for(auto val: set())
-            ret += (ret.size() ? " | " : "") + QString::number(val);
+            ret += (ret.size() ? u" | " : u"") + QString::number(val);
         return ret;
     }
     if(role == Qt::EditRole) {
@@ -82,7 +82,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         if(orientation == Qt::Vertical)
             return headerData_[section];
         else
-            return section ? "Y" : "X";
+            return section ? u"Y"_s : u"X"_s;
     }
     return QAbstractTableModel::headerData(section, orientation, role);
 }
@@ -248,22 +248,22 @@ Editor::Editor(Shapes::Plugin* plugin)
     vLayout->addWidget(view);
 
     auto pushButton = new QPushButton{tr("Apply"), this};
-    pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    pushButton->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
 
     pushButton = new QPushButton{tr("Add New"), this};
-    pushButton->setObjectName("pbAddNew");
-    pushButton->setIcon(QIcon::fromTheme("list-add"));
+    pushButton->setObjectName(u"pbAddNew"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"list-add"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
 
-    pushButton = new QPushButton{"Close", this};
-    pushButton->setObjectName("pbClose");
-    pushButton->setIcon(QIcon::fromTheme("window-close"));
+    pushButton = new QPushButton{u"Close"_s, this};
+    pushButton->setObjectName(u"pbClose"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"window-close"_s));
     vLayout->addWidget(pushButton);
 
     vLayout->setSpacing(6);
@@ -283,7 +283,7 @@ Editor::Editor(Shapes::Plugin* plugin)
 
 void Editor::add(Shapes::AbstractShape* shape) {
     model->shapes.emplace_back(static_cast<Shape*>(shape));
-    
+
     view->reset();
 }
 

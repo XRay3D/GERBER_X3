@@ -25,19 +25,19 @@ namespace Gerber {
 
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "State("
-                    << "D0" << state.dCode() << ", "
-                    << "G0" << state.gCode() << ", "
-                    << u"Positive|Negative"_s.split('|').at(state.imgPolarity()) << ", "
-                    << u"Linear|ClockwiseCircular|CounterClockwiseCircular"_s.split('|').at(state.interpolation() - 1) << ", "
-                    << u"Aperture|Line|Region"_s.split('|').at(state.type()) << ", "
-                    << u"Undef|Single|Multi"_s.split('|').at(state.quadrant()) << ", "
-                    << u"Off|On"_s.split('|').at(state.region()) << ", "
-                    << u"NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring"_s.split('|').at(state.mirroring()) << ", "
-                    << u"aperture"_s << state.aperture() << ", "
-                    << state.curPos() << ", "
-                    << u"scaling"_s << state.scaling() << ", "
-                    << u"rotating"_s << state.rotating() << ", "
+    debug.nospace() << u"State("_s
+                    << u"D0"_s << state.dCode() << u", "_s
+                    << u"G0"_s << state.gCode() << u", "_s
+                    << u"Positive|Negative"_s.split(u'|').at(state.imgPolarity()) << u", "_s
+                    << u"Linear|ClockwiseCircular|CounterClockwiseCircular"_s.split(u'|').at(state.interpolation() - 1) << u", "_s
+                    << u"Aperture|Line|Region"_s.split(u'|').at(state.type()) << u", "_s
+                    << u"Undef|Single|Multi"_s.split(u'|').at(state.quadrant()) << u", "_s
+                    << u"Off|On"_s.split(u'|').at(state.region()) << u", "_s
+                    << u"NoMirroring|X_Mirroring|Y_Mirroring|XY_Mirroring"_s.split(u'|').at(state.mirroring()) << u", "_s
+                    << u"aperture"_s << state.aperture() << u", "_s
+                    << state.curPos() << u", "_s
+                    << u"scaling"_s << state.scaling() << u", "_s
+                    << u"rotating"_s << state.rotating() << u", "_s
                     << ')';
     return debug;
 }
@@ -46,9 +46,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -116,9 +116,9 @@ Paths File::merge() const {
         auto& back = pathList.emplace_back(Paths{});
         for(auto& [aperture, paths]: map) {
             if(paths.empty()) continue;
-            qWarning() << "1" << aperture << paths.size();
+            qWarning() << u"1"_s << aperture << paths.size();
             mergePaths(paths);
-            qWarning() << "2" << aperture << paths.size();
+            qWarning() << u"2"_s << aperture << paths.size();
             CL2::ClipperOffset offset;
             // for(int i{}; i < paths.size(); ++i) {
             //     auto& path = paths[i];
@@ -130,11 +130,11 @@ Paths File::merge() const {
             offset.AddPaths(paths, JoinType::Round, EndType::Round);
             offset.Execute(apertures_.at(aperture)->size() * uScale * 0.5, paths);
             // pathList.back().append(std::move(paths));
-            qWarning() << "3" << aperture << paths.size();
+            qWarning() << u"3"_s << aperture << paths.size();
             // assert(paths.size());
             back += std::move(paths); // NOTE maybe move
         }
-        qWarning() << "4" << back.size();
+        qWarning() << u"4"_s << back.size();
     }
     // pathList.reverse();
 
@@ -275,9 +275,9 @@ FileTree::Node* File::node() {
 QIcon File::icon() const {
     switch(itemsType_) {
     case File::ApPaths:
-        return decoration(color_, 'A');
+        return decoration(color_, u'A');
     case File::Components:
-        return decoration(color_, 'C');
+        return decoration(color_, u'C');
     default:
         return decoration(color_);
     }
@@ -333,7 +333,7 @@ void File::createGi() {
         itemGroups_[Normal]->shrink_to_fit();
     }
     if constexpr(1) { // add components
-        for(const Comp::Component& component:  std::as_const(components_))
+        for(const Comp::Component& component: std::as_const(components_))
             if(!component.referencePoint().isNull())
                 itemGroups_[Components]->push_back(new Comp::Item{component, this});
         itemGroups_[Components]->shrink_to_fit();

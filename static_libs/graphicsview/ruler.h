@@ -30,7 +30,7 @@ public:
     double zoom() const { return rulerZoom_; }
     QSize minimumSizeHint() const override { return {Breadth, Breadth}; }
 
-    static constexpr auto MimeType = "image/x-puzzle-piece";
+    static inline const auto MimeType = u"image/x-puzzle-piece"_s;
 
 public slots:
     void setCursorPos(const QPoint& cursorPos_);

@@ -137,9 +137,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DisplayRole:
         switch(index.column()) {
         case Model::Name:
-            return name.size() ? name : QString{"{%1,%2}"}.arg((~pos_).x()).arg((~pos_).y()); // FIXME
+            return name.size() ? name : QString{u"{%1,%2}"_s}.arg((~pos_).x()).arg((~pos_).y()); // FIXME
             //        case Model::Position:
-            //            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
+            //            return QVariant::fromValue(pos_); // QString(u"%1 : %2"_s).arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
         case Model::GapAngle:
             return par.angle;
         case Model::apThickness:

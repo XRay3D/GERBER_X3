@@ -62,22 +62,22 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool) {
 
 QDebug operator<<(QDebug debug, const Tool& t) {
     QDebugStateSaver saver(debug);
-    debug.nospace() << "Tool(D " << t.diameter_ << ", ID " << t.id_ << ')';
+    debug.nospace() << u"Tool(D "_s << t.diameter_ << u", ID "_s << t.id_ << ')';
     return debug;
 }
 
 QString Tool::nameEnc() const {
     switch(type_) {
     case Tool::Drill:
-        return QString("D-D%1MM").arg(diameter_);
+        return QString(u"D-D%1MM"_s).arg(diameter_);
     case Tool::EndMill:
-        return QString("M-D%1MM").arg(diameter_);
+        return QString(u"M-D%1MM"_s).arg(diameter_);
     case Tool::Engraver:
-        return QString("V-D%1MMA%2DEG").arg(diameter_).arg(angle_);
+        return QString(u"V-D%1MMA%2DEG"_s).arg(diameter_).arg(angle_);
     case Tool::Laser:
-        return QString("L-D%1MM").arg(diameter_);
+        return QString(u"L-D%1MM"_s).arg(diameter_);
     case Tool::ThreadMill:
-        return QString("T-D%1MM").arg(diameter_);
+        return QString(u"T-D%1MM"_s).arg(diameter_);
     default:
         return {};
     }
@@ -146,38 +146,38 @@ double Tool::getDepth() const {
 }
 
 void Tool::read(const QJsonObject& json) {
-    angle_ = json["angle"].toDouble();
-    autoName_ = json["autoName"].toBool();
-    diameter_ = json["diameter"].toDouble();
-    feedRate_ = json["feedRate"].toDouble();
-    id_ = json["id"].toInt();
-    name_ = json["name"].toString();
-    note_ = json["note"].toString();
-    oneTurnCut_ = json["oneTurnCut"].toDouble();
-    passDepth_ = json["passDepth"].toDouble();
-    plungeRate_ = json["plungeRate"].toDouble();
-    spindleSpeed_ = json["spindleSpeed"].toInt();
-    stepover_ = json["stepover"].toDouble();
-    lenght_ = json["lenght"].toDouble(10);
+    angle_ = json[u"angle"_s].toDouble();
+    autoName_ = json[u"autoName"_s].toBool();
+    diameter_ = json[u"diameter"_s].toDouble();
+    feedRate_ = json[u"feedRate"_s].toDouble();
+    id_ = json[u"id"_s].toInt();
+    name_ = json[u"name"_s].toString();
+    note_ = json[u"note"_s].toString();
+    oneTurnCut_ = json[u"oneTurnCut"_s].toDouble();
+    passDepth_ = json[u"passDepth"_s].toDouble();
+    plungeRate_ = json[u"plungeRate"_s].toDouble();
+    spindleSpeed_ = json[u"spindleSpeed"_s].toInt();
+    stepover_ = json[u"stepover"_s].toDouble();
+    lenght_ = json[u"lenght"_s].toDouble(10);
 
-    type_ = static_cast<Type>(json["type"].toInt());
+    type_ = static_cast<Type>(json[u"type"_s].toInt());
 }
 
 void Tool::write(QJsonObject& json) const {
-    json["angle"] = angle_;
-    json["autoName"] = autoName_;
-    json["diameter"] = diameter_;
-    json["feedRate"] = feedRate_;
-    json["id"] = id_;
-    json["name"] = name_;
-    json["note"] = note_;
-    json["oneTurnCut"] = oneTurnCut_;
-    json["passDepth"] = passDepth_;
-    json["plungeRate"] = plungeRate_;
-    json["spindleSpeed"] = spindleSpeed_;
-    json["stepover"] = stepover_;
-    json["type"] = type_;
-    json["lenght"] = lenght_;
+    json[u"angle"_s] = angle_;
+    json[u"autoName"_s] = autoName_;
+    json[u"diameter"_s] = diameter_;
+    json[u"feedRate"_s] = feedRate_;
+    json[u"id"_s] = id_;
+    json[u"name"_s] = name_;
+    json[u"note"_s] = note_;
+    json[u"oneTurnCut"_s] = oneTurnCut_;
+    json[u"passDepth"_s] = passDepth_;
+    json[u"plungeRate"_s] = plungeRate_;
+    json[u"spindleSpeed"_s] = spindleSpeed_;
+    json[u"stepover"_s] = stepover_;
+    json[u"type"_s] = type_;
+    json[u"lenght"_s] = lenght_;
 }
 
 bool Tool::isValid() const {
@@ -200,15 +200,15 @@ bool Tool::isValid() const {
 QIcon Tool::icon() const {
     switch(type_) {
     case Tool::Drill:
-        return QIcon::fromTheme("drill");
+        return QIcon::fromTheme(u"drill"_s);
     case Tool::EndMill:
-        return QIcon::fromTheme("endmill");
+        return QIcon::fromTheme(u"endmill"_s);
     case Tool::Engraver:
-        return QIcon::fromTheme("engraving");
+        return QIcon::fromTheme(u"engraving"_s);
     case Tool::Laser:
-        return QIcon::fromTheme("laser");
+        return QIcon::fromTheme(u"laser"_s);
     case Tool::ThreadMill:
-        return QIcon::fromTheme("thread_mill");
+        return QIcon::fromTheme(u"thread_mill"_s);
     default:
         return QIcon();
     }
@@ -217,19 +217,19 @@ QIcon Tool::icon() const {
 QString Tool::errorStr() const {
     QString errorString;
     if(qFuzzyIsNull(diameter_))
-        errorString += "Tool diameter = 0!\n";
+        errorString += u"Tool diameter = 0!\n"_s;
     if(qFuzzyIsNull(passDepth_)) {
         if(type() == Drill)
-            errorString += "Pass = 0!\n";
+            errorString += u"Pass = 0!\n"_s;
         else
-            errorString += "Depth = 0!\n";
+            errorString += u"Depth = 0!\n"_s;
     }
     if(qFuzzyIsNull(feedRate_))
-        errorString += "Feed rate = 0\n";
+        errorString += u"Feed rate = 0\n"_s;
     if(qFuzzyIsNull(stepover_))
-        errorString += "Stepover = 0\n";
+        errorString += u"Stepover = 0\n"_s;
     if(qFuzzyIsNull(plungeRate_))
-        errorString += "Plunge rate = 0!\n";
+        errorString += u"Plunge rate = 0!\n"_s;
     return errorString;
 }
 
@@ -305,7 +305,7 @@ void ToolHolder::readTools() {
     QFile file(App::settingsPath() + u"/tools.json"_s);
 
     if(!file.exists())
-        file.setFileName(qApp->applicationDirPath() + "/tools.json"); // fallback path
+        file.setFileName(qApp->applicationDirPath() + u"/tools.json"_s); // fallback path
     if(file.exists() && file.open(QIODevice::ReadOnly))
         loadDoc = QJsonDocument::fromJson(file.readAll());
     else {
@@ -316,12 +316,12 @@ void ToolHolder::readTools() {
 }
 
 void ToolHolder::readTools(const QJsonObject& json) {
-    QJsonArray toolArray = json["tools"].toArray();
+    QJsonArray toolArray = json[u"tools"_s].toArray();
     for(int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
-        tool.setId(toolObject["id"].toInt());
+        tool.setId(toolObject[u"id"_s].toInt());
         tool.updatePath();
         tools_.try_emplace(tool.id(), tool);
     }
@@ -332,8 +332,8 @@ void ToolHolder::writeTools(QJsonObject& json) {
     for(auto& [id, tool]: tools_) {
         QJsonObject toolObject;
         tool.write(toolObject);
-        toolObject["id"] = id;
+        toolObject[u"id"_s] = id;
         toolArray.push_back(toolObject);
     }
-    json["tools"] = QJsonValue{toolArray};
+    json[u"tools"_s] = QJsonValue{toolArray};
 }

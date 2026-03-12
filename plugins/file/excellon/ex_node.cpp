@@ -69,7 +69,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
             case Qt::DisplayRole:
                 return file->shortName();
             case Qt::ToolTipRole:
-                return file->shortName() + "\n" + file->name();
+                return {file->shortName() + u'\n' + file->name()};
             case Qt::CheckStateRole:
                 return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
             case Qt::DecorationRole:
@@ -98,7 +98,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
-    menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
+    menu.addAction(QIcon::fromTheme(u"hint"_s), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
     menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
         QDialog* dialog = new QDialog;
         dialog->setObjectName(u"dialog"_s);
@@ -107,7 +107,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         QVBoxLayout* verticalLayout = new QVBoxLayout{dialog};
         verticalLayout->setObjectName(u"verticalLayout"_s);
         QTextBrowser* textBrowser = new QTextBrowser{dialog};
-        textBrowser->setFont(QFont("JetBrains Mono"));
+        textBrowser->setFont(QFont(u"JetBrains Mono"_s));
         new SyntaxHighlighter{textBrowser->document()};
         textBrowser->setObjectName(u"textBrowser"_s);
         verticalLayout->addWidget(textBrowser);
@@ -118,11 +118,11 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     });
     menu.addSeparator();
     if(!FormatDialog::showed())
-        menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Edit Format"), [this] {
+        menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Edit Format"), [this] {
             (new FormatDialog{file})->show();
         });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("document-close"), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme(u"document-close"_s), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }
 
 int Node::id() const { return file->id(); }

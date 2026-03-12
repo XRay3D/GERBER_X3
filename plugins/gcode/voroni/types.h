@@ -29,7 +29,7 @@ class File final : public GCode::File {
 public:
     explicit File();
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
-    QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"voronoi-path"_s); }
     uint32_t type() const override { return VORONOI; }
     void createGi() override;
     void genGcodeAndTile() override;

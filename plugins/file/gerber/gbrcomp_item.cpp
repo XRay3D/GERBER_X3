@@ -43,7 +43,7 @@ QPainterPath Item::shape() const {
 
 void drawText(QPainter* painter, const QString& str, const QColor& color, QPointF pt, double scale) {
     painter->save();
-    static QFont f("Consolas");
+    static QFont f(u"Consolas"_s);
     f.setPixelSize(20);
     f.setBold(true);
     const QRectF textRect = QFontMetricsF(f).boundingRect(QRectF(), Qt::AlignLeft, str);
@@ -121,7 +121,7 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
     if(scale_ < 0.05)
         for(const auto& [number, description, pos]: component_.pins())
             drawText(painter,
-                QString(description + '(' + number + ')'),
+                QString(description + u'(' + number + u')'),
                 App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF,
                 pos + QPointF(0, scale_ * 60),
                 scale_);

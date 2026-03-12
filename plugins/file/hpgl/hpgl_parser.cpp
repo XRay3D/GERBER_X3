@@ -42,7 +42,7 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
         }
         //        file->lines().push_back(line);
         //        try {
-        //            if (line == "%")
+        //            if (line == u"%"_s)
         //                continue;
 
         //            if (parseComment(line))
@@ -68,15 +68,15 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
 
         //            if (parsePos(line))
         //                continue;
-        //            qWarning() << "Excellon unparsed:" << line;
+        //            qWarning() << u"Excellon unparsed:"_s << line;
         //        } catch (const QString& errStr) {
-        //            qWarning() << "exeption Q:" << errStr;
-        //            emit interface->fileError("", QFileInfo(fileName).fileName() + "\n" + errStr);
+        //            qWarning() << u"exeption Q:"_s << errStr;
+        //            emit interface->fileError("u", QFileInfo(fileName).fileName() + u'\n' + errStr);
         //            delete file;
         //            return nullptr;
         //        } catch (...) {
-        //            qWarning() << "exeption S:" << errno;
-        //            emit interface->fileError("", QFileInfo(fileName).fileName() + "\n" + "Unknown Error!");
+        //            qWarning() << u"exeption S:"_s << errno;
+        //            emit interface->fileError("u", QFileInfo(fileName).fileName() + "_s\nu" + "_sUnknown Error!");
         //            delete file;
         //            return nullptr;
         //        }
@@ -92,21 +92,21 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
     //    try {
 
     //    } catch (const QString& wath) {
-    //        qWarning() << "exeption QString:" << wath;
+    //        qWarning() << u"exeption QString:"_s << wath;
     //        //emit fileProgress(m_file->shortName(), 1, 1);
     //        emit fileError(QFileInfo(fileName).fileName(), wath);
     //        delete file;
     //        return nullptr;
     //    } catch (const std::exception& e) {
-    //        qWarning() << "exeption:" << e.what();
+    //        qWarning() << u"exeption:"_s << e.what();
     //        //emit fileProgress(m_file->shortName(), 1, 1);
-    //        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
+    //        emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString(e.what()));
     //        delete file;
     //        return nullptr;
     //    } catch (...) {
-    //        qWarning() << "exeption:" << errno;
+    //        qWarning() << u"exeption:"_s << errno;
     //        //emit fileProgress(m_file->shortName(), 1, 1);
-    //        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
+    //        emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::number(errno));
     //        delete file;
     //        return nullptr;
     //    }

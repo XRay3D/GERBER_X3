@@ -46,7 +46,7 @@ public:
 
     struct ShapeData {
         QFont font{};
-        QString text{"Shape"};
+        QString text{u"Shape"_s};
         double angle{0.0};
         double height{10.0};
         double xy{100.0};
@@ -99,7 +99,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShText; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-text"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{this, point};
         editor_.add(shape);

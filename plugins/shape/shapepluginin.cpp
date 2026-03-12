@@ -20,7 +20,7 @@ void Plugin::updPoint(const QPointF& point) {
 
 void Plugin::finalizeShape() {
     if(item) {
-        item->addPt({std::nan("fin"), std::nan("fin")});
+        item->addPt({std::nan(""), std::nan("")});
         item->setSelected(true);
         item = nullptr;
     }
@@ -30,8 +30,8 @@ void Plugin::finalizeShape() {
 Shapes::Plugin::Plugin() { App app; }
 
 void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete All Shapes"), [tv] {
-        if(QMessageBox::question(tv, "", QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+    menu.addAction(QIcon::fromTheme(u"edit-delete"_s), QObject::tr("&Delete All Shapes"), [tv] {
+        if(QMessageBox::question(tv, {}, QObject::tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
             tv->closeFiles();
     });
 }

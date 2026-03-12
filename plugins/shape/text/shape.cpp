@@ -197,7 +197,7 @@ void Shape::readAndInit(QDataStream& stream) {
 
 void Shape::saveIData() {
     QSettings settings;
-    settings.beginGroup("ShapeText");
+    settings.beginGroup(u"ShapeText"_s);
     boost::pfr::for_each_field(iData, [&settings](auto& field, auto index) { // TODO for_each_field_name
                                                                              // if constexpr(requires { field.family(); })
                                                                              //     settings.setValue(boost::pfr::get_name<index, ShapeData>(), field.toString());
@@ -208,7 +208,7 @@ void Shape::saveIData() {
 
 Shape::ShapeData Shape::loadIData() {
     QSettings settings;
-    settings.beginGroup("ShapeText");
+    settings.beginGroup(u"ShapeText"_s);
     boost::pfr::for_each_field(iData, [&settings]<typename Ty>(Ty& field, auto index) { // TODO for_each_field_name
                                                                                         // if constexpr(requires { field.family(); })
                                                                                         //     field.fromString(settings.value(boost::pfr::get_name<index, ShapeData>()).toString());
@@ -229,7 +229,7 @@ void Shape::ok() { saveIData(); }
 
 QString Shape::name() const { return QObject::tr("Text"); }
 
-QIcon Shape::icon() const { return QIcon::fromTheme("draw-text"); }
+QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-text"_s); }
 
 } // namespace ShTxt
 

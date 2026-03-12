@@ -6,7 +6,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -30,7 +30,7 @@ public:
             /// Толщина линии.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+            // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
             float _lineWidth = 0.0F;
 
             /// <summary>
@@ -38,7 +38,7 @@ public:
             /// </summary>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("ArcCCW", typeof(ArcCCW)), XmlElement("ArcCW", typeof(ArcCW)), XmlElement("ArcByAngle", typeof(ArcByAngle)), XmlElement("ArcByMiddle", typeof(ArcByMiddle)), XmlElement("Circle", typeof(Circle)), XmlElement("Line", typeof(Line)), XmlElement("Polyline", typeof(Polyline)), XmlElement("Rect", typeof(Rect)), XmlElement("Contour", typeof(Contour))] public Object _NonfilledFigure;
+            // ORIGINAL LINE: [XmlElement(u"ArcCCW"_s, typeof(ArcCCW)), XmlElement(u"ArcCW"_s, typeof(ArcCW)), XmlElement(u"ArcByAngle"_s, typeof(ArcByAngle)), XmlElement(u"ArcByMiddle"_s, typeof(ArcByMiddle)), XmlElement(u"Circle"_s, typeof(Circle)), XmlElement(u"Line"_s, typeof(Line)), XmlElement(u"Polyline"_s, typeof(Polyline)), XmlElement(u"Rect"_s, typeof(Rect)), XmlElement(u"Contour"_s, typeof(Contour))] public Object _NonfilledFigure;
 
             std::variant<ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Circle, Line, Polyline, Rect, Contour> _NonfilledFigure;
 
@@ -58,7 +58,7 @@ public:
             /// Толщина линии.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+            // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
             float _lineWidth = 0.0F;
 
             /// <summary>
@@ -66,7 +66,7 @@ public:
             /// </summary>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("FilledCircle", typeof(FilledCircle)), XmlElement("FilledRect", typeof(FilledRect)), XmlElement("Polygon", typeof(Polygon)), XmlElement("FilledContour", typeof(FilledContour))] public Object _FilledFigure;
+            // ORIGINAL LINE: [XmlElement(u"FilledCircle"_s, typeof(FilledCircle)), XmlElement(u"FilledRect"_s, typeof(FilledRect)), XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"FilledContour"_s, typeof(FilledContour))] public Object _FilledFigure;
 
             std::variant<FilledCircle, FilledRect, Polygon, FilledContour> _FilledFigure;
 
@@ -83,14 +83,14 @@ public:
         /// Описание контура платы.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlArray("Contour")][XmlArrayItem("Shape")] public List<Shape_Contour> _Contours;
+        // ORIGINAL LINE: [XmlArray(u"Contour"_s)][XmlArrayItem(u"Shape"_s)] public List<Shape_Contour> _Contours;
         std::vector<Shape_Contour*> _Contours;
         bool ShouldSerialize_Contours();
         /// <summary>
         /// Вырезы в плате.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Voids")][XmlArrayItem("Shape")] public List<Shape_Voids> _Voids;
+        // ORIGINAL LINE: [XmlArray(u"Voids"_s)][XmlArrayItem(u"Shape"_s)] public List<Shape_Voids> _Voids;
         std::vector<Shape_Voids*> _Voids;
         bool ShouldSerialize_Voids();
     };
@@ -104,14 +104,14 @@ public:
         /// Задаёт угол в градусах c точностью до тысячных долей.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+        // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
         float _angle = 0.0F;
 
         /// <summary>
         /// Признак фиксации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("fixed")] public Bool _fixed;
+        // ORIGINAL LINE: [XmlAttribute(u"fixed"_s)] public Bool _fixed;
         Bool _fixed = static_cast<Bool>(0);
         virtual ~MntholeInstance() {
             delete _PadstackRef;
@@ -126,21 +126,21 @@ public:
         /// Ссылка на стек контактных площадок.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("PadstackRef")] public PadstackRef _PadstackRef;
+        // ORIGINAL LINE: [XmlElement(u"PadstackRef"_s)] public PadstackRef _PadstackRef;
         PadstackRef* _PadstackRef;
 
         /// <summary>
         /// ссылка на цепь.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
         NetRef* _NetRef;
 
         /// <summary>
         /// Точка привязки объекта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+        // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
         Org* _Org;
 
         void Shift(float x, float y);
@@ -165,7 +165,7 @@ public:
                 /// Тип запрета трассировки.
                 /// </summary>
             public:
-                // ORIGINAL LINE: [XmlAttribute("role")] public role _role;
+                // ORIGINAL LINE: [XmlAttribute(u"role"_s)] public role _role;
                 role _role = static_cast<role>(0);
 
                 /// <summary>
@@ -174,14 +174,14 @@ public:
                 /// <remarks>! При null необходимо смотреть _LayersRefs - там описан список ссылок типа LayerRef. </remarks>
                 // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-                // ORIGINAL LINE: [XmlElement("AllLayers", typeof(AllLayers)), XmlElement("AllLayersInner", typeof(AllLayersInner)), XmlElement("AllLayersInnerSignal", typeof(AllLayersInnerSignal)), XmlElement("AllLayersSignal", typeof(AllLayersSignal)), XmlElement("AllLayersOuter", typeof(AllLayersOuter)), XmlElement("LayerGroupRef", typeof(LayerGroupRef))] public Object _LayersRef;
+                // ORIGINAL LINE: [XmlElement(u"AllLayers"_s, typeof(AllLayers)), XmlElement(u"AllLayersInner"_s, typeof(AllLayersInner)), XmlElement(u"AllLayersInnerSignal"_s, typeof(AllLayersInnerSignal)), XmlElement(u"AllLayersSignal"_s, typeof(AllLayersSignal)), XmlElement(u"AllLayersOuter"_s, typeof(AllLayersOuter)), XmlElement(u"LayerGroupRef"_s, typeof(LayerGroupRef))] public Object _LayersRef;
                 std::any _LayersRef;
                 /// <summary>
                 /// Ссылка на слои. См. также _LayersRef
                 /// </summary>
                 /// <remarks>! При null необходимо смотреть _LayersRef - там описаны ссылки остальных типов. </remarks>
 
-                // ORIGINAL LINE: [XmlElement("LayerRef")] public List<LayerRef> _LayersRefs;
+                // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public List<LayerRef> _LayersRefs;
                 std::vector<LayerRef*> _LayersRefs;
                 bool ShouldSerialize_LayersRefs();
             };
@@ -195,7 +195,7 @@ public:
                 /// Сторона объекта.
                 /// </summary>
             public:
-                // ORIGINAL LINE: [XmlAttribute("side")] public side _side;
+                // ORIGINAL LINE: [XmlAttribute(u"side"_s)] public side _side;
                 side _side = static_cast<side>(0);
             };
             /// <summary>
@@ -204,11 +204,11 @@ public:
         public:
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("Trace", typeof(Trace))] public Trace _Trace;
+            // ORIGINAL LINE: [XmlElement(u"Trace"_s, typeof(Trace))] public Trace _Trace;
             Trace* _Trace;
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("Place", typeof(Place))] public Place _Place;
+            // ORIGINAL LINE: [XmlElement(u"Place"_s, typeof(Place))] public Place _Place;
             Place* _Place;
             virtual ~Role() {
                 delete _Trace;
@@ -219,7 +219,7 @@ public:
     public:
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("Role", typeof(Role))] public Role _Role;
+        // ORIGINAL LINE: [XmlElement(u"Role"_s, typeof(Role))] public Role _Role;
         Role* _Role;
 
         /// <summary>
@@ -227,7 +227,7 @@ public:
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("ArcCCW", typeof(ArcCCW)), XmlElement("ArcCW", typeof(ArcCW)), XmlElement("ArcByAngle", typeof(ArcByAngle)), XmlElement("ArcByMiddle", typeof(ArcByMiddle)), XmlElement("Line", typeof(Line)), XmlElement("Circle", typeof(Circle)), XmlElement("Rect", typeof(Rect)), XmlElement("FilledCircle", typeof(FilledCircle)), XmlElement("FilledRect", typeof(FilledRect)), XmlElement("Polygon", typeof(Polygon)), XmlElement("Contour", typeof(Contour)), XmlElement("FilledContour", typeof(FilledContour)), XmlElement("Polyline", typeof(Polyline))] public Object _FigureContPolyline;
+        // ORIGINAL LINE: [XmlElement(u"ArcCCW"_s, typeof(ArcCCW)), XmlElement(u"ArcCW"_s, typeof(ArcCW)), XmlElement(u"ArcByAngle"_s, typeof(ArcByAngle)), XmlElement(u"ArcByMiddle"_s, typeof(ArcByMiddle)), XmlElement(u"Line"_s, typeof(Line)), XmlElement(u"Circle"_s, typeof(Circle)), XmlElement(u"Rect"_s, typeof(Rect)), XmlElement(u"FilledCircle"_s, typeof(FilledCircle)), XmlElement(u"FilledRect"_s, typeof(FilledRect)), XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"Contour"_s, typeof(Contour)), XmlElement(u"FilledContour"_s, typeof(FilledContour)), XmlElement(u"Polyline"_s, typeof(Polyline))] public Object _FigureContPolyline;
         std::variant<ArcCCW,
             ArcCW,
             ArcByAngle,
@@ -260,21 +260,21 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Контур платы и вырезы в плате.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("BoardOutline")] public BoardOutline _BoardOutline;
+    // ORIGINAL LINE: [XmlElement(u"BoardOutline"_s)] public BoardOutline _BoardOutline;
     BoardOutline* _BoardOutline;
 
     /// <summary>
     /// Монтажные отверстия на плате.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Mntholes"), DefaultValue(null)][XmlArrayItem("MntholeInstance")] public List<MntholeInstance> _Mntholes;
+    // ORIGINAL LINE: [XmlArray(u"Mntholes"_s), DefaultValue(null)][XmlArrayItem(u"MntholeInstance"_s)] public List<MntholeInstance> _Mntholes;
     std::vector<MntholeInstance*> _Mntholes;
     virtual ~Constructive() {
         delete _BoardOutline;
@@ -285,21 +285,21 @@ public:
     /// Детали на механических слоях.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("MechLayerObjects"), DefaultValue(null)][XmlArrayItem("Detail")] public List<Detail> _MechLayerObjects;
+    // ORIGINAL LINE: [XmlArray(u"MechLayerObjects"_s), DefaultValue(null)][XmlArrayItem(u"Detail"_s)] public List<Detail> _MechLayerObjects;
     std::vector<Detail*> _MechLayerObjects;
     bool ShouldSerialize_MechLayerObjects();
     /// <summary>
     /// Описание надписей.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Texts"), DefaultValue(null)][XmlArrayItem("Text")] public List<Text> _Texts;
+    // ORIGINAL LINE: [XmlArray(u"Texts"_s), DefaultValue(null)][XmlArrayItem(u"Text"_s)] public List<Text> _Texts;
     std::vector<Text*> _Texts;
     bool ShouldSerialize_Texts();
     /// <summary>
     /// Описание запретов.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Keepouts"), DefaultValue(null)][XmlArrayItem("Keepout")] public List<Keepout_Сonstructive> _Keepouts;
+    // ORIGINAL LINE: [XmlArray(u"Keepouts"_s), DefaultValue(null)][XmlArrayItem(u"Keepout"_s)] public List<Keepout_Сonstructive> _Keepouts;
     std::vector<Keepout_Сonstructive*> _Keepouts;
     bool ShouldSerialize_Keepouts();
 

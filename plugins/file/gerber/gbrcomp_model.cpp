@@ -24,7 +24,7 @@ namespace Gerber::Comp {
 
 sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel{parent}
-    , rootItem(new sNode{""}) {
+    , rootItem(new sNode{u""_s}) {
     //    auto file = App::project().file<File>(fileId);
     //    for (auto item : *file->itemGroup(File::Components))
     //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
@@ -37,7 +37,7 @@ sModel::sModel(int fileId, QObject* parent)
     auto unsorted = new sNode{GbrObj::tr("unsorted")};
 
     for(const auto& component: file->components()) {
-        static constexpr ctll::fixed_string pattern(R"((\D+)(\d+).*)"); // fixed_string("(\\D+)(\\d+).*");
+        static constexpr ctll::fixed_string pattern{R"((\D+)(\d+).*)"}; // fixed_string(u"(\\D+)(\\d+).*"};
 
         auto data{toU16StrView(component.refdes())};
 
@@ -136,7 +136,7 @@ QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) 
         case 7: /* <decimal> Height, in the unit of the file. */
             return GbrObj::tr("Height");
         default:
-            return QString("");
+            return {};
         }
     return {};
 }

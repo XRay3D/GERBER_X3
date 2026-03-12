@@ -93,7 +93,7 @@ class AbstractFile {
             file.colorFlag_);
         file.read(in);
         if(App::splashScreenPtr())
-            App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+            App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + u"\n\n\n"_s, Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         file.createGi();
         file.setTransform(file.transform_);
         file.setVisible(visible);
@@ -231,8 +231,7 @@ inline const mvector<QString>& AbstractFile::lines() const { return lines_; }
 
 inline const QString AbstractFile::lines2() const {
     QString rstr;
-    for(auto&& str: lines_)
-        rstr.append(str).append('\n');
+    for(auto&& str: lines_) rstr.append(str).append(u'\n');
     return rstr;
 }
 

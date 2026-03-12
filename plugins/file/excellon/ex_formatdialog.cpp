@@ -27,7 +27,7 @@ FormatDialog::FormatDialog(Excellon::File* file)
     showed_ = true;
 
     ui->setupUi(this);
-    setObjectName("ExcellonDialog");
+    setObjectName(u"ExcellonDialog"_s);
 
     setWindowFlag(Qt::WindowStaysOnTopHint);
     setWindowTitle(file->shortName());
@@ -113,16 +113,16 @@ void FormatDialog::hideEvent(QHideEvent* /*event*/) { deleteLater(); }
 
 void FormatDialog::on_pbSetAsDefault_clicked() {
     QSettings settings;
-    settings.beginGroup("Excellon");
+    settings.beginGroup(u"Excellon"_s);
 
-    settings.setValue("rbInches", tmpFormat_.unitMode == Inches);
-    settings.setValue("rbMillimeters", tmpFormat_.unitMode == Millimeters);
+    settings.setValue(u"rbInches"_s, tmpFormat_.unitMode == Inches);
+    settings.setValue(u"rbMillimeters"_s, tmpFormat_.unitMode == Millimeters);
 
-    settings.setValue("rbLeading", tmpFormat_.zeroMode == LeadingZeros);
-    settings.setValue("rbTrailing", tmpFormat_.zeroMode == TrailingZeros);
+    settings.setValue(u"rbLeading"_s, tmpFormat_.zeroMode == LeadingZeros);
+    settings.setValue(u"rbTrailing"_s, tmpFormat_.zeroMode == TrailingZeros);
 
-    settings.setValue("sbxDecimal", tmpFormat_.decimal);
-    settings.setValue("sbxInteger", tmpFormat_.integer);
+    settings.setValue(u"sbxDecimal"_s, tmpFormat_.decimal);
+    settings.setValue(u"sbxInteger"_s, tmpFormat_.integer);
     settings.endGroup();
 
     Settings::setformat(tmpFormat_);

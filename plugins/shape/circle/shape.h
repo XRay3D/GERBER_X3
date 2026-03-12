@@ -63,7 +63,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShCircle; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-ellipse"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-ellipse"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
             this,

@@ -8,17 +8,12 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.00)
 
 project(
   GGEasy
   VERSION 0.9.0.0
   LANGUAGES C CXX)
-
-# if(ANDROID) set(ANDROID_PACKAGE_SOURCE_DIR
-# "${CMAKE_CURRENT_SOURCE_DIR}/android") if(ANDROID_ABI STREQUAL "armeabi-v7a")
-# set(ANDROID_EXTRA_LIBS ${CMAKE_CURRENT_SOURCE_DIR} / path / to / libcrypto.so
-# ${CMAKE_CURRENT_SOURCE_DIR } / path / to / libssl.so) endif() endif()
 
 # set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
 # set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -29,8 +24,15 @@ string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S") # [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}" -DGIT_REF_NAME="${GIT_REF_NAME}"
                 -DGIT_SHA="${GIT_SHA}")
 
-find_package(Qt6 REQUIRED
-             COMPONENTS Core Gui LinguistTools OpenGL PrintSupport Widgets)
+find_package(
+  Qt6 REQUIRED
+  COMPONENTS Core
+             Gui
+             LinguistTools
+             OpenGL
+             OpenGLWidgets
+             PrintSupport
+             Widgets)
 
 set(APP_ICON_RESOURCE_WINDOWS "myapp.rc") # WINDOWS APP ICON
 
@@ -41,36 +43,19 @@ file(GLOB UIS *.ui)
 
 set(TS_FILES ${PROJECT_NAME}_en.ts ${PROJECT_NAME}_ru.ts)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  find_package(
-    Qt6
-    COMPONENTS OpenGLWidgets
-    REQUIRED)
-endif()
-
-# if(${QT_VERSION_MAJOR} GREATER_EQUAL 6) qt6_add_resources(RESOURCES
-# ${QRC_FILES}) else() set(Qt5Core_RCC_EXECUTABLE /usr/share/qt5/bin/rcc)
-# qt5_add_resources(RESOURCES ${QRC_FILES}) endif()
-
 set(PROJECT_SOURCES ${APP_ICON_RESOURCE_WINDOWS} ${HEADERS} ${QRC_FILES}
                     ${RESOURCES} ${SOURCES} ${UIS})
 
 set_source_files_properties(
   ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
-  # qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  # qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
-  # ${PROJECT_SOURCES}) qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
-  # QM_FILES_OUTPUT_VARIABLE QM_FILES)
-else()
-  add_executable(${PROJECT_NAME} ${PROJECT_SOURCES})
-  # qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  # qt5_add_translation(${QM_FILES} ${TS_FILES})
-endif()
+qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
+# qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
+# qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
+# ${PROJECT_SOURCES}) qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
+# QM_FILES_OUTPUT_VARIABLE QM_FILES)
 
-# add_translation(${PROJECT_NAME})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(
   ${PROJECT_NAME}
@@ -83,7 +68,8 @@ target_link_libraries(
           shape
           tooldatabase
           Qt6::PrintSupport
-          Qt6::Widgets)
+          Qt6::Widgets
+          Qt6::OpenGLWidgets)
 
 if(EXISTS XrStyle)
   target_link_libraries(${PROJECT_NAME} PRIVATE XrStyle)
@@ -96,11 +82,6 @@ else()
   target_link_libraries(${PROJECT_NAME} PRIVATE stdc++_libbacktrace)
 endif()
 ]]
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  target_link_libraries(${PROJECT_NAME}
-                        PRIVATE Qt6::OpenGLWidgets)
-endif()
 
 set_target_properties(
   ${PROJECT_NAME}
@@ -124,8 +105,7 @@ if(WIN32)
   target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
   # windeployqt
   set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
-  get_target_property(_QMAKE_EXECUTABLE Qt6::qmake
-                      IMPORTED_LOCATION)
+  get_target_property(_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
   get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
   find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
   add_custom_command(

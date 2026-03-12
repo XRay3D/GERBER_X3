@@ -21,7 +21,7 @@ class File final : public GCode::File {
 public:
     explicit File();
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
-    QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshatch-path"_s); }
     uint32_t type() const override { return CROSS_HATCH; }
     void createGi() override;
     void genGcodeAndTile() override;

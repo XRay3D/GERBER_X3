@@ -72,7 +72,7 @@ void Shape::redraw() {
 
 QString Shape::name() const { return QObject::tr("Circle"); }
 
-QIcon Shape::icon() const { return QIcon::fromTheme("draw-ellipse"); }
+QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-ellipse"_s); }
 
 void Shape::setPt(const QPointF& pt) {
     if(curHandle.base()) *curHandle = pt;

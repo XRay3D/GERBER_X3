@@ -105,7 +105,7 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
             if(toolId_)
                 return App::toolHolder().tool(toolId_).icon();
             else
-                return QIcon::fromTheme("folder-sync");
+                return QIcon::fromTheme(u"folder-sync"_s);
         }
         return {};
     case Qt::UserRole:

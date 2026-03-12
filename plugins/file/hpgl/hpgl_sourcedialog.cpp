@@ -18,22 +18,22 @@ namespace Hpgl {
 
 SourceDialog::SourceDialog(int fileId, QWidget* parent)
     : QDialog(parent) {
-    //    setObjectName(QString::fromUtf8("this"));
+    //    setObjectName(QString::fromUtf8(u"this"_s));
     //    resize(600, 600);
     //    //Dialog->resize(400, 300);
     //    auto verticalLayout = new QVBoxLayout(this);
-    //    verticalLayout->setObjectName(QString::fromUtf8("verticalLayout"));
+    //    verticalLayout->setObjectName(QString::fromUtf8(u"verticalLayout"_s));
     //    //tableView
     //    auto tableView = new QTableView(this);
     //    QFont f(font());
-    //    f.setFamily("Consolas");
+    //    f.setFamily(u"Consolas"_s);
     //    tableView->setFont(f);
-    //    tableView->setObjectName(QString::fromUtf8("tableView"));
+    //    tableView->setObjectName(QString::fromUtf8(u"tableView"_s));
 
     //    tableView->setModel(new Model(App::project().file(fileId)->lines()));
     //    // horizontal Header
     //    tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    //    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());
+    //    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, u"123456789"_s).width());
     //    tableView->horizontalHeader()->setSectionResizeMode(LineData, QHeaderView::Stretch);
     //    // vertical Header
     //    tableView->verticalHeader()->setVisible(false);
@@ -71,14 +71,14 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
 
     //    {
     //        auto spinBox = new QSpinBox(this);
-    //        spinBox->setObjectName(QString::fromUtf8("spinBox"));
+    //        spinBox->setObjectName(QString::fromUtf8(u"spinBox"_s));
     //        spinBox->setRange(0, tableView->model()->rowCount());
     //        connect(spinBox, qOverload<int>(&QSpinBox::valueChanged), tableView, &QTableView::selectRow);
     //        verticalLayout->addWidget(spinBox);
     //    }
     //    // leFind
     //    auto leFind = new QLineEdit(this);
-    //    leFind->setObjectName(QString::fromUtf8("lineEdit"));
+    //    leFind->setObjectName(QString::fromUtf8(u"lineEdit"_s));
     //    connect(leFind, &QLineEdit::textChanged, [tableView](const QString& text) {
     //        for (int row = 0; row < tableView->model()->rowCount(); ++row) {
     //            if (tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(text, Qt::CaseInsensitive)) {
@@ -90,7 +90,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //    verticalLayout->addWidget(leFind);
     //    // pbNext
     //    auto pbNext = new QPushButton(this);
-    //    pbNext->setObjectName(QString::fromUtf8("pbNext"));
+    //    pbNext->setObjectName(QString::fromUtf8(u"pbNext"_s));
     //    pbNext->setText(DxfObj::tr("Next"));
     //    connect(pbNext, &QPushButton::clicked, [tableView, leFind] {
     //        for (int row = tableView->currentIndex().row() + 1; row < tableView->model()->rowCount(); ++row) {
@@ -103,7 +103,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     //    verticalLayout->addWidget(pbNext);
     //    // pbPrev
     //    auto pbPrev = new QPushButton(this);
-    //    pbPrev->setObjectName(QString::fromUtf8("pbPrev"));
+    //    pbPrev->setObjectName(QString::fromUtf8(u"pbPrev"_s));
     //    pbPrev->setText(DxfObj::tr("Prev"));
     //    connect(pbPrev, &QPushButton::clicked, [tableView, leFind] {
     //        for (int row = tableView->currentIndex().row() - 1; row >= 0; --row) {

@@ -146,13 +146,13 @@ void TestPaths(const Paths& paths_) {
             return false;
         }
         Point center = GetZ(side);
-        if(center == side) return false; //"skip side"
+        if(center == side) return false; // u"skip side"_s
 
         double a = Length(center, side) * dScale;
         double b = Length(center, *it) * dScale;
 
         if(abs(a - b) < 1e-3) {
-            qWarning() << "same side" << a << b << abs(a - b);
+            qWarning() << u"same side"_s << a << b << abs(a - b);
             SetZf(*it, center);
             return true;
         }
@@ -191,8 +191,8 @@ void TestPaths(const Paths& paths_) {
 
         // for(auto&& [center, iters]: counter) {
         //     auto it = iters.front();
-        //     if(qInfo("getPrev"); !test(getPrev(it), it))
-        //         if(qInfo("getNext"); !test(getNext(it), it))
+        //     if(qInfo(u"getPrev"_s); !test(getPrev(it), it))
+        //         if(qInfo(u"getNext"_s); !test(getNext(it), it))
         //             continue;
         // }
         if(toErace.size())
@@ -279,7 +279,7 @@ void TestPaths(const Paths& paths_) {
                         }
                         k = i;
                     } else if(source.z != currPt.z) {
-                        qCritical() << "arc" << (i - k);
+                        qCritical() << u"arc"_s << (i - k);
                         pp.lineTo(~source);
                         if(i - k == 1) {
                             source = currPt;
@@ -638,11 +638,11 @@ void reductionOfDistance(Path& path, Point point) {
         for(size_t i{0}; i < path.size(); ++i) {
             for(size_t j{i + 1}; j < path.size(); ++j) {
                 double tmp = distTo(data[i], data[j]) * dScale;
-                qCritical() << "dist" << tmp << i << ~data[i] << j << ~data[j];
+                qCritical() << u"dist"_s << tmp << i << ~data[i] << j << ~data[j];
             }
         }
 
-        qCritical() << "length =" << dist * dScale;
+        qCritical() << u"length ="_s << dist * dScale;
     }
 }
 
@@ -785,11 +785,11 @@ Pathss stacking(Paths& paths) {
     qDebug(__FUNCTION__);
 
     if(paths.empty()) return {};
-    Timer t("stacking");
+    Timer t{"stacking"};
 
     PolyTree polyTree;
     {
-        Timer t("stacking 1");
+        Timer t{"stacking 1"};
         Clipper clipper;
         clipper.AddSubject(paths);
         clipper.AddSubject({boundOfPaths(paths, uScale)});
@@ -897,7 +897,7 @@ Pathss stacking(Paths& paths) {
 // Pathss& groupedPaths(Grouping group, int32_t offset, bool skipFrame) {
 //     PolyTree polyTree;
 //     {
-//         Timer t("Union EvenOdd");
+//         Timer t{"Union EvenOdd"};
 //         Clipper clipper;
 //         clipper.AddSubject(closedSrcPaths);
 //         clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
@@ -905,7 +905,7 @@ Pathss stacking(Paths& paths) {
 //     }
 //     groupedPss.clear();
 //     {
-//         Timer t("grouping");
+//         Timer t{"grouping"};
 //         grouping(group, polyTree.Count() == 1 ? *polyTree[0] : polyTree);
 //     }
 //     if(skipFrame == false
@@ -938,7 +938,7 @@ Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) {
     rect.left -= k;
     rect.right += k;
     rect.top -= k;
-    // dbgPaths({rect.AsPath()}, "boundOfPaths", Qt::magenta);
+    // dbgPaths({rect.AsPath()}, u"boundOfPaths"_s, Qt::magenta);
     return rect.AsPath();
 }
 

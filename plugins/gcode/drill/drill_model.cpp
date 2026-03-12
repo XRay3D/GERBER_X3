@@ -129,7 +129,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         if(orientation == Qt::Horizontal) {
             switch(section) {
             case Name:
-                return tr("Aperture") + " / " + tr("Tool");
+                return {tr("Aperture") + u" / "_s + tr("Tool")};
             case Tool:;
                 return tr("Tool");
             }
@@ -137,7 +137,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         return data_[section].name.value(0);
     case Qt::SizeHintRole:
         if(orientation == Qt::Vertical)
-            return QFontMetrics(QFont()).boundingRect(QString("T999")).size() + QSize(Header::DelegateSize + 10, 1);
+            return QFontMetrics(QFont()).boundingRect(QString(u"T999"_s)).size() + QSize(Header::DelegateSize + 10, 1);
         return {};
     case Qt::TextAlignmentRole:
         if(orientation == Qt::Vertical)
@@ -153,6 +153,8 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
         return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
+
+Row::~Row() { qDeleteAll(items); }
 
 } // namespace Drilling
 

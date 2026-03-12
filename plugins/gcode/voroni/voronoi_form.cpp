@@ -29,7 +29,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->cbxSolver->setCurrentIndex(-1);
 
     MySettings settings;
-    settings.beginGroup("VoronoiForm");
+    settings.beginGroup(u"VoronoiForm"_s);
     settings.getValue(ui->dsbxPrecision, 0.1);
     settings.getValue(ui->dsbxWidth);
     settings.getValue(ui->dsbxOffset, 1.0);
@@ -53,7 +53,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("VoronoiForm");
+    settings.beginGroup(u"VoronoiForm"_s);
     settings.setValue(ui->dsbxPrecision);
     settings.setValue(ui->dsbxWidth);
     settings.setValue(ui->cbxSolver);

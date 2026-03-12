@@ -8,36 +8,21 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.00)
 
 project(graphicsview LANGUAGES CXX)
 
 find_package(
   Qt6
-  COMPONENTS OpenGL
+  COMPONENTS OpenGL OpenGLWidgets
   REQUIRED)
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  find_package(
-    Qt6
-    COMPONENTS OpenGLWidgets
-    REQUIRED)
-endif()
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
-add_library(graphicsview STATIC ${HEADERS} ${SOURCES})
+add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(
-  graphicsview PRIVATE common Qt6::Widgets
-                       Qt6::OpenGL)
-
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
-  target_link_libraries(graphicsview
-                        PRIVATE Qt6::OpenGLWidgets)
-endif()
-
-# target_compile_definitions(graphicsview PRIVATE GRAPHICSVIEW_LIBRARY)
+target_link_libraries(graphicsview PRIVATE common Qt6::Widgets Qt6::OpenGL
+                                           Qt6::OpenGLWidgets)

@@ -6,7 +6,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -27,7 +27,7 @@ public:
     public:
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("LayerTypeRef", typeof(LayerTypeRef)), XmlElement("LayerRef", typeof(LayerRef))] public Object _Reference;
+        // ORIGINAL LINE: [XmlElement(u"LayerTypeRef"_s, typeof(LayerTypeRef)), XmlElement(u"LayerRef"_s, typeof(LayerRef))] public Object _Reference;
         std::any _Reference;
     };
     /// <summary>
@@ -39,7 +39,7 @@ public:
         /// Диаметр окружности, круга, овала.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("diameter", DataType = "float")] public float _diameter;
+        // ORIGINAL LINE: [XmlAttribute(u"diameter"_s, DataType = u"float"_s)] public float _diameter;
         float _diameter = 0.0F;
     };
 
@@ -52,21 +52,21 @@ public:
         /// Диаметр окружности, круга, овала.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("diameter", DataType = "float")] public float _diameter;
+        // ORIGINAL LINE: [XmlAttribute(u"diameter"_s, DataType = u"float"_s)] public float _diameter;
         float _diameter = 0.0F;
 
         /// <summary>
         /// Параметр овальной контактной площадки: вытягивание по осям x и y.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Stretch")] public Stretch _Stretch;
+        // ORIGINAL LINE: [XmlElement(u"Stretch"_s)] public Stretch _Stretch;
         Stretch* _Stretch;
 
         /// <summary>
         /// Параметр контактной площадки: смещение точки привязки по осям x и y.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Shift")] public Shift _Shift;
+        // ORIGINAL LINE: [XmlElement(u"Shift"_s)] public Shift _Shift;
         Shift* _Shift;
         virtual ~PadOval() {
             delete _Stretch;
@@ -93,21 +93,21 @@ public:
         /// Ширина прямоугольной контактной площадки.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("width", DataType = "float")] public float _width;
+        // ORIGINAL LINE: [XmlAttribute(u"width"_s, DataType = u"float"_s)] public float _width;
         float _width = 0.0F;
 
         /// <summary>
         /// Высота прямоугольной контактной площадки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("height", DataType = "float")] public float _height;
+        // ORIGINAL LINE: [XmlAttribute(u"height"_s, DataType = u"float"_s)] public float _height;
         float _height = 0.0F;
 
         /// <summary>
         /// Тип обработки углов прямоугольной контактной площадки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("handling")] public type_handling _handling;
+        // ORIGINAL LINE: [XmlAttribute(u"handling"_s)] public type_handling _handling;
         type_handling _handling = static_cast<type_handling>(0);
         virtual ~PadRect() {
             delete _Shift;
@@ -120,7 +120,7 @@ public:
         /// Величина обработки углов прямоугольной контактной площадки. Значение зависит от типа обработки. Для скругления это радиус. Для среза это высота среза.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("handlingValue", DataType = "float")] public float _handlingValue;
+        // ORIGINAL LINE: [XmlAttribute(u"handlingValue"_s, DataType = u"float"_s)] public float _handlingValue;
         float _handlingValue = 0.0F;
 
         // ORIGINAL LINE: [XmlIgnore] public bool _handlingValueSpecified
@@ -130,7 +130,7 @@ public:
         /// Флаг выборочной обработки углов прямоугольной контактной площадки. Если не установлен, то все углы обрабатываются одинаковым образом.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("custom")] public Bool _custom;
+        // ORIGINAL LINE: [XmlAttribute(u"custom"_s)] public Bool _custom;
         Bool _custom = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _customSpecified
@@ -140,7 +140,7 @@ public:
         /// Флаг обработки левого нижнего угла прямоугольной контактной площадки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("cornerLB")] public Bool _cornerLB;
+        // ORIGINAL LINE: [XmlAttribute(u"cornerLB"_s)] public Bool _cornerLB;
         Bool _cornerLB = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _cornerLBSpecified
@@ -150,7 +150,7 @@ public:
         /// Флаг обработки правого нижнего угла прямоугольной контактной площадки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("cornerRB")] public Bool _cornerRB;
+        // ORIGINAL LINE: [XmlAttribute(u"cornerRB"_s)] public Bool _cornerRB;
         Bool _cornerRB = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _cornerRBSpecified
@@ -160,7 +160,7 @@ public:
         /// Флаг обработки правого нижнего угла прямоугольной контактной площадки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("cornerRT")] public Bool _cornerRT;
+        // ORIGINAL LINE: [XmlAttribute(u"cornerRT"_s)] public Bool _cornerRT;
         Bool _cornerRT = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _cornerRTSpecified
@@ -170,7 +170,7 @@ public:
         /// Флаг обработки левого верхнего угла прямоугольной контактной площадки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("cornerLT")] public Bool _cornerLT;
+        // ORIGINAL LINE: [XmlAttribute(u"cornerLT"_s)] public Bool _cornerLT;
         Bool _cornerLT = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _cornerLTSpecified
@@ -180,7 +180,7 @@ public:
         /// Параметр контактной площадки: смещение точки привязки по осям x и y.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Shift")] public Shift _Shift;
+        // ORIGINAL LINE: [XmlElement(u"Shift"_s)] public Shift _Shift;
         Shift* _Shift;
     };
 
@@ -194,7 +194,7 @@ public:
         /// </summary>
         /// <remarks>! Минимум 3 элемента</remarks>
     public:
-        // ORIGINAL LINE: [XmlElement("Dot")] public List<Dot> _Dots;
+        // ORIGINAL LINE: [XmlElement(u"Dot"_s)] public List<Dot> _Dots;
         std::vector<Dot*> _Dots;
         bool ShouldSerialize_Dots();
     };
@@ -208,28 +208,28 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
         /// Тип стека контактных площадок.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("type")] public type_padstack _type;
+        // ORIGINAL LINE: [XmlAttribute(u"type"_s)] public type_padstack _type;
         type_padstack _type = static_cast<type_padstack>(0);
 
         /// <summary>
         /// Диаметр отверстия.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("holeDiameter", DataType = "float")] public float _holeDiameter;
+        // ORIGINAL LINE: [XmlAttribute(u"holeDiameter"_s, DataType = u"float"_s)] public float _holeDiameter;
         float _holeDiameter = 0.0F;
 
         /// <summary>
         /// Параметр стека контактной площадки: металлизация отверстия.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("metallized")] public Bool _metallized;
+        // ORIGINAL LINE: [XmlAttribute(u"metallized"_s)] public Bool _metallized;
         Bool _metallized = static_cast<Bool>(0);
         virtual ~Padstack() {
             delete _Thermal;
@@ -242,14 +242,14 @@ public:
         /// Параметр стека контактной площадки: подключение к области металлизации (полигону).
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("connectToCopper")] public type_connectToCopper _connectToCopper;
+        // ORIGINAL LINE: [XmlAttribute(u"connectToCopper"_s)] public type_connectToCopper _connectToCopper;
         type_connectToCopper _connectToCopper = static_cast<type_connectToCopper>(0);
 
         /// <summary>
         /// Описание термобарьера.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Thermal")] public Thermal _Thermal;
+        // ORIGINAL LINE: [XmlElement(u"Thermal"_s)] public Thermal _Thermal;
         Thermal* _Thermal;
 
         /// <summary>
@@ -258,7 +258,7 @@ public:
         /// <value>PadCircle, PadOval, PadRect, PadPoly</value>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlArray("Pads")][XmlArrayItem("PadCircle", typeof(PadCircle)), XmlArrayItem("PadOval", typeof(PadOval)), XmlArrayItem("PadRect", typeof(PadRect)), XmlArrayItem("PadPoly", typeof(PadPoly))] public List<Object> _Pads;
+        // ORIGINAL LINE: [XmlArray(u"Pads"_s)][XmlArrayItem(u"PadCircle"_s, typeof(PadCircle)), XmlArrayItem(u"PadOval"_s, typeof(PadOval)), XmlArrayItem(u"PadRect"_s, typeof(PadRect)), XmlArrayItem(u"PadPoly"_s, typeof(PadPoly))] public List<Object> _Pads;
         std::vector<std::any> _Pads;
         bool ShouldSerialize_Pads();
     };
@@ -281,7 +281,7 @@ public:
         public:
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("AllLayers", typeof(AllLayers))] public AllLayers _AllLayers;
+            // ORIGINAL LINE: [XmlElement(u"AllLayers"_s, typeof(AllLayers))] public AllLayers _AllLayers;
             AllLayers* _AllLayers;
 
             /// <summary>
@@ -290,7 +290,7 @@ public:
             /// <remarks>! При null необходимо смотреть наличие _AllLayers. </remarks>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("LayerRef", typeof(LayerRef))] public List<LayerRef> _LayerRefs;
+            // ORIGINAL LINE: [XmlElement(u"LayerRef"_s, typeof(LayerRef))] public List<LayerRef> _LayerRefs;
             std::vector<LayerRef*> _LayerRefs;
             virtual ~LayerRange() {
                 delete _AllLayers;
@@ -303,21 +303,21 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
         /// Диаметр отверстия.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("holeDiameter", DataType = "float")] public float _holeDiameter;
+        // ORIGINAL LINE: [XmlAttribute(u"holeDiameter"_s, DataType = u"float"_s)] public float _holeDiameter;
         float _holeDiameter = 0.0F;
 
         /// <summary>
         /// Параметр типа переходного отверстия: возможность установить переходное отверстие на контактной площадке.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("viaOnPin")] public Bool _viaOnPin;
+        // ORIGINAL LINE: [XmlAttribute(u"viaOnPin"_s)] public Bool _viaOnPin;
         Bool _viaOnPin = static_cast<Bool>(0);
         virtual ~Viastack() {
             delete _LayerRange;
@@ -332,7 +332,7 @@ public:
         /// <value>AllLayers | [LayerRef]</value>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("LayerRange", typeof(LayerRange))] public LayerRange _LayerRange;
+        // ORIGINAL LINE: [XmlElement(u"LayerRange"_s, typeof(LayerRange))] public LayerRange _LayerRange;
         LayerRange* _LayerRange;
 
         /// <summary>
@@ -340,7 +340,7 @@ public:
         /// </summary>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlArray("ViaPads")][XmlArrayItem("PadCircle", typeof(PadCircle))] public List<PadCircle> _ViaPads;
+        // ORIGINAL LINE: [XmlArray(u"ViaPads"_s)][XmlArrayItem(u"PadCircle"_s, typeof(PadCircle))] public List<PadCircle> _ViaPads;
         std::vector<PadCircle*> _ViaPads;
         bool ShouldSerialize_ViaPads();
     };
@@ -359,14 +359,14 @@ public:
             /// Толщина линии.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+            // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
             float _lineWidth = 0.0F;
 
             /// <summary>
             /// Ссылка на слой.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+            // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
             LayerRef* _LayerRef;
 
             /// <summary>
@@ -375,7 +375,7 @@ public:
             /// <value>ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon</value>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("ArcCCW", typeof(ArcCCW)), XmlElement("ArcCW", typeof(ArcCW)), XmlElement("ArcByAngle", typeof(ArcByAngle)), XmlElement("ArcByMiddle", typeof(ArcByMiddle)), XmlElement("Line", typeof(Line)), XmlElement("Circle", typeof(Circle)), XmlElement("Rect", typeof(Rect)), XmlElement("FilledCircle", typeof(FilledCircle)), XmlElement("FilledRect", typeof(FilledRect)), XmlElement("Polygon", typeof(Polygon)), XmlElement("FilledContour", typeof(FilledContour))] public Object _Figure;
+            // ORIGINAL LINE: [XmlElement(u"ArcCCW"_s, typeof(ArcCCW)), XmlElement(u"ArcCW"_s, typeof(ArcCW)), XmlElement(u"ArcByAngle"_s, typeof(ArcByAngle)), XmlElement(u"ArcByMiddle"_s, typeof(ArcByMiddle)), XmlElement(u"Line"_s, typeof(Line)), XmlElement(u"Circle"_s, typeof(Circle)), XmlElement(u"Rect"_s, typeof(Rect)), XmlElement(u"FilledCircle"_s, typeof(FilledCircle)), XmlElement(u"FilledRect"_s, typeof(FilledRect)), XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"FilledContour"_s, typeof(FilledContour))] public Object _Figure;
             std::any _Figure;
             virtual ~Copper_Footprint() {
                 delete _LayerRef;
@@ -391,7 +391,7 @@ public:
             /// Ссылка на слой.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+            // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
             LayerRef* _LayerRef;
 
             /// <summary>
@@ -400,7 +400,7 @@ public:
             /// <value>ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon</value>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("ArcCCW", typeof(ArcCCW)), XmlElement("ArcCW", typeof(ArcCW)), XmlElement("ArcByAngle", typeof(ArcByAngle)), XmlElement("ArcByMiddle", typeof(ArcByMiddle)), XmlElement("Line", typeof(Line)), XmlElement("Circle", typeof(Circle)), XmlElement("Rect", typeof(Rect)), XmlElement("FilledCircle", typeof(FilledCircle)), XmlElement("FilledRect", typeof(FilledRect)), XmlElement("Polygon", typeof(Polygon)), XmlElement("FilledContour", typeof(FilledContour))] public Object _Figure;
+            // ORIGINAL LINE: [XmlElement(u"ArcCCW"_s, typeof(ArcCCW)), XmlElement(u"ArcCW"_s, typeof(ArcCW)), XmlElement(u"ArcByAngle"_s, typeof(ArcByAngle)), XmlElement(u"ArcByMiddle"_s, typeof(ArcByMiddle)), XmlElement(u"Line"_s, typeof(Line)), XmlElement(u"Circle"_s, typeof(Circle)), XmlElement(u"Rect"_s, typeof(Rect)), XmlElement(u"FilledCircle"_s, typeof(FilledCircle)), XmlElement(u"FilledRect"_s, typeof(FilledRect)), XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"FilledContour"_s, typeof(FilledContour))] public Object _Figure;
             std::any _Figure;
             virtual ~Keepout_Place_Trace() {
                 delete _LayerRef;
@@ -416,21 +416,21 @@ public:
             /// Идентификатор неименованных объектов.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("id")] public string _id;
+            // ORIGINAL LINE: [XmlAttribute(u"id"_s)] public string _id;
             QString _id;
 
             /// <summary>
             /// Ссылка на стек контактных площадок.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("PadstackRef")] public PadstackRef _PadstackRef;
+            // ORIGINAL LINE: [XmlElement(u"PadstackRef"_s)] public PadstackRef _PadstackRef;
             PadstackRef* _PadstackRef;
 
             /// <summary>
             /// Точка привязки объекта.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+            // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
             Org* _Org;
             virtual ~Mnthole() {
                 delete _PadstackRef;
@@ -447,28 +447,28 @@ public:
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+            // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
             QString _name;
 
             /// <summary>
             /// Параметр надписей (ярлыков): способ выравнивания текста.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("align")] public align _align;
+            // ORIGINAL LINE: [XmlAttribute(u"align"_s)] public align _align;
             align _align = static_cast<align>(0);
 
             /// <summary>
             /// Задаёт угол в градусах c точностью до тысячных долей.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+            // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
             float _angle = 0.0F;
 
             /// <summary>
             /// Параметр надписей и ярлыков: зеркальность отображения.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("mirror")] public Bool _mirror;
+            // ORIGINAL LINE: [XmlAttribute(u"mirror"_s)] public Bool _mirror;
             Bool _mirror = static_cast<Bool>(0);
             virtual ~Label_Footprint() {
                 delete _LayerRef;
@@ -483,21 +483,21 @@ public:
             /// Ссылка на слой.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+            // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
             LayerRef* _LayerRef;
 
             /// <summary>
             /// Ссылка на стиль надписей.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("TextStyleRef")] public TextStyleRef _TextStyleRef;
+            // ORIGINAL LINE: [XmlElement(u"TextStyleRef"_s)] public TextStyleRef _TextStyleRef;
             TextStyleRef* _TextStyleRef;
 
             /// <summary>
             /// Точка привязки объекта.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+            // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
             Org* _Org;
         };
 
@@ -517,21 +517,21 @@ public:
             /// Номер контактной площадки (вывода) посадочного места.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("padNum", DataType = "int")] public int _padNum;
+            // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
             int _padNum = 0;
 
             /// <summary>
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+            // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
             QString _name;
 
             /// <summary>
             /// Задаёт угол в градусах c точностью до тысячных долей.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("angle", DataType = "float")] public float _angle;
+            // ORIGINAL LINE: [XmlAttribute(u"angle"_s, DataType = u"float"_s)] public float _angle;
             float _angle = 0.0F;
 
             /// <summary>
@@ -540,7 +540,7 @@ public:
             /// иначе площадка будет расположена на противоположной стороне.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("flipped")] public Bool _flipped;
+            // ORIGINAL LINE: [XmlAttribute(u"flipped"_s)] public Bool _flipped;
             Bool _flipped = static_cast<Bool>(0);
             virtual ~Pad() {
                 delete _PadstackRef;
@@ -554,14 +554,14 @@ public:
             /// Ссылка на стек контактных площадок.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("PadstackRef")] public PadstackRef _PadstackRef;
+            // ORIGINAL LINE: [XmlElement(u"PadstackRef"_s)] public PadstackRef _PadstackRef;
             PadstackRef* _PadstackRef;
 
             /// <summary>
             /// Точка привязки объекта.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+            // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
             Org* _Org;
         };
 
@@ -569,63 +569,63 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
         /// Описание контактных площадок посадочного места.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Pads")][XmlArrayItem("Pad")] public List<Pad> _Pads;
+        // ORIGINAL LINE: [XmlArray(u"Pads"_s)][XmlArrayItem(u"Pad"_s)] public List<Pad> _Pads;
         std::vector<Pad*> _Pads;
         bool ShouldSerialize_Pads();
         /// <summary>
         /// Надписи.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Texts")][XmlArrayItem("Text")] public List<Text> _Texts;
+        // ORIGINAL LINE: [XmlArray(u"Texts"_s)][XmlArrayItem(u"Text"_s)] public List<Text> _Texts;
         std::vector<Text*> _Texts;
         bool ShouldSerialize_Texts();
         /// <summary>
         /// Детали посадочного места.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Details")][XmlArrayItem("Detail")] public List<Detail> _Details;
+        // ORIGINAL LINE: [XmlArray(u"Details"_s)][XmlArrayItem(u"Detail"_s)] public List<Detail> _Details;
         std::vector<Detail*> _Details;
         bool ShouldSerialize_Details();
         /// <summary>
         /// Области металлизации (полигонов) в посадочных местах компонентов.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Coppers")][XmlArrayItem("Copper")] public List<Copper_Footprint> _Coppers;
+        // ORIGINAL LINE: [XmlArray(u"Coppers"_s)][XmlArrayItem(u"Copper"_s)] public List<Copper_Footprint> _Coppers;
         std::vector<Copper_Footprint*> _Coppers;
         bool ShouldSerialize_Coppers();
         /// <summary>
         /// Запреты размещения в посадочном месте.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("KeepoutsPlace")][XmlArrayItem("Keepout")] public List<Keepout_Place_Trace> _KeepoutsPlace;
+        // ORIGINAL LINE: [XmlArray(u"KeepoutsPlace"_s)][XmlArrayItem(u"Keepout"_s)] public List<Keepout_Place_Trace> _KeepoutsPlace;
         std::vector<Keepout_Place_Trace*> _KeepoutsPlace;
         bool ShouldSerialize_KeepoutsPlace();
         /// <summary>
         /// Запреты трассировки в посадочном месте.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("KeepoutsTrace")][XmlArrayItem("Keepout")] public List<Keepout_Place_Trace> _KeepoutsTrace;
+        // ORIGINAL LINE: [XmlArray(u"KeepoutsTrace"_s)][XmlArrayItem(u"Keepout"_s)] public List<Keepout_Place_Trace> _KeepoutsTrace;
         std::vector<Keepout_Place_Trace*> _KeepoutsTrace;
         bool ShouldSerialize_KeepoutsTrace();
         /// <summary>
         /// Монтажные отверстия.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Mntholes")][XmlArrayItem("Mnthole")] public List<Mnthole> _Mntholes;
+        // ORIGINAL LINE: [XmlArray(u"Mntholes"_s)][XmlArrayItem(u"Mnthole"_s)] public List<Mnthole> _Mntholes;
         std::vector<Mnthole*> _Mntholes;
         bool ShouldSerialize_Mntholes();
         /// <summary>
         /// Ярлыки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Labels")][XmlArrayItem("Label")] public List<Label_Footprint> _Labels;
+        // ORIGINAL LINE: [XmlArray(u"Labels"_s)][XmlArrayItem(u"Label"_s)] public List<Label_Footprint> _Labels;
         std::vector<Label_Footprint*> _Labels;
         bool ShouldSerialize_Labels();
 
@@ -646,42 +646,42 @@ public:
             /// Номер контакта компонента.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("pinNum", DataType = "int")] public int _pinNum;
+            // ORIGINAL LINE: [XmlAttribute(u"pinNum"_s, DataType = u"int"_s)] public int _pinNum;
             int _pinNum = 0;
 
             /// <summary>
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+            // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
             QString _name;
 
             /// <summary>
             /// Схемотехническое имя контакта компонента.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("pinSymName")] public string _pinSymName;
+            // ORIGINAL LINE: [XmlAttribute(u"pinSymName"_s)] public string _pinSymName;
             QString _pinSymName;
 
             /// <summary>
             /// Параметр контакта компонента: эквивалентность.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("pinEqual", DataType = "int")] public int _pinEqual;
+            // ORIGINAL LINE: [XmlAttribute(u"pinEqual"_s, DataType = u"int"_s)] public int _pinEqual;
             int _pinEqual = 0;
 
             /// <summary>
             /// Параметр контакта (вывода) компонента: номер вентиля контакта.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("gate", DataType = "int")] public int _gate;
+            // ORIGINAL LINE: [XmlAttribute(u"gate"_s, DataType = u"int"_s)] public int _gate;
             int _gate = 0;
 
             /// <summary>
             /// Параметр контакта (вывода) компонента: эквивалентность вентиля контакта.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("gateEqual", DataType = "int")] public int _gateEqual;
+            // ORIGINAL LINE: [XmlAttribute(u"gateEqual"_s, DataType = u"int"_s)] public int _gateEqual;
             int _gateEqual = 0;
         };
 
@@ -694,14 +694,14 @@ public:
             /// Имя объекта или ссылка на именованный объект.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+            // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
             QString _name;
 
             /// <summary>
             /// Значение атрибута.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("value")] public string _value;
+            // ORIGINAL LINE: [XmlAttribute(u"value"_s)] public string _value;
             QString _value;
         };
 
@@ -709,21 +709,21 @@ public:
         /// Имя объекта или ссылка на именованный объект.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("name")] public string _name;
+        // ORIGINAL LINE: [XmlAttribute(u"name"_s)] public string _name;
         QString _name;
 
         /// <summary>
         /// Контакты схемного компонента.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Pins")][XmlArrayItem("Pin")] public List<Pin_Component> _Pins;
+        // ORIGINAL LINE: [XmlArray(u"Pins"_s)][XmlArrayItem(u"Pin"_s)] public List<Pin_Component> _Pins;
         std::vector<Pin_Component*> _Pins;
         bool ShouldSerialize_Pins();
         /// <summary>
         /// Атрибуты компонента.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlArray("Attributes")][XmlArrayItem("Attribute")] public List<Attribute_Component> _Attributes;
+        // ORIGINAL LINE: [XmlArray(u"Attributes"_s)][XmlArrayItem(u"Attribute"_s)] public List<Attribute_Component> _Attributes;
         std::vector<Attribute_Component*> _Attributes;
         bool ShouldSerialize_Attributes();
 
@@ -744,28 +744,28 @@ public:
             /// Номер контакта компонента.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("pinNum", DataType = "int")] public int _pinNum;
+            // ORIGINAL LINE: [XmlAttribute(u"pinNum"_s, DataType = u"int"_s)] public int _pinNum;
             int _pinNum = 0;
 
             /// <summary>
             /// Номер контактной площадки (вывода) посадочного места.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("padNum", DataType = "int")] public int _padNum;
+            // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
             int _padNum = 0;
 
             /// <summary>
             /// Параметр правил выравнивания задержек: тип значений констант и допусков.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("valueType")] public valueType _valueType;
+            // ORIGINAL LINE: [XmlAttribute(u"valueType"_s)] public valueType _valueType;
             valueType _valueType = static_cast<valueType>(0);
 
             /// <summary>
             /// Параметр контакта компонента в посадочном месте: задержка сигнала в посадочном месте.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("delay", DataType = "float")] public float _delay;
+            // ORIGINAL LINE: [XmlAttribute(u"delay"_s, DataType = u"float"_s)] public float _delay;
             float _delay = 0.0F;
         };
 
@@ -773,21 +773,21 @@ public:
         /// Ссылка на схемный компонент.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlElement("ComponentRef")] public ComponentRef _ComponentRef;
+        // ORIGINAL LINE: [XmlElement(u"ComponentRef"_s)] public ComponentRef _ComponentRef;
         ComponentRef* _ComponentRef;
 
         /// <summary>
         /// Ссылка на посадочное место.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("FootprintRef")] public FootprintRef _FootprintRef;
+        // ORIGINAL LINE: [XmlElement(u"FootprintRef"_s)] public FootprintRef _FootprintRef;
         FootprintRef* _FootprintRef;
 
         /// <summary>
         /// Соответствие контакта схемного компонента и вывода посадочного места.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Pinpack")] public List<Pinpack> _Pinpacks;
+        // ORIGINAL LINE: [XmlElement(u"Pinpack"_s)] public List<Pinpack> _Pinpacks;
         std::vector<Pinpack*> _Pinpacks;
         virtual ~Package() {
             delete _ComponentRef;
@@ -801,42 +801,42 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Стеки контактных площадок.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Padstacks")][XmlArrayItem("Padstack")] public List<Padstack> _Padstacks;
+    // ORIGINAL LINE: [XmlArray(u"Padstacks"_s)][XmlArrayItem(u"Padstack"_s)] public List<Padstack> _Padstacks;
     std::vector<Padstack*> _Padstacks;
     bool ShouldSerialize_Padstacks();
     /// <summary>
     /// Типы (стеки) переходных отверстий.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Viastacks")][XmlArrayItem("Viastack")] public List<Viastack> _Viastacks;
+    // ORIGINAL LINE: [XmlArray(u"Viastacks"_s)][XmlArrayItem(u"Viastack"_s)] public List<Viastack> _Viastacks;
     std::vector<Viastack*> _Viastacks;
     bool ShouldSerialize_Viastacks();
     /// <summary>
     /// Посадочные места.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Footprints")][XmlArrayItem("Footprint")] public List<Footprint> _Footprints;
+    // ORIGINAL LINE: [XmlArray(u"Footprints"_s)][XmlArrayItem(u"Footprint"_s)] public List<Footprint> _Footprints;
     std::vector<Footprint*> _Footprints;
     bool ShouldSerialize_Footprints();
     /// <summary>
     /// Схемные компоненты.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Components")][XmlArrayItem("Component")] public List<Component> _Components;
+    // ORIGINAL LINE: [XmlArray(u"Components"_s)][XmlArrayItem(u"Component"_s)] public List<Component> _Components;
     std::vector<Component*> _Components;
     bool ShouldSerialize_Components();
     /// <summary>
     /// Упаковки.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Packages")][XmlArrayItem("Package")] public List<Package> _Packages;
+    // ORIGINAL LINE: [XmlArray(u"Packages"_s)][XmlArrayItem(u"Package"_s)] public List<Package> _Packages;
     std::vector<Package*> _Packages;
     bool ShouldSerialize_Packages();
 

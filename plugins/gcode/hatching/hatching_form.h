@@ -60,8 +60,8 @@ class GCPluginImpl final : public GCode::Plugin {
     Form form{this};
     // GCode::Plugin interface
 public:
-    QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+C"}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshatch-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+C"_s}; }
     QWidget* createForm() override { return &form; };
     uint32_t type() const override { return CROSS_HATCH; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

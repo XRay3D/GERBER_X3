@@ -22,7 +22,7 @@ Block::Block(Blocks& blocks, SectionParser* sp)
     parseData(code);
     do {
         code = sp->nextCode();
-    } while(code != "BLOCK" && sp->hasNext());
+    } while(code != u"BLOCK"_s && sp->hasNext());
     code = sp->prevCode();
 }
 
@@ -56,15 +56,15 @@ void Block::parseHeader(CodeData& code) {
 
 void Block::parseData(CodeData& code) {
     do {
-        if(code == "ENDBLK")
+        if(code == u"ENDBLK"_s)
             break;
         //        sp->prevCode(); // unwind parser
         SectionENTITIES se(blocks, code, sp);
         entities = std::move(se.entities);
-        if(code == "ENDBLK")
+        if(code == u"ENDBLK"_s)
             break;
         code = sp->nextCode();
-    } while(code != "ENDBLK");
+    } while(code != u"ENDBLK"_s);
 }
 
 } // namespace Dxf

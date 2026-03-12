@@ -36,7 +36,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->setupUi(content);
     setWindowTitle(tr("Profile Toolpath"));
 
-    ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
+    ui->pbAddBridge->setIcon(QIcon::fromTheme(u"edit-cut"_s));
 
     ui->cbxBridgeAlignType->addItems({
         tr("Manually"),                    // Вручную.
@@ -49,7 +49,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup("Profile");
+    settings.beginGroup(u"Profile"_s);
     settings.getValue(ui->dsbxBridgeLenght, 1.0);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
@@ -88,7 +88,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("Profile");
+    settings.beginGroup(u"Profile"_s);
     settings.setValue(ui->dsbxBridgeLenght);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
@@ -175,7 +175,7 @@ void Form::onAddBridgeClicked() {
         auto testAndAdd = [this](QLineF testLineV, QLineF srcline) {
             QPointF intersects;
             if(auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
-                qDebug() << "intersects1" << is << intersects;
+                qDebug() << u"intersects1"_s << is << intersects;
                 auto brItem = App::grView().addItem<Gi::Bridge>();
                 //                brItem->pathHash = pathHash;
                 brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos

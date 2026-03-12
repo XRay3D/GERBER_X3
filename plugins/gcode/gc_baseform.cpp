@@ -86,7 +86,7 @@ public:
         case Qt::DisplayRole:
             if(index.column() == 0) {
                 auto pos{items[index.row()]->boundingRect().center()};
-                return QString("X = %1\nY = %2").arg(pos.x()).arg(pos.y());
+                return QString(u"X = %1\nY = %2"_s).arg(pos.x()).arg(pos.y());
             }
             return items[index.row()]->area();
         case Qt::UserRole:
@@ -171,18 +171,18 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
         content = new QWidget{ctrWidget};
 
         dsbxDepth = new DepthForm{ctrWidget};
-        dsbxDepth->setObjectName("dsbxDepth");
+        dsbxDepth->setObjectName(u"dsbxDepth"_s);
 
         leName = new QLineEdit{ctrWidget};
-        leName->setObjectName("leName");
+        leName->setObjectName(u"leName"_s);
 
         pbClose = new QPushButton{tr("Close"), ctrWidget};
-        pbClose->setIcon(QIcon::fromTheme("window-close"));
-        pbClose->setObjectName("pbClose");
+        pbClose->setIcon(QIcon::fromTheme(u"window-close"_s));
+        pbClose->setObjectName(u"pbClose"_s);
 
         pbCreate = new QPushButton{tr("Create"), ctrWidget};
-        pbCreate->setIcon(QIcon::fromTheme("document-export"));
-        pbCreate->setObjectName("pbCreate");
+        pbCreate->setIcon(QIcon::fromTheme(u"document-export"_s));
+        pbCreate->setObjectName(u"pbCreate"_s);
         connect(pbCreate, &QPushButton::clicked, this, &BaseForm::computePaths);
 
         auto line = [this] {
@@ -294,7 +294,7 @@ void BaseForm::fileHandler(File* file) {
         return;
     }
 
-    file->setFileName(fileName_ + "_" + file->name());
+    file->setFileName(fileName_ + u"_"_s + file->name());
     file->setSide(boardSide);
     if(fileId > -1) {
         exit(-123456);

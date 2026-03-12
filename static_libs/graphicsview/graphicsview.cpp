@@ -88,10 +88,10 @@ GraphicsView::GraphicsView(QWidget* parent)
     ::setCursor(vRuler);
 
     // add items to grid layout
-    QPushButton* corner = new QPushButton{App::settings().isBanana() ? "I" : "M", this};
+    QPushButton* corner = new QPushButton{App::settings().isBanana() ? u"I"_s : u"M"_s, this};
     connect(corner, &QPushButton::clicked, this, [corner, this](bool fl) {
-        corner->setText(fl ? "I" : "M");
-        corner->setToolTip(fl ? "Banana" : "Metric");
+        corner->setText(fl ? u"I"_s : u"M"_s);
+        corner->setToolTip(fl ? u"Banana"_s : u"Metric"_s);
         App::settings().setBanana(fl);
         scene()->update();
         hRuler->update();
@@ -120,16 +120,16 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     {
         QSettings settings;
-        settings.beginGroup("Viewer");
-        setOpenGL(settings.value("chbxOpenGl").toBool());
-        setRenderHint(QPainter::Antialiasing, settings.value("chbxAntialiasing", false).toBool());
-        viewport()->setObjectName("viewport");
+        settings.beginGroup(u"Viewer"_s);
+        setOpenGL(settings.value(u"chbxOpenGl"_s).toBool());
+        setRenderHint(QPainter::Antialiasing, settings.value(u"chbxAntialiasing"_s, false).toBool());
+        viewport()->setObjectName(u"viewport"_s);
         settings.endGroup();
     }
 
-    setStyleSheet("QGraphicsView { background: "
+    setStyleSheet(u"QGraphicsView { background: "_s
         % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
-        % " }");
+        % u" }"_s);
 
     startUpdateTimer(20);
 
@@ -153,7 +153,7 @@ void GraphicsView::zoom100() {
     }
 
     (0 && App::settings().guiSmoothScSh())
-        ? animate(this, "scale", getScale(), x * zoomFactorAnim)
+        ? animate(this, "scale"_ba, getScale(), x * zoomFactorAnim)
         : scale(x, y);
 }
 
@@ -179,14 +179,14 @@ void GraphicsView::zoomToSelected() {
 void GraphicsView::zoomIn() {
     if(getScale() > 10000.0) return;
     App::settings().guiSmoothScSh()
-        ? animate(this, "scale", getScale(), getScale() * zoomFactorAnim)
+        ? animate(this, "scale"_ba, getScale(), getScale() * zoomFactorAnim)
         : scale(zoomFactor, zoomFactor);
 }
 
 void GraphicsView::zoomOut() {
     if(getScale() < 1.0) return;
     App::settings().guiSmoothScSh()
-        ? animate(this, "scale", getScale(), getScale() * (1.0 / zoomFactorAnim))
+        ? animate(this, "scale"_ba, getScale(), getScale() * (1.0 / zoomFactorAnim))
         : scale(1.0 / zoomFactor, 1.0 / zoomFactor);
 }
 
@@ -289,7 +289,7 @@ template <class T>
 void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T begin, T end) {
     auto* animation = new QPropertyAnimation{target, propertyName};
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
-        setProperty(propertyName, end);
+        setProperty(propertyName.data(), end);
         updateRuler();
         point = mapToScene(viewport()->mapFromGlobal(QCursor::pos()));
         scene()->update();
@@ -317,20 +317,20 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
     const QRectF rect{rulPt1, rulPt2};
     const double angle = line.angle();
     const auto sz = QPointF{rect.width(), rect.height()} /= App::settings().lenUnit();
-    QString text;
-    std::format_to(std::back_insert_iterator(text),
-        " ∆X: {0:.3f} {5}\n"
-        " ∆Y: {1:.3f} {5}\n"
-        " ∆/: {2:.3f} {5}\n"
-        " Area: {3:.3f} {5}²\n"
-        " Angle: {4:.3f}°",
-        sz.x(),                                  // 0
-        sz.y(),                                  // 1
-        line.length(),                           // 2
-        std::abs(sz.x() * sz.y()),               // 3
-        normalizeAngleDegrees(angle),            // 4
-        App::settings().isBanana() ? "in" : "mm" // 5
-    );
+    QString text = QString::fromStdString(
+        std::format(
+            " ∆X: {0:.3f} {5}\n"
+            " ∆Y: {1:.3f} {5}\n"
+            " ∆/: {2:.3f} {5}\n"
+            " Area: {3:.3f} {5}²\n"
+            " Angle: {4:.3f}°",
+            sz.x(),                                  // 0
+            sz.y(),                                  // 1
+            line.length(),                           // 2
+            std::abs(sz.x() * sz.y()),               // 3
+            normalizeAngleDegrees(angle),            // 4
+            App::settings().isBanana() ? "in" : "mm" // 5
+            ));
 
     const double scaleFactor = App::grView().scaleFactor();
     const double crossLength = 20.0 * scaleFactor;
@@ -749,8 +749,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k,     point.y(), point.x() + k,     point.y()},
-            {    point.x(), point.y() - k,     point.x(), point.y() + k}
+            {point.x() - k, point.y(),     point.x() + k, point.y()    },
+            {point.x(),     point.y() - k, point.x(),     point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -762,8 +762,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {          0, rect.top(),            0, rect.bottom()},
-            {rect.left(),          0, rect.right(),             0}
+            {0,           rect.top(), 0,            rect.bottom()},
+            {rect.left(), 0,          rect.right(), 0            }
         };
         painter->drawLines(lines, 2);
     }

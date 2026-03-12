@@ -65,8 +65,8 @@ class Plugin final : public GCode::Plugin {
 
 public:
     // GCode::Plugin interface
-    QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"pocket-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+P"_s}; }
     QWidget* createForm() override { return &form; };
     uint32_t type() const override { return POCKET_OFFSET; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

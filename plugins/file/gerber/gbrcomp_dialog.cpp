@@ -23,20 +23,20 @@ Dialog::Dialog(QWidget* parent)
     grView->setScene(scene_ = new QGraphicsScene{grView});
     grView->scale(+1, -1);
     QSettings settings;
-    settings.beginGroup("Dialog");
-    restoreGeometry(settings.value("geometry").toByteArray());
-    splitter->restoreState(settings.value("splitter").toByteArray());
-    componentsView->header()->restoreState(settings.value("header").toByteArray());
+    settings.beginGroup(u"Dialog"_s);
+    restoreGeometry(settings.value(u"geometry"_s).toByteArray());
+    splitter->restoreState(settings.value(u"splitter"_s).toByteArray());
+    componentsView->header()->restoreState(settings.value(u"header"_s).toByteArray());
     grView->setBackgroundBrush(Qt::black);
     connect(splitter, &QSplitter::splitterMoved, [this] { resizeEvent(); });
 }
 
 Dialog::~Dialog() {
     QSettings settings;
-    settings.beginGroup("Dialog");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("splitter", splitter->saveState());
-    settings.setValue("header", componentsView->header()->saveState());
+    settings.beginGroup(u"Dialog"_s);
+    settings.setValue(u"geometry"_s, saveGeometry());
+    settings.setValue(u"splitter"_s, splitter->saveState());
+    settings.setValue(u"header"_s, componentsView->header()->saveState());
 }
 
 void Dialog::setFile(int fileId) { componentsView->setFile(fileId); }

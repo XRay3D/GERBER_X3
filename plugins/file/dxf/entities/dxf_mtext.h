@@ -98,8 +98,8 @@ public:
 
     Q_ENUM(DrawingDirectionE)
 
-    QString textString;                 // Dxf::MText::TextString DC(1, Str "T1\\PT2")
-    QString textStyleName;              // Dxf::MText::TextStyleName DC(7, Str "_Default_")
+    QString textString;                 // Dxf::MText::TextString DC(1, Str u"T1\\PT2"_s)
+    QString textStyleName;              // Dxf::MText::TextStyleName DC(7, Str u"_Default_"_s)
     QPointF insertionPoint;             // Dxf::MText::InsertionPointPointX DC(10, Dou 235)
     double rotation = 0;                // Dxf::MText::RotationAngleInRadians DC(50, Dou 135)
     double nominalTextHeight = 0;       // Dxf::MText::NominalTextHeight DC(40, Dou 2.54)

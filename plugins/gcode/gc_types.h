@@ -234,19 +234,19 @@ public:
 class Settings {
     // protected:
 public:
-    /*static inline*/ QString fileExtension_{"tap"};
-    /*static inline*/ QString formatMilling_{"G?X?Y?Z?F?S?"};
-    /*static inline*/ QString formatLaser_{"G?X?Y?Z?F?S?"};
-    /*static inline*/ QString laserConstOn_{"M3"};
-    /*static inline*/ QString laserDynamOn_{"M4"};
-    /*static inline*/ QString spindleLaserOff_{"M5"};
-    /*static inline*/ QString spindleOn_{"M3"};
+    /*static inline*/ QString fileExtension_{u"tap"_s};
+    /*static inline*/ QString formatMilling_{u"G?X?Y?Z?F?S?"_s};
+    /*static inline*/ QString formatLaser_{u"G?X?Y?Z?F?S?"_s};
+    /*static inline*/ QString laserConstOn_{u"M3"_s};
+    /*static inline*/ QString laserDynamOn_{u"M4"_s};
+    /*static inline*/ QString spindleLaserOff_{u"M5"_s};
+    /*static inline*/ QString spindleOn_{u"M3"_s};
 
-    /*static inline*/ QString start_{"G21 G17 G90\nM3 S?"};
-    /*static inline*/ QString end_{"M5\nM30"};
+    /*static inline*/ QString start_{u"G21 G17 G90\nM3 S?"_s};
+    /*static inline*/ QString end_{u"M5\nM30"_s};
 
-    /*static inline*/ QString laserStart_{"G21 G17 G90"};
-    /*static inline*/ QString laserEnd_{"M30"};
+    /*static inline*/ QString laserStart_{u"G21 G17 G90"_s};
+    /*static inline*/ QString laserEnd_{u"M30"_s};
 
     /*static inline*/ bool info_{true};
     /*static inline*/ bool sameFolder_{true};

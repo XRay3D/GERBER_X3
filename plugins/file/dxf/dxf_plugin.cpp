@@ -49,7 +49,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
 
     QTextStream in(&file);
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    in.setCodec("Windows-1251");
+    in.setCodec(u"Windows-1251"_s);
 #endif
     //    in.setAutoDetectUnicode(true);
 
@@ -60,14 +60,14 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         bool ok;
         auto code(strCode.toInt(&ok));
         if(!ok)
-            throw QString("Unknown code: raw str %1, line %2!").arg(strCode).arg(line);
+            throw QString(u"Unknown code: raw str %1, line %2!"_s).arg(strCode).arg(line);
         // Value
         QString strValue(in.readLine());
         file_->lines().push_back(strValue);
         int multi = 0;
-        while(strValue.endsWith("\\P")) {
+        while(strValue.endsWith(u"\\P"_s)) {
             file_->lines().emplace_back(in.readLine());
-            strValue.append("\n" + file_->lines().back());
+            strValue.append(u'\n' + file_->lines().back());
             ++multi;
         }
         codes.emplace_back(code, strValue, line);
@@ -79,9 +79,9 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         int progress = 0;
         // int progressCtr = 0;
         do {
-            if(auto code = getCode(); code.code() == 0 && code == "SECTION")
+            if(auto code = getCode(); code.code() == 0 && code == u"SECTION"_s)
                 ++progress;
-        } while(!in.atEnd() || *(codes.end() - 1) != "EOF");
+        } while(!in.atEnd() || *(codes.end() - 1) != u"EOF"_s);
         codes.shrink_to_fit();
         file.close();
 
@@ -89,9 +89,9 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         Timer t{"Section Parser"};
 
         for(auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
-            if(*it == "SECTION")
+            if(*it == u"SECTION"_s)
                 from = it;
-            if(auto it_ = it + 1; *it == "ENDSEC" && (*it_ == "SECTION" || *it_ == "EOF")) {
+            if(auto it_ = it + 1; *it == u"ENDSEC"_s && (*it_ == u"SECTION"_s || *it_ == u"EOF"_s)) {
                 // emit fileProgress(file_->shortName(), 0, progressCtr++);
                 to = it;
                 // const auto type = SectionParser::toType(*(from + 1)); // FIXME
@@ -120,7 +120,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
                     // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE{dxfFile(), from, to};
                     continue;
                 default:
-                    throw QString("Unknowh Section!");
+                    throw QString(u"Unknowh Section!"_s);
                 }
             }
         }
@@ -132,21 +132,21 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
             emit fileReady(file_);
         }
     } catch(const QString& wath) {
-        qWarning() << "exeption QString:" << wath;
+        qWarning() << u"exeption QString:"_s << wath;
         // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), wath);
         delete file_;
         return nullptr;
     } catch(const std::exception& e) {
-        qWarning() << "exeption:" << e.what();
+        qWarning() << u"exeption:"_s << e.what();
         // emit fileProgress(file_->shortName(), 1, 1);
-        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString(e.what()));
+        emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::fromUtf8(e.what()));
         delete file_;
         return nullptr;
     } catch(...) {
-        qWarning() << "exeption:" << errno;
+        qWarning() << u"exeption:"_s << errno;
         // emit fileProgress(file_->shortName(), 1, 1);
-        emit fileError(QFileInfo(fileName).fileName(), "Unknown Error! " + QString::number(errno));
+        emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::number(errno));
         delete file_;
         return nullptr;
     }
@@ -155,7 +155,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
 
 bool Plugin::thisIsIt(const QString& fileName) {
 
-    if(fileName.endsWith(".dxf", Qt::CaseInsensitive))
+    if(fileName.endsWith(u".dxf"_s, Qt::CaseInsensitive))
         return true;
 
     QFile file(fileName);
@@ -171,11 +171,11 @@ bool Plugin::thisIsIt(const QString& fileName) {
         }
         if(line.toInt() != 0)
             break;
-        if(line = in.readLine(); line != "SECTION")
+        if(line = in.readLine(); line != u"SECTION"_s)
             break;
         if(line = in.readLine(); line.toInt() != 2)
             break;
-        if(line = in.readLine(); line != "HEADER")
+        if(line = in.readLine(); line != u"HEADER"_s)
             break;
         return true;
     } while(false);
@@ -186,11 +186,11 @@ uint32_t Plugin::type() const { return DXF; }
 
 AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
-QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'D'); }
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'D'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     auto settingsTab = new SettingsTab{parent};
-    settingsTab->setWindowTitle("DXF");
+    settingsTab->setWindowTitle(u"DXF"_s);
     return settingsTab;
 }
 

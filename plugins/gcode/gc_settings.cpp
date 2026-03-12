@@ -14,7 +14,7 @@
 
 GCode::Tab::Tab(QWidget* parent)
     : AbstractFileSettings{parent} {
-    setWindowTitle("G-Code");
+    setWindowTitle(u"G-Code"_s);
     setObjectName(u"tabGCode"_s);
 
     tabWidget = new QTabWidget{this};
@@ -119,8 +119,8 @@ GCode::Tab::Tab(QWidget* parent)
     //        //                verticalLayoutPS->addWidget(lbl);
     //        //                cbxProfileSort = new QComboBox{tabHldi};
     //        //                cbxProfileSort->setObjectName(u"cbxProfileSort"_s);
-    //        //                cbxProfileSort->addItem("Grouping by nesting");
-    //        //                cbxProfileSort->addItem("Grouping by nesting depth");
+    //        //                cbxProfileSort->addItem(u"Grouping by nesting"_s);
+    //        //                cbxProfileSort->addItem(u"Grouping by nesting depth"_s);
     //        //                verticalLayoutPS->addWidget(cbxProfileSort);
     //        verticalLayoutPS->addStretch();
     //        tabwIndividualSettings->addTab(tabHldi, QApplication::translate("GCodeSettings", "HLDI", nullptr));
@@ -162,7 +162,7 @@ GCode::Tab::Tab(QWidget* parent)
 GCode::Tab::~Tab() { }
 
 void GCode::Tab::readSettings(MySettings& settings) {
-    settings.beginGroup("GCode");
+    settings.beginGroup(u"GCode"_s);
     App::gcSettings().info_ = settings.getValue(chbxInfo, App::gcSettings().info_);
     App::gcSettings().sameFolder_ = settings.getValue(chbxSameGFolder, App::gcSettings().sameFolder_);
     App::gcSettings().fileExtension_ = settings.getValue(leFileExtension, App::gcSettings().fileExtension_);
@@ -188,7 +188,7 @@ void GCode::Tab::readSettings(MySettings& settings) {
 }
 
 void GCode::Tab::writeSettings(MySettings& settings) {
-    settings.beginGroup("GCode");
+    settings.beginGroup(u"GCode"_s);
     App::gcSettings().fileExtension_ = settings.setValue(leFileExtension);
     App::gcSettings().formatMilling_ = settings.setValue(leFormatMilling);
     App::gcSettings().formatLaser_ = settings.setValue(leFormatLaser);

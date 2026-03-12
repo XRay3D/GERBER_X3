@@ -22,8 +22,8 @@
 #pragma warning(disable : 5055)
 #elif defined(__GNUC__) && (__GNUC__ >= 7)
 #pragma GCC diagnostic push
-#pragma GCC diagnostic ignored "-Wpragmas"
-#pragma GCC diagnostic ignored "-Wdeprecated-enum-float-conversion"
+#pragma GCC diagnostic ignored u"-Wpragmas"_s
+#pragma GCC diagnostic ignored u"-Wdeprecated-enum-float-conversion"_s
 #endif /* _MSC_VER, __GNUC__ */
 
 #include "voronoi_visual_utils.h"
@@ -165,7 +165,7 @@ void VoronoiBoost::boostVoronoi() {
         point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(minY - ky)},
         point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
-    qDebug() << "max id:" << id;
+    qDebug() << u"max id:"_s << id;
     //    const /*Point::Type*/int32_t kx = (maxX - minX) * 2;
     //    const /*Point::Type*/int32_t ky = (maxY - minY) * 2;
 
@@ -228,7 +228,7 @@ void VoronoiBoost::boostVoronoi() {
         clipper.Execute(ClipType::Intersection, FillRule::NonZero, segments, segments);
     }
 
-    //    dbgPaths(segments, "segments");
+    //    dbgPaths(segments, u"segments"_s);
     auto clean = [kAngle = 2.0](Path& path) {
         for (size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = angleTo(path[i - 1],path[i + 0]);

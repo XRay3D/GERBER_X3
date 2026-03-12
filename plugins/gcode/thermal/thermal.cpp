@@ -28,7 +28,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
     toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
 
-    dbgPaths(closedSrcPaths, "closedSrcPaths");
+    dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
 
     {     // create tool path
         { // execute offset
@@ -37,7 +37,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             // returnPs = offset.Execute(dOffset);
             returnPs = InflateRoundPolygon(closedSrcPaths, dOffset * 2);
         }
-        dbgPaths(returnPs, "returnPs");
+        dbgPaths(returnPs, u"returnPs"_s);
 
         // fix direction
         if(gcp_.side() == GCode::Outer && !gcp_.convent())

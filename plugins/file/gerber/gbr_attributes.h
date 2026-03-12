@@ -17,6 +17,8 @@
 #include <map>
 #include <memory>
 
+using namespace Qt::Literals;
+
 /*
 
 Каждый атрибут состоит из имени атрибута и необязательного значения атрибута:
@@ -235,7 +237,7 @@ public:
 //        the component pins (leads). The .P object attribute must
 //        be attached to each flash to identify the reference
 //        descriptor and pin.
-//        For the key pin, typically pin "1" or "A1", the following
+//        For the key pin, typically pin u"1"_s or u"A1"_s, the following
 //        diamond shape aperture must be used:
 //        %ADD12P,0.360X4X0.0*% (mm)
 //        %ADD12P,0.017X4X0.0*% (in)

@@ -76,9 +76,9 @@ public:
     friend bool operator==(const QString& l, const CodeData& r) { return l == r.strVal; }
     friend bool operator!=(const QString& l, const CodeData& r) { return !(l == r); }
 
-    friend bool operator==(const CodeData& l, const char* r) { return l.strVal == r; }
+    friend bool operator==(const CodeData& l, const char* r) { return l.strVal == QString::fromUtf8(r); }
     friend bool operator!=(const CodeData& l, const char* r) { return !(l == r); }
-    friend bool operator==(const char* l, const CodeData& r) { return l == r.strVal; }
+    friend bool operator==(const char* l, const CodeData& r) { return QString::fromUtf8(l) == r.strVal; }
     friend bool operator!=(const char* l, const CodeData& r) { return !(l == r); }
 
     Type type() const;

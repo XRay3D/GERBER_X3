@@ -29,7 +29,7 @@ SectionTABLES::~SectionTABLES() {
 void SectionTABLES::parse() {
     do {
         CodeData code(nextCode());
-        if(code == "TABLE") {
+        if(code == u"TABLE"_s) {
             code = nextCode();
             do {
                 auto type = AbstractTable::toType(code);
@@ -74,7 +74,7 @@ void SectionTABLES::parse() {
                         code = nextCode();
                     } while(code.code() != 0);
                 }
-            } while(code != "ENDTAB");
+            } while(code != u"ENDTAB"_s);
         }
     } while(hasNext());
 }

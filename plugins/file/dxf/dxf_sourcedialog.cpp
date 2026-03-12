@@ -26,14 +26,14 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     // tableView
     auto tableView = new QTableView{this};
     QFont f(font());
-    f.setFamily("Consolas");
+    f.setFamily(u"Consolas"_s);
     tableView->setFont(f);
     tableView->setObjectName(u"tableView"_s);
 
     tableView->setModel(new Model{App::project().file(fileId)->lines()});
     // horizontal Header
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());
+    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, u"123456789"_s).width());
     tableView->horizontalHeader()->setSectionResizeMode(LineData, QHeaderView::Stretch);
     // vertical Header
     tableView->verticalHeader()->setVisible(false);

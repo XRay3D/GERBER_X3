@@ -28,15 +28,15 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     , ui(new ::Ui::PocketOffsetForm)
     , names{tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
-    ui->toolHolder1->label()->setText("Tool 1:");
-    ui->toolHolder2->label()->setText("Tool 2:");
-    ui->toolHolder3->label()->setText("Tool 3:");
-    ui->toolHolder4->label()->setText("Tool 4:");
+    ui->toolHolder1->label()->setText(u"Tool 1:"_s);
+    ui->toolHolder2->label()->setText(u"Tool 2:"_s);
+    ui->toolHolder3->label()->setText(u"Tool 3:"_s);
+    ui->toolHolder4->label()->setText(u"Tool 4:"_s);
 
     setWindowTitle(tr("Pocket Offset Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("PocketOffset");
+    settings.beginGroup(u"PocketOffset"_s);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
     settings.getValue(ui->rbInside);
@@ -68,7 +68,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("PocketOffset");
+    settings.beginGroup(u"PocketOffset"_s);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
     settings.setValue(ui->rbInside);
@@ -126,7 +126,7 @@ void Form::computePaths() {
 }
 
 void Form::onSbxStepsValueChanged(int arg1) {
-    ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
+    ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : QString{});
 }
 
 void Form::updateName() {

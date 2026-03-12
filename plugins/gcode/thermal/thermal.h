@@ -41,7 +41,7 @@ class File final : public GCode::File {
 public:
     explicit File();
     explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
-    QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"thermal-path"_s); }
     uint32_t type() const override { return THERMAL; }
     void createGi() override;
     void genGcodeAndTile() override;

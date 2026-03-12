@@ -28,35 +28,18 @@
 
 int main(int argc, char* argv[]) {
     stacktraceAndOutput();
-    qSetMessagePattern(QLatin1String(
-        "%{if-critical}\x1b[38;2;255;0;0m"
-        "C %{endif}"
-        "%{if-debug}\x1b[38;2;196;196;196m"
-        "D %{endif}"
-        "%{if-fatal}\x1b[1;38;2;255;0;0m"
-        "F %{endif}"
-        "%{if-info}\x1b[38;2;128;255;255m"
-        "I %{endif}"
-        "%{if-warning}\x1b[38;2;255;128;0m"
-        "W %{endif}"
-        // "%{time HH:mm:ss.zzz} "
-        // "%{appname} %{pid} %{threadid} "
-        // "%{type} "
-        // "%{file}:%{line} %{function} "
-        "%{if-category}%{category}%{endif}%{message} "
-        "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"));
 
     QApplication::setAttribute(Qt::AA_Use96Dpi);
-    qputenv("QT_ENABLE_HIGHDPI_SCALING", QByteArray("0"));
+    qputenv("QT_ENABLE_HIGHDPI_SCALING", "0"_ba);
 
     Q_INIT_RESOURCE(resources);
 
     QApplication app(argc, argv);
 
     // #ifdef Q_OS_WIN
-    //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
-    //     if (settings.value("AppsUseLightTheme") == 0) {
-    //         qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
+    //     QSettings settings(u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"_s, QSettings::NativeFormat);
+    //     if (settings.value(u"AppsUseLightTheme"_s) == 0) {
+    //         qApp->setStyleSheet(u"QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"_s);
     //     }
     // #endif
 
@@ -64,17 +47,17 @@ int main(int argc, char* argv[]) {
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     {
-        QSharedMemory nixFixSharedMemory{"AppSettings"};
+        QSharedMemory nixFixSharedMemory{u"AppSettings"_s};
         if(nixFixSharedMemory.attach())
             nixFixSharedMemory.detach();
     }
 #endif
-    QApplication::setApplicationName("GGEasy");
+    QApplication::setApplicationName(u"GGEasy"_s);
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
+    QTextCodec::setCodecForLocale(QTextCodec::codecForName(u"UTF-8"_s));
 #endif
 
     [[maybe_unused]] App appSingleton;
@@ -94,17 +77,17 @@ int main(int argc, char* argv[]) {
     //    QGLFormat::setDefaultFormat(glf);
 
     if constexpr(0) {
-        QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
-        semaphore.acquire();                              // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
+        QSystemSemaphore semaphore(u"GGEasySemaphore"_s, 1); // создаём семафор
+        semaphore.acquire();                                 // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
-        QSharedMemory nix_fix_shared_memory("GGEasyMemory");
+        QSharedMemory nix_fix_shared_memory(u"GGEasyMemory"_s);
         if(nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
 #endif
         // MainWindow* mainWin = nullptr;
-        QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
+        QSharedMemory sharedMemory(u"GGEasyMemory"_s); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running = false;    // переменную для проверки ууже запущенного приложения
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
@@ -115,7 +98,7 @@ int main(int argc, char* argv[]) {
         }
         semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;
-        parser.addPositionalArgument("url", "Url of file to open");
+        parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
         parser.process(app);
         if(is_running) {
             system("pause");
@@ -137,17 +120,17 @@ int main(int argc, char* argv[]) {
 
     { // Translate
         QSettings settings;
-        settings.beginGroup("MainWindow");
-        QString locale(settings.value("locale").toString());
+        settings.beginGroup(u"MainWindow"_s);
+        QString locale(settings.value(u"locale"_s).toString());
         if(locale.isEmpty())
             locale = QLocale().name().left(2);
-        settings.setValue("locale", locale);
+        settings.setValue(u"locale"_s, locale);
         settings.endGroup();
         MainWindow::translate(locale);
     }
 
     MainWindow mainWin;
-    mainWin.setObjectName("MainWindow");
+    mainWin.setObjectName(u"MainWindow"_s);
 
     /*
     Platform        Valid suffixes
@@ -159,36 +142,36 @@ int main(int argc, char* argv[]) {
     */
 #ifdef __unix__
 #ifdef QT_DEBUG
-    const QString suffix("*.so");
+    const QString suffix(u"*.so"_s);
 #else
-    const QString suffix("*.so");
+    const QString suffix(u"*.so"_s);
 #endif
 #elif _WIN32
     const auto suffix = u"*.dll"_s;
 #else
-    static_assert(false, "Select OS");
+    static_assert(false, u"Select OS"_s);
 #endif
 
     std::vector<std::unique_ptr<QPluginLoader>> loaders;
 
     // load plugins
-    QDir dir(QApplication::applicationDirPath() + "/plugins");
-    if(dir.exists()) { // Поиск всех файлов в папке "plugins"
+    QDir dir(QApplication::applicationDirPath() + u"/plugins"_s);
+    if(dir.exists()) { // Поиск всех файлов в папке u"plugins"_s
         QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
         for(const auto& str: listFiles) { // Проход по всем файлам
             App::splashScreen().showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
-            loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + "/" + str));
+            loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + u"/"_s + str));
             if(auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
                 if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
-                    gCode->setInfo(loaders.back()->metaData().value("MetaData").toObject());
+                    gCode->setInfo(loaders.back()->metaData().value(u"MetaData"_s).toObject());
                     App::gCodePlugins().try_emplace(gCode->type(), gCode);
                     continue;
                 } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
-                    file->setInfo(loaders.back()->metaData().value("MetaData").toObject());
+                    file->setInfo(loaders.back()->metaData().value(u"MetaData"_s).toObject());
                     App::filePlugins().try_emplace(file->type(), file);
                     continue;
                 } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
-                    shape->setInfo(loaders.back()->metaData().value("MetaData").toObject());
+                    shape->setInfo(loaders.back()->metaData().value(u"MetaData"_s).toObject());
                     App::shapePlugins().try_emplace(shape->type(), shape);
                     continue;
                 }
@@ -203,7 +186,7 @@ int main(int argc, char* argv[]) {
     SettingsDialog().accept();
 
     QCommandLineParser parser;
-    parser.addPositionalArgument("url", "Url of file to open");
+    parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
     parser.process(app);
 
     for(const QString& fileName: parser.positionalArguments())

@@ -35,8 +35,8 @@ Item::Item(AbstractFile* file)
     , color_{Qt::white}
     , brushColor_{colorPtr_ ? *colorPtr_ : color_}
     , penColor_{Qt::transparent} {
-    //    animation(this, "bodyColor")
-    //    , visibleAnim(this, "opacity")     ,//    animation.setDuration(100);
+    //    animation(this, u"bodyColor"_s)
+    //    , visibleAnim(this, u"opacity"_s)     ,//    animation.setDuration(100);
     //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    connect(this, &Item::colorChanged, [this] { update(); });
     //    visibleAnim.setDuration(100);
@@ -46,7 +46,7 @@ Item::Item(AbstractFile* file)
     //    0.9); });
     QGraphicsItem::setVisible(false);
     //    connect(this, &QGraphicsObject::rotationChanged, [] {
-    //    qDebug("rotationChanged"); });
+    //    qDebug(u"rotationChanged"_s); });
 }
 
 bool Item::isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }

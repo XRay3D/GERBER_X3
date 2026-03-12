@@ -8,20 +8,19 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.00)
 
 project(thread LANGUAGES CXX)
 
 
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS  Widgets REQUIRED)
+find_package(Qt6 COMPONENTS  Widgets REQUIRED)
 
 file(GLOB HEADERS *.h)
 file(GLOB JSONS *.json)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
 
-include_directories(${CMAKE_STATIC_LIBS_DIR})
 
 set(PROJECT_SOURCES
     ${HEADERS}
@@ -32,7 +31,7 @@ set(PROJECT_SOURCES
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
     clipper
@@ -42,7 +41,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
     gi
     graphicsview
     tooldatabase
-    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt6::Widgets
 )
 
 #add_library(gc_profile STATIC
@@ -55,7 +54,7 @@ target_link_libraries(${PROJECT_NAME} PRIVATE
 #    gcode
 #    common
 #    filetree
-#    Qt${QT_VERSION_MAJOR}::Core
-#    Qt${QT_VERSION_MAJOR}::Gui
-#    Qt${QT_VERSION_MAJOR}::Widgets
+#    Qt6::Core
+#    Qt6::Gui
+#    Qt6::Widgets
 #)

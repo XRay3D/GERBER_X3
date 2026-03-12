@@ -18,7 +18,7 @@ MathParser::MathParser(QMap<QString, double>& variables)
 
 double MathParser::getVariable(QString variableName) {
     if(!variables->contains(variableName)) {
-        qWarning() << "Error: Try get unexists variable '" + variableName + "'";
+        qWarning() << "Error: Try get unexists variable '" + variableName + u"'"_s;
         return 0.0;
     }
     return variables->value(variableName, 0.0);
@@ -30,7 +30,7 @@ double MathParser::parse(const QString& s) {
         result = plusMinus(s);
         if(!result.rest.isEmpty()) {
             qWarning() << "Error: can't full parse"
-                       << "\"" << s << "\"";
+                       << u"\"_s" << s << u"\"_s";
             qWarning() << "rest: " + result.rest;
         }
     } catch(const QString& str) {
@@ -139,11 +139,11 @@ Result MathParser::num(QString s) // throws Exception
     while(i < s.length() && (s.at(i).isDigit() || s.at(i) == '.')) {
         // но также проверям, что в числе может быть только одна точка!
         if(s.at(i) == '.' && ++dot_cnt > 1)
-            throw "not valid number '" + s.mid(0, i + 1) + "'";
+            throw "not valid number '" + s.mid(0, i + 1) + u"'"_s;
         i++;
     }
     if(i == 0) // что-либо похожее на число мы не нашли
-        throw "can't get valid number in '" + s + "'";
+        throw "can't get valid number in '" + s + u"'"_s;
 
     double dPart = s.mid(0, i).toDouble();
     if(negative)

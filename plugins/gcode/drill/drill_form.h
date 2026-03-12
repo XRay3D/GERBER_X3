@@ -98,8 +98,8 @@ public:
         action->setData(true);
         return action;
     }
-    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+D"_s}; }
     QWidget* createForm() override { return &form; };
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return DRILLING; }

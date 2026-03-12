@@ -32,7 +32,7 @@ SectionENTITIES::SectionENTITIES(Blocks& blocks, CodeData& code, SectionParser* 
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
         entities.push_back(file->entities_.back().get());
-    } while(code != "ENDBLK");
+    } while(code != u"ENDBLK"_s);
 }
 
 SectionENTITIES::~SectionENTITIES() {

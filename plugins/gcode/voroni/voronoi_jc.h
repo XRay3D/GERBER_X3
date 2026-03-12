@@ -22,9 +22,10 @@ protected:
         Point second;
         int32_t id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
+        friend size_t qHash(const Pair& tag, uint = 0) {
+            return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
+        }
     };
-
-    friend inline size_t qHash(const Pair& tag, uint seed);
 
     using Pairs = QSet<Pair>;
     using Pairss = mvector<Pairs>;

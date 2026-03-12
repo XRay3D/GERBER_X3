@@ -8,7 +8,7 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.00)
 
 project(gcpocketraster LANGUAGES CXX)
 
@@ -24,11 +24,11 @@ file(GLOB JSONS *.json)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
 
-include_directories(${CMAKE_STATIC_LIBS_DIR})
-
 set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
+
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(
   ${PROJECT_NAME}
@@ -39,4 +39,4 @@ target_link_libraries(
           gi
           graphicsview
           tooldatabase
-          Qt${QT_VERSION_MAJOR}::Widgets)
+          Qt6::Widgets)

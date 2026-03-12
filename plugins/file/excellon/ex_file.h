@@ -40,7 +40,7 @@ public:
     mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
     ;
 
-    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
 
 protected:
     void write(QDataStream& stream) const override;

@@ -24,41 +24,41 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     ui->setupUi(this);
     // clang-format AlignArrayOfStructures: Left
     update = {
-        {            ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle},
-        {         ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter},
-        {         ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate},
-        {           ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght},
-        {       ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut},
+        {ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle            },
+        {ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter         },
+        {ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate         },
+        {ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght           },
+        {ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut       },
         {ui->dsbxOneTurnCutPercent, &ToolEditForm::updateDsbxOneTurnCutPercent},
-        {        ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth},
-        {       ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate},
-        {     ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed},
-        {         ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover},
-        {  ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent},
+        {ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth        },
+        {ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate       },
+        {ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed     },
+        {ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover         },
+        {ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent  },
     };
 
     get = {
-        std::pair{       ui->dsbxAngle,        &Tool::angle},
-        std::pair{    ui->dsbxDiameter,     &Tool::diameter},
-        std::pair{    ui->dsbxFeedRate,     &Tool::feedRate},
-        std::pair{      ui->dsbxLenght,       &Tool::lenght},
-        std::pair{  ui->dsbxOneTurnCut,   &Tool::oneTurnCut},
-        std::pair{   ui->dsbxPassDepth,    &Tool::passDepth},
-        std::pair{  ui->dsbxPlungeRate,   &Tool::plungeRate},
+        std::pair{ui->dsbxAngle,        &Tool::angle       },
+        std::pair{ui->dsbxDiameter,     &Tool::diameter    },
+        std::pair{ui->dsbxFeedRate,     &Tool::feedRate    },
+        std::pair{ui->dsbxLenght,       &Tool::lenght      },
+        std::pair{ui->dsbxOneTurnCut,   &Tool::oneTurnCut  },
+        std::pair{ui->dsbxPassDepth,    &Tool::passDepth   },
+        std::pair{ui->dsbxPlungeRate,   &Tool::plungeRate  },
         std::pair{ui->dsbxSpindleSpeed, &Tool::spindleSpeed},
-        std::pair{    ui->dsbxStepover,     &Tool::stepover},
+        std::pair{ui->dsbxStepover,     &Tool::stepover    },
     };
 
     set = {
-        std::pair{       ui->dsbxAngle,        &Tool::setAngle},
-        std::pair{    ui->dsbxDiameter,     &Tool::setDiameter},
-        std::pair{    ui->dsbxFeedRate,     &Tool::setFeedRate},
-        std::pair{      ui->dsbxLenght,       &Tool::setLenght},
-        std::pair{  ui->dsbxOneTurnCut,   &Tool::setOneTurnCut},
-        std::pair{   ui->dsbxPassDepth,    &Tool::setPassDepth},
-        std::pair{  ui->dsbxPlungeRate,   &Tool::setPlungeRate},
+        std::pair{ui->dsbxAngle,        &Tool::setAngle       },
+        std::pair{ui->dsbxDiameter,     &Tool::setDiameter    },
+        std::pair{ui->dsbxFeedRate,     &Tool::setFeedRate    },
+        std::pair{ui->dsbxLenght,       &Tool::setLenght      },
+        std::pair{ui->dsbxOneTurnCut,   &Tool::setOneTurnCut  },
+        std::pair{ui->dsbxPassDepth,    &Tool::setPassDepth   },
+        std::pair{ui->dsbxPlungeRate,   &Tool::setPlungeRate  },
         std::pair{ui->dsbxSpindleSpeed, &Tool::setSpindleSpeed},
-        std::pair{    ui->dsbxStepover,     &Tool::setStepover},
+        std::pair{ui->dsbxStepover,     &Tool::setStepover    },
     };
 
     dsbxMapdsbxMap = {
@@ -97,10 +97,10 @@ ToolEditForm::ToolEditForm(QWidget* parent)
         bool fl1 = parentWidget()->isWindowModified();
         bool fl2 = ui->pbApply->isEnabled();
 
-        ui->dsbxFeedRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
+        ui->dsbxFeedRate->setSuffix(u" "_s + ui->cbxFeedSpeeds->currentText());
         ui->dsbxFeedRate->setValue((ui->dsbxFeedRate->value() / lastFeed) * feed);
 
-        ui->dsbxPlungeRate->setSuffix(" " + ui->cbxFeedSpeeds->currentText());
+        ui->dsbxPlungeRate->setSuffix(u" "_s + ui->cbxFeedSpeeds->currentText());
         ui->dsbxPlungeRate->setValue((ui->dsbxPlungeRate->value() / lastFeed) * feed);
 
         parentWidget()->setWindowModified(fl1);
@@ -112,28 +112,30 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     connect(ui->teNote, &QTextEdit::textChanged, this, [this] { tool_.setNote(ui->teNote->toPlainText()); setChanged(); });
 
     ui->cbxUnits->setVisible(false);
-    ui->cbxToolType->addItem(QIcon::fromTheme("endmill"), TR("ToolEditForm", "End Mill", nullptr), Tool::EndMill);
-    ui->cbxToolType->addItem(QIcon::fromTheme("drill"), TR("ToolEditForm", "Drill", nullptr), Tool::Drill);
-    ui->cbxToolType->addItem(QIcon::fromTheme("engraving"), TR("ToolEditForm", "Engraver", nullptr), Tool::Engraver);
-    ui->cbxToolType->addItem(QIcon::fromTheme("thread_mill"), TR("ToolEditForm", "Thread Mill", nullptr), Tool::ThreadMill);
-    ui->cbxToolType->addItem(QIcon::fromTheme("laser"), TR("ToolEditForm", "Laser", nullptr), Tool::Laser);
+    ui->cbxToolType->addItem(QIcon::fromTheme(u"endmill"_s), TR("ToolEditForm", "End Mill", nullptr), Tool::EndMill);
+    ui->cbxToolType->addItem(QIcon::fromTheme(u"drill"_s), TR("ToolEditForm", "Drill", nullptr), Tool::Drill);
+    ui->cbxToolType->addItem(QIcon::fromTheme(u"engraving"_s), TR("ToolEditForm", "Engraver", nullptr), Tool::Engraver);
+    ui->cbxToolType->addItem(QIcon::fromTheme(u"thread_mill"_s), TR("ToolEditForm", "Thread Mill", nullptr), Tool::ThreadMill);
+    ui->cbxToolType->addItem(QIcon::fromTheme(u"laser"_s), TR("ToolEditForm", "Laser", nullptr), Tool::Laser);
 
     connect(ui->cbxToolType, &QComboBox::currentIndexChanged, this, &ToolEditForm::setupToolWidgets);
 
-    ui->lblWarn->setPixmap(QIcon::fromTheme("window-close").pixmap({16, 16}));
-    ui->lblWarn->setToolTip(QApplication::translate("ToolEditForm", "If the offset value is more than 50%, unmilled areas are possible.\nThese errors do not appear in the visualization.", "При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации."));
+    ui->lblWarn->setPixmap(QIcon::fromTheme(u"window-close"_s).pixmap({16, 16}));
+    ui->lblWarn->setToolTip(QApplication::translate("ToolEditForm",
+        "If the offset value is more than 50%, unmilled areas are possible.\nThese errors do not appear in the visualization.",
+        "При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации."));
 
     QSettings settings;
-    ui->cbxFeedSpeeds->setCurrentIndex(settings.value("cbxFeedSpeeds").toInt());
-    // ui->cbxUnits->setCurrentIndex(settings.value("cbxUnits").toInt());
+    ui->cbxFeedSpeeds->setCurrentIndex(settings.value(u"cbxFeedSpeeds"_s).toInt());
+    // ui->cbxUnits->setCurrentIndex(settings.value(u"cbxUnits"_s).toInt());
     setVisibleToolWidgets(false);
     setChanged(false);
 }
 
 ToolEditForm::~ToolEditForm() {
     QSettings settings;
-    settings.setValue("cbxFeedSpeeds", ui->cbxFeedSpeeds->currentIndex());
-    // settings.setValue("cbxUnits", ui->cbxUnits->currentIndex());
+    settings.setValue(u"cbxFeedSpeeds"_s, ui->cbxFeedSpeeds->currentIndex());
+    // settings.setValue(u"cbxUnits"_s, ui->cbxUnits->currentIndex());
     delete ui;
     ui = nullptr;
 }
@@ -227,7 +229,7 @@ void ToolEditForm::setupToolWidgets(int) {
     auto currType = ui->cbxToolType->currentData().value<Tool::Type>();
     tool_.setType(currType);
 
-    // qDebug() << "\n\n";
+    // qDebug() << u"\n\n"_s;
 
     static Overload value{
         [](auto* val) { return val->value(); },
@@ -261,7 +263,7 @@ void ToolEditForm::setupToolWidgets(int) {
         {Tool::Drill, tr("Pass")},
         {Tool::EndMill, tr("Depth")},
         {Tool::Engraver, tr("Depth")},
-        {Tool::Laser, ""},
+        {Tool::Laser, {}},
         {Tool::ThreadMill, tr("Thread Pitch")},
     };
 

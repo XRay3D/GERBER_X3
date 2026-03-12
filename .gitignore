@@ -134,3 +134,7 @@ bin
 
 # notepad++
 *.bak
+
+# folders
+/third_party/
+/bin/

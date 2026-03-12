@@ -81,7 +81,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    static const QStringList horizontalLabel{tr("     Name|Angle|Tickness|Count").split('|')};
+    static const QStringList horizontalLabel{tr("     Name|Angle|Tickness|Count").split(u'|')};
     switch(role) {
     case Qt::DisplayRole:
         if(orientation == Qt::Horizontal)

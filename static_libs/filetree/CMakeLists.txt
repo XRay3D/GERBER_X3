@@ -8,7 +8,7 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.00)
 
 project(filetree LANGUAGES CXX)
 
@@ -17,8 +17,6 @@ file(GLOB SOURCES *.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gi Qt6::Widgets)
-
-# target_compile_definitions(filetree PRIVATE FILETREE_LIBRARY)
+target_link_libraries(${PROJECT_NAME} PUBLIC gi Qt6::Widgets file_plugins)

@@ -124,10 +124,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             clipper.AddOpenSubject(src);
             clipper.AddClip({frame});
             clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
-            // dbgPaths(tmp, "ClipType::Intersection");
+            // dbgPaths(tmp, u"ClipType::Intersection"_s);
             frames += std::move(tmp);
             clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
-            // dbgPaths(tmp, "ClipType::Difference");
+            // dbgPaths(tmp, u"ClipType::Difference"_s);
             frames += std::move(tmp);
 
             std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort

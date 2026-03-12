@@ -4,7 +4,7 @@
 #include <string>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -18,13 +18,13 @@ public:
     /// Единицы измерения длины для всего файла. Значение по умолчанию – mm (миллиметр).
     /// </summary>
     // dist _dist = static_cast<dist>(0);
-    QS_ATTR(dist_, dist) // ORIGINAL LINE: [XmlAttribute("dist")] public dist _dist;
+    QS_ATTR(dist_, dist) // ORIGINAL LINE: [XmlAttribute(u"dist"_s)] public dist _dist;
 
     /// <summary>
     /// Единицы измерения времени для всего файла. Значение по умолчанию – ps (пикосекунда).
     /// </summary>
     // enum time_ _time = static_cast<enum time_>(0);
-    QS_ATTR(time_, time) // ORIGINAL LINE: [XmlAttribute("time")] public time_ _time;
+    QS_ATTR(time_, time) // ORIGINAL LINE: [XmlAttribute(u"time"_s)] public time_ _time;
 };
 
 /// <summary>
@@ -42,36 +42,36 @@ public:
     /// </summary>
 
 public:
-    QS_FIELD(QString, Format) // ORIGINAL LINE: [XmlElement("Format")] public string _Format;
+    QS_FIELD(QString, Format) // ORIGINAL LINE: [XmlElement(u"Format"_s)] public string _Format;
 
     /// <summary>
     /// Версия формата.
     /// </summary>
-    QS_FIELD(QString, Version) // ORIGINAL LINE: [XmlElement("Version")] public string _Version;
+    QS_FIELD(QString, Version) // ORIGINAL LINE: [XmlElement(u"Version"_s)] public string _Version;
 
     /// <summary>
     /// Название программы, создавшей файл.
     /// </summary>
-    QS_FIELD(QString, Program) // ORIGINAL LINE: [XmlElement("Program")] public string _Program;
+    QS_FIELD(QString, Program) // ORIGINAL LINE: [XmlElement(u"Program"_s)] public string _Program;
 
     /// <summary>
     /// Дата и время создания файла (в произвольной форме).
     /// </summary>
-    QS_FIELD(QString, Date) // ORIGINAL LINE: [XmlElement("Date")] public string _Date;
+    QS_FIELD(QString, Date) // ORIGINAL LINE: [XmlElement(u"Date"_s)] public string _Date;
 
     /// <summary>
     /// Формат импортированного файла, из которого был получен дизайн.
     /// </summary>
-    QS_FIELD(QString, OriginalFormat) // ORIGINAL LINE: [XmlElement("OriginalFormat")] public string _OriginalFormat;
+    QS_FIELD(QString, OriginalFormat) // ORIGINAL LINE: [XmlElement(u"OriginalFormat"_s)] public string _OriginalFormat;
 
     /// <summary>
     /// Импортированный файл. Путь к файлу задаётся относительно каталога содержащего файл проекта.
     /// </summary>
-    QS_FIELD(QString, OriginalFile) // ORIGINAL LINE: [XmlElement("OriginalFile")] public string _OriginalFile;
+    QS_FIELD(QString, OriginalFile) // ORIGINAL LINE: [XmlElement(u"OriginalFile"_s)] public string _OriginalFile;
 
     /// <summary>
     /// Единицы измерения для всего файла.
     /// </summary>
-    QS_OBJECT(Units_Header, Units) // ORIGINAL LINE: [XmlElement("Units")] public Units_Header _Units;
+    QS_OBJECT(Units_Header, Units) // ORIGINAL LINE: [XmlElement(u"Units"_s)] public Units_Header _Units;
 };
 // } // namespace TopoR_PCB_Classes

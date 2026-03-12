@@ -30,7 +30,7 @@ public:
             endFile();
         }
     }
-    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
     uint32_t type() const override { return DRILLING; }
     void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
     void genGcodeAndTile() override {

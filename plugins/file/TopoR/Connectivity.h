@@ -6,7 +6,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -28,7 +28,7 @@ public:
         /// Признак фиксации.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("fixed")] public Bool _fixed;
+        // ORIGINAL LINE: [XmlAttribute(u"fixed"_s)] public Bool _fixed;
         Bool _fixed = static_cast<Bool>(0);
         virtual ~Via() {
             delete _ViastackRef;
@@ -43,21 +43,21 @@ public:
         /// Ссылка на тип переходного отверстия.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("ViastackRef")] public ViastackRef _ViastackRef;
+        // ORIGINAL LINE: [XmlElement(u"ViastackRef"_s)] public ViastackRef _ViastackRef;
         ViastackRef* _ViastackRef;
 
         /// <summary>
         /// Ссылка на цепь.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
         NetRef* _NetRef;
 
         /// <summary>
         /// Точка привязки объекта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Org")] public Org _Org;
+        // ORIGINAL LINE: [XmlElement(u"Org"_s)] public Org _Org;
         Org* _Org;
     };
 
@@ -71,49 +71,49 @@ public:
         /// Идентификатор неименованных объектов.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("id")] public string _id;
+        // ORIGINAL LINE: [XmlAttribute(u"id"_s)] public string _id;
         QString _id;
 
         /// <summary>
         /// Параметр змейки: требуемая длина.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("Count", DataType ="float")] public float _Count;
+        // ORIGINAL LINE: [XmlAttribute(u"Count"_s, DataType =u"float"_s)] public float _Count;
         float _Count = 0.0F;
 
         /// <summary>
         /// Параметр змейки: зазор между соседними изломами.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("gap", DataType = "float")] public float _gap;
+        // ORIGINAL LINE: [XmlAttribute(u"gap"_s, DataType = u"float"_s)] public float _gap;
         float _gap = 0.0F;
 
         /// <summary>
         /// Параметр змейки: высота h1 (см. описание змейки Serpent).
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("h1", DataType = "float")] public float _h1;
+        // ORIGINAL LINE: [XmlAttribute(u"h1"_s, DataType = u"float"_s)] public float _h1;
         float _h1 = 0.0F;
 
         /// <summary>
         /// Параметр змейки: высота h2 (см. описание змейки Serpent).
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("h2", DataType = "float")] public float _h2;
+        // ORIGINAL LINE: [XmlAttribute(u"h2"_s, DataType = u"float"_s)] public float _h2;
         float _h2 = 0.0F;
 
         /// <summary>
         /// Параметр змейки: высота h3 (см. описание змейки Serpent).
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("h3", DataType = "float")] public float _h3;
+        // ORIGINAL LINE: [XmlAttribute(u"h3"_s, DataType = u"float"_s)] public float _h3;
         float _h3 = 0.0F;
 
         /// <summary>
         /// Параметр змейки: высота h4 (см. описание змейки Serpent).
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("h4", DataType = "float")] public float _h4;
+        // ORIGINAL LINE: [XmlAttribute(u"h4"_s, DataType = u"float"_s)] public float _h4;
         float _h4 = 0.0F;
     };
 
@@ -127,14 +127,14 @@ public:
         /// Идентификатор неименованных объектов.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("id")] public string _id;
+        // ORIGINAL LINE: [XmlAttribute(u"id"_s)] public string _id;
         QString _id;
 
         /// <summary>
         /// Признак фиксации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("fixed")] public Bool _fixed;
+        // ORIGINAL LINE: [XmlAttribute(u"fixed"_s)] public Bool _fixed;
         Bool _fixed = static_cast<Bool>(0);
         virtual ~ZippedWire() {
             delete _LayerRef;
@@ -149,21 +149,21 @@ public:
         /// Ссылка на слой.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+        // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
         LayerRef* _LayerRef;
 
         /// <summary>
         /// Ссылка на дифференциальный сигнал.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("DiffSignalRef")] public DiffSignalRef _DiffSignalRef;
+        // ORIGINAL LINE: [XmlElement(u"DiffSignalRef"_s)] public DiffSignalRef _DiffSignalRef;
         DiffSignalRef* _DiffSignalRef;
 
         /// <summary>
         /// Начальная точка линии, дуги.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Start")] public Start _Start;
+        // ORIGINAL LINE: [XmlElement(u"Start"_s)] public Start _Start;
         Start* _Start;
 
         /// <summary>
@@ -172,7 +172,7 @@ public:
         /// <remarks>! В случае отсутствия - предупреждение. Весь ZippedWire будет проигнорирован.</remarks>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlElement("TrackLine", typeof(TrackLine)), XmlElement("TrackArc", typeof(TrackArc)), XmlElement("TrackArcCW", typeof(TrackArcCW))] public List<Object> _Tracks;
+        // ORIGINAL LINE: [XmlElement(u"TrackLine"_s, typeof(TrackLine)), XmlElement(u"TrackArc"_s, typeof(TrackArc)), XmlElement(u"TrackArcCW"_s, typeof(TrackArcCW))] public List<Object> _Tracks;
         std::vector<std::any> _Tracks;
         bool ShouldSerialize_Tracks();
     };
@@ -198,7 +198,7 @@ public:
                 /// координаты точки, вершины.
                 /// </summary>
             public:
-                // ORIGINAL LINE: [XmlElement("Dot")] public List<Dot> _Dots;
+                // ORIGINAL LINE: [XmlElement(u"Dot"_s)] public List<Dot> _Dots;
                 std::vector<Dot*> _Dots;
                 bool ShouldSerialize_Dots();
             };
@@ -207,7 +207,7 @@ public:
             /// Признак фиксации.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlAttribute("fixed")] public Bool _fixed;
+            // ORIGINAL LINE: [XmlAttribute(u"fixed"_s)] public Bool _fixed;
             Bool _fixed = static_cast<Bool>(0);
             virtual ~Subwire() {
                 delete _Start;
@@ -220,14 +220,14 @@ public:
             /// Ширина проводника.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("width", DataType = "float")] public float _width;
+            // ORIGINAL LINE: [XmlAttribute(u"width"_s, DataType = u"float"_s)] public float _width;
             float _width = 0.0F;
 
             /// <summary>
             /// Ссылка на застёгнутую пару проводников. Строка должна содержать идентификатор описанной застёгнутой пары проводников ZippedWire.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlAttribute("zipwireRef")] public string _zipwireRef;
+            // ORIGINAL LINE: [XmlAttribute(u"zipwireRef"_s)] public string _zipwireRef;
             QString _zipwireRef;
 
             /// <summary>
@@ -235,14 +235,14 @@ public:
             /// </summary>
             /// <remarks>От KilkennyCat: сделал как массив, в спецификации не так, но так удобней</remarks>
 
-            // ORIGINAL LINE: [XmlArray("Teardrops")][XmlArrayItem("Teardrop")] public List<Teardrop> _Teardrops;
+            // ORIGINAL LINE: [XmlArray(u"Teardrops"_s)][XmlArrayItem(u"Teardrop"_s)] public List<Teardrop> _Teardrops;
             std::vector<Teardrop*> _Teardrops;
             bool ShouldSerialize_Teardrops();
             /// <summary>
             /// Начальная точка линии, дуги.
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("Start")] public Start _Start;
+            // ORIGINAL LINE: [XmlElement(u"Start"_s)] public Start _Start;
             Start* _Start;
 
             /// <summary>
@@ -251,7 +251,7 @@ public:
             /// <remarks>! В случае отсутствия - предупреждение. Весь проводник будет проигнорирован.</remarks>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("TrackLine", typeof(TrackLine)), XmlElement("TrackArc", typeof(TrackArc)), XmlElement("TrackArcCW", typeof(TrackArcCW))] public List<Object> _Tracks;
+            // ORIGINAL LINE: [XmlElement(u"TrackLine"_s, typeof(TrackLine)), XmlElement(u"TrackArc"_s, typeof(TrackArc)), XmlElement(u"TrackArcCW"_s, typeof(TrackArcCW))] public List<Object> _Tracks;
             std::vector<std::any> _Tracks;
             bool ShouldSerialize_Tracks();
         };
@@ -260,21 +260,21 @@ public:
         /// Ссылка на слой.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+        // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
         LayerRef* _LayerRef;
 
         /// <summary>
         /// Ссылка на цепь.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
         NetRef* _NetRef;
 
         /// <summary>
         /// Части проводника (последовательность сегментов с одной шириной и одинаковым признаком фиксации).
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Subwire")] public List<Subwire> _Subwires;
+        // ORIGINAL LINE: [XmlElement(u"Subwire"_s)] public List<Subwire> _Subwires;
         std::vector<Subwire*> _Subwires;
         virtual ~Wire() {
             delete _LayerRef;
@@ -299,7 +299,7 @@ public:
             /// Описание термобарьера.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlElement("Thermal")] public Thermal _Thermal;
+            // ORIGINAL LINE: [XmlElement(u"Thermal"_s)] public Thermal _Thermal;
             Thermal* _Thermal;
             virtual ~ThermalPad() {
                 delete _Thermal;
@@ -315,7 +315,7 @@ public:
             /// Описание термобарьера.
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlElement("Thermal")] public Thermal _Thermal;
+            // ORIGINAL LINE: [XmlElement(u"Thermal"_s)] public Thermal _Thermal;
             Thermal* _Thermal;
             virtual ~ThermalVia() {
                 delete _Thermal;
@@ -333,7 +333,7 @@ public:
         public:
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("FilledCircle", typeof(FilledCircle)), XmlElement("FilledRect", typeof(FilledRect)), XmlElement("Polygon", typeof(Polygon)), XmlElement("FilledContour", typeof(FilledContour))] public Object _FilledFigure;
+            // ORIGINAL LINE: [XmlElement(u"FilledCircle"_s, typeof(FilledCircle)), XmlElement(u"FilledRect"_s, typeof(FilledRect)), XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"FilledContour"_s, typeof(FilledContour))] public Object _FilledFigure;
             std::any _FilledFigure;
         };
 
@@ -351,7 +351,7 @@ public:
                 /// Толщина линии.
                 /// </summary>
             public:
-                // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+                // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
                 float _lineWidth = 0.0F;
 
                 /// <summary>
@@ -359,7 +359,7 @@ public:
                 /// </summary>
                 /// <remarks>! В случае отсутствия - весь ThermalSpoke будет проигнорирован.</remarks>
 
-                // ORIGINAL LINE: [XmlElement("Dot")] public List<Dot> _Dots;
+                // ORIGINAL LINE: [XmlElement(u"Dot"_s)] public List<Dot> _Dots;
                 std::vector<Dot*> _Dots;
                 bool ShouldSerialize_Dots();
             };
@@ -370,7 +370,7 @@ public:
         public:
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("Polygon", typeof(Polygon)), XmlElement("FilledContour", typeof(FilledContour))] public Object _Polygon;
+            // ORIGINAL LINE: [XmlElement(u"Polygon"_s, typeof(Polygon)), XmlElement(u"FilledContour"_s, typeof(FilledContour))] public Object _Polygon;
             std::any _Polygon;
 
             /// <summary>
@@ -379,14 +379,14 @@ public:
             /// <remarks>! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.</remarks>
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlArray("Voids")][XmlArrayItem("Polygon", typeof(Polygon)), XmlArrayItem("FilledContour", typeof(FilledContour))] public List<Object> _Voids;
+            // ORIGINAL LINE: [XmlArray(u"Voids"_s)][XmlArrayItem(u"Polygon"_s, typeof(Polygon)), XmlArrayItem(u"FilledContour"_s, typeof(FilledContour))] public List<Object> _Voids;
             std::vector<std::any> _Voids;
 
             /// <summary>
             /// Описание спиц термобарьеров, присутствующих на плате
             /// </summary>
 
-            // ORIGINAL LINE: [XmlElement("ThermalSpoke")] public List<ThermalSpoke> _ThermalSpokes;
+            // ORIGINAL LINE: [XmlElement(u"ThermalSpoke"_s)] public List<ThermalSpoke> _ThermalSpokes;
             std::vector<ThermalSpoke*> _ThermalSpokes;
             bool ShouldSerialize_ThermalSpokes();
         };
@@ -395,14 +395,14 @@ public:
         /// Параметр области металлизации (полигона): приоритет заливки.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("priority", DataType ="int")] public int _priority;
+        // ORIGINAL LINE: [XmlAttribute(u"priority"_s, DataType =u"int"_s)] public int _priority;
         int _priority = 0;
 
         /// <summary>
         /// Параметр области металлизации (полигона): использовать указанный зазор.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("useBackoff")] public Bool _useBackoff;
+        // ORIGINAL LINE: [XmlAttribute(u"useBackoff"_s)] public Bool _useBackoff;
         Bool _useBackoff = static_cast<Bool>(0);
         virtual ~Copper_Connectivity() {
             delete _LayerRef;
@@ -419,56 +419,56 @@ public:
         /// Параметр области металлизации (полигона): зазор до области металлизации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("backoff", DataType ="float")] public float _backoff;
+        // ORIGINAL LINE: [XmlAttribute(u"backoff"_s, DataType =u"float"_s)] public float _backoff;
         float _backoff = 0.0F;
 
         /// <summary>
         /// Параметр области металлизации (полигона) стека: подключение контактных площадок.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("connectPad")] public connectPad _connectPad;
+        // ORIGINAL LINE: [XmlAttribute(u"connectPad"_s)] public connectPad _connectPad;
         connectPad _connectPad = static_cast<connectPad>(0);
 
         /// <summary>
         /// Параметр области металлизации (полигона): подключение площадок переходных отверстий.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("connectVia")] public connectVia _connectVia;
+        // ORIGINAL LINE: [XmlAttribute(u"connectVia"_s)] public connectVia _connectVia;
         connectVia _connectVia = static_cast<connectVia>(0);
 
         /// <summary>
         /// Толщина линии.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+        // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
         float _lineWidth = 0.0F;
 
         /// <summary>
         /// Параметр области металлизации (полигона): зазор между линиями штриховки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("lineClr", DataType = "float")] public float _lineClr;
+        // ORIGINAL LINE: [XmlAttribute(u"lineClr"_s, DataType = u"float"_s)] public float _lineClr;
         float _lineClr = 0.0F;
 
         /// <summary>
         /// Параметр области металлизации (полигона): минимальная площадь островка.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("minSquare", DataType = "float")] public float _minSquare;
+        // ORIGINAL LINE: [XmlAttribute(u"minSquare"_s, DataType = u"float"_s)] public float _minSquare;
         float _minSquare = 0.0F;
 
         /// <summary>
         /// Параметр области металлизации (полигона): точность аппроксимации контура.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("precision")] public precision _precision;
+        // ORIGINAL LINE: [XmlAttribute(u"precision"_s)] public precision _precision;
         precision _precision = static_cast<precision>(0);
 
         /// <summary>
         /// Параметр области металлизации (полигона): удалять неподключенные островки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("deleteUnconnected")] public Bool _deleteUnconnected;
+        // ORIGINAL LINE: [XmlAttribute(u"deleteUnconnected"_s)] public Bool _deleteUnconnected;
         Bool _deleteUnconnected = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _deleteUnconnectedSpecified
@@ -478,28 +478,28 @@ public:
         /// Параметр области металлизации (полигона): состояние.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("state")] public state _state;
+        // ORIGINAL LINE: [XmlAttribute(u"state"_s)] public state _state;
         state _state = static_cast<state>(0);
 
         /// <summary>
         /// Параметр области металлизации (полигона): тип заливки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("fillType")] public fillType _fillType;
+        // ORIGINAL LINE: [XmlAttribute(u"fillType"_s)] public fillType _fillType;
         fillType _fillType = static_cast<fillType>(0);
 
         /// <summary>
         /// Ссылка на слой.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+        // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
         LayerRef* _LayerRef;
 
         /// <summary>
         /// Ссылка на цепь.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
         NetRef* _NetRef;
 
         /// <summary>
@@ -507,7 +507,7 @@ public:
         /// </summary>
         /// <remarks>! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.</remarks>
 
-        // ORIGINAL LINE: [XmlElement("ThermalPad")] public ThermalPad _ThermalPad;
+        // ORIGINAL LINE: [XmlElement(u"ThermalPad"_s)] public ThermalPad _ThermalPad;
         ThermalPad* _ThermalPad;
 
         /// <summary>
@@ -515,7 +515,7 @@ public:
         /// </summary>
         /// <remarks>! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.</remarks>
 
-        // ORIGINAL LINE: [XmlElement("ThermalVia")] public ThermalVia _ThermalVia;
+        // ORIGINAL LINE: [XmlElement(u"ThermalVia"_s)] public ThermalVia _ThermalVia;
         ThermalVia* _ThermalVia;
 
         /// <summary>
@@ -523,7 +523,7 @@ public:
         /// </summary>
         /// <remarks>! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.</remarks>
 
-        // ORIGINAL LINE: [XmlElement("Shape")] public Shape_Copper _Shape;
+        // ORIGINAL LINE: [XmlElement(u"Shape"_s)] public Shape_Copper _Shape;
         Shape_Copper* _Shape;
 
         /// <summary>
@@ -532,7 +532,7 @@ public:
         /// <remarks>! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.</remarks>
         // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-        // ORIGINAL LINE: [XmlArray("Voids")][XmlArrayItem("FilledCircle", typeof(FilledCircle)), XmlArrayItem("FilledRect", typeof(FilledRect)), XmlArrayItem("Polygon", typeof(Polygon)), XmlArrayItem("FilledContour", typeof(FilledContour))] public List<Object> _Voids;
+        // ORIGINAL LINE: [XmlArray(u"Voids"_s)][XmlArrayItem(u"FilledCircle"_s, typeof(FilledCircle)), XmlArrayItem(u"FilledRect"_s, typeof(FilledRect)), XmlArrayItem(u"Polygon"_s, typeof(Polygon)), XmlArrayItem(u"FilledContour"_s, typeof(FilledContour))] public List<Object> _Voids;
         std::vector<std::any> _Voids;
 
         /// <summary>
@@ -540,7 +540,7 @@ public:
         /// </summary>
         /// <remarks>! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.</remarks>
 
-        // ORIGINAL LINE: [XmlArray("Islands")][XmlArrayItem("Island")] public List<Island> _Islands;
+        // ORIGINAL LINE: [XmlArray(u"Islands"_s)][XmlArrayItem(u"Island"_s)] public List<Island> _Islands;
         std::vector<Island*> _Islands;
 
         /// <summary>
@@ -548,7 +548,7 @@ public:
         /// </summary>
         /// <remarks>! TopoR при импорте игнорирует эту информацию и строит заливку заново.</remarks>
 
-        // ORIGINAL LINE: [XmlArray("Fill")][XmlArrayItem("Line")] public List<Line> _Fill_lines;
+        // ORIGINAL LINE: [XmlArray(u"Fill"_s)][XmlArrayItem(u"Line"_s)] public List<Line> _Fill_lines;
         std::vector<Line*> _Fill_lines;
         bool ShouldSerialize_Fill_lines();
     };
@@ -569,7 +569,7 @@ public:
         public:
             // C# TO C++ CONVERTER TODO TASK: There is no C++ equivalent to the C# 'typeof' operator:
 
-            // ORIGINAL LINE: [XmlElement("ArcCCW", typeof(ArcCCW)), XmlElement("ArcCW", typeof(ArcCW)), XmlElement("ArcByAngle", typeof(ArcByAngle)), XmlElement("ArcByMiddle", typeof(ArcByMiddle)), XmlElement("Circle", typeof(Circle)), XmlElement("Line", typeof(Line)), XmlElement("Polyline", typeof(Polyline)), XmlElement("Rect", typeof(Rect)), XmlElement("Contour", typeof(Contour))] public Object _FigureContPoliline;
+            // ORIGINAL LINE: [XmlElement(u"ArcCCW"_s, typeof(ArcCCW)), XmlElement(u"ArcCW"_s, typeof(ArcCW)), XmlElement(u"ArcByAngle"_s, typeof(ArcByAngle)), XmlElement(u"ArcByMiddle"_s, typeof(ArcByMiddle)), XmlElement(u"Circle"_s, typeof(Circle)), XmlElement(u"Line"_s, typeof(Line)), XmlElement(u"Polyline"_s, typeof(Polyline)), XmlElement(u"Rect"_s, typeof(Rect)), XmlElement(u"Contour"_s, typeof(Contour))] public Object _FigureContPoliline;
             std::any _FigureContPoliline;
         };
 
@@ -577,28 +577,28 @@ public:
         /// Толщина линии.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("lineWidth", DataType = "float")] public float _lineWidth;
+        // ORIGINAL LINE: [XmlAttribute(u"lineWidth"_s, DataType = u"float"_s)] public float _lineWidth;
         float _lineWidth = 0.0F;
 
         /// <summary>
         /// Ссылка на слой.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("LayerRef")] public LayerRef _LayerRef;
+        // ORIGINAL LINE: [XmlElement(u"LayerRef"_s)] public LayerRef _LayerRef;
         LayerRef* _LayerRef;
 
         /// <summary>
         /// Ссылка на цепь.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("NetRef")] public NetRef _NetRef;
+        // ORIGINAL LINE: [XmlElement(u"NetRef"_s)] public NetRef _NetRef;
         NetRef* _NetRef;
 
         /// <summary>
         /// Описание контура незаливаемой области металлизации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlElement("Shape")] public Shape_NonfilledCopper _Shape;
+        // ORIGINAL LINE: [XmlElement(u"Shape"_s)] public Shape_NonfilledCopper _Shape;
         Shape_NonfilledCopper* _Shape;
         virtual ~NonfilledCopper() {
             delete _LayerRef;
@@ -611,49 +611,49 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Переходные отверстия на плате.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Vias")][XmlArrayItem("Via")] public List<Via> _Vias;
+    // ORIGINAL LINE: [XmlArray(u"Vias"_s)][XmlArrayItem(u"Via"_s)] public List<Via> _Vias;
     std::vector<Via*> _Vias;
     bool ShouldSerialize_Vias();
     /// <summary>
     /// Змейки
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Serpents")][XmlArrayItem("Serpent")] public List<Serpent> _Serpents;
+    // ORIGINAL LINE: [XmlArray(u"Serpents"_s)][XmlArrayItem(u"Serpent"_s)] public List<Serpent> _Serpents;
     std::vector<Serpent*> _Serpents;
     bool ShouldSerialize_Serpents();
     /// <summary>
     /// Застёгнутые пары проводников.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("ZippedWires")][XmlArrayItem("ZippedWire")] public List<ZippedWire> _ZippedWires;
+    // ORIGINAL LINE: [XmlArray(u"ZippedWires"_s)][XmlArrayItem(u"ZippedWire"_s)] public List<ZippedWire> _ZippedWires;
     std::vector<ZippedWire*> _ZippedWires;
     bool ShouldSerialize_ZippedWires();
     /// <summary>
     /// Проводники.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Wires")][XmlArrayItem("Wire")] public List<Wire> _Wires;
+    // ORIGINAL LINE: [XmlArray(u"Wires"_s)][XmlArrayItem(u"Wire"_s)] public List<Wire> _Wires;
     std::vector<Wire*> _Wires;
     bool ShouldSerialize_Wires();
     /// <summary>
     /// Oбласти металлизации (полигонов).
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("Coppers")][XmlArrayItem("Copper")] public List<Copper_Connectivity> _Coppers;
+    // ORIGINAL LINE: [XmlArray(u"Coppers"_s)][XmlArrayItem(u"Copper"_s)] public List<Copper_Connectivity> _Coppers;
     std::vector<Copper_Connectivity*> _Coppers;
     bool ShouldSerialize_Coppers();
     /// <summary>
     /// Незаливаемые области металлизации.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlArray("NonfilledCoppers")][XmlArrayItem("NonfilledCopper")] public List<NonfilledCopper> _NonfilledCoppers;
+    // ORIGINAL LINE: [XmlArray(u"NonfilledCoppers"_s)][XmlArrayItem(u"NonfilledCopper"_s)] public List<NonfilledCopper> _NonfilledCoppers;
     std::vector<NonfilledCopper*> _NonfilledCoppers;
     bool ShouldSerialize_NonfilledCoppers();
 

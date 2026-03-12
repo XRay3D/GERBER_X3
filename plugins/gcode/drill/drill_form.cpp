@@ -67,7 +67,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
     {
         MySettings settings;
-        settings.beginGroup("DrillForm");
+        settings.beginGroup(u"DrillForm"_s);
         settings.getValue(ui->rbConventional, true);
         settings.getValue(ui->rb_drilling, true);
         settings.getValue(ui->rb_in, true);
@@ -100,7 +100,7 @@ Form::~Form() {
     App::setDrillForm(nullptr);
 
     MySettings settings;
-    settings.beginGroup("DrillForm");
+    settings.beginGroup(u"DrillForm"_s);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
     settings.setValue(ui->rb_drilling);
@@ -153,7 +153,7 @@ bool Form::canToShow() {
     // return true;
     // }
     // }
-    // QMessageBox::information(nullptr, "", tr("No data to process."));
+    // QMessageBox::information(nullptr, {}, tr("No data to process."));
     // return false;
 }
 
@@ -219,7 +219,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
         // for (auto* var : peview)
         // qDebug() << var->name << var->pos;
 
-        using Key = std::pair<QByteArray, bool>;
+        using Key = std::pair<QString, bool>;
         using Val = mvector<const GraphicObject*>;
         std::map<Key, Val> map;
 
@@ -240,8 +240,8 @@ void Form::on_cbxFileCurrentIndexChanged() {
         for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
             row.icon = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
-            row.name = QString(key.first).split('|');
-            row.name.back() += ": Ø" + QString::number(std::any_cast<double>(val.front()->raw));
+            row.name = QString(key.first).split(u'|');
+            row.name.back() += u": Ø"_s + QString::number(std::any_cast<double>(val.front()->raw));
             row.diameter = std::any_cast<double>(val.front()->raw);
             row.isSlot = key.second;
             for(auto* go: val)
@@ -304,7 +304,7 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
     if(selectedIndexes().isEmpty())
         return;
     QMenu menu;
-    menu.addAction(QIcon::fromTheme("view-form"), tr("&Select Tool"), [this] {
+    menu.addAction(QIcon::fromTheme(u"view-form"_s), tr("&Select Tool"), [this] {
         bool flag = true;
         for(QModelIndex current: selectedIndexes()) {
             flag = model->isSlot(current.row());
@@ -325,7 +325,7 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
                 if(model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
                     model->setToolId(current.row(), tool.id());
                 } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
-                    QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
+                    QMessageBox::information(this, {}, u"\""_s + tool.name() + tr("\" not suitable for Tu") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + u"_s-u"_s + model->data(current.sibling(current.row(), 0)).toString() + u"_s-"_s);
                 } else if(!model->isSlot(current.row())) {
                     if(model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
                         continue;
@@ -337,7 +337,7 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
 
     for(QModelIndex current: selectedIndexes()) {
         if(model->toolId(current.row()) != -1) {
-            menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool"), [this] {
+            menu.addAction(QIcon::fromTheme(u"list-remove"_s), tr("&Remove Tool"), [this] {
                 for(QModelIndex current: selectedIndexes())
                     model->setToolId(current.row(), -1);
             });
@@ -350,7 +350,7 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
 
 void Form::customContextMenuRequested(const QPoint& pos) {
     QMenu menu;
-    menu.addAction(QIcon::fromTheme("view-form"), tr("&Choose a Tool for everyone"), [this] {
+    menu.addAction(QIcon::fromTheme(u"view-form"_s), tr("&Choose a Tool for everyone"), [this] {
         ui->toolTable->selectAll();
         bool fl = true;
         for(QModelIndex current: selectedIndexes()) {
@@ -370,7 +370,7 @@ void Form::customContextMenuRequested(const QPoint& pos) {
                 if(model->isSlot(current.row()) && tool.type() == Tool::EndMill) {
                     model->setToolId(current.row(), tool.id());
                 } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
-                    QMessageBox::information(this, "", "\"" + tool.name() + tr("\" not suitable for T") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + "-" + model->data(current.sibling(current.row(), 0)).toString() + "-");
+                    QMessageBox::information(this, {}, u"\""_s + tool.name() + tr("\" not suitable for Tu") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + u"_s-u"_s + model->data(current.sibling(current.row(), 0)).toString() + u"_s-"_s);
                 } else if(!model->isSlot(current.row())) {
                     if(model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
                         continue;
@@ -379,7 +379,7 @@ void Form::customContextMenuRequested(const QPoint& pos) {
             }
         }
     });
-    menu.addAction(QIcon::fromTheme("list-remove"), tr("&Remove Tool for everyone"), [this] {
+    menu.addAction(QIcon::fromTheme(u"list-remove"_s), tr("&Remove Tool for everyone"), [this] {
         ui->toolTable->selectAll();
         for(QModelIndex current: selectedIndexes())
             model->setToolId(current.row(), -1);
@@ -444,7 +444,7 @@ void Form::computePaths() {
         QString indexes;
         for(int32_t id: range) {
             if(indexes.size())
-                indexes += ",";
+                indexes += u","_s;
             indexes += QString::number(id);
         }
         return indexes;
@@ -476,7 +476,7 @@ void Form::computePaths() {
             (void)_;
             if(pathsMap[usedToolId].paths.size()) {
                 // GCode::File* gcode = new GCode::File({App::toolHolder().tool{usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
-                // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + "_T" + indexes(pathsMap[usedToolId].toolsApertures));
+                // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + u"_T"_s + indexes(pathsMap[usedToolId].toolsApertures));
                 // gcode->setSide(file->side());
                 // App::project().addFile(gcode);
             }

@@ -102,7 +102,7 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    static inline const mvector<QChar> cmdList{'G', 'X', 'Y', 'Z', 'F', 'S'};
+    static inline const mvector<QChar> cmdList{u'G', u'X', u'Y', u'Z', u'F', u'S'};
 
     mvector<double> getDepths();
 

@@ -95,7 +95,7 @@ void Shape::redraw() {
 
 QString Shape::name() const { return QObject::tr("Line"); }
 
-QIcon Shape::icon() const { return QIcon::fromTheme("draw-line"); }
+QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-line"_s); }
 
 void Shape::setPt(const QPointF& pt) {
     curHandle = --handles.end();

@@ -21,7 +21,7 @@ Group::~Group() {
 
 void Group::push_back(Item* item) {
     item->id_ = mvector::size() ? mvector::back()->id_ + 1 : 0;
-    item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + '\n') + QString("ID(%1): %2").arg(item->type()).arg(item->id_));
+    item->setToolTip((item->toolTip().isEmpty() ? QString() : item->toolTip() + u'\n') + u"ID(%1): %2"_s.arg(item->type()).arg(item->id_));
     item->setVisible(visible_);
     item->itemGroup = this;
     mvector::push_back(item);

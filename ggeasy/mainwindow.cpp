@@ -48,8 +48,8 @@ bool operator<(const QPair<Tool, Side>& p1, const QPair<Tool, Side>& p2) {
 
 MainWindow::MainWindow(QWidget* parent)
     : QMainWindow{parent}
-    , recentFiles{this, "recentFiles"}
-    , recentProjects{this, "recentProjects"}
+    , recentFiles{this, u"recentFiles"_s}
+    , recentProjects{this, u"recentProjects"_s}
     , project_{new Project{this}}
     , actionGroup{this}
     , reloadQuestion{this} {
@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui.grView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(ui.grView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
-        ui.statusbar->showMessage(QString("X = %1, Y = %2").arg(point.x()).arg(point.y()));
+        ui.statusbar->showMessage(QString(u"X = %1, Y = %2"_s).arg(point.x()).arg(point.y()));
     });
 
     connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
@@ -91,12 +91,11 @@ MainWindow::MainWindow(QWidget* parent)
     parserThread.start(QThread::HighestPriority);
 
     connect(ui.grView, &GraphicsView::mouseMove2, [this](const QPointF& point, const QPointF& gpoint) {
-        QString str;
-        std::format_to(std::back_inserter(str), "Origin: X{:8.3f}, Y{:8.3f}  |  Zeroed: X{:8.3f},Y{:8.3f}",
+        auto str = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
             point.x(), point.y(), gpoint.x(), gpoint.y());
         // qCritical() << str;
-        ui.statusbar->showMessage(str);
-        // ui.statusbar->showMessage(QString("Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4")
+        ui.statusbar->showMessage(QString::fromStdString(str));
+        // ui.statusbar->showMessage(QString(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s)
         //                           .arg(point.x(), 8, 'f', 3)
         //                           .arg(point.y(), 8, 'f', 3)
         //                           .arg(gpoint.x(), 8, 'f', 3)
@@ -171,7 +170,7 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         Function,
         Line,
     };
-    auto file = context[File].split("/").back();
+    auto file = context[File].split(u"/"_s).back();
     static constexpr QColor color[]{
         QColor{128, 128, 128}, // gray   QtDebugMsg
         QColor{255, 128, 000}, // orange QtWarningMsg
@@ -179,18 +178,18 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         QColor{255, 000, 000}, // red    QtFatalMsg
         QColor{128, 128, 255}, // blue   QtInfoMsg
     };
-    ui.loggingTextBrowser->setTextColor(*color);
-    ui.loggingTextBrowser->append(u"%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split('(').front()));
     ui.loggingTextBrowser->setTextColor(color[type]);
     ui.loggingTextBrowser->append(message);
-    ui.loggingTextBrowser->append("");
+    ui.loggingTextBrowser->setTextColor(*color);
+    ui.loggingTextBrowser->insertPlainText(u"%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split(u'(').front()));
+    ui.loggingTextBrowser->append({});
     ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
 }
 
 void MainWindow::loadFile(const QString& fileName) {
     if(!QFileInfo::exists(fileName)) return;
     lastPath = QFileInfo(fileName).absolutePath();
-    if(fileName.endsWith(".g2g")) {
+    if(fileName.endsWith(u".g2g"_s)) {
         if(closeProject()) {
             project_->open(fileName);
             setCurrentFile(fileName);
@@ -214,18 +213,24 @@ void MainWindow::loadFile(const QString& fileName) {
 }
 
 void MainWindow::logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message) {
-    emit logMessage(type, {context.category, context.file, context.function, QString::number(context.line)}, message);
+    emit logMessage(type, {
+                              QString::fromUtf8(context.category),
+                              QString::fromUtf8(context.file),
+                              QString::fromUtf8(context.function),
+                              QString::number(context.line),
+                          },
+        message);
 }
 
 void MainWindow::fileError(const QString& fileName, const QString& error) {
-    qCritical() << "fileError " << fileName << error;
+    qCritical() << u"fileError "_s << fileName << error;
 
     ui.loggingDockWidget->show();
-    ui.loggingTextBrowser->setTextColor(Qt::black);
+    ui.loggingTextBrowser->setTextColor(Qt::darkGray);
     ui.loggingTextBrowser->append(fileName);
     ui.loggingTextBrowser->setTextColor(Qt::darkRed);
     ui.loggingTextBrowser->append(error);
-    ui.loggingTextBrowser->append("");
+    ui.loggingTextBrowser->append({});
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value) {
@@ -249,7 +254,7 @@ void MainWindow::fileProgress(const QString& fileName, int max, int value) {
 void MainWindow::addFileToPro(AbstractFile* file) {
     if(project_->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
-        setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
+        setCurrentFile(name + u'/' + name.split(u'/').back() + u".g2g"_s);
     }
     project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
@@ -265,15 +270,15 @@ void MainWindow::open() {
     if(files.isEmpty())
         return;
 
-    if(files.filter(QRegularExpression(".+g2g$")).size()) {
-        loadFile(files.at(files.indexOf(QRegularExpression(".+g2g$"))));
+    if(files.filter(QRegularExpression(u".+g2g$"_s)).size()) {
+        loadFile(files.at(files.indexOf(QRegularExpression(u".+g2g$"_s))));
         return;
     } else {
         for(QString& fileName: files)
             loadFile(fileName);
     }
     // QString name(QFileInfo(files.first()).path());
-    // setCurrentFile(name + "/" + name.split('/').back() + ".g2g");
+    // setCurrentFile(name + u"/"_s + name.split(u'/').back() + u".g2g"_s);
 }
 
 bool MainWindow::save() {
@@ -381,41 +386,41 @@ void MainWindow::renderPdf() {
 
 void MainWindow::loadSettings() {
     QSettings settings;
-    settings.beginGroup("MainWindow");
-    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
-    restoreState(settings.value("state", QByteArray()).toByteArray());
-    lastPath = settings.value("lastPath").toString();
+    settings.beginGroup(u"MainWindow"_s);
+    restoreGeometry(settings.value(u"geometry"_s, QByteArray()).toByteArray());
+    restoreState(settings.value(u"state"_s, QByteArray()).toByteArray());
+    lastPath = settings.value(u"lastPath"_s).toString();
 
     for(auto toolBar: findChildren<QToolBar*>()) {
         settings.beginReadArray(toolBar->objectName());
         int ctr = 0;
         for(auto action: toolBar->actions()) {
             settings.setArrayIndex(ctr++);
-            action->setVisible(settings.value("actionIsVisible", true).toBool());
+            action->setVisible(settings.value(u"actionIsVisible"_s, true).toBool());
         }
         settings.endArray();
     }
 
     if(App::isDebug())
-        loadFile(settings.value("project").toString());
+        loadFile(settings.value(u"project"_s).toString());
 
     settings.endGroup();
 }
 
 void MainWindow::saveSettings() {
     QSettings settings;
-    settings.beginGroup("MainWindow");
-    settings.setValue("geometry", saveGeometry());
-    settings.setValue("state", saveState());
-    settings.setValue("lastPath", lastPath);
-    settings.setValue("project", project_->name());
+    settings.beginGroup(u"MainWindow"_s);
+    settings.setValue(u"geometry"_s, saveGeometry());
+    settings.setValue(u"state"_s, saveState());
+    settings.setValue(u"lastPath"_s, lastPath);
+    settings.setValue(u"project"_s, project_->name());
     // toolBar actions visible
     for(auto toolBar: findChildren<QToolBar*>()) {
         settings.beginWriteArray(toolBar->objectName());
         int ctr = 0;
         for(auto action: toolBar->actions()) {
             settings.setArrayIndex(ctr++);
-            settings.setValue("actionIsVisible", action->isVisible());
+            settings.setValue(u"actionIsVisible"_s, action->isVisible());
         }
         settings.endArray();
     }
@@ -483,48 +488,48 @@ void MainWindow::createActionsFile() {
     connect(fileToolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
     QAction* action;
     // New
-    action = fileMenu->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
+    action = fileMenu->addAction(QIcon::fromTheme(u"project-development-new-template"_s), tr("&New project"), this, &MainWindow::newFile);
     action->setShortcuts(QKeySequence::New);
     action->setStatusTip(tr("Create a new file"));
-    fileToolBar->addAction(QIcon::fromTheme("project-development-new-template"), tr("&New project"), this, &MainWindow::newFile);
+    fileToolBar->addAction(QIcon::fromTheme(u"project-development-new-template"_s), tr("&New project"), this, &MainWindow::newFile);
 
     // Open
-    action = fileMenu->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    action = fileMenu->addAction(QIcon::fromTheme(u"document-open"_s), tr("&Open..."), this, &MainWindow::open);
     action->setShortcuts(QKeySequence::Open);
     action->setStatusTip(tr("Open an existing file"));
-    fileToolBar->addAction(QIcon::fromTheme("document-open"), tr("&Open..."), this, &MainWindow::open);
+    fileToolBar->addAction(QIcon::fromTheme(u"document-open"_s), tr("&Open..."), this, &MainWindow::open);
 
     // Save
-    action = fileMenu->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    action = fileMenu->addAction(QIcon::fromTheme(u"document-save"_s), tr("&Save project"), this, &MainWindow::save);
     action->setShortcuts(QKeySequence::Save);
     action->setStatusTip(tr("Save the document to disk"));
-    fileToolBar->addAction(QIcon::fromTheme("document-save"), tr("&Save project"), this, &MainWindow::save);
+    fileToolBar->addAction(QIcon::fromTheme(u"document-save"_s), tr("&Save project"), this, &MainWindow::save);
 
     // Save As
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+    action = fileMenu->addAction(QIcon::fromTheme(u"document-save-as"_s), tr("Save project &As..."), this, &MainWindow::saveAs);
     action->setShortcuts(QKeySequence::SaveAs);
     action->setStatusTip(tr("Save the document under a new name"));
-    fileToolBar->addAction(QIcon::fromTheme("document-save-as"), tr("Save project &As..."), this, &MainWindow::saveAs);
+    fileToolBar->addAction(QIcon::fromTheme(u"document-save-as"_s), tr("Save project &As..."), this, &MainWindow::saveAs);
 
     // Close project
-    closeAllAct_ = fileMenu->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
+    closeAllAct_ = fileMenu->addAction(QIcon::fromTheme(u"document-close"_s), tr("&Close project \"%1\""), this, &MainWindow::closeProject);
     closeAllAct_->setShortcuts(QKeySequence::Close);
     closeAllAct_->setStatusTip(tr("Close project"));
     // closeAllAct_->setEnabled(false);
-    fileToolBar->addAction(QIcon::fromTheme("document-close"), tr("&Close project \"%1\"").arg(""), this, &MainWindow::closeProject);
+    fileToolBar->addAction(QIcon::fromTheme(u"document-close"_s), tr("&Close project \"%1\"").arg(u""), this, &MainWindow::closeProject);
 
     fileMenu->addSeparator();
     fileToolBar->addSeparator();
 
     // Save Selected Tool Paths
-    action = fileMenu->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+    action = fileMenu->addAction(QIcon::fromTheme(u"document-save-all"_s), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
     action->setStatusTip(tr("Save selected toolpaths"));
-    fileToolBar->addAction(QIcon::fromTheme("document-save-all"), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
+    fileToolBar->addAction(QIcon::fromTheme(u"document-save-all"_s), tr("&Save Selected Tool Paths..."), this, &MainWindow::saveSelectedGCodeFiles);
 
     // Export PDF
-    action = fileMenu->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), this, &MainWindow::renderPdf);
+    action = fileMenu->addAction(QIcon::fromTheme(u"acrobat"_s), tr("&Export PDF..."), this, &MainWindow::renderPdf);
     action->setStatusTip(tr("Export to PDF file"));
-    fileToolBar->addAction(QIcon::fromTheme("acrobat"), tr("&Export PDF..."), this, &MainWindow::renderPdf);
+    fileToolBar->addAction(QIcon::fromTheme(u"acrobat"_s), tr("&Export PDF..."), this, &MainWindow::renderPdf);
 
     fileMenu->addSeparator();
     fileMenu->addSeparator();
@@ -534,13 +539,13 @@ void MainWindow::createActionsFile() {
 
     fileMenu->addSeparator();
 
-    action = fileMenu->addAction(QIcon::fromTheme("document-print"), tr("P&rint"), this, &MainWindow::printDialog);
+    action = fileMenu->addAction(QIcon::fromTheme(u"document-print"_s), tr("P&rint"), this, &MainWindow::printDialog);
     action->setShortcuts(QKeySequence::Print);
     action->setStatusTip(tr("Print"));
 
     fileMenu->addSeparator();
 
-    action = fileMenu->addAction(QIcon::fromTheme("application-exit"), tr("E&xit"), qApp, &QApplication::closeAllWindows);
+    action = fileMenu->addAction(QIcon::fromTheme(u"application-exit"_s), tr("E&xit"), qApp, &QApplication::closeAllWindows);
     action->setShortcuts(QKeySequence::Quit);
     action->setStatusTip(tr("Exit the application"));
 }
@@ -549,7 +554,7 @@ void MainWindow::createActionsEdit() {
     QMenu* editMenu = menuBar()->addMenu(tr("&Edit"));
     editMenu->setObjectName(u"editMenu"_s);
     QAction* action;
-    action = editMenu->addAction(QIcon::fromTheme("edit-select-all"), tr("Select all"), this, &MainWindow::selectAll);
+    action = editMenu->addAction(QIcon::fromTheme(u"edit-select-all"_s), tr("Select all"), this, &MainWindow::selectAll);
     action->setShortcut(QKeySequence::SelectAll);
 
     auto dsaShortcut = new QShortcut{this};                                      // Инициализируем объект
@@ -560,12 +565,12 @@ void MainWindow::createActionsEdit() {
 
     undoAct = undoStack_.createUndoAction(this, tr("Undo"));
     undoAct->setShortcut(QKeySequence::Undo);
-    undoAct->setIcon(QIcon::fromTheme("edit-undo"));
+    undoAct->setIcon(QIcon::fromTheme(u"edit-undo"_s));
     editMenu->addAction(undoAct);
 
     redoAct = undoStack_.createRedoAction(this, tr("Redo"));
     redoAct->setShortcut(QKeySequence::Redo);
-    redoAct->setIcon(QIcon::fromTheme("edit-redo"));
+    redoAct->setIcon(QIcon::fromTheme(u"edit-redo"_s));
     editMenu->addAction(redoAct);
 }
 
@@ -573,7 +578,7 @@ void MainWindow::createActionsService() {
     serviceMenu = menuBar()->addMenu(tr("&Service"));
 
     toolpathToolBar = addToolBar(tr("Service"));
-    toolpathToolBar->setObjectName("tbService");
+    toolpathToolBar->setObjectName(u"tbService"_s);
     toolpathToolBar->setToolTip(tr("Service"));
 
     toolpathToolBar->addAction(redoAct);
@@ -582,30 +587,30 @@ void MainWindow::createActionsService() {
 
     QAction* action;
     // Settings
-    action = serviceMenu->addAction(QIcon::fromTheme("configure-shortcuts"), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
+    action = serviceMenu->addAction(QIcon::fromTheme(u"configure-shortcuts"_s), tr("&Settings"), [this] { SettingsDialog(this).exec(); });
     action->setStatusTip(tr("Show the application's settings box"));
     // Separator
     // toolpathToolBar->addSeparator();
     serviceMenu->addSeparator();
     // G-Code Properties
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("node"), tr("&G-Code Properties")));
-    connect(action, &QAction::toggled, this, [pf = GCode::PropertiesForm::create(nullptr/*this*/), this](bool checked) {
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(u"node"_s), tr("&G-Code Properties")));
+    connect(action, &QAction::toggled, this, [pf = GCode::PropertiesForm::create(nullptr /*this*/), this](bool checked) {
         if(checked) setDockWidget(pf.get());
         // connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
     });
     // connect(action, &QAction::toggled, this, [=, this](bool checked) {
     //     if(checked) setDockWidget(new GCode::PropertiesForm);
     // });
-    action->setShortcut(QKeySequence("Ctrl+Shift+G"));
+    action->setShortcut(QKeySequence(u"Ctrl+Shift+G"_s));
     action->setCheckable(true);
     toolpathActions.try_emplace(G_CODE_PROPERTIES, action);
     actionGroup.addAction(action);
     // Tool Base
-    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("view-form"), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
+    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme(u"view-form"_s), tr("Tool Base"), [this] { ToolDatabase(this, {}).exec(); }));
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
     // Autoplace All Refpoints
-    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Autoplace All Refpoints"), [this] {
+    serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme(u"snap-nodes-cusp"_s), tr("Autoplace All Refpoints"), [this] {
         if(updateRect()) {
             Gi::Pin::resetPos(false);
             App::home().resetPos(false);
@@ -616,17 +621,17 @@ void MainWindow::createActionsService() {
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
     // Snap to grid
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("snap-to-grid"), tr("Snap to grid"), [](bool checked) { App::settings().setSnap(checked); }));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(u"snap-to-grid"_s), tr("Snap to grid"), [](bool checked) { App::settings().setSnap(checked); }));
     action->setCheckable(true);
     // Separator
     serviceMenu->addAction(toolpathToolBar->addSeparator());
-    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme("ruller-on"), tr("Ruller"), ui.grView, &GraphicsView::setRuler));
+    serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(u"ruller-on"_s), tr("Ruller"), ui.grView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
     if(App::isDebug()) { // (need for debug)
         serviceMenu->addSeparator();
         toolpathToolBar->addSeparator();
-        serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme("snap-nodes-cusp"), tr("Resize"), [this] {
+        serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme(u"snap-nodes-cusp"_s), tr("Resize"), [this] {
             setGeometry(QRect{0, 1080, 1024, 720});
         }));
     }
@@ -650,7 +655,7 @@ void MainWindow::createActionsHelp() {
 
 void MainWindow::createActionsZoom() {
     auto vievMenu = menuBar()->addMenu(tr("&Viev"));
-    vievMenu->setObjectName("vievMenu");
+    vievMenu->setObjectName(u"vievMenu"_s);
 
     zoomToolBar = addToolBar(tr("Zoom ToolBar"));
     zoomToolBar->setObjectName(u"zoomToolBar"_s);
@@ -661,26 +666,26 @@ void MainWindow::createActionsZoom() {
 
     QAction* action;
     // Fit best
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.grView, &GraphicsView::zoomFit);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-fit-best"), tr("Fit best"), ui.grView, &GraphicsView::zoomFit);
+    zoomToolBar->addAction(QIcon::fromTheme(u"zoom-fit-best"_s), tr("Fit best"), ui.grView, &GraphicsView::zoomFit);
+    action = vievMenu->addAction(QIcon::fromTheme(u"zoom-fit-best"_s), tr("Fit best"), ui.grView, &GraphicsView::zoomFit);
     action->setShortcut(QKeySequence::FullScreen);
     vievMenu->addAction(action);
 
     // 100%
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.grView, &GraphicsView::zoom100);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-original"), tr("100%"), ui.grView, &GraphicsView::zoom100);
+    zoomToolBar->addAction(QIcon::fromTheme(u"zoom-original"_s), tr("100%"), ui.grView, &GraphicsView::zoom100);
+    action = vievMenu->addAction(QIcon::fromTheme(u"zoom-original"_s), tr("100%"), ui.grView, &GraphicsView::zoom100);
     action->setShortcut(tr("Ctrl+0"));
     vievMenu->addAction(action);
 
     // Zoom in
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.grView, &GraphicsView::zoomIn);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-in"), tr("Zoom in"), ui.grView, &GraphicsView::zoomIn);
+    zoomToolBar->addAction(QIcon::fromTheme(u"zoom-in"_s), tr("Zoom in"), ui.grView, &GraphicsView::zoomIn);
+    action = vievMenu->addAction(QIcon::fromTheme(u"zoom-in"_s), tr("Zoom in"), ui.grView, &GraphicsView::zoomIn);
     action->setShortcut(QKeySequence::ZoomIn);
     vievMenu->addAction(action);
 
     // Zoom out
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.grView, &GraphicsView::zoomOut);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-out"), tr("Zoom out"), ui.grView, &GraphicsView::zoomOut);
+    zoomToolBar->addAction(QIcon::fromTheme(u"zoom-out"_s), tr("Zoom out"), ui.grView, &GraphicsView::zoomOut);
+    action = vievMenu->addAction(QIcon::fromTheme(u"zoom-out"_s), tr("Zoom out"), ui.grView, &GraphicsView::zoomOut);
     action->setShortcut(QKeySequence::ZoomOut);
     vievMenu->addAction(action);
 
@@ -689,9 +694,9 @@ void MainWindow::createActionsZoom() {
     vievMenu->addSeparator();
 
     // Zoom to selected
-    zoomToolBar->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.grView, &GraphicsView::zoomToSelected);
-    action = vievMenu->addAction(QIcon::fromTheme("zoom-to-selected"), tr("Zoom to selected"), ui.grView, &GraphicsView::zoomToSelected);
-    action->setShortcut(QKeySequence("F12"));
+    zoomToolBar->addAction(QIcon::fromTheme(u"zoom-to-selected"_s), tr("Zoom to selected"), ui.grView, &GraphicsView::zoomToSelected);
+    action = vievMenu->addAction(QIcon::fromTheme(u"zoom-to-selected"_s), tr("Zoom to selected"), ui.grView, &GraphicsView::zoomToSelected);
+    action->setShortcut(QKeySequence(u"F12"_s));
     vievMenu->addAction(action);
 }
 
@@ -721,7 +726,7 @@ void MainWindow::createActionsShape() {
         return;
 
     QToolBar* toolBar = addToolBar(tr("Graphics Items"));
-    toolBar->setObjectName("GraphicsItemsToolBar");
+    toolBar->setObjectName(u"GraphicsItemsToolBar"_s);
     toolBar->setToolTip(tr("Graphics Items"));
 
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
@@ -736,7 +741,7 @@ void MainWindow::createActionsShape() {
     //    }
 
     for(auto& [type, shPlugin]: App::shapePlugins()) {
-        auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value("Name").toString());
+        auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value(u"Name"_s).toString());
         action->setCheckable(true);
         actionGroup.addAction(action);
         connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
@@ -787,14 +792,14 @@ void MainWindow::createActionsShape() {
         for(Gi::Item* item: rmi)
             delete item->file()->itemGroup()->takeAt(item);
     };
-    toolBar->addAction(QIcon::fromTheme("path-union"), tr("Union"), [executor] { executor(ClipType::Union); });
-    toolBar->addAction(QIcon::fromTheme("path-difference"), tr("Difference"), [executor] { executor(ClipType::Difference); });
-    toolBar->addAction(QIcon::fromTheme("path-exclusion"), tr("Exclusion"), [executor] { executor(ClipType::Xor); });
-    toolBar->addAction(QIcon::fromTheme("path-intersection"), tr("Intersection"), [executor] { executor(ClipType::Intersection); });
+    toolBar->addAction(QIcon::fromTheme(u"path-union"_s), tr("Union"), [executor] { executor(ClipType::Union); });
+    toolBar->addAction(QIcon::fromTheme(u"path-difference"_s), tr("Difference"), [executor] { executor(ClipType::Difference); });
+    toolBar->addAction(QIcon::fromTheme(u"path-exclusion"_s), tr("Exclusion"), [executor] { executor(ClipType::Xor); });
+    toolBar->addAction(QIcon::fromTheme(u"path-intersection"_s), tr("Intersection"), [executor] { executor(ClipType::Intersection); });
 
     toolBar->addSeparator();
 
-    toolBar->addAction(QIcon::fromTheme(""), tr("Create Group"), this, [] {
+    toolBar->addAction(QIcon::fromTheme({}), tr("Create Group"), this, [] {
         Paths p{CirclePath(100 * uScale, {100 * uScale, 100 * uScale})};
         App::project().addItem(new Gi::DataPath{p, nullptr});
     });
@@ -855,7 +860,7 @@ void MainWindow::saveSelectedGCodeFiles() {
             for(GCode::File* file: files) {
                 QString name(GCode::File::getLastDir().append(file->shortName()));
                 if(!name.endsWith(App::gcSettings().fileExtension()))
-                    name += QStringList({"_TS", "_BS"})[file->side()];
+                    name += QStringList({u"_TS"_s, u"_BS"_s})[file->side()];
 
                 name = QFileDialog::getSaveFileName(nullptr,
                     QObject::tr("Save GCode file"),
@@ -870,7 +875,7 @@ void MainWindow::saveSelectedGCodeFiles() {
         } else {
             QString name(GCode::File::getLastDir().append(files.first()->getTool().nameEnc()));
             if(!name.endsWith(App::gcSettings().fileExtension()))
-                name += QStringList({"_TS", "_BS"})[files.first()->side()];
+                name += QStringList({u"_TS"_s, u"_BS"_s})[files.first()->side()];
 
             name = QFileDialog::getSaveFileName(nullptr,
                 QObject::tr("Save GCode file"),
@@ -883,7 +888,7 @@ void MainWindow::saveSelectedGCodeFiles() {
 
             sl.emplace_back(tr(";\tContains files:"));
             for(auto file: files)
-                sl.push_back(";\t" + file->shortName());
+                sl.push_back(u";\t"_s + file->shortName());
             for(auto file: files) {
                 file->itemGroup()->setVisible(false);
                 file->initSave();
@@ -902,8 +907,8 @@ void MainWindow::saveSelectedGCodeFiles() {
                 for(QString& s: sl) {
                     if(!s.isEmpty())
                         str.push_back(s);
-                    if(!str.endsWith('\n'))
-                        str.push_back("\n");
+                    if(!str.endsWith(u'\n'))
+                        str.push_back(u'\n');
                 }
                 out << str;
             }
@@ -912,7 +917,7 @@ void MainWindow::saveSelectedGCodeFiles() {
     }
 
     if(gcFilesMap.empty())
-        QMessageBox::information(nullptr, "", QObject::tr("No selected toolpath files."));
+        QMessageBox::information(nullptr, {}, QObject::tr("No selected toolpath files."));
 }
 
 QString MainWindow::strippedName(const QString& fullFileName) {
@@ -982,7 +987,7 @@ bool MainWindow::saveFile(const QString& fileName) {
             tr("Warning"),
             tr("Cannot write file %1:\n%2.")
                 .arg(QDir::toNativeSeparators(fileName))
-                .arg("file.errorString()"));
+                .arg(u"file.errorString()"_s));
     }
     QApplication::restoreOverrideCursor();
 
@@ -991,7 +996,7 @@ bool MainWindow::saveFile(const QString& fileName) {
 
 void MainWindow::setCurrentFile(const QString& fileName) {
     if(fileName.isEmpty())
-        setWindowTitle(tr("Untitled") + ".g2g[*]");
+        setWindowTitle(tr("Untitled") + u".g2g[*]"_s);
     project_->setName(fileName);
     project_->setModified(false);
     setWindowModified(false);

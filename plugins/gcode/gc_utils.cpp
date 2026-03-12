@@ -25,10 +25,10 @@
 //         lastDir = QFileInfo(App::project().name()).absolutePath();
 //     else if (lastDir.isEmpty()) {
 //         QSettings settings;
-//         lastDir = settings.value("LastGCodeDir").toString();
+//         lastDir = settings.value(u"LastGCodeDir"_s).toString();
 //         if (lastDir.isEmpty())
 //             lastDir = QFileInfo(App::project().name()).absolutePath();
-//         settings.setValue("LastGCodeDir", lastDir);
+//         settings.setValue(u"LastGCodeDir"_s, lastDir);
 //     }
 //     return lastDir += '/';
 // }
@@ -43,7 +43,7 @@
 //     if (lastDir != dirPath) {
 //         lastDir = dirPath;
 //         QSettings settings;
-//         settings.setValue("LastGCodeDir", lastDir);
+//         settings.setValue(u"LastGCodeDir"_s, lastDir);
 //     }
 // }
 

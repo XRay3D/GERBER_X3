@@ -5,7 +5,7 @@
 #include <vector>
 
 /* Мною, Константином aka KilkennyCat, 05 июля 2020 года создано сиё
- * на основе "Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г.".
+ * на основе u"Описание формата TopoR PCB версия 1.2.0 Апрель 2017 г."_s.
  * k@kilkennycat.pro
  * http://kilkennycat.ru  http://kilkennycat.pro
  */
@@ -26,28 +26,28 @@ public:
         /// Настройка автоматической трассировки: режим трассировки.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("mode")] public mode_Autoroute _mode;
+        // ORIGINAL LINE: [XmlAttribute(u"mode"_s)] public mode_Autoroute _mode;
         mode_Autoroute _mode = static_cast<mode_Autoroute>(0);
 
         /// <summary>
         /// Параметр автоматической трассировки: использование функциональной эквивалентности.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("autoEqu")] public autoEqu _autoEqu;
+        // ORIGINAL LINE: [XmlAttribute(u"autoEqu"_s)] public autoEqu _autoEqu;
         autoEqu _autoEqu = static_cast<autoEqu>(0);
 
         /// <summary>
         /// Параметр автоматической трассировки: форма проводников.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("wireShape")] public wireShape _wireShape;
+        // ORIGINAL LINE: [XmlAttribute(u"wireShape"_s)] public wireShape _wireShape;
         wireShape _wireShape = static_cast<wireShape>(0);
 
         /// <summary>
         /// Параметр автоматической трассировки: создавать «капельки».
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("teardrops")] public Bool _teardrops;
+        // ORIGINAL LINE: [XmlAttribute(u"teardrops"_s)] public Bool _teardrops;
         Bool _teardrops = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _teardropsSpecified
@@ -57,7 +57,7 @@ public:
         /// Параметр автоматической трассировки: ослабленный контроль зазоров.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("weakCheck")] public Bool _weakCheck;
+        // ORIGINAL LINE: [XmlAttribute(u"weakCheck"_s)] public Bool _weakCheck;
         Bool _weakCheck = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _weakCheckSpecified
@@ -67,7 +67,7 @@ public:
         /// Параметр автоматической трассировки: использовать имеющуюся разводку в качестве начального варианта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("takeCurLayout")] public Bool _takeCurLayout;
+        // ORIGINAL LINE: [XmlAttribute(u"takeCurLayout"_s)] public Bool _takeCurLayout;
         Bool _takeCurLayout = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _takeCurLayoutSpecified
@@ -77,7 +77,7 @@ public:
         /// Настройка автоматической трассировки: соединять планарные контакты напрямую.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("directConnectSMD")] public Bool _directConnectSMD;
+        // ORIGINAL LINE: [XmlAttribute(u"directConnectSMD"_s)] public Bool _directConnectSMD;
         Bool _directConnectSMD = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _directConnectSMDSpecified
@@ -87,7 +87,7 @@ public:
         /// Настройка автоматической трассировки: не дотягивать проводник до точки привязки полигонального контакта.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("dontStretchWireToPolypin")] public Bool _dontStretchWireToPolypin;
+        // ORIGINAL LINE: [XmlAttribute(u"dontStretchWireToPolypin"_s)] public Bool _dontStretchWireToPolypin;
         Bool _dontStretchWireToPolypin = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _dontStretchWireToPolypinSpecified
@@ -103,14 +103,14 @@ public:
         /// Настройка автоматической перекладки проводников.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("refine")] public refine _refine;
+        // ORIGINAL LINE: [XmlAttribute(u"refine"_s)] public refine _refine;
         refine _refine = static_cast<refine>(0);
 
         /// <summary>
         /// Настройка автоматической подвижки.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("automove")] public automove _automove;
+        // ORIGINAL LINE: [XmlAttribute(u"automove"_s)] public automove _automove;
         automove _automove = static_cast<automove>(0);
     };
 
@@ -128,7 +128,7 @@ public:
             /// Координаты точек, вершин
             /// </summary>
         public:
-            // ORIGINAL LINE: [XmlElement("Dot")] public List<Dot> _Dots;
+            // ORIGINAL LINE: [XmlElement(u"Dot"_s)] public List<Dot> _Dots;
             std::vector<Dot*> _Dots;
             bool ShouldSerialize_Dots();
         };
@@ -137,7 +137,7 @@ public:
         /// Настройки автоматического размещения компонентов: область размещения. Область прямоугольная, задаётся двумя вершинами(верхняя левая и правая нижняя).
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlElement("PlacementArea")] public PlacementArea _PlacementArea;
+        // ORIGINAL LINE: [XmlElement(u"PlacementArea"_s)] public PlacementArea _PlacementArea;
         PlacementArea* _PlacementArea;
         virtual ~Placement() {
             delete _PlacementArea;
@@ -153,7 +153,7 @@ public:
         /// Настройка ориентации ярлыков: вращать ярлык при вращении компонента.
         /// </summary>
     public:
-        // ORIGINAL LINE: [XmlAttribute("rotateWithComp")] public Bool _rotateWithComp;
+        // ORIGINAL LINE: [XmlAttribute(u"rotateWithComp"_s)] public Bool _rotateWithComp;
         Bool _rotateWithComp = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _rotateWithCompSpecified
@@ -163,7 +163,7 @@ public:
         /// Настройка редактирования ярлыков: использовать правила ориентации.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("useOrientRules")] public Bool _useOrientRules;
+        // ORIGINAL LINE: [XmlAttribute(u"useOrientRules"_s)] public Bool _useOrientRules;
         Bool _useOrientRules = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _useOrientRulesSpecified
@@ -173,7 +173,7 @@ public:
         /// Настройка ориентации ярлыков: поворот для ярлыков горизонтальной ориентации на верхней стороне.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("topHorzRotate")] public Bool _topHorzRotate;
+        // ORIGINAL LINE: [XmlAttribute(u"topHorzRotate"_s)] public Bool _topHorzRotate;
         Bool _topHorzRotate = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _topHorzRotateSpecified
@@ -183,7 +183,7 @@ public:
         /// Настройка ориентации ярлыков: поворот для ярлыков вертикальной ориентации на верхней стороне.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("topVertRotate")] public Bool _topVertRotate;
+        // ORIGINAL LINE: [XmlAttribute(u"topVertRotate"_s)] public Bool _topVertRotate;
         Bool _topVertRotate = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _topVertRotateSpecified
@@ -193,7 +193,7 @@ public:
         /// Настройка ориентации ярлыков: поворот для ярлыков горизонтальной ориентации на нижней стороне.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("bottomHorzRotate")] public Bool _bottomHorzRotate;
+        // ORIGINAL LINE: [XmlAttribute(u"bottomHorzRotate"_s)] public Bool _bottomHorzRotate;
         Bool _bottomHorzRotate = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _bottomHorzRotateSpecified
@@ -203,7 +203,7 @@ public:
         /// Настройка ориентации ярлыков: поворот для ярлыков вертикальной ориентации на нижней стороне.
         /// </summary>
 
-        // ORIGINAL LINE: [XmlAttribute("bottomVertRotate")] public Bool _bottomVertRotate;
+        // ORIGINAL LINE: [XmlAttribute(u"bottomVertRotate"_s)] public Bool _bottomVertRotate;
         Bool _bottomVertRotate = static_cast<Bool>(0);
 
         // ORIGINAL LINE: [XmlIgnore] public bool _bottomVertRotateSpecified
@@ -214,35 +214,35 @@ public:
     /// Версия раздела.
     /// </summary>
 public:
-    // ORIGINAL LINE: [XmlAttribute("version")] public string _version;
+    // ORIGINAL LINE: [XmlAttribute(u"version"_s)] public string _version;
     QString _version;
 
     /// <summary>
     /// Настройки автоматической трассировки.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Autoroute")] public Autoroute _Autoroute;
+    // ORIGINAL LINE: [XmlElement(u"Autoroute"_s)] public Autoroute _Autoroute;
     Autoroute* _Autoroute;
 
     /// <summary>
     /// Настройки автоматических процедур.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Autoproc")] public Autoproc _Autoproc;
+    // ORIGINAL LINE: [XmlElement(u"Autoproc"_s)] public Autoproc _Autoproc;
     Autoproc* _Autoproc;
 
     /// <summary>
     /// Настройки автоматического размещения компонентов.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Placement")] public Placement _Placement;
+    // ORIGINAL LINE: [XmlElement(u"Placement"_s)] public Placement _Placement;
     Placement* _Placement;
 
     /// <summary>
     /// Настройки ориентации ярлыков.
     /// </summary>
 
-    // ORIGINAL LINE: [XmlElement("Labels")] public Labels_Settings _Labels;
+    // ORIGINAL LINE: [XmlElement(u"Labels"_s)] public Labels_Settings _Labels;
     Labels_Settings* _Labels;
 
     /********************************************************************
