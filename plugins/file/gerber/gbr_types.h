@@ -205,8 +205,8 @@ class State {
     PrimitiveType type_ = Aperture;
     QuadrantMode quadrant_ = Undef;
     RegionMode region_ = Off;
-    int aperture_ = 0;
-    int lineNum_ = 0;
+    int aperture_{};
+    int lineNum_{};
     Point curPos_;
     Mirroring mirroring_ = NoMirroring;
     double scaling_ = 1.0;

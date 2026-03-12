@@ -28,7 +28,7 @@ public:
 
 private:
     QPainterPath arrows_;
-    double sc_ = 0;
+    double sc_{};
     void updateArrows();
 
 protected:

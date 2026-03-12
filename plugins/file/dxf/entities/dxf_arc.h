@@ -43,10 +43,10 @@ public:
     };
 
     QPointF centerPoint;
-    double thickness = 0;
-    double radius = 0;
-    double startAngle = 0;
-    double endAngle = 0;
+    double thickness{};
+    double radius{};
+    double startAngle{};
+    double endAngle{};
 };
 
 } // namespace Dxf

@@ -38,8 +38,8 @@ public:
     };
 
     QPointF centerPoint;
-    double thickness = 0;
-    double radius = 0;
+    double thickness{};
+    double radius{};
 };
 
 } // namespace Dxf

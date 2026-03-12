@@ -60,5 +60,5 @@ private:
     QList<ToolItem*> childItems;
     QString name_;
     QString note_;
-    mutable int toolId_ = 0;
+    mutable int toolId_{};
 };

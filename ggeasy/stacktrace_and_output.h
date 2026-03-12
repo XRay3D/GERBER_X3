@@ -55,7 +55,7 @@ inline std::string print_trace1() {
     }
 
     std::string str;
-    for(size_t j = 0; j < nptrs; j++) {
+    for(size_t j{}; j < nptrs; j++) {
         // qCritical("%s", strings[j]);
         QString string{strings[j]};
 

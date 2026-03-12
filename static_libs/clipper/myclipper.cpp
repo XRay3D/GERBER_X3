@@ -416,10 +416,10 @@ void mergeSegments(Paths& paths, double glue) {
     size_t size;
     do {
         size = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             if(i >= paths.size()) break;
             auto& pi = paths[i];
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j) continue;
                 if(i >= paths.size()) break;
                 auto& pj = paths[j];
@@ -449,10 +449,10 @@ void mergeSegments(Paths& paths, double glue) {
     if(qFuzzyIsNull(glue)) return;
     do {
         size = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             if(i >= paths.size()) break;
             auto& pi = paths[i];
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 auto& pj = paths[j];
                 if(i == j) continue;
                 if(i >= paths.size()) break;
@@ -486,7 +486,7 @@ void mergePaths(Paths& paths, const double dist) {
     size_t max;
     do {
         max = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             ProgressCancel::setMax(max);
             ProgressCancel::setCurrent(max - paths.size());
             throwIfCancel();
@@ -610,9 +610,9 @@ void reductionOfDistance(Path& path, Point point) {
         for(size_t y{x + 1}; y < path.size(); ++y)
             matrix[x][y] = distTo(path[x], path[y]);
 
-    size_t counter = 0;
+    size_t counter{};
     while(counter < path.size()) {
-        size_t selector = 0;
+        size_t selector{};
         double length = std::numeric_limits<double>::max();
         for(size_t i = counter, end = path.size(); i < end; ++i) {
             double length2 = distTo(point, path[i]);
@@ -665,7 +665,7 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
     double angle = std::abs(stop - start);
     double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
-    for(int i = 0; i < steps; i++) {
+    for(int i{}; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
         SetZ(points.emplace_back(
                  center.x + radius * cos(theta),

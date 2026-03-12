@@ -80,7 +80,7 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     auto leFind = new QLineEdit{this};
     leFind->setObjectName(u"leFind"_s);
     connect(leFind, &QLineEdit::textChanged, [tableView](const QString& text) {
-        for(int row = 0; row < tableView->model()->rowCount(); ++row)
+        for(int row{}; row < tableView->model()->rowCount(); ++row)
             if(tableView->model()->data(tableView->model()->index(row, 2)).toString().contains(text, Qt::CaseInsensitive)) {
                 tableView->selectRow(row);
                 break;

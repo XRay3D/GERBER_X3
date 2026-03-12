@@ -83,7 +83,7 @@ public:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
-    int polylineFlags = 0;
+    int polylineFlags{};
     double startWidth = 0.0;
     double endWidth = 0.0;
 };

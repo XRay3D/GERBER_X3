@@ -69,13 +69,13 @@ public:
     void read(QDataStream& stream) override;
 
     mvector<Segment> poly;
-    int16_t counter = 0;
-    int16_t polylineFlag = 0;
-    int32_t numberOfVertices = 0;
+    int16_t counter{};
+    int16_t polylineFlag{};
+    int32_t numberOfVertices{};
     double startWidth = 0.0;
     double endWidth = 0.0;
     double constantWidth = 0.0;
-    int16_t elevation = 0;
+    int16_t elevation{};
     double thickness = 0.0;
 };
 

@@ -99,8 +99,8 @@ LwPolyline::LwPolyline(SectionParser* sp)
 // void LwPolyline::draw(const InsertEntity* const i) const
 //{
 //     if (i) {
-//         for (int r = 0; r < i->rowCount; ++r) {
-//             for (int c = 0; c < i->colCount; ++c) {
+//         for (int r{}; r < i->rowCount; ++r) {
+//             for (int c{}; c < i->colCount; ++c) {
 //                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);

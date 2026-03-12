@@ -56,7 +56,7 @@ void View::updateTree() {
 void View::updateIcons() {
     QModelIndex index = model_->index(0, 0, QModelIndex());
     int rowCount = static_cast<Node*>(index.internalPointer())->childCount();
-    for(int r = 0; r < rowCount; ++r)
+    for(int r{}; r < rowCount; ++r)
         update(model_->index(r, 0, index));
 }
 
@@ -94,7 +94,7 @@ void View::onSelectionChanged(const QItemSelection& selected, const QItemSelecti
 
 void View::hideOther() {
     const int rowCount = static_cast<Node*>(menuIndex_.parent().internalPointer())->childCount();
-    for(int row = 0; row < rowCount; ++row) {
+    for(int row{}; row < rowCount; ++row) {
         QModelIndex index2 = menuIndex_.sibling(row, 0);
         auto* item = static_cast<Node*>(index2.internalPointer());
         if(row == menuIndex_.row())

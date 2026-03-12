@@ -28,6 +28,6 @@
 //    Type type() const override { return TableItem::APPID; };
 
 //    QString applicationName;
-//    int standardFlag = 0;
+//    int standardFlag{};
 //};
 //} // namespace Dxf

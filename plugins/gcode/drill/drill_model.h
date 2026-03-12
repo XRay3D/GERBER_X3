@@ -31,7 +31,7 @@ struct Row {
     //        , rowId(id)
     //        , toolId(-1) {
     //    }
-    ~Row() { qDeleteAll(items); }
+    ~Row();
     /*const*/ QIcon icon;
     /*const*/ QStringList name;
     /*const*/ double diameter;

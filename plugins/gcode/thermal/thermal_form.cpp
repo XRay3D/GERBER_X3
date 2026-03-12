@@ -223,7 +223,7 @@ void Form::onSelectionChanged(const QItemSelection& selected, const QItemSelecti
         if(item)
             item->setSelected(true);
         else
-            for(int i = 0; i < node->childCount(); ++i)
+            for(int i{}; i < node->childCount(); ++i)
                 ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Select | QItemSelectionModel::Rows);
     }
     for(const auto& index: deselected.indexes()) {
@@ -232,7 +232,7 @@ void Form::onSelectionChanged(const QItemSelection& selected, const QItemSelecti
         if(item)
             item->setSelected(false);
         else
-            for(int i = 0; i < node->childCount(); ++i)
+            for(int i{}; i < node->childCount(); ++i)
                 ui->treeView->selectionModel()->select(model->createIndex(i, 0, node->child(i)), QItemSelectionModel::Deselect | QItemSelectionModel::Rows);
     }
 }

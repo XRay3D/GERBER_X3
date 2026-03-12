@@ -29,7 +29,7 @@ QPolygonF interpolate(const QPolygonF& points, int numValues) {
 
     QPolygonF interpolatedPoints(numValues);
     const double delta = (points[/*numPoints*/ points.size() - 1].x() - points[0].x()) / (points.size() - 1);
-    for(int i = 0; i < points.size(); i++) // interpolate
+    for(int i{}; i < points.size(); i++) // interpolate
     {
         const double x = points[0].x() + i * delta;
         interpolatedPoints[i].setX(x);
@@ -100,7 +100,7 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
     n = poly.ControlPoints.size();
     QVector<double> uVec;
     //  poly.KnotValues;
-    for(int i = 0; i < n + d; i++)
+    for(int i{}; i < n + d; i++)
         uVec.push_back(((double)i) / (n + d - 1));
     double x, y, basis, u;
     for(u = 0; u <= 1; u += 0.05) {
@@ -448,7 +448,7 @@ static int lookup(double x, const QPolygonF& values) {
     else {
         i1 = 0;
         int i2 = size - 2;
-        int i3 = 0;
+        int i3{};
 
         while(i2 - i1 > 1) {
             i3 = i1 + ((i2 - i1) >> 1);
@@ -714,7 +714,7 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     // L-U Factorization
     a[0] = std::sqrt(a[0]);
     c[0] = h[imax] / a[0];
-    double sum = 0;
+    double sum{};
 
     for(i = 0; i < imax - 1; i++) {
         b[i] /= a[i];

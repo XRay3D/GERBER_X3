@@ -144,8 +144,8 @@ struct Context {
         for(auto ptr = data; ptr != data + len; ++ptr) {
             buffer[k++] = static_cast<unsigned char>(static_cast<int16_t>(*ptr) + UCHAR_MAX + 1);
             if(k == 0x40) {
-                auto j = 0;
-                for(uint32_t i = 0; i < LBLOCK; ++i) {
+                size_t j{};
+                for(uint32_t i{}; i < LBLOCK; ++i) {
                     input[i] = to_uint32(&buffer[j]);
                     j += 4;
                 }
@@ -157,12 +157,12 @@ struct Context {
 
     constexpr void transform(const std::array<uint32_t, LBLOCK>& input) noexcept {
         auto a = state[0], b = state[1], c = state[2], d = state[3];
-        for(uint32_t r = 0; r < 4; ++r) {
+        for(uint32_t r{}; r < 4; ++r) {
             const auto g = G + r * LBLOCK;
             const auto s = S + r * 4;
             const auto k = K + r * LBLOCK;
 
-            for(size_t i = 0; i < input.size(); ++i) {
+            for(size_t i{}; i < input.size(); ++i) {
                 const auto new_b = t(F[r], a, b, c, d, input[g[i]], s[i % 4], k[i]);
                 a = d;
                 d = c;
@@ -185,8 +185,8 @@ struct Context {
 
         append(PADDING, k < 56 ? 56 - k : 120 - k);
 
-        auto j = 0;
-        for(auto i = 0; i < 14; ++i) {
+        size_t j{};
+        for(size_t i{}; i < 14; ++i) {
             input[i] = to_uint32(&buffer[j]);
             j += 4;
         }

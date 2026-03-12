@@ -13,6 +13,7 @@
 #include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "tool_pch.h"
+#include "gi_preview.h"
 
 #include <QBitmap>
 #include <QDebug>
@@ -50,7 +51,7 @@ void Model::setCreate(int row, bool create) {
 }
 
 void Model::setCreate(bool create) {
-    for(int row = 0; row < rowCount(); ++row)
+    for(int row{}; row < rowCount(); ++row)
         data_[row].useForCalc = create && data_[row].toolId != -1;
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
@@ -71,22 +72,22 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         case Qt::DecorationRole: {
             if(data_[index.row()].toolId > -1 && data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
-                for(int x = 0; x < 24; ++x)
-                    for(int y = 0; y < 24; ++y)
+                for(int x{}; x < 24; ++x)
+                    for(int y{}; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 0, 0, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             } else if(data_[index.row()].toolId > -1) {
                 return data_[row].icon;
             } else if(data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
-                for(int x = 0; x < 24; ++x)
-                    for(int y = 0; y < 24; ++y)
+                for(int x{}; x < 24; ++x)
+                    for(int y{}; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 100, 100, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             } else {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
-                for(int x = 0; x < 24; ++x)
-                    for(int y = 0; y < 24; ++y)
+                for(int x{}; x < 24; ++x)
+                    for(int y{}; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(100, 100, 100, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
             }
@@ -153,6 +154,8 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
         return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
+
+Row::~Row() { qDeleteAll(items); }
 
 } // namespace Drilling
 

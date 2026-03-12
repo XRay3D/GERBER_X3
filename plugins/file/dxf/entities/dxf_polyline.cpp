@@ -21,8 +21,8 @@ PolyLine::PolyLine(SectionParser* sp)
 // void PolyLine::draw(const InsertEntity* const i) const
 //{
 //     if (i) {
-//         for (int r = 0; r < i->rowCount; ++r) {
-//             for (int c = 0; c < i->colCount; ++c) {
+//         for (int r{}; r < i->rowCount; ++r) {
+//             for (int c{}; c < i->colCount; ++c) {
 //                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
@@ -92,7 +92,7 @@ DxfGo PolyLine::toGo() const {
             -span);
     };
 
-    for(int i = 0; i < vertex.size() - 1; ++i)
+    for(int i{}; i < vertex.size() - 1; ++i)
         addSeg(vertex[i], vertex[i + 1]);
     if(polylineFlags & ClosedPolyline)
         addSeg(vertex.last(), vertex.first());

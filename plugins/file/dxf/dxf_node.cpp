@@ -68,7 +68,7 @@ public:
 
         QStringList names(keys(file->layers()));
         std::map<QString, QColor> colors;
-        for(int row = 0; row < names.size(); ++row) {
+        for(int row{}; row < names.size(); ++row) {
             if(file->layers().at(names[row])->isEmpty()) {
                 // tableView->hideRow(row);
             } else {
@@ -87,7 +87,7 @@ public:
 
         connect(pushButtonColorize, &QPushButton::clicked, [colors, file, this] {
             const size_t count = colors.size();
-            size_t ctr = 0;
+            size_t ctr{};
             for(auto& [name, color]: colors) {
                 const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * ctr++ : 0);
                 auto layer = file->layers().at(name);
@@ -257,7 +257,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme("color-management"), DxfObj::tr("Colorize"), [this] {
         const int count = childCount();
-        for(int row = 0; row < count; ++row) {
+        for(int row{}; row < count; ++row) {
             const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
             NodeLayer* nl = reinterpret_cast<NodeLayer*>(child(row));
             nl->layer->setColor(QColor::fromHsv(k, 255, 255));

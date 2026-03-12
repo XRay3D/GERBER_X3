@@ -55,9 +55,9 @@ public:
     };
 
     QString styleName;
-    double fixedTextHeight = 0;
-    int16_t textGenerationFlag = 0;
-    int16_t standardFlag = 0;
+    double fixedTextHeight{};
+    int16_t textGenerationFlag{};
+    int16_t standardFlag{};
     QFont font;
 };
 

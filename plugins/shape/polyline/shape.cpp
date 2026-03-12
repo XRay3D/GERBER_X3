@@ -126,7 +126,7 @@ QPointF Shape::centroid() {
         if(h.type() == Handle::Corner)
             vertices.emplace_back(h);
     // For all vertices
-    for(size_t i = 0; i < vertices.size(); ++i) {
+    for(size_t i{}; i < vertices.size(); ++i) {
         QPointF p0(vertices[i]);
         QPointF p1(vertices[(i + 1) % vertices.size()]);
         a = p0.x() * p1.y() - p1.x() * p0.y();

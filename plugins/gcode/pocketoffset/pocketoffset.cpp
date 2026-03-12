@@ -216,7 +216,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         // make a bounding box for the next tool
         fillPaths[tIdx] = Inflate(fillPaths[tIdx], dOffset, JT::Round, ET::Polygon, uScale);
         ++tIdx;
-    } // for (int tIdx = 0; tIdx < tools.size(); ++tIdx) {
+    } // for (int tIdx{}; tIdx < tools.size(); ++tIdx) {
 }
 
 File::File()

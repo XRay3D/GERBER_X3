@@ -247,9 +247,9 @@ struct Hatch final : Entity {
 
     QPointF centerPoint;
     std::vector<int> pathTypeFlags;
-    int16_t edgeType = 0;
-    double thickness = 0;
-    double radius = 0;
+    int16_t edgeType{};
+    double thickness{};
+    double radius{};
 };
 
 } // namespace Dxf

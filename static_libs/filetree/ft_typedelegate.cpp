@@ -30,7 +30,7 @@ QWidget* TypeDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem&
 void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     auto comboBox = qobject_cast<QComboBox*>(editor);
     comboBox->clear();
-    int ctr = 0;
+    int ctr{};
     for(auto& [id, name, toolTip]: App::project().file(index.data(Qt::UserRole).toInt())->displayedTypes()) {
         if(id < 0)
             continue;

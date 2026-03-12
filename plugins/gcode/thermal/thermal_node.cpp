@@ -164,7 +164,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         if(container) {
             if(childs.empty())
                 return checked_ ? Qt::Checked : Qt::Unchecked;
-            int val = 0;
+            int val{};
             for(const auto& node: childs)
                 val |= node->checked_ ? 2 : 1;
             return chState[val];

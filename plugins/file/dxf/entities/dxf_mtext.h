@@ -101,11 +101,11 @@ public:
     QString textString;                 // Dxf::MText::TextString DC(1, Str "T1\\PT2")
     QString textStyleName;              // Dxf::MText::TextStyleName DC(7, Str "_Default_")
     QPointF insertionPoint;             // Dxf::MText::InsertionPointPointX DC(10, Dou 235)
-    double rotation = 0;                // Dxf::MText::RotationAngleInRadians DC(50, Dou 135)
-    double nominalTextHeight = 0;       // Dxf::MText::NominalTextHeight DC(40, Dou 2.54)
-    double referenceRectangleWidth = 0; // Dxf::MText::ReferenceRectangleWidth DC(41, Dou 1)
-    int16_t attachmentPoint = 0;        // Dxf::MText::AttachmentPoint DC(71, I16 9)
-    int16_t drawingDirection = 0;       // Dxf::MText::DrawingDirection DC(72, I16 5)
+    double rotation{};                // Dxf::MText::RotationAngleInRadians DC(50, Dou 135)
+    double nominalTextHeight{};       // Dxf::MText::NominalTextHeight DC(40, Dou 2.54)
+    double referenceRectangleWidth{}; // Dxf::MText::ReferenceRectangleWidth DC(41, Dou 1)
+    int16_t attachmentPoint{};        // Dxf::MText::AttachmentPoint DC(71, I16 9)
+    int16_t drawingDirection{};       // Dxf::MText::DrawingDirection DC(72, I16 5)
 };
 
 } // namespace Dxf
