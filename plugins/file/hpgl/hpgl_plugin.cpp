@@ -25,20 +25,20 @@ Plugin::Plugin(QObject* parent)
 AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if(type_ != type())
         return nullptr;
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 
-    QTextStream in(&file);
+    QTextStream in{&file};
     Parser::parseFile(fileName);
     return Parser::file;
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
-    QTextStream in(&file);
+    QTextStream in{&file};
     QString line(in.readLine());
     if(line.startsWith(u"IN;"_s) && fileName.endsWith(u".plt"_s, Qt::CaseInsensitive))
         return true;

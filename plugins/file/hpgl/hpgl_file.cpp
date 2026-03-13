@@ -132,7 +132,7 @@ void File::createGi() {
     //                if (go.path().size() > 1) {
     //                    auto gItem = new Gi::DataPath(go.path(), this);
     //                    if (go.entity()) {
-    //                        gItem->setToolTip(QString(u"Line %1\n%2"_s)
+    //                        gItem->setToolTip(u"Line %1\n%2"_s)
     //                                              .arg(go.entity()->data[0].line())
     //                                              .arg(go.entity()->name()));
     //                    }

@@ -219,7 +219,7 @@ QVariant AbstractShape::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole: /*   */ return QString(u"%1 (%2)"_s).arg(name()).arg(id_);
+        case Qt::DisplayRole: /*   */ return u"%1 (%2)"_s.arg(name()).arg(id_);
         case Qt::CheckStateRole: /**/ return isVisible() ? Qt::Checked : Qt::Unchecked;
         case Qt::DecorationRole: /**/ return icon();
         case FileTree::Id: /*      */ return id_;

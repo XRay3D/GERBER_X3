@@ -154,7 +154,7 @@ QIcon drawIcon(const Paths& paths, QColor color) {
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
 
-    QPixmap pixmap(IconSize, IconSize);
+    QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&pixmap);
@@ -169,7 +169,7 @@ QIcon drawIcon(const Paths& paths, QColor color) {
 }
 
 QIcon drawDrillIcon(QColor color) {
-    QPixmap pixmap(IconSize, IconSize);
+    QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&pixmap);

@@ -3,7 +3,7 @@
 #include <QApplication>
 
 int main(int argc, char* argv[]) {
-    QApplication a(argc, argv);
+    QApplication a{argc, argv};
     QFont f;
     f.setPixelSize(100);
     a.setFont(f);

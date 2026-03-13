@@ -118,7 +118,7 @@ DxfGo MText::toGo() const {
     double scaleX = {};
     double scaleY = {};
 
-    QString text(textString);
+    QString text{textString};
     text.replace(u"\\P"_s, u"\n"_s);
     QStringList list(text.split(u';').back().split(u'\n'));
     QFont font;
@@ -132,7 +132,7 @@ DxfGo MText::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fm(font);
+        QFontMetricsF fm{font};
         // offset.ry() -= fmf.descent();
         // ascent = fm.ascent();
         descent = fm.descent();
@@ -152,7 +152,7 @@ DxfGo MText::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fm(font);
+        QFontMetricsF fm{font};
         // offset.ry() -= fmf.descent();
         // ascent = fm.ascent();
         descent = fm.descent();

@@ -60,7 +60,7 @@ bool SectionParser::hasNext() const { return std::distance(it, to) > 0; }
 bool SectionParser::hasPrev() const { return std::distance(from, it) > 0; }
 
 QDebug operator<<(QDebug debug, const SectionParser& c) {
-    QDebugStateSaver saver(debug);
+    QDebugStateSaver saver{debug};
     debug.nospace() << u"\rSEC("_s << c.type << u", "_s << std::distance(c.from, c.to) << ')';
     return debug;
 }

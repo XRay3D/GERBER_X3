@@ -61,7 +61,7 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool) {
 }
 
 QDebug operator<<(QDebug debug, const Tool& t) {
-    QDebugStateSaver saver(debug);
+    QDebugStateSaver saver{debug};
     debug.nospace() << u"Tool(D "_s << t.diameter_ << u", ID "_s << t.id_ << ')';
     return debug;
 }
@@ -69,15 +69,15 @@ QDebug operator<<(QDebug debug, const Tool& t) {
 QString Tool::nameEnc() const {
     switch(type_) {
     case Tool::Drill:
-        return QString(u"D-D%1MM"_s).arg(diameter_);
+        return u"D-D%1MM"_s.arg(diameter_);
     case Tool::EndMill:
-        return QString(u"M-D%1MM"_s).arg(diameter_);
+        return u"M-D%1MM"_s.arg(diameter_);
     case Tool::Engraver:
-        return QString(u"V-D%1MMA%2DEG"_s).arg(diameter_).arg(angle_);
+        return u"V-D%1MMA%2DEG"_s.arg(diameter_).arg(angle_);
     case Tool::Laser:
-        return QString(u"L-D%1MM"_s).arg(diameter_);
+        return u"L-D%1MM"_s.arg(diameter_);
     case Tool::ThreadMill:
-        return QString(u"T-D%1MM"_s).arg(diameter_);
+        return u"T-D%1MM"_s.arg(diameter_);
     default:
         return {};
     }

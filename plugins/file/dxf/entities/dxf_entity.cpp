@@ -140,7 +140,7 @@ void Entity::draw(const InsertEntity* const i) const {
     if(i) {
         for(int r{}; r < i->rowCount; ++r) {
             for(int c{}; c < i->colCount; ++c) {
-                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+                QPointF tr{r * i->rowSpacing, r * i->colSpacing};
                 DxfGo go(toGo());
                 i->transform(go, tr);
                 i->attachToLayer(std::move(go));

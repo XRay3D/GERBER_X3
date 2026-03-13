@@ -137,9 +137,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DisplayRole:
         switch(index.column()) {
         case Model::Name:
-            return name.size() ? name : QString{u"{%1,%2}"_s}.arg((~pos_).x()).arg((~pos_).y()); // FIXME
+            return name.size() ? name : u"{%1,%2}"_s.arg((~pos_).x()).arg((~pos_).y()); // FIXME
             //        case Model::Position:
-            //            return QVariant::fromValue(pos_); // QString(u"%1 : %2"_s).arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
+            //            return QVariant::fromValue(pos_); // u"%1 : %2"_s.arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
         case Model::GapAngle:
             return par.angle;
         case Model::apThickness:
@@ -151,7 +151,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DecorationRole:
         if(!index.column()) {
             if(icon.isNull()) {
-                QPixmap p(24, 24);
+                QPixmap p{24, 24};
                 p.fill(Qt::transparent);
                 return QIcon(p);
             }

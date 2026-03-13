@@ -298,14 +298,14 @@ void Debug::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     double scale = scaleFactor();
 
     if(pen_.widthF() == 0) {
-        QPen pen(pen_);
+        QPen pen{pen_};
         pen.setWidthF(1.5 * scale);
         painter->setPen(pen);
     } else
         painter->setPen(pen_);
 
     // if(option->state & QStyle::State_MouseOver) {
-    //     QPen pen(pen_);
+    //     QPen pen{pen_};
     //     pen.setWidthF(2.0 * scale);
     //     pen.setStyle(Qt::CustomDashLine);
     //     pen.setCapStyle(Qt::FlatCap);
@@ -345,7 +345,7 @@ void Debug::updateArrows() {
     if(qFuzzyIsNull(pen_.widthF())) {
         for(const QPolygonF& path: shape_.toSubpathPolygons()) {
             for(int i{}; i < path.size() - 1; ++i) {
-                QLineF line(path[i + 1], path[i]);
+                QLineF line{path[i + 1], path[i]};
                 double length = 30 * scaleFactor();
                 if(line.length() < length && i)
                     continue;

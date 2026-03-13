@@ -19,7 +19,6 @@
 #include "myclipper.h"
 #include "utils.h"
 #include <QElapsedTimer>
-#include <QMutex>
 #include <algorithm>
 #include <ctre.hpp>
 // #include <st acktrace>
@@ -51,7 +50,7 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 namespace Gerber {
 
 QDebug operator<<(QDebug debug, const std::string_view& sw) {
-    QDebugStateSaver saver(debug);
+    QDebugStateSaver saver{debug};
     debug.nospace() << QByteArray(sw.data(), sw.size());
     return debug;
 }
@@ -124,7 +123,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             }
 
             // Line didn`t match any pattern. Warn user.
-            qWarning() << QString(u"Line ignored (%1): '"_s + gerberLine + u"'"_s).arg(lineNum_);
+            qWarning() << u"Line ignored (%1): '"_s + gerberLine + u"'"_s.arg(lineNum_);
         } // End of file parsing
 
         qDebug()
@@ -174,7 +173,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         emit afp->fileProgress(file->shortName(), 1, 1);
         delete file;
     } catch(...) {
-        QString errStr(QString(u"%1: %2"_s).arg(errno).arg(strerror(errno)));
+        QString errStr(u"%1: %2"_s.arg(errno).arg(strerror(errno)));
         qWarning() << u"exeption S:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
         emit afp->fileProgress(file->shortName(), 1, 1);
@@ -394,7 +393,7 @@ void Parser::addPath() {
         switch(abSrIdStack_.top().workingType) {
         case WorkingType::Normal: {
             auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(path_)));
-            go.name = QString(u"D%1|PolyLine"_s).arg(state_.aperture());
+            go.name = u"D%1|PolyLine"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
@@ -653,7 +652,7 @@ bool Parser::parseAperture(const QString& gLine) {
         } else {
             VarMap macroCoeff;
             for(int i{}; i < paramList.size(); ++i)
-                macroCoeff.emplace(QString(u"$%1"_s).arg(i + 1), toDouble(paramList[i], false, false));
+                macroCoeff.emplace(u"$%1"_s.arg(i + 1), toDouble(paramList[i], false, false));
             apertures.try_emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split(u'*'), macroCoeff, file));
         }
         if(attAper.function_)
@@ -928,7 +927,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         break;
     default:
         if(state_.interpolation() != ClockwiseCircular && state_.interpolation() != CounterClockwiseCircular) {
-            qWarning() << QString(u"Found arc without circular interpolation mode defined. (%1)"_s).arg(lineNum_);
+            qWarning() << u"Found arc without circular interpolation mode defined. (%1)"_s.arg(lineNum_);
             qWarning() << QString(gLine);
             state_.setCurPos({x, y});
             state_.setGCode(G01);
@@ -938,7 +937,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     }
 
     if(state_.quadrant() == Undef) {
-        qWarning() << QString(u"Found arc without preceding quadrant specification G74 or G75. (%1)"_s).arg(lineNum_);
+        qWarning() << u"Found arc without preceding quadrant specification G74 or G75. (%1)"_s.arg(lineNum_);
         qWarning() << QString(gLine);
         return true;
     }
@@ -953,7 +952,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         return true;
     case D03: // Flash should not happen here
         state_.setCurPos({x, y});
-        qWarning() << QString(u"Trying to flash within arc. (%1)"_s).arg(lineNum_);
+        qWarning() << u"Trying to flash within arc. (%1)"_s.arg(lineNum_);
         return true;
     }
 
@@ -1021,7 +1020,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         state_.setCurPos({x, y});
         path_.emplace_back(state_.curPos());
         SetZSelf(path_.back());
-        qWarning() << QString(u"Invalid arc in line %1."_s).arg(lineNum_) << gLine;
+        qWarning() << u"Invalid arc in line %1."_s.arg(lineNum_) << gLine;
     }
 
     if(arcPath.size() && path_.size() && path_.back() == arcPath.front())

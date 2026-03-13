@@ -34,10 +34,10 @@ int main(int argc, char* argv[]) {
 
     Q_INIT_RESOURCE(resources);
 
-    QApplication app(argc, argv);
+    QApplication app{argc, argv};
 
     // #ifdef Q_OS_WIN
-    //     QSettings settings(u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"_s, QSettings::NativeFormat);
+    //     QSettings settings{u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"_s, QSettings::NativeFormat};
     //     if (settings.value(u"AppsUseLightTheme"_s) == 0) {
     //         qApp->setStyleSheet(u"QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"_s);
     //     }
@@ -77,17 +77,17 @@ int main(int argc, char* argv[]) {
     //    QGLFormat::setDefaultFormat(glf);
 
     if constexpr(0) {
-        QSystemSemaphore semaphore(u"GGEasySemaphore"_s, 1); // создаём семафор
+        QSystemSemaphore semaphore{u"GGEasySemaphore"_s, 1}; // создаём семафор
         semaphore.acquire();                                 // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
 #ifdef linux
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
-        QSharedMemory nix_fix_shared_memory(u"GGEasyMemory"_s);
+        QSharedMemory nix_fix_shared_memory{u"GGEasyMemory"_s};
         if(nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
 #endif
         // MainWindow* mainWin = nullptr;
-        QSharedMemory sharedMemory(u"GGEasyMemory"_s); // Создаём экземпляр разделяемой памяти
+        QSharedMemory sharedMemory{u"GGEasyMemory"_s}; // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
         bool is_running{};    // переменную для проверки ууже запущенного приложения
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
@@ -142,9 +142,9 @@ int main(int argc, char* argv[]) {
     */
 #ifdef __unix__
 #ifdef QT_DEBUG
-    const QString suffix(u"*.so"_s);
+    const QString suffix{u"*.so"_s};
 #else
-    const QString suffix(u"*.so"_s);
+    const QString suffix{u"*.so"_s};
 #endif
 #elif _WIN32
     const auto suffix = u"*.dll"_s;

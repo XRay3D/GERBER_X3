@@ -98,11 +98,11 @@ ChaiScriptSyntaxHighlighter::ChaiScriptSyntaxHighlighter(QTextDocument* parent)
 
 void ChaiScriptSyntaxHighlighter::initializeRules() {
     for(auto& currKeyword: keywords)
-        rules.append(ChaiScriptRule(QString(u"\\b%1\\b"_s).arg(currKeyword), 0, basicStyles.value(u"keyword"_s)));
+        rules.append(ChaiScriptRule(u"\\b%1\\b"_s.arg(currKeyword), 0, basicStyles.value(u"keyword"_s)));
     for(auto& currOperator: operators)
-        rules.append(ChaiScriptRule(QString(u"%1"_s).arg(currOperator), 0, basicStyles.value(u"operator"_s)));
+        rules.append(ChaiScriptRule(u"%1"_s.arg(currOperator), 0, basicStyles.value(u"operator"_s)));
     for(auto& currBrace: braces)
-        rules.append(ChaiScriptRule(QString(u"%1"_s).arg(currBrace), 0, basicStyles.value(u"brace"_s)));
+        rules.append(ChaiScriptRule(u"%1"_s.arg(currBrace), 0, basicStyles.value(u"brace"_s)));
     // Double-quoted string, possibly containing escape sequences
     // FF: originally in python : r'u"[^"_s\\]*(\\.[^u"\\]*)*"_s'
     rules.append(ChaiScriptRule(u"\"_s[^\u"\\\\]*(\\\\.[^\"_s\\\\]*)*\"u", 0, basicStyles.value("_sstring")));
@@ -187,7 +187,7 @@ bool ChaiScriptSyntaxHighlighter::matchMultiline(const QString& text, const QReg
 
 const QTextCharFormat ChaiScriptSyntaxHighlighter::getTextCharFormat(const QString& colorName, const QString& style) {
     QTextCharFormat charFormat;
-    QColor color(colorName);
+    QColor color{colorName};
     charFormat.setForeground(color);
     if(style.contains(u"bold"_s, Qt::CaseInsensitive))
         charFormat.setFontWeight(QFont::Bold);

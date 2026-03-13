@@ -79,7 +79,7 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui.grView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(ui.grView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
-        ui.statusbar->showMessage(QString(u"X = %1, Y = %2"_s).arg(point.x()).arg(point.y()));
+        ui.statusbar->showMessage(u"X = %1, Y = %2"_s.arg(point.x()).arg(point.y()));
     });
 
     connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
@@ -95,7 +95,7 @@ MainWindow::MainWindow(QWidget* parent)
             point.x(), point.y(), gpoint.x(), gpoint.y());
         // qCritical() << str;
         ui.statusbar->showMessage(QString::fromStdString(str));
-        // ui.statusbar->showMessage(QString(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s)
+        // ui.statusbar->showMessage(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s
         //                           .arg(point.x(), 8, 'f', 3)
         //                           .arg(point.y(), 8, 'f', 3)
         //                           .arg(gpoint.x(), 8, 'f', 3)
@@ -182,7 +182,7 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
     ui.loggingTextBrowser->append(message);
     ui.loggingTextBrowser->setTextColor(*color);
     ui.loggingTextBrowser->insertPlainText(u"%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split(u'(').front()));
-    ui.loggingTextBrowser->append({});
+    // ui.loggingTextBrowser->append({});
     ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
 }
 
@@ -319,8 +319,8 @@ void MainWindow::initWidgets() {
 }
 
 void MainWindow::printDialog() {
-    QPrinter printer(QPrinter::HighResolution);
-    QPrintPreviewDialog preview(&printer, this);
+    QPrinter printer{QPrinter::HighResolution};
+    QPrintPreviewDialog preview{&printer, this};
     connect(&preview, &QPrintPreviewDialog::paintRequested, [](QPrinter* pPrinter) {
         // ScopedTrue sTrue(App::app_->drawPdf_);
         // NOTE App::setDrawPdf(true);
@@ -330,12 +330,12 @@ void MainWindow::printDialog() {
                 rect |= item->boundingRect();
         QSizeF size(rect.size());
 
-        QMarginsF margins(10, 10, 10, 10);
+        QMarginsF margins{10, 10, 10, 10};
         QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
         pPrinter->setPageMargins(margins);
         pPrinter->setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
         pPrinter->setResolution(4800);
-        QPainter painter(pPrinter);
+        QPainter painter{pPrinter};
         painter.setRenderHint(QPainter::Antialiasing);
         painter.setTransform(QTransform().scale(1.0, -1.0));
         painter.translate(0, -(pPrinter->resolution() / 25.4) * size.height());
@@ -364,17 +364,17 @@ void MainWindow::renderPdf() {
 
     QSizeF size(rect.size());
 
-    QPdfWriter pdfWriter(curFile);
+    QPdfWriter pdfWriter{curFile};
     //    pdfWriter.setPageSizeMM(size);
     //    pdfWriter.setMargins({0, 0, 0, 0});
     //    pdfWriter.setResolution(1000000);
-    QMarginsF margins(10, 10, 10, 10);
+    QMarginsF margins{10, 10, 10, 10};
     QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
     pdfWriter.setPageMargins(margins);
     pdfWriter.setPageSize(QPageSize(size + mSize, QPageSize::Millimeter));
     pdfWriter.setResolution(4800);
 
-    QPainter painter(&pdfWriter);
+    QPainter painter{&pdfWriter};
     painter.setTransform(QTransform().scale(1.0, -1.0));
     painter.translate(0, -(pdfWriter.resolution() / 25.4) * size.height());
     ui.grView->scene()->render(&painter,
@@ -900,9 +900,9 @@ void MainWindow::saveSelectedGCodeFiles() {
                     file->endFile();
                 sl.append(file->gCodeText());
             }
-            QFile file(name);
+            QFile file{name};
             if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-                QTextStream out(&file);
+                QTextStream out{&file};
                 QString str;
                 for(QString& s: sl) {
                     if(!s.isEmpty())

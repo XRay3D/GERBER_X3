@@ -26,8 +26,8 @@ AttDef::AttDef(SectionParser* sp)
 //     if (i) {
 //         for (int r{}; r < i->rowCount; ++r) {
 //             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-//                 QPointF rad(radius, radius);
+//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+//                 QPointF rad{radius, radius};
 //                 auto item = new ArcItem2{this, i->color()};
 //                 scene->addItem(item);
 //                 //                item->setToolTip(layerName);

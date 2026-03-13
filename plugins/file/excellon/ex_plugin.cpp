@@ -41,7 +41,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         return nullptr;
     }
 
-    QTextStream in(&file);
+    QTextStream in{&file};
     Parser::parseFile(fileName);
     return Parser::file;
 }
@@ -49,11 +49,11 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
 bool Plugin::thisIsIt(const QString& fileName) {
     if(fileName.endsWith(u".dxf"_s, Qt::CaseInsensitive))
         return false;
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    QTextStream in(&file);
+    QTextStream in{&file};
     QString line;
 
     static constexpr ctll::fixed_string regex1{R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)"};

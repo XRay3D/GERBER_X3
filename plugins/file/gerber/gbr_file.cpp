@@ -40,7 +40,7 @@ struct EnumToStr {
 };
 
 QDebug operator<<(QDebug debug, const State& state) {
-    QDebugStateSaver saver(debug);
+    QDebugStateSaver saver{debug};
     debug.nospace() << u"State("_s
                     << u"D0"_s << state.dCode() << u", "_s
                     << u"G0"_s << state.gCode() << u", "_s

@@ -127,7 +127,7 @@ QPointF Shape::centroid() {
             vertices.emplace_back(h);
     // For all vertices
     for(size_t i{}; i < vertices.size(); ++i) {
-        QPointF p0(vertices[i]);
+        QPointF p0{vertices[i]};
         QPointF p1(vertices[(i + 1) % vertices.size()]);
         a = p0.x() * p1.y() - p1.x() * p0.y();
         signedArea += a;

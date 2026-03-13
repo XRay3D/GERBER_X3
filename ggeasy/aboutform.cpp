@@ -19,7 +19,7 @@ AboutForm::AboutForm(QWidget* parent)
     ui->setupUi(this);
 #ifdef __MINGW32__
     //__MINGW_GCC_VERSION
-    QString str(QString(BUILD_DATE).append(u"<br/>MINGW: GCC(%1.%2.%3) MINGW(%4)"_s).arg(__GNUC__).arg(__GNUC_MINOR__).arg(__GNUC_PATCHLEVEL__).arg(__MINGW64_VERSION_STR));
+    QString str(QString(BUILD_DATE).append(u"<br/>MINGW: GCC(%1.%2.%3) MINGW(%4)"_s.arg(__GNUC__).arg(__GNUC_MINOR__).arg(__GNUC_PATCHLEVEL__).arg(__MINGW64_VERSION_STR));
 #elif __GNUG__ // specific variant for GCC
     QString str(QString::fromUtf8(BUILD_DATE).append(u"<br/>GCC_VER: ") + QString::fromUtf8(__VERSION__));
 #else

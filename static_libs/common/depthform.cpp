@@ -95,7 +95,7 @@ void DepthForm::setupUi(QWidget* Form) {
     horizontalLayout->addSpacing(6);
 
     {
-        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        QSizePolicy sizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed};
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
 

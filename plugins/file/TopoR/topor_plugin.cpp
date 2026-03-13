@@ -46,7 +46,7 @@ std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::an
         //        auto const exFile = static_cast<File*>(file);
         //        QTransform t {exFile->transform()};
         //        for (const Excellon::Hole& hole : *exFile) {
-        //            auto name {QString(u"T%1"_s).arg(hole.state.toolId)};
+        //            auto name {u"T%1"_s.arg(hole.state.toolId)};
         //            if (bool slot = hole.state.path.size(); slot)
         //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
         //            else
@@ -61,11 +61,11 @@ bool Plugin::thisIsIt(const QString& fileName) {
     if(!fileName.endsWith(u".fst"_s, Qt::CaseInsensitive))
         return false;
 
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    QTextStream in(&file);
+    QTextStream in{&file};
     QString line;
 
     while(in.readLineInto(&line)) {
