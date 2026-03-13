@@ -110,7 +110,7 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
 
 DxfGo Text::toGo() const {
 
-    //    for (auto& code : data)
+    // for (auto& code : data)
 
     double ascent{};
     double scaleX{};

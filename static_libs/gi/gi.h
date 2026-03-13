@@ -67,7 +67,7 @@ class Item : public /*QGraphicsObject*/ QGraphicsItem {
     friend class Group;
     friend class ::Project;
 
-    //    Q_OBJECT
+    // Q_OBJECT
     Q_GADGET
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(bool editable READ isEditable WRITE setEditable FINAL)
@@ -110,8 +110,8 @@ public:
     virtual void changeColor() = 0;
 
 protected:
-    //    QPropertyAnimation animation;
-    //    QPropertyAnimation visibleAnim;
+    // QPropertyAnimation animation;
+    // QPropertyAnimation visibleAnim;
 
     mutable QRectF boundingRect_;
 

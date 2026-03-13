@@ -26,7 +26,7 @@ Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths
     } else {
         for(auto&& path_: draw_)
             sourcePath_.addPolygon(~path_);
-        //        setPos(hv_.front());
+        // setPos(hv_.front());
     }
     row.items.emplace_back(this);
     update();
@@ -94,15 +94,15 @@ int Preview::toolId() const {
 }
 
 // Paths Preview::offset(const Path& path_, double offset) {
-////    ClipperOffset cOffset;
-////    // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
-////    cOffset.AddPath(path_, JoinType::Round, EndType::Round);
-////    Paths retPaths = cOffset.Execute(offset * uScale);
-////    for (Path& path_ : retPaths)
-////        path_.push_back(path_.front());
-////    qDebug() << __FUNCTION__ << retPaths.size();
-////    ReversePaths(retPaths);
-//    return {}/*retPaths*/;
+//// ClipperOffset cOffset;
+//// // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
+//// cOffset.AddPath(path_, JoinType::Round, EndType::Round);
+//// Paths retPaths = cOffset.Execute(offset * uScale);
+//// for (Path& path_ : retPaths)
+//// path_.push_back(path_.front());
+//// qDebug() << __FUNCTION__ << retPaths.size();
+//// ReversePaths(retPaths);
+// return {}/*retPaths*/;
 //}
 
 int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1); }

@@ -89,7 +89,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
                 childItems = parent_->childs.mid(1);
             switch(index.column()) {
             case Model::Name:
-                //            case Model::Position:
+                // case Model::Position:
                 return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
@@ -111,8 +111,8 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         } else {
             switch(index.column()) {
             case Model::Name:
-                //            case Model::Position:
-                //                return false;
+                // case Model::Position:
+                // return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
                 item_->redraw();
@@ -138,8 +138,8 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         switch(index.column()) {
         case Model::Name:
             return name.size() ? name : u"{%1,%2}"_s.arg((~pos_).x()).arg((~pos_).y()); // FIXME
-            //        case Model::Position:
-            //            return QVariant::fromValue(pos_); // u"%1 : %2"_s.arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
+            // case Model::Position:
+            // return QVariant::fromValue(pos_); // u"%1 : %2"_s.arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
         case Model::GapAngle:
             return par.angle;
         case Model::apThickness:

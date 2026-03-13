@@ -98,7 +98,7 @@ public:
     mvector<AbstractFile*> files(uint32_t type);
     mvector<AbstractFile*> files(const mvector<uint32_t>& types);
     void deleteFile(int32_t id);
-    //    QString fileNames();
+    // QString fileNames();
     int contains(const QString& name);
 
     // AbstractShape

@@ -142,11 +142,11 @@ void Model::addItem(Gi::Item* item) {
 
     emit select(createIndex(rowCount, 0, node));
 
-    //    QModelIndex index = createIndex(0, 0, itemFolder);
-    //    int rowCount = itemFolder->childCount();
-    //    beginInsertRows(index, rowCount, rowCount);
-    //    itemFolder->addChild(item); //, Node::DontDelete);
-    //    endInsertRows();
+    // QModelIndex index = createIndex(0, 0, itemFolder);
+    // int rowCount = itemFolder->childCount();
+    // beginInsertRows(index, rowCount, rowCount);
+    // itemFolder->addChild(item); //, Node::DontDelete);
+    // endInsertRows();
     // emit select(createIndex(rowCount, 0, shape /*->node()*/));
 }
 
@@ -177,20 +177,20 @@ QModelIndex Model::index(int row, int column, const QModelIndex& parent) const {
     if(childItem)
         return createIndex(row, column, childItem);
     return QModelIndex();
-    //    Node* childItem = getItem(parent)->child(row);
-    //    if (childItem)
-    //        return createIndex(row, column, childItem);
-    //    return QModelIndex();
+    // Node* childItem = getItem(parent)->child(row);
+    // if (childItem)
+    // return createIndex(row, column, childItem);
+    // return QModelIndex();
 }
 
 QModelIndex Model::parent(const QModelIndex& index) const {
-    //    if (!index.isValid())
-    //        return QModelIndex();
-    //    TreeItem* childItem = static_cast<TreeItem*>(index.internalPointer());
-    //    TreeItem* parentItem = childItem->parent();
-    //    if (parentItem == rootItem)
-    //        return QModelIndex();
-    //    return createIndex(parentItem->row(), 0, parentItem);
+    // if (!index.isValid())
+    // return QModelIndex();
+    // TreeItem* childItem = static_cast<TreeItem*>(index.internalPointer());
+    // TreeItem* parentItem = childItem->parent();
+    // if (parentItem == rootItem)
+    // return QModelIndex();
+    // return createIndex(parentItem->row(), 0, parentItem);
 
     if(!index.isValid())
         return QModelIndex();
@@ -256,9 +256,9 @@ int Model::rowCount(const QModelIndex& parent) const {
     parentItem = !parent.isValid() ? rootItem : static_cast<TreeItem*>(parent.internalPointer());
 
     return parentItem->childCount();
-    //    if (parent.column() > 0)
-    //        return 0;
-    //    return getItem(parent)->childCount();
+    // if (parent.column() > 0)
+    // return 0;
+    // return getItem(parent)->childCount();
 }
 
 Node* Model::getItem(const QModelIndex& index) const {

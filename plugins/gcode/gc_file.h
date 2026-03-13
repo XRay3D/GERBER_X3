@@ -21,12 +21,12 @@ class Project;
 namespace GCode {
 
 class File : public AbstractFile {
-    //    friend class ::Project;
+    // friend class ::Project;
 
 public:
     File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths = {});
     File();
-    //    GCodeType gtype() const;
+    // GCodeType gtype() const;
 
     mvector<QString> gCodeText() const;
     const Tool& getTool() const;
@@ -54,9 +54,9 @@ public:
     void endFile();
 
     // AbstractFile interfaces
-    //    void write(QDataStream& stream) const override;
-    //    void read(QDataStream& stream) override;
-    //    void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
+    // void write(QDataStream& stream) const override;
+    // void read(QDataStream& stream) override;
+    // void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
     FileTree::Node* node() override;
 
 private:
@@ -131,7 +131,7 @@ protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
     void initFrom(AbstractFile* /*file*/) override { qWarning(__FUNCTION__); }
-    //    FileTree::Node* node() override;
+    // FileTree::Node* node() override;
 
     /////////////////////////////////////////////////////////////
 

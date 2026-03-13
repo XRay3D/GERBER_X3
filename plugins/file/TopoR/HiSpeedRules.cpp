@@ -1,10 +1,9 @@
 ﻿#include "HiSpeedRules.h"
 #include <ranges>
 
-    // namespace TopoR_PCB_Classes {
+// namespace TopoR_PCB_Classes {
 
-    bool
-    HiSpeedRules::Impedance::ShouldSerialize_LayerImpedanceRules() {
+bool HiSpeedRules::Impedance::ShouldSerialize_LayerImpedanceRules() {
     return _LayerImpedanceRules.empty() ? false : _LayerImpedanceRules.size() > 0;
 }
 

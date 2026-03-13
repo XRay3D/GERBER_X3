@@ -49,7 +49,7 @@ void Shape::redraw() {
             // NOTE may invalidate the pointer↓, update↓
             curHandle = handles.insert(++curHandle, {
                                                         Handle{pts[1], Handle::Corner},
-                                                        Handle{pts[2], Handle::Adder }
+                                                        Handle{pts[2],  Handle::Adder}
             });
         } else if(curHandle->type() == Handle::Corner) {
             if(curHandle != handles.begin() + 1) {
@@ -80,7 +80,7 @@ void Shape::redraw() {
     paths_.front() = {path.begin(), path.end()};
     shape_.clear();
     shape_.addPolygon(~paths_.front());
-    //    rect_ = shape_.boundingRect();
+    // rect_ = shape_.boundingRect();
     if(handles.size() > 4) {
         auto c = centroidFast();
         if(qIsNaN(c.x()) || qIsNaN(c.y())) c = {};

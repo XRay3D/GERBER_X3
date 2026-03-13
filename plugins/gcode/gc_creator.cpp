@@ -154,10 +154,10 @@ void Creator::addRawPaths(Paths&& rawPaths) {
     if(rawPaths.empty())
         return;
 
-    //    if (gcp_.side() == On) {
-    //        workingRawPs_.push_back(rawPaths);
-    //        return;
-    //    }
+    // if (gcp_.side() == On) {
+    // workingRawPs_.push_back(rawPaths);
+    // return;
+    // }
     std::erase_if(rawPaths, [](auto&& path) { return path.size() < 2; });
 
     const double mergDist = App::project().glue() * uScale;
@@ -204,12 +204,12 @@ void Creator::createGc(Params* gcp) {
     // dbgPaths(closedSrcPaths, u"closedPaths"_s);
     // dbgPaths(openSrcPaths, u"openPaths"_s);
 
-    //    dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
-    //    dbgPaths(supportPss, u"supportPathss"_s);
-    //    dbgPaths(openSrcPaths, u"openPaths"_s);
+    // dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
+    // dbgPaths(supportPss, u"supportPathss"_s);
+    // dbgPaths(openSrcPaths, u"openPaths"_s);
 
     gcp_ = std::move(*gcp);
-    //    gcp_ = *gcp;
+    // gcp_ = *gcp;
 
     try {
         if(possibleTest() && !App::isDebug()) {
@@ -298,7 +298,7 @@ void Creator::stacking(Paths& paths) {
                 ReversePath(path);
 
             // if(false && App::settings().cleanPolygons())
-            //     CleanPolygon(path, uScale * 0.0005);
+            // CleanPolygon(path, uScale * 0.0005);
 
             if(returnPss.empty() || newPaths) {
                 returnPss.push_back({std::move(path)});
@@ -306,18 +306,18 @@ void Creator::stacking(Paths& paths) {
                 // check distance;
                 std::pair<size_t, size_t> idx;
                 double d = std::numeric_limits<double>::max();
-                //                for(size_t id {}; id < returnPss.back().back().size(); ++id) {
-                //                    const Point& ptd = returnPss.back().back()[id];
-                //                    for(size_t is {}; is < path.size(); ++is) {
-                //                        const Point& pts = path[is];
-                //                        const double l = distTo(ptdpts);
-                //                        if(d >= l) {
-                //                            d = l;
-                //                            idx.first = id;
-                //                            idx.second = is;
-                //                        }
-                //                    }
-                //                }
+                // for(size_t id {}; id < returnPss.back().back().size(); ++id) {
+                // const Point& ptd = returnPss.back().back()[id];
+                // for(size_t is {}; is < path.size(); ++is) {
+                // const Point& pts = path[is];
+                // const double l = distTo(ptdpts);
+                // if(d >= l) {
+                // d = l;
+                // idx.first = id;
+                // idx.second = is;
+                // }
+                // }
+                // }
 
                 for(size_t iDst{}; auto ptd: returnPss.back().back()) {
                     for(size_t iSrc{}; auto pts: path) {
@@ -449,8 +449,8 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
             for(auto&& node: rwPolyTree(polynode))
                 map[sorter(*node)].emplace_back(std::move(node));
             // auto i = polynode.Count();
-            auto it_ = polynode.end();                                         // std::reverse_iterator(polynode);
-            auto it = *reinterpret_cast<CL2::PolyPath64List::iterator*>(&it_); // FIXME очень грязный хак
+            auto it_ = polynode.end();                                       // std::reverse_iterator(polynode);
+            auto it = reinterpret_cast<CL2::PolyPath64List::iterator&>(it_); // FIXME очень грязный хак
             for(auto&& [nest, nodes]: map)
                 for(auto&& node: nodes)
                     *(--it) = std::move(node);
@@ -509,13 +509,13 @@ bool Creator::checkMilling(SideOfMilling side) {
             F.addPolygon(~frame);
             for(auto&& srcPath: sources) {
                 if(intersect) {
-                    //                    QPainterPath S;
-                    //                    S.addPolygon(ReversePath(srcPath));
-                    //                    if (F.intersects(S)) {
-                    //                        std::lock_guard guard {m};
-                    //                        checker[std::addressof(frame)].insert(srcPath.data());
-                    //                        break;
-                    //                    }
+                    // QPainterPath S;
+                    // S.addPolygon(ReversePath(srcPath));
+                    // if (F.intersects(S)) {
+                    // std::lock_guard guard {m};
+                    // checker[std::addressof(frame)].insert(srcPath.data());
+                    // break;
+                    // }
                 } else {
                     for(auto&& pt: srcPath) {
                         if(auto result = Clipper2Lib::PointInPolygon(pt, frame);
@@ -566,7 +566,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             mvector<QPainterPath> nonCutPPaths;
             srcPPaths.reserve(groupedPss.size());
             for(auto&& paths: groupedPss) {
-                srcPaths.insert(srcPaths.end(), paths.begin(), paths.end()); //  srcPaths.append(paths);
+                srcPaths.insert(srcPaths.end(), paths.begin(), paths.end()); // srcPaths.append(paths);
                 srcPPaths.push_back({});
                 for(auto&& path: paths)
                     srcPPaths.back().addPolygon(~path);
@@ -583,7 +583,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             setCurrent();
 
             std::for_each(std::execution::par, std::begin(nonCutPPaths), std::end(nonCutPPaths), [&srcPPaths, testArea, &m](auto&& nonCut) {
-                //            for (auto&& nonCut : nonCutPPaths) {
+                // for (auto&& nonCut : nonCutPPaths) {
                 incCurrent();
                 std::set<QPainterPath*> set;
                 for(auto&& srcPath: srcPPaths) {
@@ -621,13 +621,13 @@ bool Creator::checkMilling(SideOfMilling side) {
                 frPath = InflateRoundPolygon(frPath, 100).front();
             });
 
-            //        ClipperOffset offset(uScale);
-            //        offset.AddPaths(frPaths, JoinType::Round, EndType::Polygon);
-            //        frPaths = offset.Execute(100);
-            //        ClipperOffset offset(uScale);
-            //        offset.AddPaths(srcPaths, JoinType::Miter, EndType::Polygon);
-            //        srcPaths = offset.Execute(-1000);
-            //        ReversePaths(srcPaths);
+            // ClipperOffset offset(uScale);
+            // offset.AddPaths(frPaths, JoinType::Round, EndType::Polygon);
+            // frPaths = offset.Execute(100);
+            // ClipperOffset offset(uScale);
+            // offset.AddPaths(srcPaths, JoinType::Miter, EndType::Polygon);
+            // srcPaths = offset.Execute(-1000);
+            // ReversePaths(srcPaths);
 
             setCurrent();
             setMax(frPaths.size());
@@ -682,4 +682,4 @@ void Creator::setGcp(const Params& gcp) {
 
 } // namespace GCode
 
-#include "moc_gc_creator.cpp"
+// #include "moc_gc_creator.cpp"

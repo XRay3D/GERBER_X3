@@ -131,52 +131,52 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 // class Delegate : public QStyledItemDelegate {
-//     mutable QComboBox* cbx{};
-//     mutable QString last;
+// mutable QComboBox* cbx{};
+// mutable QString last;
 
 // public:
-//     Delegate(QObject* parent)
-//         : QStyledItemDelegate{parent} { }
-//     ~Delegate() override = default;
+// Delegate(QObject* parent)
+// : QStyledItemDelegate{parent} { }
+// ~Delegate() override = default;
 
-//    // QAbstractItemDelegate interface
-//    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-//        qDebug(__FUNCTION__);
-//        // if(cbx) return cbx;
-//        cbx = new QComboBox{parent};
-//        cbx->setEditable(true);
-//        //        cbx->setCompleter(nullptr); //
-//        connect(cbx->lineEdit(), &QLineEdit::textChanged, this, &Delegate::emitCommitData);
-//        connect(cbx, &QObject::destroyed, this, [] { qDebug(__FUNCTION__); });
-//        return cbx;
-//    }
+// // QAbstractItemDelegate interface
+// QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
+// qDebug(__FUNCTION__);
+// // if(cbx) return cbx;
+// cbx = new QComboBox{parent};
+// cbx->setEditable(true);
+// // cbx->setCompleter(nullptr); //
+// connect(cbx->lineEdit(), &QLineEdit::textChanged, this, &Delegate::emitCommitData);
+// connect(cbx, &QObject::destroyed, this, [] { qDebug(__FUNCTION__); });
+// return cbx;
+// }
 
-//    void setEditorData(QWidget* editor, const QModelIndex& index) const override {
-//        auto cbx = static_cast<QComboBox*>(editor);
-//        for(auto val: index.data(Qt::EditRole).value<std::set<double>>())
-//            cbx->addItem(QString::number(val), val);
-//        last = cbx->currentText();
-//        cbx->lineEdit()->setValidator(new QDoubleValidator{cbx});
-//        cbx->installEventFilter(const_cast<Delegate*>(this));
-//    }
+// void setEditorData(QWidget* editor, const QModelIndex& index) const override {
+// auto cbx = static_cast<QComboBox*>(editor);
+// for(auto val: index.data(Qt::EditRole).value<std::set<double>>())
+// cbx->addItem(QString::number(val), val);
+// last = cbx->currentText();
+// cbx->lineEdit()->setValidator(new QDoubleValidator{cbx});
+// cbx->installEventFilter(const_cast<Delegate*>(this));
+// }
 
-//    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
-//        if(last == cbx->currentText()) return;
-//        auto cbx = static_cast<QComboBox*>(editor);
-//        if(cbx->currentData().isValid()) model->setData(index, cbx->currentData().toDouble());
-//        else model->setData(index, cbx->currentText().toDouble());
-//    }
+// void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
+// if(last == cbx->currentText()) return;
+// auto cbx = static_cast<QComboBox*>(editor);
+// if(cbx->currentData().isValid()) model->setData(index, cbx->currentData().toDouble());
+// else model->setData(index, cbx->currentText().toDouble());
+// }
 
-//    void emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+// void emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
-//    // QObject interface
-//    bool eventFilter(QObject* watched, QEvent* event) override {
-//        if(cbx == watched && event->type() == QEvent::Show) {
-//            if(cbx->count() > 1) cbx->showPopup();
-//            cbx->lineEdit()->selectAll();
-//        }
-//        return QStyledItemDelegate::eventFilter(watched, event);
-//    }
+// // QObject interface
+// bool eventFilter(QObject* watched, QEvent* event) override {
+// if(cbx == watched && event->type() == QEvent::Show) {
+// if(cbx->count() > 1) cbx->showPopup();
+// cbx->lineEdit()->selectAll();
+// }
+// return QStyledItemDelegate::eventFilter(watched, event);
+// }
 //};
 
 class Delegate : public QStyledItemDelegate {
@@ -275,10 +275,10 @@ Editor::Editor(Shapes::Plugin* plugin)
     view->setSpan(Shape::Height, 0, 1, 2);
     view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    //    view->setEditTriggers(QAbstractItemView::AllEditTriggers);
-    //    connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-    //        view->edit(current);
-    //    });
+    // view->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    // connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    // view->edit(current);
+    // });
 }
 
 void Editor::add(Shapes::AbstractShape* shape) {

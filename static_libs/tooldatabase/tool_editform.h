@@ -92,5 +92,5 @@ private:
     std::array<std::pair<DoubleSpinBox*, decltype(&Tool::angle)>, 9> get;
     std::array<std::pair<DoubleSpinBox*, decltype(&Tool::setAngle)>, 9> set;
 
-    //    mvector<DoubleSpinBox*> update;
+    // mvector<DoubleSpinBox*> update;
 };

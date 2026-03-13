@@ -74,7 +74,7 @@ public:
     void reset();
 
     ~Editor() override = default;
-    //    Model* model;
+    // Model* model;
     Shapes::Plugin* plugin;
 
     // QWidget interface

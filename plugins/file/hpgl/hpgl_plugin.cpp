@@ -148,8 +148,8 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
             settings.endGroup();
         }
     };
-    //    auto tab = new Tab(parent);
-    //    tab->setWindowTitle(u"HPGL"_s);
+    // auto tab = new Tab(parent);
+    // tab->setWindowTitle(u"HPGL"_s);
     return nullptr;
 }
 
@@ -158,26 +158,26 @@ void Plugin::updateFileModel(AbstractFile* file) {
     const QModelIndex& fileIndex(file->node()->index());
     const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
     // clean before insert new layers
-    //    if (int count = fm->getItem(fileIndex)->childCount(); count) {
-    //        fm->beginRemoveRows_(index, 0, count - 1);
-    //        auto item = fm->getItem(index);
-    //        do {
-    //            item->remove(--count);
-    //        } while (count);
-    //        fm->endRemoveRows_();
-    //    }
-    //    Hpgl::Layers layers;
-    //    for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
+    // if (int count = fm->getItem(fileIndex)->childCount(); count) {
+    // fm->beginRemoveRows_(index, 0, count - 1);
+    // auto item = fm->getItem(index);
+    // do {
+    // item->remove(--count);
+    // } while (count);
+    // fm->endRemoveRows_();
+    // }
+    // Hpgl::Layers layers;
+    // for (auto& [name, layer] : reinterpret_cast<File*>(file)->layers()) {
 
-    //        if (!layer->isEmpty())
-    //            layers[name] = layer;
-    //    }
-    //    fm->beginInsertRows_(index, 0, int(layers.size() - 1));
-    //    for (auto& [name, layer] : layers) {
+    // if (!layer->isEmpty())
+    // layers[name] = layer;
+    // }
+    // fm->beginInsertRows_(index, 0, int(layers.size() - 1));
+    // for (auto& [name, layer] : layers) {
 
-    //        fm->getItem(index)->addChild(new Hpgl::NodeLayer(name, layer));
-    //    }
-    //    fm->endInsertRows_();
+    // fm->getItem(index)->addChild(new Hpgl::NodeLayer(name, layer));
+    // }
+    // fm->endInsertRows_();
 }
 
 } // namespace Hpgl

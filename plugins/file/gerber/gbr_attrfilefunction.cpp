@@ -28,10 +28,10 @@ Copper::Copper(File::Function function, const QStringList& list)
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1)))
     , type(toType(list.value(2))) {
-    //    qDebug()
-    //        << u"\n\t"_s << layer
-    //        << u"\n\t"_s << side
-    //        << u"\n\t"_s << type;
+    // qDebug()
+    // << u"\n\t"_s << layer
+    // << u"\n\t"_s << side
+    // << u"\n\t"_s << type;
 }
 /////////////////////////////////////////////////////
 /// \brief Plated::Plated
@@ -44,11 +44,11 @@ Plated::Plated(File::Function function, const QStringList& list)
     , layerTo(list.value(1).toInt())
     , type(toType(list.value(2)))
     , label(toLabel(list.value(3))) {
-    //    qDebug()
-    //        << u"\n\t"_s << layerFrom
-    //        << u"\n\t"_s << layerTo
-    //        << u"\n\t"_s << type
-    //        << u"\n\t"_s << label;
+    // qDebug()
+    // << u"\n\t"_s << layerFrom
+    // << u"\n\t"_s << layerTo
+    // << u"\n\t"_s << type
+    // << u"\n\t"_s << label;
 }
 /////////////////////////////////////////////////////
 /// \brief NonPlated::NonPlated
@@ -61,11 +61,11 @@ NonPlated::NonPlated(File::Function function, const QStringList& list)
     , layerTo(list.value(1).toInt())
     , type(toType(list.value(2)))
     , label(toLabel(list.value(3))) {
-    //    qDebug()
-    //        << u"\n\t"_s << layerFrom
-    //        << u"\n\t"_s << layerTo
-    //        << u"\n\t"_s << type
-    //        << u"\n\t"_s << label;
+    // qDebug()
+    // << u"\n\t"_s << layerFrom
+    // << u"\n\t"_s << layerTo
+    // << u"\n\t"_s << type
+    // << u"\n\t"_s << label;
 }
 /////////////////////////////////////////////////////
 /// \brief Legend::Legend
@@ -76,9 +76,9 @@ Legend::Legend(File::Function function, const QStringList& list)
     : AbstrFileFunc{function}
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1) {
-    //    qDebug()
-    //        << u"\n\t"_s << side
-    //        << u"\n\t"_s << index;
+    // qDebug()
+    // << u"\n\t"_s << side
+    // << u"\n\t"_s << index;
 }
 /////////////////////////////////////////////////////
 /// \brief Soldermask::Soldermask
@@ -90,10 +90,10 @@ Mask::Mask(File::Function function, const QStringList& list)
     , side(toSide(list.value(0)))
     , index(list.size() > 1 ? list.value(1).toInt() : -1)
     , type(toType(function)) {
-    //    qDebug()
-    //        << u"\n\t"_s << side
-    //        << u"\n\t"_s << index
-    //        << u"\n\t"_s << type;
+    // qDebug()
+    // << u"\n\t"_s << side
+    // << u"\n\t"_s << index
+    // << u"\n\t"_s << type;
 }
 /////////////////////////////////////////////////////
 /// \brief Profile::Profile
@@ -103,8 +103,8 @@ Mask::Mask(File::Function function, const QStringList& list)
 Profile::Profile(File::Function function, const QStringList& list)
     : AbstrFileFunc{function}
     , plated(toEdgePlated(list.value(0))) {
-    //    qDebug()
-    //        << u"\n\t"_s << plated;
+    // qDebug()
+    // << u"\n\t"_s << plated;
 }
 /////////////////////////////////////////////////////
 /// \brief Paste::Paste
@@ -114,8 +114,8 @@ Profile::Profile(File::Function function, const QStringList& list)
 Paste::Paste(File::Function function, const QStringList& list)
     : AbstrFileFunc{function}
     , side(toSide(list.value(0))) {
-    //    qDebug()
-    //        << u"\n\t"_s << side;
+    // qDebug()
+    // << u"\n\t"_s << side;
 }
 /////////////////////////////////////////////////////
 /// \brief AssemblyDrawing::AssemblyDrawing
@@ -125,8 +125,8 @@ Paste::Paste(File::Function function, const QStringList& list)
 AssemblyDrawing::AssemblyDrawing(File::Function function, const QStringList& list)
     : AbstrFileFunc{function}
     , side(toSide(list.value(0))) {
-    //    qDebug()
-    //        << u"\n\t"_s << side;
+    // qDebug()
+    // << u"\n\t"_s << side;
 }
 /////////////////////////////////////////////////////
 /// \brief Component::Component
@@ -137,9 +137,9 @@ Component::Component(File::Function function, const QStringList& list)
     : AbstrFileFunc{function}
     , layer(toLayer(list.value(0)))
     , side(toSide(list.value(1))) {
-    //    qDebug()
-    //        << u"\n\t"_s << layer
-    //        << u"\n\t"_s << side;
+    // qDebug()
+    // << u"\n\t"_s << layer
+    // << u"\n\t"_s << side;
 }
 
 } // namespace Gerber::Attr

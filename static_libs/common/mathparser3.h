@@ -18,10 +18,10 @@ public:
     public:
         double acc{};       // Аккамулятор
         QStringView rest{}; // остаток строки, которую мы еще не обработали
-        //    Result(double v = 0.0, const QStringView& r = {})
-        //        : acc{v}
-        //        , rest(r) {
-        //    }
+        // Result(double v = 0.0, const QStringView& r = {})
+        // : acc{v}
+        // , rest(r) {
+        // }
     };
     using VarMap = std::map<QString, double>;
     MathParser3(VarMap* variables);

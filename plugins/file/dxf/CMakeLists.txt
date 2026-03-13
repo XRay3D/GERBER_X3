@@ -19,7 +19,7 @@ set(PLUG_LOCAL_VERSION "2")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
 
-file(GLOB_RECURSE HEADERS *.h)
+# file(GLOB_RECURSE HEADERS *.h)
 file(GLOB_RECURSE JSONS *.json)
 file(GLOB_RECURSE SOURCES *.cpp)
 file(GLOB_RECURSE UIS *.ui)

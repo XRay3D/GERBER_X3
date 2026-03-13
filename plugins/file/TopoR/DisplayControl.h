@@ -991,14 +991,14 @@ public:
     Colors_DisplayControl* _Colors;
 
     /// <summary>
-    ///  Настройка отображения: настройки видимости объектов.
+    /// Настройка отображения: настройки видимости объектов.
     /// </summary>
 
     // ORIGINAL LINE: [XmlElement(u"Show"_s)] public Show_DisplayControl _Show;
     Show_DisplayControl* _Show;
 
     /// <summary>
-    ///  Настройки сетки.
+    /// Настройки сетки.
     /// </summary>
 
     // ORIGINAL LINE: [XmlElement(u"Grid"_s)] public Grid _Grid;

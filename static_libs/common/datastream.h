@@ -107,7 +107,7 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
 // порционное сохранение для гибкости.
 class Block final {
     QDataStream& stream;
-    //    QByteArray data;
+    // QByteArray data;
     uint32_t count{};
 
 public:

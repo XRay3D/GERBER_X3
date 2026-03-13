@@ -201,10 +201,10 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
             padding.height(),
         };
     }
-    //    const auto r1(getViewRect().toRect());
-    //    const auto r2(dstRect.toRect());
-    //    if (r1 == r2)
-    //        return;
+    // const auto r1(getViewRect().toRect());
+    // const auto r2(dstRect.toRect());
+    // if (r1 == r2)
+    // return;
     if(App::settings().guiSmoothScSh()) {
         animate(this, "viewRect", getViewRect(), dstRect);
     } else {
@@ -493,7 +493,11 @@ void GraphicsView::dropEvent(QDropEvent* event) {
     qDebug(__FUNCTION__);
     auto mimeData{event->mimeData()};
     for(QUrl& var: mimeData->urls())
-        emit fileDroped(var.path().remove(0, 1));
+        emit fileDroped(var.path()
+#ifdef Q_OS_WINDOWS
+                .remove(0, 1)
+#endif
+        );
 
     if(mimeData->hasFormat(Ruler::MimeType) && event->source() != this)
         scene()->addItem(new Gi::Guide{
@@ -569,11 +573,11 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
         QGraphicsView::mousePressEvent(&fakeEvent);
     } else if(event->button() == Qt::RightButton) {
         qInfo("RightButton");
-        //        { // удаление мостика
-        //            QGraphicsItem* item = scene()->itemAt(mapToScene(event->position().toPoint()), transform());
-        //            if (item && item->type() == Gi::Type::Bridge && !static_cast<BridgeItem*>(item)->ok())
-        //                delete item;
-        //        }
+        // { // удаление мостика
+        // QGraphicsItem* item = scene()->itemAt(mapToScene(event->position().toPoint()), transform());
+        // if (item && item->type() == Gi::Type::Bridge && !static_cast<BridgeItem*>(item)->ok())
+        // delete item;
+        // }
         // это что бы при вызове контекстного меню ничего постороннего не было
         setDragMode(NoDrag);
         emit mouseClickR(mappedPos(event));
@@ -694,8 +698,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         };
 
         auto borders = [&] {
-            const double start = isHor ? rect.left() : rect.top();   //  rectangle starting mark
-            const double end = isHor ? rect.right() : rect.bottom(); //  rectangle ending mark
+            const double start = isHor ? rect.left() : rect.top();   // rectangle starting mark
+            const double end = isHor ? rect.right() : rect.bottom(); // rectangle ending mark
 
             /*
             Условие A # Если исходная точка находится между начальной и конечной границей,
@@ -749,8 +753,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k, point.y(),     point.x() + k, point.y()    },
-            {point.x(),     point.y() - k, point.x(),     point.y() + k}
+            {point.x() - k,     point.y(), point.x() + k,     point.y()},
+            {    point.x(), point.y() - k,     point.x(), point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -762,8 +766,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {0,           rect.top(), 0,            rect.bottom()},
-            {rect.left(), 0,          rect.right(), 0            }
+            {          0, rect.top(),            0, rect.bottom()},
+            {rect.left(),          0, rect.right(),             0}
         };
         painter->drawLines(lines, 2);
     }
@@ -850,7 +854,7 @@ void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
 }
 
 void GraphicsView::timerEvent(QTimerEvent* /*event*/) {
-    //    if (event->timerId() == timerId)
+    // if (event->timerId() == timerId)
     ++App::dashOffset();
     scene()->update();
 }

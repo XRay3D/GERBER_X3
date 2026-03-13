@@ -68,10 +68,10 @@ segment_type retrieve_segment(std::vector<segment_type>& segment_data_, const ce
 point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_type& cell) {
     source_index_type index = cell.source_index();
     source_category_type category = cell.source_category();
-    //    if (category == boost::polygon::SOURCE_CATEGORY_SINGLE_POINT) {
-    //        return point_data_[index];
-    //    }
-    //    index -= point_data_.size();
+    // if (category == boost::polygon::SOURCE_CATEGORY_SINGLE_POINT) {
+    // return point_data_[index];
+    // }
+    // index -= point_data_.size();
     return category == boost::polygon::SOURCE_CATEGORY_SEGMENT_START_POINT ? low(segment_data_[index]) : high(segment_data_[index]);
 }
 
@@ -127,8 +127,8 @@ void VoronoiBoost::boostVoronoi() {
                 throwIfCancel();
                 const Point& point = path[i];
                 vecId.emplace_back(id);
-                //                !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
-                //                   : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
+                // !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
+                // : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
                 !i ? srcSegments.emplace_back(
                     point_type{static_cast<coordinate_type>(path.back().x), static_cast<coordinate_type>(path.back().y)},
                     point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)})
@@ -144,10 +144,10 @@ void VoronoiBoost::boostVoronoi() {
     }
     const /*PType*/ int32_t kx = (maxX - minX) * 2;
     const /*PType*/ int32_t ky = (maxY - minY) * 2;
-    //    srcSegments.emplace_back(maxX + kx, minY - ky, maxX + kx, maxY + ky, ++id);
-    //    srcSegments.emplace_back(maxX + kx, minY - ky, minX - kx, minY - ky, id);
-    //    srcSegments.emplace_back(minX - kx, maxY + ky, maxX + kx, maxY + ky, id);
-    //    srcSegments.emplace_back(minX - kx, minY - ky, minX - kx, maxY + ky, id);
+    // srcSegments.emplace_back(maxX + kx, minY - ky, maxX + kx, maxY + ky, ++id);
+    // srcSegments.emplace_back(maxX + kx, minY - ky, minX - kx, minY - ky, id);
+    // srcSegments.emplace_back(minX - kx, maxY + ky, maxX + kx, maxY + ky, id);
+    // srcSegments.emplace_back(minX - kx, minY - ky, minX - kx, maxY + ky, id);
     vecId.emplace_back(++id);
     srcSegments.emplace_back(
         point_type{static_cast<coordinate_type>(maxX + kx), static_cast<coordinate_type>(minY - ky)},
@@ -166,8 +166,8 @@ void VoronoiBoost::boostVoronoi() {
         point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
     qDebug() << u"max id:"_s << id;
-    //    const /*Point::Type*/int32_t kx = (maxX - minX) * 2;
-    //    const /*Point::Type*/int32_t ky = (maxY - minY) * 2;
+    // const /*Point::Type*/int32_t kx = (maxX - minX) * 2;
+    // const /*Point::Type*/int32_t ky = (maxY - minY) * 2;
 
     Paths segments;
     {
@@ -175,13 +175,13 @@ void VoronoiBoost::boostVoronoi() {
         construct_voronoi(srcSegments.begin(), srcSegments.end(), &vd);
 
         auto id0 = [&](auto edge) { return vecId[edge.cell()->source_index()]; };
-        //        auto id2 = [&](auto edge) { return srcSegments[edge->cell()->source_index()].id2; };
+        // auto id2 = [&](auto edge) { return srcSegments[edge->cell()->source_index()].id2; };
         auto id1 = [&](auto edge) { return vecId[edge.twin()->cell()->source_index()]; };
-        //        auto id2_ = [&](auto edge) { return srcSegments[edge.twin()->cell()->source_index()].id2; };
+        // auto id2_ = [&](auto edge) { return srcSegments[edge.twin()->cell()->source_index()].id2; };
 
-        //        for (auto& cell : vd.cells()) {
-        //            cell.color(srcSegments[cell.source_index()].id);
-        //        }
+        // for (auto& cell : vd.cells()) {
+        // cell.color(srcSegments[cell.source_index()].id);
+        // }
 
         std::set<Path> set;
 
@@ -189,8 +189,8 @@ void VoronoiBoost::boostVoronoi() {
             auto v0 = edge.vertex0();
             auto v1 = edge.vertex1();
 
-            //            auto cell1 = edge.cell();
-            //            auto cell2 = edge.twin()->cell();
+            // auto cell1 = edge.cell();
+            // auto cell2 = edge.twin()->cell();
 
             auto color1 = id0(edge);
             auto color2 = id1(edge);
@@ -228,7 +228,7 @@ void VoronoiBoost::boostVoronoi() {
         clipper.Execute(ClipType::Intersection, FillRule::NonZero, segments, segments);
     }
 
-    //    dbgPaths(segments, u"segments"_s);
+    // dbgPaths(segments, u"segments"_s);
     auto clean = [kAngle = 2.0](Path& path) {
         for (size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = angleTo(path[i - 1],path[i + 0]);

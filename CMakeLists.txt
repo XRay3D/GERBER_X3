@@ -132,7 +132,7 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(${COMMON_COMPILE_OPTIONS})
   link_libraries(stdc++exp)
-  add_link_options(-fuse-ld=mold)
+  add_link_options(-fuse-ld=lld)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")

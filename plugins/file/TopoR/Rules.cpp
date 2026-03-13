@@ -1,9 +1,8 @@
 ﻿#include "Rules.h"
 
-    // namespace TopoR_PCB_Classes {
+// namespace TopoR_PCB_Classes {
 
-    bool
-    Rules::WidthOfWires::getEnabledSpecified() const {
+bool Rules::WidthOfWires::getEnabledSpecified() const {
     return _enabled != Bool::off;
 }
 
@@ -124,26 +123,26 @@ bool Rules::ShouldSerialize_NetProperties() {
 }
 
 void Rules::Rename_compName(const QString& oldname, const QString& newname) {
-    //    for (auto a : *_PadConnectSettings == nullptr ? false : (_PadConnectSettings->_PadRefs.empty() ? false : _PadConnectSettings->_PadRefs.Where([&](std::any aa) {
-    //             return aa->_compName == oldname;
-    //         }))) {
-    //        a->_compName = newname;
-    //    }
-    //    for (auto a : *_PadConnectSettings == nullptr ? false : (_PadConnectSettings->_PinRefs.empty() ? false : _PadConnectSettings->_PinRefs.Where([&](std::any aa) {
-    //             return aa->_compName == oldname;
-    //         }))) {
-    //        a->_compName = newname;
-    //    }
+    // for (auto a : *_PadConnectSettings == nullptr ? false : (_PadConnectSettings->_PadRefs.empty() ? false : _PadConnectSettings->_PadRefs.Where([&](std::any aa) {
+    // return aa->_compName == oldname;
+    // }))) {
+    // a->_compName = newname;
+    // }
+    // for (auto a : *_PadConnectSettings == nullptr ? false : (_PadConnectSettings->_PinRefs.empty() ? false : _PadConnectSettings->_PinRefs.Where([&](std::any aa) {
+    // return aa->_compName == oldname;
+    // }))) {
+    // a->_compName = newname;
+    // }
 
-    //    for (auto a : _RulesClearancesCompToComp.empty() ? false : _RulesClearancesCompToComp.Where([&](std::any aa) {
-    //             return aa::_ObjectsAffected != nullptr;
-    //         })) {
-    //        for (auto b : a::_ObjectsAffected::OfType<ComponentRef*>().Where([&](std::any bb) {
-    //                 return bb->_ReferenceName == oldname;
-    //             })) {
-    //            b->_ReferenceName = newname;
-    //        }
-    //    }
+    // for (auto a : _RulesClearancesCompToComp.empty() ? false : _RulesClearancesCompToComp.Where([&](std::any aa) {
+    // return aa::_ObjectsAffected != nullptr;
+    // })) {
+    // for (auto b : a::_ObjectsAffected::OfType<ComponentRef*>().Where([&](std::any bb) {
+    // return bb->_ReferenceName == oldname;
+    // })) {
+    // b->_ReferenceName = newname;
+    // }
+    // }
 
     /****************************************************************/
 }

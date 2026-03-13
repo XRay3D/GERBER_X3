@@ -113,7 +113,7 @@ void ChaiScriptSyntaxHighlighter::initializeRules() {
     // 'def' followed by an identifier
     // FF: originally: r'\bdef\b\s*(\w+)'
     rules.append(ChaiScriptRule(u"\\bdef\\b\\s*(\\w+)"_s, 1, basicStyles.value(u"defclass"_s)));
-    //  'class' followed by an identifier
+    // 'class' followed by an identifier
     // FF: originally: r'\bclass\b\s*(\w+)'
     rules.append(ChaiScriptRule(u"\\bclass\\b\\s*(\\w+)"_s, 1, basicStyles.value(u"defclass"_s)));
 

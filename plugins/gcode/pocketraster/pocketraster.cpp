@@ -54,9 +54,9 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     Paths fillPaths;
 
     for(Paths src: groupedPss) {
-        //        ClipperOffset offset(uScale);
-        //        offset.AddPaths(src, JoinType::Round, EndType::Polygon);
-        //        src = offset.Execute(-dOffset);
+        // ClipperOffset offset(uScale);
+        // offset.AddPaths(src, JoinType::Round, EndType::Polygon);
+        // src = offset.Execute(-dOffset);
 
         src = Inflate(src, -dOffset, JoinType::Round, EndType::Polygon, uScale);
 
@@ -148,7 +148,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     { // create exposure frames
       // ClipperOffset o;
       // for(auto& p: groupedPss)
-      //     o.AddPaths(p, JoinType::Round, EndType::Polygon);
+      // o.AddPaths(p, JoinType::Round, EndType::Polygon);
       // profilePaths = o.Execute(-tool.diameter() * uScale);
         // auto it = v::join(groupedPss);
         profilePaths = Inflate(join(groupedPss), -tool.diameter() * uScale, JoinType::Round, EndType::Polygon);
@@ -190,7 +190,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         }
     }
 
-    { //  calculate
+    { // calculate
         Clipper c;
         c.AddOpenSubject({zPath});
         c.AddClip(laserPath);
@@ -290,7 +290,7 @@ void Creator::addAcc(Paths& src, const /*PType*/ int32_t accDistance) {
         }
     };
 
-    { //  calculate
+    { // calculate
         /*PType*/ int32_t yLast = src.front().front().y;
         Paths paths;
 

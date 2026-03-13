@@ -33,7 +33,7 @@ void Block::parseHeader(CodeData& code) {
         case EntityType:
         case Handle:
         case StartOfApplication_definedGroup:
-            //        case EndOfGroup:
+            // case EndOfGroup:
         case SoftPointerID:
         case SubclassMarker: break;
         case LayerName:
@@ -58,7 +58,7 @@ void Block::parseData(CodeData& code) {
     do {
         if(code == u"ENDBLK"_s)
             break;
-        //        sp->prevCode(); // unwind parser
+        // sp->prevCode(); // unwind parser
         SectionENTITIES se(blocks, code, sp);
         entities = std::move(se.entities);
         if(code == u"ENDBLK"_s)

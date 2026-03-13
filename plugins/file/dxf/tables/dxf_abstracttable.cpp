@@ -27,24 +27,24 @@ void AbstractTable::parse(CodeData& code) {
         break;
     case HandleTableOnly: // 105
         break;
-        //    case StartOfApplicationDefinedGroup: // 102
-        //        break;
-        //    case EndOfGroup: // 102
-        //        break;
+        // case StartOfApplicationDefinedGroup: // 102
+        // break;
+        // case EndOfGroup: // 102
+        // break;
     case IndicatesTheStartOfTheAutocadPersistentReactorsGroup: // 102
         break;
     case HandleToOwnerDictionary: // 330
         break;
-        //    case IndicatesEndOfGroup: // 102
-        //        break;
-        //    case StartOfAnExtensionDictionaryGrou: // 102
-        //        break;
+        // case IndicatesEndOfGroup: // 102
+        // break;
+        // case StartOfAnExtensionDictionaryGrou: // 102
+        // break;
     case Hard_OwnerID_HandleToOwnerDictionary: // 360
         break;
-        //    case DictionaryEndOfGroup: // 102
-        //        break;
-        //    case SoftPointerID_HandleToOwnerObject: // 330
-        //        break;
+        // case DictionaryEndOfGroup: // 102
+        // break;
+        // case SoftPointerID_HandleToOwnerObject: // 330
+        // break;
     case SubclassMarker: // 100
         break;
     default:

@@ -1,9 +1,9 @@
 // Boost.Polygon library voronoi_graphic_utils.hpp header file
 
-//          Copyright Andrii Sydorchuk 2010-2012.
+// Copyright Andrii Sydorchuk 2010-2012.
 // Distributed under the Boost Software License, Version 1.0.
-//    (See accompanying file LICENSE_1_0.txt or copy at
-//          http://www.boost.org/LICENSE_1_0.txt)
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
 
 // See http://www.boost.org for updates, documentation, and revision history.
 
@@ -29,18 +29,18 @@ public:
     // from the initial input set.
     //
     // Args:
-    //   point: input point.
-    //   segment: input segment.
-    //   max_dist: maximum discretization distance.
-    //   discretization: point discretization of the given Voronoi edge.
+    // point: input point.
+    // segment: input segment.
+    // max_dist: maximum discretization distance.
+    // discretization: point discretization of the given Voronoi edge.
     //
     // Template arguments:
-    //   InCT: coordinate type of the input geometries (usually integer).
-    //   Point: point type, should model point concept.
-    //   Segment: segment type, should model segment concept.
+    // InCT: coordinate type of the input geometries (usually integer).
+    // Point: point type, should model point concept.
+    // Segment: segment type, should model segment concept.
     //
     // Important:
-    //   discretization should contain both edge endpoints initially.
+    // discretization should contain both edge endpoints initially.
     template <class InCT1, class InCT2,
         template <class> class Point,
         template <class> class Segment>
@@ -126,8 +126,8 @@ private:
     }
 
     // Get normalized length of the distance between:
-    //   1) point projection onto the segment
-    //   2) start point of the segment
+    // 1) point projection onto the segment
+    // 2) start point of the segment
     // Return this length divided by the segment length. This is made to avoid
     // sqrt computation during transformation from the initial space to the
     // transformed one and vice versa. The assumption is made that projection of

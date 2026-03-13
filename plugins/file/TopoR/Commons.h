@@ -29,7 +29,7 @@ class Shift;
 
 // namespace TopoR_PCB_Classes {
 
-//	#region Enumerations //Все enum в алфавитном порядке
+// #region Enumerations //Все enum в алфавитном порядке
 
 /// <summary>
 /// Параметр надписей (ярлыков): способ выравнивания текста. Значение по умолчанию – CM.
@@ -833,9 +833,9 @@ enum class wireShape {
 Q_DECLARE_METATYPE(wireShape)
 Q_DECLARE_FLAGS(wireShapes, wireShape)
 
-//	#endregion Enumerations
+// #endregion Enumerations
 
-//	#region Reference Types
+// #region Reference Types
 /// <summary>
 /// базовый класс ссылок.
 /// </summary>
@@ -882,7 +882,7 @@ class LayerRef : public BaseRef {
     /// </summary>
     /// <remarks>В документации сказано ещё и про возможность установки типа, если имя слоя неуникально, в данный момент это отключено</remarks>
     // TODO:
-    //   XmlAttribute(u"type"_s, typeof(type_layer)),
+    // XmlAttribute(u"type"_s, typeof(type_layer)),
 };
 
 /// <summary>
@@ -1012,9 +1012,9 @@ public:
     // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
     int _padNum{};
 };
-//	#endregion Reference Type
+// #endregion Reference Type
 
-//	#region Coordinates
+// #region Coordinates
 
 class base_coordinat {
 public:
@@ -1077,9 +1077,9 @@ class Shift : public base_coordinat {
 class Stretch : public base_coordinat {
 };
 
-//	#endregion Coordinates
+// #endregion Coordinates
 
-//	#region Segments
+// #region Segments
 class IBaseSegment {
 public:
     virtual void Shift(float x, float y) = 0;
@@ -1167,9 +1167,9 @@ public:
 
     void UnitsConvert(dist_ in_units, dist_ out_units);
 };
-//	#endregion Segments
+// #endregion Segments
 
-//	#region Figures
+// #region Figures
 /// <summary>
 /// Интерфейс BaseFigure создан для реализации удобного доступа к одинаковым методам разных объектов
 /// </summary>
@@ -1473,9 +1473,9 @@ public:
     void UnitsConvert(dist_ in_units, dist_ out_units) override;
 };
 
-//	#endregion Figures
+// #endregion Figures
 
-//	#region Rules area
+// #region Rules area
 /// <summary>
 /// Устанавливает область действия правила: все слои.
 /// </summary>
@@ -1564,9 +1564,9 @@ public:
     // ORIGINAL LINE: [XmlElement(u"AllViastacksNotThrough"_s)] public string _AllViastacksNotThrough;
     QString _AllViastacksNotThrough;
 };
-//	#endregion Rules area
+// #endregion Rules area
 
-//	#region Thermal Detail Text ObjectSignal
+// #region Thermal Detail Text ObjectSignal
 
 /// <summary>
 /// Описание термобарьера.
@@ -1740,7 +1740,7 @@ public:
     // ORIGINAL LINE: [XmlElement(u"SignalRef"_s, typeof(SignalRef)), XmlElement(u"DiffSignalRef"_s, typeof(DiffSignalRef)), XmlElement(u"SignalGroupRef"_s, typeof(SignalGroupRef)),] public Object _Refs;
     std::variant<SignalRef, DiffSignalRef, SignalGroupRef> _Refs;
 };
-//	#endregion
+// #endregion
 
 /// <summary>
 /// Различные сервисные функции

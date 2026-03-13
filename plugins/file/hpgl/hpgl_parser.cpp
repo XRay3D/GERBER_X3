@@ -40,77 +40,77 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
         default:
             qDebug() << cmd;
         }
-        //        file->lines().push_back(line);
-        //        try {
-        //            if (line == u"%"_s)
-        //                continue;
+        // file->lines().push_back(line);
+        // try {
+        // if (line == u"%"_s)
+        // continue;
 
-        //            if (parseComment(line))
-        //                continue;
+        // if (parseComment(line))
+        // continue;
 
-        //            if (parseFormat(line))
-        //                continue;
+        // if (parseFormat(line))
+        // continue;
 
-        //            if (parseTCode(line))
-        //                continue;
+        // if (parseTCode(line))
+        // continue;
 
-        //            if (parseGCode(line))
-        //                continue;
+        // if (parseGCode(line))
+        // continue;
 
-        //            if (parseMCode(line))
-        //                continue;
+        // if (parseMCode(line))
+        // continue;
 
-        //            if (parseRepeat(line))
-        //                continue;
+        // if (parseRepeat(line))
+        // continue;
 
-        //            if (parseSlot(line))
-        //                continue;
+        // if (parseSlot(line))
+        // continue;
 
-        //            if (parsePos(line))
-        //                continue;
-        //            qWarning() << u"Excellon unparsed:"_s << line;
-        //        } catch (const QString& errStr) {
-        //            qWarning() << u"exeption Q:"_s << errStr;
-        //            emit interface->fileError("u", QFileInfo(fileName).fileName() + u'\n' + errStr);
-        //            delete file;
-        //            return nullptr;
-        //        } catch (...) {
-        //            qWarning() << u"exeption S:"_s << errno;
-        //            emit interface->fileError("u", QFileInfo(fileName).fileName() + "_s\nu" + "_sUnknown Error!");
-        //            delete file;
-        //            return nullptr;
-        //        }
+        // if (parsePos(line))
+        // continue;
+        // qWarning() << u"Excellon unparsed:"_s << line;
+        // } catch (const QString& errStr) {
+        // qWarning() << u"exeption Q:"_s << errStr;
+        // emit interface->fileError("u", QFileInfo(fileName).fileName() + u'\n' + errStr);
+        // delete file;
+        // return nullptr;
+        // } catch (...) {
+        // qWarning() << u"exeption S:"_s << errno;
+        // emit interface->fileError("u", QFileInfo(fileName).fileName() + "_s\nu" + "_sUnknown Error!");
+        // delete file;
+        // return nullptr;
+        // }
     }
-    //    if (file->isEmpty()) {
-    //        delete file;
-    //        file = nullptr;
-    //    } else {
-    //        emit interface->fileReady(this->file);
-    //    }
+    // if (file->isEmpty()) {
+    // delete file;
+    // file = nullptr;
+    // } else {
+    // emit interface->fileReady(this->file);
+    // }
     return file;
 
-    //    try {
+    // try {
 
-    //    } catch (const QString& wath) {
-    //        qWarning() << u"exeption QString:"_s << wath;
-    //        //emit fileProgress(m_file->shortName(), 1, 1);
-    //        emit fileError(QFileInfo(fileName).fileName(), wath);
-    //        delete file;
-    //        return nullptr;
-    //    } catch (const std::exception& e) {
-    //        qWarning() << u"exeption:"_s << e.what();
-    //        //emit fileProgress(m_file->shortName(), 1, 1);
-    //        emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString(e.what()));
-    //        delete file;
-    //        return nullptr;
-    //    } catch (...) {
-    //        qWarning() << u"exeption:"_s << errno;
-    //        //emit fileProgress(m_file->shortName(), 1, 1);
-    //        emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::number(errno));
-    //        delete file;
-    //        return nullptr;
-    //    }
-    //    return file;
+    // } catch (const QString& wath) {
+    // qWarning() << u"exeption QString:"_s << wath;
+    // //emit fileProgress(m_file->shortName(), 1, 1);
+    // emit fileError(QFileInfo(fileName).fileName(), wath);
+    // delete file;
+    // return nullptr;
+    // } catch (const std::exception& e) {
+    // qWarning() << u"exeption:"_s << e.what();
+    // //emit fileProgress(m_file->shortName(), 1, 1);
+    // emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString(e.what()));
+    // delete file;
+    // return nullptr;
+    // } catch (...) {
+    // qWarning() << u"exeption:"_s << errno;
+    // //emit fileProgress(m_file->shortName(), 1, 1);
+    // emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::number(errno));
+    // delete file;
+    // return nullptr;
+    // }
+    // return file;
 }
 
 } // namespace Hpgl

@@ -1,9 +1,8 @@
 ﻿#include "Layers.h"
 
-    // namespace TopoR_PCB_Classes {
+// namespace TopoR_PCB_Classes {
 
-    bool
-    Layer::getCompsOutlineSpecified() const { return type == layer_type::Assy; }
+bool Layer::getCompsOutlineSpecified() const { return type == layer_type::Assy; }
 
 bool Layer::getThicknessSpecified() const { return type != layer_type::Assy; }
 

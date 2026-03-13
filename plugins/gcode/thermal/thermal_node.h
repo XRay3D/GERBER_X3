@@ -25,15 +25,15 @@ class Node;
 
 // class NodeI {
 // public:
-//     virtual ~NodeI() { }
-//     virtual bool isChecked() const = 0;
-//     virtual void disable() = 0;
-//     virtual void enable() = 0;
-//     virtual QModelIndex index(int column = 0) const = 0;
+// virtual ~NodeI() { }
+// virtual bool isChecked() const = 0;
+// virtual void disable() = 0;
+// virtual void enable() = 0;
+// virtual QModelIndex index(int column = 0) const = 0;
 
-//    virtual double angle() const = 0;
-//    virtual double tickness() const = 0;
-//    virtual int count() const = 0;
+// virtual double angle() const = 0;
+// virtual double tickness() const = 0;
+// virtual int count() const = 0;
 //};
 
 #define override /**/

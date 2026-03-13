@@ -33,13 +33,13 @@ class QTreeWidgetItem;
 #endif
 
 // MathParser2::Expression::Expression(std::string_view token)
-//     : token{token} {}
+// : token{token} {}
 // MathParser2::Expression::Expression(std::string_view token, Expression a)
-//     : token{token}
-//     , args {a} {}
+// : token{token}
+// , args {a} {}
 // MathParser2::Expression::Expression(std::string_view token, Expression a, Expression b)
-//     : token{token}
-//     , args {a, b} {}
+// : token{token}
+// , args {a, b} {}
 MathParser2::MathParser2(VarMap&& variables, std::string_view input)
     : input{input}
     , variables{std::move(variables)} { }
@@ -107,7 +107,7 @@ MathParser2::Expression MathParser2::parseBinaryExpression(int minPriority) {
         auto op = parseToken();
         auto priority = getPriority(op);
         if(priority <= minPriority) {
-            //            input -= op.size();
+            // input -= op.size();
             // std::cerr << input << std::endl;
             auto begin = input.data();
             auto end = input.data() + input.size();
@@ -154,23 +154,23 @@ Double MathParser2::parse(std::string_view input_) {
         auto ret = std::nan("");
         // *std::bit_cast<uint64_t*>(&ret) |= int(e);
         return ret;
-        //        static std::array<char, 8> arr {};
-        //        std::fill_n(std::begin(arr), std::size(arr) - 1, '\0');
-        //        auto res = std::to_chars(arr.data(), arr.data() + arr.size(), (int)stringToEnum<ParseError>(ex.what()));
-        //        std::cerr << arr.data() << std::endl;
-        //        return std::nan(arr.data()); // хз почему рантайм не работает
-        //        switch (e) {
-        //        case ParseError ::Expected_round_bracket:
-        //            return std::nan("0");
-        //        case ParseError ::Invalid_input:
-        //            return std::nan("1");
-        //        case ParseError ::Unknown_binary_operator:
-        //            return std::nan("2");
-        //        case ParseError ::Unknown_expression_type:
-        //            return std::nan("3");
-        //        case ParseError ::Unknown_unary_operator:
-        //            return std::nan("4");
-        //        }
+        // static std::array<char, 8> arr {};
+        // std::fill_n(std::begin(arr), std::size(arr) - 1, '\0');
+        // auto res = std::to_chars(arr.data(), arr.data() + arr.size(), (int)stringToEnum<ParseError>(ex.what()));
+        // std::cerr << arr.data() << std::endl;
+        // return std::nan(arr.data()); // хз почему рантайм не работает
+        // switch (e) {
+        // case ParseError ::Expected_round_bracket:
+        // return std::nan("0");
+        // case ParseError ::Invalid_input:
+        // return std::nan("1");
+        // case ParseError ::Unknown_binary_operator:
+        // return std::nan("2");
+        // case ParseError ::Unknown_expression_type:
+        // return std::nan("3");
+        // case ParseError ::Unknown_unary_operator:
+        // return std::nan("4");
+        // }
     }
 }
 Double MathParser2::parse() { return eval(parseExpression()); }

@@ -65,21 +65,21 @@ void View::on_doubleClicked(const QModelIndex& index) {
         menuIndex_ = index;
         if(index.data(Role::NodeType).toInt() != Type::Folder)
             hideOther();
-        //        if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
-        //            hideOther();
-        //        } else if (index.parent() == model_->index(Model::DrillFiles, 0, QModelIndex())) {
-        //            hideOther();
-        //        } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
-        //            hideOther();
-        //            {
-        //                const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
-        //                AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
-        //                App::project().showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
-        //                file->gcp_.fileId = file->id();
-        //                App::mainWindow().editGcFile(file);
-        //                updateTree();
-        //            }
-        //    }
+        // if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
+        // hideOther();
+        // } else if (index.parent() == model_->index(Model::DrillFiles, 0, QModelIndex())) {
+        // hideOther();
+        // } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
+        // hideOther();
+        // {
+        // const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
+        // AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
+        // App::project().showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
+        // file->gcp_.fileId = file->id();
+        // App::mainWindow().editGcFile(file);
+        // updateTree();
+        // }
+        // }
     }
 }
 
@@ -110,8 +110,8 @@ void View::hideOther() {
 
 void View::closeFile() {
     model_->removeRow(menuIndex_.row(), menuIndex_.parent());
-    //    if (App::drillForm())
-    //        App::drillForm().on_pbClose_clicked();
+    // if (App::drillForm())
+    // App::drillForm().on_pbClose_clicked();
 }
 
 void View::closeFiles() {

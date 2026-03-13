@@ -69,7 +69,7 @@ void VoronoiJc::jcVoronoi() {
     {
         const /*PType*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
-            {static_cast<jcv_real>(r.left - fo),  static_cast<jcv_real>(r.top - fo)   },
+            { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
         };
         jcv_diagram diagram;

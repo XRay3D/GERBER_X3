@@ -20,7 +20,7 @@ namespace ShCirc {
 
 Shape::Shape(Shapes::Plugin* plugin, QPointF center, QPointF pt)
     : AbstractShape{plugin}
-    , radius_(QLineF{center, pt}.length()) {
+    , radius_(length(center, pt)) {
     paths_.resize(1);
 
     if(!std::isnan(center.x())) {
@@ -92,7 +92,7 @@ void Shape::setRadius(double radius) {
 }
 
 void Shape::readAndInit(QDataStream& /*stream*/) {
-    radius_ = QLineF{handles.front(), handles.back()}.length();
+    radius_ = handles.front() ^ handles.back();
     curHandle = handles.begin();
     AbstractShape::redraw();
 }

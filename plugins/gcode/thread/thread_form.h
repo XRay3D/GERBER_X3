@@ -38,7 +38,7 @@ private:
     void rb_clicked();
 
     Ui::ThreadForm* ui;
-    //    GiBridge* brItem = nullptr;
+    // GiBridge* brItem = nullptr;
 
     const QStringList names{tr("Thread On"), tr("Thread Outside"), tr("Thread Inside")};
     static inline const std::array pixmaps{
@@ -97,7 +97,7 @@ public:
     // AbstractFilePlugin interface
     AbstractFileSettings* createSettingsTab(QWidget* parent) override {
         class Tab : public AbstractFileSettings {
-            //            QComboBox* cbxThreadSort;
+            // QComboBox* cbxThreadSort;
             QTableView* tableView;
 
             class Model : public QAbstractTableModel {

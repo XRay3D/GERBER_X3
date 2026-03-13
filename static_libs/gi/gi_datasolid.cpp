@@ -34,17 +34,17 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
 
 void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     // FIXME   if (App::drawPdf()) {
-    //        painter->setBrush(Qt::black);
-    //        painter->setPen(Qt::NoPen);
-    //        painter->drawPath(shape_);
-    //        return;
-    //    }
+    // painter->setBrush(Qt::black);
+    // painter->setPen(Qt::NoPen);
+    // painter->drawPath(shape_);
+    // return;
+    // }
     // pen_.setWidth(penWidth());
 
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
-    //    for (auto&& poly : shape_.toFillPolygons())
-    //        painter->drawPolygon(poly);
+    // for (auto&& poly : shape_.toFillPolygons())
+    // painter->drawPolygon(poly);
     painter->drawPath(shape_);
     bool fl = option->state & (QStyle::State_Selected | QStyle::State_MouseOver);
     if(fl) {
@@ -57,11 +57,11 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 int DataFill::type() const { return Type::DataSolid; }
 
 void DataFill::redraw() {
-    //    shape_ = QPainterPath();
-    //    for (Path path :  std::as_const(paths_)) {
-    //        path.push_back(path.front());
-    //        shape_.addPolygon(path);
-    //    }
+    // shape_ = QPainterPath();
+    // for (Path path :  std::as_const(paths_)) {
+    // path.push_back(path.front());
+    // shape_.addPolygon(path);
+    // }
     setPos({1, 1}); // костыли
     setPos({0, 0});
     // update();
@@ -92,10 +92,10 @@ void DataFill::setPaths(Paths paths, int /*alternate*/) {
 }
 
 void DataFill::changeColor() {
-    //    auto animation = new QPropertyAnimation{this, u"bodyColor"_s};
-    //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    //    animation.setDuration(100);
-    //    animation.setStartValue(bodyColor_);
+    // auto animation = new QPropertyAnimation{this, u"bodyColor"_s};
+    // animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    // animation.setDuration(100);
+    // animation.setStartValue(bodyColor_);
 
     brushColor_ = colorPtr_ ? *colorPtr_ : color_;
 
@@ -116,11 +116,11 @@ void DataFill::changeColor() {
     penColor_.setAlpha(100);
     switch(colorState) {
     case Default:
-        //        pathColor_.setAlpha(100);
+        // pathColor_.setAlpha(100);
         break;
     case Hovered:
         penColor_.setAlpha(255);
-        //        pathColor_ = pathColor_.darker(125);
+        // pathColor_ = pathColor_.darker(125);
         break;
     case Selected:
         penColor_.setAlpha(150);
@@ -131,8 +131,8 @@ void DataFill::changeColor() {
         break;
     }
 
-    //    animation.setEndValue(bodyColor_);
-    //    animation.start();
+    // animation.setEndValue(bodyColor_);
+    // animation.start();
 }
 
 } // namespace Gi

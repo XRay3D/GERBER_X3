@@ -71,10 +71,10 @@ namespace Voronoi {
 
 void VoronoiCgal::cgalVoronoi() {
     /*PType*/ int32_t minX = std::numeric_limits</*PType*/ int32_t>::max(),
-                            minY = std::numeric_limits</*PType*/ int32_t>::max(),
-                            maxX = std::numeric_limits</*PType*/ int32_t>::min(),
-                            maxY = std::numeric_limits</*PType*/ int32_t>::min();
-    //    progress(4, 0);
+                      minY = std::numeric_limits</*PType*/ int32_t>::max(),
+                      maxX = std::numeric_limits</*PType*/ int32_t>::min(),
+                      maxY = std::numeric_limits</*PType*/ int32_t>::min();
+    // progress(4, 0);
     SDG2 sdg;
     int32_t id{};
     // add line segments to diagram
@@ -160,7 +160,7 @@ void VoronoiCgal::cgalVoronoi() {
     }
 
     r::sort(segments, {}, [](const Path& path) { return (path.front().y + path.back().y); });
-    //    mergePaths(segments, 0.005 * uScale);
+    // mergePaths(segments, 0.005 * uScale);
     mergeSegments(segments, 0.005 * uScale);
 
     auto clean = [kAngle = 2.0](Path& path) {

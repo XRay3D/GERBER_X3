@@ -18,18 +18,18 @@ Point::Point(SectionParser* sp)
 
 // void Point::draw(const Dxf::InsertEntity* const i) const
 //{
-//     if (i) {
-//         for (int r{}; r < i->rowCount; ++r) {
-//             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-//                 GraphicObject go(toGo());
-//                 i->transform(go, tr);
-//                 i->attachToLayer(std::move(go));
-//             }
-//         }
-//     } else {
-//         attachToLayer(toGo());
-//     }
+// if (i) {
+// for (int r{}; r < i->rowCount; ++r) {
+// for (int c{}; c < i->colCount; ++c) {
+// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+// GraphicObject go(toGo());
+// i->transform(go, tr);
+// i->attachToLayer(std::move(go));
+// }
+// }
+// } else {
+// attachToLayer(toGo());
+// }
 // }
 
 void Point::parse(Dxf::CodeData& code) {

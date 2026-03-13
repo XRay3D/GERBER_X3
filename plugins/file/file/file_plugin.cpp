@@ -48,15 +48,15 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
     if(plugin->type() == ::GCode::Drill) {
         Drilling::Preview retData;
-        //        auto const exFile = static_cast<File*>(file);
-        //        QTransform t {exFile->transform()};
-        //        for (const Excellon::Hole& hole : *exFile) {
-        //            auto name {u"T%1"_s.arg(hole.state.toolId)};
-        //            if (bool slot = hole.state.path.size(); slot)
-        //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
-        //            else
-        //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
-        //        }
+        // auto const exFile = static_cast<File*>(file);
+        // QTransform t {exFile->transform()};
+        // for (const Excellon::Hole& hole : *exFile) {
+        // auto name {u"T%1"_s.arg(hole.state.toolId)};
+        // if (bool slot = hole.state.path.size(); slot)
+        // retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
+        // else
+        // retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+        // }
         return retData;
     }
     return {};
@@ -73,38 +73,38 @@ bool Plugin::thisIsIt(const QString& fileName) {
     QString line;
 
     static constexpr ctll::fixed_string regex1{R"(^T(\d+)(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?(?:([CFS])(\d*\.?\d+))?.*$)"};
-    static constexpr ctll::fixed_string regex2{R"(.*Holesize.*)"_s); // fixed_string(u".*Holesize.*"};
+    static constexpr ctll::fixed_string regex2 {R"(.*Holesize.*)"_s); // fixed_string(u".*Holesize.*"};
 
-    while(in.readLineInto(&line)) {
-        auto data{toU16StrView(line)};
-        if(ctre::match<regex1>(data))
-            return true;
-        if(ctre::match<regex2>(data))
-            return true;
+        while(in.readLineInto(&line)) {
+            auto data{toU16StrView(line)};
+            if(ctre::match<regex1>(data))
+                return true;
+            if(ctre::match<regex2>(data))
+                return true;
+        }
+
+        return false;
     }
 
-    return false;
-}
+    int Plugin::type() const { return int(FileType::Excellon_); }
 
-int Plugin::type() const { return int(FileType::Excellon_); }
+    QString Plugin::folderName() const { return tr("Excellon"); }
 
-QString Plugin::folderName() const { return tr("Excellon"); }
+    AbstractFile* Plugin::loadFile(QDataStream & stream) { return load<File>(stream); }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) { return load<File>(stream); }
+    QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'E'); }
 
-QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'E'); }
+    AbstractFileSettings* Plugin::createSettingsTab(QWidget * parent) {
+        auto tab = new ExSettingsTab(parent);
+        tab->setWindowTitle(u"Excellon"_s);
+        return tab;
+    }
 
-AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
-    auto tab = new ExSettingsTab(parent);
-    tab->setWindowTitle(u"Excellon"_s);
-    return tab;
-}
-
-void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
-    cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
-    cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme(u"drill-path"_s));
-    cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
-}
+    void Plugin::addToGcForm(AbstractFile * file, QComboBox * cbx) {
+        cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+        cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme(u"drill-path"_s));
+        cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
+    }
 
 } // namespace TmpFile
 

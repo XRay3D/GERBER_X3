@@ -17,7 +17,7 @@ class QJSEngine;
 using namespace Qt::Literals;
 
 class DoubleSpinBox : public QDoubleSpinBox {
-    //    Q_OBJECT
+    // Q_OBJECT
     void red();
     void normal();
     // mutable QString str;

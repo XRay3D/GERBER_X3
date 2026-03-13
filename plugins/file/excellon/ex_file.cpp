@@ -125,7 +125,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
     for(const Excellon::Hole& hole: *this) {
         double diam = tools_.at(hole.state.toolId);
         GraphicObject go;
-        //        go.fill;
+        // go.fill;
         if(bool slot = hole.state.path.size(); !slot) {
             go.pos = ~hole.state.pos;
             go.path.emplace_back(go.pos = ~hole.state.pos);
@@ -141,12 +141,12 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
         go.raw = tools_.at(hole.state.toolId);                                           // raw;
         retData.emplace_back(go * transform_);
 
-        //        if (bool slot = hole.state.path.size(); slot)
-        //            retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
-        //        else
-        //            retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+        // if (bool slot = hole.state.path.size(); slot)
+        // retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
+        // else
+        // retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
     }
     return retData;
 }
 
-} //  namespace Excellon
+} // namespace Excellon

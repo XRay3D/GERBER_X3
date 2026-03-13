@@ -152,7 +152,7 @@ Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const {
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 /// \brief ItemsTypeDelegate::ItemsTypeDelegate
 /// \param parent
 ///

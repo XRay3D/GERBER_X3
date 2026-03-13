@@ -27,18 +27,18 @@ constexpr auto GC_DBG_FILE = md5::hash32("GCDbgFile");
 namespace GCode {
 
 // enum GCodeType : int {
-//     Null = -1,
+// Null = -1,
 
-//    Profile = 100, // FileType::GCode
-//    Pocket,
-//    Raster,
-//    Hatching,
-//    Voronoi,
-//    Thermal,
-//    Drill,
-//    LaserHLDI,
+// Profile = 100, // FileType::GCode
+// Pocket,
+// Raster,
+// Hatching,
+// Voronoi,
+// Thermal,
+// Drill,
+// LaserHLDI,
 
-//    GCodeProperties = 199,
+// GCodeProperties = 199,
 //};
 
 enum Code {
@@ -147,24 +147,24 @@ struct Params {
     Q_GADGET
 public:
     enum Param : uint32_t {
-        //        Node,
-        //        AccDistance, // need for LaserHLDI
-        //        BridgeLen, // need for Profile
-        //        Bridges,   // need for Profile
-        //        CornerTrimming, // need for Profile
-        //        Fast,
-        //        FileId,
-        //        FrameOffset, // need for Voronoi
-        //        HathStep      // need for Hatching
-        //        IgnoreCopper, // need for Thermal
-        //        Pass, // need for Raster and LaserHLDI profile
-        //        Steps,     // need for Pocket
-        //        Tolerance, // need for Voronoi
-        //        Trimming,       // need for Profile
-        //        UseAngle, // need for Raster and LaserHLDI
-        //        UseRaster,
-        //        VorT,      // need for Voronoi
-        //        Width,     // need for Voronoi
+        // Node,
+        // AccDistance, // need for LaserHLDI
+        // BridgeLen, // need for Profile
+        // Bridges,   // need for Profile
+        // CornerTrimming, // need for Profile
+        // Fast,
+        // FileId,
+        // FrameOffset, // need for Voronoi
+        // HathStep      // need for Hatching
+        // IgnoreCopper, // need for Thermal
+        // Pass, // need for Raster and LaserHLDI profile
+        // Steps,     // need for Pocket
+        // Tolerance, // need for Voronoi
+        // Trimming,       // need for Profile
+        // UseAngle, // need for Raster and LaserHLDI
+        // UseRaster,
+        // VorT,      // need for Voronoi
+        // Width,     // need for Voronoi
         Convent,
         Depth,
         GrItems,
@@ -186,27 +186,27 @@ public:
         : Params{} {
         tools.emplace_back(tool);
         params[Params::Depth] = depth;
-        //        gcType = type;
+        // gcType = type;
     }
 
     mvector<Tool> tools;
     std::map<std::underlying_type_t<Param>, Variant> params;
 
-    //    GCodeType gcType = Null;
+    // GCodeType gcType = Null;
     mutable int fileId = -1;
-    //    QColor color;
+    // QColor color;
 
     friend QDataStream& operator>>(QDataStream& stream, Params& type) {
         stream >> type.tools;
         stream >> type.params;
-        //        stream >> type.gcType;
+        // stream >> type.gcType;
         return stream;
     }
 
     friend QDataStream& operator<<(QDataStream& stream, const Params& type) {
         stream << type.tools;
         stream << type.params;
-        //        stream << type.gcType;
+        // stream << type.gcType;
         return stream;
     }
 
@@ -224,11 +224,11 @@ public:
     Paths openPaths;
     Pathss supportPathss;
 
-    //    void addPaths(Paths& val) { paths.append(val); }
-    //    void addPaths(Paths&& val) { paths.append(std::move(val)); }
-    //    void addRawPaths(Paths& val) { rawPaths.append(val); }
-    //    void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
-    //    void addSupportPaths(Pathss val) { supportPaths = val; }
+    // void addPaths(Paths& val) { paths.append(val); }
+    // void addPaths(Paths&& val) { paths.append(std::move(val)); }
+    // void addRawPaths(Paths& val) { rawPaths.append(val); }
+    // void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
+    // void addSupportPaths(Pathss val) { supportPaths = val; }
 };
 
 class Settings {

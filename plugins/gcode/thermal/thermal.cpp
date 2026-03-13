@@ -68,15 +68,15 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         if(!gcp_.params[IgnoreCopper].toInt()) {
             Clipper2Lib::ClipperOffset offset;
             for(auto go: graphicObjects) {
-                //                if (go->closed()) {
-                //                    if (go->positive())
+                // if (go->closed()) {
+                // if (go->positive())
                 offset.AddPaths(go->fill /*polygonWholes()*/, JoinType::Round, EndType::Polygon);
-                //                    else {
-                //                        Paths paths(go->polygonWholes());
-                //                        ReversePaths(paths);
-                //                        offset.AddPaths(paths, JoinType::Miter, EndType::Polygon);
-                //                    }
-                //                }
+                // else {
+                // Paths paths(go->polygonWholes());
+                // ReversePaths(paths);
+                // offset.AddPaths(paths, JoinType::Miter, EndType::Polygon);
+                // }
+                // }
             }
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddClip(framePaths);

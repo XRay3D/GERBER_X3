@@ -43,7 +43,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
             if(closedSrcPaths.size()) {
                 // ClipperOffset offset;
                 // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
-                //     offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+                // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
                 // returnPs = offset.Execute(dOffset);
                 auto it = v::join(groupedPaths(GCode::Grouping::Copper));
                 returnPs = Inflate(Paths{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
@@ -236,8 +236,8 @@ void Creator::makeBridges() {
 }
 
 void Creator::reorder() {
-    //    returnPss = {returnPs};
-    //    return;
+    // returnPss = {returnPs};
+    // return;
     PolyTree polyTree;
     {
         Clipper clipper;
@@ -287,10 +287,10 @@ void Creator::reduceDistance(Point& from, Path& to) {
 void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
     rpaths.clear();
 
-    //    auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
-    //        return i;
-    //    };
-    //    rpaths.reserve(Total(polytree));
+    // auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
+    // return i;
+    // };
+    // rpaths.reserve(Total(polytree));
 
     std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths;
 
@@ -339,14 +339,14 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
                     rpaths.emplace_back(std::move(path));
                 }
 
-                //                std::map<int, std::vector<PolyTree*>, std::greater<>> map;
-                //                for (auto node : polynode.Childs)
-                //                    map[node->Nesting].emplace_back(node);
-                //                size_t i = polynode.Count();
-                //                for (auto& [nest, nodes] : map) {
-                //                    for (auto node : nodes)
-                //                        polynode.Childs[--i] = node;
-                //                }
+                // std::map<int, std::vector<PolyTree*>, std::greater<>> map;
+                // for (auto node : polynode.Childs)
+                // map[node->Nesting].emplace_back(node);
+                // size_t i = polynode.Count();
+                // for (auto& [nest, nodes] : map) {
+                // for (auto node : nodes)
+                // polynode.Childs[--i] = node;
+                // }
                 for(auto&& node: rwPolyTree(polynode))
                     addPolyNodeToPaths(*node, nodetype);
             };
@@ -408,7 +408,7 @@ void File::createGi() {
     }
 
     item = new Gi::GcPath{g0path_};
-    //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
+    // item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 

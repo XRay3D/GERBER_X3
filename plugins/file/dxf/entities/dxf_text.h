@@ -48,7 +48,7 @@ public:
         ExtrusionDirectionY = 220,
         ExtrusionDirectionZ = 230, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         // SubclassMarker = 100, // Маркер подкласса (AcDbText)
-        //        https : //help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-62E5383D-8A14-47B4-BFC4-35824CAE8363
+        // https : //help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-62E5383D-8A14-47B4-BFC4-35824CAE8363
     };
 
     enum TextGenerationFlagsE { // 71

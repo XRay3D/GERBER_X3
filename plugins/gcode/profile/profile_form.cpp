@@ -177,7 +177,7 @@ void Form::onAddBridgeClicked() {
             if(auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
                 qDebug() << u"intersects1"_s << is << intersects;
                 auto brItem = App::grView().addItem<Gi::Bridge>();
-                //                brItem->pathHash = pathHash;
+                // brItem->pathHash = pathHash;
                 brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos
                 brItem->setPos(brItem->snapedPos(intersects));
                 brItem->setVisible(true);
@@ -215,8 +215,8 @@ void Form::onAddBridgeClicked() {
     auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
     switch(at) {
     case Manually: {
-        //        Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
-        //        Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+        // Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
+        // Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
         auto brItem = new Gi::Bridge;
         App::grView().addItem(brItem);
         brItem->setVisible(true);
@@ -304,67 +304,67 @@ void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void Form::editFile(GCode::File* /*file*/) {
 
-    //    GCode::Params gcp_ {file->gcp()};
+    // GCode::Params gcp_ {file->gcp()};
 
-    //    fileId = gcp_.fileId;
-    //    editMode_ = true;
+    // fileId = gcp_.fileId;
+    // editMode_ = true;
 
-    //    { // GUI
-    //        side = gcp_.side();
-    //        direction = static_cast<GCode::Direction>(gcp_.convent());
-    //        ui->toolHolder->setTool(gcp_.tools.front());
-    //        dsbxDepth->setValue(gcp_.params[GCode::Params::Depth].toDouble());
+    // { // GUI
+    // side = gcp_.side();
+    // direction = static_cast<GCode::Direction>(gcp_.convent());
+    // ui->toolHolder->setTool(gcp_.tools.front());
+    // dsbxDepth->setValue(gcp_.params[GCode::Params::Depth].toDouble());
 
-    //        switch (side) {
-    //        case GCode::On:
-    //            ui->rbOn->setChecked(true);
-    //            break;
-    //        case GCode::Outer:
-    //            ui->rbOutside->setChecked(true);
-    //            break;
-    //        case GCode::Inner:
-    //            ui->rbInside->setChecked(true);
-    //            break;
-    //        }
+    // switch (side) {
+    // case GCode::On:
+    // ui->rbOn->setChecked(true);
+    // break;
+    // case GCode::Outer:
+    // ui->rbOutside->setChecked(true);
+    // break;
+    // case GCode::Inner:
+    // ui->rbInside->setChecked(true);
+    // break;
+    // }
 
-    //        switch (direction) {
-    //        case GCode::Climb:
-    //            ui->rbClimb->setChecked(true);
-    //            break;
-    //        case GCode::Conventional:
-    //            ui->rbConventional->setChecked(true);
-    //            break;
-    //        }
-    //    }
+    // switch (direction) {
+    // case GCode::Climb:
+    // ui->rbClimb->setChecked(true);
+    // break;
+    // case GCode::Conventional:
+    // ui->rbConventional->setChecked(true);
+    // break;
+    // }
+    // }
 
-    //    { // GrItems
-    //        usedItems_.clear();
-    //        auto items {gcp_.params[GCode::Params::GrItems].value<UsedItems>()};
+    // { // GrItems
+    // usedItems_.clear();
+    // auto items {gcp_.params[GCode::Params::GrItems].value<UsedItems>()};
 
-    //        auto i = items.cbegin();
-    //        while (i != items.cend()) {
+    // auto i = items.cbegin();
+    // while (i != items.cend()) {
 
-    //            //            auto [_fileId, _] = i.key();
-    //            //            Q_UNUSED(_)
-    //            //            App::project().file(_fileId)->itemGroup()->setSelected(i.value());
-    //            //            ++i;
-    //        }
-    //    }
+    // // auto [_fileId, _] = i.key();
+    // // Q_UNUSED(_)
+    // // App::project().file(_fileId)->itemGroup()->setSelected(i.value());
+    // // ++i;
+    // }
+    // }
 
-    //    { // Bridges
-    //        if (gcp_.params.contains(GCode::Params::Bridges)) {
-    //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
-    //            //            for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
-    //            //                brItem = new BridgeItem{lenght_, size_, side, brItem};
-    //            //                 App::grView().addItem(brItem);
-    //            //                brItem->setPos(pos);
-    //            //                brItem->lastPos_ = pos;
-    //            //            }
-    //            updateBridge();
-    //            brItem = new Gi::Bridge{lenght_, size_, side, brItem};
-    //            //        delete item;
-    //        }
-    //    }
+    // { // Bridges
+    // if (gcp_.params.contains(GCode::Params::Bridges)) {
+    // ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
+    // // for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
+    // // brItem = new BridgeItem{lenght_, size_, side, brItem};
+    // // App::grView().addItem(brItem);
+    // // brItem->setPos(pos);
+    // // brItem->lastPos_ = pos;
+    // // }
+    // updateBridge();
+    // brItem = new Gi::Bridge{lenght_, size_, side, brItem};
+    // // delete item;
+    // }
+    // }
 }
 
 } // namespace Profile

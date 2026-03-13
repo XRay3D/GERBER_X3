@@ -13,6 +13,7 @@
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
 #include <QGraphicsEllipseItem>
+#include <gi_dbg.h>
 #include <myclipper.h>
 
 namespace Dxf {
@@ -22,18 +23,18 @@ Circle::Circle(SectionParser* sp)
 
 // void Circle::draw(const InsertEntity* const i) const
 //{
-//     if (i) {
-//         for (int r{}; r < i->rowCount; ++r) {
-//             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-//                 GraphicObject go(toGo());
-//                 i->transform(go, tr);
-//                 i->attachToLayer(std::move(go));
-//             }
-//         }
-//     } else {
-//         attachToLayer(toGo());
-//     }
+// if (i) {
+// for (int r{}; r < i->rowCount; ++r) {
+// for (int c{}; c < i->colCount; ++c) {
+// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+// GraphicObject go(toGo());
+// i->transform(go, tr);
+// i->attachToLayer(std::move(go));
+// }
+// }
+// } else {
+// attachToLayer(toGo());
+// }
 // }
 
 void Circle::parse(CodeData& code) {
@@ -91,6 +92,8 @@ DxfGo Circle::toGo() const {
     go.name = layerName; // u"T%1|Ø%2"_s.arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
     go.fill.emplace_back(~p.value(0));
     go.path.clear();
+
+    // new Gi::Debug{path, Qt::green};
 
     go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::Circle);
     go.GraphicObject::pos = ~centerPoint;

@@ -96,29 +96,29 @@ QVariant Node::data(const QModelIndex& index, int role) const {
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme(u"hint"_s), QObject::tr("&Hide other"), tv, &FileTree::View::hideOther);
-    //    menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
-    //        QDialog* dialog = new QDialog;
-    //        dialog->setObjectName(QString::fromUtf8(u"dialog"_s));
-    //        dialog->resize(600, 600);
-    //        // Dialog->resize(400, 300);
-    //        QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
-    //        verticalLayout->setObjectName(QString::fromUtf8(u"verticalLayout"_s));
-    //        QTextBrowser* textBrowser = new QTextBrowser(dialog);
-    //        textBrowser->setFont(QFont(u"JetBrains Mono"_s));
-    //        new SyntaxHighlighter(textBrowser->document());
-    //        textBrowser->setObjectName(QString::fromUtf8(u"textBrowser"_s));
-    //        verticalLayout->addWidget(textBrowser);
-    //        for (const QString& str : file->lines())
-    //            textBrowser->append(str);
-    //        dialog->exec();
-    //        delete dialog;
-    //    });
+    // menu.addAction(QIcon(), QObject::tr("&Show source"), [this] {
+    // QDialog* dialog = new QDialog;
+    // dialog->setObjectName(QString::fromUtf8(u"dialog"_s));
+    // dialog->resize(600, 600);
+    // // Dialog->resize(400, 300);
+    // QVBoxLayout* verticalLayout = new QVBoxLayout(dialog);
+    // verticalLayout->setObjectName(QString::fromUtf8(u"verticalLayout"_s));
+    // QTextBrowser* textBrowser = new QTextBrowser(dialog);
+    // textBrowser->setFont(QFont(u"JetBrains Mono"_s));
+    // new SyntaxHighlighter(textBrowser->document());
+    // textBrowser->setObjectName(QString::fromUtf8(u"textBrowser"_s));
+    // verticalLayout->addWidget(textBrowser);
+    // for (const QString& str : file->lines())
+    // textBrowser->append(str);
+    // dialog->exec();
+    // delete dialog;
+    // });
     menu.addSeparator();
-    //    if (!FormatDialog::showed()) {
-    //        menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Edit Format"), [this] {
-    //            (new FormatDialog(file))->show();
-    //        });
-    //    }
+    // if (!FormatDialog::showed()) {
+    // menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Edit Format"), [this] {
+    // (new FormatDialog(file))->show();
+    // });
+    // }
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"document-close"_s), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }

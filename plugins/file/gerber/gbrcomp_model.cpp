@@ -25,9 +25,9 @@ namespace Gerber::Comp {
 sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel{parent}
     , rootItem(new sNode{u""_s}) {
-    //    auto file = App::project().file<File>(fileId);
-    //    for (auto item : *file->itemGroup(File::Components))
-    //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
+    // auto file = App::project().file<File>(fileId);
+    // for (auto item : *file->itemGroup(File::Components))
+    // scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
 
     auto file = App::project().file<Gerber::File>(fileId);
 
@@ -57,20 +57,20 @@ sModel::sModel(int fileId, QObject* parent)
         rootItem->append(value.front().second);
     }
 
-    //    auto it = map.begin();
-    //    while (it != map.end()) {
-    //        std::sort(
-    //            it.value().begin(),
-    //            it.value().end(),
-    //            [](const QPair<int, sNode*>& p1, const QPair<int, sNode*>& p2) {
-    //                return p1.first < p2.first;
-    //            });
-    //        for (int i = 1; i < it.value().size(); ++i) {
-    //            it.value().first().second->append(it.value()[i].second);
-    //        }
-    //        rootItem->append(it.value().first().second);
-    //        ++it;
-    //    }
+    // auto it = map.begin();
+    // while (it != map.end()) {
+    // std::sort(
+    // it.value().begin(),
+    // it.value().end(),
+    // [](const QPair<int, sNode*>& p1, const QPair<int, sNode*>& p2) {
+    // return p1.first < p2.first;
+    // });
+    // for (int i = 1; i < it.value().size(); ++i) {
+    // it.value().first().second->append(it.value()[i].second);
+    // }
+    // rootItem->append(it.value().first().second);
+    // ++it;
+    // }
 
     if(unsorted->childCount() > 0)
         rootItem->append(unsorted);
@@ -80,7 +80,7 @@ sModel::sModel(int fileId, QObject* parent)
 
 sModel::~sModel() {
     delete rootItem;
-    //    App::app->sModel_ = nullptr;
+    // App::app->sModel_ = nullptr;
 }
 
 QModelIndex sModel::index(int row, int column, const QModelIndex& parent) const {

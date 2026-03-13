@@ -98,16 +98,16 @@ protected:
     };
     int colorState = Default;
 
-    //    std::unordered_map<int, QColor> colors {
-    //        { Default, QColor(128, 128, 128, dark) },            // 0 Default         gray dark
-    //        { Default | Hovered, QColor(255, 255, 255, light) }, // 1 DefaultHovered  gray light
-    //        { Selected, QColor(0, 255, 0, dark) },               // 2 Selected        green dark
-    //        { Selected | Hovered, QColor(0, 255, 0, light) },    // 3 SelectedHovered green light
-    //        { Used, QColor(255, 0, 0, dark) },                   // 4 Used            red dark
-    //        { Used | Hovered, QColor(255, 0, 0, light) },        // 5 UsedHovered     red light
-    //        { Default, QColor(255, 255, 255, 255) },             // 6 UnUsed          transparent
-    //        { Default | Hovered, QColor(255, 255, 255, dark) },  // 7 Tool            white
-    //    };
+    // std::unordered_map<int, QColor> colors {
+    // { Default, QColor(128, 128, 128, dark) },            // 0 Default         gray dark
+    // { Default | Hovered, QColor(255, 255, 255, light) }, // 1 DefaultHovered  gray light
+    // { Selected, QColor(0, 255, 0, dark) },               // 2 Selected        green dark
+    // { Selected | Hovered, QColor(0, 255, 0, light) },    // 3 SelectedHovered green light
+    // { Used, QColor(255, 0, 0, dark) },                   // 4 Used            red dark
+    // { Used | Hovered, QColor(255, 0, 0, light) },        // 5 UsedHovered     red light
+    // { Default, QColor(255, 255, 255, 255) },             // 6 UnUsed          transparent
+    // { Default | Hovered, QColor(255, 255, 255, dark) },  // 7 Tool            white
+    // };
     //};
 
     // QGraphicsItem interface

@@ -73,9 +73,6 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
                 state.mirroring() & Y_Mirroring ? -state.scaling() : state.scaling());
 
         if(m.type()) TransformPath(path, m);
-
-        // if(state.curPos().x || state.curPos().y) //??????????
-        // TranslatePath(path, state.curPos());
     }
 
     return retPaths;
@@ -241,17 +238,17 @@ void ApObround::draw() {
                 CirclePath(h, Point(-(w - h) / 2., 0.)),
                 CirclePath(h, Point((w - h) / 2., 0.)),
                 RectanglePath(w - h, h)});
-            //            clipper.AddPath(CirclePath(h, Point(-(w - h) / 2, 0)), PathType::Clip, true);
-            //            clipper.AddPath(c PathType::Clip, true);
-            //            clipper.AddPath(RectanglePath(w - h, h), PathType::Clip, true);
+            // clipper.AddPath(CirclePath(h, Point(-(w - h) / 2, 0)), PathType::Clip, true);
+            // clipper.AddPath(c PathType::Clip, true);
+            // clipper.AddPath(RectanglePath(w - h, h), PathType::Clip, true);
         } else if(w < h) {
             clipper.AddSubject({//
                 CirclePath(w, Point(0., -(h - w) / 2.)),
                 CirclePath(w, Point(0., (h - w) / 2.)),
                 RectanglePath(w, h - w)});
-            //            clipper.AddPath(CirclePath(w, Point(0, -(h - w) / 2)), PathType::Clip, true);
-            //            clipper.AddPath(CirclePath(w, Point(0, (h - w) / 2)), PathType::Clip, true);
-            //            clipper.AddPath(RectanglePath(w, h - w), PathType::Clip, true);
+            // clipper.AddPath(CirclePath(w, Point(0, -(h - w) / 2)), PathType::Clip, true);
+            // clipper.AddPath(CirclePath(w, Point(0, (h - w) / 2)), PathType::Clip, true);
+            // clipper.AddPath(RectanglePath(w, h - w), PathType::Clip, true);
         }
         // clipper.Execute(ClipType::Union, paths_, FillRule::NonZero, FillRule::NonZero);
         clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
@@ -316,7 +313,7 @@ void ApPolygon::draw() {
             static_cast</*PType*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast</*PType*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     if(rotation_ > 0.1) RotatePath(polygon, rotation_);
-    r::for_each(polygon, &SetZSelf);
+    r::for_each(polygon, &SetCSelf);
     paths_.push_back(polygon);
     minSize_ = size_ = diam_;
 }
@@ -377,8 +374,8 @@ void ApMacro::draw() {
     VarMap macroCoefficients{coefficients_};
     mvector<QPair<bool, Path>> items;
     try {
-        //        for (int i{}; i < modifiers_.size(); ++i) {
-        //            QString var{modifiers_[i]};
+        // for (int i{}; i < modifiers_.size(); ++i) {
+        // QString var{modifiers_[i]};
 
         QJSEngine js;
         for(auto&& [name, value]: macroCoefficients)
@@ -586,7 +583,7 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
         polygon.emplace_back(Point(
             static_cast</*PType*/ int32_t>(mod[X + j * 2] * uScale),
             static_cast</*PType*/ int32_t>(mod[Y + j * 2] * uScale)));
-    r::for_each(polygon, &SetZSelf);
+    r::for_each(polygon, &SetCSelf);
     if(mod.size() > (num * 2u + 3u) && mod.back() > 0)
         RotatePath(polygon, mod.back());
 
@@ -618,7 +615,7 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
             static_cast</*PType*/ int32_t>(qCos(angle) * diameter),
             static_cast</*PType*/ int32_t>(qSin(angle) * diameter)));
     }
-    r::for_each(polygon, &SetZSelf);
+    r::for_each(polygon, &SetCSelf);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);
@@ -653,10 +650,10 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
         Clipper clipper;
         clipper.AddSubject({CirclePath(outer)});
         clipper.AddClip({CirclePath(inner), RectanglePath(gap, outer), RectanglePath(outer, gap)});
-        //        clipper.AddPath(CirclePath(outer), PathType::Subject, true);
-        //        clipper.AddPath(CirclePath(inner), PathType::Clip, true);
-        //        clipper.AddPath(RectanglePath(gap, outer), PathType::Clip, true);
-        //        clipper.AddPath(RectanglePath(outer, gap), PathType::Clip, true);
+        // clipper.AddPath(CirclePath(outer), PathType::Subject, true);
+        // clipper.AddPath(CirclePath(inner), PathType::Clip, true);
+        // clipper.AddPath(RectanglePath(gap, outer), PathType::Clip, true);
+        // clipper.AddPath(RectanglePath(outer, gap), PathType::Clip, true);
         clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
     }
 

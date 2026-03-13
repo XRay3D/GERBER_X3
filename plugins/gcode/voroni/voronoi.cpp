@@ -21,7 +21,7 @@
 namespace Voronoi {
 
 // inline size_t qHash(const Creator::Pair& tag, uint = 0) {
-//     return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
+// return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
 // }
 
 void Creator::create() {

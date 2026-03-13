@@ -60,7 +60,7 @@ inline QIcon errorIcon(const QPainterPath& path) {
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
     painter.setBrush(App::settings().theme() > LightRed ? Qt::white : Qt::black);
-    //    painter.translate(tr);
+    // painter.translate(tr);
     painter.translate(-kx, ky);
     painter.scale(scale, -scale);
     painter.drawPath(path);
@@ -121,12 +121,12 @@ public:
             if(item->isSelected())
                 rect = rect.united(item->boundingRect());
         App::grView().fitInView(rect);
-        //        App::grView().zoomOut();
+        // App::grView().zoomOut();
     }
 };
 
 class TableView : public QTableView {
-    //    Q_OBJECT
+    // Q_OBJECT
 public:
     TableView(QWidget* parent)
         : QTableView{parent} {
@@ -245,7 +245,7 @@ BaseForm::~BaseForm() {
     ProgressCancel::cancel();
     if(runer.isRunning())
         // runer.terminate();
-        //  runer.quit();
+        // runer.quit();
         runer.wait();
     delete creator_;
     qDebug(__FUNCTION__);
@@ -256,7 +256,7 @@ void BaseForm::setCreator(Creator* newCreator) {
     ProgressCancel::cancel();
     if(runer.isRunning()) {
         // runer.terminate();
-        //  runer.quit();
+        // runer.quit();
         runer.wait();
     }
     ProgressCancel::reset();
@@ -274,7 +274,7 @@ void BaseForm::setCreator(Creator* newCreator) {
         connect(this,     &BaseForm::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
         connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress                     );
         // clang-format on
-        //  runer.start(QThread::LowPriority /*HighestPriority*/);
+        // runer.start(QThread::LowPriority /*HighestPriority*/);
     } else if(creator_ && !newCreator) {
         creator_ = nullptr;
     }
@@ -298,9 +298,9 @@ void BaseForm::fileHandler(File* file) {
     file->setSide(boardSide);
     if(fileId > -1) {
         exit(-123456);
-        //        App::project().reload(fileId, file);
-        //        editMode_ = false;
-        //        fileId = -1;
+        // App::project().reload(fileId, file);
+        // editMode_ = false;
+        // fileId = -1;
     } else {
         App::project().addFile(file);
     }
@@ -359,44 +359,44 @@ Params* BaseForm::getNewGcp() {
     // bool skip{true};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         qDebug() << gi << gi->file();
-        //        switch(gi->type()) {
-        //        case Gi::Type::DataSolid:
-        //            gcp->closedPaths.append(gi->paths());
-        //            break;
-        //        case Gi::Type::DataPath: {
+        // switch(gi->type()) {
+        // case Gi::Type::DataSolid:
+        // gcp->closedPaths.append(gi->paths());
+        // break;
+        // case Gi::Type::DataPath: {
         // dbgPaths(gi->paths(), __FUNCTION__);
         for(auto&& path: gi->paths())
             (path.front() == path.back() && side != On)
                 ? gcp->closedPaths.emplace_back(path)
                 : gcp->openPaths.emplace_back(path);
-        //        } break;
-        //            //            if (!file) {
-        //            //                file = gi->file();
-        //            //                boardSide = file->side();
-        //            //            } else if (file != gi->file()) {
-        //            //                if (skip) {
-        //            //                    if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
-        //            //                        return;
-        //            //                }
-        //            //            }
-        //            //            if (gi->type() == Gi::Type::DataSolid)
-        //            //                gcp->closedPaths.append(gi->paths());
-        //            //            else
-        //            //                gcp->openPaths.append(gi->paths());
-        //            //            break;
-        //        case Gi::Type::ShCircle:
-        //        case Gi::Type::ShRectangle:
-        //        case Gi::Type::ShText:
-        //        case Gi::Type::Drill:
-        //            gcp->closedPaths.append(gi->paths());
-        //            break;
-        //        case Gi::Type::ShPolyLine:
-        //        case Gi::Type::ShCirArc:
-        //            gcp->openPaths.append(gi->paths());
-        //            break;
-        //        default:
-        //            break;
-        //        }
+        // } break;
+        // // if (!file) {
+        // // file = gi->file();
+        // // boardSide = file->side();
+        // // } else if (file != gi->file()) {
+        // // if (skip) {
+        // // if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
+        // // return;
+        // // }
+        // // }
+        // // if (gi->type() == Gi::Type::DataSolid)
+        // // gcp->closedPaths.append(gi->paths());
+        // // else
+        // // gcp->openPaths.append(gi->paths());
+        // // break;
+        // case Gi::Type::ShCircle:
+        // case Gi::Type::ShRectangle:
+        // case Gi::Type::ShText:
+        // case Gi::Type::Drill:
+        // gcp->closedPaths.append(gi->paths());
+        // break;
+        // case Gi::Type::ShPolyLine:
+        // case Gi::Type::ShCirArc:
+        // gcp->openPaths.append(gi->paths());
+        // break;
+        // default:
+        // break;
+        // }
         addUsedGi(gi);
     }
 
@@ -411,14 +411,14 @@ Params* BaseForm::getNewGcp() {
 
 void BaseForm::addUsedGi(Gi::Item* gi) {
     if(gi->file()) {
-        //        File const* file = gi->file();
-        //        if (file->type() == FileType::Gerber_) {
+        // File const* file = gi->file();
+        // if (file->type() == FileType::Gerber_) {
         // #ifdef GBR_
-        //            usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
+        // usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
         // #endif
-        //        } else {
-        //            usedItems_[{file->id(), -1}].push_back(gi->id());
-        //        }
+        // } else {
+        // usedItems_[{file->id(), -1}].push_back(gi->id());
+        // }
     }
 }
 
@@ -432,7 +432,7 @@ void BaseForm::cancel() {
         runer.wait();
         // runer.terminate();
     }
-    //  runer.start(QThread::LowPriority /*HighestPriority*/);
+    // runer.start(QThread::LowPriority /*HighestPriority*/);
     stopProgress();
 }
 
@@ -512,4 +512,4 @@ void BaseForm::stopProgress() {
 
 } // namespace GCode
 
-#include "moc_gc_baseform.cpp"
+// #include "moc_gc_baseform.cpp"

@@ -60,8 +60,8 @@ public:
     double scaleX = 1; // Масштабный коэффициент по оси X(необязательно; значение по умолчанию = 1)
     double scaleY = 1; // Масштабный коэффициент по оси Y (необязательно; значение по умолчанию = 1)
     double rotationAngle{};
-    int colCount = 1;      // Column count (optional; default = 1)
-    int rowCount = 1;      // Row count (optional; default = 1)
+    int colCount = 1;    // Column count (optional; default = 1)
+    int rowCount = 1;    // Row count (optional; default = 1)
     double colSpacing{}; // Column spacing (optional; default = 0)
     double rowSpacing{}; // Row spacing (optional; default = 0)
 };

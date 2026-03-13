@@ -22,7 +22,7 @@ GcPath::GcPath(const Paths& paths, AbstractFile* file)
     for(const Path& path: paths) shape_.addPolygon(~path);
     double k;
     // if(gcFile_)
-    //     k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
+    // k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;
     // else
     k = pen_.widthF() * 0.5;
     boundingRect_ = shape_.boundingRect() + QMarginsF{k, k, k, k};

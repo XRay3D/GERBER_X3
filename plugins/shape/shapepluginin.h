@@ -26,7 +26,7 @@ struct Editor : QWidget {
 class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
-    //    std::atomic<AbstractShape*> item {};
+    // std::atomic<AbstractShape*> item {};
     friend class AbstractShape;
     AbstractShape* item{};
     void requestEditor() { emit showEditor(editor()); }

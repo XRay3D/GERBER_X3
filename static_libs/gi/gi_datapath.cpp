@@ -100,11 +100,11 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     // using v::filter;
     // using v::transform;
     // auto constexpr filter = v::filter([](auto* item) {
-    //     return item->type() == int(Type::DataPath);
+    // return item->type() == int(Type::DataPath);
     // });
 
     // auto constexpr transform = v::transform([](auto* item) {
-    //     return static_cast<Item*>(item);
+    // return static_cast<Item*>(item);
     // });
 
     const auto glue = App::project().glue() /** uScale*/;
@@ -113,7 +113,7 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     std::set<void*> set;
     std::function<void(Item*)> selector = [&](Item* item) {
         const auto& collidingItems = *itemGroup;
-        //  auto collidingItems = scene()->collidingItems(item, Qt::/*IntersectsItemBoundingRect*/ IntersectsItemBoundingRect/*IntersectsItemShape*/);
+        // auto collidingItems = scene()->collidingItems(item, Qt::/*IntersectsItemBoundingRect*/ IntersectsItemBoundingRect/*IntersectsItemShape*/);
         auto pathFrom = item->paths().front();
         for(auto* item: collidingItems /*| filter | transform*/) {
             auto pathTo = item->paths().front();
@@ -147,9 +147,9 @@ QVariant DataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QV
     } else if(change == ItemSelectedChange && App::settings().animSelection()) {
         if(value.toBool()) {
             updateSelection();
-            //  FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
+            // FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
         } else {
-            //   FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
+            // FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
             update();
         }
     }

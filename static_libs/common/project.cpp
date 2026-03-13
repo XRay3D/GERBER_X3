@@ -107,15 +107,15 @@ QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
     Paths paths;
     stream >> type;
     stream >> paths;
-    //    if(App::shapePlugins().contains(type)) {
-    //        shape = App::shapePlugin(type)->createShape();
-    //        stream >> *shape;
-    //        App::grView().addItem(shape);
-    //    } else {
-    //        QByteArray data;
-    //        stream >> data;
-    //        qDebug() << type << loadErrorMessage << data;
-    //    }
+    // if(App::shapePlugins().contains(type)) {
+    // shape = App::shapePlugin(type)->createShape();
+    // stream >> *shape;
+    // App::grView().addItem(shape);
+    // } else {
+    // QByteArray data;
+    // stream >> data;
+    // qDebug() << type << loadErrorMessage << data;
+    // }
     return stream;
 }
 
@@ -129,9 +129,9 @@ Project::Project(QObject* parent)
             && QFileInfo::exists(path)
             && QMessageBox::question(nullptr, {}, tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
                    QMessageBox::Ok, QMessageBox::Cancel)
-                == QMessageBox::Ok) {
+                == QMessageBox::Ok)
             emit reloadFile(path, static_cast<int>(files_[id]->type()));
-        } else reloadPaths.erase(path);
+        else reloadPaths.erase(path);
     });
 
     connect(this, &Project::addFileDbg, this, qOverload<GCode::File*>(&Project::addFile), Qt::QueuedConnection);
@@ -361,23 +361,23 @@ QRectF Project::getBoundingRect() {
 }
 
 // QString Project::fileNames() {
-//     std::lock_guard _{mutex};
-//     QString fileNames;
-//     for (const auto& [id, sp] : files_) {
-//         AbstractFile* item = sp.get();
-//         if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
-//             fileNames.append(item->name()).push_back(u'|');
-//     }
-//     return fileNames;
+// std::lock_guard _{mutex};
+// QString fileNames;
+// for (const auto& [id, sp] : files_) {
+// AbstractFile* item = sp.get();
+// if (sp && (item && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_)))
+// fileNames.append(item->name()).push_back(u'|');
+// }
+// return fileNames;
 // }
 
 int Project::contains(const QString& name) {
     // std::lock_guard _{mutex};
     // if(reloadPaths.contains(name))
-    //     return -1;
+    // return -1;
     for(const auto& [id, sp]: files_) {
         AbstractFile* item = sp.get();
-        //        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
+        // if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
         if(item && QFileInfo(item->name()).fileName() == QFileInfo(name).fileName())
             return item->id();
     }

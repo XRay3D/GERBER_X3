@@ -18,7 +18,7 @@ struct Arc final : Entity {
 
     // Entity interface
 public:
-    //    void draw(const InsertEntity* const i = nullptr) const override;
+    // void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override;
     ;

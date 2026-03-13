@@ -15,12 +15,12 @@
 
 // struct DimStyle final : TableItem {
 // public:
-//     DimStyle(SectionParser* sp);
+// DimStyle(SectionParser* sp);
 
-//    // TableItem interface
+// // TableItem interface
 // public:
-//    void parse(CodeData& code) override;
-//    Type type() const override { return TableItem::DIMSTYLE; }
+// void parse(CodeData& code) override;
+// Type type() const override { return TableItem::DIMSTYLE; }
 //};
 
 //} // namespace Dxf

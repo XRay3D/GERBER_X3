@@ -263,7 +263,7 @@ void Editor::reset() {
 
     cbxFont->setFontFilters(
         QFontComboBox::ScalableFonts
-        //        | QFontComboBox::NonScalableFonts
+        // | QFontComboBox::NonScalableFonts
         | QFontComboBox::MonospacedFonts
         | QFontComboBox::ProportionalFonts);
 
