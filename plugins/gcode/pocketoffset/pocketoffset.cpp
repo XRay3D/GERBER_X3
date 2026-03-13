@@ -41,28 +41,28 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     Paths cutAreaPaths;
 
     auto calculate = [&cutAreaPaths, steps, this](Paths&& paths) {
-        cutAreaPaths += Inflate(paths, -dOffset, JT::Round, ET::Polygon, uScale); // inner
+        cutAreaPaths += Inflate(paths, -dOffset, JoinType::Round, EndType::Polygon, uScale); // inner
         int counter = steps;
         do {
             if(counter == 1)
-                cutAreaPaths += Inflate(paths, dOffset, JT::Round, ET::Polygon, uScale); // outer
+                cutAreaPaths += Inflate(paths, dOffset, JoinType::Round, EndType::Polygon, uScale); // outer
             returnPs += paths;
             CleanPaths(paths, uScale * 0.001);
-            paths = Inflate(paths, stepOver, JT::Miter, ET::Polygon, uScale);
+            paths = Inflate(paths, stepOver, JoinType::Miter, EndType::Polygon, uScale);
         } while(paths.size() && --counter);
     };
 
     if(gcp_.side() == GCode::Inner) {
         dOffset = -dOffset, stepOver = -stepOver;
         for(Paths paths: groupedPaths(GCode::Grouping::Copper)) {
-            paths = Inflate(paths, dOffset, JT::Round, ET::Polygon, uScale);
+            paths = Inflate(paths, dOffset, JoinType::Round, EndType::Polygon, uScale);
             if(paths.empty())
                 continue;
             // if (App::settings().gbrCleanPolygons()) CleanPaths(paths, uScale * 0.0005);
             calculate(std::move(paths));
         }
     } else { // Outer
-        Paths paths{Inflate(closedSrcPaths, +dOffset, JT::Round, ET::Polygon, uScale)};
+        Paths paths{Inflate(closedSrcPaths, +dOffset, JoinType::Round, EndType::Polygon, uScale)};
         if(paths.empty()) {
             emit fileReady(nullptr);
             return;
@@ -95,7 +95,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     Paths cutAreaPaths;
 
     if(gcp_.side() == GCode::Outer)
-        groupedPaths(GCode::Grouping::Cutoff, static_cast</*Point::Type*/ int32_t>(toolDiameter * 1.005));
+        groupedPaths(GCode::Grouping::Cutoff, static_cast</*PType*/ int32_t>(toolDiameter * 1.005));
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
@@ -104,13 +104,13 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     setCurrent(0);
 
     for(Paths paths: groupedPss) {
-        paths = Inflate(paths, -dOffset, JT::Round, ET::Polygon, uScale);
+        paths = Inflate(paths, -dOffset, JoinType::Round, EndType::Polygon, uScale);
         // if (App::settings().gbrCleanPolygons()) CleanPaths(paths, uScale * 0.0005);
         cutAreaPaths += paths;
         do {
             CleanPaths(paths, uScale * 0.001);
             returnPs += paths;
-            paths = Inflate(paths, -stepOver, JT::Miter, ET::Polygon, uScale);
+            paths = Inflate(paths, -stepOver, JoinType::Miter, EndType::Polygon, uScale);
         } while(paths.size());
     }
 
@@ -123,7 +123,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
 
     assert(returnPss.size());
 
-    cutAreaPaths = Inflate(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
+    cutAreaPaths = Inflate(cutAreaPaths, dOffset, JoinType::Round, EndType::Polygon, uScale);
 
     file_ = new File{std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths)};
     file_->setFileName(tool.nameEnc());
@@ -159,9 +159,9 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         Paths clipFrame; // u"обтравочная"_s рамка
         for(size_t i{}; tIdx && i <= tIdx; ++i) {
             // u"обтравочная"_s рамка для текущего инструмента и предыдущих УП
-            Paths tmp = Inflate(fillPaths[i], -dOffset + uScale * 0.001, JT::Round, ET::Polygon, uScale);
+            Paths tmp = Inflate(fillPaths[i], -dOffset + uScale * 0.001, JoinType::Round, EndType::Polygon, uScale);
             // объединение рамок
-            clipFrame = CL2::Union(clipFrame, tmp, FR::EvenOdd);
+            clipFrame = CL2::Union(clipFrame, tmp, FillRule::EvenOdd);
         }
 
         Paths cutAreaPaths;
@@ -169,10 +169,10 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         {
             Timer t{"groupedPss"};
             for(size_t pIdx{}; const Paths& paths: groupedPss) {
-                Paths wp = Inflate(paths, -dOffset + 2, JT::Round, ET::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
+                Paths wp = Inflate(paths, -dOffset + 2, JoinType::Round, EndType::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
                 if(tIdx) // обрезка текущего пути предыдущим
-                    wp = CL2::Difference(wp, clipFrame, FR::EvenOdd);
+                    wp = CL2::Difference(wp, clipFrame, FillRule::EvenOdd);
 
                 if(tIdx == size - 1)
                     removeSmall(wp, dOffset * 0.5); // последний
@@ -188,7 +188,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 do {
                     returnPs += std::move(wp);
                     CleanPaths(wp, uScale * 0.0005); //-V1030
-                    wp = Inflate(wp, -stepOver, JT::Miter, ET::Polygon, uScale);
+                    wp = Inflate(wp, -stepOver, JoinType::Miter, EndType::Polygon, uScale);
                 } while(wp.size());
                 ++pIdx;
             } // for (const Paths& paths : groupedPss_) {
@@ -202,7 +202,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         // make a fill box for the toolpath and create a file
         Timer t{"cutAreaPaths"};
         // //dbgPaths(cutAreaPaths, u"cutAreaPaths"_s, Qt::green);
-        cutAreaPaths = Inflate(cutAreaPaths, dOffset, JT::Round, ET::Polygon, uScale);
+        cutAreaPaths = Inflate(cutAreaPaths, dOffset, JoinType::Round, EndType::Polygon, uScale);
 
         stacking(returnPs);
         assert(returnPss.size());
@@ -214,7 +214,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         emit fileReady(file_);
 
         // make a bounding box for the next tool
-        fillPaths[tIdx] = Inflate(fillPaths[tIdx], dOffset, JT::Round, ET::Polygon, uScale);
+        fillPaths[tIdx] = Inflate(fillPaths[tIdx], dOffset, JoinType::Round, EndType::Polygon, uScale);
         ++tIdx;
     } // for (int tIdx = 0; tIdx < tools.size(); ++tIdx) {
 }

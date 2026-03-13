@@ -59,7 +59,7 @@ void GcPath::updateArrows() {
 
     const double length = std::clamp(30 * scaleFactor(), 0.0, 0.5);
     for(const QPolygonF& path: shape_.toSubpathPolygons()) {
-        for(auto&& r: std::ranges::slide_view(path, 2)) {
+        for(auto&& r: r::slide_view(path, 2)) {
             QLineF line{r.back(), r.front()};
             if(line.length() < length) continue;
             const double angle = line.angle();

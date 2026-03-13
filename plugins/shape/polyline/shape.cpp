@@ -74,8 +74,8 @@ void Shape::redraw() {
     auto filter = [](const auto& h) { return h.type() == Handle::Corner; };
     auto transform = [](const auto& h) { return ~h; };
     auto path = handles
-        | std::views::filter(filter)
-        | std::views::transform(transform);
+        | v::filter(filter)
+        | v::transform(transform);
 
     paths_.front() = {path.begin(), path.end()};
     shape_.clear();
@@ -145,7 +145,7 @@ QPointF Shape::centroidFast() {
     double signedArea{}, a{}; // Partial signed area
 
     auto filter = [](const auto& h) { return h.type() == Handle::Corner; };
-    auto path = handles | std::views::filter(filter);
+    auto path = handles | v::filter(filter);
     mvector<QPointF> vertices{path.begin(), path.end()};
 
     auto calc = [&](const QPointF& p0, const QPointF& p1) {
@@ -155,7 +155,7 @@ QPointF Shape::centroidFast() {
     };
 
     // For all vertices except last
-    for(auto&& range: std::views::slide(vertices, 2))
+    for(auto&& range: v::slide(vertices, 2))
         calc(range.front(), range.back());
     // Do last vertex separately to avoid performing an expensive
     // modulus operation in each iteration.

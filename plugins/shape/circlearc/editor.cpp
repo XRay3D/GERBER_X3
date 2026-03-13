@@ -28,9 +28,9 @@ Model::Model(QObject* parent)
 Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array getter{&QPointF::x, &QPointF::y};
-    if(std::ranges::empty(sh)) return {};
+    if(r::empty(sh)) return {};
 
     auto set = [index, &sh] {
         std::set<double> set;
@@ -95,11 +95,11 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array setter{&Shapes::Handle::setX, &Shapes::Handle::setY};
 
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
 
         double val = value.toDouble();
 

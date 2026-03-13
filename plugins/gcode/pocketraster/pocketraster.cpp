@@ -55,10 +55,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     for(Paths src: groupedPss) {
         //        ClipperOffset offset(uScale);
-        //        offset.AddPaths(src, JT::Round, ET::Polygon);
+        //        offset.AddPaths(src, JoinType::Round, EndType::Polygon);
         //        src = offset.Execute(-dOffset);
 
-        src = Inflate(src, -dOffset, JT::Round, ET::Polygon, uScale);
+        src = Inflate(src, -dOffset, JoinType::Round, EndType::Polygon, uScale);
 
         for(auto& path: src)
             path.push_back(path.front());
@@ -129,7 +129,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
 
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
-    stepOver = static_cast</*Point::Type*/ int32_t>(tool.stepover() * uScale);
+    stepOver = static_cast</*PType*/ int32_t>(tool.stepover() * uScale);
 
     switch(gcp_.side()) {
     case GCode::Outer:
@@ -148,13 +148,13 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     { // create exposure frames
       // ClipperOffset o;
       // for(auto& p: groupedPss)
-      //     o.AddPaths(p, JT::Round, ET::Polygon);
+      //     o.AddPaths(p, JoinType::Round, EndType::Polygon);
       // profilePaths = o.Execute(-tool.diameter() * uScale);
-        // auto it = std::views::join(groupedPss);
-        profilePaths = Inflate(join(groupedPss), -tool.diameter() * uScale, JT::Round, ET::Polygon);
+        // auto it = v::join(groupedPss);
+        profilePaths = Inflate(join(groupedPss), -tool.diameter() * uScale, JoinType::Round, EndType::Polygon);
     }
-    auto pss = std::views::join(groupedPss);
-    profilePaths = Inflate(Paths{pss.begin(), pss.end()}, -dOffset, JT::Round, ET::Polygon, uScale);
+    auto pss = v::join(groupedPss);
+    profilePaths = Inflate(Paths{pss.begin(), pss.end()}, -dOffset, JoinType::Round, EndType::Polygon, uScale);
 
     // get bounds of frames
     rect = GetBounds(profilePaths);
@@ -224,7 +224,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     }
 }
 
-void Creator::addAcc(Paths& src, const /*Point::Type*/ int32_t accDistance) {
+void Creator::addAcc(Paths& src, const /*PType*/ int32_t accDistance) {
 
     Paths pPath;
     pPath.reserve(src.size() * 2 + 1);
@@ -291,7 +291,7 @@ void Creator::addAcc(Paths& src, const /*Point::Type*/ int32_t accDistance) {
     };
 
     { //  calculate
-        /*Point::Type*/ int32_t yLast = src.front().front().y;
+        /*PType*/ int32_t yLast = src.front().front().y;
         Paths paths;
 
         for(size_t i = 0; i < src.size(); ++i) {
@@ -334,7 +334,7 @@ Paths Creator::calcScanLines(const Paths& src, const Path& frame) {
     if(!scanLines.size())
         return scanLines;
     std::sort(scanLines.begin(), scanLines.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
-    /*Point::Type*/ int32_t start = scanLines.front().front().y;
+    /*PType*/ int32_t start = scanLines.front().front().y;
     bool fl = {};
     for(size_t i{}, last{}; i < scanLines.size(); ++i) {
         if(auto y = scanLines[i].front().y; y != start || i - 1 == scanLines.size()) {
@@ -377,7 +377,7 @@ Path Creator::calcZigzag(const Paths& src) {
     Clipper clipper;
     clipper.AddClip(src);
     Rect rect(GetBounds(src));
-    /*Point::Type*/ int32_t o = uScale - (rect.Height() % stepOver) / 2;
+    /*PType*/ int32_t o = uScale - (rect.Height() % stepOver) / 2;
     rect.top -= o;
     rect.bottom += o;
     rect.left -= uScale;

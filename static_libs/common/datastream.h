@@ -18,13 +18,15 @@
 #include <ranges>
 #include <type_traits>
 
-namespace pfr = boost::pfr;
+namespace pfr = boost ::pfr;
+namespace v = std ::views;
+namespace r = std ::ranges;
 
 template <class T, size_t N>
 inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
     uint32_t n;
     s >> n;
-    for(auto&& val: p | std::views::take(std::min<uint32_t>(n, N)))
+    for(auto&& val: p | v::take(std::min<uint32_t>(n, N)))
         s >> val;
     return s;
 }
@@ -96,7 +98,7 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
     // Otherwise, value() will return the least recently inserted
     // value instead of the most recently inserted one.
 
-    for(auto& [key, val]: std::views::reverse(map))
+    for(auto& [key, val]: v::reverse(map))
         stream << key << val;
 
     return stream;

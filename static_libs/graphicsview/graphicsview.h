@@ -15,8 +15,9 @@
 #include <QSettings>
 
 #include <ranges>
-namespace ranges = std::ranges;
-namespace rviews = std::ranges::views;
+
+namespace v = std ::views;
+namespace r = std ::ranges;
 
 class Ruler;
 class QGridLayout;
@@ -30,7 +31,7 @@ struct EnumHelper2 : std::integral_constant<bool, N != 0> {
         : array{e...} { }
     std::array<int, N> array;
     constexpr bool operator()(auto* item) const {
-        return ranges::contains(array, item->type());
+        return r::contains(array, item->type());
     }
 };
 
@@ -122,13 +123,13 @@ private:
             using FilterDyn = decltype([](auto* item) { return bool(dynamic_cast<T*>(item)); });
             using Transform = decltype([](auto* item) { return static_cast<T*>(item); });
             if constexpr(!isQGraphicsItem && !FilterInt::value) { // вернуть все T*
-                auto rview = items | rviews::filter(FilterDyn{}) | rviews::transform(Transform{});
+                auto rview = items | v::filter(FilterDyn{}) | v::transform(Transform{});
                 return {rview.begin(), rview.end()};
             } else if constexpr(!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
-                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn{}) | rviews::transform(Transform{});
+                auto rview = items | v::filter(et) | v::filter(FilterDyn{}) | v::transform(Transform{});
                 return {rview.begin(), rview.end()};
             } else if constexpr(isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
-                auto rview = items | rviews::filter(et);
+                auto rview = items | v::filter(et);
                 return {rview.begin(), rview.end()};
             }
         }

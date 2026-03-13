@@ -62,11 +62,11 @@ void drawPos(QPainter* painter, const QPointF& pos, double scale) {
 
     QPainterPath path;
 
-    for(int i{}; auto&& txt: std::views::split(text, "\n"sv))
+    for(int i{}; auto&& txt: v::split(text, "\n"sv))
         path.addText(QPointF{textRect.left(), textRect.height() * 0.25 * ++i},
             painter->font(), QString::fromLatin1(txt.data(), txt.size()));
     // TODO цвет текста в соответствии с темой?...
-    static const auto zip = std::views::zip(
+    static const auto zip = v::zip(
         std::array{
             QPen{Qt::black, 4, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin},
             QPen{Qt::NoPen}
@@ -205,7 +205,7 @@ void AbstractShape::redraw() {
 
     const auto hs = HandleSize * 0.5 * scale();
 
-    std::ranges::for_each(handles,
+    r::for_each(handles,
         std::bind(qOverload<const QPointF&, qreal, qreal>(&QPainterPath::addEllipse),
             &pPathHandle, _1, hs, hs));
 

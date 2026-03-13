@@ -37,7 +37,7 @@ protected:
         X,
         Y
     };
-    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, FormatDir dir);
+    bool parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir);
 
     void addPath();
     void addFlash();
@@ -50,7 +50,7 @@ protected:
     Paths createLine();
     Paths createPolygon();
 
-    QMap<QString, QString> apertureMacro_;
+    std::map<QString, QString> apertureMacro_;
 
     struct WorkingType {
         enum eWT {

@@ -175,7 +175,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             menu.addSeparator();
             // TODO rename Action in future.
             menu.addAction(QIcon::fromTheme(u"edit-delete"_s), tr("Delete Selected"), [selectedRows, this]() mutable {
-                std::ranges::sort(selectedRows, std::greater{}, &QModelIndex::row);
+                r::sort(selectedRows, std::greater{}, &QModelIndex::row);
                 for(auto&& index: selectedRows)
                     model_->removeRow(index.row(), index.parent());
             });
@@ -189,11 +189,11 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
                 menu.addSeparator();
                 menu.addAction(QIcon::fromTheme({}), tr("Transform"), [selectedRows, this]() mutable {
                     auto files = selectedRows
-                        | std::views::transform(
+                        | v::transform(
                             [](auto&& index) { return App::project().file(index.data(FileTree::Id).toInt()); })
-                        | std::views::filter(
+                        | v::filter(
                             [](auto&& file) { return file != nullptr; });
-                    if(!std::ranges::empty(files))
+                    if(!r::empty(files))
                         TransformDialog({files.begin(), files.end()}, this).exec();
                 });
             }

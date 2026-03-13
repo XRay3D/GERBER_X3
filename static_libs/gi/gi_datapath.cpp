@@ -97,13 +97,13 @@ void DataPath::updateSelection() const {
 void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     Item::mouseReleaseEvent(event);
 
-    // using std::views::filter;
-    // using std::views::transform;
-    // auto constexpr filter = std::views::filter([](auto* item) {
+    // using v::filter;
+    // using v::transform;
+    // auto constexpr filter = v::filter([](auto* item) {
     //     return item->type() == int(Type::DataPath);
     // });
 
-    // auto constexpr transform = std::views::transform([](auto* item) {
+    // auto constexpr transform = v::transform([](auto* item) {
     //     return static_cast<Item*>(item);
     // });
 
@@ -128,7 +128,7 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
                     distTo(pathFrom.front(), pathTo.front()) * dScale,
                 };
 
-                const double min = std::ranges::min(dists);
+                const double min = r::min(dists);
 
                 if(min > glue) continue;
                 item->setSelected(true);

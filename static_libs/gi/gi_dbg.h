@@ -15,11 +15,14 @@
 
 namespace Gi {
 
-class Debug : public Item {
+class Debug final : public Item {
+    Debug(const QColor& color, double width);
+    Paths paths_;
+
 public:
-    Debug(const Paths& paths, const QPen& = {Qt::white, 1.0});
-    Debug(const Path& path, const QPen& = {Qt::white, 1.0});
-    Debug(const QPainterPath& path, const QPen& = {Qt::white, 1.0});
+    Debug(const Path& path, const QColor& color = Qt::white, double width = {});
+    Debug(const Paths& paths, const QColor& color = Qt::white, double width = {});
+    Debug(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
     ~Debug() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;

@@ -72,7 +72,7 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const
     if(ps.empty())
         return;
     if(close)
-        std::ranges::for_each(ps, [](Path& p) { p.push_back(p.front()); });
+        r::for_each(ps, [](Path& p) { p.push_back(p.front()); });
     GCode::Params gcp{tool, 0.0};
     auto file = new GCDbgFile{std::move(gcp), std::move(ps), color};
     file->setFileName(fileName);
@@ -102,7 +102,7 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, /*Point::Type*/ int32_t offset, bool skipFrame) {
+Pathss& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool skipFrame) {
     PolyTree polyTree;
     {
         Timer t{"Union EvenOdd"};
@@ -138,7 +138,7 @@ void Creator::grouping(Grouping group, PolyTree& node) {
         grouping(group, *child);
 }
 
-Path Creator::boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const {
+Path Creator::boundOfPaths(const Paths& paths, /*PType*/ int32_t k) const {
     Rect rect(GetBounds(paths));
     rect.bottom += k;
     rect.left -= k;
@@ -351,7 +351,7 @@ void Creator::stacking(Paths& paths) {
     for(Paths& retPaths: returnPss) {
         for(size_t i{}; i < retPaths.size(); ++i)
             if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
-        std::ranges::reverse(retPaths);
+        r::reverse(retPaths);
         for(Path& path: retPaths)
             path.emplace_back(path.front());
     }
@@ -601,7 +601,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                 if(!frPath.isEmpty())
                     nonCutPaths.emplace_back(~frPath.toFillPolygon());
             std::erase_if(nonCutPaths, [](Path& path) { return path.empty(); }); // убрать пустые
-            std::ranges::for_each(nonCutPaths, [this](auto&& path) {
+            r::for_each(nonCutPaths, [this](auto&& path) {
                 items.push_back(new Gi::Error{{path}, Area(path) * dScale * dScale});
             });
         } else {

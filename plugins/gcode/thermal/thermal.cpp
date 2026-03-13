@@ -60,7 +60,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         Clipper clipper;
         {
             Clipper2Lib::ClipperOffset offset;
-            for(auto go: graphicObjects | std::views::filter([](auto* go) { return go->positive(); }))
+            for(auto go: graphicObjects | v::filter([](auto* go) { return go->positive(); }))
                 offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddSubject(framePaths);

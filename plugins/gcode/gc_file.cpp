@@ -257,12 +257,12 @@ QList<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths
     if(side_ == Bottom) {
         const double k = Gi::Pin::minX() + Gi::Pin::maxX();
         if(toolType() != Tool::Laser)
-            std::ranges::for_each(paths, [](auto& path) { std::reverse(path.begin(), path.end()); });
-        for(QPointF& point: std::views::join(paths))
+            r::for_each(paths, [](auto& path) { std::reverse(path.begin(), path.end()); });
+        for(QPointF& point: v::join(paths))
             point.rx() = -point.x() + k;
     }
 
-    for(QPointF& point: std::views::join(paths))
+    for(QPointF& point: v::join(paths))
         point -= App::zero().pos();
 
     return paths;
@@ -289,7 +289,7 @@ mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, doub
     if(depth) {
         double zk = depth - z_;
         double perimetr = QLineF{path.front(), path.back()}.length();
-        for(auto&& r: std::ranges::slide_view(path, 2))
+        for(auto&& r: r::slide_view(path, 2))
             perimetr += QLineF{r.front(), r.back()}.length();
 
         for(QPointF prevPt; const QPointF& point: path)
@@ -651,7 +651,7 @@ void File::createGiRaster() {
     }
     size_t i = 0;
 
-    //    for (int i {}; auto& path : std::views::join(toolPathss_)) { }
+    //    for (int i {}; auto& path : v::join(toolPathss_)) { }
 
     for(const Paths& paths: toolPathss_) {
         item = new Gi::GcPath{paths, this};

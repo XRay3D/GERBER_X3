@@ -42,7 +42,7 @@ using ST = CGAL::Segment_Delaunay_graph_storage_traits_with_info_2<GT, int, conv
 using DS = CGAL::Triangulation_data_structure_2<CGAL::Segment_Delaunay_graph_vertex_base_2<ST>, CGAL::Segment_Delaunay_graph_face_base_2<GT>>;
 using SDG2 = CGAL::Segment_Delaunay_graph_2<GT, ST, DS>;
 
-inline auto toPoint(const CGAL::Point_2<K>& point) { return Point{static_cast</*Point::Type*/ int32_t>(point.x()), static_cast</*Point::Type*/ int32_t>(point.y())}; }
+inline auto toPoint(const CGAL::Point_2<K>& point) { return Point{static_cast</*PType*/ int32_t>(point.x()), static_cast</*PType*/ int32_t>(point.y())}; }
 
 ///////////////////////////////////
 
@@ -52,7 +52,7 @@ inline auto toPoint(const CGAL::Point_2<K>& point) { return Point{static_cast</*
 struct Segment {
     Point p0;
     Point p1;
-    Segment(/*Point::Type*/ int32_t x1, /*Point::Type*/ int32_t y1, /*Point::Type*/ int32_t x2, /*Point::Type*/ int32_t y2)
+    Segment(/*PType*/ int32_t x1, /*PType*/ int32_t y1, /*PType*/ int32_t x2, /*PType*/ int32_t y2)
         : p0(x1, y1)
         , p1(x2, y2) {
     }
@@ -70,10 +70,10 @@ inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArr
 namespace Voronoi {
 
 void VoronoiCgal::cgalVoronoi() {
-    /*Point::Type*/ int32_t minX = std::numeric_limits</*Point::Type*/ int32_t>::max(),
-                            minY = std::numeric_limits</*Point::Type*/ int32_t>::max(),
-                            maxX = std::numeric_limits</*Point::Type*/ int32_t>::min(),
-                            maxY = std::numeric_limits</*Point::Type*/ int32_t>::min();
+    /*PType*/ int32_t minX = std::numeric_limits</*PType*/ int32_t>::max(),
+                            minY = std::numeric_limits</*PType*/ int32_t>::max(),
+                            maxX = std::numeric_limits</*PType*/ int32_t>::min(),
+                            maxY = std::numeric_limits</*PType*/ int32_t>::min();
     //    progress(4, 0);
     SDG2 sdg;
     int32_t id = 0;
@@ -104,8 +104,8 @@ void VoronoiCgal::cgalVoronoi() {
         }
         ++id;
     }
-    const /*Point::Type*/ int32_t kx = (maxX - minX) * 2;
-    const /*Point::Type*/ int32_t ky = (maxY - minY) * 2;
+    const /*PType*/ int32_t kx = (maxX - minX) * 2;
+    const /*PType*/ int32_t ky = (maxY - minY) * 2;
     sdg.insert(SDG2::Site_2::construct_site_2({maxX + kx, minY - ky}, {maxX + kx, maxY + ky}), id);
     sdg.insert(SDG2::Site_2::construct_site_2({maxX + kx, minY - ky}, {minX - kx, minY - ky}), id);
     sdg.insert(SDG2::Site_2::construct_site_2({minX - kx, maxY + ky}, {maxX + kx, maxY + ky}), id);
@@ -144,7 +144,7 @@ void VoronoiCgal::cgalVoronoi() {
             segments.append(edge);
         }
     }
-    const /*Point::Type*/ int32_t fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
+    const /*PType*/ int32_t fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
     Path frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
@@ -159,7 +159,7 @@ void VoronoiCgal::cgalVoronoi() {
         clipper.Execute(ClipType::Intersection, segments, FillRule::NonZero);
     }
 
-    std::ranges::sort(segments, {}, [](const Path& path) { return (path.front().y + path.back().y); });
+    r::sort(segments, {}, [](const Path& path) { return (path.front().y + path.back().y); });
     //    mergePaths(segments, 0.005 * uScale);
     mergeSegments(segments, 0.005 * uScale);
 
@@ -171,7 +171,7 @@ void VoronoiCgal::cgalVoronoi() {
                 path.remove(i--);
         }
     };
-    std::ranges::for_each(segments, clean);
+    r::for_each(segments, clean);
 
     returnPs_ = segments;
     returnPs_.push_back(frame);

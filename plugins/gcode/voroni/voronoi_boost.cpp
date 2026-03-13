@@ -89,7 +89,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
     Path path;
     path.reserve(sampled_edge.size());
     for (const auto& p: sampled_edge)
-        path.emplace_back(static_cast</*Point::Type*/ int32_t>(p.x()), static_cast</*Point::Type*/ int32_t>(p.y()));
+        path.emplace_back(static_cast</*PType*/ int32_t>(p.x()), static_cast</*PType*/ int32_t>(p.y()));
     return path;
 }
 namespace Voronoi {
@@ -97,10 +97,10 @@ namespace Voronoi {
 void VoronoiBoost::boostVoronoi() {
     const double tolerance = gcp_.params[Tolerance].toDouble() * uScale;
 
-    /*Point::Type*/ int32_t minX = std::numeric_limits</*Point::Type*/ int32_t>::max(),
-                            minY = std::numeric_limits</*Point::Type*/ int32_t>::max(),
-                            maxX = std::numeric_limits</*Point::Type*/ int32_t>::min(),
-                            maxY = std::numeric_limits</*Point::Type*/ int32_t>::min();
+    /*PType*/ int32_t minX = std::numeric_limits</*PType*/ int32_t>::max(),
+                            minY = std::numeric_limits</*PType*/ int32_t>::max(),
+                            maxX = std::numeric_limits</*PType*/ int32_t>::min(),
+                            maxY = std::numeric_limits</*PType*/ int32_t>::min();
 
     int32_t id = 0, id2 = 0;
     // add line segments to diagram
@@ -108,7 +108,7 @@ void VoronoiBoost::boostVoronoi() {
 
     size_t max{};
 
-    for (const Path& path: std::views::join(groupedPss))
+    for (const Path& path: v::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -142,8 +142,8 @@ void VoronoiBoost::boostVoronoi() {
             }
         }
     }
-    const /*Point::Type*/ int32_t kx = (maxX - minX) * 2;
-    const /*Point::Type*/ int32_t ky = (maxY - minY) * 2;
+    const /*PType*/ int32_t kx = (maxX - minX) * 2;
+    const /*PType*/ int32_t ky = (maxY - minY) * 2;
     //    srcSegments.emplace_back(maxX + kx, minY - ky, maxX + kx, maxY + ky, ++id);
     //    srcSegments.emplace_back(maxX + kx, minY - ky, minX - kx, minY - ky, id);
     //    srcSegments.emplace_back(minX - kx, maxY + ky, maxX + kx, maxY + ky, id);
@@ -196,8 +196,8 @@ void VoronoiBoost::boostVoronoi() {
             auto color2 = id1(edge);
 
             if (v0 && v1) {
-                Point p0{static_cast</*Point::Type*/ int32_t>(v0->x()), static_cast</*Point::Type*/ int32_t>(v0->y())};
-                Point p1{static_cast</*Point::Type*/ int32_t>(v1->x()), static_cast</*Point::Type*/ int32_t>(v1->y())};
+                Point p0{static_cast</*PType*/ int32_t>(v0->x()), static_cast</*PType*/ int32_t>(v0->y())};
+                Point p1{static_cast</*PType*/ int32_t>(v1->x()), static_cast</*PType*/ int32_t>(v1->y())};
                 if (color1 != color2 && color1 && color2) {
                     if (set.emplace(Path{p0, p1}).second && set.emplace(Path{p1, p0}).second) {
                         if (edge.is_curved() && distTo(p0, p1) < tolerance) {
@@ -213,7 +213,7 @@ void VoronoiBoost::boostVoronoi() {
     }
     mergeSegments(segments, 0.005 * uScale);
 
-    const /*Point::Type*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
+    const /*PType*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
     Path frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
@@ -238,8 +238,8 @@ void VoronoiBoost::boostVoronoi() {
         }
     };
 
-    std::ranges::for_each(segments, clean);
-    std::ranges::for_each(segments, clean);
+    r::for_each(segments, clean);
+    r::for_each(segments, clean);
 
     returnPs = segments;
     returnPs.push_back(frame);

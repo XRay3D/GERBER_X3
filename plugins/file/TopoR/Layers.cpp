@@ -27,10 +27,10 @@ bool Layers::ShouldSerialize_UnStackLayers() {
 }
 
 bool Layers::LayerStackUpContains(LayerRef* lref) {
-    return {}; //_StackUpLayers.empty() ? false : std::ranges::count_if(_StackUpLayers, [&](Layer* r) { return r->_name == lref->_ReferenceName; }) > 0;
+    return {}; //_StackUpLayers.empty() ? false : r::count_if(_StackUpLayers, [&](Layer* r) { return r->_name == lref->_ReferenceName; }) > 0;
 }
 
 bool Layers::LayerUnStackContain(LayerRef* lref) {
-    return {}; //_UnStackLayers.empty() ? false : std::ranges::count_if(_UnStackLayers, [&](Layer* r) { return r->_name == lref->_ReferenceName; }) > 0;
+    return {}; //_UnStackLayers.empty() ? false : r::count_if(_UnStackLayers, [&](Layer* r) { return r->_name == lref->_ReferenceName; }) > 0;
 }
 // } // namespace TopoR_PCB_Classes
