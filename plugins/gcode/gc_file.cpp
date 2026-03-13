@@ -108,9 +108,9 @@ bool File::save(const QString& name) {
 
     setLastDir(name);
     name_ = name;
-    QFile file(name_);
+    QFile file{name_};
     if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
-        QTextStream out(&file);
+        QTextStream out{&file};
         QString str;
         for(QString& s: lines_) {
             if(!s.isEmpty())
@@ -768,7 +768,7 @@ void findArcs(Path /*path*/) {
     //                center /= ctr;
     //                addPoint(center, Qt::red);
     //                double r = QLineF(center, beg).length();
-    //                QRectF rect(-r, -r, +r * 2, +r * 2);
+    //                QRectF rect{-r, -r, +r * 2, +r * 2};
 
     //                App::grView().scene()->addEllipse(rect, QPen(Qt::red, 0.0), Qt::NoBrush)->setPos(center);
     //                ctr = {};

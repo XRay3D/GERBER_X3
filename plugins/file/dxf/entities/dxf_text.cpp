@@ -87,7 +87,7 @@ Entity::Type Text::type() const { return Type::TEXT; }
 
 QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
     return debug; // NOTE QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
-    QDebugStateSaver saver(debug);
+    QDebugStateSaver saver{debug};
     debug.nospace() << u"FM("_s;
     debug.nospace() << u"\n\tascent: "_s << fm.ascent();
     debug.nospace() << u"\n\taverageCharWidth: "_s << fm.averageCharWidth();
@@ -127,7 +127,7 @@ DxfGo Text::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fmf(font);
+        QFontMetricsF fmf{font};
         scaleX = scaleY = std::max(style->fixedTextHeight, textHeight) / fmf.height();
         offset.ry() -= fmf.descent();
         ascent = fmf.ascent();
@@ -139,7 +139,7 @@ DxfGo Text::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fmf(font);
+        QFontMetricsF fmf{font};
         scaleX = scaleY = textHeight / fmf.height();
         offset.ry() -= fmf.descent();
         ascent = fmf.ascent();

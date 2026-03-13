@@ -23,7 +23,7 @@ PolyLine::PolyLine(SectionParser* sp)
 //     if (i) {
 //         for (int r{}; r < i->rowCount; ++r) {
 //             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
 //                 i->attachToLayer(std::move(go));
@@ -86,7 +86,7 @@ DxfGo PolyLine::toGo() const {
         else if(span > 180 || (qFuzzyCompare(span, 180) && (end_angle > start_angle)))
             span -= 360;
 
-        QPointF pr(radius, radius);
+        QPointF pr{radius, radius};
         path.arcTo(QRectF(center + pr, center - pr),
             -start_angle,
             -span);

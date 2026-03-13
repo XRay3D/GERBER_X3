@@ -366,7 +366,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     cbxFontSize = new QComboBox{groupBox};
     cbxFontSize->addItems({u"7"_s, u"8"_s, u"9"_s, u"10"_s, u"11"_s, u"12"_s, u"13"_s, u"14"_s});
     cbxFontSize->setObjectName(u"cbxFontSize"_s);
-    QSizePolicy sizePolicy(QSizePolicy::MinimumExpanding, QSizePolicy::Fixed);
+    QSizePolicy sizePolicy{QSizePolicy::MinimumExpanding, QSizePolicy::Fixed};
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(cbxFontSize->sizePolicy().hasHeightForWidth());
@@ -431,7 +431,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
 
     gbxColor = new QGroupBox{gbViewer};
     gbxColor->setObjectName(u"gbxColor"_s);
-    QSizePolicy sizePolicy1(QSizePolicy::Preferred, QSizePolicy::MinimumExpanding);
+    QSizePolicy sizePolicy1{QSizePolicy::Preferred, QSizePolicy::MinimumExpanding};
     sizePolicy1.setHorizontalStretch(0);
     sizePolicy1.setVerticalStretch(0);
     sizePolicy1.setHeightForWidth(gbxColor->sizePolicy().hasHeightForWidth());

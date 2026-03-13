@@ -38,7 +38,7 @@ QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>
         else if(App::filePlugins().contains(type))
             stream << App::filePlugin(type)->info()[u"Name"_s].toString();
         else
-            stream << QString(u"QString"_s);
+            stream << u"QString"_s;
         stream << *file;
     }
     return stream;
@@ -144,12 +144,12 @@ Project::~Project() {
 }
 
 bool Project::save(const QString& fileName) {
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::WriteOnly)) {
         qDebug() << file.errorString();
         return false;
     }
-    QDataStream out(&file);
+    QDataStream out{&file};
     try {
         out << (ver_ = CurrentVer);
         Block{out}.write(
@@ -180,12 +180,12 @@ bool Project::save(const QString& fileName) {
 }
 
 bool Project::open(const QString& fileName) {
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly)) {
         qDebug() << file.errorString();
         return false;
     }
-    QDataStream in(&file);
+    QDataStream in{&file};
     try {
         in >> ver_;
         if(ver_ < CurrentVer) {
@@ -271,7 +271,7 @@ void Project::close() {
 }
 
 void Project::deleteFile(int32_t id) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     if(files_.contains(id)) {
         watcher.removePath(files_[id]->name());
         files_.erase(id);
@@ -282,7 +282,7 @@ void Project::deleteFile(int32_t id) {
 }
 
 void Project::deleteShape(int32_t id) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     try {
         if(shapes_.contains(id)) {
             shapes_.erase(id);
@@ -296,7 +296,7 @@ void Project::deleteShape(int32_t id) {
 }
 
 int Project::addItem(Gi::Item* const item) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     if(!item)
         return -1;
     isPinsPlaced_ = false;
@@ -315,12 +315,12 @@ int Project::addItem(Gi::Item* const item) {
 }
 
 Gi::Item* Project::Item(int32_t id) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     return items_[id];
 }
 
 void Project::deleteItem(int32_t id) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     try {
         if(items_.contains(id)) {
             items_.erase(id);
@@ -340,7 +340,7 @@ bool Project::isModified() { return isModified_; }
 void Project::setModified(bool fl) { isModified_ = fl; }
 
 QRectF Project::getBoundingRect() {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     Point topLeft(std::numeric_limits</*PType*/ int32_t>::max(), std::numeric_limits</*PType*/ int32_t>::max());
     Point botRight(std::numeric_limits</*PType*/ int32_t>::min(), std::numeric_limits</*PType*/ int32_t>::min());
     for(const auto& [id, filePtr]: files_) {
@@ -361,7 +361,7 @@ QRectF Project::getBoundingRect() {
 }
 
 // QString Project::fileNames() {
-//     QMutexLocker locker(&mutex);
+//     std::lock_guard _{mutex};
 //     QString fileNames;
 //     for (const auto& [id, sp] : files_) {
 //         AbstractFile* item = sp.get();
@@ -372,7 +372,7 @@ QRectF Project::getBoundingRect() {
 // }
 
 int Project::contains(const QString& name) {
-    // QMutexLocker locker(&mutex);
+    // std::lock_guard _{mutex};
     // if(reloadPaths.contains(name))
     //     return -1;
     for(const auto& [id, sp]: files_) {
@@ -397,7 +397,7 @@ bool Project::reload(int32_t id, AbstractFile* file) {
 }
 
 mvector<AbstractFile*> Project::files(uint32_t type) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for(const auto& [id, sp]: files_)
@@ -408,7 +408,7 @@ mvector<AbstractFile*> Project::files(uint32_t type) {
 }
 
 mvector<AbstractFile*> Project::files(const mvector<uint32_t>& types) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     mvector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for(auto type: types) {
@@ -421,12 +421,12 @@ mvector<AbstractFile*> Project::files(const mvector<uint32_t>& types) {
 }
 
 Shapes::AbstractShape* Project::shape(int32_t id) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     return shapes_[id];
 }
 
 int Project::addFile(AbstractFile* file) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     if(!file) return -1;
     isPinsPlaced_ = false;
     file->createGi();
@@ -447,7 +447,7 @@ int Project::addFile(AbstractFile* file) {
 }
 
 int Project::addFile(GCode::File* file) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     if(!file) return -1;
     isPinsPlaced_ = false;
     file->createGi();
@@ -468,7 +468,7 @@ int Project::addFile(GCode::File* file) {
 }
 
 int Project::addShape(Shapes::AbstractShape* const shape) {
-    QMutexLocker locker(&mutex);
+    std::lock_guard _{mutex};
     if(!shape)
         return -1;
     isPinsPlaced_ = false;

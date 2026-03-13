@@ -28,7 +28,7 @@ Arc::Arc(SectionParser* sp)
 //     if (i) {
 //         for (int r{}; r < i->rowCount; ++r) {
 //             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
 //                 i->attachToLayer(std::move(go));
@@ -99,7 +99,7 @@ DxfGo Arc::toGo() const {
 
     QPainterPath path;
     path.moveTo(QLineF::fromPolar(radius, -startAngle).translated(centerPoint).p2());
-    QPointF rad(radius, radius);
+    QPointF rad{radius, radius};
     path.arcTo(QRectF(centerPoint - rad, centerPoint + rad), -startAngle, -aspan);
 
     QTransform m;

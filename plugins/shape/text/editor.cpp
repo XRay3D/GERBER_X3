@@ -31,7 +31,7 @@ auto filter = v::filter([](Shape* shape) {
 /// \brief Editor::Editor
 void Editor::setupUi() {
 
-    QSizePolicy sizePolicy(QSizePolicy::Preferred, QSizePolicy::Fixed);
+    QSizePolicy sizePolicy{QSizePolicy::Preferred, QSizePolicy::Fixed};
     sizePolicy.setHorizontalStretch(0);
     sizePolicy.setVerticalStretch(0);
     sizePolicy.setHeightForWidth(this->sizePolicy().hasHeightForWidth());

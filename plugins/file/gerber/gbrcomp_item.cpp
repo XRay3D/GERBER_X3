@@ -43,7 +43,7 @@ QPainterPath Item::shape() const {
 
 void drawText(QPainter* painter, const QString& str, const QColor& color, QPointF pt, double scale) {
     painter->save();
-    static QFont f(u"Consolas"_s);
+    static QFont f{u"Consolas"_s};
     f.setPixelSize(20);
     f.setBold(true);
     const QRectF textRect = QFontMetricsF(f).boundingRect(QRectF(), Qt::AlignLeft, str);

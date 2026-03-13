@@ -22,9 +22,9 @@ class PushButton : public QPushButton {
     //    Q_OBJECT
     QColor& color_;
     void selectColor() {
-        QColorDialog dialog(color_);
+        QColorDialog dialog{color_};
         dialog.setOption(QColorDialog::ShowAlphaChannel, true);
-        QColor color(color_);
+        QColor color{color_};
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
         if(dialog.exec() && color_ != color)
             color_ = color;
@@ -43,7 +43,7 @@ public:
 protected:
     void paintEvent(QPaintEvent* event) override {
         QPushButton::paintEvent(event);
-        QPainter p(this);
+        QPainter p{this};
         p.setPen(Qt::NoPen);
 
         //        p.setBrush(Qt::white);

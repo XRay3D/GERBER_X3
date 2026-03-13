@@ -53,7 +53,7 @@ inline QIcon errorIcon(const QPainterPath& path) {
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
 
-    QPixmap pixmap(IconSize, IconSize);
+    QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&pixmap);
@@ -86,7 +86,7 @@ public:
         case Qt::DisplayRole:
             if(index.column() == 0) {
                 auto pos{items[index.row()]->boundingRect().center()};
-                return QString(u"X = %1\nY = %2"_s).arg(pos.x()).arg(pos.y());
+                return u"X = %1\nY = %2"_s.arg(pos.x()).arg(pos.y());
             }
             return items[index.row()]->area();
         case Qt::UserRole:

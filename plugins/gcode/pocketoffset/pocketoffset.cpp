@@ -14,7 +14,7 @@
 
 namespace PocketOffset {
 
-// //dbgPaths(clipFrame, QString(u"clipFrame %1"_s).arg(tIdx), Qt::red);
+// //dbgPaths(clipFrame, u"clipFrame %1"_s.arg(tIdx), Qt::red);
 
 void Creator::create() {
     setMax(10000);
@@ -179,7 +179,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
                 else if(tIdx /*+ 1 != size*/)
                     removeSmall(wp, dOffset * 2.0); // остальные
 
-                // //dbgPaths(wp, QString(u"wp %1"_s).arg(pIdx), Qt::red);
+                // //dbgPaths(wp, u"wp %1"_s.arg(pIdx), Qt::red);
 
                 fillPaths[tIdx] += wp;
 

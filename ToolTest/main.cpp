@@ -6,7 +6,7 @@
 #include <QtWidgets>
 
 int main(int argc, char* argv[]) {
-    QApplication a(argc, argv);
+    QApplication a{argc, argv};
 
     QApplication::setApplicationName(u"GGEasy"_s);
     //    QApplication::setOrganizationName(VER_COMPANYNAME_STR);

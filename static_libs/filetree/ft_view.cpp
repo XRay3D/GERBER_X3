@@ -156,7 +156,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
     qDebug() << menuIndex_;
     if(!menuIndex_.isValid())
         return;
-    QMenu menu(this);
+    QMenu menu{this};
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
     if(menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
         const uint32_t type = menuIndex_.data(Role::Id).value<uint32_t>(); // File Type

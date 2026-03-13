@@ -109,7 +109,7 @@ void Ruler::dragMoveEvent(QDragMoveEvent* event) {
 void Ruler::dropEvent(QDropEvent* event) {
     //    if (event->mimeData()->hasFormat(MimeType)) {
     //        QByteArray pieceData = event->mimeData()->data(MimeType);
-    //        QDataStream dataStream(&pieceData, QIODevice::ReadOnly);
+    //        QDataStream dataStream{&pieceData, QIODevice::ReadOnly};
     //        QPixmap pixmap;
     //        QPoint location;
     //        dataStream >> pixmap >> location;

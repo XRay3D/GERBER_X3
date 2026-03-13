@@ -62,7 +62,7 @@ void ToolSelectorForm::updateForm() {
 }
 
 void ToolSelectorForm::readTool() {
-    QFile file(toolFileName_);
+    QFile file{toolFileName_};
     if(file.open(QIODevice::ReadOnly))
         tool_.read(QJsonDocument::fromJson(file.readAll()).object());
     else
@@ -71,7 +71,7 @@ void ToolSelectorForm::readTool() {
 }
 
 void ToolSelectorForm::writeTool() const {
-    QFile file(toolFileName_);
+    QFile file{toolFileName_};
     if(file.open(QIODevice::WriteOnly)) {
         QJsonObject json;
         tool_.write(json);
@@ -99,7 +99,7 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
         label_->setObjectName(u"label_"_s);
 
         {
-            QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+            QSizePolicy sizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred};
             sizePolicy.setHorizontalStretch(0);
             sizePolicy.setVerticalStretch(0);
             sizePolicy.setHeightForWidth(label_->sizePolicy().hasHeightForWidth());

@@ -45,7 +45,7 @@ void Preview::updateTool() {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(~path_);
                 }
-                QPolygonF path_(val);
+                QPolygonF path_{val};
                 if(path_.size()) {
                     for(QPointF point: path_) {
                         painterPath.moveTo(point - QPointF(0.0, lineKoeff));

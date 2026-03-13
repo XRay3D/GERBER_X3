@@ -177,7 +177,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"color-management"_s), GbrObj::tr("Change color"), [tv, this] {
-        QColorDialog cd(tv);
+        QColorDialog cd{tv};
         cd.setCurrentColor(file->color());
         if(cd.exec()) {
             auto color = cd.currentColor();

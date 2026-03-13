@@ -74,7 +74,7 @@ public:
 
         //        connect(tableView, &QTableView::doubleClicked, [names, file, this](const QModelIndex& index) {
         //            if (index.column() == 0) {
-        //                QColorDialog cd(this);
+        //                QColorDialog cd{this};
         //                cd.setCurrentColor(file->layers().at(names[index.row()])->color());
         //                if (cd.exec())
         //                    tableView->model()->setData(index, cd.currentColor(), Qt::DecorationRole);
@@ -362,7 +362,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
 
 void NodeLayer::menu(QMenu& menu, FileTree::View* tv) {
     //    menu.addAction(QIcon::fromTheme(u"color-management"_s), DxfObj::tr("Change color"), [tv, this] {
-    //        QColorDialog cd(tv);
+    //        QColorDialog cd{tv};
     //        cd.setCurrentColor(layer->color());
     //        if (cd.exec()) {
     //            layer->setColor(cd.currentColor());

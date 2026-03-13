@@ -58,7 +58,7 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
         ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
-    QPixmap pixmap(IconSize, IconSize);
+    QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&pixmap);
@@ -72,9 +72,9 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    QFile file(fileName);
+    QFile file{fileName};
     if(file.open(QFile::ReadOnly | QFile::Text)) {
-        QTextStream in(&file);
+        QTextStream in{&file};
         QString line;
         while(in.readLineInto(&line)) {
             auto data{toU16StrView(line)};

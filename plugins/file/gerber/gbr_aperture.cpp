@@ -111,7 +111,7 @@ ApCircle::ApCircle(double diam, double drillDiam, const File* format)
     // GerberAperture interface
 }
 
-QString ApCircle::name() const { return QString(u"C(Ø%1)"_s).arg(diam_); } // CIRCLE
+QString ApCircle::name() const { return u"C(Ø%1)"_s.arg(diam_); } // CIRCLE
 
 ApertureType ApCircle::type() const { return Circle; }
 
@@ -156,9 +156,9 @@ ApRectangle::ApRectangle(double width, double height, double drillDiam, const Fi
 QString ApRectangle::name() const // RECTANGLE
 {
     if(qFuzzyCompare(width_, height_))
-        return QString(u"R(SQ %1)"_s).arg(width_);
+        return u"R(SQ %1)"_s.arg(width_);
     else
-        return QString(u"R(%1 x %2)"_s).arg(width_).arg(height_);
+        return u"R(%1 x %2)"_s.arg(width_).arg(height_);
 }
 
 ApertureType ApRectangle::type() const { return Rectangle; }
@@ -204,7 +204,7 @@ ApObround::ApObround(double width, double height, double drillDiam, const File* 
     drillDiam_ = drillDiam;
 }
 
-QString ApObround::name() const { return QString(u"O(%1 x %2)"_s).arg(width_).arg(height_); } // OBROUND
+QString ApObround::name() const { return u"O(%1 x %2)"_s.arg(width_).arg(height_); } // OBROUND
 
 ApertureType ApObround::type() const { return Obround; }
 
@@ -280,7 +280,7 @@ double ApPolygon::rotation() const { return rotation_; }
 
 int ApPolygon::verticesCount() const { return verticesCount_; }
 
-QString ApPolygon::name() const { return QString(u"P(Ø%1, N%2)"_s).arg(diam_).arg(verticesCount_); } // POLYGON
+QString ApPolygon::name() const { return u"P(Ø%1, N%2)"_s.arg(diam_).arg(verticesCount_); } // POLYGON
 
 ApertureType ApPolygon::type() const { return Polygon; }
 
@@ -337,7 +337,7 @@ ApMacro::ApMacro(const QString& macro, const QStringList& modifiers, const VarMa
         modifiers_.removeLast();
 }
 
-QString ApMacro::name() const { return QString(u"M(%1)"_s).arg(macro_); } // MACRO
+QString ApMacro::name() const { return u"M(%1)"_s.arg(macro_); } // MACRO
 
 ApertureType ApMacro::type() const { return Macro; }
 
@@ -378,7 +378,7 @@ void ApMacro::draw() {
     mvector<QPair<bool, Path>> items;
     try {
         //        for (int i{}; i < modifiers_.size(); ++i) {
-        //            QString var(modifiers_[i]);
+        //            QString var{modifiers_[i]};
 
         QJSEngine js;
         for(auto&& [name, value]: macroCoefficients)
@@ -451,7 +451,7 @@ void ApMacro::draw() {
         }
     } catch(...) {
         qWarning() << u"Macro draw error"_s;
-        throw QString(u"Macro draw error"_s);
+        throw u"Macro draw error"_s;
     }
 
     if(items.size() > 1) {
@@ -710,7 +710,7 @@ ApBlock::ApBlock(const File* format)
     : AbstractAperture{format} {
 }
 
-QString ApBlock::name() const { return QString(u"BLOCK"_s); }
+QString ApBlock::name() const { return u"BLOCK"_s; }
 
 ApertureType ApBlock::type() const { return Block; }
 

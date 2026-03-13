@@ -18,7 +18,6 @@
 #include <QGraphicsSceneContextMenuEvent>
 #include <QIcon>
 #include <QMenu>
-#include <QMutex>
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
@@ -49,7 +48,7 @@ AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
 
-    static QMutex m;
+    static std::mutex m;
     m.lock();
     thpi.push_back(this);
     m.unlock();
@@ -86,7 +85,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(App::settings().guiColor(GuiColors::CutArea), diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(painterPath);
-            QColor pc(bodyColor_);
+            QColor pc{bodyColor_};
             pc.setAlpha(255);
             painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::grView().scaleFactor()));
             painter->drawPath(painterPath);
@@ -94,7 +93,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
         //        }
     }
     painter->setBrush(bodyColor_);
-    QColor p(bodyColor_);
+    QColor p{bodyColor_};
     p.setAlpha(255);
     painter->setPen(QPen(p, 0.0));
     painter->drawPath(sourcePath);
@@ -225,7 +224,7 @@ void PreviewItem::redraw() {
         const Point center{~rect.center()};
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
         const auto fp(sourcePath.toFillPolygons()); // FIXME not used
-        for(int i{}; i < node_->count(); ++i) {   // Gaps
+        for(int i{}; i < node_->count(); ++i) {     // Gaps
             // ClipperOffset offset;
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
             // offset.AddPath({center,

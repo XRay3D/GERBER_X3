@@ -183,7 +183,7 @@ void Form::updateThermalGi() {
     int count = std::accumulate(thPaths.begin(), thPaths.end(),
         0, [](int i, auto& val) { return i + int(val.second.size()); });
 
-    QProgressDialog pd(u"create th"_s, {}, 0, count, this);
+    QProgressDialog pd{u"create th"_s, {}, 0, count, this};
     pd.setCancelButton(nullptr);
     count = 0;
     { // create Preview Items

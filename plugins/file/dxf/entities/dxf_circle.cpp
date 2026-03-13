@@ -25,7 +25,7 @@ Circle::Circle(SectionParser* sp)
 //     if (i) {
 //         for (int r{}; r < i->rowCount; ++r) {
 //             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
 //                 i->attachToLayer(std::move(go));
@@ -73,7 +73,7 @@ Entity::Type Circle::type() const { return Type::CIRCLE; }
 
 DxfGo Circle::toGo() const {
     QPainterPath path;
-    QPointF r(radius, radius);
+    QPointF r{radius, radius};
     path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
 
     QTransform m;
@@ -88,7 +88,7 @@ DxfGo Circle::toGo() const {
     DxfGo go{id, ~p.value(0), {}}; // return {id, ~p.value(0), {}};
 
     go.raw = radius * 2;
-    go.name = layerName; // QString(u"T%1|Ø%2"_s).arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
+    go.name = layerName; // u"T%1|Ø%2"_s.arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
     go.fill.emplace_back(~p.value(0));
     go.path.clear();
 

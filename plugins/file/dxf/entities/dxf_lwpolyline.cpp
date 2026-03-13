@@ -101,7 +101,7 @@ LwPolyline::LwPolyline(SectionParser* sp)
 //     if (i) {
 //         for (int r{}; r < i->rowCount; ++r) {
 //             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
+//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
 //                 i->attachToLayer(std::move(go));
@@ -182,7 +182,7 @@ DxfGo LwPolyline::toGo() const {
 
         //        auto [center, start_angle_, end_angle_, radius] = bulgeToArc(source, target, source.bulge);
 
-        const QLineF l1(source, target);
+        const QLineF l1{source, target};
         const double lenght = l1.length() * 0.5;
         const double height = lenght * source.bulge;
         const double radius = (height * height + lenght * lenght) / (height * 2);
@@ -220,8 +220,8 @@ DxfGo LwPolyline::toGo() const {
 
         double span = end_angle - start_angle;
 
-        const QPointF rad(radius, radius);
-        const QRectF br(center + rad, center - rad);
+        const QPointF rad{radius, radius};
+        const QRectF br{center + rad, center - rad};
         path.arcTo(br, -start_angle, -span);
     };
 

@@ -29,8 +29,8 @@ Ellipse::Ellipse(SectionParser* sp)
 //     if (i) {
 //         //        for (int r{}; r < i->rowCount; ++r) {
 //         //            for (int c{}; c < i->colCount; ++c) {
-//         //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-//         //                QPointF rad(radius, radius);
+//         //                QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+//         //                QPointF rad{radius, radius};
 //         //                auto item = scene->addEllipse(QRectF(centerPoint - rad, centerPoint + rad), QPen(i->color(), thickness /*, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin*/), Qt::NoBrush);
 //         //                item->setToolTip(layerName);
 //         //                i->transform(item, tr);
@@ -39,7 +39,7 @@ Ellipse::Ellipse(SectionParser* sp)
 //         //        }
 //     } else {
 //         QPainterPath path;
-//         QLineF line(CenterPoint, EndpointOfMajorAxis);
+//         QLineF line{CenterPoint, EndpointOfMajorAxis};
 //         const double angle = line.angle();
 //         const double length = line.length() / 2;
 //         //        const auto angle = qRadiansToDegrees(std::atan2(EndpointOfMajorAxis.y() - CenterPoint.y(), EndpointOfMajorAxis.x() - CenterPoint.x()));
@@ -55,7 +55,7 @@ Ellipse::Ellipse(SectionParser* sp)
 //            else if (aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
 //                aspan -= 360;
 //        }
-//        QPointF rad(length, length * ratioOfMinorAxisToMajorAxis);
+//        QPointF rad{length, length * ratioOfMinorAxisToMajorAxis};
 //        path.arcTo(QRectF(-rad, +rad), -qRadiansToDegrees(startParameter), -aspan);
 //        //        auto item(new QGraphicsPathItem{path});
 //        //        item->setPen(QPen(color(), 0.0));

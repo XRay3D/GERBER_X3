@@ -27,7 +27,7 @@ QPolygonF interpolate(const QPolygonF& points, int numValues) {
     if(!spline.setPoints(points))
         return points;
 
-    QPolygonF interpolatedPoints(numValues);
+    QPolygonF interpolatedPoints{numValues};
     const double delta = (points[/*numPoints*/ points.size() - 1].x() - points[0].x()) / (points.size() - 1);
     for(int i{}; i < points.size(); i++) // interpolate
     {

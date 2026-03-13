@@ -47,7 +47,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     Codes codes;
     codes.reserve(10000);
 
-    QTextStream in(&file);
+    QTextStream in{&file};
 #if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
     in.setCodec(u"Windows-1251"_s);
 #endif
@@ -60,7 +60,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         bool ok;
         auto code(strCode.toInt(&ok));
         if(!ok)
-            throw QString(u"Unknown code: raw str %1, line %2!"_s).arg(strCode).arg(line);
+            throw u"Unknown code: raw str %1, line %2!"_s.arg(strCode).arg(line);
         // Value
         QString strValue(in.readLine());
         file_->lines().push_back(strValue);
@@ -120,7 +120,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
                     // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE{dxfFile(), from, to};
                     continue;
                 default:
-                    throw QString(u"Unknowh Section!"_s);
+                    throw u"Unknowh Section!"_s;
                 }
             }
         }
@@ -158,11 +158,11 @@ bool Plugin::thisIsIt(const QString& fileName) {
     if(fileName.endsWith(u".dxf"_s, Qt::CaseInsensitive))
         return true;
 
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    QTextStream in(&file);
+    QTextStream in{&file};
     do {
         QString line(in.readLine());
         if(line.toInt() == 999) {

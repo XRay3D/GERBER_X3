@@ -137,7 +137,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         return data_[section].name.value(0);
     case Qt::SizeHintRole:
         if(orientation == Qt::Vertical)
-            return QFontMetrics(QFont()).boundingRect(QString(u"T999"_s)).size() + QSize(Header::DelegateSize + 10, 1);
+            return QFontMetrics(QFont()).boundingRect(u"T999"_s).size() + QSize(Header::DelegateSize + 10, 1);
         return {};
     case Qt::TextAlignmentRole:
         if(orientation == Qt::Vertical)

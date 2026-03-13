@@ -44,9 +44,12 @@ inline void death_signal(int signum) { // обработка Segfault
     // signal(signum, SIG_DFL);
 }
 
-inline auto messageHandler = qInstallMessageHandler(nullptr);
+inline const auto defaultMessageHandler = qInstallMessageHandler(nullptr);
+
 inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, const QString& message) {
     QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
+
+    if(message == u"Painter path exceeds +/-32767 pixels.") return;
 
     if(context.file) {
         std::string_view file{context.file};
@@ -58,7 +61,7 @@ inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, 
 
     if(App::mainWindowPtr())
         App::mainWindow().logMessage2(type, context, message);
-    messageHandler(type, context, message);
+    defaultMessageHandler(type, context, message);
 }
 
 inline void stacktraceAndOutput() {
