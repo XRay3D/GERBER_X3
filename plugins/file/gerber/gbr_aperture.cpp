@@ -58,17 +58,24 @@ Paths AbstractAperture::draw(const State& state, bool notApBlock) {
             path *= 25.4;
 
         QTransform m;
-        if(!qFuzzyIsNull(state.rotating())) m.rotate(state.rotating());
-        if(!qFuzzyCompare(state.scaling(), 1.0)) m.scale(state.scaling(), state.scaling());
-        if(state.mirroring() & X_Mirroring) m.scale(-1, +1);
-        if(state.mirroring() & Y_Mirroring) m.scale(+1, -1);
 
-        // if(state.curPos().x || state.curPos().y) m.translate(state.curPos().x, state.curPos().y);
+        if(state.curPos().x || state.curPos().y)
+            m.translate(
+                dScale * state.curPos().x,
+                dScale * state.curPos().y);
 
-        if(!m.isIdentity()) TransformPath(path, m);
+        if(!qFuzzyIsNull(state.rotating()))
+            m.rotate(state.rotating());
 
-        if(state.curPos().x || state.curPos().y) //??????????
-            TranslatePath(path, state.curPos());
+        if(!qFuzzyCompare(state.scaling(), 1.0) || state.mirroring())
+            m.scale(
+                state.mirroring() & X_Mirroring ? -state.scaling() : state.scaling(),
+                state.mirroring() & Y_Mirroring ? -state.scaling() : state.scaling());
+
+        if(m.type()) TransformPath(path, m);
+
+        // if(state.curPos().x || state.curPos().y) //??????????
+        // TranslatePath(path, state.curPos());
     }
 
     return retPaths;
