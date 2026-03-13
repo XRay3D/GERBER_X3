@@ -56,15 +56,15 @@ R#M26       R#M22
 
 enum MCode {
     M_NULL = -1,
-    M00 = 0, //  End of Program - No Rewind (X#Y#)
-    M01 = 1, //  End of Pattern
-    M02 = 2, //  Repeat Pattern Offset ((M02)X#Y#)
-    //    M02 = 2, //  Swap Axes ((M02)XYM70)
-    //    M02 = 2, //  Mirror Image X Axis ((M02)XYM80)
-    //    M02 = 2, //  Mirror Image Y Axis ((M02)XYM90)
-    M06 = 6,  //  Optional Stop (X#Y#)
-    M08 = 8,  //  End of Step and Repeat
-    M09 = 9,  //  Stop for Inspection (X#Y#)
+    M00 = 0, // End of Program - No Rewind (X#Y#)
+    M01 = 1, // End of Pattern
+    M02 = 2, // Repeat Pattern Offset ((M02)X#Y#)
+    // M02 = 2, // Swap Axes ((M02)XYM70)
+    // M02 = 2, // Mirror Image X Axis ((M02)XYM80)
+    // M02 = 2, // Mirror Image Y Axis ((M02)XYM90)
+    M06 = 6,  // Optional Stop (X#Y#)
+    M08 = 8,  // End of Step and Repeat
+    M09 = 9,  // Stop for Inspection (X#Y#)
     M14 = 14, // Z Axis Route Position With Depth Controlled Contouring
     M15 = 15, // Z Axis Route Position
     M16 = 16, // Retract With Clamping - вытянуть с фиксацией.
@@ -92,16 +92,16 @@ enum MCode {
 
 enum GCode {
     G_NULL = -1,
-    G00 = 0,  //  Route Mode (X#Y#) перемещение.
-    G01 = 1,  //  Linear (Straight Line) Mode
-    G02 = 2,  //  Circular CW Mode
-    G03 = 3,  //  Circular CCW Mode
-    G04 = 4,  //  X# Variable Dwell
-    G05 = 5,  //  Drill Mode
-    G07 = 7,  //  Override current tool feed or speed
+    G00 = 0,  // Route Mode (X#Y#) перемещение.
+    G01 = 1,  // Linear (Straight Line) Mode
+    G02 = 2,  // Circular CW Mode
+    G03 = 3,  // Circular CCW Mode
+    G04 = 4,  // X# Variable Dwell
+    G05 = 5,  // Drill Mode
+    G07 = 7,  // Override current tool feed or speed
     G32 = 32, // Routed Circle Canned Cycle (X#Y#A#)
-    // CCW G34,#(,#)	Select Vision Tool
-    // CW G33X#Y#A#	Routed Circle Canned Cycle
+    // CCW G34,#(,#) Select Vision Tool
+    // CW G33X#Y#A# Routed Circle Canned Cycle
     G35 = 35, // Single Point Vision Offset (Relative to Work Zero)  (X#Y#)
     G36 = 36, // Multipoint Vision Translation (Relative to Work Zero)  (X#Y#)
     G37 = 37, // Cancel Vision Translation or Offset (From G35 or G36)
@@ -126,7 +126,7 @@ enum GCode {
 
 /*
 G90// Absolute Mode
-G05//  Drill Mode
+G05// Drill Mode
 T04
 G00X0022665Y-021561  // Route Mode (X#Y#) перемещение.
 M15                  // Z Axis Route Position
@@ -294,7 +294,7 @@ public:
         stream >> hole.state;
         return stream;
     }
-    //    friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
+    // friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
 };
 
 class Settings {

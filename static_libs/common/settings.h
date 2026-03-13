@@ -165,13 +165,13 @@ class AppSettings {
 public:
     explicit AppSettings() = default;
 
-    //    AppSettings(const AppSettings&) = delete;
-    //    AppSettings(AppSettings&&) = delete;
-    //    AppSettings& operator=(AppSettings&& a) = delete;
-    //    AppSettings& operator=(const AppSettings& app) = delete;
+    // AppSettings(const AppSettings&) = delete;
+    // AppSettings(AppSettings&&) = delete;
+    // AppSettings& operator=(AppSettings&& a) = delete;
+    // AppSettings& operator=(const AppSettings& app) = delete;
 
-    //    void set(AppSettings* appSettings);
-    //    AppSettings* ptr();
+    // void set(AppSettings* appSettings);
+    // AppSettings* ptr();
 
     /*GUI*/
     QColor& guiColor(int32_t id);
@@ -201,7 +201,7 @@ public:
     bool snap();
 
 private:
-    //    inline static AppSettings* settings_ = nullptr;
+    // inline static AppSettings* settings_ = nullptr;
 
     /*GUI*/
     enum {

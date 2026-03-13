@@ -13,15 +13,15 @@
 // namespace Dxf {
 
 // UCS::UCS(SectionParser* sp)
-//     : TableItem{sp} {
+// : TableItem{sp} {
 // }
 
 // void UCS::parse(CodeData& code) {
-//     do {
-//         data.push_back(code);
-//         code = sp->nextCode();
-//     } while (code.code() != 0);
-//     //    code = sp->prevCode();
+// do {
+// data.push_back(code);
+// code = sp->nextCode();
+// } while (code.code() != 0);
+// // code = sp->prevCode();
 // }
 
 //} // namespace Dxf

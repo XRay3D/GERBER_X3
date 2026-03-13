@@ -92,7 +92,7 @@ public:
     /*! \brief  Make xml processing instruction (hat) and returns new XML QDomDocument. On deserialization procedure all processing instructions will be ignored. */
     static QDomDocument appendXmlHat(const QDomNode& node, const QString& encoding, const QString& version = u"1.0"_s) {
         QDomDocument doc = node.toDocument();
-        QDomNode xmlNode = doc.createProcessingInstruction(u"xml"_s, QString(u"version=\"_s%1\u" encoding=\"_s%2\"").arg(version).arg(encoding));
+        QDomNode xmlNode = doc.createProcessingInstruction(u"xml"_s, QString(u"version=\"_s%1\u" encoding =\"_s%2\"").arg(version).arg(encoding));
         doc.insertBefore(xmlNode, doc.firstChild());
         return doc;
     }
@@ -278,7 +278,7 @@ private:                                                                        
     void SET(xml_attr, name)(const QDomNode& node) {                                     \
         if(!node.isNull()) {                                                             \
             name = QVariant(node.nodeValue()).value<type>();                             \
-            qDebug() << u"4"_s << name << node.nodeValue() << #name;                        \
+            qDebug() << u"4"_s << name << node.nodeValue() << #name;                     \
         }                                                                                \
     }
 #else
@@ -322,13 +322,13 @@ private:                                                                        
         QDomDocument doc;                                                       \
         QString strname = #name;                                                \
         QDomElement arrayXml = doc.createElement(QString(strname));             \
-        arrayXml.setAttribute(u"type"_s, u"array"_s);                                 \
+        arrayXml.setAttribute(u"type"_s, u"array"_s);                           \
                                                                                 \
         for(int i{}; i < name.size(); ++i) {                                    \
             itemType item = name.at(i);                                         \
-            QDomElement itemXml = doc.createElement(u"item"_s);                    \
-            itemXml.setAttribute(u"type"_s, #itemType);                            \
-            itemXml.setAttribute(u"index"_s, i);                                   \
+            QDomElement itemXml = doc.createElement(u"item"_s);                 \
+            itemXml.setAttribute(u"type"_s, #itemType);                         \
+            itemXml.setAttribute(u"index"_s, i);                                \
             itemXml.appendChild(doc.createTextNode(QVariant(item).toString())); \
             arrayXml.appendChild(itemXml);                                      \
         }                                                                       \
@@ -424,7 +424,7 @@ private:                                                               \
     QDomNode GET(xml, name)() const {                                  \
         QDomDocument doc;                                              \
         QDomElement element = doc.createElement(#name);                \
-        element.setAttribute(u"type"_s, u"array"_s);                         \
+        element.setAttribute(u"type"_s, u"array"_s);                   \
         for(int i{}; i < name.size(); ++i)                             \
             element.appendChild(name.at(i).toXml());                   \
         doc.appendChild(element);                                      \
@@ -478,35 +478,35 @@ private:                                                                   \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be QMap, QHash)    */
 /* THIS IS FOR QT DICTIONARY TYPES, for example QMap<int, QString>, QMap<int,int>, ...*/
 #ifdef QS_HAS_XML
-#define QS_XML_QT_DICT(map, name)                                                                   \
-    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                              \
-private:                                                                                            \
-    QDomNode GET(xml, name)() const {                                                               \
-        QDomDocument doc;                                                                           \
-        QDomElement element = doc.createElement(#name);                                             \
-        element.setAttribute(u"type"_s, u"map"_s);                                                        \
-        for(auto p = name.begin(); p != name.end(); ++p) {                                          \
+#define QS_XML_QT_DICT(map, name)                                                                      \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                                 \
+private:                                                                                               \
+    QDomNode GET(xml, name)() const {                                                                  \
+        QDomDocument doc;                                                                              \
+        QDomElement element = doc.createElement(#name);                                                \
+        element.setAttribute(u"type"_s, u"map"_s);                                                     \
+        for(auto p = name.begin(); p != name.end(); ++p) {                                             \
             QDomElement e = doc.createElement(u"item"_s);                                              \
             e.setAttribute(u"key"_s, QVariant(p.key()).toString());                                    \
             e.setAttribute(u"value"_s, QVariant(p.value()).toString());                                \
-            element.appendChild(e);                                                                 \
-        }                                                                                           \
-        doc.appendChild(element);                                                                   \
-        return QDomNode(doc);                                                                       \
-    }                                                                                               \
-    void SET(xml, name)(const QDomNode& node) {                                                     \
-        if(!node.isNull() && node.isElement()) {                                                    \
-            QDomElement root = node.toElement();                                                    \
-            if(root.tagName() == #name) {                                                           \
-                QDomNodeList childs = root.childNodes();                                            \
-                                                                                                    \
-                for(int i{}; i < childs.size(); ++i) {                                              \
-                    QDomElement item = childs.at(i).toElement();                                    \
+            element.appendChild(e);                                                                    \
+        }                                                                                              \
+        doc.appendChild(element);                                                                      \
+        return QDomNode(doc);                                                                          \
+    }                                                                                                  \
+    void SET(xml, name)(const QDomNode& node) {                                                        \
+        if(!node.isNull() && node.isElement()) {                                                       \
+            QDomElement root = node.toElement();                                                       \
+            if(root.tagName() == #name) {                                                              \
+                QDomNodeList childs = root.childNodes();                                               \
+                                                                                                       \
+                for(int i{}; i < childs.size(); ++i) {                                                 \
+                    QDomElement item = childs.at(i).toElement();                                       \
                     name.insert(QVariant(item.attributeNode(u"key"_s).value()).value<map::key_type>(), \
                         QVariant(item.attributeNode(u"value"_s).value()).value<map::mapped_type>());   \
-                }                                                                                   \
-            }                                                                                       \
-        }                                                                                           \
+                }                                                                                      \
+            }                                                                                          \
+        }                                                                                              \
     }
 #else
 #define QS_XML_QT_DICT(map, name)
@@ -549,37 +549,37 @@ private:                                                                   \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be QMap, QHash)    */
 /* THIS IS FOR QT DICTIONARY TYPES, for example QMap<int, CustomSerializableType> */
 #ifdef QS_HAS_XML
-#define QS_XML_QT_DICT_OBJECTS(map, name)                                                           \
-    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                              \
-private:                                                                                            \
-    QDomNode GET(xml, name)() const {                                                               \
-        QDomDocument doc;                                                                           \
-        QDomElement element = doc.createElement(#name);                                             \
-        element.setAttribute(u"type"_s, u"map"_s);                                                        \
-        for(auto p = name.begin(); p != name.end(); ++p) {                                          \
+#define QS_XML_QT_DICT_OBJECTS(map, name)                                                              \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                                 \
+private:                                                                                               \
+    QDomNode GET(xml, name)() const {                                                                  \
+        QDomDocument doc;                                                                              \
+        QDomElement element = doc.createElement(#name);                                                \
+        element.setAttribute(u"type"_s, u"map"_s);                                                     \
+        for(auto p = name.begin(); p != name.end(); ++p) {                                             \
             QDomElement e = doc.createElement(u"item"_s);                                              \
             e.setAttribute(u"key"_s, QVariant(p.key()).toString());                                    \
-            e.appendChild(p.value().toXml());                                                       \
-            element.appendChild(e);                                                                 \
-        }                                                                                           \
-        doc.appendChild(element);                                                                   \
-        return QDomNode(doc);                                                                       \
-    }                                                                                               \
-    void SET(xml, name)(const QDomNode& node) {                                                     \
-        if(!node.isNull() && node.isElement()) {                                                    \
-            QDomElement root = node.toElement();                                                    \
-            if(root.tagName() == #name) {                                                           \
-                QDomNodeList childs = root.childNodes();                                            \
-                                                                                                    \
-                for(int i{}; i < childs.size(); ++i) {                                              \
-                    QDomElement item = childs.at(i).toElement();                                    \
-                    map::mapped_type tmp;                                                           \
-                    tmp.fromXml(item.firstChild());                                                 \
+            e.appendChild(p.value().toXml());                                                          \
+            element.appendChild(e);                                                                    \
+        }                                                                                              \
+        doc.appendChild(element);                                                                      \
+        return QDomNode(doc);                                                                          \
+    }                                                                                                  \
+    void SET(xml, name)(const QDomNode& node) {                                                        \
+        if(!node.isNull() && node.isElement()) {                                                       \
+            QDomElement root = node.toElement();                                                       \
+            if(root.tagName() == #name) {                                                              \
+                QDomNodeList childs = root.childNodes();                                               \
+                                                                                                       \
+                for(int i{}; i < childs.size(); ++i) {                                                 \
+                    QDomElement item = childs.at(i).toElement();                                       \
+                    map::mapped_type tmp;                                                              \
+                    tmp.fromXml(item.firstChild());                                                    \
                     name.insert(QVariant(item.attributeNode(u"key"_s).value()).value<map::key_type>(), \
-                        tmp);                                                                       \
-                }                                                                                   \
-            }                                                                                       \
-        }                                                                                           \
+                        tmp);                                                                          \
+                }                                                                                      \
+            }                                                                                          \
+        }                                                                                              \
     }
 #else
 #define QS_XML_QT_DICT_OBJECTS(map, name)
@@ -616,36 +616,36 @@ private:                                                                   \
 #endif
 
 #ifdef QS_HAS_XML
-#define QS_XML_STL_DICT(map, name)                                                                 \
-    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                             \
-private:                                                                                           \
-    QDomNode GET(xml, name)() const {                                                              \
-        QDomDocument doc;                                                                          \
-        QDomElement element = doc.createElement(#name);                                            \
-        element.setAttribute(u"type"_s, u"map"_s);                                                       \
-        for(auto p: name) {                                                                        \
+#define QS_XML_STL_DICT(map, name)                                                                    \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                                \
+private:                                                                                              \
+    QDomNode GET(xml, name)() const {                                                                 \
+        QDomDocument doc;                                                                             \
+        QDomElement element = doc.createElement(#name);                                               \
+        element.setAttribute(u"type"_s, u"map"_s);                                                    \
+        for(auto p: name) {                                                                           \
             QDomElement e = doc.createElement(u"item"_s);                                             \
             e.setAttribute(u"key"_s, QVariant(p.first).toString());                                   \
             e.setAttribute(u"value"_s, QVariant(p.second).toString());                                \
-            element.appendChild(e);                                                                \
-        }                                                                                          \
-        doc.appendChild(element);                                                                  \
-        return QDomNode(doc);                                                                      \
-    }                                                                                              \
-    void SET(xml, name)(const QDomNode& node) {                                                    \
-        if(!node.isNull() && node.isElement()) {                                                   \
-            QDomElement root = node.toElement();                                                   \
-            if(root.tagName() == #name) {                                                          \
-                QDomNodeList childs = root.childNodes();                                           \
-                                                                                                   \
-                for(int i{}; i < childs.size(); ++i) {                                             \
-                    QDomElement item = childs.at(i).toElement();                                   \
-                    name.insert(std::pair<map::key_type, map::mapped_type>(                        \
+            element.appendChild(e);                                                                   \
+        }                                                                                             \
+        doc.appendChild(element);                                                                     \
+        return QDomNode(doc);                                                                         \
+    }                                                                                                 \
+    void SET(xml, name)(const QDomNode& node) {                                                       \
+        if(!node.isNull() && node.isElement()) {                                                      \
+            QDomElement root = node.toElement();                                                      \
+            if(root.tagName() == #name) {                                                             \
+                QDomNodeList childs = root.childNodes();                                              \
+                                                                                                      \
+                for(int i{}; i < childs.size(); ++i) {                                                \
+                    QDomElement item = childs.at(i).toElement();                                      \
+                    name.insert(std::pair<map::key_type, map::mapped_type>(                           \
                         QVariant(item.attributeNode(u"key"_s).value()).value<map::key_type>(),        \
                         QVariant(item.attributeNode(u"value"_s).value()).value<map::mapped_type>())); \
-                }                                                                                  \
-            }                                                                                      \
-        }                                                                                          \
+                }                                                                                     \
+            }                                                                                         \
+        }                                                                                             \
     }
 #else
 #define QS_XML_STL_DICT(map, name)
@@ -688,38 +688,38 @@ private:                                                                   \
 /* This collection must be provide method insert(KeyT, ValueT) (it's can be std::map)    */
 /* THIS IS FOR STL DICTIONARY TYPES, for example std::map<int, CustomSerializableType> */
 #ifdef QS_HAS_XML
-#define QS_XML_STL_DICT_OBJECTS(map, name)                                                  \
-    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                      \
-private:                                                                                    \
-    QDomNode GET(xml, name)() const {                                                       \
-        QDomDocument doc;                                                                   \
-        QDomElement element = doc.createElement(#name);                                     \
-        element.setAttribute(u"type"_s, u"map"_s);                                                \
-        for(auto p: name) {                                                                 \
+#define QS_XML_STL_DICT_OBJECTS(map, name)                                                     \
+    Q_PROPERTY(QDomNode name READ GET(xml, name) WRITE SET(xml, name))                         \
+private:                                                                                       \
+    QDomNode GET(xml, name)() const {                                                          \
+        QDomDocument doc;                                                                      \
+        QDomElement element = doc.createElement(#name);                                        \
+        element.setAttribute(u"type"_s, u"map"_s);                                             \
+        for(auto p: name) {                                                                    \
             QDomElement e = doc.createElement(u"item"_s);                                      \
             e.setAttribute(u"key"_s, QVariant(p.first).toString());                            \
-            e.appendChild(p.second.toXml());                                                \
-            element.appendChild(e);                                                         \
-        }                                                                                   \
-        doc.appendChild(element);                                                           \
-        return QDomNode(doc);                                                               \
-    }                                                                                       \
-    void SET(xml, name)(const QDomNode& node) {                                             \
-        if(!node.isNull() && node.isElement()) {                                            \
-            QDomElement root = node.toElement();                                            \
-            if(root.tagName() == #name) {                                                   \
-                QDomNodeList childs = root.childNodes();                                    \
-                                                                                            \
-                for(int i{}; i < childs.size(); ++i) {                                      \
-                    QDomElement item = childs.at(i).toElement();                            \
-                    map::mapped_type tmp;                                                   \
-                    tmp.fromXml(item.firstChild());                                         \
-                    name.insert(std::pair<map::key_type, map::mapped_type>(                 \
+            e.appendChild(p.second.toXml());                                                   \
+            element.appendChild(e);                                                            \
+        }                                                                                      \
+        doc.appendChild(element);                                                              \
+        return QDomNode(doc);                                                                  \
+    }                                                                                          \
+    void SET(xml, name)(const QDomNode& node) {                                                \
+        if(!node.isNull() && node.isElement()) {                                               \
+            QDomElement root = node.toElement();                                               \
+            if(root.tagName() == #name) {                                                      \
+                QDomNodeList childs = root.childNodes();                                       \
+                                                                                               \
+                for(int i{}; i < childs.size(); ++i) {                                         \
+                    QDomElement item = childs.at(i).toElement();                               \
+                    map::mapped_type tmp;                                                      \
+                    tmp.fromXml(item.firstChild());                                            \
+                    name.insert(std::pair<map::key_type, map::mapped_type>(                    \
                         QVariant(item.attributeNode(u"key"_s).value()).value<map::key_type>(), \
-                        tmp));                                                              \
-                }                                                                           \
-            }                                                                               \
-        }                                                                                   \
+                        tmp));                                                                 \
+                }                                                                              \
+            }                                                                                  \
+        }                                                                                      \
     }
 #else
 #define QS_XML_STL_DICT_OBJECTS(map, name)

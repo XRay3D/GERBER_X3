@@ -32,7 +32,7 @@ class Model : public QAbstractItemModel {
 public:
     enum {
         Name,
-        //        Position,
+        // Position,
         GapAngle,
         apThickness,
         GapCount,

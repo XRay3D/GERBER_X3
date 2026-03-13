@@ -33,10 +33,10 @@ void Dummy::parse(Dxf::CodeData& code) {
     default:
         do {
             data.push_back(code);
-            //        switch (static_cast<DataEnum>(code.code())) {
-            //        default:
-            //            Entity::parse(code);
-            //        }
+            // switch (static_cast<DataEnum>(code.code())) {
+            // default:
+            // Entity::parse(code);
+            // }
             code = sp->nextCode();
         } while(code.code() != 0);
     }

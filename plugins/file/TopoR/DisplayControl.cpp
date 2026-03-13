@@ -1,9 +1,8 @@
 ﻿#include "DisplayControl.h"
 
-    // namespace TopoR_PCB_Classes {
+// namespace TopoR_PCB_Classes {
 
-    bool
-    DisplayControl::Show_DisplayControl::getShowBoardOutlineSpecified() const {
+bool DisplayControl::Show_DisplayControl::getShowBoardOutlineSpecified() const {
     return _showBoardOutline != Bool::off;
 }
 

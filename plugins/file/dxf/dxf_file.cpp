@@ -28,6 +28,7 @@
 
 #include <QDebug>
 #include <QElapsedTimer>
+#include <gi_dbg.h>
 
 namespace Dxf {
 
@@ -136,6 +137,13 @@ void File::createGi() {
         for(auto& go: layer->graphicObjects_)
             go.file_ = this;
 
+    // r::fill(layers_
+    // | v::transform(&Layers::value_type::second)
+    // | v::transform(&Layer::graphicObjects_)
+    // | v::join
+    // | v::transform(&DxfGo::file_),
+    // this);
+
     Gi::Group* igNorm = itemGroups_.back();
     Gi::Group* igPath = new Gi::Group;
     itemGroups_.push_back(igPath);
@@ -152,15 +160,17 @@ void File::createGi() {
             Clipper clipper; // Clipper
             const bool empty{layer->groupedPaths_.empty()};
             for(auto& go: layer->graphicObjects_) {
-                if(empty && go.fill.size())
+                if(empty && go.fill.size()) {
+                    // if(Area(go.fill) < 0.) ReversePaths(go.fill); // FIXME add settings
                     clipper.AddSubject(go.fill);
+                }
 
                 if(go.path.size() > 1) {
                     auto gItem = new Gi::DataPath{go.path, this};
                     if(go.entity()) {
-                        //                        gItem->setToolTip(u"Line %1\n%2"_s
-                        //                                              .arg(go.entity()->data[0].line())
-                        //                                              .arg(go.entity()->name()));
+                        // gItem->setToolTip(u"Line %1\n%2"_s
+                        // .arg(go.entity()->data[0].line())
+                        // .arg(go.entity()->name()));
                         gItem->setToolTip(go.entity()->name());
                     }
                     gItem->setPenColorPtr(&layer->colorPath_);
@@ -170,9 +180,12 @@ void File::createGi() {
 
             if(empty) {
                 clipper.Execute(ClipType::Union, FillRule::NonZero, mergedPaths_);
+                CleanPaths(mergedPaths_, uScale * 0.0005);
                 layer->groupedPaths_ = std::move(groupedPaths());
-                for(auto& paths: layer->groupedPaths_)
-                    CleanPaths(paths, uScale * 0.0005);
+
+                for(auto&& path: mergedPaths_)
+                    new Gi::Debug{toPPath(toCurve(path))};
+
                 mergedPaths_.clear();
             }
 
@@ -188,7 +201,16 @@ void File::createGi() {
             layer->itemGroupPath = igPath;
 
             if(layer->itemsType_ == ItemsType::Null) {
-                layer->setItemsType(ItemsType::Both);
+                if(igNorm->size()) {
+                    igNorm->setVisible(true);
+                    igPath->setVisible(false);
+                    layer->setItemsType(ItemsType::Normal);
+                } else {
+                    igNorm->setVisible(false);
+                    igPath->setVisible(true);
+                    layer->setItemsType(ItemsType::Paths);
+                }
+                // layer->setItemsType(ItemsType::Both);
                 layer->setVisible(true);
             } else
                 layer->setVisible(visible_);
@@ -233,15 +255,15 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                     case GCType::Drill: {
                         double drillDiameter{};
                         auto rect = CL2::GetBounds(g.fill);
-                        //                        auto& ap = *apertures_.at(go.state.aperture());
+                        // auto& ap = *apertures_.at(go.state.aperture());
 
-                        //                        auto name {ap.name()};
-                        //                        if (ap.withHole())
-                        //                            drillDiameter = ap.drillDiameter();
-                        //                        else
-                        //                            drillDiameter = ap.minSize();
+                        // auto name {ap.name()};
+                        // if (ap.withHole())
+                        // drillDiameter = ap.drillDiameter();
+                        // else
+                        // drillDiameter = ap.minSize();
                         drillDiameter = std::min(rect.bottom - rect.top, rect.right - rect.left) * dScale;
-                        //                        name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
+                        // name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
                         g.raw = drillDiameter /** go.scaleX()*/;
                         g.name = /*u"С Ø"_s +*/ QString::number(drillDiameter);
                     } break;
@@ -255,19 +277,19 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     return retData;
 
     // std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
-    //     if (plugin->type() == ::GCode::Drill) {
-    //         DrillPlugin::Preview retData;
-    //         auto const dxfFile = static_cast<File*>(file);
-    //         QTransform t {dxfFile->transform()};
-    //         for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
-    //             for (auto&& go : layer->graphicObjects())
-    //                 if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
-    //                     retData[{ctr, circle->radius * 2, false, name + u": CIRCLE"_s}].posOrPath.emplace_back(t.map(circle->centerPoint));
-    //             ctr++;
-    //         }
-    //         return retData;
-    //     }
-    //     return {};
+    // if (plugin->type() == ::GCode::Drill) {
+    // DrillPlugin::Preview retData;
+    // auto const dxfFile = static_cast<File*>(file);
+    // QTransform t {dxfFile->transform()};
+    // for (int ctr {}; auto&& [name, layer] : dxfFile->layers()) {
+    // for (auto&& go : layer->graphicObjects())
+    // if (auto circle = (const Circle*)go.entity(); go.entity()->type() == Entity::CIRCLE)
+    // retData[{ctr, circle->radius * 2, false, name + u": CIRCLE"_s}].posOrPath.emplace_back(t.map(circle->centerPoint));
+    // ctr++;
+    // }
+    // return retData;
+    // }
+    // return {};
     // }
 }
 

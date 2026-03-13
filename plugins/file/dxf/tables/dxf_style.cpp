@@ -81,7 +81,7 @@ void Style::parse(CodeData& code) {
         code = sp->nextCode();
     } while(code.code() != 0);
 
-    //    for (auto& code : data)
+    // for (auto& code : data)
 }
 
 } // namespace Dxf

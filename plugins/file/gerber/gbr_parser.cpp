@@ -77,7 +77,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
 
         lineNum_ = 0;
 
-        //        std::map<int, int> rel;
+        // std::map<int, int> rel;
         QElapsedTimer t;
         t.start();
         for(const QString& gerberLine: file->lines()) {
@@ -129,7 +129,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         qDebug()
             << file->shortName() << t.elapsed() << u"ms"_s;
 
-        //        for (auto [key, val] : rel)
+        // for (auto [key, val] : rel)
 
         if(file->graphicObjects_.empty()) {
             delete file;
@@ -543,7 +543,7 @@ Paths Parser::createLine() {
     if(file->apertures_[state_.aperture()]->type() == Rectangle) {
         if(Settings::wireMinkowskiSum()) {
             solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
-            r::for_each(v::join(solution), &SetZSelf);
+            r::for_each(v::join(solution), &SetCSelf);
         } else {
             auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
             if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
@@ -555,7 +555,7 @@ Paths Parser::createLine() {
             if(qFuzzyIsNull(size))
                 return {};
             solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
-            r::for_each(v::join(solution), &SetZSelf);
+            r::for_each(v::join(solution), &SetCSelf);
         }
         if(state_.imgPolarity() == Negative)
             ReversePaths(solution);
@@ -564,26 +564,26 @@ Paths Parser::createLine() {
         if(qFuzzyIsNull(size))
             return {};
 
-        r::for_each(path_, &SetZSelf);
-        // for(auto& pt: path_) SetZ(pt);
+        r::for_each(path_, &SetCSelf);
+        // for(auto& pt: path_) SetC(pt);
         if(Settings::wireMinkowskiSum())
             solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
         else {
             // if(path_.front() != path_.back())
             solution = Inflate({path_}, size, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
             // else {
-            //     Clipper clipper;
-            //     clipper.AddSubject(
-            //         Inflate({path_}, +size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
-            //     clipper.AddClip(
-            //         Inflate({path_}, -size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
-            //     clipper.Execute(ClipType::Difference, FillRule::NonZero, solution);
+            // Clipper clipper;
+            // clipper.AddSubject(
+            // Inflate({path_}, +size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
+            // clipper.AddClip(
+            // Inflate({path_}, -size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
+            // clipper.Execute(ClipType::Difference, FillRule::NonZero, solution);
             // }
         }
 
-        //        ClipperOffset offset;
-        //        offset.AddPath(path_, JoinType::Round, EndType::Round);
-        //        solution = offset.Execute(size);
+        // ClipperOffset offset;
+        // offset.AddPath(path_, JoinType::Round, EndType::Round);
+        // solution = offset.Execute(size);
         if(state_.imgPolarity() == Negative)
             ReversePaths(solution);
     }
@@ -601,7 +601,7 @@ Paths Parser::createPolygon() {
         if(state_.imgPolarity() == Positive)
             ReversePath(path_);
     }
-    r::for_each(path_, &SetZSelf);
+    r::for_each(path_, &SetCSelf);
     return {path_};
 }
 
@@ -802,31 +802,31 @@ bool Parser::parseAttributes(const QString& gLine) {
         case Attr::Command::TA:
             attAper.parse(cap[3].split(u','));
             break;
-            //            break;
-            //            {
-            //                QStringList sl(matchAttr.cap(3).split(u','));
-            //                int index = Attr::Aperture::value(sl.first());
-            //                switch (index) {
-            //                case Attr::Aperture::AperFunction:
-            //                    if (sl.size() > 1) {
-            //                        switch (int key = Attr::AperFunction::value(sl[1])) {
-            //                        case Attr::AperFunction::Main:
-            //                        case Attr::AperFunction::Outline:
-            //                        case Attr::AperFunction::Pin:
-            //                            aperFunction = key;
-            //                            break;
-            //                        default:
-            //                            aperFunction = -1;
-            //                        }
-            //                    }
-            //                    break;
-            //                case Attr::Aperture::DrillTolerance:
-            //                case Attr::Aperture::FlashText:
-            //                default:
-            //                    ;
-            //                }
-            //                //apertureAttributesStrings.append(matchAttr.cap(2));
-            //            }
+            // break;
+            // {
+            // QStringList sl(matchAttr.cap(3).split(u','));
+            // int index = Attr::Aperture::value(sl.first());
+            // switch (index) {
+            // case Attr::Aperture::AperFunction:
+            // if (sl.size() > 1) {
+            // switch (int key = Attr::AperFunction::value(sl[1])) {
+            // case Attr::AperFunction::Main:
+            // case Attr::AperFunction::Outline:
+            // case Attr::AperFunction::Pin:
+            // aperFunction = key;
+            // break;
+            // default:
+            // aperFunction = -1;
+            // }
+            // }
+            // break;
+            // case Attr::Aperture::DrillTolerance:
+            // case Attr::Aperture::FlashText:
+            // default:
+            // ;
+            // }
+            // //apertureAttributesStrings.append(matchAttr.cap(2));
+            // }
         case Attr::Command::TO: {
             for(int i = cap[3].indexOf(u'"'); i > -1; i = cap[3].indexOf(u'"'))
                 cap[3].remove(i, 1);
@@ -853,16 +853,16 @@ bool Parser::parseAttributes(const QString& gLine) {
                     components[refDes].setData(key, sl);
                     break;
                 default:
-                    //                    static const QRegularExpression rx(u"(\\[0-9a-fA-F]{4})"_s);
-                    //                    int pos{};
-                    //                    auto match(rx.match(sl.last(), pos));
-                    //                    while (match.hasMatch()) { //(pos = rx.indexIn(sl.last(), pos)) != -1) {
-                    //                        sl.last().replace(pos++, 5, QChar(match.captured(1).right(4).toUShort(nullptr, 16)));
-                    //                        auto match(rx.match(sl.last(), pos));
-                    //                    }
-                    //                    while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
-                    //                        sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
-                    //                    }
+                    // static const QRegularExpression rx(u"(\\[0-9a-fA-F]{4})"_s);
+                    // int pos{};
+                    // auto match(rx.match(sl.last(), pos));
+                    // while (match.hasMatch()) { //(pos = rx.indexIn(sl.last(), pos)) != -1) {
+                    // sl.last().replace(pos++, 5, QChar(match.captured(1).right(4).toUShort(nullptr, 16)));
+                    // auto match(rx.match(sl.last(), pos));
+                    // }
+                    // while ((pos = rx.indexIn(sl.last(), pos)) != -1) {
+                    // sl.last().replace(pos++, 5, QChar(rx.cap(1).right(4).toUShort(nullptr, 16)));
+                    // }
                     refDes = sl.last();
                     components[refDes].setRefdes(refDes);
                 }
@@ -970,11 +970,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     auto constructArc = [this, x, y](Point center, double radius, double start, double stop) {
         auto arcPath = arc(center, radius, start, stop, state_.interpolation());
         state_.setCurPos({x, y});
-        //  Последняя точка в вычисленной дуге может иметь числовые ошибки.
-        //  Точной конечной точкой является указанная (x, y). Замена.
+        // Последняя точка в вычисленной дуге может иметь числовые ошибки.
+        // Точной конечной точкой является указанная (x, y). Замена.
         if(arcPath.size()) arcPath.back() = state_.curPos();
         else arcPath.emplace_back(state_.curPos());
-        // SetZ(arcPath.back(), center);
+        // SetC(arcPath.back(), center);
         return arcPath;
     };
 
@@ -1016,10 +1016,10 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     default:
         if((path_.size() && (path_.back() != arcStartPos)) || path_.empty())
             path_.emplace_back(arcStartPos);
-        SetZSelf(path_.back());
+        SetCSelf(path_.back());
         state_.setCurPos({x, y});
         path_.emplace_back(state_.curPos());
-        SetZSelf(path_.back());
+        SetCSelf(path_.back());
         qWarning() << u"Invalid arc in line %1."_s.arg(lineNum_) << gLine;
     }
 

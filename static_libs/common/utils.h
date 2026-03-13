@@ -15,6 +15,9 @@ using namespace std::literals;
 
 using namespace Qt::Literals;
 
+namespace r = std ::ranges;
+namespace v = std ::views;
+
 template <typename... Ts>
 struct Overload : Ts... {
     using Ts::operator()...;
@@ -22,6 +25,12 @@ struct Overload : Ts... {
 
 template <typename... Ts>
 Overload(Ts...) -> Overload<Ts...>;
+
+template <typename Func>
+struct Finaly final {
+    Func const func;
+    ~Finaly() { func(); }
+};
 
 using nS = std::nano;
 using uS = std::micro;
@@ -79,7 +88,7 @@ using TimerSec = Timer<Sec>;
 using TimerMin = Timer<Min>;
 using TimerHour = Timer<Hour>;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 inline auto toU16StrView(const QString& str) {
     return std::u16string_view{
@@ -124,7 +133,7 @@ QDebug operator<<(QDebug debug, Cap& cap) {
     return debug;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 inline constexpr double normalizeAngleDegrees(double angle) noexcept {
     return 360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0);
@@ -134,7 +143,7 @@ inline constexpr bool contains(auto var, auto... vars) noexcept {
     return ((vars == var) || ...);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 struct ScopedTrue {
     bool& fl;
@@ -143,7 +152,7 @@ struct ScopedTrue {
     ~ScopedTrue() { fl = false; }
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 template <typename... Ts>
 struct Variant : std::variant<Ts...> {
@@ -169,7 +178,7 @@ struct Variant : std::variant<Ts...> {
     operator bool() const { return has_value(); }
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 namespace EnumHelper {
 // Tool to convert enum values to/from QString
@@ -264,7 +273,7 @@ inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
             utf16 += (char16_t)uni;
         } else {
             uni -= 0x10000;                              // 0b1'00000000'00000000
-            utf16 += (char16_t)((uni >> 10) + 0xD800);   //   0b11011000'00000000
+            utf16 += (char16_t)((uni >> 10) + 0xD800);   // 0b11011000'00000000
             utf16 += (char16_t)((uni & 0x3FF) + 0xDC00); // 0b1111111111 0b11011100'00000000
         }
     }
@@ -422,3 +431,17 @@ constexpr E stringToEnum(Impl::sv str) {
                                        : it->second;
 }
 #endif
+
+QString toQString(std::string_view cp1251Str);
+
+std::string toCp1251(const QString& utf16Str);
+
+// QByteArray toUtf8(std::string_view cp1251Str);
+
+void detectEncoding(std::string_view data);
+
+/* ---------- 1. Проверка BOM  ------------------------------------------ */
+bool hasBom(std::string_view data);
+
+/* ---------- 2. Проверка валидности UTF‑8 ------------------------------ */
+bool isValidUtf8(std::string_view data) noexcept;

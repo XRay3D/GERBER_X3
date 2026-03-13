@@ -47,7 +47,7 @@ class GraphicsView : public QGraphicsView {
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
     ~GraphicsView() override;
-    //    void setScene(QGraphicsScene* Scene);
+    // void setScene(QGraphicsScene* Scene);
     void zoom100();
     void zoomFit();
     void zoomToSelected();
@@ -115,7 +115,7 @@ private:
     std::vector<T*> getItemImpl(FilterInt&& et, Args&&... args) const {
         const auto items = (scene()->*Ptr)(std::forward<Args>(args)...); // get all items
         constexpr bool isQGraphicsItem = std::is_same_v<T, QGraphicsItem>;
-        if constexpr(isQGraphicsItem && !FilterInt::value) { //  вернуть все QGraphicsItem*
+        if constexpr(isQGraphicsItem && !FilterInt::value) { // вернуть все QGraphicsItem*
             return {items.begin(), items.end()};
         } else {
             // WARNING FilterInt faster than dynamic_cast
@@ -138,7 +138,7 @@ private:
     Ruler* const hRuler;
     Ruler* const vRuler;
     QGridLayout* const gridLayout;
-    //    Scene* scene_;
+    // Scene* scene_;
     bool ruler_{};
     int rulerCtr{};
     bool boundingRect_{};

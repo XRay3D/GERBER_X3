@@ -21,7 +21,7 @@ namespace ShArc {
 // clang-format off
 Shape::Shape(Shapes::Plugin* plugin,QPointF center, QPointF pt1, QPointF pt2)
     : AbstractShape{plugin}
-    , radius_{QLineF{center, pt1}.length()} {
+    , radius_{length(center , pt1)} {
     paths_.resize(1);
     // clang-format on
     if(!std::isnan(center.x())) {
@@ -36,18 +36,17 @@ Shape::Shape(Shapes::Plugin* plugin,QPointF center, QPointF pt1, QPointF pt2)
     App::grView().addItem(this);
 }
 
-constexpr auto dot(auto u, auto v) { return u.x() * v.x() + u.y() * v.y(); }
-constexpr auto norm(auto v) { return sqrt(dot(v, v)); } // norm = length of vector
+constexpr auto norm(auto v) { return sqrt(QPointF::dotProduct(v, v)); } // norm = length of vector
 constexpr auto d(auto u, auto v) { return norm(u - v); }
 
 constexpr double distancePointToLine(const QPointF& pt, const QLineF& line) {
     QPointF v = line.p1() - line.p2();
     QPointF w = pt - line.p2();
 
-    double c1 = dot(w, v);
+    double c1 = QPointF::dotProduct(w, v);
     if(c1 <= 0.0) return d(pt, line.p2());
 
-    double c2 = dot(v, v);
+    double c2 = QPointF::dotProduct(v, v);
     if(c2 <= c1) return d(pt, line.p1());
 
     double b = c1 / c2;
@@ -79,7 +78,7 @@ void Shape::redraw() {
             }
             handles[Center] = length ? QLineF::fromPolar(length * tmp, angle - 90).translated(center).p2() : center;
             if(isCenter)
-                radius_ = QLineF{handles[Center], handles[Point1]}.length();
+                radius_ = handles[Center] ^ handles[Point1];
         };
 
         switch(std::distance(handles.begin(), curHandle)) {
@@ -194,7 +193,7 @@ void Shape::setAngle(int i, double radius) {
 
 void Shape::readAndInit(QDataStream& stream [[maybe_unused]]) {
     curHandle = handles.begin() + Center;
-    radius_ = QLineF{handles[Center], handles[Point1]}.length();
+    radius_ = handles[Center] ^ handles[Point1];
     redraw();
 }
 

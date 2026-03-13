@@ -28,12 +28,12 @@ class DxfGo final : public ::GraphicObject {
     friend QDataStream& operator>>(QDataStream& stream, DxfGo& go);
 
     int entityId_{};
-    //    Path path_;
+    // Path path_;
     File* file_ = nullptr;
     double rotationAngle_{};
     double scaleX_{1.0};
     double scaleY_{1.0};
-    //    QPointF pos_;
+    // QPointF pos_;
 
 public:
     DxfGo() = default;
@@ -53,27 +53,27 @@ public:
     const Entity* entity() const;
     size_t entityId() const;
 
+#if 0
     // GraphicObject interface
-
-    //    const Path& path() const /*override*/;
-    //    const Paths& paths() const /*override*/;
-
-    //    Path line() const /*override*/;
-    //    Path lineW() const /*override*/;
-    //    Path polyLine() const /*override*/;
-    //    Paths polyLineW() const /*override*/;
-    //    Path elipse() const /*override*/;
-    //    Paths elipseW() const /*override*/;
-    //    Path arc() const /*override*/;
-    //    Path arcW() const /*override*/;
-    //    Path polygon() const /*override*/;
-    //    Paths polygonWholes() const /*override*/;
-    //    Path hole() const /*override*/;
-    //    Paths holes() const /*override*/;
-    //    bool positive() const /*override*/;
-    //    bool closed() const /*override*/;
-    //    Path& rPath() /*override*/;
-    //    Paths& rPaths() /*override*/;
+    Path arc() const /*override*/;
+    Path arcW() const /*override*/;
+    Path elipse() const /*override*/;
+    Path hole() const /*override*/;
+    Path line() const /*override*/;
+    Path lineW() const /*override*/;
+    Path polyLine() const /*override*/;
+    Path polygon() const /*override*/;
+    Path& rPath() /*override*/;
+    Paths elipseW() const /*override*/;
+    Paths holes() const /*override*/;
+    Paths polyLineW() const /*override*/;
+    Paths polygonWholes() const /*override*/;
+    Paths& rPaths() /*override*/;
+    bool closed() const /*override*/;
+    bool positive() const /*override*/;
+    const Path& path() const /*override*/;
+    const Paths& paths() const /*override*/;
+#endif
 };
 
 } // namespace Dxf

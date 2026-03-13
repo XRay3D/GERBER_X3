@@ -36,8 +36,8 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     settings.getValue(ui->cbxSolver);
 #ifdef _USE_CGAL_
 #else
-    //    ui->cbxSolver->setCurrentIndex(0);
-    //    ui->cbxSolver->setEnabled(false);
+    // ui->cbxSolver->setCurrentIndex(0);
+    // ui->cbxSolver->setEnabled(false);
 #endif
     settings.endGroup();
 

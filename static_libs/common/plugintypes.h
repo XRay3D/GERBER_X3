@@ -15,35 +15,35 @@
 #include <myclipper.h>
 
 // struct Circle {
-//     QPointF center;
-//     double radius;
+// QPointF center;
+// double radius;
 // };
 // struct Ellipse {
-//     QPointF center;
-//     QPointF focus;
+// QPointF center;
+// QPointF focus;
 // };
 // struct ArcCircle {
-//     QPointF center;
-//     double radius;
-//     double angle1;
-//     double angle2;
+// QPointF center;
+// double radius;
+// double angle1;
+// double angle2;
 // };
 // struct ArcEllipse {
-//     QPointF center;
-//     QPointF focus;
-//     double angle1;
-//     double angle2;
+// QPointF center;
+// QPointF focus;
+// double angle1;
+// double angle2;
 // };
 
 // struct Polygon {
-//     QPolygonF points;
-//     bool open{};
+// QPolygonF points;
+// bool open{};
 // };
 
 // struct Rectangle {
-//     QPointF p1;
-//     QPointF p2;
-//     double angle;
+// QPointF p1;
+// QPointF p2;
+// double angle;
 // };
 
 struct Transform {

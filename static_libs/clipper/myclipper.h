@@ -12,12 +12,11 @@
 
 // #include "cancelation.h"
 #include "mvector.h"
-#include <clipper2/clipper.h>
-// #include "clipper.hpp"
 #include <QDebug>
 #include <QIcon>
 #include <QPolygonF>
 #include <QTransform>
+#include <clipper2/clipper.h>
 #include <numbers>
 #include <ranges>
 
@@ -29,43 +28,15 @@ enum {
     IconSize = 24
 };
 
-////////////////////////////////////////////////////////////////////////////////
-struct PointF : QPointF {
-    using QPointF::QPointF;
-    PointF(QPointF pt)
-        : QPointF{pt} { }
-    PointF& operator=(QPointF pt) { return static_cast<QPointF&>(*this) = pt, *this; }
-    void Rotate(double cosa, double sina) { // rotate vector by angle
-        double temp = -y() * sina + x() * cosa;
-        ry() = x() * sina + cosa * y();
-        rx() = temp;
-    }
-    void Rotate(double angle) {
-        if(std::abs(angle) < 1.0e-09) return;
-        Rotate(cos(angle), sin(angle));
-    }
-};
-
-struct Vertex {
-    PointF pt{}, center{};
-    enum Type : int {
-        Line = 0,
-        Ccw = 1,
-        Cw = -1,
-    } type{};
-};
-
-using Curve = std::vector<Vertex>;
-using Curves = std::vector<Curve>;
-
-QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {});
-QPainterPath toPPath(const Curves& curves);
-
-////////////////////////////////////////////////////////////////////////////////
+using std::numbers::pi;
 
 constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
-constexpr auto two_pi = std::numbers::pi * 2;
-using std::numbers::pi;
+constexpr auto two_pi = pi * 2;
+
+constexpr int uScale{100'000};
+constexpr double dScale{1. / uScale};
+
+constexpr std::numeric_limits<int32_t> LimitI32;
 
 namespace CL2 = Clipper2Lib;
 
@@ -98,19 +69,27 @@ using Clipper2Lib::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point)
 
+constexpr bool operator<(const QPointF& r, const QPointF& l) {
+    return r.x() < l.x() && r.y() < l.y();
+}
+
+constexpr bool operator<(const Point& r, const Point& l) {
+    return r.x < l.x && r.y < l.y;
+}
+
 void TestPaths(const Paths& paths);
 
-Point GetZ(const Point& dst);
-void SetZ(Point& dst, const Point& center);
-void SetZForce(Point& dst, const Point& center);
-void SetZSelf(Point& dst);
+Point GetC(const Point& dst);
+void SetC(Point& dst, const Point& center);
+void SetCForce(Point& dst, const Point& center);
+void SetCSelf(Point& dst);
 
 double Perimeter(const Path& path);
 //------------------------------------------------------------------------------
 Path CirclePath(double diametr, const Point& center = Point{});
 Path RectanglePath(double width, double height, const Point& center = Point{});
 //------------------------------------------------------------------------------
-void RotatePath(Path& polygon, double angle, const Point& center = Point{});
+void RotatePath(Path& path, double angle, const Point& center = Point{});
 
 Path& TranslatePath(Path& path, const Point& pos);
 Paths& TranslatePaths(Paths& path, const Point& pos);
@@ -134,19 +113,21 @@ QIcon drawDrillIcon(QColor color = Qt::black);
 Paths& normalize(Paths& paths);
 
 inline constexpr auto skipFront = v::drop(1);
-inline constexpr auto reverse = v::reverse;
 
 //------------------------------------------------------------------------------
 
-inline Paths Inflate(const Paths& paths, double delta, JoinType jt, EndType et, double miterLimit = 2.0, double arcTolerance = 0.0) {
+inline Paths Inflate(const Paths& paths, double delta, JoinType jt, EndType et,
+    double miterLimit = 2.0, double arcTolerance = 0.0) {
     return InflatePaths(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
 };
 
-inline Paths InflateRoundPolygon(const Paths& paths, double delta, double miterLimit = 2.0, double arcTolerance = 0.0) {
+inline Paths InflateRoundPolygon(const Paths& paths, double delta,
+    double miterLimit = 2.0, double arcTolerance = 0.0) {
     return InflatePaths(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
 };
 
-inline Paths InflateMiterPolygon(const Paths& paths, double delta, double miterLimit = 2.0, double arcTolerance = 0.0) {
+inline Paths InflateMiterPolygon(const Paths& paths, double delta,
+    double miterLimit = 2.0, double arcTolerance = 0.0) {
     return InflatePaths(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
 };
 
@@ -236,6 +217,10 @@ auto operator-=(Container auto& c, size_t index) {
 
 template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
 
+constexpr double length(const QPointF p1, const QPointF p2) {
+    return QLineF{p1, p2}.length();
+}
+
 inline Point& operator*=(Point& pt, Arithmetic auto v) noexcept {
     return pt.x *= v, pt.y *= v, pt;
 }
@@ -245,11 +230,11 @@ inline Path& operator*=(Path& path, Arithmetic auto v) noexcept {
     return path;
 }
 
-static constexpr auto uScale{100'000};
-static constexpr auto dScale{1. / uScale};
+constexpr Point toPoint(const QPointF& p) noexcept { return {p.x() * uScale, p.y() * uScale}; }
+constexpr QPointF toQPointF(const Point& p) noexcept { return {static_cast<double>(p.x) * dScale, static_cast<double>(p.y) * dScale}; }
 
-inline Point operator~(const QPointF pt) { return Point{pt.x() * uScale, pt.y() * uScale}; }
-inline QPointF operator~(const Point pt) { return {static_cast<double>(pt.x) * dScale, static_cast<double>(pt.y) * dScale}; }
+constexpr Point operator~(const QPointF& p) noexcept { return toPoint(p); }
+constexpr QPointF operator~(const Point& p) noexcept { return toQPointF(p); }
 
 template <typename T>
 struct Caster {
@@ -393,14 +378,7 @@ inline constexpr double distToSq(const Point& pt1, const Point& pt2) noexcept {
     return (x_ * x_ + y_ * y_);
 }
 
-inline auto rwPolyTree(PolyTree& polyTree) {
-    auto itB = polyTree.begin();
-    auto itE = polyTree.end();
-    return std::span{
-        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itB), // FIXME очень грязный хак
-        *reinterpret_cast<CL2::PolyPath64List::iterator*>(&itE), // FIXME очень грязный хак
-    };
-}
+std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree);
 
 Path arc(const Point& center, double radius, double start, double stop, int interpolation);
 Path arc(Point p1, Point p2, Point center, int interpolation);
@@ -415,3 +393,13 @@ Paths& sortB(Paths& src, Point startPt);
 Paths& sortBeginEnd(Paths& src, Point startPt);
 Pathss& sortB(Pathss& src, Point startPt);
 Pathss& sortBeginEnd(Pathss& src, Point startPt);
+//------------------------------------------------------------------------------
+
+QPointF polar(QPointF p, double angle /*radians*/, double distance);
+double angle(QPointF p1, QPointF p2);
+double signedBulgeRadius(QPointF start_point, QPointF end_point, double bulge);
+std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPointF end_point, double bulge);
+
+void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge);
+
+#include "curve.h"

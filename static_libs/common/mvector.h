@@ -91,23 +91,23 @@ struct mvector : std::vector<T> {
         return std::span{V::cbegin() + idx, V::cend()};
     }
 
-    //    mvector mid(size_t idx, size_t len = 0)
-    //    {
-    //        mvector v;
-    //        if (idx >= V::size())
-    //            return v;
-    //        typename V::iterator end;
-    //        const typename V::iterator begin = V::begin() + idx;
-    //        if (len == 0)
-    //            end = V::end();
-    //        else if (idx + len > V::size())
-    //            end = begin + (V::size() - idx);
-    //        else
-    //            end = begin + len;
-    //        v.reserve(std::distance(begin, end));
-    //        v.insert(v.end(), begin, end);
-    //        return v;
-    //    }
+    // mvector mid(size_t idx, size_t len = 0)
+    // {
+    // mvector v;
+    // if (idx >= V::size())
+    // return v;
+    // typename V::iterator end;
+    // const typename V::iterator begin = V::begin() + idx;
+    // if (len == 0)
+    // end = V::end();
+    // else if (idx + len > V::size())
+    // end = begin + (V::size() - idx);
+    // else
+    // end = begin + len;
+    // v.reserve(std::distance(begin, end));
+    // v.insert(v.end(), begin, end);
+    // return v;
+    // }
 
     inline void prepend(T&& t) { V::insert(V::begin(), 1, std::move(t)); }
     inline void prepend(const T& t) { V::insert(V::begin(), 1, t); }
@@ -183,14 +183,14 @@ struct mvector : std::vector<T> {
         return r;
     }
 
-    //    template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
-    //    inline auto indexOf(P* t) const noexcept
-    //    {
-    //        if (auto it = std::find(V::begin(), V::end(), std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})); it == V::end())
-    //            return std::distance(V::begin() + 1, V::begin());
-    //        else
-    //            return std::distance(V::begin(), it);
-    //    }
+    // template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
+    // inline auto indexOf(P* t) const noexcept
+    // {
+    // if (auto it = std::find(V::begin(), V::end(), std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})); it == V::end())
+    // return std::distance(V::begin() + 1, V::begin());
+    // else
+    // return std::distance(V::begin(), it);
+    // }
 
     inline bool
     contains(const T& t) const noexcept {

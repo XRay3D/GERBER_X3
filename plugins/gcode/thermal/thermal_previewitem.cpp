@@ -58,15 +58,15 @@ AbstractThermPrGi::~AbstractThermPrGi() { thpi.clear(); }
 
 void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     if(pathColor_.alpha()) {
-        //        if (isEmpty > 0) {
-        //            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
-        //            painter->setBrush(Qt::NoBrush);
-        //            for (QPolygonF polygon : bridge_) {
-        //                polygon.append(polygon.first());
-        //                painterPath.addPolygon(polygon);
-        //                painter->drawPolyline(polygon);
-        //            }
-        //        } else {
+        // if (isEmpty > 0) {
+        // painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
+        // painter->setBrush(Qt::NoBrush);
+        // for (QPolygonF polygon : bridge_) {
+        // polygon.append(polygon.first());
+        // painterPath.addPolygon(polygon);
+        // painter->drawPolyline(polygon);
+        // }
+        // } else {
         if(agr.state() == QAbstractAnimation::Running) {
             int a;
             QColor c1(App::settings().guiColor(GuiColors::CutArea));
@@ -90,7 +90,7 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
             painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::grView().scaleFactor()));
             painter->drawPath(painterPath);
         }
-        //        }
+        // }
     }
     painter->setBrush(bodyColor_);
     QColor p{bodyColor_};

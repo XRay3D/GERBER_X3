@@ -25,8 +25,8 @@ namespace Drilling {
 // using PosOrPath = std::variant<const QPointF, const QPolygonF>;
 // using Key = std::tuple<int, double, bool, QString>;
 // struct Val {
-//     mvector<PosOrPath> posOrPath;
-//     Paths draw;
+// mvector<PosOrPath> posOrPath;
+// Paths draw;
 // };
 // using Preview = std::map<Key, Val>;
 

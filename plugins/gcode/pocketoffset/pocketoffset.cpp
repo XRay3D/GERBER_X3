@@ -251,16 +251,16 @@ void File::genGcodeAndTile() {
 }
 
 void File::createGi() {
-    //    switch (gcp_.gcType) {
-    //    case GCode::Raster:
-    //        createGiRaster();
-    //        break;
-    //    case GCode::Pocket:
+    // switch (gcp_.gcType) {
+    // case GCode::Raster:
+    // createGiRaster();
+    // break;
+    // case GCode::Pocket:
     createGiPocket();
-    //        break;
-    //    default:
-    //        break;
-    //    }
+    // break;
+    // default:
+    // break;
+    // }
 
     itemGroup()->setVisible(true);
 }

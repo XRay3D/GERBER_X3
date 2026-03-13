@@ -15,10 +15,10 @@
 
 class Ruler final : public QWidget {
     Q_OBJECT
-    //    Q_ENUMS(RulerType)
-    //    Q_PROPERTY(double origin READ origin WRITE setOrigin)
-    //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
-    //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
+    // Q_ENUMS(RulerType)
+    // Q_PROPERTY(double origin READ origin WRITE setOrigin)
+    // Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
+    // Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
     static constexpr int Breadth = 24;
 

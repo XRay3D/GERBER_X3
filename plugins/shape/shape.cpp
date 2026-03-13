@@ -174,7 +174,7 @@ QPainterPath AbstractShape::shape() const {
 Paths AbstractShape::paths(int) const { return paths_; }
 
 void AbstractShape::changeColor() {
-    //    animation.setStartValue(bodyColor_);
+    // animation.setStartValue(bodyColor_);
 
     switch(colorState) {
     case Default:
@@ -193,8 +193,8 @@ void AbstractShape::changeColor() {
         break;
     }
 
-    //    animation.setEndValue(bodyColor_);
-    //    animation.start();
+    // animation.setEndValue(bodyColor_);
+    // animation.start();
 }
 
 void AbstractShape::redraw() {

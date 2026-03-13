@@ -17,8 +17,8 @@ using std::numbers::pi;
 
 /*G-Code*/
 // AppSettings::AppSettings() {
-//     if (!settings_)
-//         settings_ = this;
+// if (!settings_)
+// settings_ = this;
 //}
 
 // void AppSettings::set(AppSettings* appSettings) { settings_ = appSettings; }

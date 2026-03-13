@@ -97,7 +97,7 @@ void DialogAboutPlugins::setupUi(QDialog* Dialog) {
     buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);
-    //    pbInfo = buttonBox->addButton(u"Info"_s, QDialogButtonBox::HelpRole);
+    // pbInfo = buttonBox->addButton(u"Info"_s, QDialogButtonBox::HelpRole);
     pbClose = buttonBox->addButton(u"Close"_s, QDialogButtonBox::AcceptRole);
     verticalLayout->addWidget(buttonBox);
 

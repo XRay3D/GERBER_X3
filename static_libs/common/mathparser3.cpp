@@ -185,21 +185,21 @@ MathParser3::Result MathParser3::processFunction(QStringView func, Result r) {
     else
         qWarning() << u"function '" + func.toString() + u"' is not defined";
 
-    //    enum class Func {
-    //        sin,
-    //        cos,
-    //        tan
-    //    };
-    //    switch (Func(u"sin,cos,tan"_s.split(u',').indexOf(func))) {
-    //    case Func::sin:
-    //        return Result {sin(r.acc), r.rest};
-    //    case Func::cos:
-    //        return Result {cos(r.acc), r.rest};
-    //    case Func::tan:
-    //        return Result {tan(r.acc), r.rest};
-    //    default:
-    //        qWarning() << "function '" + func + "' is not defined";
-    //        break;
-    //    }
+    // enum class Func {
+    // sin,
+    // cos,
+    // tan
+    // };
+    // switch (Func(u"sin,cos,tan"_s.split(u',').indexOf(func))) {
+    // case Func::sin:
+    // return Result {sin(r.acc), r.rest};
+    // case Func::cos:
+    // return Result {cos(r.acc), r.rest};
+    // case Func::tan:
+    // return Result {tan(r.acc), r.rest};
+    // default:
+    // qWarning() << "function '" + func + "' is not defined";
+    // break;
+    // }
     return r;
 }

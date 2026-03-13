@@ -96,10 +96,10 @@ MainWindow::MainWindow(QWidget* parent)
         // qCritical() << str;
         ui.statusbar->showMessage(QString::fromStdString(str));
         // ui.statusbar->showMessage(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s
-        //                           .arg(point.x(), 8, 'f', 3)
-        //                           .arg(point.y(), 8, 'f', 3)
-        //                           .arg(gpoint.x(), 8, 'f', 3)
-        //                           .arg(gpoint.y(), 8, 'f', 3));
+        // .arg(point.x(), 8, 'f', 3)
+        // .arg(point.y(), 8, 'f', 3)
+        // .arg(gpoint.x(), 8, 'f', 3)
+        // .arg(gpoint.y(), 8, 'f', 3));
     });
 
     ui.treeView->setModel(new FileTree::Model{ui.treeView});
@@ -258,7 +258,7 @@ void MainWindow::addFileToPro(AbstractFile* file) {
     }
     project_->addFile(file);
     recentFiles.prependToRecentFiles(file->name());
-    //    ui.grView->zoomFit();
+    // ui.grView->zoomFit();
 }
 
 void MainWindow::open() {
@@ -359,15 +359,15 @@ void MainWindow::renderPdf() {
         if(item->isVisible() && !item->boundingRect().isNull())
             rect |= item->boundingRect();
 
-    //    QRectF rect(ui.grView->scene()->itemsBoundingRect());
-    //    QRectF rect {App::layoutFrames().boundingRect()};
+    // QRectF rect(ui.grView->scene()->itemsBoundingRect());
+    // QRectF rect {App::layoutFrames().boundingRect()};
 
     QSizeF size(rect.size());
 
     QPdfWriter pdfWriter{curFile};
-    //    pdfWriter.setPageSizeMM(size);
-    //    pdfWriter.setMargins({0, 0, 0, 0});
-    //    pdfWriter.setResolution(1000000);
+    // pdfWriter.setPageSizeMM(size);
+    // pdfWriter.setMargins({0, 0, 0, 0});
+    // pdfWriter.setResolution(1000000);
     QMarginsF margins{10, 10, 10, 10};
     QSizeF mSize(margins.left() + margins.right(), margins.top() + margins.bottom());
     pdfWriter.setPageMargins(margins);
@@ -599,7 +599,7 @@ void MainWindow::createActionsService() {
         // connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
     });
     // connect(action, &QAction::toggled, this, [=, this](bool checked) {
-    //     if(checked) setDockWidget(new GCode::PropertiesForm);
+    // if(checked) setDockWidget(new GCode::PropertiesForm);
     // });
     action->setShortcut(QKeySequence(u"Ctrl+Shift+G"_s));
     action->setCheckable(true);
@@ -732,13 +732,13 @@ void MainWindow::createActionsShape() {
     toolBar->setContextMenuPolicy(Qt::CustomContextMenu);
     connect(toolBar, &QToolBar::customContextMenuRequested, this, &MainWindow::customContextMenuForToolBar);
 
-    //    for (auto& [type, gCodePlugin] : App::gCodePlugins()) {
-    //        auto action = gCodePlugin->addAction(menu, toolpathToolBar);
-    //        action->setCheckable(true);
-    //        actionGroup.addAction(action);
-    //        toolpathActions.emplace(type, action);
-    //        connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
-    //    }
+    // for (auto& [type, gCodePlugin] : App::gCodePlugins()) {
+    // auto action = gCodePlugin->addAction(menu, toolpathToolBar);
+    // action->setCheckable(true);
+    // actionGroup.addAction(action);
+    // toolpathActions.emplace(type, action);
+    // connect(gCodePlugin, &GCode::Plugin::setDockWidget, this, &MainWindow::setDockWidget);
+    // }
 
     for(auto& [type, shPlugin]: App::shapePlugins()) {
         auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value(u"Name"_s).toString());
@@ -955,21 +955,21 @@ bool MainWindow::maybeSave() {
 void MainWindow::editGcFile(GCode::File* /*file*/) { // TODO editGcFile
     qWarning(__FUNCTION__);
     // TODO   switch (file->gtype()) {
-    //    case GCode::Null:
-    //    case md5::hash32("Profile"):
-    //        // toolpathActions[md5::hash32("Profile")]->triggered();
-    //        // reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
-    //        break;
-    //    case GCode::Pocket:
-    //    case GCode::Voronoi:
-    //    case GCode::Thermal:
-    //    case GCode::Drill:
-    //    case G_CODE_PROPERTIES:
-    //    case GCode::Raster:
-    //    case GCode::LaserHLDI:
-    //    default:
-    //        break;
-    //    }
+    // case GCode::Null:
+    // case md5::hash32("Profile"):
+    // // toolpathActions[md5::hash32("Profile")]->triggered();
+    // // reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
+    // break;
+    // case GCode::Pocket:
+    // case GCode::Voronoi:
+    // case GCode::Thermal:
+    // case GCode::Drill:
+    // case G_CODE_PROPERTIES:
+    // case GCode::Raster:
+    // case GCode::LaserHLDI:
+    // default:
+    // break;
+    // }
 }
 
 #if __has_include("xrstyle.h") && 0

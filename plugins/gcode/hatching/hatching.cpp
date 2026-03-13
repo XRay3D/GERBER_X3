@@ -25,30 +25,30 @@
 #include <ranges>
 
 // struct sort_fn {
-//     template <std::randoaccess_iterator_ I, std::sentinel_for<I> S, class Comp = r::less, class Proj = std::identity>
-//     requires std::sortable<I, Comp, Proj> constexpr I
-//     operator()(I first, S last, Comp comp = {}, Proj proj = {}) const
-//     {
-//         if (first == last)
-//             return { first };
+// template <std::randoaccess_iterator_ I, std::sentinel_for<I> S, class Comp = r::less, class Proj = std::identity>
+// requires std::sortable<I, Comp, Proj> constexpr I
+// operator()(I first, S last, Comp comp = {}, Proj proj = {}) const
+// {
+// if (first == last)
+// return { first };
 
-//        const auto pivot = *r::next(first, r::distance(first, last) / 2, last);
+// const auto pivot = *r::next(first, r::distance(first, last) / 2, last);
 
-//        auto tail1 = r::partition(first, last, [&pivot, &comp, &proj](const auto& em) { return std::invoke(comp, std::invoke(proj, em), std::invoke(proj, pivot)); });
-//        auto tail2 = r::partition(tail1, [&pivot, &comp, &proj](const auto& em) { return !std::invoke(comp, std::invoke(proj, pivot), std::invoke(proj, em)); });
+// auto tail1 = r::partition(first, last, [&pivot, &comp, &proj](const auto& em) { return std::invoke(comp, std::invoke(proj, em), std::invoke(proj, pivot)); });
+// auto tail2 = r::partition(tail1, [&pivot, &comp, &proj](const auto& em) { return !std::invoke(comp, std::invoke(proj, pivot), std::invoke(proj, em)); });
 
-//        (*this)(first, tail1.begin(), std::ref(comp), std::ref(proj));
-//        (*this)(tail2, std::ref(comp), std::ref(proj));
+// (*this)(first, tail1.begin(), std::ref(comp), std::ref(proj));
+// (*this)(tail2, std::ref(comp), std::ref(proj));
 
-//        return { r::next(first, last) };
-//    }
+// return { r::next(first, last) };
+// }
 
-//    template <r::randoaccess_range_ R, class Comp = r::less, class Proj = std::identity>
-//    requires std::sortable<r::iterator_t<R>, Comp, Proj> constexpr r::borrowed_iterator_t<R>
-//    operator()(R&& r, Comp comp = {}, Proj proj = {}) const
-//    {
-//        return (*this)(r::begin(r), r::end(r), std::move(comp), std::move(proj));
-//    }
+// template <r::randoaccess_range_ R, class Comp = r::less, class Proj = std::identity>
+// requires std::sortable<r::iterator_t<R>, Comp, Proj> constexpr r::borrowed_iterator_t<R>
+// operator()(R&& r, Comp comp = {}, Proj proj = {}) const
+// {
+// return (*this)(r::begin(r), r::end(r), std::move(comp), std::move(proj));
+// }
 //};
 // inline constexpr sort_fn sort {};
 

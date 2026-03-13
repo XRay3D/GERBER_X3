@@ -25,13 +25,13 @@ Plugin::Plugin(QObject* parent)
 }
 
 // Plugin::Plugin(QObject* parent)
-//     : AbstractFilePlugin{parent} {
-//     info_ = {
-//         {        u"Name"_s,                                                 u"GCode"_s},
-//         {     u"Version"_s,                                                   u"1.1"_s},
-//         {u"VendorAuthor"_s,                                u"X-Ray aka Bakiev Damir"_s},
-//         {        u"Info"_s, u"GCode is a static plugin always included with GGEasy."_s}
-//     };
+// : AbstractFilePlugin{parent} {
+// info_ = {
+// {        u"Name"_s,                                                 u"GCode"_s},
+// {     u"Version"_s,                                                   u"1.1"_s},
+// {u"VendorAuthor"_s,                                u"X-Ray aka Bakiev Damir"_s},
+// {        u"Info"_s, u"GCode is a static plugin always included with GGEasy."_s}
+// };
 // }
 
 QAction* Plugin::addAction(QMenu* menu, QToolBar* toolbar) {
@@ -57,9 +57,9 @@ void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
 }
 
 // AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
-//    auto tab = new Tab{parent};
-//    tab->setWindowTitle(u"G-Code"_s);
-//    return tab;
+// auto tab = new Tab{parent};
+// tab->setWindowTitle(u"G-Code"_s);
+// return tab;
 //}
 
 } // namespace GCode

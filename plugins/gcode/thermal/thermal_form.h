@@ -98,7 +98,7 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"thermal-path"_s); }
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
     QWidget* createForm() override { return &form; };
-    //    bool canToShow() const override { return /*Form::canToShow()*/; }
+    // bool canToShow() const override { return /*Form::canToShow()*/; }
     uint32_t type() const override { return THERMAL; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

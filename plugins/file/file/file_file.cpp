@@ -68,4 +68,4 @@ FileTree::Node* File::node() {
     return node_ ? node_ : node_ = new Node(this);
 }
 
-} //  namespace TmpFile
+} // namespace TmpFile

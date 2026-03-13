@@ -12,6 +12,9 @@
 #include "dxf_file.h"
 #include "dxf_insert.h"
 
+#include <format>
+#include <gi_dbg.h>
+
 namespace Dxf {
 
 PolyLine::PolyLine(SectionParser* sp)
@@ -20,18 +23,18 @@ PolyLine::PolyLine(SectionParser* sp)
 
 // void PolyLine::draw(const InsertEntity* const i) const
 //{
-//     if (i) {
-//         for (int r{}; r < i->rowCount; ++r) {
-//             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-//                 GraphicObject go(toGo());
-//                 i->transform(go, tr);
-//                 i->attachToLayer(std::move(go));
-//             }
-//         }
-//     } else {
-//         attachToLayer(toGo());
-//     }
+// if (i) {
+// for (int r{}; r < i->rowCount; ++r) {
+// for (int c{}; c < i->colCount; ++c) {
+// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+// GraphicObject go(toGo());
+// i->transform(go, tr);
+// i->attachToLayer(std::move(go));
+// }
+// }
+// } else {
+// attachToLayer(toGo());
+// }
 // }
 
 void PolyLine::parse(CodeData& code) {
@@ -53,8 +56,7 @@ void PolyLine::parse(CodeData& code) {
                 Entity::parse(code);
             }
         } else {
-            vertex.append(Dxf::Vertex(sp));
-            vertex.last().parse(code);
+            polyLine.emplace_back(sp).parse(code);
         }
     } while(code != u"SEQEND"_s);
     do {
@@ -67,47 +69,30 @@ Entity::Type PolyLine::type() const { return Type::POLYLINE; }
 
 DxfGo PolyLine::toGo() const {
     QPainterPath path;
-    auto addSeg = [&path](const Vertex& source, const Vertex& target) {
-        if(path.isEmpty())
-            path.moveTo(source);
-
-        if(source.bulge == 0.0) {
-            path.lineTo(target);
-            return;
-        }
-
-        auto [center, start_angle_, end_angle_, radius] = bulgeToArc(source, target, source.bulge);
-
-        const double start_angle = qRadiansToDegrees(qAtan2(center.y() - source.y, center.x() - source.x));
-        const double end_angle = qRadiansToDegrees(qAtan2(center.y() - target.y, center.x() - target.x));
-        double span = end_angle - start_angle;
-        if /**/ (span < -180 || (qFuzzyCompare(span, -180) && !(end_angle > start_angle)))
-            span += 360;
-        else if(span > 180 || (qFuzzyCompare(span, 180) && (end_angle > start_angle)))
-            span -= 360;
-
-        QPointF pr{radius, radius};
-        path.arcTo(QRectF(center + pr, center - pr),
-            -start_angle,
-            -span);
+    auto addSeg = [&path](const Vertex& source, const Vertex& target) mutable {
+        addArcTo(path, source, target, source.bulge);
     };
 
-    for(int i{}; i < vertex.size() - 1; ++i)
-        addSeg(vertex[i], vertex[i + 1]);
-    if(polylineFlags & ClosedPolyline)
-        addSeg(vertex.last(), vertex.first());
+    for(auto&& [from, to]: polyLine | v::pairwise) addSeg(from, to);
+
+    if(polylineFlags & ClosedPolyline) addSeg(polyLine.back(), polyLine.front());
 
     QTransform m;
     m.scale(u, u);
     QPainterPath path2;
+
+    // new Gi::Debug{path, Qt::yellow};
+
     for(auto& poly: path.toSubpathPolygons(m))
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
     auto p(path2.toSubpathPolygons(m2));
 
-    DxfGo go{id, ~p.value(0), {}}; // return {id, ~p.value(0), {}};
-    return go;
+    if(polylineFlags & ClosedPolyline) // FIXME
+        return DxfGo{id, ~p.value(0), ~p};
+    else
+        return DxfGo{id, ~p.value(0), ~p};
 }
 
 void PolyLine::write(QDataStream& stream) const {

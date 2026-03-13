@@ -114,11 +114,11 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         delete dialog;
     });
     menu.addSeparator();
-    //    if (!FormatDialog::showed()) {
-    //        menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Edit Format"), [this] {
-    //            (new FormatDialog(file))->show();
-    //        });
-    //    }
+    // if (!FormatDialog::showed()) {
+    // menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Edit Format"), [this] {
+    // (new FormatDialog(file))->show();
+    // });
+    // }
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"document-close"_s), QObject::tr("&Close"), tv, &FileTree::View::closeFile);
 }

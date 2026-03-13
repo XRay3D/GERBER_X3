@@ -145,8 +145,8 @@ void Form::rb_clicked() {
     else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    //    if (tool.type() == Tool::Laser)
-    //        ui->chbxUseTwoTools->setChecked(false);
+    // if (tool.type() == Tool::Laser)
+    // ui->chbxUseTwoTools->setChecked(false);
 
     if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
@@ -156,8 +156,8 @@ void Form::rb_clicked() {
     {
         int fl = ui->sbxToolQty->value();
 
-        //        ui->labelSteps->setVisible(fl < 2);
-        //        ui->sbxSteps->setVisible(fl < 2);
+        // ui->labelSteps->setVisible(fl < 2);
+        // ui->sbxSteps->setVisible(fl < 2);
 
         ui->toolHolder2->setVisible(--fl > 0);
         ui->toolHolder3->setVisible(--fl > 0);

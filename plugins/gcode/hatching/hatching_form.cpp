@@ -89,20 +89,20 @@ void Form::computePaths() {
     gcp->params[Creator::HathStep] = ui->dsbxHathStep->value();
     gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
     gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
-    //    if (ui->rbFast->isChecked()) {
-    //        gcp_->params[GCode::Params::Fast] = true;
-    //        gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
-    //    }
+    // if (ui->rbFast->isChecked()) {
+    // gcp_->params[GCode::Params::Fast] = true;
+    // gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    // }
 
     fileCount = 1;
     createToolpath(gcp);
 }
 
 void Form::updateName() {
-    //    const auto& tool { ui->toolHolder->tool() };
-    //    if (tool.type() != Tool::Laser)
-    //        ui->rbNormal->setChecked(true);
-    //    ui->rbFast->setEnabled(tool.type() == Tool::Laser);
+    // const auto& tool { ui->toolHolder->tool() };
+    // if (tool.type() != Tool::Laser)
+    // ui->rbNormal->setChecked(true);
+    // ui->rbFast->setEnabled(tool.type() == Tool::Laser);
     ui->dsbxHathStep->setMinimum(ui->toolHolder->tool().diameter());
     leName->setText(names[side]);
 }

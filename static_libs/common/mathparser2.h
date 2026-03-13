@@ -26,11 +26,11 @@
 #endif
 
 // ENUM(ParseError,
-//     ExpectedRoundBracket,
-//     InvalidInput,
-//     UnknownBinaryOperator,
-//     UnknownExpressionType,
-//     UnknownUnaryOperator)
+// ExpectedRoundBracket,
+// InvalidInput,
+// UnknownBinaryOperator,
+// UnknownExpressionType,
+// UnknownUnaryOperator)
 
 enum class ParseError {
     ExpectedRoundBracket,

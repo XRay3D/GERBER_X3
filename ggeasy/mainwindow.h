@@ -34,7 +34,7 @@ class File;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-    //    friend void FileTree::View::on_doubleClicked(const QModelIndex&);
+    // friend void FileTree::View::on_doubleClicked(const QModelIndex&);
     friend class Recent;
     friend class Project;
 
@@ -165,8 +165,8 @@ public:
                 }
 
                 // QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
-                //     if(auto pix = getPixmap(standardPixmap); !pix.isNull()) return pix;
-                //     return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+                // if(auto pix = getPixmap(standardPixmap); !pix.isNull()) return pix;
+                // return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
                 // }
 
                 void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
@@ -183,35 +183,35 @@ public:
                                 painter->drawLine(c.x(), c.y(), r.right(), c.y());
                             }
                         }
-                        //                    if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
-                        //                        painter->fillRect(option->rect, Qt::blue);
-                        //                    if(option->state & State_Open) // The branch indicator has an opened sub-tree.
-                        //                        painter->fillRect(option->rect, Qt::yellow);
+                        // if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
+                        // painter->fillRect(option->rect, Qt::blue);
+                        // if(option->state & State_Open) // The branch indicator has an opened sub-tree.
+                        // painter->fillRect(option->rect, Qt::yellow);
                     }
                     QProxyStyle::drawPrimitive(element, option, painter, widget);
                 }
 
-                //            void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
-                //                if(element == QStyle::PE_IndicatorBranch) {
-                //                    auto r = option->rect;
-                //                    auto c = r.center();
-                //                    auto color = Qt::darkGray; // qApp->palette().color(QPalette::Highlight);
-                //                    painter->setPen(color);
-                //                    if(!(option->state & State_Children)) {
-                //                        if(option->state & State_Sibling) // The node in the tree has a sibling (i.e., there is another node in the same column).
-                //                            painter->drawLine(c.x(), r.top(), c.x(), r.bottom());
-                //                        if(option->state & State_Item) {  // This branch indicator has an item.
-                //                            painter->drawLine(c.x(), r.top(), c.x(), c.y());
-                //                            painter->drawLine(c.x(), c.y(), r.right(), c.y());
-                //                        }
-                //                    }
-                //                    //                    if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
-                //                    //                        painter->fillRect(option->rect, Qt::blue);
-                //                    //                    if(option->state & State_Open) // The branch indicator has an opened sub-tree.
-                //                    //                        painter->fillRect(option->rect, Qt::yellow);
-                //                }
-                //                QProxyStyle::drawPrimitive(element, option, painter, widget);
-                //            }
+                // void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
+                // if(element == QStyle::PE_IndicatorBranch) {
+                // auto r = option->rect;
+                // auto c = r.center();
+                // auto color = Qt::darkGray; // qApp->palette().color(QPalette::Highlight);
+                // painter->setPen(color);
+                // if(!(option->state & State_Children)) {
+                // if(option->state & State_Sibling) // The node in the tree has a sibling (i.e., there is another node in the same column).
+                // painter->drawLine(c.x(), r.top(), c.x(), r.bottom());
+                // if(option->state & State_Item) {  // This branch indicator has an item.
+                // painter->drawLine(c.x(), r.top(), c.x(), c.y());
+                // painter->drawLine(c.x(), c.y(), r.right(), c.y());
+                // }
+                // }
+                // // if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
+                // // painter->fillRect(option->rect, Qt::blue);
+                // // if(option->state & State_Open) // The branch indicator has an opened sub-tree.
+                // // painter->fillRect(option->rect, Qt::yellow);
+                // }
+                // QProxyStyle::drawPrimitive(element, option, painter, widget);
+                // }
             };
 
             qApp->setStyle(new Style);
@@ -285,10 +285,10 @@ public:
             palette.setBrush(QPalette::Disabled, QPalette::Text, color.disabled);
             palette.setBrush(QPalette::Disabled, QPalette::Shadow, color.disabled);
 
-            //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText,color. disabled);
-            //        palette.setBrush(QPalette::Inactive, QPalette::HighlightedText,color. disabled);
-            //        palette.setBrush(QPalette::Inactive, QPalette::Text,color. disabled);
-            //        palette.setBrush(QPalette::Inactive, QPalette::Shadow,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::ButtonText,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::HighlightedText,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::Text,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::Shadow,color. disabled);
 
             qApp->setPalette(palette);
         } else {
@@ -309,7 +309,7 @@ public:
             return;
         if(auto widget = dockWidget_->widget(); widget) {
             dockWidget_->setWidget(dwContent); // NOTE  заменяет виджет новым и сбрасывается предок
-            widget->setParent(nullptr);        //       так как виджет лежит полем класса плагина.
+            widget->setParent(nullptr);        // так как виджет лежит полем класса плагина.
         } else
             dockWidget_->setWidget(dwContent);
         dockWidget_->setWindowTitle(dwContent->windowTitle());
@@ -327,7 +327,7 @@ private slots:
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
     void addFileToPro(class AbstractFile* file);
-    //    void setDockWidget(QWidget* dwContent);
+    // void setDockWidget(QWidget* dwContent);
 
 private:
     QDockWidget* dockWidget_ = nullptr;
@@ -377,7 +377,7 @@ private:
     void resetToolPathsActions() {
         if(auto widget = dockWidget_->widget(); widget) {
             dockWidget_->setWidget(new QWidget); // NOTE  заменяет виджет новым и сбрасывается предок
-            widget->setParent(nullptr);          //       так как виджет лежит полем класса плагина.
+            widget->setParent(nullptr);          // так как виджет лежит полем класса плагина.
         }
         dockWidget_->setVisible(false);
         if(auto action{actionGroup.checkedAction()}; action)

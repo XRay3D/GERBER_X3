@@ -80,7 +80,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->treeView->header()->setStretchLastSection(false);
-    //    ui->treeView->hideColumn(1);
+    // ui->treeView->hideColumn(1);
     ui->treeView->setItemDelegate(new Delegate{this});
 }
 

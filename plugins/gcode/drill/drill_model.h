@@ -21,16 +21,16 @@ class Preview;
 }
 
 struct Row {
-    //    Row(QString&& name = {},
-    //        QIcon&& icon = {},
-    //        int32_t id = {},
-    //        double diameter = {})
-    //        : icon{icon}
-    //        , name(name)
-    //        , diameter(diameter)
-    //        , rowId(id)
-    //        , toolId(-1) {
-    //    }
+    // Row(QString&& name = {},
+    // QIcon&& icon = {},
+    // int32_t id = {},
+    // double diameter = {})
+    // : icon{icon}
+    // , name(name)
+    // , diameter(diameter)
+    // , rowId(id)
+    // , toolId(-1) {
+    // }
     ~Row();
     /*const*/ QIcon icon;
     /*const*/ QStringList name;
@@ -67,7 +67,7 @@ public:
     void setCreate(bool create);
     void setCreate(int row, bool create);
     void setToolId(int row, int32_t id);
-    //    void setType(int type_) { type = type_; }
+    // void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent = {}) const override;

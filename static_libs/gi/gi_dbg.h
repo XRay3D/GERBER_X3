@@ -13,11 +13,14 @@
 #include "gi.h"
 #include <qpainterpath.h>
 
+
+
 namespace Gi {
 
 class Debug final : public Item {
     Debug(const QColor& color, double width);
     Paths paths_;
+    std::set<QPointF> centers;
 
 public:
     Debug(const Path& path, const QColor& color = Qt::white, double width = {});

@@ -185,7 +185,7 @@ protected:
     mutable bool visible_{};
     mvector<Gi::Group*> itemGroups_;
     mvector<QString> lines_;
-    //    QTransform transform_;
+    // QTransform transform_;
     Transform transform_;
 };
 

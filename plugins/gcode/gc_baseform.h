@@ -72,7 +72,7 @@ protected:
     Plugin* const plugin;
 
     DepthForm* dsbxDepth;
-    //    QLabel* label;
+    // QLabel* label;
     QLineEdit* leName;
     QPushButton* pbClose;
     QPushButton* pbCreate;

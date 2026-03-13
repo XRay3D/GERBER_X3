@@ -104,27 +104,27 @@ GCode::Tab::Tab(QWidget* parent)
         vLayout->addWidget(tabWidget);
     }
 
-    //    { // Tab HLDI
-    //        auto tabHldi = new QWidget();
-    //        tabHldi->setObjectName(u"tabHldi"_s);
-    //        chbxSimplifyHldi = new QCheckBox{QApplication::translate("GCodeSettings", "Simplify Hldi", nullptr), tabHldi);
-    //        chbxSimplifyHldi->setObjectName(u"chbxSimplifyHldi"_s);
-    //        auto verticalLayoutPS = new QVBoxLayout{tabHldi};
-    //        verticalLayoutPS->setObjectName(u"verticalLayoutPS"_s);
-    //        verticalLayoutPS->setContentsMargins(6, 6, 6, 6);
-    //        verticalLayoutPS->addWidget(chbxSimplifyHldi);
-    //        //                lbl = new QLabel{tabHldi};
-    //        //                lbl->setObjectName(u"lbl"_s);
-    //        //                lbl->setText(QApplication::translate("GCodeSettings", "Milling sequence:", nullptr));
-    //        //                verticalLayoutPS->addWidget(lbl);
-    //        //                cbxProfileSort = new QComboBox{tabHldi};
-    //        //                cbxProfileSort->setObjectName(u"cbxProfileSort"_s);
-    //        //                cbxProfileSort->addItem(u"Grouping by nesting"_s);
-    //        //                cbxProfileSort->addItem(u"Grouping by nesting depth"_s);
-    //        //                verticalLayoutPS->addWidget(cbxProfileSort);
-    //        verticalLayoutPS->addStretch();
-    //        tabwIndividualSettings->addTab(tabHldi, QApplication::translate("GCodeSettings", "HLDI", nullptr));
-    //    }
+    // { // Tab HLDI
+    // auto tabHldi = new QWidget();
+    // tabHldi->setObjectName(u"tabHldi"_s);
+    // chbxSimplifyHldi = new QCheckBox{QApplication::translate("GCodeSettings", "Simplify Hldi", nullptr), tabHldi);
+    // chbxSimplifyHldi->setObjectName(u"chbxSimplifyHldi"_s);
+    // auto verticalLayoutPS = new QVBoxLayout{tabHldi};
+    // verticalLayoutPS->setObjectName(u"verticalLayoutPS"_s);
+    // verticalLayoutPS->setContentsMargins(6, 6, 6, 6);
+    // verticalLayoutPS->addWidget(chbxSimplifyHldi);
+    // // lbl = new QLabel{tabHldi};
+    // // lbl->setObjectName(u"lbl"_s);
+    // // lbl->setText(QApplication::translate("GCodeSettings", "Milling sequence:", nullptr));
+    // // verticalLayoutPS->addWidget(lbl);
+    // // cbxProfileSort = new QComboBox{tabHldi};
+    // // cbxProfileSort->setObjectName(u"cbxProfileSort"_s);
+    // // cbxProfileSort->addItem(u"Grouping by nesting"_s);
+    // // cbxProfileSort->addItem(u"Grouping by nesting depth"_s);
+    // // verticalLayoutPS->addWidget(cbxProfileSort);
+    // verticalLayoutPS->addStretch();
+    // tabwIndividualSettings->addTab(tabHldi, QApplication::translate("GCodeSettings", "HLDI", nullptr));
+    // }
 
     auto grbxSpindle = new QGroupBox{tabCommon};
     grbxSpindle->setTitle(QApplication::translate("GCodeSettings", "Spindle / Laser Control Code", nullptr));

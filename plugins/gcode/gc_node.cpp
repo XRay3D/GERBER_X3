@@ -62,9 +62,9 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case FileTree::Column::NameColorVisible:
         switch(role) {
         case Qt::DisplayRole:
-            //            if (file->shortName().endsWith(App::gcSettings().fileExtension()))
-            //                return file->shortName();
-            //            else
+            // if (file->shortName().endsWith(App::gcSettings().fileExtension()))
+            // return file->shortName();
+            // else
             return {
                 file->shortName() + QStringList{u"_TS"_s, u"_BS"_s}
                   [file->side()]
@@ -101,12 +101,12 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch(index.column()) {
     case FileTree::Column::NameColorVisible:
-        //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
-        //            return itemFlag | Qt::ItemIsUserCheckable;
+        // if (file->shortName().endsWith(App::gcSettings().fileExtension()))
+        // return itemFlag | Qt::ItemIsUserCheckable;
         return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
     case FileTree::Column::Side: {
-        //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
-        //            return itemFlag;
+        // if (file->shortName().endsWith(App::gcSettings().fileExtension()))
+        // return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
     }
     default:

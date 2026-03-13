@@ -20,18 +20,18 @@ Line::Line(SectionParser* sp)
 
 // void Line::draw(const InsertEntity* const i) const
 //{
-//     if (i) {
-//         for (int r{}; r < i->rowCount; ++r) {
-//             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-//                 GraphicObject go(toGo());
-//                 i->transform(go, tr);
-//                 i->attachToLayer(std::move(go));
-//             }
-//         }
-//     } else {
-//         attachToLayer(toGo());
-//     }
+// if (i) {
+// for (int r{}; r < i->rowCount; ++r) {
+// for (int c{}; c < i->colCount; ++c) {
+// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+// GraphicObject go(toGo());
+// i->transform(go, tr);
+// i->attachToLayer(std::move(go));
+// }
+// }
+// } else {
+// attachToLayer(toGo());
+// }
 // }
 
 void Line::parse(CodeData& code) {
@@ -82,9 +82,9 @@ DxfGo Line::toGo() const {
     }
 
     Paths paths;
-    //    ClipperOffset offset;
-    //    offset.AddPath(p, JoinType::Round, EndType::Round);
-    //    paths = offset.Execute(thickness * uScale);
+    // ClipperOffset offset;
+    // offset.AddPath(p, JoinType::Round, EndType::Round);
+    // paths = offset.Execute(thickness * uScale);
 
     DxfGo go{id, ~p, paths}; // FIXME return {id, p, paths};
     return go;

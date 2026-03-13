@@ -17,9 +17,9 @@ public:
     explicit Plugin(QObject* parent = nullptr);
     virtual ~Plugin() = default;
 
-    //    [[nodiscard]] virtual GCode::File* loadFile(QDataStream& stream) const = 0;
-    //    [[nodiscard]] virtual QIcon icon() const = 0;
-    //    [[nodiscard]] virtual uint32_t type() const = 0;
+    // [[nodiscard]] virtual GCode::File* loadFile(QDataStream& stream) const = 0;
+    // [[nodiscard]] virtual QIcon icon() const = 0;
+    // [[nodiscard]] virtual uint32_t type() const = 0;
     [[nodiscard]] virtual QKeySequence keySequence() const = 0;
     [[nodiscard]] virtual QWidget* createForm() = 0;
     [[nodiscard]] virtual bool canToShow() const { return true; }
@@ -27,10 +27,10 @@ public:
 
     //////////////////////
 
-    //    AbstractFile* loadFile(QDataStream& stream) constoverride { return nullptr /*new File()*/; }
-    //    QIcon icon() const override { return decoration(Qt::lightGray, u'G'); }
-    //    uint32_t type() const override { return md5::hash32("GCode"); }
-    //    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    // AbstractFile* loadFile(QDataStream& stream) constoverride { return nullptr /*new File()*/; }
+    // QIcon icon() const override { return decoration(Qt::lightGray, u'G'); }
+    // uint32_t type() const override { return md5::hash32("GCode"); }
+    // AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     QString folderName() const override { return tr("Tool Paths"); }
     bool thisIsIt(const QString& /*fileName*/) override { return false; }
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;

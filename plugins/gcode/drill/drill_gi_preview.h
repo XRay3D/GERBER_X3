@@ -33,7 +33,7 @@ public:
     Path hv() const { return path_; };              // NOTE shadow base class pos func
 
     // private:
-    //     static Paths offset(const Path& path, double offset);
+    // static Paths offset(const Path& path, double offset);
 };
 }
 

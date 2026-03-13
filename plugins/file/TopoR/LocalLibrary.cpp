@@ -1,9 +1,8 @@
 ﻿#include "LocalLibrary.h"
 
-    // namespace TopoR_PCB_Classes {
+// namespace TopoR_PCB_Classes {
 
-    bool
-    LocalLibrary::PadRect::getHandlingSpecified() const {
+bool LocalLibrary::PadRect::getHandlingSpecified() const {
     return _handling != type_handling::None;
 }
 

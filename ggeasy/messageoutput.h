@@ -24,7 +24,7 @@
                                       u";"_s #G      \
                                       u";"_s #B u"m"_s
 
-//    ANSI escape color codes :
+// ANSI escape color codes :
 #define BG_BLACK()   u"\033[40m"_s
 #define BG_BLUE()    u"\033[44m"_s
 #define BG_CYAN()    u"\033[46m"_s
@@ -60,24 +60,24 @@
 #define FG_BRIGHT_YELLOW()  u"\033[93m"_s
 
 inline void myMessageOutput(QtMsgType type, const QMessageLogContext& context, const QString& msg) {
-    //    ANSI escape color codes :
-    //    Name            FG  BG
-    //    Black           30  40
-    //    Red             31  41
-    //    Green           32  42
-    //    Yellow          33  43
-    //    Blue            34  44
-    //    Magenta         35  45
-    //    Cyan            36  46
-    //    White           37  47
-    //    Bright Black    90  100
-    //    Bright Red      91  101
-    //    Bright Green    92  102
-    //    Bright Yellow   93  103
-    //    Bright Blue     94  104
-    //    Bright Magenta  95  105
-    //    Bright Cyan     96  106
-    //    Bright White    97  107
+    // ANSI escape color codes :
+    // Name            FG  BG
+    // Black           30  40
+    // Red             31  41
+    // Green           32  42
+    // Yellow          33  43
+    // Blue            34  44
+    // Magenta         35  45
+    // Cyan            36  46
+    // White           37  47
+    // Bright Black    90  100
+    // Bright Red      91  101
+    // Bright Green    92  102
+    // Bright Yellow   93  103
+    // Bright Blue     94  104
+    // Bright Magenta  95  105
+    // Bright Cyan     96  106
+    // Bright White    97  107
 
     QByteArray localMsg = msg.toUtf8();
     const char* file = context.file ? context.file : "";

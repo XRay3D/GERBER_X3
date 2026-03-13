@@ -25,7 +25,7 @@
 
 // // class template mdspan
 // template <class ElementType, class Extents, class LayoutPolicy = layout_right,
-//     class AccessorPolicy = default_accessor<ElementType>>
+// class AccessorPolicy = default_accessor<ElementType>>
 // class mdspan;
 
 // // submdspan creation
@@ -36,26 +36,26 @@
 // struct submdspan_mapping_result;
 
 // struct full_extent_t {
-//     explicit full_extent_t() = default;
+// explicit full_extent_t() = default;
 // };
 // inline constexpr full_extent_t full_extent{};
 
 // template <class IndexType, class... Extents, class... SliceSpecifiers>
 // constexpr auto submdspan_extents(const extents<IndexType, Extents...>&,
-//     SliceSpecifiers...);
+// SliceSpecifiers...);
 
 // // submdspan function template
 // template <class ElementType, class Extents, class LayoutPolicy,
-//     class AccessorPolicy, class... SliceSpecifiers>
+// class AccessorPolicy, class... SliceSpecifiers>
 // constexpr auto submdspan(
-//     const mdspan<ElementType, Extents, LayoutPolicy, AccessorPolicy>& src,
-//     SliceSpecifiers... slices) -> /* see description */;
+// const mdspan<ElementType, Extents, LayoutPolicy, AccessorPolicy>& src,
+// SliceSpecifiers... slices) -> /* see description */;
 
 // template <class T> concept /*integral-constant-like*/ = // exposition only
-//     is_integral_v<decltype(T::value)> && !is_same_v<bool, remove_const_t<decltype(T::value)>> && convertible_to<T, decltype(T::value)> && equality_comparable_with<T, decltype(T::value)> && bool_constant<T() == T::value>::value && bool_constant<static_cast<decltype(T::value)>(T()) == T::value>::value;
+// is_integral_v<decltype(T::value)> && !is_same_v<bool, remove_const_t<decltype(T::value)>> && convertible_to<T, decltype(T::value)> && equality_comparable_with<T, decltype(T::value)> && bool_constant<T() == T::value>::value && bool_constant<static_cast<decltype(T::value)>(T()) == T::value>::value;
 
 // template <class T, class IndexType> concept /*index-pair-like*/ = // exposition only
-//     /*pair-like*/<T> && convertible_to<tuple_element_t<0, T>, IndexType> && convertible_to<tuple_element_t<1, T>, IndexType>;
+// /*pair-like*/<T> && convertible_to<tuple_element_t<0, T>, IndexType> && convertible_to<tuple_element_t<1, T>, IndexType>;
 // } // namespace std
 
 // Class template std::mdspan

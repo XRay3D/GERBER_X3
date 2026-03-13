@@ -13,11 +13,11 @@
 
 // struct LType : TableItem {
 // public:
-//     LType(SectionParser* sp);
-//     // TableItem interface
+// LType(SectionParser* sp);
+// // TableItem interface
 // public:
-//     void parse(CodeData& code) override;
-//     Type type() const override { return TableItem::LTYPE; };
+// void parse(CodeData& code) override;
+// Type type() const override { return TableItem::LTYPE; };
 // };
 
 //} // namespace Dxf

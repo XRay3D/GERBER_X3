@@ -43,15 +43,15 @@ AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
 std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
     if(plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
-        //        auto const exFile = static_cast<File*>(file);
-        //        QTransform t {exFile->transform()};
-        //        for (const Excellon::Hole& hole : *exFile) {
-        //            auto name {u"T%1"_s.arg(hole.state.toolId)};
-        //            if (bool slot = hole.state.path.size(); slot)
-        //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
-        //            else
-        //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
-        //        }
+        // auto const exFile = static_cast<File*>(file);
+        // QTransform t {exFile->transform()};
+        // for (const Excellon::Hole& hole : *exFile) {
+        // auto name {u"T%1"_s.arg(hole.state.toolId)};
+        // if (bool slot = hole.state.path.size(); slot)
+        // retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
+        // else
+        // retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+        // }
         return retData;
     }
     return {};

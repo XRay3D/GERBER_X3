@@ -32,11 +32,11 @@ Drill::Drill(const Path& path, double diameter, AbstractFile* file, int toolId)
 void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
 
     // FIXME   if (App::drawPdf()) {
-    //        painter->setBrush(Qt::black);
-    //        painter->setPen(Qt::NoPen);
-    //        painter->drawPath(shape_);
-    //        return;
-    //    }
+    // painter->setBrush(Qt::black);
+    // painter->setPen(Qt::NoPen);
+    // painter->drawPath(shape_);
+    // return;
+    // }
     // pen_.setWidth(penWidth());
 
     painter->setBrush(brushColor_);
@@ -72,7 +72,7 @@ Paths Drill::paths(int /*alternate*/) const {
 }
 
 void Drill::changeColor() {
-    //    animation.setStartValue(bodyColor_);
+    // animation.setStartValue(bodyColor_);
 
     switch(colorState) {
     case Default:
@@ -103,8 +103,8 @@ void Drill::changeColor() {
         break;
     }
 
-    //    animation.setEndValue(bodyColor_);
-    //    animation.start();
+    // animation.setEndValue(bodyColor_);
+    // animation.start();
 }
 
 void Drill::create() {
@@ -113,12 +113,12 @@ void Drill::create() {
     if(!path_.size()) {
         return;
     } else if(path_.size() == 1) {
-        //        path_ = CirclePath(double(diameter_ ? diameter_ * uScale : uScale), path_.front());
-        //        ReversePath(path_);
-        //        path_.push_back(path_.front());
+        // path_ = CirclePath(double(diameter_ ? diameter_ * uScale : uScale), path_.front());
+        // ReversePath(path_);
+        // path_.push_back(path_.front());
         // shape_.addPolygon(path_);
         shape_.addEllipse(~path_.front(), diameter_ * 0.5, diameter_ * 0.5);
-        //        path_ = shape_.toFillPolygon();
+        // path_ = shape_.toFillPolygon();
     } else {
         boundingRect_ = shape_.boundingRect();
         for(auto&& path: Inflate(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {

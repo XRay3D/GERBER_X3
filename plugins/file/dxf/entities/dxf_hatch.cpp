@@ -25,18 +25,18 @@ Hatch::~Hatch() {
 
 // void Hatch::draw(const InsertEntity* const i) const
 //{
-//     if (i) {
-//         for (int r{}; r < i->rowCount; ++r) {
-//             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-//                 GraphicObject go(toGo());
-//                 i->transform(go, tr);
-//                 i->attachToLayer(std::move(go));
-//             }
-//         }
-//     } else {
-//         attachToLayer(toGo());
-//     }
+// if (i) {
+// for (int r{}; r < i->rowCount; ++r) {
+// for (int c{}; c < i->colCount; ++c) {
+// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
+// GraphicObject go(toGo());
+// i->transform(go, tr);
+// i->attachToLayer(std::move(go));
+// }
+// }
+// } else {
+// attachToLayer(toGo());
+// }
 // }
 
 void Hatch::parse(CodeData& code) {
@@ -89,10 +89,10 @@ void Hatch::parse(CodeData& code) {
             break;
         case NumberOfDegenerateBoundaryPaths: // 99
             break;
-            //        case SeedPointX: // 10
-            //            break;
-            //        case SeedPointY: // 20
-            //            break;
+            // case SeedPointX: // 10
+            // break;
+            // case SeedPointY: // 20
+            // break;
         case IndicatesSolidHatchOrGradient: // 450
             break;
         case Zero: // 451
@@ -167,41 +167,41 @@ void Hatch::parse(CodeData& code) {
             break;
         }
         // Entity::parse(code);
-        //        DC	5	S//
-        //        DC	8	S//
-        //        DC	62	I//
-        //        DC	92	I
-        //        DC	93	I
-        //        DC	72	I
-        //        DC	21	D
-        //        DC	97	I
-        //        DC	330	S//
-        //        DC	0	S
+        // DC 5 S//
+        // DC 8 S//
+        // DC 62 I//
+        // DC 92 I
+        // DC 93 I
+        // DC 72 I
+        // DC 21 D
+        // DC 97 I
+        // DC 330 S//
+        // DC 0 S
 
-        //        DC	0		S
-        //        DC	10		D
-        //        DC	100		S
-        //        DC	11		D
-        //        DC	2		S
-        //        DC	20		D
-        //        DC	21		D
-        //        DC	210		D
-        //        DC	220		D
-        //        DC	230		D
-        //        DC	330		S
-        //        DC	5		S
-        //        DC	62		I
-        //        DC	70		I
-        //        DC	71		I
-        //        DC	72		I
-        //        DC	75		I
-        //        DC	76		I
-        //        DC	8		S
-        //        DC	91		I
-        //        DC	92		I
-        //        DC	93		I
-        //        DC	97		I
-        //        DC	98		I
+        // DC 0  S
+        // DC 10  D
+        // DC 100  S
+        // DC 11  D
+        // DC 2  S
+        // DC 20  D
+        // DC 21  D
+        // DC 210  D
+        // DC 220  D
+        // DC 230  D
+        // DC 330  S
+        // DC 5  S
+        // DC 62  I
+        // DC 70  I
+        // DC 71  I
+        // DC 72  I
+        // DC 75  I
+        // DC 76  I
+        // DC 8  S
+        // DC 91  I
+        // DC 92  I
+        // DC 93  I
+        // DC 97  I
+        // DC 98  I
         code = sp->nextCode();
     } while(code.code() != 0);
 }
@@ -221,7 +221,7 @@ DxfGo Hatch::toGo() const {
 }
 
 void Hatch::write(QDataStream& stream) const {
-    //    stream << edges;
+    // stream << edges;
 
     stream << referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 
@@ -233,7 +233,7 @@ void Hatch::write(QDataStream& stream) const {
 }
 
 void Hatch::read(QDataStream& stream) {
-    //    stream >> edges;
+    // stream >> edges;
 
     stream >> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 

@@ -26,55 +26,55 @@ void Creator::create() {
 void Creator::createThread(const Tool& tool, const double depth) {
     do {
 
-        //        toolDiameter = tool.getDiameter(depth);
+        // toolDiameter = tool.getDiameter(depth);
 
-        //        const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
+        // const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
 
-        //        if(gcp_.side() == GCode::On) {
-        //            if(gcp_.params[TrimmingOpenPaths].toBool())
-        //                trimmingOpenPaths(openSrcPaths);
-        //            returnPs = std::move(closedSrcPaths);
-        //        } else {
-        //            if(closedSrcPaths.size()) {
-        //                ClipperOffset offset;
-        //                for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
-        //                    offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
-        //                returnPs = offset.Execute(dOffset);
-        //            }
-        //            if(openSrcPaths.size()) {
-        //                ClipperOffset offset;
-        //                offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
-        //                openSrcPaths = offset.Execute(dOffset);
-        //                if(!openSrcPaths.empty())
-        //                    returnPs.append(openSrcPaths);
-        //            }
-        //        }
+        // if(gcp_.side() == GCode::On) {
+        // if(gcp_.params[TrimmingOpenPaths].toBool())
+        // trimmingOpenPaths(openSrcPaths);
+        // returnPs = std::move(closedSrcPaths);
+        // } else {
+        // if(closedSrcPaths.size()) {
+        // ClipperOffset offset;
+        // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
+        // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+        // returnPs = offset.Execute(dOffset);
+        // }
+        // if(openSrcPaths.size()) {
+        // ClipperOffset offset;
+        // offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
+        // openSrcPaths = offset.Execute(dOffset);
+        // if(!openSrcPaths.empty())
+        // returnPs.append(openSrcPaths);
+        // }
+        // }
 
-        //        if(returnPs.empty() && openSrcPaths.empty())
-        //            break;
+        // if(returnPs.empty() && openSrcPaths.empty())
+        // break;
 
-        //        reorder();
+        // reorder();
 
-        //        if(gcp_.side() == GCode::On && openSrcPaths.size()) {
-        //            returnPss.reserve(returnPss.size() + openSrcPaths.size());
-        //            mergePaths(openSrcPaths);
-        //            sortBeginEnd(openSrcPaths);
-        //            for(auto&& path: openSrcPaths)
-        //                returnPss.push_back({std::move(path)});
-        //        }
+        // if(gcp_.side() == GCode::On && openSrcPaths.size()) {
+        // returnPss.reserve(returnPss.size() + openSrcPaths.size());
+        // mergePaths(openSrcPaths);
+        // sortBeginEnd(openSrcPaths);
+        // for(auto&& path: openSrcPaths)
+        // returnPss.push_back({std::move(path)});
+        // }
 
-        //        makeBridges();
+        // makeBridges();
 
-        //        if(gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
-        //            cornerTrimming();
+        // if(gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
+        // cornerTrimming();
 
-        //        if(returnPss.empty())
-        //            break;
+        // if(returnPss.empty())
+        // break;
 
-        //        file_ = new File{std::move(gcp_), std::move(returnPss));
-        //        file_->setFileName(tool.nameEnc());
-        //        emit fileReady(file_);
-        //        return;
+        // file_ = new File{std::move(gcp_), std::move(returnPss));
+        // file_->setFileName(tool.nameEnc());
+        // emit fileReady(file_);
+        // return;
     } while(0);
     emit fileReady(nullptr);
 }
@@ -96,20 +96,20 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss)
 }
 
 void File::genGcodeAndTile() {
-    //    const QRectF rect = App::project().worckRect();
-    //    for (size_t x{}; x < App::project().stepsX(); ++x) {
-    //        for (size_t y{}; y < App::project().stepsY(); ++y) {
-    //            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
+    // const QRectF rect = App::project().worckRect();
+    // for (size_t x{}; x < App::project().stepsX(); ++x) {
+    // for (size_t y{}; y < App::project().stepsY(); ++y) {
+    // const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-    //            if (toolType() == Tool::Laser)
-    //                saveLaserThread(offset);
-    //            else
-    //                saveMillingThread(offset);
+    // if (toolType() == Tool::Laser)
+    // saveLaserThread(offset);
+    // else
+    // saveMillingThread(offset);
 
-    //            if (gcp_.params.contains(GCode::Params::NotTile))
-    //                return;
-    //        }
-    //    }
+    // if (gcp_.params.contains(GCode::Params::NotTile))
+    // return;
+    // }
+    // }
 }
 
 void File::createGi() {
@@ -133,7 +133,7 @@ void File::createGi() {
     }
 
     item = new Gi::GcPath{g0path_};
-    //    item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
+    // item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 

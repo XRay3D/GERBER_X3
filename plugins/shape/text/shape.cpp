@@ -200,7 +200,7 @@ void Shape::saveIData() {
     settings.beginGroup(u"ShapeText"_s);
     boost::pfr::for_each_field(iData, [&settings](auto& field, auto index) { // TODO for_each_field_name
                                                                              // if constexpr(requires { field.family(); })
-                                                                             //     settings.setValue(boost::pfr::get_name<index, ShapeData>(), field.toString());
+                                                                             // settings.setValue(boost::pfr::get_name<index, ShapeData>(), field.toString());
                                                                              // else
         settings.setValue(boost::pfr::get_name<index, ShapeData>(), field);
     });
@@ -211,7 +211,7 @@ Shape::ShapeData Shape::loadIData() {
     settings.beginGroup(u"ShapeText"_s);
     boost::pfr::for_each_field(iData, [&settings]<typename Ty>(Ty& field, auto index) { // TODO for_each_field_name
                                                                                         // if constexpr(requires { field.family(); })
-                                                                                        //     field.fromString(settings.value(boost::pfr::get_name<index, ShapeData>()).toString());
+                                                                                        // field.fromString(settings.value(boost::pfr::get_name<index, ShapeData>()).toString());
                                                                                         // else
         field = settings.value(boost::pfr::get_name<index, ShapeData>()).template value<Ty>();
     });

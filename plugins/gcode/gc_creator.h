@@ -47,7 +47,7 @@ class Creator : public QObject, public ProgressCancel {
 public:
     Creator();
     void reset();
-    //    Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
+    // Creator(const Paths& workingPaths, const bool convent, SideOfMilling side);
     ~Creator() override;
 
     File* file() const;
@@ -63,9 +63,9 @@ public:
 
     void continueCalc(bool fl = true);
 
-    //    static void //PROG .3setProgMax(int progressMax);
-    //    static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
-    //    static void //PROG setProgInc();
+    // static void //PROG .3setProgMax(int progressMax);
+    // static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
+    // static void //PROG setProgInc();
 
     QString msg;
 
@@ -104,10 +104,10 @@ protected:
     virtual uint32_t type() { return 0; } /* = 0; */
     virtual bool possibleTest() const { return false; }
 
-    //    inline static ClipperBase* clipperPtr_;
-    //    inline static bool cancel_;
-    //    static inline int //PROG  progressMax_;
-    //    static inline int //PROG progressVal_;
+    // inline static ClipperBase* clipperPtr_;
+    // inline static bool cancel_;
+    // static inline int //PROG  progressMax_;
+    // static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
     Paths closedSrcPaths;
@@ -131,4 +131,4 @@ private:
 
 } // namespace GCode
 
-#include "app.h"
+// #include "app.h"

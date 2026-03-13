@@ -243,9 +243,9 @@ Editor::Editor(Shapes::Plugin* plugin)
     view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     // view->setEditTriggers(QAbstractItemView::CurrentChanged | QAbstractItemView::SelectedClicked);
-    //      connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-    //          view->edit(current);
-    //      });
+    // connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    // view->edit(current);
+    // });
 }
 
 void Editor::add(Shapes::AbstractShape* shape) {

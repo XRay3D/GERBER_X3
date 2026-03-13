@@ -35,18 +35,18 @@ Item::Item(AbstractFile* file)
     , color_{Qt::white}
     , brushColor_{colorPtr_ ? *colorPtr_ : color_}
     , penColor_{Qt::transparent} {
-    //    animation(this, u"bodyColor"_s)
-    //    , visibleAnim(this, u"opacity"_s)     ,//    animation.setDuration(100);
-    //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    //    connect(this, &Item::colorChanged, [this] { update(); });
-    //    visibleAnim.setDuration(100);
-    //    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    //    connect(&visibleAnim, &QAbstractAnimation::finished, [this] {
-    //    QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() >
-    //    0.9); });
+    // animation(this, u"bodyColor"_s)
+    // , visibleAnim(this, u"opacity"_s)     ,// animation.setDuration(100);
+    // animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    // connect(this, &Item::colorChanged, [this] { update(); });
+    // visibleAnim.setDuration(100);
+    // visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    // connect(&visibleAnim, &QAbstractAnimation::finished, [this] {
+    // QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() >
+    // 0.9); });
     QGraphicsItem::setVisible(false);
-    //    connect(this, &QGraphicsObject::rotationChanged, [] {
-    //    qDebug(u"rotationChanged"_s); });
+    // connect(this, &QGraphicsObject::rotationChanged, [] {
+    // qDebug(u"rotationChanged"_s); });
 }
 
 bool Item::isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }
@@ -110,16 +110,16 @@ QRectF Item::boundingRect() const {
 QPainterPath Item::shape() const { return shape_; }
 
 void Item::setVisible(bool visible) {
-    //    if (visible == isVisible() && (visible && opacity() < 1.0))
-    //        return;
-    //    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
-    //    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
-    //    visibleAnim.start();
-    //    if (visible) {
-    //        setOpacity(0.0);
+    // if (visible == isVisible() && (visible && opacity() < 1.0))
+    // return;
+    // visibleAnim.setStartValue(visible ? 0.0 : 1.0);
+    // visibleAnim.setEndValue(visible ? 1.0 : 0.0);
+    // visibleAnim.start();
+    // if (visible) {
+    // setOpacity(0.0);
     setOpacity(1.0 * visible);
     QGraphicsItem /*QGraphicsObject*/ ::setVisible(visible);
-    //    }
+    // }
 }
 
 const AbstractFile* Item::file() const { return file_; }
@@ -144,9 +144,9 @@ void Item::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
 }
 
 // double Item::penWidth(double w) const {
-//     if(scene() && scene()->views().size())
-//         w /= scene()->views().front()->transform().m11();
-//     return w;
+// if(scene() && scene()->views().size())
+// w /= scene()->views().front()->transform().m11();
+// return w;
 // };
 
 void Item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {

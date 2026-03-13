@@ -370,10 +370,10 @@ struct Plated : AbstrFileFunc {
     Q_GADGET
     static int value(const QString& str, int eNum) { return staticMetaObject.enumerator(eNum).keyToValue(str.toUtf8().data()); }
     /*i,j,(PTH|Blind|Buried)[,<label>]*/
-    //    Данные сверления / фрезерования с покрытием от слоя меди i до слоя j.
-    //    От / до заказа не имеет значения. Поле (PTH | Blind | Buried) является обязательным.
-    //    Этикетка не обязательна.
-    //    Если присутствует, он должен принимать одно из следующих значений: Drill, Rout или Mixed.
+    // Данные сверления / фрезерования с покрытием от слоя меди i до слоя j.
+    // От / до заказа не имеет значения. Поле (PTH | Blind | Buried) является обязательным.
+    // Этикетка не обязательна.
+    // Если присутствует, он должен принимать одно из следующих значений: Drill, Rout или Mixed.
 
 public:
     enum class Type {

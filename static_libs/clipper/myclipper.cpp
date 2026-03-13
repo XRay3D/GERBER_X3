@@ -29,106 +29,9 @@
 #include <qglobal.h>
 #include <set>
 
-Curve& TransformCurve(Curve& curve, const QTransform& tr) {
-    qInfo() << tr;
+//------------------------------------------------------------------------------
 
-    if(tr.isIdentity()) return curve;
-
-    for(auto& v: curve) {
-        if(v.type) v.center = tr.map(v.center);
-        v.pt = tr.map(v.pt);
-    }
-
-    if((tr.m11() < .0) ^ (tr.m22() < .0))
-        for(auto&& v: curve) v.type = Vertex::Type{-v.type};
-
-    return curve;
-}
-
-Curves& ReverseCurves(Curves& curves) {
-    // r::for_each(curves, &Curve::Reverse);
-    return curves;
-}
-
-Curve& TranslateCurve(Curve& curve, const QPointF& pos) {
-    if(!pos.isNull())
-        for(auto& pt: curve) {
-            pt.center += pos;
-            pt.pt += pos;
-        }
-    return curve;
-}
-
-void RotateCurve(Curve& curve, double angle, const PointF& center) {
-    // const bool fl = curve.GetArea() < 0;
-
-    auto rot = [center, angle](PointF& pt) {
-        pt.Rotate(qDegreesToRadians(angle));
-        pt += center;
-    };
-
-    for(auto&& pt: curve) {
-        if(pt.type) (rot(pt.center));
-        rot(pt.pt);
-    }
-
-    // if(fl != (curve.GetArea() < 0))
-    //     curve.Reverse();
-}
-
-QPainterPath toPPath(Curve curve, std::optional<QTransform> tr) {
-    if(curve.size() < 2) return {};
-
-    if(tr) TransformCurve(curve, *tr);
-
-    QPointF source = curve.front().pt;
-
-    QPainterPath pPath;
-    pPath.moveTo(source.x(), source.y());
-
-    for(auto&& v: curve | v::drop(1)) {
-        if(!v.type) {
-            pPath.lineTo(v.pt.x(), v.pt.y());
-            source = v.pt;
-            continue;
-        }
-
-        const QPointF target = v.pt;
-
-        QLineF ls{v.center, source};
-        const double r = ls.length();
-        const double asource = ls.angle();
-        const double atarget = ls.angleTo(QLineF{v.center, target});
-
-        double span = atarget;
-        // if(curve.size() == 3)
-        //     qCritical() << asource
-        //                 << atarget
-        //                 << span;
-
-        QRectF rect{
-            v.center.x() - r,
-            v.center.y() - r,
-            r * 2,
-            r * 2,
-        };
-
-        if(v.type == Vertex::Ccw) span = span - 360.;
-
-        pPath.arcTo(rect, asource, span);
-
-        source = v.pt;
-    }
-    return pPath;
-}
-
-QPainterPath toPPath(const Curves& curves) {
-    if(curves.empty()) return {};
-    QPainterPath pPath(toPPath(curves.front()));
-    for(const auto& curve: curves | v::drop(1))
-        pPath.addPath(toPPath(curve));
-    return pPath;
-}
+//------------------------------------------------------------------------------
 
 // export module myclipper;
 
@@ -182,13 +85,7 @@ QIcon drawDrillIcon(QColor color) {
 
 using namespace std::placeholders;
 
-bool operator<(const QPointF& r, const QPointF& l) {
-    return r.x() < l.x() && r.y() < l.y();
-}
 
-bool operator<(const Point& r, const Point& l) {
-    return r.x < l.x && r.y < l.y;
-}
 
 template <>
 struct std::hash<Point> {
@@ -248,7 +145,7 @@ void TestPaths(const Paths& paths_) {
             toErace.emplace_back(it);
             return false;
         }
-        Point center = GetZ(side);
+        Point center = GetC(side);
         if(center == side) return false; // u"skip side"_s
 
         double a = Length(center, side) * dScale;
@@ -256,7 +153,7 @@ void TestPaths(const Paths& paths_) {
 
         if(abs(a - b) < 1e-3) {
             qWarning() << u"same side"_s << a << b << abs(a - b);
-            SetZForce(*it, center);
+            SetCForce(*it, center);
             return true;
         }
         return false;
@@ -265,7 +162,7 @@ void TestPaths(const Paths& paths_) {
     // fix single point arc centers
     for(auto&& path: paths) {
         std::unordered_map<Point, std::vector<Path::iterator>> counter;
-        for(auto it = path.begin(); it < path.end(); ++it) counter[GetZ(*it)].emplace_back(it);
+        for(auto it = path.begin(); it < path.end(); ++it) counter[GetC(*it)].emplace_back(it);
 
         const auto count = std::erase_if(counter, [](const auto& item) {
             const auto& [key, value] = item;
@@ -286,7 +183,7 @@ void TestPaths(const Paths& paths_) {
         qCritical() << counter.size() << count;
 
         for(auto it = path.begin(); it < path.end(); ++it) {
-            if(it->z == 0 || *it == GetZ(*it))
+            if(it->z == 0 || *it == GetC(*it))
                 if(qInfo("getPrev"); !test(toErace, getPrev(it), it))
                     if(qInfo("getNext"); !test(toErace, getNext(it), it))
                         continue;
@@ -311,11 +208,11 @@ void TestPaths(const Paths& paths_) {
         double radius{};
 
         size_t count = r::count_if(path,
-            [prevR = 0.0, center = GetZ(path.front()), &radius](const Point& pt) mutable {
-                const double r = QLineF{~center, ~pt}.length();
+            [prevR = 0.0, center = GetC(path.front()), &radius](const Point& pt) mutable {
+                const double r = length(~center, ~pt);
                 radius += r;
                 if(prevR == 0.0) prevR = r;
-                bool fl = (center == GetZ(pt)) && (abs(prevR - r) < 1e-5);
+                bool fl = (center == GetC(pt)) && (abs(prevR - r) < 1e-5);
                 prevR = r;
                 return fl;
             });
@@ -323,13 +220,13 @@ void TestPaths(const Paths& paths_) {
         if(isCircle) {
             radius /= path.size();
             qWarning() << count << path.size() << radius << radius;
-            auto center = ~GetZ(path.front());
+            auto center = ~GetC(path.front());
             pp.addEllipse(center, radius, radius);
         } else {
             for(auto it = path.begin(); it < path.end(); ++it) {
                 auto&& p = *it;
                 if(!p.z) continue;
-                ppr.moveTo(~GetZ(p));
+                ppr.moveTo(~GetC(p));
                 ppr.lineTo(~p);
             }
 
@@ -370,12 +267,12 @@ void TestPaths(const Paths& paths_) {
                 pp.moveTo(~source);
                 for(size_t j{}, k; j <= path.size(); ++j) {
                     currPt = path[i % path.size()];
-                    if(!currPt.z || currPt == GetZ(currPt)) {
+                    if(!currPt.z || currPt == GetC(currPt)) {
                         if(i - k == 1) {
                             source = currPt;
                             pp.lineTo(~source);
                         } else {
-                            center = GetZ(source);
+                            center = GetC(source);
                             target = path[(i - 1) % path.size()];
                             addArc();
                             source = currPt;
@@ -388,7 +285,7 @@ void TestPaths(const Paths& paths_) {
                             source = currPt;
                             pp.lineTo(~source);
                         } else {
-                            center = GetZ(source);
+                            center = GetC(source);
                             target = path[(i - 1) % path.size()];
                             addArc();
                             source = currPt;
@@ -410,26 +307,29 @@ void TestPaths(const Paths& paths_) {
 }
 
 QDataStream& operator<<(QDataStream& stream, const Point& pt) {
-    return stream << static_cast<int32_t>(pt.x) << static_cast<int32_t>(pt.y);
+    return stream
+        << static_cast<int32_t>(pt.x)
+        << static_cast<int32_t>(pt.y)
+        << static_cast<qsizetype>(pt.z);
 }
 
 QDataStream& operator>>(QDataStream& stream, Point& pt) {
-    int32_t x, y;
-    return stream >> x >> y, pt.Init(x, y), stream;
+    return stream
+        >> reinterpret_cast<int32_t&>(pt.x)
+        >> reinterpret_cast<int32_t&>(pt.y)
+        >> reinterpret_cast<qsizetype&>(pt.z);
 }
 
-Point GetZ(const Point& dst) {
+Point GetC(const Point& dst) {
     auto array = std::bit_cast<std::array<int32_t, 2>>(dst.z);
     return {array[0], array[1]};
 }
 
-void SetZSelf(Point& dst) { SetZ(dst, dst); }
-
-constexpr std::numeric_limits<int32_t> LimitI32;
+void SetCSelf(Point& dst) { SetC(dst, dst); }
 
 #define ASSERT_LIMIT_I32(VAL) assert(LimitI32.min() < VAL && VAL < LimitI32.max());
 
-void SetZForce(Point& dst, const Point& center) {
+void SetCForce(Point& dst, const Point& center) {
     ASSERT_LIMIT_I32(center.x);
     ASSERT_LIMIT_I32(center.y);
     dst.z = std::bit_cast<int64_t>(std::array{
@@ -438,8 +338,8 @@ void SetZForce(Point& dst, const Point& center) {
     });
 }
 
-void SetZ(Point& dst, const Point& center) {
-    if(dst.z == 0) SetZForce(dst, center);
+void SetC(Point& dst, const Point& center) {
+    if(dst.z == 0) SetCForce(dst, center);
 }
 
 Path CirclePath(double diametr, const Point& center) {
@@ -455,7 +355,7 @@ Path CirclePath(double diametr, const Point& center) {
             + center;
         ++i;
     };
-    r::for_each(polygon, std::bind(&SetZ, _1, center));
+    r::for_each(polygon, std::bind(&SetC, _1, center));
     return polygon;
 }
 
@@ -469,28 +369,28 @@ Path RectanglePath(double width, double height, const Point& center) {
         {+halfWidth + center.x, +halfHeight + center.y},
         // {-halfWidth + center.x, +halfHeight + center.y},
     };
-    r::for_each(polygon, &SetZSelf);
+    r::for_each(polygon, &SetCSelf);
     // if(Area(polygon) < 0.0) ReversePath(polygon);
     return polygon;
 }
 
-void RotatePath(Path& polygon, double angle, const Point& center) {
-    const bool fl = Area(polygon) < 0;
-    for(Point& pt: polygon) {
-        const double dAangle = qDegreesToRadians(angle - angleTo(center, pt));
-        const double length = distTo(center, pt);
-        pt = Point{cos(dAangle) * length, sin(dAangle) * length};
-        pt.x += center.x;
-        pt.y += center.y;
-    }
-    if(fl != (Area(polygon) < 0))
-        ReversePath(polygon);
+void RotatePath(Path& path, double angle, const Point& center) {
+    QTransform m;
+    if(center.x || center.y)
+        m.translate(
+            dScale * center.x,
+            dScale * center.y);
+
+    if(!qFuzzyIsNull(angle))
+        m.rotate(angle);
+
+    if(m.type()) TransformPath(path, m);
 }
 
 Path& TranslatePath(Path& path, const Point& pos) {
     if(pos.x || pos.y)
         for(auto& pt: path) {
-            SetZForce(pt, GetZ(pt) + pos);
+            SetCForce(pt, GetC(pt) + pos);
             pt.x += pos.x;
             pt.y += pos.y;
         }
@@ -510,7 +410,7 @@ double Perimeter(const Path& path) {
         p += x * x + y * y;
         j = i;
     }
-    return sqrt(p);
+    return std::sqrt(p);
 }
 
 void mergeSegments(Paths& paths, double glue) {
@@ -747,6 +647,15 @@ void reductionOfDistance(Path& path, Point point) {
     }
 }
 
+std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree) {
+    auto itB = polyTree.begin();
+    auto itE = polyTree.end();
+    return {
+        reinterpret_cast<CL2::PolyPath64List::iterator&>(itB), // FIXME очень грязный хак
+        reinterpret_cast<CL2::PolyPath64List::iterator&>(itE), // FIXME очень грязный хак
+    };
+}
+
 Path arc(const Point& center, double radius, double start, double stop, int interpolation) {
     enum { // interpolation
         Linear = 1,
@@ -768,7 +677,7 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
     for(int i{}; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
-        SetZ(points.emplace_back(
+        SetC(points.emplace_back(
                  center.x + radius * cos(theta),
                  center.y + radius * sin(theta)),
             center);
@@ -1161,9 +1070,9 @@ Pathss& sortB(Pathss& src, Point startPt) {
 Path& TransformPath(Path& path, const QTransform& m) {
     if(!m.type()) return path;
     for(Point& point: path) {
-        QPointF center = m.map(~GetZ(point));
+        QPointF center = m.map(~GetC(point));
         point = ~m.map(~point);
-        SetZForce(point, ~center);
+        SetCForce(point, ~center);
     }
     if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(path);
     return path;
@@ -1172,4 +1081,124 @@ Path& TransformPath(Path& path, const QTransform& m) {
 Paths& TransformPaths(Paths& paths, const QTransform& m) {
     for(auto&& path: paths) TransformPath(path, m);
     return paths;
+}
+//------------------------------------------------------------------------------
+QPointF polar(QPointF p, double angle, double distance) {
+    // Returns the point at a specified `angle` and `distance` from point `p`.
+    return p + QPointF{cos(angle) * distance, sin(angle) * distance};
+    // return QLineF::fromPolar(distance, angle).p2() + p;
+}
+
+double angle(QPointF p1, QPointF p2) {
+    // Returns angle a line defined by two endpoints and x-axis in radians.
+    p2 -= p1;
+    return atan2(p2.y(), p2.x());
+    // return QLineF{p1, p2}.angle();
+}
+
+double signedBulgeRadius(QPointF start, QPointF end, double bulge) {
+    return length(start, end) * (1.0 + (bulge * bulge)) / 4.0 / bulge;
+}
+
+std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start, QPointF end, double bulge) {
+    /*
+    Returns arc parameters from bulge parameters.
+    Based on Bulge to Arc by `Lee Mac`_.
+    Args:
+        start: start vertex as :class:`Vec2` compatible object
+        end: end vertex as :class:`Vec2` compatible object
+        bulge: bulge value
+    Returns:
+        Tuple: (center, start_angle, end_angle, radius)
+    */
+
+    double r = signedBulgeRadius(start, end, bulge);
+    double a = angle(start, end) + ((pi / 2.0 - atan(bulge) * 2.0));
+    QPointF c = polar(start, a, r);
+
+    double a1 = angle(c, end);
+    double a2 = angle(c, start);
+
+    if(bulge < 0.0)
+        return {c, a1, a2, abs(r)};
+    else
+        return {c, a2, a1, abs(r)};
+}
+
+void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge) {
+    if(pPath.isEmpty())
+        pPath.moveTo(source);
+
+    if(qFuzzyIsNull(bulge)) {
+        pPath.lineTo(target);
+        return;
+    }
+
+    auto [center, start_angle, end_angle, radius] = bulgeToArc(source, target, bulge);
+
+    // radius = GetRadius(source, target, bulge);
+
+    start_angle = qRadiansToDegrees(start_angle);
+    end_angle = qRadiansToDegrees(end_angle);
+
+    QLineF ls{center, source};
+    // const double r = ls.length();
+    const double asource = ls.angle();
+    const double atarget = ls.angleTo(QLineF{center, target});
+
+    double span = atarget;
+
+    QRectF rect{
+        center.x() - radius,
+        center.y() - radius,
+        radius * 2,
+        radius * 2,
+    };
+
+    if(bulge > 0.) span = span - 360.;
+
+#if 0
+    const QLineF l1{source, target};
+    const double lenght = l1.length() * 0.5;
+    const double height = lenght * bulge;
+    const double radius = (height * height + lenght * lenght) / (height * 2);
+
+    QLineF l2((source + target) / 2, target);
+    l2 = l2.normalVector();
+    l2.setLength(height);
+    QPointF c(l2.p2());
+
+    QPointF center = [&source, &target, &c] {
+        double ax2 = source.x() * source.x();
+        double bx2 = target.x() * target.x();
+        double cx2 = c.x() * c.x();
+        double ay2 = source.y() * source.y();
+        double by2 = target.y() * target.y();
+        double cy2 = c.y() * c.y();
+        double d = source.x() * target.y() + source.y() * c.x() - target.y() * c.x() - source.x() * c.y() - target.x() * source.y() + target.x() * c.y();
+        return QPointF(
+            +0.5 / d * (                                                                                                //
+                source.y() * cx2 + source.y() * cy2 + target.y() * ax2 + target.y() * ay2 + c.y() * bx2 + c.y() * by2 - //
+                source.y() * bx2 - source.y() * by2 - target.y() * cx2 - target.y() * cy2 - c.y() * ax2 - c.y() * ay2),
+            -0.5 / d * (                                                                                                //
+                source.x() * cx2 + source.x() * cy2 + target.x() * ax2 + target.x() * ay2 + c.x() * bx2 + c.x() * by2 - //
+                source.x() * bx2 - source.x() * by2 - target.x() * cx2 - target.x() * cy2 - c.x() * ax2 - c.x() * ay2));
+    }();
+
+    // const double start_angle = qRadiansToDegrees(start_angle_);
+    // const double end_angle = qRadiansToDegrees(end_angle_);
+    double start_angle = qRadiansToDegrees(atan2(center.y() - source.y(), center.x() - source.x()));
+    double end_angle = qRadiansToDegrees(atan2(center.y() - target.y(), center.x() - target.x()));
+
+    if(end_angle <= start_angle)
+        end_angle += 360;
+
+    double span = end_angle - start_angle;
+
+    const QPointF rad{radius, radius};
+    const QRectF br{center + rad, center - rad};
+    pPath.arcTo(br, -start_angle, -span);
+#endif
+
+    pPath.arcTo(rect, asource, span);
 }

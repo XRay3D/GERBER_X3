@@ -34,7 +34,7 @@ ToolModel::~ToolModel() {
 
 bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
 
-    //    return false;
+    // return false;
     beginInsertRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if(!parentItem)
@@ -51,7 +51,7 @@ bool ToolModel::insertRows(int row, int count, const QModelIndex& parent) {
 
 bool ToolModel::removeRows(int row, int count, const QModelIndex& parent) {
 
-    //    return false;
+    // return false;
     beginRemoveRows(parent, row, row + count - 1);
     ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
     if(!parentItem)
@@ -70,18 +70,18 @@ bool ToolModel::moveRows(const QModelIndex& sourceParent, int sourceRow, int cou
     qDebug() << u"destinationChild"_s << destinationChild;
 
     return false;
-    //     beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
-    //     ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
-    //     ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
-    //     if (!srcItem)
-    //         srcItem = rootItem;
-    //     if (!dstItem)
-    //         dstItem = rootItem;
-    //     for (int r{}; r < count; ++r) {
-    //         dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
-    //     }
-    //     endMoveRows();
-    //     return true;
+    // beginMoveRows(sourceParent, sourceRow, sourceRow + count - 1, destinationParent, destinationChild);
+    // ToolItem* srcItem = static_cast<ToolItem*>(sourceParent.internalPointer());
+    // ToolItem* dstItem = static_cast<ToolItem*>(destinationParent.internalPointer());
+    // if (!srcItem)
+    // srcItem = rootItem;
+    // if (!dstItem)
+    // dstItem = rootItem;
+    // for (int r{}; r < count; ++r) {
+    // dstItem->insertChild(destinationChild + r, srcItem->takeChild(sourceRow));
+    // }
+    // endMoveRows();
+    // return true;
 }
 
 int ToolModel::columnCount(const QModelIndex& /*parent*/) const { return 3; }

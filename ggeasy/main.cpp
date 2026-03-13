@@ -37,10 +37,10 @@ int main(int argc, char* argv[]) {
     QApplication app{argc, argv};
 
     // #ifdef Q_OS_WIN
-    //     QSettings settings{u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"_s, QSettings::NativeFormat};
-    //     if (settings.value(u"AppsUseLightTheme"_s) == 0) {
-    //         qApp->setStyleSheet(u"QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"_s);
-    //     }
+    // QSettings settings{u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"_s, QSettings::NativeFormat};
+    // if (settings.value(u"AppsUseLightTheme"_s) == 0) {
+    // qApp->setStyleSheet(u"QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"_s);
+    // }
     // #endif
 
 #ifdef linux
@@ -71,10 +71,10 @@ int main(int argc, char* argv[]) {
     QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 
-    //  WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
-    //    glf.setSampleBuffers(true);
-    //    glf.setSamples(16);
-    //    QGLFormat::setDefaultFormat(glf);
+    // WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
+    // glf.setSampleBuffers(true);
+    // glf.setSamples(16);
+    // QGLFormat::setDefaultFormat(glf);
 
     if constexpr(0) {
         QSystemSemaphore semaphore{u"GGEasySemaphore"_s, 1}; // создаём семафор
@@ -138,7 +138,7 @@ int main(int argc, char* argv[]) {
     Unix/Linux      .so
     AIX             .a
     HP-UX           .sl, .so (HP-UXi)
-    macOS and iOS	.dylib, .bundle, .so
+    macOS and iOS .dylib, .bundle, .so
     */
 #ifdef __unix__
 #ifdef QT_DEBUG

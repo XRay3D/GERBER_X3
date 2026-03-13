@@ -43,7 +43,7 @@ private:
     void rb_clicked();
 
     Ui::ProfileForm* ui;
-    //    Gi::Bridge* brItem = nullptr;
+    // Gi::Bridge* brItem = nullptr;
 
     const QStringList names{tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps{

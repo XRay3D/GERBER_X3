@@ -121,7 +121,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     tabs.reserve(App::filePlugins().size() + 1); // NOTE +1 for GCode
 
-    //    auto model = new ModelSettings{listView};
+    // auto model = new ModelSettings{listView};
     {
         auto tab = new GCode::Tab{this};
         tabs.emplace_back(tab);
@@ -133,18 +133,18 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
         auto tab = ptr->createSettingsTab(this);
         if(!tab) continue;
 
-        //        model->addWidget(tab);
-        //        auto gbx = new QGroupBox{tab->windowTitle(), this};
-        //        auto lay = new QHBoxLayout{gbx};
-        //        lay->addWidget(tab);
-        //        verticalLayout_3->addWidget(gbx);
+        // model->addWidget(tab);
+        // auto gbx = new QGroupBox{tab->windowTitle(), this};
+        // auto lay = new QHBoxLayout{gbx};
+        // lay->addWidget(tab);
+        // verticalLayout_3->addWidget(gbx);
 
         tabs.emplace_back(tab);
         ui.tabwMain->addTab(tab, tab->windowTitle());
         tab->readSettings(settings);
     }
 
-    //    listView->setModel(model);
+    // listView->setModel(model);
 
     readSettings();
     readSettingsDialog();

@@ -53,9 +53,9 @@ double MathParser1::parse(const QString& s) {
     try {
         result = plusMinus(sv{reinterpret_cast<const char16_t*>(s.data()), size_t(s.size())});
         if(result.rest.size()) {
-            //            std::stringstream ss;
-            //            ss << boost::stacktrace::stacktrace();
-            //            qWarning() << QString::fromStdString(ss.str());
+            // std::stringstream ss;
+            // ss << boost::stacktrace::stacktrace();
+            // qWarning() << QString::fromStdString(ss.str());
             qWarning() << "Error: can't full parse'" << s << "'rest: " << result.rest.data();
         }
     } catch(const sv& str) {
@@ -111,7 +111,7 @@ MathParser1::Result MathParser1::functionVariable(sv s) {
     size_t i{};
 
     while(i < s.length() && ((QChar(s.at(i)).isLetter() || s.at(i) == u'$') || (QChar(s.at(i)).isDigit() && i > 0))) {
-        //    while (i < s.length() && (QChar(s.at(i)).isLetter() || (QChar(s.at(i)).isDigit() && i > 0))) {
+        // while (i < s.length() && (QChar(s.at(i)).isLetter() || (QChar(s.at(i)).isDigit() && i > 0))) {
         // f += s.at(i);
         i++;
     }
@@ -183,13 +183,13 @@ MathParser1::Result MathParser1::num(sv s) {
 
 MathParser1::Result MathParser1::processFunction(sv func, const Result& r) {
 
-    //    if (func.starts_with("sin"))
-    //        return Result(sin(r.acc), r.rest);
-    //    if (func.starts_with("cos"))
-    //        return Result(cos(r.acc), r.rest);
-    //    if (func.starts_with("tan"))
-    //        return Result(tan(r.acc), r.rest);
-    //    return r;
+    // if (func.starts_with("sin"))
+    // return Result(sin(r.acc), r.rest);
+    // if (func.starts_with("cos"))
+    // return Result(cos(r.acc), r.rest);
+    // if (func.starts_with("tan"))
+    // return Result(tan(r.acc), r.rest);
+    // return r;
 
     enum class Func {
         sin,

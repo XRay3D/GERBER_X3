@@ -42,32 +42,15 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
     while(in.readLineInto(&line)) {
         file->lines().push_back(line);
         try {
-            if(line == u"%"_s)
-                continue;
-
-            if(parseComment(line))
-                continue;
-
-            if(parseFormat(line))
-                continue;
-
-            if(parseTCode(line))
-                continue;
-
-            if(parseGCode(line))
-                continue;
-
-            if(parseMCode(line))
-                continue;
-
-            if(parseRepeat(line))
-                continue;
-
-            if(parseSlot(line))
-                continue;
-
-            if(parsePos(line))
-                continue;
+            if(line == u"%"_s) continue;
+            if(parseComment(line)) continue;
+            if(parseFormat(line)) continue;
+            if(parseTCode(line)) continue;
+            if(parseGCode(line)) continue;
+            if(parseMCode(line)) continue;
+            if(parseRepeat(line)) continue;
+            if(parseSlot(line)) continue;
+            if(parsePos(line)) continue;
             qWarning() << u"Excellon unparsed:"_s << line;
         } catch(const QString& errStr) {
             qWarning() << u"exeption Q:"_s << errStr;
@@ -103,14 +86,14 @@ bool Parser::parseComment(QString line) {
                     state_.toolId = tCode; // state_.tCode = file->tools_.firstKey();
                 }
                 file->tools_[tCode] = CtreCapTo(diam).toDouble() * (file->format_.unitMode == Inches ? (0.0254 * 1 / 25.4) : 1.0);
-                //                file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
+                // file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
             }
 
             // static constexpr ctll::fixed_string regexFormat(uR"(.*(?:FORMAT|format).*(\d).(\d))");
             // fixed_string(u".*(?:FORMAT|format).*(\d).(\d)");
             // if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
-            //     file->format_.integer = CtreCapTo(integer).toInt();
-            //     file->format_.decimal = CtreCapTo(decimal).toInt();
+            // file->format_.integer = CtreCapTo(integer).toInt();
+            // file->format_.decimal = CtreCapTo(decimal).toInt();
             // }
             if(auto [match, integer, decimal] = ctre::match<R"(FILE_FORMAT=(\d).+(\d))">(comment); match) {
                 file->format_.integer = CtreCapTo(integer).toInt();
@@ -168,11 +151,11 @@ bool Parser::parseMCode(const QString& line) {
         if(auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
             switch(CtreCapTo(c1).toInt()) {
             case M00: {
-                //                auto tools = file->tools_;
-                //                QList<int> keys;
-                //                std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
-                //                if (keys.indexOf(state_.toolId) < (keys.size() - 1))
-                //                    state_.toolId = keys[keys.indexOf(state_.toolId) + 1];
+                // auto tools = file->tools_;
+                // QList<int> keys;
+                // std::transform(begin(tools), end(tools), std::back_inserter(keys), [](auto& pair) { return pair.first; });
+                // if (keys.indexOf(state_.toolId) < (keys.size() - 1))
+                // state_.toolId = keys[keys.indexOf(state_.toolId) + 1];
                 state_.toolId = (++toolIt)->first;
             } break;
             case M15:
@@ -244,12 +227,12 @@ bool Parser::parseTCode(const QString& line) {
 
 bool Parser::parsePos(const QString& line) {
 
-    //    enum {
-    //        G = 1,
-    //        X,
-    //        Y,
-    //        A
-    //    };
+    // enum {
+    // G = 1,
+    // X,
+    // Y,
+    // A
+    // };
 
     static constexpr ctll::fixed_string regex(R"(^(?:G(\d+))?)"
                                               R"((?:X([\+\-]?\d*\.?\d*))?)"
@@ -297,12 +280,12 @@ bool Parser::parsePos(const QString& line) {
 }
 
 bool Parser::parseSlot(const QString& line) {
-    //    enum {
-    //        X1 = 1,
-    //        Y1,
-    //        X2,
-    //        Y2
-    //    };
+    // enum {
+    // X1 = 1,
+    // Y1,
+    // X2,
+    // Y2
+    // };
 
     static constexpr ctll::fixed_string regex(R"(^(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
                                               R"(G85)"
@@ -452,7 +435,7 @@ void Parser::circularRout() {
         QPointF c = (a + b) / 2;
         // находим перпендикуляр, нормируем его
         QPointF n = QLineF(QPointF(), a - b).normalVector().unitVector().p2();
-        //        n = new Vector2{n.y, -n.x}; //поворот на 90 градусов ;)
+        // n = new Vector2{n.y, -n.x}; //поворот на 90 градусов ;)
         // находим высоту искомого центра на отрезок
         double l = QLineF(QPointF(), a - b).length() / 2;
         double d = sqrt(r * r - l * l);

@@ -113,7 +113,7 @@ class App {
     AppSettings appSettings_;
 
     // handles handles_;
-    //    QSettings settings_;
+    // QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
     int dashOffset_{};
@@ -158,7 +158,7 @@ public:
     static auto& settings() { return app->appSettings_; }
 
     static auto& toolHolder() { return app->toolHolder_; }
-    //    static auto* qSettings() { return &app->settings_; }
+    // static auto* qSettings() { return &app->settings_; }
 
     static bool drawPdf() { return app->drawPdf_; }
     static void setDrawPdf(bool newDrawPdf) { app->drawPdf_ = newDrawPdf; }

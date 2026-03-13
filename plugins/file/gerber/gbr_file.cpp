@@ -137,11 +137,11 @@ Paths File::merge() const {
             qWarning() << u"2"_s << aperture << paths.size();
             CL2::ClipperOffset offset;
             // for(int i{}; i < paths.size(); ++i) {
-            //     auto& path = paths[i];
-            //     if(path.back() == path.front()) {
-            //         offset.AddPath(paths[i], JoinType::Round, EndType::Polygon);
-            //         paths.erase(paths.begin() + i--);
-            //     }
+            // auto& path = paths[i];
+            // if(path.back() == path.front()) {
+            // offset.AddPath(paths[i], JoinType::Round, EndType::Polygon);
+            // paths.erase(paths.begin() + i--);
+            // }
             // }
             offset.AddPaths(paths, JoinType::Round, EndType::Round);
             offset.Execute(apertures_.at(aperture)->size() * uScale * 0.5, paths);
@@ -217,7 +217,6 @@ void File::grouping(PolyTree& node, Pathss* pathss) {
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], pathss);
-
         break;
     case CopperGroup:
         if(node.IsHole()) {
@@ -231,7 +230,6 @@ void File::grouping(PolyTree& node, Pathss* pathss) {
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], pathss);
-
         break;
     }
 }

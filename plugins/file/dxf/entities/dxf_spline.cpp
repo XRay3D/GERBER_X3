@@ -72,14 +72,14 @@ void BSplineCurve(const QPointF& point1,
 
 // double blend(QVector<double>& uVec, double u, int k, int d)
 //{
-//     if (d == 1) {
-//         if (uVec[k] <= u && u < uVec[k + 1])
-//             return 1;
-//         return 0;
-//     }
-//     double b;
-//     b = ((u - uVec[k]) / (uVec[k + d - 1] - uVec[k]) * blend(uVec, u, k, d - 1)) + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
-//     return b;
+// if (d == 1) {
+// if (uVec[k] <= u && u < uVec[k + 1])
+// return 1;
+// return 0;
+// }
+// double b;
+// b = ((u - uVec[k]) / (uVec[k + d - 1] - uVec[k]) * blend(uVec, u, k, d - 1)) + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
+// return b;
 // }
 double blend(QVector<double>& uVec, double u, int k, int d) {
     if(d == 1) {
@@ -99,7 +99,7 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
     d = poly.degreeOfTheSplineCurve; // Enter degree of curve:
     n = poly.ControlPoints.size();
     QVector<double> uVec;
-    //  poly.KnotValues;
+    // poly.KnotValues;
     for(int i{}; i < n + d; i++)
         uVec.push_back(((double)i) / (n + d - 1));
     double x, y, basis, u;
@@ -117,7 +117,7 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
             path.moveTo(x, y);
         else if(!qFuzzyIsNull(x) || !qFuzzyIsNull(y))
             path.lineTo(x, y);
-        //        putpixel(roundOff(x), roundOff(y), YELLOW);
+        // putpixel(roundOff(x), roundOff(y), YELLOW);
     }
 }
 
@@ -213,7 +213,10 @@ void Spline::parse(CodeData& code) {
 
 Entity::Type Spline::type() const { return Type::SPLINE; }
 
-DxfGo Spline::toGo() const { return {}; }
+DxfGo Spline::toGo() const {
+    qInfo("TODO");
+    return {};
+}
 
 void Spline::write(QDataStream& stream) const {
     stream << FitPoints;
@@ -612,8 +615,8 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points) {
     double* b = d_data->b.data();
     double* c = d_data->c.data();
 
-    //  set up tridiagonal equation system; use coefficient
-    //  vectors as temporary buffers
+    // set up tridiagonal equation system; use coefficient
+    // vectors as temporary buffers
     QVector<double> h(size - 1);
     for(i = 0; i < size - 1; i++) {
         h[i] = p[i + 1].x() - p[i].x();
@@ -686,8 +689,8 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     QVector<double> s(size);
 
     //
-    //  setup equation system; use coefficient
-    //  vectors as temporary buffers
+    // setup equation system; use coefficient
+    // vectors as temporary buffers
     //
     for(i = 0; i < size - 1; i++) {
         h[i] = p[i + 1].x() - p[i].x();

@@ -99,8 +99,8 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
 }
 
 void File::initFrom(AbstractFile* file) {
-    //    AbstractFile::initFrom(file);
-    //    static_cast<Node*>(m_node)->file = this;
+    // AbstractFile::initFrom(file);
+    // static_cast<Node*>(m_node)->file = this;
 }
 
 FileTree::Node* File::node() {
@@ -110,64 +110,64 @@ FileTree::Node* File::node() {
 FileType File::type() const { return FileType::Hpgl; }
 
 void File::createGi() {
-    //    ItemGroup* igNorm = itemGroups_.back();
-    //    ItemGroup* igPath = new ItemGroup;
-    //    itemGroups_.push_back(igPath);
+    // ItemGroup* igNorm = itemGroups_.back();
+    // ItemGroup* igPath = new ItemGroup;
+    // itemGroups_.push_back(igPath);
 
-    //    int i{};
+    // int i{};
 
-    //    for (auto& [name, layer] : m_layers) {
-    //        if (layer->m_graphicObjects.size()) {
-    //            if (i++) {
-    //                itemGroups_.push_back(igNorm = new ItemGroup);
-    //                itemGroups_.push_back(igPath = new ItemGroup);
-    //            }
+    // for (auto& [name, layer] : m_layers) {
+    // if (layer->m_graphicObjects.size()) {
+    // if (i++) {
+    // itemGroups_.push_back(igNorm = new ItemGroup);
+    // itemGroups_.push_back(igPath = new ItemGroup);
+    // }
 
-    //            Clipper clipper; // Clipper
+    // Clipper clipper; // Clipper
 
-    //            for (auto& go : layer->m_graphicObjects) {
-    //                if (layer->m_groupedPaths.empty() && go.paths().size())
-    //                    clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
+    // for (auto& go : layer->m_graphicObjects) {
+    // if (layer->m_groupedPaths.empty() && go.paths().size())
+    // clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
 
-    //                if (go.path().size() > 1) {
-    //                    auto gItem = new Gi::DataPath(go.path(), this);
-    //                    if (go.entity()) {
-    //                        gItem->setToolTip(u"Line %1\n%2"_s)
-    //                                              .arg(go.entity()->data[0].line())
-    //                                              .arg(go.entity()->name()));
-    //                    }
-    //                    gItem->setPenColorPtr(&layer->m_colorPath);
-    //                    igPath->push_back(gItem);
-    //                }
-    //            }
+    // if (go.path().size() > 1) {
+    // auto gItem = new Gi::DataPath(go.path(), this);
+    // if (go.entity()) {
+    // gItem->setToolTip(u"Line %1\n%2"_s)
+    // .arg(go.entity()->data[0].line())
+    // .arg(go.entity()->name()));
+    // }
+    // gItem->setPenColorPtr(&layer->m_colorPath);
+    // igPath->push_back(gItem);
+    // }
+    // }
 
-    //            if (layer->m_groupedPaths.empty()) {
-    //                clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
-    //                //                dbgPaths(m_mergedPaths, u"m_mergedPaths"_s, true);
-    //                layer->m_groupedPaths = std::move(groupedPaths());
-    //                for (auto& paths : layer->m_groupedPaths)
-    //                    CleanPolygons(paths, uScale * 0.0005);
-    //                m_mergedPaths.clear();
-    //            }
+    // if (layer->m_groupedPaths.empty()) {
+    // clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
+    // // dbgPaths(m_mergedPaths, u"m_mergedPaths"_s, true);
+    // layer->m_groupedPaths = std::move(groupedPaths());
+    // for (auto& paths : layer->m_groupedPaths)
+    // CleanPolygons(paths, uScale * 0.0005);
+    // m_mergedPaths.clear();
+    // }
 
-    //            for (Paths& paths : layer->m_groupedPaths) {
-    //                auto gItem = new Gi::DataSolid(paths, this);
-    //                gItem->setColorPtr(&layer->m_colorNorm);
-    //                igNorm->push_back(gItem);
-    //            }
+    // for (Paths& paths : layer->m_groupedPaths) {
+    // auto gItem = new Gi::DataSolid(paths, this);
+    // gItem->setColorPtr(&layer->m_colorNorm);
+    // igNorm->push_back(gItem);
+    // }
 
-    //            igNorm->shrink_to_fit();
-    //            igPath->shrink_to_fit();
-    //            layer->itemGroupNorm = igNorm;
-    //            layer->itemGroupPath = igPath;
+    // igNorm->shrink_to_fit();
+    // igPath->shrink_to_fit();
+    // layer->itemGroupNorm = igNorm;
+    // layer->itemGroupPath = igPath;
 
-    //            if (layer->m_itemsType == ItemsType::Null) {
-    //                layer->setItemsType(ItemsType::Normal);
-    //                layer->setVisible(true);
-    //            } else
-    //                layer->setVisible(m_visible);
-    //        }
-    //    }
+    // if (layer->m_itemsType == ItemsType::Null) {
+    // layer->setItemsType(ItemsType::Normal);
+    // layer->setVisible(true);
+    // } else
+    // layer->setVisible(m_visible);
+    // }
+    // }
 }
 
 bool File::isVisible() const { return m_visible; }
@@ -176,56 +176,56 @@ void File::setVisible(bool visible) {
     if(visible == m_visible)
         return;
     m_visible = visible;
-    //    if (m_visible) {
-    //        for (const auto& [name, vis] : m_layersVisible) {
-    //            m_layers[name]->setVisible(vis);
-    //        }
-    //    } else {
-    //        m_layersVisible.clear();
-    //        for (const auto& [name, layer] : m_layers) {
-    //            if (!layer->isEmpty()) {
-    //                m_layersVisible[name] = layer->isVisible();
-    //                m_layers[name]->setVisible(false);
-    //            }
-    //        }
-    //    }
+    // if (m_visible) {
+    // for (const auto& [name, vis] : m_layersVisible) {
+    // m_layers[name]->setVisible(vis);
+    // }
+    // } else {
+    // m_layersVisible.clear();
+    // for (const auto& [name, layer] : m_layers) {
+    // if (!layer->isEmpty()) {
+    // m_layersVisible[name] = layer->isVisible();
+    // m_layers[name]->setVisible(false);
+    // }
+    // }
+    // }
 }
 
 void File::write(QDataStream& stream) const {
-    //    stream << m_header;
-    //    {
-    //        stream << int(m_layers.size());
-    //        for (auto& [name, layer] : m_layers) {
-    //            stream << name;
-    //            stream << *layer;
-    //        }
-    //    }
-    //    stream << m_itemsType;
-    //    if (!m_layersVisible.size() && m_visible) {
-    //        for (const auto& [name, layer] : m_layers) {
-    //            if (!layer->isEmpty()) {
-    //                m_layersVisible[name] = layer->isVisible();
-    //            }
-    //        }
-    //    }
-    //    stream << m_layersVisible;
+    // stream << m_header;
+    // {
+    // stream << int(m_layers.size());
+    // for (auto& [name, layer] : m_layers) {
+    // stream << name;
+    // stream << *layer;
+    // }
+    // }
+    // stream << m_itemsType;
+    // if (!m_layersVisible.size() && m_visible) {
+    // for (const auto& [name, layer] : m_layers) {
+    // if (!layer->isEmpty()) {
+    // m_layersVisible[name] = layer->isVisible();
+    // }
+    // }
+    // }
+    // stream << m_layersVisible;
 }
 
 void File::read(QDataStream& stream) {
-    //    stream >> m_header;
-    //    {
-    //        int size;
-    //        stream >> size;
-    //        while (size--) {
-    //            QString name;
-    //            Layer* layer = new Layer(this);
-    //            stream >> name;
-    //            stream >> *layer;
-    //            m_layers[name] = layer;
-    //        }
-    //    }
-    //    stream >> m_itemsType;
-    //    stream >> m_layersVisible;
+    // stream >> m_header;
+    // {
+    // int size;
+    // stream >> size;
+    // while (size--) {
+    // QString name;
+    // Layer* layer = new Layer(this);
+    // stream >> name;
+    // stream >> *layer;
+    // m_layers[name] = layer;
+    // }
+    // }
+    // stream >> m_itemsType;
+    // stream >> m_layersVisible;
 }
 
 Paths File::merge() const { return m_mergedPaths; }

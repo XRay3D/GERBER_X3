@@ -38,11 +38,13 @@ enum class ItemsType {
     Both
 };
 
-class Color : public QColor {
-public:
-    Color(double r, double g, double b)
-        : QColor(r * 255, g * 255, b * 255) {
-    }
+struct Color : QColor {
+    constexpr Color(double r, double g, double b)
+        : QColor{
+              static_cast<int>(r * 255),
+              static_cast<int>(g * 255),
+              static_cast<int>(b * 255),
+          } { }
 };
 
 extern const Color dxfColors[];

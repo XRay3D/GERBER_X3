@@ -12,10 +12,10 @@
 // namespace Dxf {
 // struct View : TableItem {
 // public:
-//    View(SectionParser* sp);
-//    // TableItem interface
+// View(SectionParser* sp);
+// // TableItem interface
 // public:
-//    void parse(CodeData& code) override;
-//    Type type() const override { return TableItem::VIEW; };
+// void parse(CodeData& code) override;
+// Type type() const override { return TableItem::VIEW; };
 //};
 //} // namespace Dxf

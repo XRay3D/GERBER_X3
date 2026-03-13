@@ -14,8 +14,8 @@ namespace Dxf {
 
 QDebug operator<<(QDebug debug, const CodeData& c) {
     QDebugStateSaver saver{debug};
-    //      debug.nospace() << u"DC(%1, "_s.arg(c.code_, 5).toUtf8().data();
-    //      debug.nospace() << '\n';
+    // debug.nospace() << u"DC(%1, "_s.arg(c.code_, 5).toUtf8().data();
+    // debug.nospace() << '\n';
     debug.nospace() << u"DC(%1, "_s.arg(c.code_).toUtf8().data();
     std::visit([&debug](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
@@ -142,9 +142,9 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
 
     if(!ok) {
         switch(type) {
-        case Integer16: varVal = int16_t(value.toDouble(&ok)); break;
-        case Integer32: varVal = int32_t(value.toDouble(&ok)); break;
-        case Integer64: varVal = int64_t(value.toDouble(&ok)); break;
+        case Integer16: varVal = /*int16_t*/ (value.toDouble(&ok)); break;
+        case Integer32: varVal = /*int32_t*/ (value.toDouble(&ok)); break;
+        case Integer64: varVal = /*int64_t*/ (value.toDouble(&ok)); break;
         case Double: varVal = value.toDouble(&ok); break;
         case String: varVal = value;
         }

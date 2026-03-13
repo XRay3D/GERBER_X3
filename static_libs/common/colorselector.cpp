@@ -19,7 +19,7 @@
 #include <QPushButton>
 
 class PushButton : public QPushButton {
-    //    Q_OBJECT
+    // Q_OBJECT
     QColor& color_;
     void selectColor() {
         QColorDialog dialog{color_};
@@ -28,7 +28,7 @@ class PushButton : public QPushButton {
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
         if(dialog.exec() && color_ != color)
             color_ = color;
-        //        setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
+        // setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
     }
 
 public:
@@ -36,7 +36,7 @@ public:
         : QPushButton({}, parent)
         , color_(color) {
         connect(this, &QPushButton::clicked, this, &PushButton::selectColor);
-        //        setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
+        // setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
     }
     virtual ~PushButton() { }
 
@@ -46,8 +46,8 @@ protected:
         QPainter p{this};
         p.setPen(Qt::NoPen);
 
-        //        p.setBrush(Qt::white);
-        //        p.drawRect(rect() + QMargins(-3, -3, -3, -3));
+        // p.setBrush(Qt::white);
+        // p.drawRect(rect() + QMargins(-3, -3, -3, -3));
         QLinearGradient gr(rect().topRight(), rect().bottomLeft());
         gr.setColorAt(0.1, Qt::black);
         gr.setColorAt(0.9, Qt::white);
@@ -55,12 +55,12 @@ protected:
         p.drawRect(rect() + QMargins(-3, -3, -3, -3));
         p.setBrush(color_);
         p.drawRect(rect() + QMargins(-3, -3, -3, -3));
-        //        p.setCompositionMode(QPainter::CompositionMode_Xor);
-        //        p.setPen(Qt::NoPen);
-        //        p.setBrush(Qt::black);
-        //        QPainterPath path;
-        //        path.addText(rect().bottomLeft(), font() /*Qt::AlignCenter*/, text());
-        //        p.drawPolygon(path.toFillPolygon());
+        // p.setCompositionMode(QPainter::CompositionMode_Xor);
+        // p.setPen(Qt::NoPen);
+        // p.setBrush(Qt::black);
+        // QPainterPath path;
+        // path.addText(rect().bottomLeft(), font() /*Qt::AlignCenter*/, text());
+        // p.drawPolygon(path.toFillPolygon());
         p.setPen(Qt::black);
         p.drawText(rect(), Qt::AlignCenter, text());
     }

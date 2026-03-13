@@ -17,8 +17,8 @@ namespace GCode {
 class Tab : public AbstractFileSettings {
     QCheckBox* chbxInfo;
     QCheckBox* chbxSameGFolder;
-    //    QCheckBox* chbxSimplifyHldi;
-    //    QComboBox* cbxProfileSort;
+    // QCheckBox* chbxSimplifyHldi;
+    // QComboBox* cbxProfileSort;
     QLineEdit* leFileExtension;
     QLineEdit* leFormatMilling;
     QLineEdit* leFormatLaser;

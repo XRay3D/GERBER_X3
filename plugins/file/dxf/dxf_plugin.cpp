@@ -47,11 +47,16 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     Codes codes;
     codes.reserve(10000);
 
-    QTextStream in{&file};
-#if (QT_VERSION < QT_VERSION_CHECK(6, 0, 0))
-    in.setCodec(u"Windows-1251"_s);
-#endif
-    //    in.setAutoDetectUnicode(true);
+    QByteArray data = file.readAll();
+    file.close();
+
+    detectEncoding(data);
+    if(!isValidUtf8(data))
+        data = toQString(data).toUtf8();
+
+    QTextStream in{data /*&file*/};
+
+    in.setAutoDetectUnicode(true); // BOM  ???
 
     auto getCode = [&in, &codes, &line, this] {
         // Code
@@ -83,14 +88,12 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
                 ++progress;
         } while(!in.atEnd() || *(codes.end() - 1) != u"EOF"_s);
         codes.shrink_to_fit();
-        file.close();
 
         // emit fileProgress(file_->shortName(), progress, progressCtr);
         Timer t{"Section Parser"};
 
         for(auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
-            if(*it == u"SECTION"_s)
-                from = it;
+            if(*it == u"SECTION"_s) from = it;
             if(auto it_ = it + 1; *it == u"ENDSEC"_s && (*it_ == u"SECTION"_s || *it_ == u"EOF"_s)) {
                 // emit fileProgress(file_->shortName(), 0, progressCtr++);
                 to = it;
@@ -197,26 +200,25 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 void Plugin::updateFileModel(AbstractFile* file) {
     const auto fm = App::fileModelPtr();
     const QModelIndex& fileIndex(file->node()->index());
-    const QModelIndex index = fm->createIndex_(0, 0, fileIndex.internalId());
+    const QModelIndex index = fm->createIndex(0, 0, fileIndex.internalId());
     // clean before insert new layers
     if(int count = fm->getItem(fileIndex)->childCount(); count) {
-        fm->beginRemoveRows_(index, 0, count - 1);
+        fm->beginRemoveRows(index, 0, count - 1);
         auto item = fm->getItem(index);
         do {
             item->remove(--count);
         } while(count);
-        fm->endRemoveRows_();
+        fm->endRemoveRows();
     }
     Dxf::Layers layers;
+
     for(auto& [name, layer]: reinterpret_cast<File*>(file)->layers())
+        if(!layer->isEmpty()) layers[name] = layer;
+    fm->beginInsertRows(index, 0, int(layers.size() - 1));
 
-        if(!layer->isEmpty())
-            layers[name] = layer;
-    fm->beginInsertRows_(index, 0, int(layers.size() - 1));
     for(auto& [name, layer]: layers)
-
         fm->getItem(index)->addChild(new Dxf::NodeLayer{name, layer});
-    fm->endInsertRows_();
+    fm->endInsertRows();
 }
 
 } // namespace Dxf
