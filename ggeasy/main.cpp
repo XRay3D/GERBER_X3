@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
         // MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory(u"GGEasyMemory"_s); // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running = false;    // переменную для проверки ууже запущенного приложения
+        bool is_running{};    // переменную для проверки ууже запущенного приложения
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true;      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {

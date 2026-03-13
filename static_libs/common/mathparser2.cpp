@@ -20,6 +20,7 @@ constexpr auto enumToString(ParseError err) {
     case ParseError::UnknownBinaryOperator: return "UnknownBinaryOperator"sv;
     case ParseError::UnknownExpressionType: return "UnknownExpressionType"sv;
     case ParseError::UnknownUnaryOperator: return "UnknownUnaryOperator"sv;
+    default: return ""sv;
     }
 }
 

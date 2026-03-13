@@ -224,7 +224,7 @@ private:
     bool guiSmoothScSh_;
     bool scaleHZMarkers_{};
     bool scalePinMarkers_{};
-    int theme_ = false;
+    int theme_{};
 
     /*Clipper*/
     double clpMinCircleSegmentLength_{0.5};
@@ -238,6 +238,6 @@ private:
     uint mrkZeroPos_{Qt::BottomLeftCorner};
 
     /*Other*/
-    bool banana_ = false;
-    bool snap_ = false;
+    bool banana_{};
+    bool snap_{};
 };

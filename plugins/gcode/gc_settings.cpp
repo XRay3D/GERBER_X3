@@ -211,7 +211,7 @@ void GCode::Tab::writeSettings(MySettings& settings) {
     }
     /*
          bool simplifyHldi_ {false};
-         int profileSort_ = 0;
+         int profileSort_{};
         bool simplifyHldi() { return simplifyHldi_; }
         int profileSort() { return profileSort_; }
     */

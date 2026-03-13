@@ -55,7 +55,7 @@ void Shape::redraw() {
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
     path.clear();
-    for(int i = 0; i <= intSteps; i++) {
+    for(int i{}; i <= intSteps; i++) {
         const double theta = delta_angle * i;
         path.emplace_back(Point{
             radius * cos(theta) + center.x,

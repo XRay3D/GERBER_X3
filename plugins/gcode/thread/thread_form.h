@@ -66,7 +66,7 @@ private:
 
     void updateBridgePos(QPointF pos);
 
-    int trimming_ = 0;
+    int trimming_{};
 
 protected:
     // QWidget interface

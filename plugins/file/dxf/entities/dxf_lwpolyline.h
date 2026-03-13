@@ -51,7 +51,7 @@ public:
     void parse(CodeData& code) override;
     Type type() const override;
     struct Segment : QPointF {
-        double bulge = 0.0;
+        double bulge{};
         friend QDataStream& operator<<(QDataStream& stream, const Segment& e) {
             stream << static_cast<QPointF>(e);
             stream << e.bulge;
@@ -69,14 +69,14 @@ public:
     void read(QDataStream& stream) override;
 
     mvector<Segment> poly;
-    int16_t counter = 0;
-    int16_t polylineFlag = 0;
-    int32_t numberOfVertices = 0;
-    double startWidth = 0.0;
-    double endWidth = 0.0;
-    double constantWidth = 0.0;
-    int16_t elevation = 0;
-    double thickness = 0.0;
+    int16_t counter{};
+    int16_t polylineFlag{};
+    int32_t numberOfVertices{};
+    double startWidth{};
+    double endWidth{};
+    double constantWidth{};
+    int16_t elevation{};
+    double thickness{};
 };
 
 } // namespace Dxf

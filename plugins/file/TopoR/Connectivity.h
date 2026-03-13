@@ -396,7 +396,7 @@ public:
         /// </summary>
     public:
         // ORIGINAL LINE: [XmlAttribute(u"priority"_s, DataType =u"int"_s)] public int _priority;
-        int _priority = 0;
+        int _priority{};
 
         /// <summary>
         /// Параметр области металлизации (полигона): использовать указанный зазор.

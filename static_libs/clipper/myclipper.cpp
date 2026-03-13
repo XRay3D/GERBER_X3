@@ -503,7 +503,7 @@ Paths& TranslatePaths(Paths& paths, const Point& pos) {
 }
 
 double Perimeter(const Path& path) {
-    double p = 0.0;
+    double p{};
     for(size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
         double x = path[j].x - path[i].x;
         double y = path[j].y - path[i].y;
@@ -517,10 +517,10 @@ void mergeSegments(Paths& paths, double glue) {
     size_t size;
     do {
         size = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             if(i >= paths.size()) break;
             auto& pi = paths[i];
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j) continue;
                 if(i >= paths.size()) break;
                 auto& pj = paths[j];
@@ -550,10 +550,10 @@ void mergeSegments(Paths& paths, double glue) {
     if(qFuzzyIsNull(glue)) return;
     do {
         size = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             if(i >= paths.size()) break;
             auto& pi = paths[i];
-            for(size_t j = 0; j < paths.size(); ++j) {
+            for(size_t j{}; j < paths.size(); ++j) {
                 auto& pj = paths[j];
                 if(i == j) continue;
                 if(i >= paths.size()) break;
@@ -587,7 +587,7 @@ void mergePaths(Paths& paths, const double dist) {
     size_t max;
     do {
         max = paths.size();
-        for(size_t i = 0; i < paths.size(); ++i) {
+        for(size_t i{}; i < paths.size(); ++i) {
             ProgressCancel::setMax(max);
             ProgressCancel::setCurrent(max - paths.size());
             throwIfCancel();
@@ -711,9 +711,9 @@ void reductionOfDistance(Path& path, Point point) {
         for(size_t y{x + 1}; y < path.size(); ++y)
             matrix[x][y] = distTo(path[x], path[y]);
 
-    size_t counter = 0;
+    size_t counter{};
     while(counter < path.size()) {
-        size_t selector = 0;
+        size_t selector{};
         double length = std::numeric_limits<double>::max();
         for(size_t i = counter, end = path.size(); i < end; ++i) {
             double length2 = distTo(point, path[i]);
@@ -753,7 +753,7 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
         ClockwiseCircular = 2,
         CounterClockwiseCircular = 3
     };
-    const double da_sign[4] = {0, 0, -1.0, +1.0};
+    const double da_sign[4]{0, 0, -1.0, +1.0};
     Path points;
 
     const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
@@ -766,7 +766,7 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
     double angle = std::abs(stop - start);
     double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
-    for(int i = 0; i < steps; i++) {
+    for(int i{}; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
         SetZ(points.emplace_back(
                  center.x + radius * cos(theta),
@@ -1070,7 +1070,7 @@ Pathss& sortBeginEnd(Pathss& src, Point startPt) {
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
-        bool reverse = false;
+        bool reverse{};
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
             const double lenFirst = distTo(startPt, src[secondIdx].front().front());
             const double lenLast = distTo(startPt, src[secondIdx].back().back());
@@ -1105,7 +1105,7 @@ Paths& sortBeginEnd(Paths& src, Point startPt) {
 
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
-        bool reverse = false;
+        bool reverse{};
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
             const double lenFirst = distTo(startPt, src[secondIdx].front());
             const double lenLast = distTo(startPt, src[secondIdx].back());

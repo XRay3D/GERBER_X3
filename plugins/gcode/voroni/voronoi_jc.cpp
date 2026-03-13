@@ -23,7 +23,7 @@ void VoronoiJc::jcVoronoi() {
     points.reserve(100000);
     CleanPaths(closedSrcPaths, tolerance * 0.1 * uScale);
     groupedPaths(GCode::Grouping::Copper);
-    int32_t id = 0;
+    int32_t id{};
     auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
         QLineF line{~tmp, ~point};
         if(line.length() > tolerance) {
@@ -78,7 +78,7 @@ void VoronoiJc::jcVoronoi() {
             return {static_cast</*PType*/ int32_t>(edge->pos[num].x), static_cast</*PType*/ int32_t>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
-        for(int i = 0; i < diagram.numsites; i++) {
+        for(int i{}; i < diagram.numsites; i++) {
             jcv_graphedge* graph_edge = sites[i].edges;
             while(graph_edge) {
                 const jcv_edge* edge = graph_edge->edge;
@@ -97,7 +97,7 @@ void VoronoiJc::jcVoronoi() {
         returnPs += toPath(edge);
     mergePaths(returnPs, 0.005 * uScale);
     returnPs += toPath(frame);
-    for(size_t i = 0; i < returnPs.size(); ++i) // remove verry short paths
+    for(size_t i{}; i < returnPs.size(); ++i) // remove verry short paths
         if(returnPs[i].size() < 4 && distTo(returnPs[i].front(), returnPs[i].back()) < tolerance * 0.5 * uScale)
             returnPs -= i--;
 }
@@ -128,11 +128,11 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     }
 
     const int max = merge.size();
-    for(int i = 0; i < merge.size(); ++i) {
+    for(int i{}; i < merge.size(); ++i) {
         setMax(max);
         setCurrent(max - merge.size());
         throwIfCancel();
-        for(int j = 0; j < merge.size(); ++j) {
+        for(int j{}; j < merge.size(); ++j) {
             if(i == j)
                 continue;
             if(merge[i]->Last->Pt == merge[j]->Pt) {

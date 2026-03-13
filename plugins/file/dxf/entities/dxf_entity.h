@@ -110,7 +110,7 @@ public:
     QString layerName;
     QString handle;
     QString softPointerID;
-    int16_t colorNumber = 0;
+    int16_t colorNumber{};
     int32_t id{};
 
 #ifdef QT_DEBUG

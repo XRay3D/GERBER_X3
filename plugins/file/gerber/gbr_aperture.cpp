@@ -304,7 +304,7 @@ void ApPolygon::draw() {
     Path polygon;
     const double step = 360.0 / verticesCount_;
     const double diam = diam_ * uScale;
-    for(int i = 0; i < verticesCount_; ++i)
+    for(int i{}; i < verticesCount_; ++i)
         polygon.emplace_back(Point(
             static_cast</*PType*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast</*PType*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
@@ -370,7 +370,7 @@ void ApMacro::draw() {
     VarMap macroCoefficients{coefficients_};
     mvector<QPair<bool, Path>> items;
     try {
-        //        for (int i = 0; i < modifiers_.size(); ++i) {
+        //        for (int i{}; i < modifiers_.size(); ++i) {
         //            QString var(modifiers_[i]);
 
         QJSEngine js;
@@ -543,7 +543,7 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
     {
         Clipper clipper;
         if(thickness && gap) {
-            for(int num = 0; num < mod[NumberOfRings]; ++num) {
+            for(int num{}; num < mod[NumberOfRings]; ++num) {
                 clipper.AddClip({CirclePath(diameter)});
                 diameter -= thickness * 2;
                 Path polygon(CirclePath(diameter));
@@ -605,7 +605,7 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
         static_cast</*PType*/ int32_t>(mod[CenterY] * uScale));
 
     Path polygon;
-    for(int j = 0; j < num; ++j) {
+    for(int j{}; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
         polygon.emplace_back(Point(
             static_cast</*PType*/ int32_t>(qCos(angle) * diameter),
@@ -720,7 +720,7 @@ void ApBlock::write(QDataStream& stream) const {
 
 void ApBlock::draw() {
     paths_.clear();
-    int i = 0;
+    int i{};
     while(i < V::size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddSubject(paths_);

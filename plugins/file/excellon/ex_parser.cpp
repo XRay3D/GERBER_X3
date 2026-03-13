@@ -359,7 +359,7 @@ bool Parser::parseRepeat(const QString& line) {
         QPointF p;
         parseNumber(CtreCapTo(CL2), p.rx());
         parseNumber(CtreCapTo(C3), p.ry());
-        for(int i = 0; i < count; ++i) {
+        for(int i{}; i < count; ++i) {
             state_.pos += p;
             file->append(Hole(state_, file));
         }
@@ -406,7 +406,7 @@ bool Parser::parseFormat(const QString& line) {
 }
 
 bool Parser::parseNumber(QString Str, double& val) {
-    bool flag = false;
+    bool flag{};
     int sign = +1;
     if(!Str.isEmpty()) {
         if(Str.contains(u'.')) {
@@ -444,7 +444,7 @@ bool Parser::parseNumber(QString Str, double& val) {
 
 void Parser::circularRout() {
 
-    double radius = 0.0;
+    double radius{};
     parseNumber(state_.rawPos.a, radius);
 
     auto CalcCircleCenter = [this](QPointF a, QPointF b, float r) {
@@ -472,7 +472,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
     double start = atan2(p1.y() - center.y(), p1.x() - center.x());
     double stop = atan2(p2.y() - center.y(), p2.x() - center.x());
     auto arc = [this](const QPointF& center, double radius, double start, double stop) {
-        const double da_sign[4] = {0, 0, -1.0, +1.0};
+        const double da_sign[4]{0, 0, -1.0, +1.0};
         QPolygonF points;
 
         const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
@@ -485,7 +485,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
         double angle = qAbs(stop - start);
         double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
         double delta_angle = da_sign[state_.gCode] * angle * 1.0 / steps;
-        for(int i = 0; i < steps; i++) {
+        for(int i{}; i < steps; i++) {
             double theta = start + delta_angle * (i + 1);
             points.push_back(QPointF(
                 center.x() + radius * cos(theta),
@@ -497,7 +497,7 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
 }
 
 double Parser::parseNumber(QString Str, const State& state) {
-    double val = 0.0;
+    double val{};
     int sign = +1;
     if(!Str.isEmpty()) {
         if(Str.contains(u'.')) {

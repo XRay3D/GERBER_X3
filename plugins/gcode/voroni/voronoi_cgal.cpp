@@ -76,7 +76,7 @@ void VoronoiCgal::cgalVoronoi() {
                             maxY = std::numeric_limits</*PType*/ int32_t>::min();
     //    progress(4, 0);
     SDG2 sdg;
-    int32_t id = 0;
+    int32_t id{};
     // add line segments to diagram
     msg = QObject::tr("Calc CGAL Voronoi");
 
@@ -90,7 +90,7 @@ void VoronoiCgal::cgalVoronoi() {
 
     for(const Paths& paths: groupedPss_) {
         for(const Path& path: paths) {
-            for(size_t i = 0; i < path.size(); ++i) {
+            for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 getCancelThrow();
                 const Point& point = path[i];

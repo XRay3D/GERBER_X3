@@ -71,11 +71,11 @@ public:
         PolyfaceMeshVertex = 128,                // вершина многогранной сети
     };
     operator QPointF() const { return {x, y}; };
-    int vertexFlags = 0;
-    double x = 0.0;
-    double y = 0.0;
-    double bulge = 0.0;
-    double curveFitTangentDirection = 0.0;
+    int vertexFlags{};
+    double x{};
+    double y{};
+    double bulge{};
+    double curveFitTangentDirection{};
 };
 
 } // namespace Dxf

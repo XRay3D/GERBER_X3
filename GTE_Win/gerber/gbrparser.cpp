@@ -280,7 +280,7 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
 }
 
 bool Parser::parseNumber(QString Str, cInt& val, int integer, int decimal) {
-    bool flag = false;
+    bool flag{};
     int sign = 1;
     if(!Str.isEmpty()) {
         if(!decimal)
@@ -406,7 +406,7 @@ void Parser::resetStep() {
 IntPoint Parser::parsePosition(const QString& xyStr) {
     static const QRegExp match(QStringLiteral("(?:G[01]{1,2})?(?:X([+-]?\\d*\\.?\\d+))?(?:Y([+-]?\\d*\\.?\\d+))?"));
     if(match.indexIn(xyStr) > -1) {
-        cInt tmp = 0;
+        cInt tmp{};
         if(parseNumber(match.cap(1), tmp, m_state.format()->xInteger, m_state.format()->xDecimal))
             m_state.format()->coordValueNotation == AbsoluteNotation ? m_state.curPos().X = tmp : m_state.curPos().X += tmp;
         tmp = 0;
@@ -421,7 +421,7 @@ IntPoint Parser::parsePosition(const QString& xyStr) {
 }
 
 Path Parser::arc(const IntPoint& center, double radius, double start, double stop) {
-    const double da_sign[4] = {0, 0, -1.0, +1.0};
+    const double da_sign[4]{0, 0, -1.0, +1.0};
     Path points;
 
     const int intSteps = 18; // MinStepsPerCircle;
@@ -434,7 +434,7 @@ Path Parser::arc(const IntPoint& center, double radius, double start, double sto
     double angle = qAbs(stop - start);
     double steps = qMax(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[m_state.interpolation()] * angle * 1.0 / steps;
-    for(int i = 0; i < steps; i++) {
+    for(int i{}; i < steps; i++) {
         double theta = start + delta_angle * (i + 1);
         points.push_back(IntPoint(
             static_cast<cInt>(center.X + radius * cos(theta)),
@@ -536,7 +536,7 @@ bool Parser::parseAperture(const QString& gLine) {
         case Macro:
         default:
             QMap<QString, double> macroCoeff;
-            for(int i = 0; i < paramList.size(); ++i)
+            for(int i{}; i < paramList.size(); ++i)
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
             m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, &m_format)));
             break;
@@ -634,8 +634,8 @@ bool Parser::parseStepRepeat(const QString& gLine) {
 
 void Parser::closeStepRepeat() {
     addPath();
-    for(int y = 0; y < m_stepRepeat.y; ++y) {
-        for(int x = 0; x < m_stepRepeat.x; ++x) {
+    for(int y{}; y < m_stepRepeat.y; ++y) {
+        for(int x{}; x < m_stepRepeat.x; ++x) {
             const IntPoint pt(static_cast<cInt>(m_stepRepeat.i * x), static_cast<cInt>(m_stepRepeat.j * y));
             for(GraphicObject& go: m_stepRepeat.storage) {
                 Paths paths(go.paths());
@@ -680,17 +680,17 @@ bool Parser::parseAttributes(const QString& gLine) {
         //  gerberFile.objectAttributesStrings.push_back(match.cap(2));
         //  break;
         //  case DELETE_ATTRIBUTE:
-        //  for (int i = 0; i < gerberFile.attributesStrings.size(); ++i) {
+        //  for (int i{}; i < gerberFile.attributesStrings.size(); ++i) {
         //  if (gerberFile.attributesStrings[i].indexOf(match.cap(1)) >= 0) {
         //  gerberFile.attributesStrings.removeAt(i);
         //  }
         //  }
-        //  for (int i = 0; i < gerberFile.apertureAttributesStrings.size(); ++i) {
+        //  for (int i{}; i < gerberFile.apertureAttributesStrings.size(); ++i) {
         //  if (gerberFile.apertureAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
         //  gerberFile.apertureAttributesStrings.removeAt(i);
         //  }
         //  }
-        //  for (int i = 0; i < gerberFile.objectAttributesStrings.size(); ++i) {
+        //  for (int i{}; i < gerberFile.objectAttributesStrings.size(); ++i) {
         //  if (gerberFile.objectAttributesStrings[i].indexOf(match.cap(1)) >= 0) {
         //  gerberFile.objectAttributesStrings.removeAt(i);
         //  }
@@ -768,14 +768,14 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
 
         const IntPoint& curPos = m_state.curPos();
 
-        const IntPoint centerPos[4] = {
+        const IntPoint centerPos[4]{
             {curPos.X + i, curPos.Y + j},
             {curPos.X - i, curPos.Y + j},
             {curPos.X + i, curPos.Y - j},
             {curPos.X - i, curPos.Y - j}
         };
 
-        bool valid = false;
+        bool valid{};
 
         m_path.push_back(m_state.curPos());
         Path arcPolygon;
@@ -799,7 +799,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
                 arcPolygon.push_back(m_state.curPos());
         } break;
         case Single: // G74
-            for(int c = 0; c < 4; ++c) {
+            for(int c{}; c < 4; ++c) {
                 const double radius1 = sqrt(static_cast<double>(i) * static_cast<double>(i) + static_cast<double>(j) * static_cast<double>(j));
                 const double radius2 = sqrt(pow(centerPos[c].X - x, 2.0) + pow(centerPos[c].Y - y, 2.0));
                 // Убеждаемся, что радиус начала совпадает с радиусом конца.

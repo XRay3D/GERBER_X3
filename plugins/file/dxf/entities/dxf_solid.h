@@ -68,8 +68,8 @@ public:
 
     int corners = NoCorner;
 
-    double thickness = 0;
-    double radius = 0;
+    double thickness{};
+    double radius{};
 };
 
 } // namespace Dxf

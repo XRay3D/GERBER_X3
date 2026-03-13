@@ -438,7 +438,7 @@ void GraphicsView::GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item) {
 
     if(item->type() == Gi::Type::DataSolid) {
         Gi::DataFill* ditem = dynamic_cast<Gi::DataFill*>(item);
-        double distance = 0;
+        double distance{};
         center = item->boundingRect().center();
 
         for(const auto& paths: ditem->getPaths()) {

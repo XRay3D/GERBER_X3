@@ -283,7 +283,7 @@ void Creator::addAcc(Paths& src, const /*PType*/ int32_t accDistance) {
                 paths.front().front()
             });
         }
-        for(size_t j = 0; j < paths.size(); ++j) {
+        for(size_t j{}; j < paths.size(); ++j) {
             if(j) // acc
                 pPath.emplace_back(Path{paths[j - 1].back(), paths[j].front()});
             pPath.push_back(paths[j]);
@@ -294,7 +294,7 @@ void Creator::addAcc(Paths& src, const /*PType*/ int32_t accDistance) {
         /*PType*/ int32_t yLast = src.front().front().y;
         Paths paths;
 
-        for(size_t i = 0; i < src.size(); ++i) {
+        for(size_t i{}; i < src.size(); ++i) {
 
             if(yLast != src[i].front().y) {
                 adder(paths);
@@ -467,8 +467,8 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
 
 void File::genGcodeAndTile() {
     const QRectF rect = App::project().worckRect();
-    for(size_t x = 0; x < App::project().stepsX(); ++x) {
-        for(size_t y = 0; y < App::project().stepsY(); ++y) {
+    for(size_t x{}; x < App::project().stepsX(); ++x) {
+        for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
             if(toolType() == Tool::Laser)
                 saveLaserProfile(offset);

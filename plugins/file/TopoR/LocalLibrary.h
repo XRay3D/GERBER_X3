@@ -518,7 +518,7 @@ public:
             /// </summary>
         public:
             // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
-            int _padNum = 0;
+            int _padNum{};
 
             /// <summary>
             /// Имя объекта или ссылка на именованный объект.
@@ -647,7 +647,7 @@ public:
             /// </summary>
         public:
             // ORIGINAL LINE: [XmlAttribute(u"pinNum"_s, DataType = u"int"_s)] public int _pinNum;
-            int _pinNum = 0;
+            int _pinNum{};
 
             /// <summary>
             /// Имя объекта или ссылка на именованный объект.
@@ -668,21 +668,21 @@ public:
             /// </summary>
 
             // ORIGINAL LINE: [XmlAttribute(u"pinEqual"_s, DataType = u"int"_s)] public int _pinEqual;
-            int _pinEqual = 0;
+            int _pinEqual{};
 
             /// <summary>
             /// Параметр контакта (вывода) компонента: номер вентиля контакта.
             /// </summary>
 
             // ORIGINAL LINE: [XmlAttribute(u"gate"_s, DataType = u"int"_s)] public int _gate;
-            int _gate = 0;
+            int _gate{};
 
             /// <summary>
             /// Параметр контакта (вывода) компонента: эквивалентность вентиля контакта.
             /// </summary>
 
             // ORIGINAL LINE: [XmlAttribute(u"gateEqual"_s, DataType = u"int"_s)] public int _gateEqual;
-            int _gateEqual = 0;
+            int _gateEqual{};
         };
 
         /// <summary>
@@ -745,14 +745,14 @@ public:
             /// </summary>
         public:
             // ORIGINAL LINE: [XmlAttribute(u"pinNum"_s, DataType = u"int"_s)] public int _pinNum;
-            int _pinNum = 0;
+            int _pinNum{};
 
             /// <summary>
             /// Номер контактной площадки (вывода) посадочного места.
             /// </summary>
 
             // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
-            int _padNum = 0;
+            int _padNum{};
 
             /// <summary>
             /// Параметр правил выравнивания задержек: тип значений констант и допусков.

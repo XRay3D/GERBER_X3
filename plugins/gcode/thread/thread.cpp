@@ -97,8 +97,8 @@ File::File(GCode::Params&& gcp, Pathss&& toolPathss)
 
 void File::genGcodeAndTile() {
     //    const QRectF rect = App::project().worckRect();
-    //    for (size_t x = 0; x < App::project().stepsX(); ++x) {
-    //        for (size_t y = 0; y < App::project().stepsY(); ++y) {
+    //    for (size_t x{}; x < App::project().stepsX(); ++x) {
+    //        for (size_t y{}; y < App::project().stepsY(); ++y) {
     //            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
     //            if (toolType() == Tool::Laser)
@@ -126,7 +126,7 @@ void File::createGi() {
         item = new Gi::GcPath{toolPathss_[i], this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
-        for(size_t j = 0; j < paths.size() - 1; ++j)
+        for(size_t j{}; j < paths.size() - 1; ++j)
             g0path_.push_back({paths[j].back(), paths[j + 1].front()});
         if(i < toolPathss_.size() - 1)
             g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});

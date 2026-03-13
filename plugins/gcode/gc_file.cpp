@@ -150,7 +150,7 @@ void File::endFile() {
         lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
         lines_.emplace_back(App::gcSettings().end());
     }
-    for(size_t i = 0; i < lines_.size(); ++i) // remove epty lines
+    for(size_t i{}; i < lines_.size(); ++i) // remove epty lines
         if(lines_[i].isEmpty())
             lines_.erase(lines_.begin() + i--);
 }
@@ -175,7 +175,7 @@ void File::initSave() {
         fl = false;
 
     const QString format(gcp_.getTool().type() == Tool::Laser ? App::gcSettings().formatLaser() : App::gcSettings().formatMilling());
-    for(size_t i = 0; i < cmdList.size(); ++i) {
+    for(size_t i{}; i < cmdList.size(); ++i) {
         const int index = format.indexOf(cmdList[i], 0, Qt::CaseInsensitive);
         if(index != -1) {
             formatFlags[i + AlwaysG] = format[index + 1] == u'+';
@@ -276,7 +276,7 @@ mvector<double> File::getDepths() {
     const int count = static_cast<int>(ceil(gDepth / gcp_.getTool().passDepth()));
     const double depth = gDepth / count;
     mvector<double> depths(count);
-    for(int i = 0; i < count; ++i)
+    for(int i{}; i < count; ++i)
         depths[i] = (i + 1) * -depth;
     depths.back() = -gDepth - gcp_.getTool().depth();
     return depths;
@@ -393,7 +393,7 @@ void File::saveDrill(const QPointF& offset) {
 
     for(QPointF& point: path) {
         startPath(point);
-        size_t i = 0;
+        size_t i{};
         while(true) {
             lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
             if(++i == depths.size())
@@ -417,7 +417,7 @@ void File::saveMillingPocket(const QPointF& offset) {
 
     for(QList<QPolygonF>& paths: toolPathss) {
         startPath(paths.front().front());
-        for(size_t i = 0; i < depths.size(); ++i) {
+        for(size_t i{}; i < depths.size(); ++i) {
             lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
             bool skip = true;
             for(auto& path: paths) {
@@ -503,7 +503,7 @@ void File::saveMillingRaster(const QPointF& offset) {
     const mvector<double> depths(getDepths());
 
     for(auto& paths: pathss) {
-        for(size_t i = 0; i < depths.size(); ++i) {
+        for(size_t i{}; i < depths.size(); ++i) {
             for(auto& path: paths) {
                 startPath(path.front());
                 lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
@@ -520,7 +520,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
 
     mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
 
-    int i = 0;
+    int i{};
 
     lines_.emplace_back(formated({g0(), x(pathss.front().front().front().x()), y(pathss.front().front().front().y()), z(0.0)}));
 
@@ -573,7 +573,7 @@ void File::createGiPocket() {
         itemGroup()->push_back(item);
     }
     g0path_.reserve(toolPathss_.size());
-    size_t i = 0;
+    size_t i{};
     for(const Paths& paths: toolPathss_) {
         int k = static_cast<int>((toolPathss_.size() > 1) ? (300.0 / (toolPathss_.size() - 1)) * i : 0);
         debugColor.emplace_back(QSharedPointer<QColor>(new QColor{QColor::fromHsv(k, 255, 255, 255)}));
@@ -586,7 +586,7 @@ void File::createGiPocket() {
 
         {
             Paths g1path;
-            for(size_t j = 0; j < paths.size() - 1; ++j)
+            for(size_t j{}; j < paths.size() - 1; ++j)
                 g1path.push_back({paths[j].back(), paths[j + 1].front()});
             item = new Gi::GcPath{g1path};
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
@@ -609,12 +609,12 @@ void File::createGiProfile() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
-    size_t i = 0;
+    size_t i{};
     for(const Paths& paths: toolPathss_) {
         item = new Gi::GcPath{toolPathss_[i], this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
-        for(size_t j = 0; j < paths.size() - 1; ++j)
+        for(size_t j{}; j < paths.size() - 1; ++j)
             g0path_.push_back({paths[j].back(), paths[j + 1].front()});
         if(i < toolPathss_.size() - 1)
             g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
@@ -649,7 +649,7 @@ void File::createGiRaster() {
             itemGroup()->push_back(item);
         }
     }
-    size_t i = 0;
+    size_t i{};
 
     //    for (int i {}; auto& path : v::join(toolPathss_)) { }
 
@@ -657,7 +657,7 @@ void File::createGiRaster() {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
-        for(size_t j = 0; j < paths.size() - 1; ++j)
+        for(size_t j{}; j < paths.size() - 1; ++j)
             g0path_.push_back({paths[j].back(), paths[j + 1].front()});
         if(i < toolPathss_.size() - 1)
             g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
@@ -672,7 +672,7 @@ void File::createGiLaser() {
     Paths paths;
     paths.reserve(toolPathss_.front().size() / 2 + 1);
     g0path_.reserve(paths.size());
-    for(size_t i = 0; i < toolPathss_.front().size(); ++i)
+    for(size_t i{}; i < toolPathss_.front().size(); ++i)
         if(i % 2)
             paths.push_back(toolPathss_.front()[i]);
         else
@@ -680,7 +680,7 @@ void File::createGiLaser() {
     if(toolPathss_.size() > 1) {
         paths.insert(paths.end(), toolPathss_[1].begin(), toolPathss_[1].end());
         g0path_.push_back({toolPathss_[0].back().back(), toolPathss_[1].front().front()});
-        for(size_t i = 0; i < toolPathss_[1].size() - 1; ++i)
+        for(size_t i{}; i < toolPathss_[1].size() - 1; ++i)
             g0path_.push_back({toolPathss_[1][i].back(), toolPathss_[1][i + 1].front()});
     }
 

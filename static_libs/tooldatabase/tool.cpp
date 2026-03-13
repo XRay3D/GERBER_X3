@@ -317,7 +317,7 @@ void ToolHolder::readTools() {
 
 void ToolHolder::readTools(const QJsonObject& json) {
     QJsonArray toolArray = json[u"tools"_s].toArray();
-    for(int treeIndex = 0; treeIndex < toolArray.size(); ++treeIndex) {
+    for(int treeIndex{}; treeIndex < toolArray.size(); ++treeIndex) {
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);

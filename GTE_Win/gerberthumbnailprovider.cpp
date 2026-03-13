@@ -42,7 +42,7 @@ GerberThumbnailProvider::~GerberThumbnailProvider() {
 
 // Query to the interface the component supported.
 IFACEMETHODIMP GerberThumbnailProvider::QueryInterface(REFIID riid, void** ppv) {
-    static const QITAB qit[] = {
+    static const QITAB qit[]{
         QITABENT(GerberThumbnailProvider, IThumbnailProvider),
         QITABENT(GerberThumbnailProvider, IInitializeWithStream),
         {nullptr, 0}
@@ -157,7 +157,7 @@ IFACEMETHODIMP GerberThumbnailProvider::GetThumbnail(
         //         if (gerberFile.hole.size()) {
         //             painter.setBrush(QColor(255, 0, 0, 100));
         //             painterPath = QPainterPath();
-        //             for (int i = 0; i < gerberFile.hole.size(); ++i) {
+        //             for (int i{}; i < gerberFile.hole.size(); ++i) {
         //                 painterPath.addPolygon(gerberFile.hole[i]);
         //             }
         //             painter.drawPath(painterPath);

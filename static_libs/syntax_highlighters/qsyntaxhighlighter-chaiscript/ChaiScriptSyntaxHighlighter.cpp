@@ -146,7 +146,7 @@ bool ChaiScriptSyntaxHighlighter::matchMultiline(const QString& text, const QReg
     int start = -1;
     int add = -1;
     int end = -1;
-    int length = 0;
+    int length{};
 
     // If inside triple-single quotes, start at 0
     if(previousBlockState() == inState) {

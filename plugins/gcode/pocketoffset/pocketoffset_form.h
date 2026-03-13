@@ -35,7 +35,7 @@ private slots:
 private:
     Ui::PocketOffsetForm* ui;
 
-    int direction = 0;
+    int direction{};
     void updatePixmap();
     void rb_clicked();
     const QStringList names;

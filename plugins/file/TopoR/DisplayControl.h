@@ -94,14 +94,14 @@ public:
         /// </summary>
 
         // ORIGINAL LINE: [XmlAttribute(u"hilightRate"_s, DataType = u"int"_s)] public int _hilightRate;
-        int _hilightRate = 0;
+        int _hilightRate{};
 
         /// <summary>
         /// Настройка отображения: степень затемнения невыделенных объектов.
         /// </summary>
 
         // ORIGINAL LINE: [XmlAttribute(u"darkRate"_s, DataType = u"int"_s)] public int _darkRate;
-        int _darkRate = 0;
+        int _darkRate{};
 
         /// <summary>
         /// Настройка отображения: цвет фона.

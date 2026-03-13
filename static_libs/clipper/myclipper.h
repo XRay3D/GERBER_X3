@@ -34,7 +34,7 @@ struct PointF : QPointF {
     using QPointF::QPointF;
     PointF(QPointF pt)
         : QPointF{pt} { }
-    PointF& operator=(QPointF pt) { return *this = pt; }
+    PointF& operator=(QPointF pt) { return static_cast<QPointF&>(*this) = pt, *this; }
     void Rotate(double cosa, double sina) { // rotate vector by angle
         double temp = -y() * sina + x() * cosa;
         ry() = x() * sina + cosa * y();
@@ -258,13 +258,13 @@ struct Caster {
     operator To() const { return static_cast<const To>(val); }
 };
 
-#define TRANSFORM(FROM, TO)                                                    \
-    inline TO operator~(const FROM& val) {                                     \
+#define TRANSFORM(FROM, TO)                                           \
+    inline TO operator~(const FROM& val) {                            \
         auto it = v::transform(val, [](auto&& val) { return ~val; }); \
-        TO ret;                                                                \
-        ret.reserve(Caster{val.size()});                                       \
-        r::move(it, std::back_inserter(ret));                        \
-        return ret;                                                            \
+        TO ret;                                                       \
+        ret.reserve(Caster{val.size()});                              \
+        r::move(it, std::back_inserter(ret));                         \
+        return ret;                                                   \
     }
 
 TRANSFORM(QPolygonF, Path)
@@ -345,7 +345,7 @@ inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
     if(cnt < 2)
         return false;
     QPointF p;
-    for(size_t i = 0; i < cnt; ++i) {
+    for(size_t i{}; i < cnt; ++i) {
         const Point& pt1 = path[(i + 1) % cnt];
         const Point& pt2 = path[i];
         QLineF l1(~pt1, ~pt2);

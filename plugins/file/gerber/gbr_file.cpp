@@ -110,7 +110,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
 Paths File::merge() const {
     Timer t;
     mergedPaths_.clear();
-    size_t i = 0;
+    size_t i{};
 
 #if 0 // FIXME fill closed line
     std::list<Paths> pathList;
@@ -209,13 +209,13 @@ void File::grouping(PolyTree& node, Pathss* pathss) {
         if(!node.IsHole()) {
             path = node.Polygon();
             paths.push_back(path);
-            for(size_t i = 0; i < node.Count(); ++i) {
+            for(size_t i{}; i < node.Count(); ++i) {
                 path = node[i]->Polygon();
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for(size_t i = 0; i < node.Count(); ++i)
+        for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], pathss);
 
         break;
@@ -223,13 +223,13 @@ void File::grouping(PolyTree& node, Pathss* pathss) {
         if(node.IsHole()) {
             path = node.Polygon();
             paths.push_back(path);
-            for(size_t i = 0; i < node.Count(); ++i) {
+            for(size_t i{}; i < node.Count(); ++i) {
                 path = node[i]->Polygon();
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for(size_t i = 0; i < node.Count(); ++i)
+        for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], pathss);
 
         break;
@@ -273,7 +273,7 @@ void File::setColor(const QColor& color) {
 
 mvector<const ::GraphicObject*> File::graphicObjects() const {
     mvector<const ::GraphicObject*> go(graphicObjects_.size());
-    size_t i = 0;
+    size_t i{};
     for(auto& refGo: graphicObjects_)
         go[i++] = &refGo;
     return go;
@@ -358,7 +358,7 @@ void File::createGi() {
         auto contains = [&](const Path& path) -> bool {
             constexpr double k = 0.001 * uScale;
             for(const Path& chPath: checkList) { // find copy
-                size_t counter = 0;
+                size_t counter{};
                 if(chPath.size() == path.size()) {
                     for(const Point& p1: chPath) {
                         for(const Point& p2: path) {
@@ -401,7 +401,7 @@ void File::createGi() {
         itemGroups_[ApPaths]->shrink_to_fit();
     }
 
-    bool zeroLine = false;
+    bool zeroLine{};
     for(auto& [dCode, ap]: apertures_)
         if(zeroLine = (qFuzzyIsNull(ap->minSize()) && ap->used()); zeroLine)
             break;

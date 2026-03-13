@@ -24,7 +24,7 @@ int Component::value1(const QString& key) { return staticMetaObject.enumerator(1
 int Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toUtf8().mid(1).data()); }
 
 bool Component::setData(int key, const QStringList& data) {
-    bool fl = false;
+    bool fl{};
     switch(key) {
     case Component::Rot:
         rotation_ = data.last().toDouble(&fl);

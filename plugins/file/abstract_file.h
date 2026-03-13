@@ -182,7 +182,7 @@ protected:
     int32_t id_ = -1;
     int itemsType_ = -1;
     mutable Paths mergedPaths_;
-    mutable bool visible_ = false;
+    mutable bool visible_{};
     mvector<Gi::Group*> itemGroups_;
     mvector<QString> lines_;
     //    QTransform transform_;

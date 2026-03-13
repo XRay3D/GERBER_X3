@@ -47,7 +47,7 @@ public:
     QString string() const;
 
     template <class>
-    inline static constexpr bool always_false_v = false;
+    inline static constexpr bool always_false_v{};
 
     template <typename T>
     inline operator T() const {

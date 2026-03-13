@@ -111,7 +111,7 @@ USAGE:
         // If you want to draw triangles, or relax the diagram,
         // you can iterate over the sites and get all edges easily
         const jcv_site* sites = jcv_diagraget_sites_( diagram );
-        for( int i = 0; i < diagram->numsites; ++i )
+        for( int i{}; i < diagram->numsites; ++i )
         {
             const jcv_site* site = &sites[i];
 
@@ -128,7 +128,7 @@ USAGE:
     void relax_points(const jcv_diagram* diagram, jcv_point* points)
     {
         const jcv_site* sites = jcv_diagraget_sites_(diagram);
-        for( int i = 0; i < diagram->numsites; ++i )
+        for( int i{}; i < diagram->numsites; ++i )
         {
             const jcv_site* site = &sites[i];
             jcv_point sum = site->p;
@@ -364,7 +364,7 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 // struct _jcv_point {
 //     jcv_real x;
 //     jcv_real y;
-//      int32_t id = 0;
+//      int32_t id{};
 // };
 
 // struct _jcv_graphedge {
@@ -509,7 +509,7 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 //         // If you want to draw triangles, or relax the diagram,
 //         // you can iterate over the sites and get all edges easily
 //         const jcv_site* sites = jcv_diagraget_sites_( diagram );
-//         for( int i = 0; i < diagram->numsites; ++i )
+//         for( int i{}; i < diagram->numsites; ++i )
 //         {
 //             const jcv_site* site = &sites[i];
 //             const jcv_graphedge* e = site->edges;
@@ -524,7 +524,7 @@ extern const jcv_edge* jcv_diagraget_next_edge_(const jcv_edge* edge);
 //     void relax_points(const jcv_diagram* diagram, jcv_point* points)
 //     {
 //         const jcv_site* sites = jcv_diagraget_sites_(diagram);
-//         for( int i = 0; i < diagram->numsites; ++i )
+//         for( int i{}; i < diagram->numsites; ++i )
 //         {
 //             const jcv_site* site = &sites[i];
 //             jcv_point sum = site->p;

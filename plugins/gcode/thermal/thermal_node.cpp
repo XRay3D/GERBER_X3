@@ -64,7 +64,7 @@ void Node::remove(int row) { childs.remove(row); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     if(role == Qt::CheckStateRole && !index.column()) {
-        static bool updateGuard = false;
+        static bool updateGuard{};
         checked_ = (value.value<Qt::CheckState>() == Qt::Checked);
         if(container) {
             auto childItems(this->childs);
@@ -164,7 +164,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         if(container) {
             if(childs.empty())
                 return checked_ ? Qt::Checked : Qt::Unchecked;
-            int val = 0;
+            int val{};
             for(const auto& node: childs)
                 val |= node->checked_ ? 2 : 1;
             return chState[val];

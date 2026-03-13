@@ -73,26 +73,26 @@ void File::grouping(PolyNode* node, Pathss* pathss, File::Group group) {
         if(!node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for(size_t i = 0; i < node->ChildCount(); ++i) {
+            for(size_t i{}; i < node->ChildCount(); ++i) {
                 path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for(size_t i = 0; i < node->ChildCount(); ++i)
+        for(size_t i{}; i < node->ChildCount(); ++i)
             grouping(node->Childs[i], pathss, group);
         break;
     case CopperGroup:
         if(node->IsHole()) {
             path = node->Contour;
             paths.push_back(path);
-            for(size_t i = 0; i < node->ChildCount(); ++i) {
+            for(size_t i{}; i < node->ChildCount(); ++i) {
                 path = node->Childs[i]->Contour;
                 paths.push_back(path);
             }
             pathss->push_back(paths);
         }
-        for(size_t i = 0; i < node->ChildCount(); ++i)
+        for(size_t i{}; i < node->ChildCount(); ++i)
             grouping(node->Childs[i], pathss, group);
         break;
     }
@@ -114,7 +114,7 @@ void File::createGi() {
     //    ItemGroup* igPath = new ItemGroup;
     //    itemGroups_.push_back(igPath);
 
-    //    int i = 0;
+    //    int i{};
 
     //    for (auto& [name, layer] : m_layers) {
     //        if (layer->m_graphicObjects.size()) {

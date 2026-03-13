@@ -38,10 +38,10 @@
 //    static void setLastDir(QString dirPath);
 
 // private:
-//     double feedRate_ = 0.0;
-//     double plungeRate_ = 0.0;
-//     int spindleSpeed_ = 0;
-//     int toolType_ = 0;
+//     double feedRate_{};
+//     double plungeRate_{};
+//     int spindleSpeed_{};
+//     int toolType_{};
 
 // protected:
 //     /*const*/ Params gcp_; ////

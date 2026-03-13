@@ -80,52 +80,52 @@ bool Constructive::ShouldSerialize_Keepouts() {
 void Constructive::Shift(float x, float y) {
     if(_BoardOutline != nullptr) {
         if(_BoardOutline == nullptr ? false : _BoardOutline->_Contours.size() > 0)
-            for(int i = 0; i < _BoardOutline->_Contours.size(); i++)
+            for(int i{}; i < _BoardOutline->_Contours.size(); i++)
                 _BoardOutline->_Contours[i]->Shift(x, y);
         if(_BoardOutline == nullptr ? false : _BoardOutline->_Voids.size() > 0)
-            for(int i = 0; i < _BoardOutline->_Voids.size(); i++)
+            for(int i{}; i < _BoardOutline->_Voids.size(); i++)
                 _BoardOutline->_Voids[i]->Shift(x, y);
     }
 
     if(_Mntholes.empty() ? false : _Mntholes.size() > 0)
-        for(int i = 0; i < _Mntholes.size(); i++)
+        for(int i{}; i < _Mntholes.size(); i++)
             _Mntholes[i]->Shift(x, y);
 
     if(_MechLayerObjects.empty() ? false : _MechLayerObjects.size() > 0)
-        for(int i = 0; i < _MechLayerObjects.size(); i++)
+        for(int i{}; i < _MechLayerObjects.size(); i++)
             _MechLayerObjects[i]->Shift(x, y);
 
     if(_Texts.empty() ? false : _Texts.size() > 0)
-        for(int i = 0; i < _Texts.size(); i++)
+        for(int i{}; i < _Texts.size(); i++)
             _Texts[i]->Shift(x, y);
 
     if(_Keepouts.empty() ? false : _Keepouts.size() > 0)
-        for(int i = 0; i < _Keepouts.size(); i++)
+        for(int i{}; i < _Keepouts.size(); i++)
             _Keepouts[i]->Shift(x, y);
 }
 
 void Constructive::UnitsConvert(dist_ in_units, dist_ out_units) {
     if(_BoardOutline == nullptr ? false : (_BoardOutline->_Contours.empty() ? false : _BoardOutline->_Contours.size()) > 0)
-        for(int i = 0; i < _BoardOutline->_Contours.size(); i++)
+        for(int i{}; i < _BoardOutline->_Contours.size(); i++)
             _BoardOutline->_Contours[i]->UnitsConvert(in_units, out_units);
     if(_BoardOutline == nullptr ? false : (_BoardOutline->_Voids.empty() ? false : _BoardOutline->_Voids.size()) > 0)
-        for(int i = 0; i < _BoardOutline->_Voids.size(); i++)
+        for(int i{}; i < _BoardOutline->_Voids.size(); i++)
             _BoardOutline->_Voids[i]->UnitsConvert(in_units, out_units);
 
     if(_Mntholes.empty() ? false : _Mntholes.size() > 0)
-        for(int i = 0; i < _Mntholes.size(); i++)
+        for(int i{}; i < _Mntholes.size(); i++)
             _Mntholes[i]->UnitsConvert(in_units, out_units);
 
     if(_MechLayerObjects.empty() ? false : _MechLayerObjects.size() > 0)
-        for(int i = 0; i < _MechLayerObjects.size(); i++)
+        for(int i{}; i < _MechLayerObjects.size(); i++)
             _MechLayerObjects[i]->UnitsConvert(in_units, out_units);
 
     if(_Texts.empty() ? false : _Texts.size() > 0)
-        for(int i = 0; i < _Texts.size(); i++)
+        for(int i{}; i < _Texts.size(); i++)
             _Texts[i]->UnitsConvert(in_units, out_units);
 
     if(_Keepouts.empty() ? false : _Keepouts.size() > 0)
-        for(int i = 0; i < _Keepouts.size(); i++)
+        for(int i{}; i < _Keepouts.size(); i++)
             _Keepouts[i]->UnitsConvert(in_units, out_units);
 }
 
