@@ -23,6 +23,22 @@
 
 namespace Gerber {
 
+template <typename T>
+struct EnumToStr {
+    T e;
+    template <auto>
+    static constexpr std::string_view name() {
+        return {__PRETTY_FUNCTION__};
+    }
+
+    static constexpr auto text = []<T... Ts> {
+        return std::array{name<Ts>()...};
+    }(std::integer_sequence<T, T{100}>{});
+    constexpr operator std::string_view() const {
+        return std::to_underlying(e) < text.size() ? text[std::to_underlying(e)] : std::string_view{};
+    }
+};
+
 QDebug operator<<(QDebug debug, const State& state) {
     QDebugStateSaver saver(debug);
     debug.nospace() << u"State("_s
@@ -46,9 +62,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
-        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
+        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
+        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
     };
 }
 

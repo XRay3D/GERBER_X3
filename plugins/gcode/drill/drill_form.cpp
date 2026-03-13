@@ -42,9 +42,9 @@ namespace Drilling {
 
 Paths offset(const Path& path, double offset, bool fl = false) {
     // ClipperOffset cpOffset;
-    // cpOffset.AddPath(path, JT::Round, fl ? ET::Round : ET::Round);
+    // cpOffset.AddPath(path, JoinType::Round, fl ? EndType::Round : EndType::Round);
     // Paths tmpPpaths = cpOffset.Execute(offset * uScale);
-    Paths tmpPpaths = Inflate({path}, offset * uScale, JT::Round, fl ? ET::Round : ET::Round);
+    Paths tmpPpaths = Inflate({path}, offset * uScale, JoinType::Round, fl ? EndType::Round : EndType::Round);
     for(Path& tmpPath: tmpPpaths)
         tmpPath.push_back(tmpPath.front());
     return tmpPpaths;

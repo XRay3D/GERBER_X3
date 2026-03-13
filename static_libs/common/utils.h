@@ -278,13 +278,13 @@ struct String {
 
     constexpr String(char16_t const (&str)[Size]) {
         N = Size;
-        std::ranges::copy(str, data);
+        r::copy(str, data);
     };
 
     constexpr String(char const (&str)[Size]) {
         auto utf8{utf8toUtf16(str)};
         N = utf8.size();
-        std::ranges::copy(utf8, data);
+        r::copy(utf8, data);
     };
 
     constexpr auto staticData() const { return staticData(std::make_index_sequence<Size>{}); };
@@ -351,7 +351,7 @@ consteval auto toNum(sv str) {
     return str.starts_with('-') ? -val : val;
 };
 consteval size_t enumSize(sv enums) {
-    return std::ranges::count(enums, ',') + !enums.ends_with(',');
+    return r::count(enums, ',') + !enums.ends_with(',');
 }
 template <size_t N, class E>
 consteval auto tokenize(sv base) {
@@ -359,8 +359,8 @@ consteval auto tokenize(sv base) {
     std::array<std::pair<sv, E>, N> tokens;
     std::underlying_type_t<E> val{};
     sv name;
-    for(auto&& word: std::ranges::views::split(base, u", "_ssv)) {
-        for(int i{}; auto&& tok: std::ranges::views::split(word, uu "="_ssv)) {
+    for(auto&& word: r::views::split(base, u", "_ssv)) {
+        for(int i{}; auto&& tok: r::views::split(word, uu "="_ssv)) {
             sv token{tok.begin(), tok.end()};
             if(i++ == 0)
                 name = trim(token);
@@ -395,7 +395,7 @@ inline std::string arr;                          //[100] {};
 template <class E>
     requires isEnum<E>
 constexpr Impl::sv enumToString(E e) {
-    auto it = std::ranges::find(Impl::Tokens<E>, e, &std::pair<Impl::sv, E>::second);
+    auto it = r::find(Impl::Tokens<E>, e, &std::pair<Impl::sv, E>::second);
     if(it != Impl::Tokens<E>.end())
         return it->first;
     if constexpr(isBitField<E>) {
@@ -416,7 +416,7 @@ constexpr Impl::sv enumToString(E e) {
 template <class E>
     requires isEnum<E>
 constexpr E stringToEnum(Impl::sv str) {
-    auto it = std::ranges::find(Impl::Tokens<E>, str, &std::pair<Impl::sv, E>::first);
+    auto it = r::find(Impl::Tokens<E>, str, &std::pair<Impl::sv, E>::first);
     return it == Impl::Tokens<E>.end() ? static_cast<E>(
                                              std::numeric_limits<std::underlying_type_t<E>>::min())
                                        : it->second;

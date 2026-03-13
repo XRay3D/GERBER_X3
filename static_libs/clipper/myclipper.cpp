@@ -14,20 +14,121 @@
 
 #include "app.h"
 #include "cancelation.h"
+#include "gi_dbg.h"
 #include "graphicsview.h"
 
 #include "qmath.h"
 #include <QElapsedTimer>
 #include <QGraphicsScene>
 #include <QLineF>
-#include <boost/range/combine.hpp>
-#include <qglobal.h>
-#include <set>
-
 #include <QPainter>
 #include <QPainterPath>
 #include <QPixmap>
+#include <boost/range/combine.hpp>
 #include <forward_list>
+#include <qglobal.h>
+#include <set>
+
+Curve& TransformCurve(Curve& curve, const QTransform& tr) {
+    qInfo() << tr;
+
+    if(tr.isIdentity()) return curve;
+
+    for(auto& v: curve) {
+        if(v.type) v.center = tr.map(v.center);
+        v.pt = tr.map(v.pt);
+    }
+
+    if((tr.m11() < .0) ^ (tr.m22() < .0))
+        for(auto&& v: curve) v.type = Vertex::Type{-v.type};
+
+    return curve;
+}
+
+Curves& ReverseCurves(Curves& curves) {
+    // r::for_each(curves, &Curve::Reverse);
+    return curves;
+}
+
+Curve& TranslateCurve(Curve& curve, const QPointF& pos) {
+    if(!pos.isNull())
+        for(auto& pt: curve) {
+            pt.center += pos;
+            pt.pt += pos;
+        }
+    return curve;
+}
+
+void RotateCurve(Curve& curve, double angle, const PointF& center) {
+    // const bool fl = curve.GetArea() < 0;
+
+    auto rot = [center, angle](PointF& pt) {
+        pt.Rotate(qDegreesToRadians(angle));
+        pt += center;
+    };
+
+    for(auto&& pt: curve) {
+        if(pt.type) (rot(pt.center));
+        rot(pt.pt);
+    }
+
+    // if(fl != (curve.GetArea() < 0))
+    //     curve.Reverse();
+}
+
+QPainterPath toPPath(Curve curve, std::optional<QTransform> tr) {
+    if(curve.size() < 2) return {};
+
+    if(tr) TransformCurve(curve, *tr);
+
+    QPointF source = curve.front().pt;
+
+    QPainterPath pPath;
+    pPath.moveTo(source.x(), source.y());
+
+    for(auto&& v: curve | v::drop(1)) {
+        if(!v.type) {
+            pPath.lineTo(v.pt.x(), v.pt.y());
+            source = v.pt;
+            continue;
+        }
+
+        const QPointF target = v.pt;
+
+        QLineF ls{v.center, source};
+        const double r = ls.length();
+        const double asource = ls.angle();
+        const double atarget = ls.angleTo(QLineF{v.center, target});
+
+        double span = atarget;
+        // if(curve.size() == 3)
+        //     qCritical() << asource
+        //                 << atarget
+        //                 << span;
+
+        QRectF rect{
+            v.center.x() - r,
+            v.center.y() - r,
+            r * 2,
+            r * 2,
+        };
+
+        if(v.type == Vertex::Ccw) span = span - 360.;
+
+        pPath.arcTo(rect, asource, span);
+
+        source = v.pt;
+    }
+    return pPath;
+}
+
+QPainterPath toPPath(const Curves& curves) {
+    if(curves.empty()) return {};
+    QPainterPath pPath(toPPath(curves.front()));
+    for(const auto& curve: curves | v::drop(1))
+        pPath.addPath(toPPath(curve));
+    return pPath;
+}
 
 // export module myclipper;
 
@@ -133,6 +234,8 @@ double Angle(double a, double b, double c) {
 // их можно перевести в градусы, умножив на (180/pi). 3
 
 void TestPaths(const Paths& paths_) {
+    new Gi::Debug{paths_};
+
     return;
     Paths paths = paths_;
     std::set<QPointF> set;
@@ -153,7 +256,7 @@ void TestPaths(const Paths& paths_) {
 
         if(abs(a - b) < 1e-3) {
             qWarning() << u"same side"_s << a << b << abs(a - b);
-            SetZf(*it, center);
+            SetZForce(*it, center);
             return true;
         }
         return false;
@@ -207,7 +310,7 @@ void TestPaths(const Paths& paths_) {
 
         double radius{};
 
-        size_t count = ranges::count_if(path,
+        size_t count = r::count_if(path,
             [prevR = 0.0, center = GetZ(path.front()), &radius](const Point& pt) mutable {
                 const double r = QLineF{~center, ~pt}.length();
                 radius += r;
@@ -316,29 +419,27 @@ QDataStream& operator>>(QDataStream& stream, Point& pt) {
 }
 
 Point GetZ(const Point& dst) {
-    int32_t array[2];
-    memcpy(&array, &dst.z, 8);
+    auto array = std::bit_cast<std::array<int32_t, 2>>(dst.z);
     return {array[0], array[1]};
 }
 
-void SetZs(Point& dst) { SetZ(dst, dst); }
+void SetZSelf(Point& dst) { SetZ(dst, dst); }
 
-void SetZf(Point& dst, const Point& center) {
-    constexpr auto limInt32 = std::numeric_limits<int32_t>{};
-    assert(limInt32.min() < center.x && center.x < limInt32.max());
-    assert(limInt32.min() < center.y && center.y < limInt32.max());
-    const int32_t array[]{static_cast<int32_t>(center.x), static_cast<int32_t>(center.y)};
-    memcpy(&dst.z, array, 8);
+constexpr std::numeric_limits<int32_t> LimitI32;
+
+#define ASSERT_LIMIT_I32(VAL) assert(LimitI32.min() < VAL && VAL < LimitI32.max());
+
+void SetZForce(Point& dst, const Point& center) {
+    ASSERT_LIMIT_I32(center.x);
+    ASSERT_LIMIT_I32(center.y);
+    dst.z = std::bit_cast<int64_t>(std::array{
+        static_cast<int32_t>(center.x),
+        static_cast<int32_t>(center.y),
+    });
 }
 
 void SetZ(Point& dst, const Point& center) {
-    if(!/*~*/ dst.z) {
-        constexpr auto limInt32 = std::numeric_limits<int32_t>{};
-        assert(limInt32.min() < center.x && center.x < limInt32.max());
-        assert(limInt32.min() < center.y && center.y < limInt32.max());
-        const int32_t array[]{static_cast<int32_t>(center.x), static_cast<int32_t>(center.y)};
-        memcpy(&dst.z, array, 8);
-    }
+    if(dst.z == 0) SetZForce(dst, center);
 }
 
 Path CirclePath(double diametr, const Point& center) {
@@ -354,7 +455,7 @@ Path CirclePath(double diametr, const Point& center) {
             + center;
         ++i;
     };
-    std::ranges::for_each(polygon, std::bind(&SetZ, _1, center));
+    r::for_each(polygon, std::bind(&SetZ, _1, center));
     return polygon;
 }
 
@@ -368,7 +469,7 @@ Path RectanglePath(double width, double height, const Point& center) {
         {+halfWidth + center.x, +halfHeight + center.y},
         // {-halfWidth + center.x, +halfHeight + center.y},
     };
-    std::ranges::for_each(polygon, &SetZs);
+    r::for_each(polygon, &SetZSelf);
     // if(Area(polygon) < 0.0) ReversePath(polygon);
     return polygon;
 }
@@ -389,15 +490,15 @@ void RotatePath(Path& polygon, double angle, const Point& center) {
 Path& TranslatePath(Path& path, const Point& pos) {
     if(pos.x || pos.y)
         for(auto& pt: path) {
+            SetZForce(pt, GetZ(pt) + pos);
             pt.x += pos.x;
             pt.y += pos.y;
-            SetZf(pt, GetZ(pt) + pos);
         }
     return path;
 }
 
 Paths& TranslatePaths(Paths& paths, const Point& pos) {
-    std::ranges::for_each(paths, std::bind(&TranslatePath, _1, pos));
+    r::for_each(paths, std::bind(&TranslatePath, _1, pos));
     return paths;
 }
 
@@ -886,7 +987,7 @@ Pathss stacking(Paths& paths) {
     for(Paths& retPaths: returnPss) {
         for(size_t i{}; i < retPaths.size(); ++i)
             if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
-        std::ranges::reverse(retPaths);
+        r::reverse(retPaths);
         for(Path& path: retPaths)
             path.emplace_back(path.front());
     }
@@ -932,7 +1033,7 @@ Pathss stacking(Paths& paths) {
 
 #endif
 
-Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) {
+Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k) {
     Rect rect(GetBounds(paths));
     rect.bottom += k;
     rect.left -= k;
@@ -1056,3 +1157,20 @@ Pathss& sortB(Pathss& src, Point startPt) {
 }
 
 // } // namespace MC
+
+Path& TransformPath(Path& path, const QTransform& m) {
+    // if(m.isIdentity()) return path;
+
+    for(Point& pt: path) {
+        pt = ~m.map(~pt);
+        SetZForce(pt, ~m.map(~GetZ(pt)));
+    }
+    if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(path);
+
+    return path;
+}
+
+Paths& TransformPaths(Paths& paths, const QTransform& m) {
+    for(auto&& path: paths) TransformPath(path, m);
+    return paths;
+}

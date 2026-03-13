@@ -114,7 +114,7 @@ void Shape::redraw() {
 
     size_t intSteps = App::settings().clpCircleSegments(radius_);
     const double stepAngle = two_pi / intSteps;
-    const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
+    const /*PType*/ int32_t radius = static_cast</*PType*/ int32_t>(radius_ * uScale);
     const Point center = ~handles[Center];
     intSteps *= angle / two_pi;
 

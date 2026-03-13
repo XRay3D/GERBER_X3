@@ -132,16 +132,12 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(${COMMON_COMPILE_OPTIONS})
   link_libraries(stdc++exp)
+  add_link_options(-fuse-ld=mold)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 
 endif()
-
-# FILE_SET cxx_modules TYPE CXX_MODULES FILES third_party / ctre / ctre.cppm)
-# target_compile_options(Clipper2Z PUBLIC - fPIC)
-
-find_package(QT NAMES Qt6 REQUIRED COMPONENTS Core) # Qt6
 
 find_package(
   Qt6

@@ -21,7 +21,7 @@ Q_DECLARE_METATYPE(std::set<double>)
 
 namespace ShTxt {
 
-auto filter = std::views::filter([](Shape* shape) {
+auto filter = v::filter([](Shape* shape) {
     return shape->isSelected()
         // && shape->isEditable()
         ;

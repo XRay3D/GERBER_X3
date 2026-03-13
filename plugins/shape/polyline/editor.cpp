@@ -35,7 +35,7 @@ int Model::rowCount(const QModelIndex&) const {
 }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array getter{&Handle::x, &Handle::y};
 
     auto set = [&] {
@@ -50,14 +50,14 @@ QVariant Model::data(const QModelIndex& index, int role) const {
     };
 
     if(role == Qt::DisplayRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         QString ret;
         for(auto val: set())
             ret += (ret.size() ? u" | " : u"") + QString::number(val);
         return ret;
     }
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         return QVariant::fromValue(set());
     }
     if(role == Qt::TextAlignmentRole)
@@ -76,8 +76,8 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     Qt::ItemFlags flags;
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    if(std::ranges::empty(sh)) return {};
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
+    if(r::empty(sh)) return {};
     for(auto* shape: sh) {
         if(shape->handles.size() <= size_t(index.row()))
             continue;
@@ -89,11 +89,11 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array setter{&Handle::setX, &Handle::setY};
 
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
 
         double val = value.toDouble();
 

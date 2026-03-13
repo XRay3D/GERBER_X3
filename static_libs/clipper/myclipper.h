@@ -17,14 +17,51 @@
 #include <QDebug>
 #include <QIcon>
 #include <QPolygonF>
+#include <QTransform>
 #include <numbers>
 #include <ranges>
 
-using namespace Qt::Literals;
+using namespace Qt ::Literals;
+namespace v = std ::views;
+namespace r = std ::ranges;
 
 enum {
     IconSize = 24
 };
+
+////////////////////////////////////////////////////////////////////////////////
+struct PointF : QPointF {
+    using QPointF::QPointF;
+    PointF(QPointF pt)
+        : QPointF{pt} { }
+    PointF& operator=(QPointF pt) { return *this = pt; }
+    void Rotate(double cosa, double sina) { // rotate vector by angle
+        double temp = -y() * sina + x() * cosa;
+        ry() = x() * sina + cosa * y();
+        rx() = temp;
+    }
+    void Rotate(double angle) {
+        if(std::abs(angle) < 1.0e-09) return;
+        Rotate(cos(angle), sin(angle));
+    }
+};
+
+struct Vertex {
+    PointF pt{}, center{};
+    enum Type : int {
+        Line = 0,
+        Ccw = 1,
+        Cw = -1,
+    } type{};
+};
+
+using Curve = std::vector<Vertex>;
+using Curves = std::vector<Curve>;
+
+QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {});
+QPainterPath toPPath(const Curves& curves);
+
+////////////////////////////////////////////////////////////////////////////////
 
 constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
 constexpr auto two_pi = std::numbers::pi * 2;
@@ -59,32 +96,28 @@ using Clipper2Lib::JoinType;
 using Clipper2Lib::PathType;
 using Clipper2Lib::PointInPolygonResult;
 
-using CT = Clipper2Lib::ClipType;
-using ET = Clipper2Lib::EndType;
-using FR = Clipper2Lib::FillRule;
-using JT = Clipper2Lib::JoinType;
-using PT = Clipper2Lib::PathType;
-using PIPResult = Clipper2Lib::PointInPolygonResult;
-
 Q_DECLARE_METATYPE(Point)
 
 void TestPaths(const Paths& paths);
 
 Point GetZ(const Point& dst);
 void SetZ(Point& dst, const Point& center);
-void SetZf(Point& dst, const Point& center);
-void SetZs(Point& dst);
+void SetZForce(Point& dst, const Point& center);
+void SetZSelf(Point& dst);
 
 double Perimeter(const Path& path);
-
+//------------------------------------------------------------------------------
 Path CirclePath(double diametr, const Point& center = Point{});
-
 Path RectanglePath(double width, double height, const Point& center = Point{});
-
+//------------------------------------------------------------------------------
 void RotatePath(Path& polygon, double angle, const Point& center = Point{});
 
 Path& TranslatePath(Path& path, const Point& pos);
 Paths& TranslatePaths(Paths& path, const Point& pos);
+
+Path& TransformPath(Path& path, const QTransform& m);
+Paths& TransformPaths(Paths& paths, const QTransform& m);
+//------------------------------------------------------------------------------
 
 void mergeSegments(Paths& paths, double glue = 0.0);
 
@@ -100,8 +133,8 @@ QIcon drawDrillIcon(QColor color = Qt::black);
 
 Paths& normalize(Paths& paths);
 
-inline constexpr auto skipFront = std::views::drop(1);
-inline constexpr auto reverse = std::views::reverse;
+inline constexpr auto skipFront = v::drop(1);
+inline constexpr auto reverse = v::reverse;
 
 //------------------------------------------------------------------------------
 
@@ -171,7 +204,7 @@ template <typename T> concept Range__ = requires(T c) {
 
 template <Container C>
 inline auto join(C&& cont) {
-    auto j = std::views::join(cont);
+    auto j = v::join(cont);
     return std::decay_t<decltype(*cont.begin())>{j.begin(), j.end()};
 };
 
@@ -184,15 +217,15 @@ inline int indexOf(const Cont& c, const typename Cont::value_type& v) {
 auto operator+=(Container auto& c, Range__ auto&& v) {
     c.reserve(c.size() + v.size());
     if constexpr(std::is_lvalue_reference_v<decltype(v)>)
-        std::ranges::copy(v, std::back_inserter(c));
+        r::copy(v, std::back_inserter(c));
     else
-        std::ranges::move(v, std::back_inserter(c));
+        r::move(v, std::back_inserter(c));
     return c;
 }
 
 // auto operator+=(Container auto& c, const Container auto& v) {
 //     c.reserve(c.size() + v.size());
-//     return std::ranges::copy(v, std::back_inserter(c)), c;
+//     return r::copy(v, std::back_inserter(c)), c;
 // }
 
 auto operator-=(Container auto& c, size_t index) {
@@ -202,8 +235,14 @@ auto operator-=(Container auto& c, size_t index) {
 //------------------------------------------------------------------------------
 
 template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
-inline Point& operator*=(Point& pt, Arithmetic auto v) {
+
+inline Point& operator*=(Point& pt, Arithmetic auto v) noexcept {
     return pt.x *= v, pt.y *= v, pt;
+}
+
+inline Path& operator*=(Path& path, Arithmetic auto v) noexcept {
+    for(Point& pt: path) pt *= v;
+    return path;
 }
 
 static constexpr auto uScale{100'000};
@@ -221,10 +260,10 @@ struct Caster {
 
 #define TRANSFORM(FROM, TO)                                                    \
     inline TO operator~(const FROM& val) {                                     \
-        auto it = std::views::transform(val, [](auto&& val) { return ~val; }); \
+        auto it = v::transform(val, [](auto&& val) { return ~val; }); \
         TO ret;                                                                \
         ret.reserve(Caster{val.size()});                                       \
-        std::ranges::move(it, std::back_inserter(ret));                        \
+        r::move(it, std::back_inserter(ret));                        \
         return ret;                                                            \
     }
 
@@ -370,7 +409,7 @@ void markPolyTreeDByNesting(PolyTree& polynode);
 void sortPolyTreeByNesting(PolyTree& polynode);
 Pathss stacking(Paths& paths);
 
-Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k);
+Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k);
 
 Paths& sortB(Paths& src, Point startPt);
 Paths& sortBeginEnd(Paths& src, Point startPt);

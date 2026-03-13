@@ -449,7 +449,7 @@ void BaseForm::errorHandler(int) {
     ctrWidget->setVisible(false);
     errWidget->setVisible(true);
 
-    std::ranges::for_each(creator_->items, [](auto i) { App::grView().addItem(i); });
+    r::for_each(creator_->items, [](auto i) { App::grView().addItem(i); });
 
     errTable->setModel(new ErrorModel{std::move(creator_->items), errTable});
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);

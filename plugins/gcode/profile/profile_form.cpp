@@ -191,7 +191,7 @@ void Form::onAddBridgeClicked() {
             auto bounds = GetBounds(gi->paths());
             int stepH = bounds.Width() / (value + 1);
             int stepV = bounds.Height() / (value + 1);
-            for(int var: std::views::iota(1, lround(value) + 1)) {
+            for(int var: v::iota(1, lround(value) + 1)) {
                 QLineF testLineH{
                     ~Point{bounds.left + stepH * var, bounds.bottom + uScale},
                     ~Point{bounds.left + stepH * var,    bounds.top - uScale}

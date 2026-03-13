@@ -17,7 +17,7 @@ class File;
 
 namespace Gi {
 
-class GcPath : public Item {
+class GcPath final : public Item {
 public:
     GcPath(const Path& path, AbstractFile* file = nullptr);
     GcPath(const Paths& paths, AbstractFile* file = nullptr);

@@ -25,29 +25,29 @@
 #include <ranges>
 
 // struct sort_fn {
-//     template <std::randoaccess_iterator_ I, std::sentinel_for<I> S, class Comp = std::ranges::less, class Proj = std::identity>
+//     template <std::randoaccess_iterator_ I, std::sentinel_for<I> S, class Comp = r::less, class Proj = std::identity>
 //     requires std::sortable<I, Comp, Proj> constexpr I
 //     operator()(I first, S last, Comp comp = {}, Proj proj = {}) const
 //     {
 //         if (first == last)
 //             return { first };
 
-//        const auto pivot = *std::ranges::next(first, std::ranges::distance(first, last) / 2, last);
+//        const auto pivot = *r::next(first, r::distance(first, last) / 2, last);
 
-//        auto tail1 = std::ranges::partition(first, last, [&pivot, &comp, &proj](const auto& em) { return std::invoke(comp, std::invoke(proj, em), std::invoke(proj, pivot)); });
-//        auto tail2 = std::ranges::partition(tail1, [&pivot, &comp, &proj](const auto& em) { return !std::invoke(comp, std::invoke(proj, pivot), std::invoke(proj, em)); });
+//        auto tail1 = r::partition(first, last, [&pivot, &comp, &proj](const auto& em) { return std::invoke(comp, std::invoke(proj, em), std::invoke(proj, pivot)); });
+//        auto tail2 = r::partition(tail1, [&pivot, &comp, &proj](const auto& em) { return !std::invoke(comp, std::invoke(proj, pivot), std::invoke(proj, em)); });
 
 //        (*this)(first, tail1.begin(), std::ref(comp), std::ref(proj));
 //        (*this)(tail2, std::ref(comp), std::ref(proj));
 
-//        return { std::ranges::next(first, last) };
+//        return { r::next(first, last) };
 //    }
 
-//    template <std::ranges::randoaccess_range_ R, class Comp = std::ranges::less, class Proj = std::identity>
-//    requires std::sortable<std::ranges::iterator_t<R>, Comp, Proj> constexpr std::ranges::borrowed_iterator_t<R>
+//    template <r::randoaccess_range_ R, class Comp = r::less, class Proj = std::identity>
+//    requires std::sortable<r::iterator_t<R>, Comp, Proj> constexpr r::borrowed_iterator_t<R>
 //    operator()(R&& r, Comp comp = {}, Proj proj = {}) const
 //    {
-//        return (*this)(std::ranges::begin(r), std::ranges::end(r), std::move(comp), std::move(proj));
+//        return (*this)(r::begin(r), r::end(r), std::move(comp), std::move(proj));
 //    }
 //};
 // inline constexpr sort_fn sort {};
@@ -95,15 +95,15 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         if(!sl.size())
             return sl;
 
-        std::ranges::sort(sl, {}, [](const Path& p) { return p.front().y; }); // vertical sort
+        r::sort(sl, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
-        /*Point::Type*/ int32_t start = sl.front().front().y;
+        /*PType*/ int32_t start = sl.front().front().y;
         bool fl = {};
         for(size_t i{}, last{}; i < sl.size(); ++i) {
             if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
 
-                fl ? std::ranges::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
-                    std::ranges::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
+                fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
+                    r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
 
                 for(size_t k = last; k < i; ++k) // fix direction
                     if(fl ^ (sl[k].front().x < sl[k].back().x))
@@ -130,7 +130,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             // dbgPaths(tmp, u"ClipType::Difference"_s);
             frames += std::move(tmp);
 
-            std::ranges::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
+            r::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
             std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
             for(auto& path: frames)
@@ -143,7 +143,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         Clipper clipper;
         clipper.AddClip(src);
         Rect rect(GetBounds(src));
-        /*Point::Type*/ int32_t o = uScale - (rect.Height() % static_cast</*Point::Type*/ int32_t>(hatchStep * uScale)) / 2;
+        /*PType*/ int32_t o = uScale - (rect.Height() % static_cast</*PType*/ int32_t>(hatchStep * uScale)) / 2;
         rect.top -= o;
         rect.bottom += o;
         rect.left -= uScale;

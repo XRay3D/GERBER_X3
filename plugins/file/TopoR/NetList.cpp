@@ -14,9 +14,9 @@ bool NetList::ShouldSerialize_Nets() {
 }
 
 void NetList::Rename_compName(const QString& oldname, const QString& newname) {
-    for(auto&& a: _Nets | std::views::filter([&](Net* net) { return net->_refs.size(); /*!= nullptr;*/ })) //
+    for(auto&& a: _Nets | v::filter([&](Net* net) { return net->_refs.size(); /*!= nullptr;*/ })) //
     {
-        //        for (auto&& b : a->_refs | std::views::filter([&](std::variant<PinRef, PadRef>&& ref) { return ref.index() == 0; })) { //::OfType<PinRef*>().Where([&](std::any bb) { return bb._compName == oldname; })) {
+        //        for (auto&& b : a->_refs | v::filter([&](std::variant<PinRef, PadRef>&& ref) { return ref.index() == 0; })) { //::OfType<PinRef*>().Where([&](std::any bb) { return bb._compName == oldname; })) {
         //            b->_compName = newname;
         //        }
         //        for (auto&& b : a._refs::OfType<PadRef*>().Where([&](std::any bb) { return bb._compName == oldname; })) {

@@ -75,8 +75,6 @@ protected:
     virtual void draw() = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
-
-    void transform(Path& polygon, const State& state);
 };
 
 /////////////////////////////////////////////////////

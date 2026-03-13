@@ -2,8 +2,12 @@
 
 #include <algorithm>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <vector>
+
+namespace v = std ::views;
+namespace r = std ::ranges;
 
 template <class T>
 struct mvector : std::vector<T> {
@@ -30,7 +34,7 @@ struct mvector : std::vector<T> {
         if(vec.empty()) return;
         if(V::capacity() - V::size() < vec.size())
             V::reserve(V::size() + vec.size());
-        std::ranges::move(vec, std::back_insert_iterator{*this});
+        r::move(vec, std::back_insert_iterator{*this});
     }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
@@ -143,7 +147,7 @@ struct mvector : std::vector<T> {
     {
         // using CP = const P;
         // auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
-        auto it = std::ranges::find(V::begin(), V::end(), ptr, &T::get);
+        auto it = r::find(V::begin(), V::end(), ptr, &T::get);
         if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
@@ -155,7 +159,7 @@ struct mvector : std::vector<T> {
         requires std::is_base_of_v<T, std::shared_ptr<P>>
     {
         // auto it = std::find(V::begin(), V::end(), t /*std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})*/);
-        auto it = std::ranges::find(V::begin(), V::end(), ptr, &T::get);
+        auto it = r::find(V::begin(), V::end(), ptr, &T::get);
         if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else

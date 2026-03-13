@@ -15,6 +15,7 @@
 #include "gbr_attraperfunction.h"
 #include "gbr_attrfilefunction.h"
 #include "gbr_file.h"
+#include "gi_dbg.h"
 #include "myclipper.h"
 #include "utils.h"
 #include <QElapsedTimer>
@@ -317,7 +318,7 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
     return d;
 }
 
-bool Parser::parseNumber(QString Str, /*Point::Type*/ int32_t& val, FormatDir dir) {
+bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
     bool flag = false;
     int sign = 1;
     if(!Str.isEmpty()) {
@@ -352,7 +353,7 @@ bool Parser::parseNumber(QString Str, /*Point::Type*/ int32_t& val, FormatDir di
 #endif
             }
         }
-        val = static_cast</*Point::Type*/ int32_t>(toDouble(Str, true) * pow(10.0, -decimal) * sign);
+        val = static_cast</*PType*/ int32_t>(toDouble(Str, true) * pow(10.0, -decimal) * sign);
         return true;
     }
     return flag;
@@ -507,7 +508,7 @@ Point Parser::parsePosition(const QString& xyStr) {
     auto data{toU16StrView(xyStr)};
     static constexpr ctll::fixed_string ptrnPosition{R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"}; // fixed_string(u"(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+"};
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
-        /*Point::Type*/ int32_t tmp = 0;
+        /*PType*/ int32_t tmp = 0;
         if(x && parseNumber(CtreCapTo(x), tmp, FormatDir::X))
             file->format().coordValueNotation == AbsoluteNotation
                 ? state_.curPos().x = tmp
@@ -543,7 +544,7 @@ Paths Parser::createLine() {
     if(file->apertures_[state_.aperture()]->type() == Rectangle) {
         if(Settings::wireMinkowskiSum()) {
             solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
-            std::ranges::for_each(std::views::join(solution), &SetZs);
+            r::for_each(v::join(solution), &SetZSelf);
         } else {
             auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
             if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
@@ -555,7 +556,7 @@ Paths Parser::createLine() {
             if(qFuzzyIsNull(size))
                 return {};
             solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
-            std::ranges::for_each(std::views::join(solution), &SetZs);
+            r::for_each(v::join(solution), &SetZSelf);
         }
         if(state_.imgPolarity() == Negative)
             ReversePaths(solution);
@@ -564,7 +565,7 @@ Paths Parser::createLine() {
         if(qFuzzyIsNull(size))
             return {};
 
-        std::ranges::for_each(path_, &SetZs);
+        r::for_each(path_, &SetZSelf);
         // for(auto& pt: path_) SetZ(pt);
         if(Settings::wireMinkowskiSum())
             solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
@@ -577,7 +578,7 @@ Paths Parser::createLine() {
             //         Inflate({path_}, +size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
             //     clipper.AddClip(
             //         Inflate({path_}, -size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
-            //     clipper.Execute(CT::Difference, FR::NonZero, solution);
+            //     clipper.Execute(ClipType::Difference, FillRule::NonZero, solution);
             // }
         }
 
@@ -587,6 +588,9 @@ Paths Parser::createLine() {
         if(state_.imgPolarity() == Negative)
             ReversePaths(solution);
     }
+
+    // new Gi::Debug{solution};
+
     return solution;
 }
 
@@ -598,7 +602,7 @@ Paths Parser::createPolygon() {
         if(state_.imgPolarity() == Positive)
             ReversePath(path_);
     }
-    std::ranges::for_each(path_, &SetZs);
+    r::for_each(path_, &SetZSelf);
     return {path_};
 }
 
@@ -755,7 +759,7 @@ void Parser::closeStepRepeat() {
     addPath();
     for(int y = 0; y < stepRepeat_.y; ++y) {
         for(int x = 0; x < stepRepeat_.x; ++x) {
-            const Point pt(static_cast</*Point::Type*/ int32_t>(stepRepeat_.i * x), static_cast</*Point::Type*/ int32_t>(stepRepeat_.j * y));
+            const Point pt(static_cast</*PType*/ int32_t>(stepRepeat_.i * x), static_cast</*PType*/ int32_t>(stepRepeat_.j * y));
             for(GrObject& go: stepRepeat_.storage) {
                 Paths paths(go.fill);
                 for(Path& path: paths)
@@ -779,8 +783,8 @@ bool Parser::parseApertureMacros(const QString& gLine) {
     auto data{toU16StrView(gLine)};
     static constexpr ctll::fixed_string ptrnApertureMacros{R"(^%AM([^\*]+)\*([^%]+)?(%)?$)"}; // fixed_string(u"^%AM([^\*]+)\*([^%]+)?(%)?$"};
     if(auto [whole, c1, c2, c3] = ctre::match<ptrnApertureMacros>(data); whole) {
-        if(c1.size() && c2.size()) {
-            apertureMacro_[CtreCapTo(c1)] = QString{CtreCapTo(c2)};
+        if(c1 && c2) {
+            apertureMacro_[QString{c1}] = QString{c2};
             return true;
         }
     }
@@ -1013,10 +1017,10 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     default:
         if((path_.size() && (path_.back() != arcStartPos)) || path_.empty())
             path_.emplace_back(arcStartPos);
-        SetZs(path_.back());
+        SetZSelf(path_.back());
         state_.setCurPos({x, y});
         path_.emplace_back(state_.curPos());
-        SetZs(path_.back());
+        SetZSelf(path_.back());
         qWarning() << QString(u"Invalid arc in line %1."_s).arg(lineNum_) << gLine;
     }
 

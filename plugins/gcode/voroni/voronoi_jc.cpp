@@ -67,7 +67,7 @@ void VoronoiJc::jcVoronoi() {
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const /*Point::Type*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
+        const /*PType*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             {static_cast<jcv_real>(r.left - fo),  static_cast<jcv_real>(r.top - fo)   },
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
@@ -75,7 +75,7 @@ void VoronoiJc::jcVoronoi() {
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
         auto toPoint = [](const jcv_edge* edge, int num) -> const Point {
-            return {static_cast</*Point::Type*/ int32_t>(edge->pos[num].x), static_cast</*Point::Type*/ int32_t>(edge->pos[num].y)};
+            return {static_cast</*PType*/ int32_t>(edge->pos[num].x), static_cast</*PType*/ int32_t>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for(int i = 0; i < diagram.numsites; i++) {
@@ -110,7 +110,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     for(auto&& pair: pairs)
         pairsVec.push_back(pair);
 
-    std::ranges::sort(pairsVec, {}, [](const Pair& a) { return (a.first.y + a.second.y) / 2; });
+    r::sort(pairsVec, {}, [](const Pair& a) { return (a.first.y + a.second.y) / 2; });
 
     mvector<OrdPath> holder(pairsVec.size() * 2);
     QList<OrdPath*> merge;
@@ -170,7 +170,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
                 path -= i--;
         }
     };
-    std::ranges::for_each(paths, clean);
+    r::for_each(paths, clean);
 
     return paths;
 }

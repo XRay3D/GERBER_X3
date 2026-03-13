@@ -20,8 +20,8 @@
 #include <condition_variable>
 #include <mutex>
 
-namespace ranges = std::ranges;
-namespace rviews = std::ranges::views;
+namespace ranges = r;
+namespace v = r::views;
 
 // namespace Gi {
 // class Error;
@@ -54,10 +54,10 @@ public:
 
     std::pair<int, int> getProgress();
 
-    Pathss& groupedPaths(Grouping group, /*Point::Type*/ int32_t offset = uScale, bool skipFrame = {});
+    Pathss& groupedPaths(Grouping group, /*PType*/ int32_t offset = uScale, bool skipFrame = {});
     void grouping(Grouping group, PolyTree& node);
 
-    Path boundOfPaths(const Paths& paths, /*Point::Type*/ int32_t k) const;
+    Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k) const;
 
     void createGc(Params* gcp);
 
@@ -119,7 +119,7 @@ protected:
 
     double toolDiameter{};
     double dOffset{};
-    /*Point::Type*/ int32_t stepOver{};
+    /*PType*/ int32_t stepOver{};
     Params gcp_;
 
     void isContinueCalc();

@@ -95,11 +95,11 @@ void HiSpeedRules::Rename_compName(const QString& oldname, const QString& newnam
         for(auto b: a->_Signals) {
             if(b->_ReceiverPinRef->_compName == oldname)
                 b->_ReceiverPinRef->_compName = newname;
-            for(auto c: b->_Components | std::views::filter([&](CompInstanceRef* r) { return r->_ReferenceName == oldname; }))
+            for(auto c: b->_Components | v::filter([&](CompInstanceRef* r) { return r->_ReferenceName == oldname; }))
                 c->_ReferenceName = newname;
         }
         for(auto b: a->_PinPairs)
-            for(auto c: b->_PinRefs | std::views::filter([&](PinRef* r) { return r->_compName == oldname; }))
+            for(auto c: b->_PinRefs | v::filter([&](PinRef* r) { return r->_compName == oldname; }))
                 c->_compName = newname;
     }
 }

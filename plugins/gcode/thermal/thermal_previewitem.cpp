@@ -230,8 +230,8 @@ void PreviewItem::redraw() {
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
             // offset.AddPath({center,
             // Point(
-            // static_cast</*Point::Type*/ int32_t>((cos(angle) * radius) + center.x),
-            // static_cast</*Point::Type*/ int32_t>((sin(angle) * radius) + center.y))},
+            // static_cast</*PType*/ int32_t>((cos(angle) * radius) + center.x),
+            // static_cast</*PType*/ int32_t>((sin(angle) * radius) + center.y))},
             // JoinType::Square, EndType::Butt);
             // Paths paths = offset.Execute((node_->tickness() + diameter) * uScale * 0.5);
             Paths paths = Inflate({

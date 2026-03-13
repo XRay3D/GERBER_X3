@@ -17,7 +17,7 @@ class MainWindow;
 
 namespace Gi {
 
-class DataPath : public Item {
+class DataPath final : public Item {
     mutable QPainterPath selectionShape_;
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;

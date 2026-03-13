@@ -112,7 +112,7 @@ struct GraphicObject {
 
     Paths fill;
     Path path;
-    Point pos{std::numeric_limits</*Point::Type*/ int32_t>::lowest(), std::numeric_limits</*Point::Type*/ int32_t>::lowest()};
+    Point pos{std::numeric_limits</*PType*/ int32_t>::lowest(), std::numeric_limits</*PType*/ int32_t>::lowest()};
     QString name;
     Type type{Null};
     int32_t id{-1};

@@ -75,7 +75,7 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
 
     auto transform = [](auto* item) { return static_cast<Item*>(item); };
 
-    for(Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
+    for(Item* gi: col | v::filter(filter) | v::transform(transform)) {
         auto paths = gi->paths();
         if(gi->type() == Type::DataPath
             && paths.size() == 1

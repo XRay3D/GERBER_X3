@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_dbg.h"
+#include "app.h"
+#include "graphicsview.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
 
@@ -17,17 +19,93 @@
 
 namespace Gi {
 
-Debug::Debug(const Paths& paths, const QPen& /*pen*/) {
-    for(const Path& path: paths) shape_.addPolygon(~path);
-    boundingRect_ = shape_.boundingRect(); // + QMarginsF(k, k, k, k);
+Curve toCurve(Path path) {
+    Curve curve;
+
+    auto eqCenter = [](Point l, Point r) {
+        auto cl{~GetZ(l)}, cr{~GetZ(r)};
+        // qInfo() << ~cl << ~cr;
+        // qCritical() << QLineF{~l, cl}.length() << QLineF{~r, cr}.length();
+        return cl == cr
+            && std::abs(QLineF{~l, cl}.length() - QLineF{~r, cr}.length()) < 1.e-2;
+    };
+
+    auto notEqCenter = [](Point l, Point r) {
+        auto cl{~GetZ(l)}, cr{~GetZ(r)};
+        // qInfo() << ~cl << ~cr;
+        // qCritical() << QLineF{~l, cl}.length() << QLineF{~r, cr}.length();
+        return cl != cr;
+        // && std::abs(QLineF{~l, cl}.length() - QLineF{~r, cr}.length()) < 1.e-2;
+    };
+
+    r::rotate(path, r::adjacent_find(path, notEqCenter));
+
+    auto chunks = v::chunk_by(path, eqCenter);
+
+    for(auto chunk: chunks) {
+        if(chunk.size() > 2) {
+            double ange = QLineF{~chunk[0], ~chunk[1]}.angleTo(QLineF{~chunk[1], ~chunk[2]});
+            curve.emplace_back(~chunk.front());
+            curve.emplace_back(
+                ~chunk.back(),
+                ~GetZ(chunk.front()),
+                Area(Path{chunk[0], chunk[1], GetZ(chunk[0])}) > .0 ? Vertex::Ccw : Vertex::Cw);
+        } else if(chunk.size() == 1) {
+            curve.emplace_back(~chunk.front());
+        } else {
+            curve.emplace_back(~chunk.front());
+            curve.emplace_back(~chunk.back());
+        }
+    }
+
+    curve.emplace_back(~path.front());
+
+    new Debug{toPPath(curve), Qt::green};
+    return curve;
 }
 
-Debug::Debug(const Path& path, const QPen& /*pen*/) {
-    shape_.addPolygon(~path);
-    boundingRect_ = shape_.boundingRect(); // + QMarginsF(k, k, k, k);
+Debug::Debug(const QColor& color, double width) {
+    pen_ = {color, width};
+    App::grView().addItem(this);
+    setZValue(std::numeric_limits<double>::max());
+    setVisible(true);
 }
 
-Debug::Debug(const QPainterPath& /*path*/, const QPen& /*pen*/) { }
+Debug::Debug(const Path& path, const QColor& color, double width)
+    : Debug{Paths{path}, color, width} { }
+
+Debug::Debug(const Paths& paths, const QColor& color, double width)
+    : Debug{color, width} {
+    paths_ = paths;
+#if 0
+    for(const Path& path: paths)
+        shape_.addPolygon(~path);
+    boundingRect_ = shape_.boundingRect();
+#else
+    for(const Path& path: paths) {
+        toCurve(path);
+        for(const Point& pt: path) {
+            // auto qp = ~GetZ(pt);
+            // shape_.addEllipse(qp.x() - 0.05, qp.y() - 0.05, 0.1, 0.1);
+        }
+    }
+
+    auto bounds = GetBounds(paths);
+    boundingRect_ = QRectF{
+        dScale * bounds.left,
+        dScale * bounds.top,
+        dScale * (bounds.right - bounds.left),
+        dScale * (bounds.bottom - bounds.top),
+    };
+#endif
+}
+
+Debug::Debug(const QPainterPath& path, const QColor& color, double width)
+    : Debug{color, width} {
+    shape_ = path;
+    boundingRect_ = shape_.boundingRect();
+    if(path.isEmpty()) delete this; // NOTE
+}
 
 QRectF Debug::boundingRect() const { return boundingRect_; }
 
@@ -39,16 +117,18 @@ void Debug::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     if(colorPtr_)
         color_ = *colorPtr_;
 
+    double scale = scaleFactor();
+
     if(pen_.widthF() == 0) {
         QPen pen(pen_);
-        pen.setWidthF(1.5 * scaleFactor());
+        pen.setWidthF(1.5 * scale);
         painter->setPen(pen);
     } else
         painter->setPen(pen_);
 
     // if(option->state & QStyle::State_MouseOver) {
     //     QPen pen(pen_);
-    //     pen.setWidthF(2.0 * scaleFactor());
+    //     pen.setWidthF(2.0 * scale);
     //     pen.setStyle(Qt::CustomDashLine);
     //     pen.setCapStyle(Qt::FlatCap);
     //     pen.setDashPattern({2.0, 2.0});
@@ -61,9 +141,19 @@ void Debug::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
     //    painter->setPen(QPen(Qt::magenta, 0.0));
     //    painter->drawRect(rect_);
 
+    double len = 10 * scale;
+    for(const Path& path: paths_) {
+        for(const Point& pt: path) {
+            QPointF p = ~GetZ(pt);
+            painter->drawLine(p, p + QPointF{.0, -len});
+            painter->drawLine(p, p + QPointF{.0, +len});
+            painter->drawLine(p, p + QPointF{-len, .0});
+            painter->drawLine(p, p + QPointF{+len, .0});
+        }
+    }
+
     ////////////////////////////////////////////////////// for debug cut direction
-    if(sc_ != scaleFactor())
-        updateArrows();
+    if(sc_ != scale) updateArrows();
     painter->drawPath(arrows_);
 }
 

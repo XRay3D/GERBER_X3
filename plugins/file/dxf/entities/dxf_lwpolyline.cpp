@@ -243,10 +243,10 @@ DxfGo LwPolyline::toGo() const {
         return {id, {}, {}}; // return {id, ~p.value(0), paths};
 
     // ClipperOffset offset;
-    // offset.AddPath(Path{p.value(0)}, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    // offset.AddPath(Path{p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
     // Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
     const double offset = constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0);
-    Paths paths = Inflate({~p.front()}, offset, JT::Round, polylineFlag == Closed ? ET::Polygon : ET::Round);
+    Paths paths = Inflate({~p.front()}, offset, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
     DxfGo go{id, ~p.front(), paths}; // return {id, ~p.value(0), paths};
 
     if(polylineFlag == Closed

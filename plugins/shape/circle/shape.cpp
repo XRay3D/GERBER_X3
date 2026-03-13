@@ -50,7 +50,7 @@ void Shape::redraw() {
     }
 
     const int intSteps = App::settings().clpCircleSegments(radius_);
-    const /*Point::Type*/ int32_t radius = static_cast</*Point::Type*/ int32_t>(radius_ * uScale);
+    const /*PType*/ int32_t radius = static_cast</*PType*/ int32_t>(radius_ * uScale);
     const Point center = ~handles[Center];
     const double delta_angle = (2.0 * pi) / intSteps;
     Path& path = paths_.front();
