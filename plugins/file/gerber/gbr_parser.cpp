@@ -795,7 +795,7 @@ bool Parser::parseAttributes(const QString& gLine) {
     auto data{toU16StrView(gLine)};
     static constexpr ctll::fixed_string ptrnAttributes{R"(^%(T[FAOD])(\.?)(.*)\*%$)"}; // fixed_string(u"^%(T[FAOD])(\.?)(.*)\*%$"};
     if(auto [whole, c1, c2, c3] = ctre::match<ptrnAttributes>(data); whole) {
-        QString cap[]{CtreCapTo(whole), CtreCapTo(c1), CtreCapTo(c2), CtreCapTo(c3)};
+        QStringList cap{QString{whole}, QString{c1}, QString{c2}, QString{c3}};
         switch(Attr::Command::value(cap[1])) {
         case Attr::Command::TF:
             attFile.parse(cap[3].split(u','));

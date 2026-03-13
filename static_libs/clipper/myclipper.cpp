@@ -1159,14 +1159,13 @@ Pathss& sortB(Pathss& src, Point startPt) {
 // } // namespace MC
 
 Path& TransformPath(Path& path, const QTransform& m) {
-    // if(m.isIdentity()) return path;
-
-    for(Point& pt: path) {
-        pt = ~m.map(~pt);
-        SetZForce(pt, ~m.map(~GetZ(pt)));
+    if(!m.type()) return path;
+    for(Point& point: path) {
+        QPointF center = m.map(~GetZ(point));
+        point = ~m.map(~point);
+        SetZForce(point, ~center);
     }
     if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(path);
-
     return path;
 }
 
