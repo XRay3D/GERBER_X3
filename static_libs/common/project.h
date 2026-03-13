@@ -201,7 +201,6 @@ private:
 
     // File Watcher
     QFileSystemWatcher watcher;
-    bool reloadFile_ = false;
 
     int ver_;
 
@@ -210,6 +209,8 @@ private:
     ItemMap items_;
 
     QMutex mutex;
+
+    std::set<QString> reloadPaths;
 
     QString fileName_;
     bool isModified_ = false;

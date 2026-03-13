@@ -123,15 +123,15 @@ Project::Project(QObject* parent)
     : QObject{parent}
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
+        if(!reloadPaths.emplace(path).second) return;
         const int32_t id = files_[contains(path)]->id();
         if(id > -1
             && QFileInfo::exists(path)
             && QMessageBox::question(nullptr, {}, tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
                    QMessageBox::Ok, QMessageBox::Cancel)
                 == QMessageBox::Ok) {
-            reloadFile_ = true;
             emit reloadFile(path, static_cast<int>(files_[id]->type()));
-        }
+        } else reloadPaths.erase(path);
     });
 
     connect(this, &Project::addFileDbg, this, qOverload<GCode::File*>(&Project::addFile), Qt::QueuedConnection);
@@ -373,8 +373,8 @@ QRectF Project::getBoundingRect() {
 
 int Project::contains(const QString& name) {
     // QMutexLocker locker(&mutex);
-    if(reloadFile_)
-        return -1;
+    // if(reloadPaths.contains(name))
+    //     return -1;
     for(const auto& [id, sp]: files_) {
         AbstractFile* item = sp.get();
         //        if (sp && (item->type() == FileType::Gerber_ || item->type() == FileType::Excellon_ || item->type() == FileType::Dxf_))
@@ -385,6 +385,7 @@ int Project::contains(const QString& name) {
 }
 
 bool Project::reload(int32_t id, AbstractFile* file) {
+    reloadPaths.erase(file->name());
     if(files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
@@ -426,10 +427,8 @@ Shapes::AbstractShape* Project::shape(int32_t id) {
 
 int Project::addFile(AbstractFile* file) {
     QMutexLocker locker(&mutex);
-    if(!file)
-        return -1;
+    if(!file) return -1;
     isPinsPlaced_ = false;
-    reloadFile_ = false;
     file->createGi();
     file->addToScene();
     file->setVisible(true);
@@ -449,10 +448,8 @@ int Project::addFile(AbstractFile* file) {
 
 int Project::addFile(GCode::File* file) {
     QMutexLocker locker(&mutex);
-    if(!file)
-        return -1;
+    if(!file) return -1;
     isPinsPlaced_ = false;
-    reloadFile_ = false;
     file->createGi();
     file->addToScene();
     file->setVisible(true);
