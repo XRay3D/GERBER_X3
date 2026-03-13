@@ -1010,7 +1010,7 @@ public:
     /// </summary>
 
     // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
-    int _padNum = 0;
+    int _padNum{};
 };
 //	#endregion Reference Type
 
@@ -1577,14 +1577,14 @@ class Thermal {
     /// </summary>
 public:
     // ORIGINAL LINE: [XmlAttribute(u"spokeNum"_s, DataType = u"int"_s)] public int _spokeNum;
-    int _spokeNum = 0;
+    int _spokeNum{};
 
     /// <summary>
     /// Параметр термобарьера: минимальное число спиц.
     /// </summary>
 
     // ORIGINAL LINE: [XmlAttribute(u"minSpokeNum"_s, DataType = u"int"_s)] public int _minSpokeNum;
-    int _minSpokeNum = 0;
+    int _minSpokeNum{};
 
     /// <summary>
     /// Задаёт угол в градусах c точностью до тысячных долей.

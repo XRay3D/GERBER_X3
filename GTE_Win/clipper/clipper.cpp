@@ -144,7 +144,7 @@ inline cInt Abs(cInt val) {
 //------------------------------------------------------------------------------
 
 void PolyTree::Clear() {
-    for(PolyNodes::size_type i = 0; i < AllNodes.size(); ++i)
+    for(PolyNodes::size_type i{}; i < AllNodes.size(); ++i)
         delete AllNodes[i];
     AllNodes.resize(0);
     Childs.resize(0);
@@ -387,7 +387,7 @@ double Area(const Path& poly) {
     if(size < 3)
         return 0;
 
-    double a = 0;
+    double a{};
     for(int i = 0, j = size - 1; i < size; ++i) {
         a += ((double)poly[j].X + poly[i].X) * ((double)poly[j].Y - poly[i].Y);
         j = i;
@@ -400,7 +400,7 @@ double Area(const OutPt* op) {
     const OutPt* startOp = op;
     if(!op)
         return 0;
-    double a = 0;
+    double a{};
     do {
         a += (double)(op->Prev->Pt.X + op->Pt.X) * (double)(op->Prev->Pt.Y - op->Pt.Y);
         op = op->Next;
@@ -429,7 +429,7 @@ bool PointIsVertex(const IntPoint& Pt, OutPt* pp) {
 // http://citeseerx.ist.psu.edu/viewdoc/download?doi=10.1.1.88.5498&rep=rep1&type=pdf
 int PointInPolygon(const IntPoint& pt, const Path& path) {
     // returns 0 if false, +1 if true, -1 if pt ON polygon boundary
-    int result = 0;
+    int result{};
     int cnt = path.size();
     if(cnt < 3)
         return 0;
@@ -467,7 +467,7 @@ int PointInPolygon(const IntPoint& pt, const Path& path) {
 
 int PointInPolygon(const IntPoint& pt, OutPt* op) {
     // returns 0 if false, +1 if true, -1 if pt ON polygon boundary
-    int result = 0;
+    int result{};
     OutPt* startOp = op;
     for(;;) {
         if(op->Next->Pt.Y == pt.Y) {
@@ -1168,8 +1168,8 @@ bool ClipperBase::AddPath(const Path& pg, PolyType PolyTyp, bool Closed) {
 //------------------------------------------------------------------------------
 
 bool ClipperBase::AddPaths(const Paths& ppg, PolyType PolyTyp, bool Closed) {
-    bool result = false;
-    for(Paths::size_type i = 0; i < ppg.size(); ++i)
+    bool result{};
+    for(Paths::size_type i{}; i < ppg.size(); ++i)
         if(AddPath(ppg[i], PolyTyp, Closed))
             result = true;
     return result;
@@ -1178,7 +1178,7 @@ bool ClipperBase::AddPaths(const Paths& ppg, PolyType PolyTyp, bool Closed) {
 
 void ClipperBase::Clear() {
     DisposeLocalMinimaList();
-    for(EdgeList::size_type i = 0; i < m_edges.size(); ++i) {
+    for(EdgeList::size_type i{}; i < m_edges.size(); ++i) {
         TEdge* edges = m_edges[i];
         delete[] edges;
     }
@@ -1290,7 +1290,7 @@ bool ClipperBase::PopScanbeam(cInt& Y) {
 //------------------------------------------------------------------------------
 
 void ClipperBase::DisposeAllOutRecs() {
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i)
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i)
         DisposeOutRec(i);
     m_PolyOuts.clear();
 }
@@ -1538,7 +1538,7 @@ bool Clipper::ExecuteInternal() {
 
     if(succeeded) {
         // fix orientations ...
-        for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i) {
+        for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
             OutRec* outRec = m_PolyOuts[i];
             if(!outRec->Pts || outRec->IsOpen)
                 continue;
@@ -1550,7 +1550,7 @@ bool Clipper::ExecuteInternal() {
             JoinCommonEdges();
 
         // unfortunately FixupOutPolygon() must be done after JoinCommonEdges()
-        for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i) {
+        for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
             OutRec* outRec = m_PolyOuts[i];
             if(!outRec->Pts)
                 continue;
@@ -1861,14 +1861,14 @@ void Clipper::AddJoin(OutPt* op1, OutPt* op2, const IntPoint OffPt) {
 //------------------------------------------------------------------------------
 
 void Clipper::ClearJoins() {
-    for(JoinList::size_type i = 0; i < m_Joins.size(); i++)
+    for(JoinList::size_type i{}; i < m_Joins.size(); i++)
         delete m_Joins[i];
     m_Joins.resize(0);
 }
 //------------------------------------------------------------------------------
 
 void Clipper::ClearGhostJoins() {
-    for(JoinList::size_type i = 0; i < m_GhostJoins.size(); i++)
+    for(JoinList::size_type i{}; i < m_GhostJoins.size(); i++)
         delete m_GhostJoins[i];
     m_GhostJoins.resize(0);
 }
@@ -1927,7 +1927,7 @@ void Clipper::InsertLocalMinimaIntoAEL(const cInt botY) {
 
         // if any output polygons share an edge, they'll need joining later ...
         if(Op1 && IsHorizontal(*rb) && m_GhostJoins.size() > 0 && (rb->WindDelta != 0)) {
-            for(JoinList::size_type i = 0; i < m_GhostJoins.size(); ++i) {
+            for(JoinList::size_type i{}; i < m_GhostJoins.size(); ++i) {
                 Join* jr = m_GhostJoins[i];
                 // if the horizontal Rb and a 'ghost' horizontal overlap, then convert
                 // the 'ghost' join to a real join ready for later ...
@@ -2681,7 +2681,7 @@ bool Clipper::ProcessIntersections(const cInt topY) {
 //------------------------------------------------------------------------------
 
 void Clipper::DisposeIntersectNodes() {
-    for(int i = 0; i < m_IntersectList.size(); ++i)
+    for(int i{}; i < m_IntersectList.size(); ++i)
         delete m_IntersectList[i];
     m_IntersectList.clear();
 }
@@ -2734,7 +2734,7 @@ void Clipper::BuildIntersectList(const cInt topY) {
 //------------------------------------------------------------------------------
 
 void Clipper::ProcessIntersectList() {
-    for(int i = 0; i < m_IntersectList.size(); ++i) {
+    for(int i{}; i < m_IntersectList.size(); ++i) {
         IntersectNode* iNode = m_IntersectList[i];
         {
             IntersectEdges(iNode->Edge1, iNode->Edge2, iNode->Pt);
@@ -2763,7 +2763,7 @@ bool Clipper::FixupIntersectionOrder() {
     CopyAELToSEL();
     std::sort(m_IntersectList.begin(), m_IntersectList.end(), IntersectListSort);
     int cnt = m_IntersectList.size();
-    for(int i = 0; i < cnt; ++i) {
+    for(int i{}; i < cnt; ++i) {
         if(!EdgesAdjacent(*m_IntersectList[i])) {
             int j = i + 1;
             while(j < cnt && !EdgesAdjacent(*m_IntersectList[j]))
@@ -2970,7 +2970,7 @@ void Clipper::FixupOutPolygon(OutRec& outrec) {
 int PointCount(OutPt* Pts) {
     if(!Pts)
         return 0;
-    int result = 0;
+    int result{};
     OutPt* p = Pts;
     do {
         result++;
@@ -2982,7 +2982,7 @@ int PointCount(OutPt* Pts) {
 
 void Clipper::BuildResult(Paths& polys) {
     polys.reserve(m_PolyOuts.size());
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i) {
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         if(!m_PolyOuts[i]->Pts)
             continue;
         Path pg;
@@ -2991,7 +2991,7 @@ void Clipper::BuildResult(Paths& polys) {
         if(cnt < 2)
             continue;
         pg.reserve(cnt);
-        for(int i = 0; i < cnt; ++i) {
+        for(int i{}; i < cnt; ++i) {
             pg.push_back(p->Pt);
             p = p->Prev;
         }
@@ -3004,7 +3004,7 @@ void Clipper::BuildResult2(PolyTree& polytree) {
     polytree.Clear();
     polytree.AllNodes.reserve(m_PolyOuts.size());
     // add each output polygon/contour to polytree ...
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); i++) {
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); i++) {
         OutRec* outRec = m_PolyOuts[i];
         int cnt = PointCount(outRec->Pts);
         if((outRec->IsOpen && cnt < 2) || (!outRec->IsOpen && cnt < 3))
@@ -3018,7 +3018,7 @@ void Clipper::BuildResult2(PolyTree& polytree) {
         pn->Index = 0;
         pn->Contour.reserve(cnt);
         OutPt* op = outRec->Pts->Prev;
-        for(int j = 0; j < cnt; j++) {
+        for(int j{}; j < cnt; j++) {
             pn->Contour.push_back(op->Pt);
             op = op->Prev;
         }
@@ -3026,7 +3026,7 @@ void Clipper::BuildResult2(PolyTree& polytree) {
 
     // fixup PolyNode links etc ...
     polytree.Childs.reserve(m_PolyOuts.size());
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); i++) {
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); i++) {
         OutRec* outRec = m_PolyOuts[i];
         if(!outRec->PolyNd)
             continue;
@@ -3372,7 +3372,7 @@ static OutRec* ParseFirstLeft(OutRec* FirstLeft) {
 
 void Clipper::FixupFirstLefts1(OutRec* OldOutRec, OutRec* NewOutRec) {
     // tests if NewOutRec contains the polygon before reassigning FirstLeft
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i) {
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         OutRec* outRec = m_PolyOuts[i];
         OutRec* firstLeft = ParseFirstLeft(outRec->FirstLeft);
         if(outRec->Pts && firstLeft == OldOutRec) {
@@ -3389,7 +3389,7 @@ void Clipper::FixupFirstLefts2(OutRec* InnerOutRec, OutRec* OuterOutRec) {
     // every polygon that's also contained by OuterOutRec's FirstLeft container
     //(including 0) to see if they've become inner to the new inner polygon ...
     OutRec* orfl = OuterOutRec->FirstLeft;
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i) {
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         OutRec* outRec = m_PolyOuts[i];
 
         if(!outRec->Pts || outRec == OuterOutRec || outRec == InnerOutRec)
@@ -3408,7 +3408,7 @@ void Clipper::FixupFirstLefts2(OutRec* InnerOutRec, OutRec* OuterOutRec) {
 //----------------------------------------------------------------------
 void Clipper::FixupFirstLefts3(OutRec* OldOutRec, OutRec* NewOutRec) {
     // reassigns FirstLeft WITHOUT testing if NewOutRec contains the polygon
-    for(PolyOutList::size_type i = 0; i < m_PolyOuts.size(); ++i) {
+    for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         OutRec* outRec = m_PolyOuts[i];
         OutRec* firstLeft = ParseFirstLeft(outRec->FirstLeft);
         if(outRec->Pts && firstLeft == OldOutRec)
@@ -3418,7 +3418,7 @@ void Clipper::FixupFirstLefts3(OutRec* OldOutRec, OutRec* NewOutRec) {
 //----------------------------------------------------------------------
 
 void Clipper::JoinCommonEdges() {
-    for(JoinList::size_type i = 0; i < m_Joins.size(); i++) {
+    for(JoinList::size_type i{}; i < m_Joins.size(); i++) {
         Join* join = m_Joins[i];
 
         OutRec* outRec1 = GetOutRec(join->OutPt1->Idx);
@@ -3537,7 +3537,7 @@ ClipperOffset::~ClipperOffset() {
 //------------------------------------------------------------------------------
 
 void ClipperOffset::Clear() {
-    for(int i = 0; i < m_polyNodes.ChildCount(); ++i)
+    for(int i{}; i < m_polyNodes.ChildCount(); ++i)
         delete m_polyNodes.Childs[i];
     m_polyNodes.Childs.clear();
     m_lowest.X = -1;
@@ -3586,7 +3586,7 @@ void ClipperOffset::AddPath(const Path& path, JoinType joinType, EndType endType
 //------------------------------------------------------------------------------
 
 void ClipperOffset::AddPaths(const Paths& paths, JoinType joinType, EndType endType) {
-    for(Paths::size_type i = 0; i < paths.size(); ++i)
+    for(Paths::size_type i{}; i < paths.size(); ++i)
         AddPath(paths[i], joinType, endType);
 }
 //------------------------------------------------------------------------------
@@ -3595,13 +3595,13 @@ void ClipperOffset::FixOrientations() {
     // fixup orientations of all closed paths if the orientation of the
     // closed path with the lowermost vertex is wrong ...
     if(m_lowest.X >= 0 && !Orientation(m_polyNodes.Childs[(int)m_lowest.X]->Contour)) {
-        for(int i = 0; i < m_polyNodes.ChildCount(); ++i) {
+        for(int i{}; i < m_polyNodes.ChildCount(); ++i) {
             PolyNode& node = *m_polyNodes.Childs[i];
             if(node.m_endtype == etClosedPolygon || (node.m_endtype == etClosedLine && Orientation(node.Contour)))
                 ReversePath(node.Contour);
         }
     } else {
-        for(int i = 0; i < m_polyNodes.ChildCount(); ++i) {
+        for(int i{}; i < m_polyNodes.ChildCount(); ++i) {
             PolyNode& node = *m_polyNodes.Childs[i];
             if(node.m_endtype == etClosedLine && !Orientation(node.Contour))
                 ReversePath(node.Contour);
@@ -3679,7 +3679,7 @@ void ClipperOffset::DoOffset(double delta) {
     // if Zero offset, just copy any CLOSED polygons to m_p and return ...
     if(NEAR_ZERO(delta)) {
         m_destPolys.reserve(m_polyNodes.ChildCount());
-        for(int i = 0; i < m_polyNodes.ChildCount(); i++) {
+        for(int i{}; i < m_polyNodes.ChildCount(); i++) {
             PolyNode& node = *m_polyNodes.Childs[i];
             if(node.m_endtype == etClosedPolygon)
                 m_destPolys.push_back(node.Contour);
@@ -3702,7 +3702,7 @@ void ClipperOffset::DoOffset(double delta) {
         y = ArcTolerance;
 
     // see offset_triginometry2.svg in the documentation folder ...
-    double steps = 0.0;
+    double steps{};
     if(0) {
         steps = pi / std::acos(1 - y / std::fabs(delta));
         if(steps > std::fabs(delta) * pi)
@@ -3718,7 +3718,7 @@ void ClipperOffset::DoOffset(double delta) {
         m_sin = -m_sin;
 
     m_destPolys.reserve(m_polyNodes.ChildCount() * 2);
-    for(int i = 0; i < m_polyNodes.ChildCount(); i++) {
+    for(int i{}; i < m_polyNodes.ChildCount(); i++) {
         PolyNode& node = *m_polyNodes.Childs[i];
         m_srcPoly = node.Contour;
 
@@ -3740,7 +3740,7 @@ void ClipperOffset::DoOffset(double delta) {
                 }
             } else {
                 double X = -1.0, Y = -1.0;
-                for(int j = 0; j < 4; ++j) {
+                for(int j{}; j < 4; ++j) {
                     m_destPoly.push_back(IntPoint(
                         Round(m_srcPoly[0].X + X * delta),
                         Round(m_srcPoly[0].Y + Y * delta)));
@@ -3758,7 +3758,7 @@ void ClipperOffset::DoOffset(double delta) {
         // build m_normals ...
         m_normals.clear();
         m_normals.reserve(len);
-        for(int j = 0; j < len - 1; ++j)
+        for(int j{}; j < len - 1; ++j)
             m_normals.push_back(GetUnitNormal(m_srcPoly[j], m_srcPoly[j + 1]));
         if(node.m_endtype == etClosedLine || node.m_endtype == etClosedPolygon)
             m_normals.push_back(GetUnitNormal(m_srcPoly[len - 1], m_srcPoly[0]));
@@ -3767,12 +3767,12 @@ void ClipperOffset::DoOffset(double delta) {
 
         if(node.m_endtype == etClosedPolygon) {
             int k = len - 1;
-            for(int j = 0; j < len; ++j)
+            for(int j{}; j < len; ++j)
                 OffsetPoint(j, k, node.m_jointype);
             m_destPolys.push_back(m_destPoly);
         } else if(node.m_endtype == etClosedLine) {
             int k = len - 1;
-            for(int j = 0; j < len; ++j)
+            for(int j{}; j < len; ++j)
                 OffsetPoint(j, k, node.m_jointype);
             m_destPolys.push_back(m_destPoly);
             m_destPoly.clear();
@@ -3786,7 +3786,7 @@ void ClipperOffset::DoOffset(double delta) {
                 OffsetPoint(j, k, node.m_jointype);
             m_destPolys.push_back(m_destPoly);
         } else {
-            int k = 0;
+            int k{};
             for(int j = 1; j < len - 1; ++j)
                 OffsetPoint(j, k, node.m_jointype);
 
@@ -3924,7 +3924,7 @@ void ClipperOffset::DoRound(int j, int k) {
     m_srcPoly.reserve(m_srcPoly.size() + steps + 1);
 
     double X = m_normals[k].X, Y = m_normals[k].Y, X2;
-    for(int i = 0; i < steps; ++i) {
+    for(int i{}; i < steps; ++i) {
         m_destPoly.push_back(IntPoint(
             Round(m_srcPoly[j].X + X * m_delta),
             Round(m_srcPoly[j].Y + Y * m_delta)));
@@ -3942,7 +3942,7 @@ void ClipperOffset::DoRound(int j, int k) {
 //------------------------------------------------------------------------------
 
 void Clipper::DoSimplePolygons() {
-    PolyOutList::size_type i = 0;
+    PolyOutList::size_type i{};
     while(i < m_PolyOuts.size()) {
         OutRec* outrec = m_PolyOuts[i++];
         OutPt* op = outrec->Pts;
@@ -4003,7 +4003,7 @@ Path& ReversePath(Path& p) {
 //------------------------------------------------------------------------------
 
 Paths& ReversePaths(Paths& p) {
-    for(Paths::size_type i = 0; i < p.size(); ++i)
+    for(Paths::size_type i{}; i < p.size(); ++i)
         ReversePath(p[i]);
     return p;
 }
@@ -4104,7 +4104,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance) {
     }
 
     OutPt* outPts = new OutPt[size];
-    for(int i = 0; i < size; ++i) {
+    for(int i{}; i < size; ++i) {
         outPts[i].Pt = in_poly[i];
         outPts[i].Next = &outPts[(i + 1) % size];
         outPts[i].Next->Prev = &outPts[i];
@@ -4133,7 +4133,7 @@ void CleanPolygon(const Path& in_poly, Path& out_poly, double distance) {
     if(size < 3)
         size = 0;
     out_poly.resize(size);
-    for(int i = 0; i < size; ++i) {
+    for(int i{}; i < size; ++i) {
         out_poly[i] = op->Pt;
         op = op->Next;
     }
@@ -4148,7 +4148,7 @@ void CleanPolygon(Path& poly, double distance) {
 
 void CleanPolygons(const Paths& in_polys, Paths& out_polys, double distance) {
     out_polys.resize(in_polys.size());
-    for(Paths::size_type i = 0; i < in_polys.size(); ++i)
+    for(Paths::size_type i{}; i < in_polys.size(); ++i)
         CleanPolygon(in_polys[i], out_polys[i], distance);
 }
 //------------------------------------------------------------------------------
@@ -4165,26 +4165,26 @@ void Minkowski(const Path& poly, const Path& path, Paths& solution, bool isSum, 
     Paths pp;
     pp.reserve(pathCnt);
     if(isSum)
-        for(int i = 0; i < pathCnt; ++i) {
+        for(int i{}; i < pathCnt; ++i) {
             Path p;
             p.reserve(polyCnt);
-            for(int j = 0; j < poly.size(); ++j)
+            for(int j{}; j < poly.size(); ++j)
                 p.push_back(IntPoint(path[i].X + poly[j].X, path[i].Y + poly[j].Y));
             pp.push_back(p);
         }
     else
-        for(int i = 0; i < pathCnt; ++i) {
+        for(int i{}; i < pathCnt; ++i) {
             Path p;
             p.reserve(polyCnt);
-            for(int j = 0; j < poly.size(); ++j)
+            for(int j{}; j < poly.size(); ++j)
                 p.push_back(IntPoint(path[i].X - poly[j].X, path[i].Y - poly[j].Y));
             pp.push_back(p);
         }
 
     solution.clear();
     solution.reserve((pathCnt + delta) * (polyCnt + 1));
-    for(int i = 0; i < pathCnt - 1 + delta; ++i)
-        for(int j = 0; j < polyCnt; ++j) {
+    for(int i{}; i < pathCnt - 1 + delta; ++i)
+        for(int j{}; j < polyCnt; ++j) {
             Path quad;
             quad.reserve(4);
             quad.push_back(pp[i % pathCnt][j % polyCnt]);
@@ -4209,14 +4209,14 @@ void MinkowskiSum(const Path& pattern, const Path& path, Paths& solution, bool p
 void TranslatePath(const Path& input, Path& output, const IntPoint delta) {
     // precondition: input != output
     output.resize(input.size());
-    for(int i = 0; i < input.size(); ++i)
+    for(int i{}; i < input.size(); ++i)
         output[i] = IntPoint(input[i].X + delta.X, input[i].Y + delta.Y);
 }
 //------------------------------------------------------------------------------
 
 void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool pathIsClosed) {
     Clipper c;
-    for(int i = 0; i < paths.size(); ++i) {
+    for(int i{}; i < paths.size(); ++i) {
         Paths tmp;
         Minkowski(pattern, paths[i], tmp, true, pathIsClosed);
         c.AddPaths(tmp, ptSubject, true);
@@ -4253,7 +4253,7 @@ void AddPolyNodeToPaths(const PolyNode& polynode, NodeType nodetype, Paths& path
 
     if(!polynode.Contour.empty() && match)
         paths.push_back(polynode.Contour);
-    for(int i = 0; i < polynode.ChildCount(); ++i)
+    for(int i{}; i < polynode.ChildCount(); ++i)
         AddPolyNodeToPaths(*polynode.Childs[i], nodetype, paths);
 }
 //------------------------------------------------------------------------------
@@ -4276,7 +4276,7 @@ void OpenPathsFromPolyTree(const PolyTree& polytree, Paths& paths) {
     paths.resize(0);
     paths.reserve(polytree.Total());
     // Open paths are top level only, so ...
-    for(int i = 0; i < polytree.ChildCount(); ++i)
+    for(int i{}; i < polytree.ChildCount(); ++i)
         if(polytree.Childs[i]->IsOpen())
             paths.push_back(polytree.Childs[i]->Contour);
 }
@@ -4292,7 +4292,7 @@ std::ostream& operator<<(std::ostream& s, const Path& p) {
     if(p.empty())
         return s;
     Path::size_type last = p.size() - 1;
-    for(Path::size_type i = 0; i < last; i++)
+    for(Path::size_type i{}; i < last; i++)
         s << u"("_s << p[i].X << u","_s << p[i].Y << "), ";
     s << u"("_s << p[last].X << u","_s << p[last].Y << ")\n";
     return s;
@@ -4300,7 +4300,7 @@ std::ostream& operator<<(std::ostream& s, const Path& p) {
 //------------------------------------------------------------------------------
 
 std::ostream& operator<<(std::ostream& s, const Paths& p) {
-    for(Paths::size_type i = 0; i < p.size(); i++)
+    for(Paths::size_type i{}; i < p.size(); i++)
         s << p[i];
     s << "\n";
     return s;

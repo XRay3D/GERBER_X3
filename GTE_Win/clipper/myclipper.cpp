@@ -83,7 +83,7 @@ Path CirclePath(double diametr, const IntPoint& center) {
     const double radius = diametr * 0.5;
     const int intSteps = 18;
     Path poligon(intSteps);
-    for(int i = 0; i < intSteps; ++i)
+    for(int i{}; i < intSteps; ++i)
         poligon[i] = IntPoint(
             static_cast<cInt>(cos(i * 2 * pi / intSteps) * radius) + center.X,
             static_cast<cInt>(sin(i * 2 * pi / intSteps) * radius) + center.Y);
@@ -129,8 +129,8 @@ void TranslatePath(Path& path, const IntPoint& pos) {
 }
 
 double Perimeter(const Path& path) {
-    double p = 0.0;
-    for(int i = 0; i < path.size() - 1; ++i)
+    double p{};
+    for(int i{}; i < path.size() - 1; ++i)
         p += Length(path[i], path[i + 1]);
     p += Length(path.first(), path.last());
     return p;

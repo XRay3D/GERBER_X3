@@ -96,10 +96,10 @@ private:
     QString name_;
     QString lineTypeName;
 
-    int16_t colorNumber_ = 0;
-    int16_t flags = 0;
-    int16_t lineWeightEnum = 0;
-    int16_t plottingFlag = 0;
+    int16_t colorNumber_{};
+    int16_t flags{};
+    int16_t lineWeightEnum{};
+    int16_t plottingFlag{};
 
     GraphicObjects graphicObjects_;
     ItemsType itemsType_ = ItemsType::Null;

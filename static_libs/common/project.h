@@ -85,7 +85,7 @@ public:
     template <typename T>
     mvector<T*> count() {
         QMutexLocker locker(&mutex);
-        int count = 0;
+        int count{};
         for(const auto& [id, sp]: files_)
             if(dynamic_cast<T*>(sp.get()))
                 ++count;
@@ -213,9 +213,9 @@ private:
     std::set<QString> reloadPaths;
 
     QString fileName_;
-    bool isModified_ = false;
+    bool isModified_{};
     bool isUntitled_ = true;
-    bool isPinsPlaced_ = false;
+    bool isPinsPlaced_{};
     bool pinsUsed_[4]{true, true, true, true};
     QPointF pins_[4];
     QPointF home_;

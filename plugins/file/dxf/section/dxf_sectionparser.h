@@ -43,7 +43,7 @@ public:
     const SectionType type;
     static SectionType toType(const QString& key);
 
-    mutable int counter = 0;
+    mutable int counter{};
 
     const Codes::iterator from;
     const Codes::iterator to;

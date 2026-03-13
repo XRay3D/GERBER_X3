@@ -13,8 +13,8 @@
 #include <QtMath>
 
 struct Vec2 {
-    double x = 0.0;
-    double y = 0.0;
+    double x{};
+    double y{};
 
     /*
     :class:`Vec2` represents a special 2D vector ``(x, y)``. The :class:`Vec2`

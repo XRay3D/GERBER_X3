@@ -393,7 +393,7 @@ void MainWindow::loadSettings() {
 
     for(auto toolBar: findChildren<QToolBar*>()) {
         settings.beginReadArray(toolBar->objectName());
-        int ctr = 0;
+        int ctr{};
         for(auto action: toolBar->actions()) {
             settings.setArrayIndex(ctr++);
             action->setVisible(settings.value(u"actionIsVisible"_s, true).toBool());
@@ -417,7 +417,7 @@ void MainWindow::saveSettings() {
     // toolBar actions visible
     for(auto toolBar: findChildren<QToolBar*>()) {
         settings.beginWriteArray(toolBar->objectName());
-        int ctr = 0;
+        int ctr{};
         for(auto action: toolBar->actions()) {
             settings.setArrayIndex(ctr++);
             settings.setValue(u"actionIsVisible"_s, action->isVisible());
@@ -844,7 +844,7 @@ void MainWindow::saveSelectedGCodeFiles() {
         return;
 
     mvector<GCode::File*> gcFiles(project_->files<GCode::File>());
-    for(size_t i = 0; i < gcFiles.size(); ++i)
+    for(size_t i{}; i < gcFiles.size(); ++i)
         if(!gcFiles[i]->itemGroup()->isVisible())
             gcFiles.remove(i--);
 

@@ -135,7 +135,7 @@
 //     if (isNull() || l.isNull())
 //         return 0;
 //     double cos_line = (dx() * l.dx() + dy() * l.dy()) / (length() * l.length());
-//     double rad = 0;
+//     double rad{};
 //     // only accept cos_line in the range [-1,1], if it is outside, use 0 (we return 0 rather than PI for those cases)
 //     if (cos_line >= -1.0 && cos_line <= 1.0)
 //         rad = qAcos(cos_line);

@@ -79,11 +79,11 @@ public:
     double controlPointTolerance = 0.0000001;
     double fitTolerance = 0.0000000001;
 
-    int degreeOfTheSplineCurve = 0.0;
-    int numberOfControlPoints = 0;
-    int numberOfFitPoints = 0;
-    int numberOfKnots = 0;
-    int splineFlag = 0;
+    int degreeOfTheSplineCurve{};
+    int numberOfControlPoints{};
+    int numberOfFitPoints{};
+    int numberOfKnots{};
+    int splineFlag{};
 
     Q_ENUM(DataEnum)
     Q_GADGET

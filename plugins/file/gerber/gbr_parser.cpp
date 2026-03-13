@@ -319,7 +319,7 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
 }
 
 bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
-    bool flag = false;
+    bool flag{};
     int sign = 1;
     if(!Str.isEmpty()) {
         const auto decimal = dir == FormatDir::X ? file->format().xDecimal : file->format().yDecimal;
@@ -508,7 +508,7 @@ Point Parser::parsePosition(const QString& xyStr) {
     auto data{toU16StrView(xyStr)};
     static constexpr ctll::fixed_string ptrnPosition{R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"}; // fixed_string(u"(?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+"};
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(data /*xyStr*/); whole) {
-        /*PType*/ int32_t tmp = 0;
+        /*PType*/ int32_t tmp{};
         if(x && parseNumber(CtreCapTo(x), tmp, FormatDir::X))
             file->format().coordValueNotation == AbsoluteNotation
                 ? state_.curPos().x = tmp
@@ -652,7 +652,7 @@ bool Parser::parseAperture(const QString& gLine) {
             }
         } else {
             VarMap macroCoeff;
-            for(int i = 0; i < paramList.size(); ++i)
+            for(int i{}; i < paramList.size(); ++i)
                 macroCoeff.emplace(QString(u"$%1"_s).arg(i + 1), toDouble(paramList[i], false, false));
             apertures.try_emplace(aperture, std::make_shared<ApMacro>(CtreCapTo(apType).operator QString(), apertureMacro_[CtreCapTo(apType)].split(u'*'), macroCoeff, file));
         }
@@ -757,8 +757,8 @@ bool Parser::parseStepRepeat(const QString& gLine) {
 
 void Parser::closeStepRepeat() {
     addPath();
-    for(int y = 0; y < stepRepeat_.y; ++y) {
-        for(int x = 0; x < stepRepeat_.x; ++x) {
+    for(int y{}; y < stepRepeat_.y; ++y) {
+        for(int x{}; x < stepRepeat_.x; ++x) {
             const Point pt(static_cast</*PType*/ int32_t>(stepRepeat_.i * x), static_cast</*PType*/ int32_t>(stepRepeat_.j * y));
             for(GrObject& go: stepRepeat_.storage) {
                 Paths paths(go.fill);
@@ -855,7 +855,7 @@ bool Parser::parseAttributes(const QString& gLine) {
                     break;
                 default:
                     //                    static const QRegularExpression rx(u"(\\[0-9a-fA-F]{4})"_s);
-                    //                    int pos = 0;
+                    //                    int pos{};
                     //                    auto match(rx.match(sl.last(), pos));
                     //                    while (match.hasMatch()) { //(pos = rx.indexIn(sl.last(), pos)) != -1) {
                     //                        sl.last().replace(pos++, 5, QChar(match.captured(1).right(4).toUShort(nullptr, 16)));
@@ -966,7 +966,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         Point{arcStartPos.x - i, arcStartPos.y - j}
     };
 
-    bool valid = false;
+    bool valid{};
 
     auto constructArc = [this, x, y](Point center, double radius, double start, double stop) {
         auto arcPath = arc(center, radius, start, stop, state_.interpolation());

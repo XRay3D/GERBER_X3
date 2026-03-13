@@ -90,7 +90,7 @@ MathParser3::Result MathParser3::bracket(QStringView s) {
 
 MathParser3::Result MathParser3::functionVariable(QStringView s) {
     QStringView f;
-    int i = 0;
+    int i{};
     int sign = +1;
     if(s.startsWith(u'-')) {
         sign = -1;
@@ -144,8 +144,8 @@ MathParser3::Result MathParser3::mulDiv(QStringView s) {
 }
 
 MathParser3::Result MathParser3::num(QStringView s) {
-    int i = 0;
-    int dot_cnt = 0;
+    int i{};
+    int dot_cnt{};
     bool negative{};
     // число также может начинаться с минуса
     if(s.at(0) == u'-') {

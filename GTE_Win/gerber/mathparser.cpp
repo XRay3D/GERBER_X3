@@ -77,7 +77,7 @@ Result MathParser::bracket(QString s) // throws Exception
 Result MathParser::functionVariable(QString s) // throws Exception
 {
     QString f;
-    int i = 0;
+    int i{};
     int sign = 1;
     if(s.startsWith('-')) {
         sign = -1;
@@ -127,9 +127,9 @@ Result MathParser::mulDiv(QString s) // throws Exception
 
 Result MathParser::num(QString s) // throws Exception
 {
-    int i = 0;
-    int dot_cnt = 0;
-    bool negative = false;
+    int i{};
+    int dot_cnt{};
+    bool negative{};
     // число также может начинаться с минуса
     if(s.at(0) == '-') {
         negative = true;

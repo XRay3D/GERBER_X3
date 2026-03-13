@@ -43,7 +43,7 @@ private:
 
     void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
-    int childCount_ = 0;
+    int childCount_{};
     QModelIndex menuIndex_;
     void showExcellonDialog();
 

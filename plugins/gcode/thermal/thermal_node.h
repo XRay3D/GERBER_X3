@@ -82,7 +82,7 @@ public:
     ThParam getPar() const;
 
 private:
-    const bool container = false;
+    const bool container{};
     const QIcon icon;
     const QString name;
     const Point pos_;
@@ -93,7 +93,7 @@ private:
 
     Node* parent_ = nullptr;
     mvector<std::shared_ptr<Node>> childs;
-    bool checked_ = false;
+    bool checked_{};
 
     Model* const model; // static wrong from anotherr dll
     static inline const Qt::CheckState chState[]{

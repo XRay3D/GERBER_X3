@@ -14,7 +14,7 @@
 #include <new>
 #pragma comment(lib, "shlwapi.lib")
 
-long g_cDllRef = 0;
+long g_cDllRef{};
 
 ClassFactory::ClassFactory()
     : m_cRef(1) {
@@ -27,7 +27,7 @@ ClassFactory::~ClassFactory() { InterlockedDecrement(&g_cDllRef); }
 // IUnknown
 //
 IFACEMETHODIMP ClassFactory::QueryInterface(REFIID riid, void** ppv) {
-    static const QITAB qit[] = {
+    static const QITAB qit[]{
         QITABENT(ClassFactory, IClassFactory),
         {nullptr, 0}
     };

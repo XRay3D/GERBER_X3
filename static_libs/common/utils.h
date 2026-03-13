@@ -321,9 +321,9 @@ using namespace Qt::Literals;
 
 using namespace std::literals;
 template <class Ty>
-inline constexpr bool isEnum = false;
+inline constexpr bool isEnum{};
 template <class Ty>
-inline constexpr bool isBitField = false;
+inline constexpr bool isBitField{};
 namespace Impl {
 template <class Ty>
 inline constexpr Ty Max = Ty{};
@@ -367,7 +367,7 @@ consteval auto tokenize(sv base) {
             else if(token.size())
                 val = toNum<E>(trim(token));
         }
-        tokens[count++] = {name, static_cast<E>(val++)};
+        tokens[count++]{name, static_cast<E>(val++)};
     }
     return tokens;
 }

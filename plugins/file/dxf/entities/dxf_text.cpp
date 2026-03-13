@@ -112,9 +112,9 @@ DxfGo Text::toGo() const {
 
     //    for (auto& code : data)
 
-    double ascent = 0.0;
-    double scaleX = 0.0;
-    double scaleY = 0.0;
+    double ascent{};
+    double scaleX{};
+    double scaleY{};
 
     QFont font;
     QPointF offset;

@@ -19,7 +19,7 @@
 namespace Thermal {
 
 struct ThParam {
-    double angle = 0.0;
+    double angle{};
     double tickness = 0.5;
     int count = 4;
 };

@@ -27,8 +27,8 @@ Ellipse::Ellipse(SectionParser* sp)
 // void Ellipse::draw(const InsertEntity* const i) const
 //{
 //     if (i) {
-//         //        for (int r = 0; r < i->rowCount; ++r) {
-//         //            for (int c = 0; c < i->colCount; ++c) {
+//         //        for (int r{}; r < i->rowCount; ++r) {
+//         //            for (int c{}; c < i->colCount; ++c) {
 //         //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //         //                QPointF rad(radius, radius);
 //         //                auto item = scene->addEllipse(QRectF(centerPoint - rad, centerPoint + rad), QPen(i->color(), thickness /*, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin*/), Qt::NoBrush);

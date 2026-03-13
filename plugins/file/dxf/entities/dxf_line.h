@@ -44,7 +44,7 @@ public:
 
     QPointF startPoint;
     QPointF endPoint;
-    double thickness = 0;
+    double thickness{};
 };
 
 } // namespace Dxf

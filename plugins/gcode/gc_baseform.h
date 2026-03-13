@@ -65,7 +65,7 @@ protected:
     QString trDepth{tr("Depth:")};
     QString trTool{tr("Tool:")};
 
-    bool editMode_ = false;
+    bool editMode_{};
     int fileId{-1};
 
     int fileCount{1};
@@ -119,7 +119,7 @@ private:
 
     File* file_;
     class ::QProgressDialog* progressDialog;
-    int progressTimerId = 0;
+    int progressTimerId{};
 };
 
 } // namespace GCode

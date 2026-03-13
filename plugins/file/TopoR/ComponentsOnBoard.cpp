@@ -114,7 +114,7 @@ int ComponentsOnBoard::RenameComponent(const QString& oldname, const QString& ne
 QString ComponentsOnBoard::UniqueId() {
     QString ABC{u"ABCDEFGHIJKLMNOPQRSTUVWXYZ"_s};
     QString uniqueId{""};
-    for(int i = 0; i < 8; i++)
+    for(int i{}; i < 8; i++)
         uniqueId += ABC[rand() % 26];
     if(_Components.empty() ? false : _Components.size() > 0) {
         for(auto c: _Components)

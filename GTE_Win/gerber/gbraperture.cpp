@@ -234,7 +234,7 @@ void ApPolygon::draw() {
     Path poligon;
     const double step = 360.0 / m_verticesCount;
     const double diam = this->m_diam * uScale;
-    for(int i = 0; i < m_verticesCount; ++i)
+    for(int i{}; i < m_verticesCount; ++i)
         poligon.push_back(IntPoint(
             static_cast<cInt>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast<cInt>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
@@ -280,7 +280,7 @@ void ApMacro::draw() {
     QMap<QString, double> macroCoefficients{m_coefficients};
     QVector<QPair<bool, Path>> items;
     try {
-        for(int i = 0; i < m_modifiers.size(); ++i) {
+        for(int i{}; i < m_modifiers.size(); ++i) {
             QString var(m_modifiers[i]);
             if(var.at(0) == '0') { // Skip Comment
                 qDebug() << "Macro comment:" << var;
@@ -345,7 +345,7 @@ void ApMacro::draw() {
 
     if(items.size() > 1) {
         Clipper clipper;
-        for(int i = 0; i < items.size();) {
+        for(int i{}; i < items.size();) {
             clipper.Clear();
             clipper.AddPaths(m_paths, ptSubject, true);
             bool exp = items[i].first;
@@ -452,7 +452,7 @@ void ApMacro::drawMoire(const QList<double>& mod) {
     {
         Clipper clipper;
         if(thickness && gap) {
-            for(int num = 0; num < mod[NumberOfRings]; ++num) {
+            for(int num{}; num < mod[NumberOfRings]; ++num) {
                 clipper.AddPath(CirclePath(diameter), ptClip, true);
                 diameter -= thickness * 2;
                 Path polygon(CirclePath(diameter));
@@ -486,7 +486,7 @@ Path ApMacro::drawOutlineCustomPolygon(const QList<double>& mod) {
     const int num = static_cast<int>(mod[NumberOfVertices]);
 
     Path polygon;
-    for(int j = 0; j < int(num); ++j)
+    for(int j{}; j < int(num); ++j)
         polygon.push_back(IntPoint(
             static_cast<cInt>(mod[X + j * 2] * uScale),
             static_cast<cInt>(mod[Y + j * 2] * uScale)));
@@ -516,7 +516,7 @@ Path ApMacro::drawOutlineRegularPolygon(const QList<double>& mod) {
         static_cast<cInt>(mod[CenterY] * uScale));
 
     Path polygon;
-    for(int j = 0; j < num; ++j)
+    for(int j{}; j < num; ++j)
         polygon.push_back(IntPoint(
             static_cast<cInt>(qCos(qDegreesToRadians(j * 360.0 / num)) * diameter),
             static_cast<cInt>(qSin(qDegreesToRadians(j * 360.0 / num)) * diameter)));
@@ -616,7 +616,7 @@ bool ApBlock::fit(double) const { return true; }
 
 void ApBlock::draw() {
     m_paths.clear();
-    int i = 0;
+    int i{};
     while(i < size()) {
         Clipper clipper; //(ioStrictlySimple);
         clipper.AddPaths(m_paths, ptSubject, true);

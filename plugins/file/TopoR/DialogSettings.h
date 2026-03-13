@@ -44,7 +44,7 @@ public:
         /// </summary
 
         // ORIGINAL LINE: [XmlAttribute(u"messageLimit"_s, DataType = u"int"_s)] public int _messageLimit;
-        int _messageLimit = 0;
+        int _messageLimit{};
 
         /// <summary>
         /// Настройка DRC: допуск.
@@ -479,14 +479,14 @@ public:
         /// </summary
 
         // ORIGINAL LINE: [XmlAttribute(u"intNums"_s, DataType = u"int"_s)] public int _intNums;
-        int _intNums = 0;
+        int _intNums{};
 
         /// <summary>
         /// Настройка вывода чисел в файлы Gerber, Drill: количество цифр после запятой.
         /// </summary
 
         // ORIGINAL LINE: [XmlAttribute(u"fractNums"_s, DataType = u"int"_s)] public int _fractNums;
-        int _fractNums = 0;
+        int _fractNums{};
 
         /// <summary>
         /// Настройки вывода файлов Gerber.
@@ -686,14 +686,14 @@ public:
         /// </summary
 
         // ORIGINAL LINE: [XmlAttribute(u"intNums"_s, DataType = u"int"_s)] public int _intNums;
-        int _intNums = 0;
+        int _intNums{};
 
         /// <summary>
         /// Настройка вывода чисел в файлы Gerber, Drill: количество цифр после запятой.
         /// </summary
 
         // ORIGINAL LINE: [XmlAttribute(u"fractNums"_s, DataType = u"int"_s)] public int _fractNums;
-        int _fractNums = 0;
+        int _fractNums{};
 
         /// <summary>
         /// Настройки вывода файлов Gerber.

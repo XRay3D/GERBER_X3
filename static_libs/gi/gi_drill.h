@@ -42,7 +42,7 @@ public:
 
 private:
     void create();
-    double diameter_ = 0.0;
+    double diameter_{};
     Path path_;
     QPolygonF fillPolygon;
     int toolId_ = -1;

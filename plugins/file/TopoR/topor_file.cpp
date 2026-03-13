@@ -18,7 +18,7 @@ QDataStream& operator>>(QDataStream& s, Tools& c) {
     c.clear();
     quint32 n;
     s >> n;
-    for(quint32 i = 0; i < n; ++i) {
+    for(quint32 i{}; i < n; ++i) {
         Tools::key_type key;
         Tools::mapped_type val;
         s >> key;

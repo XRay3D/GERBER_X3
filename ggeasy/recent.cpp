@@ -28,7 +28,7 @@ void Recent::createMenu(QMenu* fileMenu, const QString& menuName) {
     connect(recentMenu, &QMenu::aboutToShow, this, &Recent::updateRecentFileActions);
     recentFileSubMenuAct = recentMenu->menuAction();
 
-    for(int i = 0; i < Recent::MaxRecentFiles; ++i) {
+    for(int i{}; i < Recent::MaxRecentFiles; ++i) {
         recentFileActs[i] = recentMenu->addAction(QString(), this, &Recent::openRecentFile);
         recentFileActs[i]->setVisible(false);
     }
@@ -47,7 +47,7 @@ void Recent::createMenu(QMenu* fileMenu, const QString& menuName) {
 QStringList Recent::readRecentFiles(QSettings& settings) {
     QStringList result;
     const int count = settings.beginReadArray(recentFilesKey);
-    for(int i = 0; i < count; ++i) {
+    for(int i{}; i < count; ++i) {
         settings.setArrayIndex(i);
         auto filePath{settings.value(fileKey()).toString()};
         if(QFileInfo::exists(filePath))
@@ -60,7 +60,7 @@ QStringList Recent::readRecentFiles(QSettings& settings) {
 void Recent::writeRecentFiles(const QStringList& files, QSettings& settings) {
     const int count = files.size();
     settings.beginWriteArray(recentFilesKey);
-    for(int i = 0; i < count; ++i) {
+    for(int i{}; i < count; ++i) {
         settings.setArrayIndex(i);
         settings.setValue(fileKey(), files.at(i));
     }
@@ -98,7 +98,7 @@ void Recent::updateRecentFileActions() {
 
     const QStringList recentFiles = readRecentFiles(settings);
     const int count = qMin(int(MaxRecentFiles), recentFiles.size());
-    int i = 0;
+    int i{};
     for(; i < count; ++i) {
         const QString fileName = mainWindow->strippedName(recentFiles.at(i));
         recentFileActs[i]->setText(tr("&%1 %2").arg(i + 1).arg(fileName));

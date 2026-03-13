@@ -26,8 +26,8 @@ Hatch::~Hatch() {
 // void Hatch::draw(const InsertEntity* const i) const
 //{
 //     if (i) {
-//         for (int r = 0; r < i->rowCount; ++r) {
-//             for (int c = 0; c < i->colCount; ++c) {
+//         for (int r{}; r < i->rowCount; ++r) {
+//             for (int c{}; c < i->colCount; ++c) {
 //                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
@@ -127,7 +127,7 @@ void Hatch::parse(CodeData& code) {
             case Line: { // 1
                 auto line = new LineEdge{edgeType};
                 edges[edges.size() - 1].push_back(line);
-                for(int i = 0; i < 4; ++i) {
+                for(int i{}; i < 4; ++i) {
                     code = sp->nextCode();
                     switch(code.code()) {
                     case PrimaryX:
@@ -210,7 +210,7 @@ Entity::Type Hatch::type() const { return Type::HATCH; }
 
 DxfGo Hatch::toGo() const {
     Paths paths(edges.size());
-    for(size_t i = 0; i < edges.size(); ++i)
+    for(size_t i{}; i < edges.size(); ++i)
         for(auto edge: edges[i])
             paths[i] += ~edge->toPolygon();
     Clipper clipper;

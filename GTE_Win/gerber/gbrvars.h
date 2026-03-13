@@ -155,11 +155,11 @@ class State {
     PrimitiveType m_type = Aperture;
     QuadrantMode m_quadrant = Undef;
     RegionMode m_region = Off;
-    int m_aperture = 0;
+    int m_aperture{};
     IntPoint m_curPos;
     Mirroring m_mirroring = NoMirroring;
     double m_scaling = 1.0;
-    double m_rotating = 0.0;
+    double m_rotating{};
 
 public:
     State(Format* const format = nullptr)
@@ -252,10 +252,10 @@ struct StepRepeatStr {
         j = 0.0;
         storage.clear();
     }
-    int x = 0;
-    int y = 0;
-    double i = 0.0;
-    double j = 0.0;
+    int x{};
+    int y{};
+    double i{};
+    double j{};
     QList<GraphicObject> storage;
 };
 

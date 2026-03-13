@@ -122,7 +122,7 @@ void VoronoiBoost::boostVoronoi() {
     for (const Paths& paths: groupedPss) {
         ++id;
         for (const Path& path: paths) {
-            for (size_t i = 0; i < path.size(); ++i) {
+            for (size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 throwIfCancel();
                 const Point& point = path[i];

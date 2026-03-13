@@ -175,8 +175,8 @@ struct Format {
         : file{file} { }
     ZeroMode zeroMode = LeadingZeros;
     UnitMode unitMode = Millimeters;
-    int decimal = 0;
-    int integer = 0;
+    int decimal{};
+    int integer{};
     File* /*const*/ file = nullptr;
 
     friend QDataStream& operator<<(QDataStream& stream, const Format& fmt) {

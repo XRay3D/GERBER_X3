@@ -153,9 +153,8 @@ MathParser1::Result MathParser1::mulDiv(sv s) {
 }
 
 MathParser1::Result MathParser1::num(sv s) {
-
-    int i = 0;
-    int dot_cnt = 0;
+    size_t i{};
+    int dot_cnt{};
     bool negative{};
     // число также может начинаться с минуса
     if(s.at(0) == u'-') {

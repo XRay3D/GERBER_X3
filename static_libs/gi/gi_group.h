@@ -32,7 +32,7 @@ public:
     void setPos(QPointF offset);
 
 private:
-    bool visible_ = false;
+    bool visible_{};
     QPen pen_;
     QColor brushColor_;
 };

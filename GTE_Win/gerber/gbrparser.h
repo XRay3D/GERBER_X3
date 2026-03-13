@@ -62,8 +62,8 @@ private:
     State m_state;
     QString m_currentGerbLine;
 
-    int m_lineNum = 0;
-    int m_goId = 0;
+    int m_lineNum{};
+    int m_goId{};
 
     StepRepeatStr m_stepRepeat;
 
@@ -93,7 +93,7 @@ private:
 
     Paths merge() {
         m_mergedPaths.clear();
-        int i = 0;
+        int i{};
         while(i < m_file.size()) {
             Clipper clipper;
             clipper.AddPaths(m_mergedPaths, ptSubject, true);

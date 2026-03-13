@@ -54,9 +54,9 @@ public:
     virtual bool fit(double toolDiam) const = 0;
 
 protected:
-    bool m_isFlashed = false;
-    double m_drillDiam = 0.0;
-    double m_size = 0.0;
+    bool m_isFlashed{};
+    double m_drillDiam{};
+    double m_size{};
 
     Paths m_paths;
     virtual void draw() = 0;
@@ -80,7 +80,7 @@ protected:
     void draw() override;
 
 private:
-    double m_diam = 0.0;
+    double m_diam{};
 };
 
 /////////////////////////////////////////////////////
@@ -100,8 +100,8 @@ protected:
     void draw() override;
 
 private:
-    double m_height = 0.0;
-    double m_width = 0.0;
+    double m_height{};
+    double m_width{};
 };
 
 /////////////////////////////////////////////////////
@@ -118,8 +118,8 @@ protected:
     void draw() override;
 
 private:
-    double m_height = 0.0;
-    double m_width = 0.0;
+    double m_height{};
+    double m_width{};
 };
 
 /////////////////////////////////////////////////////
@@ -140,9 +140,9 @@ protected:
     void draw() override;
 
 private:
-    double m_diam = 0.0;
-    double m_rotation = 0.0;
-    int m_verticesCount = 0;
+    double m_diam{};
+    double m_rotation{};
+    int m_verticesCount{};
 };
 
 /////////////////////////////////////////////////////

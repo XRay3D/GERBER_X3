@@ -99,8 +99,8 @@ LwPolyline::LwPolyline(SectionParser* sp)
 // void LwPolyline::draw(const InsertEntity* const i) const
 //{
 //     if (i) {
-//         for (int r = 0; r < i->rowCount; ++r) {
-//             for (int c = 0; c < i->colCount; ++c) {
+//         for (int r{}; r < i->rowCount; ++r) {
+//             for (int c{}; c < i->colCount; ++c) {
 //                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
 //                 GraphicObject go(toGo());
 //                 i->transform(go, tr);
@@ -169,7 +169,7 @@ Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
 DxfGo LwPolyline::toGo() const {
     QPainterPath path;
-    const bool dbg = false; // NOTE data.first().line() == 17844; /*|| data.first().line() == 18422;*/
+    const bool dbg{}; // NOTE data.first().line() == 17844; /*|| data.first().line() == 18422;*/
 
     auto addSeg = [&path, dbg](const Segment& source, const Segment& target) {
         if(path.isEmpty())

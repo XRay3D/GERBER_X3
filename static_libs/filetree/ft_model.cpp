@@ -152,13 +152,13 @@ void Model::addItem(Gi::Item* item) {
 
 void Model::closeProject() {
     Node* item;
-    for(int i = 0; i < rootItem->childCount(); ++i) {
+    for(int i{}; i < rootItem->childCount(); ++i) {
         item = rootItem->child(i);
         QModelIndex index = createIndex(i, 0, item);
         int rowCount = item->childCount();
         if(rowCount) {
             beginRemoveRows(index, 0, rowCount - 1);
-            for(int j = 0; j < rowCount; ++j)
+            for(int j{}; j < rowCount; ++j)
                 item->remove(0);
             endRemoveRows();
         }

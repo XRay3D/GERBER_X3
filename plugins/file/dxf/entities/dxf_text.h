@@ -88,9 +88,9 @@ public:
     int16_t horizontalJustType = Left;
     int16_t verticalJustType = Baseline;
 
-    double thickness = 0;
-    double textHeight = 0;
-    double rotation = 0;
+    double thickness{};
+    double textHeight{};
+    double rotation{};
 };
 
 } // namespace Dxf

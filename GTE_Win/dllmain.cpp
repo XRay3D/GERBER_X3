@@ -27,7 +27,7 @@ static HINSTANCE g_hInst = nullptr;
 static QApplication* app = nullptr;
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD dwReason, LPVOID /*lpReserved*/) {
-    int c = 0;
+    int c{};
     switch(dwReason) {
     case DLL_PROCESS_ATTACH:
         // Hold the instance of this DLL module, we will use it to get the

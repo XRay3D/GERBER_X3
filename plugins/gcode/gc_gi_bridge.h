@@ -56,7 +56,7 @@ private:
 
     QPointF lastPos;
 
-    bool ok_ = false;
+    bool ok_{};
 };
 
 } // namespace Gi

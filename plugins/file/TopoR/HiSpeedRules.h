@@ -524,7 +524,7 @@ public:
             /// </summary>
         public:
             // ORIGINAL LINE: [XmlAttribute(u"minPinsNumber"_s, DataType = u"int"_s)] public int _minPinsNumber;
-            int _minPinsNumber = 0;
+            int _minPinsNumber{};
 
             /// <summary>
             /// Cсылки на цепи.
@@ -540,7 +540,7 @@ public:
         /// </summary>
     public:
         // ORIGINAL LINE: [XmlAttribute(u"maxNetsInCluster"_s, DataType = u"int"_s)] public int _maxNetsInCluster;
-        int _maxNetsInCluster = 0;
+        int _maxNetsInCluster{};
 
         /// <summary>
         /// Автоматически задавать связи.

@@ -55,7 +55,7 @@
 //    const int count = static_cast<int>(ceil(gDepth / gcp_.getTool().passDepth()));
 //    const double depth = gDepth / count;
 //    mvector<double> depths(count);
-//    for (int i = 0; i < count; ++i)
+//    for (int i{}; i < count; ++i)
 //        depths[i] = (i + 1) * -depth;
 //    depths.back() = -gDepth - gcp_.getTool().depth();
 //    return depths;

@@ -311,7 +311,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         break;
     }
 
-    for(int i = 0; i < 4; ++i)
+    for(int i{}; i < 4; ++i)
         App::pins()[i]->setPos(pt[i]);
     App::project().setPinsPos(pt);
 }
@@ -324,7 +324,7 @@ void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 }
 
 void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
-    for(int i = 0; i < 4; ++i)
+    for(int i{}; i < 4; ++i)
         App::pins()[i]->lastPos_ = App::pins()[i]->pos();
     QGraphicsItem::mousePressEvent(event);
 }
@@ -400,7 +400,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 int Pin::type() const { return Type::MarkPin; }
 
 void Pin::setPinsPos(QPointF pos[]) {
-    for(int i = 0; i < 4; ++i)
+    for(int i{}; i < 4; ++i)
         App::pins()[i]->setPos(pos[i]);
 }
 
@@ -438,14 +438,14 @@ void Pin::resetPos(bool fl) {
     if(pt[3].y() < center.y())
         pt[3].setY(center.y());
 
-    for(int i = 0; i < 4; ++i)
+    for(int i{}; i < 4; ++i)
         App::pins()[i]->setPos(pt[i]);
 
     App::project().setPinsPos(pt);
 }
 
 void Pin::setPos(const QPointF pos[]) {
-    for(int i = 0; i < 4; ++i)
+    for(int i{}; i < 4; ++i)
         App::pins()[i]->setPos(pos[i]);
 }
 
@@ -510,8 +510,8 @@ void LayoutFrames::updateRect(bool fl) {
     rect_.setHeight(rect_.height() * stepsY + spaceY_ * (stepsY - 1));
     rect_.setWidth(rect_.width() * stepsX + spaceX_ * (stepsX - 1));
 
-    for(int x = 0; x < stepsX; ++x) {
-        for(int y = 0; y < stepsY; ++y) {
+    for(int x{}; x < stepsX; ++x) {
+        for(int y{}; y < stepsY; ++y) {
             if(x || y) {
                 path.addRect(rect.translated(
                     (rect.width() + spaceX_) * x,

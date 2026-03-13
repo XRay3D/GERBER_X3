@@ -118,15 +118,15 @@ bool Shape::closed() const { return handles[1] == handles.back(); }
 QPointF Shape::centroid() {
     return {};
     QPointF centroid;
-    double signedArea = 0.0;
-    double a = 0.0; // Partial signed area
+    double signedArea{};
+    double a{}; // Partial signed area
     mvector<QPointF> vertices;
     vertices.reserve(handles.size() / 2);
     for(auto& h: handles)
         if(h.type() == Handle::Corner)
             vertices.emplace_back(h);
     // For all vertices
-    for(size_t i = 0; i < vertices.size(); ++i) {
+    for(size_t i{}; i < vertices.size(); ++i) {
         QPointF p0(vertices[i]);
         QPointF p1(vertices[(i + 1) % vertices.size()]);
         a = p0.x() * p1.y() - p1.x() * p0.y();

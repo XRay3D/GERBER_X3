@@ -35,7 +35,7 @@ public:
             /// </summary>
         public:
             // ORIGINAL LINE: [XmlAttribute(u"padNum"_s, DataType = u"int"_s)] public int _padNum;
-            int _padNum = 0;
+            int _padNum{};
 
             /// <summary>
             /// Ссылка на стек контактных площадок.

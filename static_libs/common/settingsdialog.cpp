@@ -81,7 +81,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
 
     ui.chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
 
-    for(int i = 0; i < GuiColors::Count; ++i) {
+    for(int i{}; i < GuiColors::Count; ++i) {
         ui.formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector{App::settings().guiColor_[i], defaultColor[i], ui.gbxColor});
         ui.formLayout->setWidget(i, QFormLayout::LabelRole, new QLabel{colorName[i] + u":"_s, ui.gbxColor});
     }
@@ -101,7 +101,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     QString locale(settings.value(u"locale"_s).toString());
     settings.endGroup();
 
-    for(int i = 0; i < ui.cbxLanguage->count(); ++i) {
+    for(int i{}; i < ui.cbxLanguage->count(); ++i) {
         if(ui.cbxLanguage->itemData(i).toString() == locale) {
             ui.cbxLanguage->setCurrentIndex(i);
             langIndex = i;
@@ -179,7 +179,7 @@ void SettingsDialog::readSettings() {
     settings.endGroup();
 
     settings.beginGroup(u"Color"_s);
-    for(int i = 0; i < GuiColors::Count; ++i)
+    for(int i{}; i < GuiColors::Count; ++i)
 #if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
         App::settings().guiColor_[i].fromString
 #else
@@ -243,7 +243,7 @@ void SettingsDialog::saveSettings() {
     settings.endGroup();
 
     settings.beginGroup(u"Color"_s);
-    for(int i = 0; i < GuiColors::Count; ++i)
+    for(int i{}; i < GuiColors::Count; ++i)
         settings.setValue(EnumHelper::toString(static_cast<GuiColors::Name>(i)), App::settings().guiColor_[i].name(QColor::HexArgb));
     settings.endGroup();
 
@@ -321,8 +321,8 @@ void SettingsDialog::accept() {
 }
 
 void SettingsDialog::showEvent(QShowEvent* event) {
-    int width = 0;
-    for(int i = 0; i < ui.tabwMain->tabBar()->count(); ++i)
+    int width{};
+    for(int i{}; i < ui.tabwMain->tabBar()->count(); ++i)
         width += ui.tabwMain->tabBar()->tabRect(i).width();
     resize(width + 20, 10);
     button->setMaximumHeight(ui.buttonBox->button(QDialogButtonBox::Ok)->height());

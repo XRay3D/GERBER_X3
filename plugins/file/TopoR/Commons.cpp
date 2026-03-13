@@ -118,13 +118,13 @@ bool Line::ShouldSerialize_Dots() {
 
 void Line::Shift(float x, float y) {
     if(_Dots.empty() ? false : _Dots.size() > 0)
-        for(int i = 0; i < _Dots.size(); i++)
+        for(int i{}; i < _Dots.size(); i++)
             _Dots[i]->Shift(x, y);
 }
 
 void Line::UnitsConvert(dist_ in_units, dist_ out_units) {
     if(_Dots.empty() ? false : _Dots.size() > 0)
-        for(int i = 0; i < _Dots.size(); i++)
+        for(int i{}; i < _Dots.size(); i++)
             _Dots[i]->UnitsConvert(in_units, out_units);
 }
 
@@ -137,7 +137,7 @@ void Polyline::Shift(float x, float y) {
         _Start->Shift(x, y);
 
     if(_Segments.empty() ? false : _Segments.size() > 0)
-        for(int i = 0; i < _Segments.size(); i++)
+        for(int i{}; i < _Segments.size(); i++)
             std::visit([&](auto&& s) { s.Shift(x, y); }, _Segments[i]);
 }
 
@@ -146,7 +146,7 @@ void Polyline::UnitsConvert(dist_ in_units, dist_ out_units) {
         _Start->UnitsConvert(in_units, out_units);
 
     if(_Segments.empty() ? false : _Segments.size() > 0)
-        for(int i = 0; i < _Segments.size(); i++)
+        for(int i{}; i < _Segments.size(); i++)
             std::visit([&](auto&& s) { s.UnitsConvert(in_units, out_units); }, _Segments[i]);
 }
 

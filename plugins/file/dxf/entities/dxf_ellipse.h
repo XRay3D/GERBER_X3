@@ -44,9 +44,9 @@ public:
         EndParameter = 42,   //	42	Конечный параметр (значение для полного эллипса — 2 пи)
     };
 
-    double startParameter = 0.0;
-    double endParameter = 0.0;
-    double ratioOfMinorAxisToMajorAxis = 0.0;
+    double startParameter{};
+    double endParameter{};
+    double ratioOfMinorAxisToMajorAxis{};
     QPointF CenterPoint;
     QPointF EndpointOfMajorAxis;
 };

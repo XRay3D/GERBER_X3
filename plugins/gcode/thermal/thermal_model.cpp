@@ -17,8 +17,8 @@ namespace Thermal {
 
 QIcon Model::repaint(QColor color, const QIcon& icon) const {
     QImage image(icon.pixmap(24, 24).toImage());
-    for(int x = 0; x < 24; ++x)
-        for(int y = 0; y < 24; ++y) {
+    for(int x{}; x < 24; ++x)
+        for(int y{}; y < 24; ++y) {
             color.setAlpha(image.pixelColor(x, y).alpha());
             image.setPixelColor(x, y, color);
         }
