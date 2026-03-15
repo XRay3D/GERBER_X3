@@ -579,8 +579,7 @@ void Form::computePaths() {
                     fileCount = 1;
                     emit createToolpath(gcp);
                 } break;
-                default:
-                    continue;
+                default: continue;
                 }
             }
         }

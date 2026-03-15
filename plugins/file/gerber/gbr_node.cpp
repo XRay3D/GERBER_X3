@@ -67,8 +67,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             file->setItemType(static_cast<File::ItemsType>(value.toInt()));
             emit App::fileModel().dataChanged(this -> index(), this->index(), {Qt::DecorationRole});
             return true;
-        default:
-            break;
+        default: break;
         }
         break;
     case FileTree::Select:
@@ -82,14 +81,10 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::Side:
-        return itemFlag | Qt::ItemIsEditable;
-    case FileTree::Column::ItemsType:
-        return itemFlag | Qt::ItemIsEditable;
-    default:
-        return itemFlag;
+    case FileTree::Column::NameColorVisible: return itemFlag | Qt::ItemIsUserCheckable;
+    case FileTree::Column::Side            : return itemFlag | Qt::ItemIsEditable;
+    case FileTree::Column::ItemsType       : return itemFlag | Qt::ItemIsEditable;
+    default                                : return itemFlag;
     }
 }
 
@@ -97,46 +92,30 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole:
-            return file->shortName();
-        case Qt::ToolTipRole:
-            return {file->shortName() + u'\n' + file->name()};
-        case Qt::CheckStateRole:
-            return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole:
-            return file->icon();
-        case FileTree::Id:
-            return id();
-        default:
-            return {};
+        case Qt::DisplayRole   : return file->shortName();
+        case Qt::ToolTipRole   : return {file->shortName() + u'\n' + file->name()};
+        case Qt::CheckStateRole: return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DecorationRole: return file->icon();
+        case FileTree::Id      : return id();
+        default                : return {};
         }
     case FileTree::Column::Side:
         switch(role) {
         case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-            return sideStrList[file->side()];
-        case Qt::EditRole:
-            return static_cast<bool>(file->side());
-        case FileTree::Id:
-            return id();
-        default:
-            return {};
+        case Qt::ToolTipRole: return sideStrList[file->side()];
+        case Qt::EditRole   : return static_cast<bool>(file->side());
+        case FileTree::Id   : return id();
+        default             : return {};
         }
     case FileTree::Column::ItemsType:
         switch(role) {
-        case Qt::DisplayRole:
-            return file->displayedTypes().at(file->itemsType()).shortActName();
-        case Qt::ToolTipRole:
-            return file->displayedTypes().at(file->itemsType()).actToolTip;
-        case Qt::EditRole:
-            return file->displayedTypes().at(file->itemsType()).id;
-        case FileTree::Id:
-            return id();
-        default:
-            return {};
+        case Qt::DisplayRole: return file->displayedTypes().at(file->itemsType()).shortActName();
+        case Qt::ToolTipRole: return file->displayedTypes().at(file->itemsType()).actToolTip;
+        case Qt::EditRole   : return file->displayedTypes().at(file->itemsType()).id;
+        case FileTree::Id   : return id();
+        default             : return {};
         }
-    default:
-        break;
+    default: break;
     }
     return {};
 }

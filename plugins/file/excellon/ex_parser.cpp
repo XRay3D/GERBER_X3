@@ -131,11 +131,8 @@ bool Parser::parseGCode(const QString& line) {
                 state_.gCode = G05;
                 state_.wm = DrillMode;
                 break;
-            case G90:
-                state_.gCode = G90;
-                break;
-            default:
-                break;
+            case G90: state_.gCode = G90; break;
+            default : break;
             }
             return true;
         }
@@ -173,12 +170,8 @@ bool Parser::parseMCode(const QString& line) {
                 state_.path.clear();
                 state_.rawPosList.clear();
                 break;
-            case M30:
-                state_.mCode = M30;
-                break;
-            case M48:
-                state_.mCode = M48;
-                break;
+            case M30: state_.mCode = M30; break;
+            case M48: state_.mCode = M48; break;
             case M71:
                 state_.mCode = M71;
                 file->format_.unitMode = Millimeters;
@@ -187,11 +180,8 @@ bool Parser::parseMCode(const QString& line) {
                 state_.mCode = M72;
                 file->format_.unitMode = Inches;
                 break;
-            case M95:
-                state_.mCode = M95;
-                break;
-            default:
-                break;
+            case M95: state_.mCode = M95; break;
+            default : break;
             }
             return true;
         }
@@ -256,21 +246,14 @@ bool Parser::parsePos(const QString& line) {
             state_.rawPos.a = CtreCapTo(A).toString();
 
         switch(state_.wm) {
-        case DrillMode:
-            file->append(Hole(state_, file));
-            break;
+        case DrillMode: file->append(Hole(state_, file)); break;
         case RouteMode:
             switch(state_.gCode) {
             case G00:
-            case G01:
-                state_.path.append(state_.pos);
-                break;
+            case G01: state_.path.append(state_.pos); break;
             case G02:
-            case G03:
-                circularRout();
-                break;
-            default:
-                break;
+            case G03: circularRout(); break;
+            default : break;
             }
             break;
         }
@@ -357,25 +340,15 @@ bool Parser::parseFormat(const QString& line) {
     if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
         if(C1)
             switch(unitMode.indexOf(CtreCapTo(C1))) {
-            case Inches:
-                file->format_.unitMode = Inches;
-                break;
-            case Millimeters:
-                file->format_.unitMode = Millimeters;
-                break;
-            default:
-                break;
+            case Inches     : file->format_.unitMode = Inches; break;
+            case Millimeters: file->format_.unitMode = Millimeters; break;
+            default         : break;
             }
         if(CL2)
             switch(zeroMode.indexOf(CtreCapTo(CL2))) {
-            case LeadingZeros:
-                file->format_.zeroMode = LeadingZeros;
-                break;
-            case TrailingZeros:
-                file->format_.zeroMode = TrailingZeros;
-                break;
-            default:
-                break;
+            case LeadingZeros : file->format_.zeroMode = LeadingZeros; break;
+            case TrailingZeros: file->format_.zeroMode = TrailingZeros; break;
+            default           : break;
             }
         return true;
     }
@@ -405,12 +378,8 @@ bool Parser::parseNumber(QString Str, double& val) {
             }
             if(Str.length() < file->format_.integer + file->format_.decimal) {
                 switch(file->format_.zeroMode) {
-                case LeadingZeros:
-                    Str = Str + QString(file->format_.integer + file->format_.decimal - Str.length(), u'0');
-                    break;
-                case TrailingZeros:
-                    Str = QString(file->format_.integer + file->format_.decimal - Str.length(), u'0') + Str;
-                    break;
+                case LeadingZeros : Str = Str + QString(file->format_.integer + file->format_.decimal - Str.length(), u'0'); break;
+                case TrailingZeros: Str = QString(file->format_.integer + file->format_.decimal - Str.length(), u'0') + Str; break;
                 }
             }
             val = Str.toDouble() * pow(10.0, -file->format_.decimal) * sign;
@@ -497,12 +466,8 @@ double Parser::parseNumber(QString Str, const State& state) {
 
             if(Str.length() < state.format->integer + state.format->decimal) {
                 switch(state.format->zeroMode) {
-                case LeadingZeros:
-                    Str = Str + QString(state.format->integer + state.format->decimal - Str.length(), u'0');
-                    break;
-                case TrailingZeros:
-                    Str = QString(state.format->integer + state.format->decimal - Str.length(), u'0') + Str;
-                    break;
+                case LeadingZeros : Str = Str + QString(state.format->integer + state.format->decimal - Str.length(), u'0'); break;
+                case TrailingZeros: Str = QString(state.format->integer + state.format->decimal - Str.length(), u'0') + Str; break;
                 }
             }
             val = Str.toDouble() * pow(10.0, -state.format->decimal) * sign;

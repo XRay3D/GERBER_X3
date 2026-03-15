@@ -15,18 +15,18 @@ using namespace std::literals;
 
 constexpr auto enumToString(ParseError err) {
     switch(err) {
-    case ParseError::ExpectedRoundBracket: return "ExpectedRoundBracket"sv;
-    case ParseError::InvalidInput: return "InvalidInput"sv;
+    case ParseError::ExpectedRoundBracket : return "ExpectedRoundBracket"sv;
+    case ParseError::InvalidInput         : return "InvalidInput"sv;
     case ParseError::UnknownBinaryOperator: return "UnknownBinaryOperator"sv;
     case ParseError::UnknownExpressionType: return "UnknownExpressionType"sv;
-    case ParseError::UnknownUnaryOperator: return "UnknownUnaryOperator"sv;
-    default: return ""sv;
+    case ParseError::UnknownUnaryOperator : return "UnknownUnaryOperator"sv;
+    default                               : return ""sv;
     }
 }
 
 #define USE_TREE 0
 #if USE_TREE
-#include <QTreeWidget>
+    #include <QTreeWidget>
 extern QTreeWidget* tv;
 #else
 class QTreeWidgetItem;

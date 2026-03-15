@@ -37,8 +37,7 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
     QString line;
     while(in.readLineInto(&line)) {
         switch(Cmd cmd = toCmd(line.midRef(0, 2)); cmd) {
-        default:
-            qDebug() << cmd;
+        default: qDebug() << cmd;
         }
         // file->lines().push_back(line);
         // try {

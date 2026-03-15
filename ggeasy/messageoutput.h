@@ -15,14 +15,10 @@
 #define ATTRIBUTES_OFF() u"\033[m"_s
 
 #define SET_FOREGROUND_COLOR(R, G, B) u"\033[38;2"_s \
-                                      u";"_s #R      \
-                                      u";"_s #G      \
-                                      u";"_s #B u"m"_s
+                                      u";"_s #R u";"_s #G u";"_s #B u"m"_s
 
 #define SET_BACKGROUND_COLOR(R, G, B) u"\033[48;2"_s \
-                                      u";"_s #R      \
-                                      u";"_s #G      \
-                                      u";"_s #B u"m"_s
+                                      u";"_s #R u";"_s #G u";"_s #B u"m"_s
 
 // ANSI escape color codes :
 #define BG_BLACK()   u"\033[40m"_s

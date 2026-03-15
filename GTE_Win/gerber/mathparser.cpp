@@ -161,14 +161,10 @@ Result MathParser::processFunction(QString func, Result r) {
         tan
     };
     switch(QString("sin,cos,tan").split(',').indexOf(func)) {
-    case sin:
-        return Result(qSin(r.acc), r.rest);
-    case cos:
-        return Result(qCos(r.acc), r.rest);
-    case tan:
-        return Result(qTan(r.acc), r.rest);
-    default:
-        qWarning() << "function '" + func + "' is not defined";
+    case sin:return Result(qSin(r.acc), r.rest);
+    case cos:return Result(qCos(r.acc), r.rest);
+    case tan:return Result(qTan(r.acc), r.rest);
+    default: qWarning() << "function '" + func + "' is not defined";
         break;
     }
     return r;

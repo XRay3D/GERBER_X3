@@ -142,20 +142,16 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         }
         break;
-    default:
-        break;
+    default: break;
     }
     return AbstractShape::setData(index, value, role);
 }
 
 Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
     switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return AbstractShape::flags(index) | Qt::ItemIsEditable;
-    case FileTree::Column::Side:
-        return AbstractShape::flags(index) | Qt::ItemIsEditable;
-    default:
-        return AbstractShape::flags(index);
+    case FileTree::Column::NameColorVisible: return AbstractShape::flags(index) | Qt::ItemIsEditable;
+    case FileTree::Column::Side            : return AbstractShape::flags(index) | Qt::ItemIsEditable;
+    default                                : return AbstractShape::flags(index);
     }
 }
 
@@ -163,25 +159,18 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole:
-            return u"%1 (ID: %2)"_s.arg(text()).arg(id());
-        case Qt::EditRole:
-            return text();
-        default:
-            return AbstractShape::data(index, role);
+        case Qt::DisplayRole: return u"%1 (ID: %2)"_s.arg(text()).arg(id());
+        case Qt::EditRole   : return text();
+        default             : return AbstractShape::data(index, role);
         }
     case FileTree::Column::Side:
         switch(role) {
         case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-            return sideStrList[side()];
-        case Qt::EditRole:
-            return static_cast<bool>(side());
-        default:
-            return AbstractShape::data(index, role);
+        case Qt::ToolTipRole: return sideStrList[side()];
+        case Qt::EditRole   : return static_cast<bool>(side());
+        default             : return AbstractShape::data(index, role);
         }
-    default:
-        return AbstractShape::data(index, role);
+    default: return AbstractShape::data(index, role);
     }
 }
 

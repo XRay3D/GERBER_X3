@@ -137,15 +137,13 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DisplayRole:
         switch(index.column()) {
         case Model::Name:
-            return name.size() ? name : u"{%1,%2}"_s.arg((~pos_).x()).arg((~pos_).y()); // FIXME
+            return name.size() ? name : u"{%1,%2}"_s.arg((~pos_).x()).arg((~pos_).y()); // FIXME naming
+
             // case Model::Position:
             // return QVariant::fromValue(pos_); // u"%1 : %2"_s.arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
-        case Model::GapAngle:
-            return par.angle;
-        case Model::apThickness:
-            return par.tickness;
-        case Model::GapCount:
-            return par.count;
+        case Model::GapAngle   : return par.angle;
+        case Model::apThickness: return par.tickness;
+        case Model::GapCount   : return par.count;
         }
         return {};
     case Qt::DecorationRole:
@@ -171,8 +169,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         }
         return checked_ ? Qt::Checked : Qt::Unchecked;
     case Qt::TextAlignmentRole:
-        if(index.column())
-            return Qt::AlignCenter;
+        if(index.column()) return Qt::AlignCenter;
         return {};
     default:
         break;

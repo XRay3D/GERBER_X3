@@ -34,23 +34,16 @@ FolderNode::~FolderNode() { }
 QVariant FolderNode::data(const QModelIndex& index, int role) const {
     if(!index.column()) {
         switch(role) {
-        case Qt::DisplayRole:
-            return name;
-        case Qt::DecorationRole:
-            return QIcon::fromTheme(u"folder"_s);
-        default:
-            break;
+        case Qt::DisplayRole   : return name;
+        case Qt::DecorationRole: return QIcon::fromTheme(u"folder"_s);
+        default                : break;
         }
     }
     switch(role) {
-    case Role::Id:
-        return id();
-    case Role::NodeType:
-        return Folder;
-    case Role::ContentType:
-        return childs.size() ? childs.front()->type_ : Type::Null;
-    default:
-        return {};
+    case Role::Id         : return id();
+    case Role::NodeType   : return Folder;
+    case Role::ContentType: return childs.size() ? childs.front()->type_ : Type::Null;
+    default               : return {};
     }
 }
 
@@ -66,8 +59,7 @@ bool FolderNode::setData(const QModelIndex& index, const QVariant& value, int ro
     case Qt::CheckStateRole:
         checkState_ = value.value<Qt::CheckState>();
         return true;
-    default:
-        return false;
+    default: return false;
     }
 }
 
@@ -87,23 +79,16 @@ ItemNode::~ItemNode() { }
 QVariant ItemNode::data(const QModelIndex& index, int role) const {
     if(!index.column()) {
         switch(role) {
-        case Qt::DisplayRole:
-            return u"name"_s;
-        case Qt::DecorationRole:
-            return drawIcon(item->paths(), item->color());
-        default:
-            break;
+        case Qt::DisplayRole   : return u"name"_s;
+        case Qt::DecorationRole: return drawIcon(item->paths(), item->color());
+        default                : break;
         }
     }
     switch(role) {
-    case Role::Id:
-        return item->id();
-    case Role::NodeType:
-        return Folder;
-    case Role::ContentType:
-        return childs.size() ? childs.front()->type_ : Type::Null;
-    default:
-        return {};
+    case Role::Id         : return item->id();
+    case Role::NodeType   : return Folder;
+    case Role::ContentType: return childs.size() ? childs.front()->type_ : Type::Null;
+    default               : return {};
     }
 }
 
@@ -115,8 +100,7 @@ bool ItemNode::setData(const QModelIndex& index, const QVariant& value, int role
     case Qt::CheckStateRole:
         item->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         return true;
-    default:
-        return false;
+    default: return false;
     }
 }
 

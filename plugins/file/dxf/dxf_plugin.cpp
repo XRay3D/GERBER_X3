@@ -122,8 +122,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
                 case SectionParser::THUMBNAILIMAGE:
                     // dxfFile()->sections_[type] = new SectionTHUMBNAILIMAGE{dxfFile(), from, to};
                     continue;
-                default:
-                    throw u"Unknowh Section!"_s;
+                default: throw u"Unknowh Section!"_s;
                 }
             }
         }

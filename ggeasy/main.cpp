@@ -23,7 +23,7 @@
 #include <QStandardPaths>
 #include <QSystemSemaphore>
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QTextCodec>
+    #include <QTextCodec>
 #endif
 
 int main(int argc, char* argv[]) {
@@ -89,7 +89,7 @@ int main(int argc, char* argv[]) {
         // MainWindow* mainWin = nullptr;
         QSharedMemory sharedMemory{u"GGEasyMemory"_s}; // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running{};    // переменную для проверки ууже запущенного приложения
+        bool is_running{};          // переменную для проверки ууже запущенного приложения
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true;      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
@@ -141,11 +141,11 @@ int main(int argc, char* argv[]) {
     macOS and iOS .dylib, .bundle, .so
     */
 #ifdef __unix__
-#ifdef QT_DEBUG
+    #ifdef QT_DEBUG
     const QString suffix{u"*.so"_s};
-#else
+    #else
     const QString suffix{u"*.so"_s};
-#endif
+    #endif
 #elif _WIN32
     const auto suffix = u"*.dll"_s;
 #else

@@ -10,12 +10,12 @@
  *******************************************************************************/
 #pragma once
 #ifndef GERBERPARSER_H
-#define GERBERPARSER_H
+    #define GERBERPARSER_H
 
-#include "gbr_aperture.h"
-#include "gbr_vars.h"
-#include <QObject>
-#include <QStack>
+    #include "gbr_aperture.h"
+    #include "gbr_vars.h"
+    #include <QObject>
+    #include <QStack>
 
 namespace Gerber {
 

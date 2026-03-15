@@ -177,20 +177,10 @@ void AbstractShape::changeColor() {
     // animation.setStartValue(bodyColor_);
 
     switch(colorState) {
-    case Default:
-        brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
-        brushColor_.setAlpha(50);
-        break;
-    case Hovered:
-        brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF;
-        brushColor_.setAlpha(100);
-        break;
-    case Selected:
-        brushColor_ = QColor(255, 0x0, 0x0, 100);
-        break;
-    case Hovered | Selected:
-        brushColor_ = QColor(255, 0x0, 0x0, 150);
-        break;
+    case Default           : (brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF).setAlpha(50); break;
+    case Hovered           : (brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF).setAlpha(100); break;
+    case Selected          : brushColor_ = QColor(255, 0x0, 0x0, 100); break;
+    case Hovered | Selected: brushColor_ = QColor(255, 0x0, 0x0, 150); break;
     }
 
     // animation.setEndValue(bodyColor_);
@@ -219,18 +209,18 @@ QVariant AbstractShape::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole: /*   */ return u"%1 (%2)"_s.arg(name()).arg(id_);
-        case Qt::CheckStateRole: /**/ return isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole: /**/ return icon();
-        case FileTree::Id: /*      */ return id_;
-        case FileTree::Select: /*  */ return isSelected();
-        default: /*                */ return {};
+        case Qt::DisplayRole   : return u"%1 (%2)"_s.arg(name()).arg(id_);
+        case Qt::CheckStateRole: return isVisible() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DecorationRole: return icon();
+        case FileTree::Id      : return id_;
+        case FileTree::Select  : return isSelected();
+        default                : return {};
         }
     case FileTree::Column::ItemsType:
         switch(role) {
-        case Qt::CheckStateRole: /**/ return isEditable() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DisplayRole: /*   */ return QObject::tr("Editable");
-        default: /*                */ return {};
+        case Qt::CheckStateRole: return isEditable() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DisplayRole   : return QObject::tr("Editable");
+        default                : return {};
         }
     default: return {};
     }
@@ -240,12 +230,9 @@ bool AbstractShape::setData(const QModelIndex& index, const QVariant& value, int
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::CheckStateRole:
-            return setVisible(value.value<Qt::CheckState>() == Qt::Checked), true;
-        case FileTree::Id:
-            return id_ = value.toInt(), true;
-        case FileTree::Select:
-            return setSelected(value.toBool()), true;
+        case Qt::CheckStateRole: return setVisible(value.value<Qt::CheckState>() == Qt::Checked), true;
+        case FileTree::Id      : return id_ = value.toInt(), true;
+        case FileTree::Select  : return setSelected(value.toBool()), true;
         }
         break;
     case FileTree::Column::ItemsType:
@@ -261,12 +248,9 @@ Qt::ItemFlags AbstractShape::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
-    case FileTree::Column::ItemsType:
-        return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::Side:
-        return itemFlag;
-    default:
-        return itemFlag;
+    case FileTree::Column::ItemsType       : return itemFlag | Qt::ItemIsUserCheckable;
+    case FileTree::Column::Side            : return itemFlag;
+    default                                : return itemFlag;
     }
 }
 

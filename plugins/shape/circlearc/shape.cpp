@@ -82,13 +82,9 @@ void Shape::redraw() {
         };
 
         switch(std::distance(handles.begin(), curHandle)) {
-        case Center:
-            updateCenter(true);
-            break;
+        case Center: updateCenter(true); break;
         case Point1:
-        case Point2:
-            updateCenter();
-            break;
+        case Point2: updateCenter(); break;
         }
     }
 

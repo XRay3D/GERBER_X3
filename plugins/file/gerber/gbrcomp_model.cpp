@@ -135,8 +135,7 @@ QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) 
                               "name");
         case 7: /* <decimal> Height, in the unit of the file. */
             return GbrObj::tr("Height");
-        default:
-            return {};
+        default: return {};
         }
     return {};
 }

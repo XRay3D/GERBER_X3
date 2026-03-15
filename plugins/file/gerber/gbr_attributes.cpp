@@ -36,112 +36,46 @@ File::Function File::toFunction(const QString& key) {
 
 void File::parse(const QStringList& list) {
     switch(toStdAttr(list.first())) {
-    case StdAttr::Part:
-        part = list.mid(1);
-        break;
+    case StdAttr::Part: part = list.mid(1); break;
     case StdAttr::FileFunction:
         switch(const auto function = toFunction(list[1]); function) {
-        case Function::Legend:
-            function_ = std::make_shared<struct Legend>(function, list.mid(2));
-            break;
-        case Function::Component:
-            function_ = std::make_shared<struct Component>(function, list.mid(2));
-            break;
-        case Function::Heatsinkmask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::ArrayDrawing:
-            function_ = std::make_shared<struct ArrayDrawing>(function, list.mid(2));
-            break;
-        case Function::AssemblyDrawing:
-            function_ = std::make_shared<struct AssemblyDrawing>(function, list.mid(2));
-            break;
-        case Function::Carbonmask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::Copper:
-            function_ = std::make_shared<struct Copper>(function, list.mid(2));
-            break;
-        case Function::Depthrout:
-            function_ = std::make_shared<struct Depthrout>(function, list.mid(2));
-            break;
-        case Function::Drillmap:
-            function_ = std::make_shared<struct Drillmap>(function, list.mid(2));
-            break;
-        case Function::FabricationDrawing:
-            function_ = std::make_shared<struct FabricationDrawing>(function, list.mid(2));
-            break;
-        case Function::Glue:
-            function_ = std::make_shared<struct Glue>(function, list.mid(2));
-            break;
-        case Function::Goldmask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::NonPlated:
-            function_ = std::make_shared<struct NonPlated>(function, list.mid(2));
-            break;
-        case Function::Other:
-            function_ = std::make_shared<struct Other>(function, list.mid(2));
-            break;
-        case Function::OtherDrawing:
-            function_ = std::make_shared<struct OtherDrawing>(function, list.mid(2));
-            break;
-        case Function::Pads:
-            function_ = std::make_shared<struct Pads>(function, list.mid(2));
-            break;
-        case Function::Paste:
-            function_ = std::make_shared<struct Paste>(function, list.mid(2));
-            break;
-        case Function::Peelablemask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::Plated:
-            function_ = std::make_shared<struct Plated>(function, list.mid(2));
-            break;
-        case Function::Profile:
-            function_ = std::make_shared<struct Profile>(function, list.mid(2));
-            break;
-        case Function::Silvermask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::Soldermask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::Tinmask:
-            function_ = std::make_shared<struct Mask>(function, list.mid(2));
-            break;
-        case Function::Vcut:
-            function_ = std::make_shared<struct Vcut>(function, list.mid(2));
-            break;
-        case Function::Vcutmap:
-            function_ = std::make_shared<struct Vcutmap>(function, list.mid(2));
-            break;
-        case Function::Viafill:
-            function_ = std::make_shared<struct Viafill>(function, list.mid(2));
-            break;
-        default:;
+        case Function::Legend            : function_ = std::make_shared<struct Legend>(function, list.mid(2)); break;
+        case Function::Component         : function_ = std::make_shared<struct Component>(function, list.mid(2)); break;
+        case Function::Heatsinkmask      : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::ArrayDrawing      : function_ = std::make_shared<struct ArrayDrawing>(function, list.mid(2)); break;
+        case Function::AssemblyDrawing   : function_ = std::make_shared<struct AssemblyDrawing>(function, list.mid(2)); break;
+        case Function::Carbonmask        : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::Copper            : function_ = std::make_shared<struct Copper>(function, list.mid(2)); break;
+        case Function::Depthrout         : function_ = std::make_shared<struct Depthrout>(function, list.mid(2)); break;
+        case Function::Drillmap          : function_ = std::make_shared<struct Drillmap>(function, list.mid(2)); break;
+        case Function::FabricationDrawing: function_ = std::make_shared<struct FabricationDrawing>(function, list.mid(2)); break;
+        case Function::Glue              : function_ = std::make_shared<struct Glue>(function, list.mid(2)); break;
+        case Function::Goldmask          : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::NonPlated         : function_ = std::make_shared<struct NonPlated>(function, list.mid(2)); break;
+        case Function::Other             : function_ = std::make_shared<struct Other>(function, list.mid(2)); break;
+        case Function::OtherDrawing      : function_ = std::make_shared<struct OtherDrawing>(function, list.mid(2)); break;
+        case Function::Pads              : function_ = std::make_shared<struct Pads>(function, list.mid(2)); break;
+        case Function::Paste             : function_ = std::make_shared<struct Paste>(function, list.mid(2)); break;
+        case Function::Peelablemask      : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::Plated            : function_ = std::make_shared<struct Plated>(function, list.mid(2)); break;
+        case Function::Profile           : function_ = std::make_shared<struct Profile>(function, list.mid(2)); break;
+        case Function::Silvermask        : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::Soldermask        : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::Tinmask           : function_ = std::make_shared<struct Mask>(function, list.mid(2)); break;
+        case Function::Vcut              : function_ = std::make_shared<struct Vcut>(function, list.mid(2)); break;
+        case Function::Vcutmap           : function_ = std::make_shared<struct Vcutmap>(function, list.mid(2)); break;
+        case Function::Viafill           : function_ = std::make_shared<struct Viafill>(function, list.mid(2)); break;
+        default                          :;
             throw u"Unknownwn File: %1"_s.arg(list.first());
         }
         break;
-    case StdAttr::FilePolarity:
-        filePolarity = toFilePolarityValue(list.last());
-        break;
-    case StdAttr::SameCoordinates:
-        sameCoordinates = list.mid(1);
-        break;
-    case StdAttr::CreationDate:
-        creationDate = list.last();
-        break;
-    case StdAttr::GenerationSoftware:
-        generationSoftware = list.mid(1);
-        break;
-    case StdAttr::ProjectId:
-        projectId = list.mid(1);
-        break;
-    case StdAttr::MD5:
-        md5 = list.last();
-        break;
-    default:;
+    case StdAttr::FilePolarity      : filePolarity = toFilePolarityValue(list.last()); break;
+    case StdAttr::SameCoordinates   : sameCoordinates = list.mid(1); break;
+    case StdAttr::CreationDate      : creationDate = list.last(); break;
+    case StdAttr::GenerationSoftware: generationSoftware = list.mid(1); break;
+    case StdAttr::ProjectId         : projectId = list.mid(1); break;
+    case StdAttr::MD5               : md5 = list.last(); break;
+    default                         :;
         custom[list.first()] = list.mid(1);
     }
 }
@@ -167,102 +101,40 @@ void Aperture::parse(const QStringList& list) {
         if(function_)
             function_.reset();
         switch(const auto function = toFunction(list[1]); function) {
-        case ViaDrill:
-            function_ = std::make_shared<struct ViaDrill>(function, list.mid(2));
-            break;
-        case BackDrill:
-            function_ = std::make_shared<struct BackDrill>(function, list.mid(2));
-            break;
-        case ComponentDrill:
-            function_ = std::make_shared<struct Drill>(function, list.mid(2));
-            break;
-        case MechanicalDrill:
-            function_ = std::make_shared<struct MechanicalDrill>(function, list.mid(2));
-            break;
-        case CastellatedDrill:
-            function_ = std::make_shared<struct CastellatedDrill>(function, list.mid(2));
-            break;
-        case OtherDrill:
-            function_ = std::make_shared<struct OtherDrill>(function, list.mid(2));
-            break;
-        case ComponentPad:
-            function_ = std::make_shared<struct Pad>(function, list.mid(2));
-            break;
-        case SMDPad:
-            function_ = std::make_shared<struct SMDPad>(function, list.mid(2));
-            break;
-        case BGAPad:
-            function_ = std::make_shared<struct BGAPad>(function, list.mid(2));
-            break;
-        case ConnectorPad:
-            function_ = std::make_shared<struct ConnectorPad>(function, list.mid(2));
-            break;
-        case HeatsinkPad:
-            function_ = std::make_shared<struct HeatsinkPad>(function, list.mid(2));
-            break;
-        case ViaPad:
-            function_ = std::make_shared<struct ViaPad>(function, list.mid(2));
-            break;
-        case TestPad:
-            function_ = std::make_shared<struct TestPad>(function, list.mid(2));
-            break;
-        case CastellatedPad:
-            function_ = std::make_shared<struct CastellatedPad>(function, list.mid(2));
-            break;
-        case FiducialPad:
-            function_ = std::make_shared<struct FiducialPad>(function, list.mid(2));
-            break;
-        case ReliefPad:
-            function_ = std::make_shared<struct ReliefPad>(function, list.mid(2));
-            break;
-        case WasherPad:
-            function_ = std::make_shared<struct WasherPad>(function, list.mid(2));
-            break;
-        case AntiPad:
-            function_ = std::make_shared<struct AntiPad>(function, list.mid(2));
-            break;
-        case OtherPad:
-            function_ = std::make_shared<struct OtherPad>(function, list.mid(2));
-            break;
-        case Conductor:
-            function_ = std::make_shared<struct Conductor>(function, list.mid(2));
-            break;
-        case EtchedComponent:
-            function_ = std::make_shared<struct EtchedComponent>(function, list.mid(2));
-            break;
-        case NonConductor:
-            function_ = std::make_shared<struct NonConductor>(function, list.mid(2));
-            break;
-        case CopperBalancing:
-            function_ = std::make_shared<struct CopperBalancing>(function, list.mid(2));
-            break;
-        case Border:
-            function_ = std::make_shared<struct Border>(function, list.mid(2));
-            break;
-        case OtherCopper:
-            function_ = std::make_shared<struct OtherCopper>(function, list.mid(2));
-            break;
-        case ComponentMain: // Component
-            function_ = std::make_shared<struct Main>(function, list.mid(2));
-            break;
-        case ComponentOutline:
-            function_ = std::make_shared<struct Outline>(function, list.mid(2));
-            break;
+        case ViaDrill        : function_ = std::make_shared<struct ViaDrill>(function, list.mid(2)); break;
+        case BackDrill       : function_ = std::make_shared<struct BackDrill>(function, list.mid(2)); break;
+        case ComponentDrill  : function_ = std::make_shared<struct Drill>(function, list.mid(2)); break;
+        case MechanicalDrill : function_ = std::make_shared<struct MechanicalDrill>(function, list.mid(2)); break;
+        case CastellatedDrill: function_ = std::make_shared<struct CastellatedDrill>(function, list.mid(2)); break;
+        case OtherDrill      : function_ = std::make_shared<struct OtherDrill>(function, list.mid(2)); break;
+        case ComponentPad    : function_ = std::make_shared<struct Pad>(function, list.mid(2)); break;
+        case SMDPad          : function_ = std::make_shared<struct SMDPad>(function, list.mid(2)); break;
+        case BGAPad          : function_ = std::make_shared<struct BGAPad>(function, list.mid(2)); break;
+        case ConnectorPad    : function_ = std::make_shared<struct ConnectorPad>(function, list.mid(2)); break;
+        case HeatsinkPad     : function_ = std::make_shared<struct HeatsinkPad>(function, list.mid(2)); break;
+        case ViaPad          : function_ = std::make_shared<struct ViaPad>(function, list.mid(2)); break;
+        case TestPad         : function_ = std::make_shared<struct TestPad>(function, list.mid(2)); break;
+        case CastellatedPad  : function_ = std::make_shared<struct CastellatedPad>(function, list.mid(2)); break;
+        case FiducialPad     : function_ = std::make_shared<struct FiducialPad>(function, list.mid(2)); break;
+        case ReliefPad       : function_ = std::make_shared<struct ReliefPad>(function, list.mid(2)); break;
+        case WasherPad       : function_ = std::make_shared<struct WasherPad>(function, list.mid(2)); break;
+        case AntiPad         : function_ = std::make_shared<struct AntiPad>(function, list.mid(2)); break;
+        case OtherPad        : function_ = std::make_shared<struct OtherPad>(function, list.mid(2)); break;
+        case Conductor       : function_ = std::make_shared<struct Conductor>(function, list.mid(2)); break;
+        case EtchedComponent : function_ = std::make_shared<struct EtchedComponent>(function, list.mid(2)); break;
+        case NonConductor    : function_ = std::make_shared<struct NonConductor>(function, list.mid(2)); break;
+        case CopperBalancing : function_ = std::make_shared<struct CopperBalancing>(function, list.mid(2)); break;
+        case Border          : function_ = std::make_shared<struct Border>(function, list.mid(2)); break;
+        case OtherCopper     : function_ = std::make_shared<struct OtherCopper>(function, list.mid(2)); break;
+        case ComponentMain   : function_ = std::make_shared<struct Main>(function, list.mid(2)); break; // Component
+        case ComponentOutline: function_ = std::make_shared<struct Outline>(function, list.mid(2)); break;
         case ComponentPin: //
             function_ = std::make_shared<struct Pin>(function, list.mid(2));
             break;
-        case Profile:
-            function_ = std::make_shared<struct ProfileA>(function, list.mid(2));
-            break;
-        case NonMaterial:
-            function_ = std::make_shared<struct NonMaterial>(function, list.mid(2));
-            break;
-        case Material:
-            function_ = std::make_shared<struct Material>(function, list.mid(2));
-            break;
-        case Other:
-            function_ = std::make_shared<struct OtherA>(function, list.mid(2));
-            break;
+        case Profile    : function_ = std::make_shared<struct ProfileA>(function, list.mid(2)); break;
+        case NonMaterial: function_ = std::make_shared<struct NonMaterial>(function, list.mid(2)); break;
+        case Material   : function_ = std::make_shared<struct Material>(function, list.mid(2)); break;
+        case Other      : function_ = std::make_shared<struct OtherA>(function, list.mid(2)); break;
         }
         break;
     case StdAttr::DrillTolerance:

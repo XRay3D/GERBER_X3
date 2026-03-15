@@ -440,10 +440,8 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
         ++nestCtr;
         nesting[&polynode] = nestCtr;
         switch(polynode.Count()) {
-        case 0:
-            return nestCtr--;
-        case 1:
-            return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
+        case 0: return nestCtr--;
+        case 1: return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
         default:
             std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
             for(auto&& node: rwPolyTree(polynode))
@@ -663,8 +661,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             }
         });
     } break;
-    case On:
-        break;
+    case On: break;
     }
     msg = last;
 

@@ -1703,63 +1703,47 @@ bool Clipper::IsContributing(const TEdge& edge) const {
     case ctIntersection:
         switch(pft2) {
         case pftEvenOdd:
-        case pftNonZero:
-            return (edge.WindCnt2 != 0);
-        case pftPositive:
-            return (edge.WindCnt2 > 0);
-        default:
-            return (edge.WindCnt2 < 0);
+        case pftNonZero:return (edge.WindCnt2 != 0);
+        case pftPositive:return (edge.WindCnt2 > 0);
+        default: return (edge.WindCnt2 < 0);
         }
         break;
     case ctUnion:
         switch(pft2) {
         case pftEvenOdd:
-        case pftNonZero:
-            return (edge.WindCnt2 == 0);
-        case pftPositive:
-            return (edge.WindCnt2 <= 0);
-        default:
-            return (edge.WindCnt2 >= 0);
+        case pftNonZero:return (edge.WindCnt2 == 0);
+        case pftPositive:return (edge.WindCnt2 <= 0);
+        default: return (edge.WindCnt2 >= 0);
         }
         break;
     case ctDifference:
         if(edge.PolyTyp == ptSubject)
             switch(pft2) {
             case pftEvenOdd:
-            case pftNonZero:
-                return (edge.WindCnt2 == 0);
-            case pftPositive:
-                return (edge.WindCnt2 <= 0);
-            default:
-                return (edge.WindCnt2 >= 0);
+            case pftNonZero:return (edge.WindCnt2 == 0);
+            case pftPositive:return (edge.WindCnt2 <= 0);
+            default: return (edge.WindCnt2 >= 0);
             }
         else
             switch(pft2) {
             case pftEvenOdd:
-            case pftNonZero:
-                return (edge.WindCnt2 != 0);
-            case pftPositive:
-                return (edge.WindCnt2 > 0);
-            default:
-                return (edge.WindCnt2 < 0);
+            case pftNonZero:return (edge.WindCnt2 != 0);
+            case pftPositive:return (edge.WindCnt2 > 0);
+            default: return (edge.WindCnt2 < 0);
             }
         break;
     case ctXor:
         if(edge.WindDelta == 0) // XOr always contributing unless open
             switch(pft2) {
             case pftEvenOdd:
-            case pftNonZero:
-                return (edge.WindCnt2 == 0);
-            case pftPositive:
-                return (edge.WindCnt2 <= 0);
-            default:
-                return (edge.WindCnt2 >= 0);
+            case pftNonZero:return (edge.WindCnt2 == 0);
+            case pftPositive:return (edge.WindCnt2 <= 0);
+            default: return (edge.WindCnt2 >= 0);
             }
         else
             return true;
         break;
-    default:
-        return true;
+    default: return true;
     }
 }
 //------------------------------------------------------------------------------
@@ -2087,24 +2071,14 @@ void Clipper::IntersectEdges(TEdge* e1, TEdge* e2, IntPoint& Pt) {
 
     cInt e1Wc, e2Wc;
     switch(e1FillType) {
-    case pftPositive:
-        e1Wc = e1->WindCnt;
-        break;
-    case pftNegative:
-        e1Wc = -e1->WindCnt;
-        break;
-    default:
-        e1Wc = Abs(e1->WindCnt);
+    case pftPositive:e1Wc = e1->WindCnt;break;
+    case pftNegative:e1Wc = -e1->WindCnt;break;
+    default: e1Wc = Abs(e1->WindCnt);
     }
     switch(e2FillType) {
-    case pftPositive:
-        e2Wc = e2->WindCnt;
-        break;
-    case pftNegative:
-        e2Wc = -e2->WindCnt;
-        break;
-    default:
-        e2Wc = Abs(e2->WindCnt);
+    case pftPositive:e2Wc = e2->WindCnt;break;
+    case pftNegative:e2Wc = -e2->WindCnt;break;
+    default: e2Wc = Abs(e2->WindCnt);
     }
 
     if(e1Contributing && e2Contributing) {
@@ -2133,24 +2107,14 @@ void Clipper::IntersectEdges(TEdge* e1, TEdge* e2, IntPoint& Pt) {
 
         cInt e1Wc2, e2Wc2;
         switch(e1FillType2) {
-        case pftPositive:
-            e1Wc2 = e1->WindCnt2;
-            break;
-        case pftNegative:
-            e1Wc2 = -e1->WindCnt2;
-            break;
-        default:
-            e1Wc2 = Abs(e1->WindCnt2);
+        case pftPositive:e1Wc2 = e1->WindCnt2;break;
+        case pftNegative:e1Wc2 = -e1->WindCnt2;break;
+        default: e1Wc2 = Abs(e1->WindCnt2);
         }
         switch(e2FillType2) {
-        case pftPositive:
-            e2Wc2 = e2->WindCnt2;
-            break;
-        case pftNegative:
-            e2Wc2 = -e2->WindCnt2;
-            break;
-        default:
-            e2Wc2 = Abs(e2->WindCnt2);
+        case pftPositive:e2Wc2 = e2->WindCnt2;break;
+        case pftNegative:e2Wc2 = -e2->WindCnt2;break;
+        default: e2Wc2 = Abs(e2->WindCnt2);
         }
 
         if(e1->PolyTyp != e2->PolyTyp)
@@ -3872,12 +3836,8 @@ void ClipperOffset::OffsetPoint(int j, int& k, JoinType jointype) {
                 DoSquare(j, k);
             break;
         }
-        case jtSquare:
-            DoSquare(j, k);
-            break;
-        case jtRound:
-            DoRound(j, k);
-            break;
+        case jtSquare:DoSquare(j, k);break;
+        case jtRound:DoRound(j, k);break;
         }
     k = j;
 }

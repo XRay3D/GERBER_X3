@@ -14,9 +14,9 @@
 
 #include <QElapsedTimer>
 #ifndef __GNUC__
-#undef emit
-#include <execution>
-#define emit
+    #undef emit
+    #include <execution>
+    #define emit
 
 #endif
 
@@ -71,9 +71,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     case GCode::Outer:
         groupedPaths(GCode::Grouping::Cutoff, uScale); // toolDiameter_ + 5
         break;
-    case GCode::Inner:
-        groupedPaths(GCode::Grouping::Copper);
-        break;
+    case GCode::Inner: groupedPaths(GCode::Grouping::Copper); break;
     case GCode::On:
         emit fileReady(nullptr);
         return;
@@ -284,8 +282,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         if(!returnPs.empty()) returnPss.push_back(returnPs);
         if(!profilePaths.empty()) returnPss.push_back(profilePaths);
         break;
-    default:
-        break;
+    default: break;
     }
 
     if(returnPss.empty()) {

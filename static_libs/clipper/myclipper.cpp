@@ -85,8 +85,6 @@ QIcon drawDrillIcon(QColor color) {
 
 using namespace std::placeholders;
 
-
-
 template <>
 struct std::hash<Point> {
     std::size_t operator()(const Point& pt) const noexcept {
@@ -131,7 +129,7 @@ double Angle(double a, double b, double c) {
 // их можно перевести в градусы, умножив на (180/pi). 3
 
 void TestPaths(const Paths& paths_) {
-    new Gi::Debug{paths_};
+    // new Gi::Debug{paths_};
 
     return;
     Paths paths = paths_;
@@ -771,12 +769,9 @@ void sortPolyTreeByNesting(PolyTree& polynode) {
         ++nestCtr;
         nesting[&polynode] = nestCtr;
         switch(polynode.Count()) {
-        case 0:
-            return nestCtr--;
-        case 1:
-            return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
-        default:
-            std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
+        case 0:return nestCtr--;
+        case 1:return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
+        default: std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
             for(auto&& node: rwPolyTree(polynode))
                 map[sorter(*node)].emplace_back(std::move(node));
             size_t i = polynode.Count();

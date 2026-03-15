@@ -10,11 +10,11 @@
  ********************************************************************************/
 #pragma once
 #ifndef TOOLNAME_H
-#define TOOLNAME_H
+    #define TOOLNAME_H
 
-#include <QWidget>
+    #include <QWidget>
 
-#include "tool_pch.h"
+    #include "tool_pch.h"
 
 class QLabel;
 

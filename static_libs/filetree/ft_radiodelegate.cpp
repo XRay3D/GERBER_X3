@@ -9,10 +9,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #ifdef GBR_
-#include "gbr_node.h"
-#include "radiodelegate.h"
-#include <QApplication>
-#include <QRadioButton>
+    #include "gbr_node.h"
+    #include "radiodelegate.h"
+    #include <QApplication>
+    #include <QRadioButton>
 
 ////////////////////////////////////////////////////////////
 /// \brief RadioDelegate::RadioDelegate

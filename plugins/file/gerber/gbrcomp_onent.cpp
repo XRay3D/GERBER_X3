@@ -38,8 +38,7 @@ bool Component::setData(int key, const QStringList& data) {
     case Component::Val:
         value_ = data.last();
         return true;
-    case Component::Mnt:
-        return setMountType(data.last());
+    case Component::Mnt: return setMountType(data.last());
     case Component::Ftp:
         footprintName_ = data.last();
         return true;
@@ -55,10 +54,8 @@ bool Component::setData(int key, const QStringList& data) {
     case Component::LbD:
         library_.description = data.last();
         return true;
-    case Component::Sup:
-        return false;
-    default:
-        return false;
+    case Component::Sup: return false;
+    default            : return false;
     }
     return fl;
 }

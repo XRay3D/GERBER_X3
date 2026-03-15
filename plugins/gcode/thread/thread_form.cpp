@@ -290,8 +290,7 @@ void Form::computePaths() {
     // case Gi::Type::ShCirArc:
     // wRawPaths.append(gi->paths());
     // break;
-    // default:
-    // break;
+    // default: break;
     // }
     // addUsedGi(gi);
     // }

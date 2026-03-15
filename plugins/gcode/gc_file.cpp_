@@ -415,14 +415,9 @@ void File::genGcodeAndTile() {
                 else
                     saveMillingProfile(offset);
                 break;
-            case Drill:
-                saveDrill(offset);
-                break;
-            case LaserHLDI:
-                saveLaserHLDI(offset);
-                break;
-            default:
-                break;
+            case Drill:saveDrill(offset);break;
+            case LaserHLDI:saveLaserHLDI(offset);break;
+            default: break;
             }
             if(gcp_.params.contains(GCodeParams::NotTile))
                 return;
@@ -716,13 +711,9 @@ void File::createGi() {
                 itemGroup()->emplace_back(new GiDataPath(path, this))->setPenColorPtr(&gcp_.color);
     } break;
     case GCode::Profile:
-    case GCode::Thermal:
-        createGiProfile();
-        break;
+    case GCode::Thermal:createGiProfile();break;
     case GCode::Raster:
-    case GCode::Hatching:
-        createGiRaster();
-        break;
+    case GCode::Hatching:createGiRaster();break;
     case GCode::Voronoi:
         if(toolPathss_.size() > 1) {
             GraphicsItem* item;
@@ -734,17 +725,10 @@ void File::createGi() {
         } else
             createGiProfile();
         break;
-    case GCode::Pocket:
-        createGiPocket();
-        break;
-    case GCode::Drill:
-        createGiDrill();
-        break;
-    case GCode::LaserHLDI:
-        createGiLaser();
-        break;
-    default:
-        break;
+    case GCode::Pocket:createGiPocket();break;
+    case GCode::Drill:createGiDrill();break;
+    case GCode::LaserHLDI:createGiLaser();break;
+    default: break;
     }
 
     for(auto&& paths: toolPathss_)
@@ -752,32 +736,17 @@ void File::createGi() {
             calcArcs(path);
 
     switch(gcp_.gcType) {
-    case GCode::Null:
-        icon_ = decoration(gcp_.color, name_.front());
-        break;
-    case GCode::Profile:
-        icon_ = QIcon::fromTheme("profile-path");
-        break;
-    case GCode::Pocket:
-        icon_ = QIcon::fromTheme("pocket-path");
-        break;
-    case GCode::Voronoi:
-        icon_ = QIcon::fromTheme("voronoi-path");
-        break;
-    case GCode::Thermal:
-        icon_ = QIcon::fromTheme("thermal-path");
-        break;
-    case GCode::Drill:
-        icon_ = QIcon::fromTheme("drill-path");
-        break;
+    case GCode::Null:icon_ = decoration(gcp_.color, name_.front());break;
+    case GCode::Profile:icon_ = QIcon::fromTheme("profile-path");break;
+    case GCode::Pocket:icon_ = QIcon::fromTheme("pocket-path");break;
+    case GCode::Voronoi:icon_ = QIcon::fromTheme("voronoi-path");break;
+    case GCode::Thermal:icon_ = QIcon::fromTheme("thermal-path");break;
+    case GCode::Drill:icon_ = QIcon::fromTheme("drill-path");break;
     case GCode::Raster:
-    case GCode::LaserHLDI:
-        icon_ = QIcon::fromTheme("raster-path");
-        break;
+    case GCode::LaserHLDI:icon_ = QIcon::fromTheme("raster-path");break;
     case GCode::Hatching:
         icon_ = QIcon::fromTheme("crosshatch-path");
-    default:
-        break;
+    default: break;
     }
 
     itemGroup()->setVisible(true);

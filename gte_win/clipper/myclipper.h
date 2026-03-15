@@ -10,11 +10,11 @@
  *******************************************************************************/
 #pragma once
 #ifndef MYCLIPPER_H
-#define MYCLIPPER_H
+    #define MYCLIPPER_H
 
-#include "clipper.hpp"
-#include <QDebug>
-#include <QPolygonF>
+    #include "clipper.hpp"
+    #include <QDebug>
+    #include <QPolygonF>
 
 // QDebug operator<<(QDebug debug, const IntPoint& p)
 //{

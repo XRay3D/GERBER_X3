@@ -97,69 +97,27 @@ LwPolyline::LwPolyline(SectionParser* sp)
     : Entity{sp} {
 }
 
-// void LwPolyline::draw(const InsertEntity* const i) const
-//{
-// if (i) {
-// for (int r{}; r < i->rowCount; ++r) {
-// for (int c{}; c < i->colCount; ++c) {
-// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-// GraphicObject go(toGo());
-// i->transform(go, tr);
-// i->attachToLayer(std::move(go));
-// }
-// }
-// } else {
-// attachToLayer(toGo());
-// }
-// }
-
 void LwPolyline::parse(CodeData& code) {
     Segment pt;
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMrker:
-            break;
-        case NumberOfVertices:
-            numberOfVertices = code;
-            break;
-        case PolylineFlag:
-            polylineFlag = code;
-            break;
-        case ConstantWidth:
-            constantWidth = code;
-            break;
-        case Elevation:
-            elevation = code;
-            break;
-        case Thickness:
-            thickness = code;
-            break;
-        case VertexCoordinatesX:
-            poly.emplace_back().rx() = code;
-            break;
-        case VertexCoordinatesY:
-            poly.back().ry() = code;
-            break;
-        case VertexID:
-            break;
-        case StartWidth:
-            startWidth = code;
-            break;
-        case EndWidth:
-            endWidth = code;
-            break;
-        case Bulge: // betven points
-            poly.back().bulge = code;
-            break;
-        case ExtrusionDirectionX:
-            break;
-        case ExtrusionDirectionY:
-            break;
-        case ExtrusionDirectionZ:
-            break;
-        default:
-            Entity::parse(code);
+        case SubclassMrker      : break;
+        case NumberOfVertices   : numberOfVertices = code; break;
+        case PolylineFlag       : polylineFlag = code; break;
+        case ConstantWidth      : constantWidth = code; break;
+        case Elevation          : elevation = code; break;
+        case Thickness          : thickness = code; break;
+        case VertexCoordinatesX : poly.emplace_back().rx() = code; break;
+        case VertexCoordinatesY : poly.back().ry() = code; break;
+        case VertexID           : break;
+        case StartWidth         : startWidth = code; break;
+        case EndWidth           : endWidth = code; break;
+        case Bulge              : poly.back().bulge = code; break; // betven points
+        case ExtrusionDirectionX: break;
+        case ExtrusionDirectionY: break;
+        case ExtrusionDirectionZ: break;
+        default                 : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);

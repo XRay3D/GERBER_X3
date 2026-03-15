@@ -267,8 +267,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                         g.raw = drillDiameter /** go.scaleX()*/;
                         g.name = /*u"С Ø"_s +*/ QString::number(drillDiameter);
                     } break;
-                    default:
-                        break;
+                    default: break;
                     }
                 }
             }

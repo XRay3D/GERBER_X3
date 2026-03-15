@@ -213,8 +213,7 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
                 state = Data;
             }
             break;
-        case Data:
-            break;
+        case Data: break;
         }
     };
 
@@ -232,8 +231,7 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
                 if(!tmpline.isEmpty())
                     gerberLines << (u'%' + tmpline + u"*%"_s);
             break;
-        case Data:
-            break;
+        case Data: break;
         }
         val.clear();
     };
@@ -379,12 +377,8 @@ void Parser::addPath() {
             auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
             go.name = u"D%1|Polygon"_s.arg(state_.aperture());
         } break;
-        case WorkingType::StepRepeat:
-            stepRepeat_.storage.append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
-            break;
-        case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_)));
-            break;
+        case WorkingType::StepRepeat   : stepRepeat_.storage.append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_))); break;
+        case WorkingType::ApertureBlock: apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(goId_++, state_, createPolygon(), file, GrObject::Type(type), std::move(path_))); break;
         }
         break;
     case Off:
@@ -395,12 +389,8 @@ void Parser::addPath() {
             auto& go = file->graphicObjects_.emplace_back(GrObject(goId_++, state_, createLine(), file, GrObject::Type(type), std::move(path_)));
             go.name = u"D%1|PolyLine"_s.arg(state_.aperture());
         } break;
-        case WorkingType::StepRepeat:
-            stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
-            break;
-        case WorkingType::ApertureBlock:
-            apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size(), state_, createLine(), file, GrObject::Type(type), std::move(path_)));
-            break;
+        case WorkingType::StepRepeat   : stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(), state_, createLine(), file, GrObject::Type(type), std::move(path_))); break;
+        case WorkingType::ApertureBlock: apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size(), state_, createLine(), file, GrObject::Type(type), std::move(path_))); break;
         }
         break;
     }
@@ -427,26 +417,13 @@ void Parser::addFlash() {
     int type = GrObject::FlStamp;
 
     switch(ap->type()) {
-    case Circle:
-        type |= GrObject::Circle;
-        break;
-    case Rectangle:
-        type |= GrObject::Rect;
-        break;
-    case Obround:
-        type |= GrObject::Elipse;
-        break;
-    case Polygon:
-        type |= GrObject::Polygon;
-        break;
-    case Macro:
-        type |= GrObject::Composite;
-        break;
-    case Block:
-        type |= GrObject::Composite;
-        break;
-    default:
-        break;
+    case Circle   : type |= GrObject::Circle; break;
+    case Rectangle: type |= GrObject::Rect; break;
+    case Obround  : type |= GrObject::Elipse; break;
+    case Polygon  : type |= GrObject::Polygon; break;
+    case Macro    : type |= GrObject::Composite; break;
+    case Block    : type |= GrObject::Composite; break;
+    default       : break;
     }
 
     switch(abSrIdStack_.top().workingType) {
@@ -467,14 +444,9 @@ void Parser::addFlash() {
     }
     if(aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
         switch(aperFunctionMap[state_.aperture()].function_->function) {
-        case Attr::Aperture::ComponentPin:
-            components[refDes].pins().back().pos = ~state_.curPos();
-            break;
-        case Attr::Aperture::ComponentMain:
-            components[refDes].setReferencePoint(~state_.curPos());
-            break;
-        default:
-            break;
+        case Attr::Aperture::ComponentPin : components[refDes].pins().back().pos = ~state_.curPos(); break;
+        case Attr::Aperture::ComponentMain: components[refDes].setReferencePoint(~state_.curPos()); break;
+        default                           : break;
         }
     }
 
@@ -695,14 +667,9 @@ bool Parser::parseTransformations(const QString& gLine) {
         case trPolarity:
             addPath();
             switch(slLevelPolarity.indexOf(val.data()[0])) {
-            case Positive:
-                state_.setImgPolarity(Positive);
-                break;
-            case Negative:
-                state_.setImgPolarity(Negative);
-                break;
-            default:
-                throw u"bool Parser::parseTransformations(const SLI & gLine) - Polarity error!"_s;
+            case Positive: state_.setImgPolarity(Positive); break;
+            case Negative: state_.setImgPolarity(Negative); break;
+            default      : throw u"bool Parser::parseTransformations(const SLI & gLine) - Polarity error!"_s;
             }
             return true;
         case trMirror:
@@ -796,9 +763,7 @@ bool Parser::parseAttributes(const QString& gLine) {
     if(auto [whole, c1, c2, c3] = ctre::match<ptrnAttributes>(data); whole) {
         QStringList cap{QString{whole}, QString{c1}, QString{c2}, QString{c3}};
         switch(Attr::Command::value(cap[1])) {
-        case Attr::Command::TF:
-            attFile.parse(cap[3].split(u','));
-            break;
+        case Attr::Command::TF: attFile.parse(cap[3].split(u',')); break;
         case Attr::Command::TA:
             attAper.parse(cap[3].split(u','));
             break;
@@ -815,15 +780,13 @@ bool Parser::parseAttributes(const QString& gLine) {
             // case Attr::AperFunction::Pin:
             // aperFunction = key;
             // break;
-            // default:
-            // aperFunction = -1;
+            // default: // aperFunction = -1;
             // }
             // }
             // break;
             // case Attr::Aperture::DrillTolerance:
             // case Attr::Aperture::FlashText:
-            // default:
-            // ;
+            // default: // ;
             // }
             // //apertureAttributesStrings.append(matchAttr.cap(2));
             // }
@@ -832,11 +795,8 @@ bool Parser::parseAttributes(const QString& gLine) {
                 cap[3].remove(i, 1);
             auto sl(cap[3].split(u',')); // remove symbol "
             switch(int index = Comp::Component::value1(sl.first()); index) {
-            case Comp::Component::N: // The CAD net name of a conducting object, e.g. Clk13.
-                break;
-            case Comp::Component::P: // Pins
-                components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}});
-                break;
+            case Comp::Component::N: break;                                                                 // The CAD net name of a conducting object, e.g. Clk13.
+            case Comp::Component::P: components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}}); break; // Pins
             case Comp::Component::C:
                 switch(int key = Comp::Component::value2(sl.first())) {
                 case Comp::Component::Rot:
@@ -849,11 +809,8 @@ bool Parser::parseAttributes(const QString& gLine) {
                 case Comp::Component::Hgt:
                 case Comp::Component::LbN:
                 case Comp::Component::LbD:
-                case Comp::Component::Sup:
-                    components[refDes].setData(key, sl);
-                    break;
-                default:
-                    // static const QRegularExpression rx(u"(\\[0-9a-fA-F]{4})"_s);
+                case Comp::Component::Sup: components[refDes].setData(key, sl); break;
+                default: // static const QRegularExpression rx(u"(\\[0-9a-fA-F]{4})"_s);
                     // int pos{};
                     // auto match(rx.match(sl.last(), pos));
                     // while (match.hasMatch()) { //(pos = rx.indexIn(sl.last(), pos)) != -1) {
@@ -867,8 +824,7 @@ bool Parser::parseAttributes(const QString& gLine) {
                     components[refDes].setRefdes(refDes);
                 }
                 break;
-            default:
-                qDebug() << gLine << cap[0];
+            default: qDebug() << gLine << cap[0];
             }
         } break;
         case Attr::Command::TD:
@@ -943,8 +899,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     }
 
     switch(state_.dCode()) {
-    case D01:
-        break;
+    case D01: break;
     case D02: // Nothing created! Pen Up.
         state_.setDCode(D01);
         addPath();
@@ -1052,23 +1007,15 @@ bool Parser::parseFormat(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnFormat{R"(^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$)"}; // fixed_string(u"^%FS([LT]?)([AI]?)X(\d)(\d)Y(\d)(\d)\*%$"};
     if(auto [whole, c1, c2, c3, c4, c5, c6] = ctre::match<ptrnFormat>(data); whole) {
         switch(zeroOmissionModeList.indexOf(c1.data()[0])) {
-        case OmitLeadingZeros:
-            file->format().zeroOmisMode = OmitLeadingZeros;
-            break;
+        case OmitLeadingZeros: file->format().zeroOmisMode = OmitLeadingZeros; break;
 #ifdef DEPRECATED
-        case OmitTrailingZeros:
-            file->format().zeroOmisMode = OmitTrailingZeros;
-            break;
+        case OmitTrailingZeros: file->format().zeroOmisMode = OmitTrailingZeros; break;
 #endif
         }
         switch(coordinateValuesNotationList.indexOf(c2.data()[0])) {
-        case AbsoluteNotation:
-            file->format().coordValueNotation = AbsoluteNotation;
-            break;
+        case AbsoluteNotation: file->format().coordValueNotation = AbsoluteNotation; break;
 #ifdef DEPRECATED
-        case IncrementalNotation:
-            file->format().coordValueNotation = IncrementalNotation;
-            break;
+        case IncrementalNotation: file->format().coordValueNotation = IncrementalNotation; break;
 #endif
         }
         file->format().xInteger = CtreCapTo(c3);
@@ -1110,9 +1057,7 @@ bool Parser::parseGCode(const QString& gLine) {
             state_.setInterpolation(CounterClockwiseCircular);
             state_.setGCode(G03);
             break;
-        case G04:
-            state_.setGCode(G04);
-            break;
+        case G04: state_.setGCode(G04); break;
         case G36:
             addPath();
             state_.setRegion(On);
@@ -1152,9 +1097,7 @@ bool Parser::parseGCode(const QString& gLine) {
             state_.setGCode(G91);
 #endif
             break;
-        default:
-            qWarning() << u"Erroror, unknown G-code "_s << gLine; //<< match.capturedTexts();
-            break;
+        default: qWarning() << u"Erroror, unknown G-code "_s << gLine; //<< match.capturedTexts(); break;
         }
         return true;
     }
@@ -1172,12 +1115,8 @@ bool Parser::parseImagePolarity(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnImagePolarity{R"(^%IP(POS|NEG)\*%$)"}; // fixed_string(u"^%IP(POS|NEG)\*%$"};
     if(auto [whole, c1] = ctre::match<ptrnImagePolarity>(data); whole) {
         switch(slImagePolarity.indexOf(CtreCapTo(c1))) {
-        case Positive:
-            state_.setImgPolarity(Positive);
-            break;
-        case Negative:
-            state_.setImgPolarity(Negative);
-            break;
+        case Positive: state_.setImgPolarity(Positive); break;
+        case Negative: state_.setImgPolarity(Negative); break;
         }
         return true;
     }
@@ -1231,9 +1170,7 @@ bool Parser::parseDCode(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnDCode{R"(^D0?([123])\*$)"}; // fixed_string(u"^D0?([123])\*$"};
     if(auto [whole, c1] = ctre::match<ptrnDCode>(data); whole) {
         switch(int{CtreCapTo(c1)}) {
-        case D01:
-            state_.setDCode(D01);
-            break;
+        case D01: state_.setDCode(D01); break;
         case D02:
             addPath();
             state_.setDCode(D02);
@@ -1269,12 +1206,8 @@ bool Parser::parseUnitMode(const QString& gLine) {
     static constexpr ctll::fixed_string ptrnUnitMode{R"(^%MO(IN|MM)\*%$)"}; // fixed_string(u"^%MO(IN|MM)\*%$"};
     if(auto [whole, c1] = ctre::match<ptrnUnitMode>(data); whole) {
         switch(slUnitType.indexOf(QString{CtreCapTo(c1)})) {
-        case Inches:
-            file->format().unitMode = Inches;
-            break;
-        case Millimeters:
-            file->format().unitMode = Millimeters;
-            break;
+        case Inches     : file->format().unitMode = Inches; break;
+        case Millimeters: file->format().unitMode = Millimeters; break;
         }
         return true;
     }

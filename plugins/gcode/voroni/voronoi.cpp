@@ -31,12 +31,8 @@ void Creator::create() {
 
     groupedPaths(GCode::Grouping::Copper);
     switch(gcp_.params[VoronoiType].toInt()) {
-    case 0:
-        boostVoronoi();
-        break;
-    case 1:
-        jcVoronoi();
-        break;
+    case 0: boostVoronoi(); break;
+    case 1: jcVoronoi(); break;
     }
 
     if(width < tool.getDiameter(depth)) {

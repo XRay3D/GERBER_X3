@@ -59,48 +59,23 @@ void InsertEntity::parse(CodeData& code) {
     do {
         switch(code.code()) {
         case SubclassMrker:
-        case VariableAttributes:
-            break;
-        case BlockName:
-            blockName = code.string();
-            break;
-        case InsPtX:
-            insPos.rx() = code;
-            break;
-        case InsPtY:
-            insPos.ry() = code;
-            break;
-        case InsPtZ:
-            break;
-        case ScaleX:
-            scaleX = code;
-            break;
-        case ScaleY:
-            scaleY = code;
-            break;
-        case ScaleZ:
-            break;
-        case RotationAngle:
-            rotationAngle = code;
-            break;
-        case ColCount:
-            colCount = code;
-            break;
-        case RowCount:
-            rowCount = code;
-            break;
-        case ColSpacing:
-            colSpacing = code;
-            break;
-        case RowSpacing:
-            rowSpacing = code;
-            break;
+        case VariableAttributes : break;
+        case BlockName          : blockName = code.string(); break;
+        case InsPtX             : insPos.rx() = code; break;
+        case InsPtY             : insPos.ry() = code; break;
+        case InsPtZ             : break;
+        case ScaleX             : scaleX = code; break;
+        case ScaleY             : scaleY = code; break;
+        case ScaleZ             : break;
+        case RotationAngle      : rotationAngle = code; break;
+        case ColCount           : colCount = code; break;
+        case RowCount           : rowCount = code; break;
+        case ColSpacing         : colSpacing = code; break;
+        case RowSpacing         : rowSpacing = code; break;
         case ExtrusionDirectionX:
         case ExtrusionDirectionY:
-        case ExtrusionDirectionZ:
-            break;
-        default:
-            Entity::parse(code);
+        case ExtrusionDirectionZ: break;
+        default                 : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);

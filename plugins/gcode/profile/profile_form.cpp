@@ -194,10 +194,10 @@ void Form::onAddBridgeClicked() {
             for(int var: v::iota(1, lround(value) + 1)) {
                 QLineF testLineH{
                     ~Point{bounds.left + stepH * var, bounds.bottom + uScale},
-                    ~Point{bounds.left + stepH * var,    bounds.top - uScale}
+                    ~Point{bounds.left + stepH * var, bounds.top - uScale   }
                 };
                 QLineF testLineV{
-                    ~Point{ bounds.left - uScale, bounds.top + stepV * var},
+                    ~Point{bounds.left - uScale,  bounds.top + stepV * var},
                     ~Point{bounds.right + uScale, bounds.top + stepV * var}
                 };
                 for(auto&& path: gi->paths()) {
@@ -251,8 +251,7 @@ void Form::onAddBridgeClicked() {
             }
         }
     } break;
-    default:
-        break;
+    default: break;
     }
 }
 

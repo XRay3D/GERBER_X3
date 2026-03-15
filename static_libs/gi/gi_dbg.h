@@ -13,8 +13,6 @@
 #include "gi.h"
 #include <qpainterpath.h>
 
-
-
 namespace Gi {
 
 class Debug final : public Item {

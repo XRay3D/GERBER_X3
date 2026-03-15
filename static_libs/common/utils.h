@@ -39,7 +39,8 @@ using Sec = std::ratio<1>;
 using Min = std::ratio<60>;
 using Hour = std::ratio<3600>;
 
-template <typename T, typename... Ts> constexpr bool contains_v = std::disjunction_v<std::is_same<T, Ts>...>; // Or
+template <typename T, typename... Ts>
+constexpr bool contains_v = std::disjunction_v<std::is_same<T, Ts>...>; // Or
 template <typename T, typename... Ts> concept Contains = contains_v<T, Ts...>;
 
 namespace chr = std::chrono;
@@ -224,7 +225,7 @@ struct Deleter {
 };
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QString>
+    #include <QString>
 
 template <size_t Len>
 inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
@@ -325,8 +326,8 @@ using namespace Qt::Literals;
 #endif
 
 #if USE_ENUM == 1
-#include <array>
-#include <ranges>
+    #include <array>
+    #include <ranges>
 
 using namespace std::literals;
 template <class Ty>
@@ -388,19 +389,19 @@ consteval bool isBitField(std::array<std::pair<sv, E>, N> tokens) {
     return checker == (1 << N) - 1;
 }
 } // namespace Impl
-#define ENUM(E, ...)                                                                       \
-    enum class E : int {                                                                   \
-        __VA_ARGS__                                                                        \
-    };                                                                                     \
-    template <>                                                                            \
-    inline constexpr bool isEnum<E> = true;                                                \
-    template <>                                                                            \
-    inline constexpr auto Impl::Max<E> = Impl::enumSize(#__VA_ARGS__);                     \
-    template <>                                                                            \
-    inline constexpr auto Impl::Tokens<E> = Impl::tokenize<Impl::Max<E>, E>(#__VA_ARGS__); \
-    template <>                                                                            \
-    inline constexpr auto isBitField<E> = false; // RImpl::isBitField(Impl::Tokens<E>);
-inline std::string arr;                          //[100] {};
+    #define ENUM(E, ...)                                                                       \
+        enum class E : int {                                                                   \
+            __VA_ARGS__                                                                        \
+        };                                                                                     \
+        template <>                                                                            \
+        inline constexpr bool isEnum<E> = true;                                                \
+        template <>                                                                            \
+        inline constexpr auto Impl::Max<E> = Impl::enumSize(#__VA_ARGS__);                     \
+        template <>                                                                            \
+        inline constexpr auto Impl::Tokens<E> = Impl::tokenize<Impl::Max<E>, E>(#__VA_ARGS__); \
+        template <>                                                                            \
+        inline constexpr auto isBitField<E> = false; // RImpl::isBitField(Impl::Tokens<E>);
+inline std::string arr;                              //[100] {};
 template <class E>
     requires isEnum<E>
 constexpr Impl::sv enumToString(E e) {

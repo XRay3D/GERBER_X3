@@ -136,8 +136,8 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     case Integer16: varVal = int16_t(value.toLongLong(&ok)); break;
     case Integer32: varVal = int32_t(value.toLongLong(&ok)); break;
     case Integer64: varVal = int64_t(value.toLongLong(&ok)); break;
-    case Double: varVal = value.toDouble(&ok); break;
-    case String: varVal = value;
+    case Double   : varVal = value.toDouble(&ok); break;
+    case String   : varVal = value;
     }
 
     if(!ok) {
@@ -145,8 +145,8 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
         case Integer16: varVal = /*int16_t*/ (value.toDouble(&ok)); break;
         case Integer32: varVal = /*int32_t*/ (value.toDouble(&ok)); break;
         case Integer64: varVal = /*int64_t*/ (value.toDouble(&ok)); break;
-        case Double: varVal = value.toDouble(&ok); break;
-        case String: varVal = value;
+        case Double   : varVal = value.toDouble(&ok); break;
+        case String   : varVal = value;
         }
         qWarning().nospace() << u"Type missmatch: code "_s << code << u", type "_s << type << u", raw "_s << value << u", line "_s << lineNum << u"!"_s;
     }

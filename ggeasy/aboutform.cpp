@@ -29,7 +29,8 @@ AboutForm::AboutForm(QWidget* parent)
     str.push_back(u"<br/>Application Version: " + qApp->applicationVersion());
     ui->lblAbout->setText(ui->lblAbout->text().arg(/*qApp->applicationVersion()*/ str));
     connect(ui->cmdOk_2, &QPushButton::clicked, this, &AboutForm::accept);
-    connect(ui->lblAbout, &QLabel::linkActivated, [](const QString& link) { QDesktopServices::openUrl(QUrl{link}); });
+    connect(ui->lblAbout, &QLabel::linkActivated, [](const QString& link) {
+        QDesktopServices::openUrl(QUrl{link}); });
 }
 
 AboutForm::~AboutForm() { delete ui; }

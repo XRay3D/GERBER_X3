@@ -75,32 +75,18 @@ void Drill::changeColor() {
     // animation.setStartValue(bodyColor_);
 
     switch(colorState) {
-    case Default:
-        brushColor_ = QColor(100, 100, 100);
-        break;
-    case Hovered:
-        brushColor_ = QColor(150, 0x0, 150);
-        break;
-    case Selected:
-        brushColor_ = QColor(255, 0x0, 255);
-        break;
-    case Hovered | Selected:
-        brushColor_ = QColor(127, 0x0, 255);
-        break;
+    case Default           : brushColor_ = QColor(100, 100, 100); break;
+    case Hovered           : brushColor_ = QColor(150, 0x0, 150); break;
+    case Selected          : brushColor_ = QColor(255, 0x0, 255); break;
+    case Hovered | Selected: brushColor_ = QColor(127, 0x0, 255); break;
     }
 
     penColor_ = brushColor_;
     switch(colorState) {
-    case Default:
-        break;
-    case Hovered:
-        break;
-    case Selected: // FIXME V1037. Two or more case-branches perform the same actions.
-        penColor_ = Qt::white;
-        break;
-    case Hovered | Selected:
-        penColor_ = Qt::white;
-        break;
+    case Default           : break;
+    case Hovered           : break;
+    case Selected          : penColor_ = Qt::white; break; // FIXME V1037. Two or more case-branches perform the same actions.
+    case Hovered | Selected: penColor_ = Qt::white; break;
     }
 
     // animation.setEndValue(bodyColor_);

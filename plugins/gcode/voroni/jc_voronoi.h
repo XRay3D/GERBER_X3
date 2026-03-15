@@ -165,27 +165,27 @@ extern "C" {
 #endif
 
 #ifndef JCV_REAL_TYPE
-#define JCV_REAL_TYPE double
+    #define JCV_REAL_TYPE double
 #endif
 
 #ifndef JCV_ATAN2
-#define JCV_ATAN2(_Y_, _X_) atan2(_Y_, _X_)
+    #define JCV_ATAN2(_Y_, _X_) atan2(_Y_, _X_)
 #endif
 
 #ifndef JCV_SQRT
-#define JCV_SQRT(_X_) sqrt(_X_)
+    #define JCV_SQRT(_X_) sqrt(_X_)
 #endif
 
 #ifndef JCV_PI
-#define JCV_PI 3.14159265358979323846264338327950288f
+    #define JCV_PI 3.14159265358979323846264338327950288f
 #endif
 
 #ifndef JCV_FLT_MAX
-#define JCV_FLT_MAX std::numeric_limits<JCV_REAL_TYPE>::max() // 3.402823466e+38F
+    #define JCV_FLT_MAX std::numeric_limits<JCV_REAL_TYPE>::max() // 3.402823466e+38F
 #endif
 
 #ifndef JCV_EDGE_INTERSECT_THRESHOLD
-#define JCV_EDGE_INTERSECT_THRESHOLD 1.0e-10F
+    #define JCV_EDGE_INTERSECT_THRESHOLD 1.0e-10F
 #endif
 
 typedef JCV_REAL_TYPE jcv_real;

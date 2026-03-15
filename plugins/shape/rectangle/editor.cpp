@@ -52,11 +52,9 @@ QVariant Model::data(const QModelIndex& index, int role) const {
                 set.emplace(tmp);
             }
             return set;
-        case Shape::Width:
-            return widthHeight(&Shapes::Handle::x);
-        case Shape::Height:
-            return widthHeight(&Shapes::Handle::y);
-        default: return set;
+        case Shape::Width : return widthHeight(&Shapes::Handle::x);
+        case Shape::Height: return widthHeight(&Shapes::Handle::y);
+        default           : return set;
         }
     };
 
@@ -118,12 +116,8 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
                 shape->redraw();
             }
             break;
-        case Shape::Width:
-            widthHeight(&Shapes::Handle::x, &Shapes::Handle::setX);
-            break;
-        case Shape::Height:
-            widthHeight(&Shapes::Handle::y, &Shapes::Handle::setY);
-            break;
+        case Shape::Width : widthHeight(&Shapes::Handle::x, &Shapes::Handle::setX); break;
+        case Shape::Height: widthHeight(&Shapes::Handle::y, &Shapes::Handle::setY); break;
         }
         return true;
     }

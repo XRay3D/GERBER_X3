@@ -33,8 +33,7 @@ Node::~Node() {
     // case AbstractShape:
     // App::project().deleteShape(id__);
     // break;
-    // default:
-    // break;
+    // default: break;
     // }
     // }
     childs.clear();

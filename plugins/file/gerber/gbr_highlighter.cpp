@@ -38,7 +38,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
         case 'M': return {0x00, 0xFF, 0xFF};
         case 'X': return {0xFF, 0x00, 0x00};
         case 'Y': return {0x00, 0xFF, 0x00};
-        default: return {};
+        default : return {};
         }
     };
 

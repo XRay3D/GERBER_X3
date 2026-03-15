@@ -68,18 +68,12 @@ QDebug operator<<(QDebug debug, const Tool& t) {
 
 QString Tool::nameEnc() const {
     switch(type_) {
-    case Tool::Drill:
-        return u"D-D%1MM"_s.arg(diameter_);
-    case Tool::EndMill:
-        return u"M-D%1MM"_s.arg(diameter_);
-    case Tool::Engraver:
-        return u"V-D%1MMA%2DEG"_s.arg(diameter_).arg(angle_);
-    case Tool::Laser:
-        return u"L-D%1MM"_s.arg(diameter_);
-    case Tool::ThreadMill:
-        return u"T-D%1MM"_s.arg(diameter_);
-    default:
-        return {};
+    case Tool::Drill     : return u"D-D%1MM"_s.arg(diameter_);
+    case Tool::EndMill   : return u"M-D%1MM"_s.arg(diameter_);
+    case Tool::Engraver  : return u"V-D%1MMA%2DEG"_s.arg(diameter_).arg(angle_);
+    case Tool::Laser     : return u"L-D%1MM"_s.arg(diameter_);
+    case Tool::ThreadMill: return u"T-D%1MM"_s.arg(diameter_);
+    default              : return {};
     }
 }
 QString Tool::name() const { return name_; }
@@ -136,12 +130,10 @@ double Tool::getDiameter(double depth) const {
 
 double Tool::getDepth() const {
     switch(type_) {
-    case Tool::Drill:
-        return diameter_ * 0.5 * tan(qDegreesToRadians((180.0 - angle_) * 0.5));
-    case Tool::EndMill:
+    case Tool::Drill   : return diameter_ * 0.5 * tan(qDegreesToRadians((180.0 - angle_) * 0.5));
+    case Tool::EndMill :
     case Tool::Engraver:
-    default:
-        return 0.0;
+    default            : return 0.0;
     }
 }
 
@@ -199,18 +191,12 @@ bool Tool::isValid() const {
 
 QIcon Tool::icon() const {
     switch(type_) {
-    case Tool::Drill:
-        return QIcon::fromTheme(u"drill"_s);
-    case Tool::EndMill:
-        return QIcon::fromTheme(u"endmill"_s);
-    case Tool::Engraver:
-        return QIcon::fromTheme(u"engraving"_s);
-    case Tool::Laser:
-        return QIcon::fromTheme(u"laser"_s);
-    case Tool::ThreadMill:
-        return QIcon::fromTheme(u"thread_mill"_s);
-    default:
-        return QIcon();
+    case Tool::Drill     : return QIcon::fromTheme(u"drill"_s);
+    case Tool::EndMill   : return QIcon::fromTheme(u"endmill"_s);
+    case Tool::Engraver  : return QIcon::fromTheme(u"engraving"_s);
+    case Tool::Laser     : return QIcon::fromTheme(u"laser"_s);
+    case Tool::ThreadMill: return QIcon::fromTheme(u"thread_mill"_s);
+    default              : return QIcon();
     }
 }
 

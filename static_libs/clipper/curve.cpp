@@ -401,6 +401,56 @@ Curve toCurve(Path& path) {
     Curve curve;
     QPainterPath pp;
 #if 0
+    { // find arcs
+        static auto eqCenter = [line = QLineF{}, a = 0.](Point& l, Point& r) mutable {
+            constexpr double epsilon = 0.2; // mm
+            if(line.isNull()) {
+                line = {~l, ~r};
+                return true;
+            }
+            QLineF newl{~l, ~r};
+            double angle = line.angleTo(newl);
+
+            double k = line.length() / newl.length();
+            qCritical().noquote() << std::format("{:+8.3f} {:+8.3f}", std::abs(a - angle), k);
+
+            bool fl = std::clamp(k, /*1 - epsilon*/ 0.1, 1. /*1 + epsilon*/) == k
+                && ((angle < 90 || angle > 270) && std::abs(a - angle) < 10);
+            line = newl;
+            a = angle;
+            return fl;
+        };
+
+        static auto notEqCenter = [](Point& l, Point& r) { return !eqCenter(l, r); };
+
+        if(auto it = r::adjacent_find(path, notEqCenter); it != path.end())
+            r::rotate(path, r::adjacent_find(path, notEqCenter));
+
+        auto chunks = v::chunk_by(path, eqCenter);
+
+        for(auto&& path: chunks) {
+            qDebug() << path.size();
+            if(auto c = fitCircle(path | v::transform(toQPointF) | r::to<QList>(), 1e-3)) {
+                QPainterPath pp;
+                pp.addEllipse(c->center, c->radius, c->radius);
+                Gi::Debug(pp, Qt::magenta);
+                // curve.emplace_back(~path.front());
+                // curve.emplace_back(~path.front(), c->center, Vertex::Cw);
+                // return curve;
+            }
+        }
+    }
+#endif
+
+    if(auto c = fitCircle(~path); c && path.size() > 4) {
+        pp.addEllipse(c->center, c->radius, c->radius);
+        Gi::Debug(pp, Qt::yellow);
+        curve.emplace_back(~path.front());
+        curve.emplace_back(~path.front(), c->center, Vertex::Cw);
+        return curve;
+    }
+
+#if 0
  {
         std::set<QPointF> skip;
         for(auto&& var: ~path | v::slide(10)) {
@@ -632,9 +682,9 @@ static int GetQuadrant(const PointF& v) {
 static PointF QuadrantEndPoint(int i) {
     if(i > 3) i -= 4;
     switch(i) {
-    case 0: return {0.0, +1.0};
-    case 1: return {-1.0, 0.0};
-    case 2: return {0.0, -1.0};
+    case 0 : return {0.0, +1.0};
+    case 1 : return {-1.0, 0.0};
+    case 2 : return {0.0, -1.0};
     default: return {+1.0, 0.0};
     }
 }

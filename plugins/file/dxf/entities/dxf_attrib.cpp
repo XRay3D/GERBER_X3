@@ -18,8 +18,7 @@ void Attrib::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(code.code()) {
-        default:
-            Entity::parse(code);
+        default: Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);

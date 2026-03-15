@@ -33,21 +33,20 @@ void Block::parseHeader(CodeData& code) {
         case EntityType:
         case Handle:
         case StartOfApplication_definedGroup:
-            // case EndOfGroup:
+            // case EndOfGroup: break;
         case SoftPointerID:
-        case SubclassMarker: break;
+        case SubclassMarker                 : break;
         case LayerName:
             layerName = code.string();
             break;
-
-            // case SubclassMarker_2: break;
-        case BlockName: blockName = code.string(); break;
-        case BlockTypeFlags: flags = code; break;
-        case BasePointX: basePoint.rx() = code; break;
-        case BasePointY: basePoint.ry() = code; break;
-        case BasePointZ: break;
-        case BlockName_2: blockName = code.string(); break;
-        case XrefPathName: xrefPathName = code.string(); break;
+            // case SubclassMarker_2:        break;
+        case BlockName       : blockName = code.string(); break;
+        case BlockTypeFlags  : flags = code; break;
+        case BasePointX      : basePoint.rx() = code; break;
+        case BasePointY      : basePoint.ry() = code; break;
+        case BasePointZ      : break;
+        case BlockName_2     : blockName = code.string(); break;
+        case XrefPathName    : xrefPathName = code.string(); break;
         case BlockDescription: blockDescription = code.string(); break;
         }
         code = sp->nextCode();

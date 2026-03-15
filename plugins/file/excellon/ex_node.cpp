@@ -52,12 +52,9 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable;
     switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::Side:
-        return itemFlag | Qt::ItemIsEditable;
-    default:
-        return itemFlag;
+    case FileTree::Column::NameColorVisible: return itemFlag | Qt::ItemIsUserCheckable;
+    case FileTree::Column::Side            : return itemFlag | Qt::ItemIsEditable;
+    default                                : return itemFlag;
     }
 }
 
@@ -66,33 +63,22 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         switch(FileTree::Column(index.column())) {
         case FileTree::Column::NameColorVisible:
             switch(role) {
-            case Qt::DisplayRole:
-                return file->shortName();
-            case Qt::ToolTipRole:
-                return {file->shortName() + u'\n' + file->name()};
-            case Qt::CheckStateRole:
-                return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
-            case Qt::DecorationRole:
-                return file->icon();
-            case FileTree::Id:
-                return id();
-            default:
-                return {};
+            case Qt::DisplayRole   : return file->shortName();
+            case Qt::ToolTipRole   : return {file->shortName() + u'\n' + file->name()};
+            case Qt::CheckStateRole: return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+            case Qt::DecorationRole: return file->icon();
+            case FileTree::Id      : return id();
+            default                : return {};
             }
         case FileTree::Column::Side:
             switch(role) {
             case Qt::DisplayRole:
-            case Qt::ToolTipRole:
-                return sideStrList[file->side()];
-            case Qt::EditRole:
-                return static_cast<bool>(file->side());
-            case FileTree::Id:
-                return id();
-            default:
-                return {};
+            case Qt::ToolTipRole: return sideStrList[file->side()];
+            case Qt::EditRole   : return static_cast<bool>(file->side());
+            case FileTree::Id   : return id();
+            default             : return {};
             }
-        default:
-            return {};
+        default: return {};
         }
     return {};
 }

@@ -1179,7 +1179,7 @@
 // INTERNAL FUNCTIONS
 
 #if defined(_MSC_VER) && !defined(__cplusplus)
-#define inline __inline
+    #define inline __inline
 #endif
 
 // jcv_point
@@ -2088,8 +2088,8 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     internal->eventmem = tmp.voidpp;
 
 #ifdef _MSVC_LANG
-#pragma warning(push)
-#pragma warning(disable : 4267) // possible loss of data
+    #pragma warning(push)
+    #pragma warning(disable : 4267) // possible loss of data
 #endif
     jcv_pq_create(internal->eventqueue, max_nuevents_, (void**)internal->eventmem);
 
@@ -2145,7 +2145,7 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     internal->currentsite = 0;
 
 #ifdef _MSVC_LANG
-#pragma warning(pop)
+    #pragma warning(pop)
 #endif
 
     internal->bottomsite = jcv_nextsite(internal);

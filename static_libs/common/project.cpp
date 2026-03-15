@@ -203,9 +203,7 @@ bool Project::open(const QString& fileName) {
             case ProVer_4:
             case ProVer_5:
             case ProVer_6:
-            case ProVer_7:
-                QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s));
-                break;
+            case ProVer_7: QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s)); break;
             }
             return false;
         }

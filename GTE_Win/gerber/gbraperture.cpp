@@ -307,27 +307,17 @@ void ApMacro::draw() {
             switch(static_cast<int>(mod[0])) {
             case Comment:
                 continue;
-            case Circle:
-                path = drawCircle(mod);
-                break;
-            case OutlineCustomPolygon:
-                path = drawOutlineCustomPolygon(mod);
-                break;
-            case OutlineRegularPolygon:
-                path = drawOutlineRegularPolygon(mod);
-                break;
+            case Circle:path = drawCircle(mod);break;
+            case OutlineCustomPolygon:path = drawOutlineCustomPolygon(mod);break;
+            case OutlineRegularPolygon:path = drawOutlineRegularPolygon(mod);break;
             case Moire:
                 drawMoire(mod);
                 return;
             case Thermal:
                 drawThermal(mod);
                 return;
-            case VectorLine:
-                path = drawVectorLine(mod);
-                break;
-            case CenterLine:
-                path = drawCenterLine(mod);
-                break;
+            case VectorLine:path = drawVectorLine(mod);break;
+            case CenterLine:path = drawCenterLine(mod);break;
             }
 
             const double area = Area(path);
