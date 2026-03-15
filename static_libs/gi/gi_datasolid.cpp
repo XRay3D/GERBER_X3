@@ -100,31 +100,21 @@ void DataFill::changeColor() {
     brushColor_ = colorPtr_ ? *colorPtr_ : color_;
 
     switch(colorState) {
-    case Default:
-        break;
-    case Hovered:
-    case Selected:
-        brushColor_.setAlpha(255);
-        break;
-    case Hovered | Selected:
-        brushColor_.setAlpha(255);
-        brushColor_ = brushColor_.lighter(150);
-        break;
+    case Default           : break;
+    case Hovered           :
+    case Selected          : brushColor_.setAlpha(255); break;
+    case Hovered | Selected: (brushColor_ = brushColor_.lighter(150)).setAlpha(255); break;
     }
 
     penColor_ = colorPtr_ ? *colorPtr_ : color_;
     penColor_.setAlpha(100);
     switch(colorState) {
-    case Default:
-        // pathColor_.setAlpha(100);
-        break;
+    case Default: // pathColor_.setAlpha(100);break;
     case Hovered:
         penColor_.setAlpha(255);
         // pathColor_ = pathColor_.darker(125);
         break;
-    case Selected:
-        penColor_.setAlpha(150);
-        break;
+    case Selected: penColor_.setAlpha(150); break;
     case Hovered | Selected:
         penColor_.setAlpha(255);
         penColor_ = penColor_.lighter(150);

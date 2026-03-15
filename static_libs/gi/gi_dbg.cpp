@@ -68,7 +68,7 @@ Debug::Debug(const QPainterPath& path, const QColor& color, double width)
 
 QRectF Debug::boundingRect() const { return boundingRect_; }
 
-void Debug::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
 
     if(pnColorPrt_)
@@ -111,19 +111,14 @@ void Debug::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWi
         });
     }
 
-    for(const Point& pt: paths_ | v::join | v::filter(&Point::z)) {
-        QPointF p = ~GetC(pt);
-        painter->drawLine(p, ~pt);
-    }
-
-    ////////////////////////////////////////////////////// for debug cut direction
+    ////////////////////////////////////////////////////// for Debug_ cut direction
     if(sc_ != scale) updateArrows();
     painter->drawPath(arrows_);
 }
 
 int Debug::type() const { return Type::Debug; }
 
-Paths Debug::paths(int) const { return {} /*paths_*/; }
+Paths Debug_::paths(int) const { return {} /*paths_*/; }
 
 void Debug::updateArrows() {
     sc_ = scaleFactor();

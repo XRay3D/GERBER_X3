@@ -18,14 +18,14 @@ inline void death_signal(int signum) { // обработка Segfault
     auto SIG = [signum] {
         switch(signum) {
         case SIGABRT: return "SIGABRT";
-        case SIGFPE: return "SIGFPE";
-        case SIGILL: return "SIGILL";
-        case SIGINT: return "SIGINT";
+        case SIGFPE : return "SIGFPE";
+        case SIGILL : return "SIGILL";
+        case SIGINT : return "SIGINT";
         case SIGSEGV: return "SIGSEGV";
         case SIGTERM: return "SIGTERM";
 #ifdef _MSVC_LANG
         case SIGABRT_COMPAT: return "SIGABRT_COMPAT"; // MSVC ONLY?
-        case SIGBREAK: return "SIGBREAK";             // MSVC ONLY?
+        case SIGBREAK      : return "SIGBREAK";             // MSVC ONLY?
 #endif
         default: return "";
         }
@@ -65,6 +65,15 @@ inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, 
 }
 
 inline void stacktraceAndOutput() {
+    // setenv("QT_LOGGING_RULES", "debug=true", true);
+
+    QLoggingCategory::defaultCategory()->setEnabled(QtDebugMsg, true);
+
+    // QLoggingCategory::setFilterRules({}
+    // u"*=true\n"
+    // "driver.usb.debug=true"_s
+    // );
+
     qInstallMessageHandler(myMessageHandler);
     qSetMessagePattern(
         "%{if-critical}\x1b[38;2;255;0;0m"

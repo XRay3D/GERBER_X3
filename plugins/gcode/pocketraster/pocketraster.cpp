@@ -35,12 +35,8 @@ uint32_t Creator::type() { return POCKET_RASTER; }
 
 void Creator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
     switch(gcp_.side()) {
-    case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale);
-        break;
-    case GCode::Inner:
-        groupedPaths(GCode::Grouping::Copper);
-        break;
+    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale); break;
+    case GCode::Inner: groupedPaths(GCode::Grouping::Copper); break;
     case GCode::On:
         emit fileReady(nullptr);
         return;
@@ -92,9 +88,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     }
 
     switch(prPass) {
-    case NoProfilePass:
-        returnPss.prepend(returnPs);
-        break;
+    case NoProfilePass: returnPss.prepend(returnPs); break;
     case First:
         if(!profilePaths.empty())
             returnPss.prepend(profilePaths);
@@ -105,8 +99,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         if(!profilePaths.empty())
             returnPss.push_back(profilePaths);
         break;
-    default:
-        break;
+    default: break;
     }
 
     for(auto&& paths: returnPss)
@@ -132,12 +125,8 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     stepOver = static_cast</*PType*/ int32_t>(tool.stepover() * uScale);
 
     switch(gcp_.side()) {
-    case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale);
-        break;
-    case GCode::Inner:
-        groupedPaths(GCode::Grouping::Copper);
-        break;
+    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale); break;
+    case GCode::Inner: groupedPaths(GCode::Grouping::Copper); break;
     case GCode::On:
         emit fileReady(nullptr);
         return;
@@ -178,13 +167,13 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         auto y = rect.top;
         while(y < rect.bottom) {
             zPath += Path{
-                Point{ rect.left, y},
+                Point{rect.left,  y},
                 Point{rect.right, y},
             };
             y += stepOver;
             zPath += Path{
                 Point{rect.right, y},
-                Point{ rect.left, y},
+                Point{rect.left,  y},
             };
             y += stepOver;
         }

@@ -21,39 +21,16 @@ PolyLine::PolyLine(SectionParser* sp)
     : Entity{sp} {
 }
 
-// void PolyLine::draw(const InsertEntity* const i) const
-//{
-// if (i) {
-// for (int r{}; r < i->rowCount; ++r) {
-// for (int c{}; c < i->colCount; ++c) {
-// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-// GraphicObject go(toGo());
-// i->transform(go, tr);
-// i->attachToLayer(std::move(go));
-// }
-// }
-// } else {
-// attachToLayer(toGo());
-// }
-// }
-
 void PolyLine::parse(CodeData& code) {
     do {
         data.push_back(code);
         if(code != u"VERTEX"_s) {
             code = sp->nextCode();
             switch(code.code()) {
-            case StartWidth:
-                startWidth = code;
-                break;
-            case EndWidth:
-                endWidth = code;
-                break;
-            case PolylineFlag:
-                polylineFlags = code;
-                break;
-            default:
-                Entity::parse(code);
+            case StartWidth  : startWidth = code; break;
+            case EndWidth    : endWidth = code; break;
+            case PolylineFlag: polylineFlags = code; break;
+            default          : Entity::parse(code);
             }
         } else {
             polyLine.emplace_back(sp).parse(code);

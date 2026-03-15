@@ -77,11 +77,9 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
             case 1:
                 setNote(value.toString());
                 return true;
-            default:
-                return false;
+            default: return false;
             }
-        default:
-            return false;
+        default: return false;
         }
     }
     return false;
@@ -91,14 +89,10 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
     switch(role) {
     case Qt::DisplayRole:
         switch(index.column()) {
-        case 0:
-            return name();
-        case 1:
-            return note();
-        case 2:
-            return toolId_ ? QVariant(toolId_) : QVariant();
-        default:
-            return {};
+        case 0 : return name();
+        case 1 : return note();
+        case 2 : return toolId_ ? QVariant(toolId_) : QVariant();
+        default: return {};
         }
     case Qt::DecorationRole:
         if(index.column() == 0) {
@@ -108,16 +102,14 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
                 return QIcon::fromTheme(u"folder-sync"_s);
         }
         return {};
-    case Qt::UserRole:
-        return toolId_;
+    case Qt::UserRole: return toolId_;
     case Qt::UserRole + 1:
         return childCount();
     case Qt::TextAlignmentRole:
         if(index.column() == 2)
             return Qt::AlignCenter;
         return {};
-    default:
-        return {};
+    default: return {};
     }
 }
 

@@ -49,7 +49,7 @@ void Shape::redraw() {
             // NOTE may invalidate the pointer↓, update↓
             curHandle = handles.insert(++curHandle, {
                                                         Handle{pts[1], Handle::Corner},
-                                                        Handle{pts[2],  Handle::Adder}
+                                                        Handle{pts[2], Handle::Adder }
             });
         } else if(curHandle->type() == Handle::Corner) {
             if(curHandle != handles.begin() + 1) {

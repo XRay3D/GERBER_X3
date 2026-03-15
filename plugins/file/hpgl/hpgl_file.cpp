@@ -31,7 +31,7 @@ File::File()
     m_itemsType = int(ItemsType::Normal);
     m_layerTypes = {
         {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")},
-        { int(ItemsType::Paths),  DxfObj::tr("Paths"),       DxfObj::tr("Displays paths without pen width.")},
+        {int(ItemsType::Paths),  DxfObj::tr("Paths"),  DxfObj::tr("Displays paths without pen width.")      },
     };
 }
 

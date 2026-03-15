@@ -176,8 +176,7 @@ QList<QString> Parser::format(QString data) {
                 state = Data;
             }
             break;
-        case Data:
-            break;
+        case Data: break;
         }
     };
 
@@ -195,8 +194,7 @@ QList<QString> Parser::format(QString data) {
                 if(!tmpline.isEmpty())
                     gerberLines << ('%' + tmpline + "*%");
             break;
-        case Data:
-            break;
+        case Data: break;
         }
         val.clear();
     };
@@ -331,29 +329,17 @@ void Parser::addPath() {
     case On:
         m_state.setType(Region);
         switch(m_abSrIdStack.top().first) {
-        case Normal:
-            m_file.append(GraphicObject(m_goId++, m_state, createPolygon(), nullptr, m_path));
-            break;
-        case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), nullptr, m_path));
-            break;
-        case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createPolygon(), nullptr, m_path));
-            break;
+        case Normal:m_file.append(GraphicObject(m_goId++, m_state, createPolygon(), nullptr, m_path));break;
+        case StepRepeat:m_stepRepeat.storage.append(GraphicObject(m_goId++, m_state, createPolygon(), nullptr, m_path));break;
+        case ApertureBlock:apBlock(m_abSrIdStack.top().second)->append(GraphicObject(m_goId++, m_state, createPolygon(), nullptr, m_path));break;
         }
         break;
     case Off:
         m_state.setType(Line);
         switch(m_abSrIdStack.top().first) {
-        case Normal:
-            m_file.append(GraphicObject(m_goId++, m_state, createLine(), nullptr, m_path));
-            break;
-        case StepRepeat:
-            m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, createLine(), nullptr, m_path));
-            break;
-        case ApertureBlock:
-            apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, createLine(), nullptr, m_path));
-            break;
+        case Normal:m_file.append(GraphicObject(m_goId++, m_state, createLine(), nullptr, m_path));break;
+        case StepRepeat:m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, createLine(), nullptr, m_path));break;
+        case ApertureBlock:apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, createLine(), nullptr, m_path));break;
         }
         break;
     }
@@ -372,15 +358,9 @@ void Parser::addFlash() {
         paths.push_back(ap->drawDrill(m_state));
 
     switch(m_abSrIdStack.top().first) {
-    case Normal:
-        m_file.append(GraphicObject(m_goId++, m_state, paths, nullptr));
-        break;
-    case StepRepeat:
-        m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, paths, nullptr));
-        break;
-    case ApertureBlock:
-        apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, paths, nullptr));
-        break;
+    case Normal:m_file.append(GraphicObject(m_goId++, m_state, paths, nullptr));break;
+    case StepRepeat:m_stepRepeat.storage.append(GraphicObject(m_stepRepeat.storage.size(), m_state, paths, nullptr));break;
+    case ApertureBlock:apBlock(m_abSrIdStack.top().second)->append(GraphicObject(apBlock(m_abSrIdStack.top().second)->size(), m_state, paths, nullptr));break;
     }
     resetStep();
 }
@@ -534,8 +514,7 @@ bool Parser::parseAperture(const QString& gLine) {
             m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApPolygon(toDouble(paramList[0]), paramList[1].toInt(), rotation, hole, &m_format)));
             break;
         case Macro:
-        default:
-            QMap<QString, double> macroCoeff;
+        default: QMap<QString, double> macroCoeff;
             for(int i{}; i < paramList.size(); ++i)
                 macroCoeff[QString("$%1").arg(i + 1)] = toDouble(paramList[i], false, false);
             m_apertures.insert(aperture, QSharedPointer<AbstractAperture>(new ApMacro(apType, m_apertureMacro[apType].split('*'), macroCoeff, &m_format)));
@@ -577,14 +556,9 @@ bool Parser::parseTransformations(const QString& gLine) {
         case trPolarity:
             addPath();
             switch(slLevelPolarity.indexOf(match.cap(2))) {
-            case Positive:
-                m_state.setImgPolarity(Positive);
-                break;
-            case Negative:
-                m_state.setImgPolarity(Negative);
-                break;
-            default:
-                throw "Polarity error!";
+            case Positive:m_state.setImgPolarity(Positive);break;
+            case Negative:m_state.setImgPolarity(Negative);break;
+            default: throw "Polarity error!";
             }
             return true;
         case trMirror:
@@ -753,8 +727,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         if(!match.cap(6).isEmpty())
             m_state.setDCode(static_cast<DCode>(match.cap(6).toInt()));
         switch(m_state.dCode()) {
-        case D01:
-            break;
+        case D01: break;
         case D02: // Nothing created! Pen Up.
             m_state.setDCode(D01);
             addPath();
@@ -826,8 +799,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             if(!valid)
                 qWarning() << QString("Invalid arc in line %1.").arg(m_lineNum) << gLine;
             break;
-        default:
-            m_state.setCurPos({x, y});
+        default: m_state.setCurPos({x, y});
             m_path.push_back(m_state.curPos());
             return true;
             // break;
@@ -859,23 +831,15 @@ bool Parser::parseFormat(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^%FS([LT]?)([AI]?)X(\\d)(\\d)Y(\\d)(\\d)\\*%$"));
     if(match.exactMatch(gLine)) {
         switch(zeroOmissionModeList.indexOf(match.cap(1))) {
-        case OmitLeadingZeros:
-            m_state.format()->zeroOmisMode = OmitLeadingZeros;
-            break;
+        case OmitLeadingZeros:m_state.format()->zeroOmisMode = OmitLeadingZeros;break;
 #ifdef DEPRECATED
-        case OmitTrailingZeros:
-            m_state.format()->zeroOmisMode = OmitTrailingZeros;
-            break;
+        case OmitTrailingZeros:m_state.format()->zeroOmisMode = OmitTrailingZeros;break;
 #endif
         }
         switch(coordinateValuesNotationList.indexOf(match.cap(2))) {
-        case AbsoluteNotation:
-            m_state.format()->coordValueNotation = AbsoluteNotation;
-            break;
+        case AbsoluteNotation:m_state.format()->coordValueNotation = AbsoluteNotation;break;
 #ifdef DEPRECATED
-        case IncrementalNotation:
-            m_state.format()->coordValueNotation = IncrementalNotation;
-            break;
+        case IncrementalNotation:m_state.format()->coordValueNotation = IncrementalNotation;break;
 #endif
         }
         m_state.format()->xInteger = match.cap(3).toInt();
@@ -917,9 +881,7 @@ bool Parser::parseGCode(const QString& gLine) {
             m_state.setInterpolation(CounterclockwiseCircular);
             m_state.setGCode(G03);
             break;
-        case G04:
-            m_state.setGCode(G04);
-            break;
+        case G04:m_state.setGCode(G04);break;
         case G36:
             addPath();
             m_state.setRegion(On);
@@ -959,8 +921,7 @@ bool Parser::parseGCode(const QString& gLine) {
             m_state.setGCode(G91);
 #endif
             break;
-        default:
-            qWarning() << "Erroror or deprecated G-code " << match.capturedTexts();
+        default: qWarning() << "Erroror or deprecated G-code " << match.capturedTexts();
             break;
         }
         return true;
@@ -977,12 +938,8 @@ bool Parser::parseImagePolarity(const QString& gLine) {
     static const QList<QString> slImagePolarity(QString("POS|NEG").split(u"|"_s));
     if(match.exactMatch(gLine)) {
         switch(slImagePolarity.indexOf(match.cap(1))) {
-        case Positive:
-            m_state.setImgPolarity(Positive);
-            break;
-        case Negative:
-            m_state.setImgPolarity(Negative);
-            break;
+        case Positive:m_state.setImgPolarity(Positive);break;
+        case Negative:m_state.setImgPolarity(Negative);break;
         }
         return true;
     }
@@ -1023,9 +980,7 @@ bool Parser::parseDCode(const QString& gLine) {
     static const QRegExp match(QStringLiteral("^D0?([123])\\*$"));
     if(match.exactMatch(gLine)) {
         switch(match.cap(1).toInt()) {
-        case D01:
-            m_state.setDCode(D01);
-            break;
+        case D01:m_state.setDCode(D01);break;
         case D02:
             addPath();
             m_state.setDCode(D02);
@@ -1057,12 +1012,8 @@ bool Parser::parseUnitMode(const QString& gLine) {
     static const QList<QString> slUnitType(QString("IN|MM").split(u"|"_s));
     if(match.exactMatch(gLine)) {
         switch(slUnitType.indexOf(match.cap(1))) {
-        case Inches:
-            m_state.format()->unitMode = Inches;
-            break;
-        case Millimeters:
-            m_state.format()->unitMode = Millimeters;
-            break;
+        case Inches:m_state.format()->unitMode = Inches;break;
+        case Millimeters:m_state.format()->unitMode = Millimeters;break;
         }
         return true;
     }

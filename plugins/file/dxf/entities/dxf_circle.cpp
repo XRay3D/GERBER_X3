@@ -21,50 +21,20 @@ Circle::Circle(SectionParser* sp)
     : Entity{sp} {
 }
 
-// void Circle::draw(const InsertEntity* const i) const
-//{
-// if (i) {
-// for (int r{}; r < i->rowCount; ++r) {
-// for (int c{}; c < i->colCount; ++c) {
-// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-// GraphicObject go(toGo());
-// i->transform(go, tr);
-// i->attachToLayer(std::move(go));
-// }
-// }
-// } else {
-// attachToLayer(toGo());
-// }
-// }
-
 void Circle::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker:
-            break;
-        case Thickness:
-            thickness = code;
-            break;
-        case CenterPointX:
-            centerPoint.rx() = code;
-            break;
-        case CenterPointY:
-            centerPoint.ry() = code;
-            break;
-        case CenterPointZ:
-            break;
-        case Radius:
-            radius = code;
-            break;
-        case ExtrusionDirectionX:
-            break;
-        case ExtrusionDirectionY:
-            break;
-        case ExtrusionDirectionZ:
-            break;
-        default:
-            Entity::parse(code);
+        case SubclassMarker     : break;
+        case Thickness          : thickness = code; break;
+        case CenterPointX       : centerPoint.rx() = code; break;
+        case CenterPointY       : centerPoint.ry() = code; break;
+        case CenterPointZ       : break;
+        case Radius             : radius = code; break;
+        case ExtrusionDirectionX: break;
+        case ExtrusionDirectionY: break;
+        case ExtrusionDirectionZ: break;
+        default                 : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);

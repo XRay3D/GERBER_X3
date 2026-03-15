@@ -20,75 +20,40 @@ Solid::Solid(SectionParser* sp)
     : Entity{sp} {
 }
 
-// void Solid::draw(const InsertEntity* const i) const
-//{
-// if (i) {
-// for (int r{}; r < i->rowCount; ++r) {
-// for (int c{}; c < i->colCount; ++c) {
-// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-// GraphicObject go(toGo());
-// i->transform(go, tr);
-// i->attachToLayer(std::move(go));
-// }
-// }
-// } else {
-// attachToLayer(toGo());
-// }
-// }
-
 void Solid::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker:
-            break;
-        case Thickness:
-            thickness = code;
-            break;
+        case SubclassMarker: break;
+        case Thickness     : thickness = code; break;
         case FirstCornerX:
             firstCorner.rx() = code;
             corners |= FirstCorner;
             break;
-        case FirstCornerY:
-            firstCorner.ry() = code;
-            break;
-        case FirstCornerZ:
-            break;
+        case FirstCornerY: firstCorner.ry() = code; break;
+        case FirstCornerZ: break;
         case SecondCornerX:
             secondCorner.rx() = code;
             corners |= SecondCorner;
             break;
-        case SecondCornerY:
-            secondCorner.ry() = code;
-            break;
-        case SecondCornerZ:
-            break;
+        case SecondCornerY: secondCorner.ry() = code; break;
+        case SecondCornerZ: break;
         case ThirdCornerX:
             thirdCorner.rx() = code;
             corners |= ThirdCorner;
             break;
-        case ThirdCornerY:
-            thirdCorner.ry() = code;
-            break;
-        case ThirdCornerZ:
-            break;
+        case ThirdCornerY: thirdCorner.ry() = code; break;
+        case ThirdCornerZ: break;
         case FourthCornerX:
             fourthCorner.rx() = code;
             corners |= FourthCorner;
             break;
-        case FourthCornerY:
-            fourthCorner.ry() = code;
-            break;
-        case FourthCornerZ:
-            break;
-        case ExtrusionDirectionX:
-            break;
-        case ExtrusionDirectionY:
-            break;
-        case ExtrusionDirectionZ:
-            break;
-        default:
-            Entity::parse(code);
+        case FourthCornerY      : fourthCorner.ry() = code; break;
+        case FourthCornerZ      : break;
+        case ExtrusionDirectionX: break;
+        case ExtrusionDirectionY: break;
+        case ExtrusionDirectionZ: break;
+        default                 : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);

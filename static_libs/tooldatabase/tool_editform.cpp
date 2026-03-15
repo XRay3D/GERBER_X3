@@ -24,41 +24,41 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     ui->setupUi(this);
     // clang-format AlignArrayOfStructures: Left
     update = {
-        {            ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle},
-        {         ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter},
-        {         ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate},
-        {           ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght},
-        {       ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut},
+        {ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle            },
+        {ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter         },
+        {ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate         },
+        {ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght           },
+        {ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut       },
         {ui->dsbxOneTurnCutPercent, &ToolEditForm::updateDsbxOneTurnCutPercent},
-        {        ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth},
-        {       ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate},
-        {     ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed},
-        {         ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover},
-        {  ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent},
+        {ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth        },
+        {ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate       },
+        {ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed     },
+        {ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover         },
+        {ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent  },
     };
 
     get = {
-        std::pair{       ui->dsbxAngle,        &Tool::angle},
-        std::pair{    ui->dsbxDiameter,     &Tool::diameter},
-        std::pair{    ui->dsbxFeedRate,     &Tool::feedRate},
-        std::pair{      ui->dsbxLenght,       &Tool::lenght},
-        std::pair{  ui->dsbxOneTurnCut,   &Tool::oneTurnCut},
-        std::pair{   ui->dsbxPassDepth,    &Tool::passDepth},
-        std::pair{  ui->dsbxPlungeRate,   &Tool::plungeRate},
+        std::pair{ui->dsbxAngle,        &Tool::angle       },
+        std::pair{ui->dsbxDiameter,     &Tool::diameter    },
+        std::pair{ui->dsbxFeedRate,     &Tool::feedRate    },
+        std::pair{ui->dsbxLenght,       &Tool::lenght      },
+        std::pair{ui->dsbxOneTurnCut,   &Tool::oneTurnCut  },
+        std::pair{ui->dsbxPassDepth,    &Tool::passDepth   },
+        std::pair{ui->dsbxPlungeRate,   &Tool::plungeRate  },
         std::pair{ui->dsbxSpindleSpeed, &Tool::spindleSpeed},
-        std::pair{    ui->dsbxStepover,     &Tool::stepover},
+        std::pair{ui->dsbxStepover,     &Tool::stepover    },
     };
 
     set = {
-        std::pair{       ui->dsbxAngle,        &Tool::setAngle},
-        std::pair{    ui->dsbxDiameter,     &Tool::setDiameter},
-        std::pair{    ui->dsbxFeedRate,     &Tool::setFeedRate},
-        std::pair{      ui->dsbxLenght,       &Tool::setLenght},
-        std::pair{  ui->dsbxOneTurnCut,   &Tool::setOneTurnCut},
-        std::pair{   ui->dsbxPassDepth,    &Tool::setPassDepth},
-        std::pair{  ui->dsbxPlungeRate,   &Tool::setPlungeRate},
+        std::pair{ui->dsbxAngle,        &Tool::setAngle       },
+        std::pair{ui->dsbxDiameter,     &Tool::setDiameter    },
+        std::pair{ui->dsbxFeedRate,     &Tool::setFeedRate    },
+        std::pair{ui->dsbxLenght,       &Tool::setLenght      },
+        std::pair{ui->dsbxOneTurnCut,   &Tool::setOneTurnCut  },
+        std::pair{ui->dsbxPassDepth,    &Tool::setPassDepth   },
+        std::pair{ui->dsbxPlungeRate,   &Tool::setPlungeRate  },
         std::pair{ui->dsbxSpindleSpeed, &Tool::setSpindleSpeed},
-        std::pair{    ui->dsbxStepover,     &Tool::setStepover},
+        std::pair{ui->dsbxStepover,     &Tool::setStepover    },
     };
 
     dsbxMapdsbxMap = {
@@ -78,20 +78,11 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     connect(ui->cbxFeedSpeeds, &QComboBox::currentIndexChanged, this, [this](int index) {
         double lastFeed = feed;
         switch(index) {
-        case mmPerSec: // mm/sec
-            feed = 1.0 / 60.0;
-            break;
-        case mmPerMin: // mm/min!!!
-            feed = 1.0;
-            break;
-        case cmPerMin: // cm/min
-            feed = 1.0 / 10.0;
-            break;
-        case mPerMin: // m/min
-            feed = 1.0 / 1000.0;
-            break;
-        default:
-            break;
+        case mmPerSec: feed = 1.0 / 60.0; break;   // mm/sec
+        case mmPerMin: feed = 1.0; break;          // mm/min!!!
+        case cmPerMin: feed = 1.0 / 10.0; break;   // cm/min
+        case mPerMin : feed = 1.0 / 1000.0; break; // m/min
+        default      : break;
         }
 
         bool fl1 = parentWidget()->isWindowModified();
@@ -165,14 +156,9 @@ void ToolEditForm::setTool(const Tool& tool) {
     }
 
     switch(tool_.type()) {
-    case Tool::Drill:
-        dsbxMapdsbxMap[0].defVal = 120.;
-        break;
-    case Tool::Engraver:
-        dsbxMapdsbxMap[0].defVal = 90.;
-        break;
-    default:
-        break;
+    case Tool::Drill   : dsbxMapdsbxMap[0].defVal = 120.; break;
+    case Tool::Engraver: dsbxMapdsbxMap[0].defVal = 90.; break;
+    default            : break;
     }
 
     for(auto [dsbx, get]: get)
@@ -316,18 +302,13 @@ void ToolEditForm::updateName() {
         return;
     ui->leName->setText([this](auto type) {
         switch(type) {
-        case Tool::EndMill:
-            return tr("End Mill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
-        case Tool::Engraver:
-            return tr("Engrave (%2\302\260 %1 mm tip)").arg(ui->dsbxDiameter->value()).arg(ui->dsbxAngle->value());
-        case Tool::Drill:
-            return tr("Drill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
-        case Tool::Laser:
-            return tr("Laser (Ø%1 mm)").arg(ui->dsbxDiameter->value());
-        case Tool::ThreadMill:
-            return tr("Thread Mill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
-        case Tool::Group:
-        default: return QString{};
+        case Tool::EndMill   : return tr("End Mill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
+        case Tool::Engraver  : return tr("Engrave (%2\302\260 %1 mm tip)").arg(ui->dsbxDiameter->value()).arg(ui->dsbxAngle->value());
+        case Tool::Drill     : return tr("Drill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
+        case Tool::Laser     : return tr("Laser (Ø%1 mm)").arg(ui->dsbxDiameter->value());
+        case Tool::ThreadMill: return tr("Thread Mill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
+        case Tool::Group     :
+        default              : return QString{};
         }
     }(ui->cbxToolType->currentData().value<Tool::Type>()));
 }

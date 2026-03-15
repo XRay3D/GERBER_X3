@@ -245,10 +245,10 @@ void Creator::reorder() {
         Rect r(GetBounds(returnPs));
         int k = uScale;
         Path outer = {
-            { r.left - k, r.bottom + k},
+            {r.left - k,  r.bottom + k},
             {r.right + k, r.bottom + k},
-            {r.right + k,    r.top - k},
-            { r.left - k,    r.top - k}
+            {r.right + k, r.top - k   },
+            {r.left - k,  r.top - k   }
         };
         clipper.AddSubject({outer});
         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);

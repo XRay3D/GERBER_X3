@@ -942,12 +942,9 @@ bool MainWindow::maybeSave() {
                                                        "Do you want to save your changes?"),
             QMessageBox::Save | QMessageBox::Discard | QMessageBox::Cancel);
     switch(ret) {
-    case QMessageBox::Save:
-        return save();
-    case QMessageBox::Cancel:
-        return false;
-    default:
-        break;
+    case QMessageBox::Save  : return save();
+    case QMessageBox::Cancel: return false;
+    default                 : break;
     }
     return true;
 }
@@ -967,13 +964,12 @@ void MainWindow::editGcFile(GCode::File* /*file*/) { // TODO editGcFile
     // case G_CODE_PROPERTIES:
     // case GCode::Raster:
     // case GCode::LaserHLDI:
-    // default:
-    // break;
+    // default: break;
     // }
 }
 
 #if __has_include("xrstyle.h") && 0
-#include "xrstyle.h"
+    #include "xrstyle.h"
 #endif
 
 bool MainWindow::saveFile(const QString& fileName) {
@@ -1043,13 +1039,9 @@ bool MainWindow::eventFilter(QObject* watched, QEvent* event) {
             if(!pt.isNull())
                 setGeometry(geometry().translated(mEvent->pos() - pt));
             break;
-        case QEvent::MouseButtonPress:
-            pt = mEvent->pos();
-            break;
-        case QEvent::MouseButtonRelease:
-            pt = {};
-            break;
-        default:;
+        case QEvent::MouseButtonPress  : pt = mEvent->pos(); break;
+        case QEvent::MouseButtonRelease: pt = {}; break;
+        default                        :;
         }
     }
     if(watched == dockWidget_ && event->type() == QEvent::Close)

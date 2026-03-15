@@ -24,60 +24,27 @@ Text::Text(SectionParser* sp)
 void Text::parse(CodeData& code) {
     do {
         switch(code.code()) {
-        case SubclassMarker:
-            break;
-        case Thickness:
-            thickness = code;
-            break;
-        case FirstAlignmentPtX:
-            pt1.rx() = code;
-            break;
-        case FirstAlignmentPtY:
-            pt1.ry() = code;
-            break;
-        case FirstAlignmentPtZ:
-            break;
-        case TextHeight:
-            textHeight = code;
-            break;
-        case Text_:
-            text = code.string();
-            break;
-        case Rotation:
-            rotation = code;
-            break;
-        case RelativeScaleX:
-            break;
-        case ObliqueAngle:
-            break;
-        case TextStyleName:
-            textStyleName = code.string();
-            break;
-        case TextGenerationFlags:
-            textGenerationFlag = code;
-            break;
-        case HorizontalJustType:
-            horizontalJustType = code;
-            break;
-        case VerticalJustType:
-            verticalJustType = code;
-            break;
-        case SecondAlignmentPointX:
-            pt2.rx() = code;
-            break;
-        case SecondAlignmentPointY:
-            pt2.ry() = code;
-            break;
-        case SecondAlignmentPointZ:
-            break;
-        case ExtrusionDirectionX:
-            break;
-        case ExtrusionDirectionY:
-            break;
-        case ExtrusionDirectionZ:
-            break;
-        default:
-            Entity::parse(code);
+        case SubclassMarker       : break;
+        case Thickness            : thickness = code; break;
+        case FirstAlignmentPtX    : pt1.rx() = code; break;
+        case FirstAlignmentPtY    : pt1.ry() = code; break;
+        case FirstAlignmentPtZ    : break;
+        case TextHeight           : textHeight = code; break;
+        case Text_                : text = code.string(); break;
+        case Rotation             : rotation = code; break;
+        case RelativeScaleX       : break;
+        case ObliqueAngle         : break;
+        case TextStyleName        : textStyleName = code.string(); break;
+        case TextGenerationFlags  : textGenerationFlag = code; break;
+        case HorizontalJustType   : horizontalJustType = code; break;
+        case VerticalJustType     : verticalJustType = code; break;
+        case SecondAlignmentPointX: pt2.rx() = code; break;
+        case SecondAlignmentPointY: pt2.ry() = code; break;
+        case SecondAlignmentPointZ: break;
+        case ExtrusionDirectionX  : break;
+        case ExtrusionDirectionY  : break;
+        case ExtrusionDirectionZ  : break;
+        default                   : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);
@@ -147,34 +114,19 @@ DxfGo Text::toGo() const {
     }
     // qDebug(u"scale X %f Y %f"_s, scaleX, scaleY);
     switch(horizontalJustType) {
-    case Left: // 0
-        offset.rx();
-        break;
-    case Center: // 1
-        offset.rx() -= size.width() / 2;
-        break;
-    case Right: // 2
-        offset.rx() -= size.width();
-        break;
-    case Aligned: // 3
-        break;
-    case MiddleH: // 4
-        break;
-    case Fit: // 5
-        break;
+    case Left   : offset.rx(); break;                     // 0
+    case Center : offset.rx() -= size.width() / 2; break; // 1
+    case Right  : offset.rx() -= size.width(); break;     // 2
+    case Aligned: break;                                  // 3
+    case MiddleH: break;                                  // 4
+    case Fit    : break;                                      // 5
     }
 
     switch(verticalJustType) {
-    case Baseline: // 0
-        break;
-    case Bottom: // 1
-        break;
-    case MiddleV: // 2
-        offset.ry() += ascent / 2;
-        break;
-    case Top: // 3
-        offset.ry() += ascent;
-        break;
+    case Baseline: break;                            // 0
+    case Bottom  : break;                            // 1
+    case MiddleV : offset.ry() += ascent / 2; break; // 2
+    case Top     : offset.ry() += ascent; break;          // 3
     }
 
     if(textGenerationFlag & MirroredInX)

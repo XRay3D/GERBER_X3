@@ -258,8 +258,7 @@ void File::createGi() {
     // case GCode::Pocket:
     createGiPocket();
     // break;
-    // default:
-    // break;
+    // default: break;
     // }
 
     itemGroup()->setVisible(true);

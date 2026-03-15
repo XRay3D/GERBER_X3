@@ -10,12 +10,12 @@
  *******************************************************************************/
 #pragma once
 #ifndef GERBERAPERTURE_H
-#define GERBERAPERTURE_H
+    #define GERBERAPERTURE_H
 
-#include "gbr_vars.h"
+    #include "gbr_vars.h"
 
-#include <QMap>
-#include <QtMath>
+    #include <QMap>
+    #include <QtMath>
 
 namespace Gerber {
 

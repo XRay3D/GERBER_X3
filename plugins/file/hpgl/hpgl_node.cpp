@@ -173,22 +173,17 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         }
         return false;
-    default:
-        return false;
+    default: return false;
     }
 }
 
 Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemIsSelectable;
     switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::Side:
-        return itemFlag | Qt::ItemIsEditable;
-    case FileTree::Column::ItemsType:
-        return itemFlag | Qt::ItemIsEditable;
-    default:
-        return itemFlag;
+    case FileTree::Column::NameColorVisible: return itemFlag | Qt::ItemIsUserCheckable;
+    case FileTree::Column::Side            : return itemFlag | Qt::ItemIsEditable;
+    case FileTree::Column::ItemsType       : return itemFlag | Qt::ItemIsEditable;
+    default                                : return itemFlag;
     }
 }
 
@@ -196,43 +191,31 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole:
-            return file->shortName();
-        case Qt::ToolTipRole:
-            return file->shortName() + u'\n' + file->name();
-        case Qt::CheckStateRole:
-            return file->isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole:
-            return QIcon::fromTheme(u"crosshairs"_s);
+        case Qt::DisplayRole   : return file->shortName();
+        case Qt::ToolTipRole   : return file->shortName() + u'\n' + file->name();
+        case Qt::CheckStateRole: return file->isVisible() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DecorationRole: return QIcon::fromTheme(u"crosshairs"_s);
         }
         break;
     case FileTree::Column::Side:
         switch(role) {
         case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-            return sideStrList[file->side()];
-        case Qt::EditRole:
-            return static_cast<bool>(file->side());
+        case Qt::ToolTipRole: return sideStrList[file->side()];
+        case Qt::EditRole   : return static_cast<bool>(file->side());
         }
         break;
     case FileTree::Column::ItemsType:
         switch(role) {
-        case Qt::DisplayRole:
-            return file->displayedTypes().at(int(file->itemsType())).shortActName();
-        case Qt::ToolTipRole:
-            return file->displayedTypes().at(int(file->itemsType())).actToolTip;
-        case Qt::EditRole:
-            return file->displayedTypes().at(int(file->itemsType())).id;
+        case Qt::DisplayRole: return file->displayedTypes().at(int(file->itemsType())).shortActName();
+        case Qt::ToolTipRole: return file->displayedTypes().at(int(file->itemsType())).actToolTip;
+        case Qt::EditRole   : return file->displayedTypes().at(int(file->itemsType())).id;
         }
         break;
-    default:
-        break;
+    default: break;
     }
     switch(role) {
-    case FileTree::Id:
-        return *m_id;
-    default:
-        return {};
+    case FileTree::Id: return *m_id;
+    default          : return {};
     }
     return {};
 }
@@ -313,12 +296,9 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
 Qt::ItemFlags NodeLayer::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren; //| Qt::ItemIsSelectable;
     switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return itemFlag | Qt::ItemIsUserCheckable;
-    case FileTree::Column::ItemsType:
-        return itemFlag | Qt::ItemIsEditable;
-    default:
-        return itemFlag;
+    case FileTree::Column::NameColorVisible: return itemFlag | Qt::ItemIsUserCheckable;
+    case FileTree::Column::ItemsType       : return itemFlag | Qt::ItemIsEditable;
+    default                                : return itemFlag;
     }
 }
 
@@ -335,8 +315,7 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
     // return decoration(layer->color());
     // case FileTree::Id:
     // return *m_id;
-    // default:
-    // return {};
+    // default: return {};
     // }
     // case FileTree::Column::ItemsType: {
     // auto file(layer->file());
@@ -350,12 +329,10 @@ QVariant NodeLayer::data(const QModelIndex& index, int role) const {
     // return file->displayedTypes().at(type).id;
     // case FileTree::Id:
     // return file->id();
-    // default:
-    // return {};
+    // default: return {};
     // }
     // }
-    // default:
-    // return {};
+    // default: return {};
     // }
     return {};
 }

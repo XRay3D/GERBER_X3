@@ -28,12 +28,12 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
     int type;
     stream >> type;
     switch(type) {
-    case Circle: aperture = std::make_shared<ApCircle>(stream, File::crutch); break;
+    case Circle   : aperture = std::make_shared<ApCircle>(stream, File::crutch); break;
     case Rectangle: aperture = std::make_shared<ApRectangle>(stream, File::crutch); break;
-    case Obround: aperture = std::make_shared<ApObround>(stream, File::crutch); break;
-    case Polygon: aperture = std::make_shared<ApPolygon>(stream, File::crutch); break;
-    case Macro: aperture = std::make_shared<ApMacro>(stream, File::crutch); break;
-    case Block: aperture = std::make_shared<ApBlock>(stream, File::crutch); break;
+    case Obround  : aperture = std::make_shared<ApObround>(stream, File::crutch); break;
+    case Polygon  : aperture = std::make_shared<ApPolygon>(stream, File::crutch); break;
+    case Macro    : aperture = std::make_shared<ApMacro>(stream, File::crutch); break;
+    case Block    : aperture = std::make_shared<ApBlock>(stream, File::crutch); break;
     }
     return stream;
 }
@@ -415,27 +415,17 @@ void ApMacro::draw() {
             switch(static_cast<int>(mod[0])) {
             case Comment:
                 continue;
-            case Circle:
-                path = drawCircle(mod);
-                break;
-            case OutlineCustomPolygon:
-                path = drawOutlineCustomPolygon(mod);
-                break;
-            case OutlineRegularPolygon:
-                path = drawOutlineRegularPolygon(mod);
-                break;
+            case Circle               : path = drawCircle(mod); break;
+            case OutlineCustomPolygon : path = drawOutlineCustomPolygon(mod); break;
+            case OutlineRegularPolygon: path = drawOutlineRegularPolygon(mod); break;
             case Moire:
                 drawMoire(mod);
                 return;
             case Thermal:
                 drawThermal(mod);
                 return;
-            case VectorLine:
-                path = drawVectorLine(mod);
-                break;
-            case CenterLine:
-                path = drawCenterLine(mod);
-                break;
+            case VectorLine: path = drawVectorLine(mod); break;
+            case CenterLine: path = drawCenterLine(mod); break;
             }
 
             const double area = Area(path);

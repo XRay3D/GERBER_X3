@@ -129,21 +129,13 @@ void Spline::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker: // 100
-            break;
-        case ExtrusionDirectionX: // 210
-            break;
-        case ExtrusionDirectionY: // 220
-            break;
-        case ExtrusionDirectionZ: // 230
-            break;
-        case SplineFlag: // 70
-            splineFlag = code;
-            break;
-        case DegreeOfTheSplineCurve: // 71
-            degreeOfTheSplineCurve = code;
-            break;
-        case NumberOfKnots: // 72
+        case SubclassMarker        : break;                                // 100
+        case ExtrusionDirectionX   : break;                                // 210
+        case ExtrusionDirectionY   : break;                                // 220
+        case ExtrusionDirectionZ   : break;                                // 230
+        case SplineFlag            : splineFlag = code; break;             // 70
+        case DegreeOfTheSplineCurve: degreeOfTheSplineCurve = code; break; // 71
+        case NumberOfKnots:                                                // 72
             numberOfKnots = code;
             KnotValues.reserve(numberOfKnots);
             break;
@@ -155,57 +147,30 @@ void Spline::parse(CodeData& code) {
             numberOfFitPoints = code;
             FitPoints.reserve(numberOfFitPoints);
             break;
-        case KnotTolerance: // 42
-            knotTolerance = code;
-            break;
-        case ControlPointTolerance: // 43
-            controlPointTolerance = code;
-            break;
-        case FitTolerance: // 44
-            fitTolerance = code;
-            break;
-        case StartTangentX: // 12
-            StartTangent.setX(code);
-            break;
-        case StartTangentY: // 22
-            StartTangent.setY(code);
-            break;
-        case StartTangentZ: // 32
-            break;
-        case EndTangentX: // 13
-            EndTangent.setX(code);
-            break;
-        case EndTangentY: // 23
-            EndTangent.setY(code);
-            break;
-        case EndTangentZ: // 33
-            break;
-        case KnotValue: // 40
-            KnotValues << double(code);
-            break;
-        case Weight: // 41
-            weight = code;
-            break;
-        case ControlPointsX: // 10
+        case KnotTolerance        : knotTolerance = code; break;         // 42
+        case ControlPointTolerance: controlPointTolerance = code; break; // 43
+        case FitTolerance         : fitTolerance = code; break;          // 44
+        case StartTangentX        : StartTangent.setX(code); break;      // 12
+        case StartTangentY        : StartTangent.setY(code); break;      // 22
+        case StartTangentZ        : break;                               // 32
+        case EndTangentX          : EndTangent.setX(code); break;        // 13
+        case EndTangentY          : EndTangent.setY(code); break;        // 23
+        case EndTangentZ          : break;                               // 33
+        case KnotValue            : KnotValues << double(code); break;   // 40
+        case Weight               : weight = code; break;                               // 41
+        case ControlPointsX:                                             // 10
             ControlPoints.resize(ControlPoints.size() + 1);
             ControlPoints.last().setX(code);
             break;
-        case ControlPointsY: // 20
-            ControlPoints.last().setY(code);
-            break;
-        case ControlPointsZ: // 30
-            break;
-        case FitPointsX: // 11
+        case ControlPointsY: ControlPoints.last().setY(code); break; // 20
+        case ControlPointsZ: break;                                  // 30
+        case FitPointsX:                                             // 11
             FitPoints.resize(FitPoints.size() + 1);
             FitPoints.last().setX(code);
             break;
-        case FitPointsY: // 21
-            FitPoints.last().setY(code);
-            break;
-        case FitPointsZ: // 31
-            break;
-        default:
-            Entity::parse(code);
+        case FitPointsY: FitPoints.last().setY(code); break; // 21
+        case FitPointsZ: break;                              // 31
+        default        : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);
@@ -261,19 +226,19 @@ void Spline::read(QDataStream& stream) {
 ////////////////////////////////////
 
 #ifndef M_PI_2
-// For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
-// when compiling with -std=c++11
-#define M_PI_2 (1.57079632679489661923)
+    // For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
+    // when compiling with -std=c++11
+    #define M_PI_2 (1.57079632679489661923)
 #endif
 
 #ifndef LOG_MIN
-//! Minimum value for logarithmic scales
-#define LOG_MIN 1.0e-100
+    //! Minimum value for logarithmic scales
+    #define LOG_MIN 1.0e-100
 #endif
 
 #ifndef LOG_MAX
-//! Maximum value for logarithmic scales
-#define LOG_MAX 1.0e100
+    //! Maximum value for logarithmic scales
+    #define LOG_MAX 1.0e100
 #endif
 
 // QWT_EXPORT double qwtGetMin(const double* array, int size);

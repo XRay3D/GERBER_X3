@@ -535,8 +535,7 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
         case Qt::NoModifier:
             if(!delta.x()) sbUpdate(verticalScrollBar());
             break;
-        default:
-            // QGraphicsView::wheelEvent(event);
+        default: // QGraphicsView::wheelEvent(event);
             return;
         }
     }
@@ -753,8 +752,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k,     point.y(), point.x() + k,     point.y()},
-            {    point.x(), point.y() - k,     point.x(), point.y() + k}
+            {point.x() - k, point.y(),     point.x() + k, point.y()    },
+            {point.x(),     point.y() - k, point.x(),     point.y() + k}
         };
         painter->drawLines(lines, 2);
     }
@@ -766,8 +765,8 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         color.setRed(255);
         painter->setPen({color, penWidth});
         QLineF lines[2]{
-            {          0, rect.top(),            0, rect.bottom()},
-            {rect.left(),          0, rect.right(),             0}
+            {0,           rect.top(), 0,            rect.bottom()},
+            {rect.left(), 0,          rect.right(), 0            }
         };
         painter->drawLines(lines, 2);
     }

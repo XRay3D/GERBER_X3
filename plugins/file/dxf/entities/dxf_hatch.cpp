@@ -23,94 +23,46 @@ Hatch::~Hatch() {
         qDeleteAll(edge);
 }
 
-// void Hatch::draw(const InsertEntity* const i) const
-//{
-// if (i) {
-// for (int r{}; r < i->rowCount; ++r) {
-// for (int c{}; c < i->colCount; ++c) {
-// QPointF tr{r * i->rowSpacing, r * i->colSpacing};
-// GraphicObject go(toGo());
-// i->transform(go, tr);
-// i->attachToLayer(std::move(go));
-// }
-// }
-// } else {
-// attachToLayer(toGo());
-// }
-// }
-
 void Hatch::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(code.code()) {
-        case SubclassMarker: // 100
-            break;
-        case ElevationPointX: // 10
-            break;
-        case ElevationPointY: // 20
-            break;
-        case ElevationPointZ: // 30
-            break;
-        case ExtrDirectionX: // 210
-            break;
-        case ExtrDirectionY: // 220
-            break;
-        case ExtrDirectionZ: // 230
-            break;
-        case HatchPatternName: // 2
-            break;
-        case SolidFillFlag: // 70
-            break;
-        case PatternFillColor: // 63
-            break;
-        case AssociativityFlag: // 71
-            break;
-        case NumberOfBoundaryPaths: // 91
-            break;
-        case HatchStyle: // 75
-            break;
-        case HatchPatternType: // 76
-            break;
-        case HatchPatternAngle: // 52
-            break;
-        case HatchPatternScaleOrSpacing: // 41
-            break;
-        case BoundaryAnnotationFlag: // 73
-            break;
-        case HatchPatternDoubleFlag: // 77
-            break;
-        case NumberOfPatternDefinitionLines: // 78
-            break;
-        case PixelSize: // 47
-            break;
-        case NumberOfSeedPoints: // 98
-            break;
-        case OffsetVector: // 11
-            break;
-        case NumberOfDegenerateBoundaryPaths: // 99
-            break;
-            // case SeedPointX: // 10
-            // break;
-            // case SeedPointY: // 20
-            // break;
-        case IndicatesSolidHatchOrGradient: // 450
-            break;
-        case Zero: // 451
-            break;
-        case RecordsColors: // 452
-            break;
-        case NumberOfColors: // 453
-            break;
-        case RotationAangleInRadiansForGradients: // 460
-            break;
-        case GradientDefinition: // 461
-            break;
-        case ColorTintValueUsedByDialogCode: // 462
-            break;
-        case ReservedForFutureUse: // 463
-            break;
-        case String: // 470
-            break;
+        case SubclassMarker                : break; // 100
+        case ElevationPointX               : break; // 10
+        case ElevationPointY               : break; // 20
+        case ElevationPointZ               : break; // 30
+        case ExtrDirectionX                : break; // 210
+        case ExtrDirectionY                : break; // 220
+        case ExtrDirectionZ                : break; // 230
+        case HatchPatternName              : break; // 2
+        case SolidFillFlag                 : break; // 70
+        case PatternFillColor              : break; // 63
+        case AssociativityFlag             : break; // 71
+        case NumberOfBoundaryPaths         : break; // 91
+        case HatchStyle                    : break; // 75
+        case HatchPatternType              : break; // 76
+        case HatchPatternAngle             : break; // 52
+        case HatchPatternScaleOrSpacing    : break; // 41
+        case BoundaryAnnotationFlag        : break; // 73
+        case HatchPatternDoubleFlag        : break; // 77
+        case NumberOfPatternDefinitionLines: break; // 78
+        case PixelSize                     : break; // 47
+        case NumberOfSeedPoints            : break; // 98
+        case OffsetVector                  : break;                   // 11
+        case NumberOfDegenerateBoundaryPaths:
+            break; // 99
+            // case SeedPointX: break;// 10
+            // case SeedPointY: break;// 20
+        case IndicatesSolidHatchOrGradient      : break; // 450
+        case Zero                               : break; // 451
+        case RecordsColors                      : break; // 452
+        case NumberOfColors                     : break; // 453
+        case RotationAangleInRadiansForGradients: break; // 460
+        case GradientDefinition                 : break; // 461
+        case ColorTintValueUsedByDialogCode     : break; // 462
+        case ReservedForFutureUse               : break;                // 463
+        case String:
+            break; // 470
             // посипроение контура
         case PathTypeFlag:                         // 92
             pathTypeFlags.emplace_back(int(code)); // PathTypeFlags
@@ -152,19 +104,12 @@ void Hatch::parse(CodeData& code) {
             case Spline:      // 4
                 // break;
                 throw DxfObj::tr("Unimplemented edge type in HATCH: %1").arg(edgeType);
-            default:
-                throw DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType);
+            default: throw DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType);
             }
             break;
-        case NumberOfSourceBoundaryObjects: // 97
-            referencesToSourceBoundaryObject.reserve(int(code));
-            break;
-        case ReferenceToSourceBoundaryObjects: // 330
-            referencesToSourceBoundaryObject.emplace_back(code.string());
-            break;
-        default:
-            Entity::parse(code);
-            break;
+        case NumberOfSourceBoundaryObjects   : referencesToSourceBoundaryObject.reserve(int(code)); break;          // 97
+        case ReferenceToSourceBoundaryObjects: referencesToSourceBoundaryObject.emplace_back(code.string()); break; // 330
+        default                              : Entity::parse(code); break;
         }
         // Entity::parse(code);
         // DC 5 S//

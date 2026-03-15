@@ -62,9 +62,9 @@ File::File()
     : AbstractFile() {
     itemGroups_.append({new Gi::Group, new Gi::Group});
     layerTypes_ = {
-        {    Normal,         GbrObj::tr("Normal"),                                                                GbrObj::tr("Normal view")},
-        {   ApPaths, GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
-        {Components,     GbrObj::tr("Components"),                                                            GbrObj::tr("Show components")}
+        {Normal,     GbrObj::tr("Normal"),         GbrObj::tr("Normal view")                                                               },
+        {ApPaths,    GbrObj::tr("Aperture paths"), GbrObj::tr("Displays only aperture paths of copper\nwithout width and without contacts")},
+        {Components, GbrObj::tr("Components"),     GbrObj::tr("Show components")                                                           }
     };
 }
 
@@ -97,8 +97,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                     name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
                     g.raw = drillDiameter;
                 } break;
-                default:
-                    break;
+                default: break;
                 }
             }
         }
@@ -288,12 +287,9 @@ FileTree::Node* File::node() {
 
 QIcon File::icon() const {
     switch(itemsType_) {
-    case File::ApPaths:
-        return decoration(color_, u'A');
-    case File::Components:
-        return decoration(color_, u'C');
-    default:
-        return decoration(color_);
+    case File::ApPaths   : return decoration(color_, u'A');
+    case File::Components: return decoration(color_, u'C');
+    default              : return decoration(color_);
     }
 }
 

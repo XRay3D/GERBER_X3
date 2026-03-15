@@ -88,8 +88,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
             return horizontalLabel[section];
         else
             return section + 1;
-    default:
-        return {};
+    default: return {};
     }
 }
 

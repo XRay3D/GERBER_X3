@@ -14,10 +14,10 @@
  */
 #pragma once
 #ifndef MATCHPARSER_H
-#define MATCHPARSER_H
+    #define MATCHPARSER_H
 
-#include <QMap>
-#include <QObject>
+    #include <QMap>
+    #include <QObject>
 
 class Result {
 public:

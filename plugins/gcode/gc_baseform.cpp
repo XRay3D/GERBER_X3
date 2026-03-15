@@ -89,8 +89,7 @@ public:
                 return u"X = %1\nY = %2"_s.arg(pos.x()).arg(pos.y());
             }
             return items[index.row()]->area();
-        case Qt::UserRole:
-            return QVariant::fromValue(items[index.row()]);
+        case Qt::UserRole: return QVariant::fromValue(items[index.row()]);
         case Qt::DecorationRole:
             if(index.column() == 0)
                 return errorIcon(items[index.row()]->shape());
@@ -99,8 +98,7 @@ public:
             if(index.column() == 0)
                 return Qt::AlignVCenter;
             return Qt::AlignCenter;
-        default:
-            break;
+        default: break;
         }
         return {};
     }
@@ -336,9 +334,7 @@ Params* BaseForm::getNewGcp() {
     for (auto* item : App::grView().selectedItems()) {
         auto gi = dynamic_cast<Gi::Item*>(item);
         switch (item->type()) {
-        case Gi::Type::DataSolid:
-            wPaths.append(static_cast<Gi::Item*>(item)->paths());
-            break;
+        case Gi::Type::DataSolid:wPaths.append(static_cast<Gi::Item*>(item)->paths());break;
         case Gi::Type::DataPath:
             if (testFile(gi))
                 return;
@@ -348,8 +344,7 @@ Params* BaseForm::getNewGcp() {
             if (testFile(gi))
                 return;
             wPaths.append(static_cast<Gi::Item*>(item)->paths(1));
-        default:
-            break;
+        default: break;
         }
         addUsedGi(gi);
     }
@@ -394,8 +389,7 @@ Params* BaseForm::getNewGcp() {
         // case Gi::Type::ShCirArc:
         // gcp->openPaths.append(gi->paths());
         // break;
-        // default:
-        // break;
+        // default:  break;
         // }
         addUsedGi(gi);
     }

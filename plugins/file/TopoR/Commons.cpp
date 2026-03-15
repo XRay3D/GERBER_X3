@@ -205,46 +205,24 @@ void Text::UnitsConvert(dist_ in_units, dist_ out_units) {
 float Ut::UnitsConvert(float value, dist_ in_units, dist_ out_units) {
     double k;
     switch(in_units) {
-    case dist_::mkm:
-        k = 0.001;
-        break;
-    case dist_::cm:
-        k = 10;
-        break;
-    case dist_::dm:
-        k = 100;
-        break;
-    case dist_::m:
-        k = 1000;
-        break;
-    case dist_::mil:
-        k = 0.0254000000000000002032;
-        break;
-    case dist_::inch:
-        k = 25.4000000000000002032;
-        break;
-    case dist_::mm:
-    default:
-        k = 1;
-        break;
+    case dist_::mkm : k = 0.001; break;
+    case dist_::cm  : k = 10; break;
+    case dist_::dm  : k = 100; break;
+    case dist_::m   : k = 1000; break;
+    case dist_::mil : k = 0.0254000000000000002032; break;
+    case dist_::inch: k = 25.4000000000000002032; break;
+    case dist_::mm  :
+    default         : k = 1; break;
     }
     switch(out_units) {
-    case dist_::mkm:
-        return static_cast<float>(value * k * 1000);
-    case dist_::cm:
-        return static_cast<float>(value * k * 0.1);
-    case dist_::dm:
-        return static_cast<float>(value * k * 0.01);
-    case dist_::m:
-        return static_cast<float>(value * k * 0.001);
-    case dist_::mil:
-        return static_cast<float>(value * k * 39.37007874015748);
-    case dist_::inch:
-        return static_cast<float>(value * k * 0.03937007874015748);
-    case dist_::mm:
-        return static_cast<float>(value * k);
-    default:
-        return value;
+    case dist_::mkm : return static_cast<float>(value * k * 1000);
+    case dist_::cm  : return static_cast<float>(value * k * 0.1);
+    case dist_::dm  : return static_cast<float>(value * k * 0.01);
+    case dist_::m   : return static_cast<float>(value * k * 0.001);
+    case dist_::mil : return static_cast<float>(value * k * 39.37007874015748);
+    case dist_::inch: return static_cast<float>(value * k * 0.03937007874015748);
+    case dist_::mm  : return static_cast<float>(value * k);
+    default         : return value;
     }
 }
 // } // namespace TopoR_PCB_Classes

@@ -24,7 +24,8 @@
 
 using namespace Qt::Literals;
 
-template <> struct QConcatenable<sv> : private QAbstractConcatenable {
+template <>
+struct QConcatenable<sv> : private QAbstractConcatenable {
     using type = sv;
     using ConvertTo = QString;
     static constexpr bool ExactSize = true;
@@ -197,12 +198,9 @@ MathParser1::Result MathParser1::processFunction(sv func, const Result& r) {
         tan
     };
     switch(Func(u"sin,cos,tan"_s.split(u',').indexOf(toString(func)))) {
-    case Func::sin:
-        return Result(sin(r.acc), r.rest);
-    case Func::cos:
-        return Result(cos(r.acc), r.rest);
-    case Func::tan:
-        return Result(tan(r.acc), r.rest);
+    case Func::sin: return Result(sin(r.acc), r.rest);
+    case Func::cos: return Result(cos(r.acc), r.rest);
+    case Func::tan: return Result(tan(r.acc), r.rest);
     default:
         qWarning() << "function '" << func.data() << "' is not defined";
         break;

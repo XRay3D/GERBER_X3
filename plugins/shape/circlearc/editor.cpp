@@ -63,8 +63,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
                 set.emplace(tmp);
             }
             return set;
-        default:
-            return set;
+        default: return set;
         }
     };
 
@@ -146,17 +145,11 @@ public:
         switch(index.row()) {
         case Shape::Point1:
         case Shape::Point2:
-        case Shape::Center:
-            dsbx->setRange(-10000, +10000);
-            break;
-        case Shape::Radius:
-        case Shape::Diameter:
-            dsbx->setRange(0, 10000);
-            break;
-        case Shape::Angle1:
-        case Shape::Angle2:
-            dsbx->setRange(0, 360);
-            break;
+        case Shape::Center  : dsbx->setRange(-10000, +10000); break;
+        case Shape::Radius  :
+        case Shape::Diameter: dsbx->setRange(0, 10000); break;
+        case Shape::Angle1  :
+        case Shape::Angle2  : dsbx->setRange(0, 360); break;
         }
 
         dsbx->setDecimals(3);

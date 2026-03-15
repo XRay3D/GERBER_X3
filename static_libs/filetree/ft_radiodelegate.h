@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 #ifdef GBR_
-#include <QStyledItemDelegate>
+    #include <QStyledItemDelegate>
 
 class RadioDelegate : public QStyledItemDelegate {
     Q_OBJECT

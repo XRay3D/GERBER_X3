@@ -91,33 +91,23 @@ QVariant Model::data(const QModelIndex& index, int role) const {
                 return QIcon(QPixmap::fromImage(image));
             }
         }
-        case Qt::UserRole:
-            return row;
-        default:
-            break;
+        case Qt::UserRole: return row;
+        default          : break;
         }
     } else {
         if(data_[row].toolId == -1)
             switch(role) {
-            case Qt::DisplayRole:
-                return tr("Select Tool");
-            case Qt::TextAlignmentRole:
-                return Qt::AlignCenter;
-            case Qt::UserRole:
-                return data_[row].toolId;
-            default:
-                break;
+            case Qt::DisplayRole      : return tr("Select Tool");
+            case Qt::TextAlignmentRole: return Qt::AlignCenter;
+            case Qt::UserRole         : return data_[row].toolId;
+            default                   : break;
             }
         else
             switch(role) {
-            case Qt::DisplayRole:
-                return App::toolHolder().tool(data_[row].toolId).name();
-            case Qt::DecorationRole:
-                return App::toolHolder().tool(data_[row].toolId).icon();
-            case Qt::UserRole:
-                return data_[row].toolId;
-            default:
-                break;
+            case Qt::DisplayRole   : return App::toolHolder().tool(data_[row].toolId).name();
+            case Qt::DecorationRole: return App::toolHolder().tool(data_[row].toolId).icon();
+            case Qt::UserRole      : return data_[row].toolId;
+            default                : break;
             }
     }
     return {};
@@ -128,8 +118,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
     case Qt::DisplayRole:
         if(orientation == Qt::Horizontal) {
             switch(section) {
-            case Name:
-                return {tr("Aperture") + u" / "_s + tr("Tool")};
+            case Name: return {tr("Aperture") + u" / "_s + tr("Tool")};
             case Tool:;
                 return tr("Tool");
             }
@@ -143,8 +132,7 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         if(orientation == Qt::Vertical)
             return static_cast<int>(Qt::AlignRight) | static_cast<int>(Qt::AlignVCenter);
         return Qt::AlignCenter;
-    default:
-        return {};
+    default: return {};
     }
 }
 

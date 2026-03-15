@@ -151,11 +151,11 @@ public:
 
                 QPixmap getPixmap(StandardPixmap standardPixmap) const {
                     switch(standardPixmap) {
-                    case SP_TitleBarNormalButton: return QPixmap{dwRestoreXpm};
-                    case SP_TitleBarMinButton: return QPixmap{dwMinimizeXpm};
-                    case SP_TitleBarCloseButton:
+                    case SP_TitleBarNormalButton : return QPixmap{dwRestoreXpm};
+                    case SP_TitleBarMinButton    : return QPixmap{dwMinimizeXpm};
+                    case SP_TitleBarCloseButton  :
                     case SP_DockWidgetCloseButton: return QPixmap{dwCloseXpm};
-                    default: return {};
+                    default                      : return {};
                     }
                 }
 

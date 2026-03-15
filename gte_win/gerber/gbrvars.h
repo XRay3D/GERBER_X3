@@ -10,20 +10,20 @@
  *******************************************************************************/
 #pragma once
 #ifndef GERBER_H
-#define GERBER_H
+    #define GERBER_H
 
-#include <QObject>
-#include <myclipper.h>
+    #include <QObject>
+    #include <myclipper.h>
 
-#define DEPRECATED
+    #define DEPRECATED
 
 namespace Gerber {
 
 enum ZeroOmissionMode {
     OmitLeadingZeros,
-#ifdef DEPRECATED
+    #ifdef DEPRECATED
     OmitTrailingZeros,
-#endif
+    #endif
 };
 
 enum UnitMode {
@@ -38,9 +38,9 @@ enum ImagePolarity {
 
 enum CoordinateValuesNotation {
     AbsoluteNotation,
-#ifdef DEPRECATED
+    #ifdef DEPRECATED
     IncrementalNotation,
-#endif
+    #endif
 };
 
 enum InterpolationMode {
@@ -97,21 +97,21 @@ enum GCode {
     // Region mode
     G36 = 36, // Begin region
     G37 = 37, // End region
-#ifdef DEPRECATED
+    #ifdef DEPRECATED
     // Change aperture
     G54 = 54,
     // Units mode
     G70 = 70, // Inces
     G71 = 71, // Millimeteres
-#endif
+    #endif
     // Graphics state operators defining the quadrant modeparameter, amodifier of the circular interpolation mode.
     G74 = 74, // Sets quadrant mode to ’Singlequadrant’
     G75 = 75, // Sets quadrant mode to ’Multiquadrant’
-#ifdef DEPRECATED
+    #ifdef DEPRECATED
     // Absolute / relative coordinates
     G90 = 90, // Absolute
     G91 = 91, // Relative (incremental)
-#endif
+    #endif
 };
 
 enum AttributeType {

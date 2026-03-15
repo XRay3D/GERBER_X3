@@ -53,10 +53,10 @@ AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
 
 QJsonObject Plugin::info() const {
     return QJsonObject{
-        {        u"Name"_s,                   u"HPGL"_s},
-        {     u"Version"_s,                    u"1.0"_s},
+        {u"Name"_s,         u"HPGL"_s                  },
+        {u"Version"_s,      u"1.0"_s                   },
         {u"VendorAuthor"_s, u"X-Ray aka Bakiev Damir"_s},
-        {        u"Info"_s,     u"Opening HPGL Files"_s}
+        {u"Info"_s,         u"Opening HPGL Files"_s    }
     };
 }
 
