@@ -179,6 +179,7 @@ void Spline::parse(CodeData& code) {
 Entity::Type Spline::type() const { return Type::SPLINE; }
 
 DxfGo Spline::toGo() const {
+    qInfo("Spline");
     qInfo("TODO");
     return {};
 }

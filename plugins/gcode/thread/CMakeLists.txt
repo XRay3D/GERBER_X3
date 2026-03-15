@@ -12,49 +12,24 @@ cmake_minimum_required(VERSION 4.00)
 
 project(thread LANGUAGES CXX)
 
+set(PLUG_NAME "Thread Mill")
+set(PLUG_INFO "Thread Mill")
+set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
+set(PLUG_LOCAL_VERSION "0")
 
-
-find_package(Qt6 COMPONENTS  Widgets REQUIRED)
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
+               ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
 
 file(GLOB HEADERS *.h)
 file(GLOB JSONS *.json)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
 
-
-set(PROJECT_SOURCES
-    ${HEADERS}
-    ${JSONS}
-    ${SOURCES}
-    ${UIS}
-)
+set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    clipper
-    common
-    filetree
-    gcode
-    gi
-    graphicsview
-    tooldatabase
-    Qt6::Widgets
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE clipper #[[gcode]])
 
-#add_library(gc_profile STATIC
-#    profile.cpp
-#    profile.h
-#)
-
-#target_link_libraries(gc_profile PRIVATE
-#    clipper
-#    gcode
-#    common
-#    filetree
-#    Qt6::Core
-#    Qt6::Gui
-#    Qt6::Widgets
-#)

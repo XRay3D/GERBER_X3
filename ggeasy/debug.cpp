@@ -46,42 +46,28 @@ bool MainWindow::debug() {
         int delay = 100; //-V654
 
         if(0) {
-            QDir dir{
-                uR"(C:\Users\bakiev\Junk_Yard\SFT\CAM\CopperCAM)"_s
-                // u"C:/Users/X-Ray/Documents/3018/CNC"_s
-                // u"D:/Gerber Test Files/CopperCAM/"_s
-                // u"E:/PRO/Новая папка/en.stm32f 746g-disco_gerber/gerber_B01"_s
-                // uR"(/home/x-ray/projects/dxf/)"_s
-                // uR"(/home/x-ray/projects/qt/AMK-310/AMK_TESTER)"_s
-                // uR"(/home/x-ray/Загрузки/Gerber_TL-kontroler_PCB_TL-kontroler_2_2024-03-08/)"_s
-            };
-            if(!dir.exists()) break;
+            QSettings settings;
+            QDir dir{(
+                recentFiles.readRecentFiles(settings)
+                | v::filter(qOverload<const QString&>(&QFileInfo::exists)) | v::take(1))
+                    .front()};
             for(auto&& str: dir.entryList({u"*.gbr"_s}, QDir::Files)) {
                 str = dir.path() + u'/' + str;
                 QTimer::singleShot(time += delay, [this, str] { loadFile(str); });
                 break;
             }
-            QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+            QTimer::singleShot(time += delay * 5, this, [] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
         }
 
         if(1) {
-            QTimer::singleShot(time += delay, this, [this] {
-                QSettings settings;
-                const QStringList siles = recentFiles.readRecentFiles(settings);
-                loadFile(siles.front());
-            });
-            QTimer::singleShot(time += delay * 5, this, [] { App::grView().zoomFit(); });
-        }
-
-        if(0) {
-
-            for(auto&& file: {
-                    uR"(/home/x-ray/Загрузки/gerber1.gbr)"_s,
-                    uR"(C:\Users\bakiev\Downloads\gerber1.gbr)"_s,
-                    uR"(E:\YandexDisk\G2G\RefUcamco Gerber\20191107_ciaa_acc\ciaa_acc/ciaa_acc-F_Mask.gbr)"_s}) {
+            QSettings settings;
+            for(auto&& file:
+                recentFiles.readRecentFiles(settings)
+                    | v::take(1)) {
                 if(!QFileInfo::exists(file)) continue;
                 QTimer::singleShot(time += delay, this, [this, file] { loadFile(file); });
-                QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
+                QTimer::singleShot(time += delay * 5, this, [] { App::grView().zoomFit(); });
+                // QTimer::singleShot(time += delay * 5, this, [this] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
             }
         }
 

@@ -304,16 +304,12 @@ protected:
     static inline bool simplifyRegions_;
     static inline bool skipDuplicates_;
 
-    static inline bool wireMinkowskiSum_;
-
 public:
     static bool cleanPolygons() { return cleanPolygons_; }
     static double cleanPolygonsDist() { return cleanPolygonsDist_; }
 
     static bool simplifyRegions() { return simplifyRegions_; }
     static bool skipDuplicates() { return skipDuplicates_; }
-
-    static bool wireMinkowskiSum() { return wireMinkowskiSum_; }
 };
 
 } // namespace Gerber

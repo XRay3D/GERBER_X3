@@ -16,13 +16,21 @@ set(PLUG_NAME "Pocket Offset")
 set(PLUG_INFO "Pocket Offset")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
 set(PLUG_LOCAL_VERSION "0")
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
+
+add_library(gc_pocketoffset STATIC pocketoffset.h pocketoffset.cpp)
+
+target_link_libraries(gc_pocketoffset PUBLIC clipper #[[gcode]])
 
 file(GLOB HEADERS *.h)
 file(GLOB JSONS *.json)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
+
+list(FILTER HEADERS EXCLUDE REGEX pocketoffset.h)
+list(FILTER SOURCES EXCLUDE REGEX pocketoffset.cpp)
 
 set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
@@ -30,18 +38,4 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE clipper
-          common
-          filetree
-          gcode
-          gi
-          graphicsview
-          tooldatabase
-          Qt6::Widgets)
-
-add_library(gc_pocketoffset STATIC pocketoffset.h pocketoffset.cpp)
-
-target_link_libraries(gc_pocketoffset PRIVATE clipper gcode common filetree
-                                              Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE gc_pocketoffset)

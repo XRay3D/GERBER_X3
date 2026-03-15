@@ -183,8 +183,7 @@ void File::createGi() {
                 CleanPaths(mergedPaths_, uScale * 0.0005);
                 layer->groupedPaths_ = std::move(groupedPaths());
 
-                for(auto&& path: mergedPaths_)
-                    new Gi::Debug{toPPath(toCurve(path))};
+                Gi::Debug(mergedPaths_, Qt::red)->setZValue(100);
 
                 mergedPaths_.clear();
             }

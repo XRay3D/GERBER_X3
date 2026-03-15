@@ -513,52 +513,26 @@ Paths Parser::createLine() {
     }
 
     if(file->apertures_[state_.aperture()]->type() == Rectangle) {
-        if(Settings::wireMinkowskiSum()) {
-            solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
-            r::for_each(v::join(solution), &SetCSelf);
-        } else {
-            auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
-            if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
-                throw GbrObj::tr("Aperture D%1 (%2) not supported!\n"
-                                 "Only square Aperture or use Minkowski Sum")
-                    .arg(state_.aperture())
-                    .arg(rect->name());
-            double size = rect->width_ * uScale * state_.scaling();
-            if(qFuzzyIsNull(size))
-                return {};
-            solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
-            r::for_each(v::join(solution), &SetCSelf);
-        }
-        if(state_.imgPolarity() == Negative)
-            ReversePaths(solution);
+        solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
+        r::for_each(v::join(solution), &SetCSelf);
+        // auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
+        // if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
+        //     throw GbrObj::tr("Aperture D%1 (%2) not supported!\n"
+        //                      "Only square Aperture or use Minkowski Sum")
+        //         .arg(state_.aperture())
+        //         .arg(rect->name());
+        // double size = rect->width_ * uScale * state_.scaling();
+        // if(qFuzzyIsNull(size))
+        //     return {};
+        // solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
+        // r::for_each(v::join(solution), &SetCSelf);
     } else {
         double size = file->apertures_[state_.aperture()]->size() * uScale * state_.scaling();
-        if(qFuzzyIsNull(size))
-            return {};
-
+        if(qFuzzyIsNull(size)) return {};
         r::for_each(path_, &SetCSelf);
-        // for(auto& pt: path_) SetC(pt);
-        if(Settings::wireMinkowskiSum())
-            solution = Clipper2Lib::MinkowskiSum(CirclePath(size), path_, {});
-        else {
-            // if(path_.front() != path_.back())
-            solution = Inflate({path_}, size, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
-            // else {
-            // Clipper clipper;
-            // clipper.AddSubject(
-            // Inflate({path_}, +size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
-            // clipper.AddClip(
-            // Inflate({path_}, -size, JoinType::Round, EndType::Polygon, 2.0, uScale / 1000));
-            // clipper.Execute(ClipType::Difference, FillRule::NonZero, solution);
-            // }
-        }
-
-        // ClipperOffset offset;
-        // offset.AddPath(path_, JoinType::Round, EndType::Round);
-        // solution = offset.Execute(size);
-        if(state_.imgPolarity() == Negative)
-            ReversePaths(solution);
+        solution = Inflate({path_}, size, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
     }
+    if(state_.imgPolarity() == Negative) ReversePaths(solution);
 
     // new Gi::Debug{solution};
 

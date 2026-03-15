@@ -25,7 +25,20 @@ DataFill::DataFill(Paths& paths, AbstractFile* file)
     for(Path path: paths) {
         if(path.size() && path.back() != path.front())
             path.push_back(path.front());
-        shape_.addPolygon(~path);
+        // shape_.addPolygon(~path);
+
+        // for(auto&& pt: path)
+        // if(auto c = ~GetC(pt); !c.isNull())
+        // lines1.emplace_back(c, ~pt);
+
+        shape_.addPath(toPPath(toCurve(path)));
+
+        // for(auto&& pt: path)
+        // if(auto c = ~GetC(pt); !c.isNull())
+        // lines2.emplace_back(c, ~pt);
+
+        // for(auto&& pt: path | v::transform(GetC) | v::transform(toQPointF))
+        // centers.emplace(pt);
     }
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
@@ -46,11 +59,29 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     // for (auto&& poly : shape_.toFillPolygons())
     // painter->drawPolygon(poly);
     painter->drawPath(shape_);
+
+    double scale = scaleFactor();
+
     bool fl = option->state & (QStyle::State_Selected | QStyle::State_MouseOver);
     if(fl) {
-        pen_.setWidthF(1.0 * scaleFactor());
+        pen_.setWidthF(1.0 * scale);
         pen_.setColor(penColor_);
         painter->strokePath(shape_, pen_);
+
+        painter->setPen({Qt::white, 0.0});
+        double len = 10 * scale;
+        for(const QPointF& p: paths_
+                | v::join
+                | v::transform(GetC)
+                | v::transform(toQPointF)
+                | v::filter(&QPointF::isNull)) {
+            painter->drawLines({
+                {p, p + QPointF{.0, -len}},
+                {p, p + QPointF{.0, +len}},
+                {p, p + QPointF{-len, .0}},
+                {p, p + QPointF{+len, .0}},
+            });
+        }
     }
 }
 

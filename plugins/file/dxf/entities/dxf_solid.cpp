@@ -24,30 +24,18 @@ void Solid::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker: break;
-        case Thickness     : thickness = code; break;
-        case FirstCornerX:
-            firstCorner.rx() = code;
-            corners |= FirstCorner;
-            break;
-        case FirstCornerY: firstCorner.ry() = code; break;
-        case FirstCornerZ: break;
-        case SecondCornerX:
-            secondCorner.rx() = code;
-            corners |= SecondCorner;
-            break;
-        case SecondCornerY: secondCorner.ry() = code; break;
-        case SecondCornerZ: break;
-        case ThirdCornerX:
-            thirdCorner.rx() = code;
-            corners |= ThirdCorner;
-            break;
-        case ThirdCornerY: thirdCorner.ry() = code; break;
-        case ThirdCornerZ: break;
-        case FourthCornerX:
-            fourthCorner.rx() = code;
-            corners |= FourthCorner;
-            break;
+        case SubclassMarker     : break;
+        case Thickness          : thickness = code; break;
+        case FirstCornerX       : firstCorner.rx() = code, corners |= FirstCorner; break;
+        case FirstCornerY       : firstCorner.ry() = code; break;
+        case FirstCornerZ       : break;
+        case SecondCornerX      : secondCorner.rx() = code, corners |= SecondCorner; break;
+        case SecondCornerY      : secondCorner.ry() = code; break;
+        case SecondCornerZ      : break;
+        case ThirdCornerX       : thirdCorner.rx() = code, corners |= ThirdCorner; break;
+        case ThirdCornerY       : thirdCorner.ry() = code; break;
+        case ThirdCornerZ       : break;
+        case FourthCornerX      : fourthCorner.rx() = code, corners |= FourthCorner; break;
         case FourthCornerY      : fourthCorner.ry() = code; break;
         case FourthCornerZ      : break;
         case ExtrusionDirectionX: break;
@@ -62,20 +50,25 @@ void Solid::parse(CodeData& code) {
 Entity::Type Solid::type() const { return Type::SOLID; }
 
 DxfGo Solid::toGo() const {
-    QPolygonF poly;
-    if(corners == 15) {
-        poly.reserve(5);
-        poly << firstCorner;
-        poly << secondCorner;
-        poly << fourthCorner;
-        poly << thirdCorner;
-        poly << firstCorner;
-    } else {
-        throw DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners);
-    }
+    qInfo("Solid");
+
+    if(corners != 0xF)
+        throw DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners, 2);
+
+    QPolygonF poly{
+        firstCorner,
+        secondCorner,
+        fourthCorner,
+        thirdCorner,
+        firstCorner,
+    };
+
     Path path{~poly};
+    r::for_each(path, &SetCSelf);
+
     ReversePath(path);
     DxfGo go{id, path, {path}}; // return {id, path, {path}};
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Rect);
     return go;
 }
 

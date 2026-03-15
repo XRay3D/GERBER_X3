@@ -64,16 +64,19 @@ FetchContent_Declare(
   pfr
   # GIT_REPOSITORY https: // github.com/boostorg/pfr.git
   GIT_REPOSITORY https://github.com/apolukhin/pfr_non_boost.git
-  GIT_TAG master)
+  GIT_TAG master
+  GIT_SHALLOW ON)
 FetchContent_Declare(
   ctre
   GIT_REPOSITORY
     "https://github.com/hanickadot/compile-time-regular-expressions.git"
-  GIT_TAG main)
+  GIT_TAG main
+  GIT_SHALLOW ON)
 FetchContent_Declare(
   clipper2
   GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
-  GIT_TAG main)
+  GIT_TAG main
+  GIT_SHALLOW ON)
 FetchContent_MakeAvailable(pfr ctre clipper2)
 
 #[[FIND CGAL

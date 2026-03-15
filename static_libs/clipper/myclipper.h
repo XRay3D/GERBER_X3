@@ -69,12 +69,12 @@ using Clipper2Lib::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point)
 
-constexpr bool operator<(const QPointF& r, const QPointF& l) {
-    return r.x() < l.x() && r.y() < l.y();
+constexpr bool operator<(const QPointF& r, const QPointF& l) noexcept {
+    return std::tuple{r.x(), r.y()} < std::tuple{l.x(), l.y()};
 }
 
-constexpr bool operator<(const Point& r, const Point& l) {
-    return r.x < l.x && r.y < l.y;
+constexpr bool operator<(const Point& r, const Point& l) noexcept {
+    return std::tuple{r.x, r.y} < std::tuple{l.x, l.y};
 }
 
 void TestPaths(const Paths& paths);
@@ -84,7 +84,7 @@ void SetC(Point& dst, const Point& center);
 void SetCForce(Point& dst, const Point& center);
 void SetCSelf(Point& dst);
 
-double Perimeter(const Path& path);
+double Perimeter(std::span<const Point> path, bool open = {});
 //------------------------------------------------------------------------------
 Path CirclePath(double diametr, const Point& center = Point{});
 Path RectanglePath(double width, double height, const Point& center = Point{});

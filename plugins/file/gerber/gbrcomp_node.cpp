@@ -70,27 +70,27 @@ void sNode::remove(int row) { childItems.removeAt(row); }
 
 bool sNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/) {
     // switch (index.column()) {
-    // // case Name_:
-    // // switch (role) {
-    // // case Qt::CheckStateRole:
-    // // file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-    // // return true;
-    // // default:  return false;
-    // // }
-    // // case Layer_:
-    // // switch (role) {
-    // // case Qt::EditRole:
-    // // file()->setSide(static_cast<Side>(value.toBool()));
-    // // return true;
-    // // default:  return false;
-    // // }
-    // // case Other_:
-    // // switch (role) {
-    // // case Qt::CheckStateRole:
-    // // current_ = value.value<Qt::CheckState>();
-    // // return true;
-    // // default:  return false;
-    // // }
+    // case Name_:
+    // switch (role) {
+    // case Qt::CheckStateRole:
+    // file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+    // return true;
+    // default:  return false;
+    // }
+    // case Layer_:
+    // switch (role) {
+    // case Qt::EditRole:
+    // file()->setSide(static_cast<Side>(value.toBool()));
+    // return true;
+    // default:  return false;
+    // }
+    // case Other_:
+    // switch (role) {
+    // case Qt::CheckStateRole:
+    // current_ = value.value<Qt::CheckState>();
+    // return true;
+    // default:  return false;
+    // }
     // default: // return false;
     // }
     return false;

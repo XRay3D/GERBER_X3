@@ -1082,7 +1082,7 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
 
     loggingTextBrowser = new QTextBrowser{loggingDockWidget};
     loggingTextBrowser->setObjectName(u"loggingTextBrowser"_s);
-    loggingTextBrowser->setReadOnly(false);
+    loggingTextBrowser->setReadOnly(true);
     loggingTextBrowser->setWordWrapMode(QTextOption::NoWrap);
     loggingDockWidget->setWidget(loggingTextBrowser);
     loggingDockWidget->setContentsMargins(3, 3, 3, 3);

@@ -47,6 +47,7 @@ void Arc::parse(CodeData& code) {
 Entity::Type Arc::type() const { return Type::ARC; }
 
 DxfGo Arc::toGo() const {
+    qInfo("Arc");
     if(qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
         return {};
 

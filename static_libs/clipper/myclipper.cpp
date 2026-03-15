@@ -400,14 +400,17 @@ Paths& TranslatePaths(Paths& paths, const Point& pos) {
     return paths;
 }
 
-double Perimeter(const Path& path) {
+double Perimeter(std::span<const Point> path, bool open) {
+    while(path.back() == path.front()) path = path.subspan(1);
+    if(path.size() < 2 /*(open ? 2 : 3)*/) return std::nan("");
     double p{};
-    for(size_t i = 0, j = path.size() - 1; i < path.size(); ++i) {
-        double x = path[j].x - path[i].x;
-        double y = path[j].y - path[i].y;
-        p += x * x + y * y;
-        j = i;
-    }
+    static constexpr auto dist = +[](const Point& from, const Point& to) {
+        Point v = to - from;
+        return v.x * v.x + v.y * v.y;
+    };
+    // for(auto&& [from, to]: path | v::pairwise) p += dist(from, to);
+    for(auto&& path: path | v::slide(2)) p += dist(path.front(), path.back());
+    if(!open) p += dist(path.back(), path.front());
     return std::sqrt(p);
 }
 

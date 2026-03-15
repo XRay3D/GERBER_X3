@@ -15,16 +15,21 @@
 
 namespace Gi {
 
-class Debug final : public Item {
-    Debug(const QColor& color, double width);
+class Debug_ final : public Item {
+
+    friend Debug_* Debug(const QPainterPath&, const QColor&, double);
+    friend Debug_* Debug(const Paths&, const QColor&, double);
+
+    Debug_(const QColor& color, double width);
     Paths paths_;
     std::set<QPointF> centers;
 
+    Debug_(const Path& path, const QColor& color = Qt::white, double width = {});
+    Debug_(const Paths& paths, const QColor& color = Qt::white, double width = {});
+    Debug_(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
+
 public:
-    Debug(const Path& path, const QColor& color = Qt::white, double width = {});
-    Debug(const Paths& paths, const QColor& color = Qt::white, double width = {});
-    Debug(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
-    ~Debug() override = default;
+    ~Debug_() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
@@ -38,5 +43,13 @@ private:
 protected:
     void changeColor() override { }
 };
+
+inline Debug_* Debug(const QPainterPath& path, const QColor& color = Qt::white, double width = {}) {
+    return new Debug_{path, color, width};
+}
+
+inline Debug_* Debug(const Paths& paths, const QColor& color = Qt::white, double width = {}) {
+    return new Debug_{paths, color, width};
+}
 
 } // namespace Gi

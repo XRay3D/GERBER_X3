@@ -25,6 +25,7 @@ void Attrib::parse(CodeData& code) {
 }
 
 DxfGo Attrib::toGo() const {
+    qInfo("Attrib");
     return {};
 }
 
