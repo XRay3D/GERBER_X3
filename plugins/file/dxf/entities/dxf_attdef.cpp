@@ -103,6 +103,7 @@ void AttDef::parse(CodeData& code) {
 Entity::Type AttDef::type() const { return Type::ATTDEF; }
 
 DxfGo AttDef::toGo() const {
+    qInfo("AttDef");
     qInfo("TODO");
     return {};
 }

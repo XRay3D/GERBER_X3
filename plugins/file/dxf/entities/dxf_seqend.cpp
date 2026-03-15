@@ -16,6 +16,7 @@ void SeqEnd::parse(CodeData& code) {
 }
 
 DxfGo SeqEnd::toGo() const {
+    qInfo("SeqEnd");
     return {};
 }
 

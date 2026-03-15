@@ -22,8 +22,6 @@ find_package(
   COMPONENTS uc i18n
   REQUIRED)
 
-# set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
-
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 
@@ -35,14 +33,13 @@ target_link_libraries(
   ${PROJECT_NAME}
   PUBLIC ICU::i18n
          ICU::uc
-         Qt6::Qml
-         Qt6::Widgets
          filetree
          gi
-         graphicsview
          shape
          tbb
-         tooldatabase)
+         tooldatabase
+         Qt6::Qml
+         Qt6::Widgets)
 
 # add_subdirectory(doublespinbox)
 

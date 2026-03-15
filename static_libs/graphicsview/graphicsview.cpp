@@ -748,16 +748,6 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         painter->drawLines(lines[i].data(), lines[i].size());
     }
 
-    { // draw mouse cross
-        const double k = 100 /*px*/ / getScale();
-        painter->setPen({Qt::red, penWidth});
-        QLineF lines[2]{
-            {point.x() - k, point.y(),     point.x() + k, point.y()    },
-            {point.x(),     point.y() - k, point.x(),     point.y() + k}
-        };
-        painter->drawLines(lines, 2);
-    }
-
     // draw the origin
     // if(rect.contains(QPointF{}))
     {
@@ -772,6 +762,16 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     }
 
     if(ruler_) drawRuller(painter, rect);
+
+    { // draw mouse cross
+        const double k = 100 /*px*/ / getScale();
+        painter->setPen({Qt::red, penWidth});
+        QLineF lines[2]{
+            {point.x() - k, point.y(),     point.x() + k, point.y()    },
+            {point.x(),     point.y() - k, point.x(),     point.y() + k}
+        };
+        painter->drawLines(lines, 2);
+    }
 
     painter->restore();
 

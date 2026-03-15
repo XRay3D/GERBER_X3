@@ -42,18 +42,17 @@ void Line::parse(CodeData& code) {
 Entity::Type Line::type() const { return Type::LINE; }
 
 DxfGo Line::toGo() const {
-    QPolygonF p;
-    if(p.isEmpty()) {
-        p.append(startPoint);
-        p.append(endPoint);
-    }
+    qInfo("Line");
+    qInfo() << thickness;
+    Path path{~startPoint, ~endPoint};
+    r::for_each(path, &SetCSelf);
 
-    Paths paths;
-    // ClipperOffset offset;
+    // TODO ClipperOffset offset;
     // offset.AddPath(p, JoinType::Round, EndType::Round);
     // paths = offset.Execute(thickness * uScale);
 
-    DxfGo go{id, ~p, paths}; // FIXME return {id, p, paths};
+    DxfGo go{id, path, {}}; // FIXME return {id, p, paths};
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::Line);
     return go;
 }
 

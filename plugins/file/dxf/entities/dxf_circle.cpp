@@ -43,6 +43,8 @@ void Circle::parse(CodeData& code) {
 Entity::Type Circle::type() const { return Type::CIRCLE; }
 
 DxfGo Circle::toGo() const {
+    qInfo("Circle");
+#if 0
     QPainterPath path;
     QPointF r{radius, radius};
     path.addEllipse(QRectF(centerPoint + r, centerPoint - r));
@@ -69,6 +71,13 @@ DxfGo Circle::toGo() const {
     go.GraphicObject::pos = ~centerPoint;
 
     return go;
+#else
+    Path path = CirclePath(radius * 2 + thickness, ~centerPoint);
+    DxfGo go{id, path, {path}};
+    go.name = layerName; // u"T%1|Ø%2"_s.arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
+    go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::FlDrawn | DxfGo::Circle);
+    return /*go*/ {};
+#endif
 }
 
 void Circle::write(QDataStream& stream) const {

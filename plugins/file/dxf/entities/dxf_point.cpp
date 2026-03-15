@@ -38,6 +38,7 @@ void Point::parse(Dxf::CodeData& code) {
 Entity::Type Point::type() const { return POINT; }
 
 DxfGo Point::toGo() const {
+    qInfo("Point");
     // QPolygonF p;
     // p.append(point);
 

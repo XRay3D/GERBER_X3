@@ -67,6 +67,11 @@ struct Vertex {
         Cw = -1,
     } type{};
 
+    double radius() const {
+        if(type) return length(pt, center);
+        return std::nan("");
+    }
+
     friend QDebug operator<<(QDebug dbg, const Vertex& v) { // cross product m0.m1.sin a = v0 ^ v1
         constexpr std::array types{
             "CW"sv,
@@ -91,4 +96,4 @@ using Curves = std::vector<Curve>;
 QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {}, bool arcOnly = {});
 QPainterPath toPPath(const Curves& curves);
 
-Curve toCurve(Path& path);
+Curve toCurve(Path& path, bool open = {});

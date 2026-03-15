@@ -19,18 +19,18 @@
 
 namespace Gi {
 
-Debug::Debug(const QColor& color, double width) {
+Debug_::Debug_(const QColor& color, double width) {
     pen_ = {color, width};
     App::grView().addItem(this);
     setZValue(std::numeric_limits<double>::max());
     setVisible(true);
 }
 
-Debug::Debug(const Path& path, const QColor& color, double width)
-    : Debug{Paths{path}, color, width} { }
+Debug_::Debug_(const Path& path, const QColor& color, double width)
+    : Debug_{Paths{path}, color, width} { }
 
-Debug::Debug(const Paths& paths, const QColor& color, double width)
-    : Debug{color, width} {
+Debug_::Debug_(const Paths& paths, const QColor& color, double width)
+    : Debug_{color, width} {
     paths_ = paths;
 #if 0
     for(const Path& path: paths)
@@ -45,8 +45,8 @@ Debug::Debug(const Paths& paths, const QColor& color, double width)
         // }
     }
 
-    for(Point pt: paths_ | v::join | v::transform(GetC))
-        centers.emplace(~pt);
+    for(auto&& pt: paths_ | v::join | v::transform(GetC) | v::transform(toQPointF))
+        centers.emplace(pt);
 
     auto bounds = GetBounds(paths);
     boundingRect_ = QRectF{
@@ -59,14 +59,14 @@ Debug::Debug(const Paths& paths, const QColor& color, double width)
 #endif
 }
 
-Debug::Debug(const QPainterPath& path, const QColor& color, double width)
-    : Debug{color, width} {
+Debug_::Debug_(const QPainterPath& path, const QColor& color, double width)
+    : Debug_{color, width} {
     shape_ = path;
     boundingRect_ = shape_.boundingRect();
     if(path.isEmpty()) delete this; // NOTE
 }
 
-QRectF Debug::boundingRect() const { return boundingRect_; }
+QRectF Debug_::boundingRect() const { return boundingRect_; }
 
 void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     Q_UNUSED(option)
@@ -78,8 +78,8 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     double scale = scaleFactor();
 
+    QPen pen{pen_};
     if(pen_.widthF() == 0) {
-        QPen pen{pen_};
         pen.setWidthF(1.5 * scale);
         painter->setPen(pen);
     } else
@@ -102,6 +102,14 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     double len = 10 * scale;
 
+    for(const Point& pt: paths_ | v::join | v::filter(&Point::z)) {
+        QPointF p = ~GetC(pt);
+        painter->drawLine(p, ~pt);
+    }
+
+    pen.setColor(Qt::white);
+    painter->setPen(pen);
+
     for(const QPointF& p: centers) {
         painter->drawLines({
             {p, p + QPointF{.0, -len}},
@@ -116,11 +124,11 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     painter->drawPath(arrows_);
 }
 
-int Debug::type() const { return Type::Debug; }
+int Debug_::type() const { return Type::Debug; }
 
 Paths Debug_::paths(int) const { return {} /*paths_*/; }
 
-void Debug::updateArrows() {
+void Debug_::updateArrows() {
     sc_ = scaleFactor();
     arrows_ = QPainterPath(); //.clear();
     if(qFuzzyIsNull(pen_.widthF())) {

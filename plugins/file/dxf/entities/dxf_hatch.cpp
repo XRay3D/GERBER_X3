@@ -154,6 +154,7 @@ void Hatch::parse(CodeData& code) {
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
 DxfGo Hatch::toGo() const {
+    qInfo("Hatch");
     Paths paths(edges.size());
     for(size_t i{}; i < edges.size(); ++i)
         for(auto edge: edges[i])

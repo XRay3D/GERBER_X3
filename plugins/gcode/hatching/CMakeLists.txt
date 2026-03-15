@@ -16,6 +16,7 @@ set(PLUG_NAME "Crosshatch")
 set(PLUG_INFO "Crosshatch")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
 set(PLUG_LOCAL_VERSION "0")
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
 
@@ -30,13 +31,4 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE clipper
-          gcode
-          common
-          filetree
-          gi
-          graphicsview
-          tooldatabase
-          Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE clipper #[[gcode]])

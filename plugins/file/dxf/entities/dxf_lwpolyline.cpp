@@ -12,8 +12,7 @@
 #include "dxf_lwpolyline.h"
 #include "gi_dbg.h"
 
-#include <QPainterPath>
-#include <qglobal.h>
+// #include <QPainterPath>
 
 // QPainterPath construct_path(const Polygon_2& pgn)
 //{
@@ -126,6 +125,9 @@ void LwPolyline::parse(CodeData& code) {
 Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
 DxfGo LwPolyline::toGo() const {
+    qInfo("LwPolyline");
+    if(startWidth || endWidth)
+        qWarning("TODO startWidth | endWidth");
 
     if(polylineFlag == Closed
         && poly.size() == 2
@@ -138,11 +140,14 @@ DxfGo LwPolyline::toGo() const {
             {} /*CirclePath(((poly.front() ^ poly.back())) * uScale, center)*/,
             {CirclePath((length(poly.front(), poly.back()) + constantWidth) * uScale, center)},
         };
+
         go.GraphicObject::pos = center;
         go.type = DxfGo::Type{DxfGo::FlStamp | DxfGo::Circle};
         go.name = u"id|LwPolyline/Circle"_s;
         return go;
     }
+#if 0
+
 
     QPainterPath path;
 
@@ -180,6 +185,60 @@ DxfGo LwPolyline::toGo() const {
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
 
     go.name = u"id|LwPolyline"_s;
+#else
+    Path path;
+
+    enum InterpolationMode {
+        Linear = 1,
+        ClockwiseCircular = 2,
+        CounterClockwiseCircular = 3
+    };
+
+    static auto constructArc = [](Point center, int dir, double radius, double start, double stop) {
+        auto arcPath = arc(center, radius, start, stop, dir);
+        // Последняя точка в вычисленной дуге может иметь числовые ошибки.
+        // Точной конечной точкой является указанная (x, y). Замена.
+        // if(arcPath.size()) arcPath.back() = state_.curPos();
+        // else arcPath.emplace_back(state_.curPos());
+        // SetC(arcPath.back(), center);
+        return arcPath;
+    };
+    auto addSeg = [&path](const Segment& source, const Segment& target) {
+        if(path.empty())
+            path.emplace_back(~source);
+
+        if(qFuzzyIsNull(source.bulge)) {
+            path.emplace_back(~target);
+            return;
+        }
+
+        auto [c, a1, a2, r] = bulgeToArc(source, target, source.bulge);
+
+        int dir = Area(Path{~c, ~source, ~target}) > .0
+            ? CounterClockwiseCircular
+            : ClockwiseCircular;
+
+        Path arcPath = constructArc(~c, dir, r * uScale, a1, a2);
+
+        arcPath.front() = ~source;
+        arcPath.back() = ~target;
+        path.append_range(arcPath);
+    };
+
+    for(auto&& [from, to]: poly | v::pairwise) addSeg(from, to);
+
+    if(polylineFlag == Closed) addSeg(poly.back(), poly.front());
+
+    r::for_each(path, &SetCSelf);
+
+    Paths paths = Inflate({path}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
+
+    Gi::Debug(paths, Qt::red);
+
+    DxfGo go{id, path, paths}; // return {id, ~p.value(0), paths};
+
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
+#endif
     return go;
 }
 

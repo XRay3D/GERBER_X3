@@ -76,6 +76,7 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
 }
 
 DxfGo Text::toGo() const {
+    qInfo("Text");
 
     // for (auto& code : data)
 

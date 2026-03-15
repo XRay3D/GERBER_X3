@@ -70,6 +70,7 @@ Entity::Type MText::type() const { return Type::MTEXT; }
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 DxfGo MText::toGo() const {
+    qInfo("MText");
     // double ascent = {};
     double descent = {};
     double height = {};

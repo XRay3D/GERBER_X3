@@ -55,6 +55,7 @@ void Ellipse::parse(CodeData& code) {
 Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
 
 DxfGo Ellipse::toGo() const {
+    qInfo("Ellipse");
     qInfo("TODO");
     return {};
 }
