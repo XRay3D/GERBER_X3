@@ -12,67 +12,94 @@
 
 #include "curve.h"
 #include "gi_dbg.h"
+#include "span.h"
+#include <QMatrix2x2>
+#include <QVector2D>
 #include <app.h>
 #include <ranges>
 
-Curve CircleCurve(double diametr, const Point& center) {
-    if(qFuzzyIsNull(diametr)) return {};
-    const double radius = diametr * 0.5;
-    const int intSteps = App::settings().clpCircleSegments(radius);
-    Curve polygon(intSteps);
-    for(int i{}; auto&& pt: polygon) {
-        pt = Point{
-                 cos(i * 2 * pi / intSteps) * radius,
-                 sin(i * 2 * pi / intSteps) * radius,
-             }
-            + center;
-        ++i;
-    };
-    // r::for_each(polygon, std::bind(&SetZ, _1, center));
-    return polygon;
+Curve CircleCurve(double diametr, const PointF& center) {
+    Curve curve;
+    PointF pt{center};
+    pt.rx() -= diametr / 2;
+    curve.emplace_back(pt, center, Vertex::Ccw);
+    pt.rx() += diametr;
+    curve.emplace_back(pt, center, Vertex::Ccw);
+    pt.rx() -= diametr;
+    curve.emplace_back(pt, center, Vertex::Ccw);
+    return curve;
 }
 
-Curve RectangleCurve(double width, double height, const Point& center) {
+Curve RectangleCurve(double width, double height, const PointF& center) {
     const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
-    Curve polygon{
-        {-halfWidth + center.x, +halfHeight + center.y},
-        {-halfWidth + center.x, -halfHeight + center.y},
-        {+halfWidth + center.x, -halfHeight + center.y},
-        {+halfWidth + center.x, +halfHeight + center.y},
-        // {-halfWidth + center.x, +halfHeight + center.y},
+    Curve curve{
+        Vertex{{-halfWidth + center.x(), +halfHeight + center.y()}},
+        Vertex{{-halfWidth + center.x(), -halfHeight + center.y()}},
+        Vertex{{+halfWidth + center.x(), -halfHeight + center.y()}},
+        Vertex{{+halfWidth + center.x(), +halfHeight + center.y()}},
+        Vertex{{-halfWidth + center.x(), +halfHeight + center.y()}},
     };
-    r::for_each(polygon, &SetZs);
-    // if(Area(polygon) < 0.0) ReverseCurve(polygon);
-    return polygon;
+    return curve;
 }
 
-void RotateCurve(Curve& polygon, double angle, const Point& center) {
-    const bool fl = Area(polygon) < 0;
-    for(Point& pt: polygon) {
-        const double dAangle = qDegreesToRadians(angle - Angle(center, pt));
-        const double length = distTo(center, pt);
-        pt = Point{cos(dAangle) * length, sin(dAangle) * length};
-        pt.x += center.x;
-        pt.y += center.y;
+Curve& TransformCurve(Curve& curve, const QTransform& tr) {
+    qInfo() << tr;
+
+    if(tr.isIdentity()) return curve;
+
+    for(auto& v: curve) {
+        if(v.type) v.center = tr.map(v.center);
+        v.pt = tr.map(v.pt);
     }
-    if(fl != (Area(polygon) < 0))
-        ReverseCurve(polygon);
+
+    if((tr.m11() < .0) ^ (tr.m22() < .0))
+        for(auto&& v: curve) v.type = Vertex::Type{-v.type};
+
+    return curve;
 }
 
-Curve& TranslateCurve(Curve& curve, const Point& pos) {
-    if(pos.x || pos.y)
+// Curves& ReverseCurves(Curves& curves) {
+//     r::for_each(curves.centerurves, &Curve::Reverse);
+//     return curves;
+// }
+
+Curve& TranslateCurve(Curve& curve, const PointF& pos) {
+    if(!qFuzzyIsNull(pos.length()))
         for(auto& pt: curve) {
-            pt.x += pos.x;
-            pt.y += pos.y;
-            SetZf(pt, GetZ(pt) + pos);
+            pt.center += pos;
+            pt.pt += pos;
         }
     return curve;
 }
 
-Curves& TranslateCurves(Curves& curves, const Point& pos) {
-    r::for_each(curves, std::bind(&TranslateCurve, _1, pos));
-    return curves;
+void RotateCurve(Curve& curve, double angle, const PointF& center) {
+    // const bool fl = curve.GetArea() < 0;
+
+    auto rot = [center, angle](PointF& pt) {
+        pt.Rotate(qDegreesToRadians(angle));
+        pt += center;
+    };
+
+    for(auto&& pt: curve) {
+        if(pt.type) rot(pt.center);
+        rot(pt.pt);
+    }
+
+    // if(fl != (curve.GetArea() < 0))
+    //     curve.Reverse();
+}
+
+QDataStream& operator<<(QDataStream& stream, const Vertex& vert) {
+    return stream << vert.type
+                  << vert.pt
+                  << vert.center;
+}
+
+QDataStream& operator>>(QDataStream& stream, Vertex& vert) {
+    return stream >> vert.type
+        >> vert.pt
+        >> vert.center;
 }
 
 //  Вычисление площади.
@@ -307,7 +334,7 @@ QPolygonF segmentCircleIntersection(QPointF center, double radius, QPointF segSt
 
     return result;
 }
-
+/*
 Curve& TransformCurve(Curve& curve, const QTransform& tr) {
     qInfo() << tr;
 
@@ -325,7 +352,7 @@ Curve& TransformCurve(Curve& curve, const QTransform& tr) {
 }
 
 Curves& ReverseCurves(Curves& curves) {
-    // r::for_each(curves, &Curve::Reverse);
+    r::for_each(curves, &Curve::reverse);
     return curves;
 }
 
@@ -354,7 +381,7 @@ void RotateCurve(Curve& curve, double angle, const PointF& center) {
     // if(fl != (curve.GetArea() < 0))
     //     curve.Reverse();
 }
-
+*/
 QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, bool arcOnly) {
     if(curve.size() < 2) return {};
 
@@ -404,9 +431,8 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, bool arcOnly) {
 
 QPainterPath toPPath(const Curves& curves) {
     if(curves.empty()) return {};
-    QPainterPath pPath(toPPath(curves.front()));
-    for(const auto& curve: curves | v::drop(1))
-        pPath.addPath(toPPath(curve));
+    QPainterPath pPath;
+    for(auto&& curve: curves) pPath.addPath(toPPath(curve));
     return pPath;
 }
 
@@ -592,7 +618,7 @@ QVector<Arc> extractArcs(const QPolygonF& polygon, double tolerance = 2.0) {
     return arcs;
 }
 
-Curve toCurve(Path& path, bool open) {
+Curve toCurve(std::span<Point> path, bool open) {
     Curve curve;
     QPainterPath pp;
 #if 0
@@ -637,15 +663,14 @@ Curve toCurve(Path& path, bool open) {
     }
 #endif
 
-    if(!open && path.front() != path.back()) path.emplace_back(path.front());
+    // if(path.front() == path.back()) path = path.subspan(1);
 
-    if(auto c = fitCircle(~path); c && path.size() > 4) {
-        pp.addEllipse(c->center, c->radius, c->radius);
-        Gi::Debug(pp, Qt::yellow);
-        curve.emplace_back(~path.front());
+    if(auto c = fitCircle(~path); c && path.size() > 4) { // Circle
+        // pp.addEllipse(c->center, c->radius, c->radius);
+        // Gi::Debug(pp, Qt::yellow);
         auto dir = DIR(~path[0], ~path[1], c->center);
-        curve.emplace_back(~path[path.size() / 2], c->center, dir);
-        curve.emplace_back(~path.front(), c->center, dir);
+        curve = CircleCurve(c->radius * 2, c->center);
+        if(dir == Vertex::Cw) curve.reverse();
         return curve;
     }
 
@@ -800,25 +825,24 @@ Curve toCurve(Path& path, bool open) {
 
     chunks = v::chunk_by(path, eqCenter);
 
-    if(chunks.front().size() == path.size()) {
+    if(chunks.front().size() == path.size()) { // Circle
         qWarning() << "circle" << path.size();
         QPointF center = ~GetC(path.front());
         auto dir = DIR(~path[0], ~path[1], center);
         double radius = length(center, ~path[0]);
-        curve.emplace_back(center + PointF{0., +radius});
-        curve.emplace_back(center + QPointF{0., -radius}, center, dir);
-        curve.emplace_back(center + QPointF{0., +radius}, center, dir);
+        curve = CircleCurve(radius * 2, center);
+        if(dir == Vertex::Cw) curve.reverse();
     } else {
         constexpr double epsilon = 0.01; // mm
-
         Vertex::Type type{};
         for(auto&& path: chunks) {
             QPointF pt{~path.front()};
             if(path.size() > 1) {
-                if(Perimeter(path, true) < 0.1) {
-                    curve.emplace_back(pt);
-                    continue;
-                }
+                // arc
+                // if(Perimeter(path, true) < 0.1) {
+                //     curve.emplace_back(pt);
+                //     continue;
+                // }
                 QPointF center = ~GetC(path.front());
                 type = DIR(pt, ~path[2], center);
 
@@ -826,9 +850,13 @@ Curve toCurve(Path& path, bool open) {
                     auto& v = curve.back();
                     if(v.type) {
                         if(TEST(v.radius(), v.center, pt, epsilon)) {
-                            v.pt = pt; // NOTE update prev arc
+                            QLineF radLine{v.center, pt};
+                            radLine.setLength(v.radius());
+                            v.pt = radLine.p2(); // update prev arc
                         } else if(TEST(center, v.pt, center, pt, epsilon)) {
-                            pt = v.pt; // NOTE update prev arc
+                            // QLineF radLine{center, v.pt};
+                            // radLine.setLength(v.radius());
+                            pt = v.pt; // update prev arc
                         }
                     }
                     if(!TEST(center, v.pt, center, pt, epsilon)) {
@@ -837,30 +865,24 @@ Curve toCurve(Path& path, bool open) {
                 } else curve.emplace_back(pt);
                 curve.emplace_back(~path.back(), center, type);
             } else {
+                // line
                 if(curve.size()) {
                     auto& v = curve.back();
-                    // if(v.type && TEST(v.radius(), v.center, pt, epsilon)) {
-                    //     v.pt = pt; // NOTE update prev arc
-                    //     continue;
-                    // }
-                    if(v.type) {
-                        if(TEST(v.radius(), v.center, pt, epsilon)) {
-                            v.pt = pt; // NOTE update prev arc
-                            continue;
-                        }
-                        // else if(TEST(center, v.pt, center, pt, epsilon)) {
-                        //     pt = v.pt; // NOTE update prev arc
-                        //     continue;
-                        // }
+                    if(v.type && TEST(v.radius(), v.center, pt, epsilon)) {
+                        QLineF radLine{v.center, pt};
+                        radLine.setLength(v.radius());
+                        v.pt = radLine.p2(); // update prev arc
+                        continue;
                     }
                 }
                 curve.emplace_back(pt);
             }
         }
-        if(curve.size() > 2) {
-            auto &vb = curve.back(), &vf = curve.front();
-            double rb = vb.radius(), rf = curve[1].radius();
-            if(curve.back().type && curve[1].type) {
+
+        if(!open && curve.size() > 2 /*&& curve.back().pt != curve.front().pt*/) { // close curve
+            auto &vb = curve.back(), &vf = curve.front(), &vc = curve[1];
+            double rb = vb.radius(), rf = vc.radius();
+            if(curve.back().type && vc.type) {
                 if(TEST(rb, vb.center, vf.pt)) {
                     // qCritical("CC1");
                     vb.pt = vf.pt;
@@ -871,358 +893,41 @@ Curve toCurve(Path& path, bool open) {
                     vf.pt = vb.pt;
                 } else {
                     // qCritical("CC3");
-                    curve.emplace_back(curve.front());
+                    curve.emplace_back(vf.pt);
                 }
-            } else if(vb.type && !curve[1].type) {
-                qCritical("CL");
-                if(TEST(rb, vb.center, vf.pt, 0.005)) vb.pt = vf.pt;
-                else curve.emplace_back(curve.front());
-            } else if(!vb.type && curve[1].type) {
+            } else if(vb.type && !vc.type) {
+                // qCritical("CL");
+                if(TEST(rb, vb.center, vf.pt, 0.005)) {
+                    QLineF radLine{vb.center, vf.pt};
+                    radLine.setLength(rb);
+                    vb.pt = radLine.p2();
+                } else curve.emplace_back(vf.pt);
+            } else if(!vb.type && vc.type) {
                 // qCritical("LC");
-                if(TEST(rf, curve[1].center, vb.pt, 0.005)) vf.pt = vb.pt;
-                else curve.emplace_back(curve.front());
-            } else if(!vb.type && !curve[1].type) {
+                if(TEST(rf, vc.center, vb.pt, 0.005)) {
+                    QLineF radLine{vc.center, vb.pt};
+                    radLine.setLength(rf);
+                    vf.pt = radLine.p2();
+                } else curve.emplace_back(vf.pt);
+            } else if(!vb.type && !vc.type) {
                 // qCritical("LL");
-                curve.emplace_back(curve.front());
+                curve.emplace_back(vf.pt);
             }
-
-            // && 0
-            // && curve.back().type
-            // // && isPointOnCircle(curve.front().pt, curve.back().center, curve.back().pt, 0.01)
-            // && !curve[0].type
-            // && !vf.type) {
-
-            // double radius = length(curve.back().center, curve.back().pt);
-            // auto pts = lineCircleIntersection(curve.back().center, radius, curve[0].pt, curve[1].pt);
-            // qCritical() << "Fix end" << pts;
-
-            // if(!pts.empty()) {
-            //     if(length(pts.front(), curve.front().pt) < length(pts.back(), curve.front().pt)) { // TODO fix backward.
-            //         pp.addEllipse(QRectF{-5e-2, -5e-2, 1e-1, 1e-1}.translated(pts.front()));
-            //         curve.front().pt = curve.back().pt = pts.front();
-            //     } else
-            //         curve.front().pt = curve.back().pt = pts.back();
-            // }
         }
     }
 
-    // new Gi::Debug{toPPath(curve)};
-    Gi::Debug(toPPath(curve, {}, true), Qt::green);
-    // new Gi::Debug{toPPath(curve.reverse()), Qt::magenta};
+    // Gi::Debug(toPPath(curve, {}, true), Qt::green);
+    // Gi::Debug(pp, Qt::cyan);
+    curve.area();
 
-    // for(auto&& v: curve)
-    // pp.addEllipse(QRectF{-5e-2, -5e-2, 1e-1, 1e-1}.translated(v.pt));
-    Gi::Debug(pp, Qt::cyan);
     return curve;
 }
+
+Curves toCurves(std::span<Path> paths, bool open) {
+    return {std::from_range, paths | v::transform(std::bind(toCurve, _1, open))};
+}
+
 //------------------------------------------------------------------------------
-static int GetQuadrant(const PointF& v) {
-    // 0 = [+,+], 1 = [-,+], 2 = [-,-], 3 = [+,-]
-    if(v.x() > 0) {
-        if(v.y() > 0) {
-            return 0;
-        }
-        return 3;
-    }
-    if(v.y() > 0) {
-        return 1;
-    }
-    return 2;
-}
-
-static PointF QuadrantEndPoint(int i) {
-    if(i > 3) i -= 4;
-    switch(i) {
-    case 0 : return {0.0, +1.0};
-    case 1 : return {-1.0, 0.0};
-    case 2 : return {0.0, -1.0};
-    default: return {+1.0, 0.0};
-    }
-}
-
-double IncludedAngle(const PointF& v0, const PointF& v1, int dir) {
-    // returns the absolute included angle between 2 vectors in the direction of dir ( 1=acw  -1=cw)
-    double inc_ang = PointF::dotProduct(v0, v1);
-    if(inc_ang > 1. - 1.0e-10) {
-        return 0;
-    }
-    if(inc_ang < -1. + 1.0e-10) {
-        inc_ang = pi;
-    } else { // dot product,   v1 . v2  =  cos ang
-        if(inc_ang > 1.0) {
-            inc_ang = 1.0;
-        }
-        inc_ang = acos(inc_ang); // 0 to pi radians
-
-        if(dir * PointF::crossProduct(v0, v1) < 0) {
-            inc_ang = 2 * pi - inc_ang; // cp
-        }
-    }
-    return dir * inc_ang;
-}
-
-struct Span {
-    //     PointF NearestPointNotOnSpan(const PointF& p) const;
-    //     double Parameter(const PointF& p) const;
-    //     PointF NearestPointToSpan(const Span& p, double& d) const;
-
-    //     static const PointF null_point;
-    //     static const Vertex null_vertex;
-
-    // public:
-    PointF pt;
-    Vertex vx;
-    bool m_start_span{};
-    //     Span();
-    //     Span(const PointF& p, const Vertex& v, bool start_span = false)
-    //         : m_start_span(start_span)
-    //         , pt(p)
-    //         , vx(v)
-    //     {}
-    //     PointF NearestPoint(const PointF& p) const;
-    //     PointF NearestPoint(const Span& p, double* d = NULL) const;
-    //     void GetBox(CBox2D& box);
-    //     double IncludedAngle() const;
-    //     double GetArea() const;
-    //     bool On(const PointF& p, double* t = NULL) const;
-    //     PointF MidPerim(double d) const;
-    //     PointF MidParam(double param) const;
-    //     double Length() const;
-    //     PointF GetVector(double fraction) const;
-    //     void Intersect(
-    //         const Span& s,
-    //         std::list<PointF>& pts
-    //         ) const;  // finds all the intersection points between two spans
-
-    PointF NearestPointNotOnSpan(const PointF& p) const {
-        if(!vx.type) {
-            PointF Vs{vx.pt - pt};
-            Vs.normalize();
-            double dp = PointF::dotProduct((p - pt), Vs);
-            return (Vs * dp) + pt;
-        } else {
-            double radius = pt.dist(vx.center);
-            double r = p.dist(vx.center);
-            if(r < PointF::tolerance) return pt;
-            PointF vc{vx.center - p};
-            return p + vc * ((r - radius) / r);
-        }
-    }
-
-    PointF NearestPoint(const PointF& p) const {
-        PointF np = NearestPointNotOnSpan(p);
-        double t = Parameter(np);
-        if(0.0 <= t && t <= 1.0) return np;
-        double d1 = p.dist(pt);
-        double d2 = p.dist(vx.pt);
-        return (d1 < d2) ? pt : vx.pt;
-    }
-
-    PointF MidPerim(double d) const {
-        /// returns a point which is 0-d along span
-        PointF p;
-        if(vx.type == 0) {
-            PointF vs{vx.pt - pt};
-            vs.normalize();
-            p = vs * d + pt;
-        } else {
-            PointF v{pt - vx.center};
-            double radius = v.length();
-            v.Rotate(d * int(vx.type) / radius);
-            p = v + vx.center;
-        }
-        return p;
-    }
-    PointF MidParam(double param) const {
-        /// returns a point which is 0-1 along span
-        if(qFuzzyIsNull(param)) return pt;
-
-        if(qFuzzyIsNull(param - 1.0)) return vx.pt;
-
-        PointF p;
-        if(vx.type == 0) {
-            PointF vs{vx.pt - pt};
-            p = vs * param + pt;
-        } else {
-            PointF v{pt - vx.center};
-            v.Rotate(param * IncludedAngle());
-            p = v + vx.center;
-        }
-        return p;
-    }
-
-    PointF NearestPointToSpan(const Span& p, double& d) const {
-        PointF midpoint = MidParam(0.5);
-        PointF np = p.NearestPoint(pt);
-        PointF best_point = pt;
-        double dist = np.dist(pt);
-        if(p.m_start_span) {
-            dist -= (PointF::tolerance * 2); // give start of curve most priority
-        }
-        PointF npm = p.NearestPoint(midpoint);
-        double dm = npm.dist(midpoint)
-            - PointF::tolerance; // lie about midpoint distance to give midpoints priority
-        if(dm < dist) {
-            dist = dm;
-            best_point = midpoint;
-        }
-        PointF np2 = p.NearestPoint(vx.pt);
-        double dp2 = np2.dist(vx.pt);
-        if(dp2 < dist) {
-            dist = dp2;
-            best_point = vx.pt;
-        }
-        d = dist;
-        return best_point;
-    }
-    PointF NearestPoint(const Span& p, double* d) const {
-        double best_dist;
-        PointF best_point = this->NearestPointToSpan(p, best_dist);
-
-        // try the other way round too
-        double best_dist2;
-        PointF best_point2 = p.NearestPointToSpan(*this, best_dist2);
-        if(best_dist2 < best_dist) {
-            best_point = NearestPoint(best_point2);
-            best_dist = best_dist2;
-        }
-
-        if(d) {
-            *d = best_dist;
-        }
-        return best_point;
-    }
-    QRectF boundingRect() {
-        QPolygonF box{pt, vx.pt};
-
-        if(this->vx.type) {
-            // arc, add quadrant points
-            PointF vs = pt - vx.center;
-            PointF ve = vx.pt - vx.center;
-            int qs = GetQuadrant(vs);
-            int qe = GetQuadrant(ve);
-            if(vx.type == -1) {
-                // swap qs and qe
-                int t = qs;
-                qs = qe;
-                qe = t;
-            }
-
-            if(qe < qs) qe = qe + 4;
-
-            double rad = vx.pt.dist(vx.center);
-
-            for(int i = qs; i < qe; i++)
-                box.emplace_back(vx.center + QuadrantEndPoint(i) * rad);
-        }
-        return box.boundingRect();
-    }
-
-    double IncludedAngle() const {
-        if(vx.type) {
-            PointF vs{pt - vx.center};
-            PointF ve{vx.pt - vx.center};
-            vs.ry() *= -1.;
-            ve.ry() *= -1.;
-
-            if(vx.type == -1) {
-                vs = -vs;
-                ve = -ve;
-            }
-            vs.normalize();
-            ve.normalize();
-
-            return ::IncludedAngle(vs, ve, vx.type);
-        }
-
-        return 0.0;
-    }
-    double GetArea() const {
-        if(vx.type) {
-            double angle = IncludedAngle();
-            double radius = pt.dist(vx.center);
-            return (
-                0.5
-                * ((vx.center.x() - pt.x()) * (vx.center.y() + pt.y())
-                    - (vx.center.x() - vx.pt.x()) * (vx.center.y() + vx.pt.y()) - angle * radius * radius));
-        }
-
-        return 0.5 * (vx.pt.x() - pt.x()) * (pt.y() + vx.pt.y());
-    }
-    double Parameter(const PointF& p) const {
-        double t;
-        if(vx.type == 0) {
-            PointF v0{p - pt};
-            PointF vs{vx.pt - pt};
-            double length = vs.length();
-            vs.normalize();
-            t = PointF::dotProduct(vs, v0);
-            t = t / length;
-        } else {
-            // true if p lies on arc span sp (p must be on circle of span)
-            PointF vs{pt - vx.center};
-            PointF v{p - vx.center};
-            vs.ry() *= -1.;
-            v.ry() *= -1.;
-            vs.normalize();
-            v.normalize();
-            if(vx.type == -1) {
-                vs = -vs;
-                v = -v;
-            }
-            double ang = ::IncludedAngle(vs, v, vx.type);
-            double angle = IncludedAngle();
-            t = ang / angle;
-        }
-        return t;
-    }
-    bool On(const PointF& p, double* t) const {
-        if(p != NearestPoint(p)) {
-            return false;
-        }
-        if(t) {
-            *t = Parameter(p);
-        }
-        return true;
-    }
-    double Length() const {
-        if(vx.type) {
-            double radius = pt ^ vx.center;
-            return std::abs(IncludedAngle()) * radius;
-        }
-
-        return pt ^ vx.pt;
-    }
-    PointF GetVector(double fraction) const {
-        /// returns the direction vector at point which is 0-1 along span
-        if(vx.type == 0) {
-            PointF v{vx.pt - pt};
-            v.normalize();
-            return v;
-        }
-
-        PointF p = MidParam(fraction);
-        PointF v{p - vx.center};
-        v.normalize();
-        if(vx.type == 1) {
-            return PointF(-v.y(), v.x());
-        } else {
-            return PointF(v.y(), -v.x());
-        }
-    }
-    // void Intersect(const Span& s, std::list<PointF>& pts) const {
-    //     // finds all the intersection points between two spans and puts them in the given list
-    //     geoff_geometry::PointF pInt1, pInt2;
-    //     double t[4];
-    //     int num_int = MakeSpan(*this).Intof(MakeSpan(s), pInt1, pInt2, t);
-    //     if(num_int > 0) {
-    //         pts.emplace_back(pInt1.x(), pInt1.y());
-    //     }
-    //     if(num_int > 1) {
-    //         pts.emplace_back(pInt2.x(), pInt2.y());
-    //     }
-    // }
-};
 
 //------------------------------------------------------------------------------
 
@@ -1282,23 +987,320 @@ Curve& Curve::reverse() {
 }
 
 double Curve::area() const {
-    double area = 0.0;
-    PointF prev_p = PointF(0, 0);
-    bool prev_p_valid = false;
-    for(auto It = begin(); It != end(); It++) {
-        const Vertex& vertex = *It;
-        if(prev_p_valid) {
-            area += Span(prev_p, vertex).GetArea();
-        }
-        prev_p = vertex.pt;
-        prev_p_valid = true;
-    }
+    double area{};
+    for(auto&& [fr, to]: *this | v::pairwise)
+        area += Span{fr.pt, to}.GetArea();
     return area;
 }
 
 bool Curve::isClosed() const {
-    if(size() == 0) {
-        return false;
-    }
+    if(empty()) return false;
     return front().pt == back().pt;
+}
+
+double Curve::perimetr() const {
+    double perimetr{};
+    for(auto&& [fr, to]: *this | v::pairwise)
+        perimetr += Span{fr.pt, to}.Length();
+    return perimetr;
+}
+
+static Path AddVertex(const Vertex& prev_vertex, const Vertex& vertex) {
+    constexpr double accuracy = 0.01;
+
+    if(!vertex.type) {
+        return {~vertex.pt};
+    } else {
+        Path path;
+        if(vertex.pt != prev_vertex.pt) {
+            double phi, dphi;
+
+            int Segments;
+            int i;
+            double ang1, ang2, phit;
+
+            PointF d = (prev_vertex.pt - vertex.center);
+            ang1 = atan2(d.y(), d.x());
+            if(ang1 < 0) ang1 += 2.0 * pi;
+
+            d = (vertex.pt - vertex.center);
+            ang2 = atan2(d.y(), d.x());
+            if(ang2 < 0) ang2 += 2.0 * pi;
+
+            if(vertex.type == -1) { // clockwise
+                if(ang2 > ang1) {
+                    phit = 2.0 * pi - ang2 + ang1;
+                } else {
+                    phit = ang1 - ang2;
+                }
+            } else { // counter_clockwise
+                if(ang1 > ang2) {
+                    phit = -(2.0 * pi - ang1 + ang2);
+                } else {
+                    phit = -(ang2 - ang1);
+                }
+            }
+
+            // what is the delta phi to get an accuracy of aber
+            double radius = d.length();
+            dphi = 2 * acos((radius - accuracy) / radius);
+
+            // set the number of segments
+            // if(phit > 0) {
+            //     Segments = (int)ceil(phit / dphi);
+            // } else {
+            //     Segments = (int)ceil(-phit / dphi);
+            // }
+
+            // if(Segments < CArea::m_min_arc_points) {
+            //     Segments = CArea::m_min_arc_points;
+            // }
+            // // if (Segments > CArea::m_max_arc_points)
+            // //     Segments=CArea::m_max_arc_points;
+
+            Segments = App::settings().clpCircleSegments(radius); // FIXME count by angle
+
+            // qCritical() << "Segments" << Segments;
+
+            dphi = phit / Segments;
+
+            PointF p = prev_vertex.pt;
+
+            for(i = 1; i <= Segments; i++) {
+                d = p - vertex.center;
+                phi = atan2(d.y(), d.x());
+                double nx = vertex.center.x() + radius * cos(phi - dphi);
+                double ny = vertex.center.y() + radius * sin(phi - dphi);
+                p = PointF{nx, ny};
+                SetCForce(path.emplace_back(~p), ~vertex.center);
+            }
+            return path;
+        }
+    }
+    return {};
+}
+
+Path toPath(const Curve& curve) {
+    Path path{~curve.front().pt};
+    if(curve.empty()) return {};
+    for(auto&& [fr, to]: curve | v::pairwise) {
+        Path arc = AddVertex(fr, to);
+        if(arc.size())
+            if(Point pt = GetC(arc.front()); pt != Point{})
+                SetCForce(path.back(), GetC(arc.front()));
+        path.append_range(std::move(arc));
+    }
+    r::for_each(path, &SetCSelf);
+    // Gi::Debug({path});
+    return path;
+}
+
+Paths toPaths(const Curves& curves) {
+    return {std::from_range, curves | v::transform(toPath)};
+}
+
+// Вычисление центра окружности по трём точкам
+bool circleCenter(
+    const QPointF& A, const QPointF& B, const QPointF& C,
+    QPointF& center, double& radius) {
+
+    // Середины отрезков
+    QPointF M_ab = (A + B) / 2.0;
+    QPointF M_bc = (B + C) / 2.0;
+
+    // Векторы хорд
+    QPointF v_ab = B - A;
+    QPointF v_bc = C - B;
+
+    // Нормали (перпендикуляры)
+    QPointF n_ab(-v_ab.y(), v_ab.x());
+    QPointF n_bc(-v_bc.y(), v_bc.x());
+
+    // Решение системы M_ab + t * n_ab = M_bc + s * n_bc
+    // Выразим t из уравнения для x и y
+    double det = n_ab.x() * n_bc.y() - n_ab.y() * n_bc.x();
+    if(std::abs(det) < 1e-12) return false; // Точки коллинеарны
+
+    QPointF delta = M_bc - M_ab;
+    double t = (delta.x() * n_bc.y() - delta.y() * n_bc.x()) / det;
+    center = M_ab + t * n_ab;
+    radius = QPointF::dotProduct(center - A, center - A);
+    radius = std::sqrt(radius);
+    return true;
+}
+
+// Вычисление точки на кривой Безье по параметру t
+QPointF bezierPoint(
+    const QPointF& P0, const QPointF& P1,
+    const QPointF& P2, const QPointF& P3,
+    double t) {
+
+    double u = 1.0 - t;
+    double tt = t * t;
+    double uu = u * u;
+    double uuu = uu * u;
+    double ttt = tt * t;
+
+    QPointF point = uuu * P0 + 3.0 * uu * t * P1 + 3.0 * u * tt * P2 + ttt * P3;
+    return point;
+}
+
+// Проверка, является ли кривая Безье дугой окружности
+bool isArcOfCircle(
+    const QPointF& P0, const QPointF& P1,
+    const QPointF& P2, const QPointF& P3,
+    QPointF& center, double& radius, double eps = 1e-5) {
+    // Берём три точки: начало, середина, конец
+    QPointF mid = bezierPoint(P0, P1, P2, P3, 0.5);
+    if(!circleCenter(P0, mid, P3, center, radius))
+        return false;
+
+    // Проверяем несколько точек на кривой
+    std::vector<double> params = {0.0, 0.25, 0.5, 0.75, 1.0};
+    for(double t: params) {
+        QPointF pt = bezierPoint(P0, P1, P2, P3, t);
+        double dist = QPointF::dotProduct(pt - center, pt - center);
+        dist = std::sqrt(dist);
+        if(std::abs(dist - radius) > eps)
+            return false;
+    }
+    return true;
+}
+
+/**
+ * \brief Проверка, что данный кубический Bézier задаёт круговую дугу, и поиск её центра.
+ *
+ * @param start    начальная точка
+ * @param ctrl1    первый контрольный пункт
+ * @param ctrl2    второй контрольный пункт
+ * @param end      конечная точка
+ * @param center   (out) центр найденного круга
+ * @param radius   (out) радиус круга
+ * @param tolerance допускается ошибка при проверке того, что кривая принадлежит кругу.
+ * @return true, если кривая действительно представляет круговую дугу
+ */
+bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
+    const QPointF& ctrl2, const QPointF& end,
+    QPointF& center, double& radius,
+    double tolerance = 1e-5) {
+    // 1. Никакие контрольные векторы не нулевые
+    const QPointF tanStart = ctrl1 - start;
+    const QPointF tanEnd = end - ctrl2;
+    if((tanStart - QPointF(0, 0)).manhattanLength() < tolerance || (tanEnd - QPointF(0, 0)).manhattanLength() < tolerance)
+        return false; // это линия, а не круг
+
+    // 2. Пересечение двух прямых: (X - start) · tanStart = 0
+    //                                      (X - end)   · tanEnd   = 0
+    // Решаем 2x2 систему: A * (Cx, Cy)^T = b
+    QMatrix2x2 A;
+    A.setToIdentity();
+    A(0, 0) = tanStart.x();
+    A(0, 1) = tanStart.y();
+    A(1, 0) = tanEnd.x();
+    A(1, 1) = tanEnd.y();
+    QVector2D b0 = -QVector2D(start.x() * tanStart.x() + start.y() * tanStart.y(), 0);
+    QVector2D b1 = -QVector2D(end.x() * tanEnd.x() + end.y() * tanEnd.y(), 0);
+    // Вектор b: ( -start·tanStart, -end·tanEnd )
+    //   Мы не будем использовать QMatrix2x2, а решим напрямую
+    double det = A(0, 0) * A(1, 1) - A(0, 1) * A(1, 0);
+    if(qAbs(det) < tolerance) return false; // почти параллельные прямые
+
+    double cx = (-(start.x() * tanStart.x() + start.y() * tanStart.y()) * A(1, 1)
+                    - -(end.x() * tanEnd.x() + end.y() * tanEnd.y()) * A(0, 1))
+        / det;
+    double cy = (A(0, 0) * -(end.x() * tanEnd.x() + end.y() * tanEnd.y())
+                    - A(1, 0) * -(start.x() * tanStart.x() + start.y() * tanStart.y()))
+        / det;
+
+    center = QPointF(cx, cy);
+
+    // 3. Радиус: расстояние от центра до начала
+    radius = QLineF(center, start).length();
+
+    // Проверяем, что расстояние до конца и до точки t=0.5
+    // находятся на той же окружности (с заданной точностью)
+    auto evaluateCubic = [&](qreal t) {
+        qreal u = 1 - t;
+        qreal tt = t * t, uu = u * u;
+        return u * uu * start + 3 * u * tt * ctrl1 + 3 * tt * u * ctrl2 + t * t * t * end;
+    };
+    const int samples = 5;
+    for(int i = 1; i < samples; ++i) {
+        qreal t = i / static_cast<qreal>(samples + 1);
+        QPointF pt = evaluateCubic(t);
+        double d = QLineF(pt, center).length();
+        if(qAbs(d - radius) > tolerance * radius) // относительная ошибка
+            return false;
+    }
+    return true;
+}
+
+bool isClockwise(const QPointF& center,
+    const QPointF& start,
+    const QPointF& ctrl1) {
+    QVector2D R{start - center};
+    QVector2D T{ctrl1 - start}; // касательная в начале
+    double cross = R.x() * T.y() - R.y() * T.x();
+    return cross < 0; // true → по часовой стрелке
+}
+
+Paths toPaths(const QPainterPath& pPath) {
+    using QPP = QPainterPath;
+    using El = QPP::Element;
+
+    constexpr auto name = +[](const El& e) {
+        switch(e.type) {
+        case QPP::MoveToElement     : return "MoveTo"sv;
+        case QPP::LineToElement     : return "LineTo"sv;
+        case QPP::CurveToElement    : return "CurveTo"sv;
+        case QPP::CurveToDataElement: return "CurveToData"sv;
+        }
+        return ""sv;
+    };
+    Paths paths;
+    for(auto&& elements:
+        v::iota(0, pPath.elementCount())
+            | v::transform(std::bind(&QPP::elementAt, pPath, _1))           // to Element
+            | v::chunk_by([](const El&, const El& r) { return r.type; })) { // to Subpath Polygons
+        qInfo() << "elements" << elements.size();                           // count of elements
+
+        auto segments = elements
+            | v::chunk_by([](const El&, const El& r) { return r.type > 2; }); // separate Curves
+
+        for(auto&& segment: segments)
+            qDebug() << std::vector{std::from_range,
+                segment | v::transform(name)};
+        Path path;
+        for(auto&& [from, to]:
+            segments | v::pairwise) { // 'from' point to bezier Point in 'to' if
+            if(path.empty()) path.emplace_back(~from.back());
+
+            // 'to' is Curve
+            if(to.front().type == QPP::CurveToElement) {
+                // Проверка, является ли кривая Безье дугой окружности
+                QPointF center;
+                double radius;
+                if(/*circleArcFromCubic*/ isArcOfCircle(from.back(), to[0], to[1], to[2], center, radius,
+                    1e-3)) {
+                    qWarning() << radius << center;
+                    Vertex t{
+                        QPointF{to.back()},
+                        center,
+                        // isClockwise(center, from.back(), to[0]) ? Vertex::Cw : Vertex::Ccw,
+                        DIR(center, from.back(), to.back()),
+                    };
+                    path.append_range(AddVertex({{from.back()}}, t));
+                } else {
+                    path.emplace_back(~to.back());
+                    // Gi::Debug({CircleCurve(0.5, {to[1]})});
+                    // qCritical() << "WTF must be an arc!";
+                    // qCritical() << (from | r::to<QPolygonF>()) << (to | r::to<QPolygonF>()) << (QPointF(to[0]) == to[1]) << (QPointF(to[1]) == to[2]);
+                }
+            } else
+                path.emplace_back(~to.front());
+        }
+        r::for_each(path, &SetCSelf);
+        if(path.size()) paths.emplace_back(std::move(path));
+    }
+    return paths;
 }

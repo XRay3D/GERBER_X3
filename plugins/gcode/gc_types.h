@@ -21,8 +21,8 @@
 #include <QVariant>
 #include <variant>
 
-constexpr auto G_CODE = md5::hash32("GCode");
-constexpr auto GC_DBG_FILE = md5::hash32("GCDbgFile");
+constexpr auto G_CODE = "GCode"_hash32;
+constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
 
@@ -45,8 +45,8 @@ enum Code {
     GNull = -1,
     G00 = 0,
     G01 = 1,
-    G02 = 2,
-    G03 = 3,
+    G02 = 2, // cw
+    G03 = 3, // ccw
 };
 
 enum SideOfMilling {

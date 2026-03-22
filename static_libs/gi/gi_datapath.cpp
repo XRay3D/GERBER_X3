@@ -94,6 +94,10 @@ void DataPath::updateSelection() const {
     }
 }
 
+Paths DataPath::paths(int) const {
+    return qWarning("TODO"), Paths{};
+}
+
 void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     Item::mouseReleaseEvent(event);
 

@@ -15,7 +15,7 @@
 
 namespace Voronoi {
 
-constexpr auto VORONOI = md5::hash32("Voronoi");
+constexpr auto VORONOI = "Voronoi"_hash32;
 
 enum {
     FrameOffset = GCode::Params::UserParam,

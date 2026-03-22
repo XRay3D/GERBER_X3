@@ -15,7 +15,7 @@
 
 namespace PocketRaster {
 
-constexpr auto POCKET_RASTER = md5::hash32("PocketRaster");
+constexpr auto POCKET_RASTER = "PocketRaster"_hash32;
 
 class Creator : public GCode::Creator {
 public:

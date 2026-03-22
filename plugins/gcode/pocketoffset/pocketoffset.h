@@ -15,7 +15,7 @@
 
 namespace PocketOffset {
 
-constexpr auto POCKET_OFFSET = md5::hash32("PocketOffset");
+constexpr auto POCKET_OFFSET = "PocketOffset"_hash32;
 
 class File final : public GCode::File {
 public:

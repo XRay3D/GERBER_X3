@@ -401,8 +401,8 @@ Paths& TranslatePaths(Paths& paths, const Point& pos) {
 }
 
 double Perimeter(std::span<const Point> path, bool open) {
-    while(path.back() == path.front()) path = path.subspan(1);
     if(path.size() < 2 /*(open ? 2 : 3)*/) return std::nan("");
+    while(path.back() == path.front()) path = path.subspan(1);
     double p{};
     static constexpr auto dist = +[](const Point& from, const Point& to) {
         Point v = to - from;

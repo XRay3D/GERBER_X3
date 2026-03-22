@@ -24,7 +24,7 @@ struct Settings {
 
 inline Settings settings;
 
-inline constexpr auto PROFILE = md5::hash32("Profile");
+inline constexpr auto PROFILE = "Profile"_hash32;
 
 class File final : public GCode::File {
 public:

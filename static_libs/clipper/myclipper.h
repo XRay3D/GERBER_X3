@@ -12,6 +12,7 @@
 
 // #include "cancelation.h"
 #include "mvector.h"
+#include "utils.h"
 #include <QDebug>
 #include <QIcon>
 #include <QPolygonF>
@@ -217,10 +218,6 @@ auto operator-=(Container auto& c, size_t index) {
 
 template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
 
-constexpr double length(const QPointF p1, const QPointF p2) {
-    return QLineF{p1, p2}.length();
-}
-
 inline Point& operator*=(Point& pt, Arithmetic auto v) noexcept {
     return pt.x *= v, pt.y *= v, pt;
 }
@@ -236,27 +233,20 @@ constexpr QPointF toQPointF(const Point& p) noexcept { return {static_cast<doubl
 constexpr Point operator~(const QPointF& p) noexcept { return toPoint(p); }
 constexpr QPointF operator~(const Point& p) noexcept { return toQPointF(p); }
 
-template <typename T>
-struct Caster {
-    const T& val;
-    template <typename To>
-    operator To() const { return static_cast<const To>(val); }
-};
-
 #define TRANSFORM(FROM, TO)                                           \
-    inline TO operator~(const FROM& val) {                            \
+    inline TO operator~(std::span<const FROM> val) {                  \
         auto it = v::transform(val, [](auto&& val) { return ~val; }); \
         TO ret;                                                       \
-        ret.reserve(Caster{val.size()});                              \
+        ret.reserve(Cast{val.size()});                                \
         r::move(it, std::back_inserter(ret));                         \
         return ret;                                                   \
     }
 
-TRANSFORM(QPolygonF, Path)
-TRANSFORM(Path, QPolygonF)
+TRANSFORM(QPointF, Path)
+TRANSFORM(Point, QPolygonF)
 
-TRANSFORM(QList<QPolygonF>, Paths)
-TRANSFORM(Paths, QList<QPolygonF>)
+TRANSFORM(QPolygonF, Paths)
+TRANSFORM(Path, QList<QPolygonF>)
 
 #undef TRANSFORM
 //------------------------------------------------------------------------------

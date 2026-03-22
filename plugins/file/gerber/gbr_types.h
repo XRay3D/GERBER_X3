@@ -22,7 +22,7 @@
 
 namespace Gerber {
 
-constexpr auto GERBER = md5::hash32("Gerber");
+constexpr auto GERBER = "Gerber"_hash32;
 
 class GbrObj : public QObject {
     Q_OBJECT

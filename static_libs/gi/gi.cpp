@@ -82,7 +82,7 @@ void Item::setPenColorPtr(const QColor* penColor) {
     colorChanged();
 }
 
-Paths Item::paths(int) const { return ~shape_.toSubpathPolygons(transform()); }
+Paths Item::paths(int) const { return toPaths(transform().map(shape_)); }
 
 void Item::setPaths(Paths paths, int) {
     auto t{transform()};

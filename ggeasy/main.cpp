@@ -68,7 +68,7 @@ int main(int argc, char* argv[]) {
 
     if(QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
-    QSettings::setDefaultFormat(QSettings::IniFormat);
+    // QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
 
     // WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
@@ -183,7 +183,8 @@ int main(int argc, char* argv[]) {
     }
 
     mainWin.init(); // connect plugins
-    SettingsDialog().accept();
+    SettingsDialog();
+    MainWindow::updateTheme();
 
     QCommandLineParser parser;
     parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);

@@ -94,7 +94,7 @@ void Model::addShape(Shapes::AbstractShape* shape) {
     if(!shape)
         return;
 
-    static constexpr uint32_t type = md5::hash32("Shapes");
+    static constexpr uint32_t type = "Shapes"_hash32;
     auto& itemFolder = fileFolders[type];
     if(!itemFolder) {
         QModelIndex index = createIndex(0, 0, rootItem);
@@ -119,7 +119,7 @@ void Model::addItem(Gi::Item* item) {
     if(!item)
         return;
 
-    static constexpr uint32_t type = md5::hash32("Gi::Item");
+    static constexpr uint32_t type = "Gi::Item"_hash32;
     auto& itemFolder = fileFolders[type];
     if(!itemFolder) {
         QModelIndex index = createIndex(0, 0, rootItem);

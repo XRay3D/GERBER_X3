@@ -93,7 +93,7 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int /*alternate*/ = {}) const;
+    virtual Paths paths(int /*alternate*/ = {}) const ;
     virtual void setPaths(Paths paths, int /*alternate*/ = {});
     virtual void redraw();
     // QGraphicsItem interface

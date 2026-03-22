@@ -44,12 +44,11 @@ public:
     auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const {
         return value = QSettings::value(key, defaultValue).value<T>();
     }
-
+#if 1
     template <IsWidget W>
     auto setValue(W* widget) {
         const QString name{widget->objectName()};
         assert(!name.isEmpty());
-
         if constexpr(std::is_base_of_v<QAbstractButton, W>)
             return QSettings::setValue(name, widget->isChecked()),
                    widget->isChecked();
@@ -82,7 +81,6 @@ public:
     auto getValue(W* widget, const QVariant& defaultValue = {}) const {
         const QString name{widget->objectName()};
         assert(!name.isEmpty());
-
         if constexpr(std::is_base_of_v<QAbstractButton, W>)
             return widget->setChecked(QSettings::value(name, defaultValue).toBool()),
                    widget->isChecked();
@@ -110,6 +108,11 @@ public:
         else
             throw std::logic_error(typeid(W).name());
     }
+#else
+    void setValue(QWidget* w);
+
+    void getValue(QWidget* w, const QVariant& defaultValue = {});
+#endif
 
     template <IsArithmetic V>
     auto getValue(V& val, QAnyStringView name, V def = {}) const {

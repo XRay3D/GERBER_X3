@@ -76,9 +76,13 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
 bool Parser::parseComment(QString line) {
     if(line.startsWith(u';')) {
         line = line.toUpper();
-        if(auto [match, comment] = ctre::match<R"(^;(.*)$)">(toU16StrView(line)); match) { // regexComment
+        if(auto [match, comment]
+            = ctre::match<R"(^;(.*)$)">(std::u16string_view{line});
+            match) { // regexComment
 
-            if(auto [matchTool, tool, diam] = ctre::match<R"(\s*(?:HOLESIZE)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)">(comment); matchTool) { // tool
+            if(auto [matchTool, tool, diam]
+                = ctre::match<R"(\s*(?:HOLESIZE)\s*(\d+\.?\d*)\s*=\s*(\d+\.?\d*).*)">(comment);
+                matchTool) { // tool
                 qDebug() << __FUNCTION__ << tool << diam;
                 const int tCode = static_cast<int>(CtreCapTo(tool).toDouble());
                 if(toolIt == file->tools_.end()) {
@@ -89,13 +93,15 @@ bool Parser::parseComment(QString line) {
                 // file->tools_[tCode] *= 0.0254 * (1.0 / 25.4);
             }
 
-            // static constexpr ctll::fixed_string regexFormat(uR"(.*(?:FORMAT|format).*(\d).(\d))");
-            // fixed_string(u".*(?:FORMAT|format).*(\d).(\d)");
+            // static constexpr ctll::fixed_string regexFormat(uR"(.*(?:FORMAT|format).*(\d).(\d))"};
+            // fixed_string(u".*(?:FORMAT|format).*(\d).(\d)"};
             // if (auto [matchFormat, integer, decimal] = ctre::match<regexFormat>(comment); matchFormat) {
             // file->format_.integer = CtreCapTo(integer).toInt();
             // file->format_.decimal = CtreCapTo(decimal).toInt();
             // }
-            if(auto [match, integer, decimal] = ctre::match<R"(FILE_FORMAT=(\d).+(\d))">(comment); match) {
+            if(auto [match, integer, decimal]
+                = ctre::match<R"(FILE_FORMAT=(\d).+(\d))">(comment);
+                match) {
                 file->format_.integer = CtreCapTo(integer).toInt();
                 file->format_.decimal = CtreCapTo(decimal).toInt();
             }
@@ -107,8 +113,8 @@ bool Parser::parseComment(QString line) {
 
 bool Parser::parseGCode(const QString& line) {
     if(line.startsWith(u'G')) {
-        static constexpr ctll::fixed_string regex(R"(^G([0]?[0-9]{2}).*$)"); // fixed_string(u"^G([0]?[0-9]{2}).*$"_s);
-        if(auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
+        static constexpr ctll::fixed_string regex{R"(^G([0]?[0-9]{2}).*$)"};
+        if(auto [whole, c1] = ctre::match<regex>(std::u16string_view{line}); whole) {
             switch(CtreCapTo(c1).toInt()) {
             case G00:
                 state_.gCode = G00;
@@ -143,9 +149,9 @@ bool Parser::parseGCode(const QString& line) {
 
 bool Parser::parseMCode(const QString& line) {
     if(line.startsWith(u'M')) {
-        static constexpr ctll::fixed_string regex(R"(^M([0]?[0-9]{2})$)"); // fixed_string(u"^M([0]?[0-9]{2})$"_s);
+        static constexpr ctll::fixed_string regex{R"(^M([0]?[0-9]{2})$)"};
 
-        if(auto [whole, c1] = ctre::match<regex>(toU16StrView(line)); whole) {
+        if(auto [whole, c1] = ctre::match<regex>(std::u16string_view{line}); whole) {
             switch(CtreCapTo(c1).toInt()) {
             case M00: {
                 // auto tools = file->tools_;
@@ -196,16 +202,16 @@ bool Parser::parseMCode(const QString& line) {
 
 bool Parser::parseTCode(const QString& line) {
     if(line.startsWith(u'T')) {
-
-        static constexpr ctll::fixed_string regex(R"(^T(\d+))"
-                                                  R"((?:([CFS])(\d*\.?\d+))?)"
-                                                  R"((?:([CFS])(\d*\.?\d+))?)"
-                                                  R"((?:([CFS])(\d*\.?\d+))?)"
-                                                  R"(.*$)");
-        static constexpr ctll::fixed_string regex2(R"(^.+C(\d*\.?\d+).*$)"); // fixed_string(u"^.+C(\d*\.?\d+).*$"_s);
-        if(auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(toU16StrView(line)); whole) {
+        static constexpr ctll::fixed_string regex{
+            R"(^T(\d+))"
+            R"((?:([CFS])(\d*\.?\d+))?)"
+            R"((?:([CFS])(\d*\.?\d+))?)"
+            R"((?:([CFS])(\d*\.?\d+))?)"
+            R"(.*$)"};
+        static constexpr ctll::fixed_string regex2{R"(^.+C(\d*\.?\d+).*$)"};
+        if(auto [whole, tool, cfs1, diam1, cfs2, diam2, cfs3, diam3] = ctre::match<regex>(std::u16string_view{line}); whole) {
             state_.toolId = CtreCapTo(tool).toInt();
-            if(auto [whole, diam] = *ctre::search_all<regex2>(toU16StrView(line)).begin(); whole) {
+            if(auto [whole, diam] = *ctre::search_all<regex2>(std::u16string_view{line}).begin(); whole) {
                 file->tools_[state_.toolId] = CtreCapTo(diam).toDouble();
                 return true;
             }
@@ -224,13 +230,14 @@ bool Parser::parsePos(const QString& line) {
     // A
     // };
 
-    static constexpr ctll::fixed_string regex(R"(^(?:G(\d+))?)"
-                                              R"((?:X([\+\-]?\d*\.?\d*))?)"
-                                              R"((?:Y([\+\-]?\d*\.?\d*))?)"
-                                              R"((?:A([\+\-]?\d*\.?\d*))?)"
-                                              R"(.*$)");
+    static constexpr ctll::fixed_string regex{
+        R"(^(?:G(\d+))?)"
+        R"((?:X([\+\-]?\d*\.?\d*))?)"
+        R"((?:Y([\+\-]?\d*\.?\d*))?)"
+        R"((?:A([\+\-]?\d*\.?\d*))?)"
+        R"(.*$)"};
 
-    if(auto [whole, G, X, Y, A] = ctre::match<regex>(toU16StrView(line)); whole) {
+    if(auto [whole, G, X, Y, A] = ctre::match<regex>(std::u16string_view{line}); whole) {
         if(!X && !Y)
             return false;
 
@@ -270,11 +277,12 @@ bool Parser::parseSlot(const QString& line) {
     // Y2
     // };
 
-    static constexpr ctll::fixed_string regex(R"(^(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
-                                              R"(G85)"
-                                              R"((?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
-                                              R"(.*$)");
-    if(auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(toU16StrView(line)); whole) {
+    static constexpr ctll::fixed_string regex{
+        R"(^(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
+        R"(G85)"
+        R"((?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?)"
+        R"(.*$)"};
+    if(auto [whole, X1, Y1, X2, Y2] = ctre::match<regex>(std::u16string_view{line}); whole) {
         state_.gCode = G85;
         state_.path.clear();
         state_.rawPosList.clear();
@@ -316,11 +324,11 @@ bool Parser::parseSlot(const QString& line) {
 
 bool Parser::parseRepeat(const QString& line) {
 
-    static constexpr ctll::fixed_string regex(R"(^R(\d+))"
+    static constexpr ctll::fixed_string regex{R"(^R(\d+))"
                                               R"((?:X([\+\-]?\d*\.?\d+))?)"
                                               R"((?:Y([\+\-]?\d*\.?\d+))?)"
-                                              R"($)");
-    if(auto [whole, C1, CL2, C3] = ctre::match<regex>(toU16StrView(line)); whole) {
+                                              R"($)"};
+    if(auto [whole, C1, CL2, C3] = ctre::match<regex>(std::u16string_view{line}); whole) {
         int count = CtreCapTo(C1).toInt();
         QPointF p;
         parseNumber(CtreCapTo(CL2), p.rx());
@@ -337,7 +345,7 @@ bool Parser::parseRepeat(const QString& line) {
 bool Parser::parseFormat(const QString& line) {
     static const QVector<QString> unitMode({u"INCH"_s, u"METRIC"_s});
     static const QVector<QString> zeroMode({u"LZ"_s, u"TZ"_s});
-    if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(toU16StrView(line)); whole) {
+    if(auto [whole, C1, CL2] = ctre::match<R"(^(METRIC|INCH).?(LZ|TZ)?$)">(std::u16string_view{line}); whole) {
         if(C1)
             switch(unitMode.indexOf(CtreCapTo(C1))) {
             case Inches     : file->format_.unitMode = Inches; break;
@@ -352,8 +360,8 @@ bool Parser::parseFormat(const QString& line) {
             }
         return true;
     }
-    static constexpr ctll::fixed_string regex2(R"(^(FMAT).*(2)?$)"); // fixed_string(u"^(FMAT).*(2)?$"_s);
-    if(auto [whole, C1, CL2] = ctre::match<regex2>(toU16StrView(line)); whole) {
+    static constexpr ctll::fixed_string regex2{R"(^(FMAT).*(2)?$)"};
+    if(auto [whole, C1, CL2] = ctre::match<regex2>(std::u16string_view{line}); whole) {
         file->format_.unitMode = Inches;
         file->format_.zeroMode = LeadingZeros;
         return true;
