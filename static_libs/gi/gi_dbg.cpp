@@ -32,7 +32,7 @@ Debug_::Debug_(const Path& path, const QColor& color, double width)
 Debug_::Debug_(const Paths& paths, const QColor& color, double width)
     : Debug_{color, width} {
     paths_ = paths;
-#if 0
+#if 1
     for(const Path& path: paths)
         shape_.addPolygon(~path);
     boundingRect_ = shape_.boundingRect();
@@ -100,15 +100,15 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     // painter->setPen(QPen(Qt::magenta, 0.0));
     // painter->drawRect(rect_);
 
+    pen.setColor({0, 255, 0, 255});
+    painter->setPen(pen);
+
     double len = 10 * scale;
 
     for(const Point& pt: paths_ | v::join | v::filter(&Point::z)) {
         QPointF p = ~GetC(pt);
         painter->drawLine(p, ~pt);
     }
-
-    pen.setColor(Qt::white);
-    painter->setPen(pen);
 
     for(const QPointF& p: centers) {
         painter->drawLines({

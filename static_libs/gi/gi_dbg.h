@@ -17,8 +17,9 @@ namespace Gi {
 
 class Debug_ final : public Item {
 
-    friend Debug_* Debug(const QPainterPath&, const QColor&, double);
+    friend Debug_* Debug(const Curves&, const QColor&, double);
     friend Debug_* Debug(const Paths&, const QColor&, double);
+    friend Debug_* Debug(const QPainterPath&, const QColor&, double);
 
     Debug_(const QColor& color, double width);
     Paths paths_;
@@ -46,6 +47,10 @@ protected:
 
 inline Debug_* Debug(const QPainterPath& path, const QColor& color = Qt::white, double width = {}) {
     return new Debug_{path, color, width};
+}
+
+inline Debug_* Debug(const Curves& curves, const QColor& color = Qt::white, double width = {}) {
+    return new Debug_{toPPath(curves), color, width};
 }
 
 inline Debug_* Debug(const Paths& paths, const QColor& color = Qt::white, double width = {}) {

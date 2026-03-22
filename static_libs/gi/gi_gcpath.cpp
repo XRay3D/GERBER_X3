@@ -19,7 +19,11 @@ GcPath::GcPath(const Path& path, AbstractFile* file)
 
 GcPath::GcPath(const Paths& paths, AbstractFile* file)
     : gcFile_{file} {
-    for(const Path& path: paths) shape_.addPolygon(~path);
+
+    Curves curves = toCurves(const_cast<Paths&>(paths));
+    shape_ = toPPath(curves);
+
+    // for(const Path& path: paths) shape_.addPolygon(~path);
     double k;
     // if(gcFile_)
     // k = 0; // FIXME gcFile_->gcp_.getToolDiameter() * 0.5;

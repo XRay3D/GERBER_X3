@@ -34,5 +34,4 @@ public:
     // Item interface
     void changeColor() override;
 };
-
 } // namespace Gi

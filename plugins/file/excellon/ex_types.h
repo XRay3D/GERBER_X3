@@ -21,7 +21,7 @@ class Drill;
 
 namespace Excellon {
 
-constexpr auto EXCELLON = md5::hash32("Excellon");
+constexpr auto EXCELLON = "Excellon"_hash32;
 
 using Tools = std::map<int, double>;
 

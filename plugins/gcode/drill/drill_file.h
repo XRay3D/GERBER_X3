@@ -15,7 +15,7 @@
 
 namespace Drilling {
 
-constexpr auto DRILLING = md5::hash32("Drilling");
+constexpr auto DRILLING = "Drilling"_hash32;
 
 class File final : public GCode::File {
 public:

@@ -312,6 +312,85 @@ mvector<QString> File::savePath(const QPolygonF& path, double spindleSpeed, doub
     return lines;
 }
 
+mvector<QString> File::saveCurve(const Curve& curve, double spindleSpeed, double depth) {
+    mvector<QString> lines;
+    lines.reserve(curve.size());
+    bool skip = true;
+
+    // auto RtoIJ = [](const PointF& start, const Vertex& end) {
+    //     // 1. Центр окружности
+    //     const auto [cx, cy] = end.center;
+
+    //     // 2. Размеры дуги
+    //     const double r1 = std::hypot(start.x() - cx, start.y() - cy);
+    //     const double r2 = std::hypot(middle.x() - cx, middle.y() - cy);
+    //     const double r3 = std::hypot(end.x() - cx, end.y() - cy);
+    //     const double eps = 1e-6;
+    //     if (std::abs(r1 - r2) > eps || std::abs(r2 - r3) > eps)
+    //         throw std::runtime_error("Points are not concyclic – impossible arc");
+
+    //     // 3. Смещение центра относительно начала пути
+    //     const double i = end.center - start;
+
+    //     // 4. Направление
+    //     const ArcDirection direction = dir.value_or(orientation(start, middle, end));
+    //     const char gcodeLetter = (direction == ArcDirection::Clockwise) ? '2' : '3';
+
+    //     // // 5. Форматирование строки
+    //     // // Сохраняем точность в string (e.g. «.4f»)
+    //     // std::string fmt = "{:." + std::to_string(precision) + "f}";
+    //     // auto formatVal = [&fmt](double v) -> std::string {
+    //     //     return std::format(fmt, v);
+    //     // };
+
+    //     // Конструируем G‑код: X, Y, I, J, (K = 0 – можно опустить)
+    //     const std::string gcode =
+    //         std::format("G{} X{} Y{} I{} J{}",
+    //                     gcodeLetter,
+    //                     formatVal(end.x()),
+    //                     formatVal(end.y()),
+    //                     formatVal(ix),
+    //                     formatVal(iy));
+
+    //     return gcode;
+    // };
+
+    if(depth) {
+        double zk = depth - z_;
+        double perimetr = curve.perimetr();
+        qWarning() << "perimetr" << perimetr;
+
+        for(Vertex prevPt; const Vertex& to: curve)
+            if(skip) {
+                prevPt = to;
+                skip = false;
+            } else {
+                z_ += Span{prevPt.pt, to}.Length() / perimetr * zk;
+                // z_ = zk;
+                if(to.type) {
+                    auto [I, J] = to.center - prevPt.pt;
+                    lines.emplace_back(formated({g(to), x(to.x()), y(to.y()), z(z_), i(I), j(J), feed(feedRate()), speed(spindleSpeed)}));
+                } else
+                    lines.emplace_back(formated({g1(), x(to.x()), y(to.y()), z(z_), feed(feedRate()), speed(spindleSpeed)}));
+                prevPt = to;
+            }
+    } else {
+        for(auto&& [fr, to]: curve | v::pairwise) {
+            if(to.type) {
+                auto [I, J] = to.center - fr.pt;
+                lines.emplace_back(formated({g(to), x(to.x()), y(to.y()), z(z_), i(I), j(J), feed(feedRate()), speed(spindleSpeed)}));
+            } else
+                lines.emplace_back(formated({g1(), x(to.x()), y(to.y()), feed(feedRate()), speed(spindleSpeed)}));
+        }
+        // for(const Vertex& v: curve)
+        //     if(skip)
+        //         skip = false;
+        //     else
+        //         lines.emplace_back(formated({g1(), x(v.x()), y(v.y()), feed(feedRate()), speed(spindleSpeed)}));
+    }
+    return lines;
+}
+
 QString File::formated(const mvector<QString>& data) {
     QString ret;
     for(const QString& str: data) {
@@ -329,6 +408,22 @@ QString File::formated(const mvector<QString>& data) {
 QString File::g0() { return gCode_ = G00, u"G0"_s; }
 
 QString File::g1() { return gCode_ = G01, u"G1"_s; }
+
+QString File::g2() { return gCode_ = G02, u"G2"_s; }
+
+QString File::g3() { return gCode_ = G03, u"G3"_s; }
+
+QString File::g(const Vertex& v) {
+    switch(v.type) {
+    case Vertex::Line: return g1();
+    case Vertex::Ccw : return g3();
+    case Vertex::Cw  : return g2();
+    }
+}
+
+QString File::i(double val) { return u'I' + format(val); }
+
+QString File::j(double val) { return u'J' + format(val); }
 
 QString File::x(double val) { return u'X' + format(val); }
 
@@ -446,7 +541,41 @@ void File::saveMillingProfile(const QPointF& offset) {
 
     mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());
-
+#if 1
+    for(Paths paths: toolPathss_) {
+        Curves curves = toCurves(paths);
+        for(size_t i{}; i < depths.size(); ++i) {
+            for(size_t j{}; j < paths.size(); ++j) {
+                Curve& path = curves[j];
+                if(path.front().pt == path.back().pt) { // make complete depth and remove from worck
+                    // startPath(path.front());
+                    // for (auto&& depth: depths) {
+                    // lines_.emplace_back(formated({g1(), z(depth), feed(plungeRate())}));
+                    // auto sp(savePath(path, spindleSpeed(), depth));
+                    // lines_.append(sp);
+                    // }
+                    // endPath();
+                    // paths.erase(paths.begin() + j--);
+                    startPath(path.front().pt);
+                    for(auto&& depth: depths) {
+                        // lines_.emplace_back(formated({g1(), z(depth), feed(plungeRate())}));
+                        auto sp(saveCurve(path, spindleSpeed(), depth));
+                        lines_.append(sp);
+                    }
+                    lines_.append(saveCurve(path, spindleSpeed())); // Проход без спирали.
+                    endPath();
+                    paths.erase(paths.begin() + j--);
+                } else {
+                    startPath(path.front().pt);
+                    lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
+                    auto sp(saveCurve(path, spindleSpeed()));
+                    lines_.append(sp);
+                    endPath();
+                }
+            }
+        }
+    }
+#else
     for(auto& paths: pathss) {
         for(size_t i{}; i < depths.size(); ++i) {
             for(qsizetype j{}; j < paths.size(); ++j) {
@@ -479,6 +608,7 @@ void File::saveMillingProfile(const QPointF& offset) {
             }
         }
     }
+#endif
 }
 
 void File::saveLaserProfile(const QPointF& offset) {

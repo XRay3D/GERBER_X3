@@ -180,12 +180,11 @@ void SettingsDialog::readSettings() {
 
     settings.beginGroup(u"Color"_s);
     for(int i{}; i < GuiColors::Count; ++i)
-#if QT_VERSION > QT_VERSION_CHECK(6, 0, 0)
-        App::settings().guiColor_[i].fromString
-#else
-        App::settings().guiColor_[i].setNamedColor
-#endif
-            (settings.value(EnumHelper::toString(static_cast<GuiColors::Name>(i)), App::settings().guiColor_[i].name(QColor::HexArgb)).toString());
+        App::settings().guiColor_[i]
+            = settings.value(
+                          EnumHelper::toString(static_cast<GuiColors::Name>(i)),
+                          App::settings().guiColor_[i].name(QColor::HexArgb))
+                  .toString();
 
     settings.endGroup();
 

@@ -91,13 +91,6 @@ using TimerHour = Timer<Hour>;
 
 //------------------------------------------------------------------------------
 
-inline auto toU16StrView(const QString& str) {
-    return std::u16string_view{
-        reinterpret_cast<const char16_t*>(str.utf16()),
-        static_cast<size_t>(str.size()),
-    };
-}
-
 template <class T>
 struct CtreCapTo {
     T& cap;
@@ -356,6 +349,16 @@ consteval auto toNum(sv str) {
     for(auto var: str) {
         if(var == '-')
             continue;
+        template <typename T>
+        Cast(T && arg) -> Cast<decltype(arg)>;
+
+        template <typename T>
+        template <typename To>
+        constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
+
+        template <>
+        template <typename To>
+        constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
         val *= 10, val += var - '0';
     }
     return str.starts_with('-') ? -val : val;
@@ -446,3 +449,22 @@ bool hasBom(std::string_view data);
 
 /* ---------- 2. Проверка валидности UTF‑8 ------------------------------ */
 bool isValidUtf8(std::string_view data) noexcept;
+
+//------------------------------------------------------------------------------
+
+template <typename T>
+struct Cast final {
+    T val;
+    template <typename To>
+    constexpr operator To() const;
+};
+template <typename T>
+Cast(T&& arg) -> Cast<decltype(arg)>;
+
+template <typename T>
+template <typename To>
+constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
+
+template <>
+template <typename To>
+constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }

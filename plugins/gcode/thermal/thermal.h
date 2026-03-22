@@ -17,7 +17,7 @@ class AbstractFile;
 
 namespace Thermal {
 
-constexpr auto THERMAL = md5::hash32("Thermal");
+constexpr auto THERMAL = "Thermal"_hash32;
 
 class Creator : public ::GCode::Creator {
 public:

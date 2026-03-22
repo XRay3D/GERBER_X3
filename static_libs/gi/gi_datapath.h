@@ -22,6 +22,8 @@ class DataPath final : public Item {
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;
 
+    Paths paths(int /*alternate*/ = {}) const override;
+
     void redraw() override { update(); }
     void changeColor() override { }
     friend class ::MainWindow;

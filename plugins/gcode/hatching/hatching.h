@@ -15,7 +15,7 @@
 
 namespace CrossHatch {
 
-constexpr auto CROSS_HATCH = md5::hash32("CrossHatch");
+constexpr auto CROSS_HATCH = "CrossHatch"_hash32;
 
 class File final : public GCode::File {
 public:

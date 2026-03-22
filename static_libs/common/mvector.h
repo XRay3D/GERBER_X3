@@ -1,6 +1,7 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <memory>
 #include <ranges>
 #include <span>
@@ -8,6 +9,7 @@
 
 namespace v = std ::views;
 namespace r = std ::ranges;
+using namespace std ::placeholders;
 
 template <class T>
 struct mvector : std::vector<T> {

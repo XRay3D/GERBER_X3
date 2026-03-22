@@ -84,15 +84,19 @@ protected:
         AlwaysX,
         AlwaysY,
         AlwaysZ,
-        AlwaysF,
+        AlwaysI,
+        AlwaysJ,
         AlwaysS,
+        AlwaysF,
 
         SpaceG,
         SpaceX,
         SpaceY,
         SpaceZ,
-        SpaceF,
+        SpaceI,
+        SpaceJ,
         SpaceS,
+        SpaceF,
 
         Size
     };
@@ -102,21 +106,37 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    static inline const mvector<QChar> cmdList{u'G', u'X', u'Y', u'Z', u'F', u'S'};
+    static inline const mvector<QChar> cmdList{
+        u'G',
+        u'X',
+        u'Y',
+        u'Z',
+        u'I',
+        u'J',
+        u'S',
+        u'F',
+    };
 
     mvector<double> getDepths();
 
     bool formatFlags[Size]{};
-    QString lastValues[6];
+    QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
 
     mvector<QString> savePath(const QPolygonF& path, double spindleSpeed, double depth = {});
+    mvector<QString> saveCurve(const Curve& curve, double spindleSpeed, double depth = {});
 
     QString formated(const mvector<QString>& data);
 
     QString g0();
     QString g1();
+    QString g2();
+    QString g3();
+    void extracted(const Vertex& v);
+    QString g(const Vertex& v);
 
+    QString i(double val);
+    QString j(double val);
     QString x(double val);
     QString y(double val);
     QString z(double val);

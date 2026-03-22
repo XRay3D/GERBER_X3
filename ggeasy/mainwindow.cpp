@@ -36,7 +36,7 @@
 
 // static auto PointConverter = QMetaType::registerConverter(&Point::toString); NOTE
 
-inline constexpr auto G_CODE_PROPERTIES = md5::hash32("GCodeProperties");
+inline constexpr auto G_CODE_PROPERTIES = "GCodeProperties"_hash32;
 
 static const int id[]{
     qRegisterMetaType<QtMsgType>("QtMsgType"),
@@ -953,8 +953,8 @@ void MainWindow::editGcFile(GCode::File* /*file*/) { // TODO editGcFile
     qWarning(__FUNCTION__);
     // TODO   switch (file->gtype()) {
     // case GCode::Null:
-    // case md5::hash32("Profile"):
-    // // toolpathActions[md5::hash32("Profile")]->triggered();
+    // case "Profile"_hash32:
+    // // toolpathActions["Profile"_hash32]->triggered();
     // // reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
     // break;
     // case GCode::Pocket:

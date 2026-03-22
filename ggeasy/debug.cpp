@@ -72,25 +72,7 @@ bool MainWindow::debug() {
         }
 
         if(0) {
-            constexpr auto TYPE = md5::hash32("PocketRaster");
-            if(!toolpathActions.contains(TYPE))
-                break;
-            QTimer::singleShot(time += delay, this, [this] { selectAll(); });
-            QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
-            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
-        }
-
-        if(0) {
-            constexpr auto TYPE = md5::hash32("PocketOffset");
-            if(!toolpathActions.contains(TYPE))
-                break;
-            QTimer::singleShot(time += delay, this, [this] { selectAll(); });
-            QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
-            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
-        }
-
-        if(0) {
-            constexpr auto TYPE = md5::hash32("CrossHatch");
+            constexpr auto TYPE = "PocketRaster"_hash32;
             if(!toolpathActions.contains(TYPE)) break;
             QTimer::singleShot(time += delay, this, [this] { selectAll(); });
             QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
@@ -98,18 +80,34 @@ bool MainWindow::debug() {
         }
 
         if(0) {
-            constexpr auto DRILLING = md5::hash32("Drilling");
+            constexpr auto TYPE = "PocketOffset"_hash32;
+            if(!toolpathActions.contains(TYPE)) break;
+            QTimer::singleShot(time += delay, this, [this] { selectAll(); });
+            QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
+            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
+        }
+
+        if(0) {
+            constexpr auto TYPE = "CrossHatch"_hash32;
+            if(!toolpathActions.contains(TYPE)) break;
+            QTimer::singleShot(time += delay, this, [this] { selectAll(); });
+            QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
+            QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
+        }
+
+        if(0) {
+            constexpr auto DRILLING = "Drilling"_hash32;
             QTimer::singleShot(time += delay, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
             QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
         }
 
         if(0) {
-            constexpr auto THERMAL = md5::hash32("Thermal");
+            constexpr auto THERMAL = "Thermal"_hash32;
             QTimer::singleShot(time += delay, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
         }
 
-        if(0) {
-            constexpr auto PROFILE = md5::hash32("Profile");
+        if(1) {
+            constexpr auto PROFILE = "Profile"_hash32;
             delay_ms(1000);
             QTimer::singleShot(time += delay, this, [this] { selectAll(); });
             QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
@@ -119,7 +117,7 @@ bool MainWindow::debug() {
         }
 
         if(0) {
-            constexpr auto THREAD = md5::hash32("Thread");
+            constexpr auto THREAD = "Thread"_hash32;
             QTimer::singleShot(time += delay, this, [this, THREAD] { toolpathActions[THREAD]->toggle(); });
 
             // QTimer::singleShot(time += delay, this, [this] { selectAll(); });
