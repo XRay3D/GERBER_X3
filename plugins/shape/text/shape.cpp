@@ -12,8 +12,6 @@
 #include "graphicsview.h"
 #include "math.h"
 
-#include <QIcon>
-#include <assert.h>
 #include <boost/pfr.hpp>
 
 using Shapes::Handle;
@@ -23,7 +21,6 @@ namespace ShTxt {
 Shape::Shape(Shapes::Plugin* plugin, QPointF pt1)
     : AbstractShape{plugin} {
     loadIData();
-    paths_.resize(1);
     if(!std::isnan(pt1.x())) {
         handles = {
             Handle{pt1, Handle::Center}
@@ -89,13 +86,12 @@ void Shape::redraw() {
     transform.translate(handles.front().x(), handles.front().y());
     transform.rotate(iData.angle - 360);
 
-    paths_.clear();
     shape_.clear();
-
+    Paths paths;
     Clipper clipper;
     clipper.AddClip(~painterPath.toSubpathPolygons(transform));
-    clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
-    for(auto& sp: paths_) {
+    clipper.Execute(ClipType::Union, FillRule::NonZero, paths);
+    for(auto& sp: paths) {
         sp.emplace_back(sp.front());
         shape_.addPolygon(~sp);
     }

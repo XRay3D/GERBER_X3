@@ -226,37 +226,33 @@ public:
             } const color = []() noexcept -> Color {
             switch(App::settings().theme()) {
             case LightBlue: return {
-                    {230, 230, 230}, // base
-                    {127, 127, 127}, // disabled
-                    { 61, 174, 233}, // highlight
-                    { 61, 174, 233}, // link
-                    {200, 200, 200}, // window
-                    {  0,   0,   0}  // windowText
-                };
+                    .base       {230, 230, 230},
+                    .disabled   {127, 127, 127},
+                    .highlight  { 61, 174, 233},
+                    .link       { 61, 174, 233},
+                    .window     {200, 200, 200},
+                    .windowText {  0,   0,   0}};
             case LightRed: return {
-                    {230, 230, 230}, // base
-                    {127, 127, 127}, // disabled
-                    {218,  68,  83}, // highlight
-                    { 61, 174, 233}, // link
-                    {200, 200, 200}, // window
-                    {  0,   0,   0}  // windowText
-                };
+                    .base       {230, 230, 230},
+                    .disabled   {127, 127, 127},
+                    .highlight  {218,  68,  83},
+                    .link       { 61, 174, 233},
+                    .window     {200, 200, 200},
+                    .windowText {  0,   0,   0}};
             case DarkBlue: return {
-                    { 20,  20,  20}, // base
-                    { 80,  80,  80}, // disabled
-                    { 61, 174, 233}, // highlight
-                    { 61, 174, 233}, // link
-                    { 30,  30,  30}, // window
-                    {220, 220, 220}  // windowText
-                };
+                    .base       { 20,  20,  20},
+                    .disabled   { 80,  80,  80},
+                    .highlight  { 61, 174, 233},
+                    .link       { 61, 174, 233},
+                    .window     { 30,  30,  30},
+                    .windowText {220, 220, 220}};
             case DarkRed: default: return {
-                    { 20,  20,  20}, // base
-                    { 80,  80,  80}, // disabled
-                    {218,  68,  83}, // highlight
-                    { 61, 174, 233}, // link
-                    { 30,  30,  30}, // window
-                    {220, 220, 220}  // windowText
-                };
+                    .base       { 20,  20,  20},
+                    .disabled   { 80,  80,  80},
+                    .highlight  {218,  68,  83},
+                    .link       { 61, 174, 233},
+                    .window     { 30,  30,  30},
+                    .windowText {220, 220, 220}};
             } }();
 
             QPalette palette;
@@ -298,8 +294,6 @@ public:
         }
 
         QIcon::setThemeName(App::settings().theme() < DarkBlue ? u"ggeasy-light"_s : u"ggeasy-dark"_s);
-        if(App::mainWindowPtr() && App::mainWindow().isVisible())
-            SettingsDialog().show();
     }
 
     QUndoStack& undoStack() { return undoStack_; }

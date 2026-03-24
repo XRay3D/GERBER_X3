@@ -22,9 +22,6 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    #include <QTextCodec>
-#endif
 
 int main(int argc, char* argv[]) {
     stacktraceAndOutput();
@@ -55,10 +52,6 @@ int main(int argc, char* argv[]) {
     QApplication::setApplicationName(u"GGEasy"_s);
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName(u"UTF-8"_s));
-#endif
 
     [[maybe_unused]] App appSingleton;
     [[maybe_unused]] GCode::Settings gcSingleton;

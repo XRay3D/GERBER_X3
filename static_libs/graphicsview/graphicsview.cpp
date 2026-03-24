@@ -20,6 +20,7 @@
 
 #include <QDrag>
 #include <QDragEnterEvent>
+#include <QGraphicsSceneMouseEvent>
 #include <QGridLayout>
 #include <QGuiApplication>
 #include <QMenu>
@@ -61,18 +62,38 @@ GraphicsView::GraphicsView(QWidget* parent)
     vRuler{new Ruler{Qt::Vertical, this}},
     gridLayout{new QGridLayout{this}} {
 
-    setCacheMode(CacheBackground);
+    // setCacheMode(CacheBackground);
     setOptimizationFlag(DontSavePainterState);
-    setOptimizationFlag(DontAdjustForAntialiasing);
-    setViewportUpdateMode(SmartViewportUpdate);
+    // setOptimizationFlag(DontAdjustForAntialiasing);
+    // setViewportUpdateMode(SmartViewportUpdate);
     setDragMode(RubberBandDrag);
 
-    setContextMenuPolicy(Qt::DefaultContextMenu);
+    // setContextMenuPolicy(Qt::DefaultContextMenu);
 
     setAcceptDrops(true);
 
     ////////////////////////////////////
-    setScene(new QGraphicsScene{this});
+    struct Scene final : public QGraphicsScene {
+        using QGraphicsScene::QGraphicsScene;
+        QPointF mappedPos() { return qobject_cast<GraphicsView*>(parent())->scenePos; }
+        void mousePressEvent(QGraphicsSceneMouseEvent* event) override {
+            event->setScenePos(mappedPos());
+            QGraphicsScene::mousePressEvent(event);
+        }
+        void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override {
+            event->setScenePos(mappedPos());
+            QGraphicsScene::mouseMoveEvent(event);
+        }
+        void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override {
+            event->setScenePos(mappedPos());
+            QGraphicsScene::mouseReleaseEvent(event);
+        }
+        void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override {
+            event->setScenePos(mappedPos());
+            QGraphicsScene::mouseDoubleClickEvent(event);
+        }
+    };
+    setScene(new Scene{this});
     App::setGraphicsView(this);
 
     scene()->setSceneRect(-1000, -1000, +2000, +2000); // 2x2 meters
@@ -219,8 +240,24 @@ void GraphicsView::setRuler(bool ruller) {
     scene()->update();
 }
 
-QPointF GraphicsView::mappedPos(QMouseEvent* event) const {
-    return App::settings().getSnappedPos(mapToScene(event->position().toPoint()), event->modifiers());
+QPointF GraphicsView::toScenePos(QMouseEvent* event) {
+    scenePos = App::settings().getSnappedPos(
+        mapToScene(event->position()), event->modifiers());
+    return scenePos;
+}
+
+QPointF GraphicsView::mapFromScene(const QPointF& point) const {
+    static QPainterPath pp;
+    pp.clear();
+    pp.moveTo(point);
+    return QGraphicsView::mapFromScene(pp).elementAt(0);
+}
+
+QPointF GraphicsView::mapToScene(const QPointF& point) const {
+    static QPainterPath pp;
+    pp.clear();
+    pp.moveTo(point);
+    return QGraphicsView::mapToScene(pp).elementAt(0);
 }
 
 void GraphicsView::setScale(double s) noexcept {
@@ -278,7 +315,7 @@ QRectF GraphicsView::getSelectedBoundingRect() {
 void GraphicsView::updateRuler() {
     // layout()->setContentsMargins(0, 0, 0, horizontalScrollBar()->isVisible() ? horizontalScrollBar()->height() : 0);
     updateSceneRect(QRectF{}); // actualize mapFromScene
-    QPoint p = mapFromScene(QPointF{});
+    QPoint p = QGraphicsView::mapFromScene(QPointF{});
     vRuler->setOrigin(p.y());
     hRuler->setOrigin(p.x());
     vRuler->setRulerZoom(std::abs(transform().m22() * 0.1));
@@ -291,7 +328,7 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
         setProperty(propertyName.data(), end);
         updateRuler();
-        point = mapToScene(viewport()->mapFromGlobal(QCursor::pos()));
+        scenePos = mapToScene(viewport()->mapFromGlobal(QCursor::pos()));
         scene()->update();
     });
     if constexpr(std::is_same_v<T, QRectF>) {
@@ -544,64 +581,57 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
     update();
 }
 
+auto mouseDragEvent(QMouseEvent* event, QEvent::Type type, Qt::MouseButton button, bool add) {
+    return std::make_unique<QMouseEvent>(
+        type,
+        event->position(),
+        event->scenePosition(),
+        event->globalPosition(),
+        button,
+        add ? event->buttons() | button : event->buttons() & ~button,
+        event->modifiers());
+}
+
 void GraphicsView::mousePressEvent(QMouseEvent* event) {
-    // QGraphicsView::mousePressEvent(event);
+    pressPos = mapToScene(event->position());
+    toScenePos(event);
+    qDebug() << event->button();
     if(event->buttons() & Qt::MiddleButton) {
-        qInfo("MiddleButton");
-        QMouseEvent releaseEvent{
-            QEvent::MouseButtonRelease,
-            event->position(),
-            event->scenePosition(),
-            event->globalPosition(),
-            Qt::LeftButton,
-            event->buttons() | Qt::LeftButton,
-            event->modifiers(),
-        };
-        QGraphicsView::mouseReleaseEvent(&releaseEvent);
+        event->accept();
         setDragMode(ScrollHandDrag);
         setInteractive(false);
-        QMouseEvent fakeEvent{
-            event->type(),
-            event->position(),
-            event->scenePosition(),
-            event->globalPosition(),
-            Qt::LeftButton,
-            event->buttons() | Qt::LeftButton,
-            event->modifiers(),
-        };
+        QMouseEvent fakeEvent{event->type(),
+            event->position(), event->scenePosition(), event->globalPosition(),
+            Qt::LeftButton, event->buttons() | Qt::LeftButton, event->modifiers()};
         QGraphicsView::mousePressEvent(&fakeEvent);
     } else if(event->button() == Qt::RightButton) {
-        qInfo("RightButton");
         // { // удаление мостика
         // QGraphicsItem* item = scene()->itemAt(mapToScene(event->position().toPoint()), transform());
         // if (item && item->type() == Gi::Type::Bridge && !static_cast<BridgeItem*>(item)->ok())
         // delete item;
         // }
+
+        // setDragMode(NoDrag);
+        // setInteractive(true);
+        // QGraphicsView::mousePressEvent(event);
+
         // это что бы при вызове контекстного меню ничего постороннего не было
-        setDragMode(NoDrag);
-        emit mouseClickR(mappedPos(event));
+        emit mouseClickR(scenePos);
+#if 0
+        QGraphicsItem* item = scene()->itemAt(/*mapToScene(event->position().toPoint())*/
+            scenePos, transform());
 
-        // Ruler
-
-        if(ruler_) {
-            const QPointF point(mappedPos(event));
-            emit mouseClickR(point);
-            // scene_->setDrawRuller(true);
-            // scene_->setCross2(point);
-        }
-
-        QGraphicsItem* item = scene()->itemAt(mapToScene(event->position().toPoint()), transform());
-        if(item && contains(item->type(), Gi::Type::Drill, Gi::Type::DataSolid))
+        if(item && contains<Gi::Type::Drill, Gi::Type::DataSolid>(item->type()))
             GiToShapeEvent(event, item);
-        QGraphicsView::mousePressEvent(event);
+#endif
     } else {
         qInfo("else");
-        setDragMode(RubberBandDrag);
-        // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
         QGraphicsView::mousePressEvent(event);
-        if(ruler_ && !(rulerCtr++ & 0x1)) rulPt1 = mappedPos(event);
+        // setDragMode(RubberBandDrag);
+        // это для выделения рамкой  - работа по-умолчанию левой кнопки мыши
+        if(ruler_ && !(rulerCtr++ & 0x1)) rulPt1 = scenePos;
 
-        if(auto item{scene()->itemAt(mapToScene(event->position().toPoint()), transform())};
+        if(auto item{scene()->itemAt(scenePos, transform())};
             0 && item
             && item->type() == QGraphicsPixmapItem::Type) { // NOTE  возможно DD для направляющих не сделаю.
             QMimeData* mimeData = new QMimeData;
@@ -624,49 +654,47 @@ void GraphicsView::mousePressEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::mouseReleaseEvent(QMouseEvent* event) {
-    // QGraphicsView::mousePressEvent(event);
+    qWarning() << event->button();
     if(event->button() == Qt::MiddleButton) {
-        qInfo("MiddleButton");
+        event->accept();
         // отпускаем левую кнопку мыши которую виртуально зажали в mousePressEvent
-        QMouseEvent fakeEvent{
-            event->type(),
-            event->position(),
-            event->scenePosition(),
-            event->globalPosition(),
-            Qt::LeftButton,
-            event->buttons() & ~Qt::LeftButton,
-            event->modifiers(),
-        };
+        QMouseEvent fakeEvent{event->type(),
+            event->position(), event->scenePosition(), event->globalPosition(),
+            Qt::LeftButton, event->buttons() & ~Qt::LeftButton, event->modifiers()};
         QGraphicsView::mouseReleaseEvent(&fakeEvent);
         setDragMode(RubberBandDrag);
         setInteractive(true);
     } else if(event->button() == Qt::RightButton) {
-        qInfo("RightButton");
         // это что бы при вызове контекстного меню ничего постороннего не было
-        QGraphicsView::mousePressEvent(event);
+        // QGraphicsView::mousePressEvent(event);
         setDragMode(RubberBandDrag);
-        // WTF scene_->setDrawRuller(false);
-        latPos = event->position().toPoint();
+        // setDragMode(RubberBandDrag);
+        // setInteractive(true);
+        // emit mouseClickR(toScenePos(event));
     } else {
-        qInfo("else");
         QGraphicsView::mouseReleaseEvent(event);
-        emit mouseClickL(mappedPos(event));
+        emit mouseClickL(toScenePos(event));
     }
 }
 
 void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
-    emit mouseMove(mapToScene(event->position().toPoint()));
     QGraphicsView::mouseMoveEvent(event);
 
-    vRuler->setCursorPos(event->position().toPoint());
-    hRuler->setCursorPos(event->position().toPoint());
-    point = mappedPos(event);
-    if(ruler_ && rulerCtr & 0x1) rulPt2 = point;
+    auto dir = pressPos - mapToScene(event->position());
+    if(dir.x() > 0 && dir.y() < 0)
+        setRubberBandSelectionMode(Qt::IntersectsItemShape);
+    else
+        setRubberBandSelectionMode(Qt::ContainsItemShape);
 
-    // расчёт смещения для нулевых координат
-    emit mouseMove2(point, point - App::project().zeroPos());
+    QPoint pt = event->position().toPoint();
+    vRuler->setCursorPos(pt);
+    hRuler->setCursorPos(pt);
 
-    scene()->update();
+    emit mouseMove(toScenePos(event));
+
+    if(ruler_ && rulerCtr & 0x1) rulPt2 = scenePos;
+
+    // scene()->update();
 }
 
 void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) {
@@ -761,17 +789,17 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         painter->drawLines(lines, 2);
     }
 
-    if(ruler_) drawRuller(painter, rect);
-
     { // draw mouse cross
         const double k = 100 /*px*/ / getScale();
         painter->setPen({Qt::red, penWidth});
         QLineF lines[2]{
-            {point.x() - k, point.y(),     point.x() + k, point.y()    },
-            {point.x(),     point.y() - k, point.x(),     point.y() + k}
+            {scenePos.x() - k, scenePos.y(),     scenePos.x() + k, scenePos.y()    },
+            {scenePos.x(),     scenePos.y() - k, scenePos.x(),     scenePos.y() + k}
         };
         painter->drawLines(lines, 2);
     }
+
+    if(ruler_) drawRuller(painter, rect);
 
     painter->restore();
 

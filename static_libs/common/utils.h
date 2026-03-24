@@ -137,6 +137,11 @@ inline constexpr bool contains(auto var, auto... vars) noexcept {
     return ((vars == var) || ...);
 }
 
+template <auto... vars>
+inline constexpr bool contains(auto var) noexcept {
+    return ((vars == var) || ...);
+}
+
 //------------------------------------------------------------------------------
 
 struct ScopedTrue {
@@ -473,4 +478,3 @@ Cast(T&& arg) -> Cast<decltype(arg)>;
 // template <>
 // template <typename To>
 // constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
-

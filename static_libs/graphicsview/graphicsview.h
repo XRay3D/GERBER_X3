@@ -58,7 +58,10 @@ public:
     void setRuler(bool ruller);
 
     double scaleFactor() const noexcept { return 1.0 / getScale(); }
-    QPointF mappedPos(QMouseEvent* event) const;
+    QPointF toScenePos(QMouseEvent* event);
+    QPointF mapFromScene(const QPointF& point) const;
+    QPointF mapToScene(const QPointF& point) const;
+    using QGraphicsView::mapToScene;
 
     void setScale(double s) noexcept;
     double getScale() const noexcept { return transform().m11(); }
@@ -105,7 +108,6 @@ public:
 
 signals:
     void fileDroped(const QString&);
-    void mouseMove2(const QPointF&, const QPointF&);
     void mouseClickL(const QPointF&);
     void mouseClickR(const QPointF&);
     void mouseMove(const QPointF&);
@@ -145,8 +147,7 @@ private:
     void updateRuler();
     template <class T>
     void animate(QObject* target, const QByteArray& propertyName, T begin, T end);
-    QPoint latPos;
-    QPointF point, rulPt1, rulPt2;
+    QPointF scenePos, rulPt1, rulPt2, pressPos;
 
     void drawRuller(QPainter* painter, const QRectF& rect) const;
     int timerId{};

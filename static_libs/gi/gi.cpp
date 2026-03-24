@@ -82,7 +82,9 @@ void Item::setPenColorPtr(const QColor* penColor) {
     colorChanged();
 }
 
-Paths Item::paths(int) const { return toPaths(transform().map(shape_)); }
+Paths Item::paths(int) const {
+    return toPaths(transform().map(shape_));
+}
 
 void Item::setPaths(Paths paths, int) {
     auto t{transform()};

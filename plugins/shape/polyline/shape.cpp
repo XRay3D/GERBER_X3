@@ -20,8 +20,6 @@ namespace ShPoly {
 
 Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
     : AbstractShape{plugin} {
-    paths_.resize(1);
-
     if(!std::isnan(pt1.x())) {
         handles = {
             Handle{(pt1 + pt1) / 2, Handle::Center},
@@ -31,66 +29,49 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
         };
         redraw();
     }
-
     App::grView().addItem(this);
 }
 
 void Shape::redraw() {
-    if(curHandle.base() && QGraphicsItem::flags() & ItemIsMovable) {
+    if(curHandle && QGraphicsItem::flags() & ItemIsMovable) {
         if(curHandle->type() == Handle::Adder) {
-            QPointF pts[]{
-                QLineF{curHandle[-1], *curHandle}
-                    .center(),
-                *curHandle,
-                QLineF{curHandle[+1], *curHandle}
-                    .center(),
+            *curHandle = (curHandle[-1] + *curHandle) / 2;
+            std::initializer_list<Handle> pts{
+                // (curHandle[-1] + *curHandle) / 2,
+                {*curHandle,                       Handle::Corner},
+                {(curHandle[+1] + *curHandle) / 2, Handle::Adder },
             };
-            *curHandle = pts[0];
-            // NOTE may invalidate the pointer↓, update↓
-            curHandle = handles.insert(++curHandle, {
-                                                        Handle{pts[1], Handle::Corner},
-                                                        Handle{pts[2], Handle::Adder }
-            });
+            HIt it{++curHandle};
+            curHandle = handles.insert(it, pts).base();
         } else if(curHandle->type() == Handle::Corner) {
-            if(curHandle != handles.begin() + 1) {
+            if(curHandle != handles.data() + 1) {
                 if(handles.size() > 4 && *curHandle == curHandle[-2]) {
-                    // NOTE may invalidate the pointer↓, update↓
-                    curHandle = handles.erase(curHandle - 2, curHandle);
+                    curHandle = handles.erase(HIt{curHandle - 2}, HIt{curHandle}).base();
                 } else { // update adder
-                    curHandle[-1] = QLineF{*curHandle, curHandle[-2]}.center();
+                    curHandle[-1] = (*curHandle + curHandle[-2]) / 2;
                 }
             }
-            if(curHandle != handles.end() - 1) {
+            if(curHandle != (--handles.end()).base()) {
                 if(handles.size() > 4 && *curHandle == curHandle[+2]) {
-                    // NOTE may invalidate the pointer↓, update↓
-                    curHandle = handles.erase(curHandle, curHandle + 2);
+                    curHandle = handles.erase(HIt{curHandle}, HIt{curHandle + 2}).base();
                 } else { // update adder
-                    curHandle[+1] = QLineF{*curHandle, curHandle[+2]}.center();
+                    curHandle[+1] = (*curHandle + curHandle[+2]) / 2;
                 }
             }
         }
     }
 
-    auto filter = [](const auto& h) { return h.type() == Handle::Corner; };
-    auto transform = [](const auto& h) { return ~h; };
     auto path = handles
-        | v::filter(filter)
-        | v::transform(transform);
+        | v::filter(std::bind(std::equal_to{}, Handle::Corner, _1))
+        | r::to<QPolygonF>();
 
-    paths_.front() = {path.begin(), path.end()};
     shape_.clear();
-    shape_.addPolygon(~paths_.front());
-    // rect_ = shape_.boundingRect();
+    shape_.addPolygon(path);
     if(handles.size() > 4) {
         auto c = centroidFast();
         if(qIsNaN(c.x()) || qIsNaN(c.y())) c = {};
         handles[0] = shape_.boundingRect().contains(c) && !c.isNull() ? c : shape_.boundingRect().center();
-        // handles[0].setVisible(true);
-    } else {
-        // handles[0].setVisible(false);
     }
-
-    assert(paths_.size() == 1);
 }
 
 QString Shape::name() const { return QObject::tr("Line"); }
@@ -98,7 +79,7 @@ QString Shape::name() const { return QObject::tr("Line"); }
 QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-line"_s); }
 
 void Shape::setPt(const QPointF& pt) {
-    curHandle = --handles.end();
+    curHandle = (--handles.end()).base();
     *curHandle = pt;
     curHandle[-1] = QLineF{curHandle[-2], pt}.center();
     curHandle = {};
