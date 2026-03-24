@@ -307,7 +307,7 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
                          const QKeySequence& ks, auto&& func, auto... fl) {
         [[maybe_unused]] auto action = menu.addAction(
             QIcon::fromTheme(icon), text, ks, std::move(func));
-        ((action->setCheckable(true), action->setChecked(fl)), ...);
+        ((action->setCheckable(sizeof...(fl)), action->setChecked(fl)), ...);
     };
 
     addAction(
@@ -317,6 +317,15 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
     addAction(
         u"hint"_s, QObject::tr(R"(&Visible "%1")").arg(name()), {},
         [this](bool fl) { setVisible(fl); }, isVisible());
+
+    addAction(
+        u"gnumeric-column-hide-symbolic"_s, QObject::tr("&Hide"), {},
+        [] {
+            for(auto* gi:
+                App::grView().items<AbstractShape>()
+                    | v::filter(&Gi::Item::isSelected))
+                gi->setVisible(false);
+        });
 
     addAction(
         {}, QObject::tr(R"(&Editable "%1")").arg(name()), {},

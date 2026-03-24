@@ -31,8 +31,8 @@ struct std::hash<QPointF> {
 namespace Profile {
 
 Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
-    , ui(new Ui::ProfileForm) {
+    : GCode::BaseForm{plugin, new Creator, parent}
+    , ui{new Ui::ProfileForm} {
     ui->setupUi(content);
     setWindowTitle(tr("Profile Toolpath"));
 
