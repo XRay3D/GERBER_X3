@@ -22,7 +22,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
 
 add_library(gc_profile STATIC profile.cpp profile.h)
 
-target_link_libraries(gc_profile PUBLIC clipper #[[gcode]])
+target_link_libraries(gc_profile PUBLIC geometry #[[gcode]])
 
 file(GLOB HEADERS *.h)
 file(GLOB JSONS *.json)

@@ -171,11 +171,16 @@ void SettingsDialog::readSettings() {
     settings.beginGroup(u"Viewer"_s);
     settings.getValue(ui.chbxAntialiasing);
     settings.getValue(ui.chbxOpenGl);
-    settings.getValue(ui.chbxScaleHZMarkers, App::settings().scaleHZMarkers_);
-    settings.getValue(ui.chbxScalePinMarkers, App::settings().scalePinMarkers_);
-    settings.getValue(ui.chbxSmoothScSh, App::settings().guiSmoothScSh_);
-    settings.getValue(ui.chbxAnimSelection, App::settings().animSelection_);
-    settings.getValue(ui.cbxTheme, App::settings().theme_);
+    App::settings().scaleHZMarkers_
+        = settings.getValue(ui.chbxScaleHZMarkers, App::settings().scaleHZMarkers_);
+    App::settings().scalePinMarkers_
+        = settings.getValue(ui.chbxScalePinMarkers, App::settings().scalePinMarkers_);
+    App::settings().guiSmoothScSh_
+        = settings.getValue(ui.chbxSmoothScSh, App::settings().guiSmoothScSh_);
+    App::settings().animSelection_
+        = settings.getValue(ui.chbxAnimSelection, App::settings().animSelection_);
+    App::settings().theme_
+        = settings.getValue(ui.cbxTheme, App::settings().theme_);
     settings.endGroup();
 
     settings.beginGroup(u"Color"_s);
@@ -196,8 +201,10 @@ void SettingsDialog::readSettings() {
 
     /*Clipper*/
     settings.beginGroup(u"Clipper"_s);
-    settings.getValue(ui.dsbxMinCircleSegmentLength, App::settings().clpMinCircleSegmentLength_);
-    settings.getValue(ui.sbxMinCircleSegments, App::settings().clpMinCircleSegments_);
+    App::settings().clpMinCircleSegmentLength_
+        = settings.getValue(ui.dsbxMinCircleSegmentLength, App::settings().clpMinCircleSegmentLength_);
+    App::settings().clpMinCircleSegments_
+        = settings.getValue(ui.sbxMinCircleSegments, App::settings().clpMinCircleSegments_);
     settings.endGroup();
 
     /*Markers*/
@@ -215,8 +222,8 @@ void SettingsDialog::readSettings() {
     settings.getValue(ui.cbxZeroPos, HomePosition::TopLeft);
     settings.endGroup();
     /*Other*/
-    settings.getValue(App::settings().banana_, "inch", false);
-    settings.getValue(App::settings().snap_, "snap", false);
+    settings.getValue("inch", App::settings().banana_, false);
+    settings.getValue("snap", App::settings().snap_, false);
     for(auto tab: tabs)
         tab->readSettings(settings);
 }
@@ -266,8 +273,8 @@ void SettingsDialog::saveSettings() {
     settings.endGroup();
 
     /*Other*/
-    settings.setValue(App::settings().banana_, "inch");
-    settings.setValue(App::settings().snap_, "snap");
+    settings.setValue("inch", App::settings().banana_);
+    settings.setValue("snap", App::settings().snap_);
     for(auto tab: tabs)
         tab->writeSettings(settings);
 }

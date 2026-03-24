@@ -92,7 +92,7 @@ void Shape::setRadius(double radius) {
 }
 
 void Shape::readAndInit(QDataStream& /*stream*/) {
-    radius_ = handles.front() ^ handles.back();
+    radius_ = length(handles.front(), handles.back());
     curHandle = handles.begin();
     AbstractShape::redraw();
 }

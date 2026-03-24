@@ -456,15 +456,21 @@ template <typename T>
 struct Cast final {
     T val;
     template <typename To>
-    constexpr operator To() const;
+    constexpr operator To() const {
+        if constexpr(std::is_same_v<std::remove_cvref_t<T>, QVariant>)
+            return val.template value<To>();
+        else
+            return static_cast<To>(val);
+    }
 };
 template <typename T>
 Cast(T&& arg) -> Cast<decltype(arg)>;
 
-template <typename T>
-template <typename To>
-constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
+// template <typename T>
+// template <typename To>
+// constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
 
-template <>
-template <typename To>
-constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
+// template <>
+// template <typename To>
+// constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
+

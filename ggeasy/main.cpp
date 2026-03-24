@@ -158,23 +158,31 @@ int main(int argc, char* argv[]) {
     QDir dir(QApplication::applicationDirPath() + u"/plugins"_s);
     if(dir.exists()) { // Поиск всех файлов в папке u"plugins"_s
         QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
+        auto text = QObject::tr("Load plugin %1\n\n\n");
         for(const auto& str: listFiles) { // Проход по всем файлам
-            App::splashScreen().showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+            App::splashScreen().showMessage(text.arg(str),
+                Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
             loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + u"/"_s + str));
             if(auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
-                if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
-                    gCode->setInfo(loaders.back()->metaData().value(u"MetaData"_s).toObject());
-                    App::gCodePlugins().try_emplace(gCode->type(), gCode);
+                PluginData* pd{};
+                if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj)) {
+                    pd = App::gCodePlugins()
+                             .try_emplace(gCode->type(), gCode)
+                             .first->second;
+                } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj)) {
+                    pd = App::filePlugins()
+                             .try_emplace(file->type(), file)
+                             .first->second;
+                } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj)) {
+                    pd = App::shapePlugins()
+                             .try_emplace(shape->type(), shape)
+                             .first->second;
+                } else
                     continue;
-                } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
-                    file->setInfo(loaders.back()->metaData().value(u"MetaData"_s).toObject());
-                    App::filePlugins().try_emplace(file->type(), file);
-                    continue;
-                } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
-                    shape->setInfo(loaders.back()->metaData().value(u"MetaData"_s).toObject());
-                    App::shapePlugins().try_emplace(shape->type(), shape);
-                    continue;
-                }
+                pd->setInfo(loaders.back()
+                        ->metaData()
+                        .value(u"MetaData"_s)
+                        .toObject());
             } else {
                 qDebug() << str << loaders.back()->errorString();
                 loaders.pop_back();
@@ -182,9 +190,9 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    mainWin.init(); // connect plugins
     SettingsDialog();
     MainWindow::updateTheme();
+    mainWin.init(); // connect plugins
 
     QCommandLineParser parser;
     parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
