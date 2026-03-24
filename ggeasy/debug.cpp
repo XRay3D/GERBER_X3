@@ -40,6 +40,7 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 } // namespace QtPrivate
 
 bool MainWindow::debug() {
+    return false;
 
     while(App::isDebug() || 1) { // FIXME NOTE need for debug
         int time = 100;

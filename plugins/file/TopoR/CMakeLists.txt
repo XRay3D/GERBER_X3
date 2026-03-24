@@ -31,7 +31,7 @@ target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 add_definitions(-DQS_HAS_XML=1)
 
 target_link_libraries(${PROJECT_NAME} PRIVATE
-    clipper
+    geometry
     common
     filetree
     gcode

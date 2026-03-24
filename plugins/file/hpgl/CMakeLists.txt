@@ -41,7 +41,7 @@ add_library(hpgl SHARED
 
 link_directories(../../libs${SUFFIX})
 target_link_libraries(hpgl PRIVATE
-    clipper
+    geometry
     common
     filetree
     gi

@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+#include "utils.h"
 #include <QColor>
 #include <QDebug>
 #include <QFont>
@@ -28,22 +29,13 @@ class QRadioButton;
 class QSpinBox;
 class QTabWidget;
 
-#define varName(val) val, #val
+#define varName(val) #val, val
 
 template <typename W> concept IsWidget = std::is_base_of_v<QWidget, W>;
 template <typename T> concept IsArithmetic = std::is_arithmetic_v<T>;
 
 class MySettings : public QSettings {
 public:
-    template <typename T>
-    auto setValue(const QString& key, const T& value) {
-        return QSettings::setValue(key, value), value;
-    }
-
-    template <typename T>
-    auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const {
-        return value = QSettings::value(key, defaultValue).value<T>();
-    }
 #if 1
     template <IsWidget W>
     auto setValue(W* widget) {
@@ -82,28 +74,28 @@ public:
         const QString name{widget->objectName()};
         assert(!name.isEmpty());
         if constexpr(std::is_base_of_v<QAbstractButton, W>)
-            return widget->setChecked(QSettings::value(name, defaultValue).toBool()),
+            return widget->setChecked(Cast{QSettings::value(name, defaultValue)}),
                    widget->isChecked();
         else if constexpr(std::is_base_of_v<QDoubleSpinBox, W>)
-            return widget->setValue(QSettings::value(name, defaultValue).toDouble()),
+            return widget->setValue(Cast{QSettings::value(name, defaultValue)}),
                    widget->value();
         else if constexpr(std::is_same_v<W, QSpinBox>)
-            return widget->setValue(QSettings::value(name, defaultValue).toInt()),
+            return widget->setValue(Cast{QSettings::value(name, defaultValue)}),
                    widget->value();
         else if constexpr(std::is_same_v<W, QComboBox>)
-            return widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt()),
+            return widget->setCurrentIndex(Cast{QSettings::value(name, defaultValue)}),
                    widget->currentIndex();
         else if constexpr(std::is_same_v<W, QFontComboBox>) //
             return widget->setCurrentFont(QFont{QSettings::value(name, defaultValue).toString()}),
                    widget->currentFont().family();
         else if constexpr(std::is_same_v<W, QLineEdit>)
-            return widget->setText(QSettings::value(name, defaultValue).toString()),
+            return widget->setText(Cast{QSettings::value(name, defaultValue)}),
                    widget->text();
         else if constexpr(std::is_same_v<W, QPlainTextEdit>)
-            return widget->setPlainText(QSettings::value(name, defaultValue).toString()),
+            return widget->setPlainText(Cast{QSettings::value(name, defaultValue)}),
                    widget->toPlainText();
         else if constexpr(std::is_same_v<W, QTabWidget>)
-            return widget->setCurrentIndex(QSettings::value(name, defaultValue).toInt()),
+            return widget->setCurrentIndex(Cast{QSettings::value(name, defaultValue)}),
                    widget->currentIndex();
         else
             throw std::logic_error(typeid(W).name());
@@ -115,13 +107,25 @@ public:
 #endif
 
     template <IsArithmetic V>
-    auto getValue(V& val, QAnyStringView name, V def = {}) const {
+    auto getValue(QAnyStringView name, V& val, V def = {}) const {
         return val = QSettings::value(name, def).template value<V>();
     }
 
     template <IsArithmetic V>
-    auto setValue(V val, QAnyStringView name) {
+    auto setValue(QAnyStringView name, V val) {
         return QSettings::setValue(name, val), val;
+    }
+
+    template <typename T>
+        requires(!IsArithmetic<T>)
+    auto setValue(const QString& key, const T& value) {
+        return QSettings::setValue(key, value), value;
+    }
+
+    template <typename T>
+        requires(!IsArithmetic<T>)
+    auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const {
+        return value = QSettings::value(key, defaultValue).value<T>();
     }
 };
 

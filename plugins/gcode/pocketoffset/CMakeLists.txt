@@ -22,7 +22,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
 
 add_library(gc_pocketoffset STATIC pocketoffset.h pocketoffset.cpp)
 
-target_link_libraries(gc_pocketoffset PUBLIC clipper #[[gcode]])
+target_link_libraries(gc_pocketoffset PUBLIC geometry #[[gcode]])
 
 file(GLOB HEADERS *.h)
 file(GLOB JSONS *.json)

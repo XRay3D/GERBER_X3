@@ -36,9 +36,9 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
     MySettings settings;
     settings.beginGroup(u"Thermal"_s);
-    settings.getValue(par.angle, u"angle"_s, 0.0);
-    settings.getValue(par.count, u"count"_s, 4);
-    settings.getValue(par.tickness, u"tickness"_s, 0.5);
+    settings.getValue("angle", par.angle, 0.0);
+    settings.getValue("count", par.count, 4);
+    settings.getValue("tickness", par.tickness, 0.5);
     lastMax = settings.getValue(ui->dsbxAreaMax, 10.0);
     lastMin = settings.getValue(ui->dsbxAreaMin);
     settings.getValue(ui->chbxIgnoreCopper);
@@ -88,9 +88,9 @@ Form::~Form() {
     MySettings settings;
     settings.beginGroup(u"Thermal"_s);
     if(model && model->data_.size()) {
-        settings.setValue(model->thParam().angle, "angle");
-        settings.setValue(model->thParam().count, "count");
-        settings.setValue(model->thParam().tickness, "tickness");
+        settings.setValue("angle", model->thParam().angle);
+        settings.setValue("count", model->thParam().count);
+        settings.setValue("tickness", model->thParam().tickness);
     }
     settings.setValue(ui->dsbxAreaMax);
     settings.setValue(ui->dsbxAreaMin);
