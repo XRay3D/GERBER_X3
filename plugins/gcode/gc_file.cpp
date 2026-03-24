@@ -541,7 +541,7 @@ void File::saveMillingProfile(const QPointF& offset) {
 
     mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());
-#if 1
+#if 0
     for(Paths paths: toolPathss_) {
         Curves curves = toCurves(paths);
         for(size_t i{}; i < depths.size(); ++i) {
