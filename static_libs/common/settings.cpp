@@ -106,7 +106,7 @@ double AppSettings::lenUnit() { return banana_ ? 25.4 : 1.0; }
 void AppSettings::setBanana(bool val) { banana_ = val; }
 
 QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod) {
-    if((mod & Qt::ALT) || snap_) {
+    if(bool(mod & Qt::ALT) ^ snap_) {
         const double scale = AppSettings::gridStep(App::grView().getScale());
         const auto px = pt / scale;
         return {scale * std::round(px.x()), scale * std::round(px.y())};

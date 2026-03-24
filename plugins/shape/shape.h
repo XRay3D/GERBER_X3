@@ -24,7 +24,8 @@ struct Handle final : QPointF {
         Adder,
         Center,
         Corner,
-        Null
+        Center2,
+        Null,
     } type_{Null};
 
     using QPointF::operator=;
@@ -50,10 +51,16 @@ struct Handle final : QPointF {
 
     void setType(Type type) noexcept { type_ = type; }
     Type type() const noexcept { return type_; }
+
+    bool operator==(Type type) const noexcept { return type_ == type; }
 };
+
+using UndoPair = std::pair<AbstractShape*, std::vector<Handle>>;
+using UndoHandles = std::vector<UndoPair>;
 
 class AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend class Node;
+    friend struct UndoMove;
 
     friend QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape);
     friend QDataStream& operator>>(QDataStream& stream, AbstractShape& shape);
@@ -63,13 +70,14 @@ public:
     AbstractShape(Plugin* plugin);
     ~AbstractShape() override;
 
+    std::vector<AbstractShape*> static shapes();
+
     // QGraphicsItem interface
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
     QRectF boundingRect() const override;
     QPainterPath shape() const override;
 
     // Gi::Item interface
-    Paths paths(int alternate = {}) const override;
     void changeColor() override;
     void redraw() override;
 
@@ -90,22 +98,22 @@ public:
 
 protected:
     double scale(bool* hasUpdate = nullptr) const;
-    bool test(const QPointF& point);
+    bool inHandle(const QPointF& point);
 
     Plugin* const plugin;
-    mutable mvector<Handle> handles;
-    using HIter = mvector<Handle>::iterator;
-    HIter curHandle{};
+    mutable std::vector<Handle> handles;
+    Handle* curHandle{};
+    using HIt = std::vector<Handle>::const_iterator;
 
-    Paths paths_;
-    std::unordered_map<AbstractShape*, mvector<QPointF>> hInitPos; // групповое перемещение
-    QPointF initPos;                                               // групповое перемещение
+    // Paths paths_;
+    void updateHandleShape();
 
     // QGraphicsItem interface
-    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     QVariant itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) override;
 
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
@@ -113,6 +121,12 @@ protected:
     // AbstractShape interface
     virtual void write(QDataStream& stream [[maybe_unused]]) const { };                          // write to project
     virtual void readAndInit(QDataStream& stream [[maybe_unused]]) { AbstractShape::redraw(); }; // read from project
+
+    // групповое перемещение
+    int moveFlag{};
+    static UndoPair toPair(AbstractShape* sh) { return {sh, sh->handles}; }
+    static constexpr auto toPairs = v::transform(toPair);
+    std::vector<Handle> undoHandles;
 };
 
 } // namespace Shapes

@@ -90,10 +90,10 @@ MainWindow::MainWindow(QWidget* parent)
 
     parserThread.start(QThread::HighestPriority);
 
-    connect(ui.grView, &GraphicsView::mouseMove2, [this](const QPointF& point, const QPointF& gpoint) {
+    connect(ui.grView, &GraphicsView::mouseMove, [this](const QPointF& point) {
+        auto gpoint = point - App::project().zeroPos();
         auto str = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
             point.x(), point.y(), gpoint.x(), gpoint.y());
-        // qCritical() << str;
         ui.statusbar->showMessage(QString::fromStdString(str));
         // ui.statusbar->showMessage(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s
         // .arg(point.x(), 8, 'f', 3)
@@ -181,7 +181,7 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
     ui.loggingTextBrowser->setTextColor(color[type]);
     ui.loggingTextBrowser->append(message);
     ui.loggingTextBrowser->setTextColor(*color);
-    ui.loggingTextBrowser->insertPlainText(u"%1: %2 '%3'"_s.arg(file, context[Line], context[Function].split(u'(').front()));
+    ui.loggingTextBrowser->insertPlainText(u" <- %1: %2 '%3'"_s.arg(file, context[Line], context[Function].split(u'(').front()));
     // ui.loggingTextBrowser->append({});
     ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
 }
@@ -628,7 +628,7 @@ void MainWindow::createActionsService() {
     serviceMenu->addAction(action = toolpathToolBar->addAction(QIcon::fromTheme(u"ruller-on"_s), tr("Ruller"), ui.grView, &GraphicsView::setRuler));
     action->setCheckable(true);
     // Resize
-    if(App::isDebug()) { // (need for debug)
+    if(App::isDebug() && 0) { // (need for debug)
         serviceMenu->addSeparator();
         toolpathToolBar->addSeparator();
         serviceMenu->addAction(toolpathToolBar->addAction(QIcon::fromTheme(u"snap-nodes-cusp"_s), tr("Resize"), [this] {
@@ -1080,10 +1080,11 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
         | QDockWidget::DockWidgetMovable | QDockWidget::DockWidgetClosable);
     loggingDockWidget->setAllowedAreas(Qt::AllDockWidgetAreas);
 
-    loggingTextBrowser = new QTextBrowser{loggingDockWidget};
+    loggingTextBrowser = new QTextBrowser{loggingDockWidget}; // NOTE loggingTextBrowser
     loggingTextBrowser->setObjectName(u"loggingTextBrowser"_s);
     loggingTextBrowser->setReadOnly(true);
     loggingTextBrowser->setWordWrapMode(QTextOption::NoWrap);
+    loggingTextBrowser->setFontFamily(u"Iosevka Light Extended"_s);
     loggingDockWidget->setWidget(loggingTextBrowser);
     loggingDockWidget->setContentsMargins(3, 3, 3, 3);
     MainWindow->addDockWidget(Qt::RightDockWidgetArea, loggingDockWidget);

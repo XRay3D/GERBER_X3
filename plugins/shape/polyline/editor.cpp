@@ -100,7 +100,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         for(auto* shape: sh) {
             if(shape->handles.size() <= size_t(index.row())) continue;
             (shape->handles[index.row()].*setter[index.column()])(val);
-            // shape->curHandle = shape->handles.begin() + index.row();
+            // shape->curHandle = shape->handles.data() + index.row();
             shape->redraw();
         }
 

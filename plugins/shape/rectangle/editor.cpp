@@ -99,7 +99,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
                 (((shape->handles[Shape::Point1].*get)() - (shape->handles[Shape::Point3].*get)()) < 0
                         ? (shape->handles[Shape::Point3].*set)((shape->handles[Shape::Point1].*get)() + val)
                         : (shape->handles[Shape::Point3].*set)((shape->handles[Shape::Point1].*get)() - val));
-                shape->curHandle = shape->handles.begin() + Shape::Point3;
+                shape->curHandle = shape->handles.data() + Shape::Point3;
                 shape->redraw();
             }
         };
@@ -112,7 +112,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Shape::Point4:
             for(auto* shape: sh) {
                 (shape->handles[index.row()].*setter[index.column()])(val);
-                shape->curHandle = shape->handles.begin() + index.row();
+                shape->curHandle = shape->handles.data() + index.row();
                 shape->redraw();
             }
             break;

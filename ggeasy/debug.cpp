@@ -40,8 +40,6 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 } // namespace QtPrivate
 
 bool MainWindow::debug() {
-    return false;
-
     while(App::isDebug() || 1) { // FIXME NOTE need for debug
         int time = 100;
         int delay = 100; //-V654
@@ -60,7 +58,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay * 5, this, [] { App::grView().fitInView(App::grView().scene()->itemsBoundingRect()); });
         }
 
-        if(1) {
+        if(0) { // read Recent File
             QSettings settings;
             for(auto&& file:
                 recentFiles.readRecentFiles(settings)
@@ -107,7 +105,7 @@ bool MainWindow::debug() {
             QTimer::singleShot(time += delay, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
         }
 
-        if(1) {
+        if(0) {
             constexpr auto PROFILE = "Profile"_hash32;
             delay_ms(1000);
             QTimer::singleShot(time += delay, this, [this] { selectAll(); });

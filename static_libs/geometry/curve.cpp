@@ -1141,7 +1141,11 @@ QPointF bezierPoint(
     double uuu = uu * u;
     double ttt = tt * t;
 
-    QPointF point = uuu * P0 + 3.0 * uu * t * P1 + 3.0 * u * tt * P2 + ttt * P3;
+    QPointF point
+        = uuu * P0
+        + 3.0 * uu * t * P1
+        + 3.0 * u * tt * P2
+        + ttt * P3;
     return point;
 }
 
@@ -1150,19 +1154,30 @@ bool isArcOfCircle(
     const QPointF& P0, const QPointF& P1,
     const QPointF& P2, const QPointF& P3,
     QPointF& center, double& radius, double eps = 1e-5) {
+
+    std::vector path{
+        std::from_range,
+        std::array{0.0, 0.25, 0.5, 0.75, 1.0}
+            | v::transform(std::bind(bezierPoint, P0, P1, P2, P3, _1))
+    };
+
+    if(auto c = fitCircle(path, eps); c) { // Circle
+        center = c->center, radius = c->radius;
+        return true;
+    }
+
     // Берём три точки: начало, середина, конец
     QPointF mid = bezierPoint(P0, P1, P2, P3, 0.5);
+
     if(!circleCenter(P0, mid, P3, center, radius))
         return false;
 
     // Проверяем несколько точек на кривой
-    std::vector<double> params = {0.0, 0.25, 0.5, 0.75, 1.0};
-    for(double t: params) {
-        QPointF pt = bezierPoint(P0, P1, P2, P3, t);
-        double dist = QPointF::dotProduct(pt - center, pt - center);
+    for(double t: {0.0, 0.25, 0.5, 0.75, 1.0}) {
+        QPointF pt = bezierPoint(P0, P1, P2, P3, t) - center;
+        double dist = QPointF::dotProduct(pt, pt);
         dist = std::sqrt(dist);
-        if(std::abs(dist - radius) > eps)
-            return false;
+        if(!TEST(dist, radius, eps)) return false;
     }
     return true;
 }
@@ -1281,7 +1296,7 @@ Paths toPaths(const QPainterPath& pPath) {
                 QPointF center;
                 double radius;
                 if(/*circleArcFromCubic*/ isArcOfCircle(from.back(), to[0], to[1], to[2], center, radius,
-                    1e-3)) {
+                    5e-3)) {
                     qWarning() << radius << center;
                     Vertex t{
                         QPointF{to.back()},

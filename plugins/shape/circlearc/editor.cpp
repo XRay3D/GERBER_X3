@@ -108,7 +108,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Shape::Center:
             for(auto* shape: sh) {
                 (shape->handles[index.row()].*setter[index.column()])(val);
-                shape->curHandle = shape->handles.begin() + index.row();
+                shape->curHandle = shape->handles.data() + index.row();
                 shape->redraw();
             }
             break;

@@ -203,7 +203,7 @@ public:
     bool isBanana();
     double lenUnit();
     void setBanana(bool val);
-    QPointF getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod = Qt::NoModifier);
+    QPointF getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod = {});
     void setSnap(bool val);
     bool snap();
 
