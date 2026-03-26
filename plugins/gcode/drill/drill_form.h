@@ -37,7 +37,7 @@ class Form final : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
     void updateFiles();
@@ -100,7 +100,8 @@ public:
     }
     QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+D"_s}; }
-    QWidget* createForm() override { return &form; };
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Drilling"_s; }
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return DRILLING; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

@@ -62,7 +62,7 @@ int main(int argc, char* argv[]) {
     if(QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
     // QSettings::setDefaultFormat(QSettings::IniFormat);
-    // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
+    // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, {});
 
     // WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
     // glf.setSampleBuffers(true);
@@ -190,6 +190,10 @@ int main(int argc, char* argv[]) {
     QCommandLineParser parser;
     parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
     parser.process(app);
+    std::vector<std::string_view> cli{
+        std::from_range, std::span{++argv, static_cast<size_t>(--argc)}
+    };
+    mainWin.cli(cli);
 
     for(const QString& fileName: parser.positionalArguments())
         mainWin.loadFile(fileName);

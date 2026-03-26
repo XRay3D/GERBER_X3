@@ -14,13 +14,13 @@
 
 namespace Gi {
 
-GcPath::GcPath(const Path& path, AbstractFile* file)
+GcPath::GcPath(Path path, AbstractFile* file)
     : GcPath{Paths{path}, file} { }
 
-GcPath::GcPath(const Paths& paths, AbstractFile* file)
+GcPath::GcPath(Paths paths, AbstractFile* file)
     : gcFile_{file} {
 
-    Curves curves = toCurves(const_cast<Paths&>(paths));
+    Curves curves = toCurves(paths);
     shape_ = toPPath(curves);
 
     // for(const Path& path: paths) shape_.addPolygon(~path);
@@ -67,12 +67,14 @@ void GcPath::updateArrows() {
             QLineF line{r.back(), r.front()};
             if(line.length() < length) continue;
             const double angle = line.angle();
-            line.setLength(length);
-            line.setAngle(angle + 10);
-            arrows_.moveTo(line.p2());
-            line.setAngle(angle - 10);
-            arrows_.lineTo(line.p1());
-            arrows_.lineTo(line.p2());
+            if(length > 0.) {
+                line.setLength(length);
+                line.setAngle(angle + 10);
+                arrows_.moveTo(line.p2());
+                line.setAngle(angle - 10);
+                arrows_.lineTo(line.p1());
+                arrows_.lineTo(line.p2());
+            }
         }
     }
 }

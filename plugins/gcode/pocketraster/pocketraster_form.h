@@ -25,7 +25,7 @@ class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form();
 
 private slots:
@@ -65,7 +65,8 @@ class GCPluginImpl final : public GCode::Plugin {
 public:
     QIcon icon() const override { return QIcon::fromTheme(u"raster-path"_s); }
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+R"_s}; }
-    QWidget* createForm() override { return &form; };
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"PocketRaster"_s; };
     uint32_t type() const override { return POCKET_RASTER; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

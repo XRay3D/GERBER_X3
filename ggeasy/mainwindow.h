@@ -37,6 +37,7 @@ class MainWindow : public QMainWindow {
     // friend void FileTree::View::on_doubleClicked(const QModelIndex&);
     friend class Recent;
     friend class Project;
+    friend int main(int, char*[]);
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -409,7 +410,7 @@ private:
 private:
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
-    bool debug();
+    bool cli(std::span<std::string_view> commands = {});
 
     // QWidget interface
 protected:

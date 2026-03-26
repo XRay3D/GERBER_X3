@@ -28,6 +28,7 @@ struct Curve : std::vector<Vertex> {
 };
 
 using Curves = std::vector<Curve>;
+using Curvess = std::vector<Curves>;
 
 QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {}, bool arcOnly = {});
 QPainterPath toPPath(const Curves& curves);

@@ -73,6 +73,9 @@ protected:
 
     QList<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_);
 
+    Curvess normalizedCurvess(const QPointF& offset);
+    Curves normalizedCurves(const QPointF& offset, Curves &&paths_);
+
     ////////////////////////////////////////
     Paths pocketPaths_; /////
     Pathss toolPathss_; /////

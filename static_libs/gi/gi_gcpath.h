@@ -19,8 +19,8 @@ namespace Gi {
 
 class GcPath final : public Item {
 public:
-    GcPath(const Path& path, AbstractFile* file = nullptr);
-    GcPath(const Paths& paths, AbstractFile* file = nullptr);
+    GcPath(Path path, AbstractFile* file = nullptr);
+    GcPath(Paths paths, AbstractFile* file = nullptr);
     ~GcPath() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
