@@ -155,9 +155,9 @@ protected:
     }
 };
 
-BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
-    : QWidget{parent}
-    , plugin{plugin}
+BaseForm::BaseForm(Plugin* plugin, Creator* tpc)
+    : /*QWidget{this}
+    ,*/ plugin{plugin}
     , progressDialog(new QProgressDialog{this}) {
 
     auto vLayout = new QVBoxLayout{this};
@@ -168,7 +168,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent)
     { // Creator
         content = new QWidget{ctrWidget};
 
-        dsbxDepth = new DepthForm{ctrWidget};
+        dsbxDepth = new DepthForm{plugin->gcName(), ctrWidget};
         dsbxDepth->setObjectName(u"dsbxDepth"_s);
 
         leName = new QLineEdit{ctrWidget};

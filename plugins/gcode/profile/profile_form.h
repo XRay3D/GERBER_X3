@@ -30,7 +30,7 @@ class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
 private slots:
@@ -97,6 +97,7 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+F"_s}; }
     QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Profile"_s; }
     uint32_t type() const override { return "Profile"_hash32; }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 

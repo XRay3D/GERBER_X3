@@ -12,6 +12,7 @@
 #include <variant>
 
 using namespace std::literals;
+using namespace std::placeholders;
 
 using namespace Qt::Literals;
 

@@ -108,7 +108,7 @@ public:
 
     template <IsArithmetic V>
     auto getValue(QAnyStringView name, V& val, V def = {}) const {
-        return val = QSettings::value(name, def).template value<V>();
+        return val = Cast{QSettings::value(name, def)};
     }
 
     template <IsArithmetic V>
@@ -125,7 +125,7 @@ public:
     template <typename T>
         requires(!IsArithmetic<T>)
     auto getValue(const QString& key, T& value, const QVariant& defaultValue = {}) const {
-        return value = QSettings::value(key, defaultValue).value<T>();
+        return value = Cast{QSettings::value(key, defaultValue)};
     }
 };
 

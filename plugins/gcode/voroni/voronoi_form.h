@@ -23,7 +23,7 @@ class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
 private slots:
@@ -54,7 +54,8 @@ class Plugin final : public GCode::Plugin {
     // GCode::Plugin interface
 public:
     uint32_t type() const override { return VORONOI; }
-    QWidget* createForm() override { return &form; };
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Voronoi"_s; };
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+V"_s}; }
     QIcon icon() const override { return QIcon::fromTheme(u"voronoi-path"_s); }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

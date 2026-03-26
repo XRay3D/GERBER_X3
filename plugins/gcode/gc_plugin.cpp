@@ -20,9 +20,7 @@
 namespace GCode {
 
 Plugin::Plugin(QObject* parent)
-    : AbstractFilePlugin{parent} {
-    App app;
-}
+    : AbstractFilePlugin{parent} { }
 
 // Plugin::Plugin(QObject* parent)
 // : AbstractFilePlugin{parent} {

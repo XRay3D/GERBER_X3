@@ -248,6 +248,38 @@ mvector<QList<QPolygonF>> File::normalizedPathss(const QPointF& offset) {
     return pathss;
 }
 
+Curvess File::normalizedCurvess(const QPointF& offset) {
+    Curvess curvess;
+    curvess.reserve(toolPathss_.size());
+    for(Paths paths: toolPathss_) {
+        curvess.emplace_back(normalizedCurves(offset, toCurves(paths)));
+    }
+
+    return curvess;
+}
+
+Curves File::normalizedCurves(const QPointF& offset, Curves&& curves) {
+    if(curves.empty()) curves = toCurves(toolPathss_.front()); // FIXME wtf
+
+    r::for_each(curves, std::bind(TranslateCurve, _1, offset /*- App::zero().pos()*/));
+
+    if(side_ == Bottom) {
+        const double k = Gi::Pin::minX() + Gi::Pin::maxX();
+        if(toolType() != Tool::Laser) r::for_each(curves, &Curve::reverse);
+        for(Vertex& v: v::join(curves)) {
+            v.pt.rx() = -v.pt.x() + k;
+            if(v) v.center.rx() = -v.center.x() + k;
+        }
+    }
+
+    for(Vertex& v: v::join(curves)) { // FIXME ^^^^^^^^^
+        v.pt -= App::zero().pos();
+        if(v) v.center -= App::zero().pos();
+    }
+
+    return curves;
+}
+
 QList<QPolygonF> File::normalizedPaths(const QPointF& offset, const Paths& paths_) {
     QList<QPolygonF> paths{~(paths_.empty() ? toolPathss_.front() : paths_)};
 
@@ -539,15 +571,14 @@ void File::saveMillingProfile(const QPointF& offset) {
     // return;
     // }
 
-    mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
     const mvector<double> depths(getDepths());
-#if 0
-    for(Paths paths: toolPathss_) {
-        Curves curves = toCurves(paths);
+#if 1
+    Curvess curvess{normalizedCurvess(offset)};
+    for(auto&& curves: curvess) {
         for(size_t i{}; i < depths.size(); ++i) {
-            for(size_t j{}; j < paths.size(); ++j) {
-                Curve& path = curves[j];
-                if(path.front().pt == path.back().pt) { // make complete depth and remove from worck
+            for(size_t j{}; j < curves.size(); ++j) {
+                Curve& curve = curves[j];
+                if(curve.front().pt == curve.back().pt) { // make complete depth and remove from worck
                     // startPath(path.front());
                     // for (auto&& depth: depths) {
                     // lines_.emplace_back(formated({g1(), z(depth), feed(plungeRate())}));
@@ -556,19 +587,19 @@ void File::saveMillingProfile(const QPointF& offset) {
                     // }
                     // endPath();
                     // paths.erase(paths.begin() + j--);
-                    startPath(path.front().pt);
+                    startPath(curve.front().pt);
                     for(auto&& depth: depths) {
                         // lines_.emplace_back(formated({g1(), z(depth), feed(plungeRate())}));
-                        auto sp(saveCurve(path, spindleSpeed(), depth));
+                        auto sp(saveCurve(curve, spindleSpeed(), depth));
                         lines_.append(sp);
                     }
-                    lines_.append(saveCurve(path, spindleSpeed())); // Проход без спирали.
+                    lines_.append(saveCurve(curve, spindleSpeed())); // Проход без спирали.
                     endPath();
-                    paths.erase(paths.begin() + j--);
+                    curves.erase(curves.begin() + j--);
                 } else {
-                    startPath(path.front().pt);
+                    startPath(curve.front().pt);
                     lines_.emplace_back(formated({g1(), z(depths[i]), feed(plungeRate())}));
-                    auto sp(saveCurve(path, spindleSpeed()));
+                    auto sp(saveCurve(curve, spindleSpeed()));
                     lines_.append(sp);
                     endPath();
                 }
@@ -576,6 +607,7 @@ void File::saveMillingProfile(const QPointF& offset) {
         }
     }
 #else
+    mvector<QList<QPolygonF>> pathss(normalizedPathss(offset));
     for(auto& paths: pathss) {
         for(size_t i{}; i < depths.size(); ++i) {
             for(qsizetype j{}; j < paths.size(); ++j) {

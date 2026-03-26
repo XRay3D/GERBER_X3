@@ -22,6 +22,7 @@ public:
     // [[nodiscard]] virtual uint32_t type() const = 0;
     [[nodiscard]] virtual QKeySequence keySequence() const = 0;
     [[nodiscard]] virtual QWidget* createForm() = 0;
+    [[nodiscard]] virtual QString gcName() const = 0;
     [[nodiscard]] virtual bool canToShow() const { return true; }
     [[nodiscard]] virtual QAction* addAction(QMenu* menu, QToolBar* toolbar);
 

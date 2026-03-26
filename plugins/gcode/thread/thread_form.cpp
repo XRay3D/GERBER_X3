@@ -171,8 +171,8 @@ public:
     }
 };
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::BaseForm{plugin, new Creator}
     , ui(new Ui::ThreadForm) {
     ui->setupUi(content);
     setWindowTitle(tr("Thread Toolpath"));

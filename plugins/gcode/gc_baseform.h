@@ -26,7 +26,7 @@ class BaseForm : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BaseForm(Plugin* plugin, Creator* tpc, QWidget* parent = nullptr);
+    explicit BaseForm(Plugin* plugin, Creator* tpc);
     ~BaseForm() override;
     virtual void editFile(File* file) = 0;
 

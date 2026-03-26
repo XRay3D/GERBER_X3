@@ -618,6 +618,27 @@ QVector<Arc> extractArcs(const QPolygonF& polygon, double tolerance = 2.0) {
     return arcs;
 }
 
+// Функция вычисления угла между отрезками OA и OB в градусах
+// Возвращает угол в диапазоне [0, 180], либо NAN при вырожденных отрезках
+double angleBetweenSegments(const QPointF& O, const QPointF& A, const QPointF& B) {
+    PointF OA = A - O;
+    PointF OB = B - O;
+
+    double lenOA = OA.length();
+    double lenOB = OB.length();
+
+    if(lenOA < 1e-9 || lenOB < 1e-9)
+        return std::nan(""); // один из отрезков вырожден
+
+    double cosVal = dot(OA, OB) / (lenOA * lenOB);
+    // Ограничиваем значение из-за возможных погрешностей
+    if(cosVal > 1.0) cosVal = 1.0;
+    if(cosVal < -1.0) cosVal = -1.0;
+
+    double angleRad = std::acos(cosVal);
+    return angleRad * 180.0 / pi;
+}
+
 Curve toCurve(std::span<Point> path, bool open) {
     Curve curve;
     QPainterPath pp;
@@ -663,8 +684,12 @@ Curve toCurve(std::span<Point> path, bool open) {
     }
 #endif
 
-    // if(path.front() == path.back()) path = path.subspan(1);
+    if(!open && path.front() == path.back())
+        path = path.subspan(1); // FIXME
+    else
+        open = true;
 
+#if 0
     if(auto c = fitCircle(~path); c && path.size() > 4) { // Circle
         // pp.addEllipse(c->center, c->radius, c->radius);
         // Gi::Debug(pp, Qt::yellow);
@@ -673,6 +698,7 @@ Curve toCurve(std::span<Point> path, bool open) {
         if(dir == Vertex::Cw) curve.reverse();
         return curve;
     }
+#endif
 
 #if 0
     {
@@ -737,18 +763,44 @@ Curve toCurve(std::span<Point> path, bool open) {
     }
 #endif
 
-    if(1) { // Исправление центров объединённых линий.
-        static auto fixJoinedCenters = +[](Point& p1, Point& p2, Point& p3) {
+#if 1
+    { // Исправление центров объединённых линий.
+
+        QPainterPath pp;
+        /* FIXME static*/ auto fixJoinedCenters = [](Point& p1, Point& p2, Point& p3) {
             constexpr double epsilon = 0.001; // mm
             const QPointF c1{~GetC(p1)}, c2{~GetC(p2)}, c3{~GetC(p3)};
-            if(c2.isNull() && c1 == c3 && TEST(c1, ~p1, c1, ~p2, epsilon))
+            if(c2.isNull() && c1 == c3
+                && TEST(c1, ~p1, c1, ~p2, epsilon)
+                && TEST(c3, ~p3, c3, ~p2, epsilon))
                 SetCForce(p2, ~c1);
+
+            double a1 = angleBetweenSegments(~p2, ~p1, c2);
+            double a2 = angleBetweenSegments(~p2, c2, ~p3);
+
+            if(a1 > 90 && a2 > 90) // 100% это не центр
+                SetCForce(p2, Point{});
         };
         for(auto&& [p1, p2, p3]: path | v::adjacent<3>)
             fixJoinedCenters(p1, p2, p3);
+        if(!open && path.size() > 2) {
+            if(path.front() == path.back() && path.size() > 3) {
+                // qFatal();
+                fixJoinedCenters(path[1], path[2], path.back());
+                fixJoinedCenters(path.end()[-2], path.back(), path[1]);
+            } else {
+                fixJoinedCenters(path[2], path[1], path.back());
+                fixJoinedCenters(path.end()[-2], path.back(), path.front());
+            }
+        }
+
+        // Gi::Debug(toPPath(curve, {}, true), Qt::green);
+        // Gi::Debug(pp, Qt::cyan);
+
         // fixJoinedCenters(path[1], path.back(), path.front());
         // fixJoinedCenters(path[1], path.front(), path.back());
     }
+#endif
 
     static auto eqCenter = +[](Point& l, Point& r) {
         constexpr double epsilon = 0.001; // mm
@@ -767,7 +819,7 @@ Curve toCurve(std::span<Point> path, bool open) {
 
     static auto notEqCenter = +[](Point& l, Point& r) { return !eqCenter(l, r); };
 
-    if(auto it = r::adjacent_find(path, notEqCenter); it != path.end())
+    if(auto it = r::adjacent_find(path, notEqCenter); !open && it != path.end())
         r::rotate(path, it + 1);
 
     auto chunks = v::chunk_by(path, eqCenter);
@@ -827,6 +879,7 @@ Curve toCurve(std::span<Point> path, bool open) {
 
     if(chunks.front().size() == path.size()) { // Circle
         qWarning() << "circle" << path.size();
+
         QPointF center = ~GetC(path.front());
         auto dir = DIR(~path[0], ~path[1], center);
         double radius = length(center, ~path[0]);

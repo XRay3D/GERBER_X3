@@ -18,8 +18,8 @@
 
 namespace PocketRaster {
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::BaseForm{plugin, new Creator}
     , ui(new Ui::PocketRasterForm)
     , names{tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);

@@ -33,7 +33,7 @@ class Form : public GCode::BaseForm {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
     void updateFiles();
 
@@ -97,7 +97,8 @@ public:
     }
     QIcon icon() const override { return QIcon::fromTheme(u"thermal-path"_s); }
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
-    QWidget* createForm() override { return &form; };
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Thermal"_s; };
     // bool canToShow() const override { return /*Form::canToShow()*/; }
     uint32_t type() const override { return THERMAL; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

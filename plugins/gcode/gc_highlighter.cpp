@@ -15,6 +15,13 @@
 #include <QTextBrowser>
 #include <ctre.hpp>
 
+using namespace Qt::Literals;
+
+using namespace std::placeholders;
+
+namespace r = std ::ranges;
+namespace v = std ::views;
+
 namespace GCode {
 
 Highlighter::Highlighter(QTextDocument* parent)

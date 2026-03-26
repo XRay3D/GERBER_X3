@@ -41,7 +41,7 @@ class AbstractFilePlugin : public QObject, public PluginData {
 
 public:
     explicit AbstractFilePlugin(QObject* parent = nullptr)
-        : QObject{parent} { }
+        : QObject{parent} { App{}; } // init global App
     virtual ~AbstractFilePlugin() = default;
 
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };

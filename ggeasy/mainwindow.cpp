@@ -120,7 +120,6 @@ MainWindow::~MainWindow() {
 }
 
 void MainWindow::init() {
-
     for(auto& [type, ptr]: App::filePlugins()) { // connect plugins
         ptr->moveToThread(&parserThread);
         connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
@@ -139,8 +138,6 @@ void MainWindow::init() {
     menuBar()->installEventFilter(this);
 
     toolpathActions[G_CODE_PROPERTIES]->triggered();
-
-    debug();
 }
 
 QMenu* MainWindow::createPopupMenu() {

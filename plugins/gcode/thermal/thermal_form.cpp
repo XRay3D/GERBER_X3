@@ -25,8 +25,8 @@ enum {
     Size = 24
 };
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::BaseForm{plugin, new Creator}
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
     ui->treeView->setIconSize(QSize(Size, Size));

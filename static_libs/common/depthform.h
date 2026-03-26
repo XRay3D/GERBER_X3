@@ -18,7 +18,7 @@ class QRadioButton;
 class DepthForm : public QWidget {
     Q_OBJECT
 public:
-    explicit DepthForm(QWidget* parent = nullptr);
+    explicit DepthForm(QString&& groupName, QWidget* parent = nullptr);
     ~DepthForm() override;
     double value() const;
     void setValue(double value);
@@ -35,7 +35,7 @@ private:
     QRadioButton* rbCopper;
     QRadioButton* rbCustom;
 
-    const QString parentName_;
+    const QString groupName;
 
     void setupUi(QWidget* Form);
     void retranslateUi(QWidget* Form);

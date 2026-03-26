@@ -78,6 +78,8 @@ struct Vertex {
         return std::nan("");
     }
 
+    constexpr operator bool() const { return type != Line; }
+
     constexpr inline qreal x() const noexcept { return pt.x(); }
 
     constexpr inline qreal y() const noexcept { return pt.y(); }

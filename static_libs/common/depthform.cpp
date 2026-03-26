@@ -15,16 +15,15 @@
 #include "settings.h"
 #include <QtWidgets>
 
-DepthForm::DepthForm(QWidget* parent)
+DepthForm::DepthForm(QString&& groupName_, QWidget* parent)
     : QWidget{parent}
-    , parentName_(parent->objectName()) {
+    , groupName{std::move(groupName_)} {
     setupUi(this);
     retranslateUi(this);
 
     connect(dsbx, &QDoubleSpinBox::valueChanged, this, &DepthForm::valueChanged);
     connect(dsbx, &QDoubleSpinBox::valueChanged, [this](double value) {
-        if(dsbx->isEnabled())
-            value_ = value;
+        if(dsbx->isEnabled()) value_ = value;
     });
     connect(rbCustom, &QRadioButton::toggled, [this](bool checked) {
         if(checked) {
@@ -46,8 +45,8 @@ DepthForm::DepthForm(QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup(parentName_);
-    settings.getValue(u"dsbxDepth"_s, value_);
+    settings.beginGroup(groupName);
+    settings.getValue("dsbxDepth", value_);
     settings.getValue(rbBoard);
     settings.getValue(rbCopper);
     settings.getValue(rbCustom, true);
@@ -56,8 +55,8 @@ DepthForm::DepthForm(QWidget* parent)
 
 DepthForm::~DepthForm() {
     MySettings settings;
-    settings.beginGroup(parentName_);
-    settings.setValue(u"dsbxDepth"_s, value_);
+    settings.beginGroup(groupName);
+    settings.setValue("dsbxDepth", value_);
     settings.setValue(rbBoard);
     settings.setValue(rbCopper);
     settings.setValue(rbCustom);
