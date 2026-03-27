@@ -73,7 +73,7 @@ void FormatDialog::on_pushButton_clicked() {
         }
         if(c == 2) {
             QPointF p{pair.second - pair.first};
-            if(QLineF(pair.first, pair.second).length() < 0.001) // 1 uMetr
+            if(geo::Length(pair.first, pair.second) < 0.001) // 1 uMetr
                 return;
 
             App::grView().zoomFit();

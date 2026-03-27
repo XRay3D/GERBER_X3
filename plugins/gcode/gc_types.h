@@ -65,7 +65,8 @@ enum class Grouping {
     Cutoff,
 };
 
-using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
+using UsedItems = std::map<std::vector<int32_t>, std::vector<int32_t>>;
+
 using V = std::variant<int, double, UsedItems, size_t>;
 
 struct Variant : V {
@@ -74,14 +75,12 @@ struct Variant : V {
     friend QDataStream& operator>>(QDataStream& stream, V& v) {
         uint8_t index;
         stream >> index;
-        using Init = V& (*)(V&);
-        static std::unordered_map<uint8_t, Init> map{
-            {0, [](V& v) -> V& { return v = int{}; }      },
-            {1, [](V& v) -> V& { return v = double{}; }   },
-            {2, [](V& v) -> V& { return v = UsedItems{}; }},
-            {2, [](V& v) -> V& { return v = size_t{}; }   },
-        };
-        std::visit([&stream](auto&& val) { stream >> val; }, map[index](v));
+        switch(index) {
+        case 0: stream >> v.emplace<0>(); break;
+        case 1: stream >> v.emplace<1>(); break;
+        case 2: stream >> v.emplace<2>(); break;
+        case 3: stream >> v.emplace<3>(); break;
+        }
         return stream;
     }
 
@@ -178,15 +177,23 @@ public:
     Q_ENUM(Param)
 
     Params() {
-        if(!params.contains(MultiToolIndex))
-            params[MultiToolIndex] = 0;
+        if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;
     }
 
-    Params(const Tool& tool, double depth /*, uint32_t type*/)
+    Params(const Tool& tool, double depth)
         : Params{} {
         tools.emplace_back(tool);
         params[Params::Depth] = depth;
-        // gcType = type;
+    }
+
+    Params(const Tool& tool, double depth, Paths&& toolPaths)
+        : Params{tool, depth} {
+        supportCurvess.emplace_back(toCurves(toolPaths));
+    }
+
+    Params(const Tool& tool, double depth, Curves&& toolPaths)
+        : Params{tool, depth} {
+        supportCurvess.emplace_back(std::move(toolPaths));
     }
 
     mvector<Tool> tools;
@@ -196,21 +203,25 @@ public:
     mutable int fileId = -1;
     // QColor color;
 
-    friend QDataStream& operator>>(QDataStream& stream, Params& type) {
-        stream >> type.tools;
-        stream >> type.params;
-        // stream >> type.gcType;
-        return stream;
+    friend QDataStream& operator>>(QDataStream& stream, Params& par) {
+        return stream >> par.tools
+            >> par.params
+            >> par.closedCurves
+            >> par.supportCurvess;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const Params& type) {
-        stream << type.tools;
-        stream << type.params;
-        // stream << type.gcType;
-        return stream;
+    friend QDataStream& operator<<(QDataStream& stream, const Params& par) {
+        return stream << par.tools
+                      << par.params
+                      << par.closedCurves
+                      << par.supportCurvess;
     }
 
-    const Tool& getTool() const { return tools[params.at(MultiToolIndex).toInt()]; }
+    explicit operator bool() const {
+        return openCurves.size() || closedCurves.size();
+    }
+
+    const Tool& tool() const { return tools[params.at(MultiToolIndex).toInt()]; }
 
     SideOfMilling side() const { return static_cast<SideOfMilling>(params.at(Side).toInt()); }
     bool convent() const { return params.at(Convent).toBool(); }
@@ -220,23 +231,28 @@ public:
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }
 
-    Paths closedPaths;
-    Paths openPaths;
-    Pathss supportPathss;
+    Curves closedCurves; // pocketAreaPaths
+    Curves openCurves;
+    Curvess supportCurvess; // toolCurvess
 
-    // void addPaths(Paths& val) { paths.append(val); }
-    // void addPaths(Paths&& val) { paths.append(std::move(val)); }
-    // void addRawPaths(Paths& val) { rawPaths.append(val); }
-    // void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
-    // void addSupportPaths(Pathss val) { supportPaths = val; }
+    const Curves& pocketAreaCurves() const { return closedCurves; }
+    void setPocketAreaCurves(Curves&& arg) { closedCurves = std::move(arg); }
+
+    const Curvess& toolPathss() const { return supportCurvess; }
+    void setToolPathss(Curvess&& arg) { supportCurvess = std::move(arg); }
+
+    auto feedRate() const -> double { return tool().feedRate(); }
+    auto plungeRate() const -> double { return tool().plungeRate(); }
+    auto spindleSpeed() const -> int { return tool().spindleSpeed(); }
+    auto toolType() const -> int { return tool().type(); }
 };
 
 class Settings {
     // protected:
 public:
     /*static inline*/ QString fileExtension_{u"tap"_s};
-    /*static inline*/ QString formatMilling_{u"G?X?Y?Z?F?S?"_s};
-    /*static inline*/ QString formatLaser_{u"G?X?Y?Z?F?S?"_s};
+    /*static inline*/ QString formatMilling_{u"G?X?Y?I+J+Z?F?S?"_s};
+    /*static inline*/ QString formatLaser_{u"G?X?Y?I+J+Z?F?S?"_s};
     /*static inline*/ QString laserConstOn_{u"M3"_s};
     /*static inline*/ QString laserDynamOn_{u"M4"_s};
     /*static inline*/ QString spindleLaserOff_{u"M5"_s};

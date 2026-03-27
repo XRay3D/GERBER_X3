@@ -18,7 +18,7 @@
 namespace CrossHatch {
 
 Form::Form(GCode::Plugin* plugin)
-    : GCode::BaseForm{plugin, new Creator}
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::HatchingForm)
     , names{tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps{
@@ -77,25 +77,23 @@ void Form::computePaths() {
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->tools.push_back(tool);
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.tools.push_back(tool);
 
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp->params[Creator::HathStep] = ui->dsbxHathStep->value();
-    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
-    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[Creator::HathStep] = ui->dsbxHathStep->value();
+    gcp.params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp.params[Creator::UseAngle] = ui->dsbxAngle->value();
     // if (ui->rbFast->isChecked()) {
-    // gcp_->params[GCode::Params::Fast] = true;
-    // gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    // gcp.params[GCode::Params::Fast] = true;
+    // gcp.params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
     // }
 
     fileCount = 1;
-    createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {

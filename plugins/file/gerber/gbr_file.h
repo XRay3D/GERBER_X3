@@ -46,7 +46,7 @@ public:
     // AbstractFile interface
     mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
     void setItemType(int type) override;
-    int itemsType() const override;
+    int32_t itemsType() const override;
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
     QIcon icon() const override;

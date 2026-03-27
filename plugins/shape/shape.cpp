@@ -351,7 +351,7 @@ bool AbstractShape::inHandle(const QPointF& point) {
     curHandle = {};
     const auto hSize = HandleSize * 0.5 * scale();
     for(auto& var: handles)
-        if(length(point, var) <= hSize)
+        if(geo::Length(point, var) <= hSize)
             return curHandle = &var, true;
     return false;
 }

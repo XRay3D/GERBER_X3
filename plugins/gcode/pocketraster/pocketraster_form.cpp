@@ -10,6 +10,7 @@
  *******************************************************************************/
 
 #include "pocketraster_form.h"
+#include "gi_dbg.h"
 #include "ui_pocketrasterform.h"
 
 #include "graphicsview.h"
@@ -19,7 +20,7 @@
 namespace PocketRaster {
 
 Form::Form(GCode::Plugin* plugin)
-    : GCode::BaseForm{plugin, new Creator}
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::PocketRasterForm)
     , names{tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
@@ -78,24 +79,22 @@ void Form::computePaths() {
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->tools.push_back(tool);
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.tools.push_back(tool);
 
-    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp.params[Creator::UseAngle] = ui->dsbxAngle->value();
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[Creator::Pass] = ui->cbxPass->currentIndex();
     if(ui->rbFast->isChecked()) {
-        gcp->params[Creator::Fast] = true;
-        gcp->params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
+        gcp.params[Creator::Fast] = true;
+        gcp.params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
     }
 
     fileCount = 1;
-    createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {

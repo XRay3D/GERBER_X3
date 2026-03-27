@@ -22,25 +22,31 @@ namespace GCode {
 
 class File : public AbstractFile {
     // friend class ::Project;
+protected:
+    double feedRate{};
+    double plungeRate{};
+    int spindleSpeed{};
+    int toolType{};
+    QString strFeed;
+    QString strPlungeFeed;
+    QString strSpindle;
+    Params gcp; ////
 
 public:
-    File(Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths = {});
-    File();
-    // GCodeType gtype() const;
+    File(Params&& gcp): feedRate{gcp.feedRate()}
+                      , plungeRate{gcp.plungeRate()}
+                      , spindleSpeed{gcp.spindleSpeed()}
+                      , toolType{gcp.toolType()}
+                      , strFeed{u'F' + format(feedRate)}
+                      , strPlungeFeed{u'F' + format(plungeRate)}
+                      , strSpindle{u'S' + format(plungeRate)}
+                      , gcp{std::move(gcp)} { }
 
-    mvector<QString> gCodeText() const;
-    const Tool& getTool() const;
-    const Params& gcp() const;
+    File() = default;
+    ~File() override = default;
 
-    double feedRate();
-    double plungeRate();
-    int spindleSpeed();
-    int toolType();
-
-    void setFeedRate(double val);
-    void setPlungeRate(double val);
-    void setSpindleSpeed(int val);
-    void setToolType(int val);
+    std::vector<QString> gCodeText() const { return lines_; }
+    const Tool& tool() const { return gcp.tool(); }
 
     static QString getLastDir();
     static void setLastDir(QString dirPath);
@@ -53,35 +59,17 @@ public:
     virtual void genGcodeAndTile() = 0;
     void endFile();
 
-    // AbstractFile interfaces
-    // void write(QDataStream& stream) const override;
-    // void read(QDataStream& stream) override;
-    // void initFrom(AbstractFile* file) override { qWarning(__FUNCTION__); }
     FileTree::Node* node() override;
-
-private:
-    double feedRate_{};
-    double plungeRate_{};
-    int spindleSpeed_{};
-    int toolType_{};
 
 protected:
     void startPath(const QPointF& point);
     void endPath();
 
-    mvector<QList<QPolygonF>> normalizedPathss(const QPointF& offset);
+    Curvess mirrorAndOffsetCurves(const QPointF& offset);
+    Curves mirrorAndOffsetCurves(const QPointF& offset, Curves paths_);
 
-    QList<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_);
-
-    Curvess normalizedCurvess(const QPointF& offset);
-    Curves normalizedCurves(const QPointF& offset, Curves &&paths_);
-
-    ////////////////////////////////////////
-    Paths pocketPaths_; /////
-    Pathss toolPathss_; /////
     mvector<QSharedPointer<QColor>> debugColor;
 
-    Params gcp_; ////
     enum {
         AlwaysG,
         AlwaysX,
@@ -104,7 +92,7 @@ protected:
         Size
     };
 
-    Paths g0path_;
+    Curves g0path_;
     double z_{};
 
     static inline QString lastDir;
@@ -126,33 +114,32 @@ protected:
     QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
 
-    mvector<QString> savePath(const QPolygonF& path, double spindleSpeed, double depth = {});
-    mvector<QString> saveCurve(const Curve& curve, double spindleSpeed, double depth = {});
+    std::vector<QString> savePath(const Curve& curve, double depth = {});
 
-    QString formated(const mvector<QString>& data);
+    QString formated(const std::vector<QString>& data);
 
     QString g0();
     QString g1();
     QString g2();
     QString g3();
-    void extracted(const Vertex& v);
-    QString g(const Vertex& v);
+    void extracted(const geo::Vertex& v);
+    QString g(const geo::Vertex& v);
 
-    QString i(double val);
-    QString j(double val);
-    QString x(double val);
-    QString y(double val);
-    QString z(double val);
+    QString i(double val) { return u'I' + format(val); }
+    QString j(double val) { return u'J' + format(val); }
+    QString x(double val) { return u'X' + format(val); }
+    QString y(double val) { return u'Y' + format(val); }
+    QString z(double val) { return u'Z' + format(val); }
 
-    QString feed(double val);
-    QString speed(int val);
-    QString format(double val);
+    QString speed(int val) { return u'S' + QString::number(val); }
+
+    static QString format(double val);
 
     virtual Paths merge() const override { return {}; }
 
     // AbstractFile interfaces
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
+    void write(QDataStream& stream) const override { stream << gcp; }
+    void read(QDataStream& stream) override { stream >> gcp; }
     void initFrom(AbstractFile* /*file*/) override { qWarning(__FUNCTION__); }
     // FileTree::Node* node() override;
 

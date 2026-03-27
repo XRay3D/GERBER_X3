@@ -63,6 +63,7 @@ public:
 
     virtual Point pos() const = 0;
     virtual Paths paths() const = 0;
+    virtual Curves curves() const = 0;
     virtual void redraw() = 0;
 
 protected:
@@ -142,6 +143,10 @@ public:
     // QGraphicsItem interface
 public:
     QRectF boundingRect() const override;
+
+    // AbstractThermPrGi interface
+public:
+    Curves curves() const override;
 };
 
 } // namespace Thermal

@@ -21,6 +21,7 @@ class GcPath final : public Item {
 public:
     GcPath(Path path, AbstractFile* file = nullptr);
     GcPath(Paths paths, AbstractFile* file = nullptr);
+    GcPath(Curves curves, AbstractFile* file = nullptr);
     ~GcPath() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
@@ -30,8 +31,6 @@ public:
 private:
     AbstractFile* gcFile_;
     QPainterPath arrows_;
-    double sc_{};
-    void updateArrows();
 
 protected:
     void changeColor() override { }

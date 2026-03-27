@@ -16,6 +16,7 @@
 #include "app.h"
 #include "gi.h"
 #include "gi_datapath.h"
+#include "gi_dbg.h"
 #include "gi_error.h"
 #include "gi_gcpath.h"
 #include "gi_point.h"
@@ -37,8 +38,8 @@ class GCDbgFile final : public GCode::File {
     QColor color;
 
 public:
-    explicit GCDbgFile(GCode::Params&& gcp, Paths&& toolPaths, QColor color)
-        : GCode::File(std::move(gcp), {}, std::move(toolPaths))
+    explicit GCDbgFile(GCode::Params&& gcp, QColor color)
+        : GCode::File{std::move(gcp)}
         , color{color} {
         initSave();
         addInfo();
@@ -52,12 +53,12 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
     uint32_t type() const override { return GC_DBG_FILE; }
     void createGi() override {
-        Gi::Item* item = new Gi::GcPath{pocketPaths_, this};
-        // item->setPen(QPen(color, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        Gi::Item* item = new Gi::GcPath{gcp.pocketAreaCurves(), this};
+        // item->setPen(QPen(color, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         // item->setPenColorPtr(&color);
         itemGroup()->push_back(item);
-        // for(int i{}; i < pocketPaths_.size() - 1; ++i)
-        // g0path_.emplace_back(Path{pocketPaths_[i].back(), pocketPaths_[i + 1].front()});
+        // for(int i{}; i < pocketAreaPaths_.size() - 1; ++i)
+        // g0path_.emplace_back(Path{pocketAreaPaths_[i].back(), pocketAreaPaths_[i + 1].front()});
         // item = new Gi::GcPath{g0path_};
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         // itemGroup()->push_back(item);
@@ -73,8 +74,8 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const
         return;
     if(close)
         r::for_each(ps, [](Path& p) { p.push_back(p.front()); });
-    GCode::Params gcp{tool, 0.0};
-    auto file = new GCDbgFile{std::move(gcp), std::move(ps), color};
+    GCode::Params gcp{tool, 0.0, std::move(ps)};
+    auto file = new GCDbgFile{std::move(gcp), color};
     file->setFileName(fileName);
     emit App::project().addFileDbg(file);
 };
@@ -116,6 +117,11 @@ Pathss& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool ski
         Timer t{"grouping"};
         grouping(group, polyTree.Count() == 1 ? *polyTree[0] : polyTree);
     }
+
+    if(group == Grouping::Copper)
+        for(Paths& paths: groupedPss)
+            ReversePaths(paths);
+
     if(skipFrame == false
         && group == Grouping::Cutoff
         && groupedPss.size() > 2
@@ -125,97 +131,73 @@ Pathss& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool ski
 }
 
 void Creator::grouping(Grouping group, PolyTree& node) {
-
     if((group == Grouping::Cutoff) ^ node.IsHole()) {
         Paths paths;
         paths.reserve(node.Count() + 1);
         paths.emplace_back(std::move(node.Polygon()));
-        for(auto&& child: node)
-            paths.emplace_back(std::move(child->Polygon()));
+        for(auto&& child: node) paths.emplace_back(std::move(child->Polygon()));
+        // Gi::Debug(paths);
         groupedPss.emplace_back(std::move(paths));
     }
-    for(auto&& child: node)
-        grouping(group, *child);
-}
-
-Path Creator::boundOfPaths(const Paths& paths, /*PType*/ int32_t k) const {
-    Rect rect(GetBounds(paths));
-    rect.bottom += k;
-    rect.left -= k;
-    rect.right += k;
-    rect.top -= k;
-    // dbgPaths({rect.AsPath()}, u"boundOfPaths"_s, Qt::magenta);
-    return rect.AsPath();
+    for(auto&& child: node) grouping(group, *child);
 }
 
 void Creator::addRawPaths(Paths&& rawPaths) {
-    qDebug(__FUNCTION__);
+    qCritical() << "addRawPaths" << rawPaths.size();
 
-    if(rawPaths.empty())
-        return;
+    if(rawPaths.empty()) return;
 
-    // if (gcp_.side() == On) {
-    // workingRawPs_.push_back(rawPaths);
-    // return;
-    // }
-    std::erase_if(rawPaths, [](auto&& path) { return path.size() < 2; });
+    std::erase_if(rawPaths, [](Path& path) { return path.size() < 2; });
 
     const double mergDist = App::project().glue() * uScale;
 
     Clipper clipper;
-    for(size_t i{}; i < rawPaths.size(); ++i) {
-        Point& pf = rawPaths[i].front();
-        Point& pl = rawPaths[i].back();
-        if(rawPaths[i].size() > 3 && (pf == pl || distTo(pf, pl) < mergDist)) {
-            clipper.AddSubject({rawPaths[i]});
+    for(size_t i{}; i < rawPaths.size(); ++i) { // find closed rawPaths
+        Path& path = rawPaths[i];
+        Point& pf = path.front();
+        Point& pl = path.back();
+        if(path.size() > 3 && (pf == pl || distTo(pf, pl) < mergDist)) {
+            clipper.AddSubject({path});
             rawPaths.erase(rawPaths.begin() + i--);
         }
     }
 
-    mergePaths(rawPaths, mergDist);
+    mergePaths(rawPaths, mergDist); // attempt to glue
 
-    for(Path& path: rawPaths) {
+    for(Path& path: rawPaths) { // find closed rawPaths
         Point& pf = path.front();
         Point& pl = path.back();
         if(path.size() > 3 && (pf == pl || distTo(pf, pl) < mergDist))
             clipper.AddSubject({path});
         else
-            openSrcPaths.push_back(path);
+            openSrcPaths.emplace_back(path);
     }
 
     Paths paths;
     clipper.AddClip({boundOfPaths(rawPaths, uScale)});
     clipper.Execute(ClipType::Xor, FillRule::EvenOdd, paths);
-    closedSrcPaths.insert(closedSrcPaths.end(), paths.begin() + 1, paths.end()); // paths.takeFirst();
+
+    // Gi::Debug(paths, Qt::red);
+    if(paths.size() > 1)
+        closedSrcPaths.append_range(paths | v::drop(1)); // drop frame
 }
 
-void Creator::createGc(Params* gcp) {
+void Creator::createGc(Params&& newGcp) {
     qDebug(__FUNCTION__);
 
     reset();
 
-    if(gcp->closedPaths.size())
-        closedSrcPaths.insert(closedSrcPaths.end(), gcp->closedPaths.begin(), gcp->closedPaths.end());
-    if(gcp->openPaths.size())
-        addRawPaths(std::move(gcp->openPaths));
-    if(gcp->supportPathss.size())
-        supportPss.append(std::move(gcp->supportPathss));
+    gcp = std::move(newGcp);
 
-    // dbgPaths(closedSrcPaths, u"closedPaths"_s);
-    // dbgPaths(openSrcPaths, u"openPaths"_s);
-
-    // dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
-    // dbgPaths(supportPss, u"supportPathss"_s);
-    // dbgPaths(openSrcPaths, u"openPaths"_s);
-
-    gcp_ = std::move(*gcp);
-    // gcp_ = *gcp;
+    closedSrcPaths = toPaths(gcp.closedCurves);
+    addRawPaths(toPaths(gcp.openCurves));
+    supportPss.append_range(gcp.supportCurvess | v::transform(qOverload<const Curves&>(toPaths)));
 
     try {
         if(possibleTest() && !App::isDebug()) {
             try {
                 checkMillingFl = true;
-                checkMilling(gcp_.side());
+                checkMilling(gcp.side());
             } catch(const Cancel& e) {
                 ProgressCancel::reset();
                 qWarning() << u"checkMilling canceled:"_s << e.what();
@@ -229,15 +211,15 @@ void Creator::createGc(Params* gcp) {
             Timer t{"createGc"};
             create();
         }
-        qWarning() << u"Creator::createGc() finish"_s;
+        qWarning() << u"Creator finish"_s << file_;
     } catch(const Cancel& e) {
-        qWarning() << u"Creator::createGc() canceled:"_s << e.what();
+        qWarning() << u"Creator canceled:"_s << e.what();
     } catch(const std::exception& e) {
-        qWarning() << u"Creator::createGc() exeption:"_s << e.what();
+        qWarning() << u"Creator exeption:"_s << e.what();
     } catch(...) {
-        qWarning() << u"Creator::createGc() exeption:"_s << errno;
+        qWarning() << u"Creator exeption:"_s << errno;
     }
-    delete gcp;
+    emit fileReady(file_);
 }
 
 File* Creator::file() const { return file_; }
@@ -294,7 +276,7 @@ void Creator::stacking(Paths& paths) {
     std::function<void(PolyTree*, bool)> stacker = [&stacker, &rotateDiest, this](PolyTree* node, bool newPaths) {
         if(!returnPss.empty() || newPaths) {
             Path path(node->Polygon());
-            if(!(gcp_.convent() ^ !node->IsHole()) ^ (gcp_.side() == Outer))
+            if(!(gcp.convent() ^ !node->IsHole()) ^ (gcp.side() == Outer))
                 ReversePath(path);
 
             // if(false && App::settings().cleanPolygons())
@@ -479,13 +461,13 @@ bool Creator::checkMilling(SideOfMilling side) {
     qDebug(__FUNCTION__);
     Timer t(__FUNCTION__);
 
-    const double toolDiameter = gcp_.tools.back().getDiameter(gcp_.getDepth()) * uScale;
+    const double toolDiameter = gcp.tools.back().getDiameter(gcp.getDepth()) * uScale;
     const double toolRadius = toolDiameter * 0.5;
 
     QString last{msg};
     msg = tr("Check milling for errors");
 
-    auto createFrame = [toolRadius](auto& srcPaths) {
+    auto createFrame = [toolRadius](auto& srcPaths) -> Paths {
         auto retPaths = InflateRoundPolygon(srcPaths, -toolRadius);
         CleanPaths(retPaths, uScale);
         return InflateRoundPolygon(retPaths, toolRadius + 10);
@@ -670,10 +652,10 @@ bool Creator::checkMilling(SideOfMilling side) {
     return true;
 }
 
-Params Creator::getGcp() const { return gcp_; }
+Params Creator::getGcp() const { return gcp; }
 
-void Creator::setGcp(const Params& gcp) {
-    gcp_ = gcp;
+void Creator::setGcp(const Params& newGcp) {
+    gcp = newGcp;
     reset();
 }
 

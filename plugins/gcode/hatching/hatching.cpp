@@ -56,18 +56,18 @@ namespace CrossHatch {
 
 void Creator::create() {
     createRaster(
-        gcp_.tools.front(),
-        gcp_.params[GCode::Params::Depth].toDouble(),
-        gcp_.params[UseAngle].toDouble(),
-        gcp_.params[HathStep].toDouble(),
-        gcp_.params[Pass].toInt());
+        gcp.tools.front(),
+        gcp.params[GCode::Params::Depth].toDouble(),
+        gcp.params[UseAngle].toDouble(),
+        gcp.params[HathStep].toDouble(),
+        gcp.params[Pass].toInt());
 }
 
 void Creator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
     QElapsedTimer t;
     t.start();
 
-    switch(gcp_.side()) {
+    switch(gcp.side()) {
     case GCode::Outer:
         groupedPaths(GCode::Grouping::Cutoff, uScale); // toolDiameter_ + 5
         break;
@@ -263,7 +263,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     if(!profilePaths.empty() && prPass) {
         sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
-        if(gcp_.convent())
+        if(gcp.convent())
             ReversePaths(profilePaths);
         for(Path& path: profilePaths)
             path.push_back(path.front());
@@ -285,12 +285,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     default: break;
     }
 
-    if(returnPss.empty()) {
-        emit fileReady(nullptr);
-    } else {
-        file_ = new File{std::move(gcp_), std::move(returnPss), {}};
+    if(returnPss.size()) {
+        gcp.setToolPathss(toCurvess(returnPss));
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
     }
 }
 
@@ -298,9 +296,9 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if(gcp_.tools.front().diameter()) {
+File::File(GCode::Params&& gcp)
+    : GCode::File{std::move(gcp)} {
+    if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -315,12 +313,12 @@ void File::genGcodeAndTile() {
         for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if(toolType() == Tool::Laser)
+            if(toolType == Tool::Laser)
                 saveLaserProfile(offset);
             else
                 saveMillingProfile(offset);
 
-            if(gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

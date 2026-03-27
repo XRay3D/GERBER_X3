@@ -11,7 +11,7 @@
 #pragma once
 
 #include "drill_file.h"
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 
 namespace Ui {
@@ -33,7 +33,7 @@ namespace Drilling {
 class Model;
 class Header;
 
-class Form final : public GCode::BaseForm {
+class Form final : public GCode::Form {
     Q_OBJECT
 
 public:

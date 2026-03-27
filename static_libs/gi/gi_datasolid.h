@@ -18,10 +18,13 @@ class File;
 namespace Gi {
 
 class DataFill final : public Item {
-    Paths& paths_;
+    Curves curves_;
 
 public:
-    explicit DataFill(Paths& paths_, AbstractFile* file);
+    explicit DataFill(Curves curves, AbstractFile* file);
+    explicit DataFill(const Paths& paths, AbstractFile* file)
+        : DataFill{toCurves(paths), file} { }
+
     ~DataFill() override = default;
 
     // QGraphicsItem interface
@@ -29,7 +32,8 @@ public:
     int type() const override;
     // Item interface
     void redraw() override;
-    Paths& getPaths();
+
+    // Paths& getPaths();
     void setPaths(Paths paths, int alternate = {}) override;
     // Item interface
     void changeColor() override;

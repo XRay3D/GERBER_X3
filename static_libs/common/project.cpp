@@ -83,6 +83,7 @@ QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
             stream >> *shape;
             shape->name() = name;
         } else { // skip shape data
+            shape = nullptr;
             QByteArray data;
             stream >> data;
             qDebug() << type << name << data;

@@ -82,11 +82,11 @@ void Item::setPenColorPtr(const QColor* penColor) {
     colorChanged();
 }
 
-Paths Item::paths(int) const {
-    return toPaths(transform().map(shape_));
-}
+Paths Item::paths(int /*param*/) const { return toPaths(transform().map(shape_)); }
 
-void Item::setPaths(Paths paths, int) {
+Curves Item::curves(int /*param*/) const { return toCurves(transform().map(shape_)); }
+
+void Item::setPaths(Paths paths, int /*param*/) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
@@ -98,6 +98,11 @@ void Item::setPaths(Paths paths, int) {
     t.rotate(-a);
     for(auto&& path: ~paths)
         shape_.addPolygon(t.map(path));
+    redraw();
+}
+
+void Item::setCurves(Curves curves, int /*param*/) {
+    qFatal("TODO");
     redraw();
 }
 
@@ -137,6 +142,45 @@ double Item::scaleFactor() const {
         if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
     }
     return scale;
+}
+
+std::optional<QPainterPath> Item::updateArrows() {
+    if(auto sf = scaleFactor(); scar == sf)
+        return {};
+    else
+        scar = sf;
+
+    QPainterPath arrows;
+
+    using QPP = QPainterPath;
+    using El = QPP::Element;
+
+    const double length = std::clamp(30 * scar, 0.0, 0.5);
+
+    for(auto&& elements:
+        v::iota(0, shape_.elementCount())
+            | v::transform(std::bind(&QPP::elementAt, shape_, _1))          // to Element
+            | v::chunk_by([](const El&, const El& r) { return r.type; })) { // to Subpath Polygons
+
+        constexpr auto splitCurve = +[](const El&, const El& r) {
+            return r.type > QPP::CurveToElement;
+        };
+
+        for(auto&& [from, to]: v::pairwise(v::chunk_by(elements, splitCurve))) {
+            QLineF line{to.back(), to.front().type == QPP::CurveToElement ? to[1] : from.back()};
+            if(line.length() < length) continue;
+            const double angle = line.angle();
+            if(length > 0.) {
+                line.setLength(length);
+                line.setAngle(angle + 10);
+                arrows.moveTo(line.p2());
+                line.setAngle(angle - 10);
+                arrows.lineTo(line.p1());
+                arrows.lineTo(line.p2());
+            }
+        }
+    }
+    return arrows;
 }
 
 void Item::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {

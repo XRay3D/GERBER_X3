@@ -266,6 +266,8 @@ QRectF PreviewItem::boundingRect() const {
     return painterPath.boundingRect().united(sourcePath.boundingRect());
 }
 
+Curves PreviewItem::curves() const { return toCurves(paths_); }
+
 } // namespace Thermal
 
 #include "moc_thermal_previewitem.cpp"

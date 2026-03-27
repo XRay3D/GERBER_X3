@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "pocketraster.h"
 #include <QToolBar>
@@ -21,7 +21,7 @@ class PocketRasterForm;
 
 namespace PocketRaster {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:

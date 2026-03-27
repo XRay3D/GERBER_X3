@@ -31,10 +31,10 @@ signals:
 };
 
 // class Model : public QAbstractTableModel {
-// const mvector<QString>& lines;
+// const std::vector<QString>& lines;
 
 // public:
-// Model(const mvector<QString>& lines, QObject* parent = nullptr)
+// Model(const std::vector<QString>& lines, QObject* parent = nullptr)
 // : QAbstractTableModel(parent)
 // , lines(lines)
 // {

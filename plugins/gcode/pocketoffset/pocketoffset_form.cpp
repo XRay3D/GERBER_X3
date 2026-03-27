@@ -24,7 +24,7 @@ enum {
 };
 
 Form::Form(GCode::Plugin* plugin)
-    : GCode::BaseForm{plugin, new Creator}
+    : GCode::Form{plugin, new Creator}
     , ui(new ::Ui::PocketOffsetForm)
     , names{tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
@@ -93,13 +93,12 @@ void Form::computePaths() {
             return;
         }
     }
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+
+    if(!getNewGcpWithGi()) return;
 
     for(const Tool& t: tool) {
-        gcp->tools.push_back(t);
-        if(gcp->tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
+        gcp.tools.push_back(t);
+        if(gcp.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
             break;
     }
 
@@ -110,19 +109,19 @@ void Form::computePaths() {
         auto cmp2 = [this](const Tool& t1, const Tool& t2) -> bool {
             return qFuzzyCompare(t1.getDiameter(dsbxDepth->value()), t2.getDiameter(dsbxDepth->value()));
         };
-        std::sort(gcp->tools.begin(), gcp->tools.end(), cmp);
-        auto last = std::unique(gcp->tools.begin(), gcp->tools.end(), cmp2);
-        gcp->tools.erase(last, gcp->tools.end());
+        std::sort(gcp.tools.begin(), gcp.tools.end(), cmp);
+        auto last = std::unique(gcp.tools.begin(), gcp.tools.end(), cmp2);
+        gcp.tools.erase(last, gcp.tools.end());
     }
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
     if(ui->sbxSteps->isVisible())
-        gcp->params[Creator::OffsetSteps] = ui->sbxSteps->value();
+        gcp.params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
-    fileCount = static_cast<int>(gcp->tools.size());
-    createToolpath(gcp);
+    fileCount = static_cast<int>(gcp.tools.size());
+    emit createToolpath(&gcp);
 }
 
 void Form::onSbxStepsValueChanged(int arg1) {

@@ -144,7 +144,7 @@ void VoronoiCgal::cgalVoronoi() {
             segments.append(edge);
         }
     }
-    const /*PType*/ int32_t fo = gcp_.params[GCode::Params::FrameOffset].toDouble() * uScale;
+    const /*PType*/ int32_t fo = gcp.params[GCode::Params::FrameOffset].toDouble() * uScale;
     Path frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},

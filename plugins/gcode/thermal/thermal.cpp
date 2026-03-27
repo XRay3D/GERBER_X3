@@ -19,9 +19,9 @@ Creator::Creator() { }
 void Creator::create() {
     qDebug(__FUNCTION__);
     createThermal(
-        App::project().file(gcp_.params[FileId].toInt()),
-        gcp_.tools.front(),
-        gcp_.params[GCode::Params::Depth].toDouble());
+        App::project().file(gcp.params[FileId].toInt()),
+        gcp.tools.front(),
+        gcp.params[GCode::Params::Depth].toDouble());
 }
 
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
@@ -40,9 +40,9 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         dbgPaths(returnPs, u"returnPs"_s);
 
         // fix direction
-        if(gcp_.side() == GCode::Outer && !gcp_.convent())
+        if(gcp.side() == GCode::Outer && !gcp.convent())
             ReversePaths(returnPs);
-        else if(gcp_.side() == GCode::Inner && gcp_.convent())
+        else if(gcp.side() == GCode::Inner && gcp.convent())
             ReversePaths(returnPs);
 
         for(Path& path: returnPs)
@@ -65,7 +65,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddSubject(framePaths);
         }
-        if(!gcp_.params[IgnoreCopper].toInt()) {
+        if(!gcp.params[IgnoreCopper].toInt()) {
             Clipper2Lib::ClipperOffset offset;
             for(auto go: graphicObjects) {
                 // if (go->closed()) {
@@ -97,13 +97,11 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
     if(returnPs.size())
         returnPss.push_back(sortB(returnPs, ~(App::home().pos() + App::zero().pos())));
 
-    if(returnPss.empty()) {
-        emit fileReady(nullptr);
-    } else {
+    if(returnPss.size()) {
         sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
-        file_ = new File{std::move(gcp_), std::move(returnPss)};
+        gcp.setToolPathss(toCurvess(returnPss));
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
     }
 }
 
@@ -112,9 +110,9 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss)
-    : GCode::File(std::move(gcp), std::move(toolPathss)) {
-    if(gcp_.tools.front().diameter()) {
+File::File(GCode::Params&& gcp)
+    : GCode::File{std::move(gcp)} {
+    if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -129,12 +127,12 @@ void File::genGcodeAndTile() {
         for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if(toolType() == Tool::Laser)
+            if(toolType == Tool::Laser)
                 saveLaserProfile(offset);
             else
                 saveMillingProfile(offset);
 
-            if(gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp.params.contains(GCode::Params::NotTile))
                 return;
         }
     }

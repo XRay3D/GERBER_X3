@@ -17,7 +17,7 @@ size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(rein
 namespace Voronoi {
 
 void VoronoiJc::jcVoronoi() {
-    const auto tolerance = gcp_.params[Tolerance].toDouble();
+    const auto tolerance = gcp.params[Tolerance].toDouble();
 
     mvector<jcv_point> points;
     points.reserve(100000);
@@ -67,7 +67,7 @@ void VoronoiJc::jcVoronoi() {
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const /*PType*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
+        const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
             {static_cast<jcv_real>(r.left - fo),  static_cast<jcv_real>(r.top - fo)   },
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
@@ -157,7 +157,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     auto clean = [this, kAngle = 2.0](Path& path) {
         for(size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line{~path[i], ~path[i + 1]};
-            if(line.length() < gcp_.params[Tolerance].toDouble()) {
+            if(line.length() < gcp.params[Tolerance].toDouble()) {
                 path[i] = ~line.center();
                 path -= i + 1;
                 --i;

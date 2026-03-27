@@ -25,22 +25,21 @@ namespace Voronoi {
 // }
 
 void Creator::create() {
-    const auto& tool = gcp_.tools.front();
-    const auto depth = gcp_.params[GCode::Params::Depth].toDouble();
-    const auto width = gcp_.params[Width].toDouble();
+    const auto& tool = gcp.tools.front();
+    const auto depth = gcp.params[GCode::Params::Depth].toDouble();
+    const auto width = gcp.params[Width].toDouble();
 
     groupedPaths(GCode::Grouping::Copper);
-    switch(gcp_.params[VoronoiType].toInt()) {
+    switch(gcp.params[VoronoiType].toInt()) {
     case 0: boostVoronoi(); break;
     case 1: jcVoronoi(); break;
     }
 
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-
-        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))}, {}};
+        gcp.setToolPathss(toCurvess({sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))}));
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
     } else {
         Paths copy{returnPs};
         copy.resize(copy.size() - 1); // remove frame
@@ -69,10 +68,10 @@ void Creator::create() {
                 returnPss.erase(begin);
             else
                 ++begin;
-
-        file_ = new File{std::move(gcp_), std::move(returnPss), std::move(openSrcPaths)};
+        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.setPocketAreaCurves(toCurves(openSrcPaths));
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
     }
 }
 
@@ -134,9 +133,9 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if(gcp_.tools.front().diameter()) {
+File::File(GCode::Params&& gcp)
+    : GCode::File{std::move(gcp)} {
+    if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -151,27 +150,27 @@ void File::genGcodeAndTile() {
         for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if(toolType() == Tool::Laser)
-                if(toolPathss_.size() > 1)
+            if(toolType == Tool::Laser)
+                if(gcp.toolPathss().size() > 1)
                     saveLaserPocket(offset);
                 else
                     saveLaserProfile(offset);
-            else if(toolPathss_.size() > 1)
+            else if(gcp.toolPathss().size() > 1)
                 saveMillingPocket(offset);
             else
                 saveMillingProfile(offset);
 
-            if(gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
 void File::createGi() {
-    if(toolPathss_.size() > 1) {
+    if(gcp.toolPathss().size() > 1) {
         Gi::Item* item;
-        item = new Gi::GcPath{toolPathss_.back().back(), this};
-        // item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item = new Gi::GcPath{{gcp.toolPathss().back().back()}, this};
+        // item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
         createGiPocket();

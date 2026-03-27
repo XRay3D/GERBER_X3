@@ -64,7 +64,7 @@ DxfGo Solid::toGo() const {
     };
 
     Path path{~poly};
-    r::for_each(path, &SetCSelf);
+    r::for_each(path, SetCSelf);
 
     ReversePath(path);
     DxfGo go{id, path, {path}}; // return {id, path, {path}};

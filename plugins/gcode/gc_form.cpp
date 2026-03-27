@@ -8,7 +8,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "gc_baseform.h"
+#include "gc_form.h"
 
 #include "abstract_file.h"
 #include "app.h"
@@ -155,9 +155,10 @@ protected:
     }
 };
 
-BaseForm::BaseForm(Plugin* plugin, Creator* tpc)
+Form::Form(Plugin* plugin, Creator* tpc)
     : /*QWidget{this}
-    ,*/ plugin{plugin}
+    ,*/
+    plugin{plugin}
     , progressDialog(new QProgressDialog{this}) {
 
     auto vLayout = new QVBoxLayout{this};
@@ -181,7 +182,7 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc)
         pbCreate = new QPushButton{tr("Create"), ctrWidget};
         pbCreate->setIcon(QIcon::fromTheme(u"document-export"_s));
         pbCreate->setObjectName(u"pbCreate"_s);
-        connect(pbCreate, &QPushButton::clicked, this, &BaseForm::computePaths);
+        connect(pbCreate, &QPushButton::clicked, this, &Form::computePaths);
 
         auto line = [this] {
             auto line = new QFrame{ctrWidget};
@@ -222,9 +223,9 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc)
         errBtnBox->button(QDialogButtonBox::Cancel)->setText(tr("Break"));
 
         connect(errBtnBox->button(QDialogButtonBox::Ok),
-            &QAbstractButton::clicked, this, &BaseForm::errContinue);
+            &QAbstractButton::clicked, this, &Form::errContinue);
         connect(errBtnBox->button(QDialogButtonBox::Cancel),
-            &QAbstractButton::clicked, this, &BaseForm::errBreak);
+            &QAbstractButton::clicked, this, &Form::errBreak);
         errWidget->setVisible({});
     }
 
@@ -234,11 +235,11 @@ BaseForm::BaseForm(Plugin* plugin, Creator* tpc)
     progressDialog->setAutoClose(false);
     progressDialog->setAutoReset(false);
     progressDialog->reset();
-    connect(progressDialog, &QProgressDialog::canceled, this, &BaseForm::cancel);
+    connect(progressDialog, &QProgressDialog::canceled, this, &Form::cancel);
     setCreator(tpc);
 }
 
-BaseForm::~BaseForm() {
+Form::~Form() {
     if(errWidget->isVisible()) errBreak();
     ProgressCancel::cancel();
     if(runer.isRunning())
@@ -249,7 +250,7 @@ BaseForm::~BaseForm() {
     qDebug(__FUNCTION__);
 }
 
-void BaseForm::setCreator(Creator* newCreator) {
+void Form::setCreator(Creator* newCreator) {
     qDebug() << __FUNCTION__ << creator_ << newCreator;
     ProgressCancel::cancel();
     if(runer.isRunning()) {
@@ -265,12 +266,12 @@ void BaseForm::setCreator(Creator* newCreator) {
         creator_->moveToThread(&runer);
         // clang-format off
         // connect(&runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
-        connect(creator_, &Creator::canceled,        this,     &BaseForm::stopProgress                      );
-        connect(creator_, &Creator::errorOccurred,   this,     &BaseForm::errorHandler                      );
-        connect(creator_, &Creator::fileReady,       this,     &BaseForm::fileHandler                       );
+        connect(creator_, &Creator::canceled,        this,     &Form::stopProgress                      );
+        connect(creator_, &Creator::errorOccurred,   this,     &Form::errorHandler                      );
+        connect(creator_, &Creator::fileReady,       this,     &Form::fileHandler                       );
          // connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,      Qt::QueuedConnection);
-        connect(this,     &BaseForm::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
-        connect(this,     &BaseForm::createToolpath, this,     &BaseForm::startProgress                     );
+        connect(this,     &Form::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
+        connect(this,     &Form::createToolpath, this,     &Form::startProgress                     );
         // clang-format on
         // runer.start(QThread::LowPriority /*HighestPriority*/);
     } else if(creator_ && !newCreator) {
@@ -278,7 +279,7 @@ void BaseForm::setCreator(Creator* newCreator) {
     }
 }
 
-void BaseForm::fileHandler(File* file) {
+void Form::fileHandler(File* file) {
     qDebug() << __FUNCTION__ << file;
     if(--fileCount == 0)
         cancel();
@@ -304,7 +305,7 @@ void BaseForm::fileHandler(File* file) {
     }
 }
 
-void BaseForm::timerEvent(QTimerEvent* event) {
+void Form::timerEvent(QTimerEvent* event) {
     if(event->timerId() == progressTimerId && progressDialog && creator_) {
         const auto [max, val] = creator_->getProgress();
         progressDialog->setMaximum(max);
@@ -313,8 +314,9 @@ void BaseForm::timerEvent(QTimerEvent* event) {
     }
 }
 
-Params* BaseForm::getNewGcp() {
-    auto gcp = new GCode::Params;
+const Params& Form::getNewGcpWithGi() {
+    usedItems_.clear();
+    gcp = {}; // NOTE clear
 
     /*
     auto testFile = [&file, &skip, this](Gi::Item* gi) -> bool {
@@ -353,17 +355,16 @@ Params* BaseForm::getNewGcp() {
     // AbstractFile const* file = nullptr;
     // bool skip{true};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
-        qDebug() << gi << gi->file();
+        // qDebug() << gi << gi->file();
         // switch(gi->type()) {
         // case Gi::Type::DataSolid:
-        // gcp->closedPaths.append(gi->paths());
+        // gcp.closedPaths.append(gi->paths());
         // break;
         // case Gi::Type::DataPath: {
         // dbgPaths(gi->paths(), __FUNCTION__);
-        for(auto&& path: gi->paths())
-            (path.front() == path.back() && side != On)
-                ? gcp->closedPaths.emplace_back(path)
-                : gcp->openPaths.emplace_back(path);
+        for(auto&& curve: gi->curves())
+            curve.isClosed() ? gcp.closedCurves.emplace_back(curve)
+                             : gcp.openCurves.emplace_back(curve);
         // } break;
         // // if (!file) {
         // // file = gi->file();
@@ -375,62 +376,54 @@ Params* BaseForm::getNewGcp() {
         // // }
         // // }
         // // if (gi->type() == Gi::Type::DataSolid)
-        // // gcp->closedPaths.append(gi->paths());
+        // // gcp.closedPaths.append(gi->paths());
         // // else
-        // // gcp->openPaths.append(gi->paths());
+        // // gcp.openPaths.append(gi->paths());
         // // break;
         // case Gi::Type::ShCircle:
         // case Gi::Type::ShRectangle:
         // case Gi::Type::ShText:
         // case Gi::Type::Drill:
-        // gcp->closedPaths.append(gi->paths());
+        // gcp.closedPaths.append(gi->paths());
         // break;
         // case Gi::Type::ShPolyLine:
         // case Gi::Type::ShCirArc:
-        // gcp->openPaths.append(gi->paths());
+        // gcp.openPaths.append(gi->paths());
         // break;
         // default:  break;
         // }
         addUsedGi(gi);
     }
 
-    if(gcp->openPaths.empty() && gcp->closedPaths.empty()) {
-        delete gcp;
+    gcp.params[GCode::Params::GrItems].setValue(usedItems_);
+
+    if(!gcp)
         QMessageBox::warning(this, tr("Warning"), tr("No data for working..."));
-        return nullptr;
-    }
 
     return gcp;
 }
 
-void BaseForm::addUsedGi(Gi::Item* gi) {
-    if(gi->file()) {
-        // File const* file = gi->file();
-        // if (file->type() == FileType::Gerber_) {
-        // #ifdef GBR_
-        // usedItems_[{file->id(), reinterpret_cast<const Gerber::File*>(file)->itemsType()}].push_back(gi->id());
-        // #endif
-        // } else {
-        // usedItems_[{file->id(), -1}].push_back(gi->id());
-        // }
-    }
+void Form::addUsedGi(Gi::Item* gi) {
+    if(auto file = gi->file(); file)
+        usedItems_[{file->id(), file->itemsType()}].push_back(gi->id());
 }
 
-void BaseForm::cancel() {
-    if(creator_ == nullptr)
-        return;
+void Form::cancel() {
+    if(creator_ == nullptr) return;
+
     creator_->continueCalc(false);
     ProgressCancel::cancel();
     if(runer.isRunning()) {
         // runer.quit();
+        // runer.wait();
+        runer.terminate();
         runer.wait();
-        // runer.terminate();
     }
     // runer.start(QThread::LowPriority /*HighestPriority*/);
     stopProgress();
 }
 
-void BaseForm::errorHandler(int) {
+void Form::errorHandler(int) {
     if(creator_ == nullptr)
         return;
 
@@ -452,7 +445,7 @@ void BaseForm::errorHandler(int) {
     App::grView().startUpdateTimer(32);
 }
 
-void BaseForm::errContinue() {
+void Form::errContinue() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
@@ -467,7 +460,7 @@ void BaseForm::errContinue() {
     creator_->continueCalc(true);
 }
 
-void BaseForm::errBreak() {
+void Form::errBreak() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
@@ -481,7 +474,7 @@ void BaseForm::errBreak() {
     creator_->continueCalc(false);
 }
 
-void BaseForm::startProgress() {
+void Form::startProgress() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
@@ -492,7 +485,7 @@ void BaseForm::startProgress() {
     progressTimerId = startTimer(100);
 }
 
-void BaseForm::stopProgress() {
+void Form::stopProgress() {
     if(creator_ == nullptr)
         return;
     qDebug() << __FUNCTION__ << creator_->checkMillingFl;

@@ -32,7 +32,7 @@ void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool cl
 inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
     if(pss.empty())
         return;
-    for(auto&& paths: pss.midRef(1))
+    for(auto&& paths: pss | v::drop(1))
         pss.front().insert(pss.front().end(), paths.begin(), paths.end());
     dbgPaths(pss.front(), fileName, color, closed, tool);
 }
@@ -57,9 +57,7 @@ public:
     Pathss& groupedPaths(Grouping group, /*PType*/ int32_t offset = uScale, bool skipFrame = {});
     void grouping(Grouping group, PolyTree& node);
 
-    Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k) const;
-
-    void createGc(Params* gcp);
+    void createGc(Params&& gcp);
 
     void continueCalc(bool fl = true);
 
@@ -77,7 +75,7 @@ private:
     void addRawPaths(Paths&& paths);
 
     Params getGcp() const;
-    void setGcp(const Params& gcp_);
+    void setGcp(const Params& gcp);
 
 signals:
     void fileReady(File* file);
@@ -120,7 +118,7 @@ protected:
     double toolDiameter{};
     double dOffset{};
     /*PType*/ int32_t stepOver{};
-    Params gcp_;
+    Params gcp;
 
     void isContinueCalc();
 

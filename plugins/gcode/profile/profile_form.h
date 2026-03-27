@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "profile.h"
 #include <QToolBar>
@@ -26,7 +26,7 @@ class Bridge;
 
 namespace Profile {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:

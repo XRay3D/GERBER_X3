@@ -20,7 +20,7 @@
 namespace Voronoi {
 
 Form::Form(GCode::Plugin* plugin)
-    : GCode::BaseForm{plugin, new Creator}
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(content);
 
@@ -69,20 +69,18 @@ void Form::computePaths() {
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(true);
-    gcp->setSide(GCode::Outer);
-    gcp->tools.push_back(tool);
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp->params[FrameOffset] = ui->dsbxOffset->value();
-    gcp->params[Tolerance] = ui->dsbxPrecision->value();
-    gcp->params[VoronoiType] = ui->cbxSolver->currentIndex();
-    gcp->params[Width] = ui->dsbxWidth->value() + 0.001;
+    gcp.setConvent(true);
+    gcp.setSide(GCode::Outer);
+    gcp.tools.push_back(tool);
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[FrameOffset] = ui->dsbxOffset->value();
+    gcp.params[Tolerance] = ui->dsbxPrecision->value();
+    gcp.params[VoronoiType] = ui->cbxSolver->currentIndex();
+    gcp.params[Width] = ui->dsbxWidth->value() + 0.001;
 
-    createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {

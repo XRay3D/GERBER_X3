@@ -11,8 +11,8 @@
 #include "voronoi_boost.h"
 #include "types.h"
 
-#if 0 // __has_include(<boost/polygon/voronoi.hpp>)
-    #include "mvector.h"
+#if __has_include(<boost/polygon/voronoi.hpp>)
+// #include "mvector.h"
 
     #include <cstdio>
     #include <vector>
@@ -88,19 +88,19 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
 
     Path path;
     path.reserve(sampled_edge.size());
-    for (const auto& p: sampled_edge)
+    for(const auto& p: sampled_edge)
         path.emplace_back(static_cast</*PType*/ int32_t>(p.x()), static_cast</*PType*/ int32_t>(p.y()));
     return path;
 }
 namespace Voronoi {
 
 void VoronoiBoost::boostVoronoi() {
-    const double tolerance = gcp_.params[Tolerance].toDouble() * uScale;
+    const double tolerance = gcp.params[Tolerance].toDouble() * uScale;
 
     /*PType*/ int32_t minX = std::numeric_limits</*PType*/ int32_t>::max(),
-                            minY = std::numeric_limits</*PType*/ int32_t>::max(),
-                            maxX = std::numeric_limits</*PType*/ int32_t>::min(),
-                            maxY = std::numeric_limits</*PType*/ int32_t>::min();
+                      minY = std::numeric_limits</*PType*/ int32_t>::max(),
+                      maxX = std::numeric_limits</*PType*/ int32_t>::min(),
+                      maxY = std::numeric_limits</*PType*/ int32_t>::min();
 
     int32_t id = 0, id2 = 0;
     // add line segments to diagram
@@ -108,7 +108,7 @@ void VoronoiBoost::boostVoronoi() {
 
     size_t max{};
 
-    for (const Path& path: v::join(groupedPss))
+    for(const Path& path: v::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -119,10 +119,10 @@ void VoronoiBoost::boostVoronoi() {
     std::vector<int> vecId;
     srcSegments.reserve(max);
 
-    for (const Paths& paths: groupedPss) {
+    for(const Paths& paths: groupedPss) {
         ++id;
-        for (const Path& path: paths) {
-            for (size_t i{}; i < path.size(); ++i) {
+        for(const Path& path: paths) {
+            for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 throwIfCancel();
                 const Point& point = path[i];
@@ -130,11 +130,11 @@ void VoronoiBoost::boostVoronoi() {
                 // !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
                 // : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
                 !i ? srcSegments.emplace_back(
-                    point_type{static_cast<coordinate_type>(path.back().x), static_cast<coordinate_type>(path.back().y)},
-                    point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)})
+                         point_type{static_cast<coordinate_type>(path.back().x), static_cast<coordinate_type>(path.back().y)},
+                         point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)})
                    : srcSegments.emplace_back(
-                       point_type{static_cast<coordinate_type>(path[i - 1].x), static_cast<coordinate_type>(path[i - 1].y)},
-                       point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)});
+                         point_type{static_cast<coordinate_type>(path[i - 1].x), static_cast<coordinate_type>(path[i - 1].y)},
+                         point_type{static_cast<coordinate_type>(point.x), static_cast<coordinate_type>(point.y)});
                 maxX = std::max<int32_t>(maxX, point.x);
                 maxY = std::max<int32_t>(maxY, point.y);
                 minX = std::min<int32_t>(minX, point.x);
@@ -183,9 +183,14 @@ void VoronoiBoost::boostVoronoi() {
         // cell.color(srcSegments[cell.source_index()].id);
         // }
 
-        std::set<Path> set;
+        struct Pair {
+            Point p1, p2;
+            constexpr auto operator<=>(const Pair&) const = default;
+        };
 
-        for (auto& edge: vd.edges()) {
+        std::set<std::pair<Point, Point>> set;
+
+        for(auto& edge: vd.edges()) {
             auto v0 = edge.vertex0();
             auto v1 = edge.vertex1();
 
@@ -195,12 +200,12 @@ void VoronoiBoost::boostVoronoi() {
             auto color1 = id0(edge);
             auto color2 = id1(edge);
 
-            if (v0 && v1) {
+            if(v0 && v1) {
                 Point p0{static_cast</*PType*/ int32_t>(v0->x()), static_cast</*PType*/ int32_t>(v0->y())};
                 Point p1{static_cast</*PType*/ int32_t>(v1->x()), static_cast</*PType*/ int32_t>(v1->y())};
-                if (color1 != color2 && color1 && color2) {
-                    if (set.emplace(Path{p0, p1}).second && set.emplace(Path{p1, p0}).second) {
-                        if (edge.is_curved() && distTo(p0, p1) < tolerance) {
+                if(color1 != color2 && color1 && color2) {
+                    if(set.emplace(p0, p1).second && set.emplace(p1, p0).second) {
+                        if(edge.is_curved() && distTo(p0, p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
                             // segments.emplace_back(Path { p0, p1 });
                         } else {
@@ -213,7 +218,7 @@ void VoronoiBoost::boostVoronoi() {
     }
     mergeSegments(segments, 0.005 * uScale);
 
-    const /*PType*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
+    const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
     Path frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
@@ -230,10 +235,10 @@ void VoronoiBoost::boostVoronoi() {
 
     // dbgPaths(segments, u"segments"_s);
     auto clean = [kAngle = 2.0](Path& path) {
-        for (size_t i = 1; i < path.size() - 1; ++i) {
-            const double a1 = angleTo(path[i - 1],path[i + 0]);
-            const double a2 = angleTo(path[i + 0],path[i + 1]);
-            if (abs(a1 - a2) < kAngle)
+        for(size_t i = 1; i < path.size() - 1; ++i) {
+            const double a1 = angleTo(path[i - 1], path[i + 0]);
+            const double a2 = angleTo(path[i + 0], path[i + 1]);
+            if(abs(a1 - a2) < kAngle)
                 path -= i--;
         }
     };

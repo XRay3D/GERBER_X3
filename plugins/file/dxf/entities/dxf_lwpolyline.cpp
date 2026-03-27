@@ -138,7 +138,7 @@ DxfGo LwPolyline::toGo() const {
         DxfGo go{
             id,
             {} /*CirclePath(((poly.front() ^ poly.back())) * uScale, center)*/,
-            {CirclePath((length(poly.front(), poly.back()) + constantWidth) * uScale, center)},
+            {CirclePath((geo::Length(poly.front(), poly.back()) + constantWidth) * uScale, center)},
         };
 
         go.GraphicObject::pos = center;
@@ -229,7 +229,7 @@ DxfGo LwPolyline::toGo() const {
 
     if(polylineFlag == Closed) addSeg(poly.back(), poly.front());
 
-    r::for_each(path, &SetCSelf);
+    r::for_each(path, SetCSelf);
 
     Paths paths = Inflate({path}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
 

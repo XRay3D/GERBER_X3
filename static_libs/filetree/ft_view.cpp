@@ -74,8 +74,8 @@ void View::on_doubleClicked(const QModelIndex& index) {
         // {
         // const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
         // AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
-        // App::project().showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
-        // file->gcp_.fileId = file->id();
+        // App::project().showFiles(file->gcp.params[GCode::Params::GrItems].value<UsedItems>().keys());
+        // file->gcp.fileId = file->id();
         // App::mainWindow().editGcFile(file);
         // updateTree();
         // }

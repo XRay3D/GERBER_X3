@@ -41,6 +41,7 @@ inline void death_signal(int signum) { // обработка Segfault
     qCritical("%s\n%s", SIG(), str.c_str());
 
     exit(-signum);
+    // std::unreachable();
     // signal(signum, SIG_DFL);
 }
 
@@ -50,6 +51,7 @@ inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, 
     QMessageLogContext& context_ = const_cast<QMessageLogContext&>(context);
 
     if(message == u"Painter path exceeds +/-32767 pixels.") return;
+    if(message.startsWith(u"QBasicTimer::start")) return;
 
     if(context.file) {
         std::string_view file{context.file};
@@ -91,7 +93,7 @@ inline void stacktraceAndOutput() {
         // "%{type} "
         // "%{file}:%{line} %{function} "
         "%{if-category}%{category}%{endif}%{message} "
-        "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"_L1);
+        "\x1b[38;2;64;64;64m <- %{function} <- %{file}:%{line}\x1b[0m"_L1);
 
     // QApplication::setStyle(QStyleFactory::create("Windows 11"));
     signal(SIGABRT, death_signal);

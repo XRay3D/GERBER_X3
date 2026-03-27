@@ -71,7 +71,7 @@ GCode::Tab::Tab(QWidget* parent)
             verticalLayoutM->addWidget(lbl);
             leFormatMilling = new QLineEdit{tab};
             leFormatMilling->setObjectName(u"leFormatMilling"_s);
-            leFormatMilling->setToolTip(QApplication::translate("GCodeSettings", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
+            leFormatMilling->setToolTip(QApplication::translate("GCodeSettings", "<html><head/><body><p>Default <span style=\" font-weight:600;\">G?X?Y?I+J+Z?F?S?</span></p><p><span style=\" font-weight:600;\">?</span> - only if the value has changed.</p><p><span style=\" font-weight:600;\">+</span> - always.</p><p>If one of the commands <span style=\" font-weight:600;\">G, X, Y, Z, F</span> and<span style=\" font-weight:600;\"> S</span> is missing, it will not be inserted into the G-code.</p><p>If there is a space between the teams, then it will also be inserted into the G-code.</p><p><br/></p></body></html>", nullptr));
             verticalLayoutM->addWidget(leFormatMilling);
             tabWidget->addTab(tab, QApplication::translate("GCodeSettings", "Milling", nullptr));
         }

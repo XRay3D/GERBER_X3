@@ -45,7 +45,7 @@ DxfGo Line::toGo() const {
     qInfo("Line");
     qInfo() << thickness;
     Path path{~startPoint, ~endPoint};
-    r::for_each(path, &SetCSelf);
+    r::for_each(path, SetCSelf);
 
     // TODO ClipperOffset offset;
     // offset.AddPath(p, JoinType::Round, EndType::Round);

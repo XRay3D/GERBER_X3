@@ -18,7 +18,7 @@ class Drill final : public Item {
     using Item::update;
 
 public:
-    Drill(const Path& path, double diameter, AbstractFile* file, int toolId);
+    Drill(const QPolygonF& path, double diameter, AbstractFile* file, int toolId);
     ~Drill() override { }
 
     // QGraphicsItem interface
@@ -32,7 +32,7 @@ public:
     bool isSlot();
     double diameter() const { return diameter_; }
     void setDiameter(double diameter);
-    void update(const Path& path, double diameter);
+    void updatePath(const QPolygonF &path, double diameter);
 
     int toolId() const { return toolId_; }
     void setToolId(int newToolId) {
@@ -43,7 +43,7 @@ public:
 private:
     void create();
     double diameter_{};
-    Path path_;
+    QPolygonF path_;
     QPolygonF fillPolygon;
     int toolId_ = -1;
 };

@@ -9,7 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_dbg.h"
+#include "abstract_file.h"
 #include "app.h"
+#include "ft_model.h"
 #include "graphicsview.h"
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -18,6 +20,43 @@
 // #undef QT_DEBUG
 
 namespace Gi {
+
+struct Node final : FileTree::Node {
+    Debug_* giDbg;
+
+    Node(Debug_* giDbg)
+        : FileTree::Node{FileTree::File}, giDbg{giDbg} { }
+
+    QVariant data(const QModelIndex& index, int role) const override {
+        if(role == Qt::DecorationRole && !index.column())
+            return drawIcon(giDbg->shape_, giDbg->pen_.color(), true);
+
+        return {};
+    }
+    bool setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/) override {
+        return {};
+    }
+    Qt::ItemFlags flags(const QModelIndex& /*index*/) const override {
+        return Qt::ItemIsEnabled | Qt::ItemIsSelectable;
+    }
+    void menu(QMenu& /*menu*/, FileTree::View* /*tv*/) override { }
+};
+
+struct Dymmy final : AbstractFile {
+    Debug_* giDbg;
+    Dymmy(Debug_* giDbg): giDbg{giDbg} { }
+
+    // AbstractFile interface
+    uint32_t type() const override { return Type::Debug; }
+    void createGi() override { }
+    FileTree::Node* node() override { return giDbg->node; }
+    QIcon icon() const override { return {}; }
+
+protected:
+    void write(QDataStream& /*stream*/) const override { }
+    void read(QDataStream& /*stream*/) override { }
+    Paths merge() const override { return {}; }
+};
 
 Debug_::Debug_(const QColor& color, double width) {
     pen_ = {color, width};
@@ -31,39 +70,40 @@ Debug_::Debug_(const Path& path, const QColor& color, double width)
 
 Debug_::Debug_(const Paths& paths, const QColor& color, double width)
     : Debug_{color, width} {
-    paths_ = paths;
-#if 1
-    for(const Path& path: paths)
+    for(const Path& path: paths) {
+        shape_.moveTo(~path.front());
         shape_.addPolygon(~path);
+    }
     boundingRect_ = shape_.boundingRect();
-#else
-    for(Path& path: paths_) {
-        toCurve(path);
-        // for(const Point& pt: path) {
-        // auto qp = ~GetZ(pt);
-        // shape_.addEllipse(qp.x() - 0.05, qp.y() - 0.05, 0.1, 0.1);
-        // }
+
+    if(shape_.isEmpty()) {
+        delete this; // NOTE
+        return;
     }
 
-    for(auto&& pt: paths_ | v::join | v::transform(GetC) | v::transform(toQPointF))
-        centers.emplace(pt);
-
-    auto bounds = GetBounds(paths);
-    boundingRect_ = QRectF{
-        dScale * bounds.left,
-        dScale * bounds.top,
-        dScale * (bounds.right - bounds.left),
-        dScale * (bounds.bottom - bounds.top),
-    };
-
-#endif
+    // node = new Node{this};
+    // Dymmy dymmy{this};
+    // App::fileModel().addFile(&dymmy);
 }
 
 Debug_::Debug_(const QPainterPath& path, const QColor& color, double width)
     : Debug_{color, width} {
     shape_ = path;
     boundingRect_ = shape_.boundingRect();
-    if(path.isEmpty()) delete this; // NOTE
+
+    if(shape_.isEmpty()) {
+        delete this; // NOTE
+        return;
+    }
+
+    // node = new Node{this};
+    // Dymmy dymmy{this};
+    // App::fileModel().addFile(&dymmy);
+}
+
+Debug_::~Debug_() {
+    // node->giDbg = nullptr;
+    // delete node;
 }
 
 QRectF Debug_::boundingRect() const { return boundingRect_; }
@@ -100,8 +140,8 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     // painter->setPen(QPen(Qt::magenta, 0.0));
     // painter->drawRect(rect_);
 
-    pen.setColor({0, 255, 0, 255});
-    painter->setPen(pen);
+    // pen.setColor({0, 255, 0, 255});
+    // painter->setPen(pen);
 
     double len = 10 * scale;
 
@@ -120,39 +160,14 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     }
 
     ////////////////////////////////////////////////////// for Debug_ cut direction
-    if(sc_ != scale) updateArrows();
-    painter->drawPath(arrows_);
+    if(arrows) {
+        if(auto ar = updateArrows()) arrows_ = std::move(*ar); // for direction
+        painter->drawPath(arrows_);
+    }
 }
 
 int Debug_::type() const { return Type::Debug; }
 
 Paths Debug_::paths(int) const { return {} /*paths_*/; }
-
-void Debug_::updateArrows() {
-    sc_ = scaleFactor();
-    arrows_ = QPainterPath(); //.clear();
-    if(qFuzzyIsNull(pen_.widthF())) {
-        for(const QPolygonF& path: shape_.toSubpathPolygons()) {
-            for(auto&& [b, e]: path | v::pairwise | v::reverse) {
-                QLineF line{e, b};
-                double length = 30 * scaleFactor();
-
-                if(length > 0.5)
-                    length = 0.5;
-                const double angle = line.angle();
-                line.setLength(length);
-                line.setAngle(angle + 10);
-                arrows_.moveTo(line.p1());
-                arrows_.lineTo(line.p2());
-                // painter->drawLine(line);
-                line.setAngle(angle - 10);
-                arrows_.moveTo(line.p1());
-                arrows_.lineTo(line.p2());
-                // painter->drawLine(line);
-                break;
-            }
-        }
-    }
-}
 
 } // namespace Gi

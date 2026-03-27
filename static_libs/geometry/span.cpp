@@ -1,23 +1,23 @@
 #include "span.h"
-#include "curve.h"
+
+using namespace geo;
+// using namespace circle;
 
 double IncludedAngle(const PointF& v0, const PointF& v1, int dir) {
     // returns the absolute included angle between 2 vectors in the direction of dir ( 1=acw  -1=cw)
     double inc_ang = PointF::dotProduct(v0, v1);
-    if(inc_ang > 1. - 1.0e-10) {
-        return 0;
-    }
+    if(inc_ang > 1. - 1.0e-10) return 0;
+
     if(inc_ang < -1. + 1.0e-10) {
         inc_ang = pi;
     } else { // dot product,   v1 . v2  =  cos ang
-        if(inc_ang > 1.0) {
+        if(inc_ang > 1.0)
             inc_ang = 1.0;
-        }
+
         inc_ang = acos(inc_ang); // 0 to pi radians
 
-        if(dir * PointF::crossProduct(v0, v1) < 0) {
+        if(dir * PointF::crossProduct(v0, v1) < 0)
             inc_ang = 2 * pi - inc_ang; // cp
-        }
     }
     return dir * inc_ang;
 }
@@ -175,8 +175,8 @@ QRectF Span::boundingRect() {
 
 double Span::IncludedAngle() const {
     if(vx.type) {
-        PointF vs{pt - vx.center};
-        PointF ve{vx.pt - vx.center};
+        PointF vs = pt - vx.center;
+        PointF ve = vx.pt - vx.center;
         vs.ry() *= -1.;
         ve.ry() *= -1.;
 

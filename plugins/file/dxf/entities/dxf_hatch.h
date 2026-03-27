@@ -243,7 +243,7 @@ struct Hatch final : Entity {
 
     mvector<mvector<Edge*>> edges;
 
-    mvector<QString> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
+    std::vector<QString> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 
     QPointF centerPoint;
     std::vector<int> pathTypeFlags;

@@ -19,19 +19,19 @@ namespace PocketOffset {
 void Creator::create() {
     setMax(10000);
 
-    assert(gcp_.side() != GCode::On);
+    assert(gcp.side() != GCode::On);
 
-    if(gcp_.tools.size() > 1)
-        createMultiTool(gcp_.tools, gcp_.params[GCode::Params::Depth].toDouble());
-    else if(gcp_.params.contains(OffsetSteps) && gcp_.params[OffsetSteps].toInt() > 0)
-        createFixedSteps(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble(), gcp_.params[OffsetSteps].toInt());
+    if(this->gcp.tools.size() > 1)
+        createMultiTool(gcp.tools, gcp.params[GCode::Params::Depth].toDouble());
+    else if(gcp.params.contains(OffsetSteps) && gcp.params[OffsetSteps].toInt() > 0)
+        createFixedSteps(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble(), gcp.params[OffsetSteps].toInt());
     else
-        createStdFull(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble());
+        createStdFull(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 
 void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) {
     Timer t{__FUNCTION__};
-    if(gcp_.side() == GCode::On)
+    if(gcp.side() == GCode::On)
         return;
 
     toolDiameter = tool.getDiameter(depth) * uScale;
@@ -52,7 +52,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
         } while(paths.size() && --counter);
     };
 
-    if(gcp_.side() == GCode::Inner) {
+    if(gcp.side() == GCode::Inner) {
         dOffset = -dOffset, stepOver = -stepOver;
         for(Paths paths: groupedPaths(GCode::Grouping::Copper)) {
             paths = Inflate(paths, dOffset, JoinType::Round, EndType::Polygon, uScale);
@@ -78,15 +78,17 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     stacking(returnPs);
     assert(returnPss.size());
 
-    file_ = new File{std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths)};
+    gcp.setToolPathss(toCurvess(returnPss));
+    gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
+    file_ = new File{std::move(gcp)};
+
     file_->setFileName(tool.nameEnc());
-    emit fileReady(file_);
 }
 
 void Creator::createStdFull(const Tool& tool, const double depth) {
     Timer t{__FUNCTION__};
 
-    if(gcp_.side() == GCode::On)
+    if(gcp.side() == GCode::On)
         return;
 
     toolDiameter = tool.getDiameter(depth) * uScale;
@@ -94,7 +96,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     stepOver = tool.stepover() * uScale;
     Paths cutAreaPaths;
 
-    if(gcp_.side() == GCode::Outer)
+    if(gcp.side() == GCode::Outer)
         groupedPaths(GCode::Grouping::Cutoff, static_cast</*PType*/ int32_t>(toolDiameter * 1.005));
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
@@ -125,14 +127,16 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
 
     cutAreaPaths = Inflate(cutAreaPaths, dOffset, JoinType::Round, EndType::Polygon, uScale);
 
-    file_ = new File{std::move(gcp_), std::move(returnPss), std::move(cutAreaPaths)};
+    gcp.setToolPathss(toCurvess(returnPss));
+    gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
+    file_ = new File{std::move(gcp)};
+
     file_->setFileName(tool.nameEnc());
-    emit fileReady(file_);
 }
 
 void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
-    if(gcp_.side() == GCode::Outer)
+    if(gcp.side() == GCode::Outer)
         groupedPaths(GCode::Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005 * uScale);
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
@@ -207,24 +211,26 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         stacking(returnPs);
         assert(returnPss.size());
 
-        gcp_.params[GCode::Params::MultiToolIndex] = tIdx;
+        gcp.params[GCode::Params::MultiToolIndex] = tIdx;
 
-        file_ = new File{GCode::Params{gcp_}, std::move(returnPss), std::move(cutAreaPaths)};
+        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
 
         // make a bounding box for the next tool
         fillPaths[tIdx] = Inflate(fillPaths[tIdx], dOffset, JoinType::Round, EndType::Polygon, uScale);
-        ++tIdx;
+
+        if(++tIdx < tools.size()) emit fileReady(file_); // NOTE skip last
     } // for (int tIdx{}; tIdx < tools.size(); ++tIdx) {
 }
 
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if(gcp_.tools.front().diameter()) {
+File::File(GCode::Params&& gcp)
+    : GCode::File{std::move(gcp)} {
+    if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -239,19 +245,19 @@ void File::genGcodeAndTile() {
     for(size_t x{}; x < proj.stepsX(); ++x) {
         for(size_t y{}; y < proj.stepsY(); ++y) {
             const QPointF offset{(rect.width() + proj.spaceX()) * x, (rect.height() + proj.spaceY()) * y};
-            if(toolType() == Tool::Laser)
+            if(toolType == Tool::Laser)
                 saveLaserPocket(offset);
             else
                 saveMillingPocket(offset);
 
-            if(gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
 void File::createGi() {
-    // switch (gcp_.gcType) {
+    // switch (gcp.gcType) {
     // case GCode::Raster:
     // createGiRaster();
     // break;

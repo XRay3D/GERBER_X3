@@ -29,7 +29,7 @@ public:
 protected:
     void parseLines(const QString& gerberLines, const QString& fileName);
 
-    mvector<QString> cleanAndFormatFile(QString data);
+    std::vector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
 

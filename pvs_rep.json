@@ -100649,7 +100649,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,
@@ -294278,7 +294278,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the right operand of the gcp_.getTool().spindleSpeed() 'assignment'.",
+      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the right operand of the gcp.getTool().spindleSpeed() 'assignment'.",
       "positions": [
         {
           "column": 1,
@@ -294305,7 +294305,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the right operand of the gcp_.getTool().spindleSpeed() 'assignment'.",
+      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the right operand of the gcp.getTool().spindleSpeed() 'assignment'.",
       "positions": [
         {
           "column": 1,
@@ -294359,7 +294359,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 2,
-      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp_.getTool()' expression repeatedly.",
+      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp.getTool()' expression repeatedly.",
       "positions": [
         {
           "column": 1,
@@ -297108,7 +297108,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 2,
-      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp_.getTool()' expression repeatedly.",
+      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp.getTool()' expression repeatedly.",
       "positions": [
         {
           "column": 1,
@@ -297345,7 +297345,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the first argument 'gcp_.getTool().spindleSpeed()' of the function call 'setSpindleSpeed'.",
+      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the first argument 'gcp.getTool().spindleSpeed()' of the function call 'setSpindleSpeed'.",
       "positions": [
         {
           "column": 1,
@@ -297372,7 +297372,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the first argument 'gcp_.getTool().spindleSpeed()' of the function call 'setSpindleSpeed'.",
+      "message": "There should be no 'floating to integral' implicit cast. Consider inspecting the first argument 'gcp.getTool().spindleSpeed()' of the function call 'setSpindleSpeed'.",
       "positions": [
         {
           "column": 1,
@@ -297426,7 +297426,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 2,
-      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp_.getTool()' expression repeatedly.",
+      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp.getTool()' expression repeatedly.",
       "positions": [
         {
           "column": 1,
@@ -298426,7 +298426,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp_.getTool()' expression repeatedly.",
+      "message": "Decreased performance. Consider creating a reference to avoid using the 'gcp.getTool()' expression repeatedly.",
       "positions": [
         {
           "column": 1,
@@ -303161,7 +303161,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 2,
-      "message": "Implicit conversion of 'i' to memsize type in an arithmetic expression: i < pocketPaths_.size() - 1",
+      "message": "Implicit conversion of 'i' to memsize type in an arithmetic expression: i < pocketAreaPaths_.size() - 1",
       "positions": [
         {
           "column": 1,
@@ -303188,7 +303188,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 2,
-      "message": "Incorrect index type: pocketPaths_[not a memsize-type]. Use memsize type instead.",
+      "message": "Incorrect index type: pocketAreaPaths_[not a memsize-type]. Use memsize type instead.",
       "positions": [
         {
           "column": 1,
@@ -341704,7 +341704,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,
@@ -353022,7 +353022,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,
@@ -359203,7 +359203,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,
@@ -378235,7 +378235,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,
@@ -420599,7 +420599,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,
@@ -431086,7 +431086,7 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 3,
-      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp_.tools.front().diameter()) > Epsilon.",
+      "message": "An odd precise comparison. It's probably better to use a comparison with defined precision: fabs(gcp.tools.front().diameter()) > Epsilon.",
       "positions": [
         {
           "column": 1,

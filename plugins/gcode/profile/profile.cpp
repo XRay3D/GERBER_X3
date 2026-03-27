@@ -19,72 +19,71 @@
 
 #undef emit
 #include <execution>
+#include <gi_dbg.h>
 #define emit
 
 namespace Profile {
 
 void Creator::create() {
     // WARNING App::fileTreeView().closeFiles();
-    createProfile(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble());
+    createProfile(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 
 void Creator::createProfile(const Tool& tool, const double depth) {
-    do {
+    Finaly _{[this] { emit fileReady(file_); }};
 
-        toolDiameter = tool.getDiameter(depth);
+    toolDiameter = tool.getDiameter(depth);
 
-        const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) /** 0.5*/ * uScale;
+    const double dOffset = ((gcp.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) /** 0.5*/ * uScale;
 
-        if(gcp_.side() == GCode::On) {
-            if(gcp_.params[TrimmingOpenPaths].toBool())
-                trimmingOpenPaths(openSrcPaths);
-            returnPs = std::move(closedSrcPaths);
-        } else {
-            if(closedSrcPaths.size()) {
-                // ClipperOffset offset;
-                // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
-                // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
-                // returnPs = offset.Execute(dOffset);
-                auto it = v::join(groupedPaths(GCode::Grouping::Copper));
-                returnPs = Inflate(Paths{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
-            }
-            if(openSrcPaths.size()) {
-                // ClipperOffset offset;
-                // offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
-                // openSrcPaths = offset.Execute(dOffset);
-                openSrcPaths = Inflate(openSrcPaths, dOffset, JoinType::Round, EndType::Round);
-                if(!openSrcPaths.empty())
-                    returnPs += openSrcPaths;
-            }
+    if(gcp.side() == GCode::On) {
+        if(gcp.params[TrimmingOpenPaths].toBool())
+            trimmingOpenPaths(openSrcPaths);
+        returnPs = std::move(closedSrcPaths);
+    } else {
+        if(closedSrcPaths.size()) {
+            // ClipperOffset offset;
+            // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
+            // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+            // returnPs = offset.Execute(dOffset);
+            auto it = v::join(groupedPaths(GCode::Grouping::Copper));
+            returnPs = Inflate(Paths{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
         }
-
-        if(returnPs.empty() && openSrcPaths.empty())
-            break;
-
-        reorder();
-
-        if(gcp_.side() == GCode::On && openSrcPaths.size()) {
-            returnPss.reserve(returnPss.size() + openSrcPaths.size());
-            mergePaths(openSrcPaths);
-            sortBeginEnd(openSrcPaths, ~(App::home().pos() + App::zero().pos()));
-            for(auto&& path: openSrcPaths)
-                returnPss.push_back({std::move(path)});
+        if(openSrcPaths.size()) {
+            // ClipperOffset offset;
+            // offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
+            // openSrcPaths = offset.Execute(dOffset);
+            openSrcPaths = Inflate(openSrcPaths, dOffset, JoinType::Round, EndType::Round);
+            if(!openSrcPaths.empty())
+                returnPs += openSrcPaths;
         }
+    }
 
-        makeBridges();
+    if(returnPs.empty() && openSrcPaths.empty()) return;
 
-        if(gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
-            cornerTrimming();
+    reorder();
 
-        if(returnPss.empty())
-            break;
+    if(gcp.side() == GCode::On && openSrcPaths.size()) {
+        returnPss.reserve(returnPss.size() + openSrcPaths.size());
+        mergePaths(openSrcPaths);
+        sortBeginEnd(openSrcPaths, ~(App::home().pos() + App::zero().pos()));
+        for(auto&& path: openSrcPaths)
+            returnPss.push_back({std::move(path)});
+    }
 
-        file_ = new File{std::move(gcp_), std::move(returnPss)};
-        file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
-        return;
-    } while(0);
-    emit fileReady(nullptr);
+    makeBridges();
+
+    if(gcp.params.contains(TrimmingCorners) && gcp.params[TrimmingCorners].toInt())
+        cornerTrimming();
+
+    if(returnPss.empty()) return;
+
+    // Gi::Debug(returnPss | v::join | r::to<std::vector>(), Qt::yellow);
+
+    gcp.setToolPathss(toCurvess(returnPss));
+
+    file_ = new File{std::move(gcp)};
+    file_->setFileName(tool.nameEnc());
 }
 
 void Creator::trimmingOpenPaths(Paths& paths) {
@@ -137,8 +136,8 @@ void Creator::cornerTrimming() {
     Timer_mS t{};
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
-    const double testAngle = gcp_.convent() ? 90.0 : 270.0;
-    const double trimAngle = gcp_.convent() ? -45.0 : +45;
+    const double testAngle = gcp.convent() ? 90.0 : 270.0;
+    const double trimAngle = gcp.convent() ? -45.0 : +45;
 
 #if _ITERATOR_DEBUG_LEVEL == /*0*/ 100 // FIXME
     auto insert = [=](auto& path, auto cornerPrev, auto&& corner, auto cornerNext) {
@@ -259,13 +258,17 @@ void Creator::reorder() {
 
     std::reverse(returnPs.begin(), returnPs.end());
 
-    if((gcp_.side() == GCode::Inner) ^ gcp_.convent())
+    if((gcp.side() == GCode::Inner) ^ gcp.convent())
         ReversePaths(returnPs);
 
     returnPss.reserve(returnPs.size());
 
     for(auto&& path: returnPs) {
+
+        CL2::StripDuplicates(path, true);
+        CL2::SimplifyPath(path, uScale / 100);
         path.push_back(path.front());
+
         returnPss.push_back({path});
     }
 }
@@ -359,9 +362,9 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss)
-    : GCode::File(std::move(gcp), std::move(toolPathss)) {
-    if(gcp_.tools.front().diameter()) {
+File::File(GCode::Params&& gcp)
+    : GCode::File{std::move(gcp)} {
+    if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -376,42 +379,40 @@ void File::genGcodeAndTile() {
         for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if(toolType() == Tool::Laser)
+            if(toolType == Tool::Laser)
                 saveLaserProfile(offset);
             else
                 saveMillingProfile(offset);
 
-            if(gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
 void File::createGi() {
-
+    auto& toolPathss = gcp.toolPathss();
     Gi::Item* item;
-    for(const Paths& paths: toolPathss_) {
+    for(const Curves& paths: toolPathss) {
         item = new Gi::GcPath{paths, this};
-        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
 
-    for(size_t i{}; const Paths& paths: toolPathss_) {
-        item = new Gi::GcPath{toolPathss_[i], this};
+    for(const Curves& paths: toolPathss) {
+        item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
-        for(size_t j{}; j < paths.size() - 1; ++j)
-            g0path_.push_back({paths[j].back(), paths[j + 1].front()});
-        if(i < toolPathss_.size() - 1)
-            g0path_.push_back({toolPathss_[i].back().back(), toolPathss_[++i].front().front()});
     }
+
+    for(auto&& [from, to]: toolPathss | v::join | v::pairwise)
+        g0path_.push_back(Curve{{from.back().pt}, {to.front().pt}});
 
     item = new Gi::GcPath{g0path_};
     // item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
-
     itemGroup()->setVisible(true);
 }
 

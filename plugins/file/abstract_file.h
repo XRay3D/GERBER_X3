@@ -108,7 +108,7 @@ public:
         return file;
     }
 
-    AbstractFile();
+    AbstractFile() = default;
 
     virtual ~AbstractFile();
 
@@ -125,8 +125,8 @@ public:
     Paths mergedPaths() const;
     Pathss groupedPaths() const;
 
-    mvector<QString>& lines();
-    const mvector<QString>& lines() const;
+    std::vector<QString>& lines();
+    const std::vector<QString>& lines() const;
     const QString lines2() const;
     virtual mvector<const GraphicObject*> graphicObjects() const;
 
@@ -183,15 +183,11 @@ protected:
     int itemsType_ = -1;
     mutable Paths mergedPaths_;
     mutable bool visible_{};
-    mvector<Gi::Group*> itemGroups_;
-    mvector<QString> lines_;
+    mvector<Gi::Group*> itemGroups_{new Gi::Group};
+    std::vector<QString> lines_;
     // QTransform transform_;
     Transform transform_;
 };
-
-inline AbstractFile::AbstractFile()
-    : itemGroups_{new Gi::Group} {
-}
 
 inline AbstractFile::~AbstractFile() { qDeleteAll(itemGroups_); }
 
@@ -225,9 +221,9 @@ inline Paths AbstractFile::mergedPaths() const { return mergedPaths_.size() ? me
 
 inline Pathss AbstractFile::groupedPaths() const { return groupedPaths_; }
 
-inline mvector<QString>& AbstractFile::lines() { return lines_; }
+inline std::vector<QString>& AbstractFile::lines() { return lines_; }
 
-inline const mvector<QString>& AbstractFile::lines() const { return lines_; }
+inline const std::vector<QString>& AbstractFile::lines() const { return lines_; }
 
 inline const QString AbstractFile::lines2() const {
     QString rstr;
