@@ -458,6 +458,7 @@ bool isValidUtf8(std::string_view data) noexcept;
 
 //------------------------------------------------------------------------------
 
+#if 0
 template <typename T>
 struct Cast final {
     T val;
@@ -471,11 +472,20 @@ struct Cast final {
 };
 template <typename T>
 Cast(T&& arg) -> Cast<decltype(arg)>;
+#else
+template <typename T>
+struct Cast final {
+    const T& val;
+    template <typename To>
+    constexpr operator To() const;
+};
 
-// template <typename T>
-// template <typename To>
-// constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
+template <typename T>
+template <typename To>
+constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
 
-// template <>
-// template <typename To>
-// constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
+template <>
+template <typename To>
+constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
+
+#endif

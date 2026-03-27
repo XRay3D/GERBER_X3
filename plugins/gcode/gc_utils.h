@@ -44,7 +44,7 @@
 // int toolType_{};
 
 // protected:
-// /*const*/ Params gcp_; ////
+// /*const*/ Params gcp; ////
 // enum {
 // AlwaysG,
 // AlwaysX,
@@ -85,8 +85,8 @@
 // return u"G1"_s;
 // }
 
-// mvector<QString> savePath(const QPolygonF& path, double spindleSpeed) {
-// mvector<QString> lines;
+// std::vector<QString> savePath(const QPolygonF& path, double spindleSpeed) {
+// std::vector<QString> lines;
 // lines.reserve(path.size());
 // bool skip = true;
 // for (const QPointF& point : path) {
@@ -98,7 +98,7 @@
 // return lines;
 // }
 
-// QString formated(const mvector<QString>& data) {
+// QString formated(const std::vector<QString>& data) {
 // QString ret;
 // for (const QString& str : data) {
 // const int index = cmdList.indexOf(str.front().toUpper());

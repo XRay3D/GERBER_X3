@@ -22,12 +22,12 @@ namespace GCode {
 
 class File;
 
-class BaseForm : public QWidget {
+class Form : public QWidget {
     Q_OBJECT
 
 public:
-    explicit BaseForm(Plugin* plugin, Creator* tpc);
-    ~BaseForm() override;
+    explicit Form(Plugin* plugin, Creator* tpc);
+    ~Form() override;
     virtual void editFile(File* file) = 0;
 
     Creator* creator() const { return creator_; }
@@ -48,11 +48,11 @@ protected:
 
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
-    // BaseForm interface
+    // Form interface
     virtual void computePaths() = 0;
     virtual void updateName() = 0;
 
-    GCode::Params* getNewGcp();
+    const Params& getNewGcpWithGi();
 
     Direction direction = Climb;
     SideOfMilling side = Outer;
@@ -78,6 +78,7 @@ protected:
     QPushButton* pbCreate;
     QWidget* content;
     QGridLayout* grid;
+    Params gcp;
 
 private:
     Creator* creator_{nullptr};
@@ -100,25 +101,33 @@ private:
     // QThread thread;
     class Runer : public QThread {
         // Q_OBJECT
-        BaseForm* const form;
-        Params* gcp{};
+        Form* const form;
+        Params gcp{};
 
     public:
-        Runer(BaseForm* form)
+        Runer(Form* form)
             : form{form} { }
         virtual ~Runer() { }
         void createGc(Params* newGcp) {
-            gcp = newGcp;
-            start();
+            if(0) { // FIXME
+                gcp = std::move(*newGcp);
+                start();
+            } else {
+                form->creator_->createGc(std::move(*newGcp));
+            }
         }
 
     protected:
         // QThread interface
-        void run() override { form->creator_->createGc(gcp); }
+        void run() override {
+            // setTerminationEnabled(true);
+            form->creator_->createGc(std::move(gcp));
+            // setTerminationEnabled(false);
+        }
     } runer{this};
 
     File* file_;
-    class ::QProgressDialog* progressDialog;
+    class QProgressDialog* progressDialog;
     int progressTimerId{};
 };
 

@@ -74,22 +74,24 @@ GraphicsView::GraphicsView(QWidget* parent)
 
     ////////////////////////////////////
     struct Scene final : public QGraphicsScene {
+        QPointF last;
         using QGraphicsScene::QGraphicsScene;
         QPointF mappedPos() { return qobject_cast<GraphicsView*>(parent())->scenePos; }
         void mousePressEvent(QGraphicsSceneMouseEvent* event) override {
-            event->setScenePos(mappedPos());
+            event->setScenePos(last = mappedPos());
             QGraphicsScene::mousePressEvent(event);
         }
         void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override {
-            event->setScenePos(mappedPos());
+            if(last == mappedPos()) return;
+            event->setScenePos(last = mappedPos());
             QGraphicsScene::mouseMoveEvent(event);
         }
         void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override {
-            event->setScenePos(mappedPos());
+            event->setScenePos(last = mappedPos());
             QGraphicsScene::mouseReleaseEvent(event);
         }
         void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override {
-            event->setScenePos(mappedPos());
+            event->setScenePos(last = mappedPos());
             QGraphicsScene::mouseDoubleClickEvent(event);
         }
     };
@@ -198,7 +200,7 @@ void GraphicsView::zoomToSelected() {
 }
 
 void GraphicsView::zoomIn() {
-    if(getScale() > 10000.0) return;
+    if(getScale() > 100000.0) return;
     App::settings().guiSmoothScSh()
         ? animate(this, "scale"_ba, getScale(), getScale() * zoomFactorAnim)
         : scale(zoomFactor, zoomFactor);
@@ -477,17 +479,17 @@ void GraphicsView::GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item) {
         Gi::DataFill* ditem = dynamic_cast<Gi::DataFill*>(item);
         double distance{};
         center = item->boundingRect().center();
-
-        for(const auto& paths: ditem->getPaths()) {
-            for(const auto& path: paths) {
-                QPointF point{path.x * dScale, path.y * dScale};
-                distance = std::max(distance,
-                    std::sqrt(std::pow(point.x() - center.x(), 2)
-                        + std::pow(point.y() - center.y(), 2)));
-                maxX = std::max(maxX, point.x());
-                maxY = std::max(maxY, point.y());
-            }
-        }
+        qFatal("edit");
+        // for(const auto& paths: ditem->getPaths()) {
+        //     for(const auto& path: paths) {
+        //         QPointF point{path.x * dScale, path.y * dScale};
+        //         distance = std::max(distance,
+        //             std::sqrt(std::pow(point.x() - center.x(), 2)
+        //                 + std::pow(point.y() - center.y(), 2)));
+        //         maxX = std::max(maxX, point.x());
+        //         maxY = std::max(maxY, point.y());
+        //     }
+        // }
 
         radius = QPointF{distance, 0};
         rect = QPointF{maxX, maxY} - center;

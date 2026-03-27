@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "pocketoffset.h"
 #include "ui_pocketoffsetform.h"
 #include <QToolBar>
@@ -21,7 +21,7 @@ class PocketOffsetForm;
 
 namespace PocketOffset {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:

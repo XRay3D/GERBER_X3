@@ -28,6 +28,7 @@ class File;
 
 namespace Gi {
 class Item;
+class Debug_;
 } // namespace Gi
 
 namespace FileTree {
@@ -41,6 +42,7 @@ class Model : public QAbstractItemModel {
     friend class ::Project;
     friend class Node;
     friend class View;
+    friend class Gi::Debug_;
 
 signals:
     void updateActions();

@@ -593,8 +593,7 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
 
     sbxMinCircleSegments = new QSpinBox{groupBox_4};
     sbxMinCircleSegments->setObjectName(u"sbxMinCircleSegments"_s);
-    sbxMinCircleSegments->setMinimum(12);
-    sbxMinCircleSegments->setMaximum(360);
+    sbxMinCircleSegments->setRange(36, 360);
 
     formLayout_3->setWidget(0, QFormLayout::FieldRole, sbxMinCircleSegments);
 
@@ -606,10 +605,9 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     dsbxMinCircleSegmentLength = new DoubleSpinBox{groupBox_4};
     dsbxMinCircleSegmentLength->setObjectName(u"dsbxMinCircleSegmentLength"_s);
     dsbxMinCircleSegmentLength->setDecimals(2);
-    dsbxMinCircleSegmentLength->setMinimum(0.010000000000000);
-    dsbxMinCircleSegmentLength->setMaximum(10.0);
-    dsbxMinCircleSegmentLength->setSingleStep(0.010000000000000);
-    dsbxMinCircleSegmentLength->setValue(0.500000000000000);
+    dsbxMinCircleSegmentLength->setRange(0.1, 10.0);
+    dsbxMinCircleSegmentLength->setSingleStep(0.05);
+    dsbxMinCircleSegmentLength->setValue(0.50);
 
     formLayout_3->setWidget(1, QFormLayout::FieldRole, dsbxMinCircleSegmentLength);
 

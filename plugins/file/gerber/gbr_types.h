@@ -35,24 +35,24 @@ class AbstractAperture;
 
 using ApertureMap = std::map<int, std::shared_ptr<AbstractAperture>>;
 
-enum ZeroOmissionMode {
+enum ZeroOmissionMode : bool {
     OmitLeadingZeros,
 #ifdef DEPRECATED
     OmitTrailingZeros,
 #endif
 };
 
-enum UnitMode {
+enum UnitMode : bool {
     Inches,
     Millimeters,
 };
 
-enum ImagePolarity {
+enum ImagePolarity : bool {
     Positive,
     Negative,
 };
 
-enum CoordinateValuesNotation {
+enum CoordinateValuesNotation : bool {
     AbsoluteNotation,
 #ifdef DEPRECATED
     IncrementalNotation,
@@ -65,7 +65,7 @@ enum InterpolationMode {
     CounterClockwiseCircular = 3
 };
 
-enum RegionMode {
+enum RegionMode : bool {
     Off,
     On
 };

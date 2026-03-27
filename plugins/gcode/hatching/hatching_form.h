@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "hatching.h"
 #include <QToolBar>
@@ -21,7 +21,7 @@ class HatchingForm;
 
 namespace CrossHatch {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:

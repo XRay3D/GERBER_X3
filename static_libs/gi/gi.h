@@ -93,8 +93,10 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int /*alternate*/ = {}) const ;
-    virtual void setPaths(Paths paths, int /*alternate*/ = {});
+    virtual Paths paths(int param = {}) const;
+    virtual Curves curves(int param = {}) const;
+    virtual void setPaths(Paths paths, int param = {});
+    virtual void setCurves(Curves curves, int param = {});
     virtual void redraw();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -137,6 +139,8 @@ protected:
     };
 
     int colorState = Default;
+    double scar;
+    std::optional<QPainterPath> updateArrows();
 
     // QGraphicsItem interface
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;

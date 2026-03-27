@@ -169,7 +169,7 @@ center=QPointF{cx, cy};
     if(polylineFlags & ClosedPolyline)
         addSeg(polyLine.back(), polyLine.front());
 
-    // r::for_each(path, &SetCSelf);
+    // r::for_each(path, SetCSelf);
 
     // Paths paths = Inflate({path}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
 

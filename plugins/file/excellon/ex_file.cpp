@@ -55,8 +55,8 @@ void File::setFormat(const Format& value) {
     (format_ = value).file = this;
     for(Hole& hole: *this) {
         hole.state.updatePos();
-        hole.item->update(hole.state.path.size() ? ~hole.state.path
-                                                 : Path{~hole.state.pos},
+        hole.item->updatePath(hole.state.path.size() ? hole.state.path
+                                                     : QPolygonF{hole.state.pos},
             hole.state.currentToolDiameter());
     }
 }
@@ -101,8 +101,8 @@ void File::read(QDataStream& stream) {
 void File::createGi() {
     for(Hole& hole: *this)
         itemGroup()->push_back(hole.item = new Gi::Drill{
-                                   hole.state.path.size() ? ~hole.state.path
-                                                          : Path{~hole.state.pos},
+                                   hole.state.path.size() ? hole.state.path
+                                                          : QPolygonF{hole.state.pos},
                                    hole.state.currentToolDiameter(),
                                    this,
                                    hole.state.toolId});

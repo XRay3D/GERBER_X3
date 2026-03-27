@@ -49,6 +49,7 @@ void Model::addFile(AbstractFile* file) {
     if(!file)
         return;
     uint32_t type = file->type();
+    Node* node = file->node();
     if(App::filePlugins().contains(type)) {
         auto& itemFolder = fileFolders[type];
         if(!itemFolder) {
@@ -61,7 +62,7 @@ void Model::addFile(AbstractFile* file) {
         }
         int rowCount = addFile(itemFolder, file);
         App::filePlugin(type)->updateFileModel(file);
-        emit select(createIndex(rowCount, 0, file->node()));
+        emit select(createIndex(rowCount, 0, node));
     } else if(App::gCodePlugins().contains(type)) {
         type = G_CODE;
         auto& itemFolder = fileFolders[type];
@@ -74,7 +75,7 @@ void Model::addFile(AbstractFile* file) {
             endInsertRows();
         }
         int rowCount = addFile(itemFolder, file);
-        emit select(createIndex(rowCount, 0, file->node()));
+        emit select(createIndex(rowCount, 0, node));
     } else if(type == GC_DBG_FILE) {
         auto& itemFolder = fileFolders[type];
         if(!itemFolder) {
@@ -86,7 +87,24 @@ void Model::addFile(AbstractFile* file) {
             endInsertRows();
         }
         int rowCount = addFile(itemFolder, file);
-        emit select(createIndex(rowCount, 0, file->node()));
+        emit select(createIndex(rowCount, 0, node));
+    } else if(type == Gi::Type::Debug) {
+        auto& itemFolder = fileFolders[type];
+        if(!itemFolder) {
+            QModelIndex index = createIndex(0, 0, rootItem);
+            int rowCount = rootItem->childCount();
+            beginInsertRows(index, rowCount, rowCount);
+            itemFolder = new FolderNode{u"Gi::Debug"_s, static_cast<int32_t>(type)};
+            rootItem->addChild(itemFolder);
+            endInsertRows();
+        }
+        // int rowCount = addFile(itemFolder, file);
+        QModelIndex index = createIndex(0, 0, itemFolder);
+        int rowCount = itemFolder->childCount();
+        beginInsertRows(index, rowCount, rowCount);
+        itemFolder->addChild(node);
+        endInsertRows();
+        emit select(createIndex(rowCount, 0, node));
     }
 }
 

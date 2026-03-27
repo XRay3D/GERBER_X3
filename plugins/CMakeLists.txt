@@ -17,8 +17,8 @@ set(FILE_PLUGINS gerber dxf excellon)
 add_subdirectory(file)
 
 set(GCODE_PLUGINS
-    pocketoffset
     profile
+    pocketoffset
     drill
     hatching
     pocketraster

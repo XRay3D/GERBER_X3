@@ -53,7 +53,7 @@ Paths offset(const Path& path, double offset, bool fl = false) {
 /////////////////////////////////////////////
 
 Form::Form(GCode::Plugin* plugin)
-    : GCode::BaseForm{plugin, nullptr}
+    : GCode::Form{plugin, nullptr}
     , ui(new Ui::DrillForm) {
     ui->setupUi(content);
 
@@ -546,11 +546,14 @@ void Form::computePaths() {
         for(auto& [toolId, val]: pathsMap) {
             if(val.drillPath.size()) {
                 reductionOfDistance(val.drillPath, ~App::home().pos());
-
                 GCode::File* gcode = new File{
-                    {App::toolHolder().tool(toolId), dsbxDepth->value()},
-                    {{val.drillPath}}
+                    GCode::Params{
+                                  App::toolHolder().tool(toolId),
+                                  dsbxDepth->value(),
+                                  {val.drillPath},
+                                  }
                 };
+
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + /*type_ +*/ indexes(val.toolsApertures));
                 gcode->setSide(file->side());
                 App::project().addFile(gcode);
@@ -558,26 +561,26 @@ void Form::computePaths() {
             if(val.paths.size()) {
                 switch(worckType) {
                 case GCType::Profile: {
-                    auto gcp = new GCode::Params;
-                    gcp->setConvent(ui->rbConventional->isChecked());
-                    gcp->setSide(side);
-                    gcp->tools = {App::toolHolder().tool(toolId)};
-                    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-                    gcp->closedPaths = std::move(val.paths);
+                    gcp = {};
+                    gcp.setConvent(ui->rbConventional->isChecked());
+                    gcp.setSide(side);
+                    gcp.tools = {App::toolHolder().tool(toolId)};
+                    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+                    gcp.closedCurves.append_range(toCurves(val.paths)); // FIXME
                     setCreator(new Profile::Creator);
                     fileCount = 1;
-                    emit createToolpath(gcp);
+                    emit createToolpath(&gcp);
                 } break;
                 case GCType::Pocket: {
-                    auto gcp = new GCode::Params;
-                    gcp->setConvent(ui->rbConventional->isChecked());
-                    gcp->setSide(GCode::Inner);
-                    gcp->tools = {App::toolHolder().tool(toolId)};
-                    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-                    gcp->closedPaths = std::move(val.paths);
+                    gcp = {};
+                    gcp.setConvent(ui->rbConventional->isChecked());
+                    gcp.setSide(GCode::Inner);
+                    gcp.tools = {App::toolHolder().tool(toolId)};
+                    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+                    gcp.closedCurves.append_range(toCurves(val.paths)); // FIXME
                     setCreator(new PocketOffset::Creator);
                     fileCount = 1;
-                    emit createToolpath(gcp);
+                    emit createToolpath(&gcp);
                 } break;
                 default: continue;
                 }

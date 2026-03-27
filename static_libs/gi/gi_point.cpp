@@ -371,10 +371,11 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             settings.setValue(u"depth"_s, depth);
             settings.endGroup();
 
-            GCode::Params gcp_{tool, depth};
-            gcp_.params[GCode::Params::NotTile];
+            GCode::Params gcp{tool, depth};
+            gcp.params[GCode::Params::NotTile];
+            gcp.setToolPathss({{toCurve(dst)}});
 
-            auto drillls = new Drilling::File{std::move(gcp_), Pathss{{~dst}}};
+            auto drillls = new Drilling::File{std::move(gcp)};
             drillls->setFileName(tr("Pin_") + tool.nameEnc());
             App::project().addFile(drillls);
         }

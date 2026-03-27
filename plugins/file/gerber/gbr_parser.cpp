@@ -182,8 +182,8 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
     reset(); // clear parser data
 }
 
-mvector<QString> Parser::cleanAndFormatFile(QString data) {
-    mvector<QString> gerberLines;
+std::vector<QString> Parser::cleanAndFormatFile(QString data) {
+    std::vector<QString> gerberLines;
     gerberLines.reserve(100000);
 
     enum State {
@@ -200,7 +200,7 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
         case Macro:
             lastLine.push_back(val);
             if(lastLine.endsWith(u'%')) {
-                gerberLines << lastLine;
+                gerberLines.emplace_back(lastLine);
                 state = Data;
             }
             break;
@@ -209,7 +209,7 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
             if(lastLine.endsWith(u'%')) {
                 for(QString& tmpline: lastLine.remove(u'%').split(u'*'))
                     if(!tmpline.isEmpty())
-                        gerberLines << (u'%' + tmpline + u"*%"_s);
+                        gerberLines.emplace_back(u'%' + tmpline + u"*%"_s);
                 state = Data;
             }
             break;
@@ -224,12 +224,12 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
                 val.push_back(u'%');
             if(!val.endsWith(u"*%"_s))
                 val.insert(val.length() - 2, u'*');
-            gerberLines << val;
+            gerberLines.emplace_back(val);
             break;
         case Param:
             for(QString& tmpline: val.remove(u'%').split(u'*'))
                 if(!tmpline.isEmpty())
-                    gerberLines << (u'%' + tmpline + u"*%"_s);
+                    gerberLines.emplace_back(u'%' + tmpline + u"*%"_s);
             break;
         case Data: break;
         }
@@ -240,9 +240,9 @@ mvector<QString> Parser::cleanAndFormatFile(QString data) {
         if(val.count(u'*') > 1) {
             for(QString& tmpline: val.split(u'*'))
                 if(!tmpline.isEmpty())
-                    gerberLines << (tmpline + u'*');
+                    gerberLines.emplace_back(tmpline + u'*');
         } else {
-            gerberLines << val;
+            gerberLines.emplace_back(val);
         }
     };
     for(QString& line: data
@@ -575,7 +575,7 @@ Paths Parser::createLine() {
 
     if(file->apertures_[state_.aperture()]->type() == Rectangle) {
         solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
-        r::for_each(v::join(solution), &SetCSelf);
+        r::for_each(v::join(solution), SetCSelf);
         // auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
         // if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
         //     throw GbrObj::tr("Aperture D%1 (%2) not supported!\n"
@@ -586,12 +586,12 @@ Paths Parser::createLine() {
         // if(qFuzzyIsNull(size))
         //     return {};
         // solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
-        // r::for_each(v::join(solution), &SetCSelf);
+        // r::for_each(v::join(solution), SetCSelf);
     } else {
         double size = file->apertures_[state_.aperture()]->size() * uScale * state_.scaling();
         if(qFuzzyIsNull(size)) return {};
-        r::for_each(path_, &SetCSelf);
-        solution = Inflate({path_}, size, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
+        r::for_each(path_, SetCSelf);
+        solution = Inflate({path_}, size, JoinType::Round, EndType::Round);
     }
     if(state_.imgPolarity() == Negative) ReversePaths(solution);
 
@@ -608,7 +608,7 @@ Paths Parser::createPolygon() {
         if(state_.imgPolarity() == Positive)
             ReversePath(path_);
     }
-    r::for_each(path_, &SetCSelf);
+    r::for_each(path_, SetCSelf);
     return {path_};
 }
 
@@ -973,9 +973,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         state_.setCurPos({x, y});
         // Последняя точка в вычисленной дуге может иметь числовые ошибки.
         // Точной конечной точкой является указанная (x, y). Замена.
-        if(arcPath.size()) arcPath.back() = state_.curPos();
-        else arcPath.emplace_back(state_.curPos());
-        // SetC(arcPath.back(), center);
+        if(arcPath.size()) arcPath.back() = state_.curPos(); // set center it self
+        else arcPath.emplace_back(state_.curPos());          // set center it self
         return arcPath;
     };
 
@@ -1024,8 +1023,6 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         qWarning() << u"Invalid arc in line %1."_s.arg(lineNum_) << gLine;
     }
 
-    if(arcPath.size() && path_.size() && path_.back() == arcPath.front())
-        path_.erase(--path_.end());
     path_ += std::move(arcPath);
 
     return true;

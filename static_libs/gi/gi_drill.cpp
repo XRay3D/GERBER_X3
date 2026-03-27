@@ -17,7 +17,7 @@
 
 namespace Gi {
 
-Drill::Drill(const Path& path, double diameter, AbstractFile* file, int toolId)
+Drill::Drill(const QPolygonF& path, double diameter, AbstractFile* file, int toolId)
     : Item{file}
     , diameter_{diameter}
     , path_{path}
@@ -58,7 +58,7 @@ void Drill::setDiameter(double diameter) {
     update();
 }
 
-void Drill::update(const Path& path, double diameter) {
+void Drill::updatePath(const QPolygonF& path, double diameter) {
     diameter_ = diameter;
     path_ = path;
     create();
@@ -103,11 +103,12 @@ void Drill::create() {
         // ReversePath(path_);
         // path_.push_back(path_.front());
         // shape_.addPolygon(path_);
-        shape_.addEllipse(~path_.front(), diameter_ * 0.5, diameter_ * 0.5);
+        shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
         // path_ = shape_.toFillPolygon();
     } else {
+        qFatal("toCurve");
         boundingRect_ = shape_.boundingRect();
-        for(auto&& path: Inflate(Paths{path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
+        for(auto&& path: Inflate(Paths{~path_}, diameter_ * uScale, JoinType::Round, EndType::Round, uScale)) {
             path.push_back(path.front());
             shape_.addPolygon(~path);
         }

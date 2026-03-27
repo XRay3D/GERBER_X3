@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "voronoi.h"
 #include <QToolBar>
 
@@ -19,7 +19,7 @@ class VoronoiForm;
 }
 namespace Voronoi {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:

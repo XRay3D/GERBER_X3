@@ -69,45 +69,61 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
         pair{"PocketRaster"sv,   [this] {
                  constexpr auto TYPE = "PocketRaster"_hash32;
                  if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
+
                  QTimer::singleShot(time += delay, this, [this] { selectAll(); });
-                 QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
                  QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
              }  },
         pair{"PocketOffset"sv,   [this] {
                  constexpr auto TYPE = "PocketOffset"_hash32;
                  if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
+
                  QTimer::singleShot(time += delay, this, [this] { selectAll(); });
-                 QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
                  QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
              }  },
+        pair{"Voronoi"sv,        [this] {
+                 constexpr auto TYPE = "Voronoi"_hash32;
+                 if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
+
+                 QTimer::singleShot(time += delay, this, [this] { selectAll(); });
+                 QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
+             }       },
         pair{"CrossHatch"sv,     [this] {
                  constexpr auto TYPE = "CrossHatch"_hash32;
                  if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
+
                  QTimer::singleShot(time += delay, this, [this] { selectAll(); });
-                 QTimer::singleShot(time += delay, this, [this, TYPE] { toolpathActions[TYPE]->toggle(); });
                  QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
              }    },
         pair{"Drilling"sv,       [this] {
-                 constexpr auto DRILLING = "Drilling"_hash32;
-                 QTimer::singleShot(time += delay, this, [this, DRILLING] { toolpathActions[DRILLING]->toggle(); });
+                 constexpr auto TYPE = "Drilling"_hash32;
+                 if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
+
                  QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
              }      },
         pair{"Thermal"sv,        [this] {
-                 constexpr auto THERMAL = "Thermal"_hash32;
-                 QTimer::singleShot(time += delay, this, [this, THERMAL] { toolpathActions[THERMAL]->toggle(); });
+                 constexpr auto TYPE = "Thermal"_hash32;
+                 if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
              }       },
         pair{"Profile"sv,        [this] {
-                 constexpr auto PROFILE = "Profile"_hash32;
+                 constexpr auto TYPE = "Profile"_hash32;
+                 if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
                  delay_ms(1000);
                  QTimer::singleShot(time += delay, this, [this] { selectAll(); });
-                 QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
-                 // QTimer::singleShot(time += delay, this,[this] { dockWidget_->findChild<QPushButton*>(u"pbAddBridge"_s)->click(); });
+                 QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbAddBridge"_s)->click(); });
                  QTimer::singleShot(time += delay, this, [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
-                 QTimer::singleShot(time += delay, this, [this] { App::grView().zoomFit(); });
+                 QTimer::singleShot(time += delay, this, [] { App::grView().zoomFit(); });
              }       },
         pair{"Thread"sv,         [this] {
-                 constexpr auto THREAD = "Thread"_hash32;
-                 QTimer::singleShot(time += delay, this, [this, THREAD] { toolpathActions[THREAD]->toggle(); });
+                 constexpr auto TYPE = "Thread"_hash32;
+                 if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
 
                  // QTimer::singleShot(time += delay, this, [this] { selectAll(); });
                  // QTimer::singleShot(time += delay, this, [this, PROFILE] { toolpathActions[PROFILE]->toggle(); });
@@ -135,7 +151,7 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
 
                  for(auto* action: actionGroup.actions())
                      if(action->text() == u"Text"_s)
-                         QTimer::singleShot(time += delay, this, [this, action] { action->toggle(); });
+                         QTimer::singleShot(time += delay, this, [action] { action->toggle(); });
                  QTimer::singleShot(time += delay, this, [this] { selectAll(); });
              }          },
     };

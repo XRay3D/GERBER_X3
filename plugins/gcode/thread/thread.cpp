@@ -20,7 +20,7 @@ namespace Thread {
 
 void Creator::create() {
     // WARNING App::fileTreeView().closeFiles();
-    createThread(gcp_.tools.front(), gcp_.params[GCode::Params::Depth].toDouble());
+    createThread(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 
 void Creator::createThread(const Tool& tool, const double depth) {
@@ -28,10 +28,10 @@ void Creator::createThread(const Tool& tool, const double depth) {
 
         // toolDiameter = tool.getDiameter(depth);
 
-        // const double dOffset = ((gcp_.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
+        // const double dOffset = ((gcp.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) * 0.5 * uScale;
 
-        // if(gcp_.side() == GCode::On) {
-        // if(gcp_.params[TrimmingOpenPaths].toBool())
+        // if(gcp.side() == GCode::On) {
+        // if(gcp.params[TrimmingOpenPaths].toBool())
         // trimmingOpenPaths(openSrcPaths);
         // returnPs = std::move(closedSrcPaths);
         // } else {
@@ -55,7 +55,7 @@ void Creator::createThread(const Tool& tool, const double depth) {
 
         // reorder();
 
-        // if(gcp_.side() == GCode::On && openSrcPaths.size()) {
+        // if(gcp.side() == GCode::On && openSrcPaths.size()) {
         // returnPss.reserve(returnPss.size() + openSrcPaths.size());
         // mergePaths(openSrcPaths);
         // sortBeginEnd(openSrcPaths);
@@ -65,13 +65,13 @@ void Creator::createThread(const Tool& tool, const double depth) {
 
         // makeBridges();
 
-        // if(gcp_.params.contains(TrimmingCorners) && gcp_.params[TrimmingCorners].toInt())
+        // if(gcp.params.contains(TrimmingCorners) && gcp.params[TrimmingCorners].toInt())
         // cornerTrimming();
 
         // if(returnPss.empty())
         // break;
 
-        // file_ = new File{std::move(gcp_), std::move(returnPss));
+        // file_ = new File{std::move(gcp), std::move(returnPss));
         // file_->setFileName(tool.nameEnc());
         // emit fileReady(file_);
         // return;
@@ -86,7 +86,7 @@ File::File()
 
 File::File(GCode::Params&& gcp, Pathss&& toolPathss)
     : GCode::File(std::move(gcp), std::move(toolPathss)) {
-    if(gcp_.tools.front().diameter()) {
+    if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -106,7 +106,7 @@ void File::genGcodeAndTile() {
     // else
     // saveMillingThread(offset);
 
-    // if (gcp_.params.contains(GCode::Params::NotTile))
+    // if (gcp.params.contains(GCode::Params::NotTile))
     // return;
     // }
     // }
@@ -117,7 +117,7 @@ void File::createGi() {
     Gi::Item* item;
     for(const Paths& paths: toolPathss_) {
         item = new Gi::GcPath{paths, this};
-        item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }

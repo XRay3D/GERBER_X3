@@ -61,7 +61,7 @@ public:
         }
     }
     static void extracted(QtMsgType& type);
-    void messageHandler(QtMsgType type, const QStringList& context, const QString& message);
+    void loggingHandler(QtMsgType type, const QStringList& context, const QString& message);
     void loadFile(const QString& fileName);
     static void updateTheme() {
 

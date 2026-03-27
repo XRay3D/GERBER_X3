@@ -34,8 +34,8 @@ using std::numbers::pi;
 constexpr auto sqrt1_2 = std::numbers::sqrt2 * 0.5;
 constexpr auto two_pi = pi * 2;
 
-constexpr int uScale{100'000};
-constexpr double dScale{1. / uScale};
+constexpr int uScale = 1e+5;
+constexpr double dScale = 1e-5;
 
 constexpr std::numeric_limits<int32_t> LimitI32;
 
@@ -49,7 +49,7 @@ using Point = Clipper2Lib::Point64;
 
 using Path = Clipper2Lib::Path64;
 using Paths = Clipper2Lib::Paths64;
-using Pathss = mvector<Paths>;
+using Pathss = std::vector<Paths>;
 
 using PolyTree = Clipper2Lib::PolyTree64;
 using Rect = Clipper2Lib::Rect64;
@@ -78,12 +78,86 @@ constexpr bool operator<(const Point& r, const Point& l) noexcept {
     return std::tuple{r.x, r.y} < std::tuple{l.x, l.y};
 }
 
+// constexpr bool operator<(const Point& l, const Point& r) noexcept {
+// return std::tie(l.x, l.y) < std::tie(r.x, r.y);
+// };
+
+// template <>
+// struct std::less<Point> : public std::binary_function<Point, Point, bool> {
+//     bool operator()(const Point& l, const Point& r) const {
+//         return std::tie(l.x, l.y) < std::tie(r.x, r.y);
+//     }
+//     bool operator()(Point& l, Point& r) const {
+//         return std::tie(l.x, l.y) < std::tie(r.x, r.y);
+//     }
+// };
+
 void TestPaths(const Paths& paths);
 
 Point GetC(const Point& dst);
 void SetC(Point& dst, const Point& center);
 void SetCForce(Point& dst, const Point& center);
 void SetCSelf(Point& dst);
+
+//------------------------------------------------------------------------------
+
+template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
+
+inline Point& operator*=(Point& pt, Arithmetic auto v) noexcept {
+    return pt.x *= v, pt.y *= v, pt;
+}
+
+inline Path& operator*=(Path& path, Arithmetic auto v) noexcept {
+    for(Point& pt: path) pt *= v; // FIME maybe and center
+    return path;
+}
+
+constexpr Point toPoint(const QPointF& p) noexcept { return {
+    p.x() * uScale,
+    p.y() * uScale,
+}; }
+constexpr QPointF toQPointF(const Point& p) noexcept { return {
+    p.x * dScale,
+    p.y * dScale,
+}; }
+
+constexpr Point operator~(const QPointF& p) noexcept { return toPoint(p); }
+constexpr QPointF operator~(const Point& p) noexcept { return toQPointF(p); }
+
+constexpr Point operator!(const Point& p) noexcept { return GetC(p); }
+
+#define TRANSFORM(FROM, TO)                                           \
+    inline TO operator~(std::span<const FROM> val) {                  \
+        auto it = v::transform(val, [](auto&& val) { return ~val; }); \
+        TO ret;                                                       \
+        ret.reserve(Cast{val.size()});                                \
+        r::move(it, std::back_inserter(ret));                         \
+        return ret;                                                   \
+    }
+
+TRANSFORM(QPointF, Path)
+TRANSFORM(Point, QPolygonF)
+
+TRANSFORM(QPolygonF, Paths)
+TRANSFORM(Path, QList<QPolygonF>)
+
+#undef TRANSFORM
+
+template <>
+template <>
+constexpr Cast<QPointF>::operator Point() const { return ~val; }
+
+template <>
+template <>
+constexpr Cast<Point>::operator QPointF() const { return ~val; }
+//------------------------------------------------------------------------------
+
+constexpr double Radius(Point p) {
+    Point c = GetC(p);
+    if(p == Point{}) return std::nan("");
+    p = p - c;
+    return hypot(p.x, p.y) * dScale;
+}
 
 double Perimeter(std::span<const Point> path, bool open = {});
 //------------------------------------------------------------------------------
@@ -99,14 +173,15 @@ Path& TransformPath(Path& path, const QTransform& m);
 Paths& TransformPaths(Paths& paths, const QTransform& m);
 //------------------------------------------------------------------------------
 
-void mergeSegments(Paths& paths, double glue = 0.0);
+void mergeSegments(Paths& paths, double glue = {});
 
 /////////////////////////////////////////////////
 /// \brief склеивает пути при совпадении конечных точек
 /// \param paths - пути
 /// \param maxDist - максимальное расстояние между конечными точками
-void mergePaths(Paths& paths, const double dist = 0.0);
+void mergePaths(Paths& paths, const double dist = {});
 
+QIcon drawIcon(const QPainterPath& pPath, QColor color = Qt::black, bool stroke = false);
 QIcon drawIcon(const Paths& paths, QColor color = Qt::black);
 
 QIcon drawDrillIcon(QColor color = Qt::black);
@@ -117,20 +192,15 @@ inline constexpr auto skipFront = v::drop(1);
 
 //------------------------------------------------------------------------------
 
-inline Paths Inflate(const Paths& paths, double delta, JoinType jt, EndType et,
-    double miterLimit = 2.0, double arcTolerance = 0.0) {
-    return InflatePaths(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
-};
+Paths Inflate(const Paths& paths, double delta,
+    JoinType jt, EndType et,
+    double miterLimit = 2.0, double arcTolerance = {});
 
-inline Paths InflateRoundPolygon(const Paths& paths, double delta,
-    double miterLimit = 2.0, double arcTolerance = 0.0) {
-    return InflatePaths(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
-};
+Paths InflateRoundPolygon(const Paths& paths, double delta,
+    double miterLimit = 2.0, double arcTolerance = {});
 
-inline Paths InflateMiterPolygon(const Paths& paths, double delta,
-    double miterLimit = 2.0, double arcTolerance = 0.0) {
-    return InflatePaths(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
-};
+Paths InflateMiterPolygon(const Paths& paths, double delta,
+    double miterLimit = 2.0, double arcTolerance = {});
 
 template <typename T>
 inline void CleanPaths(Clipper2Lib::Path<T>& path, double k) {
@@ -159,25 +229,14 @@ inline Clipper2Lib::Paths<T>& ReversePaths(Clipper2Lib::Paths<T>& paths) {
 
 QDataStream& operator<<(QDataStream& stream, const Point& pt);
 QDataStream& operator>>(QDataStream& stream, Point& pt);
-inline QDebug operator<<(QDebug d, const Point& p) {
-    return d << "Point(" << p.x << ", " << p.y << ')';
-}
+QDebug operator<<(QDebug d, const Point& p);
 
 //----Container helpers----------------------------------------------------------------
 
-template <typename T> concept Container = requires(T c) {
-    c.begin();
-    c.end();
+template <typename T> concept Container = r::range<T> && requires(T c) {
     c.reserve(size_t{});
-    // { typename T::value_type{} } -> std::same_as<std::decay_t<decltype(*c.begin())>>;
-    // T::value_type;
-    // { std::is_same<T, QByteArray> } -> std::same_as<std::false_type>;
-    // { std::is_same<T, QString> } -> std::same_as<std::false_type>;
-};
+    c.append_range(c);
 
-template <typename T> concept Range__ = requires(T c) {
-    c.begin();
-    c.end();
     // { typename T::value_type{} } -> std::same_as<std::decay_t<decltype(*c.begin())>>;
     // T::value_type;
     // { std::is_same<T, QByteArray> } -> std::same_as<std::false_type>;
@@ -196,12 +255,9 @@ inline int indexOf(const Cont& c, const typename Cont::value_type& v) {
     return it == c.end() ? -1 : std::distance(c.begin(), it);
 }
 
-auto operator+=(Container auto& c, Range__ auto&& v) {
-    c.reserve(c.size() + v.size());
-    if constexpr(std::is_lvalue_reference_v<decltype(v)>)
-        r::copy(v, std::back_inserter(c));
-    else
-        r::move(v, std::back_inserter(c));
+auto operator+=(Container auto& c, r::range auto&& v) {
+    c.reserve(c.size() + r::size(v));
+    c.append_range(std::forward<decltype(v)>(v));
     return c;
 }
 
@@ -213,43 +269,6 @@ auto operator+=(Container auto& c, Range__ auto&& v) {
 auto operator-=(Container auto& c, size_t index) {
     return c.erase(c.begin() + index), c;
 }
-
-//------------------------------------------------------------------------------
-
-template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
-
-inline Point& operator*=(Point& pt, Arithmetic auto v) noexcept {
-    return pt.x *= v, pt.y *= v, pt;
-}
-
-inline Path& operator*=(Path& path, Arithmetic auto v) noexcept {
-    for(Point& pt: path) pt *= v;
-    return path;
-}
-
-constexpr Point toPoint(const QPointF& p) noexcept { return {p.x() * uScale, p.y() * uScale}; }
-constexpr QPointF toQPointF(const Point& p) noexcept { return {static_cast<double>(p.x) * dScale, static_cast<double>(p.y) * dScale}; }
-
-constexpr Point operator~(const QPointF& p) noexcept { return toPoint(p); }
-constexpr QPointF operator~(const Point& p) noexcept { return toQPointF(p); }
-
-#define TRANSFORM(FROM, TO)                                           \
-    inline TO operator~(std::span<const FROM> val) {                  \
-        auto it = v::transform(val, [](auto&& val) { return ~val; }); \
-        TO ret;                                                       \
-        ret.reserve(Cast{val.size()});                                \
-        r::move(it, std::back_inserter(ret));                         \
-        return ret;                                                   \
-    }
-
-TRANSFORM(QPointF, Path)
-TRANSFORM(Point, QPolygonF)
-
-TRANSFORM(QPolygonF, Paths)
-TRANSFORM(Path, QList<QPolygonF>)
-
-#undef TRANSFORM
-//------------------------------------------------------------------------------
 
 // template <typename T>
 // inline Clipper2Lib::Rect<T> GetBounds(const Clipper2Lib::Paths<T>& paths) {
@@ -383,12 +402,6 @@ Paths& sortB(Paths& src, Point startPt);
 Paths& sortBeginEnd(Paths& src, Point startPt);
 Pathss& sortB(Pathss& src, Point startPt);
 Pathss& sortBeginEnd(Pathss& src, Point startPt);
-//------------------------------------------------------------------------------
-
-QPointF polar(QPointF p, double angle /*radians*/, double distance);
-double angle(QPointF p1, QPointF p2);
-double signedBulgeRadius(QPointF start_point, QPointF end_point, double bulge);
-std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start_point, QPointF end_point, double bulge);
 
 void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge);
 

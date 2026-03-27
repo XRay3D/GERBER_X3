@@ -108,7 +108,7 @@ MainWindow::MainWindow(QWidget* parent)
     connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
     connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
-    connect(this, &MainWindow::logMessage, this, &MainWindow::messageHandler, Qt::QueuedConnection); // thread safe logging
+    connect(this, &MainWindow::logMessage, this, &MainWindow::loggingHandler, Qt::QueuedConnection); // thread safe logging
 }
 
 MainWindow::~MainWindow() {
@@ -159,7 +159,7 @@ const QDockWidget* MainWindow::dockWidget() const { return dockWidget_; }
 
 QDockWidget* MainWindow::dockWidget() { return dockWidget_; }
 
-void MainWindow::messageHandler(QtMsgType type, const QStringList& context, const QString& message) {
+void MainWindow::loggingHandler(QtMsgType type, const QStringList& context, const QString& message) {
     ui.loggingTextBrowser->setTextColor(QColor{128, 128, 128});
     enum {
         Category,
@@ -167,7 +167,7 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         Function,
         Line,
     };
-    auto file = context[File].split(u"/"_s).back();
+    auto file = context[File].split(u'/').back();
     static constexpr QColor color[]{
         QColor{128, 128, 128}, // gray   QtDebugMsg
         QColor{255, 128, 000}, // orange QtWarningMsg
@@ -176,10 +176,10 @@ void MainWindow::messageHandler(QtMsgType type, const QStringList& context, cons
         QColor{128, 128, 255}, // blue   QtInfoMsg
     };
     ui.loggingTextBrowser->setTextColor(color[type]);
-    ui.loggingTextBrowser->append(message);
+    ui.loggingTextBrowser->insertPlainText(message);
     ui.loggingTextBrowser->setTextColor(*color);
     ui.loggingTextBrowser->insertPlainText(u" <- %1: %2 '%3'"_s.arg(file, context[Line], context[Function].split(u'(').front()));
-    // ui.loggingTextBrowser->append({});
+    ui.loggingTextBrowser->append({});
     ui.loggingTextBrowser->moveCursor(QTextCursor::MoveOperation::End);
 }
 
@@ -760,8 +760,8 @@ void MainWindow::createActionsShape() {
 
     toolBar->addSeparator();
 
-    auto executor = [](ClipType type) {
-        qDebug("На переделке");
+    static constexpr auto executor = +[](ClipType type) {
+        qFatal("На переделке");
 
         auto selectedItems(App::grView().selectedItems());
         Paths clipPaths;
@@ -789,10 +789,14 @@ void MainWindow::createActionsShape() {
         for(Gi::Item* item: rmi)
             delete item->file()->itemGroup()->takeAt(item);
     };
-    toolBar->addAction(QIcon::fromTheme(u"path-union"_s), tr("Union"), [executor] { executor(ClipType::Union); });
-    toolBar->addAction(QIcon::fromTheme(u"path-difference"_s), tr("Difference"), [executor] { executor(ClipType::Difference); });
-    toolBar->addAction(QIcon::fromTheme(u"path-exclusion"_s), tr("Exclusion"), [executor] { executor(ClipType::Xor); });
-    toolBar->addAction(QIcon::fromTheme(u"path-intersection"_s), tr("Intersection"), [executor] { executor(ClipType::Intersection); });
+    toolBar->addAction(QIcon::fromTheme(u"path-union"_s), tr("Union"),
+        [] { executor(ClipType::Union); });
+    toolBar->addAction(QIcon::fromTheme(u"path-difference"_s), tr("Difference"),
+        [] { executor(ClipType::Difference); });
+    toolBar->addAction(QIcon::fromTheme(u"path-exclusion"_s), tr("Exclusion"),
+        [] { executor(ClipType::Xor); });
+    toolBar->addAction(QIcon::fromTheme(u"path-intersection"_s), tr("Intersection"),
+        [] { executor(ClipType::Intersection); });
 
     toolBar->addSeparator();
 
@@ -850,7 +854,7 @@ void MainWindow::saveSelectedGCodeFiles() {
 
     std::map<Key, GcFiles> gcFilesMap;
     for(GCode::File* file: gcFiles)
-        gcFilesMap[{file->getTool().hash2(), file->side()}].append(file);
+        gcFilesMap[{file->tool().hash2(), file->side()}].append(file);
 
     for(const auto& [key, files]: gcFilesMap) {
         if(files.size() < 2) {
@@ -870,7 +874,7 @@ void MainWindow::saveSelectedGCodeFiles() {
                 file->itemGroup()->setVisible(false);
             }
         } else {
-            QString name(GCode::File::getLastDir().append(files.first()->getTool().nameEnc()));
+            QString name(GCode::File::getLastDir().append(files.first()->tool().nameEnc()));
             if(!name.endsWith(App::gcSettings().fileExtension()))
                 name += QStringList({u"_TS"_s, u"_BS"_s})[files.first()->side()];
 
@@ -881,7 +885,7 @@ void MainWindow::saveSelectedGCodeFiles() {
 
             if(name.isEmpty())
                 return;
-            mvector<QString> sl;
+            std::vector<QString> sl;
 
             sl.emplace_back(tr(";\tContains files:"));
             for(auto file: files)
@@ -895,7 +899,7 @@ void MainWindow::saveSelectedGCodeFiles() {
                 file->genGcodeAndTile();
                 if(file == files.back())
                     file->endFile();
-                sl.append(file->gCodeText());
+                sl.append_range(file->gCodeText());
             }
             QFile file{name};
             if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {

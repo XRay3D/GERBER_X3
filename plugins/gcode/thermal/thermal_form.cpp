@@ -26,7 +26,7 @@ enum {
 };
 
 Form::Form(GCode::Plugin* plugin)
-    : GCode::BaseForm{plugin, new Creator}
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
     ui->treeView->setIconSize(QSize(Size, Size));
@@ -130,24 +130,24 @@ void Form::computePaths() {
         return;
     }
 
-    auto gpc = new GCode::Params;
+    gcp = {};
 
     for(auto& item: items_) {
         if(item->isValid()) {
-            gpc->closedPaths += item->paths();
+            gcp.closedCurves.assign_range(item->curves());
             if(Paths bridge = item->bridge(); bridge.size())
-                gpc->supportPathss.emplace_back(item->bridge());
+                gcp.supportCurvess.emplace_back(toCurves(item->bridge()));
         }
     }
 
-    gpc->setConvent(true);
-    gpc->setSide(GCode::Outer);
-    gpc->tools.push_back(tool);
-    gpc->params[GCode::Params::Depth] = dsbxDepth->value();
-    gpc->params[Creator::FileId] = ui->cbxFile->currentData().value<AbstractFile*>()->id();
-    gpc->params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
+    gcp.setConvent(true);
+    gcp.setSide(GCode::Outer);
+    gcp.tools.push_back(tool);
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[Creator::FileId] = ui->cbxFile->currentData().value<AbstractFile*>()->id();
+    gcp.params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
     fileCount = 1;
-    emit createToolpath(gpc);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {

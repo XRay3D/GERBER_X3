@@ -20,9 +20,9 @@ constexpr auto DRILLING = "Drilling"_hash32;
 class File final : public GCode::File {
 public:
     using GCode::File::File;
-    explicit File(GCode::Params&& gcp, Pathss&& toolPathss)
-        : GCode::File(std::move(gcp), std::move(toolPathss), {}) {
-        if(gcp_.tools.front().diameter()) {
+    explicit File(GCode::Params&& gcp)
+        : GCode::File{std::move(gcp)} {
+        if(this->gcp.tools.front().diameter()) {
             initSave();
             addInfo();
             statFile();
@@ -39,7 +39,7 @@ public:
             for(size_t y{}; y < App::project().stepsY(); ++y) {
                 const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
                 saveDrill(offset);
-                if(gcp_.params.contains(GCode::Params::NotTile))
+                if(gcp.params.contains(GCode::Params::NotTile))
                     return;
             }
         }

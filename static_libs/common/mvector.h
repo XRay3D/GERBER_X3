@@ -26,18 +26,18 @@ struct mvector : std::vector<T> {
         V::insert(pos, std::begin(r), std::end(r));
     }
 
-    template <typename Range>
-        requires requires(Range r) {std::begin(r); std::end(r); }
-    inline void append(const Range& r) {
-        V::insert(V::end(), std::begin(r), std::end(r));
-    }
+    // template <typename Range>
+    //     requires requires(Range r) {std::begin(r); std::end(r); }
+    // inline void append(const Range& r) {
+    //     V::insert(V::end(), std::begin(r), std::end(r));
+    // }
 
-    inline void append(V&& vec) {
-        if(vec.empty()) return;
-        if(V::capacity() - V::size() < vec.size())
-            V::reserve(V::size() + vec.size());
-        r::move(vec, std::back_insert_iterator{*this});
-    }
+    // inline void append(V&& vec) {
+    //     if(vec.empty()) return;
+    //     if(V::capacity() - V::size() < vec.size())
+    //         V::reserve(V::size() + vec.size());
+    //     r::move(vec, std::back_insert_iterator{*this});
+    // }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 

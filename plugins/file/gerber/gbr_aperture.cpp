@@ -313,7 +313,7 @@ void ApPolygon::draw() {
             static_cast</*PType*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
             static_cast</*PType*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
     if(rotation_ > 0.1) RotatePath(polygon, rotation_);
-    r::for_each(polygon, &SetCSelf);
+    r::for_each(polygon, SetCSelf);
     paths_.push_back(polygon);
     minSize_ = size_ = diam_;
 }
@@ -372,7 +372,8 @@ void ApMacro::draw() {
     };
 
     VarMap macroCoefficients{coefficients_};
-    mvector<QPair<bool, Path>> items;
+    using pair = std::pair<bool, Path>;
+    std::vector<pair> items;
     try {
         // for (int i{}; i < modifiers_.size(); ++i) {
         // QString var{modifiers_[i]};
@@ -442,16 +443,12 @@ void ApMacro::draw() {
     }
 
     if(items.size() > 1) {
-        for(size_t i{}; i < items.size();) {
-            Clipper clipper;
-            clipper.AddSubject(paths_);
-            bool exp = items[i].first;
-            while(i < items.size() && exp == items[i].first)
-                clipper.AddClip({items[i++].second});
-            if(exp)
-                clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
-            else
-                clipper.Execute(ClipType::Difference, FillRule::NonZero, paths_);
+        constexpr auto sameExp = +[](pair& l, pair& r) { return l.first == r.first; };
+        constexpr std::array CT{ClipType::Difference, ClipType::Union};
+        for(auto&& item: v::chunk_by(items, sameExp)) {
+            Paths clip{std::from_range, v::transform(item, &pair::second)};
+            bool fl = item.front().first;
+            paths_ = CL2::BooleanOp(CT[fl], FillRule::NonZero, paths_, clip);
         }
     } else
         paths_.push_back(items.front().second);
@@ -573,7 +570,7 @@ Path ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
         polygon.emplace_back(Point(
             static_cast</*PType*/ int32_t>(mod[X + j * 2] * uScale),
             static_cast</*PType*/ int32_t>(mod[Y + j * 2] * uScale)));
-    r::for_each(polygon, &SetCSelf);
+    r::for_each(polygon, SetCSelf);
     if(mod.size() > (num * 2u + 3u) && mod.back() > 0)
         RotatePath(polygon, mod.back());
 
@@ -605,7 +602,7 @@ Path ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
             static_cast</*PType*/ int32_t>(qCos(angle) * diameter),
             static_cast</*PType*/ int32_t>(qSin(angle) * diameter)));
     }
-    r::for_each(polygon, &SetCSelf);
+    r::for_each(polygon, SetCSelf);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
         RotatePath(polygon, mod[RotationAngle]);

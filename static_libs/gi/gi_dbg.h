@@ -16,6 +16,9 @@
 namespace Gi {
 
 class Debug_ final : public Item {
+    friend struct Node;
+    friend struct Dymmy;
+    struct Node* node;
 
     friend Debug_* Debug(const Curves&, const QColor&, double);
     friend Debug_* Debug(const Paths&, const QColor&, double);
@@ -30,16 +33,15 @@ class Debug_ final : public Item {
     Debug_(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
 
 public:
-    ~Debug_() override = default;
+    ~Debug_() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths paths(int alternate = {}) const override;
+    bool arrows{true};
 
 private:
     QPainterPath arrows_;
-    double sc_{};
-    void updateArrows();
 
 protected:
     void changeColor() override { }

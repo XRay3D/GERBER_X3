@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "thread.h"
 #include <QToolBar>
@@ -23,7 +23,7 @@ class GiBridge;
 
 namespace Thread {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:
