@@ -158,7 +158,7 @@ DxfGo Hatch::toGo() const {
     Paths paths(edges.size());
     for(size_t i{}; i < edges.size(); ++i)
         for(auto edge: edges[i])
-            paths[i] += ~edge->toPolygon();
+            paths[i].append_range(~edge->toPolygon());
     Clipper clipper;
     clipper.AddOpenSubject(paths); // FIXME AddSubject???
     clipper.Execute(ClipType::Union, FillRule::EvenOdd, paths);

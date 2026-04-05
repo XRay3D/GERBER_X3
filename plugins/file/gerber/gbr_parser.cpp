@@ -1023,7 +1023,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         qWarning() << u"Invalid arc in line %1."_s.arg(lineNum_) << gLine;
     }
 
-    path_ += std::move(arcPath);
+    path_.append_range(std::move(arcPath));
 
     return true;
 }

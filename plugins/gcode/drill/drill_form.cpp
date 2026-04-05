@@ -504,16 +504,16 @@ void Form::computePaths() {
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             switch(side) {
                             case GCode::On:
-                                pathsMap[row.toolId].paths += item->paths();
+                                pathsMap[row.toolId].paths.append_range(item->paths());
                                 created = true;
                                 break;
                             case GCode::Outer:
-                                pathsMap[row.toolId].paths += item->offset();
+                                pathsMap[row.toolId].paths.append_range(item->offset());
                                 created = true;
                                 break;
                             case GCode::Inner:
                                 // if (item->fit(dsbxDepth->value())) {
-                                pathsMap[row.toolId].paths += item->offset();
+                                pathsMap[row.toolId].paths.append_range(item->offset());
                                 created = true;
                                 // }
                                 break;
@@ -523,7 +523,7 @@ void Form::computePaths() {
                     case GCType::Pocket:
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             // if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(dsbxDepth->value())) {
-                            pathsMap[row.toolId].paths += item->offset();
+                            pathsMap[row.toolId].paths.append_range(item->offset());
                             created = true;
                             // }
                         }

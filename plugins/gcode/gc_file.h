@@ -97,16 +97,7 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    static inline const mvector<QChar> cmdList{
-        u'G',
-        u'X',
-        u'Y',
-        u'Z',
-        u'I',
-        u'J',
-        u'S',
-        u'F',
-    };
+    static inline constexpr auto CMD_LIST = u"GXYZIJSF"_sv;
 
     mvector<double> getDepths();
 
@@ -114,9 +105,15 @@ protected:
     QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
 
-    std::vector<QString> savePath(const Curve& curve, double depth = {});
+    std::vector<QString> savePath(const Curve& curve, double perimetr = {}, double depth = {});
 
     QString formated(const std::vector<QString>& data);
+
+    struct {
+        QChar c;
+        constexpr QString operator()(double val) const { return c + format(val); }
+        constexpr operator QString() const { return c + u"0"_s; }
+    } static constexpr i{u'I'}, j{u'J'}, x{u'X'}, y{u'Y'}, z{u'Z'}, speed{u'S'};
 
     QString g0();
     QString g1();
@@ -125,13 +122,12 @@ protected:
     void extracted(const geo::Vertex& v);
     QString g(const geo::Vertex& v);
 
-    QString i(double val) { return u'I' + format(val); }
-    QString j(double val) { return u'J' + format(val); }
-    QString x(double val) { return u'X' + format(val); }
-    QString y(double val) { return u'Y' + format(val); }
-    QString z(double val) { return u'Z' + format(val); }
-
-    QString speed(int val) { return u'S' + QString::number(val); }
+    // QString i(double val) { return u'I' + format(val); }
+    // QString j(double val) { return u'J' + format(val); }
+    // QString x(double val) { return u'X' + format(val); }
+    // QString y(double val) { return u'Y' + format(val); }
+    // QString z(double val) { return u'Z' + format(val); }
+    // QString speed(int val) { return u'S' + QString::number(val); }
 
     static QString format(double val);
 

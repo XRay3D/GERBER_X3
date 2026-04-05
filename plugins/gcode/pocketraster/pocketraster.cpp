@@ -53,7 +53,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
         for(auto& path: src) path.push_back(path.front());
 
-        if(prPass) profilePaths += src;
+        if(prPass) profilePaths.append_range(src);
 
         if(src.size()) {
             for(auto& path: src) RotatePath(path, angle);
@@ -158,15 +158,15 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     { // create u"snake"_s
         auto y = rect.top;
         while(y < rect.bottom) {
-            zPath += Path{
+            zPath.append_range(Path{
                 Point{rect.left,  y},
                 Point{rect.right, y},
-            };
+            });
             y += stepOver;
-            zPath += Path{
+            zPath.append_range(Path{
                 Point{rect.right, y},
                 Point{rect.left,  y},
-            };
+            });
             y += stepOver;
         }
     }
@@ -232,26 +232,26 @@ void Creator::addAcc(Paths& src, const /*PType*/ int32_t accDistance) {
             {
                 const Path& path = pPath.back();
                 if(path.front().x < path.back().x) // acc
-                    acc += Path{
+                    acc.append_range(Path{
                         path.back(), {path.back().x + accDistance, path.front().y}
-                    };
+                    });
                 else
-                    acc += Path{
+                    acc.append_range(Path{
                         path.back(), {path.back().x - accDistance, path.front().y}
-                    };
+                    });
             }
             {
                 const Path& path = paths.front();
                 if(path.front().x > path.back().x) // acc
-                    acc += Path{
+                    acc.append_range(Path{
                         {path.front().x + accDistance, path.front().y},
                         path.front()
-                    };
+                    });
                 else
-                    acc += Path{
+                    acc.append_range(Path{
                         {path.front().x - accDistance, path.front().y},
                         path.front()
-                    };
+                    });
             }
             pPath.push_back(acc);
         } else { // acc first
@@ -338,10 +338,10 @@ Paths Creator::calcFrames(const Paths& src, const Path& frame) {
     clipper.AddClip({frame});
     clipper.Execute(ClipType::Intersection, FillRule::Positive, tmp, tmp); // FillRule::Positive
     // dbgPaths(tmp, u"ClipType::Intersection"_s);
-    frames += std::move(tmp);
+    frames.append_range(std::move(tmp));
     clipper.Execute(ClipType::Difference, FillRule::Positive, tmp, tmp); // FillRule::Positive
     // dbgPaths(tmp, u"ClipType::Difference"_s);
-    frames += std::move(tmp);
+    frames.append_range(std::move(tmp));
     std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
     for(auto& path: frames)
         if(path.front().y > path.back().y)
@@ -398,12 +398,12 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
         for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
             throwIfCancel();
             if(path.empty() || path.back() == bit->front()) {
-                path.empty() ? path += * bit
-                             : path += *bit | skipFront;
+                path.empty() ? path.append_range(*bit)
+                             : path.append_range(*bit | skipFront);
                 bList.erase(bit);
                 for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                     if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
-                        path += *fit | skipFront;
+                        path.append_range(*fit | skipFront);
                         fList.erase(fit);
                         bit = bList.begin();
                         break;
@@ -416,7 +416,7 @@ Paths Creator::merge(const Paths& scanLines, const Paths& frames) {
         }
         for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
             if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
-                *fit += path | skipFront;
+                fit->append_range(path | skipFront);
                 std::swap(*fit, path);
                 fList.erase(fit);
                 break;

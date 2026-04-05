@@ -334,11 +334,17 @@ QRectF Curve::boundingRect() const {
 }
 
 Curve& Curve::reverse() {
+    Curve newreversed = reversed();
+    swap(newreversed);
+    return *this;
+}
+
+Curve Curve::reversed() const {
     Curve new_vertices;
-    Vertex* prev{};
+    const Vertex* prev{};
     // qWarning() << *this;
 
-    for(Vertex& v: *this | v::reverse) {
+    for(const Vertex& v: *this | v::reverse) {
         Vertex::Type type{};
         PointF cp{};
         if(prev) {
@@ -349,25 +355,7 @@ Curve& Curve::reverse() {
         new_vertices.push_back(new_v);
         prev = &v;
     }
-    swap(new_vertices);
-
-    // qWarning() << *this;
-
-    // r::reverse(*this);
-
-    // Vertex prev;
-    // for(auto&& v: *this) {
-    // }
-    // Vertex prev;
-    // for(auto&& [s, d]: *this | v::pairwise) {
-    //     prev = s;
-    //     // std::swap(s.center, d.center);
-    //     // if(prev.type) {
-    //     //     std::swap(s.type, d.type);
-    //     //     d.type = Vertex::Type{-d.type};
-    //     // }
-    // }
-    return *this;
+    return new_vertices;
 }
 
 double Curve::area() const {

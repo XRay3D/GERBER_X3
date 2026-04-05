@@ -94,9 +94,9 @@ void VoronoiJc::jcVoronoi() {
     }
 
     for(const auto& [key, edge]: edges)
-        returnPs += toPath(edge);
+        returnPs.append_range(toPath(edge));
     mergePaths(returnPs, 0.005 * uScale);
-    returnPs += toPath(frame);
+    returnPs.append_range(toPath(frame));
     for(size_t i{}; i < returnPs.size(); ++i) // remove verry short paths
         if(returnPs[i].size() < 4 && distTo(returnPs[i].front(), returnPs[i].back()) < tolerance * 0.5 * uScale)
             returnPs -= i--;

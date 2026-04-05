@@ -21,6 +21,7 @@ struct Curve : std::vector<geo::Vertex> {
 
     QRectF boundingRect() const;
     Curve& reverse();
+    Curve reversed() const;
     double area() const;
     bool isClosed() const;
     double perimetr() const;

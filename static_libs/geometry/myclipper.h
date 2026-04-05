@@ -255,11 +255,11 @@ inline int indexOf(const Cont& c, const typename Cont::value_type& v) {
     return it == c.end() ? -1 : std::distance(c.begin(), it);
 }
 
-auto operator+=(Container auto& c, r::range auto&& v) {
-    c.reserve(c.size() + r::size(v));
-    c.append_range(std::forward<decltype(v)>(v));
-    return c;
-}
+// auto operator+=(Container auto& c, r::range auto&& v) {
+//     c.reserve(c.size() + r::size(v));
+//     c.append_range(std::forward<decltype(v)>(v));
+//     return c;
+// }
 
 // auto operator+=(Container auto& c, const Container auto& v) {
 //     c.reserve(c.size() + v.size());

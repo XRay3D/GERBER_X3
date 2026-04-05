@@ -501,8 +501,8 @@ void mergePaths(Paths& paths, const double maxDist) {
     size_t max;
 
     auto append = [&](size_t& i, size_t& j) {
-        paths[i] += paths[j] | skipFront; // paths[i].append(paths[j].mid(1));
-        paths -= j--;                     // paths.remove(j--;
+        paths[i].append_range(paths[j] | skipFront); // paths[i].append(paths[j].mid(1));
+        paths -= j--;                                // paths.remove(j--;
     };
 
     do {
