@@ -55,7 +55,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
             // openSrcPaths = offset.Execute(dOffset);
             openSrcPaths = Inflate(openSrcPaths, dOffset, JoinType::Round, EndType::Round);
             if(!openSrcPaths.empty())
-                returnPs += openSrcPaths;
+                returnPs.append_range(openSrcPaths);
         }
     }
 
@@ -204,7 +204,7 @@ void Creator::makeBridges() {
         Paths frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JoinType::Miter, EndType::Butt, uScale);
         Paths clip;
         for(Gi::Bridge* bip: biStack)
-            clip += bip->paths();
+            clip.append_range(bip->paths());
 
         frame = CL2::Intersect(frame, clip, FillRule::Positive);
 
@@ -223,7 +223,7 @@ void Creator::makeBridges() {
 
         auto IsPositive = [](Paths paths) {
             for(auto&& path: paths | v::drop(1))
-                paths.front() += std::move(path); // NOTE  move?
+                paths.front().append_range(std::move(path)); // NOTE  move?
             return CL2::IsPositive(paths.front());
         };
 
@@ -323,7 +323,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
             qDebug() << u"nest"_s << nest << paths.size();
             if(paths.size() > 1)
                 sortB(paths, ~(App::home().pos() + App::zero().pos()));
-            rpaths += std::move(paths); // NOTE move?
+            rpaths.append_range(std::move(paths)); // NOTE move?
         }
     } else { // Grouping by nesting depth
         sortPolyTreeByNesting(polytree);

@@ -166,6 +166,8 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
         if(r::find(commands, name) != commands.end())
             func();
 
+    QTimer::singleShot(time += delay, this, [] { App::grView().zoomFit(); });
+
     time = 100;
     delay = 100;
 

@@ -123,10 +123,10 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             clipper.AddClip({frame});
             clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, u"ClipType::Intersection"_s);
-            frames += std::move(tmp);
+            frames.append_range(std::move(tmp));
             clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
             // dbgPaths(tmp, u"ClipType::Difference"_s);
-            frames += std::move(tmp);
+            frames.append_range(std::move(tmp));
 
             r::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
 
@@ -186,12 +186,12 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
                 throwIfCancel();
                 if(path.empty() || path.back() == bit->front()) {
-                    path.empty() ? path += * bit
-                                 : path += *bit | skipFront;
+                    path.empty() ? path.append_range(*bit)
+                                 : path.append_range(*bit | skipFront);
                     bList.erase(bit);
                     for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                         if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
-                            path += *fit | skipFront;
+                            path.append_range(*fit | skipFront);
                             fList.erase(fit);
                             bit = bList.begin();
                             break;
@@ -204,7 +204,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             }
             for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                 if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
-                    *fit += path | skipFront;
+                    fit->append_range(path | skipFront);
                     std::swap(*fit, path);
                     fList.erase(fit);
                     break;
@@ -221,7 +221,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             for(auto& path: src)
                 path.push_back(path.front());
             if(prPass)
-                profilePaths += src;
+                profilePaths.append_range(src);
         }
 
         QElapsedTimer t;
@@ -237,7 +237,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                         auto merged{merge(scanLines, frames)};
                         for(auto& path: merged)
                             RotatePath(path, -angle);
-                        returnPs += std::move(merged);
+                        returnPs.append_range(std::move(merged));
                     }
                 }
             }
@@ -251,7 +251,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
                         auto merged{merge(scanLines, frames)};
                         for(auto& path: merged)
                             RotatePath(path, -(angle + 90));
-                        returnPs += std::move(merged);
+                        returnPs.append_range(std::move(merged));
                     }
                 }
             }

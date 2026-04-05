@@ -112,7 +112,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
         openSrcPaths = tmpPaths1;
         Paths tmpPaths;
         do {
-            tmpPaths += tmpPaths1;
+            tmpPaths.append_range(tmpPaths1);
             // offset.Clear();
             // offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
             // tmpPaths1 = offset.Execute(-stepOver);

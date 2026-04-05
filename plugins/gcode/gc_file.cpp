@@ -93,8 +93,8 @@ void File::initSave() {
         fl = false;
 
     const QString format(gcp.tool().type() == Tool::Laser ? App::gcSettings().formatLaser() : App::gcSettings().formatMilling());
-    for(size_t i{}; i < cmdList.size(); ++i) {
-        const int index = format.indexOf(cmdList[i], 0, Qt::CaseInsensitive);
+    for(size_t i{}; i < CMD_LIST.size(); ++i) {
+        const int index = format.indexOf(CMD_LIST[i], 0, Qt::CaseInsensitive);
         if(index != -1) {
             formatFlags[i + AlwaysG] = format[index + 1] == u'+';
             if((index + 2) < format.size())
@@ -151,8 +151,10 @@ void File::endFile() {
     }
 
     std::erase_if(lines_, std::bind(&QString::isEmpty, _1)); // remove epty lines
-
-    qApp->clipboard()->setText(lines_ | v::join_with(u'\n') | r::to<QString>());
+    qApp->clipboard()->setText(lines_
+        | v::filter([](QString& str) { return !str.startsWith(u';'); })
+        | v::join_with(u'\n')
+        | r::to<QString>());
 }
 
 FileTree::Node* File::node() { return node_ ? node_ : node_ = new Node{this}; }
@@ -179,13 +181,10 @@ void File::endPath() {
 
 Curvess File::mirrorAndOffsetCurves(const QPointF& offset) {
     auto& toolPathss = gcp.toolPathss();
-
-    return toolPathss;
     Curvess curvess;
     curvess.reserve(toolPathss.size());
     for(Curves curves: toolPathss)
         curvess.emplace_back(mirrorAndOffsetCurves(offset, curves));
-
     return curvess;
 }
 
@@ -227,37 +226,27 @@ mvector<double> File::getDepths() {
     return depths;
 }
 
-std::vector<QString> File::savePath(const Curve& curve, double depth) {
+std::vector<QString> File::savePath(const Curve& curve, double perimetr, double depth) {
     std::vector<QString> lines;
     lines.reserve(curve.size());
-    bool skip = true;
 
-    if(depth) {
+    auto getLine = [this](const Vertex& fr, const Vertex& to) -> QString {
+        if(to.type) {
+            auto [I, J] = to.center - fr.pt;
+            return formated({g(to), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle});
+        } else
+            return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
+    };
+    if(depth && perimetr) {
         double zk = depth - z_;
         double perimetr = curve.perimetr();
-        qWarning() << "perimetr" << perimetr;
-        for(Vertex prevPt; const Vertex& to: curve)
-            if(skip) {
-                prevPt = to;
-                skip = false;
-            } else {
-                z_ += Span{prevPt.pt, to}.Length() / perimetr * zk;
-                if(to.type) {
-                    auto [I, J] = to.center - prevPt.pt;
-                    lines.emplace_back(formated({g(to), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle}));
-                } else
-                    lines.emplace_back(formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle}));
-                prevPt = to;
-            }
-    } else {
-        qWarning() << "else";
-        for(auto&& [fr, to]: curve | v::pairwise) {
-            if(to.type) {
-                auto [I, J] = to.center - fr.pt;
-                lines.emplace_back(formated({g(to), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle}));
-            } else
-                lines.emplace_back(formated({g1(), x(to.x()), y(to.y()), strFeed, strSpindle}));
+        for(auto&& [fr, to]: v::pairwise(curve)) {
+            z_ += Span{fr.pt, to}.Length() / perimetr * zk;
+            lines.emplace_back(getLine(fr, to));
         }
+    } else {
+        for(auto&& [fr, to]: curve | v::pairwise)
+            lines.emplace_back(getLine(fr, to));
     }
     return lines;
 }
@@ -265,7 +254,7 @@ std::vector<QString> File::savePath(const Curve& curve, double depth) {
 QString File::formated(const std::vector<QString>& data) {
     QString ret;
     for(const QString& str: data) {
-        const int index = cmdList.indexOf(str.front().toUpper());
+        ssize_t index = CMD_LIST.indexOf(str.front(), 0, Qt::CaseInsensitive);
         if(index != -1) {
             if(formatFlags[AlwaysG + index] || lastValues[index] != str) {
                 lastValues[index] = str;
@@ -293,11 +282,11 @@ QString File::g(const Vertex& v) {
 }
 
 QString File::format(double val) {
-    //     QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
-    //     if(str.contains(u'e'))
-    //         return QString::number(val, 'f', 3);
-    //     return str;
-    return QString::fromStdString(std::format("{:1.3f}", val));
+    QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
+    if(str.contains(u'e'))
+        return QString::number(val, 'f', 3);
+    return str;
+    // return QString::fromStdString(std::format("{:1.3f}", val));
 }
 
 /////////////////////////////////////////////////////////////
@@ -367,53 +356,73 @@ void File::saveLaserProfile(const QPointF& offset) {
 }
 
 void File::saveMillingPocket(const QPointF& offset) {
-    lines_.emplace_back(App::gcSettings().spindleOn());
+    // lines_.emplace_back(App::gcSettings().spindleOn());
     Curvess toolPathss = mirrorAndOffsetCurves(offset);
-    const mvector<double> depths(getDepths());
-    qCritical("TODO G2 G3");
-    for(Curves& paths: toolPathss) {
-        startPath(paths.front().front());
-        for(size_t i{}; i < depths.size(); ++i) {
-            lines_.emplace_back(formated({g1(), z(depths[i]), strPlungeFeed}));
-            bool skip = true;
-            for(auto& path: paths) {
-                for(const Vertex& point: path)
-                    if(skip)
-                        skip = false;
-                    else
-                        lines_.emplace_back(formated({g1(), x(point.x()), y(point.y()), strFeed}));
+    const mvector<double> depths = getDepths();
+    double diameter = tool().diameter();
+    QPointF point = toolPathss.front().front().front().pt;
+    startPath(point);
+    for(const Curves& paths: toolPathss) {
+        for(double zd: depths) {
+            for(const Curve& path: paths) {
+                bool first = !geo::TEST(std::exchange(point, path.front().pt), path.front().pt, diameter, diameter * 2);
+                if(first) {
+                    endPath();
+                    startPath(point);
+                }
+                // if(first || (paths.front().front().pt == path.front().pt)) {
+                //     lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
+                //     lines_.append_range(savePath(path, path.perimetr(), zd));
+                //     // lines_.append_range(savePath(path));
+                // } else {
+                lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
+                lines_.emplace_back(formated({g1(), z(z_ = zd), strPlungeFeed}));  // start z0 surface
+                lines_.append_range(savePath(path));
+                // }
             }
-            for(size_t j = paths.size() - 2; j != std::numeric_limits<size_t>::max() && i < depths.size() - 1; --j) {
-                QPointF point = paths[j].back();
-                lines_.emplace_back(formated({g0(), x(point.x()), y(point.y())}));
-            }
-            if(paths.size() > 1 && i < (depths.size() - 1))
-                lines_.emplace_back(formated({g0(), x(paths.front().front().x()), y(paths.front().front().y())}));
         }
-        endPath();
     }
+    endPath();
 }
 
 void File::saveMillingProfile(const QPointF& offset) {
     const mvector<double> depths(getDepths());
     Curvess toolPathss = mirrorAndOffsetCurves(offset);
-    for(auto&& paths: toolPathss) {
-        for(size_t i{}; i < depths.size(); ++i) {
-            for(size_t j{}; j < paths.size(); ++j) {
-                Curve& curve = paths[j];
-                // if(curve.front().pt == curve.back().pt) { // make complete depth and remove from worck
-                startPath(curve.front().pt);
-                for(auto&& depth: depths) lines_.append_range(savePath(curve, depth));
-                lines_.append_range(savePath(curve)); // Проход без спирали.
+    for(const Curves& paths: toolPathss) {
+        if(paths.size() == 1) {
+            const Curve& path = paths.front();
+            double perimetr = path.perimetr();
+            if(paths.front().isClosed()) { // Spiral
+                startPath(path.front().pt);
+                for(double depth: depths)
+                    lines_.append_range(savePath(path, perimetr, depth));
+                lines_.append_range(savePath(path)); // Проход без спирали.
                 endPath();
-                paths.erase(paths.begin() + j--);
-                // } else {
-                // startPath(curve.front().pt);
-                // lines_.emplace_back(formated({g1(), z(depths[i]), strPlungeFeed}));
-                // lines_.append_range(savePath(curve, spindleSpeed));
-                // endPath();
-                // }
+            } else { // Zigzag
+                startPath(path.front().pt);
+                const Curve reversed = paths.front().reversed();
+                uint i{};
+                for(double depth: depths)
+                    lines_.append_range(savePath(i++ & 1u ? reversed : path, perimetr, depth));
+                lines_.append_range(savePath(i & 1u ? reversed : path)); // Проход без спирали.
+                endPath();
             }
+        } else {
+            // tool().diameter();
+            // double perimetr = r::fold_left(
+            //     v::transform(paths, std::bind(&Curve::perimetr, _1)),
+            //     0.0, std::plus<double>{});
+            startPath(paths.front().front().pt);
+            for(double zd: depths) {
+                for(const Curve& path: paths) {
+                    PointF point = path.front().pt;
+                    lines_.emplace_back(formated({g0(), x(point.x()), y(point.y())})); // start xy
+                    lines_.emplace_back(formated({g1(), z(z_ = zd), strPlungeFeed}));  // start z0 surface
+                    lines_.append_range(savePath(path));
+                    lines_.emplace_back(formated({g0(), z(0)}));
+                }
+            }
+            endPath();
         }
     }
 }
