@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -41,7 +41,9 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
 #if 0
     painter->strokePath(shape_, pen_);
 #else
+    #if DEBUG
     brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
+    #endif
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     //    for (auto&& poly : shape_.toFillPolygons())

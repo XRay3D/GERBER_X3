@@ -1,9 +1,9 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2025
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2025
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
@@ -106,9 +106,8 @@ if(QT_VERSION_MAJOR EQUAL 6)
   qt_finalize_executable(${PROJECT_NAME})
 endif()
 
-if(WIN32)
+if(WIN32) # windeployqt
   target_link_libraries(${PROJECT_NAME} PRIVATE setupapi)
-  # windeployqt
   set(CMAKE_INSTALL_UCRT_LIBRARIES TRUE)
   get_target_property(_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
   get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
