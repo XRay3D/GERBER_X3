@@ -36,7 +36,12 @@ target_link_libraries(
          filetree
          gi
          shape
+         $<$<PLATFORM_ID:Linux_>:
          tbb
+         >
+         $<$<PLATFORM_ID:Windows>:
+         tbb12.dll
+         >
          tooldatabase
          Qt6::Qml
          Qt6::Widgets)

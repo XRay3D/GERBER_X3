@@ -1,0 +1,38 @@
+1 TYPELIB "versioninfo.rc"
+
+IDI_ICON1 ICON DISCARDABLE "myapp.ico"
+
+1 VERSIONINFO
+ FILEVERSION 0, 9, 0, 0
+ PRODUCTVERSION 0, 9, 0, 0
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x4L
+ FILETYPE 0x2L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904e4"
+        BEGIN
+            VALUE "CompanyName", "X-Ray"
+            VALUE "FileDescription", "GGEasy"
+            VALUE "FileVersion","0.9.0.0"
+            VALUE "InternalName", "GGEasy"
+            VALUE "LegalCopyright", "Copyright (c) 2021 X-Ray"
+            VALUE "OriginalFilename", "GGEasy.exe"
+            VALUE "ProductName", "GGEasy"
+            VALUE "ProductVersion","0.9.0.0"
+        ## здесь мы тоже указываем информацию о нашем
+        ## исполняемом файле
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1252
+    END
+END

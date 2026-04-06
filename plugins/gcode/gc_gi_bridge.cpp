@@ -95,12 +95,12 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
     if(!line.isNull()) {
         minLenght = line.length() - lenght / 2;
         angle_ = line.angle();
-        if(Length(line.center(),pos) < lenght / 2 && line.length() < lenght) {
+        if(Length(line.center(), pos) < lenght / 2 && line.length() < lenght) {
             // точка центра прямой
             retPos = line.center();
             ok_ = true;
             update(); // Cutoff
-        } else if(Length(line.p1(),pos) < minLenght && Length(line.p2(),pos) < minLenght) {
+        } else if(Length(line.p1(), pos) < minLenght && Length(line.p2(), pos) < minLenght) {
             // точка пересечения на прямой перпендикуляра из 3 точки
             auto k1 = (line.p2().x() - line.p1().x());
             auto k2 = (line.p2().y() - line.p1().y());

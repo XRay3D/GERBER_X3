@@ -1199,7 +1199,7 @@ Curve toCurve(std::span<const Point> path_) {
     };
 
     constexpr std::array fixers{
-        +[/*fixLLL*/](VSpan, VSpan, VSpan, SDSpan) {}, // do nothing
+        +[/*fixLLL*/](VSpan, VSpan, VSpan, SDSpan) { }, // do nothing
 
         fixLLC,
         +[/*fixLCL*/](VSpan v0, VSpan v1, VSpan v2, SDSpan sd) { // TODO???

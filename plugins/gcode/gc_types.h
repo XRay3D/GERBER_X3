@@ -67,7 +67,7 @@ enum class Grouping {
 
 using UsedItems = std::map<std::vector<int32_t>, std::vector<int32_t>>;
 
-using V = std::variant<int, double, UsedItems, size_t>;
+using V = std::variant<qsizetype, double, UsedItems>;
 
 struct Variant : V {
     using V::V;
@@ -79,7 +79,6 @@ struct Variant : V {
         case 0: stream >> v.emplace<0>(); break;
         case 1: stream >> v.emplace<1>(); break;
         case 2: stream >> v.emplace<2>(); break;
-        case 3: stream >> v.emplace<3>(); break;
         }
         return stream;
     }
@@ -90,11 +89,10 @@ struct Variant : V {
         return stream;
     }
 
-    Variant() { }
-
-    template <class T>
-    Variant(const T& val)
-        : V{val} { }
+    // Variant() { }
+    // template <class T>
+    // Variant(const T& val)
+    //     : V{val} { }
 
     int toInt() const {
         return std::visit([](auto&& val) -> int {

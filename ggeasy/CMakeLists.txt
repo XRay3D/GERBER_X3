@@ -24,6 +24,11 @@ string(TIMESTAMP DT "%d.%m.%Y - %H:%M:%S") # [<format string>] [UTC])
 add_definitions(-DBUILD_DATE="${DT}" -DGIT_REF_NAME="${GIT_REF_NAME}"
                 -DGIT_SHA="${GIT_SHA}")
 
+set(SOFTDEVELOPER X-Ray)
+configure_file(
+  versioninfo.rc.in ${CMAKE_CURRENT_LIST_DIR}/versioninfo.rc # @ONLY
+  NEWLINE_STYLE WIN32)
+
 find_package(
   Qt6 REQUIRED
   COMPONENTS Core
@@ -34,7 +39,7 @@ find_package(
              PrintSupport
              Widgets)
 
-set(APP_ICON_RESOURCE_WINDOWS "myapp.rc") # WINDOWS APP ICON
+set(APP_ICON_RESOURCE_WINDOWS "versioninfo.rc") # WINDOWS APP ICON
 
 file(GLOB HEADERS *.h)
 file(GLOB QRC_FILES res/*.qrc)

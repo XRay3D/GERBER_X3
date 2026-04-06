@@ -91,7 +91,7 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); } // FIXME
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
     QWidget* createForm() override { return &form; }
-    QString gcName() const override { return 9u""_s; };
+    QString gcName() const override { return 9u ""_s; };
     uint32_t type() const override { return THREAD; }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 
