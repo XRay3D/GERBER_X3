@@ -116,13 +116,7 @@ Paths File::merge() const {
     };
     constexpr std::array CT{ClipType::Union, ClipType::Difference};
     constexpr std::array FR{FillRule::Positive, FillRule::NonZero};
-#if 0
-    for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity)) {
-        Paths clip{std::from_range, v::join(v::transform(gObjects, &GrObject::fill))};
-        bool fl = gObjects.front().state.imgPolarity();
-        mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
-    }
-#else
+#if DEBUG && 1
     for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity) | v::reverse) {
         Paths clip{
             std::from_range,
@@ -135,9 +129,13 @@ Paths File::merge() const {
         mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
         break;
     }
-
+#else
+    for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity)) {
+        Paths clip{std::from_range, v::join(v::transform(gObjects, &GrObject::fill))};
+        bool fl = gObjects.front().state.imgPolarity();
+        mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
+    }
     // Gi::Debug(mergedPaths_, {255, 255, 255, 128}); //->arrows = {};
-
 #endif
     if(Settings::cleanPolygons())
         CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);

@@ -1,9 +1,9 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2025
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2025
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 4.00 FATAL_ERROR)
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-project(GERBER_X3 VERSION 0.9.1)
+project(GERBER_X3 VERSION 0.9.9)
 
 # set(CMAKE_CXX_MODULE_STD ON)
 set(CMAKE_CXX_STANDARD 26)
@@ -24,6 +24,10 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_UNITY_BUILD ON)
 set_source_files_properties(PROPERTIES SKIP_UNITY_BUILD_INCLUSION ON)
+
+if(CMAKE_BUILD_TYPE STREQUAL Debug)
+  add_definitions(-DDEBUG=1)
+endif()
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
