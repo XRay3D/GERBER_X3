@@ -27,7 +27,10 @@ int main(int argc, char* argv[]) {
     stacktraceAndOutput();
 
     QApplication::setAttribute(Qt::AA_Use96Dpi);
+
     qputenv("QT_ENABLE_HIGHDPI_SCALING", "0"_ba);
+
+    qputenv("QT_QPA_PLATFORM", "windows:darkmode=1"_ba); // 1|2
 
     Q_INIT_RESOURCE(resources);
 
@@ -40,7 +43,7 @@ int main(int argc, char* argv[]) {
     // }
     // #endif
 
-#ifdef linux
+#ifdef Q_OS_UNIX
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     {
@@ -72,7 +75,7 @@ int main(int argc, char* argv[]) {
     if constexpr(0) {
         QSystemSemaphore semaphore{u"GGEasySemaphore"_s, 1}; // создаём семафор
         semaphore.acquire();                                 // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
-#ifdef linux
+#ifdef Q_OS_UNIX
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
         QSharedMemory nix_fix_shared_memory{u"GGEasyMemory"_s};
@@ -133,13 +136,13 @@ int main(int argc, char* argv[]) {
     HP-UX           .sl, .so (HP-UXi)
     macOS and iOS .dylib, .bundle, .so
     */
-#ifdef __unix__
+#ifdef Q_OS_UNIX
     #ifdef QT_DEBUG
     const QString suffix{u"*.so"_s};
     #else
     const QString suffix{u"*.so"_s};
     #endif
-#elif _WIN32
+#elif defined(Q_OS_WIN)
     const auto suffix = u"*.dll"_s;
 #else
     static_assert(false, u"Select OS"_s);

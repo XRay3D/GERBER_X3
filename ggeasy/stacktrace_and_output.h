@@ -9,8 +9,10 @@
 #include <stacktrace>
 #include <string>
 
-#include <execinfo.h> // linux
-#include <sys/wait.h> // linux
+#ifdef Q_OS_UNIX
+    #include <execinfo.h> // linux
+    #include <sys/wait.h> // linux
+#endif
 
 using namespace std::literals;
 

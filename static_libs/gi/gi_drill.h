@@ -32,7 +32,7 @@ public:
     bool isSlot();
     double diameter() const { return diameter_; }
     void setDiameter(double diameter);
-    void updatePath(const QPolygonF &path, double diameter);
+    void updatePath(const QPolygonF& path, double diameter);
 
     int toolId() const { return toolId_; }
     void setToolId(int newToolId) {

@@ -66,6 +66,7 @@ public:
     static void updateTheme() {
 
         static auto palette = qApp->style()->standardPalette();
+        static auto style = qApp->style()->name();
 
         if(App::settings().theme()) {
 
@@ -191,31 +192,7 @@ public:
                     }
                     QProxyStyle::drawPrimitive(element, option, painter, widget);
                 }
-
-                // void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
-                // if(element == QStyle::PE_IndicatorBranch) {
-                // auto r = option->rect;
-                // auto c = r.center();
-                // auto color = Qt::darkGray; // qApp->palette().color(QPalette::Highlight);
-                // painter->setPen(color);
-                // if(!(option->state & State_Children)) {
-                // if(option->state & State_Sibling) // The node in the tree has a sibling (i.e., there is another node in the same column).
-                // painter->drawLine(c.x(), r.top(), c.x(), r.bottom());
-                // if(option->state & State_Item) {  // This branch indicator has an item.
-                // painter->drawLine(c.x(), r.top(), c.x(), c.y());
-                // painter->drawLine(c.x(), c.y(), r.right(), c.y());
-                // }
-                // }
-                // // if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
-                // // painter->fillRect(option->rect, Qt::blue);
-                // // if(option->state & State_Open) // The branch indicator has an opened sub-tree.
-                // // painter->fillRect(option->rect, Qt::yellow);
-                // }
-                // QProxyStyle::drawPrimitive(element, option, painter, widget);
-                // }
             };
-
-            qApp->setStyle(new Style);
 
             struct Color {
                 QColor base;
@@ -288,10 +265,11 @@ public:
             // palette.setBrush(QPalette::Inactive, QPalette::Shadow,color. disabled);
 
             qApp->setPalette(palette);
+            qApp->setStyle(new Style);
         } else {
-            // qApp->setStyle(style);
-            qApp->setStyle(QStyleFactory::create(u"Fusion"_s));
-            qApp->setPalette(palette); // QApplication::style()->standardPalette());
+            qApp->setStyle(QStyleFactory::create(style));
+            // qApp->setStyle(QStyleFactory::create(u"Fusion"_s));
+            // qApp->setPalette(palette); // QApplication::style()->standardPalette());
         }
 
         QIcon::setThemeName(App::settings().theme() < DarkBlue ? u"ggeasy-light"_s : u"ggeasy-dark"_s);

@@ -276,7 +276,7 @@ struct {
         return (*this)(seg.begin());
     }
 
-} angle_between_segments;
+} constexpr angle_between_segments;
 
 //------------------------------------------------------------------------------
 
@@ -314,14 +314,14 @@ struct {
     }
 
     // Находим наиболее "округлённое" число
-    constexpr double operator()(r::range auto values) noexcept
+    constexpr double operator()(r::range auto values) const noexcept
         requires std::convertible_to<r::range_value_t<decltype(values)>, double>
     {
         // return *r::min_element(values, {}, countSignificantBits);
         return *r::min_element(values, {}, measureRoundness);
     }
 
-} get_roundest;
+} constexpr get_roundest;
 
 struct {
     constexpr bool operator()(double l1, double l2,

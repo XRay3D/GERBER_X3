@@ -1,4 +1,4 @@
-set CLANG_FORMAT="C:\Qt\Tools\QtCreator\bin\clang\bin\clang-format.exe"
+set CLANG_FORMAT="M:\ucrt64\bin\clang-format.exe"
 set CODE_STYLE=%CD%\code_style.txt
 
 for %%P in (GGEasy GTE_Win plugins static_libs) do (

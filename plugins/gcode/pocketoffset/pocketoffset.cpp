@@ -217,7 +217,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         stacking(returnPs);
         assert(returnPss.size());
 
-        gcp.params[GCode::Params::MultiToolIndex] = tIdx;
+        gcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
 
         gcp.setToolPathss(toCurvess(returnPss));
         gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
