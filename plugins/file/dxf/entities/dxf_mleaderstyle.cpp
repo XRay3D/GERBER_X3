@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_mleaderstyle.h"
 namespace Dxf {
-MLeaderStyle::MLeaderStyle(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

@@ -1,9 +1,6 @@
 #include "dxf_seqend.h"
 
 namespace Dxf {
-SeqEnd::SeqEnd(SectionParser* sp)
-    : Entity{sp} {
-}
 
 void SeqEnd::parse(CodeData& code) {
     do {

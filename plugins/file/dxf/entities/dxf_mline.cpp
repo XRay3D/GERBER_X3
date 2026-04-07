@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_mline.h"
 namespace Dxf {
-MLine::MLine(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

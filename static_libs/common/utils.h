@@ -410,7 +410,7 @@ consteval bool isBitField(std::array<std::pair<sv, E>, N> tokens) {
         inline constexpr auto Impl::Tokens<E> = Impl::tokenize<Impl::Max<E>, E>(#__VA_ARGS__); \
         template <>                                                                            \
         inline constexpr auto isBitField<E> = false; // RImpl::isBitField(Impl::Tokens<E>);
-inline std::string arr; //[100] {};
+inline std::string arr;                              //[100] {};
 template <class E>
     requires isEnum<E>
 constexpr Impl::sv enumToString(E e) {

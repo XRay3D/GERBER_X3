@@ -4,11 +4,9 @@
 
 namespace Dxf {
 
-class SeqEnd final : public Entity {
-public:
-    SeqEnd(SectionParser* sp);
+struct SeqEnd final : Entity {
+    using Entity::Entity;
     // Entity interface
-public:
     void parse(CodeData& code) override;
     Type type() const override { return SEQEND; };
     DxfGo toGo() const override;

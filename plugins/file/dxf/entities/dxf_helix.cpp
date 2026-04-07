@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_helix.h"
 namespace Dxf {
-Helix::Helix(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

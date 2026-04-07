@@ -20,9 +20,6 @@
 #include <qmath.h>
 
 namespace Dxf {
-Ellipse::Ellipse(SectionParser* sp)
-    : Entity{sp} {
-}
 
 void Ellipse::parse(CodeData& code) {
     do {

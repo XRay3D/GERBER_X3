@@ -33,14 +33,15 @@ protected:
     Params gcp; ////
 
 public:
-    File(Params&& gcp): feedRate{gcp.feedRate()}
-                      , plungeRate{gcp.plungeRate()}
-                      , spindleSpeed{gcp.spindleSpeed()}
-                      , toolType{gcp.toolType()}
-                      , strFeed{u'F' + format(feedRate)}
-                      , strPlungeFeed{u'F' + format(plungeRate)}
-                      , strSpindle{u'S' + format(plungeRate)}
-                      , gcp{std::move(gcp)} { }
+    File(Params&& gcp)
+        : feedRate{gcp.feedRate()}
+        , plungeRate{gcp.plungeRate()}
+        , spindleSpeed{gcp.spindleSpeed()}
+        , toolType{gcp.toolType()}
+        , strFeed{u'F' + format(feedRate)}
+        , strPlungeFeed{u'F' + format(plungeRate)}
+        , strSpindle{u'S' + format(plungeRate)}
+        , gcp{std::move(gcp)} { }
 
     File() = default;
     ~File() override = default;

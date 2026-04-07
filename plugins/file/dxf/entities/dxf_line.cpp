@@ -14,10 +14,6 @@
 
 namespace Dxf {
 
-Line::Line(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void Line::parse(CodeData& code) {
     do {
         data.push_back(code);

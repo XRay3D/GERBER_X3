@@ -14,14 +14,12 @@
 
 namespace Dxf {
 
-class Dummy final : public Entity {
+struct Dummy final : Entity {
     Type type_;
 
-public:
     Dummy(SectionParser* sp, Type type = NULL_ENT);
 
     // Entity interface
-public:
     void draw(const InsertEntity* const) const override;
     void parse(CodeData& code) override;
     Type type() const override { return NULL_ENT; }
@@ -29,8 +27,6 @@ public:
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
-    // void write(QDataStream&) const override { }
-    // void read(QDataStream&) override { }
 };
 
 } // namespace Dxf

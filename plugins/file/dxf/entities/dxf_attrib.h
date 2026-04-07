@@ -12,10 +12,9 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct Attrib final : Entity {
-    Attrib(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-public:
     void parse(CodeData& code) override;
     Type type() const override { return ATTRIB; };
     DxfGo toGo() const override;

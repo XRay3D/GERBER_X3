@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_mesh.h"
 namespace Dxf {
-Mesh::Mesh(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

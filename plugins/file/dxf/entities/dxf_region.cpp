@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_region.h"
 namespace Dxf {
-Region::Region(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

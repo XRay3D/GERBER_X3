@@ -21,7 +21,8 @@ GcPath::GcPath(Path path, AbstractFile* file)
 GcPath::GcPath(Paths paths, AbstractFile* file)
     : GcPath{toCurves(paths), file} { }
 
-GcPath::GcPath(Curves curves, AbstractFile* file): gcFile_{file} {
+GcPath::GcPath(Curves curves, AbstractFile* file)
+    : gcFile_{file} {
 
     // Gi::Debug(paths, Qt::magenta)->arrows = {};
     // Gi::Debug(toPaths(toCurves(paths)), Qt::green)->arrows = {};

@@ -16,10 +16,6 @@
 
 namespace Dxf {
 
-Solid::Solid(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void Solid::parse(CodeData& code) {
     do {
         data.push_back(code);

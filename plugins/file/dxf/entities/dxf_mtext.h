@@ -18,7 +18,7 @@ struct MText final : Entity {
     Q_GADGET
 
 public:
-    MText(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
     void parse(CodeData& code) override;

@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_viewport.h"
 namespace Dxf {
-Viewport::Viewport(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_sun.h"
 namespace Dxf {
-Sun::Sun(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

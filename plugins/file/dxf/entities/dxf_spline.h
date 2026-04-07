@@ -14,10 +14,9 @@
 #include <cmath>
 namespace Dxf {
 struct Spline final : Entity {
-    Spline(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-public:
     void parse(CodeData& code) override;
     Type type() const override;
     DxfGo toGo() const override;

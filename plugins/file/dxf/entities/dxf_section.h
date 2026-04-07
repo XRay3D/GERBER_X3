@@ -11,14 +11,13 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct Section final : Entity {
-    Section(SectionParser* sp);
+    using Entity::Entity;
     Type type() const override { return Type::SECTION; }
     DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
-    // void write(QDataStream&) const override { }
-    // void read(QDataStream&) override { }
+
     void parse(CodeData& code) override {
         do {
             data.push_back(code);

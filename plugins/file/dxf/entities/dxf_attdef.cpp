@@ -17,9 +17,6 @@
 #include <QPainter>
 
 namespace Dxf {
-AttDef::AttDef(SectionParser* sp)
-    : Entity{sp} {
-}
 
 void AttDef::parse(CodeData& code) {
     do {

@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_shape.h"
 namespace Dxf {
-AbstractShape::AbstractShape(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

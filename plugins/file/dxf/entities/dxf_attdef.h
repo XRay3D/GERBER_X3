@@ -13,14 +13,13 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct AttDef final : Entity {
-    AttDef(SectionParser* sp);
+    using Entity::Entity;
 
     // EntityInterface
-public:
-    // void draw(const InsertEntity* const i = nullptr) const override;
+
     void parse(CodeData& code) override;
     Type type() const override;
-    ;
+
     DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;

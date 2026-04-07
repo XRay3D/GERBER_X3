@@ -17,9 +17,6 @@
 #include <myclipper.h>
 
 namespace Dxf {
-Circle::Circle(SectionParser* sp)
-    : Entity{sp} {
-}
 
 void Circle::parse(CodeData& code) {
     do {

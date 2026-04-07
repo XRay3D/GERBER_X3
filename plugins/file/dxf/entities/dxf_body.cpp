@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_body.h"
 namespace Dxf {
-Body::Body(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

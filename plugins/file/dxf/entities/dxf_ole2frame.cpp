@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_ole2frame.h"
 namespace Dxf {
-Ole2Frame::Ole2Frame(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

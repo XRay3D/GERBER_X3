@@ -121,10 +121,6 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
     }
 }
 
-Spline::Spline(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void Spline::parse(CodeData& code) {
     do {
         data.push_back(code);
