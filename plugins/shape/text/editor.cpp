@@ -126,7 +126,7 @@ void Editor::setupUi() {
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
     connect(pushButton, &QPushButton::clicked, this, [this] {
         for(auto* shape: shapes | filter) {
-            shape->iDataCopy = shape->iData;
+            shape->iDataCopy = shape->txtData;
             shape->ok();
         }
     });
@@ -151,7 +151,7 @@ void Editor::updateText() {
     if(resetFl) return;
     QString text = plainTextEdit->toPlainText();
     for(auto* shape: shapes | filter) {
-        shape->iData.text = text;
+        shape->txtData.text = text;
         shape->redraw();
     }
 }
@@ -163,7 +163,7 @@ void Editor::updateFont() {
     font.setItalic(chbxItalic->isChecked());
     plainTextEdit->setFont(font);
     for(auto* shape: shapes | filter) {
-        shape->iData.font = font;
+        shape->txtData.font = font;
         shape->redraw();
     }
 }
@@ -171,7 +171,7 @@ void Editor::updateFont() {
 void Editor::updateAngle() {
     if(resetFl) return;
     for(auto* shape: shapes | filter) {
-        shape->iData.angle = dsbxAngle->value();
+        shape->txtData.angle = dsbxAngle->value();
         shape->redraw();
     }
 }
@@ -179,7 +179,7 @@ void Editor::updateAngle() {
 void Editor::updateHeight() {
     if(resetFl) return;
     for(auto* shape: shapes | filter) {
-        shape->iData.height = dsbxHeight->value();
+        shape->txtData.height = dsbxHeight->value();
         shape->redraw();
     }
 }
@@ -187,7 +187,7 @@ void Editor::updateHeight() {
 void Editor::updateXY() {
     if(resetFl) return;
     for(auto* shape: shapes | filter) {
-        shape->iData.xy = dsbxXY->value();
+        shape->txtData.xy = dsbxXY->value();
         shape->redraw();
     }
 }
@@ -224,7 +224,7 @@ void Editor::updateCenterAlign() {
     else if(rb_tr->isChecked()) handleAlign = Shape::TopRight;
 
     for(auto* shape: shapes | filter) {
-        shape->iData.handleAlign = handleAlign;
+        shape->txtData.handleAlign = handleAlign;
         shape->redraw();
     }
 }
@@ -233,7 +233,7 @@ void Editor::updateSide() {
     if(resetFl) return;
 
     for(auto* shape: shapes | filter) {
-        shape->iData.side = static_cast<Side>(cbxSide->currentIndex());
+        shape->txtData.side = static_cast<Side>(cbxSide->currentIndex());
         shape->redraw();
     }
 }
@@ -269,8 +269,8 @@ void Editor::reset() {
 
     auto filtered = shapes | filter;
     auto& first = filtered.empty()
-        ? shapes.front()->iData
-        : filtered.front()->iData;
+        ? shapes.front()->txtData
+        : filtered.front()->txtData;
 
     if(qFuzzyIsNull(first.height)) first.height = 10.0;
     if(qFuzzyIsNull(first.xy)) first.xy = 100.0;

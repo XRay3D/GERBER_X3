@@ -61,16 +61,22 @@ void Shape::redraw() {
         }
     }
 
-    auto path = handles
-        | v::filter(std::bind(std::equal_to{}, Handle::Corner, _1))
-        | r::to<QPolygonF>();
+    Curve curve{
+        std::from_range,
+        v::filter(handles, std::bind(std::equal_to{}, Handle::Corner, _1))
+            | v::transform([](QPointF& pt) { return geo::Vertex{pt}; }),
+    };
 
-    shape_.clear();
-    shape_.addPolygon(path);
+    if(closed && !curve.isClosed()) curve.emplace_back(curve.front().pt);
+    curves_ = {std::move(curve)};
+    shape_ = toPPath(curves_);
+
     if(handles.size() > 4) {
-        auto c = centroidFast();
+        QPointF c = centroidFast();
         if(qIsNaN(c.x()) || qIsNaN(c.y())) c = {};
-        handles[0] = shape_.boundingRect().contains(c) && !c.isNull() ? c : shape_.boundingRect().center();
+        handles[0] = shape_.boundingRect().contains(c) && !c.isNull()
+            ? c
+            : shape_.boundingRect().center();
     }
 }
 
@@ -91,10 +97,10 @@ bool Shape::addPt(const QPointF& pt) {
     handles.emplace_back((handles.back() + pt) / 2, Handle::Adder);
     handles.emplace_back(pt);
     redraw();
-    return !closed();
+    return !isClosed();
 }
 
-bool Shape::closed() const { return handles[1] == handles.back(); }
+bool Shape::isClosed() const { return closed || handles[1] == handles.back(); }
 
 QPointF Shape::centroid() {
     return {};

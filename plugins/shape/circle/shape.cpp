@@ -43,9 +43,9 @@ void Shape::redraw() {
     case Point1:
     default    : radius_ = geo::Length(handles[Center], handles[Point1]);
     }
-
-    shape_.clear();
-    shape_.addEllipse(handles[Center], radius_, radius_);
+    closed = true;
+    curves_ = {CircleCurve(radius_ * 2., handles[Center])};
+    shape_ = toPPath(curves_);
     assert(handles.size() == PtCount);
 }
 

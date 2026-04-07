@@ -63,16 +63,18 @@ void Shape::redraw() {
     //     handles[Point1],
     // });shape_.
 
-    Path path{
-        ~handles[Point1],
-        ~handles[Point2],
-        ~handles[Point3],
-        ~handles[Point4],
-        ~handles[Point1],
+    curves_ = {
+        {
+         {handles[Point1]},
+         {handles[Point2]},
+         {handles[Point3]},
+         {handles[Point4]},
+         {handles[Point1]},
+         },
     };
-
-    if(Area(path) < 0) ReversePath(path);
-    shape_.addPolygon(~path);
+    closed = true;
+    if(curves_.front().area() < 0) curves_.front().reverse();
+    shape_ = toPPath(curves_);
     assert(handles.size() == PtCount);
 }
 

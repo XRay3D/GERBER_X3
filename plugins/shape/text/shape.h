@@ -80,10 +80,10 @@ protected:
     void readAndInit(QDataStream& stream) override;
 
 private:
-    ShapeData iData;
+    ShapeData txtData;
     ShapeData iDataCopy;
-    void saveIData();
-    ShapeData loadIData();
+    void saveData();
+    ShapeData loadData();
 
     void save();
     void restore();

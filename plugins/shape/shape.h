@@ -104,6 +104,7 @@ protected:
     mutable std::vector<Handle> handles;
     Handle* curHandle{};
     using HIt = std::vector<Handle>::const_iterator;
+    bool closed{};
 
     // Paths paths_;
     void updateHandleShape();
