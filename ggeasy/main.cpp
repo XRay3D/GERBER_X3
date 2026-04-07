@@ -30,7 +30,7 @@ int main(int argc, char* argv[]) {
 
     qputenv("QT_ENABLE_HIGHDPI_SCALING", "0"_ba);
 
-    qputenv("QT_QPA_PLATFORM", "windows:darkmode=1"_ba); // 1|2
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1"_ba); // 1|2
 
     Q_INIT_RESOURCE(resources);
 
@@ -59,7 +59,7 @@ int main(int argc, char* argv[]) {
     [[maybe_unused]] App appSingleton;
     [[maybe_unused]] GCode::Settings gcSingleton;
     App::setGcSettings(&gcSingleton);
-    App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+    App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).constFirst();
     App::toolHolder().readTools();
 
     if(QDir dir(App::settingsPath()); !dir.exists())

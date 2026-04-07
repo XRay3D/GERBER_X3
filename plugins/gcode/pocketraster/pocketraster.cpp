@@ -102,7 +102,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     std::erase_if(returnPss, empty);
     // Gi::Debug(returnPss | v::join | r::to<Paths>(), Qt::magenta);
     if(returnPss.size()) {
-        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.toolPathss = toCurvess(returnPss);
         gcp.setPocketAreaCurves(toCurves(fillPaths));
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
@@ -195,7 +195,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         std::erase_if(returnPss, [](auto& paths) { return paths.empty(); });
         for(auto& paths: returnPss)
             std::erase_if(paths, [](auto& path) { return path.empty(); });
-        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.toolPathss = toCurvess(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }

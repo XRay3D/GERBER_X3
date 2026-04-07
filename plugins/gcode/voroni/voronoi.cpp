@@ -37,7 +37,7 @@ void Creator::create() {
 
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-        gcp.setToolPathss(toCurvess({sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))}));
+        gcp.toolPathss = toCurvess({sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))});
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     } else {
@@ -68,7 +68,7 @@ void Creator::create() {
                 returnPss.erase(begin);
             else
                 ++begin;
-        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.toolPathss = toCurvess(returnPss);
         gcp.setPocketAreaCurves(toCurves(openSrcPaths));
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
@@ -151,11 +151,11 @@ void File::genGcodeAndTile() {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
             if(toolType == Tool::Laser)
-                if(gcp.toolPathss().size() > 1)
+                if(gcp.toolPathss.size() > 1)
                     saveLaserPocket(offset);
                 else
                     saveLaserProfile(offset);
-            else if(gcp.toolPathss().size() > 1)
+            else if(gcp.toolPathss.size() > 1)
                 saveMillingPocket(offset);
             else
                 saveMillingProfile(offset);
@@ -167,9 +167,9 @@ void File::genGcodeAndTile() {
 }
 
 void File::createGi() {
-    if(gcp.toolPathss().size() > 1) {
+    if(gcp.toolPathss.size() > 1) {
         Gi::Item* item;
-        item = new Gi::GcPath{{gcp.toolPathss().back().back()}, this};
+        item = new Gi::GcPath{{gcp.toolPathss.back().back()}, this};
         // item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);

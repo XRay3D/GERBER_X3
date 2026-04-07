@@ -18,7 +18,6 @@ class File;
 namespace Gi {
 
 class DataFill final : public Item {
-    Curves curves_;
 
 public:
     explicit DataFill(Curves curves, AbstractFile* file);

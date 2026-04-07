@@ -180,17 +180,15 @@ void File::endPath() {
 }
 
 Curvess File::mirrorAndOffsetCurves(const QPointF& offset) {
-    auto& toolPathss = gcp.toolPathss();
     Curvess curvess;
-    curvess.reserve(toolPathss.size());
-    for(Curves curves: toolPathss)
+    curvess.reserve(gcp.toolPathss.size());
+    for(Curves curves: gcp.toolPathss)
         curvess.emplace_back(mirrorAndOffsetCurves(offset, curves));
     return curvess;
 }
 
 Curves File::mirrorAndOffsetCurves(const QPointF& offset, Curves curves) {
-    auto& toolPathss = gcp.toolPathss();
-    if(curves.empty()) curves = toolPathss.front(); // FIXME wtf
+    if(curves.empty()) curves = gcp.toolPathss.front(); // FIXME wtf
 
     r::for_each(curves, std::bind(TranslateCurve, _1, offset /*- App::zero().pos()*/));
 
@@ -291,9 +289,7 @@ QString File::format(double val) {
 
 /////////////////////////////////////////////////////////////
 void File::saveDrill(const QPointF& offset) {
-    auto& toolPathss = gcp.toolPathss();
-
-    Curve path = mirrorAndOffsetCurves(offset, toolPathss.front()).front();
+    Curve path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
 
     const std::vector<double> depths(getDepths());
 
@@ -357,12 +353,12 @@ void File::saveLaserProfile(const QPointF& offset) {
 
 void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
-    Curvess toolPathss = mirrorAndOffsetCurves(offset);
+
     const mvector<double> depths = getDepths();
     double diameter = tool().diameter();
-    QPointF point = toolPathss.front().front().front().pt;
+    QPointF point = gcp.toolPathss.front().front().front().pt;
     startPath(point);
-    for(const Curves& paths: toolPathss) {
+    for(const Curves& paths: gcp.toolPathss) {
         for(double zd: depths) {
             for(const Curve& path: paths) {
                 bool first = !geo::TEST(std::exchange(point, path.front().pt), path.front().pt, diameter, diameter * 2);
@@ -387,8 +383,8 @@ void File::saveMillingPocket(const QPointF& offset) {
 
 void File::saveMillingProfile(const QPointF& offset) {
     const mvector<double> depths(getDepths());
-    Curvess toolPathss = mirrorAndOffsetCurves(offset);
-    for(const Curves& paths: toolPathss) {
+
+    for(const Curves& paths: gcp.toolPathss) {
         if(paths.size() == 1) {
             const Curve& path = paths.front();
             double perimetr = path.perimetr();
@@ -447,16 +443,15 @@ void File::saveMillingRaster(const QPointF& offset) {
 }
 
 void File::createGiDrill() {
-    auto& toolPathss = gcp.toolPathss();
 
     Gi::Item* item;
-    for(QPointF point: toolPathss.front().front()) {
+    for(QPointF point: gcp.toolPathss.front().front()) {
         item = new Gi::Drill{{point}, gcp.tool().diameter(), this, gcp.tool().id()};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
-    item = new Gi::GcPath{{toolPathss.front().front()}};
+    item = new Gi::GcPath{{gcp.toolPathss.front().front()}};
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 }
@@ -464,20 +459,18 @@ void File::createGiDrill() {
 void File::createGiLaser() {
     Curves paths;
 
-    auto& toolPathss = gcp.toolPathss();
-
-    paths.reserve(toolPathss.front().size() / 2 + 1);
+    paths.reserve(gcp.toolPathss.front().size() / 2 + 1);
     g0path_.reserve(paths.size());
-    for(size_t i{}; i < toolPathss.front().size(); ++i)
+    for(size_t i{}; i < gcp.toolPathss.front().size(); ++i)
         if(i % 2)
-            paths.push_back(toolPathss.front()[i]);
+            paths.push_back(gcp.toolPathss.front()[i]);
         else
-            g0path_.push_back(toolPathss.front()[i]);
-    if(toolPathss.size() > 1) {
-        paths.insert(paths.end(), toolPathss[1].begin(), toolPathss[1].end());
-        g0path_.push_back({toolPathss[0].back().back(), toolPathss[1].front().front()});
-        for(size_t i{}; i < toolPathss[1].size() - 1; ++i)
-            g0path_.push_back({toolPathss[1][i].back(), toolPathss[1][i + 1].front()});
+            g0path_.push_back(gcp.toolPathss.front()[i]);
+    if(gcp.toolPathss.size() > 1) {
+        paths.insert(paths.end(), gcp.toolPathss[1].begin(), gcp.toolPathss[1].end());
+        g0path_.push_back({gcp.toolPathss[0].back().back(), gcp.toolPathss[1].front().front()});
+        for(size_t i{}; i < gcp.toolPathss[1].size() - 1; ++i)
+            g0path_.push_back({gcp.toolPathss[1][i].back(), gcp.toolPathss[1][i + 1].front()});
     }
 
     auto item = new Gi::GcPath{paths, this};
@@ -510,7 +503,7 @@ void File::createGiLaser() {
 }
 
 void File::createGiPocket() {
-    auto& toolPathss = gcp.toolPathss();
+
     auto& pocketAreaCurves = gcp.pocketAreaCurves();
 
     Gi::Item* item;
@@ -523,8 +516,8 @@ void File::createGiPocket() {
         itemGroup()->push_back(item);
     }
 
-    for(size_t i{}; const Curves& paths: toolPathss) {
-        int k = static_cast<int>((toolPathss.size() > 1) ? (300.0 / (toolPathss.size() - 1)) * i : 0);
+    for(size_t i{}; const Curves& paths: gcp.toolPathss) {
+        int k = static_cast<int>((gcp.toolPathss.size() > 1) ? (300.0 / (gcp.toolPathss.size() - 1)) * i : 0);
         debugColor.emplace_back(QSharedPointer<QColor>(new QColor{QColor::fromHsv(k, 255, 255, 255)}));
 
         for(const Curve& path: paths) {
@@ -543,8 +536,8 @@ void File::createGiPocket() {
         itemGroup()->push_back(item);
     }
 
-    g0path_.reserve(toolPathss.size());
-    for(auto&& [fr, to]: v::pairwise(toolPathss))
+    g0path_.reserve(gcp.toolPathss.size());
+    for(auto&& [fr, to]: v::pairwise(gcp.toolPathss))
         g0path_.push_back({{fr.back().back().pt}, {to.front().front().pt}});
 
     item = new Gi::GcPath{g0path_};
@@ -553,20 +546,18 @@ void File::createGiPocket() {
 }
 
 void File::createGiProfile() {
-    auto& toolPathss = gcp.toolPathss();
 
     Gi::Item* item;
-    for(const Curves& paths: toolPathss) {
+    for(const Curves& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
-    size_t i{};
 
     g0path_.clear();
 
-    for(const Curves& paths: toolPathss) {
+    for(const Curves& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
@@ -582,15 +573,14 @@ void File::createGiProfile() {
 }
 
 void File::createGiRaster() {
-    // int k = static_cast<int>((toolPathss.size() > 1) ? (300.0 / (toolPathss.size() - 1)) * i : 0);
+    // int k = static_cast<int>((gcp.toolPathss.size() > 1) ? (300.0 / (gcp.toolPathss.size() - 1)) * i : 0);
     // QColor* c = new QColor;
     // *c = QColor::fromHsv(k, 255, 255, 255);
 
-    auto& toolPathss = gcp.toolPathss();
     auto& pocketAreaCurves = gcp.pocketAreaCurves();
 
     Gi::Item* item;
-    g0path_.reserve(toolPathss.size());
+    g0path_.reserve(gcp.toolPathss.size());
 
     if(pocketAreaCurves.size()) {
         item = new Gi::DataFill{pocketAreaCurves, nullptr}; // FIXME const_cast
@@ -601,7 +591,7 @@ void File::createGiRaster() {
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->push_back(item);
     } else {
-        for(const Curves& paths: toolPathss) {
+        for(const Curves& paths: gcp.toolPathss) {
             item = new Gi::GcPath{paths, this};
             item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -610,16 +600,16 @@ void File::createGiRaster() {
     }
     size_t i{};
 
-    // for (int i {}; auto& path : v::join(toolPathss)) { }
+    // for (int i {}; auto& path : v::join(gcp.toolPathss)) { }
 
-    for(const Curves& paths: toolPathss) {
+    for(const Curves& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for(size_t j{}; j < paths.size() - 1; ++j)
             g0path_.push_back({paths[j].back(), paths[j + 1].front()});
-        if(i < toolPathss.size() - 1)
-            g0path_.push_back({toolPathss[i].back().back(), toolPathss[++i].front().front()});
+        if(i < gcp.toolPathss.size() - 1)
+            g0path_.push_back({gcp.toolPathss[i].back().back(), gcp.toolPathss[++i].front().front()});
     }
 
     item = new Gi::GcPath{g0path_};

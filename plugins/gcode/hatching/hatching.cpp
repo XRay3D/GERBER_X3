@@ -286,7 +286,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     }
 
     if(returnPss.size()) {
-        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.toolPathss = toCurvess(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }

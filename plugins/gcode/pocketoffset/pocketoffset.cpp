@@ -80,7 +80,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     stacking(returnPs);
     assert(returnPss.size());
 
-    gcp.setToolPathss(toCurvess(returnPss));
+    gcp.toolPathss = toCurvess(returnPss);
     gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
     file_ = new File{std::move(gcp)};
 
@@ -133,7 +133,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
 
     cutAreaPaths = InflateRoundPolygon(cutAreaPaths, dOffset * 2, uScale);
 
-    gcp.setToolPathss(toCurvess(returnPss));
+    gcp.toolPathss = toCurvess(returnPss);
     gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
     file_ = new File{std::move(gcp)};
 
@@ -219,7 +219,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 
         gcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
 
-        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.toolPathss = toCurvess(returnPss);
         gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());

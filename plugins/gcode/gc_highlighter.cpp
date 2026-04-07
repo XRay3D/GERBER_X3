@@ -68,8 +68,12 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     resize(600, 600);
     setWindowTitle(windowTitle);
     auto tbCode = new QTextBrowser{this};
-    tbCode->setFontFamily(u"JetBrains Mono"_s);
-    tbCode->setFontPointSize(16);
+
+    QFont font{
+        {u"JetBrains Mono"_s, u"Iosevka Extended"_s, u"Monospace"_s}
+    };
+    font.setPointSize(16);
+    tbCode->setFont(font);
     tbCode->setWordWrapMode({});
     new Highlighter{tbCode->document()};
     tbCode->setPlainText(text);
@@ -77,18 +81,13 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     int lineCount = text.count(u'\n') + 3;
 
     auto tbLine = new QTextEdit{this};
-    tbLine->setFontFamily(u"JetBrains Mono"_s);
-    tbLine->setFontPointSize(16);
+    tbLine->setFont(font);
     tbLine->setReadOnly(true);
     tbLine->setPlainText(v::iota(1, lineCount)
         | v::transform(std::bind(qOverload<int, int>(QString::number), _1, 10))
         | v::join_with(u'\n')
         | r::to<QString>());
-    tbLine->setFixedWidth(
-        tbLine->fontMetrics()
-            .boundingRect(QString::number(lineCount))
-            .width()
-        * 3);
+    tbLine->setFixedWidth(QFontMetrics{font}.boundingRect(QString::number(lineCount * 10)).width());
 
     tbLine->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 

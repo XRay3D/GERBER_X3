@@ -120,6 +120,7 @@ protected:
     const AbstractFile* file_;
     Group* itemGroup = nullptr;
     QPainterPath shape_;
+    Curves curves_;
 
     QPen pen_;
 

@@ -181,6 +181,11 @@ void File::createGi() {
             if(empty) {
                 clipper.Execute(ClipType::Union, FillRule::NonZero, mergedPaths_);
                 CleanPaths(mergedPaths_, uScale * 0.0005);
+
+                for(Path& path: mergedPaths_)
+                    if(path.back() != path.front())
+                        path.emplace_back(path.front());
+
                 layer->groupedPaths_ = std::move(groupedPaths());
 
                 // Gi::Debug(mergedPaths_, Qt::red)->setZValue(100);

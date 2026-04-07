@@ -36,7 +36,7 @@ target_link_libraries(
          filetree
          gi
          shape
-         $<$<PLATFORM_ID:Linux_>:
+         $<$<PLATFORM_ID:Linux>:
          tbb
          >
          $<$<PLATFORM_ID:Windows>:
