@@ -354,6 +354,8 @@ const Params& Form::getNewGcpWithGi() {
 
     // AbstractFile const* file = nullptr;
     // bool skip{true};
+
+    int side{};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         // qDebug() << gi << gi->file();
         // switch(gi->type()) {
@@ -365,11 +367,13 @@ const Params& Form::getNewGcpWithGi() {
         for(auto&& curve: gi->curves())
             curve.isClosed() ? gcp.closedCurves.emplace_back(curve)
                              : gcp.openCurves.emplace_back(curve);
+        if(auto file = gi->file())
+            file->side() == Side::Bottom ? --side : ++side;
+
         // } break;
         // // if (!file) {
         // // file = gi->file();
-        // // boardSide = file->side();
-        // // } else if (file != gi->file()) {
+        // // boardSide = file->side();        // // } else if (file != gi->file()) {
         // // if (skip) {
         // // if ((skip = (QMessageBox::question(this, tr("Warning"), tr("Work items from different files!\nWould you like to continue?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::No)))
         // // return;
@@ -394,7 +398,7 @@ const Params& Form::getNewGcpWithGi() {
         // }
         addUsedGi(gi);
     }
-
+    gcp.params[GCode::Params::Side].setValue(side < 0 ? Side::Bottom : Side::Top);
     gcp.params[GCode::Params::GrItems].setValue(usedItems_);
 
     if(!gcp)

@@ -22,15 +22,14 @@ class DataPath final : public Item {
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;
 
-    Paths paths(int /*alternate*/ = {}) const override;
-
     void redraw() override { update(); }
     void changeColor() override { }
     friend class ::MainWindow;
 
 public:
-    DataPath(const Path& path, AbstractFile* file);
-    DataPath(const Paths& path, AbstractFile* file);
+    DataPath(Curves curves, AbstractFile* file);
+    DataPath(const Path& path, AbstractFile* file): DataPath{{toCurve(path)}, file} { }
+    DataPath(const Paths& paths, AbstractFile* file): DataPath{toCurves(paths), file} { }
 
 protected:
     // QGraphicsItem interface

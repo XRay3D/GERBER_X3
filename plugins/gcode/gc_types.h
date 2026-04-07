@@ -232,12 +232,10 @@ public:
     Curves closedCurves; // pocketAreaPaths
     Curves openCurves;
     Curvess supportCurvess; // toolCurvess
+    Curvess toolPathss;     // toolCurvess
 
     const Curves& pocketAreaCurves() const { return closedCurves; }
     void setPocketAreaCurves(Curves&& arg) { closedCurves = std::move(arg); }
-
-    const Curvess& toolPathss() const { return supportCurvess; }
-    void setToolPathss(Curvess&& arg) { supportCurvess = std::move(arg); }
 
     auto feedRate() const -> double { return tool().feedRate(); }
     auto plungeRate() const -> double { return tool().plungeRate(); }

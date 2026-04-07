@@ -99,7 +99,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
 
     if(returnPss.size()) {
         sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
-        gcp.setToolPathss(toCurvess(returnPss));
+        gcp.toolPathss = toCurvess(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }

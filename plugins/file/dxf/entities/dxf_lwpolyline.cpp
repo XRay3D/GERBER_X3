@@ -233,7 +233,7 @@ DxfGo LwPolyline::toGo() const {
 
     Paths paths = Inflate({path}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
 
-    Gi::Debug(paths, Qt::red);
+    // Gi::Debug(paths, Qt::red);
 
     DxfGo go{id, path, paths}; // return {id, ~p.value(0), paths};
 

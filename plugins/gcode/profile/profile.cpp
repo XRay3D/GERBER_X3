@@ -80,7 +80,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
 
     // Gi::Debug(returnPss | v::join | r::to<std::vector>(), Qt::yellow);
 
-    gcp.setToolPathss(toCurvess(returnPss));
+    gcp.toolPathss = toCurvess(returnPss);
 
     file_ = new File{std::move(gcp)};
     file_->setFileName(tool.nameEnc());
@@ -391,22 +391,21 @@ void File::genGcodeAndTile() {
 }
 
 void File::createGi() {
-    auto& toolPathss = gcp.toolPathss();
     Gi::Item* item;
-    for(const Curves& paths: toolPathss) {
+    for(const Curves& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
 
-    for(const Curves& paths: toolPathss) {
+    for(const Curves& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
     }
 
-    for(auto&& [from, to]: toolPathss | v::join | v::pairwise)
+    for(auto&& [from, to]: gcp.toolPathss | v::join | v::pairwise)
         g0path_.push_back(Curve{{from.back().pt}, {to.front().pt}});
 
     item = new Gi::GcPath{g0path_};

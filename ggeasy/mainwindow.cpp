@@ -761,10 +761,7 @@ void MainWindow::createActionsShape() {
     toolBar->addSeparator();
 
     static constexpr auto executor = +[](ClipType type) {
-        qCritical("На переделке");
-        return;
-
-        auto selectedItems(App::grView().selectedItems());
+        auto selectedItems = App::grView().selectedItems();
         Paths clipPaths;
         for(QGraphicsItem* clipItem: selectedItems)
             if(clipItem->type() >= Gi::Type::ShCircle)

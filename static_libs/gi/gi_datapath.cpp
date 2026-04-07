@@ -11,91 +11,73 @@
 #include "gi_datapath.h"
 
 #include "abstract_file.h"
-#include "gc_types.h"
-#include "graphicsview.h"
 #include "project.h"
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
-#include <ranges>
 #include <set>
 
 namespace Gi {
 
-DataPath::DataPath(const Path& path, AbstractFile* file)
+static QPainterPathStroker str{
+    {Qt::transparent, 1., Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin}
+};
+
+void DataPath::updateSelection() const {
+    const double scale = scaleFactor();
+    if(qFuzzyCompare(scale_, scale)) return;
+    constexpr auto width{5}; // screen pixels
+    scale_ = scale;
+#if 1
+    str.setWidth(width * scale);
+    selectionShape_ = str.createStroke(shape_);
+    boundingRect_ = selectionShape_.boundingRect();
+#else
+    auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, JoinType::Miter, EndType::Square);
+    selectionShape_.clear();
+    for(Path& path: tmpPpath) selectionShape_.addPolygon(~path);
+    boundingRect_ = selectionShape_.boundingRect();
+    assert(tmpPpath.size());
+    assert(tmpPpath.front().size());
+#endif
+    // qWarning() << shape_;
+    // qWarning() << selectionShape_;
+    assert(shape_.elementCount());
+    assert(selectionShape_.elementCount() > 1);
+}
+
+DataPath::DataPath(Curves curves, AbstractFile* file)
     : Item{file} {
-    shape_.addPolygon(~path);
+    curves_ = std::move(curves);
+    shape_ = toPPath(curves_);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
     setSelected(false);
 }
 
-DataPath::DataPath(const Paths& paths, AbstractFile* file)
-    : Item{file} {
-    for(auto&& path: paths)
-        shape_.addPolygon(~path);
-    updateSelection();
-    setAcceptHoverEvents(true);
-    setFlag(ItemIsSelectable, true);
-    setSelected(false);
-}
+QPainterPath DataPath::shape() const { return selectionShape_; }
 
-void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if(pnColorPrt_)
-        pen_.setColor(*pnColorPrt_);
-    if(colorPtr_)
-        color_ = *colorPtr_;
-    // pen_.setWidth(penWidth());
-    updateSelection();
-
-    QColor color{pen_.color()};
-    QPen pen{pen_};
-    constexpr double dl = 3;
-
-    if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
-        if(option->state & QStyle::State_Selected) {
-            color.setAlpha(255);
-            pen.setColor(color);
-            pen.setDashOffset(App::dashOffset());
+QVariant DataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    if(change == ItemVisibleChange && value.toBool()) {
+        updateSelection();
+    } else if(change == ItemSelectedChange && App::settings().animSelection()) {
+        if(value.toBool()) {
+            updateSelection();
+            // FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
+        } else {
+            // FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
+            update();
         }
-        pen.setWidthF(2.0 * scaleFactor());
-        pen.setStyle(Qt::CustomDashLine);
-        pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({dl, dl - 1});
     }
-    if(option->state & QStyle::State_MouseOver) {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor{255, 255, 255, 128});
-        painter->drawPath(selectionShape_);
-    }
-
-    painter->setPen(pen);
-    painter->setBrush(Qt::NoBrush);
-    painter->drawPath(shape_);
+    return value;
 }
 
 int DataPath::type() const { return Type::DataPath; }
 
-QPainterPath DataPath::shape() const { return selectionShape_; }
-
-void DataPath::updateSelection() const {
-    if(const double scale = scaleFactor(); !qFuzzyCompare(scale_, scale)) {
-        scale_ = scale;
-        selectionShape_ = {};    // reset QPainterPath
-                                 // ClipperOffset offset;
-                                 // offset.AddPath(Path{~shape_.toSubpathPolygons().front()}, JoinType::Square, EndType::Square);
-                                 // auto tmpPpath{offset.Execute(5 * uScale * scale_)};
-        constexpr auto width{5}; // screen pixels
-        auto tmpPpath = Inflate({~shape_.toSubpathPolygons().front()}, width * uScale * scale_, JoinType::Miter, EndType::Square);
-        for(auto&& path: tmpPpath)
-            selectionShape_.addPolygon(~path);
-        boundingRect_ = selectionShape_.boundingRect();
-    }
-}
-
-Paths DataPath::paths(int) const {
-    return qWarning("TODO"), Paths{};
+void DataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
+    QGraphicsItem::hoverEnterEvent(event);
+    updateSelection();
 }
 
 void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
@@ -145,24 +127,37 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         selector(this);
 }
 
-QVariant DataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if(change == ItemVisibleChange && value.toBool()) {
-        updateSelection();
-    } else if(change == ItemSelectedChange && App::settings().animSelection()) {
-        if(value.toBool()) {
-            updateSelection();
-            // FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
-        } else {
-            // FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
-            update();
-        }
-    }
-    return value;
-}
-
-void DataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
-    QGraphicsItem::hoverEnterEvent(event);
+void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+    if(pnColorPrt_)
+        pen_.setColor(*pnColorPrt_);
+    if(colorPtr_)
+        color_ = *colorPtr_;
+    // pen_.setWidth(penWidth());
     updateSelection();
+
+    QColor color{pen_.color()};
+    QPen pen{pen_};
+
+    if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
+        if(option->state & QStyle::State_Selected) {
+            color.setAlpha(255);
+            pen.setColor(color);
+            pen.setDashOffset(App::dashOffset());
+        }
+        pen.setWidthF(2 * scaleFactor());
+        pen.setStyle(Qt::CustomDashLine);
+        pen.setCapStyle(Qt::FlatCap);
+        pen.setDashPattern({pi, pi - 1});
+    }
+    if(option->state & QStyle::State_MouseOver) {
+        painter->setPen(Qt::NoPen);
+        painter->setBrush(QColor{255, 255, 255, 128});
+        painter->drawPath(selectionShape_);
+    }
+
+    painter->setPen(pen);
+    painter->setBrush(Qt::NoBrush);
+    painter->drawPath(shape_);
 }
 
 } // namespace Gi

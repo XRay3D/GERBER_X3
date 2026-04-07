@@ -20,11 +20,10 @@
 namespace Gi {
 
 DataFill::DataFill(Curves curves, AbstractFile* file)
-    : Item{file}
-    , curves_{std::move(curves)} {
+    : Item{file} {
+    curves_ = std::move(curves);
     // shape_ = toPPath(toCurves(toPaths(curves_)));
     shape_ = toPPath(curves_);
-
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -76,7 +75,7 @@ void DataFill::redraw() {
 // }
 
 void DataFill::setPaths(Paths paths, int /*alternate*/) {
-    qFatal("setPaths");
+    qCritical("setPaths");
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());

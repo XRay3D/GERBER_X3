@@ -66,11 +66,11 @@ private:                                          \
     class TYPE* NAME##_ = nullptr;                \
                                                   \
 public:                                           \
-    static auto& NAME() {                         \
+    static TYPE& NAME() {                         \
         assert(app->NAME##_);                     \
         return *app->NAME##_;                     \
     }                                             \
-    static auto* NAME##Ptr() {                    \
+    static TYPE* NAME##Ptr() {                    \
         /*assert(app->NAME##_);*/                 \
         return app->NAME##_;                      \
     }                                             \
