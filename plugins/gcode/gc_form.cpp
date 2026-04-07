@@ -357,16 +357,18 @@ const Params& Form::getNewGcpWithGi() {
 
     int side{};
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
-        // qDebug() << gi << gi->file();
+        qDebug() << gi << gi->file();
         // switch(gi->type()) {
         // case Gi::Type::DataSolid:
         // gcp.closedPaths.append(gi->paths());
         // break;
         // case Gi::Type::DataPath: {
         // dbgPaths(gi->paths(), __FUNCTION__);
-        for(auto&& curve: gi->curves())
-            curve.isClosed() ? gcp.closedCurves.emplace_back(curve)
-                             : gcp.openCurves.emplace_back(curve);
+        for(auto&& curve: gi->curves()) {
+            qWarning() << curve;
+            curve.isClosed() ? gcp.closedCurves.emplace_back(std::move(curve))
+                             : gcp.openCurves.emplace_back(std::move(curve));
+        }
         if(auto file = gi->file())
             file->side() == Side::Bottom ? --side : ++side;
 

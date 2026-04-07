@@ -36,7 +36,7 @@ public:
     void setPt(const QPointF& pt) override;
     bool addPt(const QPointF& pt) override;
 
-    bool closed() const;
+    bool isClosed() const;
 
 protected:
     void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()

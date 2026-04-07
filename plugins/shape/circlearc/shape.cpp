@@ -86,22 +86,36 @@ void Shape::redraw() {
         radius_ = geo::Length(handles[Center], handles[Point1]);
     }
 
-    shape_.clear();
-    shape_.moveTo(handles[Point1]);
-
-    QRectF rect{
-        handles[Center].x() - radius_,
-        handles[Center].y() - radius_,
-        radius_ * 2,
-        radius_ * 2,
+    Curve curve{
+        {{
+             handles[Point1],
+         },
+         {
+                handles[Point2],
+                handles[Center],
+                geo::DIR(handles[Point1], handles[Center], handles[Point2]),
+            }}
     };
+    if(closed) curve.emplace_back(curve.front().pt);
+    curves_ = {std::move(curve)};
+    shape_ = toPPath(curves_);
 
-    QLineF l1{handles[Center], handles[Point1]};
-    shape_.arcTo(rect,
-        l1.angle(),
-        l1.angleTo({handles[Center], handles[Point2]}));
+    // shape_.clear();
+    // shape_.moveTo(handles[Point1]);
 
-    assert(handles.size() == PtCount);
+    // QRectF rect{
+    //     handles[Center].x() - radius_,
+    //     handles[Center].y() - radius_,
+    //     radius_ * 2,
+    //     radius_ * 2,
+    // };
+
+    // QLineF l1{handles[Center], handles[Point1]};
+    // shape_.arcTo(rect,
+    //     l1.angle(),
+    //     l1.angleTo({handles[Center], handles[Point2]}));
+
+    // assert(handles.size() == PtCount);
 }
 
 QString Shape::name() const { return QObject::tr("CircleArc"); }

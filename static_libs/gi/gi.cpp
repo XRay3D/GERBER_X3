@@ -87,7 +87,9 @@ Paths Item::paths(int /*param*/) const { return toPaths(transform().map(shape_))
 Curves Item::curves(int param) const {
     Curves curves{curves_};
     if(param) return curves;
-    r::for_each(curves, std::bind(TransformCurve, _1, transform()));
+    auto tr = transform();
+    if(!tr.isIdentity())
+        r::for_each(curves, std::bind(TransformCurve, _1, std::move(tr)));
     return curves;
 }
 
