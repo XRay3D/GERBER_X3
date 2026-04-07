@@ -14,14 +14,6 @@
 #include <QPolygonF>
 
 namespace Dxf {
-Hatch::Hatch(SectionParser* sp)
-    : Entity{sp} {
-}
-
-Hatch::~Hatch() {
-    for(auto edge: edges)
-        qDeleteAll(edge);
-}
 
 void Hatch::parse(CodeData& code) {
     do {
@@ -78,7 +70,7 @@ void Hatch::parse(CodeData& code) {
             switch(edgeType) {
             case Line: { // 1
                 auto line = new LineEdge{edgeType};
-                edges[edges.size() - 1].push_back(line);
+                edges[edges.size() - 1].emplace_back(line);
                 for(int i{}; i < 4; ++i) {
                     code = sp->nextCode();
                     switch(code.code()) {
@@ -157,7 +149,7 @@ DxfGo Hatch::toGo() const {
     qInfo("Hatch");
     Paths paths(edges.size());
     for(size_t i{}; i < edges.size(); ++i)
-        for(auto edge: edges[i])
+        for(auto&& edge: edges[i])
             paths[i].append_range(~edge->toPolygon());
     Clipper clipper;
     clipper.AddOpenSubject(paths); // FIXME AddSubject???

@@ -12,11 +12,10 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct Ellipse final : Entity {
-    Ellipse(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-public:
-    // void draw(const InsertEntity* const i = nullptr) const override;
+
     void parse(CodeData& code) override;
     Type type() const override;
     DxfGo toGo() const override;

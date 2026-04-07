@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_section.h"
 namespace Dxf {
-Section::Section(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

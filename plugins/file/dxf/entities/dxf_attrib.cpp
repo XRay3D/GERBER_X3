@@ -10,9 +10,6 @@
  *******************************************************************************/
 #include "dxf_attrib.h"
 namespace Dxf {
-Attrib::Attrib(SectionParser* sp)
-    : Entity{sp} {
-}
 
 void Attrib::parse(CodeData& code) {
     do {

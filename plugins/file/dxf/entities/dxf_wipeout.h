@@ -11,9 +11,8 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct Wipeout final : Entity {
-    Wipeout(SectionParser* sp);
+    using Entity::Entity;
     // Entity interface
-public:
     Type type() const override { return Type::WIPEOUT; }
     DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);

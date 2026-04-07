@@ -15,7 +15,7 @@
 
 namespace Dxf {
 struct LwPolyline final : Entity {
-    LwPolyline(SectionParser* sp);
+    using Entity::Entity;
     // 5
     // 8
     // 62
@@ -45,8 +45,6 @@ struct LwPolyline final : Entity {
         Plinegen = 128 // PLINEGEN
     };
     // Entity interface
-public:
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;

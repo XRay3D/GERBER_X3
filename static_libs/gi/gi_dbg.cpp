@@ -44,7 +44,8 @@ struct Node final : FileTree::Node {
 
 struct Dymmy final : AbstractFile {
     Debug_* giDbg;
-    Dymmy(Debug_* giDbg): giDbg{giDbg} { }
+    Dymmy(Debug_* giDbg)
+        : giDbg{giDbg} { }
 
     // AbstractFile interface
     uint32_t type() const override { return Type::Debug; }

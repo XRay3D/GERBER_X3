@@ -14,10 +14,6 @@
 
 namespace Dxf {
 
-PolyLine::PolyLine(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void PolyLine::parse(CodeData& code) {
     do {
         data.push_back(code);

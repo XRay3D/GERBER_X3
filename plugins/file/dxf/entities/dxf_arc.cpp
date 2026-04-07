@@ -19,10 +19,6 @@
 
 namespace Dxf {
 
-Arc::Arc(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void Arc::parse(CodeData& code) {
     do {
         data.push_back(code);

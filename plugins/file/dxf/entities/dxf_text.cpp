@@ -17,10 +17,6 @@
 
 namespace Dxf {
 
-Text::Text(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void Text::parse(CodeData& code) {
     do {
         switch(code.code()) {

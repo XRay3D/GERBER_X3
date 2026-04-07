@@ -92,10 +92,6 @@
 
 namespace Dxf {
 
-LwPolyline::LwPolyline(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void LwPolyline::parse(CodeData& code) {
     Segment pt;
     do {

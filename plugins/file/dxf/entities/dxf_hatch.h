@@ -17,14 +17,13 @@ namespace Dxf {
 // штриховка
 
 struct Hatch final : Entity {
-    Hatch(SectionParser* sp);
-    ~Hatch();
+    using Entity::Entity;
+
     // Entity interface
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;
-    ;
+
     DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
@@ -241,7 +240,7 @@ struct Hatch final : Entity {
         }
     };
 
-    mvector<mvector<Edge*>> edges;
+    mvector<mvector<std::unique_ptr<Edge>>> edges;
 
     std::vector<QString> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 

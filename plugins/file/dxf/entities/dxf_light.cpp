@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_light.h"
 namespace Dxf {
-Light::Light(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

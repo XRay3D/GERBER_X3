@@ -11,6 +11,5 @@
 #include "dxf_underlay.h"
 namespace Dxf {
 Underlay::Underlay(SectionParser* sp)
-    : Entity{sp} {
-}
+    : Entity{sp} { }
 } // namespace Dxf

@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_tolerance.h"
 namespace Dxf {
-Tolerance::Tolerance(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

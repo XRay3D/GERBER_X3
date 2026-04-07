@@ -14,11 +14,9 @@ namespace Dxf {
 struct Text final : Entity {
     Q_GADGET
 public:
-    Text(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;

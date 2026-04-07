@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_trace.h"
 namespace Dxf {
-Trace::Trace(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

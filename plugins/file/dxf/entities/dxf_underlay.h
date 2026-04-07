@@ -17,8 +17,7 @@ struct Underlay final : Entity {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
         return {};
     }
-    // void write(QDataStream&) const override { }
-    // void read(QDataStream&) override { }
+
     void parse(CodeData& code) override {
         do {
             data.push_back(code);

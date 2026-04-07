@@ -10,7 +10,5 @@
  *******************************************************************************/
 #include "dxf_xline.h"
 namespace Dxf {
-XLine::XLine(SectionParser* sp)
-    : Entity{sp} {
-}
+
 } // namespace Dxf

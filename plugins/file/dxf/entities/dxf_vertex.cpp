@@ -13,8 +13,7 @@
 namespace Dxf {
 
 Vertex::Vertex(SectionParser* sp)
-    : Entity{sp} {
-}
+    : Entity{sp} { }
 
 void Vertex::parse(Dxf::CodeData& code) {
     do {

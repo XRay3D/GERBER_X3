@@ -12,10 +12,6 @@
 
 namespace Dxf {
 
-Point::Point(SectionParser* sp)
-    : Entity{sp} {
-}
-
 void Point::parse(Dxf::CodeData& code) {
     do {
         data.push_back(code);

@@ -11,7 +11,8 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct Dimension final : Entity {
-    Dimension(SectionParser* sp);
+    using Entity::Entity;
+
     Type type() const override { return Type::DIMENSION; }
     DxfGo toGo() const override {
         qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);

@@ -15,11 +15,9 @@
 namespace Dxf {
 
 struct Line final : Entity {
-    Line(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-public:
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;

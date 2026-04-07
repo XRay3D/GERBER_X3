@@ -14,11 +14,10 @@ namespace Dxf {
 
 Dxf::Dummy::Dummy(Dxf::SectionParser* sp, Dxf::Entity::Type type)
     : Entity{sp}
-    , type_(type) {
+    , type_{type} {
 }
 
-void Dummy::draw(const Dxf::InsertEntity* const) const {
-}
+void Dummy::draw(const Dxf::InsertEntity* const) const { }
 
 void Dummy::parse(Dxf::CodeData& code) {
     switch(type_) {
