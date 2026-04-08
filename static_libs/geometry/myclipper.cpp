@@ -961,23 +961,42 @@ void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge)
     pPath.arcTo(rect, asource, span);
 }
 
+// option1 - static callback function
+static void UpdateCenter(
+    const Point& /*e1bot*/, const Point& /*e1top*/,
+    const Point& /*e2bot*/, const Point& /*e2top*/, Point& pt) {
+    qCritical() << pt;
+    SetCForce(pt, pt);
+}
+
+Paths InflatePathsZ(const Paths& paths, double delta, JoinType jt, EndType et,
+    double miterLimit, double arcTolerance) {
+    if(delta == 0.0) return paths;
+    CL2::ClipperOffset offset{miterLimit, arcTolerance};
+    offset.SetZCallback(UpdateCenter);
+    offset.AddPaths(paths, jt, et);
+    Paths solution;
+    offset.Execute(delta, solution);
+    return solution;
+}
+
 Paths Inflate(const Paths& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
-    return InflatePaths(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
+    return InflatePathsZ(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
 }
 
 Paths InflateRoundPolygon(const Paths& paths,
     double delta, double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
-    return InflatePaths(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
+    return InflatePathsZ(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
 }
 
 Paths InflateMiterPolygon(const Paths& paths,
     double delta, double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
-    return InflatePaths(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
+    return InflatePathsZ(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
 }
 
 QDebug operator<<(QDebug d, const Point& p) {

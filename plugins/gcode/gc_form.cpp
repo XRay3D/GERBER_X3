@@ -251,7 +251,7 @@ Form::~Form() {
 }
 
 void Form::setCreator(Creator* newCreator) {
-    qDebug() << __FUNCTION__ << creator_ << newCreator;
+    // qDebug() << __FUNCTION__ << creator_ << newCreator;
     ProgressCancel::cancel();
     if(runer.isRunning()) {
         // runer.terminate();
@@ -260,7 +260,7 @@ void Form::setCreator(Creator* newCreator) {
     }
     ProgressCancel::reset();
     if(creator_ != newCreator && newCreator) {
-        qDebug(__FUNCTION__);
+        // qDebug(__FUNCTION__);
         delete creator_;
         creator_ = newCreator;
         creator_->moveToThread(&runer);
@@ -365,12 +365,11 @@ const Params& Form::getNewGcpWithGi() {
         // case Gi::Type::DataPath: {
         // dbgPaths(gi->paths(), __FUNCTION__);
         for(auto&& curve: gi->curves()) {
-            qWarning() << curve;
+            // qWarning() << curve;
             curve.isClosed() ? gcp.closedCurves.emplace_back(std::move(curve))
                              : gcp.openCurves.emplace_back(std::move(curve));
         }
-        if(auto file = gi->file())
-            file->side() == Side::Bottom ? --side : ++side;
+        gi->side() == Side::Bottom ? --side : ++side;
 
         // } break;
         // // if (!file) {
@@ -400,8 +399,9 @@ const Params& Form::getNewGcpWithGi() {
         // }
         addUsedGi(gi);
     }
-    gcp.params[GCode::Params::Side].setValue(side < 0 ? Side::Bottom : Side::Top);
-    gcp.params[GCode::Params::GrItems].setValue(usedItems_);
+    qCritical() << "side" << side;
+    gcp.params[Params::FileSide].setValue(side < 0 ? Side::Bottom : Side::Top);
+    gcp.params[Params::GrItems].setValue(usedItems_);
 
     if(!gcp)
         QMessageBox::warning(this, tr("Warning"), tr("No data for working..."));

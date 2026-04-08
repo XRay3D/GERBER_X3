@@ -57,7 +57,7 @@ using Rect = Clipper2Lib::Rect64;
 // func
 using Clipper2Lib::Area;
 using Clipper2Lib::GetBounds;
-using Clipper2Lib::InflatePaths;
+// using Clipper2Lib::InflatePaths;
 using Clipper2Lib::PointInPolygon;
 
 // enum
@@ -191,6 +191,9 @@ Paths& normalize(Paths& paths);
 inline constexpr auto skipFront = v::drop(1);
 
 //------------------------------------------------------------------------------
+Paths InflatePathsZ(const Paths& paths, double delta,
+    JoinType jt, EndType et, double miterLimit = 2.0,
+    double arcTolerance = 0.0);
 
 Paths Inflate(const Paths& paths, double delta,
     JoinType jt, EndType et,

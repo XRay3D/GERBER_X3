@@ -66,7 +66,7 @@ public:
     QString text() const;
     void setText(const QString& value);
 
-    Side side() const;
+    Side side() const override;
     void setSide(const Side& side);
 
     // AbstractShape interface

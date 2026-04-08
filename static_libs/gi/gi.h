@@ -11,6 +11,7 @@
 #pragma once
 
 #include "myclipper.h"
+#include "plugintypes.h"
 
 #include <QAnimationGroup>
 #include <QGraphicsItem>
@@ -110,6 +111,8 @@ public:
     int32_t id() const;
     void setId(int32_t id);
     virtual void changeColor() = 0;
+
+    virtual Side side() const;
 
 protected:
     // QPropertyAnimation animation;

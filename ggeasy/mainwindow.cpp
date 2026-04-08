@@ -767,7 +767,7 @@ void MainWindow::createActionsShape() {
             if(clipItem->type() >= Gi::Type::ShCircle)
                 clipPaths.append_range(static_cast<Gi::Item*>(clipItem)->paths());
 
-        QList<Gi::Item*> rmi;
+        std::set<Gi::Item*> rmi;
         for(QGraphicsItem* item: selectedItems) {
             if(item->type() == Gi::Type::DataSolid) {
                 auto gitem = static_cast<Gi::DataFill*>(item);
@@ -777,15 +777,22 @@ void MainWindow::createActionsShape() {
                 Paths paths;
                 clipper.Execute(type, FillRule::EvenOdd, paths /*FillRule::Positive*/);
                 if(paths.empty()) {
-                    rmi.push_back(gitem);
+                    rmi.emplace(gitem);
                 } else {
                     ReversePaths(paths); // NOTE ??
                     gitem->setPaths(paths);
                 }
             }
         }
-        for(Gi::Item* item: rmi)
-            delete item->file()->itemGroup()->takeAt(item);
+
+        for(auto* file: rmi | v::transform(&Gi::Item::file) | r::to<std::set>())
+            std::erase_if(*file->itemGroup(),
+                [&rmi](auto&& gi) {
+                    auto it = rmi.find(gi.get());
+                    bool fl = it != rmi.end();
+                    rmi.erase(it);
+                    return fl;
+                });
     };
     toolBar->addAction(QIcon::fromTheme(u"path-union"_s), tr("Union"),
         [] { executor(ClipType::Union); });

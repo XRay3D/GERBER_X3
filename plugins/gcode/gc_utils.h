@@ -21,7 +21,7 @@
 
 // class File : public AbstractFile {
 // public:
-// File(Params&& gcp);
+// File(Params&& newGcp);
 // File() {};
 
 // inline double feedRate() { return feedRate_; }

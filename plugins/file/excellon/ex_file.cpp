@@ -76,7 +76,7 @@ Tools File::tools() const {
 }
 
 Paths Excellon::File::merge() const {
-    for(Gi::Item* item: *itemGroups_.back())
+    for(auto&& item: *itemGroups_.back())
         mergedPaths_.append_range(item->paths());
     return mergedPaths_;
 }

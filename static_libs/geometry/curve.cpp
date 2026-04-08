@@ -829,6 +829,8 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, int arcOnly) {
             r * 2,
         };
 
+        drawCross45(v.center);
+
         if(v.type == Vertex::Ccw) span = span - 360.;
 
         pPath.arcTo(rect, asource, span);
@@ -1264,8 +1266,8 @@ Curve toCurve(std::span<const Point> path_) {
     // for(auto&& [fr, to]: v::pairwise(curve))
     // if(to.type) pp.addPolygon(~arcToPath(fr, to));
     // Gi::Debug(pp, {0, 255, 0, 128}); //->arrows = {};
-    // Gi::Debug(toPPath(curve, {}, 1), {0, 255, 0, 128}); //->arrows = {};
-    // Gi::Debug(toPPath(curve, {}, 2), {255, 0, 0, 128}); //->arrows = {};
+    Gi::Debug(toPPath(curve, {}, 1), {0, 255, 0, 128}); //->arrows = {};
+    Gi::Debug(toPPath(curve, {}, 2), {255, 0, 0, 128}); //->arrows = {};
 
     return curve;
 }
