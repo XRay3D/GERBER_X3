@@ -110,9 +110,9 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp)
-    : GCode::File{std::move(gcp)} {
-    if(this->gcp.tools.front().diameter()) {
+File::File(GCode::Params&& newGcp)
+    : GCode::File{std::move(newGcp)} {
+    if(gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();

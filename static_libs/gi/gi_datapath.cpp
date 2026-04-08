@@ -101,10 +101,10 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         const auto& collidingItems = *itemGroup;
         // auto collidingItems = scene()->collidingItems(item, Qt::/*IntersectsItemBoundingRect*/ IntersectsItemBoundingRect/*IntersectsItemShape*/);
         auto pathFrom = item->paths().front();
-        for(auto* item: collidingItems /*| filter | transform*/) {
+        for(auto&& item: collidingItems /*| filter | transform*/) {
             auto pathTo = item->paths().front();
             // if(/*itemGroup->contains(item) &&*/ !set.contains(item)) {
-            if(set.insert(item).second) {
+            if(set.insert(item.get()).second) {
                 // auto [i, _] = set.emplace(item, Path{pathTo.front(), pathTo.back()});
 
                 const double dists[]{
@@ -118,7 +118,7 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
                 if(min > glue) continue;
                 item->setSelected(true);
-                selector(item);
+                selector(item.get());
             }
         }
     };

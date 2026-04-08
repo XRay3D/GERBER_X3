@@ -32,7 +32,10 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
 }
 
 void Shape::redraw() {
-    auto updCenter = [this] { handles[Center] = QLineF{handles[Point1], handles[Point3]}.center(); };
+    auto updCenter = [this] {
+        handles[Center] = QLineF{handles[Point1], handles[Point3]}.center();
+    };
+
     auto updCorner = [this](int src, int p1, int p2) {
         handles[p1] = {handles[src].x(), curHandle->y()};
         handles[p2] = {curHandle->x(), handles[src].y()};
@@ -42,7 +45,6 @@ void Shape::redraw() {
     case Center: {
         QRectF rect{handles[Point1], handles[Point3]};
         rect.moveCenter(handles[Center]);
-        // auto center{handles[Center] };
         handles[Point1] = rect.topLeft();
         handles[Point2] = rect.topRight();
         handles[Point3] = rect.bottomRight();
@@ -70,7 +72,7 @@ void Shape::redraw() {
          {handles[Point3]},
          {handles[Point4]},
          {handles[Point1]},
-         },
+         }
     };
     closed = true;
     if(curves_.front().area() < 0) curves_.front().reverse();

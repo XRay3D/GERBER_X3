@@ -241,8 +241,8 @@ inline void AbstractFile::initFrom(AbstractFile* file) {
     setColor(file->color_);
     setItemType(file->itemsType_);
     setTransform(file->transform_);
-    for(auto* ig: itemGroups_)
-        for(auto* gi: *ig)
+    for(auto&& ig: itemGroups_)
+        for(auto&& gi: *ig)
             gi->setZValue(-id_);
 }
 
@@ -267,8 +267,8 @@ inline void AbstractFile::setColor(const QColor& color) { color_ = color; }
 inline void AbstractFile::setTransform(const Transform& transform) {
     transform_ = transform;
     QTransform t{transform};
-    for(auto* ig: itemGroups_)
-        for(auto* gi: *ig)
+    for(auto&& ig: itemGroups_)
+        for(auto&& gi: *ig)
             gi->setTransform(t);
 }
 

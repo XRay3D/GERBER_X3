@@ -148,6 +148,8 @@ int Item::id() const { return id_; }
 
 void Item::setId(int32_t id) { id_ = id; }
 
+Side Item::side() const { return file_ ? file_->side() : Side::Top; }
+
 double Item::scaleFactor() const {
     double scale = 1.0;
     if(scene() && scene()->views().size()) {

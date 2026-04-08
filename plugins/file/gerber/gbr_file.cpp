@@ -116,7 +116,7 @@ Paths File::merge() const {
     };
     constexpr std::array CT{ClipType::Union, ClipType::Difference};
     constexpr std::array FR{FillRule::Positive, FillRule::NonZero};
-#if DEBUG && 1
+#if DEBUG && 0
     for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity) | v::reverse) {
         Paths clip{
             std::from_range,

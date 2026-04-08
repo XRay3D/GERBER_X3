@@ -14,9 +14,9 @@
 
 namespace Gi {
 
-class Group : public mvector<Item*> {
+class Group : public std::vector<std::unique_ptr<Item>> {
 public:
-    ~Group();
+    // ~Group();
     void push_back(Item* item);
     void setVisible(bool visible);
     void setSelected(const mvector<int>& ids);

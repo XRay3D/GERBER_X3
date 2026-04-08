@@ -80,7 +80,6 @@ public:
     // Gi::Item interface
     void changeColor() override;
     void redraw() override;
-
     // AbstractShape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;

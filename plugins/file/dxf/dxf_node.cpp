@@ -92,7 +92,7 @@ public:
                 const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * ctr++ : 0);
                 auto layer = file->layers().at(name);
                 layer->setColor(QColor::fromHsv(k, 255, 255));
-                for(auto gi: *layer->itemGroup())
+                for(auto&& gi: *layer->itemGroup())
                     gi->changeColor();
             }
             tableView->reset();
@@ -243,7 +243,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
             const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
             NodeLayer* nl = reinterpret_cast<NodeLayer*>(child(row));
             nl->layer->setColor(QColor::fromHsv(k, 255, 255));
-            for(auto gi: *nl->layer->itemGroup())
+            for(auto&& gi: *nl->layer->itemGroup())
                 gi->changeColor();
         }
     });
@@ -338,7 +338,7 @@ void NodeLayer::menu(QMenu& menu, FileTree::View* tv) {
         cd.setCurrentColor(layer->color());
         if(cd.exec()) {
             layer->setColor(cd.currentColor());
-            for(auto gi: *layer->itemGroup())
+            for(auto&& gi: *layer->itemGroup())
                 gi->changeColor();
         }
     });

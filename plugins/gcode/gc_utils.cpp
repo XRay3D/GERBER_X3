@@ -16,7 +16,7 @@
 
 // namespace GCode {
 
-// File::File(Params&& gcp)
+// File::File(Params&& newGcp)
 // : gcp(std::move(gcp)) {
 // }
 

@@ -23,7 +23,7 @@ void Creator::create() {
 
     assert(gcp.side() != GCode::On);
 
-    if(this->gcp.tools.size() > 1)
+    if(gcp.tools.size() > 1)
         createMultiTool(gcp.tools, gcp.params[GCode::Params::Depth].toDouble());
     else if(gcp.params.contains(OffsetSteps) && gcp.params[OffsetSteps].toInt() > 0) // FIXME inside steps
         createFixedSteps(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble(), gcp.params[OffsetSteps].toInt());
@@ -234,9 +234,9 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp)
-    : GCode::File{std::move(gcp)} {
-    if(this->gcp.tools.front().diameter()) {
+File::File(GCode::Params&& newGcp)
+    : GCode::File{std::move(newGcp)} {
+    if(gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();

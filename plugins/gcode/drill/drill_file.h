@@ -20,9 +20,9 @@ constexpr auto DRILLING = "Drilling"_hash32;
 class File final : public GCode::File {
 public:
     using GCode::File::File;
-    explicit File(GCode::Params&& gcp)
-        : GCode::File{std::move(gcp)} {
-        if(this->gcp.tools.front().diameter()) {
+    explicit File(GCode::Params&& newGcp)
+        : GCode::File{std::move(newGcp)} {
+        if(gcp.tools.front().diameter()) {
             initSave();
             addInfo();
             statFile();

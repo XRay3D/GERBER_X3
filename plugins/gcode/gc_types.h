@@ -89,46 +89,62 @@ struct Variant : V {
         return stream;
     }
 
-    // Variant() { }
-    // template <class T>
-    // Variant(const T& val)
-    //     : V{val} { }
-
-    int toInt() const {
+    qsizetype toInt() const {
         return std::visit([](auto&& val) -> int {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return int{};
             else
-                return int(val); }, (V&)*this);
+                return int(val);
+        },
+            (V&)*this);
     }
 
-    size_t toUsize_t() const {
+    size_t toUInt() const {
         return std::visit([](auto&& val) -> size_t {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return size_t{};
             else
-                return size_t(val); }, (V&)*this);
+                return size_t(val);
+        },
+            (V&)*this);
     }
 
     bool toBool() const {
         return std::visit([](auto&& val) -> bool {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return bool{};
-             else
-                return bool(val); }, (V&)*this);
+            else
+                return bool(val);
+        },
+            (V&)*this);
     }
 
     double toDouble() const {
         return std::visit([](auto&& val) -> double {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return {};
-             else
-                return double(val); }, (V&)*this);
+            else
+                return double(val);
+        },
+            (V&)*this);
     }
+
+    template <class T>
+        requires std::is_enum_v<T>
+    operator T() const { return static_cast<T>(toInt()); }
+
+    template <std::unsigned_integral T>
+    operator T() const { return static_cast<T>(toUInt()); }
+
+    template <std::integral T>
+    operator T() const { return static_cast<T>(toInt()); }
+
+    template <std::floating_point T>
+    operator T() const { return static_cast<T>(toDouble()); }
 
     template <class T>
     void setValue(const T& val) { *this = val; }
@@ -168,6 +184,7 @@ public:
         MultiToolIndex, // need for Pocket
         NotTile,        // не раскладывать если даже раскладка включена
         Side,
+        FileSide,
 
         UserParam = 100
     };
