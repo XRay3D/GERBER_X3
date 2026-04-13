@@ -6,6 +6,7 @@
 #include <app.h>
 #include <csignal>
 #include <cxxabi.h>
+#include <fstream>
 #include <stacktrace>
 #include <string>
 
@@ -41,7 +42,10 @@ inline void death_signal(int signum) { // обработка Segfault
     // MessageBoxA(NULL, str.str().c_str(), "Exception catched: SIGSEGV (segment violation)!", NULL);
     // QMessageBox::critical(nullptr, "Exception catched: SIGSEGV (segment violation)!", QString::fromStdString(str.str()));
     qCritical("%s\n%s", SIG(), str.c_str());
-
+    {
+        std::ofstream stacktrace{std::format("stacktrace {}.log", std::chrono::high_resolution_clock::now())};
+        stacktrace << str << '\n';
+    }
     exit(-signum);
     // std::unreachable();
     // signal(signum, SIG_DFL);

@@ -26,7 +26,7 @@ public:
     int type() const override { return int(Type::Drill); }
 
     // Item interface
-    Paths paths(int alternate = {}) const override;
+    // Paths paths(int alternate = {}) const override;
     void changeColor() override;
 
     bool isSlot();
@@ -44,7 +44,7 @@ private:
     void create();
     double diameter_{};
     QPolygonF path_;
-    QPolygonF fillPolygon;
+    // QPolygonF fillPolygon;
     int toolId_ = -1;
 };
 

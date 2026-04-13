@@ -14,7 +14,7 @@
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
-#include "stacktrace_and_output.h"
+#include "stacktrace_and_logs.h"
 #include "version.h"
 
 #include <QCommandLineParser>
