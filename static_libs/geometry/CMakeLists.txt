@@ -21,5 +21,7 @@ add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(geometry PUBLIC Clipper2Z common 2Geom::2geom cairo
-                                      glib-2.0)
+target_link_libraries(
+  geometry PUBLIC Clipper2Z common # 2Geom::2geom cairo
+                  # glib-2.0
+)
