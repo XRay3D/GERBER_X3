@@ -20,7 +20,7 @@ namespace ShArc {
 class Shape;
 
 class Model : public QAbstractTableModel {
-    Q_OBJECT
+    // Q_OBJECT
     friend class Shape;
     QStringList headerData_{
         tr(" Point 1"),
@@ -48,7 +48,7 @@ public:
 };
 
 class Editor : public Shapes::Editor {
-    Q_OBJECT
+    // Q_OBJECT
 
     QTableView* view;
     QActionGroup actionGroup{this};

@@ -408,4 +408,4 @@ Pathss& sortBeginEnd(Pathss& src, Point startPt);
 
 void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge);
 
-#include "curve.h"
+// #include "curve.h"

@@ -12,10 +12,13 @@
 #include "gi_point.h"
 #include "project.h"
 #include <QElapsedTimer>
-#undef emit
-#include <execution>
 #include <gi_dbg.h>
-#define emit
+
+#ifdef Q_OS_UNIX
+    #undef emit
+    #include <execution>
+    #define emit
+#endif
 
 namespace PocketRaster {
 
@@ -205,11 +208,11 @@ void Creator::addAcc(Paths& src, const /*PType*/ int32_t accDistance) {
 
     Paths pPath;
     pPath.reserve(src.size() * 2 + 1);
-#ifndef __GNUC__
-    std::sort(std::execution::par, src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.front().y > p2.front().y; });
-#else
-    std::sort(src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.front().y > p2.front().y; });
+    std::sort(
+#ifdef Q_OS_UNIX
+        std::execution::par,
 #endif
+        src.begin(), src.end(), [](const Path& p1, const Path& p2) -> bool { return p1.front().y > p2.front().y; });
     bool reverse{};
 
     auto format = [&reverse](Path& src) -> Path& {

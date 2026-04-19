@@ -272,7 +272,11 @@ public:
             // qApp->setPalette(palette); // QApplication::style()->standardPalette());
         }
 
-        QIcon::setThemeName(App::settings().theme() < DarkBlue ? u"ggeasy-light"_s : u"ggeasy-dark"_s);
+        QIcon::setThemeName(
+            App::settings().theme() > LightRed
+                    || palette.text().color().red() > 128
+                ? u"ggeasy-light"_s
+                : u"ggeasy-dark"_s);
     }
 
     QUndoStack& undoStack() { return undoStack_; }

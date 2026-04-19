@@ -112,12 +112,15 @@ if(WIN32) # windeployqt
   get_target_property(_QMAKE_EXECUTABLE Qt6::qmake IMPORTED_LOCATION)
   get_filename_component(_QT_BIN_DIR "${_QMAKE_EXECUTABLE}" DIRECTORY)
   find_program(WINDEPLOYQT_EXECUTABLE windeployqt HINTS "${_QT_BIN_DIR}")
+  if(EXISTS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/Qt6Core.dll")
+    return()
+  endif()
   add_custom_command(
     TARGET ${PROJECT_NAME}
     POST_BUILD
     COMMAND
       "${CMAKE_COMMAND}" -E env PATH="${_QT_BIN_DIR}"
-      "${WINDEPLOYQT_EXECUTABLE}" --verbose 1 --no-compiler-runtime
+      "${WINDEPLOYQT_EXECUTABLE}" --verbose 1 #--no-compiler-runtime
       \"$<TARGET_FILE:${PROJECT_NAME}>\"
     COMMENT "Deploying Qt...")
 elseif(UNIX) # LINUX

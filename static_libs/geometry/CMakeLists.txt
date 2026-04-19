@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 4.00)
 
 project(geometry LANGUAGES CXX)
 
-find_package(2Geom REQUIRED)
+# find_package(2Geom REQUIRED)
 
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)

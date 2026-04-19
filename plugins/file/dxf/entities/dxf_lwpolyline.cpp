@@ -136,6 +136,7 @@ DxfGo LwPolyline::toGo() const {
             {} /*CirclePath(((poly.front() ^ poly.back())) * uScale, center)*/,
             {CirclePath((geo::Length(poly.front(), poly.back()) + constantWidth) * uScale, center)},
         };
+        r::for_each(go.fill.front(), std::bind(SetC, _1, center));
 
         go.GraphicObject::pos = center;
         go.type = DxfGo::Type{DxfGo::FlStamp | DxfGo::Circle};

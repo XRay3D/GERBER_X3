@@ -26,6 +26,7 @@
 #include <QPixmap>
 #include <boost/range/combine.hpp>
 #include <forward_list>
+#include <mutex>
 #include <qglobal.h>
 #include <set>
 

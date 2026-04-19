@@ -23,6 +23,7 @@
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
+#include <mutex>
 
 namespace Thermal {
 

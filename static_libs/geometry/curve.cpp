@@ -76,7 +76,7 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
     double ang1 = atan2(d.y(), d.x());
     if(ang1 < 0) ang1 += 2.0 * pi;
 
-    d = (dst.pt - dst.center);
+    d           = (dst.pt - dst.center);
     double ang2 = atan2(d.y(), d.x());
     if(ang2 < 0) ang2 += 2.0 * pi;
 
@@ -93,7 +93,7 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
     // // what is the delta phi to get an accuracy of aber
     // double phit = Span{src.pt, dst}.IncludedAngle();
     double radius = dst.radius();
-    double dphi = 2 * acos((radius - accuracy) / radius);
+    double dphi   = 2 * acos((radius - accuracy) / radius);
 
     int Segments = ceil(std::abs(phit) / dphi) * 2;
 
@@ -102,11 +102,11 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
     Path path; //{~src.pt};
     QPointF p = src.pt;
     for(int i{1}; i <= Segments; i++) {
-        d = p - dst.center;
+        d          = p - dst.center;
         double phi = atan2(d.y(), d.x());
-        double nx = dst.center.x() + radius * cos(phi - dphi);
-        double ny = dst.center.y() + radius * sin(phi - dphi);
-        p = QPointF{nx, ny};
+        double nx  = dst.center.x() + radius * cos(phi - dphi);
+        double ny  = dst.center.y() + radius * sin(phi - dphi);
+        p          = QPointF{nx, ny};
         SetC(path.emplace_back(~p), ~dst.center);
     }
     if(path.size()) {
@@ -121,7 +121,7 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
 
     // Углы концевых точек (в радианах)
     double startAngle = std::atan2(src.y() - dst.center.y(), src.x() - dst.center.x());
-    double endAngle = std::atan2(dst.y() - dst.center.y(), dst.x() - dst.center.x());
+    double endAngle   = std::atan2(dst.y() - dst.center.y(), dst.x() - dst.center.x());
 
     // Нормализация в диапазон [0, 2π)
     auto normalize = [](double a) {
@@ -130,7 +130,7 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
         return a;
     };
     startAngle = normalize(startAngle);
-    endAngle = normalize(endAngle);
+    endAngle   = normalize(endAngle);
 
     // Вычисляем угловое расстояние с учётом направления
     double delta = endAngle - startAngle;
@@ -180,7 +180,7 @@ Curve CircleCurve(double diametr, const QPointF& center) {
 }
 
 Curve RectangleCurve(double width, double height, const QPointF& center) {
-    const double halfWidth = width * 0.5;
+    const double halfWidth  = width * 0.5;
     const double halfHeight = height * 0.5;
     Curve curve{
         Vertex{{-halfWidth + center.x(), +halfHeight + center.y()}},
@@ -349,7 +349,7 @@ Curve Curve::reversed() const {
         PointF cp{};
         if(prev) {
             type = Vertex::Type{-prev->type};
-            cp = prev->center;
+            cp   = prev->center;
         }
         Vertex new_v(v.pt, cp, type);
         new_vertices.push_back(new_v);
@@ -400,10 +400,10 @@ bool circleCenter(
     if(std::abs(det) < 1e-12) return false; // Точки коллинеарны
 
     QPointF delta = M_bc - M_ab;
-    double t = (delta.x() * n_bc.y() - delta.y() * n_bc.x()) / det;
-    center = M_ab + t * n_ab;
-    PointF pt = center - A;
-    radius = pt.length();
+    double t      = (delta.x() * n_bc.y() - delta.y() * n_bc.x()) / det;
+    center        = M_ab + t * n_ab;
+    PointF pt     = center - A;
+    radius        = pt.length();
     return true;
 }
 
@@ -413,9 +413,9 @@ QPointF bezierPoint(
     const QPointF& P2, const QPointF& P3,
     double t) {
 
-    double u = 1.0 - t;
-    double tt = t * t;
-    double uu = u * u;
+    double u   = 1.0 - t;
+    double tt  = t * t;
+    double uu  = u * u;
     double uuu = uu * u;
     double ttt = tt * t;
 
@@ -452,22 +452,22 @@ bool isArcOfCircle(
 
     // Проверяем несколько точек на кривой
     for(double t: {0.0, /* 0.25,*/ 0.5, /*0.75,*/ 1.0}) {
-        QPointF pt = bezierPoint(P0, P1, P2, P3, t) - center;
+        QPointF pt  = bezierPoint(P0, P1, P2, P3, t) - center;
         double dist = QPointF::dotProduct(pt, pt);
-        dist = std::sqrt(dist);
+        dist        = std::sqrt(dist);
         if(!TEST(dist, radius, eps)) return false;
     }
 #elif 0 // точки на окружности
     const qreal epsilon = 1e-10;
 
     // Используем все 4 точки для нахождения центра методом наименьших квадратов
-    qreal sum_x = P0.x() + P1.x() + P2.x() + P3.x();
-    qreal sum_y = P0.y() + P1.y() + P2.y() + P3.y();
-    qreal sum_x2 = P0.x() * P0.x() + P1.x() * P1.x() + P2.x() * P2.x() + P3.x() * P3.x();
-    qreal sum_y2 = P0.y() * P0.y() + P1.y() * P1.y() + P2.y() * P2.y() + P3.y() * P3.y();
-    qreal sum_xy = P0.x() * P0.y() + P1.x() * P1.y() + P2.x() * P2.y() + P3.x() * P3.y();
-    qreal sum_x3 = P0.x() * P0.x() * P0.x() + P1.x() * P1.x() * P1.x() + P2.x() * P2.x() * P2.x() + P3.x() * P3.x() * P3.x();
-    qreal sum_y3 = P0.y() * P0.y() * P0.y() + P1.y() * P1.y() * P1.y() + P2.y() * P2.y() * P2.y() + P3.y() * P3.y() * P3.y();
+    qreal sum_x   = P0.x() + P1.x() + P2.x() + P3.x();
+    qreal sum_y   = P0.y() + P1.y() + P2.y() + P3.y();
+    qreal sum_x2  = P0.x() * P0.x() + P1.x() * P1.x() + P2.x() * P2.x() + P3.x() * P3.x();
+    qreal sum_y2  = P0.y() * P0.y() + P1.y() * P1.y() + P2.y() * P2.y() + P3.y() * P3.y();
+    qreal sum_xy  = P0.x() * P0.y() + P1.x() * P1.y() + P2.x() * P2.y() + P3.x() * P3.y();
+    qreal sum_x3  = P0.x() * P0.x() * P0.x() + P1.x() * P1.x() * P1.x() + P2.x() * P2.x() * P2.x() + P3.x() * P3.x() * P3.x();
+    qreal sum_y3  = P0.y() * P0.y() * P0.y() + P1.y() * P1.y() * P1.y() + P2.y() * P2.y() * P2.y() + P3.y() * P3.y() * P3.y();
     qreal sum_x2y = P0.x() * P0.x() * P0.y() + P1.x() * P1.x() * P1.y() + P2.x() * P2.x() * P2.y() + P3.x() * P3.x() * P3.y();
     qreal sum_xy2 = P0.x() * P0.y() * P0.y() + P1.x() * P1.y() * P1.y() + P2.x() * P2.y() * P2.y() + P3.x() * P3.y() * P3.y();
 
@@ -505,13 +505,13 @@ bool isArcOfCircle(
     // ===== МЕТОД 1: Использование касательных в конечных точках =====
 
     // Касательный вектор в начале (направление от P0 к P1)
-    qreal t0x = P1.x() - P0.x();
-    qreal t0y = P1.y() - P0.y();
+    qreal t0x    = P1.x() - P0.x();
+    qreal t0y    = P1.y() - P0.y();
     qreal t0_len = std::hypot(t0x, t0y);
 
     // Касательный вектор в конце (направление от P2 к P3)
-    qreal t3x = P3.x() - P2.x();
-    qreal t3y = P3.y() - P2.y();
+    qreal t3x    = P3.x() - P2.x();
+    qreal t3y    = P3.y() - P2.y();
     qreal t3_len = std::hypot(t3x, t3y);
 
     // Проверка на вырожденные случаи
@@ -556,7 +556,7 @@ bool isArcOfCircle(
 
     // Детерминант матрицы коэффициентов
     qreal det = r0x * (-r3y) - r0y * (-r3x);
-    det = r0x * r3y - r0y * r3x;
+    det       = r0x * r3y - r0y * r3x;
 
     if(std::abs(det) < epsilon) {
         qCritical() << "Перпендикулярные биссектрисы параллельны (точки коллинеарны или дуга вырождена)";
@@ -673,7 +673,7 @@ bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
     double tolerance = 1e-5) {
     // 1. Никакие контрольные векторы не нулевые
     const QPointF tanStart = ctrl1 - start;
-    const QPointF tanEnd = end - ctrl2;
+    const QPointF tanEnd   = end - ctrl2;
     if((tanStart - QPointF(0, 0)).manhattanLength() < tolerance || (tanEnd - QPointF(0, 0)).manhattanLength() < tolerance)
         return false; // это линия, а не круг
 
@@ -682,10 +682,10 @@ bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
     // Решаем 2x2 систему: A * (Cx, Cy)^T = b
     QMatrix2x2 A;
     A.setToIdentity();
-    A(0, 0) = tanStart.x();
-    A(0, 1) = tanStart.y();
-    A(1, 0) = tanEnd.x();
-    A(1, 1) = tanEnd.y();
+    A(0, 0)      = tanStart.x();
+    A(0, 1)      = tanStart.y();
+    A(1, 0)      = tanEnd.x();
+    A(1, 1)      = tanEnd.y();
     QVector2D b0 = -QVector2D(start.x() * tanStart.x() + start.y() * tanStart.y(), 0);
     QVector2D b1 = -QVector2D(end.x() * tanEnd.x() + end.y() * tanEnd.y(), 0);
     // Вектор b: ( -start·tanStart, -end·tanEnd )
@@ -708,15 +708,15 @@ bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
     // Проверяем, что расстояние до конца и до точки t=0.5
     // находятся на той же окружности (с заданной точностью)
     auto evaluateCubic = [&](qreal t) {
-        qreal u = 1 - t;
+        qreal u  = 1 - t;
         qreal tt = t * t, uu = u * u;
         return u * uu * start + 3 * u * tt * ctrl1 + 3 * tt * u * ctrl2 + t * t * t * end;
     };
     const int samples = 5;
     for(int i = 1; i < samples; ++i) {
-        qreal t = i / static_cast<qreal>(samples + 1);
+        qreal t    = i / static_cast<qreal>(samples + 1);
         QPointF pt = evaluateCubic(t);
-        double d = Length(pt, center);
+        double d   = Length(pt, center);
         if(qAbs(d - radius) > tolerance * radius) // относительная ошибка
             return false;
     }
@@ -761,8 +761,8 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start, QPointF en
         Tuple: (center, start_angle, end_angle, radius)
     */
 
-    double r = signedBulgeRadius(start, end, bulge);
-    double a = angle(start, end) + ((pi / 2.0 - atan(bulge) * 2.0));
+    double r  = signedBulgeRadius(start, end, bulge);
+    double a  = angle(start, end) + ((pi / 2.0 - atan(bulge) * 2.0));
     QPointF c = polar(start, a, r);
 
     double a1 = angle(c, end);
@@ -818,7 +818,7 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, int arcOnly) {
         // NOTE Qt stupid angles
         const double asource = ls.angle();
         const double atarget = ls.angleTo(QLineF{v.center, target});
-        double span = atarget;
+        double span          = atarget;
         // qCritical() << atarget << v.type;
         // drawCross(v.center, u"f%1 s%2 t%3"_s.arg(asource).arg(span).arg(v.type));
 
@@ -972,10 +972,10 @@ Curve toCurve(std::span<const Point> path_) {
       // Исправление пляшущих дуг после обединения отркрытых концов линий
         auto fixClippedArcs = [](Point& p1, Point& p2, Point& p3) {
             constexpr double epsilon = 0.001; // mm
-            const QPointF c1 = ~!p1,
-                          c2 = ~!p2,
-                          c3 = ~!p3,
-                          p = ~p2;
+            const QPointF c1         = ~!p1,
+                          c2         = ~!p2,
+                          c3         = ~!p3,
+                          p          = ~p2;
             if(c1 == c3 && c2.isNull()
                 && TEST(c1, ~p1, c1, p, epsilon)
                 && TEST(c3, ~p3, c3, p, epsilon))
@@ -1050,9 +1050,9 @@ Curve toCurve(std::span<const Point> path_) {
     if(closed && segments.front().size() == path.size()) { // Circle
         // qCritical() << "circle" << path.size();
         QPointF center = ~!path.front();
-        auto dir = DIR(~path[0], ~path[1], center);
-        double radius = get_roundest(v::transform(segments.front(), Radius));
-        curve = CircleCurve(radius * 2, center);
+        auto dir       = DIR(~path[0], ~path[1], center);
+        double radius  = get_roundest(v::transform(segments.front(), Radius));
+        curve          = CircleCurve(radius * 2, center);
         if(dir == Vertex::Cw) curve.reverse();
         assert(closed && curve.isClosed());
         return curve;
@@ -1094,7 +1094,7 @@ Curve toCurve(std::span<const Point> path_) {
     // fill curve
     for(const SegData& sd: sds) {
         if(sd) { // arcTo
-            curve.emplace_back(sd.vtx()).userData = &sd;
+            curve.emplace_back(sd.vtx()).userData  = &sd;
             curve.emplace_back(sd.vtx2()).userData = &sd;
         } else { // lineTo
             curve.emplace_back(sd.vtx()).userData = &sd;
@@ -1102,7 +1102,7 @@ Curve toCurve(std::span<const Point> path_) {
     }
 
     // fix arcs
-    using VSpan = std::span<Vertex>;
+    using VSpan  = std::span<Vertex>;
     using SDSpan = std::span<const SegData>;
     // using SDSpan = decltype((tmp.cbegin()));
     // auto sd = tmp.begin();
@@ -1234,8 +1234,8 @@ Curve toCurve(std::span<const Point> path_) {
         if(fl && closed) { // Close
             auto [vf0, vf1, vf2] = adjacent.front();
             auto [vb0, vb1, vb2] = adjacent.back();
-            fixers[vb2.back() * 4 + vf0.back() * 2 + vf1.back() * 1](vb2, vf0, vf1, {sds.back(), sds.front(), sds[1]});
-            fixers[vb1.back() * 4 + vb2.back() * 2 + vf0.back() * 1](vb1, vb2, vf0, {sds.end()[-2], sds.back(), sds.front()});
+            fixers[vb2.back() * 4 + vf0.back() * 2 + vf1.back() * 1](vb2, vf0, vf1, std::array{sds.back(), sds.front(), sds[1]});
+            fixers[vb1.back() * 4 + vb2.back() * 2 + vf0.back() * 1](vb1, vb2, vf0, std::array{sds.end()[-2], sds.back(), sds.front()});
         }
 
         for(auto it = curve.begin(); it != curve.end();) { // clean duplicates after fixers
@@ -1266,8 +1266,8 @@ Curve toCurve(std::span<const Point> path_) {
     // for(auto&& [fr, to]: v::pairwise(curve))
     // if(to.type) pp.addPolygon(~arcToPath(fr, to));
     // Gi::Debug(pp, {0, 255, 0, 128}); //->arrows = {};
-    Gi::Debug(toPPath(curve, {}, 1), {0, 255, 0, 128}); //->arrows = {};
-    Gi::Debug(toPPath(curve, {}, 2), {255, 0, 0, 128}); //->arrows = {};
+    Gi::Debug(toPPath(curve, {}, 1), QColor{0, 255, 0, 128}); //->arrows = {};
+    Gi::Debug(toPPath(curve, {}, 2), QColor{255, 0, 0, 128}); //->arrows = {};
 
     return curve;
 }
@@ -1319,7 +1319,7 @@ Paths toPaths(const Curves& curves) {
 
 Curves toCurves(const QPainterPath& pPath) {
     using QPP = QPainterPath;
-    using El = QPP::Element;
+    using El  = QPP::Element;
     Curves curves;
     for(auto&& elements: v::iota(0, pPath.elementCount())
             | v::transform(std::bind(&QPP::elementAt, pPath, _1))            // to Element
@@ -1328,7 +1328,7 @@ Curves toCurves(const QPainterPath& pPath) {
         // qInfo() << "elements" << elements.size();                         // count of elements
 
         constexpr auto splitPaths = +[](const El&, const El& r) { return r.type > QPP::CurveToElement; };
-        auto subpaths = v::chunk_by(elements, splitPaths); // separate Curves
+        auto subpaths             = v::chunk_by(elements, splitPaths); // separate Curves
 
         Curve curve;
         for(auto&& [from, to]: v::pairwise(subpaths)) { // 'from' point to bezier Point in 'to' if

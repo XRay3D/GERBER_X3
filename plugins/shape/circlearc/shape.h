@@ -61,7 +61,7 @@ private:
 };
 
 class Plugin : public Shapes::Plugin {
-    Q_OBJECT
+    // Q_OBJECT
     Q_PLUGIN_METADATA(IID ShapePlugin_iid FILE "description.json")
     Q_INTERFACES(Shapes::Plugin)
 

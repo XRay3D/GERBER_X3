@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "curve.h"
 #include "myclipper.h"
 #include "plugintypes.h"
 

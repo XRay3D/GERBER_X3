@@ -22,7 +22,7 @@ add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets #[[tbb]] common)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets common)
 
 set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 

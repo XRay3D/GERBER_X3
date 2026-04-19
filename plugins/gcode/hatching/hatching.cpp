@@ -13,13 +13,6 @@
 #include "project.h"
 
 #include <QElapsedTimer>
-#ifndef __GNUC__
-    #undef emit
-    #include <execution>
-    #define emit
-
-#endif
-
 #include <algorithm>
 #include <forward_list>
 #include <ranges>

@@ -154,6 +154,8 @@ DxfGo Hatch::toGo() const {
     Clipper clipper;
     clipper.AddOpenSubject(paths); // FIXME AddSubject???
     clipper.Execute(ClipType::Union, FillRule::EvenOdd, paths);
+    r::for_each(paths | v::join, SetCSelf);
+
     // dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
     return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths};
 }
