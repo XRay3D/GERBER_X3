@@ -25,10 +25,6 @@
 #include <QTableView>
 #include <QtWidgets>
 
-#undef emit
-#include <execution>
-#define emit
-
 // #include <condition_variable>
 // #include <mutex>
 // #include <ranges>

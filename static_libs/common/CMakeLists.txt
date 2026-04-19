@@ -28,6 +28,8 @@ file(GLOB SOURCES *.cpp)
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+# target_link_options(  ${PROJECT_NAME} PUBLIC $<$<PLATFORM_ID:Windows>:
+# -ltbb12.dll >)
 
 target_link_libraries(
   ${PROJECT_NAME}
@@ -40,7 +42,7 @@ target_link_libraries(
          tbb
          >
          $<$<PLATFORM_ID:Windows>:
-         tbb12.dll
+         # tbb12.dll.a
          >
          tooldatabase
          Qt6::Qml

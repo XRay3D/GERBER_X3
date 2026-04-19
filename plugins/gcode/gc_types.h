@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "curve.h"
 #include "datastream.h"
 #include "md5.h"
 #include "myclipper.h"

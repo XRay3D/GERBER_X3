@@ -72,9 +72,12 @@ DxfGo Arc::toGo() const {
         path2.addPolygon(poly);
     QTransform m2;
     m2.scale(d, d);
-    auto p(path2.toSubpathPolygons(m2).first());
+    auto p(~path2.toSubpathPolygons(m2).first());
+    r::for_each(p, std::bind(SetC, _1, ~centerPoint));
+    SetCForce(p.front(), p.front());
+    SetCForce(p.back(), p.back());
 
-    DxfGo go{id, ~p, {}}; // return {id, p, {}};
+    DxfGo go{id, p, {}}; // return {id, p, {}};
     return go;
 }
 

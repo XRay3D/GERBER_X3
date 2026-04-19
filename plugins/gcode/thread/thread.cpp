@@ -14,8 +14,6 @@
 #include "gi_gcpath.h"
 // #include "graphicsview.h"
 
-#include <execution>
-
 namespace Thread {
 
 void Creator::create() {

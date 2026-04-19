@@ -70,6 +70,8 @@ DxfGo Circle::toGo() const {
     return go;
 #else
     Path path = CirclePath(radius * 2 + thickness, ~centerPoint);
+    r::for_each(path, std::bind(SetC, _1, ~centerPoint));
+
     DxfGo go{id, path, {path}};
     go.name = layerName; // u"T%1|Ø%2"_s.arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
     go.type = DxfGo::Type(DxfGo::FlStamp | DxfGo::FlDrawn | DxfGo::Circle);

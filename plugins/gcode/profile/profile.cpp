@@ -16,11 +16,13 @@
 #include "graphicsview.h"
 #include "project.h"
 #include "utils.h"
-
-#undef emit
-#include <execution>
 #include <gi_dbg.h>
-#define emit
+
+#ifdef Q_OS_UNIX
+    #undef emit
+    #include <execution>
+    #define emit
+#endif
 
 namespace Profile {
 
@@ -178,14 +180,18 @@ void Creator::cornerTrimming() {
 
     auto paths = v::join(returnPss);
 
-    std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path& path) {
-        path.reserve(path.size() * 3);
-        for(Point* corner = std::next(path.data()); corner < std::prev(path.data() + path.size()); ++corner)
-            insert(path, std::prev(corner), corner, std::next(corner));
-        if(path.front() == path.back()) // for trimming between the beginning and the end of the path
-            insert(path, &path.back() - 1, &path.back(), &path.front() + 1);
-        path.shrink_to_fit();
-    });
+    std::for_each(
+    #ifdef Q_OS_UNIX
+        std::execution::par_unseq,
+    #endif
+        std::begin(paths), std::end(paths), [insert](Path& path) {
+            path.reserve(path.size() * 3);
+            for(Point* corner = std::next(path.data()); corner < std::prev(path.data() + path.size()); ++corner)
+                insert(path, std::prev(corner), corner, std::next(corner));
+            if(path.front() == path.back()) // for trimming between the beginning and the end of the path
+                insert(path, &path.back() - 1, &path.back(), &path.front() + 1);
+            path.shrink_to_fit();
+        });
 #endif
 }
 
@@ -194,42 +200,46 @@ void Creator::makeBridges() {
     if(bridgeItems.empty())
         return;
 
-    std::for_each(std::execution::par_unseq, returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
-        // find Bridges
-        auto biStack = bridgeItems | v::filter([&rPaths](Gi::Bridge* bi) { return bi->test(rPaths.front()); });
-        if(r::empty(biStack)) return;
-        auto isPositive1 = CL2::IsPositive(rPaths.front());
+    std::for_each(
+#ifdef Q_OS_UNIX
+        std::execution::par_unseq,
+#endif
+        returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
+            // find Bridges
+            auto biStack = bridgeItems | v::filter([&rPaths](Gi::Bridge* bi) { return bi->test(rPaths.front()); });
+            if(r::empty(biStack)) return;
+            auto isPositive1 = CL2::IsPositive(rPaths.front());
 
-        // create frame
-        Paths frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JoinType::Miter, EndType::Butt, uScale);
-        Paths clip;
-        for(Gi::Bridge* bip: biStack)
-            clip.append_range(bip->paths());
+            // create frame
+            Paths frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JoinType::Miter, EndType::Butt, uScale);
+            Paths clip;
+            for(Gi::Bridge* bip: biStack)
+                clip.append_range(bip->paths());
 
-        frame = CL2::Intersect(frame, clip, FillRule::Positive);
+            frame = CL2::Intersect(frame, clip, FillRule::Positive);
 
-        // cut toolPath
-        Clipper clipper;
-        clipper.AddOpenSubject(rPaths);
-        clipper.AddClip(frame);
-        PolyTree polytree;
-        clipper.Execute(ClipType::Difference, FillRule::Positive, frame, rPaths);
+            // cut toolPath
+            Clipper clipper;
+            clipper.AddOpenSubject(rPaths);
+            clipper.AddClip(frame);
+            PolyTree polytree;
+            clipper.Execute(ClipType::Difference, FillRule::Positive, frame, rPaths);
 
-        if(rPaths.empty())
-            return;
+            if(rPaths.empty())
+                return;
 
-        mergePaths(rPaths);
-        sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
+            mergePaths(rPaths);
+            sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
 
-        auto IsPositive = [](Paths paths) {
-            for(auto&& path: paths | v::drop(1))
-                paths.front().append_range(std::move(path)); // NOTE  move?
-            return CL2::IsPositive(paths.front());
-        };
+            auto IsPositive = [](Paths paths) {
+                for(auto&& path: paths | v::drop(1))
+                    paths.front().append_range(std::move(path)); // NOTE  move?
+                return CL2::IsPositive(paths.front());
+            };
 
-        if(isPositive1 ^ IsPositive(rPaths)) // Вернуть исходное направление пути
-            ReversePaths(rPaths), r::reverse(rPaths);
-    });
+            if(isPositive1 ^ IsPositive(rPaths)) // Вернуть исходное направление пути
+                ReversePaths(rPaths), r::reverse(rPaths);
+        });
 
     std::erase_if(returnPss, [](auto&& paths) { return paths.empty(); });
 }

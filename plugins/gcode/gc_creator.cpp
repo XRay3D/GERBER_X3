@@ -25,11 +25,11 @@
 
 #include "project.h"
 #include "utils.h"
-
-#undef emit
-#include <execution>
-#define emit
-// std::execution::parallel_policy
+#ifdef Q_OS_UNIX
+    #undef emit
+    #include <execution>
+    #define emit
+#endif
 #include <forward_list>
 #include <set>
 #include <stdexcept>
@@ -483,31 +483,35 @@ bool Creator::checkMilling(SideOfMilling side) {
         setMax(frames.size());
         setCurrent();
 
-        std::for_each(std::execution::par, std::begin(frames), std::end(frames), [&](auto&& frame) {
-            incCurrent();
-            QPainterPath F;
-            F.addPolygon(~frame);
-            for(auto&& srcPath: sources) {
-                if(intersect) {
-                    // QPainterPath S;
-                    // S.addPolygon(ReversePath(srcPath));
-                    // if (F.intersects(S)) {
-                    // std::lock_guard guard {m};
-                    // checker[std::addressof(frame)].insert(srcPath.data());
-                    // break;
-                    // }
-                } else {
-                    for(auto&& pt: srcPath) {
-                        if(auto result = Clipper2Lib::PointInPolygon(pt, frame);
-                            result == PointInPolygonResult::IsOn || result == PointInPolygonResult::IsInside) {
-                            std::lock_guard guard{m};
-                            checker[std::addressof(frame)].insert(srcPath.data());
-                            break;
+        std::for_each(
+#ifdef Q_OS_UNIX
+            std::execution::par,
+#endif
+            std::begin(frames), std::end(frames), [&](auto&& frame) {
+                incCurrent();
+                QPainterPath F;
+                F.addPolygon(~frame);
+                for(auto&& srcPath: sources) {
+                    if(intersect) {
+                        // QPainterPath S;
+                        // S.addPolygon(ReversePath(srcPath));
+                        // if (F.intersects(S)) {
+                        // std::lock_guard guard {m};
+                        // checker[std::addressof(frame)].insert(srcPath.data());
+                        // break;
+                        // }
+                    } else {
+                        for(auto&& pt: srcPath) {
+                            if(auto result = Clipper2Lib::PointInPolygon(pt, frame);
+                                result == PointInPolygonResult::IsOn || result == PointInPolygonResult::IsInside) {
+                                std::lock_guard guard{m};
+                                checker[std::addressof(frame)].insert(srcPath.data());
+                                break;
+                            }
                         }
                     }
                 }
-            }
-        });
+            });
         std::erase_if(checker, [](const auto& p) {
             return p.second.size() < 2; // 5??
         });
@@ -562,19 +566,23 @@ bool Creator::checkMilling(SideOfMilling side) {
             setMax(nonCutPPaths.size());
             setCurrent();
 
-            std::for_each(std::execution::par, std::begin(nonCutPPaths), std::end(nonCutPPaths), [&srcPPaths, testArea, &m](auto&& nonCut) {
-                // for (auto&& nonCut : nonCutPPaths) {
-                incCurrent();
-                std::set<QPainterPath*> set;
-                for(auto&& srcPath: srcPPaths) {
-                    if(nonCut.intersects(srcPath)) {
-                        std::lock_guard guard{m};
-                        set.emplace(&srcPath);
+            std::for_each(
+#ifdef Q_OS_UNIX
+                std::execution::par,
+#endif
+                std::begin(nonCutPPaths), std::end(nonCutPPaths), [&srcPPaths, testArea, &m](auto&& nonCut) {
+                    // for (auto&& nonCut : nonCutPPaths) {
+                    incCurrent();
+                    std::set<QPainterPath*> set;
+                    for(auto&& srcPath: srcPPaths) {
+                        if(nonCut.intersects(srcPath)) {
+                            std::lock_guard guard{m};
+                            set.emplace(&srcPath);
+                        }
                     }
-                }
-                if(set.size() < 2 && Area(~nonCut.toFillPolygon()) < testArea)
-                    nonCut.clear();
-            });
+                    if(set.size() < 2 && Area(~nonCut.toFillPolygon()) < testArea)
+                        nonCut.clear();
+                });
 
             nonCutPaths.clear();
             for(auto&& frPath: nonCutPPaths)
@@ -594,12 +602,16 @@ bool Creator::checkMilling(SideOfMilling side) {
             if(frPaths.empty()) // ????
                 break;
 
-            std::for_each(std::execution::par, std::begin(frPaths), std::end(frPaths), [](auto&& frPath) {
-                // ClipperOffset offset(uScale);
-                // offset.AddPath(frPath, JoinType::Round, EndType::Polygon);
-                // frPath = offset.Execute(100).front();
-                frPath = InflateRoundPolygon(frPath, 100).front();
-            });
+            std::for_each(
+#ifdef Q_OS_UNIX
+                std::execution::par,
+#endif
+                std::begin(frPaths), std::end(frPaths), [](auto&& frPath) {
+                    // ClipperOffset offset(uScale);
+                    // offset.AddPath(frPath, JoinType::Round, EndType::Polygon);
+                    // frPath = offset.Execute(100).front();
+                    frPath = InflateRoundPolygon(frPath, 100).front();
+                });
 
             // ClipperOffset offset(uScale);
             // offset.AddPaths(frPaths, JoinType::Round, EndType::Polygon);
@@ -614,34 +626,42 @@ bool Creator::checkMilling(SideOfMilling side) {
 
             auto checker{testFrame(frPaths, srcPaths, true)};
             items.reserve(checker.size());
-            std::for_each(std::execution::par, std::begin(checker), std::end(checker), [&](auto&& checker) {
-                auto&& [frame, set] = checker;
-                items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
-            });
+            std::for_each(
+#ifdef Q_OS_UNIX
+                std::execution::par,
+#endif
+                std::begin(checker), std::end(checker), [&](auto&& checker) {
+                    auto&& [frame, set] = checker;
+                    items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
+                });
         }
     } break;
     case Inner: {
         Timer t{"Inner"};
         groupedPaths(Grouping::Copper);
         std::mutex m;
-        std::for_each(std::execution::par, std::begin(groupedPss), std::end(groupedPss), [&](auto&& srcPaths) {
-            // for (int i {}; auto&& srcPaths : groupedPss) {
-            Paths frPaths = createFrame(srcPaths);
-            if(frPaths.size() == 0) { // Doesn't fit at all
-                std::lock_guard guard{m};
-                items.push_back(new Gi::Error{srcPaths, Area(srcPaths) * dScale * dScale});
-            } else if(frPaths.size() > 1) { // Fits with breaks
-                srcPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
-                if(srcPaths.empty())
-                    return; //
-                setCurrent();
-                setMax(frPaths.size());
-                auto checker{testFrame(srcPaths, frPaths)};
-                std::lock_guard guard{m};
-                for(auto&& [frame, set]: checker)
-                    items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
-            }
-        });
+        std::for_each(
+#ifdef Q_OS_UNIX
+            std::execution::par,
+#endif
+            std::begin(groupedPss), std::end(groupedPss), [&](auto&& srcPaths) {
+                // for (int i {}; auto&& srcPaths : groupedPss) {
+                Paths frPaths = createFrame(srcPaths);
+                if(frPaths.size() == 0) { // Doesn't fit at all
+                    std::lock_guard guard{m};
+                    items.push_back(new Gi::Error{srcPaths, Area(srcPaths) * dScale * dScale});
+                } else if(frPaths.size() > 1) { // Fits with breaks
+                    srcPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
+                    if(srcPaths.empty())
+                        return; //
+                    setCurrent();
+                    setMax(frPaths.size());
+                    auto checker{testFrame(srcPaths, frPaths)};
+                    std::lock_guard guard{m};
+                    for(auto&& [frame, set]: checker)
+                        items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
+                }
+            });
     } break;
     case On: break;
     }
