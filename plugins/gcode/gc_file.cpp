@@ -356,9 +356,14 @@ void File::saveMillingPocket(const QPointF& offset) {
 
     const mvector<double> depths = getDepths();
     double diameter = tool().diameter();
-    QPointF point = gcp.toolPathss.front().front().front().pt;
+
+    Curvess pathss = mirrorAndOffsetCurves(offset);
+
+    QPointF point = pathss.front().front().front().pt;
+
+
     startPath(point);
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Curves& paths: pathss) {
         for(double zd: depths) {
             for(const Curve& path: paths) {
                 bool first = !geo::TEST(std::exchange(point, path.front().pt), path.front().pt, diameter, diameter * 2);
@@ -383,8 +388,9 @@ void File::saveMillingPocket(const QPointF& offset) {
 
 void File::saveMillingProfile(const QPointF& offset) {
     const mvector<double> depths(getDepths());
+    Curvess pathss = mirrorAndOffsetCurves(offset);
 
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Curves& paths: pathss) {
         if(paths.size() == 1) {
             const Curve& path = paths.front();
             double perimetr = path.perimetr();
