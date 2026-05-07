@@ -78,7 +78,9 @@ Debug_::Debug_(const Paths& paths, const QColor& color, double width)
     boundingRect_ = shape_.boundingRect();
 
     if(shape_.isEmpty()) {
+#if DEBUG
         delete this; // NOTE
+#endif
         return;
     }
 
@@ -89,7 +91,7 @@ Debug_::Debug_(const Paths& paths, const QColor& color, double width)
 
 Debug_::Debug_(const QPainterPath& path, const QColor& color, double width)
     : Debug_{color, width} {
-    shape_ = path;
+    shape_        = path;
     boundingRect_ = shape_.boundingRect();
 
     if(shape_.isEmpty()) {
