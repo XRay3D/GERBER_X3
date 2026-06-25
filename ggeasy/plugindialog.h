@@ -27,9 +27,9 @@ class DialogAboutPlugins : public QDialog {
     QPushButton* pbClose;
     QPushButton* pbInfo;
 
-    void setupUi(QDialog* Dialog); // setupUi
+    void setupUi(); // setupUi
 
-    void retranslateUi(QDialog* Dialog); // retranslateUi
+    void retranslateUi(); // retranslateUi
 
 public:
     DialogAboutPlugins(QWidget* parent = nullptr);
