@@ -24,10 +24,9 @@
 #include <QTreeWidget>
 // #include "a_pch.h"
 
-DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
-    : QDialog{parent} {
-    setupUi(this);
-    retranslateUi(this);
+DialogAboutPlugins::DialogAboutPlugins(QWidget* parent): QDialog{parent} {
+    setupUi();
+    retranslateUi();
 
     treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     treeWidget->header()->setSectionResizeMode(2, QHeaderView::Stretch);
@@ -80,20 +79,20 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
 
 DialogAboutPlugins::~DialogAboutPlugins() { }
 
-void DialogAboutPlugins::setupUi(QDialog* Dialog) {
-    if(Dialog->objectName().isEmpty())
-        Dialog->setObjectName(u"Dialog"_s);
-    Dialog->resize(400, 300);
-    verticalLayout = new QVBoxLayout{Dialog};
+void DialogAboutPlugins::setupUi() {
+    if(objectName().isEmpty())
+        setObjectName(u"Dialog"_s);
+    resize(400, 300);
+    verticalLayout = new QVBoxLayout{this};
     verticalLayout->setSpacing(6);
     verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(6, 6, 6, 6);
 
-    treeWidget = new QTreeWidget{Dialog};
+    treeWidget = new QTreeWidget{this};
     treeWidget->setObjectName(u"treeWidget"_s);
     verticalLayout->addWidget(treeWidget);
 
-    buttonBox = new QDialogButtonBox{Dialog};
+    buttonBox = new QDialogButtonBox{this};
     buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);
@@ -101,15 +100,15 @@ void DialogAboutPlugins::setupUi(QDialog* Dialog) {
     pbClose = buttonBox->addButton(u"Close"_s, QDialogButtonBox::AcceptRole);
     verticalLayout->addWidget(buttonBox);
 
-    retranslateUi(Dialog);
-    QObject::connect(buttonBox, SIGNAL(accepted()), Dialog, SLOT(accept()));
-    QObject::connect(buttonBox, SIGNAL(rejected()), Dialog, SLOT(reject()));
+    retranslateUi();
+    QObject::connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    QObject::connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    QMetaObject::connectSlotsByName(Dialog);
+    QMetaObject::connectSlotsByName(this);
 }
 
-void DialogAboutPlugins::retranslateUi(QDialog* Dialog) {
-    Dialog->setWindowTitle(QApplication::translate("Dialog", "About Plugins...", nullptr));
+void DialogAboutPlugins::retranslateUi() {
+    setWindowTitle(QApplication::translate("Dialog", "About Plugins...", nullptr));
     treeWidget->setColumnCount(3);
     treeWidget->setHeaderLabels({//
         QApplication::translate("Dialog", "Name", nullptr),
