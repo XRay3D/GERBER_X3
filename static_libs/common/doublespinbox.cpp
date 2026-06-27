@@ -238,9 +238,11 @@ QValidator::State DoubleSpinBox::validate(QString& input, int& pos) const {
     // Invalid      0 Строка явно недействительна.
     // Intermediate 1 Строка является вероятным промежуточным значением.
     // Acceptable   2 Строка приемлема в качестве конечного результата; то есть это действительно.
-    auto fixMath = [this](QString& str) {
+    auto fixMath = [this](QString str) {
         QElapsedTimer timer;
         timer.start();
+        const QString sfx = suffix();
+        if(str.endsWith(sfx)) str.chop(sfx.size());
         if constexpr(0) {
             static const std::pair<QString, QString> array[]{
                 {u"E"_s,       u"Math.E"_s      }, // const
@@ -301,7 +303,7 @@ QValidator::State DoubleSpinBox::validate(QString& input, int& pos) const {
         }
         str.replace(u',', u'.');
         qWarning() << __FUNCTION__ << timer.nsecsElapsed() / 1000 << u"us"_s << str;
-        return str.mid(0, str.size() - suffix().size());
+        return str;
     };
     if(input.size() == 0) return QValidator::Intermediate;
     if(input.count(u'(') != input.count(u')')) return QValidator::Intermediate;
