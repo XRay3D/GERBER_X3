@@ -26,6 +26,9 @@ public:
 signals:
     void valueChanged(double);
 
+protected:
+    void showEvent(QShowEvent* event) override;
+
 private:
     double value_{};
 
