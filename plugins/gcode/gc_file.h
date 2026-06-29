@@ -40,7 +40,7 @@ public:
         , toolType{newGcp.toolType()}
         , strFeed{u'F' + format(feedRate)}
         , strPlungeFeed{u'F' + format(plungeRate)}
-        , strSpindle{u'S' + format(plungeRate)}
+        , strSpindle{u'S' + format(spindleSpeed)}
         , gcp{std::move(newGcp)} {
         setSide(gcp.params[Params::FileSide]);
     }
