@@ -63,6 +63,14 @@ DepthForm::~DepthForm() {
     settings.endGroup();
 }
 
+void DepthForm::showEvent(QShowEvent* event) {
+    if(rbCopper->isChecked())
+        dsbx->setValue(App::project().copperThickness());
+    else if(rbBoard->isChecked())
+        dsbx->setValue(App::project().boardThickness());
+    QWidget::showEvent(event);
+}
+
 double DepthForm::value() const { return dsbx->value(); }
 
 void DepthForm::setValue(double value) {
