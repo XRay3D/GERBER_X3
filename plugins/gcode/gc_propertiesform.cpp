@@ -48,6 +48,12 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsX);
     connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsY);
 
+    connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSafeZ);
+    connect(ui->dsbxClearence, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setClearence);
+    connect(ui->dsbxPlunge, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setPlunge);
+    connect(ui->dsbxThickness, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setBoardThickness);
+    connect(ui->dsbxCopperThickness, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setCopperThickness);
+
     connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, [this](double value) {
         ui->dsbxSafeZ->setValue(value);
         ui->dsbxSafeZ->setValue(value);
@@ -75,9 +81,6 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     });
 
     ui->pbOk->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
-
-    if(parent != nullptr)
-        setWindowTitle(ui->label->text());
 
     for(auto* button: findChildren<QPushButton*>())
         button->setIconSize({16, 16});
