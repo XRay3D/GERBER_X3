@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 4.00)
 
 project(gcode)
 
-# include_directories()
-
 file(GLOB HEADERS *.h)
 file(GLOB SOURCES *.cpp)
 file(GLOB UIS *.ui)
