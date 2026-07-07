@@ -379,8 +379,8 @@ void Form::rb_clicked() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if(GiBridge::moveBrPtr)
-        GiBridge::moveBrPtr->setPos(pos);
+    // if(GiBridge::moveBrPtr)
+        // GiBridge::moveBrPtr->setPos(pos);
 }
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }

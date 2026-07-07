@@ -15,6 +15,7 @@
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "stacktrace_and_logs.h"
+#include "tool_database.h"
 #include "version.h"
 
 #include <QCommandLineParser>
@@ -124,6 +125,8 @@ int main(int argc, char* argv[]) {
         settings.endGroup();
         MainWindow::translate(locale);
     }
+
+    if(0) return ToolDatabase{}.exec();
 
     MainWindow mainWin;
     mainWin.setObjectName(u"MainWindow"_s);

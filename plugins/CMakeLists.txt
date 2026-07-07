@@ -23,5 +23,6 @@ set(GCODE_PLUGINS
     hatching
     pocketraster
     voroni
-    thermal)
+    thermal
+    thread)
 add_subdirectory(gcode)

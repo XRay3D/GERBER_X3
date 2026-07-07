@@ -82,8 +82,8 @@ void Creator::createThread(const Tool& tool, const double depth) {
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss)
-    : GCode::File(std::move(gcp), std::move(toolPathss)) {
+File::File(GCode::Params&& gcp)
+    : GCode::File{std::move(gcp)} {
     if(this->gcp.tools.front().diameter()) {
         initSave();
         addInfo();
@@ -111,9 +111,9 @@ void File::genGcodeAndTile() {
 }
 
 void File::createGi() {
-
+/*
     Gi::Item* item;
-    for(const Paths& paths: toolPathss_) {
+    for(const Paths& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -135,7 +135,8 @@ void File::createGi() {
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
 
-    itemGroup()->setVisible(true);
+    itemGroup()->setVisible(true);+
+    */
 }
 
 } // namespace Thread

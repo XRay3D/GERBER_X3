@@ -318,7 +318,7 @@ inline constexpr auto THREAD = md5::hash32("Thread");
 class File final : public GCode::File {
 public:
     explicit File();
-    explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
+    explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); } // FIXME
     uint32_t type() const override { return THREAD; }
     void createGi() override;

@@ -42,12 +42,12 @@ private:
 
     const QStringList names{tr("Thread On"), tr("Thread Outside"), tr("Thread Inside")};
     static inline const std::array pixmaps{
-        u"prof_on_climb"_s_qs,
-        u"prof_out_climb"_s_qs,
-        u"prof_in_climb"_s_qs,
-        u"prof_on_conv"_s_qs,
-        u"prof_out_conv"_s_qs,
-        u"prof_in_conv"_s_qs,
+        u"prof_on_climb"_s,
+        u"prof_out_climb"_s,
+        u"prof_in_climb"_s,
+        u"prof_on_conv"_s,
+        u"prof_out_conv"_s,
+        u"prof_in_conv"_s,
     };
 
     enum Trimming {
@@ -82,7 +82,7 @@ public:
 
 class GCPluginImpl final : public GCode::Plugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "thread.json")
+    Q_PLUGIN_METADATA(IID GCodeInterface_iid FILE "description.json")
     Q_INTERFACES(GCode::Plugin)
     Form form{this};
 
@@ -91,7 +91,7 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); } // FIXME
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
     QWidget* createForm() override { return &form; }
-    QString gcName() const override { return 9u ""_s; };
+    QString gcName() const override { return u""_s; };
     uint32_t type() const override { return THREAD; }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 
