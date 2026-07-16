@@ -40,8 +40,8 @@ SectionENTITIES::~SectionENTITIES() {
 
 void SectionENTITIES::parse() {
     CodeData code = nextCode();
-    code = nextCode();
-    code = nextCode();
+    code          = nextCode();
+    code          = nextCode();
     do {
         file->entities_.emplace_back(entityParse(code));
         file->entities_.back()->parse(code);
@@ -100,7 +100,9 @@ std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {
     case Entity::VIEWPORT         : return std::make_shared<Viewport>(sp);
     case Entity::WIPEOUT          : return std::make_shared<Dummy /*Wipeout*/>(sp);
     case Entity::XLINE            : return std::make_shared<XLine>(sp);
-    default                       : throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+    default:
+        return std::make_shared<Dummy /* FIXME default:*/>(sp);
+        // default                       : throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
     }
     throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
 }

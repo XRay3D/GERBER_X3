@@ -50,7 +50,7 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
                      recentFiles.readRecentFiles(settings)
                      | v::filter(qOverload<const QString&>(&QFileInfo::exists)) | v::take(1))
                          .front()};
-                 for(auto&& str: dir.entryList({u"*.gbr"_s}, QDir::Files)) {
+                 for(auto&& str: dir.entryList({u"*.dxf"_s}, QDir::Files)) {
                      str = dir.path() + u'/' + str;
                      QTimer::singleShot(time += delay, [this, str] { loadFile(str); });
                      break;

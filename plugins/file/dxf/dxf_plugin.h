@@ -38,6 +38,7 @@ public:
     void updateFileModel(AbstractFile* file) override;
     // public slots:
     AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
+    [[nodiscard]] virtual QString extension() const override { return tr("DXF (*.dxf)"); }
 
 private:
     File* file_ = nullptr;

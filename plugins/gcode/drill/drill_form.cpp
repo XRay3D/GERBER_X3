@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "drill_form.h"
+#include "circle/shape.h"
 #include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "drill_model.h"
@@ -135,6 +136,10 @@ void Form::updateFiles() {
             ui->cbxFile->addItem(file->icon(), file->shortName(), QVariant::fromValue(file));
     }
 
+    if(auto shapes = App::project().shapes(::Gi::Type::ShCircle); shapes.size()) {
+        ui->cbxFile->addItem(shapes.front()->icon(), shapes.front()->name(), QVariant::fromValue(shapes));
+    }
+
     if(ui->cbxFile->count())
         on_cbxFileCurrentIndexChanged();
 
@@ -208,12 +213,9 @@ void Form::initToolTable() {
 }
 
 void Form::on_cbxFileCurrentIndexChanged() {
-    file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
-    qDebug() << file << file->id();
-    if(!App::project().contains(file))
-        return;
-
-    try {
+    auto execFile = [this] {
+        qDebug() << file << file->id();
+        if(!App::project().contains(file)) return;
         // auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->getDataForGC(file, plugin));
         // auto peview = ui->cbxFile->currentData().value<mvector<const GraphicObject*>>();
         // for (auto* var : peview)
@@ -232,18 +234,18 @@ void Form::on_cbxFileCurrentIndexChanged() {
             map[Key{var.name, var.path.size() > 1}].emplace_back(&var);
         }
 
-        model = new Model{map.size(), ui->toolTable};
+        model      = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
         QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
-            row.icon = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
-            row.name = QString(key.first).split(u'|');
+            row.icon  = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
+            row.name  = QString(key.first).split(u'|');
             row.name.back() += u": Ø"_s + QString::number(std::any_cast<double>(val.front()->raw));
             row.diameter = std::any_cast<double>(val.front()->raw);
-            row.isSlot = key.second;
+            row.isSlot   = key.second;
             for(auto* go: val)
                 new Gi::Preview{
                     (go->path.size() > 1 ? Path{go->path} : Path{go->pos}),
@@ -252,7 +254,44 @@ void Form::on_cbxFileCurrentIndexChanged() {
                     row,
                     go->fill};
         }
+    };
+    auto execShapes = [this] {
+        auto shapes = ui->cbxFile->currentData(Qt::UserRole).value<std::vector<Shapes::AbstractShape*>>();
+        qInfo() << shapes.size();
 
+        using Key = std::pair<QString, double>;
+        using Val = std::vector<Shapes::AbstractShape*>;
+        std::map<Key, Val> map;
+
+        for(auto* shape: shapes)
+            if(shape->isVisible())
+                map[Key{shape->name(), std::any_cast<double>(shape->getVal(ShCirc::Shape::Diameter))}].emplace_back(shape);
+
+        model      = new Model{map.size(), ui->toolTable};
+        auto& data = model->data();
+
+        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
+
+        for(int i{}; auto& [key, shapes]: map) {
+            auto& row    = data[i++];
+            row.icon     = shapes.front()->icon();
+            row.name     = QString(key.first).split(u'|');
+            row.diameter = std::any_cast<double>(shapes.front()->getVal(ShCirc::Shape::Diameter));
+            row.name.back() += u": Ø%1"_s.arg(row.diameter);
+            row.isSlot = false;
+            for(auto* shape: shapes)
+                new Gi::Preview{
+                    {~std::any_cast<QPointF>(shape->getVal(ShCirc::Shape::Center))},
+                    row.diameter,
+                    data.back().toolId,
+                    row,
+                    toPaths(toCurves(shape->shape()))};
+        }
+    };
+    try {
+        file = ui->cbxFile->currentData(Qt::UserRole).value<AbstractFile*>();
+        if(file) execFile();
+        else execShapes();
         App::grView().scene()->update();
     } catch(const std::exception& exc) {
         qDebug("%s: %s", __FUNCTION__, exc.what()); //-V576
@@ -391,8 +430,8 @@ void Form::customContextMenuRequested(const QPoint& pos) {
 }
 
 void Form::pickUpTool() {
-    if(!model)
-        return;
+    if(!model) return;
+
     const double k = 0.05; // 5%
     int ctr{};
     for(const auto& row: model->data()) {
@@ -405,17 +444,16 @@ void Form::pickUpTool() {
             const auto diameter = tool.getDiameter(dsbxDepth->value());
             return drillDiameterMin <= diameter && drillDiameterMax >= diameter;
         };
-
-        for(auto& [id, tool]: App::toolHolder().tools()) {
-            if(!row.isSlot && (tool.type() == Tool::Drill || tool.type() == Tool::EndMill) && isFit(tool)) {
-                model->setToolId(ctr, id);
-                break;
-            }
-            if(row.isSlot && tool.type() == Tool::EndMill && isFit(tool)) {
+        auto set    = !row.isSlot ? std::set{Tool::Drill, Tool::EndMill} : std::set{Tool::EndMill};
+        auto filter = v::filter([&set](auto& t) { return set.contains(t.second.type()); });
+        for(auto& [id, tool]: App::toolHolder().tools() | filter) {
+            qWarning() << tool;
+            if(isFit(tool)) {
                 model->setToolId(ctr, id);
                 break;
             }
         }
+
         ++ctr;
     }
 }
@@ -555,7 +593,7 @@ void Form::computePaths() {
                 };
 
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + /*type_ +*/ indexes(val.toolsApertures));
-                gcode->setSide(file->side());
+                if(file) gcode->setSide(file->side());
                 App::project().addFile(gcode);
             }
             if(val.paths.size()) {
@@ -564,7 +602,7 @@ void Form::computePaths() {
                     gcp = {};
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(side);
-                    gcp.tools = {App::toolHolder().tool(toolId)};
+                    gcp.tools                        = {App::toolHolder().tool(toolId)};
                     gcp.params[GCode::Params::Depth] = dsbxDepth->value();
                     gcp.closedCurves.append_range(toCurves(val.paths)); // FIXME
                     setCreator(new Profile::Creator);
@@ -575,7 +613,7 @@ void Form::computePaths() {
                     gcp = {};
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
-                    gcp.tools = {App::toolHolder().tool(toolId)};
+                    gcp.tools                        = {App::toolHolder().tool(toolId)};
                     gcp.params[GCode::Params::Depth] = dsbxDepth->value();
                     gcp.closedCurves.append_range(toCurves(val.paths)); // FIXME
                     setCreator(new PocketOffset::Creator);

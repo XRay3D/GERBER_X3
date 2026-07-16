@@ -10,16 +10,19 @@
  ********************************************************************************/
 #pragma once
 
+#include "abstract_shape.h"
 #include "datastream.h"
 #include "mvector.h"
 #include "utils.h"
 
 #include <QFileSystemWatcher>
+#include <QGraphicsItem>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QObject>
 #include <QRectF>
 #include <memory>
+// #include <shape.h>
 
 enum FileVersion {
     ProVer_1 = 1,
@@ -51,7 +54,7 @@ class QFileSystemWatcher;
 using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
 // using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
 using ShapesMap = std::map<int, Shapes::AbstractShape*>;
-using ItemMap = std::map<int, Gi::Item*>;
+using ItemMap   = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
@@ -76,10 +79,21 @@ public:
         mvector<T*> rfiles;
         for(const auto& [id, sp]: files_) {
             T* file = dynamic_cast<T*>(sp.get());
-            if(file)
-                rfiles.push_back(file);
+            if(file) rfiles.emplace_back(file);
         }
         return rfiles;
+    }
+
+    template <typename T = Shapes::AbstractShape>
+    std::vector<T*> shapes(int type = -1) {
+        QMutexLocker locker(&mutex);
+        std::vector<T*> shapes;
+        for(const auto& [id, sp]: shapes_) {
+            if(type != -1 && sp->type() != type) continue;
+            if(T* shape = dynamic_cast<T*>(sp); shape)
+                shapes.emplace_back(shape);
+        }
+        return shapes;
     }
 
     template <typename T>
