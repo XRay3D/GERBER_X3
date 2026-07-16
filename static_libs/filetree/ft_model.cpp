@@ -16,7 +16,7 @@
 #include "gc_types.h"
 #include "md5.h"
 #include "project.h"
-#include "shape.h"
+#include "abstract_shape.h"
 
 #include <QTimer>
 

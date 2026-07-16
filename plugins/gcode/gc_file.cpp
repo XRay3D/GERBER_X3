@@ -215,7 +215,7 @@ mvector<double> File::getDepths() {
     if(gDepth < tool.passDepth() || qFuzzyCompare(gDepth, tool.passDepth()))
         return {-gDepth - tool.getDepth()};
 
-    const int count = static_cast<int>(ceil(gDepth / tool.passDepth()));
+    const int count    = static_cast<int>(ceil(gDepth / tool.passDepth()));
     const double depth = gDepth / count;
     mvector<double> depths(count);
     for(int i{}; i < count; ++i)
@@ -236,7 +236,7 @@ std::vector<QString> File::savePath(const Curve& curve, double perimetr, double 
             return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
     };
     if(depth && perimetr) {
-        double zk = depth - z_;
+        double zk       = depth - z_;
         double perimetr = curve.perimetr();
         for(auto&& [fr, to]: v::pairwise(curve)) {
             z_ += Span{fr.pt, to}.Length() / perimetr * zk;
@@ -290,17 +290,17 @@ QString File::format(double val) {
 /////////////////////////////////////////////////////////////
 void File::saveDrill(const QPointF& offset) {
     Curve path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
-
     const std::vector<double> depths(getDepths());
-
     for(QPointF point: path) {
         startPath(point);
         size_t i{};
         while(true) {
             lines_.emplace_back(formated({g1(), z(depths[i]), strPlungeFeed}));
-            if(++i == depths.size())
-                break;
-            lines_.emplace_back(formated({g0(), z(0.0)}));
+            if(++i == depths.size()) break;
+            if(gcp.tool().lenght() > depths[i])
+                lines_.emplace_back(formated({g0(), z(depths[i] + gcp.tool().oneTurnCut() * 4)}));
+            else
+                lines_.emplace_back(formated({g0(), z(0)}));
         }
         endPath();
     }
@@ -355,12 +355,11 @@ void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
 
     const mvector<double> depths = getDepths();
-    double diameter = tool().diameter();
+    double diameter              = tool().diameter();
 
     Curvess pathss = mirrorAndOffsetCurves(offset);
 
     QPointF point = pathss.front().front().front().pt;
-
 
     startPath(point);
     for(const Curves& paths: pathss) {
@@ -393,7 +392,7 @@ void File::saveMillingProfile(const QPointF& offset) {
     for(const Curves& paths: pathss) {
         if(paths.size() == 1) {
             const Curve& path = paths.front();
-            double perimetr = path.perimetr();
+            double perimetr   = path.perimetr();
             if(paths.front().isClosed()) { // Spiral
                 startPath(path.front().pt);
                 for(double depth: depths)
@@ -449,7 +448,7 @@ void File::saveMillingRaster(const QPointF& offset) {
 }
 
 void File::createGiDrill() {
-
+    if(!gcp.toolPathss.size()) return;
     Gi::Item* item;
     for(QPointF point: gcp.toolPathss.front().front()) {
         item = new Gi::Drill{{point}, gcp.tool().diameter(), this, gcp.tool().id()};

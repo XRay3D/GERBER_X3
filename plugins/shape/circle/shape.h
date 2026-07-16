@@ -38,12 +38,22 @@ public:
     double radius() const;
     void setRadius(double radius);
 
-    enum PointEnum {
+    enum PointEnum : int {
         Center,
         Point1,
         PtCount,
         Radius = PtCount, // model
         Diameter,         // model
+    };
+
+    [[nodiscard]] std::any getVal(int id) const override {
+        switch(PointEnum{id}) {
+        case Center  : return static_cast<QPointF>(handles[Center]);
+        case Point1  : return static_cast<QPointF>(handles[Point1]);
+        case Radius  : return radius_;
+        case Diameter: return radius_ * 2;
+        default      : return {};
+        };
     };
 
 protected:

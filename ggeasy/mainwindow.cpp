@@ -92,8 +92,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui.grView, &GraphicsView::mouseMove, [this](const QPointF& point) {
         auto gpoint = point - App::project().zeroPos();
-        auto str = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
-            point.x(), point.y(), gpoint.x(), gpoint.y());
+        auto str    = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
+               point.x(), point.y(), gpoint.x(), gpoint.y());
         ui.statusbar->showMessage(QString::fromStdString(str));
         // ui.statusbar->showMessage(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s
         // .arg(point.x(), 8, 'f', 3)
@@ -259,20 +259,25 @@ void MainWindow::addFileToPro(AbstractFile* file) {
 }
 
 void MainWindow::open() {
-    QStringList files(QFileDialog::getOpenFileNames(
-        this,
-        tr("Open File"),
-        lastPath,
-        tr("Any (*.*);;Gerber/Excellon (*.gbr *.exc *.drl);;Project (*.g2g)")));
-    if(files.isEmpty())
-        return;
+    auto extensions = v::join_with(App::filePlugins()
+                              | v::transform(&FilePluginMap::value_type::second)
+                              | v::transform(&AbstractFilePlugin::extension)
+                              | v::filter(&QString::size),
+                          u";;")
+        | r::to<QString>();
+    /*tr("Any (*.*)"
+                              ";;Gerber/Excellon (*.gbr *.exc *.drl)"
+                              ";;Project (*.g2g)"))*/
+    QStringList files{QFileDialog::getOpenFileNames(
+        this, tr("Open File"), lastPath, extensions + tr(";;Any (*.*)"))};
+
+    if(files.isEmpty()) return;
 
     if(files.filter(QRegularExpression(u".+g2g$"_s)).size()) {
         loadFile(files.at(files.indexOf(QRegularExpression(u".+g2g$"_s))));
         return;
     } else {
-        for(QString& fileName: files)
-            loadFile(fileName);
+        for(QString& fileName: files) loadFile(fileName);
     }
     // QString name(QFileInfo(files.first()).path());
     // setCurrentFile(name + u"/"_s + name.split(u'/').back() + u".g2g"_s);
@@ -854,7 +859,7 @@ void MainWindow::saveSelectedGCodeFiles() {
         if(!gcFiles[i]->itemGroup()->isVisible())
             gcFiles.remove(i--);
 
-    using Key = std::pair<size_t, Side>;
+    using Key     = std::pair<size_t, Side>;
     using GcFiles = QList<GCode::File*>;
 
     std::map<Key, GcFiles> gcFilesMap;

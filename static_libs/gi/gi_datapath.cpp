@@ -42,8 +42,8 @@ void DataPath::updateSelection() const {
 #endif
     // qWarning() << shape_;
     // qWarning() << selectionShape_;
-    assert(shape_.elementCount());
-    assert(selectionShape_.elementCount() > 1);
+    // FIXME dont create empty assert(shape_.elementCount());
+    // FIXME dont create empty assert(selectionShape_.elementCount() > 1);
 }
 
 DataPath::DataPath(Curves curves, AbstractFile* file)

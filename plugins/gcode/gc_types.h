@@ -22,7 +22,7 @@
 #include <QVariant>
 #include <variant>
 
-constexpr auto G_CODE = "GCode"_hash32;
+constexpr auto G_CODE      = "GCode"_hash32;
 constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
@@ -44,10 +44,10 @@ namespace GCode {
 
 enum Code {
     GNull = -1,
-    G00 = 0,
-    G01 = 1,
-    G02 = 2, // cw
-    G03 = 3, // ccw
+    G00   = 0,
+    G01   = 1,
+    G02   = 2, // cw
+    G03   = 3, // ccw
 };
 
 enum SideOfMilling {
@@ -204,12 +204,12 @@ public:
 
     Params(const Tool& tool, double depth, Paths&& toolPaths)
         : Params{tool, depth} {
-        supportCurvess.emplace_back(toCurves(toolPaths));
+        toolPathss /*supportCurvess*/.emplace_back(toCurves(toolPaths));
     }
 
     Params(const Tool& tool, double depth, Curves&& toolPaths)
         : Params{tool, depth} {
-        supportCurvess.emplace_back(std::move(toolPaths));
+        toolPathss /*supportCurvess*/.emplace_back(std::move(toolPaths));
     }
 
     mvector<Tool> tools;

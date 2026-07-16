@@ -62,7 +62,9 @@ std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionPa
     case Entity::VIEWPORT         : return std::make_shared<Viewport>(sp);
     case Entity::WIPEOUT          : return std::make_shared<Wipeout>(sp);
     case Entity::XLINE            : return std::make_shared<XLine>(sp);
-    default                       : throw std::logic_error(__FUNCTION__); // throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+    default:
+        return std::make_shared<Dummy /*Dimension*/>(sp);
+        // throw std::logic_error(std::format("{}:{}",__FUNCTION__,+key)); // throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
     }
     // throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
 }

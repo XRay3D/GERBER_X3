@@ -31,8 +31,8 @@ public:
     AbstractFileSettings(QWidget* parent)
         : QWidget{parent} {
     }
-    virtual ~AbstractFileSettings() = default;
-    virtual void readSettings(MySettings& settings) = 0;
+    virtual ~AbstractFileSettings()                  = default;
+    virtual void readSettings(MySettings& settings)  = 0;
     virtual void writeSettings(MySettings& settings) = 0;
 };
 
@@ -45,11 +45,12 @@ public:
     virtual ~AbstractFilePlugin() = default;
 
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
-    [[nodiscard]] virtual QString folderName() const = 0;
-    [[nodiscard]] virtual QIcon icon() const = 0;
+    [[nodiscard]] virtual QString folderName() const                        = 0;
+    [[nodiscard]] virtual QIcon icon() const                                = 0;
     [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) const = 0;
-    [[nodiscard]] virtual bool thisIsIt(const QString& fileName) = 0;
-    [[nodiscard]] virtual uint32_t type() const = 0;
+    [[nodiscard]] virtual bool thisIsIt(const QString& fileName)            = 0;
+    [[nodiscard]] virtual uint32_t type() const                             = 0;
+    [[nodiscard]] virtual QString extension() const { return {}; } // = 0;
 
     virtual void createMainMenu(
         [[maybe_unused]] QMenu& menu,

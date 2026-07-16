@@ -19,8 +19,8 @@
 #include <type_traits>
 
 namespace pfr = boost ::pfr;
-namespace v = std ::views;
-namespace r = std ::ranges;
+namespace v   = std ::views;
+namespace r   = std ::ranges;
 
 template <class T, size_t N>
 inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
@@ -52,6 +52,7 @@ inline QDataStream& operator<<(QDataStream& s, size_t val) {
 /// std::vector<T>
 ///
 template <typename T, class Alloc>
+    requires(not std::is_pointer_v<T>)
 inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& container) {
     uint32_t n;
     stream >> n;
@@ -65,6 +66,7 @@ inline QDataStream& operator>>(QDataStream& stream, std::vector<T, Alloc>& conta
 }
 
 template <typename T, class Alloc>
+    requires(not std::is_pointer_v<T>)
 inline QDataStream& operator<<(QDataStream& stream, const std::vector<T, Alloc>& container) {
     stream << uint32_t(container.size());
     for(const auto& var: container) stream << var;

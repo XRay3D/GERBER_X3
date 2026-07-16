@@ -62,7 +62,7 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool) {
 
 QDebug operator<<(QDebug debug, const Tool& t) {
     QDebugStateSaver saver{debug};
-    debug.nospace() << u"Tool(D "_s << t.diameter_ << u", ID "_s << t.id_ << ')';
+    debug.nospace() << u"Tool(D "_s << t.diameter_ << u", ID "_s << t.id_ << u", Ty "_s << t.type_ << ')';
     return debug;
 }
 
@@ -138,38 +138,38 @@ double Tool::getDepth() const {
 }
 
 void Tool::read(const QJsonObject& json) {
-    angle_ = json[u"angle"_s].toDouble();
-    autoName_ = json[u"autoName"_s].toBool();
-    diameter_ = json[u"diameter"_s].toDouble();
-    feedRate_ = json[u"feedRate"_s].toDouble();
-    id_ = json[u"id"_s].toInt();
-    name_ = json[u"name"_s].toString();
-    note_ = json[u"note"_s].toString();
-    oneTurnCut_ = json[u"oneTurnCut"_s].toDouble();
-    passDepth_ = json[u"passDepth"_s].toDouble();
-    plungeRate_ = json[u"plungeRate"_s].toDouble();
+    angle_        = json[u"angle"_s].toDouble();
+    autoName_     = json[u"autoName"_s].toBool();
+    diameter_     = json[u"diameter"_s].toDouble();
+    feedRate_     = json[u"feedRate"_s].toDouble();
+    id_           = json[u"id"_s].toInt();
+    name_         = json[u"name"_s].toString();
+    note_         = json[u"note"_s].toString();
+    oneTurnCut_   = json[u"oneTurnCut"_s].toDouble();
+    passDepth_    = json[u"passDepth"_s].toDouble();
+    plungeRate_   = json[u"plungeRate"_s].toDouble();
     spindleSpeed_ = json[u"spindleSpeed"_s].toInt();
-    stepover_ = json[u"stepover"_s].toDouble();
-    lenght_ = json[u"lenght"_s].toDouble(10);
+    stepover_     = json[u"stepover"_s].toDouble();
+    lenght_       = json[u"lenght"_s].toDouble(10);
 
     type_ = static_cast<Type>(json[u"type"_s].toInt());
 }
 
 void Tool::write(QJsonObject& json) const {
-    json[u"angle"_s] = angle_;
-    json[u"autoName"_s] = autoName_;
-    json[u"diameter"_s] = diameter_;
-    json[u"feedRate"_s] = feedRate_;
-    json[u"id"_s] = id_;
-    json[u"name"_s] = name_;
-    json[u"note"_s] = note_;
-    json[u"oneTurnCut"_s] = oneTurnCut_;
-    json[u"passDepth"_s] = passDepth_;
-    json[u"plungeRate"_s] = plungeRate_;
+    json[u"angle"_s]        = angle_;
+    json[u"autoName"_s]     = autoName_;
+    json[u"diameter"_s]     = diameter_;
+    json[u"feedRate"_s]     = feedRate_;
+    json[u"id"_s]           = id_;
+    json[u"name"_s]         = name_;
+    json[u"note"_s]         = note_;
+    json[u"oneTurnCut"_s]   = oneTurnCut_;
+    json[u"passDepth"_s]    = passDepth_;
+    json[u"plungeRate"_s]   = plungeRate_;
     json[u"spindleSpeed"_s] = spindleSpeed_;
-    json[u"stepover"_s] = stepover_;
-    json[u"type"_s] = type_;
-    json[u"lenght"_s] = lenght_;
+    json[u"stepover"_s]     = stepover_;
+    json[u"type"_s]         = type_;
+    json[u"lenght"_s]       = lenght_;
 }
 
 bool Tool::isValid() const {
@@ -272,9 +272,9 @@ size_t Tool::hash2() const {
 QPainterPath Tool::path(const QPointF& pt) const { return path_.translated(pt); }
 
 void Tool::updatePath(double depth) {
-    const double diameter = getDiameter(depth);
+    const double diameter  = getDiameter(depth);
     const double lineKoeff = diameter * 0.7;
-    path_ = QPainterPath();
+    path_                  = QPainterPath();
     path_.addEllipse({}, diameter * 0.5, diameter * 0.5);
     path_.moveTo(QPointF(0.0, +lineKoeff));
     path_.lineTo(QPointF(0.0, -lineKoeff));

@@ -861,6 +861,12 @@ Curve toCurve(std::span<const QPointF> path) {
 }
 
 Curve toCurve(std::span<const Point> path_) {
+    if(path_.size() == 1
+        || (path_.size() == 2 && path_.front() == path_.back()))
+        return {
+            geo::Vertex{~path_.front(), ~GetC(path_.front())}
+        };
+
     Curve curve;
     QPainterPath pp;
 

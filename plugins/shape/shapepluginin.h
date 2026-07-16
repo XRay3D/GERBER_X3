@@ -12,7 +12,7 @@
 
 #include "ft_view.h"
 #include "plugindata.h"
-#include "shape.h"
+#include "abstract_shape.h"
 
 namespace Shapes {
 class Node;

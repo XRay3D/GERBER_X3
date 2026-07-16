@@ -90,7 +90,7 @@ public:
             size_t ctr{};
             for(auto& [name, color]: colors) {
                 const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * ctr++ : 0);
-                auto layer = file->layers().at(name);
+                auto layer  = file->layers().at(name);
                 layer->setColor(QColor::fromHsv(k, 255, 255));
                 for(auto&& gi: *layer->itemGroup())
                     gi->changeColor();
@@ -164,7 +164,9 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch(role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-        emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
+        emit App::fileModel().dataChanged(
+            childs.front() -> index(index.column()),
+            childs.back()->index(index.column()), {role});
         return true;
     case Qt::EditRole:
         switch(FileTree::Column(index.column())) {
@@ -173,7 +175,10 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         case FileTree::Column::ItemsType:
             file->setItemType(value.toInt());
-            emit App::fileModel().dataChanged(childs.front() -> index(index.column()), childs.back()->index(index.column()), {role});
+            if(childs.empty()) return {};
+            emit App::fileModel().dataChanged(
+                childs.front() -> index(index.column()),
+                childs.back()->index(index.column()), {role});
             return true;
         default: break;
         }
@@ -240,7 +245,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme(u"color-management"_s), DxfObj::tr("Colorize"), [this] {
         const int count = childCount();
         for(int row{}; row < count; ++row) {
-            const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
+            const int k   = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
             NodeLayer* nl = reinterpret_cast<NodeLayer*>(child(row));
             nl->layer->setColor(QColor::fromHsv(k, 255, 255));
             for(auto&& gi: *nl->layer->itemGroup())

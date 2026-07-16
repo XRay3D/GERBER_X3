@@ -8,7 +8,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "shape.h"
+#include "abstract_shape.h"
 #include "ft_view.h"
 #include "graphicsview.h"
 #include "qgraphicsscene.h"
