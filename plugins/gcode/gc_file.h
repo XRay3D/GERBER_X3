@@ -20,8 +20,11 @@ class Project;
 
 namespace GCode {
 
+class GcFileProxy;
+
 class File : public AbstractFile {
     // friend class ::Project;
+    friend class GcFileProxy;
 protected:
     double feedRate{};
     double plungeRate{};
@@ -55,6 +58,8 @@ public:
     static void setLastDir(QString dirPath);
 
     bool save(const QString& name);
+
+    static void ensureDefaultScripts();
 
     void initSave();
     void statFile();
@@ -133,6 +138,8 @@ protected:
     // QString speed(int val) { return u'S' + QString::number(val); }
 
     static QString format(double val);
+
+    bool runJsScript(const QString& scriptPath);
 
     virtual Paths merge() const override { return {}; }
 

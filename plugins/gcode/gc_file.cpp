@@ -9,7 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_file.h"
+#include "gc_jsproxy.h"
 #include "gc_node.h"
+#include "gc_plugin.h"
 
 #include "app.h"
 #include "gi.h"
@@ -23,7 +25,11 @@
 #include "project.h"
 #include "span.h"
 
+#include <QCoreApplication>
+#include <QDir>
+#include <QFile>
 #include <QFileInfo>
+#include <QJSEngine>
 #include <QRegularExpression>
 
 using namespace geo;
@@ -43,6 +49,85 @@ QString File::getLastDir() {
     return lastDir += u'/';
 }
 
+static bool jsEvalFile(QJSEngine& engine, const QString& path) {
+    QFile f{path};
+    if(!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
+        qWarning() << "GCode JS: cannot open" << path;
+        return false;
+    }
+    auto result = engine.evaluate(QString::fromUtf8(f.readAll()), path);
+    if(result.isError()) {
+        qWarning() << "GCode JS error in" << path
+                   << "line" << result.property(u"lineNumber"_s).toInt()
+                   << ":" << result.toString();
+        return false;
+    }
+    return true;
+}
+
+bool File::runJsScript(const QString& scriptPath) {
+    QJSEngine engine;
+    engine.installExtensions(QJSEngine::ConsoleExtension);
+    GcFileProxy proxy{this, &engine};
+    auto proxyVal = engine.newQObject(&proxy);
+
+    // Load common_gcode.js from the same directory before the plugin script
+    const QString commonPath = QFileInfo{scriptPath}.dir().filePath(u"common_gcode.js"_s);
+    if(QFile::exists(commonPath) && !jsEvalFile(engine, commonPath))
+        return false;
+
+    if(!jsEvalFile(engine, scriptPath))
+        return false;
+
+    auto generateFn = engine.globalObject().property(u"generate"_s);
+    if(!generateFn.isCallable()) {
+        qWarning() << "GCode JS:" << scriptPath << "has no generate() function";
+        return false;
+    }
+
+    auto callResult = generateFn.call({proxyVal});
+    if(callResult.isError()) {
+        qWarning() << "GCode JS generate() error in" << scriptPath
+                   << "line" << callResult.property(u"lineNumber"_s).toInt()
+                   << ":" << callResult.toString();
+        return false;
+    }
+
+    return true;
+}
+
+void File::ensureDefaultScripts() {
+    static bool done = false;
+    if(done) return;
+    done = true;
+
+    const QString scriptsDirPath = QCoreApplication::applicationDirPath() + u"/scripts"_s;
+    QDir{}.mkpath(scriptsDirPath);
+
+    // Extract all embedded script resources to disk if they are missing
+    const QDir resDir{u":/gcode/scripts"_s};
+    for(const QString& fileName: resDir.entryList(QDir::Files)) {
+        const QString destPath = scriptsDirPath + u'/' + fileName;
+        if(!QFile::exists(destPath)) {
+            QFile src{u":/gcode/scripts/"_s + fileName};
+            QFile dst{destPath};
+            if(src.open(QIODevice::ReadOnly) && dst.open(QIODevice::WriteOnly | QIODevice::Truncate))
+                dst.write(src.readAll());
+        }
+    }
+
+    // Set default script path for plugins that have no configured script
+    for(auto& [type, ptr]: App::gCodePlugins()) {
+        const QString gcName = ptr->gcName();
+        if(gcName.isEmpty()) continue;
+        if(App::gcSettings().scriptPaths_.value(gcName).isEmpty()) {
+            const QString defaultPath = scriptsDirPath + u'/' + gcName.toLower() + u".js"_s;
+            if(QFile::exists(defaultPath))
+                App::gcSettings().scriptPaths_[gcName] = defaultPath;
+        }
+    }
+}
+
 void File::setLastDir(QString dirPath) {
     dirPath = QFileInfo(dirPath).absolutePath();
     if(App::gcSettings().sameFolder() && !redirected) {
@@ -58,13 +143,21 @@ void File::setLastDir(QString dirPath) {
 }
 
 bool File::save(const QString& name) {
-    if(name.isEmpty())
-        return false;
+    if(name.isEmpty()) return false;
 
     initSave();
     addInfo();
     statFile();
+
+    bool jsRan = false;
+    // if(auto* plugin = App::gCodePlugin(type())) {
+    //     const QString scriptPath = App::gcSettings().scriptPath(plugin->gcName());
+    //     if(!scriptPath.isEmpty() && QFile::exists(scriptPath))
+    //         jsRan = runJsScript(scriptPath);
+    // }
+    // if(!jsRan)
     genGcodeAndTile();
+
     endFile();
 
     setLastDir(name);
@@ -215,7 +308,7 @@ mvector<double> File::getDepths() {
     if(gDepth < tool.passDepth() || qFuzzyCompare(gDepth, tool.passDepth()))
         return {-gDepth - tool.getDepth()};
 
-    const int count    = static_cast<int>(ceil(gDepth / tool.passDepth()));
+    const int count = static_cast<int>(ceil(gDepth / tool.passDepth()));
     const double depth = gDepth / count;
     mvector<double> depths(count);
     for(int i{}; i < count; ++i)
@@ -236,7 +329,7 @@ std::vector<QString> File::savePath(const Curve& curve, double perimetr, double 
             return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
     };
     if(depth && perimetr) {
-        double zk       = depth - z_;
+        double zk = depth - z_;
         double perimetr = curve.perimetr();
         for(auto&& [fr, to]: v::pairwise(curve)) {
             z_ += Span{fr.pt, to}.Length() / perimetr * zk;
@@ -355,7 +448,7 @@ void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
 
     const mvector<double> depths = getDepths();
-    double diameter              = tool().diameter();
+    double diameter = tool().diameter();
 
     Curvess pathss = mirrorAndOffsetCurves(offset);
 
@@ -392,7 +485,7 @@ void File::saveMillingProfile(const QPointF& offset) {
     for(const Curves& paths: pathss) {
         if(paths.size() == 1) {
             const Curve& path = paths.front();
-            double perimetr   = path.perimetr();
+            double perimetr = path.perimetr();
             if(paths.front().isClosed()) { // Spiral
                 startPath(path.front().pt);
                 for(double depth: depths)

@@ -9,8 +9,13 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_settings.h"
+#include "gc_file.h"
 #include "gc_plugin.h"
 #include "gc_types.h"
+
+#include <QFileDialog>
+#include <QHBoxLayout>
+#include <QPushButton>
 
 GCode::Tab::Tab(QWidget* parent)
     : AbstractFileSettings{parent} {
@@ -154,6 +159,38 @@ GCode::Tab::Tab(QWidget* parent)
 
     vLayout->addWidget(grbxSpindle);
 
+    { // Scripts tab
+        auto tabScripts = new QWidget{tabWidget};
+        auto svLayout = new QVBoxLayout{tabScripts};
+        svLayout->setContentsMargins(6, 6, 6, 6);
+        svLayout->addWidget(new QLabel{QApplication::translate("GCodeSettings",
+            "JavaScript file to use for G-code generation (leave blank to use built-in C++ logic):", nullptr), tabScripts});
+        for(auto& [type, ptr]: App::gCodePlugins()) {
+            const QString name = ptr->gcName();
+            if(name.isEmpty()) continue;
+            auto hLayout = new QHBoxLayout;
+            hLayout->addWidget(new QLabel{name, tabScripts});
+            auto le = new QLineEdit{tabScripts};
+            le->setObjectName(u"script_"_s + name);
+            le->setPlaceholderText(QApplication::translate("GCodeSettings", "built-in", nullptr));
+            hLayout->addWidget(le);
+            auto btn = new QPushButton{QApplication::translate("GCodeSettings", "Browse...", nullptr), tabScripts};
+            QObject::connect(btn, &QPushButton::clicked, le, [le, tabScripts]() {
+                QString path = QFileDialog::getOpenFileName(
+                    tabScripts,
+                    QObject::tr("Select Script"),
+                    le->text().isEmpty() ? QString{} : le->text(),
+                    QObject::tr("JavaScript (*.js);;All files (*)"));
+                if(!path.isEmpty()) le->setText(path);
+            });
+            hLayout->addWidget(btn);
+            svLayout->addLayout(hLayout);
+            scriptLineEdits_[name] = le;
+        }
+        svLayout->addStretch();
+        tabWidget->addTab(tabScripts, QApplication::translate("GCodeSettings", "Scripts", nullptr));
+    }
+
     for(auto& [type, ptr]: App::gCodePlugins())
         if(auto tab = ptr->createSettingsTab(tabCommon); tab)
             tabWidget->addTab(tab, tab->windowTitle());
@@ -179,9 +216,22 @@ void GCode::Tab::readSettings(MySettings& settings) {
     App::gcSettings().laserEnd_ = settings.getValue(pteLaserEnd, App::gcSettings().laserEnd_);
     App::gcSettings().laserStart_ = settings.getValue(pteLaserStart, App::gcSettings().laserStart_);
 
+    // Script paths: read stored values directly, bypassing widget
+    settings.beginGroup(u"ScriptPaths"_s);
+    for(auto it = scriptLineEdits_.cbegin(); it != scriptLineEdits_.cend(); ++it)
+        App::gcSettings().scriptPaths_[it.key()] = settings.value(it.value()->objectName(), QString{}).toString();
+    settings.endGroup();
+
+    // Ensure scripts are on disk and set default paths for unconfigured plugins
+    File::ensureDefaultScripts();
+
+    // Refresh widgets with final paths (ensureDefaultScripts may have set new defaults)
+    for(auto it = scriptLineEdits_.cbegin(); it != scriptLineEdits_.cend(); ++it)
+        it.value()->setText(App::gcSettings().scriptPaths_.value(it.key()));
+
     for(int i{1}; i < tabWidget->count(); ++i) {
-        auto tab = static_cast<AbstractFileSettings*>(tabWidget->widget(i));
-        tab->readSettings(settings);
+        if(auto tab = dynamic_cast<AbstractFileSettings*>(tabWidget->widget(i)))
+            tab->readSettings(settings);
     }
 
     settings.endGroup();
@@ -205,9 +255,15 @@ void GCode::Tab::writeSettings(MySettings& settings) {
     App::gcSettings().laserStart_ = settings.setValue(pteLaserStart);
     App::gcSettings().laserEnd_ = settings.setValue(pteLaserEnd);
 
+    // Script paths
+    settings.beginGroup(u"ScriptPaths"_s);
+    for(auto it = scriptLineEdits_.cbegin(); it != scriptLineEdits_.cend(); ++it)
+        App::gcSettings().scriptPaths_[it.key()] = settings.setValue(it.value());
+    settings.endGroup();
+
     for(int i{1}; i < tabWidget->count(); ++i) {
-        auto tab = static_cast<AbstractFileSettings*>(tabWidget->widget(i));
-        tab->writeSettings(settings);
+        if(auto tab = dynamic_cast<AbstractFileSettings*>(tabWidget->widget(i)))
+            tab->writeSettings(settings);
     }
     /*
          bool simplifyHldi_ {false};

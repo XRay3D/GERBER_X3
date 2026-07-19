@@ -12,6 +12,8 @@
 
 #include "abstract_fileplugin.h"
 
+#include <QMap>
+
 namespace GCode {
 
 class Tab : public AbstractFileSettings {
@@ -31,6 +33,7 @@ class Tab : public AbstractFileSettings {
     QPlainTextEdit* pteLaserStart;
     QPlainTextEdit* pteStart;
     QTabWidget* tabWidget;
+    QMap<QString, QLineEdit*> scriptLineEdits_; // gcName -> path line edit
 
 public:
     Tab(QWidget* parent);

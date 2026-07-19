@@ -19,6 +19,7 @@
 
 #include <QColor>
 #include <QDebug>
+#include <QMap>
 #include <QVariant>
 #include <variant>
 
@@ -281,6 +282,8 @@ public:
     /*static inline*/ bool info_{true};
     /*static inline*/ bool sameFolder_{true};
 
+    QMap<QString, QString> scriptPaths_; // gcName -> JS script file path
+
 public:
     /*static*/ QString fileExtension() { return fileExtension_; }
     /*static*/ QString formatMilling() { return formatMilling_; }
@@ -299,6 +302,9 @@ public:
 
     /*static*/ bool info() { return info_; }
     /*static*/ bool sameFolder() { return sameFolder_; }
+
+    QString scriptPath(const QString& gcName) const { return scriptPaths_.value(gcName); }
+    void setScriptPath(const QString& gcName, const QString& path) { scriptPaths_[gcName] = path; }
 };
 
 } // namespace GCode
