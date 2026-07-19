@@ -49,6 +49,39 @@ add_definitions(
   -DQT_DISABLE_DEPRECATED_BEFORE=0x070000
   -Dsaturate_cast=saturating_cast)
 
+set(COMMON_COMPILE_OPTIONS
+    -fPIC
+    # * ffast - math
+    -march=native
+    # * xc ++ - system - header iostream
+    -Wall
+    # * Wconversion - Werror
+    -Wextra
+    -Wimplicit-fallthrough
+    -Wpedantic)
+
+if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+  add_compile_options(${COMMON_COMPILE_OPTIONS})
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  # add_definitions(-D_FORTIFY_SOURCE=3 -D_GLIBCXX_ASSERTIONS)
+  add_compile_options(
+    ${COMMON_COMPILE_OPTIONS}
+    # -O1
+    -fhardened
+    -freflection
+    -fstack-protector-strong
+    # -fvtable-verify=preinit#std
+    -fstack-clash-protection
+    # -fcf-protection=full
+    -Wno-error=hardened)
+  link_libraries(stdc++exp -Wl,-z,relro -Wl,-z,now)
+  add_link_options(-fuse-ld=lld)
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+
+elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+
+endif()
+
 # FIND BOOST
 find_package(Boost)
 if(Boost_FOUND)
@@ -67,12 +100,16 @@ endif()
 include(FetchContent)
 set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
 
-FetchContent_Declare(
-  pfr
-  # GIT_REPOSITORY https: // github.com/boostorg/pfr.git
-  GIT_REPOSITORY https://github.com/apolukhin/pfr_non_boost.git
-  GIT_TAG master
-  GIT_SHALLOW ON)
+set(CLIPPER2_UTILS OFF)
+set(CLIPPER2_EXAMPLES OFF)
+set(CLIPPER2_TESTS OFF)
+set(CLIPPER2_USINGZ "ONLY")
+add_definitions(-DUSINGZ=1)
+# add_subdirectory(third_party/clipper2-src/CPP)
+
+# FetchContent_Declare( pfr # GIT_REPOSITORY https: //
+# github.com/boostorg/pfr.git GIT_REPOSITORY
+# https://github.com/apolukhin/pfr_non_boost.git GIT_TAG master GIT_SHALLOW ON)
 FetchContent_Declare(
   ctre
   GIT_REPOSITORY
@@ -83,8 +120,9 @@ FetchContent_Declare(
   clipper2
   GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
   GIT_TAG main
-  GIT_SHALLOW ON)
-FetchContent_MakeAvailable(pfr ctre clipper2)
+  GIT_SHALLOW ON
+  SOURCE_SUBDIR CPP)
+FetchContent_MakeAvailable(#[[pfr]] ctre clipper2)
 
 #[[FIND CGAL
 find_package(CGAL)
@@ -115,39 +153,14 @@ include_directories(ggeasy)
 
 # CXX_MODULES FILES static_libs / common / std.cppm)
 
-set(CLIPPER2_UTILS OFF)
-set(CLIPPER2_EXAMPLES OFF)
-set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ "ONLY")
-add_definitions(-DUSINGZ=1)
-add_subdirectory(third_party/clipper2-src/CPP)
+# target_compile_definitions(Clipper2Z USINGZ=1) get_target_property(defs
+# Clipper2Z COMPILE_DEFINITIONS) message(FATAL_ERROR ${defs}) list(FILTER defs
+# EXCLUDE REGEX "_FORTIFY_SOURCE") # Отфильтровываем нужное
+# set_target_properties(Clipper2Z PROPERTIES COMPILE_DEFINITIONS ${defs})
 
 # add_subdirectory(third_party / clipper2 / CPP)
 
 # set(CTRE_MODULE ON) add_subdirectory(third_party / ctre)
-
-set(COMMON_COMPILE_OPTIONS
-    -fPIC
-    # * ffast - math
-    -march=native
-    # * xc ++ - system - header iostream
-    -Wall
-    # * Wconversion - Werror
-    -Wextra
-    -Wimplicit-fallthrough
-    -Wpedantic)
-
-if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-  add_compile_options(${COMMON_COMPILE_OPTIONS})
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-  add_compile_options(${COMMON_COMPILE_OPTIONS})
-  link_libraries(stdc++exp)
-  add_link_options(-fuse-ld=lld)
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
-
-elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
-
-endif()
 
 find_package(
   Qt6
