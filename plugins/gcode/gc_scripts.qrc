@@ -1,0 +1,9 @@
+<RCC>
+    <qresource prefix="/gcode/scripts">
+        <file>scripts/common_gcode.js</file>
+        <file>scripts/profile.js</file>
+        <file>scripts/drilling.js</file>
+        <file>scripts/pocketoffset.js</file>
+        <file>scripts/pocketraster.js</file>
+    </qresource>
+</RCC>

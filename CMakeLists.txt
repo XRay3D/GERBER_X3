@@ -164,7 +164,7 @@ include_directories(ggeasy)
 
 find_package(
   Qt6
-  COMPONENTS Widgets LinguistTools
+  COMPONENTS Widgets LinguistTools Qml
   REQUIRED)
 
 # qt_standard_project_setup(I18N_TRANSLATED_LANGUAGES ru en)
