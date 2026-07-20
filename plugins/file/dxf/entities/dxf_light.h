@@ -14,7 +14,7 @@ struct Light final : Entity {
     using Entity::Entity;
     Type type() const override { return Type::LIGHT; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
 

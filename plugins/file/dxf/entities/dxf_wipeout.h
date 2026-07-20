@@ -15,7 +15,7 @@ struct Wipeout final : Entity {
     // Entity interface
     Type type() const override { return Type::WIPEOUT; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
     void parse(CodeData& code) override {

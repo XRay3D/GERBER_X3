@@ -43,42 +43,19 @@ void Arc::parse(CodeData& code) {
 Entity::Type Arc::type() const { return Type::ARC; }
 
 DxfGo Arc::toGo() const {
-    qInfo("Arc");
-    if(qFuzzyIsNull(radius) || (qFuzzyCompare(startAngle, endAngle)))
-        return {};
+    assert(thickness == 0); // TODO thickness
 
-    double aspan = endAngle - startAngle;
+    QPointF
+        p1{cos(qDegreesToRadians(startAngle)), sin(qDegreesToRadians(startAngle))},
+        p2{cos(qDegreesToRadians(endAngle)), sin(qDegreesToRadians(endAngle))};
+    Curve curve{
+        {p1 * radius + centerPoint},
+        {p2 * radius + centerPoint, centerPoint, geo::DIR(p1, QPointF{}, p2)}
+    };
 
-    if(const bool ccw = endAngle > startAngle;
-        endAngle >= 0 && startAngle >= 0) {
-        if(!ccw)
-            aspan += 360;
-    } else {
-        if(aspan < -180 || (qFuzzyCompare(aspan, -180) && !ccw))
-            aspan += 360;
-        else if(aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
-            aspan -= 360;
-    }
-
-    QPainterPath path;
-    path.moveTo(QLineF::fromPolar(radius, -startAngle).translated(centerPoint).p2());
-    QPointF rad{radius, radius};
-    path.arcTo(QRectF(centerPoint - rad, centerPoint + rad), -startAngle, -aspan);
-
-    QTransform m;
-    m.scale(u, u);
-    QPainterPath path2;
-    for(auto& poly: path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QTransform m2;
-    m2.scale(d, d);
-    auto p(~path2.toSubpathPolygons(m2).first());
-    r::for_each(p, std::bind(SetC, _1, ~centerPoint));
-    SetCForce(p.front(), p.front());
-    SetCForce(p.back(), p.back());
-
-    DxfGo go{id, p, {}}; // return {id, p, {}};
+    DxfGo go{id, std::move(curve)};
     return go;
+    return {};
 }
 
 void Arc::write(QDataStream& stream) const {

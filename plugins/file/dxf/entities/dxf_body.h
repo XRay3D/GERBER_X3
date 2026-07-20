@@ -15,7 +15,7 @@ struct Body final : Entity {
 
     Type type() const override { return Type::BODY; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
 

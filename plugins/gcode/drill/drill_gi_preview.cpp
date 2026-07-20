@@ -39,7 +39,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter = tool.getDiameter(tool.getDepth());
+                const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 for(Path& path_: Inflate(Paths{path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
                     path_.push_back(path_.front());
@@ -61,7 +61,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPointF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter = tool.getDiameter(tool.getDepth());
+                const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 painterPath.moveTo(-QPointF(0.0, lineKoeff));
                 painterPath.lineTo(+QPointF(0.0, lineKoeff));
@@ -85,8 +85,8 @@ Paths Preview::paths() const {
 }
 
 bool Preview::fit(double depth) const {
-    const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth);
-    return sourceDiameter_ > diameter && !qFuzzyCompare(sourceDiameter_, diameter);
+    const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth) * 0.999;
+    return sourceDiameter_ > diameter; // && !qFuzzyCompare(sourceDiameter_, diameter); FIXME logic
 }
 
 int Preview::toolId() const {

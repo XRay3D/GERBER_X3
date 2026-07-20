@@ -83,10 +83,10 @@ void InsertEntity::parse(CodeData& code) {
 
 void InsertEntity::transform(DxfGo& item, QPointF tr) const {
     tr = insPos + tr;
-    item.setPos(-basePoint);
+    item.pos = -basePoint;
     item.setScale(scaleX, scaleY);
     item.setRotation(rotationAngle);
-    item.setPos(tr);
+    item.pos = tr;
 
     QTransform transform;
     transform.translate(tr.x(), tr.y());
@@ -94,8 +94,8 @@ void InsertEntity::transform(DxfGo& item, QPointF tr) const {
     transform.rotate(rotationAngle);
     transform.translate(-basePoint.x(), -basePoint.y());
 
-    TransformPath(item.path, transform);
-    TransformPaths(item.fill, transform);
+    TransformCurve(item.path, transform);
+    TransformCurves(item.fill, transform);
 }
 
 } // namespace Dxf

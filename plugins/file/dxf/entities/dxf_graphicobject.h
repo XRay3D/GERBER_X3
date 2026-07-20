@@ -37,7 +37,7 @@ class DxfGo final : public ::GraphicObject {
 
 public:
     DxfGo() = default;
-    DxfGo(int entityId, const Path& path, const Paths& paths);
+    DxfGo(int entityId,  Curve&& path,  Curves&& paths = {});
 
     void setRotation(double rotationAngle);
     double rotationAngle() const;
@@ -47,8 +47,8 @@ public:
     double scaleX() const;
     double scaleY() const;
 
-    void setPos(QPointF pos);
-    QPointF pos() const;
+    // void setPos(QPointF pos);
+    // QPointF pos() const;
 
     const Entity* entity() const;
     size_t entityId() const;

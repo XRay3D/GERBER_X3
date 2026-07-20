@@ -193,7 +193,7 @@ Curve RectangleCurve(double width, double height, const QPointF& center) {
 }
 
 Curve& TransformCurve(Curve& curve, const QTransform& tr) {
-    qInfo() << tr;
+    // qInfo() << tr;
 
     if(tr.isIdentity()) return curve;
 
@@ -368,6 +368,10 @@ double Curve::area() const {
 bool Curve::isClosed() const {
     if(empty()) return false;
     return front().pt == back().pt;
+}
+
+bool Curve::isPositive() const {
+    return area() > 0.0;
 }
 
 double Curve::perimetr() const {
@@ -1272,8 +1276,8 @@ Curve toCurve(std::span<const Point> path_) {
     // for(auto&& [fr, to]: v::pairwise(curve))
     // if(to.type) pp.addPolygon(~arcToPath(fr, to));
     // Gi::Debug(pp, {0, 255, 0, 128}); //->arrows = {};
-    Gi::Debug(toPPath(curve, {}, 1), QColor{0, 255, 0, 128}); //->arrows = {};
-    Gi::Debug(toPPath(curve, {}, 2), QColor{255, 0, 0, 128}); //->arrows = {};
+    // Gi::Debug(toPPath(curve, {}, 1), QColor{0, 255, 0, 128}); //->arrows = {};
+    // Gi::Debug(toPPath(curve, {}, 2), QColor{255, 0, 0, 128}); //->arrows = {};
 
     return curve;
 }
@@ -1356,4 +1360,15 @@ Curves toCurves(const QPainterPath& pPath) {
         if(curve.size()) curves.emplace_back(std::move(curve));
     }
     return curves;
+}
+
+Curves& TransformCurves(Curves& curves, const QTransform& tr) {
+    r::for_each(curves, std::bind(TransformCurve, _1, tr));
+    return curves;
+}
+
+QIcon drawIcon(const Curves& paths, QColor color) {
+    // static std::mutex m;
+    // std::lock_guard l{m};
+    return drawIcon(toPPath(paths), color);
 }

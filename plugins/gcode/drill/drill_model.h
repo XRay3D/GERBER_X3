@@ -62,7 +62,7 @@ public:
     bool isSlot(int row) const { return data_[row].isSlot; }
     bool useForCalc(int row) const { return data_[row].useForCalc; }
 
-    int toolId(int row) const { return data_[row].toolId; }
+    int32_t toolId(int row) const { return data_[row].toolId; }
 
     void setCreate(bool create);
     void setCreate(int row, bool create);

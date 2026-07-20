@@ -248,11 +248,11 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.isSlot   = key.second;
             for(auto* go: val)
                 new Gi::Preview{
-                    (go->path.size() > 1 ? Path{go->path} : Path{go->pos}),
+                    (go->path.size() > 1 ? toPath(go->path) : Path{~go->pos}),
                     row.diameter,
                     data.back().toolId,
                     row,
-                    go->fill};
+                    toPaths(go->fill)};
         }
     };
     auto execShapes = [this] {
@@ -448,7 +448,7 @@ void Form::pickUpTool() {
         auto filter = v::filter([&set](auto& t) { return set.contains(t.second.type()); });
         for(auto& [id, tool]: App::toolHolder().tools() | filter) {
             qWarning() << tool;
-            if(isFit(tool)) {
+            if(model->toolId(ctr) < 1 && isFit(tool)) {
                 model->setToolId(ctr, id);
                 break;
             }
@@ -510,13 +510,20 @@ void Form::computePaths() {
             }
         }
 
-        for(auto [usedToolId, _]: pathsMap) {
-            (void)_;
-            if(pathsMap[usedToolId].paths.size()) {
-                // GCode::File* gcode = new GCode::File({App::toolHolder().tool{usedToolId), dsbxDepth->value(), GCType::Profile}, {pathsMap[usedToolId].paths});
-                // gcode->setFileName(App::toolHolder().tool(usedToolId).nameEnc() + u"_T"_s + indexes(pathsMap[usedToolId].toolsApertures));
-                // gcode->setSide(file->side());
-                // App::project().addFile(gcode);
+        for(auto [usedToolId, data]: pathsMap) {
+            if(data.paths.size()) {
+                GCode::File* gcode = new File{
+                    GCode::Params{
+                                  App::toolHolder().tool(usedToolId),
+                                  dsbxDepth->value(),
+                                  std::move(data.paths),
+                                  }
+                };
+                gcode->setFileName(
+                    App::toolHolder().tool(usedToolId).nameEnc()
+                    + u"_T"_s + indexes(pathsMap[usedToolId].toolsApertures));
+                if(file) gcode->setSide(file->side());
+                App::project().addFile(gcode);
             }
         }
     }
