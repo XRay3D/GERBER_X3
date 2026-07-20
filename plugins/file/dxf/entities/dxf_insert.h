@@ -23,7 +23,7 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
     void write(QDataStream& /*stream*/) const override { }

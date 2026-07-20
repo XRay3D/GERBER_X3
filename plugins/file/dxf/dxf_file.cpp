@@ -34,7 +34,7 @@ namespace Dxf {
 
 File::File()
     : AbstractFile() {
-    itemsType_ = int(ItemsType::Normal);
+    itemsType_  = int(ItemsType::Normal);
     layerTypes_ = {
         {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")   },
         {int(ItemsType::Paths),  DxfObj::tr("Paths"),  DxfObj::tr("Displays paths without pen width.")         },
@@ -63,7 +63,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
         Clipper clipper;
         clipper.AddSubject(mergedPaths());
         Rect r(GetBounds(mergedPaths()));
-        int k = /*uScale*/ 1;
+        int k      = /*uScale*/ 1;
         Path outer = {
             Point(r.left - k, r.bottom + k),
             Point(r.right + k, r.bottom + k),
@@ -162,11 +162,11 @@ void File::createGi() {
             for(auto& go: layer->graphicObjects_) {
                 if(empty && go.fill.size()) {
                     // if(Area(go.fill) < 0.) ReversePaths(go.fill); // FIXME add settings
-                    clipper.AddSubject(go.fill);
+                    clipper.AddSubject(toPaths(go.fill));
                 }
 
                 if(go.path.size() > 1) {
-                    auto gItem = new Gi::DataPath{go.path, this};
+                    auto gItem = new Gi::DataPath{{go.path}, this};
                     if(go.entity()) {
                         // gItem->setToolTip(u"Line %1\n%2"_s
                         // .arg(go.entity()->data[0].line())
@@ -214,10 +214,10 @@ void File::createGi() {
                     igPath->setVisible(true);
                     layer->setItemsType(ItemsType::Paths);
                 }
-                // layer->setItemsType(ItemsType::Both);
                 layer->setVisible(true);
             } else
                 layer->setVisible(visible_);
+            layer->setItemsType(ItemsType::Both);
         }
     }
 }
@@ -247,18 +247,21 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     mvector<GraphicObject> retData;
     auto t = transform_.toQTransform(); // cached  QTransform
     for(auto&& criterion: criterias) {
-        for(auto&& [name, layer]: layers())
+        for(auto&& [name, layer]: layers()) {
+            if(!layer->isVisible()) continue;
             for(const auto& go: layer->graphicObjects()) {
                 auto transformedGo = go * t; // return copy
                 if(criterion.test(transformedGo)) {
                     auto& g = retData.emplace_back(transformedGo);
+                    if(g.type & GraphicObject::Circle)
+                        g.path.clear();
                     if(test)
                         return retData;
 
                     switch(gcType) {
                     case GCType::Drill: {
                         double drillDiameter{};
-                        auto rect = CL2::GetBounds(g.fill);
+                        auto rect = BoundingRect(g.fill);
                         // auto& ap = *apertures_.at(go.state.aperture());
 
                         // auto name {ap.name()};
@@ -266,15 +269,16 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                         // drillDiameter = ap.drillDiameter();
                         // else
                         // drillDiameter = ap.minSize();
-                        drillDiameter = std::min(rect.bottom - rect.top, rect.right - rect.left) * dScale;
+                        drillDiameter = std::min(rect.bottom() - rect.top(), rect.right() - rect.left());
                         // name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
-                        g.raw = drillDiameter /** go.scaleX()*/;
+                        g.raw  = drillDiameter /** go.scaleX()*/;
                         g.name = /*u"С Ø"_s +*/ QString::number(drillDiameter);
                     } break;
                     default: break;
                     }
                 }
             }
+        }
     }
 
     return retData;

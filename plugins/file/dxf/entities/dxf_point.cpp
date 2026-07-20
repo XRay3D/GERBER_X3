@@ -38,7 +38,7 @@ DxfGo Point::toGo() const {
     // QPolygonF p;
     // p.append(point);
 
-    DxfGo go{id, {~point}, {}}; // return {id, p, {}};
+    DxfGo go{id, {{point}}, {}}; // return {id, p, {}};
     return go;
 }
 

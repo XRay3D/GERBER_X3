@@ -38,16 +38,15 @@ void Line::parse(CodeData& code) {
 Entity::Type Line::type() const { return Type::LINE; }
 
 DxfGo Line::toGo() const {
-    qInfo("Line");
-    qInfo() << thickness;
-    Path path{~startPoint, ~endPoint};
-    r::for_each(path, SetCSelf);
-
+    if(thickness) qCritical() << thickness;
     // TODO ClipperOffset offset;
     // offset.AddPath(p, JoinType::Round, EndType::Round);
     // paths = offset.Execute(thickness * uScale);
-
-    DxfGo go{id, path, {}}; // FIXME return {id, p, paths};
+    Curve curve{{startPoint}, {endPoint}};
+    DxfGo go{
+        id, std::move(curve)
+        //, paths
+    };
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::Line);
     return go;
 }

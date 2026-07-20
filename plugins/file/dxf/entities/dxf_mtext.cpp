@@ -66,7 +66,6 @@ Entity::Type MText::type() const { return Type::MTEXT; }
 extern QDebug operator<<(QDebug debug, const QFontMetricsF& fm);
 
 DxfGo MText::toGo() const {
-    qInfo("MText");
     // double ascent = {};
     double descent = {};
     double height = {};
@@ -150,19 +149,12 @@ DxfGo MText::toGo() const {
     }
 
     QTransform m;
-    m.scale(u * scaleX, -u * scaleY);
+    m.translate(insertionPoint.x(), insertionPoint.y());
+    // m.rotate(qRadiansToDegrees(rotationAngleInRadians));
+    m.rotate(rotation > 360 ? rotation * 0.01 : rotation);
+    m.scale(scaleX, -scaleY);
 
-    QPainterPath path2;
-    for(auto& poly: path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-
-    QTransform m2;
-    m2.translate(insertionPoint.x(), insertionPoint.y());
-    // m2.rotate(qRadiansToDegrees(rotationAngleInRadians));
-    m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(d, d);
-
-    DxfGo go{id, {}, ~path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
+    DxfGo go{id, {}, toCurves(m.map(path))};
     return go;
 }
 

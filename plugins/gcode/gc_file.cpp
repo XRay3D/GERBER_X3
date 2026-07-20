@@ -150,13 +150,14 @@ bool File::save(const QString& name) {
     statFile();
 
     bool jsRan = false;
-    // if(auto* plugin = App::gCodePlugin(type())) {
-    //     const QString scriptPath = App::gcSettings().scriptPath(plugin->gcName());
-    //     if(!scriptPath.isEmpty() && QFile::exists(scriptPath))
-    //         jsRan = runJsScript(scriptPath);
-    // }
-    // if(!jsRan)
-    genGcodeAndTile();
+    if(auto* plugin = App::gCodePlugin(type())) {
+        const QString scriptPath = App::gcSettings().scriptPath(plugin->gcName());
+        if(!scriptPath.isEmpty() && QFile::exists(scriptPath))
+            jsRan = runJsScript(scriptPath);
+    }
+    assert(jsRan);
+    if(!jsRan)
+        genGcodeAndTile();
 
     endFile();
 
@@ -384,7 +385,7 @@ QString File::format(double val) {
 void File::saveDrill(const QPointF& offset) {
     Curve path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
     const std::vector<double> depths(getDepths());
-    for(QPointF point: path) {
+    for(auto&& point: path) {
         startPath(point);
         size_t i{};
         while(true) {

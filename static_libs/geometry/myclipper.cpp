@@ -50,11 +50,13 @@ QIcon drawIcon(const Paths& paths, QColor color) {
     return drawIcon(painterPath, color);
 }
 
+
+
 QIcon drawIcon(const QPainterPath& pPath, QColor color, bool stroke) {
-    auto rect = pPath.boundingRect();
+    auto rect    = pPath.boundingRect();
     double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
-    double ky = rect.bottom() * scale;
-    double kx = rect.left() * scale;
+    double ky    = rect.bottom() * scale;
+    double kx    = rect.left() * scale;
     QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
@@ -130,12 +132,14 @@ void SetCSelf(Point& dst) { SetC(dst, dst); }
 #define ASSERT_LIMIT_I32(VAL) assert(LimitI32.min() < VAL && VAL < LimitI32.max());
 
 void SetCForce(Point& dst, const Point& center) {
-    ASSERT_LIMIT_I32(center.x);
-    ASSERT_LIMIT_I32(center.y);
-    dst.z = std::bit_cast<int64_t>(std::array{
-        static_cast<int32_t>(center.x),
-        static_cast<int32_t>(center.y),
-    });
+    // ASSERT_LIMIT_I32(center.x);// FIXME SetC
+    // ASSERT_LIMIT_I32(center.y);// FIXME SetC
+    if(LimitI32.min() < center.x && center.x < LimitI32.max()
+        && LimitI32.min() < center.y && center.y < LimitI32.max())
+        dst.z = std::bit_cast<int64_t>(std::array{
+            static_cast<int32_t>(center.x),
+            static_cast<int32_t>(center.y),
+        });
 }
 
 void SetC(Point& dst, const Point& center) {
@@ -145,7 +149,7 @@ void SetC(Point& dst, const Point& center) {
 Path CirclePath(double diametr, const Point& center) {
     if(qFuzzyIsNull(diametr)) return {};
     const double radius = diametr * 0.5;
-    const int intSteps = App::settings().clpCircleSegments(radius * dScale);
+    const int intSteps  = App::settings().clpCircleSegments(radius * dScale);
     Path polygon(intSteps);
     for(int i{}; auto&& pt: polygon) {
         pt = Point{
@@ -160,7 +164,7 @@ Path CirclePath(double diametr, const Point& center) {
 }
 
 Path RectanglePath(double width, double height, const Point& center) {
-    const double halfWidth = width * 0.5;
+    const double halfWidth  = width * 0.5;
     const double halfHeight = height * 0.5;
     Path polygon{
         {-halfWidth + center.x, +halfHeight + center.y},
@@ -226,7 +230,7 @@ void mergeSegments(Paths& paths, double glue) {
             for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j) continue;
                 if(i >= paths.size()) break;
-                auto& pj = paths[j];
+                auto& pj  = paths[j];
                 Point pib = pi.back();
                 Point pjf = pj.front();
                 if(pib == pjf) {
@@ -421,7 +425,7 @@ void reductionOfDistance(Path& path, Point point) {
         for(size_t i = counter, end = path.size(); i < end; ++i) {
             double length2 = distTo(point, path[i]);
             if(length > length2) {
-                length = length2;
+                length   = length2;
                 selector = i;
             }
         }
@@ -461,8 +465,8 @@ std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree) {
 
 Path arc(const Point& center, double radius, double start, double stop, int interpolation) {
     enum { // interpolation
-        Linear = 1,
-        ClockwiseCircular = 2,
+        Linear                   = 1,
+        ClockwiseCircular        = 2,
         CounterClockwiseCircular = 3
     };
     const double da_sign[4]{0, 0, -1.0, +1.0};
@@ -475,8 +479,8 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
     else if(interpolation == CounterClockwiseCircular && stop <= start)
         stop += 2.0 * pi;
 
-    double angle = std::abs(stop - start);
-    double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
+    double angle       = std::abs(stop - start);
+    double steps       = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
     for(int i{1}; i <= steps; i++) { // 1 skip first - back of paths item set center it self
         double theta = start + delta_angle * i;
@@ -491,8 +495,8 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
 
 Path arc(Point p1, Point p2, Point center, int interpolation) {
     double radius = sqrt(pow((center.x - p1.x), 2) + pow((center.y - p1.y), 2));
-    double start = atan2(p1.y - center.y, p1.x - center.x);
-    double stop = atan2(p2.y - center.y, p2.x - center.x);
+    double start  = atan2(p1.y - center.y, p1.x - center.x);
+    double stop   = atan2(p2.y - center.y, p2.x - center.x);
     return arc(center, radius, start, stop, interpolation);
 }
 
@@ -782,7 +786,7 @@ Pathss& sortBeginEnd(Pathss& src, Point startPt) {
         bool reverse{};
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
             const double lenFirst = distTo(startPt, src[secondIdx].front().front());
-            const double lenLast = distTo(startPt, src[secondIdx].back().back());
+            const double lenLast  = distTo(startPt, src[secondIdx].back().back());
             if(lenFirst < lenLast) {
                 if(destLen > lenFirst) {
                     destLen = lenFirst;
@@ -817,7 +821,7 @@ Paths& sortBeginEnd(Paths& src, Point startPt) {
         bool reverse{};
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
             const double lenFirst = distTo(startPt, src[secondIdx].front());
-            const double lenLast = distTo(startPt, src[secondIdx].back());
+            const double lenLast  = distTo(startPt, src[secondIdx].back());
             if(lenFirst < lenLast) {
                 if(destLen > lenFirst) {
                     destLen = lenFirst;
@@ -871,7 +875,7 @@ Path& TransformPath(Path& path, const QTransform& m) {
     if(!m.type()) return path;
     for(Point& point: path) {
         QPointF center = m.map(~GetC(point));
-        point = ~m.map(~point);
+        point          = ~m.map(~point);
         SetCForce(point, ~center);
     }
     if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(path);
@@ -898,7 +902,7 @@ void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge)
     // radius = GetRadius(source, target, bulge);
 
     start_angle = qRadiansToDegrees(start_angle);
-    end_angle = qRadiansToDegrees(end_angle);
+    end_angle   = qRadiansToDegrees(end_angle);
 
     QLineF ls{center, source};
     // const double r = ls.length();

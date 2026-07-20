@@ -256,14 +256,16 @@ public:
     inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 
-struct GrObject : public GraphicObject {
+struct GrObject : GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        return ::Block{stream}.write(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        stream << go;
+        return ::Block{stream}.write(go.state);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        return ::Block{stream}.read(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        stream >> go;
+        return ::Block{stream}.read(go.state);
     }
 
     File* gFile{nullptr};

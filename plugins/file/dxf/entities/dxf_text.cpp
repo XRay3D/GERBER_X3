@@ -72,13 +72,9 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
 }
 
 DxfGo Text::toGo() const {
-    qInfo("Text");
-
-    // for (auto& code : data)
-
     double ascent{};
-    double scaleX{};
-    double scaleY{};
+    double scaleX{1};
+    double scaleY{1};
 
     QFont font;
     QPointF offset;
@@ -91,11 +87,11 @@ DxfGo Text::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fmf{font};
-        scaleX = scaleY = std::max(style->fixedTextHeight, textHeight) / fmf.height();
-        offset.ry() -= fmf.descent();
-        ascent = fmf.ascent();
-        size = fmf.size(0, text);
+        QFontMetricsF fm{font};
+        scaleX = scaleY = std::max(style->fixedTextHeight, textHeight) / fm.capHeight();
+        offset.ry() -= fm.descent();
+        ascent = fm.ascent();
+        size = fm.size(0, text);
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -103,11 +99,11 @@ DxfGo Text::toGo() const {
             font.setBold(Settings::boldFont());
             font.setItalic(Settings::italicFont());
         }
-        QFontMetricsF fmf{font};
-        scaleX = scaleY = textHeight / fmf.height();
-        offset.ry() -= fmf.descent();
-        ascent = fmf.ascent();
-        size = fmf.size(0, text);
+        QFontMetricsF fm{font};
+        scaleX = scaleY = textHeight / fm.capHeight();
+        offset.ry() -= fm.descent();
+        ascent = fm.ascent();
+        size = fm.size(0, text);
     }
     // qDebug(u"scale X %f Y %f"_s, scaleX, scaleY);
     switch(horizontalJustType) {
@@ -133,18 +129,12 @@ DxfGo Text::toGo() const {
 
     QPainterPath path;
     path.addText(offset, font, text);
-
     QTransform m;
-    m.scale(u * scaleX, -u * scaleY);
-    QPainterPath path2;
-    for(auto& poly: path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QTransform m2;
-    m2.translate(pt2.x(), pt2.y());
-    m2.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m2.scale(d, d);
+    m.translate(pt2.x(), pt2.y());
+    m.rotate(rotation > 360 ? rotation * 0.01 : rotation);
+    m.scale(0.1, -0.1);
 
-    DxfGo go{id, {}, ~path2.toSubpathPolygons(m2)}; // return {id, {}, path2.toSubpathPolygons(m2)};
+    DxfGo go{id, {}, toCurves(m.map(path))};
     return go;
 }
 

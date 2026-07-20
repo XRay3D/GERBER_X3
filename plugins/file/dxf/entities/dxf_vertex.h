@@ -21,7 +21,7 @@ struct Vertex final : Entity {
     void parse(CodeData& code) override;
     Type type() const override { return Type::VERTEX; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
 

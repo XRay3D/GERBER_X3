@@ -13,16 +13,18 @@ cmake_minimum_required(VERSION 4.00)
 set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
 add_subdirectory(shape)
 
-set(FILE_PLUGINS gerber dxf excellon svg)
+set(FILE_PLUGINS #[[gerber]] dxf #[[excellon svg]])
 add_subdirectory(file)
 
 set(GCODE_PLUGINS
     profile
     pocketoffset
     drill
+    #[[
     hatching
     pocketraster
     voroni
     thermal
-    thread)
+    thread]]
+)
 add_subdirectory(gcode)

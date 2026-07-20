@@ -24,16 +24,50 @@ struct Curve : std::vector<geo::Vertex> {
     Curve reversed() const;
     double area() const;
     bool isClosed() const;
+    bool isPositive() const;
     double perimetr() const;
 };
 
+inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
+    uint32_t n;
+    stream >> n;
+    container.resize(n);
+    for(auto& var: container) {
+        stream >> var;
+        if(stream.status() != QDataStream::Ok)
+            return container.clear(), stream;
+    }
+    return stream;
+}
+
+inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
+    stream << uint32_t(container.size());
+    for(const auto& var: container) stream << var;
+    return stream;
+}
+
 using Curves = std::vector<Curve>;
 using Curvess = std::vector<Curves>;
+
+QIcon drawIcon(const Curves& paths, QColor color);
+
+constexpr double Area(const Curve& curve) { return curve.area(); }
+constexpr double Area(const Curves& curves) {
+    return r::fold_left(curves | v::transform(&Curve::area), 0.0, std::plus{});
+}
+constexpr QRectF BoundingRect(const Curves& curves) {
+    if(curves.empty()) return {};
+    return r::fold_left(
+        curves | v::transform(&Curve::boundingRect),
+        curves.front().boundingRect(),
+        std::bit_or{});
+}
 
 Curve CircleCurve(double diametr, const QPointF& center = {});
 Curve RectangleCurve(double width, double height, const QPointF& center = {});
 
 Curve& TransformCurve(Curve& curve, const QTransform& tr);
+Curves& TransformCurves(Curves& curve, const QTransform& tr);
 Curves& ReverseCurves(Curves& curves);
 Curve& TranslateCurve(Curve& curve, const QPointF& pos = {});
 void RotateCurve(Curve& curve, double angle, const QPointF& center = {});

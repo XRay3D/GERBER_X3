@@ -14,7 +14,7 @@ class Preview final : public ::Gi::AbstractPreview {
     int toolId_{-1};
 
 public:
-    explicit Preview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
+    explicit Preview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});// FIXME to Curve
 
     // AbstractPreview interface
     void updateTool() override;

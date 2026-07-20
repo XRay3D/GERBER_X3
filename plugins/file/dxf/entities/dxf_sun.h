@@ -14,7 +14,7 @@ struct Sun final : Entity {
     using Entity::Entity;
     Type type() const override { return Type::SUN; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
 

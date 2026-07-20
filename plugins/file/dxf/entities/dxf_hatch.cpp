@@ -146,7 +146,7 @@ void Hatch::parse(CodeData& code) {
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
 DxfGo Hatch::toGo() const {
-    qInfo("Hatch");
+    qInfo("Hatch"); // TODO Hatch
     Paths paths(edges.size());
     for(size_t i{}; i < edges.size(); ++i)
         for(auto&& edge: edges[i])
@@ -157,7 +157,9 @@ DxfGo Hatch::toGo() const {
     r::for_each(paths | v::join, SetCSelf);
 
     // dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
-    return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths};
+    return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, toCurves(paths)};
+
+    return {};
 }
 
 void Hatch::write(QDataStream& stream) const {

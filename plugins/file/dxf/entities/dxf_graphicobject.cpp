@@ -34,10 +34,10 @@ QDataStream& operator>>(QDataStream& stream, DxfGo& go) {
 
 size_t DxfGo::entityId() const { return entityId_; }
 
-DxfGo::DxfGo(int entityId, const Path& path, const Paths& paths)
+DxfGo::DxfGo(int entityId, Curve&& curve, Curves&& curves)
     : entityId_{entityId} {
-    fill = paths;
-    ::GraphicObject::path = path;
+    fill = std::move(curves);
+    ::GraphicObject::path = std::move(curve);
 }
 
 void DxfGo::setRotation(double rotationAngle) {
@@ -78,15 +78,15 @@ double DxfGo::scaleX() const { return scaleX_; }
 
 double DxfGo::scaleY() const { return scaleY_; }
 
-void DxfGo::setPos(QPointF pos) {
-    ::GraphicObject::pos = ~pos;
-#if 0
-    TranslatePath(::GraphicObject::path, ~pos);
-    for(auto& path: fill) TranslatePath(path, ::GraphicObject::pos);
-#endif
-}
+// void DxfGo::setPos(QPointF pos) {
+//     ::GraphicObject::pos = ~pos;
+// #if 0
+//     TranslatePath(::GraphicObject::path, ~pos);
+//     for(auto& path: fill) TranslatePath(path, ::GraphicObject::pos);
+// #endif
+// }
 
-QPointF DxfGo::pos() const { return ~::GraphicObject::pos; }
+// QPointF DxfGo::pos() const { return ~::GraphicObject::pos; }
 
 const Entity* DxfGo::entity() const { return file_ ? file_->entities().at(entityId_).get() : nullptr; }
 

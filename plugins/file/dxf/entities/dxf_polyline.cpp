@@ -40,31 +40,48 @@ Entity::Type PolyLine::type() const { return Type::POLYLINE; }
 DxfGo PolyLine::toGo() const {
     qInfo("PolyLine");
 #if 1
-    QPainterPath path;
-    auto addSeg = [&path](const Vertex& source, const Vertex& target) mutable {
-        addArcTo(path, source, target, source.bulge);
+    Curve path;
+
+    auto addArcTo = [&path](QPointF source, QPointF target, double bulge) {
+        if(path.empty())
+            path.emplace_back(source);
+
+        if(qFuzzyIsNull(bulge)) {
+            path.emplace_back(target);
+            return;
+        }
+
+        auto [center, _ /*start_angle*/, _ /*end_angle*/, radius] = bulgeToArc(source, target, bulge);
+        path.emplace_back(geo::Vertex{
+            target,
+            center,
+            bulge > 0 ? geo::Vertex::Ccw : geo::Vertex::Cw,
+        });
+    };
+    auto addSeg = [&addArcTo](const Vertex& source, const Vertex& target) mutable {
+        addArcTo(source, target, source.bulge);
     };
 
     for(auto&& [from, to]: polyLine | v::pairwise) addSeg(from, to);
 
     if(polylineFlags & ClosedPolyline) addSeg(polyLine.back(), polyLine.front());
 
-    QTransform m;
-    m.scale(u, u);
-    QPainterPath path2;
+    // QTransform m;
+    // m.scale(u, u);
+    // QPainterPath path2;
 
-    // new Gi::Debug{path, Qt::yellow};
+    // // new Gi::Debug{path, Qt::yellow};
 
-    for(auto& polyLine: path.toSubpathPolygons(m))
-        path2.addPolygon(polyLine);
-    QTransform m2;
-    m2.scale(d, d);
-    auto polygon(path2.toSubpathPolygons(m2));
+    // for(auto& polyLine: path.toSubpathPolygons(m))
+    //     path2.addPolygon(polyLine);
+    // QTransform m2;
+    // m2.scale(d, d);
+    // auto polygon(path2.toSubpathPolygons(m2));
 
     if(polylineFlags & ClosedPolyline) // FIXME
-        return DxfGo{id, ~polygon.value(0), ~polygon};
+        return DxfGo{id, Curve{path}, {std::move(path)}};
     else
-        return DxfGo{id, ~polygon.value(0), {}};
+        return DxfGo{id, std::move(path)};
 #else // TODO direct construct path
 
     if(startWidth || endWidth)

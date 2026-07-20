@@ -24,7 +24,7 @@ struct Dummy final : Entity {
     void parse(CodeData& code) override;
     Type type() const override { return NULL_ENT; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
 };

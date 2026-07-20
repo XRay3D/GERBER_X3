@@ -121,7 +121,6 @@ void LwPolyline::parse(CodeData& code) {
 Entity::Type LwPolyline::type() const { return Type::LWPOLYLINE; }
 
 DxfGo LwPolyline::toGo() const {
-    qInfo("LwPolyline");
     if(startWidth || endWidth)
         qWarning("TODO startWidth | endWidth");
 
@@ -129,113 +128,45 @@ DxfGo LwPolyline::toGo() const {
         && poly.size() == 2
         && qFuzzyCompare(poly.front().bulge, 1.)
         && qFuzzyCompare(poly.back().bulge, 1.)) {
-        Point center = ~((poly.front() + poly.back()) / 2);
-
+        QPointF center = (poly.front() + poly.back()) / 2;
+        Curve circle = CircleCurve((geo::Length(poly.front(), poly.back()) + constantWidth), center);
         DxfGo go{
             id,
-            {} /*CirclePath(((poly.front() ^ poly.back())) * uScale, center)*/,
-            {CirclePath((geo::Length(poly.front(), poly.back()) + constantWidth) * uScale, center)},
+            Curve{circle},
+            {std::move(circle)},
         };
-        r::for_each(go.fill.front(), std::bind(SetC, _1, center));
-
         go.GraphicObject::pos = center;
         go.type = DxfGo::Type{DxfGo::FlStamp | DxfGo::Circle};
         go.name = u"id|LwPolyline/Circle"_s;
         return go;
     }
-#if 0
 
-
-    QPainterPath path;
-
-    auto addSeg = [&path](const Segment& source, const Segment& target) {
-        addArcTo(path, source, target, source.bulge);
-    };
-
-    for(auto&& [from, to]: poly | v::pairwise) addSeg(from, to);
-
-    if(polylineFlag == Closed) addSeg(poly.back(), poly.front());
-
-    QTransform m;
-    m.scale(u, u);
-    QPainterPath path2;
-
-    // new Gi::Debug{path, Qt::magenta};
-
-    for(auto& poly: path.toSubpathPolygons(m))
-        path2.addPolygon(poly);
-    QTransform m2;
-    m2.scale(d, d);
-    auto p(path2.toSubpathPolygons(m2));
-
-    if(p.empty())
-        return {id, {}, {}}; // return {id, ~p.value(0), paths};
-
-    // ClipperOffset offset;
-    // offset.AddPath(Path{p.value(0)}, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
-    // Paths paths{offset.Execute(constantWidth * uScale * (poly.size() == 2 && polylineFlag == Closed ? 0.5 : 1.0))};
-
-    const double offset = constantWidth * uScale * (/*poly.size() == 2 &&*/ polylineFlag == Closed ? 0.5 : 1.0);
-    Paths paths = Inflate({~p.front()}, offset, JoinType::Round, polylineFlag == Closed ? EndType::Polygon : EndType::Round);
-    DxfGo go{id, ~p.front(), paths}; // return {id, ~p.value(0), paths};
-
-    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
-
-    go.name = u"id|LwPolyline"_s;
-#else
-    Path path;
-
-    enum InterpolationMode {
-        Linear = 1,
-        ClockwiseCircular = 2,
-        CounterClockwiseCircular = 3
-    };
-
-    static auto constructArc = [](Point center, int dir, double radius, double start, double stop) {
-        auto arcPath = arc(center, radius, start, stop, dir);
-        // Последняя точка в вычисленной дуге может иметь числовые ошибки.
-        // Точной конечной точкой является указанная (x, y). Замена.
-        // if(arcPath.size()) arcPath.back() = state_.curPos();
-        // else arcPath.emplace_back(state_.curPos());
-        // SetC(arcPath.back(), center);
-        return arcPath;
-    };
-    auto addSeg = [&path](const Segment& source, const Segment& target) {
-        if(path.empty())
-            path.emplace_back(~source);
-
+    Curve curve;
+    auto addSeg = [&curve](const Segment& source, const Segment& target) {
+        if(curve.empty())
+            curve.emplace_back(source);
         if(qFuzzyIsNull(source.bulge)) {
-            path.emplace_back(~target);
+            curve.emplace_back(target);
             return;
         }
-
         auto [c, a1, a2, r] = bulgeToArc(source, target, source.bulge);
-
-        int dir = Area(Path{~c, ~source, ~target}) > .0
-            ? CounterClockwiseCircular
-            : ClockwiseCircular;
-
-        Path arcPath = constructArc(~c, dir, r * uScale, a1, a2);
-
-        arcPath.front() = ~source;
-        arcPath.back() = ~target;
-        path.append_range(arcPath);
+        curve.emplace_back(target, c, geo::DIR(source, c, target));
     };
 
     for(auto&& [from, to]: poly | v::pairwise) addSeg(from, to);
 
     if(polylineFlag == Closed) addSeg(poly.back(), poly.front());
 
-    r::for_each(path, SetCSelf);
+    // r::for_each(curve, SetCSelf);
 
-    Paths paths = Inflate({path}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
+    Paths paths = Inflate({toPath(curve)}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
 
     // Gi::Debug(paths, Qt::red);
 
-    DxfGo go{id, path, paths}; // return {id, ~p.value(0), paths};
+    DxfGo go{id, std::move(curve), toCurves(paths)}; // return {id, ~p.value(0), paths};
 
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
-#endif
+
     return go;
 }
 
