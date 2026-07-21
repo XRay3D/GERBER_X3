@@ -11,6 +11,7 @@
 #include "gi_point.h"
 
 #include "drill/drill_file.h"
+#include "gc_file.h"
 #include "gc_propertiesform.h"
 #include "gc_types.h"
 #include "gi.h"
@@ -163,9 +164,16 @@ void Marker::updateGCPForm() {
 
 void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
+    moved = true;
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
     updateGCPForm();
+}
+
+void Marker::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseReleaseEvent(event);
+    if(moved) GCode::regenerateGCodeFiles();
+    moved = false;
 }
 
 void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
@@ -253,6 +261,7 @@ QPainterPath Pin::shape() const {
 
 void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
+    moved = true;
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
     QPointF pt[4]{
@@ -270,7 +279,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
             pt[0].rx() = center.x();
         if(pt[0].y() > center.y())
             pt[0].ry() = center.y();
-        pt[2] = App::pin2().lastPos_ - (pt[0] - lastPos_);
+        pt[2]      = App::pin2().lastPos_ - (pt[0] - lastPos_);
         pt[1].rx() = pt[2].x();
         pt[1].ry() = pt[0].y();
         pt[3].rx() = pt[0].x();
@@ -281,7 +290,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
             pt[1].rx() = center.x();
         if(pt[1].y() > center.y())
             pt[1].ry() = center.y();
-        pt[3] = App::pin3().lastPos_ - (pt[1] - lastPos_);
+        pt[3]      = App::pin3().lastPos_ - (pt[1] - lastPos_);
         pt[0].rx() = pt[3].x();
         pt[0].ry() = pt[1].y();
         pt[2].rx() = pt[1].x();
@@ -292,7 +301,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
             pt[2].rx() = center.x();
         if(pt[2].y() < center.y())
             pt[2].ry() = center.y();
-        pt[0] = App::pin0().lastPos_ - (pt[2] - lastPos_);
+        pt[0]      = App::pin0().lastPos_ - (pt[2] - lastPos_);
         pt[1].rx() = pt[2].x();
         pt[1].ry() = pt[0].y();
         pt[3].rx() = pt[0].x();
@@ -303,7 +312,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
             pt[3].rx() = center.x();
         if(pt[3].y() < center.y())
             pt[3].ry() = center.y();
-        pt[1] = App::pin1().lastPos_ - (pt[3] - lastPos_);
+        pt[1]      = App::pin1().lastPos_ - (pt[3] - lastPos_);
         pt[0].rx() = pt[3].x();
         pt[0].ry() = pt[1].y();
         pt[2].rx() = pt[1].x();
@@ -314,6 +323,12 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     for(int i{}; i < 4; ++i)
         App::pins()[i]->setPos(pt[i]);
     App::project().setPinsPos(pt);
+}
+
+void Pin::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseReleaseEvent(event);
+    if(moved) GCode::regenerateGCodeFiles();
+    moved = false;
 }
 
 void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {

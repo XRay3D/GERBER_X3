@@ -11,12 +11,18 @@
 #include "gc_propertiesform.h"
 #include "ui_gcodepropertiesform.h"
 
+#include "gc_file.h"
 #include "gi_point.h"
 #include "project.h"
 #include "settings.h"
 #include <QMessageBox>
 
 namespace GCode {
+
+// Безопасная высота/зазор/глубина подвода влияют на уже сгенерированный текст
+// G-кода существующих файлов (File::lines_) — пересобираем его сразу же, а не
+// ждём следующего явного "Save Toolpath", иначе экспортированный/показанный
+// текст останется устаревшим.
 
 PropertiesForm::PropertiesForm(QWidget* parent)
     : QWidget{parent}
@@ -45,13 +51,18 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     connect(ui->dsbxGlue, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setGlue);
     connect(ui->dsbxSpaceX, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSpaceX);
     connect(ui->dsbxSpaceY, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSpaceY);
-    connect(ui->sbxStepsX, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsX);
-    connect(ui->sbxStepsY, qOverload<int>(&QSpinBox::valueChanged), App::projectPtr(), &Project::setStepsY);
+    connect(ui->sbxStepsX, &QSpinBox::valueChanged, App::projectPtr(), &Project::setStepsX);
+    connect(ui->sbxStepsY, &QSpinBox::valueChanged, App::projectPtr(), &Project::setStepsY);
 
-    connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSafeZ);
     connect(ui->dsbxClearence, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setClearence);
     connect(ui->dsbxPlunge, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setPlunge);
+    connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setSafeZ);
     connect(ui->dsbxThickness, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setBoardThickness);
+
+    // connect(ui->dsbxClearence, &QDoubleSpinBox::valueChanged, this, regenerateGCodeFiles);
+    // connect(ui->dsbxPlunge, &QDoubleSpinBox::valueChanged, this, regenerateGCodeFiles);
+    // connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, this, regenerateGCodeFiles);
+
     connect(ui->dsbxCopperThickness, &QDoubleSpinBox::valueChanged, App::projectPtr(), &Project::setCopperThickness);
 
     connect(ui->dsbxSafeZ, &QDoubleSpinBox::valueChanged, [this](double value) {
@@ -66,13 +77,15 @@ PropertiesForm::PropertiesForm(QWidget* parent)
     load();
 
     connect(ui->pbOk, &QPushButton::clicked, [this, parent] {
-        if(parent
-            && ui->dsbxThickness->value() > 0.0
+        regenerateGCodeFiles();
+        if(ui->dsbxThickness->value() > 0.0
             && ui->dsbxCopperThickness->value() > 0.0
             && ui->dsbxClearence->value() > 0.0
             && ui->dsbxSafeZ->value() > 0.0) {
 
-            parent->close();
+            committed_ = true; // подтверждено — hideEvent не должен откатывать изменения
+            if(parent) parent->close();
+            else close(); // без родительского диалога (докнутая панель) закрываемся сами
             return;
         }
         if(ui->dsbxCopperThickness->value() == 0.0) ui->dsbxCopperThickness->flicker();
@@ -94,7 +107,54 @@ PropertiesForm::~PropertiesForm() {
     delete ui;
 }
 
+void PropertiesForm::showEvent(QShowEvent* event) {
+    QWidget::showEvent(event);
+    committed_ = false;
+    snapshot_  = {
+         .safeZ           = ui->dsbxSafeZ->value(),
+         .clearence       = ui->dsbxClearence->value(),
+         .plunge          = ui->dsbxPlunge->value(),
+         .thickness       = ui->dsbxThickness->value(),
+         .copperThickness = ui->dsbxCopperThickness->value(),
+         .glue            = ui->dsbxGlue->value(),
+         .spaceX          = ui->dsbxSpaceX->value(),
+         .spaceY          = ui->dsbxSpaceY->value(),
+         .stepsX          = ui->sbxStepsX->value(),
+         .stepsY          = ui->sbxStepsY->value(),
+         .homeX           = ui->dsbxHomeX->value(),
+         .homeY           = ui->dsbxHomeY->value(),
+         .zeroX           = ui->dsbxZeroX->value(),
+         .zeroY           = ui->dsbxZeroY->value(),
+    };
+}
+
+void PropertiesForm::hideEvent(QHideEvent* event) {
+    QWidget::hideEvent(event);
+    if(!committed_) applySnapshot(snapshot_);
+}
+
+void PropertiesForm::applySnapshot(const Snapshot& s) {
+    // Порядок важен: safeZ/clearence/plunge подтягивают друг друга через свои
+    // valueChanged-обработчики, поэтому восстанавливаем их последними в этой тройке
+    // друг за другом, чтобы финальным значением осталось именно значение снимка.
+    ui->dsbxThickness->setValue(s.thickness);
+    ui->dsbxCopperThickness->setValue(s.copperThickness);
+    ui->dsbxGlue->setValue(s.glue);
+    ui->dsbxSpaceX->setValue(s.spaceX);
+    ui->dsbxSpaceY->setValue(s.spaceY);
+    ui->sbxStepsX->setValue(s.stepsX);
+    ui->sbxStepsY->setValue(s.stepsY);
+    ui->dsbxHomeX->setValue(s.homeX);
+    ui->dsbxHomeY->setValue(s.homeY);
+    ui->dsbxZeroX->setValue(s.zeroX);
+    ui->dsbxZeroY->setValue(s.zeroY);
+    ui->dsbxSafeZ->setValue(s.safeZ);
+    ui->dsbxClearence->setValue(s.clearence);
+    ui->dsbxPlunge->setValue(s.plunge);
+}
+
 void PropertiesForm::updatePosDsbxs() {
+    regenerateGCodeFiles();
     ui->dsbxHomeX->setValue(App::home().pos().x());
     ui->dsbxHomeY->setValue(App::home().pos().y());
     ui->dsbxZeroX->setValue(App::zero().pos().x());
