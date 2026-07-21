@@ -33,7 +33,12 @@ AbstractPreview::AbstractPreview()
 
     connect(this, &AbstractPreview::colorChanged, [this] { update(); });
     setAcceptHoverEvents(true);
-    setFlag(ItemIsSelectable, true);
+    // ItemIsSelectable здесь двойного назначения: помимо штатной семантики Qt,
+    // changeColor() читает этот флаг как признак "инструмент назначен" (Used -> красный).
+    // Пока инструмент не выбран (Model::setToolId ещё не вызывался с id > -1),
+    // флаг должен быть выключен — иначе превью до первого назначения инструмента
+    // всегда красное вместо серого.
+    setFlag(ItemIsSelectable, false);
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
     App::grView().addItem(this);

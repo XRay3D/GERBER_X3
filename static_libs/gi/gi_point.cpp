@@ -265,20 +265,16 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
 
     QPointF pt[4]{
-        App::pin0().pos(),
-        App::pin1().pos(),
-        App::pin2().pos(),
-        App::pin3().pos()};
+        App::pin0().pos(), App::pin1().pos(),
+        App::pin2().pos(), App::pin3().pos()};
 
     const QPointF center(App::layoutFrames().boundingRect().center());
     // const QPointF center(App::project().worckRect().center());
 
     switch(index_) {
     case 0:
-        if(pt[0].x() > center.x())
-            pt[0].rx() = center.x();
-        if(pt[0].y() > center.y())
-            pt[0].ry() = center.y();
+        if(pt[0].x() > center.x()) pt[0].rx() = center.x();
+        if(pt[0].y() > center.y()) pt[0].ry() = center.y();
         pt[2]      = App::pin2().lastPos_ - (pt[0] - lastPos_);
         pt[1].rx() = pt[2].x();
         pt[1].ry() = pt[0].y();
@@ -286,10 +282,8 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         pt[3].ry() = pt[2].y();
         break;
     case 1:
-        if(pt[1].x() < center.x())
-            pt[1].rx() = center.x();
-        if(pt[1].y() > center.y())
-            pt[1].ry() = center.y();
+        if(pt[1].x() < center.x()) pt[1].rx() = center.x();
+        if(pt[1].y() > center.y()) pt[1].ry() = center.y();
         pt[3]      = App::pin3().lastPos_ - (pt[1] - lastPos_);
         pt[0].rx() = pt[3].x();
         pt[0].ry() = pt[1].y();
@@ -297,10 +291,8 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         pt[2].ry() = pt[3].y();
         break;
     case 2:
-        if(pt[2].x() < center.x())
-            pt[2].rx() = center.x();
-        if(pt[2].y() < center.y())
-            pt[2].ry() = center.y();
+        if(pt[2].x() < center.x()) pt[2].rx() = center.x();
+        if(pt[2].y() < center.y()) pt[2].ry() = center.y();
         pt[0]      = App::pin0().lastPos_ - (pt[2] - lastPos_);
         pt[1].rx() = pt[2].x();
         pt[1].ry() = pt[0].y();
@@ -308,10 +300,8 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
         pt[3].ry() = pt[2].y();
         break;
     case 3:
-        if(pt[3].x() > center.x())
-            pt[3].rx() = center.x();
-        if(pt[3].y() < center.y())
-            pt[3].ry() = center.y();
+        if(pt[3].x() > center.x()) pt[3].rx() = center.x();
+        if(pt[3].y() < center.y()) pt[3].ry() = center.y();
         pt[1]      = App::pin1().lastPos_ - (pt[3] - lastPos_);
         pt[0].rx() = pt[3].x();
         pt[0].ry() = pt[1].y();
@@ -437,22 +427,14 @@ void Pin::resetPos(bool fl) {
 
     const QPointF center(rect.center());
 
-    if(pt[0].x() > center.x())
-        pt[0].setX(center.x());
-    if(pt[0].y() > center.y())
-        pt[0].setY(center.y());
-    if(pt[1].x() < center.x())
-        pt[1].setX(center.x());
-    if(pt[1].y() > center.y())
-        pt[1].setY(center.y());
-    if(pt[2].x() < center.x())
-        pt[2].setX(center.x());
-    if(pt[2].y() < center.y())
-        pt[2].setY(center.y());
-    if(pt[3].x() > center.x())
-        pt[3].setX(center.x());
-    if(pt[3].y() < center.y())
-        pt[3].setY(center.y());
+    if(pt[0].x() > center.x()) pt[0].setX(center.x());
+    if(pt[0].y() > center.y()) pt[0].setY(center.y());
+    if(pt[1].x() < center.x()) pt[1].setX(center.x());
+    if(pt[1].y() > center.y()) pt[1].setY(center.y());
+    if(pt[2].x() < center.x()) pt[2].setX(center.x());
+    if(pt[2].y() < center.y()) pt[2].setY(center.y());
+    if(pt[3].x() > center.x()) pt[3].setX(center.x());
+    if(pt[3].y() < center.y()) pt[3].setY(center.y());
 
     for(int i{}; i < 4; ++i)
         App::pins()[i]->setPos(pt[i]);

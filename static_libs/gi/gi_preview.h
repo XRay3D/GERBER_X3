@@ -47,10 +47,9 @@ public:
     //////////////////////////////////////////
     int type() const override;
     double sourceDiameter() const;
-    virtual int toolId() const = 0;
-
-    virtual void updateTool() = 0;
-    virtual Paths paths() const = 0;
+    virtual int toolId() const           = 0;
+    virtual void updateTool()            = 0;
+    virtual Paths paths() const          = 0;
     virtual bool fit(double depth) const = 0;
 
     void changeColor();
@@ -76,39 +75,26 @@ protected:
         Tool,
     };
 
-    static constexpr int dark = 180;
+    static constexpr int dark  = 180;
     static constexpr int light = 255;
-    inline static const QColor colors[]{
-        QColor(128, 128, 128, dark),  // 0 Default         gray dark
-        QColor(255, 255, 255, light), // 1 DefaultHovered  gray light
-        QColor(0, 255, 0, dark),      // 2 Selected        green dark
-        QColor(0, 255, 0, light),     // 3 SelectedHovered green light
-        QColor(255, 0, 0, dark),      // 4 Used            red dark
-        QColor(255, 0, 0, light),     // 5 UsedHovered     red light
-        QColor(255, 255, 255, 255),   // 6 UnUsed          transparent
-        QColor(255, 255, 255, dark),  // 7 Tool            white
+    inline static const std::array colors{
+        QColor{128, 128, 128, dark }, // 0 Default         gray dark
+        QColor{255, 255, 255, light}, // 1 DefaultHovered  gray light
+        QColor{0,   255, 0,   dark }, // 2 Selected        green dark
+        QColor{0,   255, 0,   light}, // 3 SelectedHovered green light
+        QColor{255, 0,   0,   dark }, // 4 Used            red dark
+        QColor{255, 0,   0,   light}, // 5 UsedHovered     red light
+        QColor{255, 255, 255, 255  }, // 6 UnUsed          transparent
+        QColor{255, 255, 255, dark }, // 7 Tool            white
     };
 
-    enum ColorState {
+    enum ColorState : int {
         Default,
-        Hovered = 1,
+        Hovered  = 1,
         Selected = 2,
-        Used = 4,
-        Tool = 8,
-    };
-    int colorState = Default;
-
-    // std::unordered_map<int, QColor> colors {
-    // { Default, QColor(128, 128, 128, dark) },            // 0 Default         gray dark
-    // { Default | Hovered, QColor(255, 255, 255, light) }, // 1 DefaultHovered  gray light
-    // { Selected, QColor(0, 255, 0, dark) },               // 2 Selected        green dark
-    // { Selected | Hovered, QColor(0, 255, 0, light) },    // 3 SelectedHovered green light
-    // { Used, QColor(255, 0, 0, dark) },                   // 4 Used            red dark
-    // { Used | Hovered, QColor(255, 0, 0, light) },        // 5 UsedHovered     red light
-    // { Default, QColor(255, 255, 255, 255) },             // 6 UnUsed          transparent
-    // { Default | Hovered, QColor(255, 255, 255, dark) },  // 7 Tool            white
-    // };
-    //};
+        Used     = 4,
+        Tool     = 8,
+    } colorState{};
 
     // QGraphicsItem interface
 protected:

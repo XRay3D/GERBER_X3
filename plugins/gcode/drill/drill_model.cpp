@@ -30,8 +30,11 @@ void Model::setToolId(int row, int32_t id) {
         data_[row].useForCalc = id > -1;
     data_[row].toolId = id;
     for(auto item: data_[row].items) {
-        item->updateTool();
+        // Флаг должен быть выставлен ДО updateTool(), т.к. тот в конце вызывает
+        // changeColor(), которая читает ItemIsSelectable как признак "Used" —
+        // иначе цвет пересчитывается по ещё не обновлённому (старому) флагу.
         item->setFlag(QGraphicsItem::ItemIsSelectable, id > -1);
+        item->updateTool();
     }
     emit set(row, id > -1);
     emit dataChanged(createIndex(row, 0), createIndex(row, 1));

@@ -14,7 +14,7 @@ class Preview final : public ::Gi::AbstractPreview {
     int toolId_{-1};
 
 public:
-    explicit Preview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});// FIXME to Curve
+    explicit Preview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {}); // FIXME to Curve
 
     // AbstractPreview interface
     void updateTool() override;
@@ -31,9 +31,6 @@ public:
     Paths offset() const;
     QPointF pos() const { return ~path_.front(); }; // NOTE shadow base class pos func
     Path hv() const { return path_; };              // NOTE shadow base class pos func
-
-    // private:
-    // static Paths offset(const Path& path, double offset);
 };
 }
 
