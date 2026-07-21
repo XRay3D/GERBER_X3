@@ -22,9 +22,16 @@ namespace GCode {
 
 class GcFileProxy;
 
+// Пересобрать lines_ у всех G-code файлов проекта. Вызывать сразу же, как только
+// меняется параметр, влияющий на генерацию текста G-кода (сторона платы, safeZ/
+// clearence/plunge, положение Home/Zero/Pin и т.п.) — иначе lines_ останется
+// устаревшим до следующего явного "Save Toolpath".
+void regenerateGCodeFiles();
+
 class File : public AbstractFile {
     // friend class ::Project;
     friend class GcFileProxy;
+
 protected:
     double feedRate{};
     double plungeRate{};
@@ -48,7 +55,7 @@ public:
         setSide(gcp.params[Params::FileSide]);
     }
 
-    File() = default;
+    File()           = default;
     ~File() override = default;
 
     std::vector<QString> gCodeText() const { return lines_; }
@@ -58,6 +65,12 @@ public:
     static void setLastDir(QString dirPath);
 
     bool save(const QString& name);
+
+    // Пересобрать lines_ (текст G-кода) из текущих параметров: стороны платы,
+    // безопасной высоты, зазора, глубины подвода и т.п. Нужно вызывать сразу же,
+    // как только один из этих параметров меняется у уже созданного файла —
+    // иначе lines_ останется устаревшим до следующего явного "Save Toolpath".
+    void regenerate();
 
     static void ensureDefaultScripts();
 

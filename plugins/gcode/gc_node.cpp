@@ -10,6 +10,7 @@
  ********************************************************************************/
 #include "gc_node.h"
 #include "abstract_file.h"
+#include "gc_file.h"
 #include "gc_highlighter.h"
 #include "project.h"
 
@@ -45,6 +46,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         switch(role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
+            static_cast<File*>(file)->regenerate(); // lines_ устарели при смене стороны платы
             return true;
         default:;
         }

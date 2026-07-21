@@ -46,9 +46,11 @@ private:
     QPainterPath shape_;
     const Type type_;
     void updateGCPForm();
+    bool moved{};
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
@@ -82,9 +84,11 @@ private:
     QPointF lastPos_;
     const uint index_;
     static inline int ctr_;
+    bool moved{};
 
 protected:
     void mouseMoveEvent(QGraphicsSceneMouseEvent* event) override;
+    void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
     void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
