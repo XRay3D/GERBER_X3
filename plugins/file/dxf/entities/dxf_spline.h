@@ -66,13 +66,21 @@ struct Spline final : Entity {
         FitPointsZ = 31, // Dxf: y and z valuesOfFitPoints (inWcs); OneEntryPerFitPoint  = 21, 31 ,// 21, 31 Файл DXF: значения Y и Z определяющих точек (в МСК); одна запись на определяющую точку
     };
 
+    enum SplineFlagBits {
+        Closed = 1,     // замкнутый сплайн
+        Periodic = 2,   // периодический сплайн
+        Rational = 4,   // рациональный сплайн
+        Planar = 8,     // плоский
+        Linear = 16,    // линейный (также задается бит 8 — плоский)
+    };
+
     QPolygonF FitPoints;
     QPolygonF ControlPoints;
     QPointF StartTangent;
     QPointF EndTangent;
 
     QVector<double> KnotValues;
-    double weight = 1.0;
+    QVector<double> Weights; // группа 41: вес на каждую управляющую точку (одна запись на точку, отсутствующие = 1.0)
 
     double knotTolerance = 0.0000001;
     double controlPointTolerance = 0.0000001;

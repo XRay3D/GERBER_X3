@@ -19,6 +19,7 @@
 #include "dxf_dummy.h"
 #include "dxf_ellipse.h"
 #include "dxf_entity.h"
+#include "dxf_face3d.h"
 #include "dxf_graphicobject.h"
 #include "dxf_hatch.h"
 #include "dxf_helix.h"

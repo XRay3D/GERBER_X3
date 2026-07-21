@@ -27,6 +27,7 @@ std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionPa
     case Entity::CIRCLE           : return std::make_shared<Circle>(sp);
     case Entity::DIMENSION        : return std::make_shared<Dimension>(sp);
     case Entity::ELLIPSE          : return std::make_shared<Ellipse>(sp);
+    case Entity::FACE3D           : return std::make_shared<Face3D>(sp);
     case Entity::HATCH            : return std::make_shared<Hatch>(sp);
     case Entity::HELIX            : return std::make_shared<Helix>(sp);
     case Entity::IMAGE            : return std::make_shared<Image>(sp);
@@ -170,6 +171,8 @@ void Entity::read(QDataStream& stream) {
 }
 
 Entity::Type Entity::toType(const QString& key) {
+    if(key.compare(u"3DFACE"_s, Qt::CaseInsensitive) == 0) // "3DFACE" не может быть ключом Q_ENUM, т.к. начинается с цифры
+        return Type::FACE3D;
     return Type(staticMetaObject.enumerator(0).keyToValue(key.toUtf8().toUpper().data()));
 }
 

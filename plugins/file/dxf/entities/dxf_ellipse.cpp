@@ -52,9 +52,73 @@ void Ellipse::parse(CodeData& code) {
 Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
 
 DxfGo Ellipse::toGo() const {
-    qInfo("Ellipse");
-    qInfo("TODO");
-    return {};
+    const double majorLen = std::hypot(EndpointOfMajorAxis.x(), EndpointOfMajorAxis.y());
+    if(qFuzzyIsNull(majorLen) || qFuzzyIsNull(ratioOfMinorAxisToMajorAxis))
+        return {};
+
+    const double minorLen = majorLen * ratioOfMinorAxisToMajorAxis;
+    const double rotation = std::atan2(EndpointOfMajorAxis.y(), EndpointOfMajorAxis.x());
+    const double cosR = std::cos(rotation);
+    const double sinR = std::sin(rotation);
+
+    auto pointAt = [&](double t) {
+        const double lx = majorLen * std::cos(t);
+        const double ly = minorLen * std::sin(t);
+        return QPointF{
+            CenterPoint.x() + lx * cosR - ly * sinR,
+            CenterPoint.y() + lx * sinR + ly * cosR,
+        };
+    };
+
+    double span = endParameter - startParameter;
+    const bool closed = qFuzzyIsNull(span) || span >= two_pi - 1.0e-9;
+    if(qFuzzyIsNull(span))
+        span = two_pi;
+
+    // Эллипс представляется цепочкой круговых дуг: на каждом малом участке подбирается
+    // окружность, проходящая через начало, середину и конец участка (как и Circle/Arc,
+    // Curve хранит именно круговые дуги, а не плотную ломаную).
+    const int segments = std::clamp(int(std::round(std::abs(span) / two_pi * 36.0)), 4, 72);
+
+    Curve curve;
+    QPointF prev = pointAt(startParameter);
+    curve.emplace_back(prev);
+    for(int i{}; i < segments; ++i) {
+        const double t0 = startParameter + span * i / segments;
+        const double t1 = startParameter + span * (i + 1) / segments;
+        const double tm = (t0 + t1) / 2;
+        const QPointF p0 = prev;
+        const QPointF pm = pointAt(tm);
+        const QPointF p1 = pointAt(t1);
+
+        const double ax = p0.x(), ay = p0.y();
+        const double bx = pm.x(), by = pm.y();
+        const double cx = p1.x(), cy = p1.y();
+        const double d = 2.0 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+
+        if(qFuzzyIsNull(d)) {
+            curve.emplace_back(p1); // вырожденный (почти прямой) участок
+        } else {
+            const double a2 = ax * ax + ay * ay, b2 = bx * bx + by * by, c2 = cx * cx + cy * cy;
+            const QPointF center{
+                (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
+                (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
+            };
+            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+        }
+        prev = p1;
+    }
+
+    if(closed) {
+        DxfGo go{id, Curve{curve}, {std::move(curve)}};
+        go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Elipse);
+        go.GraphicObject::pos = CenterPoint;
+        return go;
+    }
+
+    DxfGo go{id, std::move(curve)};
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::Elipse);
+    return go;
 }
 
 void Ellipse::write(QDataStream& stream) const {

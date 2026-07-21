@@ -43,6 +43,7 @@ public:
         CIRCLE,
         DIMENSION,
         ELLIPSE,
+        FACE3D, // 3DFACE, спец-обработка имени в toType()/typeName() — цифра не может быть первым символом Q_ENUM ключа
         HATCH,
         HELIX,
         IMAGE,
@@ -78,8 +79,7 @@ public:
         VIEWPORT,
         WIPEOUT,
         XLINE,
-        // 3DFACE,
-        // 3DSOLID,
+        // 3DSOLID, // бинарные данные ACIS — не реализовано
     };
     Q_ENUM(Type)
     static Type toType(const QString& key);

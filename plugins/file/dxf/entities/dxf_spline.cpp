@@ -18,6 +18,7 @@
 #include <QPainterPath>
 #include <QPolygonF>
 #include <QtMath>
+#include <functional>
 #include <qglobal.h>
 
 namespace Dxf {
@@ -153,7 +154,7 @@ void Spline::parse(CodeData& code) {
         case EndTangentY          : EndTangent.setY(code); break;        // 23
         case EndTangentZ          : break;                               // 33
         case KnotValue            : KnotValues << double(code); break;   // 40
-        case Weight               : weight = code; break;                               // 41
+        case Weight               : Weights << double(code); break;     // 41, одна запись на управляющую точку
         case ControlPointsX:                                             // 10
             ControlPoints.resize(ControlPoints.size() + 1);
             ControlPoints.last().setX(code);
@@ -174,10 +175,114 @@ void Spline::parse(CodeData& code) {
 
 Entity::Type Spline::type() const { return Type::SPLINE; }
 
+namespace {
+
+// Кокс-де Бур: значение i-й базисной функции степени p в точке u для узлового вектора U.
+double nurbsBasis(int i, int p, double u, const QVector<double>& U) {
+    if(p == 0)
+        return (U[i] <= u && u < U[i + 1]) ? 1.0 : 0.0;
+
+    double left{}, right{};
+    if(const double d1 = U[i + p] - U[i]; !qFuzzyIsNull(d1))
+        left = (u - U[i]) / d1 * nurbsBasis(i, p - 1, u, U);
+    if(const double d2 = U[i + p + 1] - U[i + 1]; !qFuzzyIsNull(d2))
+        right = (U[i + p + 1] - u) / d2 * nurbsBasis(i + 1, p - 1, u, U);
+    return left + right;
+}
+
+// Точка рациональной B-сплайн кривой (NURBS) в параметре u.
+QPointF nurbsPoint(double u, int degree, const QVector<double>& U, const QPolygonF& ctrl, const QVector<double>& weights) {
+    double x{}, y{}, wsum{};
+    for(int i{}; i < ctrl.size(); ++i) {
+        const double b = nurbsBasis(i, degree, u, U) * weights[i];
+        x += b * ctrl[i].x();
+        y += b * ctrl[i].y();
+        wsum += b;
+    }
+    if(qFuzzyIsNull(wsum))
+        return ctrl.last();
+    return {x / wsum, y / wsum};
+}
+
+// Аппроксимация плотно выбранных точек кривой цепочкой круговых дуг: на каждом малом
+// участке подбирается окружность, проходящая через его начало, середину и конец —
+// так же, как это сделано для ELLIPSE, чтобы Curve всюду хранила дуги, а не ломаную.
+void appendArcChain(Curve& curve, const std::function<QPointF(double)>& pointAt, double tFrom, double tTo, int segments) {
+    QPointF prev = pointAt(tFrom);
+    if(curve.empty())
+        curve.emplace_back(prev);
+
+    for(int i{}; i < segments; ++i) {
+        const double t0 = tFrom + (tTo - tFrom) * i / segments;
+        const double t1 = tFrom + (tTo - tFrom) * (i + 1) / segments;
+        const QPointF p0 = prev;
+        const QPointF pm = pointAt((t0 + t1) / 2);
+        const QPointF p1 = pointAt(t1);
+
+        const double ax = p0.x(), ay = p0.y();
+        const double bx = pm.x(), by = pm.y();
+        const double cx = p1.x(), cy = p1.y();
+        const double d = 2.0 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+
+        if(qFuzzyIsNull(d)) {
+            curve.emplace_back(p1);
+        } else {
+            const double a2 = ax * ax + ay * ay, b2 = bx * bx + by * by, c2 = cx * cx + cy * cy;
+            const QPointF center{
+                (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
+                (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
+            };
+            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+        }
+        prev = p1;
+    }
+}
+
+} // namespace
+
 DxfGo Spline::toGo() const {
-    qInfo("Spline");
-    qInfo("TODO");
-    return {};
+    const bool haveNurbs = ControlPoints.size() >= 2
+        && degreeOfTheSplineCurve > 0
+        && KnotValues.size() == ControlPoints.size() + degreeOfTheSplineCurve + 1;
+
+    Curve curve;
+    const bool closed = (splineFlag & Closed) != 0;
+
+    if(haveNurbs) {
+        QVector<double> weights = Weights;
+        if(weights.size() != ControlPoints.size())
+            weights = QVector<double>(ControlPoints.size(), 1.0); // группа 41 отсутствует -> все веса 1 (не рациональный сплайн)
+
+        const double uMin = KnotValues.first();
+        const double uMax = KnotValues.last();
+        if(qFuzzyCompare(uMin, uMax))
+            return {};
+
+        auto pointAt = [&](double u) {
+            return nurbsPoint(qBound(uMin, u, uMax - (uMax - uMin) * 1.0e-9), degreeOfTheSplineCurve, KnotValues, ControlPoints, weights);
+        };
+
+        const int segments = qBound(16, ControlPoints.size() * 8, 400);
+        appendArcChain(curve, pointAt, uMin, uMax, segments);
+    } else if(FitPoints.size() >= 2) {
+        qWarning("Spline: no valid control-point/knot data, falling back to a polyline through fit points");
+        for(const QPointF& p: FitPoints) curve.emplace_back(p);
+    } else if(ControlPoints.size() >= 2) {
+        qWarning("Spline: no valid knot vector, falling back to a polyline through control points");
+        for(const QPointF& p: ControlPoints) curve.emplace_back(p);
+    } else {
+        return {};
+    }
+
+    if(closed) {
+        DxfGo go{id, Curve{curve}, {std::move(curve)}};
+        go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::PolyLine);
+        return go;
+    }
+
+    DxfGo go{id, std::move(curve)};
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
+    return go;
 }
 
 void Spline::write(QDataStream& stream) const {
@@ -187,7 +292,7 @@ void Spline::write(QDataStream& stream) const {
     stream << EndTangent;
 
     stream << KnotValues;
-    stream << weight;
+    stream << Weights;
 
     stream << knotTolerance;
     stream << controlPointTolerance;
@@ -207,7 +312,7 @@ void Spline::read(QDataStream& stream) {
     stream >> EndTangent;
 
     stream >> KnotValues;
-    stream >> weight;
+    stream >> Weights;
 
     stream >> knotTolerance;
     stream >> controlPointTolerance;
