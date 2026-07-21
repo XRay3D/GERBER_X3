@@ -42,13 +42,20 @@ void SectionENTITIES::parse() {
     CodeData code = nextCode();
     code          = nextCode();
     code          = nextCode();
+    // К этому моменту file->entities_ уже может содержать сущности, разобранные
+    // при чтении секции BLOCKS (они хранятся там же, чтобы id оставался индексом
+    // в общем векторе). Их рисовать здесь нельзя: они будут отрисованы через
+    // InsertEntity::draw() с нужным смещением/масштабом/поворотом, когда до них
+    // дойдёт очередь при разборе соответствующего INSERT. Иначе геометрия блока
+    // рисуется ещё и напрямую, в исходных координатах блока с масштабом 1:1.
+    const size_t first = file->entities_.size();
     do {
         file->entities_.emplace_back(entityParse(code));
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
     } while(hasNext());
-    for(auto& e: std::as_const(file->entities_))
-        e->draw();
+    for(size_t i = first; i < file->entities_.size(); ++i)
+        file->entities_[i]->draw();
 }
 
 std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {

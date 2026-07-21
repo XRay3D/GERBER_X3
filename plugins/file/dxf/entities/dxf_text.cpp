@@ -73,6 +73,7 @@ QDebug operator<<(QDebug debug, const QFontMetricsF& fm) {
 
 DxfGo Text::toGo() const {
     double ascent{};
+    double descent{};
     double scaleX{1};
     double scaleY{1};
 
@@ -81,7 +82,7 @@ DxfGo Text::toGo() const {
     QSizeF size;
     if(sp->file->styles().contains(textStyleName)) {
         Style* style = sp->file->styles()[textStyleName];
-        font = style->font;
+        font         = style->font;
         if(Settings::overrideFonts()) {
             font.setFamily(Settings::defaultFont());
             font.setBold(Settings::boldFont());
@@ -89,9 +90,9 @@ DxfGo Text::toGo() const {
         }
         QFontMetricsF fm{font};
         scaleX = scaleY = std::max(style->fixedTextHeight, textHeight) / fm.capHeight();
-        offset.ry() -= fm.descent();
-        ascent = fm.ascent();
-        size = fm.size(0, text);
+        ascent          = fm.ascent();
+        descent         = fm.descent();
+        size            = fm.size(0, text);
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -101,13 +102,13 @@ DxfGo Text::toGo() const {
         }
         QFontMetricsF fm{font};
         scaleX = scaleY = textHeight / fm.capHeight();
-        offset.ry() -= fm.descent();
-        ascent = fm.ascent();
-        size = fm.size(0, text);
+        ascent          = fm.ascent();
+        descent         = fm.descent();
+        size            = fm.size(0, text);
     }
     // qDebug(u"scale X %f Y %f"_s, scaleX, scaleY);
     switch(horizontalJustType) {
-    case Left   : offset.rx(); break;                     // 0
+    case Left   : break;                                  // 0
     case Center : offset.rx() -= size.width() / 2; break; // 1
     case Right  : offset.rx() -= size.width(); break;     // 2
     case Aligned: break;                                  // 3
@@ -116,10 +117,10 @@ DxfGo Text::toGo() const {
     }
 
     switch(verticalJustType) {
-    case Baseline: break;                            // 0
-    case Bottom  : break;                            // 1
-    case MiddleV : offset.ry() += ascent / 2; break; // 2
-    case Top     : offset.ry() += ascent; break;          // 3
+    case Baseline: break;                                        // 0, начало addText() — уже базовая линия
+    case Bottom  : offset.ry() -= descent; break;                // 1
+    case MiddleV : offset.ry() += (ascent - descent) / 2; break; // 2
+    case Top     : offset.ry() += ascent; break;                      // 3
     }
 
     if(textGenerationFlag & MirroredInX)
@@ -129,13 +130,19 @@ DxfGo Text::toGo() const {
 
     QPainterPath path;
     path.addText(offset, font, text);
-    QTransform m;
-    m.translate(pt2.x(), pt2.y());
-    m.rotate(rotation > 360 ? rotation * 0.01 : rotation);
-    m.scale(0.1, -0.1);
 
-    DxfGo go{id, {}, toCurves(m.map(path))};
+    // Вторая точка выравнивания значима только при нестандартном выравнивании
+    // (не "слева по базовой линии"); иначе в качестве точки вставки берётся первая точка.
+    const QPointF anchor = (horizontalJustType != Left || verticalJustType != Baseline) ? pt2 : pt1;
+
+    QTransform m;
+    m.translate(anchor.x(), anchor.y());
+    m.rotate(rotation > 360 ? rotation * 0.01 : rotation);
+    m.scale(scaleX, -scaleY);
+
+    DxfGo go{id, {} /*toCurve(m.map(path).toFillPolygon())*/, toCurves(m.map(path))};
     return go;
+    return {};
 }
 
 void Text::write(QDataStream& stream) const {

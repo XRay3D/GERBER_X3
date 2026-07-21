@@ -14,6 +14,7 @@
 #include "tables/dxf_style.h"
 
 #include <QFont>
+#include <QtMath>
 
 namespace Dxf {
 
@@ -91,8 +92,8 @@ DxfGo MText::toGo() const {
         // ascent = fm.ascent();
         descent = fm.descent();
         height = fm.height();
-        size = fm.size(0, text);
-        scaleX = scaleY = std::max(style->fixedTextHeight, nominalTextHeight) / fm.height();
+        size = fm.size(0, list.join(u'\n'));
+        scaleX = scaleY = std::max(style->fixedTextHeight, nominalTextHeight) / fm.capHeight();
         if(drawingDirection == ByStyle) {
             if(style->textGenerationFlag & Style::MirroredInX)
                 scaleX = -scaleX;
@@ -111,10 +112,27 @@ DxfGo MText::toGo() const {
         // ascent = fm.ascent();
         descent = fm.descent();
         height = fm.height();
-        size = fm.size(0, text);
-        scaleX = scaleY = nominalTextHeight / fm.height();
+        size = fm.size(0, list.join(u'\n'));
+        scaleX = scaleY = nominalTextHeight / fm.capHeight();
     }
 
+#if 1 // MiddleLeft: X должен оставаться 0, как и у остальных *Left — раньше туда по ошибке
+      // попадала формула (size.height() / 2 - descent), не имеющая отношения к горизонтали.
+    [&] {
+        switch(attachmentPoint) {
+        case TopLeft     : return offset += {0, size.height() - descent};                     // вверху слева
+        case TopCenter   : return offset += {-size.width() / 2, size.height() - descent};     // вверху по центру
+        case TopRight    : return offset += {-size.width(), size.height() - descent};         // вверху справа
+        case MiddleLeft  : return offset += {0., -descent};                                   // посередине слева
+        case MiddleCenter: return offset += {-size.width() / 2, size.height() / 2 - descent}; // посередине по центру
+        case MiddleRight : return offset += {-size.width(), size.height() / 2 - descent};     // посередине справа
+        case BottomLeft  : return offset;                                                     // снизу слева;
+        case BottomCenter: return offset += {-size.width() / 2, 0};                           // снизу по центру
+        case BottomRight : return offset += {-size.width(), 0};                               // снизу справа
+        default          : return offset;
+        }
+    }();
+#else
     [&] {
         switch(attachmentPoint) {
         case TopLeft     : return offset += {0, size.height() - descent};                     // вверху слева
@@ -129,11 +147,26 @@ DxfGo MText::toGo() const {
         default          : return offset;
         }
     }();
+#endif
 
     QPainterPath path;
 
     for(int i = list.size() - 1; i >= 0; --i) {
         double x = {};
+#if 1 // Left-выравнивание не должно центрировать строки внутри блока — раньше при разной
+      // длине строк более короткие строки "уезжали" к центру вместо выравнивания по левому краю.
+        switch(attachmentPoint) {
+        case TopLeft     : // вверху слева
+        case MiddleLeft  :                                                                                                   // посередине слева
+        case BottomLeft  : x = 0; break;                                                                                     // снизу слева
+        case TopCenter   :                                                                                                   // вверху по центру
+        case MiddleCenter:                                                                                                   // посередине по центру
+        case BottomCenter: x = (size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width()) * 0.5; break; // снизу по центру
+        case TopRight    :                                                                                                  // вверху справа
+        case MiddleRight :                                                                                                  // посередине справа
+        case BottomRight : x = size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width(); break;          // снизу справа
+        }
+#else
         switch(attachmentPoint) {
         case TopLeft: // вверху слева
         case MiddleLeft:
@@ -145,13 +178,15 @@ DxfGo MText::toGo() const {
         case MiddleRight :                                                                                                  // посередине справа
         case BottomRight : x = size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width(); break;          // снизу справа
         }
+#endif
         path.addText(offset - QPointF(-x, size.height() - height * (i + 1)), font, list[i]);
     }
 
     QTransform m;
     m.translate(insertionPoint.x(), insertionPoint.y());
-    // m.rotate(qRadiansToDegrees(rotationAngleInRadians));
-    m.rotate(rotation > 360 ? rotation * 0.01 : rotation);
+    // Групповой код 50 у MTEXT — угол поворота в радианах (в отличие от большинства
+    // других сущностей DXF, где код 50 задаётся в градусах), а QTransform::rotate() ждёт градусы.
+    m.rotate(qRadiansToDegrees(rotation));
     m.scale(scaleX, -scaleY);
 
     DxfGo go{id, {}, toCurves(m.map(path))};
