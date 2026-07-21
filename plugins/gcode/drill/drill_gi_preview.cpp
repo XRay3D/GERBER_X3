@@ -33,7 +33,7 @@ Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths
 }
 
 void Preview::updateTool() {
-    if(toolId() > -1) {
+    if(toolId() > 0) {
         colorState |= Tool;
         if(path_.size() > 1)
             toolPath_ = [this](const QPolygonF& val) {
@@ -89,28 +89,15 @@ bool Preview::fit(double depth) const {
     return sourceDiameter_ > diameter; // && !qFuzzyCompare(sourceDiameter_, diameter); FIXME logic
 }
 
-int Preview::toolId() const {
-    return toolId_ < 0 ? row.toolId : toolId_;
-}
-
-// Paths Preview::offset(const Path& path_, double offset) {
-//// ClipperOffset cOffset;
-//// // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
-//// cOffset.AddPath(path_, JoinType::Round, EndType::Round);
-//// Paths retPaths = cOffset.Execute(offset * uScale);
-//// for (Path& path_ : retPaths)
-//// path_.push_back(path_.front());
-//// qDebug() << __FUNCTION__ << retPaths.size();
-//// ReversePaths(retPaths);
-// return {}/*retPaths*/;
-//}
+int Preview::toolId() const { return toolId_ < 1 ? row.toolId : toolId_; }
 
 int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1); }
 
 bool Preview::isSlot() const { return path_.size() > 1; }
 
 Paths Preview::offset() const {
-    return ~sourcePath_.toSubpathPolygons(); /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
+    return ~sourcePath_.toSubpathPolygons();
+    /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
 }
 
 }

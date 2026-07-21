@@ -33,15 +33,15 @@ struct Finaly final {
     ~Finaly() { func(); }
 };
 
-using nS = std::nano;
-using uS = std::micro;
-using mS = std::milli;
-using Sec = std::ratio<1>;
-using Min = std::ratio<60>;
+using nS   = std::nano;
+using uS   = std::micro;
+using mS   = std::milli;
+using Sec  = std::ratio<1>;
+using Min  = std::ratio<60>;
 using Hour = std::ratio<3600>;
 
 template <typename T, typename... Ts>
-constexpr bool contains_v = std::disjunction_v<std::is_same<T, Ts>...>; // Or
+constexpr bool contains_v                              = std::disjunction_v<std::is_same<T, Ts>...>; // Or
 template <typename T, typename... Ts> concept Contains = contains_v<T, Ts...>;
 
 namespace chr = std::chrono;
@@ -83,11 +83,11 @@ struct Timer {
     ~Timer() { now(); }
 };
 
-using Timer_nS = Timer<nS>;
-using Timer_uS = Timer<uS>;
-using Timer_mS = Timer<mS>;
-using TimerSec = Timer<Sec>;
-using TimerMin = Timer<Min>;
+using Timer_nS  = Timer<nS>;
+using Timer_uS  = Timer<uS>;
+using Timer_mS  = Timer<mS>;
+using TimerSec  = Timer<Sec>;
+using TimerMin  = Timer<Min>;
 using TimerHour = Timer<Hour>;
 
 //------------------------------------------------------------------------------
@@ -238,18 +238,18 @@ inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
         unsigned char ch = utf8[i++];
 
         if(ch <= 0x7F) { // 0b01111111
-            uni = ch;
+            uni  = ch;
             todo = 0;
         } else if(ch <= 0xBF) // 0b10111111
             throw error;
         else if(ch <= 0xDF) { // 0b11011111
-            uni = ch & 0x1F;  // 0b00011111
+            uni  = ch & 0x1F; // 0b00011111
             todo = 1;
         } else if(ch <= 0xEF) { // 0b11101111
-            uni = ch & 0x0F;    // 0b00001111
+            uni  = ch & 0x0F;   // 0b00001111
             todo = 2;
         } else if(ch <= 0xF7) { // 0b11110111
-            uni = ch & 0x07;    // 0b00000111
+            uni  = ch & 0x07;   // 0b00000111
             todo = 3;
         } else
             throw error;
@@ -338,7 +338,7 @@ template <class Ty>
 inline constexpr Ty Max = Ty{};
 template <class Ty>
 inline constexpr Ty Tokens = Ty{};
-using sv = std::string_view;
+using sv                   = std::string_view;
 consteval auto trim(sv str) {
     auto isSpaceOrSep = [](auto ch) {
         return ch == ' ' || ch == ','; // || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v';
@@ -488,4 +488,143 @@ template <>
 template <typename To>
 constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
 
+#endif
+//------------------------------------------------------------------------------
+template <typename E> concept Enum = std::is_enum_v<E>;
+
+// template <typename E> concept Integral = std::is_integral_v<E>;
+
+inline namespace EnumOps {
+
+#if __cpp_lib_to_underlying >= 202102L
+using std::to_underlying;
+#else
+template <Enum E>
+[[nodiscard]] constexpr auto to_underlying(E e) noexcept {
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+#endif
+
+template <Enum E>
+[[nodiscard]] constexpr auto operator+(E left) noexcept { return to_underlying(left); }
+
+template <Enum E>
+[[nodiscard]] constexpr E& operator++(E& e) noexcept { return e = static_cast<E>(+e + 1); }
+
+template <Enum E>
+[[nodiscard]] constexpr E operator++(E& e, int) noexcept { return std::exchange(e, static_cast<E>(+e + 1)); }
+
+template <Enum E>
+[[nodiscard]] constexpr E& operator--(E& e) noexcept { return e = static_cast<E>(+e - 1); }
+
+template <Enum E>
+[[nodiscard]] constexpr E operator--(E& e, int) noexcept { return std::exchange(e, static_cast<E>(+e - 1)); }
+
+#define DECLARE_VIEWS_IOTA(ENUM)                                        \
+    template <>                                                         \
+    struct std::incrementable_traits<ENUM> {                            \
+        using difference_type = make_signed_t<underlying_type_t<ENUM>>; \
+    };
+
+// Enum OP Enum
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & +right); }
+
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator^(L left, R right) noexcept { return static_cast<L>(+left ^ +right); }
+
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | +right); }
+
+template <Enum E>
+[[nodiscard]] constexpr E operator~(E left) noexcept { return static_cast<E>(~+left); }
+
+// // Enum OP Integral
+// template <Enum L, Integral R>
+// [[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & right); }
+
+// template <Enum L, Integral R>
+// [[nodiscard]] constexpr L operator^(L left, R right) noexcept { return static_cast<L>(+left ^ right); }
+
+// template <Enum L, Integral R>
+// [[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | right); }
+
+// // Integral OP Enum
+// template <Integral L, Enum R>
+// [[nodiscard]] constexpr R operator&(L left, R right) noexcept { return static_cast<R>(left & +right); }
+
+// template <Integral L, Enum R>
+// [[nodiscard]] constexpr R operator^(L left, R right) noexcept { return static_cast<R>(left ^ +right); }
+
+// template <Integral L, Enum R>
+// [[nodiscard]] constexpr R operator|(L left, R right) noexcept { return static_cast<R>(left | +right); }
+
+// Enum OP= Enum
+template <Enum L, Enum R>
+/*[[nodiscard]]*/ constexpr const L& operator&=(L& left, R right) noexcept { return left = left & right; }
+
+template <Enum L, Enum R>
+/*[[nodiscard]]*/ constexpr const L& operator^=(L& left, R right) noexcept { return left = left ^ right; }
+
+template <Enum L, Enum R>
+/*[[nodiscard]]*/ constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
+
+// // Enum OP= Integral
+// template <Enum L, Integral R>
+// [[nodiscard]] constexpr const L& operator&=(L& left, R right) noexcept { return left = left & right; }
+
+// template <Enum L, Integral R>
+// [[nodiscard]] constexpr const L& operator^=(L& left, R right) noexcept { return left = left ^ right; }
+
+// template <Enum L, Integral R>
+// [[nodiscard]] constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
+
+} // namespace EnumOps
+
+template <Enum E>
+constexpr bool HasAllFlags(E value, E flags) noexcept { return (+value & +flags) == +flags; }
+
+template <Enum E>
+constexpr bool HasAnyFlag(E value, E flags) noexcept { return (+value & +flags) != 0; }
+
+#if TEST
+namespace Test {
+
+using namespace Zhele::EnumOps;
+
+enum class E : signed char {
+    A,
+    B,
+    C,
+    D
+};
+
+static_assert((E::B & E::C) == E::A);
+static_assert((E::B ^ E::C) == E::D);
+static_assert((E::B | E::C) == E::D);
+
+static_assert((E::B & 2) == E::A);
+static_assert((E::B ^ 2) == E::D);
+static_assert((E::B | 2) == E::D);
+
+static_assert((1 & E::C) == E::A);
+static_assert((1 ^ E::C) == E::D);
+static_assert((1 | E::C) == E::D);
+
+static_assert(~E::A == static_cast<E>(-1));
+static_assert(Zhele::HasAllFlags(E::D, E::B | E::C));
+static_assert(Zhele::HasAnyFlag(E::D, E::C));
+
+static_assert([](E e) consteval { return e &= 2; }(E::B) == E::A);
+static_assert([](E e) consteval { return e ^= 2; }(E::B) == E::D);
+static_assert([](E e) consteval { return e |= 2; }(E::B) == E::D);
+
+static_assert([](E e) consteval { return e++; }(E::B) == E::B);
+static_assert([](E e) consteval { return e--; }(E::B) == E::B);
+static_assert([](E e) consteval { return ++e; }(E::B) == E::C);
+static_assert([](E e) consteval { return --e; }(E::B) == E::A);
+static_assert([](E e) consteval { auto _ = e++; return e; }(E::B) == E::C);
+static_assert([](E e) consteval { auto _ = e--; return e; }(E::B) == E::A);
+
+} // namespace Test
 #endif
