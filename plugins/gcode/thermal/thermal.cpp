@@ -25,7 +25,7 @@ void Creator::create() {
 }
 
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
-    toolDiameter = tool.getDiameter(depth);
+    toolDiameter         = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
 
     dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
@@ -61,7 +61,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         {
             Clipper2Lib::ClipperOffset offset;
             for(auto go: graphicObjects | v::filter([](auto* go) { return go->positive(); }))
-                offset.AddPaths(go->fill /*polyLineW()*/, JoinType::Round, EndType::Polygon);
+                offset.AddPaths(toPaths(go->fill) /*polyLineW()*/, JoinType::Round, EndType::Polygon);
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddSubject(framePaths);
         }
@@ -70,7 +70,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
             for(auto go: graphicObjects) {
                 // if (go->closed()) {
                 // if (go->positive())
-                offset.AddPaths(go->fill /*polygonWholes()*/, JoinType::Round, EndType::Polygon);
+                offset.AddPaths(toPaths(go->fill) /*polygonWholes()*/, JoinType::Round, EndType::Polygon);
                 // else {
                 // Paths paths(go->polygonWholes());
                 // ReversePaths(paths);
@@ -100,7 +100,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
     if(returnPss.size()) {
         sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
         gcp.toolPathss = toCurvess(returnPss);
-        file_ = new File{std::move(gcp)};
+        file_          = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }
 }

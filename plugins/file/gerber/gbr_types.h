@@ -277,8 +277,8 @@ struct GrObject : GraphicObject {
         : gFile{gFile}
         , state{state} {
         GraphicObject::id = id;
-        GraphicObject::fill = std::move(paths);
-        GraphicObject::path = std::move(path);
+        GraphicObject::fill = toCurves(paths);
+        GraphicObject::path = toCurve(path);
         GraphicObject::type = type;
     }
 };

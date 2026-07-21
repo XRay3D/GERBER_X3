@@ -17,14 +17,7 @@ set(FILE_PLUGINS #[[gerber]] dxf #[[excellon svg]])
 add_subdirectory(file)
 
 set(GCODE_PLUGINS
-    profile
-    pocketoffset
-    drill
-    #[[
-    hatching
-    pocketraster
-    voroni
-    thermal
-    thread]]
-)
+    profile pocketoffset drill # hatching pocketraster
+    # voroni thermal
+    thread)
 add_subdirectory(gcode)

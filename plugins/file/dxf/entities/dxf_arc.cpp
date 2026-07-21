@@ -48,9 +48,14 @@ DxfGo Arc::toGo() const {
     QPointF
         p1{cos(qDegreesToRadians(startAngle)), sin(qDegreesToRadians(startAngle))},
         p2{cos(qDegreesToRadians(endAngle)), sin(qDegreesToRadians(endAngle))};
+    // По спецификации DXF дуга ARC всегда идёт против часовой стрелки (Ccw) от
+    // startAngle к endAngle, независимо от величины дуги. geo::DIR() определяет
+    // направление по кратчайшему углу между точками и для дуг больше 180° даёт
+    // неверный результат (Cw вместо Ccw) — направление здесь не вычисляется,
+    // а фиксировано согласно спецификации.
     Curve curve{
         {p1 * radius + centerPoint},
-        {p2 * radius + centerPoint, centerPoint, geo::DIR(p1, QPointF{}, p2)}
+        {p2 * radius + centerPoint, centerPoint, geo::Vertex::Ccw}
     };
 
     DxfGo go{id, std::move(curve)};
