@@ -44,7 +44,7 @@ namespace GCode {
 void regenerateGCodeFiles() {
     // r::for_each(App::project().files<File>(), &File::regenerate);
     auto files = App::project().files<File>();
-    std::for_each(std::execution::par_unseq,
+    std::for_each( // std::execution::par_unseq,
         files.begin(), files.end(),
         [](File* f) { f->regenerate(); });
 }
@@ -166,9 +166,12 @@ void File::regenerate() {
         if(!scriptPath.isEmpty() && QFile::exists(scriptPath))
             jsRan = runJsScript(scriptPath);
     }
-    assert(jsRan);
+    // assert(jsRan);
     if(!jsRan)
-        genGcodeAndTile();
+        try {
+            genGcodeAndTile();
+        } catch(...) {
+        }
 
     endFile();
 }
@@ -362,7 +365,8 @@ std::vector<QString> File::savePath(const Curve& curve, double perimetr, double 
 
 QString File::formated(const std::vector<QString>& data) {
     QString ret;
-    for(const QString& str: data) {
+    for(const QString& str: data | v::filter(&QString::size)) {
+        // if(str.isEmpty())continue
         ssize_t index = CMD_LIST.indexOf(str.front(), 0, Qt::CaseInsensitive);
         if(index != -1) {
             if(formatFlags[AlwaysG + index] || lastValues[index] != str) {
@@ -400,6 +404,7 @@ QString File::format(double val) {
 
 /////////////////////////////////////////////////////////////
 void File::saveDrill(const QPointF& offset) {
+    if(gcp.toolPathss.empty()) return;
     Curve path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
     const std::vector<double> depths(getDepths());
     for(auto&& point: path) {
@@ -409,7 +414,7 @@ void File::saveDrill(const QPointF& offset) {
             lines_.emplace_back(formated({g1(), z(depths[i]), strPlungeFeed}));
             if(++i == depths.size()) break;
             if(gcp.tool().lenght() > depths[i])
-                lines_.emplace_back(formated({g0(), z(depths[i] + gcp.tool().oneTurnCut() * 4)}));
+                lines_.emplace_back(formated({g0(), z(depths[i] - gcp.tool().oneTurnCut() * 4)}));
             else
                 lines_.emplace_back(formated({g0(), z(0)}));
         }

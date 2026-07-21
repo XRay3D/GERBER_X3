@@ -28,6 +28,7 @@ namespace Profile {
 
 void Creator::create() {
     // WARNING App::fileTreeView().closeFiles();
+    if(gcp.tools.empty()) return; // FIXME
     createProfile(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 
@@ -48,7 +49,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
             // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
             // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
             // returnPs = offset.Execute(dOffset);
-            auto it = v::join(groupedPaths(GCode::Grouping::Copper));
+            auto it  = v::join(groupedPaths(GCode::Grouping::Copper));
             returnPs = Inflate(Paths{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
         }
         if(openSrcPaths.size()) {
@@ -172,7 +173,7 @@ void Creator::cornerTrimming() {
             && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
             l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
             auto tmp = {~l2.p1(), ~l2.p2()};
-            auto it = path.begin() + std::distance(path.data(), corner);
+            auto it  = path.begin() + std::distance(path.data(), corner);
             path.insert(it, tmp.begin(), tmp.end());
             std::advance(corner, 2);
         }
@@ -252,7 +253,7 @@ void Creator::reorder() {
         Clipper clipper;
         clipper.AddSubject(returnPs);
         Rect r(GetBounds(returnPs));
-        int k = uScale;
+        int k      = uScale;
         Path outer = {
             {r.left - k,  r.bottom + k},
             {r.right + k, r.bottom + k},
@@ -288,7 +289,7 @@ void Creator::reduceDistance(Point& from, Path& to) {
     int ctr2 = 0, idx = 0;
     for(auto pt2: to) {
         if(auto tmp = distToSq(from, pt2); d > tmp) {
-            d = tmp;
+            d   = tmp;
             idx = ctr2;
         }
         ++ctr2;
