@@ -73,7 +73,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     else if(400 <= code && code <= 409) type = Integer16;   // 16-разрядное целое значение
     else if(410 <= code && code <= 419) type = String;      // Строка. Подробные сведения см. в разделе «Хранение строковых значений»
     else if(420 <= code && code <= 429) type = Integer32;   // 32-разрядное целое значение
-    else if(430 <= code && code <= 439) type = Integer64;   // Строка. Подробные сведения см. в разделе «Хранение строковых значений»
+    else if(430 <= code && code <= 439) type = String;      // Строка. Подробные сведения см. в разделе «Хранение строковых значений»
     else if(440 <= code && code <= 449) type = Integer32;   // 32-разрядное целое значение
     else if(450 <= code && code <= 459) type = Integer64;   // Long
     else if(460 <= code && code <= 469) type = Double;      // Значение с плавающей запятой двойной точности
