@@ -117,13 +117,22 @@ consteval auto fields_count() {
 template <typename T, typename Func>
     requires(is_class_type(^^std::remove_cvref_t<T>))
 constexpr auto for_each_field(T&& str, Func&& func) {
-    static constexpr auto MEMBERS = std::define_static_array(nonstatic_data_members_of(^^std::remove_cvref_t<T>, CTX));
-    size_t i{};
+    static constexpr auto MEMBERS = std::define_static_array(
+        nonstatic_data_members_of(^^std::remove_cvref_t<T>, CTX));
+
     template for(constexpr auto MEMBER: MEMBERS) {
-        if constexpr(requires { func(std::forward<T>(str).[:MEMBER:]); })
+        if constexpr(
+            requires {
+                func(std::forward<T>(str).[:MEMBER:]);
+            })
             func(std::forward<T>(str).[:MEMBER:]);
-        else if constexpr(requires { func(std::forward<T>(str).[:MEMBER:], i++); })
-            func(std::forward<T>(str).[:MEMBER:], display_string_of(MEMBER));
+        else if constexpr(
+            requires {
+                func(std::forward<T>(str).[:MEMBER:], identifier_of(MEMBER));
+            })
+            func(std::forward<T>(str).[:MEMBER:], identifier_of(MEMBER));
+        else
+            static_assert("no mach func!");
         // else if constexpr(requires { func(std::forward<T>(str).[:MEMBER:], i++); })
         // func(std::forward<T>(str).[:MEMBER:], i++);
     }
@@ -131,7 +140,7 @@ constexpr auto for_each_field(T&& str, Func&& func) {
 
 template <size_t I, typename T>
 constexpr auto get_name() {
-    return display_string_of(nonstatic_data_members_of(^^T, CTX)[I]);
+    return identifier_of(nonstatic_data_members_of(^^T, CTX)[I]);
 }
 
 // порционное сохранение для гибкости.

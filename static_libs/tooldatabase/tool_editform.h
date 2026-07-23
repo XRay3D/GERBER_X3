@@ -15,9 +15,7 @@
 #include "tool.h"
 #include <QWidget>
 #include <array>
-#include <optional>
-#include <set>
-#include <variant>
+#include <flat_map>
 
 namespace Ui {
 class ToolEditForm;
@@ -55,16 +53,6 @@ private:
 
     void valueChanged(double value);
 
-    struct Data {
-        DoubleSpinBox* dsbx[2];
-        std::set<Tool::Type> set;
-        std::variant<double, DoubleSpinBox*> max;
-        std::optional<double> defVal;
-        std::optional<double> lastVal;
-    };
-
-    std::array<Data, 7> dsbxMapdsbxMap;
-
     ToolItem* item_{nullptr};
     Tool tool_;
     double feed{1.0};
@@ -77,6 +65,7 @@ private:
     using Key = decltype(&Tool::angle);
 
     void updateDsbxAngle(double val);
+    void updateDsbxHoleDiam(double val);
     void updateDsbxDiameter(double val);
     void updateDsbxFeedRate(double val);
     void updateDsbxOneTurnCut(double val);
@@ -88,9 +77,9 @@ private:
     void updateDsbxOneTurnCutPercent(double val);
     void updateDsbxStepoverPercent(double val);
 
-    std::map<QDoubleSpinBox*, decltype(&ToolEditForm::updateDsbxAngle)> update;
-    std::array<std::pair<DoubleSpinBox*, decltype(&Tool::angle)>, 9> get;
-    std::array<std::pair<DoubleSpinBox*, decltype(&Tool::setAngle)>, 9> set;
+    std::flat_map<QDoubleSpinBox*, decltype(&ToolEditForm::updateDsbxAngle)> update;
+    std::array<std::pair<DoubleSpinBox*, decltype(&Tool::angle)>, 12> get;
+    std::array<std::pair<DoubleSpinBox*, decltype(&Tool::setAngle)>, 12> set;
 
     // mvector<DoubleSpinBox*> update;
 };

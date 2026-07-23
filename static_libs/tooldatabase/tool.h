@@ -24,15 +24,11 @@ class Tool {
     friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
-    Tool() = default;
-    Tool(double diameter)
-        : diameter_{diameter} { }
-
     enum class ID : int32_t {
         // Folder = -1,
-        Null   = 0,
+        Null = 0,
         Folder = 0,
-        Tool   = +1
+        Tool = +1
     };
 
     enum Type {
@@ -44,50 +40,76 @@ public:
         Group = 100
     };
 
+private:
+    struct {
+        QString name{QObject::tr("Default")};
+        QString note;
+        double angle{.0};
+        double diameter{1.};
+        double feedRate{600.};
+        double oneTurnCut{0.1};
+        double passDepth{2.}; // max thread pitch
+        double plungeRate{100.};
+        double spindleSpeed{12000.};
+        double stepover{0.5};
+        double lenght{1.}; //
+        ID id{ID::Null};
+        Type type{EndMill};
+        bool autoName{true};
+    } data;
+
+public:
+    Tool() = default;
+    Tool(double diameter) { data.diameter = diameter; }
+
     // name
     QString nameEnc() const;
-    QString name() const { return name_; }
-    void setName(const QString& name) { hash_ = {}, name_ = name; }
+    QString name() const { return data.name; }
+    void setName(const QString& name) { hash_ = {}, data.name = name; }
     // note
-    QString note() const { return note_; }
-    void setNote(const QString& note) { hash_ = {}, note_ = note; }
+    QString note() const { return data.note; }
+    void setNote(const QString& note) { hash_ = {}, data.note = note; }
     // type
-    Type type() const;
-    void setType(int type) { hash_ = {}, type_ = static_cast<Type>(type); }
+    Type type() const { return data.type; }
+    void setType(int type) { hash_ = {}, data.type = static_cast<Type>(type); }
     // angle
-    double angle() const { return angle_; }
-    void setAngle(double angle) { hash_ = {}, angle_ = angle; }
+    double angle() const { return data.angle; }
+    void setAngle(double angle) { hash_ = {}, data.angle = angle; }
     // diameter
-    double diameter() const { return diameter_; }
-    void setDiameter(double diameter) { hash_ = {}, diameter_ = diameter, updatePath(); }
+    double diameter() const { return data.diameter; }
+    void setDiameter(double diameter) { hash_ = {}, data.diameter = diameter, updatePath(); }
     // feedRate
-    double feedRate_mmPerSec() const { return feedRate_ / 60.0; }
-    double feedRate() const { return feedRate_; }
-    void setFeedRate(double feedRate) { hash_ = {}, feedRate_ = feedRate; }
+    double feedRate_mmPerSec() const { return data.feedRate / 60.0; }
+    double feedRate() const { return data.feedRate; }
+    void setFeedRate(double feedRate) { hash_ = {}, data.feedRate = feedRate; }
     // oneTurnCut
-    double oneTurnCut() const { return oneTurnCut_; }
-    void setOneTurnCut(double oneTurnCut) { hash_ = {}, oneTurnCut_ = oneTurnCut; }
+    double oneTurnCut() const { return data.oneTurnCut; }
+    void setOneTurnCut(double oneTurnCut) { hash_ = {}, data.oneTurnCut = oneTurnCut; }
     // passDepth
-    double passDepth() const { return passDepth_; }
-    void setPassDepth(double passDepth) { hash_ = {}, passDepth_ = passDepth; }
+    double passDepth() const { return data.passDepth; }
+    void setPassDepth(double passDepth) { hash_ = {}, data.passDepth = passDepth; }
     // plungeRate
-    double plungeRate() const { return plungeRate_; }
-    void setPlungeRate(double plungeRate) { hash_ = {}, plungeRate_ = plungeRate; }
+    double plungeRate() const { return data.plungeRate; }
+    void setPlungeRate(double plungeRate) { hash_ = {}, data.plungeRate = plungeRate; }
     // spindleSpeed
-    double spindleSpeed() const { return spindleSpeed_; }
-    void setSpindleSpeed(double spindleSpeed) { hash_ = {}, spindleSpeed_ = spindleSpeed; }
+    double spindleSpeed() const { return data.spindleSpeed; }
+    void setSpindleSpeed(double spindleSpeed) { hash_ = {}, data.spindleSpeed = spindleSpeed; }
     // stepover
-    double stepover() const { return stepover_; }
-    void setStepover(double stepover) { hash_ = {}, stepover_ = stepover; }
+    double stepover() const { return data.stepover; }
+    void setStepover(double stepover) { hash_ = {}, data.stepover = stepover; }
     // autoName
-    bool autoName() const { return autoName_; }
-    void setAutoName(bool autoName) { hash_ = {}, autoName_ = autoName; }
+    bool autoName() const { return data.autoName; }
+    void setAutoName(bool autoName) { hash_ = {}, data.autoName = autoName; }
     // lenght
-    double lenght() const { return lenght_; }
-    void setLenght(double lenght) { hash_ = {}, lenght_ = lenght; }
-    // id
-    ID id() const { return id_; }
-    void setId(ID id) { hash_ = {}, id_ = id; }
+    double lenght() const { return data.lenght; }
+    void setLenght(double lenght) { hash_ = {}, data.lenght = lenght; }
+    // Thread Hole Diam
+    double holeDiam() const { return data.angle; }
+    void setHoleDiam(double val) { hash_ = {}, data.angle = val; }
+    // ID
+    ID id() const { return data.id; }
+    void setId(ID id) { hash_ = {}, data.id = id; }
+
     // depth_
     static double depth() { return depth_; }
     static void setDepth(double depth) { depth_ = depth; }
@@ -108,31 +130,12 @@ public:
     void updatePath(double depth = 0.0);
 
 private:
-    QString name_{QObject::tr("Default")};
-    QString note_;
-
-    double angle_{.0};
-    double diameter_{1.};
-    double feedRate_{100.};
-    double oneTurnCut_{0.1};
-    double passDepth_{2.}; // max thread pitch
-    double plungeRate_{600.};
-    double spindleSpeed_{12000.};
-    double stepover_{0.5};
-    double lenght_{1.}; //
-
     static inline double depth_;
-
-    ID id_{ID::Null};
 
     mutable size_t hash_{};
     mutable size_t hash2_{};
 
-    Type type_{EndMill};
-
     QPainterPath path_;
-
-    bool autoName_{true};
 };
 
 using Tools = std::map<Tool::ID, Tool, std::greater<Tool::ID>>;
@@ -142,10 +145,10 @@ class ToolHolder {
     friend class AbstractFilePlugin;
 
     Tools tools_;
-    ToolHolder(const ToolHolder&)            = delete;
+    ToolHolder(const ToolHolder&) = delete;
     ToolHolder& operator=(const ToolHolder&) = delete;
-    ToolHolder(ToolHolder&&)                 = delete;
-    ToolHolder& operator=(ToolHolder&&)      = delete;
+    ToolHolder(ToolHolder&&) = delete;
+    ToolHolder& operator=(ToolHolder&&) = delete;
 
 public:
     ToolHolder() = default;
@@ -159,3 +162,4 @@ public:
 
 Q_DECLARE_METATYPE(Tool)
 Q_DECLARE_METATYPE(Tool::Type)
+Q_DECLARE_METATYPE(Tool::ID)
