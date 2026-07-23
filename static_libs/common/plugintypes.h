@@ -74,7 +74,8 @@ enum class GCType {
     Drill,
     Pocket,
     Profile,
-    Thermal
+    Thermal,
+    THread
 };
 
 struct GraphicObject {

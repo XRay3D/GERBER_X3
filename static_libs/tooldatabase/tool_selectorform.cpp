@@ -42,9 +42,11 @@ void ToolSelectorForm::setTool(const Tool& tool) {
 const Tool& ToolSelectorForm::tool() const { return tool_; }
 
 void ToolSelectorForm::on_pbSelect_clicked() {
-    ToolDatabase tdb(this, {Tool::EndMill, Tool::Engraver, Tool::Laser});
-    if(tdb.exec())
-        setTool(tdb.tool());
+    ToolDatabase tdb{
+        this,
+        std::array{Tool::EndMill, Tool::Engraver, Tool::Laser},
+    };
+    if(tdb.exec()) setTool(tdb.tool());
 }
 
 void ToolSelectorForm::on_pbEdit_clicked() {

@@ -40,9 +40,9 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 } // namespace QtPrivate
 
 bool MainWindow::cli(std::span<std::string_view> commands) {
-    static int time = 100;
+    static int time  = 100;
     static int delay = 100; //-V654
-    using pair = std::pair<std::string_view, std::function<void()>>;
+    using pair       = std::pair<std::string_view, std::function<void()>>;
     static std::array commandsMap{
         pair{"LoadDir"sv,        [this] {
                  QSettings settings;
@@ -110,6 +110,11 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
                  if(!toolpathActions.contains(TYPE)) return;
                  toolpathActions[TYPE]->toggle();
              }       },
+        pair{"Thread"sv,         [this] {
+                 constexpr auto TYPE = "THREAD"_hash32;
+                 if(!toolpathActions.contains(TYPE)) return;
+                 toolpathActions[TYPE]->toggle();
+             }        },
         pair{"Profile"sv,        [this] {
                  constexpr auto TYPE = "Profile"_hash32;
                  if(!toolpathActions.contains(TYPE)) return;
@@ -168,7 +173,7 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
 
     QTimer::singleShot(time += delay, this, [] { App::grView().zoomFit(); });
 
-    time = 100;
+    time  = 100;
     delay = 100;
 
     // if (0) {
