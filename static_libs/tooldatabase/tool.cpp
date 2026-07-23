@@ -76,49 +76,9 @@ QString Tool::nameEnc() const {
     default              : return {};
     }
 }
-QString Tool::name() const { return name_; }
-void Tool::setName(const QString& name) { hash_ = {}, name_ = name; }
 
-QString Tool::note() const { return note_; }
-void Tool::setNote(const QString& note) { hash_ = {}, note_ = note; }
 
-Tool::Type Tool::type() const { return type_; }
-void Tool::setType(int type) { hash_ = {}, type_ = static_cast<Type>(type); }
 
-double Tool::angle() const { return angle_; }
-void Tool::setAngle(double angle) { hash_ = {}, angle_ = angle; }
-
-double Tool::diameter() const { return diameter_; }
-void Tool::setDiameter(double diameter) { hash_ = {}, diameter_ = diameter, updatePath(); }
-
-double Tool::feedRate_mmPerSec() const { return feedRate_ / 60.0; }
-double Tool::feedRate() const { return feedRate_; }
-void Tool::setFeedRate(double feedRate) { hash_ = {}, feedRate_ = feedRate; }
-
-double Tool::oneTurnCut() const { return oneTurnCut_; }
-void Tool::setOneTurnCut(double oneTurnCut) { hash_ = {}, oneTurnCut_ = oneTurnCut; }
-
-double Tool::passDepth() const { return passDepth_; }
-void Tool::setPassDepth(double passDepth) { hash_ = {}, passDepth_ = passDepth; }
-
-double Tool::plungeRate() const { return plungeRate_; }
-void Tool::setPlungeRate(double plungeRate) { hash_ = {}, plungeRate_ = plungeRate; }
-
-double Tool::spindleSpeed() const { return spindleSpeed_; }
-void Tool::setSpindleSpeed(double spindleSpeed) { hash_ = {}, spindleSpeed_ = spindleSpeed; }
-
-double Tool::stepover() const { return stepover_; }
-void Tool::setStepover(double stepover) { hash_ = {}, stepover_ = stepover; }
-
-bool Tool::autoName() const { return autoName_; }
-void Tool::setAutoName(bool autoName) { hash_ = {}, autoName_ = autoName; }
-
-double Tool::lenght() const { return lenght_; }
-void Tool::setLenght(double lenght) { hash_ = {}, lenght_ = lenght; }
-
-int Tool::id() const { return id_; }
-
-void Tool::setId(int32_t id) { hash_ = {}, id_ = id; }
 double Tool::getDiameter(double depth) const {
     if(type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
@@ -138,38 +98,38 @@ double Tool::getDepth() const {
 }
 
 void Tool::read(const QJsonObject& json) {
-    angle_        = json[u"angle"_s].toDouble();
-    autoName_     = json[u"autoName"_s].toBool();
-    diameter_     = json[u"diameter"_s].toDouble();
-    feedRate_     = json[u"feedRate"_s].toDouble();
-    id_           = json[u"id"_s].toInt();
-    name_         = json[u"name"_s].toString();
-    note_         = json[u"note"_s].toString();
-    oneTurnCut_   = json[u"oneTurnCut"_s].toDouble();
-    passDepth_    = json[u"passDepth"_s].toDouble();
-    plungeRate_   = json[u"plungeRate"_s].toDouble();
+    angle_ = json[u"angle"_s].toDouble();
+    autoName_ = json[u"autoName"_s].toBool();
+    diameter_ = json[u"diameter"_s].toDouble();
+    feedRate_ = json[u"feedRate"_s].toDouble();
+    id_ = json[u"id"_s].toInt();
+    name_ = json[u"name"_s].toString();
+    note_ = json[u"note"_s].toString();
+    oneTurnCut_ = json[u"oneTurnCut"_s].toDouble();
+    passDepth_ = json[u"passDepth"_s].toDouble();
+    plungeRate_ = json[u"plungeRate"_s].toDouble();
     spindleSpeed_ = json[u"spindleSpeed"_s].toInt();
-    stepover_     = json[u"stepover"_s].toDouble();
-    lenght_       = json[u"lenght"_s].toDouble(10);
+    stepover_ = json[u"stepover"_s].toDouble();
+    lenght_ = json[u"lenght"_s].toDouble(10);
 
     type_ = static_cast<Type>(json[u"type"_s].toInt());
 }
 
 void Tool::write(QJsonObject& json) const {
-    json[u"angle"_s]        = angle_;
-    json[u"autoName"_s]     = autoName_;
-    json[u"diameter"_s]     = diameter_;
-    json[u"feedRate"_s]     = feedRate_;
-    json[u"id"_s]           = id_;
-    json[u"name"_s]         = name_;
-    json[u"note"_s]         = note_;
-    json[u"oneTurnCut"_s]   = oneTurnCut_;
-    json[u"passDepth"_s]    = passDepth_;
-    json[u"plungeRate"_s]   = plungeRate_;
+    json[u"angle"_s] = angle_;
+    json[u"autoName"_s] = autoName_;
+    json[u"diameter"_s] = diameter_;
+    json[u"feedRate"_s] = feedRate_;
+    json[u"id"_s] = id_;
+    json[u"name"_s] = name_;
+    json[u"note"_s] = note_;
+    json[u"oneTurnCut"_s] = oneTurnCut_;
+    json[u"passDepth"_s] = passDepth_;
+    json[u"plungeRate"_s] = plungeRate_;
     json[u"spindleSpeed"_s] = spindleSpeed_;
-    json[u"stepover"_s]     = stepover_;
-    json[u"type"_s]         = type_;
-    json[u"lenght"_s]       = lenght_;
+    json[u"stepover"_s] = stepover_;
+    json[u"type"_s] = type_;
+    json[u"lenght"_s] = lenght_;
 }
 
 bool Tool::isValid() const {
@@ -272,9 +232,9 @@ size_t Tool::hash2() const {
 QPainterPath Tool::path(const QPointF& pt) const { return path_.translated(pt); }
 
 void Tool::updatePath(double depth) {
-    const double diameter  = getDiameter(depth);
+    const double diameter = getDiameter(depth);
     const double lineKoeff = diameter * 0.7;
-    path_                  = QPainterPath();
+    path_ = QPainterPath();
     path_.addEllipse({}, diameter * 0.5, diameter * 0.5);
     path_.moveTo(QPointF(0.0, +lineKoeff));
     path_.lineTo(QPointF(0.0, -lineKoeff));

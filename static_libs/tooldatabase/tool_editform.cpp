@@ -14,74 +14,72 @@
 
 #include "tool_item.h"
 #include <QDebug>
+#include <QFormLayout>
 #include <QSettings>
 
 #define TR QCoreApplication::translate
 
 ToolEditForm::ToolEditForm(QWidget* parent)
     : QWidget{parent}
-    , ui(new Ui::ToolEditForm) {
+    , ui{new Ui::ToolEditForm{}} {
     ui->setupUi(this);
     // clang-format AlignArrayOfStructures: Left
     update = {
         {ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle            },
         {ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter         },
+        {ui->dsbxHoleDiam,          &ToolEditForm::updateDsbxHoleDiam         },
         {ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate         },
         {ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght           },
         {ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut       },
         {ui->dsbxOneTurnCutPercent, &ToolEditForm::updateDsbxOneTurnCutPercent},
-        {ui->dsbxPassDepth,         &ToolEditForm::updateDsbxPassDepth        },
         {ui->dsbxPlungeRate,        &ToolEditForm::updateDsbxPlungeRate       },
         {ui->dsbxSpindleSpeed,      &ToolEditForm::updateDsbxSpindleSpeed     },
         {ui->dsbxStepover,          &ToolEditForm::updateDsbxStepover         },
         {ui->dsbxStepoverPercent,   &ToolEditForm::updateDsbxStepoverPercent  },
+        {ui->dsbxDepth,             &ToolEditForm::updateDsbxPassDepth        },
+        {ui->dsbxPass,              &ToolEditForm::updateDsbxPassDepth        },
+        {ui->dsbxThreadPitch,       &ToolEditForm::updateDsbxPassDepth        },
     };
+    for(auto [dsbx, _]: update)
+        connect(dsbx, &QDoubleSpinBox::valueChanged, this, &ToolEditForm::valueChanged);
 
     get = {
         std::pair{ui->dsbxAngle,        &Tool::angle       },
+        std::pair{ui->dsbxHoleDiam,     &Tool::angle       },
+        std::pair{ui->dsbxDepth,        &Tool::passDepth   },
         std::pair{ui->dsbxDiameter,     &Tool::diameter    },
         std::pair{ui->dsbxFeedRate,     &Tool::feedRate    },
         std::pair{ui->dsbxLenght,       &Tool::lenght      },
         std::pair{ui->dsbxOneTurnCut,   &Tool::oneTurnCut  },
-        std::pair{ui->dsbxPassDepth,    &Tool::passDepth   },
+        std::pair{ui->dsbxPass,         &Tool::passDepth   },
         std::pair{ui->dsbxPlungeRate,   &Tool::plungeRate  },
         std::pair{ui->dsbxSpindleSpeed, &Tool::spindleSpeed},
         std::pair{ui->dsbxStepover,     &Tool::stepover    },
+        std::pair{ui->dsbxThreadPitch,  &Tool::passDepth   },
     };
 
     set = {
         std::pair{ui->dsbxAngle,        &Tool::setAngle       },
+        std::pair{ui->dsbxHoleDiam,     &Tool::setAngle       },
+        std::pair{ui->dsbxDepth,        &Tool::setPassDepth   },
         std::pair{ui->dsbxDiameter,     &Tool::setDiameter    },
         std::pair{ui->dsbxFeedRate,     &Tool::setFeedRate    },
         std::pair{ui->dsbxLenght,       &Tool::setLenght      },
         std::pair{ui->dsbxOneTurnCut,   &Tool::setOneTurnCut  },
-        std::pair{ui->dsbxPassDepth,    &Tool::setPassDepth   },
+        std::pair{ui->dsbxPass,         &Tool::setPassDepth   },
         std::pair{ui->dsbxPlungeRate,   &Tool::setPlungeRate  },
         std::pair{ui->dsbxSpindleSpeed, &Tool::setSpindleSpeed},
         std::pair{ui->dsbxStepover,     &Tool::setStepover    },
+        std::pair{ui->dsbxThreadPitch,  &Tool::setPassDepth   },
     };
-
-    dsbxMapdsbxMap = {
-        // clang-format off
-        Data {{ui->dsbxAngle},                                 {Tool::Drill, Tool::Engraver},                                  180.0, 120.0    ,std::nullopt},
-        Data {{ui->dsbxFeedRate},                              {Tool::Laser, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         ,std::nullopt,std::nullopt},
-        Data {{ui->dsbxLenght},                                {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         ,std::nullopt,std::nullopt},
-        Data {{ui->dsbxOneTurnCut, ui->dsbxOneTurnCutPercent}, {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, ui->dsbxDiameter,std::nullopt,std::nullopt},
-        Data {{ui->dsbxPassDepth},                             {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100.0           ,std::nullopt,std::nullopt},
-        Data {{ui->dsbxPlungeRate},                            {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, 100000.         ,std::nullopt,std::nullopt}, // ThreadMill?
-        Data {{ui->dsbxStepover, ui->dsbxStepoverPercent},     {Tool::Laser, Tool::EndMill, Tool::Engraver, Tool::ThreadMill}, ui->dsbxDiameter,std::nullopt,std::nullopt},
-    }; // clang-format on
-
-    for(auto [dsbx, _]: update)
-        connect(dsbx, &QDoubleSpinBox::valueChanged, this, &ToolEditForm::valueChanged);
 
     connect(ui->cbxFeedSpeeds, &QComboBox::currentIndexChanged, this, [this](int index) {
         double lastFeed = feed;
         switch(index) {
-        case mmPerSec: feed = 1.0 / 60.0; break;   // mm/sec
-        case mmPerMin: feed = 1.0; break;          // mm/min!!!
-        case cmPerMin: feed = 1.0 / 10.0; break;   // cm/min
-        case mPerMin : feed = 1.0 / 1000.0; break; // m/min
+        case mmPerSec: feed = 1. / 60.; break;   // mm/sec
+        case mmPerMin: feed = 1.; break;         // mm/min!!!
+        case cmPerMin: feed = 1. / 10.; break;   // cm/min
+        case mPerMin : feed = 1. / 1000.; break; // m/min
         default      : break;
         }
 
@@ -150,25 +148,26 @@ void ToolEditForm::setTool(const Tool& tool) {
     // qDebug(__FUNCTION__);
     tool_ = tool;
 
-    for(auto& data: dsbxMapdsbxMap) {
-        data.dsbx[0]->setEnabled(true);
-        data.dsbx[0]->setMaximum(std::numeric_limits<double>::max());
-    }
+    const std::array dsbxList{
+        ui->dsbxAngle,
+        ui->dsbxDepth,
+        ui->dsbxFeedRate,
+        ui->dsbxLenght,
+        ui->dsbxOneTurnCut,
+        ui->dsbxPass,
+        ui->dsbxPlungeRate,
+        ui->dsbxStepover,
+        ui->dsbxThreadPitch,
+    };
 
-    switch(tool_.type()) {
-    case Tool::Drill   : dsbxMapdsbxMap[0].defVal = 120.; break;
-    case Tool::Engraver: dsbxMapdsbxMap[0].defVal = 90.; break;
-    default            : break;
-    }
+    for(DoubleSpinBox* dsbx: dsbxList)
+        dsbx->setMaximum(std::numeric_limits<double>::max());
 
     for(auto [dsbx, get]: get)
         dsbx->setValue((tool.*get)());
 
-    for(auto& data: dsbxMapdsbxMap)
-        if(qFuzzyIsNull(data.dsbx[0]->value()))
-            data.lastVal.reset();
-        else
-            data.lastVal = data.dsbx[0]->value();
+    for(DoubleSpinBox* dsbx: dsbxList)
+        dsbx->setProperty("lastVal", qFuzzyIsNull(dsbx->value()) ? QVariant{} : QVariant{dsbx->value()});
 
     for(int i{}; i < ui->cbxToolType->count(); ++i) {
         if(ui->cbxToolType->itemData(i).value<Tool::Type>() == tool.type()) {
@@ -205,55 +204,99 @@ void ToolEditForm::setVisibleToolWidgets(bool visible) {
     setMinimumWidth(width());
 }
 
-// bool operator<(std::set<Tool::Type> l, std::set<Tool::Type> r) {
-// return l < r;
-// }
-
 void ToolEditForm::setupToolWidgets(int) {
-    [[maybe_unused]] const auto lastType = tool_.type();
-
     auto currType = ui->cbxToolType->currentData().value<Tool::Type>();
     tool_.setType(currType);
 
-    // qDebug() << u"\n\n"_s;
-
-    static Overload value{
-        [](auto* val) { return val->value(); },
-        [](auto val) { return val; },
+    // строки, которые скрываются/показываются в зависимости от типа инструмента
+    static const std::array trackedDsbx{
+        ui->dsbxAngle,
+        ui->dsbxFeedRate,
+        ui->dsbxLenght,
+        ui->dsbxOneTurnCut,
+        ui->dsbxPass,
+        ui->dsbxThreadPitch,
+        ui->dsbxDepth,
+        ui->dsbxPlungeRate,
+        ui->dsbxStepover,
+        ui->dsbxHoleDiam,
     };
 
-    for(auto& data: dsbxMapdsbxMap) {
-        if(data.set.contains(currType)) {
-            data.dsbx[0]->setMaximum(std::visit(value, data.max));
+    // перед скрытием запоминаем значения ещё видимых полей, чтобы восстановить их при возврате к этому типу
+    for(auto* dsbx: trackedDsbx)
+        if(dsbx->isVisible()) dsbx->setProperty("lastVal", dsbx->value());
 
-            if(data.lastVal) // restore last val
-                data.dsbx[0]->setValue(data.lastVal.value());
-            else if(data.defVal) // set default val
-                data.dsbx[0]->setValue(data.defVal.value());
+    // скрываем все строки во всех формах — дальше покажем только нужные для currType
+    for(QFormLayout* form: {ui->formGeometry, ui->formCutParam, ui->formFeedSpeeds})
+        for(int row: v::iota(0, form->rowCount()))
+            form->setRowVisible(row, false);
 
-            data.dsbx[0]->setEnabled(true);
-        } else {
-            if(data.dsbx[0]->isEnabled()) // save val
-                data.lastVal = data.dsbx[0]->value();
+    // строки, общие для любого типа инструмента
+    ui->formGeometry->setRowVisible(ui->lblUnits, true);
+    ui->formGeometry->setRowVisible(ui->dsbxDiameter, true);
+    ui->formFeedSpeeds->setRowVisible(ui->dsbxSpindleSpeed, true);
+    ui->formCutParam->setRowVisible(ui->label_2, true); // Vc и число зубьев
 
-            data.dsbx[0]->setRange(.0, .0);
-            data.dsbx[0]->setEnabled(false);
-        }
-        if(data.dsbx[1])
-            data.dsbx[1]->setEnabled(data.dsbx[0]->isEnabled());
+    // одиночное поле: виджет сам является и меткой, и полем своей строки формы
+    auto show = [](QFormLayout* form, DoubleSpinBox* dsbx, double max, std::optional<double> defVal = {}) {
+        dsbx->setMaximum(max);
+        if(auto lastVal = dsbx->property("lastVal"); lastVal.isValid()) // восстановить последнее значение
+            dsbx->setValue(lastVal.toDouble());
+        else if(defVal) // значение по умолчанию
+            dsbx->setValue(defVal.value());
+        form->setRowVisible(dsbx, true);
+    };
+
+    // парное поле: dsbx делит строку формы с процентным дублёром через вложенный QHBoxLayout
+    auto showPair = [](QFormLayout* form, QLayout* row, DoubleSpinBox* dsbx, double max) {
+        dsbx->setMaximum(max);
+        if(auto lastVal = dsbx->property("lastVal"); lastVal.isValid()) // восстановить последнее значение
+            dsbx->setValue(lastVal.toDouble());
+        form->setRowVisible(row, true);
+    };
+
+    const double diameter = ui->dsbxDiameter->value();
+
+    switch(currType) {
+    case Tool::Drill:
+        show(ui->formCutParam, ui->dsbxPass, 10.);
+        show(ui->formGeometry, ui->dsbxAngle, 180., 120.);
+        show(ui->formGeometry, ui->dsbxLenght, 100000.);
+        showPair(ui->formCutParam, ui->hlayOneTurnCut, ui->dsbxOneTurnCut, diameter);
+        show(ui->formFeedSpeeds, ui->dsbxPlungeRate, 100000.);
+        break;
+    case Tool::EndMill:
+        show(ui->formCutParam, ui->dsbxDepth, 10.);
+        show(ui->formFeedSpeeds, ui->dsbxFeedRate, 100000.);
+        show(ui->formGeometry, ui->dsbxLenght, 100000.);
+        showPair(ui->formCutParam, ui->hlayOneTurnCut, ui->dsbxOneTurnCut, diameter);
+        show(ui->formFeedSpeeds, ui->dsbxPlungeRate, 100000.);
+        showPair(ui->formCutParam, ui->hlayStepover, ui->dsbxStepover, diameter);
+        break;
+    case Tool::ThreadMill:
+        show(ui->formCutParam, ui->dsbxHoleDiam, 10.);
+        show(ui->formCutParam, ui->dsbxThreadPitch, 10.);
+        show(ui->formFeedSpeeds, ui->dsbxFeedRate, 100000.);
+        show(ui->formGeometry, ui->dsbxLenght, 100000.);
+        showPair(ui->formCutParam, ui->hlayOneTurnCut, ui->dsbxOneTurnCut, diameter);
+        show(ui->formFeedSpeeds, ui->dsbxPlungeRate, 100000.);
+        showPair(ui->formCutParam, ui->hlayStepover, ui->dsbxStepover, diameter);
+        break;
+    case Tool::Engraver:
+        show(ui->formCutParam, ui->dsbxDepth, 10.);
+        show(ui->formGeometry, ui->dsbxAngle, 180., 90.);
+        show(ui->formFeedSpeeds, ui->dsbxFeedRate, 100000.);
+        show(ui->formGeometry, ui->dsbxLenght, 100000.);
+        showPair(ui->formCutParam, ui->hlayOneTurnCut, ui->dsbxOneTurnCut, diameter);
+        show(ui->formFeedSpeeds, ui->dsbxPlungeRate, 100000.);
+        showPair(ui->formCutParam, ui->hlayStepover, ui->dsbxStepover, diameter);
+        break;
+    case Tool::Laser:
+        show(ui->formFeedSpeeds, ui->dsbxFeedRate, 100000.);
+        showPair(ui->formCutParam, ui->hlayStepover, ui->dsbxStepover, diameter);
+        break;
+    default: break;
     }
-
-    // //qDebug() << lastVal;
-
-    static const std::unordered_map<Tool::Type, QString> lblText{
-        {Tool::Drill, tr("Pass")},
-        {Tool::EndMill, tr("Depth")},
-        {Tool::Engraver, tr("Depth")},
-        {Tool::Laser, {}},
-        {Tool::ThreadMill, tr("Thread Pitch")},
-    };
-
-    ui->lblPassDepth->setText(lblText.at(currType));
 
     setChanged();
     updateName();
@@ -271,14 +314,15 @@ void ToolEditForm::on_pbApply_clicked() {
     bool fl{};
 
     for(auto [dsbx, set]: set)
-        if(dsbx->isEnabled() && qFuzzyIsNull(dsbx->value()))
+        if(dsbx->isVisible() && qFuzzyIsNull(dsbx->value()))
             dsbx->flicker(), fl = true;
 
     if(fl)
         return;
 
     for(auto [dsbx, set]: set)
-        (tool_.*set)(dsbx->value());
+        if(dsbx->isVisible())
+            (tool_.*set)(dsbx->value());
 
     if(item_ && tool_.isValid()) {
         item_->setName(tool_.name());
@@ -306,7 +350,7 @@ void ToolEditForm::updateName() {
         case Tool::Engraver  : return tr("Engrave (%2\302\260 %1 mm tip)").arg(ui->dsbxDiameter->value()).arg(ui->dsbxAngle->value());
         case Tool::Drill     : return tr("Drill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
         case Tool::Laser     : return tr("Laser (Ø%1 mm)").arg(ui->dsbxDiameter->value());
-        case Tool::ThreadMill: return tr("Thread Mill (Ø%1 mm)").arg(ui->dsbxDiameter->value());
+        case Tool::ThreadMill: return tr("Thread (Ø%1 mm)").arg(ui->dsbxDiameter->value());
         case Tool::Group     :
         default              : return QString{};
         }
@@ -318,14 +362,18 @@ void ToolEditForm::updateDsbxAngle(double val) {
     tool_.setAngle(val);
 }
 
+void ToolEditForm::updateDsbxHoleDiam(double val) {
+    tool_.setAngle(val);
+}
+
 void ToolEditForm::updateDsbxDiameter(double val) {
     // qDebug() << __FUNCTION__ << val;
     tool_.setDiameter(val);
     ui->dsbxOneTurnCut->setMaximum(val);
     ui->dsbxStepover->setMaximum(val);
-    if(ui->dsbxStepover->value() == 0.0)
+    if(ui->dsbxStepover->value() == 0.)
         ui->dsbxStepover->setValue(val * 0.5);
-    if(ui->dsbxOneTurnCut->value() == 0.0)
+    if(ui->dsbxOneTurnCut->value() == 0.)
         ui->dsbxOneTurnCut->setValue(val * 0.1);
     emit ui->dsbxOneTurnCutPercent->valueChanged(ui->dsbxOneTurnCutPercent->value());
     emit ui->dsbxStepoverPercent->valueChanged(ui->dsbxStepoverPercent->value());
@@ -339,7 +387,7 @@ void ToolEditForm::updateDsbxFeedRate(double val) {
 void ToolEditForm::updateDsbxOneTurnCut(double val) {
     // qDebug() << __FUNCTION__ << val;
     tool_.setOneTurnCut(val);
-    ui->dsbxOneTurnCutPercent->setValue(tool_.diameter() > 0.0 ? val / (tool_.diameter() * 0.01) : 0.0);
+    ui->dsbxOneTurnCutPercent->setValue(tool_.diameter() > 0. ? val / (tool_.diameter() * 0.1) : 0.);
     if(ui->chbxFeedRate->isChecked())
         ui->dsbxFeedRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed);
     if(ui->chbxPlungeRate->isChecked())
@@ -368,7 +416,7 @@ void ToolEditForm::updateDsbxSpindleSpeed(double val) {
 void ToolEditForm::updateDsbxStepover(double val) {
     // qDebug() << __FUNCTION__ << val;
     tool_.setStepover(val);
-    ui->dsbxStepoverPercent->setValue(tool_.diameter() > 0.0 ? val / (tool_.diameter() * 0.01) : 0.0);
+    ui->dsbxStepoverPercent->setValue(tool_.diameter() > 0. ? val / (tool_.diameter() * 0.1) : 0.);
 }
 
 void ToolEditForm::updateDsbxLenght(double val) {
@@ -378,12 +426,12 @@ void ToolEditForm::updateDsbxLenght(double val) {
 
 void ToolEditForm::updateDsbxOneTurnCutPercent(double val) {
     // qDebug() << __FUNCTION__ << val;
-    ui->dsbxOneTurnCut->setValue(val * (tool_.diameter() * 0.01));
+    ui->dsbxOneTurnCut->setValue(val * (tool_.diameter() * 0.1));
 }
 
 void ToolEditForm::updateDsbxStepoverPercent(double val) {
     // qDebug() << __FUNCTION__ << val;
-    ui->dsbxStepover->setValue(val * (tool_.diameter() * 0.01));
+    ui->dsbxStepover->setValue(val * (tool_.diameter() * 0.1));
 }
 
 #include "moc_tool_editform.cpp"
