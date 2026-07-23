@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>407</width>
-    <height>734</height>
+    <height>810</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -146,7 +146,7 @@
         <property name="title">
          <string>Geometry</string>
         </property>
-        <layout class="QFormLayout" name="formLayout">
+        <layout class="QFormLayout" name="formGeometry">
          <property name="labelAlignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
@@ -263,14 +263,14 @@
            </property>
           </widget>
          </item>
-         <item row="3" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="label">
            <property name="text">
             <string>Lenght:</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="4" column="1">
           <widget class="DoubleSpinBox" name="dsbxLenght">
            <property name="suffix">
             <string> mm</string>
@@ -286,6 +286,23 @@
            </property>
           </widget>
          </item>
+         <item row="3" column="1">
+          <widget class="DoubleSpinBox" name="dsbxHoleDiam">
+           <property name="suffix">
+            <string> mm</string>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
+          <widget class="QLabel" name="label_3">
+           <property name="text">
+            <string>Hole ∅</string>
+           </property>
+          </widget>
+         </item>
         </layout>
        </widget>
       </item>
@@ -297,7 +314,7 @@
         <property name="title">
          <string>Cutting Parameters</string>
         </property>
-        <layout class="QFormLayout" name="formLayout_2">
+        <layout class="QFormLayout" name="formCutParam">
          <property name="labelAlignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
@@ -314,14 +331,14 @@
           <number>6</number>
          </property>
          <item row="0" column="0">
-          <widget class="QLabel" name="lblPassDepth">
+          <widget class="QLabel" name="lblPass">
            <property name="text">
-            <string>Pass or Depth (Ap)</string>
+            <string>Pass (Ap)</string>
            </property>
           </widget>
          </item>
          <item row="0" column="1">
-          <widget class="DoubleSpinBox" name="dsbxPassDepth">
+          <widget class="DoubleSpinBox" name="dsbxPass">
            <property name="suffix">
             <string> mm</string>
            </property>
@@ -337,6 +354,52 @@
           </widget>
          </item>
          <item row="1" column="0">
+          <widget class="QLabel" name="lblThreadPitch">
+           <property name="text">
+            <string>Thread Pitch</string>
+           </property>
+          </widget>
+         </item>
+         <item row="1" column="1">
+          <widget class="DoubleSpinBox" name="dsbxThreadPitch">
+           <property name="suffix">
+            <string> mm</string>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="0">
+          <widget class="QLabel" name="lblDepth">
+           <property name="text">
+            <string>Depth (Ap)</string>
+           </property>
+          </widget>
+         </item>
+         <item row="2" column="1">
+          <widget class="DoubleSpinBox" name="dsbxDepth">
+           <property name="suffix">
+            <string> mm</string>
+           </property>
+           <property name="decimals">
+            <number>3</number>
+           </property>
+           <property name="maximum">
+            <double>10.000000000000000</double>
+           </property>
+           <property name="singleStep">
+            <double>0.100000000000000</double>
+           </property>
+          </widget>
+         </item>
+         <item row="3" column="0">
           <layout class="QHBoxLayout" name="horizontalLayout">
            <item>
             <widget class="QLabel" name="lblWarn">
@@ -354,7 +417,7 @@
            </item>
           </layout>
          </item>
-         <item row="1" column="1">
+         <item row="3" column="1">
           <layout class="QHBoxLayout" name="hlayStepover">
            <property name="leftMargin">
             <number>0</number>
@@ -402,14 +465,14 @@
            </item>
           </layout>
          </item>
-         <item row="2" column="0">
+         <item row="4" column="0">
           <widget class="QLabel" name="lblCut">
            <property name="text">
             <string>One-turn Cut (Fz...)</string>
            </property>
           </widget>
          </item>
-         <item row="2" column="1">
+         <item row="4" column="1">
           <layout class="QHBoxLayout" name="hlayOneTurnCut">
            <property name="leftMargin">
             <number>0</number>
@@ -457,14 +520,14 @@
            </item>
           </layout>
          </item>
-         <item row="3" column="0">
+         <item row="5" column="0">
           <widget class="QLabel" name="label_2">
            <property name="text">
             <string>Vc</string>
            </property>
           </widget>
          </item>
-         <item row="3" column="1">
+         <item row="5" column="1">
           <layout class="QHBoxLayout" name="horizontalLayout_2">
            <item>
             <widget class="QDoubleSpinBox" name="dsbxVc"/>
@@ -485,7 +548,7 @@
         <property name="title">
          <string>Feed Speeds</string>
         </property>
-        <layout class="QFormLayout" name="formLayout_4">
+        <layout class="QFormLayout" name="formFeedSpeeds">
          <property name="labelAlignment">
           <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
          </property>
