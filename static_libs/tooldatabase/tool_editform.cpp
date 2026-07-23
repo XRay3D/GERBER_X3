@@ -254,6 +254,13 @@ void ToolEditForm::setupToolWidgets(int) {
     };
 
     ui->lblPassDepth->setText(lblText.at(currType));
+    ui->sideAngleLabel->setText(currType == Tool::ThreadMill ? tr("Tool ∅") : tr("Angle"));
+    ui->dsbxAngle->setSuffix(currType == Tool::ThreadMill ? tr(" mm") : u" °"_s);
+    if(currType == Tool::ThreadMill) {
+        ui->dsbxAngle->setEnabled(true);
+        ui->dsbxAngle->setRange(0, 10);
+        ui->dsbxAngle->setDecimals(3);
+    }
 
     setChanged();
     updateName();

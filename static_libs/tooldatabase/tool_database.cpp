@@ -16,7 +16,7 @@
 #include <QMessageBox>
 #include <QSettings>
 
-ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
+ToolDatabase::ToolDatabase(QWidget* parent, std::span<const Tool::Type> types)
     : QDialog{parent}
     , ui(new Ui::ToolDatabase)
     , types_(types) {
@@ -38,13 +38,13 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     connect(ui->treeView, &ToolTreeView::itemSelected, [this](ToolItem* item) {
         if(item->isTool())
             tool_ = item->tool();
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && types_.contains(item->tool().type())) || types_.empty());
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && r::contains(types_, item->tool().type())) || types_.empty());
         ui->toolEdit->setItem(item);
     });
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [this](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-        if((item->isTool() && types_.contains(item->tool().type()))) {
+        if((item->isTool() && r::contains(types_, item->tool().type()))) {
             if(item->tool().isValid()) {
                 tool_ = item->tool();
                 accept();

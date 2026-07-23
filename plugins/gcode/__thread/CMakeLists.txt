@@ -1,19 +1,19 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2026
+ Date      :  03 October 2022
  Website   :  na
- Copyright :  Damir Bakiev 2016-2026
+ Copyright :  Damir Bakiev 2016-2022
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 4.00)
 
-project(gcthread LANGUAGES CXX)
+project(thread LANGUAGES CXX)
 
-set(PLUG_NAME "Thread")
-set(PLUG_INFO "Thread")
+set(PLUG_NAME "Thread Mill")
+set(PLUG_INFO "Thread Mill")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
 set(PLUG_LOCAL_VERSION "0")
 
@@ -31,5 +31,5 @@ add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME}
-                      PRIVATE gcode #[[gc_pocketoffset gc_profile]])
+target_link_libraries(${PROJECT_NAME} PRIVATE geometry #[[gcode]])
+

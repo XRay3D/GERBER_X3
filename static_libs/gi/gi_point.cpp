@@ -337,7 +337,9 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
     auto action = menu.addAction(QIcon::fromTheme(u"drill-path"_s), tr("&Create path for Pins"), [] {
-        ToolDatabase tdb(App::grViewPtr(), {Tool::Drill, Tool::EndMill});
+        ToolDatabase tdb{
+            App::grViewPtr(), std::array{Tool::Drill, Tool::EndMill}
+        };
         if(tdb.exec()) {
             Tool tool(tdb.tool());
 
