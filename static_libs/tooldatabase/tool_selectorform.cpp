@@ -26,7 +26,7 @@ ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     , toolFileName_{App::settingsPath() + u'/' + parent->objectName() + QString::number(counter) + u".json"_s} {
     setupUi(this);
     readTool();
-    label_->setStyleSheet(tool_.id() < 0 ? u"QLabel { color: red }"_s : QString{});
+    label_->setStyleSheet(tool_.id() < Tool::ID::Folder ? u"QLabel { color: red }"_s : QString{});
 }
 
 ToolSelectorForm::~ToolSelectorForm() {
@@ -35,7 +35,7 @@ ToolSelectorForm::~ToolSelectorForm() {
 
 void ToolSelectorForm::setTool(const Tool& tool) {
     tool_ = tool;
-    label_->setStyleSheet(tool.id() < 0 ? u"QLabel { color: red }"_s : QString{});
+    label_->setStyleSheet(tool.id() < Tool::ID::Folder ? u"QLabel { color: red }"_s : QString{});
     updateForm();
 }
 

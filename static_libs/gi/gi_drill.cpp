@@ -10,6 +10,7 @@
  ********************************************************************************/
 #include "gi_drill.h"
 
+#include "app.h"
 #include "myclipper.h"
 
 #include <QPainter>
@@ -17,7 +18,7 @@
 
 namespace Gi {
 
-Drill::Drill(const QPolygonF& path, double diameter, AbstractFile* file, int toolId)
+Drill::Drill(const QPolygonF& path, double diameter, AbstractFile* file, Tool::ID toolId)
     : Item{file}
     , diameter_{diameter}
     , path_{path}
@@ -60,9 +61,16 @@ void Drill::setDiameter(double diameter) {
 
 void Drill::updatePath(const QPolygonF& path, double diameter) {
     diameter_ = diameter;
-    path_ = path;
+    path_     = path;
     create();
     update();
+}
+
+void Drill::setToolId(Tool::ID newToolId) {
+    toolId_ = newToolId;
+    setToolTip(QObject::tr("Tool %1, Ø%2mm")
+            .arg(App::toolHolder().tool(toolId_).name())
+            .arg(diameter_));
 }
 
 // Paths Drill::paths(int /*alternate*/) const {
@@ -106,7 +114,7 @@ void Drill::create() {
         Path path = ~path_;
         r::for_each(path, SetCSelf);
         curves_ = toCurves(InflateRoundPolygon({path}, diameter_ * uScale));
-        shape_ = toPPath(curves_);
+        shape_  = toPPath(curves_);
     }
     boundingRect_ = shape_.boundingRect();
 }

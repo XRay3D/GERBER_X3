@@ -100,7 +100,7 @@ void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex
     checkRect_[logicalIndex] = option.rect = getRect(rect);
 
     option.state = checked(logicalIndex) ? QStyle::State_On : QStyle::State_Off;
-    option.state |= model()->toolId(logicalIndex) != -1 && isEnabled() ? QStyle::State_Enabled : QStyle::State_None;
+    option.state |= model()->toolId(logicalIndex) != Tool::ID::Null && isEnabled() ? QStyle::State_Enabled : QStyle::State_None;
 
     style()->drawPrimitive(orientation() == Qt::Horizontal ? QStyle::PE_IndicatorRadioButton : QStyle::PE_IndicatorCheckBox, &option, painter);
 }

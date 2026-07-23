@@ -69,7 +69,7 @@ private:
     // Layer layer = Copper;
 
     QVector<int> rawIndex;
-    std::forward_list<Path> checkList;
+    std::forward_list<Curve> checkList;
     static inline File* crutch;
 
     // FileTree::Node interface

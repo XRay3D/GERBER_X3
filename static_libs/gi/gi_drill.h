@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gi.h"
+#include "tool.h"
 
 namespace Gi {
 
@@ -18,7 +19,7 @@ class Drill final : public Item {
     using Item::update;
 
 public:
-    Drill(const QPolygonF& path, double diameter, AbstractFile* file, int toolId);
+    Drill(const QPolygonF& path, double diameter, AbstractFile* file, Tool::ID toolId);
     ~Drill() override { }
 
     // QGraphicsItem interface
@@ -34,18 +35,15 @@ public:
     void setDiameter(double diameter);
     void updatePath(const QPolygonF& path, double diameter);
 
-    int toolId() const { return toolId_; }
-    void setToolId(int newToolId) {
-        toolId_ = newToolId;
-        setToolTip(QObject::tr("Tool %1, Ø%2mm").arg(toolId_).arg(diameter_));
-    }
+    Tool::ID toolId() const { return toolId_; }
+    void setToolId(Tool::ID newToolId);
 
 private:
     void create();
     double diameter_{};
     QPolygonF path_;
     // QPolygonF fillPolygon;
-    int toolId_ = -1;
+    Tool::ID toolId_ = Tool::ID::Null;
 };
 
 } // namespace Gi

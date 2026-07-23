@@ -24,8 +24,8 @@ static QStringList side{QObject::tr("Null"), QObject::tr("Outer"), QObject::tr("
 struct ThreadParam {
     int thread;
     int side;
-    int toolT;
-    int tool;
+    Tool::ID toolT;
+    Tool::ID tool;
     double depth;
     double x;
     double y;
@@ -54,9 +54,11 @@ public:
             case 2:
                 if(App::toolHolder().tools().contains(data.toolT))
                     return App::toolHolder().tool(data.toolT).name();
+                return {};
             case 3:
                 if(App::toolHolder().tools().contains(data.tool))
                     return App::toolHolder().tool(data.tool).name();
+                return {};
             case 4: return data.depth;
             case 5: return data.x;
             case 6: return data.y;
@@ -66,8 +68,8 @@ public:
             switch(index.column()) {
             case 0: return data.thread;
             case 1: return data.side;
-            case 2: return data.toolT;
-            case 3: return data.tool;
+            case 2: return QVariant::fromValue(data.toolT);
+            case 3: return QVariant::fromValue(data.tool);
             case 4: return data.depth;
             case 5: return data.x;
             case 6: return data.y;
@@ -140,14 +142,14 @@ public:
             auto cbx = new QComboBox{parent};
             for(auto&& [id, tool]: App::toolHolder().tools())
                 if(tool.type() == Tool::ThreadMill)
-                    cbx->addItem(tool.name(), tool.id());
+                    cbx->addItem(tool.name(), QVariant::fromValue(tool.id()));
             return cbx;
         }
         case 3: {
             auto cbx = new QComboBox{parent};
             for(auto&& [id, tool]: App::toolHolder().tools())
                 if(tool.type() == Tool::EndMill || tool.type() == Tool::Drill)
-                    cbx->addItem(tool.name(), tool.id());
+                    cbx->addItem(tool.name(), QVariant::fromValue(tool.id()));
             return cbx;
         }
         case 4:
@@ -380,7 +382,7 @@ void Form::rb_clicked() {
 
 void Form::updateBridgePos(QPointF pos) {
     // if(GiBridge::moveBrPtr)
-        // GiBridge::moveBrPtr->setPos(pos);
+    // GiBridge::moveBrPtr->setPos(pos);
 }
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }

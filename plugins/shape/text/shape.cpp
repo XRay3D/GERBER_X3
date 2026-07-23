@@ -12,7 +12,7 @@
 #include "graphicsview.h"
 #include "math.h"
 
-#include <boost/pfr.hpp>
+// #include <boost/pfr.hpp>
 
 using Shapes::Handle;
 
@@ -36,7 +36,7 @@ void Shape::redraw() {
 
     QFontMetrics fm{txtData.font};
     const double capHeight = fm.capHeight();
-    const double scale = txtData.height / capHeight;
+    const double scale     = txtData.height / capHeight;
 
     QPainterPath painterPath; // TODO align multiline text
     for(double i{}; auto&& txt: txtData.text.split(u'\n'))
@@ -193,22 +193,22 @@ void Shape::readAndInit(QDataStream& stream) {
 void Shape::saveData() {
     QSettings settings;
     settings.beginGroup(u"ShapeText"_s);
-    boost::pfr::for_each_field(txtData, [&settings](auto& field, auto index) { // TODO for_each_field_name
-                                                                               // if constexpr(requires { field.family(); })
-                                                                               // settings.setValue(boost::pfr::get_name<index, ShapeData>(), field.toString());
-                                                                               // else
-        settings.setValue(boost::pfr::get_name<index, ShapeData>(), field);
+    for_each_field(txtData, [&settings](auto& field, std::string_view name) { // TODO for_each_field_name
+                                                                              // if constexpr(requires { field.family(); })
+                                                                              // settings.setValue(get_name<index, ShapeData>(), field.toString());
+                                                                              // else
+        settings.setValue(name, field);
     });
 }
 
 Shape::ShapeData Shape::loadData() {
     QSettings settings;
     settings.beginGroup(u"ShapeText"_s);
-    boost::pfr::for_each_field(txtData, [&settings]<typename Ty>(Ty& field, auto index) { // TODO for_each_field_name
-                                                                                          // if constexpr(requires { field.family(); })
-                                                                                          // field.fromString(settings.value(boost::pfr::get_name<index, ShapeData>()).toString());
-                                                                                          // else
-        field = settings.value(boost::pfr::get_name<index, ShapeData>()).template value<Ty>();
+    for_each_field(txtData, [&settings]<typename Ty>(Ty& field, std::string_view name) { // TODO for_each_field_name
+                                                                                         // if constexpr(requires { field.family(); })
+                                                                                         // field.fromString(settings.value(name).toString());
+                                                                                         // else
+        field = settings.value(name).template value<Ty>();
     });
     return txtData;
 }

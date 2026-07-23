@@ -47,8 +47,8 @@ protected:
 
     Point parsePosition(const QString& xyStr);
 
-    Paths createLine();
-    Paths createPolygon();
+    Curves createLine();
+    Curves createPolygon();
 
     std::map<QString, QString> apertureMacro_;
 

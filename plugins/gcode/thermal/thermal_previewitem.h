@@ -131,11 +131,11 @@ protected:
 };
 
 class PreviewItem final : public AbstractThermPrGi {
-    const Paths& paths_;
-    const Point pos_;
+    const Curves& paths_;
+    const QPointF pos_;
 
 public:
-    PreviewItem(const Paths& paths, const Point pos, Tool& tool);
+    PreviewItem(const Curves& paths, const QPointF pos, Tool& tool);
     Point pos() const override;
     Paths paths() const override;
     void redraw() override;

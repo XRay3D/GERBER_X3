@@ -366,7 +366,7 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
                 } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, {}, u"\""_s + tool.name() + tr("\" not suitable for Tu") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + u"_s-u"_s + model->data(current.sibling(current.row(), 0)).toString() + u"_s-"_s);
                 } else if(!model->isSlot(current.row())) {
-                    if(model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
+                    if(model->toolId(current.row()) > Tool::ID::Null && !model->useForCalc(current.row()))
                         continue;
                     model->setToolId(current.row(), tool.id());
                 }
@@ -375,10 +375,10 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
     });
 
     for(QModelIndex current: selectedIndexes()) {
-        if(model->toolId(current.row()) != -1) {
+        if(model->toolId(current.row()) != Tool::ID::Null) {
             menu.addAction(QIcon::fromTheme(u"list-remove"_s), tr("&Remove Tool"), [this] {
                 for(QModelIndex current: selectedIndexes())
-                    model->setToolId(current.row(), -1);
+                    model->setToolId(current.row(), Tool::ID::Null);
             });
             break;
         }
@@ -411,7 +411,7 @@ void Form::customContextMenuRequested(const QPoint& pos) {
                 } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, {}, u"\""_s + tool.name() + tr("\" not suitable for Tu") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + u"_s-u"_s + model->data(current.sibling(current.row(), 0)).toString() + u"_s-"_s);
                 } else if(!model->isSlot(current.row())) {
-                    if(model->toolId(current.row()) > -1 && !model->useForCalc(current.row()))
+                    if(model->toolId(current.row()) > Tool::ID::Null && !model->useForCalc(current.row()))
                         continue;
                     model->setToolId(current.row(), tool.id());
                 }
@@ -421,9 +421,9 @@ void Form::customContextMenuRequested(const QPoint& pos) {
     menu.addAction(QIcon::fromTheme(u"list-remove"_s), tr("&Remove Tool for everyone"), [this] {
         ui->toolTable->selectAll();
         for(QModelIndex current: selectedIndexes())
-            model->setToolId(current.row(), -1);
+            model->setToolId(current.row(), Tool::ID::Null);
         for(int i{}; i < model->rowCount(); ++i)
-            if(model->toolId(i) != -1)
+            if(model->toolId(i) != Tool::ID::Null)
                 return;
     });
     menu.exec(ui->toolTable->horizontalHeader()->mapToGlobal(pos));
@@ -448,7 +448,7 @@ void Form::pickUpTool() {
         auto filter = v::filter([&set](auto& t) { return set.contains(t.second.type()); });
         for(auto& [id, tool]: App::toolHolder().tools() | filter) {
             qWarning() << tool;
-            if(model->toolId(ctr) < 1 && isFit(tool)) {
+            if(model->toolId(ctr) < Tool::ID::Tool && isFit(tool)) {
                 model->setToolId(ctr, id);
                 break;
             }
@@ -494,12 +494,13 @@ void Form::computePaths() {
             mvector<int> toolsApertures;
         };
 
-        std::map<int, Data> pathsMap;
+        std::map<Tool::ID, Data> pathsMap;
 
         for(int i{}; auto&& row: *model) {
-            if(row.toolId > -1 && row.useForCalc && row.isSlot) {
+            if(row.toolId > Tool::ID::Null && row.useForCalc && row.isSlot) {
                 pathsMap[row.toolId].toolsApertures.push_back(i);
                 for(auto& item: row.items) {
+                    if(!item->isUsed()) continue;
                     if(item->fit(dsbxDepth->value()))
                         for(Path& path: offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
                             pathsMap[row.toolId].paths.push_back(path);
@@ -535,13 +536,14 @@ void Form::computePaths() {
             mvector<int> toolsApertures;
         };
 
-        std::map<int, Data> pathsMap;
+        std::map<Tool::ID, Data> pathsMap;
 
         for(int i{}; auto&& row: *model) {
             bool created{};
-            if(row.toolId > -1 && row.useForCalc) {
+            if(row.toolId > Tool::ID::Null && row.useForCalc) {
                 pathsMap[row.toolId].toolsApertures.push_back(i);
                 for(auto& item: row.items) {
+                    if(!item->isUsed()) continue;
                     // if (item->isSlot())
                     // continue;
                     switch(worckType) {

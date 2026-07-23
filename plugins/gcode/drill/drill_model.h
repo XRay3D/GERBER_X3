@@ -11,6 +11,7 @@
 #pragma once
 
 #include "mvector.h"
+#include "tool.h"
 #include <QAbstractTableModel>
 #include <QIcon>
 
@@ -37,7 +38,7 @@ struct Row {
     /*const*/ double diameter;
     /*const*/ bool isSlot;
     bool useForCalc{};
-    int toolId{-1};
+    Tool::ID toolId{};
     mvector<Gi::Preview*> items;
 };
 
@@ -62,11 +63,11 @@ public:
     bool isSlot(int row) const { return data_[row].isSlot; }
     bool useForCalc(int row) const { return data_[row].useForCalc; }
 
-    int32_t toolId(int row) const { return data_[row].toolId; }
+    Tool::ID toolId(int row) const { return data_[row].toolId; }
 
     void setCreate(bool create);
     void setCreate(int row, bool create);
-    void setToolId(int row, int32_t id);
+    void setToolId(int row, Tool::ID id);
     // void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface

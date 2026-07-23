@@ -11,7 +11,6 @@
 #include "gi_preview.h"
 
 #include "graphicsview.h"
-#include "tool_pch.h"
 #include <QPainter>
 #include <QPropertyAnimation>
 
@@ -19,17 +18,17 @@ namespace Gi {
 
 AbstractPreview::AbstractPreview()
     : propAnimGr{this}
-    , propAnimBr(this, "bodyColor"_ba)
-    , propAnimPn(this, "pathColor"_ba)
-    , bodyColor_(colors[(int)Colors::Default])
-    , pathColor_(colors[(int)Colors::UnUsed]) {
+    , propAnimBr{this, "bodyColor"_ba}
+    , propAnimPn{this, "pathColor"_ba}
+    , bodyColor_{colors[0].body}
+    , pathColor_{colors[0].path} {
     propAnimGr.addAnimation(&propAnimBr);
     propAnimGr.addAnimation(&propAnimPn);
 
     propAnimBr.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    propAnimBr.setDuration(150);
+    propAnimBr.setDuration(100);
     propAnimPn.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    propAnimPn.setDuration(150);
+    propAnimPn.setDuration(100);
 
     connect(this, &AbstractPreview::colorChanged, [this] { update(); });
     setAcceptHoverEvents(true);
@@ -49,7 +48,7 @@ void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, 
     painter->setBrush(bodyColor_);
     painter->drawPath(sourcePath_);
     // draw tool
-    if(toolId() > -1) {
+    if(toolId() > Tool::ID{}) {
         painter->setPen(QPen(pathColor_, 2 * App::grView().scaleFactor()));
         painter->setBrush(Qt::NoBrush);
         if(toolPath_.isEmpty())
@@ -68,53 +67,49 @@ int AbstractPreview::type() const { return int(Type::Preview); }
 double AbstractPreview::sourceDiameter() const { return sourceDiameter_; }
 
 void AbstractPreview::changeColor() {
-    if(flags() & ItemIsSelectable)
-        colorState |= Used;
-    else
-        colorState &= ~Used;
+    // ItemIsSelectable отражает "инструмент назначен строке" (см. Model::setToolId/
+    // setCreate), used — персональный признак конкретного превью, переключаемый
+    // двойным кликом. Бит Used выставлен только если оба условия верны — без if,
+    // подстановкой 0/4 по булеву значению.
+
+    // colorState = ColorState{+(colorState & CS::Used) | (+CS::Used * ((flags() & ItemIsSelectable) && used))};
+
+    // qWarning() << (+(cs & CS::Hovered) ? "Hovered " : "        ")
+    //            << (+(cs & CS::Selected) ? "Selected" : "        ")
+    //            << (+(cs & CS::Used) ? "Used    " : "        ")
+    //            << (+(cs & CS::Tool) ? "Tool    " : "        ");
+    auto cs = colorState & (flags() & ItemIsSelectable ? ~CS::Default : ~(CS::Used | CS::Tool));
 
     propAnimBr.setStartValue(bodyColor_);
     propAnimPn.setStartValue(pathColor_);
-
-    if(colorState & Selected)
-        propAnimBr.setEndValue(colors[int((colorState & Hovered) ? Colors::SelectedHovered : Colors::Selected)]);
-    else if(colorState & Used)
-        propAnimBr.setEndValue(colors[int((colorState & Hovered) ? Colors::UsedHovered : Colors::Used)]);
-    else
-        propAnimBr.setEndValue(colors[int((colorState & Hovered) ? Colors::DefaultHovered : Colors::Default)]);
-
-    if(colorState & Used)
-        propAnimPn.setEndValue(colors[int((colorState & Tool) ? Colors::Tool : Colors::UnUsed)]);
-    else
-        propAnimPn.setEndValue(colors[int((colorState & Tool) ? Colors::Default : Colors::UnUsed)]);
+    const StateColors& c = colors[+cs];
+    propAnimBr.setEndValue(c.body);
+    propAnimPn.setEndValue(c.path);
 
     propAnimGr.start();
 }
 
 void AbstractPreview::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
-    colorState |= Hovered;
-    changeColor();
     QGraphicsItem::hoverEnterEvent(event);
+    colorState |= CS::Hovered;
+    changeColor();
 }
 
 void AbstractPreview::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
-    colorState &= ~Hovered;
-    changeColor();
     QGraphicsItem::hoverLeaveEvent(event);
+    colorState &= ~CS::Hovered;
+    changeColor();
 }
 
 QVariant AbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
+    auto val = QGraphicsItem::itemChange(change, value);
     if(change == ItemSelectedChange) {
-        if(value.toInt())
-            colorState |= Selected;
-        else
-            colorState &= ~Selected;
+        value.toInt() ? colorState |= CS::Selected
+                      : colorState &= ~CS::Selected;
         changeColor();
     } else if(change == ItemEnabledChange) {
-        if(value.toInt())
-            colorState |= Used;
-        else
-            colorState &= ~Used;
+        value.toInt() ? colorState |= CS::Used
+                      : colorState &= ~CS::Used;
         changeColor();
     } else if(change == ItemVisibleChange) {
         auto animation = new QPropertyAnimation{this, "opacity"_ba};
@@ -124,7 +119,7 @@ QVariant AbstractPreview::itemChange(QGraphicsItem::GraphicsItemChange change, c
         animation->setEndValue(1.0);
         animation->start(QAbstractAnimation::DeleteWhenStopped);
     }
-    return QGraphicsItem::itemChange(change, value);
+    return val;
 }
 
 } // namespace Gi

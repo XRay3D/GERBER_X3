@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal_form.h"
+#include "curve.h"
 #include "ui_thermalform.h"
 
 #include "thermal.h"
@@ -143,10 +144,10 @@ void Form::computePaths() {
     gcp.setConvent(true);
     gcp.setSide(GCode::Outer);
     gcp.tools.push_back(tool);
-    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp.params[Creator::FileId] = ui->cbxFile->currentData().value<AbstractFile*>()->id();
+    gcp.params[GCode::Params::Depth]  = dsbxDepth->value();
+    gcp.params[Creator::FileId]       = ui->cbxFile->currentData().value<AbstractFile*>()->id();
     gcp.params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    fileCount = 1;
+    fileCount                         = 1;
     emit createToolpath(&gcp);
 }
 
@@ -159,7 +160,8 @@ void Form::updateName() {
 void Form::hideEvent(QHideEvent* event) { // NOTE clean and hide pr gi
     delete ui->treeView->model();
     model = nullptr;
-    items_.clear();
+    items_.clear(); // static std::mutex m;
+    // std::lock_guard l{m};
     event->accept();
 }
 
@@ -198,7 +200,7 @@ void Form::updateThermalGi() {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
-                node->append(new Node{drawIcon(paths), {}, par, pos, tprItem.get(), model});
+                node->append(new Node{drawIcon(paths), {}, par, ~pos, tprItem.get(), model});
             }
             qApp->processEvents();
             pd.setValue(++count);

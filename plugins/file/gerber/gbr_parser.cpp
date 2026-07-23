@@ -267,12 +267,12 @@ std::vector<QString> Parser::cleanAndFormatFile(QString data) {
             continue;
         } else if(line.startsWith(u"%AM"_s)) {
             lastLineClose(state, lastLine);
-            state = Macro;
+            state    = Macro;
             lastLine = line;
             continue;
         } else if(line.startsWith(u'%')) {
             lastLineClose(state, lastLine);
-            state = Param;
+            state    = Param;
             lastLine = line;
             continue;
         } else if(line.endsWith(u'*') && line.length() > 1) {
@@ -327,7 +327,7 @@ bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
                                                  : file->format().yDecimal;
         const auto integer = dir == FormatDir::X ? file->format().xInteger
                                                  : file->format().yInteger;
-        const auto maxLen = integer + decimal;
+        const auto maxLen  = integer + decimal;
 
         if(Str.indexOf(u"+"_s) == 0) {
             Str.remove(0, 1);
@@ -387,9 +387,9 @@ void Parser::addPath() {
                 createPolygon(),
                 file,
                 GrObject::Type(type),
-                std::move(path_),
+                toCurve(path_),
             });
-            go.name = u"D%1|Polygon"_s.arg(state_.aperture());
+            go.name  = u"D%1|Polygon"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject{
@@ -398,7 +398,7 @@ void Parser::addPath() {
                 createPolygon(),
                 file,
                 GrObject::Type(type),
-                std::move(path_),
+                toCurve(path_),
             });
             break;
         case WorkingType::ApertureBlock:
@@ -408,7 +408,7 @@ void Parser::addPath() {
                 createPolygon(),
                 file,
                 GrObject::Type(type),
-                std::move(path_),
+                toCurve(path_),
             });
             break;
         }
@@ -424,9 +424,9 @@ void Parser::addPath() {
                 createLine(),
                 file,
                 GrObject::Type(type),
-                std::move(path_),
+                toCurve(path_),
             });
-            go.name = u"D%1|PolyLine"_s.arg(state_.aperture());
+            go.name  = u"D%1|PolyLine"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject{
@@ -435,7 +435,7 @@ void Parser::addPath() {
                 createLine(),
                 file,
                 GrObject::Type(type),
-                std::move(path_),
+                toCurve(path_),
             });
             break;
         case WorkingType::ApertureBlock:
@@ -445,7 +445,7 @@ void Parser::addPath() {
                 createLine(),
                 file,
                 GrObject::Type(type),
-                std::move(path_),
+                toCurve(path_),
             });
             break;
         }
@@ -485,23 +485,35 @@ void Parser::addFlash() {
 
     switch(abSrIdStack_.top().workingType) {
     case WorkingType::Normal: {
-        auto& go = file->graphicObjects_.emplace_back(GrObject{
-            goId_++,
+        auto& go = file->graphicObjects_.emplace_back(
+            GrObject{
+                goId_++,
+                state_,
+                toCurves(paths),
+                file,
+                GrObject::Type(type),
+            });
+        go.name = u"D%1|%2"_s.arg(state_.aperture()).arg(ap->name());
+        go.pos  = ~state_.curPos();
+    } break;
+    case WorkingType::StepRepeat:
+        stepRepeat_.storage.append(
+            GrObject{
+                static_cast<int32_t>(stepRepeat_.storage.size()),
+                state_,
+                toCurves(paths),
+                file,
+                GrObject::Type(type),
+            });
+        break;
+    case WorkingType::ApertureBlock:
+        apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject{
+            static_cast<int32_t>(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size()), //
             state_,
-            std::move(paths),
+            toCurves(paths),
             file,
             GrObject::Type(type),
         });
-        go.name = u"D%1|%2"_s.arg(state_.aperture()).arg(ap->name());
-        go.pos = state_.curPos();
-    } break;
-    case WorkingType::StepRepeat:
-        stepRepeat_.storage.append(GrObject(stepRepeat_.storage.size(),
-            state_, std::move(paths), file, GrObject::Type(type)));
-        break;
-    case WorkingType::ApertureBlock:
-        apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size(), //
-            state_, std::move(paths), file, GrObject::Type(type)));
         break;
     }
     if(aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
@@ -562,7 +574,7 @@ Point Parser::parsePosition(const QString& xyStr) {
     return state_.curPos();
 }
 
-Paths Parser::createLine() {
+Curves Parser::createLine() {
     if(file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
         file->apertures_[state_.aperture()].get()->setUsed();
     Paths solution;
@@ -597,10 +609,10 @@ Paths Parser::createLine() {
 
     // new Gi::Debug{solution};
 
-    return solution;
+    return toCurves(solution);
 }
 
-Paths Parser::createPolygon() {
+Curves Parser::createPolygon() {
     if(Area(path_) > 0.0) {
         if(state_.imgPolarity() == Negative)
             ReversePath(path_);
@@ -609,7 +621,7 @@ Paths Parser::createPolygon() {
             ReversePath(path_);
     }
     r::for_each(path_, SetCSelf);
-    return {path_};
+    return {toCurve(path_)};
 }
 
 bool Parser::parseAperture(const QString& gLine) {
@@ -759,15 +771,15 @@ void Parser::closeStepRepeat() {
     addPath();
     for(int y{}; y < stepRepeat_.y; ++y) {
         for(int x{}; x < stepRepeat_.x; ++x) {
-            const Point pt(static_cast</*PType*/ int32_t>(stepRepeat_.i * x), static_cast</*PType*/ int32_t>(stepRepeat_.j * y));
+            const QPointF pt{stepRepeat_.i * x, stepRepeat_.j * y};
             for(GrObject& go: stepRepeat_.storage) {
-                Paths paths(go.fill);
-                for(Path& path: paths)
-                    TranslatePath(path, pt);
-                Path path(go.path);
-                TranslatePath(path, pt);
+                auto paths{go.fill};
+                for(auto&& path: paths)
+                    TranslateCurve(path, pt);
+                auto path{go.path};
+                TranslateCurve(path, pt);
                 auto state = go.state;
-                state.setCurPos({state.curPos().x + pt.x, state.curPos().y + pt.y});
+                state.setCurPos({state.curPos().x + pt.x(), state.curPos().y + pt.y()});
                 file->graphicObjects_.emplace_back(GrObject{
                     goId_++,
                     state,
@@ -982,8 +994,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     switch(state_.quadrant()) {
     case Multi: { // G75
         const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
-        const double start = atan2(-j, -i); // Start angle
-        const auto& center = centerPos.front();
+        const double start   = atan2(-j, -i); // Start angle
+        const auto& center   = centerPos.front();
         // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
         // Ч­то должно привести к образованию дуги в 360 градусов.
         const double stop = (arcStartPos == Point{x, y})
@@ -1003,11 +1015,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             j = center.y - arcStartPos.y;
             // Углы
             const double start = atan2(-j, -i);
-            const double stop = atan2(-center.y + y, -center.x + x);
+            const double stop  = atan2(-center.y + y, -center.x + x);
             const double angle = arcAngle(start, stop);
             if(angle < (pi + 1e-5) * 0.5) {
                 arcPath = constructArc(center, radius1, start, stop);
-                valid = true;
+                valid   = true;
                 break;
             }
         }

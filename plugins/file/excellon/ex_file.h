@@ -27,7 +27,7 @@ public:
 
     uint32_t type() const override { return EXCELLON; }
 
-    double tool(int t) const;
+    double tool(unsigned t) const;
     Tools tools() const;
 
     Format format() const;

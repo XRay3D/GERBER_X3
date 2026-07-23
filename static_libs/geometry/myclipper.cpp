@@ -50,8 +50,6 @@ QIcon drawIcon(const Paths& paths, QColor color) {
     return drawIcon(painterPath, color);
 }
 
-
-
 QIcon drawIcon(const QPainterPath& pPath, QColor color, bool stroke) {
     auto rect    = pPath.boundingRect();
     double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());

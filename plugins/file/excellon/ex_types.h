@@ -11,6 +11,7 @@
 #pragma once
 #include "datastream.h"
 #include "md5.h"
+#include "tool.h"
 #include <QPolygonF>
 #include <numbers>
 #include <type_traits>
@@ -23,7 +24,7 @@ namespace Excellon {
 
 constexpr auto EXCELLON = "Excellon"_hash32;
 
-using Tools = std::map<int, double>;
+using Tools = std::map<unsigned, double>;
 
 enum UnitMode {
     Inches,
@@ -56,9 +57,9 @@ R#M26       R#M22
 
 enum MCode {
     M_NULL = -1,
-    M00 = 0, // End of Program - No Rewind (X#Y#)
-    M01 = 1, // End of Pattern
-    M02 = 2, // Repeat Pattern Offset ((M02)X#Y#)
+    M00    = 0, // End of Program - No Rewind (X#Y#)
+    M01    = 1, // End of Pattern
+    M02    = 2, // Repeat Pattern Offset ((M02)X#Y#)
     // M02 = 2, // Swap Axes ((M02)XYM70)
     // M02 = 2, // Mirror Image X Axis ((M02)XYM80)
     // M02 = 2, // Mirror Image Y Axis ((M02)XYM90)
@@ -92,14 +93,14 @@ enum MCode {
 
 enum GCode {
     G_NULL = -1,
-    G00 = 0,  // Route Mode (X#Y#) перемещение.
-    G01 = 1,  // Linear (Straight Line) Mode
-    G02 = 2,  // Circular CW Mode
-    G03 = 3,  // Circular CCW Mode
-    G04 = 4,  // X# Variable Dwell
-    G05 = 5,  // Drill Mode
-    G07 = 7,  // Override current tool feed or speed
-    G32 = 32, // Routed Circle Canned Cycle (X#Y#A#)
+    G00    = 0,  // Route Mode (X#Y#) перемещение.
+    G01    = 1,  // Linear (Straight Line) Mode
+    G02    = 2,  // Circular CW Mode
+    G03    = 3,  // Circular CCW Mode
+    G04    = 4,  // X# Variable Dwell
+    G05    = 5,  // Drill Mode
+    G07    = 7,  // Override current tool feed or speed
+    G32    = 32, // Routed Circle Canned Cycle (X#Y#A#)
     // CCW G34,#(,#) Select Vision Tool
     // CW G33X#Y#A# Routed Circle Canned Cycle
     G35 = 35, // Single Point Vision Offset (Relative to Work Zero)  (X#Y#)
@@ -202,13 +203,13 @@ struct State {
 
     void reset(Format* f) {
         format = f;
-        gCode = G_NULL;
-        mCode = M_NULL;
+        gCode  = G_NULL;
+        mCode  = M_NULL;
         path.clear();
         pos = QPointF();
         rawPos.clear();
-        toolId = 0;
-        wm = DrillMode;
+        toolId = {};
+        wm     = DrillMode;
     }
     void updatePos();
 
@@ -238,10 +239,10 @@ struct State {
     Pos rawPos;
     QList<Pos> rawPosList;
     Format* format = nullptr;
-    GCode gCode = G05 /*G_NULL*/;
-    MCode mCode = M_NULL;
-    WorkMode wm = DrillMode;
-    int toolId = -1;
+    GCode gCode    = G05 /*G_NULL*/;
+    MCode mCode    = M_NULL;
+    WorkMode wm    = DrillMode;
+    unsigned toolId{};
     QPointF pos;
     QPolygonF path;
 

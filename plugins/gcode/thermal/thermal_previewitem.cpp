@@ -188,19 +188,16 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
     return QGraphicsItem::itemChange(change, value);
 }
 
-PreviewItem::PreviewItem(const Paths& paths, const Point pos, Tool& tool)
+PreviewItem::PreviewItem(const Curves& paths, const QPointF pos, Tool& tool)
     : AbstractThermPrGi{tool}
     , paths_{paths}
     , pos_{pos} {
-    for(QPolygonF polygon: ~paths) {
-        polygon.append(polygon.first());
-        sourcePath.addPolygon(polygon);
-    }
+    sourcePath = toPPath(paths_);
 }
 
-Point PreviewItem::pos() const { return pos_; }
+Point PreviewItem::pos() const { return ~pos_; }
 
-Paths PreviewItem::paths() const { return paths_; }
+Paths PreviewItem::paths() const { return toPaths(paths_); }
 
 void PreviewItem::redraw() {
     if(double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
@@ -208,7 +205,7 @@ void PreviewItem::redraw() {
         // ClipperOffset offset;
         // offset.AddPaths(paths_, JoinType::Round, EndType::Polygon);
         // cashedPath = offset.Execute(diameter * uScale * 0.5); // toolpath
-        cashedPath = InflateRoundPolygon(paths_, diameter * uScale /** 0.5*/);
+        cashedPath = InflateRoundPolygon(toPaths(paths_), diameter * uScale /** 0.5*/);
         // offset.Clear();
         // offset.AddPaths(cashedPath, JoinType::Miter, EndType::Round);
         // cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
@@ -267,7 +264,7 @@ QRectF PreviewItem::boundingRect() const {
     return painterPath.boundingRect().united(sourcePath.boundingRect());
 }
 
-Curves PreviewItem::curves() const { return toCurves(paths_); }
+Curves PreviewItem::curves() const { return paths_; }
 
 } // namespace Thermal
 

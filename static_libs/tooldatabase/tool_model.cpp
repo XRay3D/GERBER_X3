@@ -190,9 +190,9 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
         beginRow = rowCount(QModelIndex());
 
     QString encodedData = QString::fromUtf8(data->data(mimeType)); // FIXME
-    QStringList list = encodedData.split(u'|', Qt::SkipEmptyParts);
+    QStringList list    = encodedData.split(u'|', Qt::SkipEmptyParts);
     for(QString& item: list) {
-        ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
+        ToolItem* copyItem   = reinterpret_cast<ToolItem*>(item.toLongLong());
         ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
         if(copyItem) {
             if(!parentItem)
@@ -245,13 +245,13 @@ void ToolModel::saveTools() {
             item = stack.last()->child(row.last());
             QJsonObject treeNode;
             if(item->isTool()) {
-                treeNode[u"id"_s] = item->toolId();
+                treeNode[u"id"_s] = +item->toolId();
             } else {
                 treeNode[u"name"_s] = item->name();
                 treeNode[u"note"_s] = item->note();
             }
             treeNode[u"tool"_s] = item->isTool();
-            treeNode[u"tab"_s] = row.size() - 1;
+            treeNode[u"tab"_s]  = row.size() - 1;
             treeArray.push_back(treeNode);
             if(item->childCount()) {
                 stack.push_back(item);
@@ -291,7 +291,7 @@ void ToolModel::loadTools() {
     for(int treelIndex{}; treelIndex < treeArray.size(); ++treelIndex) {
 
         QJsonObject json = treeArray[treelIndex].toObject();
-        int nesting = json[u"tab"_s].toInt();
+        int nesting      = json[u"tab"_s].toInt();
 
         if(nesting > nestingStack.last()) {
             // The last child of the current parent is now the new parent unless the current parent has no children.
@@ -310,9 +310,9 @@ void ToolModel::loadTools() {
         ToolItem* parent = parentsStack.last();
         ToolItem* item;
         if(json[u"tool"_s].toBool())
-            item = new ToolItem{json[u"id"_s].toInt()};
+            item = new ToolItem{Tool::ID{json[u"id"_s].toInt()}};
         else {
-            item = new ToolItem();
+            item = new ToolItem{};
             item->setName(json[u"name"_s].toString());
             item->setNote(json[u"note"_s].toString());
         }

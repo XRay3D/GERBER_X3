@@ -505,6 +505,12 @@ template <Enum E>
 }
 #endif
 
+#define DECLARE_VIEWS_IOTA(ENUM)                                        \
+    template <>                                                         \
+    struct std::incrementable_traits<ENUM> {                            \
+        using difference_type = make_signed_t<underlying_type_t<ENUM>>; \
+    };
+
 template <Enum E>
 [[nodiscard]] constexpr auto operator+(E left) noexcept { return to_underlying(left); }
 
@@ -520,12 +526,6 @@ template <Enum E>
 template <Enum E>
 [[nodiscard]] constexpr E operator--(E& e, int) noexcept { return std::exchange(e, static_cast<E>(+e - 1)); }
 
-#define DECLARE_VIEWS_IOTA(ENUM)                                        \
-    template <>                                                         \
-    struct std::incrementable_traits<ENUM> {                            \
-        using difference_type = make_signed_t<underlying_type_t<ENUM>>; \
-    };
-
 // Enum OP Enum
 template <Enum L, Enum R>
 [[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & +right); }
@@ -536,28 +536,11 @@ template <Enum L, Enum R>
 template <Enum L, Enum R>
 [[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | +right); }
 
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator+(L left, R right) noexcept { return static_cast<L>(+left | +right); }
+
 template <Enum E>
 [[nodiscard]] constexpr E operator~(E left) noexcept { return static_cast<E>(~+left); }
-
-// // Enum OP Integral
-// template <Enum L, Integral R>
-// [[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & right); }
-
-// template <Enum L, Integral R>
-// [[nodiscard]] constexpr L operator^(L left, R right) noexcept { return static_cast<L>(+left ^ right); }
-
-// template <Enum L, Integral R>
-// [[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | right); }
-
-// // Integral OP Enum
-// template <Integral L, Enum R>
-// [[nodiscard]] constexpr R operator&(L left, R right) noexcept { return static_cast<R>(left & +right); }
-
-// template <Integral L, Enum R>
-// [[nodiscard]] constexpr R operator^(L left, R right) noexcept { return static_cast<R>(left ^ +right); }
-
-// template <Integral L, Enum R>
-// [[nodiscard]] constexpr R operator|(L left, R right) noexcept { return static_cast<R>(left | +right); }
 
 // Enum OP= Enum
 template <Enum L, Enum R>
@@ -569,15 +552,39 @@ template <Enum L, Enum R>
 template <Enum L, Enum R>
 /*[[nodiscard]]*/ constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
 
-// // Enum OP= Integral
-// template <Enum L, Integral R>
-// [[nodiscard]] constexpr const L& operator&=(L& left, R right) noexcept { return left = left & right; }
+#if 0 //  Enum and Integral
+// Enum OP Integral
+template <Enum L, Integral R>
+[[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & right); }
 
-// template <Enum L, Integral R>
-// [[nodiscard]] constexpr const L& operator^=(L& left, R right) noexcept { return left = left ^ right; }
+template <Enum L, Integral R>
+[[nodiscard]] constexpr L operator^(L left, R right) noexcept { return static_cast<L>(+left ^ right); }
 
-// template <Enum L, Integral R>
-// [[nodiscard]] constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
+template <Enum L, Integral R>
+[[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | right); }
+
+// Integral OP Enum
+template <Integral L, Enum R>
+[[nodiscard]] constexpr R operator&(L left, R right) noexcept { return static_cast<R>(left & +right); }
+
+template <Integral L, Enum R>
+[[nodiscard]] constexpr R operator^(L left, R right) noexcept { return static_cast<R>(left ^ +right); }
+
+template <Integral L, Enum R>
+[[nodiscard]] constexpr R operator|(L left, R right) noexcept { return static_cast<R>(left | +right); }
+
+
+// Enum OP= Integral
+template <Enum L, Integral R>
+[[nodiscard]] constexpr const L& operator&=(L& left, R right) noexcept { return left = left & right; }
+
+template <Enum L, Integral R>
+[[nodiscard]] constexpr const L& operator^=(L& left, R right) noexcept { return left = left ^ right; }
+
+template <Enum L, Integral R>
+[[nodiscard]] constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
+
+#endif
 
 } // namespace EnumOps
 
