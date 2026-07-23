@@ -13,7 +13,7 @@
 
 namespace Drilling {
 namespace Gi {
-Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths& draw_)
+Preview::Preview(Path&& path, double diameter, Tool::ID toolId, Row& row, const Paths& draw_)
     : path_{std::move(path)}
     , row{row}
     , toolId_{toolId} {
@@ -33,8 +33,8 @@ Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths
 }
 
 void Preview::updateTool() {
-    if(toolId() > 0) {
-        colorState |= Tool;
+    if(toolId() > Tool::ID{}) {
+        colorState |= ColorState::Tool;
         if(path_.size() > 1)
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
@@ -71,7 +71,7 @@ void Preview::updateTool() {
                 return painterPath.translated(val);
             }(~path_.front());
     } else {
-        colorState &= ~Tool;
+        colorState &= ~ColorState::Tool;
         toolPath_ = {};
     }
     changeColor();
@@ -89,7 +89,7 @@ bool Preview::fit(double depth) const {
     return sourceDiameter_ > diameter; // && !qFuzzyCompare(sourceDiameter_, diameter); FIXME logic
 }
 
-int Preview::toolId() const { return toolId_ < 1 ? row.toolId : toolId_; }
+Tool::ID Preview::toolId() const { return (toolId_ < Tool::ID::Tool) ? row.toolId : toolId_; }
 
 int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1); }
 
@@ -98,6 +98,12 @@ bool Preview::isSlot() const { return path_.size() > 1; }
 Paths Preview::offset() const {
     return ~sourcePath_.toSubpathPolygons();
     /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
+}
+
+void Preview::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseDoubleClickEvent(event);
+    colorState ^= CS::Used;
+    changeColor();
 }
 
 }

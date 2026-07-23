@@ -10,17 +10,18 @@
  ********************************************************************************/
 #pragma once
 
-#include <boost/pfr.hpp>
+// #include <boost/pfr.hpp>
 
 #include <QByteArray>
 #include <QDataStream>
 #include <map>
+#include <meta>
 #include <ranges>
 #include <type_traits>
 
-namespace pfr = boost ::pfr;
-namespace v   = std ::views;
-namespace r   = std ::ranges;
+// namespace pfr = boost ::pfr;
+namespace v = std ::views;
+namespace r = std ::ranges;
 
 template <class T, size_t N>
 inline QDataStream& operator>>(QDataStream& s, T (&p)[N]) {
@@ -106,6 +107,33 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
     return stream;
 }
 
+static constexpr auto CTX = std::meta::access_context::current();
+
+template <typename T>
+consteval auto fields_count() {
+    return nonstatic_data_members_of(^^T, CTX).size();
+}
+
+template <typename T, typename Func>
+    requires(is_class_type(^^std::remove_cvref_t<T>))
+constexpr auto for_each_field(T&& str, Func&& func) {
+    static constexpr auto MEMBERS = std::define_static_array(nonstatic_data_members_of(^^std::remove_cvref_t<T>, CTX));
+    size_t i{};
+    template for(constexpr auto MEMBER: MEMBERS) {
+        if constexpr(requires { func(std::forward<T>(str).[:MEMBER:]); })
+            func(std::forward<T>(str).[:MEMBER:]);
+        else if constexpr(requires { func(std::forward<T>(str).[:MEMBER:], i++); })
+            func(std::forward<T>(str).[:MEMBER:], display_string_of(MEMBER));
+        // else if constexpr(requires { func(std::forward<T>(str).[:MEMBER:], i++); })
+        // func(std::forward<T>(str).[:MEMBER:], i++);
+    }
+}
+
+template <size_t I, typename T>
+constexpr auto get_name() {
+    return display_string_of(nonstatic_data_members_of(^^T, CTX)[I]);
+}
+
 // порционное сохранение для гибкости.
 class Block final {
     QDataStream& stream;
@@ -117,19 +145,19 @@ public:
         : stream{stream} { }
 
     template <typename T>
-        requires(pfr::detail::fields_count<T>() > 1)
+        requires(fields_count<T>() > 1)
     QDataStream& read(T& val) {
         stream >> count;
-        count = std::min<uint32_t>(count, pfr::detail::fields_count<T>());
-        pfr::for_each_field(val, [this](auto& field) { if(count) --count, stream >> field; });
+        count = std::min<uint32_t>(count, fields_count<T>());
+        for_each_field(val, [this](auto& field) { if(count) --count, stream >> field; });
         return stream;
     }
 
     template <typename T>
-        requires(pfr::detail::fields_count<T>() > 1)
+        requires(fields_count<T>() > 1)
     QDataStream& write(const T& val) {
-        stream << (count = pfr::detail::fields_count<T>());
-        pfr::for_each_field(val, [this](const auto& field) { stream << field; });
+        stream << (count = fields_count<T>());
+        for_each_field(val, [this](const auto& field) { stream << field; });
         return stream;
     }
 

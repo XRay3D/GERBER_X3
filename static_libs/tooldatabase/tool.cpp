@@ -62,7 +62,7 @@ QDataStream& operator>>(QDataStream& stream, Tool& tool) {
 
 QDebug operator<<(QDebug debug, const Tool& t) {
     QDebugStateSaver saver{debug};
-    debug.nospace() << u"Tool(D "_s << t.diameter_ << u", ID "_s << t.id_ << u", Ty "_s << t.type_ << ')';
+    debug.nospace() << u"Tool(D "_s << t.diameter_ << u", ID "_s << +t.id_ << u", Ty "_s << t.type_ << ')';
     return debug;
 }
 
@@ -76,49 +76,9 @@ QString Tool::nameEnc() const {
     default              : return {};
     }
 }
-QString Tool::name() const { return name_; }
-void Tool::setName(const QString& name) { hash_ = {}, name_ = name; }
-
-QString Tool::note() const { return note_; }
-void Tool::setNote(const QString& note) { hash_ = {}, note_ = note; }
 
 Tool::Type Tool::type() const { return type_; }
-void Tool::setType(int type) { hash_ = {}, type_ = static_cast<Type>(type); }
 
-double Tool::angle() const { return angle_; }
-void Tool::setAngle(double angle) { hash_ = {}, angle_ = angle; }
-
-double Tool::diameter() const { return diameter_; }
-void Tool::setDiameter(double diameter) { hash_ = {}, diameter_ = diameter, updatePath(); }
-
-double Tool::feedRate_mmPerSec() const { return feedRate_ / 60.0; }
-double Tool::feedRate() const { return feedRate_; }
-void Tool::setFeedRate(double feedRate) { hash_ = {}, feedRate_ = feedRate; }
-
-double Tool::oneTurnCut() const { return oneTurnCut_; }
-void Tool::setOneTurnCut(double oneTurnCut) { hash_ = {}, oneTurnCut_ = oneTurnCut; }
-
-double Tool::passDepth() const { return passDepth_; }
-void Tool::setPassDepth(double passDepth) { hash_ = {}, passDepth_ = passDepth; }
-
-double Tool::plungeRate() const { return plungeRate_; }
-void Tool::setPlungeRate(double plungeRate) { hash_ = {}, plungeRate_ = plungeRate; }
-
-double Tool::spindleSpeed() const { return spindleSpeed_; }
-void Tool::setSpindleSpeed(double spindleSpeed) { hash_ = {}, spindleSpeed_ = spindleSpeed; }
-
-double Tool::stepover() const { return stepover_; }
-void Tool::setStepover(double stepover) { hash_ = {}, stepover_ = stepover; }
-
-bool Tool::autoName() const { return autoName_; }
-void Tool::setAutoName(bool autoName) { hash_ = {}, autoName_ = autoName; }
-
-double Tool::lenght() const { return lenght_; }
-void Tool::setLenght(double lenght) { hash_ = {}, lenght_ = lenght; }
-
-int Tool::id() const { return id_; }
-
-void Tool::setId(int32_t id) { hash_ = {}, id_ = id; }
 double Tool::getDiameter(double depth) const {
     if(type() == Engraver && depth > 0.0 && angle() > 0.0 && angle() <= 90.0) {
         double a = qDegreesToRadians(90 - angle() / 2);
@@ -142,7 +102,7 @@ void Tool::read(const QJsonObject& json) {
     autoName_     = json[u"autoName"_s].toBool();
     diameter_     = json[u"diameter"_s].toDouble();
     feedRate_     = json[u"feedRate"_s].toDouble();
-    id_           = json[u"id"_s].toInt();
+    id_           = static_cast<ID>(json[u"id"_s].toInt());
     name_         = json[u"name"_s].toString();
     note_         = json[u"note"_s].toString();
     oneTurnCut_   = json[u"oneTurnCut"_s].toDouble();
@@ -160,7 +120,7 @@ void Tool::write(QJsonObject& json) const {
     json[u"autoName"_s]     = autoName_;
     json[u"diameter"_s]     = diameter_;
     json[u"feedRate"_s]     = feedRate_;
-    json[u"id"_s]           = id_;
+    json[u"id"_s]           = +id_;
     json[u"name"_s]         = name_;
     json[u"note"_s]         = note_;
     json[u"oneTurnCut"_s]   = oneTurnCut_;
@@ -174,16 +134,11 @@ void Tool::write(QJsonObject& json) const {
 
 bool Tool::isValid() const {
     do {
-        if(qFuzzyIsNull(diameter_))
-            break;
-        if(type_ != Laser && qFuzzyIsNull(passDepth_))
-            break;
-        if(type_ != Drill && qFuzzyIsNull(feedRate_))
-            break;
-        if(type_ != Drill && qFuzzyIsNull(stepover_))
-            break;
-        if(type_ != Laser && qFuzzyIsNull(plungeRate_))
-            break;
+        if(qFuzzyIsNull(diameter_)) break;
+        if(type_ != Laser && qFuzzyIsNull(passDepth_)) break;
+        if(type_ != Drill && qFuzzyIsNull(feedRate_)) break;
+        if(type_ != Drill && qFuzzyIsNull(stepover_)) break;
+        if(type_ != Laser && qFuzzyIsNull(plungeRate_)) break;
         return true;
     } while(0);
     return false;
@@ -224,15 +179,13 @@ void Tool::errorMessageBox(QWidget* parent) const {
 }
 
 size_t Tool::hash() const {
-    if(hash_)
-        return hash_;
-
-    QByteArray hashData;
-    hashData.push_back(name_.toUtf8());
-    hashData.push_back(note_.toUtf8());
+    if(hash_) return hash_;
+    std::vector<char> hashData;
+    hashData.append_range(name_.toUtf8());
+    hashData.append_range(note_.toUtf8());
     auto push_back = [&hashData](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
-        hashData.append(reinterpret_cast<const char*>(&arg), sizeof(T));
+        hashData.append_range(std::bit_cast<std::array<char, sizeof(T)>>(arg));
     };
     push_back(type_);
     push_back(angle_);
@@ -245,9 +198,7 @@ size_t Tool::hash() const {
     push_back(stepover_);
     push_back(autoName_);
     push_back(id_);
-    hash_ = qHash(hashData);
-
-    return hash_;
+    return hash_ = qHash(hashData);
 }
 
 size_t Tool::hash2() const {
@@ -307,7 +258,7 @@ void ToolHolder::readTools(const QJsonObject& json) {
         Tool tool;
         QJsonObject toolObject = toolArray[treeIndex].toObject();
         tool.read(toolObject);
-        tool.setId(toolObject[u"id"_s].toInt());
+        tool.setId(static_cast<Tool::ID>(toolObject[u"id"_s].toInt()));
         tool.updatePath();
         tools_.try_emplace(tool.id(), tool);
     }
@@ -318,7 +269,7 @@ void ToolHolder::writeTools(QJsonObject& json) {
     for(auto& [id, tool]: tools_) {
         QJsonObject toolObject;
         tool.write(toolObject);
-        toolObject[u"id"_s] = id;
+        toolObject[u"id"_s] = +id;
         toolArray.push_back(toolObject);
     }
     json[u"tools"_s] = QJsonValue{toolArray};

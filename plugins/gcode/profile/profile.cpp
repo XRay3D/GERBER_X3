@@ -28,7 +28,6 @@ namespace Profile {
 
 void Creator::create() {
     // WARNING App::fileTreeView().closeFiles();
-    if(gcp.tools.empty()) return; // FIXME
     createProfile(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 

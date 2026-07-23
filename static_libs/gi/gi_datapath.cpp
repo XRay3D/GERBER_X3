@@ -31,7 +31,7 @@ void DataPath::updateSelection() const {
 #if 1
     str.setWidth(width * scale);
     selectionShape_ = str.createStroke(shape_);
-    boundingRect_ = selectionShape_.boundingRect();
+    boundingRect_   = selectionShape_.boundingRect();
 #else
     auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, JoinType::Miter, EndType::Square);
     selectionShape_.clear();
@@ -49,7 +49,7 @@ void DataPath::updateSelection() const {
 DataPath::DataPath(Curves curves, AbstractFile* file)
     : Item{file} {
     curves_ = std::move(curves);
-    shape_ = toPPath(curves_);
+    shape_  = toPPath(curves_);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -147,7 +147,7 @@ void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen.setWidthF(2 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({pi, pi - 1});
+        pen.setDashPattern({pi * 2, pi * 2 - 1});
     }
     if(option->state & QStyle::State_MouseOver) {
         painter->setPen(Qt::NoPen);

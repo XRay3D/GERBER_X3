@@ -391,6 +391,7 @@ QString File::g(const Vertex& v) {
     case Vertex::Line: return g1();
     case Vertex::Ccw : return g3();
     case Vertex::Cw  : return g2();
+    default          : return {};
     }
 }
 

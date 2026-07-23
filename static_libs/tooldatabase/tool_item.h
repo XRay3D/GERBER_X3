@@ -15,7 +15,7 @@ class ToolItem {
 
 public:
     ToolItem() = default;
-    ToolItem(int toolId);
+    ToolItem(Tool::ID toolId);
     ToolItem(const ToolItem& item);
     ~ToolItem();
 
@@ -37,7 +37,7 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex&) const;
 
-    int toolId() const;
+    Tool::ID toolId() const;
 
     Tool& tool();
 
@@ -60,5 +60,5 @@ private:
     QList<ToolItem*> childItems;
     QString name_;
     QString note_;
-    mutable int toolId_{};
+    mutable Tool::ID id{};
 };

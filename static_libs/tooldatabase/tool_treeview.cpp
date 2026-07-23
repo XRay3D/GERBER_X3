@@ -60,7 +60,7 @@ void ToolTreeView::newTool() {
 
     if(item) {
         item->setIsTool();
-        item->tool().setName(tr("New Tool ") + QString::number(item->toolId()));
+        item->tool().setName(tr("New Tool ") + QString::number(+item->toolId()));
         index = model_->createIndex(item->row(), 0, item);
         selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }

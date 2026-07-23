@@ -125,14 +125,20 @@ Paths File::merge() const {
                 // | v::take(5)),
                 | v::drop(208 - 99 - 5) | v::take(5)),
         };
-        bool fl = gObjects.front().state.imgPolarity();
+        bool fl      = gObjects.front().state.imgPolarity();
         mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
         break;
     }
 #else
     for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity)) {
-        Paths clip{std::from_range, v::join(v::transform(gObjects, &GrObject::fill))};
-        bool fl = gObjects.front().state.imgPolarity();
+        Paths clip{
+            std::from_range,
+            gObjects
+                | v::transform(&GrObject::fill)
+                | v::transform(qOverload<const Curves&>(toPaths))
+                | v::join,
+        };
+        bool fl      = gObjects.front().state.imgPolarity();
         mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
     }
     // Gi::Debug(mergedPaths_, {255, 255, 255, 128}); //->arrows = {};
@@ -187,7 +193,7 @@ Pathss& File::groupedPaths(File::Group group, bool fl) {
         Clipper clipper;
         clipper.AddSubject(mergedPaths());
         auto r{GetBounds(mergedPaths())};
-        int k = uScale;
+        int k      = uScale;
         Path outer = {
             Point(r.left - k, r.bottom + k),
             Point(r.right + k, r.bottom + k),
@@ -279,7 +285,7 @@ void File::read(QDataStream& stream) {
         components_);
 
     for(GrObject& go: graphicObjects_) {
-        go.gFile = this;
+        go.gFile       = this;
         go.state.file_ = this;
     }
 }
@@ -300,14 +306,14 @@ void File::createGi() {
         itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr(1) { // add aperture paths
-        auto contains = [&](const Path& path) -> bool {
+        auto contains = [&](const Curve& path) -> bool {
             constexpr double k = 0.001 * uScale;
-            for(const Path& chPath: checkList) { // find copy
+            for(const auto& chPath: checkList) { // find copy
                 size_t counter{};
                 if(chPath.size() == path.size()) {
-                    for(const Point& p1: chPath) {
-                        for(const Point& p2: path) {
-                            if((abs(p1.x - p2.x) < k) && (abs(p1.y - p2.y) < k)) {
+                    for(const auto& p1: chPath) {
+                        for(const auto& p2: path) {
+                            if((abs(p1.x() - p2.x()) < k) && (abs(p1.y() - p2.y()) < k)) {
                                 ++counter;
                                 break;
                             }
@@ -323,22 +329,22 @@ void File::createGi() {
         for(const GrObject& go: graphicObjects_) {
             if(!go.path.empty()) {
                 if(Settings::simplifyRegions() && go.path.front() == go.path.back()) {
-                    Paths paths;
-                    SimplifyPolygon(go.path, paths);
-                    for(Path& path: paths) {
+                    Curves paths;
+                    // FIXME SimplifyPolygon(toPath(go.path), paths);
+                    for(auto&& path: paths) {
                         path.push_back(path.front());
                         if(!Settings::skipDuplicates()) {
                             checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{checkList.front(), this});
+                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{{checkList.front()}, this});
                         } else if(!contains(path)) {
                             checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{checkList.front(), this});
+                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{{checkList.front()}, this});
                         }
                     }
                 } else if(!Settings::skipDuplicates()) {
-                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{go.path, this});
+                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
                 } else if(!contains(go.path)) {
-                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{go.path, this});
+                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
                     checkList.push_front(go.path);
                 }
             }
@@ -362,8 +368,8 @@ void File::createGi() {
 
     setColor(color_);
 
-    layerTypes_[Normal].id = itemGroups_[Normal]->size() ? Normal : NullType;
-    layerTypes_[ApPaths].id = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
+    layerTypes_[Normal].id     = itemGroups_[Normal]->size() ? Normal : NullType;
+    layerTypes_[ApPaths].id    = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
     layerTypes_[Components].id = itemGroups_[Components]->size() ? Components : NullType;
 
     itemGroups_[ApPaths]->setVisible(false);

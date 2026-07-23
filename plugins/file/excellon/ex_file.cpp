@@ -61,7 +61,7 @@ void File::setFormat(const Format& value) {
     }
 }
 
-double File::tool(int t) const {
+double File::tool(unsigned t) const {
     if(tools_.contains(t))
         return format_.unitMode == Inches ? tools_.at(t) * 25.4 : tools_.at(t);
     return {};
@@ -93,7 +93,7 @@ void File::read(QDataStream& stream) {
     stream >> format_;
     format_.file = this;
     for(Hole& hole: *this) {
-        hole.file = this;
+        hole.file         = this;
         hole.state.format = &format_;
     }
 }
@@ -105,7 +105,7 @@ void File::createGi() {
                                                           : QPolygonF{hole.state.pos},
                                    hole.state.currentToolDiameter(),
                                    this,
-                                   hole.state.toolId});
+                                   static_cast<Tool::ID>(hole.state.toolId)});
     itemGroup()->setVisible(true);
 }
 
@@ -127,18 +127,20 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
         GraphicObject go;
         // go.fill;
         if(bool slot = hole.state.path.size(); !slot) {
-            go.pos = ~hole.state.pos;
-            go.path.emplace_back(go.pos = ~hole.state.pos);
-            go.fill.emplace_back(CirclePath(diam * uScale, go.pos));
+            go.pos = hole.state.pos;
+            go.path.emplace_back(go.pos = hole.state.pos);
+            go.fill.emplace_back(CircleCurve(diam, go.pos));
         } else {
-            go.path = ~hole.state.path;
+            go.path = Curve{std::from_range, hole.state.path | v::transform([](const QPointF& pt) { return geo::Vertex{pt}; })};
             // go.pos = go.path.front();
-            go.fill = Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
+            go.fill = toCurves(Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale));
         }
-        go.name = u"T%1|Ø%2"_s.arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)); // name;
-        go.type = GraphicObject::FlStamp;                                                // type{},//{Null};
-                                                                                         // go.id = int32_t {};                                                                             // id {-1};
-        go.raw = tools_.at(hole.state.toolId);                                           // raw;
+        go.name = u"T%1|Ø%2"_s
+                      .arg(+hole.state.toolId)
+                      .arg(tools_.at(hole.state.toolId)); // name;
+        go.type = GraphicObject::FlStamp;                 // type{},//{Null};
+                                                          // go.id = int32_t {};                                                                             // id {-1};
+        go.raw = tools_.at(hole.state.toolId);            // raw;
         retData.emplace_back(go * transform_);
 
         // if (bool slot = hole.state.path.size(); slot)

@@ -46,10 +46,10 @@ inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
     return stream;
 }
 
-using Curves = std::vector<Curve>;
+using Curves  = std::vector<Curve>;
 using Curvess = std::vector<Curves>;
 
-QIcon drawIcon(const Curves& paths, QColor color);
+QIcon drawIcon(const Curves& curves, QColor color = Qt::black);
 
 constexpr double Area(const Curve& curve) { return curve.area(); }
 constexpr double Area(const Curves& curves) {

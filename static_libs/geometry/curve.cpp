@@ -1367,8 +1367,6 @@ Curves& TransformCurves(Curves& curves, const QTransform& tr) {
     return curves;
 }
 
-QIcon drawIcon(const Curves& paths, QColor color) {
-    // static std::mutex m;
-    // std::lock_guard l{m};
-    return drawIcon(toPPath(paths), color);
+QIcon drawIcon(const Curves& curves, QColor color) {
+    return drawIcon(toPPath(curves), color);
 }

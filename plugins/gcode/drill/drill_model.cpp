@@ -25,23 +25,23 @@ Model::Model(size_t rowCount, QObject* parent)
     data_.resize(rowCount);
 }
 
-void Model::setToolId(int row, int32_t id) {
+void Model::setToolId(int row, Tool::ID id) {
     if(data_[row].toolId != id)
-        data_[row].useForCalc = id > -1;
+        data_[row].useForCalc = id > Tool::ID::Null;
     data_[row].toolId = id;
     for(auto item: data_[row].items) {
         // Флаг должен быть выставлен ДО updateTool(), т.к. тот в конце вызывает
         // changeColor(), которая читает ItemIsSelectable как признак "Used" —
         // иначе цвет пересчитывается по ещё не обновлённому (старому) флагу.
-        item->setFlag(QGraphicsItem::ItemIsSelectable, id > -1);
+        item->setFlag(QGraphicsItem::ItemIsSelectable, id > Tool::ID::Null);
         item->updateTool();
     }
-    emit set(row, id > -1);
+    emit set(row, id > Tool::ID::Null);
     emit dataChanged(createIndex(row, 0), createIndex(row, 1));
 }
 
 void Model::setCreate(int row, bool create) {
-    if(data_[row].toolId == -1)
+    if(data_[row].toolId == Tool::ID::Null)
         return;
     data_[row].useForCalc = create;
     for(auto item: data_[row].items) {
@@ -54,7 +54,7 @@ void Model::setCreate(int row, bool create) {
 
 void Model::setCreate(bool create) {
     for(int row{}; row < rowCount(); ++row)
-        data_[row].useForCalc = create && data_[row].toolId != -1;
+        data_[row].useForCalc = create && data_[row].toolId != Tool::ID::Null;
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
 
@@ -72,13 +72,13 @@ QVariant Model::data(const QModelIndex& index, int role) const {
             else
                 return data_[row].name.back();
         case Qt::DecorationRole: {
-            if(data_[index.row()].toolId > -1 && data_[row].isSlot) {
+            if(data_[index.row()].toolId > Tool::ID::Null && data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
                 for(int x{}; x < 24; ++x)
                     for(int y{}; y < 24; ++y)
                         image.setPixelColor(x, y, QColor(255, 0, 0, image.pixelColor(x, y).alpha()));
                 return QIcon(QPixmap::fromImage(image));
-            } else if(data_[index.row()].toolId > -1) {
+            } else if(data_[index.row()].toolId > Tool::ID::Null) {
                 return data_[row].icon;
             } else if(data_[row].isSlot) {
                 QImage image(data_[row].icon.pixmap(24, 24).toImage());
@@ -98,18 +98,18 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         default          : break;
         }
     } else {
-        if(data_[row].toolId == -1)
+        if(data_[row].toolId == Tool::ID::Null)
             switch(role) {
             case Qt::DisplayRole      : return tr("Select Tool");
             case Qt::TextAlignmentRole: return Qt::AlignCenter;
-            case Qt::UserRole         : return data_[row].toolId;
+            case Qt::UserRole         : return +data_[row].toolId;
             default                   : break;
             }
         else
             switch(role) {
             case Qt::DisplayRole   : return App::toolHolder().tool(data_[row].toolId).name();
             case Qt::DecorationRole: return App::toolHolder().tool(data_[row].toolId).icon();
-            case Qt::UserRole      : return data_[row].toolId;
+            case Qt::UserRole      : return +data_[row].toolId;
             default                : break;
             }
     }

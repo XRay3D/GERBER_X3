@@ -58,7 +58,10 @@ set(COMMON_COMPILE_OPTIONS
     # * Wconversion - Werror
     -Wextra
     -Wimplicit-fallthrough
-    -Wpedantic)
+    -Wpedantic
+    # -Og instead of the default -O0 in Debug: _FORTIFY_SOURCE (pulled in by
+    # -fhardened) requires optimizations, otherwise GCC emits -Whardened.
+    $<$<CONFIG:Debug>:-Og>)
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(${COMMON_COMPILE_OPTIONS})
@@ -73,7 +76,7 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     # -fvtable-verify=preinit#std
     -fstack-clash-protection
     # -fcf-protection=full
-    -Wno-error=hardened)
+  )
   link_libraries(stdc++exp -Wl,-z,relro -Wl,-z,now)
   add_link_options(-fuse-ld=lld)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")

@@ -1095,7 +1095,7 @@ void MainWindow::Ui::setupUi(QMainWindow* MainWindow) {
     loggingTextBrowser->setObjectName(u"loggingTextBrowser"_s);
     loggingTextBrowser->setReadOnly(true);
     loggingTextBrowser->setWordWrapMode(QTextOption::NoWrap);
-    loggingTextBrowser->setFontFamily(u"Iosevka Light Extended"_s);
+    loggingTextBrowser->setCurrentFont(QFont{u"Monospace"_s});
     loggingDockWidget->setWidget(loggingTextBrowser);
     loggingDockWidget->setContentsMargins(3, 3, 3, 3);
     MainWindow->addDockWidget(Qt::RightDockWidgetArea, loggingDockWidget);
