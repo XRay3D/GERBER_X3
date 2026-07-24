@@ -41,16 +41,6 @@
 
 namespace Threading {
 
-Paths offset(const Path& path, double offset, bool fl = false) {
-    // ClipperOffset cpOffset;
-    // cpOffset.AddPath(path, JoinType::Round, fl ? EndType::Round : EndType::Round);
-    // Paths tmpPpaths = cpOffset.Execute(offset * uScale);
-    Paths tmpPpaths = Inflate({path}, offset * uScale, JoinType::Round, fl ? EndType::Round : EndType::Round);
-    for(Path& tmpPath: tmpPpaths)
-        tmpPath.push_back(tmpPath.front());
-    return tmpPpaths;
-}
-
 /////////////////////////////////////////////
 
 Form::Form(GCode::Plugin* plugin)
@@ -76,6 +66,9 @@ Form::Form(GCode::Plugin* plugin)
         settings.getValue(ui->rbLeft);
         settings.getValue(ui->rbRight, true);
         settings.getValue(ui->chbxZoomToSelected);
+        settings.getValue(ui->chbxCircle);
+        settings.getValue(ui->chbxChamfer);
+        settings.getValue(ui->sbxStarts, 1);
         settings.endGroup();
     }
 
@@ -91,7 +84,7 @@ Form::Form(GCode::Plugin* plugin)
     updateButtonIconSize();
     updateState();
     updateFiles();
-    setWindowTitle(tr("GCType::Drill Toolpath"));
+    setWindowTitle(tr("Thread"));
     // FIXME App::setDrillForm(this);
 }
 
@@ -107,6 +100,9 @@ Form::~Form() {
     settings.setValue(ui->rbLeft);
     settings.setValue(ui->rbRight);
     settings.setValue(ui->chbxZoomToSelected);
+    settings.setValue(ui->chbxCircle);
+    settings.setValue(ui->chbxChamfer);
+    settings.setValue(ui->sbxStarts);
     settings.endGroup();
 
     delete ui;
@@ -227,15 +223,15 @@ void Form::on_cbxFileCurrentIndexChanged() {
             map[var.name].emplace_back(&var);
         }
 
-        model      = new Model{map.size(), ui->toolTable};
+        model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
         QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
-            row.icon  = drawIcon(val.front()->fill, color);
-            row.name  = key.split(u'|');
+            row.icon = drawIcon(val.front()->fill, color);
+            row.name = key.split(u'|');
             row.name.back() += u": Ø"_s + QString::number(std::any_cast<double>(val.front()->raw));
             row.diameter = std::any_cast<double>(val.front()->raw);
             for(auto* go: val)
@@ -259,15 +255,15 @@ void Form::on_cbxFileCurrentIndexChanged() {
             if(shape->isVisible())
                 map[Key{shape->name(), std::any_cast<double>(shape->getVal(ShCirc::Shape::Diameter))}].emplace_back(shape);
 
-        model      = new Model{map.size(), ui->toolTable};
+        model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
         QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, shapes]: map) {
-            auto& row    = data[i++];
-            row.icon     = shapes.front()->icon();
-            row.name     = QString(key.first).split(u'|');
+            auto& row = data[i++];
+            row.icon = shapes.front()->icon();
+            row.name = QString(key.first).split(u'|');
             row.diameter = std::any_cast<double>(shapes.front()->getVal(ShCirc::Shape::Diameter));
             row.name.back() += u": Ø%1"_s.arg(row.diameter);
             for(auto* shape: shapes)
@@ -443,16 +439,19 @@ void Form::computePaths() {
 
     std::map<Tool::ID, Data> pathsMap;
 
+    // Each thread mark is encoded as a 2-point path: {center, center + (M/2, 0)}.
+    // The threading.js script derives the hole/rod center and its nominal thread
+    // diameter M from that pair; M isn't otherwise available per-point.
     for(int i{}; auto&& row: *model) {
         if(row.toolId > Tool::ID{} && row.useForCalc) {
             pathsMap[row.toolId].toolsApertures.push_back(i);
             for(auto& item: row.items) {
                 if(!item->isUsed()) continue;
-                if(item->fit(dsbxDepth->value()))
-                    for(Path& path: offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
-                        pathsMap[row.toolId].paths.push_back(path);
-                else
-                    pathsMap[row.toolId].paths.push_back(item->paths().front());
+                const QPointF center{item->pos()};
+                const double radius{item->sourceDiameter() * 0.5};
+                pathsMap[row.toolId].paths.push_back(Path{
+                    ~center, ~QPointF{center.x() + radius, center.y()}
+                });
             }
             model->setCreate(i++, !pathsMap.contains(row.toolId));
         }
@@ -460,13 +459,15 @@ void Form::computePaths() {
 
     for(auto [usedToolId, data]: pathsMap) {
         if(data.paths.size()) {
-            GCode::File* gcode = new File{
-                GCode::Params{
-                              App::toolHolder().tool(usedToolId),
-                              dsbxDepth->value(),
-                              std::move(data.paths),
-                              }
-            };
+            GCode::Params gcp{App::toolHolder().tool(usedToolId), dsbxDepth->value(), std::move(data.paths)};
+            gcp.setSide(ui->rbInside->isChecked() ? GCode::Inner : GCode::Outer);
+            gcp.setConvent(!ui->rbClimb->isChecked());
+            gcp.setLeftHand(ui->rbLeft->isChecked());
+            gcp.setCircle(ui->chbxCircle->isChecked());
+            gcp.setChamfer(ui->chbxChamfer->isChecked());
+            gcp.setStarts(ui->sbxStarts->value());
+
+            GCode::File* gcode = new File{std::move(gcp)};
             gcode->setFileName(
                 App::toolHolder().tool(usedToolId).nameEnc()
                 + u"_T"_s + indexes(pathsMap[usedToolId].toolsApertures));

@@ -274,7 +274,7 @@ void ToolEditForm::setupToolWidgets(int) {
         showPair(ui->formCutParam, ui->hlayStepover, ui->dsbxStepover, diameter);
         break;
     case Tool::ThreadMill:
-        show(ui->formCutParam, ui->dsbxHoleDiam, 10.);
+        show(ui->formGeometry, ui->dsbxHoleDiam, 10.);
         show(ui->formCutParam, ui->dsbxThreadPitch, 10.);
         show(ui->formFeedSpeeds, ui->dsbxFeedRate, 100000.);
         show(ui->formGeometry, ui->dsbxLenght, 100000.);

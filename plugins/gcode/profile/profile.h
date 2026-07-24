@@ -42,14 +42,12 @@ public:
     Creator() = default;
     ~Creator() override = default;
 
-    enum {
-        BridgeLen = GCode::Params::UserParam,
-        TrimmingCorners,
-        TrimmingOpenPaths,
-        BridgeAlignType,
-        BridgeValue,
-        BridgeValue2,
-    };
+    static inline const QString BridgeLen        = u"BridgeLen"_s;
+    static inline const QString TrimmingCorners   = u"TrimmingCorners"_s;
+    static inline const QString TrimmingOpenPaths = u"TrimmingOpenPaths"_s;
+    static inline const QString BridgeAlignType   = u"BridgeAlignType"_s;
+    static inline const QString BridgeValue       = u"BridgeValue"_s;
+    static inline const QString BridgeValue2      = u"BridgeValue2"_s;
 
 private:
     void createProfile(const Tool& tool, const double depth);

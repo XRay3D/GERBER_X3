@@ -706,6 +706,12 @@ void MainWindow::createActionsToolPath() {
     if(!App::gCodePlugins().size())
         return;
 
+    // Wire up default JS script paths now, at plugin-load time, rather than
+    // waiting for the user to open Settings (GCode::Tab::readSettings is the
+    // only other caller) — otherwise a plugin whose toolpath is JS-only
+    // (e.g. Threading) silently produces nothing until Settings is opened once.
+    GCode::File::ensureDefaultScripts();
+
     QMenu* menu = menuBar()->addMenu(tr("&Paths"));
 
     toolpathToolBar = addToolBar(tr("Toolpath"));

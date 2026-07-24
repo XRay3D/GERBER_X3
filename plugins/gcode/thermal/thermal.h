@@ -23,10 +23,8 @@ class Creator : public ::GCode::Creator {
 public:
     Creator();
     ~Creator() override = default;
-    enum {
-        FileId = GCode::Params::UserParam,
-        IgnoreCopper,
-    };
+    static inline const QString FileId       = u"FileId"_s;
+    static inline const QString IgnoreCopper = u"IgnoreCopper"_s;
 
 private:
     void createThermal(AbstractFile* file, const Tool& tool, const double depth);

@@ -21,6 +21,7 @@
 #include <QDebug>
 #include <QMap>
 #include <QVariant>
+#include <algorithm>
 #include <variant>
 
 constexpr auto G_CODE      = "GCode"_hash32;
@@ -159,39 +160,21 @@ struct Variant : V {
 };
 
 struct Params {
-    Q_GADGET
 public:
-    enum Param : uint32_t {
-        // Node,
-        // AccDistance, // need for LaserHLDI
-        // BridgeLen, // need for Profile
-        // Bridges,   // need for Profile
-        // CornerTrimming, // need for Profile
-        // Fast,
-        // FileId,
-        // FrameOffset, // need for Voronoi
-        // HathStep      // need for Hatching
-        // IgnoreCopper, // need for Thermal
-        // Pass, // need for Raster and LaserHLDI profile
-        // Steps,     // need for Pocket
-        // Tolerance, // need for Voronoi
-        // Trimming,       // need for Profile
-        // UseAngle, // need for Raster and LaserHLDI
-        // UseRaster,
-        // VorT,      // need for Voronoi
-        // Width,     // need for Voronoi
-        Convent,
-        Depth,
-        GrItems,
-        MultiToolIndex, // need for Pocket
-        NotTile,        // не раскладывать если даже раскладка включена
-        Side,
-        FileSide,
-
-        UserParam = 100
-    };
-
-    Q_ENUM(Param)
+    // Parameter keys are names, not an enum: each plugin can add its own
+    // (see e.g. Profile::Creator::BridgeLen) without needing a shared numeric
+    // range to avoid collisions, and a serialized/dumped Params reads as text.
+    static inline const QString Convent        = u"Convent"_s;
+    static inline const QString Depth          = u"Depth"_s;
+    static inline const QString GrItems        = u"GrItems"_s;
+    static inline const QString MultiToolIndex = u"MultiToolIndex"_s; // need for Pocket
+    static inline const QString NotTile        = u"NotTile"_s;        // не раскладывать если даже раскладка включена
+    static inline const QString Side           = u"Side"_s;
+    static inline const QString FileSide       = u"FileSide"_s;
+    static inline const QString LeftHand       = u"LeftHand"_s; // need for Threading
+    static inline const QString Circle         = u"Circle"_s;   // need for Threading
+    static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
+    static inline const QString Starts         = u"Starts"_s;   // need for Threading
 
     Params() {
         if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;
@@ -214,7 +197,7 @@ public:
     }
 
     mvector<Tool> tools;
-    std::map<std::underlying_type_t<Param>, Variant> params;
+    std::map<QString, Variant> params;
 
     // GCodeType gcType = Null;
     mutable int fileId = -1;
@@ -245,8 +228,17 @@ public:
     double getToolDiameter() const { return tools.at(params.at(MultiToolIndex).toInt()).getDiameter(params.at(Depth).toInt()); }
     double getDepth() const { return params.at(Depth).toDouble(); }
 
+    bool leftHand() const { return params.contains(LeftHand) && params.at(LeftHand).toBool(); }
+    bool circle() const { return params.contains(Circle) && params.at(Circle).toBool(); }
+    bool chamfer() const { return params.contains(Chamfer) && params.at(Chamfer).toBool(); }
+    int starts() const { return params.contains(Starts) ? std::max(1, static_cast<int>(params.at(Starts).toInt())) : 1; }
+
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }
+    void setLeftHand(bool val) { params[LeftHand] = val; }
+    void setCircle(bool val) { params[Circle] = val; }
+    void setChamfer(bool val) { params[Chamfer] = val; }
+    void setStarts(int val) { params[Starts] = val; }
 
     Curves closedCurves; // pocketAreaPaths
     Curves openCurves;

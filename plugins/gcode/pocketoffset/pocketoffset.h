@@ -31,9 +31,7 @@ class Creator : public GCode::Creator {
 public:
     using GCode::Creator::Creator;
 
-    enum {
-        OffsetSteps = GCode::Params::UserParam,
-    };
+    static inline const QString OffsetSteps = u"OffsetSteps"_s;
 
 private:
     void createFixedSteps(const Tool& tool, const double depth, int steps);
