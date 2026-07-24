@@ -97,7 +97,7 @@ public:
         action->setData(true);
         return action;
     }
-    QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
+    QIcon icon() const override { return QIcon::fromTheme(u"thread-path"_s); }
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
     QWidget* createForm() override { return &form; }
     QString gcName() const override { return u"Threading"_s; }

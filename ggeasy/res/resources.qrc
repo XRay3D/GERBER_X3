@@ -50,6 +50,7 @@
         <file>icons/ggeasy-dark/actions/16/project-open.svg</file>
         <file>icons/ggeasy-dark/actions/16/snap-nodes-cusp.svg</file>
         <file>icons/ggeasy-dark/actions/16/thermal-path.svg</file>
+        <file>icons/ggeasy-dark/actions/16/thread-path.svg</file>
         <file>icons/ggeasy-dark/actions/16/tools-wizard.svg</file>
         <file>icons/ggeasy-dark/actions/16/view-form-action.svg</file>
         <file>icons/ggeasy-dark/actions/16/view-form.svg</file>
@@ -105,6 +106,7 @@
         <file>icons/ggeasy-dark/actions/22/project-development-new-template.svg</file>
         <file>icons/ggeasy-dark/actions/22/raster-path.svg</file>
         <file>icons/ggeasy-dark/actions/22/thermal-path.svg</file>
+        <file>icons/ggeasy-dark/actions/22/thread-path.svg</file>
         <file>icons/ggeasy-dark/actions/22/tools-wizard.svg</file>
         <file>icons/ggeasy-dark/actions/22/view-form-action.svg</file>
         <file>icons/ggeasy-dark/actions/22/view-form.svg</file>
@@ -154,6 +156,7 @@
         <file>icons/ggeasy-dark/actions/24/snap-nodes-cusp.svg</file>
         <file>icons/ggeasy-dark/actions/24/snap-to-grid.svg</file>
         <file>icons/ggeasy-dark/actions/24/thermal-path.svg</file>
+        <file>icons/ggeasy-dark/actions/24/thread-path.svg</file>
         <file>icons/ggeasy-dark/actions/24/tools-wizard.svg</file>
         <file>icons/ggeasy-dark/actions/24/view-form-action.svg</file>
         <file>icons/ggeasy-dark/actions/24/view-form.svg</file>
@@ -224,6 +227,7 @@
         <file>icons/ggeasy-light/actions/16/project-open.svg</file>
         <file>icons/ggeasy-light/actions/16/snap-nodes-cusp.svg</file>
         <file>icons/ggeasy-light/actions/16/thermal-path.svg</file>
+        <file>icons/ggeasy-light/actions/16/thread-path.svg</file>
         <file>icons/ggeasy-light/actions/16/tools-wizard.svg</file>
         <file>icons/ggeasy-light/actions/16/view-form-action.svg</file>
         <file>icons/ggeasy-light/actions/16/view-form.svg</file>
@@ -279,6 +283,7 @@
         <file>icons/ggeasy-light/actions/22/project-development-new-template.svg</file>
         <file>icons/ggeasy-light/actions/22/raster-path.svg</file>
         <file>icons/ggeasy-light/actions/22/thermal-path.svg</file>
+        <file>icons/ggeasy-light/actions/22/thread-path.svg</file>
         <file>icons/ggeasy-light/actions/22/tools-wizard.svg</file>
         <file>icons/ggeasy-light/actions/22/view-form-action.svg</file>
         <file>icons/ggeasy-light/actions/22/view-form.svg</file>
@@ -328,6 +333,7 @@
         <file>icons/ggeasy-light/actions/24/snap-nodes-cusp.svg</file>
         <file>icons/ggeasy-light/actions/24/snap-to-grid.svg</file>
         <file>icons/ggeasy-light/actions/24/thermal-path.svg</file>
+        <file>icons/ggeasy-light/actions/24/thread-path.svg</file>
         <file>icons/ggeasy-light/actions/24/tools-wizard.svg</file>
         <file>icons/ggeasy-light/actions/24/view-form-action.svg</file>
         <file>icons/ggeasy-light/actions/24/view-form.svg</file>

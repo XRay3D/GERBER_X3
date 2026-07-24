@@ -34,6 +34,14 @@ int GcFileProxy::spindleSpeed() const { return file_->spindleSpeed; }
 QString GcFileProxy::strFeed() const { return file_->strFeed; }
 QString GcFileProxy::strPlungeFeed() const { return file_->strPlungeFeed; }
 QString GcFileProxy::strSpindle() const { return file_->strSpindle; }
+bool GcFileProxy::inside() const { return !file_->gcp.params.contains(GCode::Params::Side) || file_->gcp.side() != GCode::Outer; }
+bool GcFileProxy::climb() const { return !file_->gcp.params.contains(GCode::Params::Convent) || !file_->gcp.convent(); }
+bool GcFileProxy::leftHand() const { return file_->gcp.leftHand(); }
+double GcFileProxy::threadPitch() const { return file_->gcp.tool().passDepth(); }
+double GcFileProxy::threadHoleDiam() const { return file_->gcp.tool().holeDiam(); }
+bool GcFileProxy::circle() const { return file_->gcp.circle(); }
+bool GcFileProxy::chamfer() const { return file_->gcp.chamfer(); }
+int GcFileProxy::starts() const { return file_->gcp.starts(); }
 double GcFileProxy::safeZ() const { return App::project().safeZ(); }
 double GcFileProxy::plunge() const { return App::project().plunge(); }
 double GcFileProxy::clearance() const { return App::project().clearence(); }
@@ -129,5 +137,6 @@ QString GcFileProxy::fmtZ(double v) { return File::z(v); }
 QString GcFileProxy::fmtI(double v) { return File::i(v); }
 QString GcFileProxy::fmtJ(double v) { return File::j(v); }
 QString GcFileProxy::fmtS(int v) { return File::speed(static_cast<double>(v)); }
+QString GcFileProxy::fmtF(double v) { return u'F' + File::format(v); }
 
 } // namespace GCode

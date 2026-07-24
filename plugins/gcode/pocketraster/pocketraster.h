@@ -22,12 +22,10 @@ public:
     Creator() { }
     ~Creator() override = default;
 
-    enum {
-        AccDistance = GCode::Params::UserParam,
-        Fast,
-        Pass,
-        UseAngle,
-    };
+    static inline const QString AccDistance = u"AccDistance"_s;
+    static inline const QString Fast        = u"Fast"_s;
+    static inline const QString Pass        = u"Pass"_s;
+    static inline const QString UseAngle    = u"UseAngle"_s;
 
     enum {
         NoProfilePass,
