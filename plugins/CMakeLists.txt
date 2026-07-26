@@ -8,7 +8,7 @@ License   :
 Use, modification & distribution is subject to Boost Software License Ver 1.
 http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 4.00)
+cmake_minimum_required(VERSION 4.0)
 
 set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
 add_subdirectory(shape)

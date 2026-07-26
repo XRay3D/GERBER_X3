@@ -8,7 +8,7 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 4.00)
+cmake_minimum_required(VERSION 4.0)
 
 project(gcprofile LANGUAGES CXX)
 
@@ -18,16 +18,15 @@ set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
 set(PLUG_LOCAL_VERSION "0")
 
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
+               ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
 add_library(gc_profile STATIC profile.cpp profile.h)
+target_link_libraries(gc_profile PUBLIC geometry)
 
-target_link_libraries(gc_profile PUBLIC geometry #[[gcode]])
-
-file(GLOB HEADERS *.h)
-file(GLOB JSONS *.json)
-file(GLOB SOURCES *.cpp)
-file(GLOB UIS *.ui)
+file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
+file(GLOB UIS CONFIGURE_DEPENDS *.ui)
+file(GLOB JSONS CONFIGURE_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/*.json)
 
 list(FILTER HEADERS EXCLUDE REGEX profile.h)
 list(FILTER SOURCES EXCLUDE REGEX profile.cpp)
@@ -36,6 +35,10 @@ set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
-target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE gc_profile)
+
+target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})
