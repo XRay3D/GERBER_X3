@@ -8,20 +8,15 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 4.00)
+cmake_minimum_required(VERSION 4.0)
 
 project(geometry LANGUAGES CXX)
 
-# find_package(2Geom REQUIRED)
-
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
+file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(
-  geometry PUBLIC Clipper2Z common # 2Geom::2geom cairo
-                  # glib-2.0
-)
+target_link_libraries(${PROJECT_NAME} PUBLIC Clipper2Z common)

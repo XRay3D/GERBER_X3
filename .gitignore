@@ -108,6 +108,10 @@ libs_*
 # Binaries
 bin/*
 
+# Generated files (produced by configure_file, should not be committed)
+description.json
+versioninfo.rc
+
 # ....
 2geom/*
 style/*
