@@ -13,6 +13,7 @@
 #include "gi_datasolid.h"
 #include "gi_drill.h"
 #include "gi_point.h"
+#include "gridtick.h"
 #include "myclipper.h"
 #include "project.h"
 #include "ruler.h"
@@ -34,8 +35,6 @@
 
 #include <cmath>
 #include <format>
-#include <limits>
-#include <unordered_set>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -704,67 +703,26 @@ void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) {
 }
 
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
-#if 1
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
 
-    int gs{};
-    mvector<QLineF> lines[3];
-    std::unordered_set<int> dublicateFilter[2]{{0}, {0}}; // reserve to draw the origin
-    int size[3][2]{};
-
-    auto calcGrid = [&](double scaleMeter) {
-        bool isHor{};
-
-        auto fillLines = [&](double start, double end, double step) {
-            size[gs][isHor] = abs(ceil((end - start) / step));
-            lines[gs].reserve(size[gs][0] + size[gs][1]);
-            for(double current = start; (step < 0 ? current >= end : current <= end); current += step)
-                if(dublicateFilter[isHor].emplace(static_cast<int>(current * (std::numeric_limits<int>::max() / 10000))).second) // filter
-                    isHor ? lines[gs].emplace_back(current, rect.top(), current, rect.bottom())
-                          : lines[gs].emplace_back(rect.left(), current, rect.right(), current);
-        };
-
-        auto borders = [&] {
-            const double start = isHor ? rect.left() : rect.top();   // rectangle starting mark
-            const double end = isHor ? rect.right() : rect.bottom(); // rectangle ending mark
-
-            /*
-            Условие A # Если исходная точка находится между начальной и конечной границей,
-            нам нужно провести линию от левой до правой границы.
-            Условие B # Если исходная точка находится слева от начальной границы,
-            нам нужно провести линию от исходной точки до конечной границы.
-            Условие C # Если исходная точка находится справа от конечной границы,
-            нам нужно провести линию от исходной точки до начальной границы.
-            */
-            if(start <= 0 && 0 <= end) {
-                fillLines(0, end, +scaleMeter);
-                fillLines(0, start, -scaleMeter);
-            } else if(0 < start) {
-                int tickCount = +static_cast<int>(start / scaleMeter);
-                fillLines(+scaleMeter * tickCount, end, +scaleMeter);
-            } else if(0 > end) {
-                int tickCount = -static_cast<int>(end / scaleMeter);
-                fillLines(-scaleMeter * tickCount, start, -scaleMeter);
-            }
-        };
-        borders();
-        isHor = true;
-        borders();
-    };
+    // Single pass over the finest grid: every 5th tick also belongs to the
+    // medium grid, every 10th also to the coarse grid, so classifying by
+    // index replaces the old float-hashed dedup set entirely.
+    mvector<QLineF> lines[3]; // 0 = Grid01, 1 = Grid05, 2 = Grid10
     const auto gridStep = App::settings().gridStep(getScale());
-    // drawing a scale of 1.0
-    gs = 2;
-    calcGrid(gridStep * 10);
 
-    // drawing a scale of 0.2
-    gs = 1;
-    calcGrid(gridStep * 5);
+    const auto tickCountX = static_cast<size_t>(std::floor((rect.right() - rect.left()) / gridStep)) + 2;
+    const auto tickCountY = static_cast<size_t>(std::floor((rect.bottom() - rect.top()) / gridStep)) + 2;
+    for(auto& l: lines) l.reserve(tickCountX + tickCountY);
 
-    // drawing a scale of 0.1
-    gs = 0;
-    calcGrid(gridStep * 1);
+    forEachGridTick(0.0, rect.left(), rect.right(), gridStep, [&](int64_t index, double x) {
+        lines[gridTickLevel(index)].emplace_back(x, rect.top(), x, rect.bottom());
+    });
+    forEachGridTick(0.0, rect.top(), rect.bottom(), gridStep, [&](int64_t index, double y) {
+        lines[gridTickLevel(index)].emplace_back(rect.left(), y, rect.right(), y);
+    });
 
     const QColor color[3]{
         App::settings().guiColor(GuiColors::Grid01),
@@ -772,7 +730,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         App::settings().guiColor(GuiColors::Grid10),
     };
     const double penWidth = 1.0 / getScale();
-    // draw grid
+    // draw grid, coarsest on top
     for(int i{}; i < 3; ++i) {
         painter->setPen({color[i], penWidth});
         painter->drawLines(lines[i].data(), lines[i].size());
@@ -804,78 +762,6 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     if(ruler_) drawRuller(painter, rect);
 
     painter->restore();
-
-#else
-    const double scale = App::settings().gridStep(hRuler->zoom());
-
-    static std::unordered_map<int, int> gridLinesX, gridLinesY;
-    gridLinesX.clear(), gridLinesY.clear();
-    auto draw = [&](const auto sc) {
-        double y, x;
-        if(sc >= 1.0) {
-            int top = floor(rect.top());
-            int left = floor(rect.left());
-            y = top - top % int(sc);
-            x = left - left % int(sc);
-        } else {
-            const double k = 1.0 / sc;
-            int top = floor(rect.top()) * k;
-            int left = floor(rect.left()) * k;
-            y = (top - top % int(k)) / k;
-            x = (left - left % int(k)) / k;
-        }
-
-        for(const auto end_ = rect.bottom(); y < end_; y += sc)
-            ++gridLinesY[ceil(y * uScale)];
-
-        for(const auto end_ = rect.right(); x < end_; x += sc)
-            ++gridLinesX[ceil(x * uScale)];
-    };
-
-    const QColor color[4]{
-        {255, 0, 0, 127}, // рисовние нулей красным
-        App::settings().guiColor(GuiColors::Grid01),
-        App::settings().guiColor(GuiColors::Grid05),
-        App::settings().guiColor(GuiColors::Grid10),
-    };
-
-    draw(scale * 0.1);
-    draw(scale * 0.5);
-    draw(scale * 1.0);
-
-    gridLinesX[0] = 0; // рисовние нулей красным
-    gridLinesY[0] = 0;
-
-    static mvector<QLineF> lines[4];
-    for(auto&& vec: lines)
-        vec.clear();
-    double tmp{};
-    for(auto [x, colorIndex]: gridLinesX) {
-        tmp = x * dScale;
-        lines[colorIndex].emplace_back(tmp, rect.top(), tmp, rect.bottom());
-    }
-    for(auto [y, colorIndex]: gridLinesY) {
-        tmp = y * dScale;
-        lines[colorIndex].emplace_back(rect.left(), tmp, rect.right(), tmp);
-    }
-    const double penWidth = 1.0 / getScale();
-
-    painter->save();
-    painter->setRenderHint(QPainter::Antialiasing, false);
-    for(int colorIndex{}; auto&& vec: lines) {
-        painter->setPen({color[colorIndex++], penWidth});
-        painter->drawLines(vec.data(), vec.size());
-    }
-
-    auto k{100 / transform().m11()};
-    painter->setPen({Qt::red, penWidth});
-    painter->drawLine(QLineF{point.x() - k, point.y(), point.x() + k, point.y()});
-    painter->drawLine(QLineF{point.x(), point.y() - k, point.x(), point.y() + k});
-
-    if(ruler_) drawRuller(painter, rect);
-
-    painter->restore();
-#endif
 }
 
 void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {

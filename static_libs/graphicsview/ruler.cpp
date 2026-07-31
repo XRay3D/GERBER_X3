@@ -11,6 +11,7 @@
 // https://kernelcoder.wordpress.com/tag/ruler-in-qgraphicsview/
 #include "ruler.h"
 #include "app.h"
+#include "gridtick.h"
 
 // #include <QDebug>
 #include <QDrag>
@@ -238,78 +239,56 @@ void Ruler::paintEvent(QPaintEvent* event [[maybe_unused]]) {
     }
 }
 
-void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPositoin) {
-    // Flagging whether we are horizontal or vertical only to reduce
-    // to cheching many times
-    bool isHorzRuler = Qt::Horizontal == orientation_;
+void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPosition) {
+    const bool isHorzRuler = Qt::Horizontal == orientation_;
+    const double step = scaleMeter * rulerUnit_ * rulerZoom_;
 
-    scaleMeter = scaleMeter * rulerUnit_ * rulerZoom_;
+    // Ruler rectangle starting/ending mark
+    const double rulerStartMark = isHorzRuler ? rulerRect.left() : rulerRect.top();
+    const double rulerEndMark = isHorzRuler ? rulerRect.right() : rulerRect.bottom();
 
-    // Ruler rectangle starting mark
-    double rulerStartMark = isHorzRuler ? rulerRect.left() : rulerRect.top();
-    // Ruler rectangle ending mark
-    double rulerEndMark = isHorzRuler ? rulerRect.right() : rulerRect.bottom();
-    /*
-    Condition A # If origin point is between the start & end mard, we have to draw both from origin to left mark & origin to right mark.
-    Condition B # If origin point is left of the start mark, we have to draw from origin to end mark.
-    Condition C # If origin point is right of the end mark, we have to draw from origin to start mark.
-    */
-    if(origin_ >= rulerStartMark && origin_ <= rulerEndMark) {
-        DrawFromOriginTo(painter, rulerRect, origin_, rulerEndMark, 0, scaleMeter, startPositoin);
-        DrawFromOriginTo(painter, rulerRect, origin_, rulerStartMark, 0, -scaleMeter, startPositoin);
-    } else if(origin_ < rulerStartMark) {
-        int tickNo = int((rulerStartMark - origin_) / scaleMeter);
-        DrawFromOriginTo(painter, rulerRect, origin_ + scaleMeter * tickNo,
-            rulerEndMark, tickNo, scaleMeter, startPositoin);
-    } else if(origin_ > rulerEndMark) {
-        int tickNo = int((origin_ - rulerEndMark) / scaleMeter);
-        DrawFromOriginTo(painter, rulerRect, origin_ - scaleMeter * tickNo,
-            rulerStartMark, tickNo, -scaleMeter, startPositoin);
-    }
-}
-
-void Ruler::DrawFromOriginTo(QPainter* painter, QRectF rect, double startMark, double endMark, int startTickNo, double step, double startPosition) {
-    const auto isHorzRuler = (Qt::Horizontal == orientation_);
     const auto K = gridStep * tickKoef * (1.0 / App::settings().lenUnit());
+    constexpr double padding = 3;
 
     painter->setFont(font());
 
     mvector<QLineF> lines;
-    lines.reserve(abs(ceil((endMark - startMark) / step)));
+    lines.reserve(static_cast<size_t>(std::ceil((rulerEndMark - rulerStartMark) / step)) + 2);
 
-    constexpr double padding = 3;
-
-    for(double current = startMark; (step < 0 ? current >= endMark : current <= endMark); current += step) {
-        double x1, y1;
+    // tick position = origin_ + index * step, computed by multiplication (not
+    // accumulated addition) so there is no drift when panned far from the origin.
+    forEachGridTick(origin_, rulerStartMark, rulerEndMark, step, [&](int64_t index, double current) {
         lines.emplace_back(
-            x1 = isHorzRuler ? current : rect.left() + startPosition,
-            y1 = isHorzRuler ? rect.top() : current,
-            /*x2*/ isHorzRuler ? current : rect.right(),
-            /*y2*/ isHorzRuler ? rect.bottom() - startPosition : current);
+            isHorzRuler ? current : rulerRect.left() + startPosition,
+            isHorzRuler ? rulerRect.top() : current,
+            isHorzRuler ? current : rulerRect.right(),
+            isHorzRuler ? rulerRect.bottom() - startPosition : current);
+
         if(drawText) [[unlikely]] {
             painter->save();
             QColor color{0xFFFFFF ^ App::settings().guiColor(GuiColors::Background).rgb()};
             painter->setPen({color, 0.0});
-            auto number{QString::number(startTickNo * K)};
+            auto number{QString::number(std::abs(index) * K)};
 
-            if(startTickNo) [[likely]]
-                number = ((isHorzRuler ^ (step > 0.0)) ? u"-"_s : u"+"_s) + number;
+            if(index) [[likely]] {
+                const bool positive = isHorzRuler ? index > 0 : index < 0;
+                number = (positive ? u"+"_s : u"-"_s) + number;
+            }
 
             QRectF textRect(QFontMetricsF(font()).boundingRect(number));
             textRect.setWidth(textRect.width() + 1);
             if(isHorzRuler) {
-                painter->translate(x1 + padding, textRect.height());
+                painter->translate(current + padding, textRect.height());
                 painter->drawText(textRect, Qt::AlignCenter, number);
             } else {
-                painter->translate(textRect.height() - padding, y1 - padding);
+                painter->translate(textRect.height() - padding, current - padding);
                 painter->rotate(-90);
                 painter->drawText(textRect, number);
             }
             painter->restore();
         }
-        ++startTickNo;
-    }
-    // painter->setPen(meterPen); // zero width pen is cosmetic pen
+    });
+
     painter->drawLines(lines.data(), lines.size());
 }
 
