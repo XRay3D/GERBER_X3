@@ -872,12 +872,6 @@ Curve toCurve(std::span<const Point> path_) {
         };
 
     Curve curve;
-    QPainterPath pp;
-
-    // if(closed && path_.front() == path_.back())
-    // path_ = path_.subspan(1); // FIXME
-    // else
-    // closed = false;
 
     bool closed = path_.front() == path_.back();
     if(closed) path_ = path_.subspan(1); // FIXME
@@ -899,89 +893,16 @@ Curve toCurve(std::span<const Point> path_) {
 
     auto segments = v::chunk_by(path, eqCenter);
 
-    { // draw arc segments center 45
-        for(auto&& segment: segments)
-            if(segment.size() > 1) pp.addPolygon(~segment);
-        // Gi::Debug(pp, Qt::red); //->arrows = {};
-        pp.clear();
-    }
-    // return {};
-
-#if 0
-    { // find arcs
-        static auto eqCenter = [line = QLineF{}, a = 0.](Point& l, Point& r) mutable {
-            constexpr double epsilon = 0.2; // mm
-            if(line.isNull()) {
-                line = {~l, ~r};
-                return true;
-            }
-            QLineF newl{~l, ~r};
-            double angle = line.angleTo(newl);
-
-            double k = line.length() / newl.length();
-            qCritical().noquote() << std::format("{:+8.3f} {:+8.3f}", std::abs(a - angle), k);
-
-            bool fl = std::clamp(k, /*1 - epsilon*/ 0.1, 1. /*1 + epsilon*/) == k
-                && ((angle < 90 || angle > 270) && TEST(a,angle,10));
-            line = newl;
-            a = angle;
-            return fl;
-        };
-
-        static auto notEqCenter = [](Point& l, Point& r) { return !eqCenter(l, r); };
-
-        if(auto it = r::adjacent_find(path, notEqCenter); it != path.end())
-            r::rotate(path, r::adjacent_find(path, notEqCenter));
-
-        auto chunks = segments;
-
-        for(auto&& path: chunks) {
-            qDebug() << path.size();
-            if(auto c = fitCircle(path | v::transform(toQPointF) | r::to<QList>(), 1e-3)) {
-                QPainterPath pp;
-                pp.addEllipse(c->center, c->radius, c->radius);
-                // Gi::Debug(pp, Qt::magenta);
-                // curve.emplace_back(~path.front());
-                // curve.emplace_back(~path.front(), c->center, Vertex::Cw);
-                // return curve;
-            }
-        }
-    }
-#endif
-
     if(closed)
         if(auto it = r::adjacent_find(path, notEqCenter); it != path.end())
             r::rotate(path, ++it);
 
-#if 0
-    if(auto c = fitCircle(~path); c && path.size() > 4) { // Circle
-        // pp.addEllipse(c->center, c->radius, c->radius);
-        // Gi::Debug(pp, Qt::yellow);
-        auto dir = DIR(~path[0], ~path[1], c->center);
-        curve = CircleCurve(c->radius * 2, c->center);
-        if(dir == Vertex::Cw) curve.reverse();
-        return curve;
-    }
-#endif
-
-    constexpr double k = 0.1;
-    if(0) { // draw cross of center 45
-        for(auto&& span: segments) {
-            auto cl{~!span.back()};
-            pp.moveTo(cl + QPointF{+k, +k});
-            pp.lineTo(cl + QPointF{-k, -k});
-            pp.moveTo(cl + QPointF{+k, -k});
-            pp.lineTo(cl + QPointF{-k, +k});
-        }
-        // Gi::Debug(pp, Qt::green)->arrows = {};
-        pp.clear();
-    }
-
     { // Исправление центров
+        constexpr double epsilon = 0.001; // mm, допуск совпадения центров дуг
+
 #if 1
       // Исправление пляшущих дуг после обединения отркрытых концов линий
         auto fixClippedArcs = [](Point& p1, Point& p2, Point& p3) {
-            constexpr double epsilon = 0.001; // mm
             const QPointF c1         = ~!p1,
                           c2         = ~!p2,
                           c3         = ~!p3,
@@ -1013,7 +934,6 @@ Curve toCurve(std::span<const Point> path_) {
 
         // Исправление едничных центров рядом с дугами
         auto fixCenterS2 = [set = std::set<void*>{}](PSpan s1, PSpan s2) mutable -> bool {
-            constexpr double epsilon = 0.001; // mm
             if(s1.size() > 1 && s2.size() == 1) {
                 QPointF c = ~!s1.back();
                 if(TEST(c, ~s1.back(), c, ~s2.front(), epsilon)
@@ -1042,20 +962,6 @@ Curve toCurve(std::span<const Point> path_) {
             // qCritical() << "ctr" << ctr;
         } while(ctr && segments.front().size() != path.size());
     }
-
-    if(0) { // draw cross of center 90
-        for(auto&& span: segments) {
-            auto cl{~!span.back()};
-            pp.moveTo(cl + QPointF{+k, 0.});
-            pp.lineTo(cl + QPointF{-k, 0.});
-            pp.moveTo(cl + QPointF{0., -k});
-            pp.lineTo(cl + QPointF{0., +k});
-        }
-        // Gi::Debug(pp, Qt::red)->arrows = {};
-        pp.clear();
-    }
-
-    // qInfo() << "toCurve" << path.size();
 
     if(closed && segments.front().size() == path.size()) { // Circle
         // qCritical() << "circle" << path.size();
@@ -1099,15 +1005,13 @@ Curve toCurve(std::span<const Point> path_) {
         v::transform(segments, +[](Segment&& seg) -> SegData { return {seg}; }),
     };
 
-    static constexpr double epsilon = 0.005; // mm
-
     // fill curve
     for(const SegData& sd: sds) {
         if(sd) { // arcTo
-            curve.emplace_back(sd.vtx()).userData  = &sd;
-            curve.emplace_back(sd.vtx2()).userData = &sd;
+            curve.emplace_back(sd.vtx());
+            curve.emplace_back(sd.vtx2());
         } else { // lineTo
-            curve.emplace_back(sd.vtx()).userData = &sd;
+            curve.emplace_back(sd.vtx());
         }
     }
 
@@ -1120,55 +1024,43 @@ Curve toCurve(std::span<const Point> path_) {
     //     // qWarning() << vs.size() << !!vs.front() << !!vs.back();
     // }
 
-    // enum Joins {
-    //     L, // line
-    //     C, // curve
-    //     LLL = L,
-    //     LLC,
-    //     LCL,
-    //     LCC,
-    //     CLL,
-    //     CLC,
-    //     CCL,
-    //     CCC,
-    // };
+    enum Joins {
+        L, // line
+        C, // curve
+        LLL = L,
+        LLC,
+        LCL,
+        LCC,
+        CLL,
+        CLC,
+        CCL,
+        CCC,
+    };
+
+    // index into `fixers` below: v0/v1/v2 each contribute their L/C bit, matching the Joins enum
+    constexpr static auto joinKind = +[](VSpan v0, VSpan v1, VSpan v2) -> Joins {
+        return Joins(v0.back() * 4 + v1.back() * 2 + v2.back() * 1);
+    };
 
     constexpr static auto fixCC = +[](VSpan v0, VSpan v1, SDSpan sd) {
-        return;
         QPolygonF pts = c::intersection(v0[1], v1[1]);
-        // drawCross(v0[1], "c", Qt::cyan);
-        // drawCross(v1[0], "c", Qt::cyan);
-        if(pts.size() == 1) {
+        if(pts.size() == 1) { // circles touch/cross at a single point
             v0[1].pt = v1[0].pt = pts.front();
-            // for(QPointF& pt: pts) drawCross(pt, "c1", Qt::green);
-        } else if(pts.size() > 1 && TEST(pts.front(), pts.back(), 0.01)) {
+        } else if(pts.size() > 1 && TEST(pts.front(), pts.back(), 0.01)) { // two intersections collapse to ~one point
             v0[1].pt = r::min(pts, {}, std::bind(Length, _1, v0[1]));
             v1[0].pt = r::min(pts, {}, std::bind(Length, _1, v1[0]));
-            // for(QPointF& pt: pts) drawCross(pt, "c2", Qt::green);
-        } else if(pts.size() > 1 && (TEST(pts.front(), v0[1], 0.01) || TEST(v1[0], pts.back(), 0.01))) {
+        } else if(pts.size() > 1 && (TEST(pts.front(), v0[1], 0.01) || TEST(v1[0], pts.back(), 0.01))) { // one root already matches an endpoint
             v1[0].pt = v0[1].pt = r::min(pts, {}, std::bind(Length, _1, v0[1]));
-        } else if(TEST(v0[1].center, v1[1].center, sd[0].radius + sd[1].radius, 0.01)) {
-            // drawCross(v0[1], "c3", Qt::cyan);
-            // drawCross(v1[0], "c3", Qt::cyan);
-            auto pts = c::cross_tangent_points(v0[1], v1[1]);
-            // for(QPointF& pt: pts | v::join) drawCross(pt, "c3", Qt::green);
-            if(pts.size() == 2) {
-                // if(sd[0].radius > sd[1].radius) {
-                //     v0[1].pt = r::min(pts | v::transform([](auto& a) { return a[0]; }), {}, std::bind(Length, _1, v0[1]));
-                //     v1[0].pt = r::min(pts | v::transform([](auto& a) { return a[1]; }), {}, std::bind(Length, _1, v1[1]));
-                // } else {
-                //     v0[1].pt = r::min(pts | v::transform([](auto& a) { return a[0]; }), {}, std::bind(Length, _1, v0[1]));
-                //     v1[0].pt = r::min(pts | v::transform([](auto& a) { return a[1]; }), {}, std::bind(Length, _1, v1[1]));
-                // }
-            } else {
-                // QPainterPath pp;
-                // pp.addEllipse(v0[1], sd[0].radius, sd[0].radius);
-                // pp.addEllipse(v1[1], sd[1].radius, sd[1].radius);
-                // Gi::Debug(pp, Qt::magenta);
+        } else if(TEST(v0[1].center, v1[1].center, sd[0].radius + sd[1].radius, 0.01)) { // circles externally tangent within tolerance, but not exactly touching
+            auto tangents = c::cross_tangent_points(v0[1], v1[1]);
+            if(tangents.size() == 2) {
+                auto& best = Length(tangents[0][0], v0[1]) + Length(tangents[0][1], v1[0])
+                        <= Length(tangents[1][0], v0[1]) + Length(tangents[1][1], v1[0])
+                    ? tangents[0]
+                    : tangents[1];
+                v0[1].pt = best[0];
+                v1[0].pt = best[1];
             }
-        } else {
-            // drawCross(v0[1], "c4", Qt::red);
-            // drawCross(v1[0], "c4", Qt::red);
         }
     };
 
@@ -1239,20 +1131,13 @@ Curve toCurve(std::span<const Point> path_) {
         bool fl{};
         auto adjacent = v::adjacent<3>(v::chunk_by(curve, [](Vertex&, Vertex& r) -> bool { return r; }));
         for(auto* sd = sds.data(); auto [v0, v1, v2]: adjacent)
-            fl |= 1, fixers[v0.back() * 4 + v1.back() * 2 + v2.back() * 1](v0, v1, v2, {sd, sd++ + 3});
+            fl |= 1, fixers[joinKind(v0, v1, v2)](v0, v1, v2, {sd, sd++ + 3});
 
         if(fl && closed) { // Close
             auto [vf0, vf1, vf2] = adjacent.front();
             auto [vb0, vb1, vb2] = adjacent.back();
-            fixers[vb2.back() * 4 + vf0.back() * 2 + vf1.back() * 1](vb2, vf0, vf1, std::array{sds.back(), sds.front(), sds[1]});
-            fixers[vb1.back() * 4 + vb2.back() * 2 + vf0.back() * 1](vb1, vb2, vf0, std::array{sds.end()[-2], sds.back(), sds.front()});
-        }
-
-        for(auto it = curve.begin(); it != curve.end();) { // clean duplicates after fixers
-            Vertex& v1 = *it++;
-            if(it == curve.end()) break;
-            Vertex& v2 = *it;
-            if(v1.pt == v2.pt) it = curve.erase(v1 ? it : (--it));
+            fixers[joinKind(vb2, vf0, vf1)](vb2, vf0, vf1, std::array{sds.back(), sds.front(), sds[1]});
+            fixers[joinKind(vb1, vb2, vf0)](vb1, vb2, vf0, std::array{sds.end()[-2], sds.back(), sds.front()});
         }
 
         size_t s;
@@ -1267,17 +1152,7 @@ Curve toCurve(std::span<const Point> path_) {
         } while(s != curve.size());
     }
 
-    // qWarning() << "Close" << closed << curve.isClosed();
-
     if(closed && !curve.isClosed()) curve.emplace_back(curve.front());
-    // if(closed)
-    // assert(toCurves(toPPath(curve)).front().isClosed());
-
-    // for(auto&& [fr, to]: v::pairwise(curve))
-    // if(to.type) pp.addPolygon(~arcToPath(fr, to));
-    // Gi::Debug(pp, {0, 255, 0, 128}); //->arrows = {};
-    // Gi::Debug(toPPath(curve, {}, 1), QColor{0, 255, 0, 128}); //->arrows = {};
-    // Gi::Debug(toPPath(curve, {}, 2), QColor{255, 0, 0, 128}); //->arrows = {};
 
     return curve;
 }
