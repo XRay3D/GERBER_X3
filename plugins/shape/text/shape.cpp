@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,9 +12,7 @@
 #include "graphicsview.h"
 #include "math.h"
 
-#include <QIcon>
-#include <assert.h>
-#include <boost/pfr.hpp>
+// #include <boost/pfr.hpp>
 
 using Shapes::Handle;
 
@@ -22,8 +20,7 @@ namespace ShTxt {
 
 Shape::Shape(Shapes::Plugin* plugin, QPointF pt1)
     : AbstractShape{plugin} {
-    loadIData();
-    paths_.resize(1);
+    loadData();
     if(!std::isnan(pt1.x())) {
         handles = {
             Handle{pt1, Handle::Center}
@@ -34,17 +31,19 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1)
 }
 
 void Shape::redraw() {
-    QPainterPath painterPath;
 
-    iData.font.setPixelSize(1000);
+    txtData.font.setPixelSize(100);
 
-    painterPath.addText({}, iData.font, iData.text);
-    auto bRect = painterPath.boundingRect();
-
-    QFontMetrics fm{iData.font};
+    QFontMetrics fm{txtData.font};
     const double capHeight = fm.capHeight();
-    const double scale = iData.height / capHeight;
-    // const double xyScale = 100.0 / iData.xy;
+    const double scale     = txtData.height / capHeight;
+
+    QPainterPath painterPath; // TODO align multiline text
+    for(double i{}; auto&& txt: txtData.text.split(u'\n'))
+        painterPath.addText({0.0, fm.height() * i++}, txtData.font, txt);
+
+    auto bRect = painterPath.boundingRect();
+    // const double xyScale = 100.0 / txtData.xy;
 
     QPointF handlePt = [width = bRect.width(), capHeight](auto handleAlign) -> QPointF {
         // clang-format off
@@ -61,61 +60,68 @@ void Shape::redraw() {
         default:          return {                        };
         }
         // clang-format on
-    }(iData.handleAlign)
+    }(txtData.handleAlign)
         * -1;
 
     QTransform transform;
     transform.translate(-bRect.left() * scale, 0);
     transform.translate(handlePt.x() * scale, handlePt.y() * scale);
-    if(iData.side == Bottom) {
+    transform.translate(handles[0].x(), handles[0].y());
+    if(txtData.side == Bottom) {
         transform.translate((bRect.right() + bRect.left()) * scale, 0);
-        transform.scale(-scale * (iData.xy / 100.), -scale);
+        transform.scale(-scale * (txtData.xy / 100.), -scale);
     } else {
-        transform.scale(+scale * (iData.xy / 100.), -scale);
+        transform.scale(+scale * (txtData.xy / 100.), -scale);
     }
 
-    {
-        // text to polygons
-        shape_.clear();
-        for(auto& polygon: painterPath.toSubpathPolygons())
-            shape_.addPolygon(polygon);
-        painterPath.clear();
-        for(auto& polygon: shape_.toSubpathPolygons(transform)) // transform polygons with matrix
-            painterPath.addPolygon(polygon);
-    }
+    shape_ = transform.map(painterPath);
+
+    // {
+    //     // text to polygons
+    //     shape_.clear();
+    //     for(auto& polygon: painterPath.toSubpathPolygons())
+    //         shape_.addPolygon(polygon);
+    //     painterPath.clear();
+    //     for(auto& polygon: shape_.toSubpathPolygons(transform)) // transform polygons with matrix
+    //         painterPath.addPolygon(polygon);
+    // }
 
     // reverse
-    transform.reset();
-    transform.translate(handles.front().x(), handles.front().y());
-    transform.rotate(iData.angle - 360);
+    // transform.reset();
+    // transform.translate(handles.front().x(), handles.front().y());
+    // transform.rotate(txtData.angle - 360);
 
-    paths_.clear();
+#if 0
+    shape_ = transform.map(painterPath);
+#else
     shape_.clear();
-
+    Paths paths;
     Clipper clipper;
     clipper.AddClip(~painterPath.toSubpathPolygons(transform));
-    clipper.Execute(ClipType::Union, FillRule::NonZero, paths_);
-    for(auto& sp: paths_) {
+    clipper.Execute(ClipType::Union, FillRule::NonZero, paths);
+    for(auto& sp: paths) {
         sp.emplace_back(sp.front());
         shape_.addPolygon(~sp);
     }
+#endif
+    curves_ = toCurves(shape_);
 
     setPos(1, 1), setPos(0, 0);
 
     assert(handles.size() == 1);
 }
 
-QString Shape::text() const { return iData.text; }
+QString Shape::text() const { return txtData.text; }
 
 void Shape::setText(const QString& value) {
-    iData.text = value;
+    txtData.text = value;
     redraw();
 }
 
-Side Shape::side() const { return iData.side; }
+Side Shape::side() const { return txtData.side; }
 
 void Shape::setSide(const Side& side) {
-    iData.side = side;
+    txtData.side = side;
     redraw();
 }
 
@@ -142,20 +148,16 @@ bool Shape::setData(const QModelIndex& index, const QVariant& value, int role) {
             return true;
         }
         break;
-    default:
-        break;
+    default: break;
     }
     return AbstractShape::setData(index, value, role);
 }
 
 Qt::ItemFlags Shape::flags(const QModelIndex& index) const {
     switch(FileTree::Column(index.column())) {
-    case FileTree::Column::NameColorVisible:
-        return AbstractShape::flags(index) | Qt::ItemIsEditable;
-    case FileTree::Column::Side:
-        return AbstractShape::flags(index) | Qt::ItemIsEditable;
-    default:
-        return AbstractShape::flags(index);
+    case FileTree::Column::NameColorVisible: return AbstractShape::flags(index) | Qt::ItemIsEditable;
+    case FileTree::Column::Side            : return AbstractShape::flags(index) | Qt::ItemIsEditable;
+    default                                : return AbstractShape::flags(index);
     }
 }
 
@@ -163,73 +165,66 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     switch(FileTree::Column(index.column())) {
     case FileTree::Column::NameColorVisible:
         switch(role) {
-        case Qt::DisplayRole:
-            return u"%1 (ID: %2)"_s.arg(text()).arg(id());
-        case Qt::EditRole:
-            return text();
-        default:
-            return AbstractShape::data(index, role);
+        case Qt::DisplayRole: return u"%1 (ID: %2)"_s.arg(text()).arg(id());
+        case Qt::EditRole   : return text();
+        default             : return AbstractShape::data(index, role);
         }
     case FileTree::Column::Side:
         switch(role) {
         case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-            return sideStrList[side()];
-        case Qt::EditRole:
-            return static_cast<bool>(side());
-        default:
-            return AbstractShape::data(index, role);
+        case Qt::ToolTipRole: return sideStrList[side()];
+        case Qt::EditRole   : return static_cast<bool>(side());
+        default             : return AbstractShape::data(index, role);
         }
-    default:
-        return AbstractShape::data(index, role);
+    default: return AbstractShape::data(index, role);
     }
 }
 
 void Shape::write(QDataStream& stream) const {
-    Block{stream}.write(iData);
+    Block{stream}.write(txtData);
     // AbstractShape::write(stream);
 }
 
 void Shape::readAndInit(QDataStream& stream) {
-    Block{stream}.read(iData);
+    Block{stream}.read(txtData);
     AbstractShape::redraw();
 }
 
-void Shape::saveIData() {
+void Shape::saveData() {
     QSettings settings;
-    settings.beginGroup("ShapeText");
-    boost::pfr::for_each_field(iData, [&settings](auto& field, auto index) { // TODO for_each_field_name
-                                                                             // if constexpr(requires { field.family(); })
-                                                                             //     settings.setValue(boost::pfr::get_name<index, ShapeData>(), field.toString());
-                                                                             // else
-        settings.setValue(boost::pfr::get_name<index, ShapeData>(), field);
+    settings.beginGroup(u"ShapeText"_s);
+    for_each_field(txtData, [&settings](auto& field, std::string_view name) { // TODO for_each_field_name
+                                                                              // if constexpr(requires { field.family(); })
+                                                                              // settings.setValue(get_name<index, ShapeData>(), field.toString());
+                                                                              // else
+        settings.setValue(name, field);
     });
 }
 
-Shape::ShapeData Shape::loadIData() {
+Shape::ShapeData Shape::loadData() {
     QSettings settings;
-    settings.beginGroup("ShapeText");
-    boost::pfr::for_each_field(iData, [&settings]<typename Ty>(Ty& field, auto index) { // TODO for_each_field_name
-                                                                                        // if constexpr(requires { field.family(); })
-                                                                                        //     field.fromString(settings.value(boost::pfr::get_name<index, ShapeData>()).toString());
-                                                                                        // else
-        field = settings.value(boost::pfr::get_name<index, ShapeData>()).template value<Ty>();
+    settings.beginGroup(u"ShapeText"_s);
+    for_each_field(txtData, [&settings]<typename Ty>(Ty& field, std::string_view name) { // TODO for_each_field_name
+                                                                                         // if constexpr(requires { field.family(); })
+                                                                                         // field.fromString(settings.value(name).toString());
+                                                                                         // else
+        field = settings.value(name).template value<Ty>();
     });
-    return iData;
+    return txtData;
 }
 
-void Shape::save() { iDataCopy = iData; }
+void Shape::save() { iDataCopy = txtData; }
 
 void Shape::restore() {
-    iData = std::move(iDataCopy);
+    txtData = std::move(iDataCopy);
     AbstractShape::redraw();
 }
 
-void Shape::ok() { saveIData(); }
+void Shape::ok() { saveData(); }
 
 QString Shape::name() const { return QObject::tr("Text"); }
 
-QIcon Shape::icon() const { return QIcon::fromTheme("draw-text"); }
+QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-text"_s); }
 
 } // namespace ShTxt
 

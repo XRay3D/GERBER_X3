@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -32,13 +32,13 @@ struct std::hash<QPointF> {
 
 namespace Profile {
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
-    , ui(new Ui::ProfileForm) {
+Form::Form(GCode::Plugin* plugin)
+    : GCode::Form{plugin, new Creator}
+    , ui{new Ui::ProfileForm} {
     ui->setupUi(content);
     setWindowTitle(tr("Profile Toolpath"));
 
-    ui->pbAddBridge->setIcon(QIcon::fromTheme("edit-cut"));
+    ui->pbAddBridge->setIcon(QIcon::fromTheme(u"edit-cut"_s));
 
     ui->cbxBridgeAlignType->addItems({
         tr("Manually"),                    // Вручную.
@@ -51,7 +51,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup("Profile");
+    settings.beginGroup(u"Profile"_s);
     settings.getValue(ui->dsbxBridgeLenght, 1.0);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
@@ -90,7 +90,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("Profile");
+    settings.beginGroup(u"Profile"_s);
     settings.setValue(ui->dsbxBridgeLenght);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
@@ -110,44 +110,40 @@ Form::~Form() {
 }
 
 void Form::computePaths() {
-    usedItems_.clear();
+
     const auto tool{ui->toolHolder->tool()};
     if(!tool.isValid()) {
         tool.errorMessageBox(this);
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->tools.push_back(tool);
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.tools.push_back(tool);
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
 
-    gcp->params[Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
-    gcp->params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
-    // NOTE reserve   gcp_.params[Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
+    gcp.params[Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
+    gcp.params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
+    // NOTE reserve   gcp.params[Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
 
     if(side == GCode::On)
-        gcp->params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
+        gcp.params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
     else
-        gcp->params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
-
-    gcp->params[GCode::Params::GrItems].setValue(usedItems_);
+        gcp.params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
 
     QPolygonF brv;
     for(QGraphicsItem* item: App::grView().items())
         if(item->type() == Gi::Type::Bridge)
             brv.push_back(item->pos());
     if(!brv.isEmpty()) {
-        // gcp_.params[GCode::Params::Bridges].fromValue(brv);
-        gcp->params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
+        // gcp.params[GCode::Params::Bridges].fromValue(brv);
+        gcp.params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
     }
 
     fileCount = 1;
-    emit createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {
@@ -177,9 +173,9 @@ void Form::onAddBridgeClicked() {
         auto testAndAdd = [](QLineF testLineV, QLineF srcline) {
             QPointF intersects;
             if(auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
-                qDebug() << "intersects1" << is << intersects;
+                qDebug() << u"intersects1"_s << is << intersects;
                 auto brItem = App::grView().addItem<Gi::Bridge>();
-                //                brItem->pathHash = pathHash;
+                // brItem->pathHash = pathHash;
                 brItem->setPos(intersects); // NOTE need to collidingItems in snapedPos
                 brItem->setPos(brItem->snapedPos(intersects));
                 brItem->setVisible(true);
@@ -192,13 +188,13 @@ void Form::onAddBridgeClicked() {
             auto bounds = GetBounds(gi->paths());
             int stepH = bounds.Width() / (value + 1);
             int stepV = bounds.Height() / (value + 1);
-            for(int var: std::views::iota(1, lround(value) + 1)) {
+            for(int var: v::iota(1, lround(value) + 1)) {
                 QLineF testLineH{
                     ~Point{bounds.left + stepH * var, bounds.bottom + uScale},
-                    ~Point{bounds.left + stepH * var,    bounds.top - uScale}
+                    ~Point{bounds.left + stepH * var, bounds.top - uScale   }
                 };
                 QLineF testLineV{
-                    ~Point{ bounds.left - uScale, bounds.top + stepV * var},
+                    ~Point{bounds.left - uScale,  bounds.top + stepV * var},
                     ~Point{bounds.right + uScale, bounds.top + stepV * var}
                 };
                 for(auto&& path: gi->paths()) {
@@ -216,8 +212,8 @@ void Form::onAddBridgeClicked() {
     auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
     switch(at) {
     case Manually: {
-        //        Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
-        //        Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+        // Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
+        // Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
         auto brItem = new Gi::Bridge;
         App::grView().addItem(brItem);
         brItem->setVisible(true);
@@ -252,8 +248,7 @@ void Form::onAddBridgeClicked() {
             }
         }
     } break;
-    default:
-        break;
+    default: break;
     }
 }
 
@@ -305,67 +300,67 @@ void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
 void Form::editFile(GCode::File* /*file*/) {
 
-    //    GCode::Params gcp_ {file->gcp()};
+    // GCode::Params gcp {file->gcp()};
 
-    //    fileId = gcp_.fileId;
-    //    editMode_ = true;
+    // fileId = gcp.fileId;
+    // editMode_ = true;
 
-    //    { // GUI
-    //        side = gcp_.side();
-    //        direction = static_cast<GCode::Direction>(gcp_.convent());
-    //        ui->toolHolder->setTool(gcp_.tools.front());
-    //        dsbxDepth->setValue(gcp_.params[GCode::Params::Depth].toDouble());
+    // { // GUI
+    // side = gcp.side();
+    // direction = static_cast<GCode::Direction>(gcp.convent());
+    // ui->toolHolder->setTool(gcp.tools.front());
+    // dsbxDepth->setValue(gcp.params[GCode::Params::Depth].toDouble());
 
-    //        switch (side) {
-    //        case GCode::On:
-    //            ui->rbOn->setChecked(true);
-    //            break;
-    //        case GCode::Outer:
-    //            ui->rbOutside->setChecked(true);
-    //            break;
-    //        case GCode::Inner:
-    //            ui->rbInside->setChecked(true);
-    //            break;
-    //        }
+    // switch (side) {
+    // case GCode::On:
+    // ui->rbOn->setChecked(true);
+    // break;
+    // case GCode::Outer:
+    // ui->rbOutside->setChecked(true);
+    // break;
+    // case GCode::Inner:
+    // ui->rbInside->setChecked(true);
+    // break;
+    // }
 
-    //        switch (direction) {
-    //        case GCode::Climb:
-    //            ui->rbClimb->setChecked(true);
-    //            break;
-    //        case GCode::Conventional:
-    //            ui->rbConventional->setChecked(true);
-    //            break;
-    //        }
-    //    }
+    // switch (direction) {
+    // case GCode::Climb:
+    // ui->rbClimb->setChecked(true);
+    // break;
+    // case GCode::Conventional:
+    // ui->rbConventional->setChecked(true);
+    // break;
+    // }
+    // }
 
-    //    { // GrItems
-    //        usedItems_.clear();
-    //        auto items {gcp_.params[GCode::Params::GrItems].value<UsedItems>()};
+    // { // GrItems
+    // usedItems_.clear();
+    // auto items {gcp.params[GCode::Params::GrItems].value<UsedItems>()};
 
-    //        auto i = items.cbegin();
-    //        while (i != items.cend()) {
+    // auto i = items.cbegin();
+    // while (i != items.cend()) {
 
-    //            //            auto [_fileId, _] = i.key();
-    //            //            Q_UNUSED(_)
-    //            //            App::project().file(_fileId)->itemGroup()->setSelected(i.value());
-    //            //            ++i;
-    //        }
-    //    }
+    // // auto [_fileId, _] = i.key();
+    // // Q_UNUSED(_)
+    // // App::project().file(_fileId)->itemGroup()->setSelected(i.value());
+    // // ++i;
+    // }
+    // }
 
-    //    { // Bridges
-    //        if (gcp_.params.contains(GCode::Params::Bridges)) {
-    //            ui->dsbxBridgeLenght->setValue(gcp_.params[GCode::Params::BridgeLen].toDouble());
-    //            //            for (auto& pos : gcp_.params[GCode::Params::Bridges].value<QPolygonF>()) {
-    //            //                brItem = new BridgeItem{lenght_, size_, side, brItem};
-    //            //                 App::grView().addItem(brItem);
-    //            //                brItem->setPos(pos);
-    //            //                brItem->lastPos_ = pos;
-    //            //            }
-    //            updateBridge();
-    //            brItem = new Gi::Bridge{lenght_, size_, side, brItem};
-    //            //        delete item;
-    //        }
-    //    }
+    // { // Bridges
+    // if (gcp.params.contains(GCode::Params::Bridges)) {
+    // ui->dsbxBridgeLenght->setValue(gcp.params[GCode::Params::BridgeLen].toDouble());
+    // // for (auto& pos : gcp.params[GCode::Params::Bridges].value<QPolygonF>()) {
+    // // brItem = new BridgeItem{lenght_, size_, side, brItem};
+    // // App::grView().addItem(brItem);
+    // // brItem->setPos(pos);
+    // // brItem->lastPos_ = pos;
+    // // }
+    // updateBridge();
+    // brItem = new Gi::Bridge{lenght_, size_, side, brItem};
+    // // delete item;
+    // }
+    // }
 }
 
 } // namespace Profile

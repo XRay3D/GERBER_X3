@@ -3,13 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "utils.h"
 #include <QObject>
 #include <QPainterPath>
 
@@ -23,9 +24,12 @@ class Tool {
     friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
-    Tool() = default;
-    Tool(double diameter)
-        : diameter_{diameter} { }
+    enum class ID : int32_t {
+        // Folder = -1,
+        Null = 0,
+        Folder = 0,
+        Tool = +1
+    };
 
     enum Type {
         Drill,
@@ -36,50 +40,76 @@ public:
         Group = 100
     };
 
+private:
+    struct {
+        QString name{QObject::tr("Default")};
+        QString note;
+        double angle{.0};
+        double diameter{1.};
+        double feedRate{600.};
+        double oneTurnCut{0.1};
+        double passDepth{2.}; // max thread pitch
+        double plungeRate{100.};
+        double spindleSpeed{12000.};
+        double stepover{0.5};
+        double lenght{1.}; //
+        ID id{ID::Null};
+        Type type{EndMill};
+        bool autoName{true};
+    } data;
+
+public:
+    Tool() = default;
+    Tool(double diameter) { data.diameter = diameter; }
+
     // name
     QString nameEnc() const;
-    QString name() const;
-    void setName(const QString& name);
+    QString name() const { return data.name; }
+    void setName(const QString& name) { hash_ = {}, data.name = name; }
     // note
-    QString note() const;
-    void setNote(const QString& note);
+    QString note() const { return data.note; }
+    void setNote(const QString& note) { hash_ = {}, data.note = note; }
     // type
-    Type type() const;
-    void setType(int type);
+    Type type() const { return data.type; }
+    void setType(int type) { hash_ = {}, data.type = static_cast<Type>(type); }
     // angle
-    double angle() const;
-    void setAngle(double angle);
+    double angle() const { return data.angle; }
+    void setAngle(double angle) { hash_ = {}, data.angle = angle; }
     // diameter
-    double diameter() const;
-    void setDiameter(double diameter);
+    double diameter() const { return data.diameter; }
+    void setDiameter(double diameter) { hash_ = {}, data.diameter = diameter, updatePath(); }
     // feedRate
-    double feedRate_mmPerSec() const;
-    double feedRate() const;
-    void setFeedRate(double feedRate);
+    double feedRate_mmPerSec() const { return data.feedRate / 60.0; }
+    double feedRate() const { return data.feedRate; }
+    void setFeedRate(double feedRate) { hash_ = {}, data.feedRate = feedRate; }
     // oneTurnCut
-    double oneTurnCut() const;
-    void setOneTurnCut(double oneTurnCut);
+    double oneTurnCut() const { return data.oneTurnCut; }
+    void setOneTurnCut(double oneTurnCut) { hash_ = {}, data.oneTurnCut = oneTurnCut; }
     // passDepth
-    double passDepth() const;
-    void setPassDepth(double passDepth);
+    double passDepth() const { return data.passDepth; }
+    void setPassDepth(double passDepth) { hash_ = {}, data.passDepth = passDepth; }
     // plungeRate
-    double plungeRate() const;
-    void setPlungeRate(double plungeRate);
+    double plungeRate() const { return data.plungeRate; }
+    void setPlungeRate(double plungeRate) { hash_ = {}, data.plungeRate = plungeRate; }
     // spindleSpeed
-    double spindleSpeed() const;
-    void setSpindleSpeed(double spindleSpeed);
+    double spindleSpeed() const { return data.spindleSpeed; }
+    void setSpindleSpeed(double spindleSpeed) { hash_ = {}, data.spindleSpeed = spindleSpeed; }
     // stepover
-    double stepover() const;
-    void setStepover(double stepover);
+    double stepover() const { return data.stepover; }
+    void setStepover(double stepover) { hash_ = {}, data.stepover = stepover; }
     // autoName
-    bool autoName() const;
-    void setAutoName(bool autoName);
+    bool autoName() const { return data.autoName; }
+    void setAutoName(bool autoName) { hash_ = {}, data.autoName = autoName; }
     // lenght
-    double lenght() const;
-    void setLenght(double autoName);
-    // id
-    int32_t id() const;
-    void setId(int32_t id);
+    double lenght() const { return data.lenght; }
+    void setLenght(double lenght) { hash_ = {}, data.lenght = lenght; }
+    // Thread Hole Diam
+    double holeDiam() const { return data.angle; }
+    void setHoleDiam(double val) { hash_ = {}, data.angle = val; }
+    // ID
+    ID id() const { return data.id; }
+    void setId(ID id) { hash_ = {}, data.id = id; }
+
     // depth_
     static double depth() { return depth_; }
     static void setDepth(double depth) { depth_ = depth; }
@@ -100,34 +130,15 @@ public:
     void updatePath(double depth = 0.0);
 
 private:
-    QString name_{QObject::tr("Default")};
-    QString note_;
-
-    double angle_{.0};
-    double diameter_{1.};
-    double feedRate_{100.};
-    double oneTurnCut_{0.1};
-    double passDepth_{2.}; // max thread pitch
-    double plungeRate_{600.};
-    double spindleSpeed_{12000.};
-    double stepover_{0.5};
-    double lenght_{1.}; //
-
     static inline double depth_;
-
-    int32_t id_{-1};
 
     mutable size_t hash_{};
     mutable size_t hash2_{};
 
-    Type type_{EndMill};
-
     QPainterPath path_;
-
-    bool autoName_{true};
 };
 
-using Tools = std::map<int, Tool, std::greater<int>>;
+using Tools = std::map<Tool::ID, Tool, std::greater<Tool::ID>>;
 
 class ToolHolder {
     friend class ToolItem;
@@ -142,7 +153,7 @@ class ToolHolder {
 public:
     ToolHolder() = default;
 
-    const Tool& tool(int32_t id) { return tools_.at(id); }
+    const Tool& tool(Tool::ID id) { return tools_.at(id); }
     const Tools& tools() { return tools_; }
     void readTools();
     void readTools(const QJsonObject& json);
@@ -151,3 +162,4 @@ public:
 
 Q_DECLARE_METATYPE(Tool)
 Q_DECLARE_METATYPE(Tool::Type)
+Q_DECLARE_METATYPE(Tool::ID)

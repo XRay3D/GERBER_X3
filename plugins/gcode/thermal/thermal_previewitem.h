@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -63,6 +63,7 @@ public:
 
     virtual Point pos() const = 0;
     virtual Paths paths() const = 0;
+    virtual Curves curves() const = 0;
     virtual void redraw() = 0;
 
 protected:
@@ -130,11 +131,11 @@ protected:
 };
 
 class PreviewItem final : public AbstractThermPrGi {
-    const Paths& paths_;
-    const Point pos_;
+    const Curves& paths_;
+    const QPointF pos_;
 
 public:
-    PreviewItem(const Paths& paths, const Point pos, Tool& tool);
+    PreviewItem(const Curves& paths, const QPointF pos, Tool& tool);
     Point pos() const override;
     Paths paths() const override;
     void redraw() override;
@@ -142,6 +143,10 @@ public:
     // QGraphicsItem interface
 public:
     QRectF boundingRect() const override;
+
+    // AbstractThermPrGi interface
+public:
+    Curves curves() const override;
 };
 
 } // namespace Thermal

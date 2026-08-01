@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -32,10 +32,10 @@ signals:
 };
 
 class Model : public QAbstractTableModel {
-    const mvector<QString>& lines;
+    const std::vector<QString>& lines;
 
 public:
-    Model(const mvector<QString>& lines, QObject* parent = nullptr)
+    Model(const std::vector<QString>& lines, QObject* parent = nullptr)
         : QAbstractTableModel{parent}
         , lines(lines) {
     }
@@ -48,21 +48,15 @@ public:
     QVariant data(const QModelIndex& index, int role = Qt::DisplayRole) const override {
         if(role == Qt::DisplayRole)
             switch(index.column()) {
-            case LineNum:
-                return index.row() + 1;
-            case LineType:
-                return index.row() % 2 ? DxfObj::tr("Data") : DxfObj::tr("Code");
-            case LineData:
-                return lines.at(index.row());
+            case LineNum : return index.row() + 1;
+            case LineType: return index.row() % 2 ? DxfObj::tr("Data") : DxfObj::tr("Code");
+            case LineData: return lines.at(index.row());
             }
         else if(role == Qt::TextAlignmentRole)
             switch(index.column()) {
-            case LineNum:
-                return Qt::AlignCenter;
-            case LineType:
-                return Qt::AlignCenter;
-            case LineData:
-                return Qt::AlignVCenter;
+            case LineNum : return Qt::AlignCenter;
+            case LineType: return Qt::AlignCenter;
+            case LineData: return Qt::AlignVCenter;
             }
         return {};
     }
@@ -70,12 +64,9 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role = Qt::DisplayRole) const override {
         if(orientation == Qt::Horizontal && role == Qt::DisplayRole)
             switch(section) {
-            case LineNum:
-                return DxfObj::tr("Line");
-            case LineType:
-                return DxfObj::tr("Type");
-            case LineData:
-                return DxfObj::tr("Data");
+            case LineNum : return DxfObj::tr("Line");
+            case LineType: return DxfObj::tr("Type");
+            case LineData: return DxfObj::tr("Data");
             }
         return {};
     }

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,7 +11,7 @@
 #pragma once
 
 #include "drill_file.h"
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 
 namespace Ui {
@@ -25,19 +25,19 @@ namespace Drilling {
 // using PosOrPath = std::variant<const QPointF, const QPolygonF>;
 // using Key = std::tuple<int, double, bool, QString>;
 // struct Val {
-//     mvector<PosOrPath> posOrPath;
-//     Paths draw;
+// mvector<PosOrPath> posOrPath;
+// Paths draw;
 // };
 // using Preview = std::map<Key, Val>;
 
 class Model;
 class Header;
 
-class Form final : public GCode::BaseForm {
+class Form final : public GCode::Form {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
     void updateFiles();
@@ -98,9 +98,10 @@ public:
         action->setData(true);
         return action;
     }
-    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+D"}; }
-    QWidget* createForm() override { return &form; };
+    QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+D"_s}; }
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Drilling"_s; }
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return DRILLING; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }

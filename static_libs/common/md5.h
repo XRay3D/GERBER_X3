@@ -1,6 +1,6 @@
 /*
  * Permission is hereby granted, free of charge, to any person obtaining a copy of this software
- * and associated documentation files (the "Software"), to deal in the Software without restriction,
+ * and associated documentation files (the u"Software"_s), to deal in the Software without restriction,
  * including without limitation the rights to use, copy, modify, merge, publish, distribute,
  * sublicense, and/or sell copies of the Software, and to permit persons to whom the Software is
  * furnished to do so, subject to the following conditions:
@@ -8,7 +8,7 @@
  * The above copyright notice and this permission notice shall be included in all copies or
  * substantial portions of the Software.
 
- * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
+ * THE SOFTWARE IS PROVIDED u"AS IS"_s, WITHOUT WARRANTY OF ANY KIND, EXPRESS OR IMPLIED, INCLUDING
  * BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY, FITNESS FOR A PARTICULAR PURPOSE AND
  * NONINFRINGEMENT. IN NO EVENT SHALL THE AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM,
  * DAMAGES OR OTHER LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
@@ -40,7 +40,7 @@ constexpr size_t const_strlen(const char* str) {
 constexpr Digest make_digest(const std::array<uint32_t, 4>& input) noexcept {
     Digest digest{};
     for(size_t i{}; i < input.size(); ++i) {
-        digest[i * 4 + 0] = static_cast<unsigned char>((input[i] >> 0) & 0xff);
+        digest[i * 4] = static_cast<unsigned char>((input[i]) & 0xff);
         digest[i * 4 + 1] = static_cast<unsigned char>((input[i] >> 8) & 0xff);
         digest[i * 4 + 2] = static_cast<unsigned char>((input[i] >> 16) & 0xff);
         digest[i * 4 + 3] = static_cast<unsigned char>((input[i] >> 24) & 0xff);
@@ -65,15 +65,15 @@ constexpr uint32_t i(uint32_t b, uint32_t c, uint32_t d) noexcept {
     return c ^ (b | ~d);
 }
 
-constexpr Fn F[4] = {f, g, h, i};
+constexpr Fn F[4]{f, g, h, i};
 
-constexpr uint32_t G[CBLOCK] = {
+constexpr uint32_t G[CBLOCK]{
     0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15,
     1, 6, 11, 0, 5, 10, 15, 4, 9, 14, 3, 8, 13, 2, 7, 12,
     5, 8, 11, 14, 1, 4, 7, 10, 13, 0, 3, 6, 9, 12, 15, 2,
     0, 7, 14, 5, 12, 3, 10, 1, 8, 15, 6, 13, 4, 11, 2, 9};
 
-constexpr uint32_t K[CBLOCK] = {
+constexpr uint32_t K[CBLOCK]{
     0xD76AA478, 0xE8C7B756, 0x242070DB, 0xC1BDCEEE,
     0xF57C0FAF, 0x4787C62A, 0xA8304613, 0xFD469501,
     0x698098D8, 0x8B44F7AF, 0xFFFF5BB1, 0x895CD7BE,
@@ -91,13 +91,13 @@ constexpr uint32_t K[CBLOCK] = {
     0x6FA87E4F, 0xFE2CE6E0, 0xA3014314, 0x4E0811A1,
     0xF7537E82, 0xBD3AF235, 0x2AD7D2BB, 0xEB86D391};
 
-constexpr uint32_t S[LBLOCK] = {
+constexpr uint32_t S[LBLOCK]{
     7, 12, 17, 22,
     5, 9, 14, 20,
     4, 11, 16, 23,
     6, 10, 15, 21};
 
-constexpr char PADDING[CBLOCK] = {
+constexpr char PADDING[CBLOCK]{
     -128, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, // 0x80 = -128
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00,
@@ -144,7 +144,7 @@ struct Context {
         for(auto ptr = data; ptr != data + len; ++ptr) {
             buffer[k++] = static_cast<unsigned char>(static_cast<int16_t>(*ptr) + UCHAR_MAX + 1);
             if(k == 0x40) {
-                size_t j{};
+                uint32_t j{};
                 for(uint32_t i{}; i < LBLOCK; ++i) {
                     input[i] = to_uint32(&buffer[j]);
                     j += 4;
@@ -185,8 +185,8 @@ struct Context {
 
         append(PADDING, k < 56 ? 56 - k : 120 - k);
 
-        size_t j{};
-        for(size_t i{}; i < 14; ++i) {
+        uint32_t j{};
+        for(uint32_t i{}; i < 14; ++i) {
             input[i] = to_uint32(&buffer[j]);
             j += 4;
         }

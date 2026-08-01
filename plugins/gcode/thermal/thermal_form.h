@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,7 +11,7 @@
 #pragma once
 #include <QToolBar>
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "thermal.h"
 #include "thermal_vars.h"
@@ -29,11 +29,11 @@ namespace Thermal {
 
 class AbstractThermPrGi;
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
     void updateFiles();
 
@@ -95,10 +95,11 @@ public:
         action->setData(true);
         return action;
     }
-    QIcon icon() const override { return QIcon::fromTheme("thermal-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+T"}; }
-    QWidget* createForm() override { return &form; };
-    //    bool canToShow() const override { return /*Form::canToShow()*/; }
+    QIcon icon() const override { return QIcon::fromTheme(u"thermal-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+T"_s}; }
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Thermal"_s; };
+    // bool canToShow() const override { return /*Form::canToShow()*/; }
     uint32_t type() const override { return THERMAL; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

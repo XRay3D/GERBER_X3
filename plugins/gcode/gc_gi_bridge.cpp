@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,6 +11,7 @@
 #include "gc_gi_bridge.h"
 
 #include "gcode.h"
+#include "geometry.h"
 #include "graphicsview.h"
 
 #include <QPainter>
@@ -75,7 +76,7 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
 
     auto transform = [](auto* item) { return static_cast<Item*>(item); };
 
-    for(Item* gi: col | rviews::filter(filter) | rviews::transform(transform)) {
+    for(Item* gi: col | v::filter(filter) | v::transform(transform)) {
         auto paths = gi->paths();
         if(gi->type() == Type::DataPath
             && paths.size() == 1
@@ -95,12 +96,12 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
     if(!line.isNull()) {
         minLenght = line.length() - lenght / 2;
         angle_ = line.angle();
-        if(QLineF(line.center(), pos).length() < lenght / 2 && line.length() < lenght) {
+        if(geo::Length(line.center(), pos) < lenght / 2 && line.length() < lenght) {
             // точка центра прямой
             retPos = line.center();
             ok_ = true;
             update(); // Cutoff
-        } else if(QLineF(line.p1(), pos).length() < minLenght && QLineF(line.p2(), pos).length() < minLenght) {
+        } else if(geo::Length(line.p1(), pos) < minLenght && geo::Length(line.p2(), pos) < minLenght) {
             // точка пересечения на прямой перпендикуляра из 3 точки
             auto k1 = (line.p2().x() - line.p1().x());
             auto k2 = (line.p2().y() - line.p1().y());
@@ -126,7 +127,7 @@ void Bridge::update() {
         return;
 
     QLineF lTool, lCenter = QLineF::fromPolar(toolDiam + lenght, angle_);
-    double start{}, span{180};
+    double start{}, span = 180;
     switch(side) {
     case GCode::On:
         lCenter.translate(-lCenter.center());

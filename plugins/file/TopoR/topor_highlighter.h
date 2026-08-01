@@ -17,15 +17,15 @@
 // namespace TopoR {
 
 // class SyntaxHighlighter : public QSyntaxHighlighter {
-//     Q_OBJECT
+// Q_OBJECT
 // public:
-//     explicit SyntaxHighlighter(QTextDocument* parent);
+// explicit SyntaxHighlighter(QTextDocument* parent);
 
 // signals:
 
-//    // QSyntaxHighlighter interface
+// // QSyntaxHighlighter interface
 // protected:
-//    void highlightBlock(const QString& text) override;
+// void highlightBlock(const QString& text) override;
 
 // private:
 // };

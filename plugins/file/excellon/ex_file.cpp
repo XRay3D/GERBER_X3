@@ -55,13 +55,13 @@ void File::setFormat(const Format& value) {
     (format_ = value).file = this;
     for(Hole& hole: *this) {
         hole.state.updatePos();
-        hole.item->update(hole.state.path.size() ? ~hole.state.path
-                                                 : Path{~hole.state.pos},
+        hole.item->updatePath(hole.state.path.size() ? hole.state.path
+                                                     : QPolygonF{hole.state.pos},
             hole.state.currentToolDiameter());
     }
 }
 
-double File::tool(int t) const {
+double File::tool(unsigned t) const {
     if(tools_.contains(t))
         return format_.unitMode == Inches ? tools_.at(t) * 25.4 : tools_.at(t);
     return {};
@@ -76,8 +76,8 @@ Tools File::tools() const {
 }
 
 Paths Excellon::File::merge() const {
-    for(Gi::Item* item: *itemGroups_.back())
-        mergedPaths_ += item->paths();
+    for(auto&& item: *itemGroups_.back())
+        mergedPaths_.append_range(item->paths());
     return mergedPaths_;
 }
 
@@ -93,7 +93,7 @@ void File::read(QDataStream& stream) {
     stream >> format_;
     format_.file = this;
     for(Hole& hole: *this) {
-        hole.file = this;
+        hole.file         = this;
         hole.state.format = &format_;
     }
 }
@@ -101,11 +101,11 @@ void File::read(QDataStream& stream) {
 void File::createGi() {
     for(Hole& hole: *this)
         itemGroup()->push_back(hole.item = new Gi::Drill{
-                                   hole.state.path.size() ? ~hole.state.path
-                                                          : Path{~hole.state.pos},
+                                   hole.state.path.size() ? hole.state.path
+                                                          : QPolygonF{hole.state.pos},
                                    hole.state.currentToolDiameter(),
                                    this,
-                                   hole.state.toolId});
+                                   static_cast<Tool::ID>(hole.state.toolId)});
     itemGroup()->setVisible(true);
 }
 
@@ -125,28 +125,30 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
     for(const Excellon::Hole& hole: *this) {
         double diam = tools_.at(hole.state.toolId);
         GraphicObject go;
-        //        go.fill;
+        // go.fill;
         if(bool slot = hole.state.path.size(); !slot) {
-            go.pos = ~hole.state.pos;
-            go.path.emplace_back(go.pos = ~hole.state.pos);
-            go.fill.emplace_back(CirclePath(diam * uScale, go.pos));
+            go.pos = hole.state.pos;
+            go.path.emplace_back(go.pos = hole.state.pos);
+            go.fill.emplace_back(CircleCurve(diam, go.pos));
         } else {
-            go.path = ~hole.state.path;
+            go.path = Curve{std::from_range, hole.state.path | v::transform([](const QPointF& pt) { return geo::Vertex{pt}; })};
             // go.pos = go.path.front();
-            go.fill = Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale);
+            go.fill = toCurves(Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale));
         }
-        go.name = QString("T%1|Ø%2").arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
-        go.type = GraphicObject::FlStamp;                                                               // type{},//{Null};
-                                                                                                        // go.id = int32_t {};                                                                             // id {-1};
-        go.raw = tools_.at(hole.state.toolId);                                                          // raw;
+        go.name = u"T%1|Ø%2"_s
+                      .arg(+hole.state.toolId)
+                      .arg(tools_.at(hole.state.toolId)); // name;
+        go.type = GraphicObject::FlStamp;                 // type{},//{Null};
+                                                          // go.id = int32_t {};                                                                             // id {-1};
+        go.raw = tools_.at(hole.state.toolId);            // raw;
         retData.emplace_back(go * transform_);
 
-        //        if (bool slot = hole.state.path.size(); slot)
-        //            retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
-        //        else
-        //            retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+        // if (bool slot = hole.state.path.size(); slot)
+        // retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
+        // else
+        // retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
     }
     return retData;
 }
 
-} //  namespace Excellon
+} // namespace Excellon

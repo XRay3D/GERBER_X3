@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -81,15 +81,14 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
-    static const QStringList horizontalLabel{tr("     Name|Angle|Tickness|Count").split('|')};
+    static const QStringList horizontalLabel{tr("     Name|Angle|Tickness|Count").split(u'|')};
     switch(role) {
     case Qt::DisplayRole:
         if(orientation == Qt::Horizontal)
             return horizontalLabel[section];
         else
             return section + 1;
-    default:
-        return {};
+    default: return {};
     }
 }
 

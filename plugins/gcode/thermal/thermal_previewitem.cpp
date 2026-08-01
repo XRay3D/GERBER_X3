@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,19 +18,19 @@
 #include <QGraphicsSceneContextMenuEvent>
 #include <QIcon>
 #include <QMenu>
-#include <QMutex>
 #include <QPainter>
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
 #include <QtMath>
+#include <mutex>
 
 namespace Thermal {
 
 AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     : agr{this}
-    , pa1(this, "bodyColor")
-    , pa2(this, "pathColor")
+    , pa1{this, "bodyColor"_ba}
+    , pa2{this, "pathColor"_ba}
     , tool(tool)
     , bodyColor_(colors[(int)Colors::Default])
     , pathColor_(colors[(int)Colors::UnUsed])
@@ -49,7 +49,7 @@ AbstractThermPrGi::AbstractThermPrGi(Tool& tool)
     setOpacity(0);
     setZValue(std::numeric_limits<double>::max() - 10);
 
-    static QMutex m;
+    static std::mutex m;
     m.lock();
     thpi.push_back(this);
     m.unlock();
@@ -59,15 +59,15 @@ AbstractThermPrGi::~AbstractThermPrGi() { thpi.clear(); }
 
 void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
     if(pathColor_.alpha()) {
-        //        if (isEmpty > 0) {
-        //            painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
-        //            painter->setBrush(Qt::NoBrush);
-        //            for (QPolygonF polygon : bridge_) {
-        //                polygon.append(polygon.first());
-        //                painterPath.addPolygon(polygon);
-        //                painter->drawPolyline(polygon);
-        //            }
-        //        } else {
+        // if (isEmpty > 0) {
+        // painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 0.0));
+        // painter->setBrush(Qt::NoBrush);
+        // for (QPolygonF polygon : bridge_) {
+        // polygon.append(polygon.first());
+        // painterPath.addPolygon(polygon);
+        // painter->drawPolyline(polygon);
+        // }
+        // } else {
         if(agr.state() == QAbstractAnimation::Running) {
             int a;
             QColor c1(App::settings().guiColor(GuiColors::CutArea));
@@ -86,15 +86,15 @@ void AbstractThermPrGi::paint(QPainter* painter, const QStyleOptionGraphicsItem*
             painter->setBrush(Qt::NoBrush);
             painter->setPen(QPen(App::settings().guiColor(GuiColors::CutArea), diameter, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             painter->drawPath(painterPath);
-            QColor pc(bodyColor_);
+            QColor pc{bodyColor_};
             pc.setAlpha(255);
             painter->setPen(QPen(App::settings().guiColor(GuiColors::ToolPath), 2 * App::grView().scaleFactor()));
             painter->drawPath(painterPath);
         }
-        //        }
+        // }
     }
     painter->setBrush(bodyColor_);
-    QColor p(bodyColor_);
+    QColor p{bodyColor_};
     p.setAlpha(255);
     painter->setPen(QPen(p, 0.0));
     painter->drawPath(sourcePath);
@@ -126,7 +126,7 @@ void AbstractThermPrGi::changeColor() {
 void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
     if(node_->isChecked())
-        menu.addAction(QIcon::fromTheme("list-remove"), QObject::tr("Exclude from the calculation"), [this] {
+        menu.addAction(QIcon::fromTheme(u"list-remove"_s), QObject::tr("Exclude from the calculation"), [this] {
             for(auto item: thpi)
                 if((item == this || item->isSelected()) && item->node_->isChecked()) {
                     item->node_->disable();
@@ -135,7 +135,7 @@ void AbstractThermPrGi::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) 
                 }
         });
     else
-        menu.addAction(QIcon::fromTheme("list-add"), QObject::tr("Include in the calculation"), [this] {
+        menu.addAction(QIcon::fromTheme(u"list-add"_s), QObject::tr("Include in the calculation"), [this] {
             for(auto item: thpi)
                 if((item == this || item->isSelected()) && !item->node_->isChecked()) {
                     item->node_->enable();
@@ -178,7 +178,7 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
         }
         changeColor();
     } else if(change == ItemVisibleChange) {
-        auto animation = new QPropertyAnimation{this, "opacity"};
+        auto animation = new QPropertyAnimation{this, "opacity"_ba};
         animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
         animation->setDuration(200);
         animation->setStartValue(0.0);
@@ -188,19 +188,16 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
     return QGraphicsItem::itemChange(change, value);
 }
 
-PreviewItem::PreviewItem(const Paths& paths, const Point pos, Tool& tool)
+PreviewItem::PreviewItem(const Curves& paths, const QPointF pos, Tool& tool)
     : AbstractThermPrGi{tool}
     , paths_{paths}
     , pos_{pos} {
-    for(QPolygonF polygon: ~paths) {
-        polygon.append(polygon.first());
-        sourcePath.addPolygon(polygon);
-    }
+    sourcePath = toPPath(paths_);
 }
 
-Point PreviewItem::pos() const { return pos_; }
+Point PreviewItem::pos() const { return ~pos_; }
 
-Paths PreviewItem::paths() const { return paths_; }
+Paths PreviewItem::paths() const { return toPaths(paths_); }
 
 void PreviewItem::redraw() {
     if(double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
@@ -208,7 +205,7 @@ void PreviewItem::redraw() {
         // ClipperOffset offset;
         // offset.AddPaths(paths_, JoinType::Round, EndType::Polygon);
         // cashedPath = offset.Execute(diameter * uScale * 0.5); // toolpath
-        cashedPath = InflateRoundPolygon(paths_, diameter * uScale /** 0.5*/);
+        cashedPath = InflateRoundPolygon(toPaths(paths_), diameter * uScale /** 0.5*/);
         // offset.Clear();
         // offset.AddPaths(cashedPath, JoinType::Miter, EndType::Round);
         // cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
@@ -225,13 +222,13 @@ void PreviewItem::redraw() {
         const Point center{~rect.center()};
         const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
         const auto fp(sourcePath.toFillPolygons()); // FIXME not used
-        for(int i{}; i < node_->count(); ++i) {   // Gaps
+        for(int i{}; i < node_->count(); ++i) {     // Gaps
             // ClipperOffset offset;
             double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
             // offset.AddPath({center,
             // Point(
-            // static_cast</*Point::Type*/ int32_t>((cos(angle) * radius) + center.x),
-            // static_cast</*Point::Type*/ int32_t>((sin(angle) * radius) + center.y))},
+            // static_cast</*PType*/ int32_t>((cos(angle) * radius) + center.x),
+            // static_cast</*PType*/ int32_t>((sin(angle) * radius) + center.y))},
             // JoinType::Square, EndType::Butt);
             // Paths paths = offset.Execute((node_->tickness() + diameter) * uScale * 0.5);
             Paths paths = Inflate({
@@ -266,6 +263,8 @@ void PreviewItem::redraw() {
 QRectF PreviewItem::boundingRect() const {
     return painterPath.boundingRect().united(sourcePath.boundingRect());
 }
+
+Curves PreviewItem::curves() const { return paths_; }
 
 } // namespace Thermal
 

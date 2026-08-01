@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,11 +13,10 @@
 namespace Dxf {
 
 struct Point final : Entity {
-    Point(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-public:
-    //    void draw(const InsertEntity* const i = nullptr) const override;
+
     void parse(CodeData& code) override;
     Type type() const override;
     DxfGo toGo() const override;

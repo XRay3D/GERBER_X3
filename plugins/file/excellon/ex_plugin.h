@@ -35,6 +35,7 @@ public:
     AbstractFile* loadFile(QDataStream& stream) const override;
     QIcon icon() const override;
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    [[nodiscard]] virtual QString extension() const override { return tr("Excellon (*.exc *.drl)"); }
 
     // public slots:
     AbstractFile* parseFile(const QString& fileName, uint32_t type) override;

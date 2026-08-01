@@ -58,7 +58,7 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
         ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
     else
         kx -= (static_cast<double>(IconSize) - rect.width() * scale) / 2;
-    QPixmap pixmap(IconSize, IconSize);
+    QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
     painter.begin(&pixmap);
@@ -72,13 +72,14 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    QFile file(fileName);
+    QFile file{fileName};
     if(file.open(QFile::ReadOnly | QFile::Text)) {
-        QTextStream in(&file);
+        QTextStream in{&file};
         QString line;
         while(in.readLineInto(&line)) {
-            auto data{std::u16string_view{line}};
-            if(*ctre::search_all<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(data).begin())
+            if(*ctre::search_all<R"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)">(
+                   std::u16string_view{line})
+                    .begin())
                 return true;
         }
     }
@@ -87,7 +88,7 @@ bool Plugin::thisIsIt(const QString& fileName) {
 
 AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
-QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'G'); }
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'G'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     class Tab : public AbstractFileSettings, Settings {
@@ -95,9 +96,6 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
         QCheckBox* chbxSkipDuplicates;
         QCheckBox* chbxSimplifyRegions;
         DoubleSpinBox* dsbxCleanPolygonsDist;
-
-        QRadioButton* rbClipperOffset;
-        QRadioButton* rbMinkowskiSum;
 
     public:
         Tab(QWidget* parent = nullptr)
@@ -137,58 +135,34 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
                 vBoxLayout->setContentsMargins(6, 9, 6, 6);
             }
 
-            {
-                auto groupBox2 = new QGroupBox{this};
-                groupBox2->setObjectName(u"groupBox2"_s);
-                groupBox2->setTitle(QApplication::translate("SettingsDialog", "Wire Creation Method", nullptr));
-                verticalLayout->addWidget(groupBox2);
-
-                rbClipperOffset = new QRadioButton{groupBox2};
-                rbClipperOffset->setObjectName(u"rbClipperOffset"_s);
-
-                rbMinkowskiSum = new QRadioButton{groupBox2};
-                rbMinkowskiSum->setObjectName(u"rbMinkowskiSum"_s);
-                auto vBoxLayout = new QVBoxLayout{groupBox2};
-                vBoxLayout->setContentsMargins(6, 9, 6, 6);
-                vBoxLayout->addWidget(rbClipperOffset);
-                vBoxLayout->addWidget(rbMinkowskiSum);
-            }
             verticalLayout->addItem(new QSpacerItem{20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding});
 
             chbxCleanPolygons->setText(QApplication::translate("SettingsDialog", "Cleaning Polygons", nullptr));
             chbxSkipDuplicates->setText(QApplication::translate("SettingsDialog", "Skip duplicates", nullptr));
             chbxSimplifyRegions->setText(QApplication::translate("SettingsDialog", "Simplify Regions", nullptr));
-
-            rbClipperOffset->setText(QApplication::translate("SettingsDialog", "Clipper Offset", nullptr));
-            rbClipperOffset->setToolTip(QApplication::translate("SettingsDialog", "Faster", nullptr));
-            rbMinkowskiSum->setText(QApplication::translate("SettingsDialog", "Minkowski Sum", nullptr));
-            rbMinkowskiSum->setToolTip(QApplication::translate("SettingsDialog", "Better, can cause glitches", nullptr));
         }
         virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override {
-            settings.beginGroup("Gerber");
+            settings.beginGroup(u"Gerber"_s);
             cleanPolygons_ = settings.getValue(chbxCleanPolygons, cleanPolygons_);
             cleanPolygonsDist_ = settings.getValue(dsbxCleanPolygonsDist, cleanPolygonsDist_);
             simplifyRegions_ = settings.getValue(chbxSimplifyRegions, simplifyRegions_);
             skipDuplicates_ = settings.getValue(chbxSkipDuplicates, skipDuplicates_);
 
-            wireMinkowskiSum_ = settings.getValue(rbMinkowskiSum, wireMinkowskiSum_);
-            rbClipperOffset->setChecked(!wireMinkowskiSum_);
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override {
-            settings.beginGroup("Gerber");
+            settings.beginGroup(u"Gerber"_s);
             cleanPolygons_ = settings.setValue(chbxCleanPolygons);
             cleanPolygonsDist_ = settings.setValue(dsbxCleanPolygonsDist);
             simplifyRegions_ = settings.setValue(chbxSimplifyRegions);
             skipDuplicates_ = settings.setValue(chbxSkipDuplicates);
 
-            wireMinkowskiSum_ = settings.setValue(rbMinkowskiSum);
             settings.endGroup();
         }
     };
     auto tab = new Tab{parent};
-    tab->setWindowTitle("Gerber X3");
+    tab->setWindowTitle(u"Gerber X3"_s);
     return tab;
 }
 

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -100,7 +100,7 @@ void Header::paintSection(QPainter* painter, const QRect& rect, int logicalIndex
     checkRect_[logicalIndex] = option.rect = getRect(rect);
 
     option.state = checked(logicalIndex) ? QStyle::State_On : QStyle::State_Off;
-    option.state |= model()->toolId(logicalIndex) != -1 && isEnabled() ? QStyle::State_Enabled : QStyle::State_None;
+    option.state |= model()->toolId(logicalIndex) != Tool::ID::Null && isEnabled() ? QStyle::State_Enabled : QStyle::State_None;
 
     style()->drawPrimitive(orientation() == Qt::Horizontal ? QStyle::PE_IndicatorRadioButton : QStyle::PE_IndicatorCheckBox, &option, painter);
 }

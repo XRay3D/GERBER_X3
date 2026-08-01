@@ -4,7 +4,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,17 +24,16 @@
 #include <QTreeWidget>
 // #include "a_pch.h"
 
-DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
-    : QDialog{parent} {
-    setupUi(this);
-    retranslateUi(this);
+DialogAboutPlugins::DialogAboutPlugins(QWidget* parent): QDialog{parent} {
+    setupUi();
+    retranslateUi();
 
     treeWidget->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     treeWidget->header()->setSectionResizeMode(2, QHeaderView::Stretch);
     treeWidget->setAlternatingRowColors(true);
     treeWidget->setIconSize({24, 24});
 
-    auto addRows = [](QTreeWidgetItem* twItem, char c, auto map) {
+    auto addRows = [](QTreeWidgetItem* twItem, QChar c, auto map) {
         QFont boldFont = twItem->font(0);
         boldFont.setBold(true);
         twItem->setIcon(0, decoration(Qt::lightGray, c));
@@ -45,34 +44,34 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
             auto featureItem = new QTreeWidgetItem{twItem};
             featureItem->setExpanded(true);
             featureItem->setIcon(0, ptr->icon());
-            featureItem->setText(0, json.value("Name").toString().remove('&'));
-            featureItem->setText(1, json.value("Version").toString());
-            featureItem->setText(2, json.value("VendorAuthor").toString());
-            featureItem->setToolTip(0, json.value("Info").toString());
-            featureItem->setToolTip(1, json.value("Info").toString());
-            featureItem->setToolTip(2, json.value("Info").toString());
+            featureItem->setText(0, json[u"Name"_s].toString().remove(u'&'));
+            featureItem->setText(1, json[u"Version"_s].toString());
+            featureItem->setText(2, json[u"VendorAuthor"_s].toString());
+            featureItem->setToolTip(0, json[u"Info"_s].toString());
+            featureItem->setToolTip(1, json[u"Info"_s].toString());
+            featureItem->setToolTip(2, json[u"Info"_s].toString());
         }
     };
 
     if(App::filePlugins().size()) {
         auto interfaceItem = new QTreeWidgetItem{
-            treeWidget, {tr("File Plugins"), "", ""}
+            treeWidget, {tr("File Plugins"), {}, {}}
         };
-        addRows(interfaceItem, 'F', App::filePlugins());
+        addRows(interfaceItem, u'F', App::filePlugins());
     }
 
     if(App::shapePlugins().size()) {
         auto interfaceItem = new QTreeWidgetItem{
-            treeWidget, {tr("Shape Plugins"), "", ""}
+            treeWidget, {tr("Shape Plugins"), {}, {}}
         };
-        addRows(interfaceItem, 'S', App::shapePlugins());
+        addRows(interfaceItem, u'S', App::shapePlugins());
     }
 
     if(App::gCodePlugins().size()) {
         auto interfaceItem = new QTreeWidgetItem{
-            treeWidget, {tr("GCode Plugins"), "", ""}
+            treeWidget, {tr("GCode Plugins"), {}, {}}
         };
-        addRows(interfaceItem, 'G', App::gCodePlugins());
+        addRows(interfaceItem, u'G', App::gCodePlugins());
     }
 
     resize(600, 600);
@@ -80,36 +79,36 @@ DialogAboutPlugins::DialogAboutPlugins(QWidget* parent)
 
 DialogAboutPlugins::~DialogAboutPlugins() { }
 
-void DialogAboutPlugins::setupUi(QDialog* Dialog) {
-    if(Dialog->objectName().isEmpty())
-        Dialog->setObjectName(u"Dialog"_s);
-    Dialog->resize(400, 300);
-    verticalLayout = new QVBoxLayout{Dialog};
+void DialogAboutPlugins::setupUi() {
+    if(objectName().isEmpty())
+        setObjectName(u"Dialog"_s);
+    resize(400, 300);
+    verticalLayout = new QVBoxLayout{this};
     verticalLayout->setSpacing(6);
     verticalLayout->setObjectName(u"verticalLayout"_s);
     verticalLayout->setContentsMargins(6, 6, 6, 6);
 
-    treeWidget = new QTreeWidget{Dialog};
+    treeWidget = new QTreeWidget{this};
     treeWidget->setObjectName(u"treeWidget"_s);
     verticalLayout->addWidget(treeWidget);
 
-    buttonBox = new QDialogButtonBox{Dialog};
+    buttonBox = new QDialogButtonBox{this};
     buttonBox->setObjectName(u"buttonBox"_s);
     buttonBox->setOrientation(Qt::Horizontal);
     buttonBox->setStandardButtons(QDialogButtonBox::NoButton);
-    //    pbInfo = buttonBox->addButton("Info", QDialogButtonBox::HelpRole);
-    pbClose = buttonBox->addButton("Close", QDialogButtonBox::AcceptRole);
+    // pbInfo = buttonBox->addButton(u"Info"_s, QDialogButtonBox::HelpRole);
+    pbClose = buttonBox->addButton(u"Close"_s, QDialogButtonBox::AcceptRole);
     verticalLayout->addWidget(buttonBox);
 
-    retranslateUi(Dialog);
-    QObject::connect(buttonBox, SIGNAL(accepted()), Dialog, SLOT(accept()));
-    QObject::connect(buttonBox, SIGNAL(rejected()), Dialog, SLOT(reject()));
+    retranslateUi();
+    QObject::connect(buttonBox, SIGNAL(accepted()), this, SLOT(accept()));
+    QObject::connect(buttonBox, SIGNAL(rejected()), this, SLOT(reject()));
 
-    QMetaObject::connectSlotsByName(Dialog);
+    QMetaObject::connectSlotsByName(this);
 }
 
-void DialogAboutPlugins::retranslateUi(QDialog* Dialog) {
-    Dialog->setWindowTitle(QApplication::translate("Dialog", "About Plugins...", nullptr));
+void DialogAboutPlugins::retranslateUi() {
+    setWindowTitle(QApplication::translate("Dialog", "About Plugins...", nullptr));
     treeWidget->setColumnCount(3);
     treeWidget->setHeaderLabels({//
         QApplication::translate("Dialog", "Name", nullptr),

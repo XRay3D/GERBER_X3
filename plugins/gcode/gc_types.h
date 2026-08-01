@@ -3,13 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "curve.h"
 #include "datastream.h"
 #include "md5.h"
 #include "myclipper.h"
@@ -18,35 +19,37 @@
 
 #include <QColor>
 #include <QDebug>
+#include <QMap>
 #include <QVariant>
+#include <algorithm>
 #include <variant>
 
-constexpr auto G_CODE = md5::hash32("GCode");
-constexpr auto GC_DBG_FILE = md5::hash32("GCDbgFile");
+constexpr auto G_CODE      = "GCode"_hash32;
+constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
 
 // enum GCodeType : int {
-//     Null = -1,
+// Null = -1,
 
-//    Profile = 100, // FileType::GCode
-//    Pocket,
-//    Raster,
-//    Hatching,
-//    Voronoi,
-//    Thermal,
-//    Drill,
-//    LaserHLDI,
+// Profile = 100, // FileType::GCode
+// Pocket,
+// Raster,
+// Hatching,
+// Voronoi,
+// Thermal,
+// Drill,
+// LaserHLDI,
 
-//    GCodeProperties = 199,
+// GCodeProperties = 199,
 //};
 
 enum Code {
     GNull = -1,
-    G00 = 0,
-    G01 = 1,
-    G02 = 2,
-    G03 = 3,
+    G00   = 0,
+    G01   = 1,
+    G02   = 2, // cw
+    G03   = 3, // ccw
 };
 
 enum SideOfMilling {
@@ -65,8 +68,9 @@ enum class Grouping {
     Cutoff,
 };
 
-using UsedItems = std::map<std::pair<int, int>, std::vector<int>>;
-using V = std::variant<int, double, UsedItems, quint64>;
+using UsedItems = std::map<std::vector<int32_t>, std::vector<int32_t>>;
+
+using V = std::variant<qsizetype, double, UsedItems>;
 
 struct Variant : V {
     using V::V;
@@ -74,20 +78,11 @@ struct Variant : V {
     friend QDataStream& operator>>(QDataStream& stream, V& v) {
         uint8_t index;
         stream >> index;
-        using Init = V& (*)(V&);
-        static std::unordered_map<uint8_t, Init> map{
-            {0,       [](V& v) -> V& { return v = int{}; }},
-            {1,    [](V& v) -> V& { return v = double{}; }},
-            {2, [](V& v) -> V& { return v = UsedItems{}; }},
-            {3,   [](V& v) -> V& { return v = quint64{}; }},
-        };
-        std::visit([&stream]<typename T>(T& val) {
-            if constexpr(std::is_same_v<UsedItems, T>)
-                stream >> val;
-            else
-                stream.readRawData(reinterpret_cast<char*>(&val), sizeof(T));
-        },
-            map[index](v));
+        switch(index) {
+        case 0: stream >> v.emplace<0>(); break;
+        case 1: stream >> v.emplace<1>(); break;
+        case 2: stream >> v.emplace<2>(); break;
+        }
         return stream;
     }
 
@@ -103,47 +98,62 @@ struct Variant : V {
         return stream;
     }
 
-    Variant() { }
-
-    template <class T>
-    Variant(const T& val)
-        : V{val} { }
-
-    int toInt() const {
+    qsizetype toInt() const {
         return std::visit([](auto&& val) -> int {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return int{};
             else
-                return int(val); }, (V&)*this);
+                return int(val);
+        },
+            (V&)*this);
     }
 
-    quint64 toUquint64() const {
-        return std::visit([](auto&& val) -> quint64 {
+    size_t toUInt() const {
+        return std::visit([](auto&& val) -> size_t {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
-                return quint64{};
+            if constexpr(std::is_same_v<T, UsedItems>)
+                return size_t{};
             else
-                return quint64(val); }, (V&)*this);
+                return size_t(val);
+        },
+            (V&)*this);
     }
 
     bool toBool() const {
         return std::visit([](auto&& val) -> bool {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return bool{};
-             else
-                return bool(val); }, (V&)*this);
+            else
+                return bool(val);
+        },
+            (V&)*this);
     }
 
     double toDouble() const {
         return std::visit([](auto&& val) -> double {
             using T = std::decay_t<decltype(val)>;
-            if constexpr (std::is_same_v<T, UsedItems>)
+            if constexpr(std::is_same_v<T, UsedItems>)
                 return {};
-             else
-                return double(val); }, (V&)*this);
+            else
+                return double(val);
+        },
+            (V&)*this);
     }
+
+    template <class T>
+        requires std::is_enum_v<T>
+    operator T() const { return static_cast<T>(toInt()); }
+
+    template <std::unsigned_integral T>
+    operator T() const { return static_cast<T>(toUInt()); }
+
+    template <std::integral T>
+    operator T() const { return static_cast<T>(toInt()); }
+
+    template <std::floating_point T>
+    operator T() const { return static_cast<T>(toDouble()); }
 
     template <class T>
     void setValue(const T& val) { *this = val; }
@@ -156,112 +166,121 @@ struct Variant : V {
 };
 
 struct Params {
-    Q_GADGET
 public:
-    enum Param : uint32_t {
-        //        Node,
-        //        AccDistance, // need for LaserHLDI
-        //        BridgeLen, // need for Profile
-        //        Bridges,   // need for Profile
-        //        CornerTrimming, // need for Profile
-        //        Fast,
-        //        FileId,
-        //        FrameOffset, // need for Voronoi
-        //        HathStep      // need for Hatching
-        //        IgnoreCopper, // need for Thermal
-        //        Pass, // need for Raster and LaserHLDI profile
-        //        Steps,     // need for Pocket
-        //        Tolerance, // need for Voronoi
-        //        Trimming,       // need for Profile
-        //        UseAngle, // need for Raster and LaserHLDI
-        //        UseRaster,
-        //        VorT,      // need for Voronoi
-        //        Width,     // need for Voronoi
-        Convent,
-        Depth,
-        GrItems,
-        MultiToolIndex, // need for Pocket
-        NotTile,        // не раскладывать если даже раскладка включена
-        Side,
-
-        UserParam = 100
-    };
-
-    Q_ENUM(Param)
+    // Parameter keys are names, not an enum: each plugin can add its own
+    // (see e.g. Profile::Creator::BridgeLen) without needing a shared numeric
+    // range to avoid collisions, and a serialized/dumped Params reads as text.
+    static inline const QString Convent        = u"Convent"_s;
+    static inline const QString Depth          = u"Depth"_s;
+    static inline const QString GrItems        = u"GrItems"_s;
+    static inline const QString MultiToolIndex = u"MultiToolIndex"_s; // need for Pocket
+    static inline const QString NotTile        = u"NotTile"_s;        // не раскладывать если даже раскладка включена
+    static inline const QString Side           = u"Side"_s;
+    static inline const QString FileSide       = u"FileSide"_s;
+    static inline const QString LeftHand       = u"LeftHand"_s; // need for Threading
+    static inline const QString Circle         = u"Circle"_s;   // need for Threading
+    static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
+    static inline const QString Starts         = u"Starts"_s;   // need for Threading
 
     Params() {
-        if(!params.contains(MultiToolIndex))
-            params[MultiToolIndex] = 0;
+        if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;
     }
 
-    Params(const Tool& tool, double depth /*, uint32_t type*/)
+    Params(const Tool& tool, double depth)
         : Params{} {
         tools.emplace_back(tool);
         params[Params::Depth] = depth;
-        //        gcType = type;
+    }
+
+    Params(const Tool& tool, double depth, Paths&& toolPaths)
+        : Params{tool, depth} {
+        toolPathss /*supportCurvess*/.emplace_back(toCurves(toolPaths));
+    }
+
+    Params(const Tool& tool, double depth, Curves&& toolPaths)
+        : Params{tool, depth} {
+        toolPathss /*supportCurvess*/.emplace_back(std::move(toolPaths));
     }
 
     mvector<Tool> tools;
-    std::map<std::underlying_type_t<Param>, Variant> params;
+    std::map<QString, Variant> params;
 
-    //    GCodeType gcType = Null;
+    // GCodeType gcType = Null;
     mutable int fileId = -1;
-    //    QColor color;
+    // QColor color;
 
-    friend QDataStream& operator>>(QDataStream& stream, Params& type) {
-        stream >> type.tools;
-        stream >> type.params;
-        //        stream >> type.gcType;
-        return stream;
+    friend QDataStream& operator>>(QDataStream& stream, Params& par) {
+        return stream >> par.tools
+            >> par.params
+            >> par.closedCurves
+            >> par.supportCurvess;
     }
 
-    friend QDataStream& operator<<(QDataStream& stream, const Params& type) {
-        stream << type.tools;
-        stream << type.params;
-        //        stream << type.gcType;
-        return stream;
+    friend QDataStream& operator<<(QDataStream& stream, const Params& par) {
+        return stream << par.tools
+                      << par.params
+                      << par.closedCurves
+                      << par.supportCurvess;
     }
 
-    const Tool& getTool() const { return tools[params.at(MultiToolIndex).toInt()]; }
+    explicit operator bool() const {
+        return openCurves.size() || closedCurves.size();
+    }
+
+    const Tool& tool() const { return tools[params.at(MultiToolIndex).toInt()]; }
 
     SideOfMilling side() const { return static_cast<SideOfMilling>(params.at(Side).toInt()); }
     bool convent() const { return params.at(Convent).toBool(); }
     double getToolDiameter() const { return tools.at(params.at(MultiToolIndex).toInt()).getDiameter(params.at(Depth).toInt()); }
     double getDepth() const { return params.at(Depth).toDouble(); }
 
+    bool leftHand() const { return params.contains(LeftHand) && params.at(LeftHand).toBool(); }
+    bool circle() const { return params.contains(Circle) && params.at(Circle).toBool(); }
+    bool chamfer() const { return params.contains(Chamfer) && params.at(Chamfer).toBool(); }
+    int starts() const { return params.contains(Starts) ? std::max(1, static_cast<int>(params.at(Starts).toInt())) : 1; }
+
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }
+    void setLeftHand(bool val) { params[LeftHand] = val; }
+    void setCircle(bool val) { params[Circle] = val; }
+    void setChamfer(bool val) { params[Chamfer] = val; }
+    void setStarts(int val) { params[Starts] = val; }
 
-    Paths closedPaths;
-    Paths openPaths;
-    Pathss supportPathss;
+    Curves closedCurves; // pocketAreaPaths
+    Curves openCurves;
+    Curvess supportCurvess; // toolCurvess
+    Curvess toolPathss;     // toolCurvess
 
-    //    void addPaths(Paths& val) { paths.append(val); }
-    //    void addPaths(Paths&& val) { paths.append(std::move(val)); }
-    //    void addRawPaths(Paths& val) { rawPaths.append(val); }
-    //    void addRawPaths(Paths&& val) { rawPaths.append(std::move(val)); }
-    //    void addSupportPaths(Pathss val) { supportPaths = val; }
+    const Curves& pocketAreaCurves() const { return closedCurves; }
+    void setPocketAreaCurves(Curves&& arg) { closedCurves = std::move(arg); }
+
+    auto feedRate() const -> double { return tool().feedRate(); }
+    auto plungeRate() const -> double { return tool().plungeRate(); }
+    auto spindleSpeed() const -> int { return tool().spindleSpeed(); }
+    auto toolType() const -> int { return tool().type(); }
 };
 
 class Settings {
     // protected:
 public:
-    /*static inline*/ QString fileExtension_{"tap"};
-    /*static inline*/ QString formatMilling_{"G?X?Y?Z?F?S?"};
-    /*static inline*/ QString formatLaser_{"G?X?Y?Z?F?S?"};
-    /*static inline*/ QString laserConstOn_{"M3"};
-    /*static inline*/ QString laserDynamOn_{"M4"};
-    /*static inline*/ QString spindleLaserOff_{"M5"};
-    /*static inline*/ QString spindleOn_{"M3"};
+    /*static inline*/ QString fileExtension_{u"tap"_s};
+    /*static inline*/ QString formatMilling_{u"G?X?Y?I+J+Z?F?S?"_s};
+    /*static inline*/ QString formatLaser_{u"G?X?Y?I+J+Z?F?S?"_s};
+    /*static inline*/ QString laserConstOn_{u"M3"_s};
+    /*static inline*/ QString laserDynamOn_{u"M4"_s};
+    /*static inline*/ QString spindleLaserOff_{u"M5"_s};
+    /*static inline*/ QString spindleOn_{u"M3"_s};
 
-    /*static inline*/ QString start_{"G21 G17 G90\nM3 S?"};
-    /*static inline*/ QString end_{"M5\nM30"};
+    /*static inline*/ QString start_{u"G21 G17 G90\nM3 S?"_s};
+    /*static inline*/ QString end_{u"M5\nM30"_s};
 
-    /*static inline*/ QString laserStart_{"G21 G17 G90"};
-    /*static inline*/ QString laserEnd_{"M30"};
+    /*static inline*/ QString laserStart_{u"G21 G17 G90"_s};
+    /*static inline*/ QString laserEnd_{u"M30"_s};
 
     /*static inline*/ bool info_{true};
     /*static inline*/ bool sameFolder_{true};
+
+    QMap<QString, QString> scriptPaths_; // gcName -> JS script file path
 
 public:
     /*static*/ QString fileExtension() { return fileExtension_; }
@@ -281,6 +300,9 @@ public:
 
     /*static*/ bool info() { return info_; }
     /*static*/ bool sameFolder() { return sameFolder_; }
+
+    QString scriptPath(const QString& gcName) const { return scriptPaths_.value(gcName); }
+    void setScriptPath(const QString& gcName, const QString& path) { scriptPaths_[gcName] = path; }
 };
 
 } // namespace GCode

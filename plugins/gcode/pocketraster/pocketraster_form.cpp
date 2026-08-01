@@ -3,13 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 
 #include "pocketraster_form.h"
+#include "gi_dbg.h"
 #include "ui_pocketrasterform.h"
 
 #include "graphicsview.h"
@@ -18,8 +19,8 @@
 
 namespace PocketRaster {
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::PocketRasterForm)
     , names{tr("Raster On"), tr("Raster Outside"), tr("Raster Inside")} {
     ui->setupUi(content);
@@ -27,7 +28,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     setWindowTitle(tr("Pocket Raster Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("PocketRasterForm");
+    settings.beginGroup(u"PocketRasterForm"_s);
     settings.getValue(ui->cbxPass);
     settings.getValue(ui->dsbxAcc);
     settings.getValue(ui->dsbxAngle);
@@ -56,7 +57,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 Form::~Form() {
 
     MySettings settings;
-    settings.beginGroup("PocketRasterForm");
+    settings.beginGroup(u"PocketRasterForm"_s);
     settings.setValue(ui->cbxPass);
     settings.setValue(ui->dsbxAcc);
     settings.setValue(ui->dsbxAngle);
@@ -78,24 +79,22 @@ void Form::computePaths() {
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->tools.push_back(tool);
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.tools.push_back(tool);
 
-    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp.params[Creator::UseAngle] = ui->dsbxAngle->value();
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[Creator::Pass] = ui->cbxPass->currentIndex();
     if(ui->rbFast->isChecked()) {
-        gcp->params[Creator::Fast] = true;
-        gcp->params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
+        gcp.params[Creator::Fast] = true;
+        gcp.params[Creator::AccDistance] = (tool.feedRate_mmPerSec() * tool.feedRate_mmPerSec()) / (2 * ui->dsbxAcc->value());
     }
 
     fileCount = 1;
-    createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -26,14 +26,14 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
     // tableView
     auto tableView = new QTableView{this};
     QFont f(font());
-    f.setFamily("Consolas");
+    f.setFamily(u"Consolas"_s);
     tableView->setFont(f);
     tableView->setObjectName(u"tableView"_s);
 
     tableView->setModel(new Model{App::project().file(fileId)->lines()});
     // horizontal Header
     tableView->horizontalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, "123456789").width());
+    tableView->horizontalHeader()->setDefaultSectionSize(QFontMetrics(tableView->font()).size(Qt::TextSingleLine, u"123456789"_s).width());
     tableView->horizontalHeader()->setSectionResizeMode(LineData, QHeaderView::Stretch);
     // vertical Header
     tableView->verticalHeader()->setVisible(false);
@@ -42,31 +42,31 @@ SourceDialog::SourceDialog(int fileId, QWidget* parent)
 
     tableView->setAlternatingRowColors(true);
 
-    //    class ItemDelegate : public QItemDelegate {
-    //    public:
-    //        ItemDelegate(QObject* parent = nullptr)
-    //            : QItemDelegate{parent} {};
+    // class ItemDelegate : public QItemDelegate {
+    // public:
+    // ItemDelegate(QObject* parent = nullptr)
+    // : QItemDelegate{parent} {};
 
-    //        void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
-    //        {
-    //            if (option.state & QStyle::State_Selected)
-    //                painter->fillRect(option.rect, QColor(255, 200, 200));
-    //            auto option2(option);
-    //            option2.state &= ~QStyle::State_Selected;
-    //            QItemDelegate::paint(painter, option2, index);
-    //        }
-    //        // QItemDelegate interface
-    //    protected:
-    //        void drawFocus(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect) const override
-    //        {
-    //            if (option.state & QStyle::State_HasFocus) {
-    //                painter->setBrush(Qt::NoBrush);
-    //                painter->setPen(Qt::red);
-    //                painter->drawRect(QRect(rect.topLeft(), rect.size() - QSize(1, 1))); //без QSize(1, 1) вылезает на сетку, не красиво.
-    //            }
-    //        };
-    //    };
-    //    tableView->setItemDelegate(new ItemDelegate{tableView});
+    // void paint(QPainter* painter, const QStyleOptionViewItem& option, const QModelIndex& index) const override
+    // {
+    // if (option.state & QStyle::State_Selected)
+    // painter->fillRect(option.rect, QColor(255, 200, 200));
+    // auto option2(option);
+    // option2.state &= ~QStyle::State_Selected;
+    // QItemDelegate::paint(painter, option2, index);
+    // }
+    // // QItemDelegate interface
+    // protected:
+    // void drawFocus(QPainter* painter, const QStyleOptionViewItem& option, const QRect& rect) const override
+    // {
+    // if (option.state & QStyle::State_HasFocus) {
+    // painter->setBrush(Qt::NoBrush);
+    // painter->setPen(Qt::red);
+    // painter->drawRect(QRect(rect.topLeft(), rect.size() - QSize(1, 1))); //без QSize(1, 1) вылезает на сетку, не красиво.
+    // }
+    // };
+    // };
+    // tableView->setItemDelegate(new ItemDelegate{tableView});
     verticalLayout->addWidget(tableView);
 
     {

@@ -1,61 +1,38 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  03 October 2022
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2022
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.0)
 
-project(thread LANGUAGES CXX)
+project(gcthread LANGUAGES CXX)
 
+set(PLUG_NAME "Thread")
+set(PLUG_INFO "Thread")
+set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
+set(PLUG_LOCAL_VERSION "0")
 
+configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
+               ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
-find_package(Qt${QT_VERSION_MAJOR} COMPONENTS  Widgets REQUIRED)
+file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
+file(GLOB UIS CONFIGURE_DEPENDS *.ui)
+file(GLOB JSONS CONFIGURE_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/*.json)
 
-file(GLOB HEADERS *.h)
-file(GLOB JSONS *.json)
-file(GLOB SOURCES *.cpp)
-file(GLOB UIS *.ui)
-
-include_directories(${CMAKE_STATIC_LIBS_DIR})
-
-set(PROJECT_SOURCES
-    ${HEADERS}
-    ${JSONS}
-    ${SOURCES}
-    ${UIS}
-)
+set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
-#target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE
-    clipper
-    common
-    filetree
-    gcode
-    gi
-    graphicsview
-    tooldatabase
-    Qt${QT_VERSION_MAJOR}::Widgets
-)
+target_link_libraries(${PROJECT_NAME} PRIVATE gcode)
 
-#add_library(gc_profile STATIC
-#    profile.cpp
-#    profile.h
-#)
-
-#target_link_libraries(gc_profile PRIVATE
-#    clipper
-#    gcode
-#    common
-#    filetree
-#    Qt${QT_VERSION_MAJOR}::Core
-#    Qt${QT_VERSION_MAJOR}::Gui
-#    Qt${QT_VERSION_MAJOR}::Widgets
-#)
+target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})

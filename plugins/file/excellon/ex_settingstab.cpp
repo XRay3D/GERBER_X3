@@ -137,10 +137,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             QString text;
             if(re.isValid()) {
                 auto match = re.match(leTestParseZero->text());
-                for(int ctr{}; QString & string: match.capturedTexts())
+                for(int ctr{}; QString& string: match.capturedTexts())
                     text.append(uR"(%1:("%2"), )"_s.arg(ctr++).arg(string));
                 if(!match.hasMatch())
-                    text = "No captured texts";
+                    text = u"No captured texts"_s;
             } else {
                 text = re.errorString();
             }
@@ -154,10 +154,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             QString text;
             if(re.isValid()) {
                 auto match = re.match(leTestParseUnit->text());
-                for(int ctr{}; QString & string: match.capturedTexts())
+                for(int ctr{}; QString& string: match.capturedTexts())
                     text.append(uR"(%1:("%2"), )"_s.arg(ctr++).arg(string));
                 if(!match.hasMatch())
-                    text = "No captured texts";
+                    text = u"No captured texts"_s;
             } else {
                 text = re.errorString();
             }
@@ -171,10 +171,10 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
             QString text;
             if(re.isValid()) {
                 auto match = re.match(leTestParseDecimalAndInteger->text());
-                for(int ctr{}; QString & string: match.capturedTexts())
+                for(int ctr{}; QString& string: match.capturedTexts())
                     text.append(uR"(%1:("%2"), )"_s.arg(ctr++).arg(string));
                 if(!match.hasMatch())
-                    text = "No captured texts";
+                    text = u"No captured texts"_s;
             } else {
                 text = re.errorString();
             }
@@ -192,17 +192,17 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Parse Zero:", nullptr), grbxParse}, leParseZero);
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Test String:", nullptr), grbxParse}, leTestParseZero);
 
-        formLay->addRow(new QLabel{"", grbxParse}, nullWidget);
+        formLay->addRow(new QLabel{{}, grbxParse}, nullWidget);
 
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Parse Unit:", nullptr), grbxParse}, leParseUnit);
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Test String:", nullptr), grbxParse}, leTestParseUnit);
 
-        formLay->addRow(new QLabel{"", grbxParse}, nullWidget);
+        formLay->addRow(new QLabel{{}, grbxParse}, nullWidget);
 
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Parse Decimal And Integer:", nullptr), grbxParse}, leParseDecimalAndInteger);
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Test String:", nullptr), grbxParse}, leTestParseDecimalAndInteger);
 
-        formLay->addRow(new QLabel{"", grbxParse}, nullWidget);
+        formLay->addRow(new QLabel{{}, grbxParse}, nullWidget);
 
         formLay->addRow(new QLabel{QApplication::translate("ExcellonDialog", "Test Output:", nullptr), grbxParse}, leTestOutput);
         vlayTab->addWidget(grbxParse);
@@ -218,8 +218,8 @@ ExSettingsTab::ExSettingsTab(QWidget* parent)
 ExSettingsTab::~ExSettingsTab() { }
 
 void ExSettingsTab::readSettings(MySettings& settings) {
-    settings.beginGroup("Excellon");
-    //  static inline Format format_;
+    settings.beginGroup(u"Excellon"_s);
+    // static inline Format format_;
 
     format_.decimal = settings.getValue(sbxDecimal, format_.decimal);
     format_.integer = settings.getValue(sbxInteger, format_.integer);
@@ -230,15 +230,15 @@ void ExSettingsTab::readSettings(MySettings& settings) {
     format_.zeroMode = static_cast<ZeroMode>(settings.getValue(rbLeading, bool(format_.zeroMode == LeadingZeros)));
     format_.zeroMode = static_cast<ZeroMode>(settings.getValue(rbTrailing, bool(format_.zeroMode == TrailingZeros)));
 
-    //            parseZeroMode_ = settings.getValue(leParseZero, parseZeroMode_);
-    //            parseUnitMode_ = settings.getValue(leParseUnit, parseUnitMode_);
-    //            parseDecimalAndInteger_ = settings.getValue(leParseDecimalAndInteger, parseDecimalAndInteger_);
+    // parseZeroMode_ = settings.getValue(leParseZero, parseZeroMode_);
+    // parseUnitMode_ = settings.getValue(leParseUnit, parseUnitMode_);
+    // parseDecimalAndInteger_ = settings.getValue(leParseDecimalAndInteger, parseDecimalAndInteger_);
 
     settings.endGroup();
 }
 
 void ExSettingsTab::writeSettings(MySettings& settings) {
-    settings.beginGroup("Excellon");
+    settings.beginGroup(u"Excellon"_s);
 
     format_.decimal = settings.setValue(sbxDecimal);
     format_.integer = settings.setValue(sbxInteger);
@@ -249,9 +249,9 @@ void ExSettingsTab::writeSettings(MySettings& settings) {
     settings.setValue(rbLeading);
     format_.zeroMode = static_cast<ZeroMode>(settings.setValue(rbTrailing));
 
-    //            parseZeroMode_ = settings.setValue(leParseZero);
-    //            parseUnitMode_ = settings.setValue(leParseUnit);
-    //            parseDecimalAndInteger_ = settings.setValue(leParseDecimalAndInteger);
+    // parseZeroMode_ = settings.setValue(leParseZero);
+    // parseUnitMode_ = settings.setValue(leParseUnit);
+    // parseDecimalAndInteger_ = settings.setValue(leParseDecimalAndInteger);
 
     settings.endGroup();
 }

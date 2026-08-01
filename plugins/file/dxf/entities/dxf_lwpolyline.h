@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,7 +15,7 @@
 
 namespace Dxf {
 struct LwPolyline final : Entity {
-    LwPolyline(SectionParser* sp);
+    using Entity::Entity;
     // 5
     // 8
     // 62
@@ -45,13 +45,11 @@ struct LwPolyline final : Entity {
         Plinegen = 128 // PLINEGEN
     };
     // Entity interface
-public:
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;
     struct Segment : QPointF {
-        double bulge = 0.0;
+        double bulge{};
         friend QDataStream& operator<<(QDataStream& stream, const Segment& e) {
             stream << static_cast<QPointF>(e);
             stream << e.bulge;
@@ -72,11 +70,11 @@ public:
     int16_t counter{};
     int16_t polylineFlag{};
     int32_t numberOfVertices{};
-    double startWidth = 0.0;
-    double endWidth = 0.0;
-    double constantWidth = 0.0;
+    double startWidth{};
+    double endWidth{};
+    double constantWidth{};
     int16_t elevation{};
-    double thickness = 0.0;
+    double thickness{};
 };
 
 } // namespace Dxf

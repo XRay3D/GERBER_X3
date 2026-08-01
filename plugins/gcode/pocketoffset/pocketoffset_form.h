@@ -3,14 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "pocketoffset.h"
 #include "ui_pocketoffsetform.h"
 #include <QToolBar>
@@ -21,11 +21,11 @@ class PocketOffsetForm;
 
 namespace PocketOffset {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
 private slots:
@@ -65,9 +65,10 @@ class Plugin final : public GCode::Plugin {
 
 public:
     // GCode::Plugin interface
-    QIcon icon() const override { return QIcon::fromTheme("pocket-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+P"}; }
-    QWidget* createForm() override { return &form; };
+    QIcon icon() const override { return QIcon::fromTheme(u"pocket-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+P"_s}; }
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"PocketOffset"_s; };
     uint32_t type() const override { return POCKET_OFFSET; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

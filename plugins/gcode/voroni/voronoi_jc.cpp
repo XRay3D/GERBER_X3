@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,13 +12,12 @@
 #include "jc_voronoi.h"
 #include "types.h"
 
+size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
 
 namespace Voronoi {
 
-// /*inline*/ size_t qHash(const VoronoiJc::Pair& tag, uint = 0) { return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y); }
-
 void VoronoiJc::jcVoronoi() {
-    const auto tolerance = gcp_.params[Tolerance].toDouble();
+    const auto tolerance = gcp.params[Tolerance].toDouble();
 
     mvector<jcv_point> points;
     points.reserve(100000);
@@ -68,15 +67,15 @@ void VoronoiJc::jcVoronoi() {
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const /*Point::Type*/ int32_t fo = gcp_.params[FrameOffset].toDouble() * uScale;
+        const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
         jcv_rect bounding_box = {
-            { static_cast<jcv_real>(r.left - fo),    static_cast<jcv_real>(r.top - fo)},
+            {static_cast<jcv_real>(r.left - fo),  static_cast<jcv_real>(r.top - fo)   },
             {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
         };
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
         auto toPoint = [](const jcv_edge* edge, int num) -> const Point {
-            return {static_cast</*Point::Type*/ int32_t>(edge->pos[num].x), static_cast</*Point::Type*/ int32_t>(edge->pos[num].y)};
+            return {static_cast</*PType*/ int32_t>(edge->pos[num].x), static_cast</*PType*/ int32_t>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for(int i{}; i < diagram.numsites; i++) {
@@ -95,9 +94,9 @@ void VoronoiJc::jcVoronoi() {
     }
 
     for(const auto& [key, edge]: edges)
-        returnPs += toPath(edge);
+        returnPs.append_range(toPath(edge));
     mergePaths(returnPs, 0.005 * uScale);
-    returnPs += toPath(frame);
+    returnPs.append_range(toPath(frame));
     for(size_t i{}; i < returnPs.size(); ++i) // remove verry short paths
         if(returnPs[i].size() < 4 && distTo(returnPs[i].front(), returnPs[i].back()) < tolerance * 0.5 * uScale)
             returnPs -= i--;
@@ -111,7 +110,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     for(auto&& pair: pairs)
         pairsVec.push_back(pair);
 
-    std::ranges::sort(pairsVec, {}, [](const Pair& a) { return (a.first.y + a.second.y) / 2; });
+    r::sort(pairsVec, {}, [](const Pair& a) { return (a.first.y + a.second.y) / 2; });
 
     mvector<OrdPath> holder(pairsVec.size() * 2);
     QList<OrdPath*> merge;
@@ -158,7 +157,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
     auto clean = [this, kAngle = 2.0](Path& path) {
         for(size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line{~path[i], ~path[i + 1]};
-            if(line.length() < gcp_.params[Tolerance].toDouble()) {
+            if(line.length() < gcp.params[Tolerance].toDouble()) {
                 path[i] = ~line.center();
                 path -= i + 1;
                 --i;
@@ -171,7 +170,7 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
                 path -= i--;
         }
     };
-    std::ranges::for_each(paths, clean);
+    r::for_each(paths, clean);
 
     return paths;
 }

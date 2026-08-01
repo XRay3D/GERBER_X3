@@ -34,6 +34,7 @@ public:
     [[nodiscard]] AbstractFile* loadFile(QDataStream& stream) const override;
     [[nodiscard]] bool thisIsIt(const QString& fileName) override;
     [[nodiscard]] uint32_t type() const override { return GERBER; }
+    [[nodiscard]] virtual QString extension() const override { return tr("Gerber (*.gbr)"); }
 
     // public slots:
     [[nodiscard]] AbstractFile* parseFile(const QString& fileName, uint32_t type) override;

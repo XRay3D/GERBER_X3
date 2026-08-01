@@ -3,7 +3,7 @@
 // * Version   :  na                                                              *
 // * Date      :  XXXXX XX, 2025                                                  *
 // * Website   :  na                                                              *
-// * Copyright :  Damir Bakiev 2016-2025                                          *
+// * Copyright :  Damir Bakiev 2016-2026                                          *
 // * License   :                                                                  *
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,10 +18,10 @@ public:
     public:
         double acc{};       // Аккамулятор
         QStringView rest{}; // остаток строки, которую мы еще не обработали
-        //    Result(double v = 0.0, const QStringView& r = {})
-        //        : acc{v}
-        //        , rest(r) {
-        //    }
+        // Result(double v = 0.0, const QStringView& r = {})
+        // : acc{v}
+        // , rest(r) {
+        // }
     };
     using VarMap = std::map<QString, double>;
     MathParser3(VarMap* variables);

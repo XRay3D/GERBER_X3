@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,7 +15,7 @@ class ToolItem {
 
 public:
     ToolItem() = default;
-    ToolItem(int toolId);
+    ToolItem(Tool::ID toolId);
     ToolItem(const ToolItem& item);
     ~ToolItem();
 
@@ -37,7 +37,7 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex&) const;
 
-    int toolId() const;
+    Tool::ID toolId() const;
 
     Tool& tool();
 
@@ -55,10 +55,10 @@ public:
     ToolItem& operator=(const ToolItem&) = delete;
 
 private:
-    static inline bool deleteEnable_ = false;
+    static inline bool deleteEnable_{};
     ToolItem* parentItem = nullptr;
     QList<ToolItem*> childItems;
     QString name_;
     QString note_;
-    mutable int toolId_{};
+    mutable Tool::ID id{};
 };

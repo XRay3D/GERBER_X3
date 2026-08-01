@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,9 +17,9 @@
 #include <QVariant>
 
 ToolItem::ToolItem(const ToolItem& item) {
-    if(item.toolId_ > 0) {
-        toolId_ = item.toolId_;
-        item.toolId_ = 0;
+    if(item.id > Tool::ID{}) {
+        id      = item.id;
+        item.id = Tool::ID::Folder;
     } else {
         name_ = item.name_;
         note_ = item.note_;
@@ -28,13 +28,14 @@ ToolItem::ToolItem(const ToolItem& item) {
         addChild(new ToolItem{*i});
 }
 
-ToolItem::ToolItem(int toolId)
-    : toolId_{toolId} {
+ToolItem::ToolItem(Tool::ID toolId)
+    // : id{toolId == Tool::ID{} ? Tool::ID::Folder : toolId} {
+    : id{toolId} {
 }
 
 ToolItem::~ToolItem() {
-    if(toolId_ && deleteEnable_)
-        App::toolHolder().tools_.erase(toolId_);
+    if(+id && deleteEnable_)
+        App::toolHolder().tools_.erase(id);
     qDeleteAll(childItems);
 }
 
@@ -77,11 +78,9 @@ bool ToolItem::setData(const QModelIndex& index, const QVariant& value, int role
             case 1:
                 setNote(value.toString());
                 return true;
-            default:
-                return false;
+            default: return false;
             }
-        default:
-            return false;
+        default: return false;
         }
     }
     return false;
@@ -91,82 +90,76 @@ QVariant ToolItem::data(const QModelIndex& index, int role) const {
     switch(role) {
     case Qt::DisplayRole:
         switch(index.column()) {
-        case 0:
-            return name();
-        case 1:
-            return note();
-        case 2:
-            return toolId_ ? QVariant(toolId_) : QVariant();
-        default:
-            return {};
+        case 0 : return name();
+        case 1 : return note();
+        case 2 : return +id ? QVariant{+id} : QVariant{};
+        default: return {};
         }
     case Qt::DecorationRole:
         if(index.column() == 0) {
-            if(toolId_)
-                return App::toolHolder().tool(toolId_).icon();
+            if(+id)
+                return App::toolHolder().tool(id).icon();
             else
-                return QIcon::fromTheme("folder-sync");
+                return QIcon::fromTheme(u"folder-sync"_s);
         }
         return {};
-    case Qt::UserRole:
-        return toolId_;
+    case Qt::UserRole: return +id;
     case Qt::UserRole + 1:
         return childCount();
     case Qt::TextAlignmentRole:
         if(index.column() == 2)
             return Qt::AlignCenter;
         return {};
-    default:
-        return {};
+    default: return {};
     }
 }
 
 Qt::ItemFlags ToolItem::flags(const QModelIndex& /*index*/) const {
     Qt::ItemFlags flags = Qt::ItemIsEnabled | Qt::ItemIsDragEnabled | Qt::ItemIsSelectable;
-    if(!toolId_)
+    if(id == Tool::ID::Folder)
         flags |= Qt::ItemIsDropEnabled;
     else
         flags |= Qt::ItemNeverHasChildren;
     return flags;
 }
 
-int ToolItem::toolId() const { return toolId_; }
+Tool::ID ToolItem::toolId() const { return id; }
 
 Tool& ToolItem::tool() {
-    if(App::toolHolder().tools().contains(toolId_))
-        return App::toolHolder().tools_[toolId_];
+    if(App::toolHolder().tools().contains(id))
+        return App::toolHolder().tools_[id];
     static Tool tmp;
     return tmp;
 }
 
-bool ToolItem::isTool() const { return toolId_ > 0; }
+bool ToolItem::isTool() const { return id > Tool::ID{}; }
 
 void ToolItem::setIsTool() {
     if(App::toolHolder().tools_.size())
-        toolId_ = App::toolHolder().tools_.begin()->first + 1;
+        id = App::toolHolder().tools_.begin()->first + Tool::ID::Tool;
     else
-        toolId_ = 1;
-    App::toolHolder().tools_[toolId_].setId(toolId_);
+        id = Tool::ID::Tool;
+    App::toolHolder().tools_[id].setId(id);
 }
 
 QString ToolItem::note() const {
-    return toolId_ ? App::toolHolder().tools_[toolId_].note() : note_;
+    return +id ? App::toolHolder().tools_[id].note() : note_;
 }
 
 void ToolItem::setNote(const QString& value) {
-    if(toolId_)
-        App::toolHolder().tools_[toolId_].setNote(value);
+    if(+id)
+        App::toolHolder().tools_[id].setNote(value);
     else
         note_ = value;
 }
 
 void ToolItem::setDeleteEnable(bool deleteEnable) { deleteEnable_ = deleteEnable; }
 
-QString ToolItem::name() const { return toolId_ ? App::toolHolder().tool(toolId_).name() : name_; }
+QString ToolItem::name() const { return +id ? App::toolHolder().tool(id).name() : name_; }
 
 void ToolItem::setName(const QString& value) {
-    if(toolId_)
-        App::toolHolder().tools_[toolId_].setName(value);
+    if(+id)
+        App::toolHolder().tools_[id].setName(value);
     else
         name_ = value;
 }

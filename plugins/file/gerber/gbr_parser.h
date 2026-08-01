@@ -29,7 +29,7 @@ public:
 protected:
     void parseLines(const QString& gerberLines, const QString& fileName);
 
-    mvector<QString> cleanAndFormatFile(QString data);
+    std::vector<QString> cleanAndFormatFile(QString data);
     double arcAngle(double start, double stop);
     double toDouble(const QString& Str, bool scale = false, bool inchControl = true);
 
@@ -37,7 +37,7 @@ protected:
         X,
         Y
     };
-    bool parseNumber(QString Str, /*Point::Type*/ int32_t& val, FormatDir dir);
+    bool parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir);
 
     void addPath();
     void addFlash();
@@ -47,10 +47,10 @@ protected:
 
     Point parsePosition(const QString& xyStr);
 
-    Paths createLine();
-    Paths createPolygon();
+    Curves createLine();
+    Curves createPolygon();
 
-    QMap<QString, QString> apertureMacro_;
+    std::map<QString, QString> apertureMacro_;
 
     struct WorkingType {
         enum eWT {

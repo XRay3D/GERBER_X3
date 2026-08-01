@@ -46,7 +46,7 @@ public:
     // AbstractFile interface
     mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
     void setItemType(int type) override;
-    int itemsType() const override;
+    int32_t itemsType() const override;
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
     QIcon icon() const override;
@@ -69,7 +69,7 @@ private:
     // Layer layer = Copper;
 
     QVector<int> rawIndex;
-    std::forward_list<Path> checkList;
+    std::forward_list<Curve> checkList;
     static inline File* crutch;
 
     // FileTree::Node interface

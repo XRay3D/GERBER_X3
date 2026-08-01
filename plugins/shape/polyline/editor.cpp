@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -35,7 +35,7 @@ int Model::rowCount(const QModelIndex&) const {
 }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array getter{&Handle::x, &Handle::y};
 
     auto set = [&] {
@@ -50,14 +50,14 @@ QVariant Model::data(const QModelIndex& index, int role) const {
     };
 
     if(role == Qt::DisplayRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         QString ret;
         for(auto val: set())
-            ret += (ret.size() ? " | " : "") + QString::number(val);
+            ret += (ret.size() ? u" | " : u"") + QString::number(val);
         return ret;
     }
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         return QVariant::fromValue(set());
     }
     if(role == Qt::TextAlignmentRole)
@@ -68,7 +68,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
     if(role == Qt::DisplayRole && orientation == Qt::Horizontal)
-        return section ? "Y" : "X";
+        return section ? u"Y"_s : u"X"_s;
     if(role == Qt::TextAlignmentRole)
         return Qt::AlignCenter;
     return QAbstractTableModel::headerData(section, orientation, role);
@@ -76,8 +76,8 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 
 Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     Qt::ItemFlags flags;
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
-    if(std::ranges::empty(sh)) return {};
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
+    if(r::empty(sh)) return {};
     for(auto* shape: sh) {
         if(shape->handles.size() <= size_t(index.row()))
             continue;
@@ -89,18 +89,18 @@ Qt::ItemFlags Model::flags(const QModelIndex& index) const {
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array setter{&Handle::setX, &Handle::setY};
 
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
 
         double val = value.toDouble();
 
         for(auto* shape: sh) {
             if(shape->handles.size() <= size_t(index.row())) continue;
             (shape->handles[index.row()].*setter[index.column()])(val);
-            // shape->curHandle = shape->handles.begin() + index.row();
+            // shape->curHandle = shape->handles.data() + index.row();
             shape->redraw();
         }
 
@@ -174,22 +174,22 @@ Editor::Editor(Shapes::Plugin* plugin)
     vLayout->addWidget(view);
 
     auto pushButton = new QPushButton{tr("Apply"), this};
-    pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    pushButton->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
 
     pushButton = new QPushButton{tr("Add New"), this};
-    pushButton->setObjectName("pbAddNew");
-    pushButton->setIcon(QIcon::fromTheme("list-add"));
+    pushButton->setObjectName(u"pbAddNew"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"list-add"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
 
-    pushButton = new QPushButton{"Close", this};
-    pushButton->setObjectName("pbClose");
-    pushButton->setIcon(QIcon::fromTheme("window-close"));
+    pushButton = new QPushButton{u"Close"_s, this};
+    pushButton->setObjectName(u"pbClose"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"window-close"_s));
     vLayout->addWidget(pushButton);
 
     vLayout->setSpacing(6);
@@ -200,9 +200,9 @@ Editor::Editor(Shapes::Plugin* plugin)
     view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     view->setEditTriggers(QAbstractItemView::AllEditTriggers);
-    //    connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-    //        view->edit(current);
-    //    });
+    // connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    // view->edit(current);
+    // });
 }
 
 void Editor::add(Shapes::AbstractShape* shape) {

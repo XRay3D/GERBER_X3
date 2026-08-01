@@ -3,7 +3,7 @@
 // * Version   :  na                                                              *
 // * Date      :  XXXXX XX, 2025                                                  *
 // * Website   :  na                                                              *
-// * Copyright :  Damir Bakiev 2016-2025                                          *
+// * Copyright :  Damir Bakiev 2016-2026                                          *
 // * License   :                                                                  *
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,7 +24,8 @@
 
 using namespace Qt::Literals;
 
-template <> struct QConcatenable<sv> : private QAbstractConcatenable {
+template <>
+struct QConcatenable<sv> : private QAbstractConcatenable {
     using type = sv;
     using ConvertTo = QString;
     static constexpr bool ExactSize = true;
@@ -53,9 +54,9 @@ double MathParser1::parse(const QString& s) {
     try {
         result = plusMinus(sv{reinterpret_cast<const char16_t*>(s.data()), size_t(s.size())});
         if(result.rest.size()) {
-            //            std::stringstream ss;
-            //            ss << boost::stacktrace::stacktrace();
-            //            qWarning() << QString::fromStdString(ss.str());
+            // std::stringstream ss;
+            // ss << boost::stacktrace::stacktrace();
+            // qWarning() << QString::fromStdString(ss.str());
             qWarning() << "Error: can't full parse'" << s << "'rest: " << result.rest.data();
         }
     } catch(const sv& str) {
@@ -111,7 +112,7 @@ MathParser1::Result MathParser1::functionVariable(sv s) {
     size_t i{};
 
     while(i < s.length() && ((QChar(s.at(i)).isLetter() || s.at(i) == u'$') || (QChar(s.at(i)).isDigit() && i > 0))) {
-        //    while (i < s.length() && (QChar(s.at(i)).isLetter() || (QChar(s.at(i)).isDigit() && i > 0))) {
+        // while (i < s.length() && (QChar(s.at(i)).isLetter() || (QChar(s.at(i)).isDigit() && i > 0))) {
         // f += s.at(i);
         i++;
     }
@@ -153,7 +154,6 @@ MathParser1::Result MathParser1::mulDiv(sv s) {
 }
 
 MathParser1::Result MathParser1::num(sv s) {
-
     size_t i{};
     int dot_cnt{};
     bool negative{};
@@ -184,13 +184,13 @@ MathParser1::Result MathParser1::num(sv s) {
 
 MathParser1::Result MathParser1::processFunction(sv func, const Result& r) {
 
-    //    if (func.starts_with("sin"))
-    //        return Result(sin(r.acc), r.rest);
-    //    if (func.starts_with("cos"))
-    //        return Result(cos(r.acc), r.rest);
-    //    if (func.starts_with("tan"))
-    //        return Result(tan(r.acc), r.rest);
-    //    return r;
+    // if (func.starts_with("sin"))
+    // return Result(sin(r.acc), r.rest);
+    // if (func.starts_with("cos"))
+    // return Result(cos(r.acc), r.rest);
+    // if (func.starts_with("tan"))
+    // return Result(tan(r.acc), r.rest);
+    // return r;
 
     enum class Func {
         sin,
@@ -198,12 +198,9 @@ MathParser1::Result MathParser1::processFunction(sv func, const Result& r) {
         tan
     };
     switch(Func(u"sin,cos,tan"_s.split(u',').indexOf(toString(func)))) {
-    case Func::sin:
-        return Result(sin(r.acc), r.rest);
-    case Func::cos:
-        return Result(cos(r.acc), r.rest);
-    case Func::tan:
-        return Result(tan(r.acc), r.rest);
+    case Func::sin: return Result(sin(r.acc), r.rest);
+    case Func::cos: return Result(cos(r.acc), r.rest);
+    case Func::tan: return Result(tan(r.acc), r.rest);
     default:
         qWarning() << "function '" << func.data() << "' is not defined";
         break;

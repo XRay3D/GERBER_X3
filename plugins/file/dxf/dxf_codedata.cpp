@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,22 +14,22 @@
 namespace Dxf {
 
 QDebug operator<<(QDebug debug, const CodeData& c) {
-    QDebugStateSaver saver(debug);
-    //      debug.nospace() << QString("DC(%1, ").arg(c.code_, 5).toUtf8().data();
-    //      debug.nospace() << '\n';
-    debug.nospace() << QString("DC(%1, ").arg(c.code_).toUtf8().data();
+    QDebugStateSaver saver{debug};
+    // debug.nospace() << u"DC(%1, "_s.arg(c.code_, 5).toUtf8().data();
+    // debug.nospace() << '\n';
+    debug.nospace() << u"DC(%1, "_s.arg(c.code_).toUtf8().data();
     std::visit([&debug](auto&& arg) {
         using T = std::decay_t<decltype(arg)>;
         if constexpr /*  */ (std::is_same_v<T, double>)
-            debug << "F64 ";
+            debug << u"F64 "_s;
         else if constexpr(std::is_same_v<T, int16_t>)
-            debug << "I16 ";
+            debug << u"I16 "_s;
         else if constexpr(std::is_same_v<T, int32_t>)
-            debug << "I32 ";
+            debug << u"I32 "_s;
         else if constexpr(std::is_same_v<T, int64_t>)
-            debug << "I64 ";
+            debug << u"I64 "_s;
         else if constexpr(std::is_same_v<T, QString>)
-            debug << "Str ";
+            debug << u"Str "_s;
         debug << arg;
     },
         c.varVal);
@@ -74,7 +74,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     else if(400 <= code && code <= 409) type = Integer16;   // 16-разрядное целое значение
     else if(410 <= code && code <= 419) type = String;      // Строка. Подробные сведения см. в разделе «Хранение строковых значений»
     else if(420 <= code && code <= 429) type = Integer32;   // 32-разрядное целое значение
-    else if(430 <= code && code <= 439) type = Integer64;   // Строка. Подробные сведения см. в разделе «Хранение строковых значений»
+    else if(430 <= code && code <= 439) type = String;      // Строка. Подробные сведения см. в разделе «Хранение строковых значений»
     else if(440 <= code && code <= 449) type = Integer32;   // 32-разрядное целое значение
     else if(450 <= code && code <= 459) type = Integer64;   // Long
     else if(460 <= code && code <= 469) type = Double;      // Значение с плавающей запятой двойной точности
@@ -85,7 +85,7 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     else if(1010 <= code && code <= 1059) type = Double;    // Значение с плавающей запятой двойной точности
     else if(1060 <= code && code <= 1070) type = Integer16; // 16-разрядное целое значение
     else if(1071 == code) type = Integer32;                 // 32-разрядное целое значение
-    else throw Exception{std::format("Unknown type: code {}, raw {}, line {}!", code, value.toStdString(), lineNum)};
+    else throw u"Unknown type: code %1, raw %2, line %3!"_s.arg(code).arg(value).arg(lineNum);
 #else
 
     if(0 <= code && code <= 9) type = String;                         // String
@@ -137,23 +137,23 @@ CodeData::CodeData(int code, const QString& value, int lineNum)
     case Integer16: varVal = int16_t(value.toLongLong(&ok)); break;
     case Integer32: varVal = int32_t(value.toLongLong(&ok)); break;
     case Integer64: varVal = int64_t(value.toLongLong(&ok)); break;
-    case Double: varVal = value.toDouble(&ok); break;
-    case String: varVal = value;
+    case Double   : varVal = value.toDouble(&ok); break;
+    case String   : varVal = value;
     }
 
     if(!ok) {
         switch(type) {
-        case Integer16: varVal = int16_t(value.toDouble(&ok)); break;
-        case Integer32: varVal = int32_t(value.toDouble(&ok)); break;
-        case Integer64: varVal = int64_t(value.toDouble(&ok)); break;
-        case Double: varVal = value.toDouble(&ok); break;
-        case String: varVal = value;
+        case Integer16: varVal = /*int16_t*/ (value.toDouble(&ok)); break;
+        case Integer32: varVal = /*int32_t*/ (value.toDouble(&ok)); break;
+        case Integer64: varVal = /*int64_t*/ (value.toDouble(&ok)); break;
+        case Double   : varVal = value.toDouble(&ok); break;
+        case String   : varVal = value;
         }
-        qWarning().nospace() << "Type missmatch: code " << code << ", type " << type << ", raw " << value << ", line " << lineNum << "!";
+        qWarning().nospace() << u"Type missmatch: code "_s << code << u", type "_s << type << u", raw "_s << value << u", line "_s << lineNum << u"!"_s;
     }
 
     if(!ok)
-        throw Exception{QString("Error value: code %1, raw %2, line %3!").arg(code).arg(value).arg(lineNum)};
+        throw u"Error value: code %1, raw %2, line %3!"_s.arg(code).arg(value).arg(lineNum);
 }
 
 int CodeData::code() const { return code_; }

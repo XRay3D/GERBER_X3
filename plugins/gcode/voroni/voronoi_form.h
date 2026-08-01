@@ -3,14 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "voronoi.h"
 #include <QToolBar>
 
@@ -19,11 +19,11 @@ class VoronoiForm;
 }
 namespace Voronoi {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
 private slots:
@@ -33,8 +33,8 @@ private slots:
 private:
     Ui::VoronoiForm* ui;
 
-    double size_ = 0.0;
-    double lenght_ = 0.0;
+    double size_{};
+    double lenght_{};
     void setWidth(double w);
 
     // FormsUtil interface
@@ -54,9 +54,10 @@ class Plugin final : public GCode::Plugin {
     // GCode::Plugin interface
 public:
     uint32_t type() const override { return VORONOI; }
-    QWidget* createForm() override { return &form; };
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+V"}; }
-    QIcon icon() const override { return QIcon::fromTheme("voronoi-path"); }
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"Voronoi"_s; };
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+V"_s}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"voronoi-path"_s); }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };
 

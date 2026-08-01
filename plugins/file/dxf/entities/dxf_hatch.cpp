@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,103 +14,47 @@
 #include <QPolygonF>
 
 namespace Dxf {
-Hatch::Hatch(SectionParser* sp)
-    : Entity{sp} {
-}
-
-Hatch::~Hatch() {
-    for(auto edge: edges)
-        qDeleteAll(edge);
-}
-
-// void Hatch::draw(const InsertEntity* const i) const
-//{
-//     if (i) {
-//         for (int r{}; r < i->rowCount; ++r) {
-//             for (int c{}; c < i->colCount; ++c) {
-//                 QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-//                 GraphicObject go(toGo());
-//                 i->transform(go, tr);
-//                 i->attachToLayer(std::move(go));
-//             }
-//         }
-//     } else {
-//         attachToLayer(toGo());
-//     }
-// }
 
 void Hatch::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(code.code()) {
-        case SubclassMarker: // 100
-            break;
-        case ElevationPointX: // 10
-            break;
-        case ElevationPointY: // 20
-            break;
-        case ElevationPointZ: // 30
-            break;
-        case ExtrDirectionX: // 210
-            break;
-        case ExtrDirectionY: // 220
-            break;
-        case ExtrDirectionZ: // 230
-            break;
-        case HatchPatternName: // 2
-            break;
-        case SolidFillFlag: // 70
-            break;
-        case PatternFillColor: // 63
-            break;
-        case AssociativityFlag: // 71
-            break;
-        case NumberOfBoundaryPaths: // 91
-            break;
-        case HatchStyle: // 75
-            break;
-        case HatchPatternType: // 76
-            break;
-        case HatchPatternAngle: // 52
-            break;
-        case HatchPatternScaleOrSpacing: // 41
-            break;
-        case BoundaryAnnotationFlag: // 73
-            break;
-        case HatchPatternDoubleFlag: // 77
-            break;
-        case NumberOfPatternDefinitionLines: // 78
-            break;
-        case PixelSize: // 47
-            break;
-        case NumberOfSeedPoints: // 98
-            break;
-        case OffsetVector: // 11
-            break;
-        case NumberOfDegenerateBoundaryPaths: // 99
-            break;
-            //        case SeedPointX: // 10
-            //            break;
-            //        case SeedPointY: // 20
-            //            break;
-        case IndicatesSolidHatchOrGradient: // 450
-            break;
-        case Zero: // 451
-            break;
-        case RecordsColors: // 452
-            break;
-        case NumberOfColors: // 453
-            break;
-        case RotationAangleInRadiansForGradients: // 460
-            break;
-        case GradientDefinition: // 461
-            break;
-        case ColorTintValueUsedByDialogCode: // 462
-            break;
-        case ReservedForFutureUse: // 463
-            break;
-        case String: // 470
-            break;
+        case SubclassMarker                : break; // 100
+        case ElevationPointX               : break; // 10
+        case ElevationPointY               : break; // 20
+        case ElevationPointZ               : break; // 30
+        case ExtrDirectionX                : break; // 210
+        case ExtrDirectionY                : break; // 220
+        case ExtrDirectionZ                : break; // 230
+        case HatchPatternName              : break; // 2
+        case SolidFillFlag                 : break; // 70
+        case PatternFillColor              : break; // 63
+        case AssociativityFlag             : break; // 71
+        case NumberOfBoundaryPaths         : break; // 91
+        case HatchStyle                    : break; // 75
+        case HatchPatternType              : break; // 76
+        case HatchPatternAngle             : break; // 52
+        case HatchPatternScaleOrSpacing    : break; // 41
+        case BoundaryAnnotationFlag        : break; // 73
+        case HatchPatternDoubleFlag        : break; // 77
+        case NumberOfPatternDefinitionLines: break; // 78
+        case PixelSize                     : break; // 47
+        case NumberOfSeedPoints            : break; // 98
+        case OffsetVector                  : break;                   // 11
+        case NumberOfDegenerateBoundaryPaths:
+            break; // 99
+            // case SeedPointX: break;// 10
+            // case SeedPointY: break;// 20
+        case IndicatesSolidHatchOrGradient      : break; // 450
+        case Zero                               : break; // 451
+        case RecordsColors                      : break; // 452
+        case NumberOfColors                     : break; // 453
+        case RotationAangleInRadiansForGradients: break; // 460
+        case GradientDefinition                 : break; // 461
+        case ColorTintValueUsedByDialogCode     : break; // 462
+        case ReservedForFutureUse               : break;                // 463
+        case String:
+            break; // 470
             // посипроение контура
         case PathTypeFlag:                         // 92
             pathTypeFlags.emplace_back(int(code)); // PathTypeFlags
@@ -126,7 +70,7 @@ void Hatch::parse(CodeData& code) {
             switch(edgeType) {
             case Line: { // 1
                 auto line = new LineEdge{edgeType};
-                edges[edges.size() - 1].push_back(line);
+                edges[edges.size() - 1].emplace_back(line);
                 for(int i{}; i < 4; ++i) {
                     code = sp->nextCode();
                     switch(code.code()) {
@@ -151,57 +95,50 @@ void Hatch::parse(CodeData& code) {
                               // break;
             case Spline:      // 4
                 // break;
-                throw Exception{DxfObj::tr("Unimplemented edge type in HATCH: %1").arg(edgeType)};
-            default:
-                throw Exception{DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType)};
+                throw DxfObj::tr("Unimplemented edge type in HATCH: %1").arg(edgeType);
+            default: throw DxfObj::tr("Unknown edge type in HATCH: %1").arg(edgeType);
             }
             break;
-        case NumberOfSourceBoundaryObjects: // 97
-            referencesToSourceBoundaryObject.reserve(int(code));
-            break;
-        case ReferenceToSourceBoundaryObjects: // 330
-            referencesToSourceBoundaryObject.emplace_back(code.string());
-            break;
-        default:
-            Entity::parse(code);
-            break;
+        case NumberOfSourceBoundaryObjects   : referencesToSourceBoundaryObject.reserve(int(code)); break;          // 97
+        case ReferenceToSourceBoundaryObjects: referencesToSourceBoundaryObject.emplace_back(code.string()); break; // 330
+        default                              : Entity::parse(code); break;
         }
         // Entity::parse(code);
-        //        DC	5	S//
-        //        DC	8	S//
-        //        DC	62	I//
-        //        DC	92	I
-        //        DC	93	I
-        //        DC	72	I
-        //        DC	21	D
-        //        DC	97	I
-        //        DC	330	S//
-        //        DC	0	S
+        // DC 5 S//
+        // DC 8 S//
+        // DC 62 I//
+        // DC 92 I
+        // DC 93 I
+        // DC 72 I
+        // DC 21 D
+        // DC 97 I
+        // DC 330 S//
+        // DC 0 S
 
-        //        DC	0		S
-        //        DC	10		D
-        //        DC	100		S
-        //        DC	11		D
-        //        DC	2		S
-        //        DC	20		D
-        //        DC	21		D
-        //        DC	210		D
-        //        DC	220		D
-        //        DC	230		D
-        //        DC	330		S
-        //        DC	5		S
-        //        DC	62		I
-        //        DC	70		I
-        //        DC	71		I
-        //        DC	72		I
-        //        DC	75		I
-        //        DC	76		I
-        //        DC	8		S
-        //        DC	91		I
-        //        DC	92		I
-        //        DC	93		I
-        //        DC	97		I
-        //        DC	98		I
+        // DC 0  S
+        // DC 10  D
+        // DC 100  S
+        // DC 11  D
+        // DC 2  S
+        // DC 20  D
+        // DC 21  D
+        // DC 210  D
+        // DC 220  D
+        // DC 230  D
+        // DC 330  S
+        // DC 5  S
+        // DC 62  I
+        // DC 70  I
+        // DC 71  I
+        // DC 72  I
+        // DC 75  I
+        // DC 76  I
+        // DC 8  S
+        // DC 91  I
+        // DC 92  I
+        // DC 93  I
+        // DC 97  I
+        // DC 98  I
         code = sp->nextCode();
     } while(code.code() != 0);
 }
@@ -209,19 +146,24 @@ void Hatch::parse(CodeData& code) {
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
 DxfGo Hatch::toGo() const {
+    qInfo("Hatch"); // TODO Hatch
     Paths paths(edges.size());
     for(size_t i{}; i < edges.size(); ++i)
-        for(auto edge: edges[i])
-            paths[i] += ~edge->toPolygon();
+        for(auto&& edge: edges[i])
+            paths[i].append_range(~edge->toPolygon());
     Clipper clipper;
     clipper.AddOpenSubject(paths); // FIXME AddSubject???
     clipper.Execute(ClipType::Union, FillRule::EvenOdd, paths);
+    r::for_each(paths | v::join, SetCSelf);
+
     // dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
-    return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, paths};
+    return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, toCurves(paths)};
+
+    return {};
 }
 
 void Hatch::write(QDataStream& stream) const {
-    //    stream << edges;
+    // stream << edges;
 
     stream << referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 
@@ -233,7 +175,7 @@ void Hatch::write(QDataStream& stream) const {
 }
 
 void Hatch::read(QDataStream& stream) {
-    //    stream >> edges;
+    // stream >> edges;
 
     stream >> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 

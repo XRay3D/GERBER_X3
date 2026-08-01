@@ -3,12 +3,13 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal_form.h"
+#include "curve.h"
 #include "ui_thermalform.h"
 
 #include "thermal.h"
@@ -25,8 +26,8 @@ enum {
     Size = 24
 };
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::ThermalForm) {
     ui->setupUi(content);
     ui->treeView->setIconSize(QSize(Size, Size));
@@ -35,10 +36,10 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     grid->setRowStretch(7, 0);
 
     MySettings settings;
-    settings.beginGroup("Thermal");
-    settings.getValue(par.angle, "angle", 0.0);
-    settings.getValue(par.count, "count", 4);
-    settings.getValue(par.tickness, "tickness", 0.5);
+    settings.beginGroup(u"Thermal"_s);
+    settings.getValue("angle", par.angle, 0.0);
+    settings.getValue("count", par.count, 4);
+    settings.getValue("tickness", par.tickness, 0.5);
     lastMax = settings.getValue(ui->dsbxAreaMax, 10.0);
     lastMin = settings.getValue(ui->dsbxAreaMin);
     settings.getValue(ui->chbxIgnoreCopper);
@@ -62,7 +63,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     updateButtonIconSize();
 
     if(0) {
-        chbx = new QCheckBox{"", ui->treeView};
+        chbx = new QCheckBox{{}, ui->treeView};
         chbx->setMinimumHeight(ui->treeView->header()->height() - 4);
         chbx->setEnabled(false);
         auto lay = new QGridLayout{ui->treeView->header()};
@@ -80,17 +81,17 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
     ui->treeView->header()->setStretchLastSection(false);
-    //    ui->treeView->hideColumn(1);
+    // ui->treeView->hideColumn(1);
     ui->treeView->setItemDelegate(new Delegate{this});
 }
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("Thermal");
+    settings.beginGroup(u"Thermal"_s);
     if(model && model->data_.size()) {
-        settings.setValue(model->thParam().angle, "angle");
-        settings.setValue(model->thParam().count, "count");
-        settings.setValue(model->thParam().tickness, "tickness");
+        settings.setValue("angle", model->thParam().angle);
+        settings.setValue("count", model->thParam().count);
+        settings.setValue("tickness", model->thParam().tickness);
     }
     settings.setValue(ui->dsbxAreaMax);
     settings.setValue(ui->dsbxAreaMin);
@@ -130,24 +131,24 @@ void Form::computePaths() {
         return;
     }
 
-    auto gpc = new GCode::Params;
+    gcp = {};
 
     for(auto& item: items_) {
         if(item->isValid()) {
-            gpc->closedPaths += item->paths();
+            gcp.closedCurves.assign_range(item->curves());
             if(Paths bridge = item->bridge(); bridge.size())
-                gpc->supportPathss.emplace_back(item->bridge());
+                gcp.supportCurvess.emplace_back(toCurves(item->bridge()));
         }
     }
 
-    gpc->setConvent(true);
-    gpc->setSide(GCode::Outer);
-    gpc->tools.push_back(tool);
-    gpc->params[GCode::Params::Depth] = dsbxDepth->value();
-    gpc->params[Creator::FileId] = ui->cbxFile->currentData().value<AbstractFile*>()->id();
-    gpc->params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    fileCount = 1;
-    emit createToolpath(gpc);
+    gcp.setConvent(true);
+    gcp.setSide(GCode::Outer);
+    gcp.tools.push_back(tool);
+    gcp.params[GCode::Params::Depth]  = dsbxDepth->value();
+    gcp.params[Creator::FileId]       = ui->cbxFile->currentData().value<AbstractFile*>()->id();
+    gcp.params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
+    fileCount                         = 1;
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {
@@ -159,7 +160,8 @@ void Form::updateName() {
 void Form::hideEvent(QHideEvent* event) { // NOTE clean and hide pr gi
     delete ui->treeView->model();
     model = nullptr;
-    items_.clear();
+    items_.clear(); // static std::mutex m;
+    // std::lock_guard l{m};
     event->accept();
 }
 
@@ -183,7 +185,7 @@ void Form::updateThermalGi() {
     int count = std::accumulate(thPaths.begin(), thPaths.end(),
         0, [](int i, auto& val) { return i + int(val.second.size()); });
 
-    QProgressDialog pd("create th", "", 0, count, this);
+    QProgressDialog pd{u"create th"_s, {}, 0, count, this};
     pd.setCancelButton(nullptr);
     count = 0;
     { // create Preview Items
@@ -198,7 +200,7 @@ void Form::updateThermalGi() {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
-                node->append(new Node{drawIcon(paths), "", par, pos, tprItem.get(), model});
+                node->append(new Node{drawIcon(paths), {}, par, ~pos, tprItem.get(), model});
             }
             qApp->processEvents();
             pd.setValue(++count);

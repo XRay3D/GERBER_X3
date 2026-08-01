@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,6 +11,7 @@
 #include "gi_point.h"
 
 #include "drill/drill_file.h"
+#include "gc_file.h"
 #include "gc_propertiesform.h"
 #include "gc_types.h"
 #include "gi.h"
@@ -29,7 +30,7 @@ constexpr QRectF ARC_RECT{-3, -3, 6, 6};
 bool updateRect() {
     QRectF rect(App::grView().getSelectedBoundingRect());
     if(rect.isEmpty()) {
-        if(QMessageBox::question(nullptr, "",
+        if(QMessageBox::question(nullptr, {},
                QObject::tr("There are no selected items to define the border.\n"
                            "The old border will be used."),
                QMessageBox::No, QMessageBox::Yes)
@@ -165,7 +166,16 @@ void Marker::updateGCPForm() {
 
 void Marker::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
+    moved = true;
+    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
+
     updateGCPForm();
+}
+
+void Marker::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseReleaseEvent(event);
+    if(moved) GCode::regenerateGCodeFiles();
+    moved = false;
 }
 
 void Marker::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
@@ -186,7 +196,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setCheckable(true);
     action->setChecked(!(flags() & QGraphicsItem::ItemIsMovable));
     menu.addSeparator();
-    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    action = menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Settings"), [] {
         SettingsDialog(nullptr, SettingsDialog::Utils).exec();
     });
     menu.exec(event->screenPos());
@@ -199,7 +209,7 @@ void Marker::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 Pin::Pin()
     : QGraphicsObject{nullptr}
     , index_(ctr_++) {
-    setObjectName("Pin");
+    setObjectName(u"Pin"_s);
     setAcceptHoverEvents(true);
 
     if(index_ % 2) {
@@ -258,53 +268,64 @@ void fixXY(QPointF& pt, const QPointF& center, auto cmpX, auto cmpY) {
 
 void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseMoveEvent(event);
-    std::array pt{
-        App::pin0().pos(),
-        App::pin1().pos(),
-        App::pin2().pos(),
-        App::pin3().pos(),
-    };
+    moved = true;
+    setPos(App::settings().getSnappedPos(pos(), event->modifiers()));
+
+    QPointF pt[4]{
+        App::pin0().pos(), App::pin1().pos(),
+        App::pin2().pos(), App::pin3().pos()};
 
     const QPointF center(App::layoutFrames().boundingRect().center());
     // const QPointF center(App::project().worckRect().center());
 
     switch(index_) {
     case 0:
-        fixXY(pt[0], center, std::greater{}, std::greater{});
-        pt[2] = App::pin2().lastPos - (pt[0] - lastPos);
-        pt[1].setX(pt[2].x());
-        pt[1].setY(pt[0].y());
-        pt[3].setX(pt[0].x());
-        pt[3].setY(pt[2].y());
+        if(pt[0].x() > center.x()) pt[0].rx() = center.x();
+        if(pt[0].y() > center.y()) pt[0].ry() = center.y();
+        pt[2]      = App::pin2().lastPos_ - (pt[0] - lastPos_);
+        pt[1].rx() = pt[2].x();
+        pt[1].ry() = pt[0].y();
+        pt[3].rx() = pt[0].x();
+        pt[3].ry() = pt[2].y();
         break;
     case 1:
-        fixXY(pt[1], center, std::less{}, std::greater{});
-        pt[3] = App::pin3().lastPos - (pt[1] - lastPos);
-        pt[0].setX(pt[3].x());
-        pt[0].setY(pt[1].y());
-        pt[2].setX(pt[1].x());
-        pt[2].setY(pt[3].y());
+        if(pt[1].x() < center.x()) pt[1].rx() = center.x();
+        if(pt[1].y() > center.y()) pt[1].ry() = center.y();
+        pt[3]      = App::pin3().lastPos_ - (pt[1] - lastPos_);
+        pt[0].rx() = pt[3].x();
+        pt[0].ry() = pt[1].y();
+        pt[2].rx() = pt[1].x();
+        pt[2].ry() = pt[3].y();
         break;
     case 2:
-        fixXY(pt[2], center, std::less{}, std::less{});
-        pt[0] = App::pin0().lastPos - (pt[2] - lastPos);
-        pt[1].setX(pt[2].x());
-        pt[1].setY(pt[0].y());
-        pt[3].setX(pt[0].x());
-        pt[3].setY(pt[2].y());
+        if(pt[2].x() < center.x()) pt[2].rx() = center.x();
+        if(pt[2].y() < center.y()) pt[2].ry() = center.y();
+        pt[0]      = App::pin0().lastPos_ - (pt[2] - lastPos_);
+        pt[1].rx() = pt[2].x();
+        pt[1].ry() = pt[0].y();
+        pt[3].rx() = pt[0].x();
+        pt[3].ry() = pt[2].y();
         break;
     case 3:
-        fixXY(pt[3], center, std::greater{}, std::less{});
-        pt[1] = App::pin1().lastPos - (pt[3] - lastPos);
-        pt[0].setX(pt[3].x());
-        pt[0].setY(pt[1].y());
-        pt[2].setX(pt[1].x());
-        pt[2].setY(pt[3].y());
+        if(pt[3].x() > center.x()) pt[3].rx() = center.x();
+        if(pt[3].y() < center.y()) pt[3].ry() = center.y();
+        pt[1]      = App::pin1().lastPos_ - (pt[3] - lastPos_);
+        pt[0].rx() = pt[3].x();
+        pt[0].ry() = pt[1].y();
+        pt[2].rx() = pt[1].x();
+        pt[2].ry() = pt[3].y();
         break;
     }
 
-    setPos(pt.data());
-    App::project().setPinsPos(pt.data());
+    for(int i{}; i < 4; ++i)
+        App::pins()[i]->setPos(pt[i]);
+    App::project().setPinsPos(pt);
+}
+
+void Pin::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseReleaseEvent(event);
+    if(moved) GCode::regenerateGCodeFiles();
+    moved = false;
 }
 
 void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
@@ -315,14 +336,16 @@ void Pin::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
 
 void Pin::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     for(int i{}; i < 4; ++i)
-        App::pins()[i]->lastPos = App::pins()[i]->pos();
+        App::pins()[i]->lastPos_ = App::pins()[i]->pos();
     QGraphicsItem::mousePressEvent(event);
 }
 void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     QMenu menu;
 
-    auto action = menu.addAction(QIcon::fromTheme("drill-path"), tr("&Create path for Pins"), [] {
-        ToolDatabase tdb(App::grViewPtr(), {Tool::Drill, Tool::EndMill});
+    auto action = menu.addAction(QIcon::fromTheme(u"drill-path"_s), tr("&Create path for Pins"), [] {
+        ToolDatabase tdb{
+            App::grViewPtr(), std::array{Tool::Drill, Tool::EndMill}
+        };
         if(tdb.exec()) {
             Tool tool(tdb.tool());
 
@@ -338,19 +361,19 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             }
 
             QSettings settings;
-            settings.beginGroup("Pin");
+            settings.beginGroup(u"Pin"_s);
             bool ok;
             double depth = QInputDialog::getDouble(
-                nullptr,                            // parent
-                "",                                 // title
-                tr("Set Depth"),                    // label
-                settings.value("depth").toDouble(), // value
-                0,                                  // minValue
-                20,                                 // maxValue
-                1,                                  // decimals
-                &ok,                                // ok
-                Qt::WindowFlags(),                  // flags
-                1                                   // step
+                nullptr,                               // parent
+                {},                                    // title
+                tr("Set Depth"),                       // label
+                settings.value(u"depth"_s).toDouble(), // value
+                0,                                     // minValue
+                20,                                    // maxValue
+                1,                                     // decimals
+                &ok,                                   // ok
+                Qt::WindowFlags(),                     // flags
+                1                                      // step
             );
             if(!ok)
                 return;
@@ -358,13 +381,14 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
             if(depth == 0.0)
                 return;
 
-            settings.setValue("depth", depth);
+            settings.setValue(u"depth"_s, depth);
             settings.endGroup();
 
-            GCode::Params gcp_{tool, depth};
-            gcp_.params[GCode::Params::NotTile];
+            GCode::Params gcp{tool, depth};
+            gcp.params[GCode::Params::NotTile];
+            gcp.toolPathss = {{toCurve(dst)}};
 
-            auto drillls = new Drilling::File{std::move(gcp_), Pathss{{~dst}}};
+            auto drillls = new Drilling::File{std::move(gcp)};
             drillls->setFileName(tr("Pin_") + tool.nameEnc());
             App::project().addFile(drillls);
         }
@@ -381,7 +405,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     action->setChecked(App::project().pinUsed(index_));
 
     menu.addSeparator();
-    action = menu.addAction(QIcon::fromTheme("configure-shortcuts"), QObject::tr("&Settings"), [] {
+    action = menu.addAction(QIcon::fromTheme(u"configure-shortcuts"_s), QObject::tr("&Settings"), [] {
         SettingsDialog(nullptr, SettingsDialog::Utils).exec();
     });
     menu.exec(event->screenPos());
@@ -389,35 +413,44 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
 int Pin::type() const { return Type::MarkPin; }
 
+void Pin::setPinsPos(QPointF pos[]) {
+    for(int i{}; i < 4; ++i)
+        App::pins()[i]->setPos(pos[i]);
+}
+
 void Pin::resetPos(bool fl) {
     if(fl && !updateRect()) return;
 
     const auto offset = App::settings().mkrPinOffset();
     const auto rect = App::layoutFrames().boundingRect(); // App::project().worckRect()
 
-    std::array pt{
-        QPointF{-offset.x(), -offset.y()}
-            + rect.topLeft(),
-        QPointF{+offset.x(), -offset.y()}
-            + rect.topRight(),
-        QPointF{+offset.x(), +offset.y()}
-            + rect.bottomRight(),
-        QPointF{-offset.x(), +offset.y()}
-            + rect.bottomLeft(),
+    QPointF pt[]{
+        QPointF(rect.topLeft() + QPointF(-offset.x(), -offset.y())),
+        QPointF(rect.topRight() + QPointF(+offset.x(), -offset.y())),
+        QPointF(rect.bottomRight() + QPointF(+offset.x(), +offset.y())),
+        QPointF(rect.bottomLeft() + QPointF(-offset.x(), +offset.y())),
     };
 
-    const auto center = rect.center();
-    fixXY(pt[0], center, std::greater{}, std::greater{});
-    fixXY(pt[1], center, std::less{}, std::greater{});
-    fixXY(pt[2], center, std::less{}, std::less{});
-    fixXY(pt[3], center, std::greater{}, std::less{});
+    const QPointF center(rect.center());
 
-    setPos(pt.data());
-    App::project().setPinsPos(pt.data());
+    if(pt[0].x() > center.x()) pt[0].setX(center.x());
+    if(pt[0].y() > center.y()) pt[0].setY(center.y());
+    if(pt[1].x() < center.x()) pt[1].setX(center.x());
+    if(pt[1].y() > center.y()) pt[1].setY(center.y());
+    if(pt[2].x() < center.x()) pt[2].setX(center.x());
+    if(pt[2].y() < center.y()) pt[2].setY(center.y());
+    if(pt[3].x() > center.x()) pt[3].setX(center.x());
+    if(pt[3].y() < center.y()) pt[3].setY(center.y());
+
+    for(int i{}; i < 4; ++i)
+        App::pins()[i]->setPos(pt[i]);
+
+    App::project().setPinsPos(pt);
 }
 
-void Pin::setPos(const QPointF pos[4]) {
-    for(auto* pin: App::pins()) pin->setPos(*pos++);
+void Pin::setPos(const QPointF pos[]) {
+    for(int i{}; i < 4; ++i)
+        App::pins()[i]->setPos(pos[i]);
 }
 
 void Pin::updateToolTip() {

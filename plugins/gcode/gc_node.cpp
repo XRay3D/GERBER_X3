@@ -3,13 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_node.h"
 #include "abstract_file.h"
+#include "gc_file.h"
 #include "gc_highlighter.h"
 #include "project.h"
 
@@ -46,6 +47,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         switch(role) {
         case Qt::EditRole:
             file->setSide(static_cast<Side>(value.toBool()));
+            static_cast<File*>(file)->regenerate(); // lines_ устарели при смене стороны платы
             return true;
         default:;
         }
@@ -64,35 +66,28 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case FileTree::Column::NameColorVisible:
         switch(role) {
         case Qt::DisplayRole:
-            //            if (file->shortName().endsWith(App::gcSettings().fileExtension()))
-            //                return file->shortName();
-            //            else
-            return file->shortName() + QStringList({"_TS", "_BS"})[file->side()];
-        case Qt::EditRole:
-            return file->shortName();
-        case Qt::ToolTipRole:
-            return file->shortName() + "\n" + file->name();
-        case Qt::CheckStateRole:
-            return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
-        case Qt::DecorationRole:
-            return file->icon();
-        case FileTree::Id:
-            return id();
-        default:
-            return {};
+            // if (file->shortName().endsWith(App::gcSettings().fileExtension()))
+            // return file->shortName();
+            // else
+            return {
+                file->shortName() + QStringList{u"_TS"_s, u"_BS"_s}
+                  [file->side()]
+            };
+        case Qt::EditRole      : return file->shortName();
+        case Qt::ToolTipRole   : return {file->shortName() + u'\n' + file->name()};
+        case Qt::CheckStateRole: return file->itemGroup()->isVisible() ? Qt::Checked : Qt::Unchecked;
+        case Qt::DecorationRole: return file->icon();
+        case FileTree::Id      : return id();
+        default                : return {};
         }
     case FileTree::Column::Side:
         switch(role) {
         case Qt::DisplayRole:
-        case Qt::ToolTipRole:
-            return sideStrList[file->side()];
-        case Qt::EditRole:
-            return static_cast<bool>(file->side());
-        default:
-            return {};
+        case Qt::ToolTipRole: return sideStrList[file->side()];
+        case Qt::EditRole   : return static_cast<bool>(file->side());
+        default             : return {};
         }
-    default:
-        return {};
+    default: return {};
     }
 }
 
@@ -100,26 +95,25 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
     Qt::ItemFlags itemFlag = Qt::ItemIsEnabled | Qt::ItemNeverHasChildren | Qt::ItemIsSelectable /*| Qt::ItemIsDragEnabled*/;
     switch(index.column()) {
     case FileTree::Column::NameColorVisible:
-        //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
-        //            return itemFlag | Qt::ItemIsUserCheckable;
+        // if (file->shortName().endsWith(App::gcSettings().fileExtension()))
+        // return itemFlag | Qt::ItemIsUserCheckable;
         return itemFlag | Qt::ItemIsUserCheckable | Qt::ItemIsEditable;
     case FileTree::Column::Side: {
-        //        if (file->shortName().endsWith(App::gcSettings().fileExtension()))
-        //            return itemFlag;
+        // if (file->shortName().endsWith(App::gcSettings().fileExtension()))
+        // return itemFlag;
         return itemFlag | Qt::ItemIsEditable;
     }
-    default:
-        return itemFlag;
+    default: return itemFlag;
     }
 }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
     static std::unordered_map<int, Dialog*> dialog;
-    menu.addAction(QIcon::fromTheme("document-save"), QObject::tr("&Save Toolpath"), [tv, this] {
+    menu.addAction(QIcon::fromTheme(u"document-save"_s), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(id());
     });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("hint"), QObject::tr("&Hide other"),
+    menu.addAction(QIcon::fromTheme(u"hint"_s), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
     if(!dialog[id()])
         menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
@@ -132,7 +126,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
             dialog[id()]->show();
         });
     menu.addSeparator();
-    menu.addAction(QIcon::fromTheme("edit-delete"), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
+    menu.addAction(QIcon::fromTheme(u"edit-delete"_s), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }
 
 int Node::id() const { return file->id(); }

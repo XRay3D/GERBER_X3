@@ -3,16 +3,16 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #ifdef GBR_
-#include "gbr_node.h"
-#include "radiodelegate.h"
-#include <QApplication>
-#include <QRadioButton>
+    #include "gbr_node.h"
+    #include "radiodelegate.h"
+    #include <QApplication>
+    #include <QRadioButton>
 
 ////////////////////////////////////////////////////////////
 /// \brief RadioDelegate::RadioDelegate
@@ -24,11 +24,11 @@ RadioDelegate::RadioDelegate(QObject* parent)
 
 QWidget* RadioDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto* radioButton = new QRadioButton{parent};
-    //    radioButton->addItems({ tr("Top"), tr("Bottom") });
-    //        if (index.column() == 1)
-    //            comboBox->addItems(IconPreviewArea::iconModeNames());
-    //        else if (index.column() == 2)
-    //            comboBox->addItems(IconPreviewArea::iconStateNames());
+    // radioButton->addItems({ tr("Top"), tr("Bottom") });
+    // if (index.column() == 1)
+    // comboBox->addItems(IconPreviewArea::iconModeNames());
+    // else if (index.column() == 2)
+    // comboBox->addItems(IconPreviewArea::iconStateNames());
     // connect(comboBox, qOverload<int>(&QComboBox::activated), this, &LayerDelegate::emitCommitData);
     connect(radioButton, &QRadioButton::clicked, this, &RadioDelegate::commitAndCloseEditor);
     return radioButton;
@@ -38,8 +38,8 @@ void RadioDelegate::setEditorData(QWidget* editor, const QModelIndex& index) con
     auto* radioButton = qobject_cast<QRadioButton*>(editor);
     if(!radioButton)
         return;
-    //        int pos = comboBox->findText(index.model()->data(index).toString(),
-    //            Qt::MatchExactly);
+    // int pos = comboBox->findText(index.model()->data(index).toString(),
+    // Qt::MatchExactly);
     radioButton->setChecked(index.model()->data(index).toInt());
 }
 
@@ -54,12 +54,12 @@ void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
     QStyledItemDelegate::paint(painter, option, index);
     if(dynamic_cast<Gerber::Node*>(reinterpret_cast<FileTree::Node*>(index.internalPointer()))) {
 
-        //        StarRating starRating = qvariant_cast<StarRating>(index.data());
+        // StarRating starRating = qvariant_cast<StarRating>(index.data());
 
-        //        if (option.state & QStyle::State_Selected)
-        //            painter->fillRect(option.rect, option.palette.highlight());
+        // if (option.state & QStyle::State_Selected)
+        // painter->fillRect(option.rect, option.palette.highlight());
 
-        //        starRating.paint(painter, option.rect, option.palette, StarRating::ReadOnly);
+        // starRating.paint(painter, option.rect, option.palette, StarRating::ReadOnly);
         // QStyleOptionButton progressBarOption;
         // progressBarOption.rect = option.rect;
         QApplication::style()->drawControl(QStyle::CE_RadioButton, &option, painter);
@@ -70,12 +70,12 @@ void RadioDelegate::paint(QPainter* painter, const QStyleOptionViewItem& option,
 
 QSize RadioDelegate::sizeHint(const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     return {24, 24};
-    //    if (index.data().canConvert<StarRating>()) {
-    //        StarRating starRating = qvariant_cast<StarRating>(index.data());
-    //        return starRating.sizeHint();
-    //    } else {
-    //    return QStyledItemDelegate::sizeHint(option, index);
-    //    }
+    // if (index.data().canConvert<StarRating>()) {
+    // StarRating starRating = qvariant_cast<StarRating>(index.data());
+    // return starRating.sizeHint();
+    // } else {
+    // return QStyledItemDelegate::sizeHint(option, index);
+    // }
 }
 
 void RadioDelegate::commitAndCloseEditor() {

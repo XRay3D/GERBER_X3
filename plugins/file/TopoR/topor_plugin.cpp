@@ -43,33 +43,33 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
 std::any Plugin::getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param) {
     if(plugin->type() == ::GCode::Drill) {
         DrillPlugin::Preview retData;
-        //        auto const exFile = static_cast<File*>(file);
-        //        QTransform t {exFile->transform()};
-        //        for (const Excellon::Hole& hole : *exFile) {
-        //            auto name {QString("T%1").arg(hole.state.toolId)};
-        //            if (bool slot = hole.state.path.size(); slot)
-        //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
-        //            else
-        //                retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
-        //        }
+        // auto const exFile = static_cast<File*>(file);
+        // QTransform t {exFile->transform()};
+        // for (const Excellon::Hole& hole : *exFile) {
+        // auto name {u"T%1"_s.arg(hole.state.toolId)};
+        // if (bool slot = hole.state.path.size(); slot)
+        // retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
+        // else
+        // retData[{hole.state.toolId, exFile->tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+        // }
         return retData;
     }
     return {};
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
-    if(!fileName.endsWith(".fst", Qt::CaseInsensitive))
+    if(!fileName.endsWith(u".fst"_s, Qt::CaseInsensitive))
         return false;
 
-    QFile file(fileName);
+    QFile file{fileName};
     if(!file.open(QFile::ReadOnly | QFile::Text))
         return false;
 
-    QTextStream in(&file);
+    QTextStream in{&file};
     QString line;
 
     while(in.readLineInto(&line)) {
-        if(line.contains("<TopoR_PCB_File>")) {
+        if(line.contains(u"<TopoR_PCB_File>"_s)) {
             qDebug(__FUNCTION__);
             return true;
         }
@@ -84,19 +84,19 @@ QString Plugin::folderName() const { return tr("TopoR"); }
 
 AbstractFile* Plugin::loadFile(QDataStream& /*stream*/) const { return nullptr; }
 
-QIcon Plugin::icon() const { return decoration(Qt::lightGray, 'T'); }
+QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'T'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
     auto tab = new ExSettingsTab(parent);
-    tab->setWindowTitle("Excellon");
+    tab->setWindowTitle(u"Excellon"_s);
     return tab;
 }
 
-// void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
-//     cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
-//     cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme("drill-path"));
-//     cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
-// }
+void Plugin::addToGcForm(AbstractFile* file, QComboBox* cbx) {
+    cbx->addItem(file->shortName(), QVariant::fromValue(static_cast<void*>(file)));
+    cbx->setItemIcon(cbx->count() - 1, QIcon::fromTheme(u"drill-path"_s));
+    cbx->setItemData(cbx->count() - 1, QSize(0, IconSize), Qt::SizeHintRole);
+}
 
 } // namespace TopoR
 

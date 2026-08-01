@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=GGEasy
+GenericName=Gerber to G-code
+Comment=Подготовка G-code из файлов Gerber для фрезеровки плат на ЧПУ
+Exec=GGEasy %f
+Icon=ggeasy
+Categories=Graphics;Engineering;
+Terminal=false

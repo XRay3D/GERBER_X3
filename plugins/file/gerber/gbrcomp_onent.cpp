@@ -24,7 +24,7 @@ int Component::value1(const QString& key) { return staticMetaObject.enumerator(1
 int Component::value2(const QString& key) { return staticMetaObject.enumerator(2).keyToValue(key.toUtf8().mid(1).data()); }
 
 bool Component::setData(int key, const QStringList& data) {
-    bool fl = false;
+    bool fl{};
     switch(key) {
     case Component::Rot:
         rotation_ = data.last().toDouble(&fl);
@@ -38,8 +38,7 @@ bool Component::setData(int key, const QStringList& data) {
     case Component::Val:
         value_ = data.last();
         return true;
-    case Component::Mnt:
-        return setMountType(data.last());
+    case Component::Mnt: return setMountType(data.last());
     case Component::Ftp:
         footprintName_ = data.last();
         return true;
@@ -55,10 +54,8 @@ bool Component::setData(int key, const QStringList& data) {
     case Component::LbD:
         library_.description = data.last();
         return true;
-    case Component::Sup:
-        return false;
-    default:
-        return false;
+    case Component::Sup: return false;
+    default            : return false;
     }
     return fl;
 }

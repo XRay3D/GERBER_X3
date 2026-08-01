@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -22,7 +22,7 @@ void SectionBLOCKS::parse() {
     CodeData code;
     do {
         code = nextCode();
-        if(code == "BLOCK") {
+        if(code == u"BLOCK"_s) {
             auto block = new Block{blocks, this};
             if(!block->blockName.isEmpty()) {
                 blocks[block->blockName] = block;
@@ -31,7 +31,7 @@ void SectionBLOCKS::parse() {
                 throw Exception{DxfObj::tr("blockName ERR!")};
             }
         }
-    } while(code != "ENDSEC");
+    } while(code != u"ENDSEC"_s);
 }
 
 } // namespace Dxf

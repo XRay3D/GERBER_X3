@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -47,7 +47,7 @@ public:
     QString string() const;
 
     template <class>
-    inline static constexpr bool always_false_v = false;
+    inline static constexpr bool always_false_v{};
 
     template <typename T>
     inline operator T() const {
@@ -76,9 +76,9 @@ public:
     friend bool operator==(const QString& l, const CodeData& r) { return l == r.strVal; }
     friend bool operator!=(const QString& l, const CodeData& r) { return !(l == r); }
 
-    friend bool operator==(const CodeData& l, const char* r) { return l.strVal == r; }
+    friend bool operator==(const CodeData& l, const char* r) { return l.strVal == QString::fromUtf8(r); }
     friend bool operator!=(const CodeData& l, const char* r) { return !(l == r); }
-    friend bool operator==(const char* l, const CodeData& r) { return l == r.strVal; }
+    friend bool operator==(const char* l, const CodeData& r) { return QString::fromUtf8(l) == r.strVal; }
     friend bool operator!=(const char* l, const CodeData& r) { return !(l == r); }
 
     Type type() const;

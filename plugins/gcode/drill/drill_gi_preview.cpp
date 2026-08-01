@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,7 +13,7 @@
 
 namespace Drilling {
 namespace Gi {
-Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths& draw_)
+Preview::Preview(Path&& path, double diameter, Tool::ID toolId, Row& row, const Paths& draw_)
     : path_{std::move(path)}
     , row{row}
     , toolId_{toolId} {
@@ -26,26 +26,26 @@ Preview::Preview(Path&& path, double diameter, int toolId, Row& row, const Paths
     } else {
         for(auto&& path_: draw_)
             sourcePath_.addPolygon(~path_);
-        //        setPos(hv_.front());
+        // setPos(hv_.front());
     }
     row.items.emplace_back(this);
     update();
 }
 
 void Preview::updateTool() {
-    if(toolId() > -1) {
-        colorState |= Tool;
+    if(toolId() > Tool::ID{}) {
+        colorState |= ColorState::Tool;
         if(path_.size() > 1)
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter = tool.getDiameter(tool.getDepth());
+                const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 for(Path& path_: Inflate(Paths{path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(~path_);
                 }
-                QPolygonF path_(val);
+                QPolygonF path_{val};
                 if(path_.size()) {
                     for(QPointF point: path_) {
                         painterPath.moveTo(point - QPointF(0.0, lineKoeff));
@@ -61,7 +61,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPointF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter = tool.getDiameter(tool.getDepth());
+                const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 painterPath.moveTo(-QPointF(0.0, lineKoeff));
                 painterPath.lineTo(+QPointF(0.0, lineKoeff));
@@ -71,7 +71,7 @@ void Preview::updateTool() {
                 return painterPath.translated(val);
             }(~path_.front());
     } else {
-        colorState &= ~Tool;
+        colorState &= ~ColorState::Tool;
         toolPath_ = {};
     }
     changeColor();
@@ -85,32 +85,25 @@ Paths Preview::paths() const {
 }
 
 bool Preview::fit(double depth) const {
-    const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth);
-    return sourceDiameter_ > diameter && !qFuzzyCompare(sourceDiameter_, diameter);
+    const auto diameter = App::toolHolder().tool(toolId()).getDiameter(depth) * 0.999;
+    return sourceDiameter_ > diameter; // && !qFuzzyCompare(sourceDiameter_, diameter); FIXME logic
 }
 
-int Preview::toolId() const {
-    return toolId_ < 0 ? row.toolId : toolId_;
-}
-
-// Paths Preview::offset(const Path& path_, double offset) {
-////    ClipperOffset cOffset;
-////    // cpOffset.AddPath(path_, JoinType::Round, EndType::Round);
-////    cOffset.AddPath(path_, JoinType::Round, EndType::Round);
-////    Paths retPaths = cOffset.Execute(offset * uScale);
-////    for (Path& path_ : retPaths)
-////        path_.push_back(path_.front());
-////    qDebug() << __FUNCTION__ << retPaths.size();
-////    ReversePaths(retPaths);
-//    return {}/*retPaths*/;
-//}
+Tool::ID Preview::toolId() const { return (toolId_ < Tool::ID::Tool) ? row.toolId : toolId_; }
 
 int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1); }
 
 bool Preview::isSlot() const { return path_.size() > 1; }
 
 Paths Preview::offset() const {
-    return ~sourcePath_.toSubpathPolygons(); /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
+    return ~sourcePath_.toSubpathPolygons();
+    /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
+}
+
+void Preview::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
+    QGraphicsItem::mouseDoubleClickEvent(event);
+    colorState ^= CS::Used;
+    changeColor();
 }
 
 }

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -25,18 +25,17 @@ Node::Node(Type type)
     : type_{type} { }
 
 Node::~Node() {
-    //    if (id__ > -1) {
-    //        switch (type) {
-    //        case File:
-    //            App::project().deleteFile(id__);
-    //            break;
-    //        case AbstractShape:
-    //            App::project().deleteShape(id__);
-    //            break;
-    //        default:
-    //            break;
-    //        }
-    //    }
+    // if (id__ > -1) {
+    // switch (type) {
+    // case File:
+    // App::project().deleteFile(id__);
+    // break;
+    // case AbstractShape:
+    // App::project().deleteShape(id__);
+    // break;
+    // default: break;
+    // }
+    // }
     childs.clear();
 }
 
@@ -61,9 +60,9 @@ int Node::childCount() const { return static_cast<int>(childs.size()); }
 int Node::row() const {
     if(parent_)
         return parent_->childs.indexOf(this);
-    //    for (int i = 0, size = parent_->childs.size(); i < size; ++i)
-    //        if (parent_->childs[i].get() == this)
-    //            return i;
+    // for (int i = 0, size = parent_->childs.size(); i < size; ++i)
+    // if (parent_->childs[i].get() == this)
+    // return i;
     return -1;
 }
 
@@ -71,9 +70,9 @@ void Node::addChild(Node* item, Deleter::Polycy delPolycy) {
     item->parent_ = this;
     childs.emplace_back(item).get_deleter().del = delPolycy;
 
-    //    childs.resize(childs.size() + 1);
-    //    childs.back().reset(item);
-    //    childs.back().get_deleter().del = delPolycy; // swap(std::unique_ptr<Node, Deleter>(item, Deleter {!dontDelete}));
+    // childs.resize(childs.size() + 1);
+    // childs.back().reset(item);
+    // childs.back().get_deleter().del = delPolycy; // swap(std::unique_ptr<Node, Deleter>(item, Deleter {!dontDelete}));
 }
 
 void Node::remove(int row) { childs.takeAt(row); }

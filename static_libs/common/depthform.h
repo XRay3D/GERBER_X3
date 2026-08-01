@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,7 +18,7 @@ class QRadioButton;
 class DepthForm : public QWidget {
     Q_OBJECT
 public:
-    explicit DepthForm(QWidget* parent = nullptr);
+    explicit DepthForm(QString&& groupName, QWidget* parent = nullptr);
     ~DepthForm() override;
     double value() const;
     void setValue(double value);
@@ -26,8 +26,11 @@ public:
 signals:
     void valueChanged(double);
 
+protected:
+    void showEvent(QShowEvent* event) override;
+
 private:
-    double value_ = 0.0;
+    double value_{};
 
     DoubleSpinBox* dsbx;
     QLabel* label;
@@ -35,7 +38,7 @@ private:
     QRadioButton* rbCopper;
     QRadioButton* rbCustom;
 
-    const QString parentName_;
+    const QString groupName;
 
     void setupUi(QWidget* Form);
     void retranslateUi(QWidget* Form);

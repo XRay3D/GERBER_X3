@@ -4,27 +4,25 @@ set(DIR_NAME
     "Qt6.${QT_VERSION_MINOR}_${CMAKE_CXX_COMPILER_ID}_${CMAKE_BUILD_TYPE}")
 
 if("${CMAKE_SIZEOF_VOID_P}" STREQUAL "8")
-  set(DIR_NAME "${DIR_NAME}_x64")
+    set(DIR_NAME "${DIR_NAME}_x64")
 else()
-  set(DIR_NAME "${DIR_NAME}_x32")
+    set(DIR_NAME "${DIR_NAME}_x32")
 endif()
 
 set(OUTPUT_DIRECTORY "${CMAKE_SOURCE_DIR}/bin/${DIR_NAME}/bin")
-
 set(PLUGINS_DIR "${OUTPUT_DIRECTORY}/plugins")
-
+set(SCRIPTS_DIR "${OUTPUT_DIRECTORY}/scripts")
 set(STATIC_LIBS_DIR "${CMAKE_SOURCE_DIR}/bin/${DIR_NAME}/static_libs")
 
-message(${PROJECT_NAME})
-message("CMAKE_SOURCE_DIR >> ${CMAKE_SOURCE_DIR}")
-message("STATIC_LIBS_DIR  >> ${STATIC_LIBS_DIR}")
-message("PLUGINS_DIR      >> ${PLUGINS_DIR}")
-message("DIR_NAME         >> ${DIR_NAME}")
+message(STATUS "${PROJECT_NAME}")
+message(STATUS "CMAKE_SOURCE_DIR >> ${CMAKE_SOURCE_DIR}")
+message(STATUS "STATIC_LIBS_DIR  >> ${STATIC_LIBS_DIR}")
+message(STATUS "PLUGINS_DIR      >> ${PLUGINS_DIR}")
+message(STATUS "DIR_NAME         >> ${DIR_NAME}")
 
-link_directories(STATIC_LIBS_DIR)
+link_directories(${STATIC_LIBS_DIR})
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${PLUGINS_DIR})
-set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY ${STATIC_LIBS_DIR})
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 set(CMAKE_MODULE_PATH ${CMAKE_ARCHIVE_OUTPUT_DIRECTORY})
 
@@ -59,8 +57,3 @@ function(add_translation TARGET)
     ${QM_FILES} PROPERTIES OUTPUT_LOCATION ${OUTPUT_DIRECTORY}/translations)
 
 endfunction()
-
-# set(QT_TRANSLATION_DIR "${Qt6_DIR}/../../../translations") file(GLOB
-# QT_TRANSLATIONS ${QT_TRANSLATION_DIR}/*.qm)
-# qt_add_resources(ex-texteditor-cmake "qt-translations" PREFIX "/translations"
-# BASE ${QT_TRANSLATION_DIR} FILES ${QT_TRANSLATIONS})

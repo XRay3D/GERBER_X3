@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -32,31 +32,18 @@ void Layer::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(code.code()) {
-        case SubclassMarker:
-            break;
+        case SubclassMarker: break;
         case LayerName:
             qDebug() << code.string();
             name_ = code.string();
             break;
-        case Flags:
-            flags = code;
-            break;
-        case ColorNumber:
-            colorNumber_ = code;
-            break;
-        case LineTypeName:
-            lineTypeName = code.string();
-            break;
-        case PlottingFlag:
-            plottingFlag = code.string().toInt();
-            break;
-        case LineWeightEnum:
-            lineWeightEnum = code;
-            break;
-        case PlotStyleNameID:
-            break;
-        case MaterialID:
-            break;
+        case Flags          : flags = code; break;
+        case ColorNumber    : colorNumber_ = code; break;
+        case LineTypeName   : lineTypeName = code.string(); break;
+        case PlottingFlag   : plottingFlag = code.string().toInt(); break;
+        case LineWeightEnum : lineWeightEnum = code; break;
+        case PlotStyleNameID: break;
+        case MaterialID     : break;
         }
         code = sp->nextCode();
     } while(code.code() != 0);

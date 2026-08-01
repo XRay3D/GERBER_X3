@@ -174,8 +174,8 @@ public:
     bool isNull() const { return isNull_; }
 
 private:
-    double rotation_ = 0.0; /* <decimal> The rotation angle of the component.*/
-    double height_ = 0.0;   /* <decimal> Height, in the unit of the file. */
+    double rotation_{}; /* <decimal> The rotation angle of the component.*/
+    double height_{};   /* <decimal> Height, in the unit of the file. */
     mutable Item* componentitem_ = nullptr;
     Library library_;
     Manufacturer manufacturer_;

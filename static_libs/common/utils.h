@@ -12,6 +12,12 @@
 #include <variant>
 
 using namespace std::literals;
+using namespace std::placeholders;
+
+using namespace Qt::Literals;
+
+namespace r = std ::ranges;
+namespace v = std ::views;
 
 template <typename... Ts>
 struct Overload : Ts... {
@@ -21,14 +27,21 @@ struct Overload : Ts... {
 template <typename... Ts>
 Overload(Ts...) -> Overload<Ts...>;
 
-using nS = std::nano;
-using uS = std::micro;
-using mS = std::milli;
-using Sec = std::ratio<1>;
-using Min = std::ratio<60>;
+template <typename Func>
+struct Finaly final {
+    Func const func;
+    ~Finaly() { func(); }
+};
+
+using nS   = std::nano;
+using uS   = std::micro;
+using mS   = std::milli;
+using Sec  = std::ratio<1>;
+using Min  = std::ratio<60>;
 using Hour = std::ratio<3600>;
 
-template <typename T, typename... Ts> constexpr bool contains_v = std::disjunction_v<std::is_same<T, Ts>...>; // Or
+template <typename T, typename... Ts>
+constexpr bool contains_v                              = std::disjunction_v<std::is_same<T, Ts>...>; // Or
 template <typename T, typename... Ts> concept Contains = contains_v<T, Ts...>;
 
 namespace chr = std::chrono;
@@ -70,14 +83,14 @@ struct Timer {
     ~Timer() { now(); }
 };
 
-using Timer_nS = Timer<nS>;
-using Timer_uS = Timer<uS>;
-using Timer_mS = Timer<mS>;
-using TimerSec = Timer<Sec>;
-using TimerMin = Timer<Min>;
+using Timer_nS  = Timer<nS>;
+using Timer_uS  = Timer<uS>;
+using Timer_mS  = Timer<mS>;
+using TimerSec  = Timer<Sec>;
+using TimerMin  = Timer<Min>;
 using TimerHour = Timer<Hour>;
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 template <class T>
 struct CtreCapTo {
@@ -86,6 +99,13 @@ struct CtreCapTo {
     auto toString() const { return QString::fromUtf16(cap.data(), cap.size()); }
     auto toDouble() const { return toString().toDouble(); }
     auto toInt() const { return toString().toInt(); }
+    auto toString() const {
+        // qDebug(u"QString  D%d S%d"_s, cap.data(), cap.size());
+        return QString{
+            reinterpret_cast<const QChar*>(cap.data()),
+            static_cast<qsizetype>(cap.size()),
+        };
+    }
 
     operator QString() const { return toString(); }
     operator double() const { return toDouble(); }
@@ -107,7 +127,7 @@ QDebug operator<<(QDebug debug, Cap& cap) {
     return debug;
 }
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 inline constexpr double normalizeAngleDegrees(double angle) noexcept {
     return 360.0 - (angle > 180.0 ? angle - 180.0 : angle + 180.0);
@@ -117,7 +137,12 @@ inline constexpr bool contains(auto var, auto... vars) noexcept {
     return ((vars == var) || ...);
 }
 
-////////////////////////////////////////////////////////////////////////////////
+template <auto... vars>
+inline constexpr bool contains(auto var) noexcept {
+    return ((vars == var) || ...);
+}
+
+//------------------------------------------------------------------------------
 
 struct ScopedTrue {
     bool& fl;
@@ -126,7 +151,7 @@ struct ScopedTrue {
     ~ScopedTrue() { fl = false; }
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 template <typename... Ts>
 struct Variant : std::variant<Ts...> {
@@ -152,7 +177,7 @@ struct Variant : std::variant<Ts...> {
     operator bool() const { return has_value(); }
 };
 
-////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 
 namespace EnumHelper {
 // Tool to convert enum values to/from QString
@@ -198,32 +223,32 @@ struct Deleter {
 };
 
 #if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QString>
+    #include <QString>
 
 template <size_t Len>
 inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
     std::vector<uint32_t> unicode;
     size_t i{};
 
-    auto error{"not a UTF-8 string"};
+    auto error{u"not a UTF-8 string"_s};
     while(i < Len) {
         unsigned long uni;
         size_t todo;
         unsigned char ch = utf8[i++];
 
         if(ch <= 0x7F) { // 0b01111111
-            uni = ch;
+            uni  = ch;
             todo = 0;
         } else if(ch <= 0xBF) // 0b10111111
             throw error;
         else if(ch <= 0xDF) { // 0b11011111
-            uni = ch & 0x1F;  // 0b00011111
+            uni  = ch & 0x1F; // 0b00011111
             todo = 1;
         } else if(ch <= 0xEF) { // 0b11101111
-            uni = ch & 0x0F;    // 0b00001111
+            uni  = ch & 0x0F;   // 0b00001111
             todo = 2;
         } else if(ch <= 0xF7) { // 0b11110111
-            uni = ch & 0x07;    // 0b00000111
+            uni  = ch & 0x07;   // 0b00000111
             todo = 3;
         } else
             throw error;
@@ -247,7 +272,7 @@ inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
             utf16 += (char16_t)uni;
         } else {
             uni -= 0x10000;                              // 0b1'00000000'00000000
-            utf16 += (char16_t)((uni >> 10) + 0xD800);   //   0b11011000'00000000
+            utf16 += (char16_t)((uni >> 10) + 0xD800);   // 0b11011000'00000000
             utf16 += (char16_t)((uni & 0x3FF) + 0xDC00); // 0b1111111111 0b11011100'00000000
         }
     }
@@ -261,13 +286,13 @@ struct String {
 
     constexpr String(char16_t const (&str)[Size]) {
         N = Size;
-        std::ranges::copy(str, data);
+        r::copy(str, data);
     };
 
     constexpr String(char const (&str)[Size]) {
         auto utf8{utf8toUtf16(str)};
         N = utf8.size();
-        std::ranges::copy(utf8, data);
+        r::copy(utf8, data);
     };
 
     constexpr auto staticData() const { return staticData(std::make_index_sequence<Size>{}); };
@@ -299,20 +324,20 @@ using namespace Qt::Literals;
 #endif
 
 #if USE_ENUM == 1
-#include <array>
-#include <ranges>
+    #include <array>
+    #include <ranges>
 
 using namespace std::literals;
 template <class Ty>
-inline constexpr bool isEnum = false;
+inline constexpr bool isEnum{};
 template <class Ty>
-inline constexpr bool isBitField = false;
+inline constexpr bool isBitField{};
 namespace Impl {
 template <class Ty>
 inline constexpr Ty Max = Ty{};
 template <class Ty>
 inline constexpr Ty Tokens = Ty{};
-using sv = std::string_view;
+using sv                   = std::string_view;
 consteval auto trim(sv str) {
     auto isSpaceOrSep = [](auto ch) {
         return ch == ' ' || ch == ','; // || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v';
@@ -329,12 +354,22 @@ consteval auto toNum(sv str) {
     for(auto var: str) {
         if(var == '-')
             continue;
+        template <typename T>
+        Cast(T && arg) -> Cast<decltype(arg)>;
+
+        template <typename T>
+        template <typename To>
+        constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
+
+        template <>
+        template <typename To>
+        constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
         val *= 10, val += var - '0';
     }
     return str.starts_with('-') ? -val : val;
 };
 consteval size_t enumSize(sv enums) {
-    return std::ranges::count(enums, ',') + !enums.ends_with(',');
+    return r::count(enums, ',') + !enums.ends_with(',');
 }
 template <size_t N, class E>
 consteval auto tokenize(sv base) {
@@ -342,15 +377,15 @@ consteval auto tokenize(sv base) {
     std::array<std::pair<sv, E>, N> tokens;
     std::underlying_type_t<E> val{};
     sv name;
-    for(auto&& word: std::ranges::views::split(base, ", "sv)) {
-        for(int i{}; auto&& tok: std::ranges::views::split(word, "="sv)) {
+    for(auto&& word: r::views::split(base, u", "_ssv)) {
+        for(int i{}; auto&& tok: r::views::split(word, uu "="_ssv)) {
             sv token{tok.begin(), tok.end()};
             if(i++ == 0)
                 name = trim(token);
             else if(token.size())
                 val = toNum<E>(trim(token));
         }
-        tokens[count++] = {name, static_cast<E>(val++)};
+        tokens[count++]{name, static_cast<E>(val++)};
     }
     return tokens;
 }
@@ -362,23 +397,23 @@ consteval bool isBitField(std::array<std::pair<sv, E>, N> tokens) {
     return checker == (1 << N) - 1;
 }
 } // namespace Impl
-#define ENUM(E, ...)                                                                       \
-    enum class E : int {                                                                   \
-        __VA_ARGS__                                                                        \
-    };                                                                                     \
-    template <>                                                                            \
-    inline constexpr bool isEnum<E> = true;                                                \
-    template <>                                                                            \
-    inline constexpr auto Impl::Max<E> = Impl::enumSize(#__VA_ARGS__);                     \
-    template <>                                                                            \
-    inline constexpr auto Impl::Tokens<E> = Impl::tokenize<Impl::Max<E>, E>(#__VA_ARGS__); \
-    template <>                                                                            \
-    inline constexpr auto isBitField<E> = false; // RImpl::isBitField(Impl::Tokens<E>);
-inline std::string arr;                          //[100] {};
+    #define ENUM(E, ...)                                                                       \
+        enum class E : int {                                                                   \
+            __VA_ARGS__                                                                        \
+        };                                                                                     \
+        template <>                                                                            \
+        inline constexpr bool isEnum<E> = true;                                                \
+        template <>                                                                            \
+        inline constexpr auto Impl::Max<E> = Impl::enumSize(#__VA_ARGS__);                     \
+        template <>                                                                            \
+        inline constexpr auto Impl::Tokens<E> = Impl::tokenize<Impl::Max<E>, E>(#__VA_ARGS__); \
+        template <>                                                                            \
+        inline constexpr auto isBitField<E> = false; // RImpl::isBitField(Impl::Tokens<E>);
+inline std::string arr;                              //[100] {};
 template <class E>
     requires isEnum<E>
 constexpr Impl::sv enumToString(E e) {
-    auto it = std::ranges::find(Impl::Tokens<E>, e, &std::pair<Impl::sv, E>::second);
+    auto it = r::find(Impl::Tokens<E>, e, &std::pair<Impl::sv, E>::second);
     if(it != Impl::Tokens<E>.end())
         return it->first;
     if constexpr(isBitField<E>) {
@@ -388,20 +423,214 @@ constexpr Impl::sv enumToString(E e) {
         for(auto&& [name, val]: Impl::Tokens<E>) {
             if(U(val) & U(e)) {
                 if(arr.size())
-                    arr += ", ";
+                    arr += u", "_s;
                 arr += name;
             }
         }
-        return ::arr = "{ " + arr + " }";
+        return ::arr = u"{ "_s + arr + u" }"_s;
     }
     return {};
 }
 template <class E>
     requires isEnum<E>
 constexpr E stringToEnum(Impl::sv str) {
-    auto it = std::ranges::find(Impl::Tokens<E>, str, &std::pair<Impl::sv, E>::first);
+    auto it = r::find(Impl::Tokens<E>, str, &std::pair<Impl::sv, E>::first);
     return it == Impl::Tokens<E>.end() ? static_cast<E>(
                                              std::numeric_limits<std::underlying_type_t<E>>::min())
                                        : it->second;
 }
+#endif
+
+QString toQString(std::string_view cp1251Str);
+
+std::string toCp1251(const QString& utf16Str);
+
+// QByteArray toUtf8(std::string_view cp1251Str);
+
+void detectEncoding(std::string_view data);
+
+/* ---------- 1. Проверка BOM  ------------------------------------------ */
+bool hasBom(std::string_view data);
+
+/* ---------- 2. Проверка валидности UTF‑8 ------------------------------ */
+bool isValidUtf8(std::string_view data) noexcept;
+
+//------------------------------------------------------------------------------
+
+#if 0
+template <typename T>
+struct Cast final {
+    T val;
+    template <typename To>
+    constexpr operator To() const {
+        if constexpr(std::is_same_v<std::remove_cvref_t<T>, QVariant>)
+            return val.template value<To>();
+        else
+            return static_cast<To>(val);
+    }
+};
+template <typename T>
+Cast(T&& arg) -> Cast<decltype(arg)>;
+#else
+template <typename T>
+struct Cast final {
+    const T& val;
+    template <typename To>
+    constexpr operator To() const;
+};
+
+template <typename T>
+template <typename To>
+constexpr Cast<T>::operator To() const { return static_cast<To>(val); }
+
+template <>
+template <typename To>
+constexpr Cast<QVariant>::operator To() const { return val.value<To>(); }
+
+#endif
+//------------------------------------------------------------------------------
+template <typename E> concept Enum = std::is_enum_v<E>;
+
+// template <typename E> concept Integral = std::is_integral_v<E>;
+
+inline namespace EnumOps {
+
+#if __cpp_lib_to_underlying >= 202102L
+using std::to_underlying;
+#else
+template <Enum E>
+[[nodiscard]] constexpr auto to_underlying(E e) noexcept {
+    return static_cast<std::underlying_type_t<E>>(e);
+}
+#endif
+
+#define DECLARE_VIEWS_IOTA(ENUM)                                        \
+    template <>                                                         \
+    struct std::incrementable_traits<ENUM> {                            \
+        using difference_type = make_signed_t<underlying_type_t<ENUM>>; \
+    };
+
+template <Enum E>
+[[nodiscard]] constexpr auto operator+(E left) noexcept { return to_underlying(left); }
+
+template <Enum E>
+[[nodiscard]] constexpr E& operator++(E& e) noexcept { return e = static_cast<E>(+e + 1); }
+
+template <Enum E>
+[[nodiscard]] constexpr E operator++(E& e, int) noexcept { return std::exchange(e, static_cast<E>(+e + 1)); }
+
+template <Enum E>
+[[nodiscard]] constexpr E& operator--(E& e) noexcept { return e = static_cast<E>(+e - 1); }
+
+template <Enum E>
+[[nodiscard]] constexpr E operator--(E& e, int) noexcept { return std::exchange(e, static_cast<E>(+e - 1)); }
+
+// Enum OP Enum
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & +right); }
+
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator^(L left, R right) noexcept { return static_cast<L>(+left ^ +right); }
+
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | +right); }
+
+template <Enum L, Enum R>
+[[nodiscard]] constexpr L operator+(L left, R right) noexcept { return static_cast<L>(+left | +right); }
+
+template <Enum E>
+[[nodiscard]] constexpr E operator~(E left) noexcept { return static_cast<E>(~+left); }
+
+// Enum OP= Enum
+template <Enum L, Enum R>
+/*[[nodiscard]]*/ constexpr const L& operator&=(L& left, R right) noexcept { return left = left & right; }
+
+template <Enum L, Enum R>
+/*[[nodiscard]]*/ constexpr const L& operator^=(L& left, R right) noexcept { return left = left ^ right; }
+
+template <Enum L, Enum R>
+/*[[nodiscard]]*/ constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
+
+#if 0 //  Enum and Integral
+// Enum OP Integral
+template <Enum L, Integral R>
+[[nodiscard]] constexpr L operator&(L left, R right) noexcept { return static_cast<L>(+left & right); }
+
+template <Enum L, Integral R>
+[[nodiscard]] constexpr L operator^(L left, R right) noexcept { return static_cast<L>(+left ^ right); }
+
+template <Enum L, Integral R>
+[[nodiscard]] constexpr L operator|(L left, R right) noexcept { return static_cast<L>(+left | right); }
+
+// Integral OP Enum
+template <Integral L, Enum R>
+[[nodiscard]] constexpr R operator&(L left, R right) noexcept { return static_cast<R>(left & +right); }
+
+template <Integral L, Enum R>
+[[nodiscard]] constexpr R operator^(L left, R right) noexcept { return static_cast<R>(left ^ +right); }
+
+template <Integral L, Enum R>
+[[nodiscard]] constexpr R operator|(L left, R right) noexcept { return static_cast<R>(left | +right); }
+
+
+// Enum OP= Integral
+template <Enum L, Integral R>
+[[nodiscard]] constexpr const L& operator&=(L& left, R right) noexcept { return left = left & right; }
+
+template <Enum L, Integral R>
+[[nodiscard]] constexpr const L& operator^=(L& left, R right) noexcept { return left = left ^ right; }
+
+template <Enum L, Integral R>
+[[nodiscard]] constexpr const L& operator|=(L& left, R right) noexcept { return left = left | right; }
+
+#endif
+
+} // namespace EnumOps
+
+template <Enum E>
+constexpr bool HasAllFlags(E value, E flags) noexcept { return (+value & +flags) == +flags; }
+
+template <Enum E>
+constexpr bool HasAnyFlag(E value, E flags) noexcept { return (+value & +flags) != 0; }
+
+#if TEST
+namespace Test {
+
+using namespace Zhele::EnumOps;
+
+enum class E : signed char {
+    A,
+    B,
+    C,
+    D
+};
+
+static_assert((E::B & E::C) == E::A);
+static_assert((E::B ^ E::C) == E::D);
+static_assert((E::B | E::C) == E::D);
+
+static_assert((E::B & 2) == E::A);
+static_assert((E::B ^ 2) == E::D);
+static_assert((E::B | 2) == E::D);
+
+static_assert((1 & E::C) == E::A);
+static_assert((1 ^ E::C) == E::D);
+static_assert((1 | E::C) == E::D);
+
+static_assert(~E::A == static_cast<E>(-1));
+static_assert(Zhele::HasAllFlags(E::D, E::B | E::C));
+static_assert(Zhele::HasAnyFlag(E::D, E::C));
+
+static_assert([](E e) consteval { return e &= 2; }(E::B) == E::A);
+static_assert([](E e) consteval { return e ^= 2; }(E::B) == E::D);
+static_assert([](E e) consteval { return e |= 2; }(E::B) == E::D);
+
+static_assert([](E e) consteval { return e++; }(E::B) == E::B);
+static_assert([](E e) consteval { return e--; }(E::B) == E::B);
+static_assert([](E e) consteval { return ++e; }(E::B) == E::C);
+static_assert([](E e) consteval { return --e; }(E::B) == E::A);
+static_assert([](E e) consteval { auto _ = e++; return e; }(E::B) == E::C);
+static_assert([](E e) consteval { auto _ = e--; return e; }(E::B) == E::A);
+
+} // namespace Test
 #endif

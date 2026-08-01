@@ -75,8 +75,6 @@ protected:
     virtual void draw() = 0;
     virtual void read(QDataStream& stream) = 0;
     virtual void write(QDataStream& stream) const = 0;
-
-    void transform(Path& polygon, const State& state);
 };
 
 /////////////////////////////////////////////////////
@@ -186,7 +184,7 @@ private:
 using VarMap = std::map<QString, double>;
 class ApMacro final : public AbstractAperture {
 public:
-    ApMacro(const QString& macro, const QList<QString>& modifiers, const VarMap& coefficients, const File* file);
+    ApMacro(const QString& macro, const QStringList& modifiers, const VarMap& coefficients, const File* file);
     ApMacro(QDataStream& stream, const File* file)
         : AbstractAperture{file} {
         read(stream);
@@ -202,7 +200,7 @@ protected:
 
 private:
     QString macro_;
-    QList<QString> modifiers_;
+    QStringList modifiers_;
     VarMap coefficients_;
 
     double Angle(const Point& pt1, const Point& pt2) {

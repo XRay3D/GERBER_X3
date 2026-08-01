@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,10 +18,12 @@ class File;
 namespace Gi {
 
 class DataFill final : public Item {
-    Paths& paths_;
 
 public:
-    explicit DataFill(Paths& paths_, AbstractFile* file);
+    explicit DataFill(Curves curves, AbstractFile* file);
+    explicit DataFill(const Paths& paths, AbstractFile* file)
+        : DataFill{toCurves(paths), file} { }
+
     ~DataFill() override = default;
 
     // QGraphicsItem interface
@@ -29,10 +31,10 @@ public:
     int type() const override;
     // Item interface
     void redraw() override;
-    Paths& getPaths();
+
+    // Paths& getPaths();
     void setPaths(Paths paths, int alternate = {}) override;
     // Item interface
     void changeColor() override;
 };
-
 } // namespace Gi

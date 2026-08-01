@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -49,11 +49,13 @@ enum class ItemsType {
     Both
 };
 
-class Color : public QColor {
-public:
-    Color(double r, double g, double b)
-        : QColor(r * 255, g * 255, b * 255) {
-    }
+struct Color : QColor {
+    constexpr Color(double r, double g, double b)
+        : QColor{
+              static_cast<int>(r * 255),
+              static_cast<int>(g * 255),
+              static_cast<int>(b * 255),
+          } { }
 };
 
 extern const Color dxfColors[];
@@ -77,7 +79,7 @@ using Tables = std::map<int, QVector<AbstractTable*>>;
 
 class Settings {
 protected:
-    static inline QString defaultFont_{"Arial"};
+    static inline QString defaultFont_{u"Arial"_s};
     static inline bool boldFont_{false};
     static inline bool italicFont_{false};
     static inline bool overrideFonts_{false};

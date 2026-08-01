@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -13,8 +13,8 @@
 #include <QtMath>
 
 struct Vec2 {
-    double x = 0.0;
-    double y = 0.0;
+    double x{};
+    double y{};
 
     /*
     :class:`Vec2` represents a special 2D vector ``(x, y)``. The :class:`Vec2`

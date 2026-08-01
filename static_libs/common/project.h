@@ -3,23 +3,26 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "abstract_shape.h"
 #include "datastream.h"
 #include "mvector.h"
 #include "utils.h"
 
 #include <QFileSystemWatcher>
+#include <QGraphicsItem>
 #include <QMutex>
 #include <QMutexLocker>
 #include <QObject>
 #include <QRectF>
 #include <memory>
+// #include <shape.h>
 
 namespace GCode {
 class File;
@@ -40,7 +43,7 @@ class QFileSystemWatcher;
 using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
 // using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
 using ShapesMap = std::map<int, Shapes::AbstractShape*>;
-using ItemMap = std::map<int, Gi::Item*>;
+using ItemMap   = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
@@ -77,10 +80,21 @@ public:
         mvector<T*> rfiles;
         for(const auto& [id, sp]: files_) {
             T* file = dynamic_cast<T*>(sp.get());
-            if(file)
-                rfiles.push_back(file);
+            if(file) rfiles.emplace_back(file);
         }
         return rfiles;
+    }
+
+    template <typename T = Shapes::AbstractShape>
+    std::vector<T*> shapes(int type = -1) {
+        QMutexLocker locker(&mutex);
+        std::vector<T*> shapes;
+        for(const auto& [id, sp]: shapes_) {
+            if(type != -1 && sp->type() != type) continue;
+            if(T* shape = dynamic_cast<T*>(sp); shape)
+                shapes.emplace_back(shape);
+        }
+        return shapes;
     }
 
     template <typename T>
@@ -99,7 +113,7 @@ public:
     mvector<AbstractFile*> files(uint32_t type);
     mvector<AbstractFile*> files(const mvector<uint32_t>& types);
     void deleteFile(int32_t id);
-    //    QString fileNames();
+    // QString fileNames();
     int contains(const QString& name);
 
     // AbstractShape
@@ -202,7 +216,6 @@ private:
 
     // File Watcher
     QFileSystemWatcher watcher;
-    bool reloadFile_ = false;
 
     Version ver_;
 
@@ -212,10 +225,12 @@ private:
 
     QMutex mutex;
 
+    std::set<QString> reloadPaths;
+
     QString fileName_;
-    bool isModified_ = false;
+    bool isModified_{};
     bool isUntitled_ = true;
-    bool isPinsPlaced_ = false;
+    bool isPinsPlaced_{};
     bool pinsUsed_[4]{true, true, true, true};
     QPointF pins_[4];
     QPointF home_;

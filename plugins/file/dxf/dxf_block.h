@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -39,10 +39,10 @@ struct Block {
     enum DataEnum {
         EntityType = 0,                        // Тип объекта (BLOCK)
         Handle = 5,                            // Дескриптор
-        StartOfApplication_definedGroup = 102, // Начало определенной приложением группы "{имя_приложения". Например, "{ACAD_REACTORS" обозначает начало группы постоянных реакторов AutoCAD (необязательно)
+        StartOfApplication_definedGroup = 102, // Начало определенной приложением группы u"{имя_приложения"_s. Например, u"{ACAD_REACTORS"_s обозначает начало группы постоянных реакторов AutoCAD (необязательно)
         // коды, определенные в приложении
         // Коды и значения в пределах группы с кодом 102,//,//определяются в приложении (необязательно)
-        EndOfGroup = 102,       // Конец группы, "}" (необязательно)
+        EndOfGroup = 102,       // Конец группы, u"}"_s (необязательно)
         SoftPointerID = 330,    // Идентификатор/дескриптор символьного указателя на объект владельца
         SubclassMarker = 100,   // Маркер подкласса (AcDbEntity)
         LayerName = 8,          // Имя слоя

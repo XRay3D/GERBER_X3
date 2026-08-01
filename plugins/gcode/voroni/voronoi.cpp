@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,31 +16,26 @@
 
 namespace Voronoi {
 
-/*inline*/ size_t qHash(const Creator::Pair& tag, uint = 0) {
-    return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
-}
+// inline size_t qHash(const Creator::Pair& tag, uint = 0) {
+// return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
+// }
 
 void Creator::create() {
-    const auto& tool = gcp_.tools.front();
-    const auto depth = gcp_.params[GCode::Params::Depth].toDouble();
-    const auto width = gcp_.params[Width].toDouble();
+    const auto& tool = gcp.tools.front();
+    const auto depth = gcp.params[GCode::Params::Depth].toDouble();
+    const auto width = gcp.params[Width].toDouble();
 
     groupedPaths(GCode::Grouping::Copper);
-    switch(gcp_.params[VoronoiType].toInt()) {
-    case 0:
-        boostVoronoi();
-        break;
-    case 1:
-        jcVoronoi();
-        break;
+    switch(gcp.params[VoronoiType].toInt()) {
+    case 0: boostVoronoi(); break;
+    case 1: jcVoronoi(); break;
     }
 
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-
-        file_ = new File{std::move(gcp_), {sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))}, {}};
+        gcp.toolPathss = toCurvess(std::array{sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))});
+        file_          = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
     } else {
         Paths copy{returnPs};
         copy.resize(copy.size() - 1); // remove frame
@@ -55,7 +50,7 @@ void Creator::create() {
             for(auto&& p: copy)
                 returnPss.emplace_back(Paths{p});
         }
-        dbgPaths(returnPs, "создание пермычек");
+        dbgPaths(returnPs, u"создание пермычек"_s);
         { // создание заливки.
             Clipper2Lib::ClipperOffset offset(uScale);
             offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Polygon);
@@ -69,18 +64,18 @@ void Creator::create() {
                 returnPss.erase(begin);
             else
                 ++begin;
-
-        file_ = new File{std::move(gcp_), std::move(returnPss), std::move(openSrcPaths)};
+        gcp.toolPathss = toCurvess(returnPss);
+        gcp.setPocketAreaCurves(toCurves(openSrcPaths));
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
-        emit fileReady(file_);
     }
 }
 
 void Creator::createOffset(const Tool& tool, double depth, const double width) {
-    msg = tr("Create Offset");
+    msg          = tr("Create Offset");
     toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset = toolDiameter / 2;
-    stepOver = tool.stepover() * uScale;
+    dOffset      = toolDiameter / 2;
+    stepOver     = tool.stepover() * uScale;
     const Path frame{returnPs.back()};
     // returnPs.pop_back();
     { // create offset
@@ -110,10 +105,10 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
         // Paths tmpPaths1;
         // tmpPaths1 = offset.Execute(-dOffset);
         Paths tmpPaths1 = InflateRoundPolygon(returnPs, -dOffset);
-        openSrcPaths = tmpPaths1;
+        openSrcPaths    = tmpPaths1;
         Paths tmpPaths;
         do {
-            tmpPaths += tmpPaths1;
+            tmpPaths.append_range(tmpPaths1);
             // offset.Clear();
             // offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
             // tmpPaths1 = offset.Execute(-stepOver);
@@ -134,9 +129,9 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
 File::File()
     : GCode::File() { }
 
-File::File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths)
-    : GCode::File(std::move(gcp), std::move(toolPathss), std::move(pocketPaths)) {
-    if(gcp_.tools.front().diameter()) {
+File::File(GCode::Params&& newGcp)
+    : GCode::File{std::move(newGcp)} {
+    if(gcp.tools.front().diameter()) {
         initSave();
         addInfo();
         statFile();
@@ -151,27 +146,27 @@ void File::genGcodeAndTile() {
         for(size_t y{}; y < App::project().stepsY(); ++y) {
             const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
 
-            if(toolType() == Tool::Laser)
-                if(toolPathss_.size() > 1)
+            if(toolType == Tool::Laser)
+                if(gcp.toolPathss.size() > 1)
                     saveLaserPocket(offset);
                 else
                     saveLaserProfile(offset);
-            else if(toolPathss_.size() > 1)
+            else if(gcp.toolPathss.size() > 1)
                 saveMillingPocket(offset);
             else
                 saveMillingProfile(offset);
 
-            if(gcp_.params.contains(GCode::Params::NotTile))
+            if(gcp.params.contains(GCode::Params::NotTile))
                 return;
         }
     }
 }
 
 void File::createGi() {
-    if(toolPathss_.size() > 1) {
+    if(gcp.toolPathss.size() > 1) {
         Gi::Item* item;
-        item = new Gi::GcPath{toolPathss_.back().back(), this};
-        // item->setPen(QPen(Qt::black, gcp_.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item = new Gi::GcPath{{gcp.toolPathss.back().back()}, this};
+        // item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
         createGiPocket();

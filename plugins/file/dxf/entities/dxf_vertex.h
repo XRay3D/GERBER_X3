@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,16 +18,12 @@ struct Vertex final : Entity {
     Vertex(SectionParser* sp = nullptr);
 
     // Entity interface
-public:
-    //    void draw(const InsertEntity* const i = nullptr) const override;
     void parse(CodeData& code) override;
     Type type() const override { return Type::VERTEX; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
-    // void write(QDataStream&) const override { }
-    // void read(QDataStream&) override { }
 
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbVertex)
@@ -70,12 +66,15 @@ public:
         _3DPolygonMesh = 64,                     // полигональная 3D-сеть
         PolyfaceMeshVertex = 128,                // вершина многогранной сети
     };
-    operator QPointF() const { return {x, y}; };
+
+    QPointF point() const { return {x, y}; };
+    operator QPointF() const { return point(); };
+
     int vertexFlags{};
-    double x = 0.0;
-    double y = 0.0;
-    double bulge = 0.0;
-    double curveFitTangentDirection = 0.0;
+    double x{};
+    double y{};
+    double bulge{};
+    double curveFitTangentDirection{};
 };
 
 } // namespace Dxf

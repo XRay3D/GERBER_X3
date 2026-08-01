@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,7 +23,7 @@ Delegate::Delegate(QObject* parent)
 QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const {
     switch(index.column()) {
     case Model::Name:
-        //    case Model::Position:
+        // case Model::Position:
         break;
     case Model::GapAngle: {
         auto* dsbx = new DoubleSpinBox{parent};
@@ -58,7 +58,7 @@ QWidget* Delegate::createEditor(QWidget* parent, const QStyleOptionViewItem& opt
 void Delegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
     switch(index.column()) {
     case Model::Name:
-        //    case Model::Position:
+        // case Model::Position:
         return;
     case Model::GapAngle:
     case Model::apThickness: {
@@ -81,7 +81,7 @@ void Delegate::setEditorData(QWidget* editor, const QModelIndex& index) const {
 void Delegate::setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const {
     switch(index.column()) {
     case Model::Name:
-        //    case Model::Position:
+        // case Model::Position:
         return;
     case Model::GapAngle:
     case Model::apThickness: {

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -19,8 +19,8 @@
 
 namespace Voronoi {
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::VoronoiForm) {
     ui->setupUi(content);
 
@@ -29,15 +29,15 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     ui->cbxSolver->setCurrentIndex(-1);
 
     MySettings settings;
-    settings.beginGroup("VoronoiForm");
+    settings.beginGroup(u"VoronoiForm"_s);
     settings.getValue(ui->dsbxPrecision, 0.1);
     settings.getValue(ui->dsbxWidth);
     settings.getValue(ui->dsbxOffset, 1.0);
     settings.getValue(ui->cbxSolver);
 #ifdef _USE_CGAL_
 #else
-    //    ui->cbxSolver->setCurrentIndex(0);
-    //    ui->cbxSolver->setEnabled(false);
+    // ui->cbxSolver->setCurrentIndex(0);
+    // ui->cbxSolver->setEnabled(false);
 #endif
     settings.endGroup();
 
@@ -53,7 +53,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("VoronoiForm");
+    settings.beginGroup(u"VoronoiForm"_s);
     settings.setValue(ui->dsbxPrecision);
     settings.setValue(ui->dsbxWidth);
     settings.setValue(ui->cbxSolver);
@@ -69,20 +69,18 @@ void Form::computePaths() {
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(true);
-    gcp->setSide(GCode::Outer);
-    gcp->tools.push_back(tool);
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp->params[FrameOffset] = ui->dsbxOffset->value();
-    gcp->params[Tolerance] = ui->dsbxPrecision->value();
-    gcp->params[VoronoiType] = ui->cbxSolver->currentIndex();
-    gcp->params[Width] = ui->dsbxWidth->value() + 0.001;
+    gcp.setConvent(true);
+    gcp.setSide(GCode::Outer);
+    gcp.tools.push_back(tool);
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[FrameOffset] = ui->dsbxOffset->value();
+    gcp.params[Tolerance] = ui->dsbxPrecision->value();
+    gcp.params[VoronoiType] = ui->cbxSolver->currentIndex();
+    gcp.params[Width] = ui->dsbxWidth->value() + 0.001;
 
-    createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {

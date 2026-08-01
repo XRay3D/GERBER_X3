@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -25,15 +25,15 @@ class Node;
 
 // class NodeI {
 // public:
-//     virtual ~NodeI() { }
-//     virtual bool isChecked() const = 0;
-//     virtual void disable() = 0;
-//     virtual void enable() = 0;
-//     virtual QModelIndex index(int column = 0) const = 0;
+// virtual ~NodeI() { }
+// virtual bool isChecked() const = 0;
+// virtual void disable() = 0;
+// virtual void enable() = 0;
+// virtual QModelIndex index(int column = 0) const = 0;
 
-//    virtual double angle() const = 0;
-//    virtual double tickness() const = 0;
-//    virtual int count() const = 0;
+// virtual double angle() const = 0;
+// virtual double tickness() const = 0;
+// virtual int count() const = 0;
 //};
 
 #define OVERRIDE /**/
@@ -82,7 +82,7 @@ public:
     ThParam getPar() const;
 
 private:
-    const bool container = false;
+    const bool container{};
     const QIcon icon;
     const QString name;
     const Point pos_;
@@ -93,7 +93,7 @@ private:
 
     Node* parent_ = nullptr;
     mvector<std::shared_ptr<Node>> childs;
-    bool checked_ = false;
+    bool checked_{};
 
     Model* const model; // static wrong from anotherr dll
     static inline const Qt::CheckState chState[]{

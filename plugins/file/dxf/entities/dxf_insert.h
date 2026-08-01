@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,7 +23,7 @@ public:
     void parse(CodeData& code) override;
     Type type() const override { return Type::INSERT; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
     void write(QDataStream& /*stream*/) const override { }
@@ -60,8 +60,8 @@ public:
     double scaleX = 1; // Масштабный коэффициент по оси X(необязательно; значение по умолчанию = 1)
     double scaleY = 1; // Масштабный коэффициент по оси Y (необязательно; значение по умолчанию = 1)
     double rotationAngle{};
-    int colCount = 1;      // Column count (optional; default = 1)
-    int rowCount = 1;      // Row count (optional; default = 1)
+    int colCount = 1;    // Column count (optional; default = 1)
+    int rowCount = 1;    // Row count (optional; default = 1)
     double colSpacing{}; // Column spacing (optional; default = 0)
     double rowSpacing{}; // Row spacing (optional; default = 0)
 };
