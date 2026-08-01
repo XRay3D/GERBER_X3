@@ -1,17 +1,17 @@
 #[[
- Author    :  Damir Bakiev                                                    
- Version   :  na                                                              
+ Author    :  Damir Bakiev
+ Version   :  na
  Date      :  ХХ ХХХ 2026
- Website   :  na                                                              
+ Website   :  na
  Copyright :  Damir Bakiev 2016-2026
- License   :                                                                  
- Use, modification & distribution is subject to Boost Software License Ver 1. 
- http://www.boost.org/LICENSE_1_0.txt                                         
+ License   :
+ Use, modification & distribution is subject to Boost Software License Ver 1.
+ http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 4.0)
 
 # static lib
-add_subdirectory(geometry)
+add_subdirectory(geometCry)
 add_subdirectory(filetree)
 add_subdirectory(gi)
 add_subdirectory(graphicsview)

@@ -199,6 +199,7 @@ public:
     uint mkrZeroPos();
 
     /*Other*/
+    double gridStep(double scale);
     bool isBanana();
     double lenUnit();
     void setBanana(bool val);

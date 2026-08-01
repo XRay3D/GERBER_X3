@@ -63,22 +63,19 @@ MainWindow::MainWindow(QWidget* parent)
     ui.statusbar->setFont(f);
 
     LayoutFrames* lfp;
-    {
-        auto scene = ui.grView->scene();
-        scene->addItem(new Gi::Marker{Gi::Marker::Home});
-        scene->addItem(new Gi::Marker{Gi::Marker::Zero});
+    ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Home});
+    ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Zero});
 
-        App::setPin0(new Gi::Pin);
-        App::setPin1(new Gi::Pin);
-        App::setPin2(new Gi::Pin);
-        App::setPin3(new Gi::Pin);
+    App::setPin0(new Gi::Pin);
+    App::setPin1(new Gi::Pin);
+    App::setPin2(new Gi::Pin);
+    App::setPin3(new Gi::Pin);
 
-        scene->addItem(&App::pin0());
-        scene->addItem(&App::pin1());
-        scene->addItem(&App::pin2());
-        scene->addItem(&App::pin3());
-        scene->addItem(lfp = new LayoutFrames);
-    }
+    ui.grView->scene()->addItem(&App::pin0());
+    ui.grView->scene()->addItem(&App::pin1());
+    ui.grView->scene()->addItem(&App::pin2());
+    ui.grView->scene()->addItem(&App::pin3());
+    ui.grView->scene()->addItem(lfp = new LayoutFrames());
 
     connect(ui.grView, &GraphicsView::fileDroped, this, &MainWindow::loadFile);
     connect(ui.grView, &GraphicsView::mouseMove, this, [this](const QPointF& point) { // status bar
@@ -115,10 +112,10 @@ MainWindow::MainWindow(QWidget* parent)
 }
 
 MainWindow::~MainWindow() {
-    App::setMainWindow(nullptr);
     parserThread.quit();
     parserThread.wait();
     // App::project().close();
+    App::setMainWindow(nullptr);
     qDebug(__FUNCTION__);
 }
 
@@ -126,7 +123,7 @@ void MainWindow::init() {
     for(auto& [type, ptr]: App::filePlugins()) { // connect plugins
         ptr->moveToThread(&parserThread);
         connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
-        connect(ptr, &AbstractFilePlugin::fileProgress_, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+        connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
         connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
         connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
@@ -235,25 +232,23 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value) {
     if(max && !value) {
-        auto pd = std::make_unique<QProgressDialog>(this);
+        QProgressDialog* pd = new QProgressDialog{this};
         pd->setCancelButton(nullptr);
         pd->setLabelText(fileName);
         pd->setMaximum(max);
         // pd->setModal(true);
         // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
         pd->show();
-        progressDialogs_.emplace(fileName, std::move(pd));
-    } else if(progressDialogs_.contains(fileName) && !max && !value) {
-        progressDialogs_.erase(fileName);
-    } else if(progressDialogs_.contains(fileName) && max && value) {
-        progressDialogs_[fileName]->setMaximum(max);
-        progressDialogs_[fileName]->setValue(0);
-    } else if(progressDialogs_.contains(fileName))
+        progressDialogs_[fileName] = pd;
+    } else if(max == 1 && value == 1) {
+        progressDialogs_[fileName]->hide();
+        progressDialogs_[fileName]->deleteLater();
+        progressDialogs_.remove(fileName);
+    } else
         progressDialogs_[fileName]->setValue(value);
 }
 
 void MainWindow::addFileToPro(AbstractFile* file) {
-    progressDialogs_.erase(file->shortName());
     if(project_->isUntitled()) {
         QString name(QFileInfo(file->name()).path());
         setCurrentFile(name + u'/' + name.split(u'/').back() + u".g2g"_s);

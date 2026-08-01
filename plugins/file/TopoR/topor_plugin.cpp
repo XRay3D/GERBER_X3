@@ -29,7 +29,7 @@ Plugin::Plugin(QObject* parent)
     , Parser(this) {
 }
 
-AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
+AbstractFile* Plugin::parseFile(const QString& fileName, int type_) {
     if(type_ != type())
         return nullptr;
     if(!QFile(fileName).exists())
@@ -78,11 +78,11 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-uint32_t Plugin::type() const { return md5::hash32("TopoR"); }
+int Plugin::type() const { return int(FileType::TopoR); }
 
 QString Plugin::folderName() const { return tr("TopoR"); }
 
-AbstractFile* Plugin::loadFile(QDataStream& /*stream*/) const { return nullptr; }
+AbstractFile* Plugin::loadFile(QDataStream& stream) { return new / File(); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'T'); }
 

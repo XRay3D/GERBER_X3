@@ -242,8 +242,6 @@ Form::~Form() {
         // runer.terminate();
         // runer.quit();
         runer.wait();
-    ProgressCancel::reset();
-
     delete creator_;
     qDebug(__FUNCTION__);
 }
@@ -256,8 +254,6 @@ void Form::setCreator(Creator* newCreator) {
         // runer.quit();
         runer.wait();
     }
-    ProgressCancel::reset();
-
     ProgressCancel::reset();
     if(creator_ != newCreator && newCreator) {
         // qDebug(__FUNCTION__);

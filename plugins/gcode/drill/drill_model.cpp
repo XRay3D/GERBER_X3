@@ -13,7 +13,6 @@
 #include "drill_gi_preview.h"
 #include "drill_header.h"
 #include "tool_pch.h"
-#include "gi_preview.h"
 
 #include <QBitmap>
 #include <QDebug>
@@ -68,7 +67,7 @@ QVariant Model::data(const QModelIndex& index, int role) const {
     if(index.column() == Name) {
         switch(role) {
         case Qt::DisplayRole:
-            if(data_[row].isSlot) // FIXME ??
+            if(data_[row].isSlot)
                 return data_[row].name.back();
             else
                 return data_[row].name.back();

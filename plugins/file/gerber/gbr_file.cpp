@@ -9,7 +9,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "gbr_file.h"
-#include "abstract_fileplugin.h"
 #include "gbr_node.h"
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"

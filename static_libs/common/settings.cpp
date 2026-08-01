@@ -97,6 +97,10 @@ QPointF AppSettings::mkrZeroOffset() { return mrkZeroOffset_; }
 uint AppSettings::mkrZeroPos() { return mrkZeroPos_; }
 
 /*Other*/
+double AppSettings::gridStep(double scale) {
+    if(banana_) return pow(10.0, ceil(log10(10.0 / 25.4 / scale))) * 25.4;
+    else [[likely]] return pow(10.0, ceil(log10(10.0 / scale)));
+}
 bool AppSettings::isBanana() { return banana_; }
 double AppSettings::lenUnit() { return banana_ ? 25.4 : 1.0; }
 void AppSettings::setBanana(bool val) { banana_ = val; }

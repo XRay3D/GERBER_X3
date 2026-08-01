@@ -34,10 +34,8 @@ public:
     static bool isCancel() { return cancel_; }
     static void throwIfCancel() {
         ++current_;
-        if(cancel_) [[unlikely]] {
-            cancel_ = false;
+        if(cancel_) [[unlikely]]
             throw Cancel{__FUNCTION__};
-        }
     }
     static void setCancel(bool cancel) { cancel_ = cancel; }
     static void cancel() { cancel_ = true; }

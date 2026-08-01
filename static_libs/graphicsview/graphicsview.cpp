@@ -161,16 +161,15 @@ GraphicsView::GraphicsView(QWidget* parent)
 GraphicsView::~GraphicsView() { App::setGraphicsView(nullptr); }
 
 void GraphicsView::zoom100() {
-    double x = 1.0,
-           y = 1.0;
-    const double m11 = QGraphicsView::transform().m11(),
-                 m22 = QGraphicsView::transform().m22();
+    double x = 1.0, y = 1.0;
+
+    const double m11 = QGraphicsView::transform().m11(), m22 = QGraphicsView::transform().m22();
     if(/* DISABLES CODE */ (0)) {
         x = std::abs(1.0 / m11 / (25.4 / physicalDpiX()));
         y = std::abs(1.0 / m22 / (25.4 / physicalDpiY()));
-    } else if(auto ps = QGuiApplication::primaryScreen(); ps) {
-        const QSizeF size = screen()->physicalSize(); // size in mm
-        const QSize scrGeometry = ps->size();         // size in pix
+    } else {
+        const QSizeF size = screen()->physicalSize();                          // size in mm
+        const QRect scrGeometry(QGuiApplication::primaryScreen()->geometry()); // size in pix
         x = std::abs(1.0 / m11 / (size.height() / scrGeometry.height()));
         y = std::abs(1.0 / m22 / (size.width() / scrGeometry.width()));
     }
@@ -263,11 +262,10 @@ QPointF GraphicsView::mapToScene(const QPointF& point) const {
 }
 
 void GraphicsView::setScale(double s) noexcept {
-    const auto trans = transform();
-    setTransform({//
-        +s /* 11 */, trans.m12(), trans.m13(),
-        trans.m21(), -s /* 22 */, trans.m23(),
-        trans.m31(), trans.m32(), trans.m33()});
+    const auto trf(transform());
+    setTransform({+s /*11*/, trf.m12(), trf.m13(),
+        /*      */ trf.m21(), -s /*22*/, trf.m23(),
+        /*      */ trf.m31(), trf.m32(), trf.m33()});
 }
 
 void GraphicsView::scale(double sx, double sy) {
@@ -288,25 +286,9 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
         // if(dynamic_cast<QWidget*>(viewport())) break;
         setViewport(new QWidget{this});
     }
-
-    setStyleSheet("QGraphicsView { background: "
-        % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
-        % " }");
-
     // } while(false);
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
-
-    setStyleSheet("QGraphicsView { background: "
-        % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
-        % " }");
-}
-
-double GraphicsView::gridStep() const {
-    if(App::settings().isBanana())
-        return pow(10.0, ceil(log10(10.0 / 25.4 / getScale()))) * 25.4;
-    else [[likely]]
-        return pow(10.0, ceil(log10(10.0 / getScale())));
 }
 
 void GraphicsView::setViewRect(const QRectF& r) {
@@ -723,7 +705,7 @@ void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) {
 void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     painter->save();
     painter->setRenderHint(QPainter::Antialiasing, false);
-    painter->setRenderHint(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
+    painter->setRenderHints(QPainter::TextAntialiasing); // | QPainter::HighQualityAntialiasing);
 
     // Single pass over the finest grid: every 5th tick also belongs to the
     // medium grid, every 10th also to the coarse grid, so classifying by
@@ -783,7 +765,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
 }
 
 void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
-    painter->fillRect(rect, App::settings().guiColor(GuiColors::Background));
+    painter->fillRect(rect, Qt::black);
 }
 
 void GraphicsView::timerEvent(QTimerEvent* /*event*/) {

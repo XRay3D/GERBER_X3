@@ -29,7 +29,7 @@ public:
     Paths paths(int alternate = {}) const override;
 
 private:
-    [[maybe_unused]] AbstractFile* gcFile_;
+    AbstractFile* gcFile_;
     QPainterPath arrows_;
 
 protected:

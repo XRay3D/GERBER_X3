@@ -88,13 +88,7 @@ struct Variant : V {
 
     friend QDataStream& operator<<(QDataStream& stream, const V& v) {
         stream << uint8_t(v.index());
-        std::visit([&stream]<typename T>(const T& val) {
-            if constexpr(std::is_same_v<UsedItems, T>)
-                stream << val;
-            else
-                stream.writeRawData(reinterpret_cast<const char*>(&val), sizeof(T));
-        },
-            v);
+        std::visit([&stream](auto&& val) { stream << val; }, v);
         return stream;
     }
 

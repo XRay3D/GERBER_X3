@@ -70,8 +70,6 @@ public:
 
         if(App::settings().theme()) {
 
-            if(!App::settings().theme()) return;
-
             static const char* const dwCloseXpm[]{
                 "11 13 3 1",
                 "  c None",
@@ -335,7 +333,7 @@ private:
     std::map<uint32_t, QAction*> toolpathActions;
     QActionGroup actionGroup;
 
-    std::unordered_map<QString, std::unique_ptr<class QProgressDialog>> progressDialogs_;
+    QMap<QString, class QProgressDialog*> progressDialogs_;
     QMessageBox reloadQuestion;
 
     void open();

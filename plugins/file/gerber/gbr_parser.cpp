@@ -49,17 +49,6 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 */
 namespace Gerber {
 
-struct Exception final : std::exception {
-    std::string str;
-    Exception(QString&& str)
-        : str{str.toStdString()} { }
-    explicit Exception(std::string&& str)
-        : str{std::move(str)} { }
-    ~Exception() noexcept override = default;
-    // exception interface
-    const char* what() const noexcept override { return str.c_str(); }
-};
-
 QDebug operator<<(QDebug debug, const std::string_view& sw) {
     QDebugStateSaver saver{debug};
     debug.nospace() << QByteArray(sw.data(), sw.size());
@@ -84,7 +73,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         if(file->lines().empty())
             emit afp->fileError({}, file->shortName() + u'\n' + u"Incorrect File!");
 
-        emit afp->createProgress(file->shortName(), static_cast<int>(file->lines().size()));
+        emit afp->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
 
         lineNum_ = 0;
 
@@ -95,7 +84,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             currentGerbLine_ = gerberLine;
             ++lineNum_;
             if(!(lineNum_ % 1000))
-                emit afp->updateProgressVal(file->shortName(),  lineNum_);
+                emit afp->fileProgress(file->shortName(), 0, lineNum_);
             auto dummy = [](const QString& gLine) -> bool {
                 static constexpr ctll::fixed_string ptrnDummy{R"(^%(.{2})(.+)\*%$)"};
                 if(auto [whole, id, par] = ctre::match<ptrnDummy>(std::u16string_view{gLine}); whole) ///*regexp.match(gLine)); match.hasMatch()*/) {
@@ -143,7 +132,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
 
         if(file->graphicObjects_.empty()) {
             delete file;
-            file = nullptr;
         } else {
 
             if(attFile.function_ && attFile.function_->side_() == Attr::AbstrFileFunc::Side::Bot)
@@ -356,7 +344,7 @@ bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
                 + u"0.%1"_s.arg(Str.split(u'.').last()).toDouble());
 
         while(Str.length() < maxLen) {
-            switch(format.zeroOmisMode) {
+            switch(file->format().zeroOmisMode) {
             case OmitLeadingZeros:
                 Str = QString(maxLen - Str.length(), u'0') + Str;
                 // Str = u"0"_s + Str;
@@ -566,22 +554,22 @@ Point Parser::parsePosition(const QString& xyStr) {
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(std::u16string_view{xyStr}); whole) {
         /*PType*/ int32_t tmp{};
         if(x && parseNumber(CtreCapTo(x), tmp, FormatDir::X))
-            format.coordValueNotation == AbsoluteNotation
+            file->format().coordValueNotation == AbsoluteNotation
                 ? state_.curPos().x = tmp
                 : state_.curPos().x += tmp;
         tmp = 0;
         if(y && parseNumber(CtreCapTo(y), tmp, FormatDir::Y))
-            format.coordValueNotation == AbsoluteNotation
+            file->format().coordValueNotation == AbsoluteNotation
                 ? state_.curPos().y = tmp
                 : state_.curPos().y += tmp;
     }
 
     if(2.0e-310 > state_.curPos().x && state_.curPos().x > 0.0)
-        throw Exception{GbrObj::tr("line num %1: '%2', error value.")
-                .arg(QString::number(lineNum_), QString(currentGerbLine_))};
+        throw GbrObj::tr("line num %1: '%2', error value.")
+            .arg(QString::number(lineNum_), QString(currentGerbLine_));
     if(2.0e-310 > state_.curPos().y && state_.curPos().y > 0.0)
-        throw Exception{GbrObj::tr("line num %1: '%2', error value.")
-                .arg(QString::number(lineNum_), QString(currentGerbLine_))};
+        throw GbrObj::tr("line num %1: '%2', error value.")
+            .arg(QString::number(lineNum_), QString(currentGerbLine_));
 
     return state_.curPos();
 }
@@ -760,7 +748,7 @@ bool Parser::parseStepRepeat(const QString& gLine) {
         stepRepeat_.y = CtreCapTo(sry);
         stepRepeat_.i = CtreCapTo(sri), stepRepeat_.i *= uScale;
         stepRepeat_.j = CtreCapTo(srj), stepRepeat_.j *= uScale;
-        if(format.unitMode == Inches) {
+        if(file->format().unitMode == Inches) {
             stepRepeat_.i *= 25.4;
             stepRepeat_.j *= 25.4;
         }
@@ -1086,14 +1074,12 @@ bool Parser::parseFormat(const QString& gLine) {
         case IncrementalNotation: file->format().coordValueNotation = IncrementalNotation; break;
 #endif
         }
-        format.xInteger = CtreCapTo(c3);
-        format.xDecimal = CtreCapTo(c4);
-        format.yInteger = CtreCapTo(c5);
-        format.yDecimal = CtreCapTo(c6);
+        file->format().xInteger = CtreCapTo(c3);
+        file->format().xDecimal = CtreCapTo(c4);
+        file->format().yInteger = CtreCapTo(c5);
+        file->format().yDecimal = CtreCapTo(c6);
 
-        file->format() = format;
-
-        int intVal = format.xInteger;
+        int intVal = file->format().xInteger;
         if(intVal < 0 || intVal > 8)
             throw u"Modifiers '"_s + gLine + u"' XY is out of bounds 0в‰¤Nв‰¤7"_s;
         intVal = file->format().xDecimal;
@@ -1141,13 +1127,11 @@ bool Parser::parseGCode(const QString& gLine) {
             break;
 #ifdef DEPRECATED
         case G70:
-            format.unitMode = Inches;
-            file->format() = format;
+            file->format().unitMode = Inches;
             state_.setGCode(G70);
             break;
         case G71:
-            format.unitMode = Millimeters;
-            file->format() = format;
+            file->format().unitMode = Millimeters;
             state_.setGCode(G71);
             break;
 #endif
@@ -1161,13 +1145,11 @@ bool Parser::parseGCode(const QString& gLine) {
             break;
 #ifdef DEPRECATED
         case G90:
-            format.coordValueNotation = AbsoluteNotation;
-            file->format() = format;
+            file->format().coordValueNotation = AbsoluteNotation;
             state_.setGCode(G90);
             break;
         case G91:
-            format.coordValueNotation = IncrementalNotation;
-            file->format() = format;
+            file->format().coordValueNotation = IncrementalNotation;
             state_.setGCode(G91);
 #endif
             break;

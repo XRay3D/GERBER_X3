@@ -17,18 +17,17 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
-#include <set>
 
 namespace Shapes {
 
-static constexpr int HandleR = 10; // R pix
+static constexpr int HandleSize = 20;
 
 QDataStream& operator<<(QDataStream& stream, const Handle& handle) {
-    return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_}, stream;
+    return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_};
 }
 
 QDataStream& operator>>(QDataStream& stream, Handle& handle) {
-    return stream >> BlockRead{static_cast<QPointF&>(handle), handle.type_}, stream;
+    return stream >> BlockRead{static_cast<QPointF&>(handle), handle.type_};
 }
 
 QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
@@ -37,45 +36,10 @@ QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
     return stream << write;
 }
 
-#if 0
-template <typename T, auto Get, auto Set>
-struct RWS {
-    T* obj;
-    using Arg = std::remove_cvref_t<decltype((obj->*Get)())>;
-    operator Arg() const { (obj->*Get)(); }
-    auto& operator=(const Arg& val) { return (obj->*Set)(val), *obj; }
-    template <typename Stream>
-    Stream& operator>>(Stream& stream) {
-        Arg arg;
-        stream >> arg;
-        (obj->*Set)(arg);
-        return stream;
-    }
-    template <typename Stream>
-    Stream& operator<<(Stream& stream) const {
-        return stream << (obj->*Get)();
-    }
-};
-
-using setVisible = RWS<AbstractShape*, &AbstractShape::isVisible, &AbstractShape::setVisible>;
-using setEditable = RWS<AbstractShape*, &AbstractShape::isEditable, &AbstractShape::setEditable>;
-#endif
-
 QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
     bool bFlag[2];
-    if(App::project().ver() == Project::Ver_7) { // Load Prewios
-        BlockRead in{shape.id_, bFlag[0]};
-        stream >> in;
-        uint32_t size;
-        in >> bFlag[1] >> size;
-        shape.handles.resize(size);
-        for(auto&& handle: shape.handles)
-            in >> static_cast<QPointF&>(handle) >> handle.type_;
-        shape.readAndInit(in);
-    } else {
-        bool bFlag[2];
-        shape.readAndInit(stream >> BlockRead{shape.id_, bFlag[0], bFlag[1], shape.handles});
-    }
+    shape.readAndInit(stream >> BlockRead{shape.id_, bFlag[0], bFlag[1], shape.handles});
+    assert(shape.handles.size());
     shape.setVisible(bFlag[0]);
     shape.setEditable(bFlag[1]);
     shape.setToolTip(shape.name() % QString::number(shape.id_));
@@ -403,21 +367,6 @@ void AbstractShape::updateHandleShape() {
 }
 
 // QGraphicsItem interface /////////////////////////////////////////////////////
-
-static std::set<AbstractShape*> set;
-
-QVariant AbstractShape::itemChange(GraphicsItemChange change, const QVariant& value) {
-    auto value_ = Gi::Item::itemChange(change, value);
-    if(change == ItemSelectedHasChanged) // && value.toBool())
-    {
-        if(value.toBool())
-            set.insert(this);
-        else
-            set.erase(this);
-        plugin->editor()->updateData();
-    }
-    return value_;
-}
 
 void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);

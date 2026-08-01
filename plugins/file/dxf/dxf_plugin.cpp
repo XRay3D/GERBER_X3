@@ -130,6 +130,7 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
             delete file_;
             file_ = nullptr;
         } else {
+            // emit fileProgress(file_->shortName(), 1, 1);
             emit fileReady(file_);
         }
     } catch(const QString& wath) {

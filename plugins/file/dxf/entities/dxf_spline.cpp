@@ -439,7 +439,7 @@ inline double qwtGetMin(const double* array, int size) {
 
     double rv = array[0];
     for(int i = 1; i < size; i++)
-        rv = std::min(rv, array[i]);
+        rv = qMin(rv, array[i]);
 
     return rv;
 }

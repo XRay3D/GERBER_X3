@@ -95,8 +95,9 @@ using TimerHour = Timer<Hour>;
 template <class T>
 struct CtreCapTo {
     T& cap;
+    constexpr CtreCapTo(T& cap)
+        : cap{cap} { }
 
-    auto toString() const { return QString::fromUtf16(cap.data(), cap.size()); }
     auto toDouble() const { return toString().toDouble(); }
     auto toInt() const { return toString().toInt(); }
     auto toString() const {

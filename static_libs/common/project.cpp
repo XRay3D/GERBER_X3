@@ -189,8 +189,7 @@ bool Project::open(const QString& fileName) {
     QDataStream in{&file};
     try {
         in >> ver_;
-
-        if(ver_ < CurrentVer && ver_ != Ver_7) {
+        if(ver_ < CurrentVer) {
             auto message = tr("Unable to load project version %1 in\n"
                               "the current version(%3) of the program.\n"
                               "Use version %2.");
@@ -611,10 +610,10 @@ void Project::setZeroPos(const QPointF& pos) {
 
 const QPointF* Project::pinsPos() const { return pins_; }
 void Project::setPinsPos(const QPointF pos[4]) {
-    pins_[0] = *pos++;
-    pins_[1] = *pos++;
-    pins_[2] = *pos++;
-    pins_[3] = *pos++;
+    pins_[0] = pos[0];
+    pins_[1] = pos[1];
+    pins_[2] = pos[2];
+    pins_[3] = pos[3];
     setChanged();
 }
 
@@ -624,7 +623,7 @@ void Project::setPinUsed(bool used, int idx) {
     setChanged();
 }
 
-Project::Version Project::ver() const { return ver_; }
+int Project::ver() const { return ver_; }
 
 double Project::safeZ() const { return safeZ_; }
 void Project::setSafeZ(double safeZ) {
