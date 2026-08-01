@@ -22,9 +22,28 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_UNITY_BUILD ON)
-if(CMAKE_SYSTEM_NAME STREQUAL Linux)
-    set(CMAKE_LINKER_TYPE MOLD)
+
+# Используем mold/lld, если они есть в системе и реально поддерживаются
+# текущим тулчейном (просто наличия бинарника недостаточно: например,
+# mold из Homebrew/MSYS2 может присутствовать, но не поддерживаться
+# CMAKE_LINKER_TYPE на конкретной платформе/компиляторе).
+include(CheckLinkerFlag)
+find_program(MOLD_EXECUTABLE mold)
+if(MOLD_EXECUTABLE)
+    check_linker_flag(CXX "-fuse-ld=mold" CXX_LINKER_SUPPORTS_MOLD)
 endif()
+if(CXX_LINKER_SUPPORTS_MOLD)
+    set(CMAKE_LINKER_TYPE MOLD)
+else()
+    find_program(LLD_EXECUTABLE NAMES ld.lld lld)
+    if(LLD_EXECUTABLE)
+        check_linker_flag(CXX "-fuse-ld=lld" CXX_LINKER_SUPPORTS_LLD)
+    endif()
+    if(CXX_LINKER_SUPPORTS_LLD)
+        set(CMAKE_LINKER_TYPE LLD)
+    endif()
+endif()
+
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
 option(GERBER_NATIVE_MARCH "Optimize for host CPU architecture (disables portability)" ON)
