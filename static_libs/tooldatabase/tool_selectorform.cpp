@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,10 +23,10 @@
 ToolSelectorForm::ToolSelectorForm(QWidget* parent)
     : QWidget{parent}
     , counter{static_cast<int>(parent->findChildren<ToolSelectorForm*>().count())}
-    , toolFileName_{App::settingsPath() + '/' + parent->objectName() + QString::number(counter) + ".json"} {
+    , toolFileName_{App::settingsPath() + u'/' + parent->objectName() + QString::number(counter) + u".json"_s} {
     setupUi(this);
     readTool();
-    label_->setStyleSheet(tool_.id() < 0 ? "QLabel { color: red }" : "");
+    label_->setStyleSheet(tool_.id() < Tool::ID::Folder ? u"QLabel { color: red }"_s : QString{});
 }
 
 ToolSelectorForm::~ToolSelectorForm() {
@@ -35,16 +35,18 @@ ToolSelectorForm::~ToolSelectorForm() {
 
 void ToolSelectorForm::setTool(const Tool& tool) {
     tool_ = tool;
-    label_->setStyleSheet(tool.id() < 0 ? "QLabel { color: red }" : "");
+    label_->setStyleSheet(tool.id() < Tool::ID::Folder ? u"QLabel { color: red }"_s : QString{});
     updateForm();
 }
 
 const Tool& ToolSelectorForm::tool() const { return tool_; }
 
 void ToolSelectorForm::on_pbSelect_clicked() {
-    ToolDatabase tdb(this, {Tool::EndMill, Tool::Engraver, Tool::Laser});
-    if(tdb.exec())
-        setTool(tdb.tool());
+    ToolDatabase tdb{
+        this,
+        std::array{Tool::EndMill, Tool::Engraver, Tool::Laser},
+    };
+    if(tdb.exec()) setTool(tdb.tool());
 }
 
 void ToolSelectorForm::on_pbEdit_clicked() {
@@ -62,7 +64,7 @@ void ToolSelectorForm::updateForm() {
 }
 
 void ToolSelectorForm::readTool() {
-    QFile file(toolFileName_);
+    QFile file{toolFileName_};
     if(file.open(QIODevice::ReadOnly))
         tool_.read(QJsonDocument::fromJson(file.readAll()).object());
     else
@@ -71,7 +73,7 @@ void ToolSelectorForm::readTool() {
 }
 
 void ToolSelectorForm::writeTool() const {
-    QFile file(toolFileName_);
+    QFile file{toolFileName_};
     if(file.open(QIODevice::WriteOnly)) {
         QJsonObject json;
         tool_.write(json);
@@ -99,7 +101,7 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
         label_->setObjectName(u"label_"_s);
 
         {
-            QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Preferred);
+            QSizePolicy sizePolicy{QSizePolicy::Fixed, QSizePolicy::Preferred};
             sizePolicy.setHorizontalStretch(0);
             sizePolicy.setVerticalStretch(0);
             sizePolicy.setHeightForWidth(label_->sizePolicy().hasHeightForWidth());
@@ -132,14 +134,14 @@ void ToolSelectorForm::setupUi(QWidget* ToolSelectorForm) {
     {
         pbSelect = new QPushButton{ToolSelectorForm};
         pbSelect->setObjectName(u"pbSelect"_s);
-        pbSelect->setIcon(QIcon::fromTheme("view-form"));
+        pbSelect->setIcon(QIcon::fromTheme(u"view-form"_s));
         gridLayout->addWidget(pbSelect, 1, 1, 1, 1);
     }
 
     {
         pbEdit = new QPushButton{ToolSelectorForm};
         pbEdit->setObjectName(u"pbEdit"_s);
-        pbEdit->setIcon(QIcon::fromTheme("document-edit"));
+        pbEdit->setIcon(QIcon::fromTheme(u"document-edit"_s));
         gridLayout->addWidget(pbEdit, 1, 2, 1, 1);
     }
 

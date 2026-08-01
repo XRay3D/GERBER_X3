@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,7 +20,7 @@ SideDelegate::SideDelegate(QObject* parent)
 
 QWidget* SideDelegate::createEditor(QWidget* parent, const QStyleOptionViewItem& /*option*/, const QModelIndex& /*index*/) const {
     auto* comboBox = new QComboBox{parent};
-    comboBox->addItems(tr("Top|Bottom").split('|'));
+    comboBox->addItems(tr("Top|Bottom").split(u'|'));
     comboBox->setItemData(0, comboBox->size(), Qt::SizeHintRole);
     comboBox->setItemData(1, comboBox->size(), Qt::SizeHintRole);
     connect(comboBox, qOverload<int>(&QComboBox::activated), this, &SideDelegate::emitCommitData);

@@ -25,7 +25,7 @@ Parser::Parser(AbstractFilePlugin* const interface)
 
 AbstractFile* Parser::parseFile(const QString& fileName) {
     qDebug(__FUNCTION__);
-    QFile file_(fileName);
+    QFile file_{fileName};
     if(!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
 

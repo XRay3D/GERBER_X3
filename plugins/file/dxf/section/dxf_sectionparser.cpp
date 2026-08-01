@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -60,8 +60,8 @@ bool SectionParser::hasNext() const { return std::distance(it, to) > 0; }
 bool SectionParser::hasPrev() const { return std::distance(from, it) > 0; }
 
 QDebug operator<<(QDebug debug, const SectionParser& c) {
-    QDebugStateSaver saver(debug);
-    debug.nospace() << "\rSEC(" << c.type << ", " << std::distance(c.from, c.to) << ')';
+    QDebugStateSaver saver{debug};
+    debug.nospace() << u"\rSEC("_s << c.type << u", "_s << std::distance(c.from, c.to) << ')';
     return debug;
 }
 

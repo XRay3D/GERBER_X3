@@ -1,9 +1,9 @@
 /********************************************************************************
  * Author    :  Damir Bakiev                                                    *
  * Version   :  na                                                              *
- * Date      :  ХХ ХХХ 2025                                                 *
+ * Date      :  ХХ ХХХ 2026                                                 *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,14 +15,14 @@
 
 namespace Drilling {
 
-constexpr auto DRILLING = md5::hash32("Drilling");
+constexpr auto DRILLING = "Drilling"_hash32;
 
 class File final : public GCode::File {
 public:
     using GCode::File::File;
-    explicit File(GCode::Params&& gcp, Pathss&& toolPathss)
-        : GCode::File(std::move(gcp), std::move(toolPathss), {}) {
-        if(gcp_.tools.front().diameter()) {
+    explicit File(GCode::Params&& newGcp)
+        : GCode::File{std::move(newGcp)} {
+        if(gcp.tools.front().diameter()) {
             initSave();
             addInfo();
             statFile();
@@ -30,7 +30,7 @@ public:
             endFile();
         }
     }
-    QIcon icon() const override { return QIcon::fromTheme("drill-path"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
     uint32_t type() const override { return DRILLING; }
     void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
     void genGcodeAndTile() override {
@@ -39,7 +39,7 @@ public:
             for(size_t y{}; y < App::project().stepsY(); ++y) {
                 const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
                 saveDrill(offset);
-                if(gcp_.params.contains(GCode::Params::NotTile))
+                if(gcp.params.contains(GCode::Params::NotTile))
                     return;
             }
         }

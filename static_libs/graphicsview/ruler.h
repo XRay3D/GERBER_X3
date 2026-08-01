@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,10 +15,10 @@
 
 class Ruler final : public QWidget {
     Q_OBJECT
-    //    Q_ENUMS(RulerType)
-    //    Q_PROPERTY(double origin READ origin WRITE setOrigin)
-    //    Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
-    //    Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
+    // Q_ENUMS(RulerType)
+    // Q_PROPERTY(double origin READ origin WRITE setOrigin)
+    // Q_PROPERTY(double rulerUnit READ rulerUnit WRITE setRulerUnit)
+    // Q_PROPERTY(double rulerZoom READ rulerZoom WRITE setRulerZoom)
 public:
     static constexpr int Breadth = 24;
 
@@ -30,7 +30,7 @@ public:
     double zoom() const { return rulerZoom_; }
     QSize minimumSizeHint() const override { return {Breadth, Breadth}; }
 
-    static constexpr auto MimeType = "image/x-puzzle-piece";
+    static inline const auto MimeType = u"image/x-puzzle-piece"_s;
 
 public slots:
     void setCursorPos(const QPoint& cursorPos_);
@@ -50,11 +50,7 @@ protected:
     void paintEvent(QPaintEvent* event) override;
 
 private:
-    void DrawAScaleMeter(QPainter* painter, const QRectF& rulerRect,
-        double scaleMeter, double startPositoin);
-    void DrawFromOriginTo(QPainter* painter, const QRectF& rulerRect,
-        double startMark, double endMark,
-        int startTickNo, double step, double startPosition);
+    void DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMeter, double startPosition);
     void DrawMousePosTick(QPainter* painter);
 
     double gridStep{1.0};

@@ -11,10 +11,10 @@ namespace Gi {
 class Preview final : public ::Gi::AbstractPreview {
     Path path_;
     Row& row;
-    int toolId_{-1};
+    Tool::ID toolId_{};
 
 public:
-    explicit Preview(Path&& hv, double diameter, int toolId, Row& row, const Paths& draw_ = {});
+    explicit Preview(Path&& hv, double diameter, Tool::ID  toolId, Row& row, const Paths& draw_ = {}); // FIXME to Curve
 
     // AbstractPreview interface
     void updateTool() override;
@@ -22,7 +22,7 @@ public:
     bool fit(double depth) const override;
 
     // AbstractDrillPrGI interface
-    int toolId() const override;
+    Tool::ID toolId() const override;
 
     // QGraphicsItem interface
     int type() const override;
@@ -32,8 +32,10 @@ public:
     QPointF pos() const { return ~path_.front(); }; // NOTE shadow base class pos func
     Path hv() const { return path_; };              // NOTE shadow base class pos func
 
-    // private:
-    //     static Paths offset(const Path& path, double offset);
+protected:
+    // Двойной клик по превью переключает использование этого отверстия/паза
+    // для построения G-кода (эквивалент чекбокса в шапке таблицы инструментов).
+    void mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) override;
 };
 }
 

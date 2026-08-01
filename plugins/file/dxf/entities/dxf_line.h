@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,11 +15,9 @@
 namespace Dxf {
 
 struct Line final : Entity {
-    Line(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-public:
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;
@@ -34,7 +32,7 @@ public:
         EndPointY = 21, // Файл DXF: значения Y и Z конечной точки (в МСК)
         EndPointZ = 31,
         ExtrusionDirectionX = 210, // Направление выдавливания (необязательно; значение по умолчанию = 0, 0, 1)//Файл DXF: значение X; приложение: 3D-вектор
-        ExtrusionDirectionY = 220, //  Файл DXF: значения Y и Z для направления выдавливания (необязательно)
+        ExtrusionDirectionY = 220, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         ExtrusionDirectionZ = 230,
     };
 

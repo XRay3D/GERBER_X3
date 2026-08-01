@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,7 +20,7 @@ namespace ShArc {
 class Shape;
 
 class Model : public QAbstractTableModel {
-    Q_OBJECT
+    // Q_OBJECT
     friend class Shape;
     QStringList headerData_{
         tr(" Point 1"),
@@ -48,7 +48,7 @@ public:
 };
 
 class Editor : public Shapes::Editor {
-    Q_OBJECT
+    // Q_OBJECT
 
     QTableView* view;
     QActionGroup actionGroup{this};

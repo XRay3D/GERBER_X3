@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,6 +11,7 @@
 #pragma once
 
 #include "mvector.h"
+#include "tool.h"
 #include <QAbstractTableModel>
 #include <QIcon>
 
@@ -21,23 +22,23 @@ class Preview;
 }
 
 struct Row {
-    //    Row(QString&& name = {},
-    //        QIcon&& icon = {},
-    //        int32_t id = {},
-    //        double diameter = {})
-    //        : icon{icon}
-    //        , name(name)
-    //        , diameter(diameter)
-    //        , rowId(id)
-    //        , toolId(-1) {
-    //    }
+    // Row(QString&& name = {},
+    // QIcon&& icon = {},
+    // int32_t id = {},
+    // double diameter = {})
+    // : icon{icon}
+    // , name(name)
+    // , diameter(diameter)
+    // , rowId(id)
+    // , toolId(-1) {
+    // }
     ~Row();
     /*const*/ QIcon icon;
     /*const*/ QStringList name;
     /*const*/ double diameter;
     /*const*/ bool isSlot;
     bool useForCalc{};
-    int toolId{-1};
+    Tool::ID toolId{};
     mvector<Gi::Preview*> items;
 };
 
@@ -62,12 +63,12 @@ public:
     bool isSlot(int row) const { return data_[row].isSlot; }
     bool useForCalc(int row) const { return data_[row].useForCalc; }
 
-    int toolId(int row) const { return data_[row].toolId; }
+    Tool::ID toolId(int row) const { return data_[row].toolId; }
 
     void setCreate(bool create);
     void setCreate(int row, bool create);
-    void setToolId(int row, int32_t id);
-    //    void setType(int type_) { type = type_; }
+    void setToolId(int row, Tool::ID id);
+    // void setType(int type_) { type = type_; }
 
     // QAbstractItemModel interface
     int rowCount(const QModelIndex& parent = {}) const override;

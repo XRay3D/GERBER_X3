@@ -12,6 +12,8 @@
 #include "mvector.h"
 #include <ctre.hpp>
 
+using namespace Qt::Literals;
+
 namespace Gerber {
 
 SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
@@ -21,7 +23,7 @@ SyntaxHighlighter::SyntaxHighlighter(QTextDocument* parent)
 void SyntaxHighlighter::highlightBlock(const QString& text) {
     static QTextCharFormat myClassFormat;
 
-    if(text.startsWith("%") && text.endsWith("*%")) {
+    if(text.startsWith(u"%"_s) && text.endsWith(u"*%"_s)) {
         myClassFormat.setForeground(QColor(0x80, 0x80, 0x00));
         setFormat(0, text.size(), myClassFormat);
         return;
@@ -36,7 +38,7 @@ void SyntaxHighlighter::highlightBlock(const QString& text) {
         case 'M': return {0x00, 0xFF, 0xFF};
         case 'X': return {0xFF, 0x00, 0x00};
         case 'Y': return {0x00, 0xFF, 0x00};
-        default: return {};
+        default : return {};
         }
     };
 

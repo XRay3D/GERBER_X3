@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -81,7 +81,7 @@ public:
     bool isVisible() const override;
     void setVisible(bool visible) override;
     mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
-    QIcon icon() const override { return QIcon::fromTheme("crosshairs"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
 
 protected:
     void write(QDataStream& stream) const override;

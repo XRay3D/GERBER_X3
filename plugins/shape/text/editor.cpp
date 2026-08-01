@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -21,9 +21,10 @@ Q_DECLARE_METATYPE(std::set<double>)
 
 namespace ShTxt {
 
-auto filter = std::views::filter([](Shape* shape) {
-    return shape->isSelected();
-    // && shape->isEditable();
+auto filter = v::filter([](Shape* shape) {
+    return shape->isSelected()
+        // && shape->isEditable()
+        ;
 });
 
 //////////////////////////////////////////
@@ -70,7 +71,7 @@ void Editor::setupUi() {
     formLayout->addRow(new QLabel{TR("TextEditor", "Pos. Y:", nullptr), this}, dsbxY = new DoubleSpinBox{this});
     formLayout->addRow(new QLabel{TR("TextEditor", "Side:", nullptr), this}, cbxSide = new QComboBox{this});
 
-    cbxSide->addItems(TR("TextEditor", "Top|Bottom").split('|'));
+    cbxSide->addItems(TR("TextEditor", "Top|Bottom").split(u'|'));
 
     dsbxAngle->setDecimals(0);
     dsbxAngle->setMaximum(360.0);
@@ -120,19 +121,19 @@ void Editor::setupUi() {
 
     // Apply
     auto pushButton = new QPushButton{TR("TextEditor", "Apply"), this};
-    pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    pushButton->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
     formLayout->addRow(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
     connect(pushButton, &QPushButton::clicked, this, [this] {
         for(auto* shape: shapes | filter) {
-            shape->iDataCopy = shape->iData;
+            shape->iDataCopy = shape->txtData;
             shape->ok();
         }
     });
 
     // Add New
     pushButton = new QPushButton{TR("TextEditor", "Add New"), this};
-    pushButton->setIcon(QIcon::fromTheme("list-add"));
+    pushButton->setIcon(QIcon::fromTheme(u"list-add"_s));
     formLayout->addRow(pushButton);
     connect(pushButton, &QPushButton::clicked, this, [this] {
         plugin->finalizeShape();
@@ -140,9 +141,9 @@ void Editor::setupUi() {
     });
 
     // Close
-    pushButton = new QPushButton{"Close", this};
-    pushButton->setObjectName("pbClose");
-    pushButton->setIcon(QIcon::fromTheme("window-close"));
+    pushButton = new QPushButton{u"Close"_s, this};
+    pushButton->setObjectName(u"pbClose"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"window-close"_s));
     formLayout->addRow(pushButton);
 }
 
@@ -150,7 +151,7 @@ void Editor::updateText() {
     if(resetFl) return;
     QString text = plainTextEdit->toPlainText();
     for(auto* shape: shapes | filter) {
-        shape->iData.text = text;
+        shape->txtData.text = text;
         shape->redraw();
     }
 }
@@ -162,7 +163,7 @@ void Editor::updateFont() {
     font.setItalic(chbxItalic->isChecked());
     plainTextEdit->setFont(font);
     for(auto* shape: shapes | filter) {
-        shape->iData.font = font;
+        shape->txtData.font = font;
         shape->redraw();
     }
 }
@@ -170,7 +171,7 @@ void Editor::updateFont() {
 void Editor::updateAngle() {
     if(resetFl) return;
     for(auto* shape: shapes | filter) {
-        shape->iData.angle = dsbxAngle->value();
+        shape->txtData.angle = dsbxAngle->value();
         shape->redraw();
     }
 }
@@ -178,7 +179,7 @@ void Editor::updateAngle() {
 void Editor::updateHeight() {
     if(resetFl) return;
     for(auto* shape: shapes | filter) {
-        shape->iData.height = dsbxHeight->value();
+        shape->txtData.height = dsbxHeight->value();
         shape->redraw();
     }
 }
@@ -186,7 +187,7 @@ void Editor::updateHeight() {
 void Editor::updateXY() {
     if(resetFl) return;
     for(auto* shape: shapes | filter) {
-        shape->iData.xy = dsbxXY->value();
+        shape->txtData.xy = dsbxXY->value();
         shape->redraw();
     }
 }
@@ -223,7 +224,7 @@ void Editor::updateCenterAlign() {
     else if(rb_tr->isChecked()) handleAlign = Shape::TopRight;
 
     for(auto* shape: shapes | filter) {
-        shape->iData.handleAlign = handleAlign;
+        shape->txtData.handleAlign = handleAlign;
         shape->redraw();
     }
 }
@@ -232,7 +233,7 @@ void Editor::updateSide() {
     if(resetFl) return;
 
     for(auto* shape: shapes | filter) {
-        shape->iData.side = static_cast<Side>(cbxSide->currentIndex());
+        shape->txtData.side = static_cast<Side>(cbxSide->currentIndex());
         shape->redraw();
     }
 }
@@ -262,14 +263,14 @@ void Editor::reset() {
 
     cbxFont->setFontFilters(
         QFontComboBox::ScalableFonts
-        //        | QFontComboBox::NonScalableFonts
+        // | QFontComboBox::NonScalableFonts
         | QFontComboBox::MonospacedFonts
         | QFontComboBox::ProportionalFonts);
 
     auto filtered = shapes | filter;
     auto& first = filtered.empty()
-        ? shapes.front()->iData
-        : filtered.front()->iData;
+        ? shapes.front()->txtData
+        : filtered.front()->txtData;
 
     if(qFuzzyIsNull(first.height)) first.height = 10.0;
     if(qFuzzyIsNull(first.xy)) first.xy = 100.0;

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -36,7 +36,7 @@ public:
     void setPt(const QPointF& pt) override;
     bool addPt(const QPointF& pt) override;
 
-    bool closed() const;
+    bool isClosed() const;
 
 protected:
     void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
@@ -55,7 +55,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShPolyLine; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-line"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-line"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
             this,

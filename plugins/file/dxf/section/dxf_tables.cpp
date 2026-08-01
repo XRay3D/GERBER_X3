@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -29,38 +29,20 @@ SectionTABLES::~SectionTABLES() {
 void SectionTABLES::parse() {
     do {
         CodeData code(nextCode());
-        if(code == "TABLE") {
+        if(code == u"TABLE"_s) {
             code = nextCode();
             do {
                 auto type = AbstractTable::toType(code);
                 switch(type) {
-                case AbstractTable::APPID:
-                    // tables[type].append(new AppId{this});
-                    break;
-                case AbstractTable::BLOCK_RECORD:
-                    // tables[type].append(new BlockRecord{this});
-                    break;
-                case AbstractTable::DIMSTYLE:
-                    // tables[type].append(new DimStyle{this});
-                    break;
-                case AbstractTable::LAYER:
-                    tables[type].append(new Layer{this});
-                    break;
-                case AbstractTable::LTYPE:
-                    // tables[type].append(new LType{this});
-                    break;
-                case AbstractTable::STYLE:
-                    tables[type].append(new Style{this});
-                    break;
-                case AbstractTable::UCS:
-                    // tables[type].append(new UCS{this});
-                    break;
-                case AbstractTable::VIEW:
-                    // tables[type].append(new View{this});
-                    break;
-                case AbstractTable::VPORT:
-                    // tables[type].append(new VPort{this});
-                    break;
+                case AbstractTable::APPID       : /* tables[type].append(new AppId{this});*/ break;
+                case AbstractTable::BLOCK_RECORD: /* tables[type].append(new BlockRecord{this});*/ break;
+                case AbstractTable::DIMSTYLE    : /* tables[type].append(new DimStyle{this});*/ break;
+                case AbstractTable::LAYER       : tables[type].append(new Layer{this}); break;
+                case AbstractTable::LTYPE       : /* tables[type].append(new LType{this});*/ break;
+                case AbstractTable::STYLE       : tables[type].append(new Style{this}); break;
+                case AbstractTable::UCS         : /* tables[type].append(new UCS{this});*/ break;
+                case AbstractTable::VIEW        : /* tables[type].append(new View{this});*/ break;
+                case AbstractTable::VPORT       : /* tables[type].append(new VPort{this});*/ break;
                 }
                 if(tables.contains(type)) {
                     tables[type].last()->parse(code);
@@ -74,7 +56,7 @@ void SectionTABLES::parse() {
                         code = nextCode();
                     } while(code.code() != 0);
                 }
-            } while(code != "ENDTAB");
+            } while(code != u"ENDTAB"_s);
         }
     } while(hasNext());
 }

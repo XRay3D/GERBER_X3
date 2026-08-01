@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -19,35 +19,35 @@
 #include <QPushButton>
 
 class PushButton : public QPushButton {
-    //    Q_OBJECT
+    // Q_OBJECT
     QColor& color_;
     void selectColor() {
-        QColorDialog dialog(color_);
+        QColorDialog dialog{color_};
         dialog.setOption(QColorDialog::ShowAlphaChannel, true);
-        QColor color(color_);
+        QColor color{color_};
         connect(&dialog, &QColorDialog::currentColorChanged, [&color](const QColor& c) { color = c; });
         if(dialog.exec() && color_ != color)
             color_ = color;
-        //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
+        // setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
     }
 
 public:
     PushButton(QColor& color, QWidget* parent = nullptr)
-        : QPushButton("", parent)
+        : QPushButton({}, parent)
         , color_(color) {
         connect(this, &QPushButton::clicked, this, &PushButton::selectColor);
-        //        setText("ARGB " + color_.name(QColor::HexArgb).toUpper());
+        // setText(u"ARGB "_s + color_.name(QColor::HexArgb).toUpper());
     }
     virtual ~PushButton() { }
 
 protected:
     void paintEvent(QPaintEvent* event) override {
         QPushButton::paintEvent(event);
-        QPainter p(this);
+        QPainter p{this};
         p.setPen(Qt::NoPen);
 
-        //        p.setBrush(Qt::white);
-        //        p.drawRect(rect() + QMargins(-3, -3, -3, -3));
+        // p.setBrush(Qt::white);
+        // p.drawRect(rect() + QMargins(-3, -3, -3, -3));
         QLinearGradient gr(rect().topRight(), rect().bottomLeft());
         gr.setColorAt(0.1, Qt::black);
         gr.setColorAt(0.9, Qt::white);
@@ -55,12 +55,12 @@ protected:
         p.drawRect(rect() + QMargins(-3, -3, -3, -3));
         p.setBrush(color_);
         p.drawRect(rect() + QMargins(-3, -3, -3, -3));
-        //        p.setCompositionMode(QPainter::CompositionMode_Xor);
-        //        p.setPen(Qt::NoPen);
-        //        p.setBrush(Qt::black);
-        //        QPainterPath path;
-        //        path.addText(rect().bottomLeft(), font() /*Qt::AlignCenter*/, text());
-        //        p.drawPolygon(path.toFillPolygon());
+        // p.setCompositionMode(QPainter::CompositionMode_Xor);
+        // p.setPen(Qt::NoPen);
+        // p.setBrush(Qt::black);
+        // QPainterPath path;
+        // path.addText(rect().bottomLeft(), font() /*Qt::AlignCenter*/, text());
+        // p.drawPolygon(path.toFillPolygon());
         p.setPen(Qt::black);
         p.drawText(rect(), Qt::AlignCenter, text());
     }

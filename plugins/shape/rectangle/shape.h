@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -60,7 +60,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface *
     uint32_t type() const override { return Gi::Type::ShRectangle; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-rectangle"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-rectangle"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
             this,

@@ -1,72 +1,43 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2025
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2025
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.0)
 
 project(gcode)
 
-# include_directories()
+file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
+file(GLOB UIS CONFIGURE_DEPENDS *.ui)
+file(GLOB JS_SCRIPTS CONFIGURE_DEPENDS "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*.js")
 
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
-file(GLOB UIS *.ui)
+qt_add_resources(QRC_SOURCES gc_scripts.qrc)
 
-set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${UIS})
+set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${UIS} ${QRC_SOURCES})
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
-
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC clipper file_plugins gi ctre
-                                             Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PUBLIC geometry ctre Qt6::Qml)
 
-set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
+# Copy JS scripts to output directory so users can view and edit them
+add_custom_target(
+    ${PROJECT_NAME}_scripts ALL
+    COMMAND ${CMAKE_COMMAND} -E make_directory "${SCRIPTS_DIR}"
+    COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JS_SCRIPTS} "${SCRIPTS_DIR}/"
+    DEPENDS ${JS_SCRIPTS}
+    COMMENT "Copying GCode scripts to ${SCRIPTS_DIR}/")
+add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_scripts)
 
-set_source_files_properties(
-  ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
+target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})
 
-qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${PROJECT_SOURCES})
-# qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE
-# QM_FILES)
-
-if(Enable_Pocketoffset)
-  add_subdirectory(pocketoffset)
-endif()
-
-if(Enable_Profile)
-  add_subdirectory(profile)
-endif()
-
-if(Enable_Drill)
-  add_subdirectory(drill)
-endif()
-
-if(Enable_Hatching)
-  add_subdirectory(hatching)
-endif()
-
-if(Enable_Pocketraster)
-  add_subdirectory(pocketraster)
-endif()
-
-if(Enable_Voroni)
-  add_subdirectory(voroni)
-endif()
-
-if(Enable_Thermal)
-  add_subdirectory(thermal)
-endif()
-
-if(Enable_Thread)
-  # add_subdirectory(thread)
-endif()
+foreach(SUBDIRECTORY ${GCODE_PLUGINS})
+    add_subdirectory(${SUBDIRECTORY})
+endforeach()

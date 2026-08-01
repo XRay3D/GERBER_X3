@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,31 +23,20 @@ void Style::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(code.code()) {
-        case SubclassMarker: // 100
-            break;
-        case StyleName: // 2
+        case SubclassMarker: break; // 100
+        case StyleName:             // 2
             styleName = code.string();
             sp->file->styles()[styleName] = this;
             break;
-        case StandardFlag: // 70
-            standardFlag = code;
-            break;
-        case FixedTextHeight: // 40
-            fixedTextHeight = code;
-            break;
-        case WidthFactor: // 41
-            break;
-        case ObliqueAngle: // 50
-            break;
-        case TextGenerationFlag: // 71
-            textGenerationFlag = code;
-            break;
-        case LastHeightUsed: // 42
-            break;
-        case PrimaryFontFileName: // 3
-            break;
-        case BigfontFileName: // 4
-            break;
+        case StandardFlag       : standardFlag = code; break;       // 70
+        case FixedTextHeight    : fixedTextHeight = code; break;    // 40
+        case WidthFactor        : break;                            // 41
+        case ObliqueAngle       : break;                            // 50
+        case TextGenerationFlag : textGenerationFlag = code; break; // 71
+        case LastHeightUsed     : break;                            // 42
+        case PrimaryFontFileName: break;                            // 3
+        case BigfontFileName    : break;                                // 4
+
         case ALongValueWhichContainsATruetypeFontsPitchAndFamily_CharacterSet_AndItalicAndBoldFlags: // 1071
             if((int32_t(code) & 0xA) == 0xA) {
                 font.setBold(false);
@@ -75,13 +64,12 @@ void Style::parse(CodeData& code) {
                 font.setFamily(Settings::defaultFont());
             }
             break;
-        default:
-            AbstractTable::parse(code);
+        default: AbstractTable::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);
 
-    //    for (auto& code : data)
+    // for (auto& code : data)
 }
 
 } // namespace Dxf

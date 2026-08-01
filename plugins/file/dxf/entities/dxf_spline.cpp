@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -18,6 +18,7 @@
 #include <QPainterPath>
 #include <QPolygonF>
 #include <QtMath>
+#include <functional>
 #include <qglobal.h>
 
 namespace Dxf {
@@ -27,7 +28,7 @@ QPolygonF interpolate(const QPolygonF& points, int numValues) {
     if(!spline.setPoints(points))
         return points;
 
-    QPolygonF interpolatedPoints(numValues);
+    QPolygonF interpolatedPoints{numValues};
     const double delta = (points[/*numPoints*/ points.size() - 1].x() - points[0].x()) / (points.size() - 1);
     for(int i{}; i < points.size(); i++) // interpolate
     {
@@ -72,14 +73,14 @@ void BSplineCurve(const QPointF& point1,
 
 // double blend(QVector<double>& uVec, double u, int k, int d)
 //{
-//     if (d == 1) {
-//         if (uVec[k] <= u && u < uVec[k + 1])
-//             return 1;
-//         return 0;
-//     }
-//     double b;
-//     b = ((u - uVec[k]) / (uVec[k + d - 1] - uVec[k]) * blend(uVec, u, k, d - 1)) + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
-//     return b;
+// if (d == 1) {
+// if (uVec[k] <= u && u < uVec[k + 1])
+// return 1;
+// return 0;
+// }
+// double b;
+// b = ((u - uVec[k]) / (uVec[k + d - 1] - uVec[k]) * blend(uVec, u, k, d - 1)) + ((uVec[k + d] - u) / (uVec[k + d] - uVec[k + 1]) * blend(uVec, u, k + 1, d - 1));
+// return b;
 // }
 double blend(QVector<double>& uVec, double u, int k, int d) {
     if(d == 1) {
@@ -99,14 +100,14 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
     d = poly.degreeOfTheSplineCurve; // Enter degree of curve:
     n = poly.ControlPoints.size();
     QVector<double> uVec;
-    //  poly.KnotValues;
+    // poly.KnotValues;
     for(int i{}; i < n + d; i++)
         uVec.push_back(((double)i) / (n + d - 1));
     double x, y, basis, u;
     for(u = 0; u <= 1; u += 0.05) {
         x = 0;
         y = 0;
-        for(int i = 0.0; i < poly.ControlPoints.size(); i++) {
+        for(int i{}; i < poly.ControlPoints.size(); i++) {
             // basis = blend(uVec, u, i, d);
             basis = blend(uVec, u, i, d);
             x += basis * poly.ControlPoints[i].x();
@@ -117,33 +118,21 @@ void drawBSplineCurve(const Spline& poly, QPainterPath& path) {
             path.moveTo(x, y);
         else if(!qFuzzyIsNull(x) || !qFuzzyIsNull(y))
             path.lineTo(x, y);
-        //        putpixel(roundOff(x), roundOff(y), YELLOW);
+        // putpixel(roundOff(x), roundOff(y), YELLOW);
     }
-}
-
-Spline::Spline(SectionParser* sp)
-    : Entity{sp} {
 }
 
 void Spline::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker: // 100
-            break;
-        case ExtrusionDirectionX: // 210
-            break;
-        case ExtrusionDirectionY: // 220
-            break;
-        case ExtrusionDirectionZ: // 230
-            break;
-        case SplineFlag: // 70
-            splineFlag = code;
-            break;
-        case DegreeOfTheSplineCurve: // 71
-            degreeOfTheSplineCurve = code;
-            break;
-        case NumberOfKnots: // 72
+        case SubclassMarker        : break;                                // 100
+        case ExtrusionDirectionX   : break;                                // 210
+        case ExtrusionDirectionY   : break;                                // 220
+        case ExtrusionDirectionZ   : break;                                // 230
+        case SplineFlag            : splineFlag = code; break;             // 70
+        case DegreeOfTheSplineCurve: degreeOfTheSplineCurve = code; break; // 71
+        case NumberOfKnots:                                                // 72
             numberOfKnots = code;
             KnotValues.reserve(numberOfKnots);
             break;
@@ -155,57 +144,30 @@ void Spline::parse(CodeData& code) {
             numberOfFitPoints = code;
             FitPoints.reserve(numberOfFitPoints);
             break;
-        case KnotTolerance: // 42
-            knotTolerance = code;
-            break;
-        case ControlPointTolerance: // 43
-            controlPointTolerance = code;
-            break;
-        case FitTolerance: // 44
-            fitTolerance = code;
-            break;
-        case StartTangentX: // 12
-            StartTangent.setX(code);
-            break;
-        case StartTangentY: // 22
-            StartTangent.setY(code);
-            break;
-        case StartTangentZ: // 32
-            break;
-        case EndTangentX: // 13
-            EndTangent.setX(code);
-            break;
-        case EndTangentY: // 23
-            EndTangent.setY(code);
-            break;
-        case EndTangentZ: // 33
-            break;
-        case KnotValue: // 40
-            KnotValues << double(code);
-            break;
-        case Weight: // 41
-            weight = code;
-            break;
-        case ControlPointsX: // 10
+        case KnotTolerance        : knotTolerance = code; break;         // 42
+        case ControlPointTolerance: controlPointTolerance = code; break; // 43
+        case FitTolerance         : fitTolerance = code; break;          // 44
+        case StartTangentX        : StartTangent.setX(code); break;      // 12
+        case StartTangentY        : StartTangent.setY(code); break;      // 22
+        case StartTangentZ        : break;                               // 32
+        case EndTangentX          : EndTangent.setX(code); break;        // 13
+        case EndTangentY          : EndTangent.setY(code); break;        // 23
+        case EndTangentZ          : break;                               // 33
+        case KnotValue            : KnotValues << double(code); break;   // 40
+        case Weight               : Weights << double(code); break;     // 41, одна запись на управляющую точку
+        case ControlPointsX:                                             // 10
             ControlPoints.resize(ControlPoints.size() + 1);
             ControlPoints.last().setX(code);
             break;
-        case ControlPointsY: // 20
-            ControlPoints.last().setY(code);
-            break;
-        case ControlPointsZ: // 30
-            break;
-        case FitPointsX: // 11
+        case ControlPointsY: ControlPoints.last().setY(code); break; // 20
+        case ControlPointsZ: break;                                  // 30
+        case FitPointsX:                                             // 11
             FitPoints.resize(FitPoints.size() + 1);
             FitPoints.last().setX(code);
             break;
-        case FitPointsY: // 21
-            FitPoints.last().setY(code);
-            break;
-        case FitPointsZ: // 31
-            break;
-        default:
-            Entity::parse(code);
+        case FitPointsY: FitPoints.last().setY(code); break; // 21
+        case FitPointsZ: break;                              // 31
+        default        : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);
@@ -213,7 +175,115 @@ void Spline::parse(CodeData& code) {
 
 Entity::Type Spline::type() const { return Type::SPLINE; }
 
-DxfGo Spline::toGo() const { return {}; }
+namespace {
+
+// Кокс-де Бур: значение i-й базисной функции степени p в точке u для узлового вектора U.
+double nurbsBasis(int i, int p, double u, const QVector<double>& U) {
+    if(p == 0)
+        return (U[i] <= u && u < U[i + 1]) ? 1.0 : 0.0;
+
+    double left{}, right{};
+    if(const double d1 = U[i + p] - U[i]; !qFuzzyIsNull(d1))
+        left = (u - U[i]) / d1 * nurbsBasis(i, p - 1, u, U);
+    if(const double d2 = U[i + p + 1] - U[i + 1]; !qFuzzyIsNull(d2))
+        right = (U[i + p + 1] - u) / d2 * nurbsBasis(i + 1, p - 1, u, U);
+    return left + right;
+}
+
+// Точка рациональной B-сплайн кривой (NURBS) в параметре u.
+QPointF nurbsPoint(double u, int degree, const QVector<double>& U, const QPolygonF& ctrl, const QVector<double>& weights) {
+    double x{}, y{}, wsum{};
+    for(int i{}; i < ctrl.size(); ++i) {
+        const double b = nurbsBasis(i, degree, u, U) * weights[i];
+        x += b * ctrl[i].x();
+        y += b * ctrl[i].y();
+        wsum += b;
+    }
+    if(qFuzzyIsNull(wsum))
+        return ctrl.last();
+    return {x / wsum, y / wsum};
+}
+
+// Аппроксимация плотно выбранных точек кривой цепочкой круговых дуг: на каждом малом
+// участке подбирается окружность, проходящая через его начало, середину и конец —
+// так же, как это сделано для ELLIPSE, чтобы Curve всюду хранила дуги, а не ломаную.
+void appendArcChain(Curve& curve, const std::function<QPointF(double)>& pointAt, double tFrom, double tTo, int segments) {
+    QPointF prev = pointAt(tFrom);
+    if(curve.empty())
+        curve.emplace_back(prev);
+
+    for(int i{}; i < segments; ++i) {
+        const double t0 = tFrom + (tTo - tFrom) * i / segments;
+        const double t1 = tFrom + (tTo - tFrom) * (i + 1) / segments;
+        const QPointF p0 = prev;
+        const QPointF pm = pointAt((t0 + t1) / 2);
+        const QPointF p1 = pointAt(t1);
+
+        const double ax = p0.x(), ay = p0.y();
+        const double bx = pm.x(), by = pm.y();
+        const double cx = p1.x(), cy = p1.y();
+        const double d = 2.0 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+
+        if(qFuzzyIsNull(d)) {
+            curve.emplace_back(p1);
+        } else {
+            const double a2 = ax * ax + ay * ay, b2 = bx * bx + by * by, c2 = cx * cx + cy * cy;
+            const QPointF center{
+                (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
+                (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
+            };
+            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+        }
+        prev = p1;
+    }
+}
+
+} // namespace
+
+DxfGo Spline::toGo() const {
+    const bool haveNurbs = ControlPoints.size() >= 2
+        && degreeOfTheSplineCurve > 0
+        && KnotValues.size() == ControlPoints.size() + degreeOfTheSplineCurve + 1;
+
+    Curve curve;
+    const bool closed = (splineFlag & Closed) != 0;
+
+    if(haveNurbs) {
+        QVector<double> weights = Weights;
+        if(weights.size() != ControlPoints.size())
+            weights = QVector<double>(ControlPoints.size(), 1.0); // группа 41 отсутствует -> все веса 1 (не рациональный сплайн)
+
+        const double uMin = KnotValues.first();
+        const double uMax = KnotValues.last();
+        if(qFuzzyCompare(uMin, uMax))
+            return {};
+
+        auto pointAt = [&](double u) {
+            return nurbsPoint(qBound(uMin, u, uMax - (uMax - uMin) * 1.0e-9), degreeOfTheSplineCurve, KnotValues, ControlPoints, weights);
+        };
+
+        const int segments = qBound(16, ControlPoints.size() * 8, 400);
+        appendArcChain(curve, pointAt, uMin, uMax, segments);
+    } else if(FitPoints.size() >= 2) {
+        qWarning("Spline: no valid control-point/knot data, falling back to a polyline through fit points");
+        for(const QPointF& p: FitPoints) curve.emplace_back(p);
+    } else if(ControlPoints.size() >= 2) {
+        qWarning("Spline: no valid knot vector, falling back to a polyline through control points");
+        for(const QPointF& p: ControlPoints) curve.emplace_back(p);
+    } else {
+        return {};
+    }
+
+    if(closed) {
+        DxfGo go{id, Curve{curve}, {std::move(curve)}};
+        go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::PolyLine);
+        return go;
+    }
+
+    DxfGo go{id, std::move(curve)};
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
+    return go;
+}
 
 void Spline::write(QDataStream& stream) const {
     stream << FitPoints;
@@ -222,7 +292,7 @@ void Spline::write(QDataStream& stream) const {
     stream << EndTangent;
 
     stream << KnotValues;
-    stream << weight;
+    stream << Weights;
 
     stream << knotTolerance;
     stream << controlPointTolerance;
@@ -242,7 +312,7 @@ void Spline::read(QDataStream& stream) {
     stream >> EndTangent;
 
     stream >> KnotValues;
-    stream >> weight;
+    stream >> Weights;
 
     stream >> knotTolerance;
     stream >> controlPointTolerance;
@@ -258,19 +328,19 @@ void Spline::read(QDataStream& stream) {
 ////////////////////////////////////
 
 #ifndef M_PI_2
-// For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
-// when compiling with -std=c++11
-#define M_PI_2 (1.57079632679489661923)
+    // For Qt <= 4.8.4 M_PI_2 is not known by MinGW-w64
+    // when compiling with -std=c++11
+    #define M_PI_2 (1.57079632679489661923)
 #endif
 
 #ifndef LOG_MIN
-//! Minimum value for logarithmic scales
-#define LOG_MIN 1.0e-100
+    //! Minimum value for logarithmic scales
+    #define LOG_MIN 1.0e-100
 #endif
 
 #ifndef LOG_MAX
-//! Maximum value for logarithmic scales
-#define LOG_MAX 1.0e100
+    //! Maximum value for logarithmic scales
+    #define LOG_MAX 1.0e100
 #endif
 
 // QWT_EXPORT double qwtGetMin(const double* array, int size);
@@ -281,7 +351,7 @@ void Spline::read(QDataStream& stream) {
 
 /*!
   \brief Compare 2 values, relative to an interval
-  Values are "equal", when :
+  Values are u"equal"_s, when :
   \f$\cdot value2 - value1 <= abs(intervalSize * 10e^{-6})\f$
   \param value1 First value to compare
   \param value2 Second value to compare
@@ -612,8 +682,8 @@ bool QwtSpline::buildNaturalSpline(const QPolygonF& points) {
     double* b = d_data->b.data();
     double* c = d_data->c.data();
 
-    //  set up tridiagonal equation system; use coefficient
-    //  vectors as temporary buffers
+    // set up tridiagonal equation system; use coefficient
+    // vectors as temporary buffers
     QVector<double> h(size - 1);
     for(i = 0; i < size - 1; i++) {
         h[i] = p[i + 1].x() - p[i].x();
@@ -686,8 +756,8 @@ bool QwtSpline::buildPeriodicSpline(const QPolygonF& points) {
     QVector<double> s(size);
 
     //
-    //  setup equation system; use coefficient
-    //  vectors as temporary buffers
+    // setup equation system; use coefficient
+    // vectors as temporary buffers
     //
     for(i = 0; i < size - 1; i++) {
         h[i] = p[i + 1].x() - p[i].x();

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -93,7 +93,7 @@ class AbstractFile {
             file.colorFlag_);
         file.read(in);
         if(App::splashScreenPtr())
-            App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + "\n\n\n", Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+            App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + u"\n\n\n"_s, Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         file.createGi();
         file.setTransform(file.transform_);
         file.setVisible(visible);
@@ -108,7 +108,7 @@ public:
         return file;
     }
 
-    AbstractFile();
+    AbstractFile() = default;
 
     virtual ~AbstractFile();
 
@@ -125,8 +125,8 @@ public:
     Paths mergedPaths() const;
     Pathss groupedPaths() const;
 
-    mvector<QString>& lines();
-    const mvector<QString>& lines() const;
+    std::vector<QString>& lines();
+    const std::vector<QString>& lines() const;
     const QString lines2() const;
     virtual mvector<const GraphicObject*> graphicObjects() const;
 
@@ -182,16 +182,12 @@ protected:
     int32_t id_ = -1;
     int itemsType_ = -1;
     mutable Paths mergedPaths_;
-    mutable bool visible_ = false;
-    mvector<Gi::Group*> itemGroups_;
-    mvector<QString> lines_;
-    //    QTransform transform_;
+    mutable bool visible_{};
+    mvector<Gi::Group*> itemGroups_{new Gi::Group};
+    std::vector<QString> lines_;
+    // QTransform transform_;
     Transform transform_;
 };
-
-inline AbstractFile::AbstractFile()
-    : itemGroups_{new Gi::Group} {
-}
 
 inline AbstractFile::~AbstractFile() { qDeleteAll(itemGroups_); }
 
@@ -225,14 +221,13 @@ inline Paths AbstractFile::mergedPaths() const { return mergedPaths_.size() ? me
 
 inline Pathss AbstractFile::groupedPaths() const { return groupedPaths_; }
 
-inline mvector<QString>& AbstractFile::lines() { return lines_; }
+inline std::vector<QString>& AbstractFile::lines() { return lines_; }
 
-inline const mvector<QString>& AbstractFile::lines() const { return lines_; }
+inline const std::vector<QString>& AbstractFile::lines() const { return lines_; }
 
 inline const QString AbstractFile::lines2() const {
     QString rstr;
-    for(auto&& str: lines_)
-        rstr.append(str).append('\n');
+    for(auto&& str: lines_) rstr.append(str).append(u'\n');
     return rstr;
 }
 
@@ -246,8 +241,8 @@ inline void AbstractFile::initFrom(AbstractFile* file) {
     setColor(file->color_);
     setItemType(file->itemsType_);
     setTransform(file->transform_);
-    for(auto* ig: itemGroups_)
-        for(auto* gi: *ig)
+    for(auto&& ig: itemGroups_)
+        for(auto&& gi: *ig)
             gi->setZValue(-id_);
 }
 
@@ -272,8 +267,8 @@ inline void AbstractFile::setColor(const QColor& color) { color_ = color; }
 inline void AbstractFile::setTransform(const Transform& transform) {
     transform_ = transform;
     QTransform t{transform};
-    for(auto* ig: itemGroups_)
-        for(auto* gi: *ig)
+    for(auto&& ig: itemGroups_)
+        for(auto&& gi: *ig)
             gi->setTransform(t);
 }
 

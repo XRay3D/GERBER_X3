@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,11 +14,9 @@ namespace Dxf {
 struct Text final : Entity {
     Q_GADGET
 public:
-    Text(SectionParser* sp);
+    using Entity::Entity;
 
     // Entity interface
-
-    // void draw(const InsertEntity* const i = nullptr) const override;
 
     void parse(CodeData& code) override;
     Type type() const override;
@@ -48,7 +46,7 @@ public:
         ExtrusionDirectionY = 220,
         ExtrusionDirectionZ = 230, // Файл DXF: значения Y и Z для направления выдавливания (необязательно)
         // SubclassMarker = 100, // Маркер подкласса (AcDbText)
-        //        https : //help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-62E5383D-8A14-47B4-BFC4-35824CAE8363
+        // https : //help.autodesk.com/view/OARX/2020/RUS/?guid=GUID-62E5383D-8A14-47B4-BFC4-35824CAE8363
     };
 
     enum TextGenerationFlagsE { // 71
@@ -79,7 +77,7 @@ public:
     Q_ENUM(VerticalJustTypeE)
 
     QString text;
-    QString textStyleName = "STANDARD";
+    QString textStyleName = u"STANDARD"_s;
 
     QPointF pt1;
     QPointF pt2;

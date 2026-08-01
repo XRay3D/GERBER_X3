@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -46,7 +46,7 @@ public:
 
     struct ShapeData {
         QFont font{};
-        QString text{"Shape"};
+        QString text{u"Shape"_s};
         double angle{0.0};
         double height{10.0};
         double xy{100.0};
@@ -66,7 +66,7 @@ public:
     QString text() const;
     void setText(const QString& value);
 
-    Side side() const;
+    Side side() const override;
     void setSide(const Side& side);
 
     // AbstractShape interface
@@ -80,10 +80,10 @@ protected:
     void readAndInit(QDataStream& stream) override;
 
 private:
-    ShapeData iData;
+    ShapeData txtData;
     ShapeData iDataCopy;
-    void saveIData();
-    ShapeData loadIData();
+    void saveData();
+    ShapeData loadData();
 
     void save();
     void restore();
@@ -99,7 +99,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShText; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-text"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-text"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{this, point};
         editor_.add(shape);

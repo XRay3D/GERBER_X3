@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,8 +17,8 @@
 
 namespace CrossHatch {
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::Form{plugin, new Creator}
     , ui(new Ui::HatchingForm)
     , names{tr("Raster On"), tr("Hatching Outside"), tr("Hatching Inside")}
     , pixmaps{
@@ -30,7 +30,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
     setWindowTitle(tr("CrossHatch Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("HatchingForm");
+    settings.beginGroup(u"HatchingForm"_s);
     settings.getValue(ui->cbxPass);
     settings.getValue(ui->dsbxAngle);
     settings.getValue(ui->dsbxHathStep);
@@ -57,7 +57,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 Form::~Form() {
 
     MySettings settings;
-    settings.beginGroup("HatchingForm");
+    settings.beginGroup(u"HatchingForm"_s);
     settings.setValue(ui->cbxPass);
     settings.setValue(ui->dsbxAngle);
     settings.setValue(ui->dsbxHathStep);
@@ -77,32 +77,30 @@ void Form::computePaths() {
         return;
     }
 
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+    if(!getNewGcpWithGi()) return;
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->tools.push_back(tool);
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.tools.push_back(tool);
 
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
-    gcp->params[Creator::HathStep] = ui->dsbxHathStep->value();
-    gcp->params[Creator::Pass] = ui->cbxPass->currentIndex();
-    gcp->params[Creator::UseAngle] = ui->dsbxAngle->value();
-    //    if (ui->rbFast->isChecked()) {
-    //        gcp_->params[GCode::Params::Fast] = true;
-    //        gcp_->params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
-    //    }
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[Creator::HathStep] = ui->dsbxHathStep->value();
+    gcp.params[Creator::Pass] = ui->cbxPass->currentIndex();
+    gcp.params[Creator::UseAngle] = ui->dsbxAngle->value();
+    // if (ui->rbFast->isChecked()) {
+    // gcp.params[GCode::Params::Fast] = true;
+    // gcp.params[GCode::Params::AccDistance] = (tool.feedRateMmS() * tool.feedRateMmS()) / (2 * ui->dsbxAcc->value());
+    // }
 
     fileCount = 1;
-    createToolpath(gcp);
+    emit createToolpath(&gcp);
 }
 
 void Form::updateName() {
-    //    const auto& tool { ui->toolHolder->tool() };
-    //    if (tool.type() != Tool::Laser)
-    //        ui->rbNormal->setChecked(true);
-    //    ui->rbFast->setEnabled(tool.type() == Tool::Laser);
+    // const auto& tool { ui->toolHolder->tool() };
+    // if (tool.type() != Tool::Laser)
+    // ui->rbNormal->setChecked(true);
+    // ui->rbFast->setEnabled(tool.type() == Tool::Laser);
     ui->dsbxHathStep->setMinimum(ui->toolHolder->tool().diameter());
     leName->setText(names[side]);
 }

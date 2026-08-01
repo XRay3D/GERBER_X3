@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -23,20 +23,20 @@ enum {
     Raster,
 };
 
-Form::Form(GCode::Plugin* plugin, QWidget* parent)
-    : GCode::BaseForm(plugin, new Creator, parent)
+Form::Form(GCode::Plugin* plugin)
+    : GCode::Form{plugin, new Creator}
     , ui(new ::Ui::PocketOffsetForm)
     , names{tr("Pocket On"), tr("Pocket Outside"), tr("Pocket Inside")} {
     ui->setupUi(content);
-    ui->toolHolder1->label()->setText("Tool 1:");
-    ui->toolHolder2->label()->setText("Tool 2:");
-    ui->toolHolder3->label()->setText("Tool 3:");
-    ui->toolHolder4->label()->setText("Tool 4:");
+    ui->toolHolder1->label()->setText(u"Tool 1:"_s);
+    ui->toolHolder2->label()->setText(u"Tool 2:"_s);
+    ui->toolHolder3->label()->setText(u"Tool 3:"_s);
+    ui->toolHolder4->label()->setText(u"Tool 4:"_s);
 
     setWindowTitle(tr("Pocket Offset Toolpath"));
 
     MySettings settings;
-    settings.beginGroup("PocketOffset");
+    settings.beginGroup(u"PocketOffset"_s);
     settings.getValue(ui->rbClimb);
     settings.getValue(ui->rbConventional);
     settings.getValue(ui->rbInside);
@@ -68,7 +68,7 @@ Form::Form(GCode::Plugin* plugin, QWidget* parent)
 
 Form::~Form() {
     MySettings settings;
-    settings.beginGroup("PocketOffset");
+    settings.beginGroup(u"PocketOffset"_s);
     settings.setValue(ui->rbClimb);
     settings.setValue(ui->rbConventional);
     settings.setValue(ui->rbInside);
@@ -93,13 +93,12 @@ void Form::computePaths() {
             return;
         }
     }
-    auto gcp = getNewGcp();
-    if(!gcp)
-        return;
+
+    if(!getNewGcpWithGi()) return;
 
     for(const Tool& t: tool) {
-        gcp->tools.push_back(t);
-        if(gcp->tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
+        gcp.tools.push_back(t);
+        if(gcp.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
             break;
     }
 
@@ -110,23 +109,23 @@ void Form::computePaths() {
         auto cmp2 = [this](const Tool& t1, const Tool& t2) -> bool {
             return qFuzzyCompare(t1.getDiameter(dsbxDepth->value()), t2.getDiameter(dsbxDepth->value()));
         };
-        std::sort(gcp->tools.begin(), gcp->tools.end(), cmp);
-        auto last = std::unique(gcp->tools.begin(), gcp->tools.end(), cmp2);
-        gcp->tools.erase(last, gcp->tools.end());
+        std::sort(gcp.tools.begin(), gcp.tools.end(), cmp);
+        auto last = std::unique(gcp.tools.begin(), gcp.tools.end(), cmp2);
+        gcp.tools.erase(last, gcp.tools.end());
     }
 
-    gcp->setConvent(ui->rbConventional->isChecked());
-    gcp->setSide(side);
-    gcp->params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.setConvent(ui->rbConventional->isChecked());
+    gcp.setSide(side);
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
     if(ui->sbxSteps->isVisible())
-        gcp->params[Creator::OffsetSteps] = ui->sbxSteps->value();
+        gcp.params[Creator::OffsetSteps] = ui->sbxSteps->value();
 
-    fileCount = static_cast<int>(gcp->tools.size());
-    createToolpath(gcp);
+    fileCount = static_cast<int>(gcp.tools.size());
+    emit createToolpath(&gcp);
 }
 
 void Form::onSbxStepsValueChanged(int arg1) {
-    ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : "");
+    ui->sbxSteps->setSuffix(!arg1 ? tr(" - Infinity") : QString{});
 }
 
 void Form::updateName() {
@@ -145,8 +144,8 @@ void Form::rb_clicked() {
     else if(ui->rbInside->isChecked())
         side = GCode::Inner;
 
-    //    if (tool.type() == Tool::Laser)
-    //        ui->chbxUseTwoTools->setChecked(false);
+    // if (tool.type() == Tool::Laser)
+    // ui->chbxUseTwoTools->setChecked(false);
 
     if(ui->rbClimb->isChecked())
         direction = GCode::Climb;
@@ -156,8 +155,8 @@ void Form::rb_clicked() {
     {
         int fl = ui->sbxToolQty->value();
 
-        //        ui->labelSteps->setVisible(fl < 2);
-        //        ui->sbxSteps->setVisible(fl < 2);
+        // ui->labelSteps->setVisible(fl < 2);
+        // ui->sbxSteps->setVisible(fl < 2);
 
         ui->toolHolder2->setVisible(--fl > 0);
         ui->toolHolder3->setVisible(--fl > 0);

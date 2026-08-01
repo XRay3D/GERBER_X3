@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -42,8 +42,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const {
     switch(index.column()) {
     case Visible:
         switch(role) {
-        case Qt::DisplayRole:
-            return {};
+        case Qt::DisplayRole: return {};
         case Qt::CheckStateRole:
             if(layers.at(names[index.row()])->itemGroup())
                 return (layers.at(names[index.row()])->itemGroup()->isVisible()) ? Qt::Checked : Qt::Unchecked;
@@ -52,10 +51,8 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const {
             if(layers.at(names[index.row()])->itemGroup())
                 return static_cast<int>(layers.at(names[index.row()])->itemGroup()->isVisible());
             return {};
-        case Qt::DecorationRole:
-            return decoration(layers.at(names[index.row()])->color());
-        case Qt::TextAlignmentRole:
-            return Qt::AlignCenter;
+        case Qt::DecorationRole   : return decoration(layers.at(names[index.row()])->color());
+        case Qt::TextAlignmentRole: return Qt::AlignCenter;
         }
         return {};
     case EntityCount:
@@ -64,8 +61,7 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const {
             if(layers.at(names[index.row()])->itemGroup())
                 return static_cast<int>(layers.at(names[index.row()])->itemGroup()->size());
             return DxfObj::tr("Empty layer");
-        case Qt::TextAlignmentRole:
-            return Qt::AlignCenter;
+        case Qt::TextAlignmentRole: return Qt::AlignCenter;
         }
         return {};
     case Type:
@@ -76,14 +72,11 @@ QVariant LayerModel::data(const QModelIndex& index, int role) const {
                 return ar[static_cast<int>(layers.at(names[index.row()])->itemsType())];
             }
             return DxfObj::tr("Empty layer");
-        case Qt::EditRole:
-            return static_cast<int>(layers.at(names[index.row()])->itemsType());
-        case Qt::TextAlignmentRole:
-            return Qt::AlignCenter;
+        case Qt::EditRole         : return static_cast<int>(layers.at(names[index.row()])->itemsType());
+        case Qt::TextAlignmentRole: return Qt::AlignCenter;
         }
         return {};
-    default:
-        return {};
+    default: return {};
     }
 }
 
@@ -98,11 +91,10 @@ bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int ro
         case Qt::DecorationRole:
             layers[names[index.row()]]->setColor(value.value<QColor>());
             if(layers.at(names[index.row()])->itemGroup())
-                for(auto gi: *layers[names[index.row()]]->itemGroup())
+                for(auto&& gi: *layers[names[index.row()]]->itemGroup())
                     gi->changeColor();
             return true;
-        default:
-            return false;
+        default: return false;
         }
     case EntityCount:
     case Type:
@@ -110,12 +102,10 @@ bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int ro
         case Qt::EditRole:
             layers.at(names[index.row()])->setItemsType(static_cast<ItemsType>(value.toInt()));
             return true;
-        default:
-            return {};
+        default: return {};
         }
 
-    default:
-        return false;
+    default: return false;
     }
     return false;
 }
@@ -124,12 +114,9 @@ QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int ro
     if(role == Qt::DisplayRole) {
         if(orientation == Qt::Horizontal) {
             switch(section) {
-            case Visible:
-                return DxfObj::tr("Visible\n& color");
-            case EntityCount:
-                return DxfObj::tr("Entity\ncount");
-            case Type:
-                return DxfObj::tr("Visible\ntype");
+            case Visible    : return DxfObj::tr("Visible\n& color");
+            case EntityCount: return DxfObj::tr("Entity\ncount");
+            case Type       : return DxfObj::tr("Visible\ntype");
             }
         } else {
             return names[section];
@@ -141,18 +128,14 @@ QVariant LayerModel::headerData(int section, Qt::Orientation orientation, int ro
 Qt::ItemFlags LayerModel::flags(const QModelIndex& index) const {
     auto flags = Qt::ItemIsEnabled;
     switch(index.column()) {
-    case Visible:
-        return flags | Qt::ItemIsUserCheckable;
-    case EntityCount:
-        return flags;
-    case Type:
-        return flags | ((layers.at(names[index.row()])->itemGroup()) ? Qt::ItemIsEditable : Qt::NoItemFlags);
-    default:
-        return flags;
+    case Visible    : return flags | Qt::ItemIsUserCheckable;
+    case EntityCount: return flags;
+    case Type       : return flags | ((layers.at(names[index.row()])->itemGroup()) ? Qt::ItemIsEditable : Qt::NoItemFlags);
+    default         : return flags;
     }
 }
 
-////////////////////////////////////////////////////////////////////////////////////////////
+//------------------------------------------------------------------------------
 /// \brief ItemsTypeDelegate::ItemsTypeDelegate
 /// \param parent
 ///

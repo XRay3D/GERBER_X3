@@ -3,7 +3,7 @@
 // * Version   :  na                                                              *
 // * Date      :  XXXXX XX, 2025                                                  *
 // * Website   :  na                                                              *
-// * Copyright :  Damir Bakiev 2016-2025                                          *
+// * Copyright :  Damir Bakiev 2016-2026                                          *
 // * License   :                                                                  *
 // * Use, modification & distribution is subject to Boost Software License Ver 1. *
 // * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -174,10 +174,10 @@ MathParser3::Result MathParser3::processFunction(QStringView func, Result r) {
 
     using F = double (*)(double);
     static std::unordered_map<QStringView, F> funcMap{
-        { u"cos",  [](double val) { return cos(val); }},
-        { u"sin",  [](double val) { return sin(val); }},
+        {u"cos",  [](double val) { return cos(val); } },
+        {u"sin",  [](double val) { return sin(val); } },
         {u"sqrt", [](double val) { return sqrt(val); }},
-        { u"tan",  [](double val) { return tan(val); }},
+        {u"tan",  [](double val) { return tan(val); } },
     };
 
     if(funcMap.contains(func))
@@ -185,21 +185,20 @@ MathParser3::Result MathParser3::processFunction(QStringView func, Result r) {
     else
         qWarning() << u"function '" + func.toString() + u"' is not defined";
 
-    //    enum class Func {
-    //        sin,
-    //        cos,
-    //        tan
-    //    };
-    //    switch (Func(u"sin,cos,tan"_s.split(u',').indexOf(func))) {
-    //    case Func::sin:
-    //        return Result {sin(r.acc), r.rest};
-    //    case Func::cos:
-    //        return Result {cos(r.acc), r.rest};
-    //    case Func::tan:
-    //        return Result {tan(r.acc), r.rest};
-    //    default:
-    //        qWarning() << "function '" + func + "' is not defined";
-    //        break;
-    //    }
+    // enum class Func {
+    // sin,
+    // cos,
+    // tan
+    // };
+    // switch (Func(u"sin,cos,tan"_s.split(u',').indexOf(func))) {
+    // case Func::sin:
+    // return Result {sin(r.acc), r.rest};
+    // case Func::cos:
+    // return Result {cos(r.acc), r.rest};
+    // case Func::tan:
+    // return Result {tan(r.acc), r.rest};
+    // default: qWarning() << "function '" + func + "' is not defined";
+    // break;
+    // }
     return r;
 }

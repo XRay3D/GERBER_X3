@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,8 +12,8 @@
 
 namespace Dxf {
 
-const Color dxfColors[]{
-    {0.0000, 0.0000, 0.0000}, // unused
+constexpr Color dxfColors[]{
+    {0.5000, 0.5000, 0.5000}, //  {0.0000, 0.0000, 0.0000}, // unused
     {1.0000, 0.0000, 0.0000}, // 1
     {1.0000, 1.0000, 0.0000},
     {0.0000, 1.0000, 0.0000},
@@ -268,9 +268,9 @@ const Color dxfColors[]{
     {0.5980, 0.5980, 0.5980},
     {0.7320, 0.7320, 0.7320},
     {0.8660, 0.8660, 0.8660},
-    {0.5000, 0.5000, 0.5000}  // 255//    { 1.0000, 1.0000, 1.0000 } // 255
+    {0.5000, 0.5000, 0.5000}  // 255// { 1.0000, 1.0000, 1.0000 } // 255
 };
 
-}
+} // namespace Dxf
 
 #include "moc_dxf_types.cpp"

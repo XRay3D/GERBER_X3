@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -38,10 +38,10 @@ void Error::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/,
         painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * pi * 8)) * 30 + 30, 255, 255, 255));
     } else {
         QBrush br(QColor(255, 0, 255));
-        //        br.setStyle(Qt::Dense4Pattern);
-        //        QMatrix matrix;
-        //        matrix.scale(scaleFactor() * 3, scaleFactor() * 3);
-        //        br.setMatrix(matrix);
+        // br.setStyle(Qt::Dense4Pattern);
+        // QMatrix matrix;
+        // matrix.scale(scaleFactor() * 3, scaleFactor() * 3);
+        // br.setMatrix(matrix);
         painter->setBrush(br);
     }
 

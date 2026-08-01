@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -64,7 +64,7 @@ void Node::remove(int row) { childs.remove(row); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     if(role == Qt::CheckStateRole && !index.column()) {
-        static bool updateGuard = false;
+        static bool updateGuard{};
         checked_ = (value.value<Qt::CheckState>() == Qt::Checked);
         if(container) {
             auto childItems(this->childs);
@@ -89,7 +89,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
                 childItems = parent_->childs.mid(1);
             switch(index.column()) {
             case Model::Name:
-                //            case Model::Position:
+                // case Model::Position:
                 return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
@@ -111,8 +111,8 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         } else {
             switch(index.column()) {
             case Model::Name:
-                //            case Model::Position:
-                //                return false;
+                // case Model::Position:
+                // return false;
             case Model::GapAngle:
                 par.angle = value.toDouble();
                 item_->redraw();
@@ -137,21 +137,19 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DisplayRole:
         switch(index.column()) {
         case Model::Name:
-            return name.size() ? name : QString{"{%1,%2}"}.arg((~pos_).x()).arg((~pos_).y()); // FIXME
-            //        case Model::Position:
-            //            return QVariant::fromValue(pos_); // QString("%1 : %2").arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
-        case Model::GapAngle:
-            return par.angle;
-        case Model::apThickness:
-            return par.tickness;
-        case Model::GapCount:
-            return par.count;
+            return name.size() ? name : u"{%1,%2}"_s.arg((~pos_).x()).arg((~pos_).y()); // FIXME naming
+
+            // case Model::Position:
+            // return QVariant::fromValue(pos_); // u"%1 : %2"_s.arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
+        case Model::GapAngle   : return par.angle;
+        case Model::apThickness: return par.tickness;
+        case Model::GapCount   : return par.count;
         }
         return {};
     case Qt::DecorationRole:
         if(!index.column()) {
             if(icon.isNull()) {
-                QPixmap p(24, 24);
+                QPixmap p{24, 24};
                 p.fill(Qt::transparent);
                 return QIcon(p);
             }
@@ -171,8 +169,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
         }
         return checked_ ? Qt::Checked : Qt::Unchecked;
     case Qt::TextAlignmentRole:
-        if(index.column())
-            return Qt::AlignCenter;
+        if(index.column()) return Qt::AlignCenter;
         return {};
     default:
         break;

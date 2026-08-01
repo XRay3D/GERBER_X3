@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -42,7 +42,7 @@ SettingsTab::SettingsTab(QWidget* parent)
     labelBoldFont->setObjectName(u"labelBoldFont"_s);
     formLayout->setWidget(1, QFormLayout::LabelRole, labelBoldFont);
 
-    chbxBoldFont = new QCheckBox{" ", groupBox};
+    chbxBoldFont = new QCheckBox{u" "_s, groupBox};
     chbxBoldFont->setObjectName(u"chbxBoldFont"_s);
     formLayout->setWidget(1, QFormLayout::FieldRole, chbxBoldFont);
     // Italic Font
@@ -50,7 +50,7 @@ SettingsTab::SettingsTab(QWidget* parent)
     labelItalicFont->setObjectName(u"labelItalicFont"_s);
     formLayout->setWidget(2, QFormLayout::LabelRole, labelItalicFont);
 
-    chbxItalicFont = new QCheckBox{" ", groupBox};
+    chbxItalicFont = new QCheckBox{u" "_s, groupBox};
     chbxItalicFont->setObjectName(u"chbxItalicFont"_s);
     formLayout->setWidget(2, QFormLayout::FieldRole, chbxItalicFont);
     // Override Fonts
@@ -58,7 +58,7 @@ SettingsTab::SettingsTab(QWidget* parent)
     labelOverrideFonts->setObjectName(u"labelOverrideFonts"_s);
     formLayout->setWidget(3, QFormLayout::LabelRole, labelOverrideFonts);
 
-    chbxOverrideFonts = new QCheckBox{" ", groupBox};
+    chbxOverrideFonts = new QCheckBox{u" "_s, groupBox};
     chbxOverrideFonts->setObjectName(u"chbxOverrideFonts"_s);
     formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
 
@@ -81,8 +81,8 @@ SettingsTab::SettingsTab(QWidget* parent)
 SettingsTab::~SettingsTab() { }
 
 void SettingsTab::readSettings(MySettings& settings) {
-    settings.beginGroup("Dxf");
-    defaultFont_ = settings.getValue(fcbxDxfDefaultFont, "Arial");
+    settings.beginGroup(u"Dxf"_s);
+    defaultFont_ = settings.getValue(fcbxDxfDefaultFont, u"Arial"_s);
     boldFont_ = settings.getValue(chbxBoldFont, false);
     italicFont_ = settings.getValue(chbxItalicFont, false);
     overrideFonts_ = settings.getValue(chbxOverrideFonts, false);
@@ -90,7 +90,7 @@ void SettingsTab::readSettings(MySettings& settings) {
 }
 
 void SettingsTab::writeSettings(MySettings& settings) {
-    settings.beginGroup("Dxf");
+    settings.beginGroup(u"Dxf"_s);
     defaultFont_ = settings.setValue(fcbxDxfDefaultFont);
     boldFont_ = settings.setValue(chbxBoldFont);
     italicFont_ = settings.setValue(chbxItalicFont);

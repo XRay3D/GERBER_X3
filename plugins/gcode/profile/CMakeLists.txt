@@ -1,14 +1,14 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2025
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2025
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.0)
 
 project(gcprofile LANGUAGES CXX)
 
@@ -16,34 +16,29 @@ set(PLUG_NAME "Profile")
 set(PLUG_INFO "Profile")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
 set(PLUG_LOCAL_VERSION "0")
+
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
+               ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
-file(GLOB HEADERS *.h)
-file(GLOB JSONS *.json)
-file(GLOB SOURCES *.cpp)
-file(GLOB UIS *.ui)
+add_library(gc_profile STATIC profile.cpp profile.h)
+target_link_libraries(gc_profile PUBLIC geometry)
 
+file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
+file(GLOB UIS CONFIGURE_DEPENDS *.ui)
+file(GLOB JSONS CONFIGURE_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/*.json)
 
+list(FILTER HEADERS EXCLUDE REGEX profile.h)
+list(FILTER SOURCES EXCLUDE REGEX profile.cpp)
 
 set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE clipper
-          common
-          filetree
-          gcode
-          gi
-          graphicsview
-          tooldatabase
-          Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE gc_profile)
 
-add_library(gc_profile STATIC profile.cpp profile.h)
-
-target_link_libraries(gc_profile PRIVATE clipper gcode common filetree
-                                         Qt6::Widgets)
+target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})

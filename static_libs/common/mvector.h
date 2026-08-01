@@ -1,9 +1,15 @@
 #pragma once
 
 #include <algorithm>
+#include <functional>
 #include <memory>
+#include <ranges>
 #include <span>
 #include <vector>
+
+namespace v = std ::views;
+namespace r = std ::ranges;
+using namespace std ::placeholders;
 
 template <class T>
 struct mvector : std::vector<T> {
@@ -20,18 +26,18 @@ struct mvector : std::vector<T> {
         V::insert(pos, std::begin(r), std::end(r));
     }
 
-    template <typename Range>
-        requires requires(Range r) {std::begin(r); std::end(r); }
-    inline void append(const Range& r) {
-        V::insert(V::end(), std::begin(r), std::end(r));
-    }
+    // template <typename Range>
+    //     requires requires(Range r) {std::begin(r); std::end(r); }
+    // inline void append(const Range& r) {
+    //     V::insert(V::end(), std::begin(r), std::end(r));
+    // }
 
-    inline void append(V&& vec) {
-        if(vec.empty()) return;
-        if(V::capacity() - V::size() < vec.size())
-            V::reserve(V::size() + vec.size());
-        std::ranges::move(vec, std::back_insert_iterator{*this});
-    }
+    // inline void append(V&& vec) {
+    //     if(vec.empty()) return;
+    //     if(V::capacity() - V::size() < vec.size())
+    //         V::reserve(V::size() + vec.size());
+    //     r::move(vec, std::back_insert_iterator{*this});
+    // }
 
     inline void remove(size_t idx) { V::erase(V::begin() + idx); }
 
@@ -87,23 +93,23 @@ struct mvector : std::vector<T> {
         return std::span{V::cbegin() + idx, V::cend()};
     }
 
-    //    mvector mid(size_t idx, size_t len = 0)
-    //    {
-    //        mvector v;
-    //        if (idx >= V::size())
-    //            return v;
-    //        typename V::iterator end;
-    //        const typename V::iterator begin = V::begin() + idx;
-    //        if (len == 0)
-    //            end = V::end();
-    //        else if (idx + len > V::size())
-    //            end = begin + (V::size() - idx);
-    //        else
-    //            end = begin + len;
-    //        v.reserve(std::distance(begin, end));
-    //        v.insert(v.end(), begin, end);
-    //        return v;
-    //    }
+    // mvector mid(size_t idx, size_t len = 0)
+    // {
+    // mvector v;
+    // if (idx >= V::size())
+    // return v;
+    // typename V::iterator end;
+    // const typename V::iterator begin = V::begin() + idx;
+    // if (len == 0)
+    // end = V::end();
+    // else if (idx + len > V::size())
+    // end = begin + (V::size() - idx);
+    // else
+    // end = begin + len;
+    // v.reserve(std::distance(begin, end));
+    // v.insert(v.end(), begin, end);
+    // return v;
+    // }
 
     inline void prepend(T&& t) { V::insert(V::begin(), 1, std::move(t)); }
     inline void prepend(const T& t) { V::insert(V::begin(), 1, t); }
@@ -143,7 +149,7 @@ struct mvector : std::vector<T> {
     {
         // using CP = const P;
         // auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
-        auto it = std::ranges::find(V::begin(), V::end(), ptr, &T::get);
+        auto it = r::find(V::begin(), V::end(), ptr, &T::get);
         if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
@@ -155,7 +161,7 @@ struct mvector : std::vector<T> {
         requires std::is_base_of_v<T, std::shared_ptr<P>>
     {
         // auto it = std::find(V::begin(), V::end(), t /*std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})*/);
-        auto it = std::ranges::find(V::begin(), V::end(), ptr, &T::get);
+        auto it = r::find(V::begin(), V::end(), ptr, &T::get);
         if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else
@@ -179,14 +185,14 @@ struct mvector : std::vector<T> {
         return r;
     }
 
-    //    template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
-    //    inline auto indexOf(P* t) const noexcept
-    //    {
-    //        if (auto it = std::find(V::begin(), V::end(), std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})); it == V::end())
-    //            return std::distance(V::begin() + 1, V::begin());
-    //        else
-    //            return std::distance(V::begin(), it);
-    //    }
+    // template <class P, std::enable_if_t<std::is_base_of_v<T, std::shared_ptr<P>>, int> = 0>
+    // inline auto indexOf(P* t) const noexcept
+    // {
+    // if (auto it = std::find(V::begin(), V::end(), std::shared_ptr<P, std::function<void(P*)>>(t, [](P*) {})); it == V::end())
+    // return std::distance(V::begin() + 1, V::begin());
+    // else
+    // return std::distance(V::begin(), it);
+    // }
 
     inline bool
     contains(const T& t) const noexcept {

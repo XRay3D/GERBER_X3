@@ -113,7 +113,7 @@ struct mvector : std::vector<T> {
         requires std::is_base_of_v<T, std::unique_ptr<P>>
     {
         using CP = const P;
-        auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) {}));
+        auto it = std::find(V::begin(), V::end(), std::unique_ptr<CP, std::function<void(CP*)>>(t, [](CP*) { }));
         if(it == V::end())
             return std::distance(V::begin() + 1, V::begin());
         else

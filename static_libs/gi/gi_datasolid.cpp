@@ -3,14 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gi_datasolid.h"
-
 #include "abstract_file.h"
+#include "gi_dbg.h"
 #include "graphicsview.h"
 #include <QElapsedTimer>
 #include <QPainter>
@@ -19,14 +19,11 @@
 
 namespace Gi {
 
-DataFill::DataFill(Paths& paths, AbstractFile* file)
-    : Item{file}
-    , paths_{paths} {
-    for(Path path: paths) {
-        if(path.size() && path.back() != path.front())
-            path.push_back(path.front());
-        shape_.addPolygon(~path);
-    }
+DataFill::DataFill(Curves curves, AbstractFile* file)
+    : Item{file} {
+    curves_ = std::move(curves);
+    // shape_ = toPPath(toCurves(toPaths(curves_)));
+    shape_ = toPPath(curves_);
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -40,7 +37,12 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     //        return;
     //    }
     // pen_.setWidth(penWidth());
-
+#if 0
+    painter->strokePath(shape_, pen_);
+#else
+    #if DEBUG
+    brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
+    #endif
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     //    for (auto&& poly : shape_.toFillPolygons())
@@ -52,6 +54,7 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen_.setColor(penColor_);
         painter->strokePath(shape_, pen_);
     }
+#endif
 }
 
 int DataFill::type() const { return Type::DataSolid; }
@@ -67,11 +70,12 @@ void DataFill::redraw() {
     // update();
 }
 
-Paths& DataFill::getPaths() {
-    return paths_;
-}
+// Paths& DataFill::getPaths() {
+//     return curves_;
+// }
 
 void DataFill::setPaths(Paths paths, int /*alternate*/) {
+    qCritical("setPaths");
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
@@ -86,7 +90,7 @@ void DataFill::setPaths(Paths paths, int /*alternate*/) {
     shape_ = {};
     for(auto&& path: paths)
         shape_.addPolygon(t.map(~path));
-    paths_ = std::move(paths);
+    // paths_ = std::move(paths);
 
     redraw();
 }

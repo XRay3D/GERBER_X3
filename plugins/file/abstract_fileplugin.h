@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -31,8 +31,8 @@ public:
     AbstractFileSettings(QWidget* parent)
         : QWidget{parent} {
     }
-    virtual ~AbstractFileSettings() = default;
-    virtual void readSettings(MySettings& settings) = 0;
+    virtual ~AbstractFileSettings()                  = default;
+    virtual void readSettings(MySettings& settings)  = 0;
     virtual void writeSettings(MySettings& settings) = 0;
 };
 
@@ -41,21 +41,22 @@ class AbstractFilePlugin : public QObject, public PluginData {
 
 public:
     explicit AbstractFilePlugin(QObject* parent = nullptr)
-        : QObject{parent} { }
+        : QObject{parent} { App{}; } // init global App
     virtual ~AbstractFilePlugin() = default;
 
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
-    [[nodiscard]] virtual QString folderName() const = 0;
-    [[nodiscard]] virtual QIcon icon() const = 0;
+    [[nodiscard]] virtual QString folderName() const                        = 0;
+    [[nodiscard]] virtual QIcon icon() const                                = 0;
     [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) const = 0;
-    [[nodiscard]] virtual bool thisIsIt(const QString& fileName) = 0;
-    [[nodiscard]] virtual uint32_t type() const = 0;
+    [[nodiscard]] virtual bool thisIsIt(const QString& fileName)            = 0;
+    [[nodiscard]] virtual uint32_t type() const                             = 0;
+    [[nodiscard]] virtual QString extension() const { return {}; } // = 0;
 
     virtual void createMainMenu(
         [[maybe_unused]] QMenu& menu,
         [[maybe_unused]] FileTree::View* tv) {
-        menu.addAction(QIcon::fromTheme("document-close"), tr("&Close All Files"), [tv] {
-            if(QMessageBox::question(tv, "", tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
+        menu.addAction(QIcon::fromTheme(u"document-close"_s), tr("&Close All Files"), [tv] {
+            if(QMessageBox::question(tv, {}, tr("Really?"), QMessageBox::Yes, QMessageBox::No) == QMessageBox::Yes)
                 tv->closeFiles();
         });
     };

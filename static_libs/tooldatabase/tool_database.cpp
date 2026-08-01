@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -16,7 +16,7 @@
 #include <QMessageBox>
 #include <QSettings>
 
-ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
+ToolDatabase::ToolDatabase(QWidget* parent, std::span<const Tool::Type> types)
     : QDialog{parent}
     , ui(new Ui::ToolDatabase)
     , types_(types) {
@@ -38,13 +38,13 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
     connect(ui->treeView, &ToolTreeView::itemSelected, [this](ToolItem* item) {
         if(item->isTool())
             tool_ = item->tool();
-        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && types_.contains(item->tool().type())) || types_.empty());
+        ui->buttonBox->button(QDialogButtonBox::Ok)->setEnabled((item->isTool() && r::contains(types_, item->tool().type())) || types_.empty());
         ui->toolEdit->setItem(item);
     });
 
     connect(ui->treeView, &ToolTreeView::doubleClicked, [this](const QModelIndex& index) {
         ToolItem* item = static_cast<ToolItem*>(index.internalPointer());
-        if((item->isTool() && types_.contains(item->tool().type()))) {
+        if((item->isTool() && r::contains(types_, item->tool().type()))) {
             if(item->tool().isValid()) {
                 tool_ = item->tool();
                 accept();
@@ -54,10 +54,10 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
         }
     });
 
-    ui->pbCopy->setIcon(QIcon::fromTheme("edit-copy"));
-    ui->pbDelete->setIcon(QIcon::fromTheme("edit-delete"));
-    ui->pbNew->setIcon(QIcon::fromTheme("list-add"));
-    ui->pbNewGroup->setIcon(QIcon::fromTheme("folder-add"));
+    ui->pbCopy->setIcon(QIcon::fromTheme(u"edit-copy"_s));
+    ui->pbDelete->setIcon(QIcon::fromTheme(u"edit-delete"_s));
+    ui->pbNew->setIcon(QIcon::fromTheme(u"list-add"_s));
+    ui->pbNewGroup->setIcon(QIcon::fromTheme(u"folder-add"_s));
 
     ui->treeView->header()->setSectionResizeMode(QHeaderView::ResizeToContents);
     ui->treeView->header()->setSectionResizeMode(0, QHeaderView::Stretch);
@@ -66,8 +66,8 @@ ToolDatabase::ToolDatabase(QWidget* parent, mvector<Tool::Type> types)
 
 ToolDatabase::~ToolDatabase() {
     QSettings settings;
-    settings.beginGroup("ToolDatabase");
-    settings.setValue("geometry", saveGeometry());
+    settings.beginGroup(u"ToolDatabase"_s);
+    settings.setValue(u"geometry"_s, saveGeometry());
     // qWarning() << geometry();
     delete ui;
 }
@@ -85,8 +85,8 @@ void ToolDatabase::keyPressEvent(QKeyEvent* evt) {
 void ToolDatabase::showEvent(QShowEvent* event) {
     QDialog::showEvent(event);
     QSettings settings;
-    settings.beginGroup("ToolDatabase");
-    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    settings.beginGroup(u"ToolDatabase"_s);
+    restoreGeometry(settings.value(u"geometry"_s, QByteArray()).toByteArray());
     // qWarning() << geometry();
 }
 

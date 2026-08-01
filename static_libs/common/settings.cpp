@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -11,14 +11,61 @@
 #include "settings.h"
 #include "app.h"
 #include "graphicsview.h"
+#include <QtWidgets>
 #include <cmath>
 #include <numbers>
+
 using std::numbers::pi;
+
+template <typename W, auto SET, auto GET>
+struct WidgetIO {
+    static std::optional<QVariant> save(QWidget* w) {
+        if(auto cw = qobject_cast<W*>(w))
+            return QVariant::fromValue((cw->*GET)());
+        return {};
+    }
+    static bool load(QWidget* w, QVariant& var) {
+        if(auto cw = qobject_cast<W*>(w))
+            return (cw->*SET)(Cast{var}), true;
+        return {};
+    }
+};
+
+template <typename... Ws>
+struct Widgets {
+    static QVariant save(QWidget* w) {
+        for(auto save: std::array{Ws::save...})
+            if(auto opt = save(w))
+                return std::move(*opt);
+        return {};
+    }
+    static bool load(QWidget* w, QVariant& var) {
+        if(var.isNull()) return {};
+        for(auto load: std::array{Ws::load...})
+            if(load(w, var)) return true;
+        return {};
+    }
+};
+
+constexpr Widgets<
+    // clang-format off
+    WidgetIO<QTimeEdit,       &QTimeEdit::setTime,           &QTimeEdit::time>,
+    WidgetIO<QCheckBox,       &QCheckBox::setCheckState,     &QCheckBox::checkState>,
+    WidgetIO<QAbstractButton, &QAbstractButton::setChecked,  &QAbstractButton::isChecked>,
+    WidgetIO<QComboBox,       &QComboBox::setCurrentText,    &QComboBox::currentText>,
+    WidgetIO<QDoubleSpinBox,  &QDoubleSpinBox::setValue,     &QDoubleSpinBox::value>,
+    WidgetIO<QLineEdit,       &QLineEdit::setText,           &QLineEdit::text>,
+    WidgetIO<QPlainTextEdit,  &QPlainTextEdit::setPlainText, &QPlainTextEdit::toPlainText>,
+    WidgetIO<QSpinBox,        &QSpinBox::setValue,           &QSpinBox::value>,
+    WidgetIO<QTabWidget,      &QTabWidget::setCurrentIndex,  &QTabWidget::currentIndex>
+    // clang-format on
+    >
+    Widget;
 
 /*G-Code*/
 // AppSettings::AppSettings() {
-//     if (!settings_)
-//         settings_ = this;
+// if (!settings_)
+// settings_ = this;
 //}
 
 // void AppSettings::set(AppSettings* appSettings) { settings_ = appSettings; }
@@ -53,5 +100,45 @@ uint AppSettings::mkrZeroPos() { return mrkZeroPos_; }
 bool AppSettings::isBanana() { return banana_; }
 double AppSettings::lenUnit() { return banana_ ? 25.4 : 1.0; }
 void AppSettings::setBanana(bool val) { banana_ = val; }
+
+QPointF AppSettings::getSnappedPos(QPointF pt, Qt::KeyboardModifiers mod) {
+    if(bool(mod & Qt::ALT) ^ snap_) {
+        const double scale = AppSettings::gridStep(App::grView().getScale());
+        const auto px = pt / scale;
+        return {scale * std::round(px.x()), scale * std::round(px.y())};
+    }
+    return pt;
+}
+
 void AppSettings::setSnap(bool val) { snap_ = val; }
 bool AppSettings::snap() { return snap_; }
+
+#if 0
+void MySettings::setValue(QWidget* w) {
+    if(!w) return;
+    const QString objectName{w->objectName()};
+    if(!objectName.size() || objectName.contains(u'_')) {
+        // qWarning() << w;
+        return;
+    }
+
+    if(QVariant var = Widget.save(w); !var.isNull()) {
+        // if(!widgetData.emplace(objectName, std::move(var)).second)
+        widgetData[objectName] = std::move(var);
+        return;
+    }
+}
+
+void MySettings::getValue(QWidget* w, const QVariant& defaultValue) {
+    if(!w) return;
+    const QString objectName{w->objectName()};
+    if(!objectName.size() || objectName.contains(u'_')) {
+        // qWarning() << w;
+        return;
+    }
+    if(auto it = widgetData.find(objectName);
+        it != widgetData.end()
+        && Widget.load(w, it->second))
+        return;
+}
+#endif

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,103 +20,30 @@
 #include <qmath.h>
 
 namespace Dxf {
-Ellipse::Ellipse(SectionParser* sp)
-    : Entity{sp} {
-}
-
-// void Ellipse::draw(const InsertEntity* const i) const
-//{
-//     if (i) {
-//         //        for (int r{}; r < i->rowCount; ++r) {
-//         //            for (int c{}; c < i->colCount; ++c) {
-//         //                QPointF tr(r * i->rowSpacing, r * i->colSpacing);
-//         //                QPointF rad(radius, radius);
-//         //                auto item = scene->addEllipse(QRectF(centerPoint - rad, centerPoint + rad), QPen(i->color(), thickness /*, Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin*/), Qt::NoBrush);
-//         //                item->setToolTip(layerName);
-//         //                i->transform(item, tr);
-//         //                i->attachToLayer(item);
-//         //            }
-//         //        }
-//     } else {
-//         QPainterPath path;
-//         QLineF line(CenterPoint, EndpointOfMajorAxis);
-//         const double angle = line.angle();
-//         const double length = line.length() / 2;
-//         //        const auto angle = qRadiansToDegrees(std::atan2(EndpointOfMajorAxis.y() - CenterPoint.y(), EndpointOfMajorAxis.x() - CenterPoint.x()));
-
-//        double aspan = qRadiansToDegrees(endParameter) - qRadiansToDegrees(startParameter);
-//        const bool ccw = endParameter > startParameter;
-//        if (endParameter >= 0 && startParameter >= 0) {
-//            if (!ccw)
-//                aspan += 360;
-//        } else {
-//            if (aspan < -180 || (qFuzzyCompare(aspan, -180) && !ccw))
-//                aspan += 360;
-//            else if (aspan > 180 || (qFuzzyCompare(aspan, 180) && ccw))
-//                aspan -= 360;
-//        }
-//        QPointF rad(length, length * ratioOfMinorAxisToMajorAxis);
-//        path.arcTo(QRectF(-rad, +rad), -qRadiansToDegrees(startParameter), -aspan);
-//        //        auto item(new QGraphicsPathItem{path});
-//        //        item->setPen(QPen(color(), 0.0));
-//        //        item->setBrush(Qt::NoBrush);
-//        //        item->setRotation(angle);
-//        //        item->setPos(CenterPoint);
-//        //        path.arcTo(QRectF(CenterPoint - rad, CenterPoint + rad), -qRadiansToDegrees(startParameter), -aspan);
-//        //        attachToLayer(scene->addPath(path, QPen(color(), 0.0), Qt::NoBrush));
-//        //        scene->addItem(item);
-//        //        attachToLayer(item);
-//        auto item = scene->addEllipse(QRectF(-rad, +rad), QPen(color(), 0.0), Qt::NoBrush);
-//        item->setStartAngle(-qRadiansToDegrees(startParameter) * 16);
-//        item->setSpanAngle(-qRadiansToDegrees(aspan) * 16);
-//        item->setRotation(angle);
-//        item->setPos(CenterPoint);
-//        attachToLayer(item);
-//    }
-//}
 
 void Ellipse::parse(CodeData& code) {
     do {
         data.push_back(code);
         switch(static_cast<DataEnum>(code.code())) {
-        case SubclassMarker: // 100
-            break;           //	100	Маркер подкласса (AcDbEllipse)
+        case SubclassMarker             : break; // 100 Маркер подкласса (AcDbEllipse)
 
-        case CenterPointX: // 10
-            CenterPoint.setX(code);
-            break;         //	10	Центральная точка (в МСК)
-        case CenterPointY: // 20
-            CenterPoint.setY(code);
-            break;         //		Файл DXF: значение X; приложение: 3D-точка
-        case CenterPointZ: // 30
-            break;         //	20, 30	Файл DXF: значения Y и Z для центральной точки (в МСК)
+        case CenterPointX               : CenterPoint.setX(code); break; // 10 Центральная точка (в МСК)
+        case CenterPointY               : CenterPoint.setY(code); break; // 20 // Файл DXF: значение X; приложение: 3D-точка
+        case CenterPointZ               : break;                         // 30 // 20, 30 Файл DXF: значения Y и Z для центральной точки (в МСК)
 
-        case EndpointOfMajorAxisX: // 11
-            EndpointOfMajorAxis.setX(code);
-            break;                 //	11	Конечная точка главной оси относительно центральной точки (в МСК)
-        case EndpointOfMajorAxisY: // 21
-            EndpointOfMajorAxis.setY(code);
-            break;                 //		Файл DXF: значение X; приложение: 3D-точка
-        case EndpointOfMajorAxisZ: // 31
-            break;                 //	21, 31	Файл DXF: значения Y и Z для конечной точки главной оси относительно центральной точки (в МСК)
+        case EndpointOfMajorAxisX       : EndpointOfMajorAxis.setX(code); break; // 11 Конечная точка главной оси относительно центральной точки (в МСК)
+        case EndpointOfMajorAxisY       : EndpointOfMajorAxis.setY(code); break; // 21 // Файл DXF: значение X; приложение: 3D-точка
+        case EndpointOfMajorAxisZ       : break;                                 // 31 // 21, 31 Файл DXF: значения Y и Z для конечной точки главной оси относительно центральной точки (в МСК)
 
-        case ExtrusionDirectionX: // 210
-        case ExtrusionDirectionY: // 220
-        case ExtrusionDirectionZ: // 230
-            break;
+        case ExtrusionDirectionX        :        // 210
+        case ExtrusionDirectionY        :        // 220
+        case ExtrusionDirectionZ        : break; // 230 //
 
-        case RatioOfMinorAxisToMajorAxis: // 40
-            ratioOfMinorAxisToMajorAxis = code;
-            break; //	40	Соотношение малой и главной осей
+        case RatioOfMinorAxisToMajorAxis: ratioOfMinorAxisToMajorAxis = code; break; // 40 Соотношение малой и главной осей
 
-        case StartParameter: // 41
-            startParameter = code;
-            break;         //	41	Начальный параметр (значение для полного эллипса — 0,0)
-        case EndParameter: // 42
-            endParameter = code;
-            break; //	42	Конечный параметр (значение для полного эллипса — 2 пи)
-        default:
-            Entity::parse(code);
+        case StartParameter             : startParameter = code; break; // 41 Начальный параметр (значение для полного эллипса — 0,0)
+        case EndParameter               : endParameter = code; break;   // 42 Конечный параметр (значение для полного эллипса — 2 пи)
+        default                         : Entity::parse(code);
         }
         code = sp->nextCode();
     } while(code.code() != 0);
@@ -124,7 +51,75 @@ void Ellipse::parse(CodeData& code) {
 
 Entity::Type Ellipse::type() const { return Entity::ELLIPSE; }
 
-DxfGo Ellipse::toGo() const { return {}; }
+DxfGo Ellipse::toGo() const {
+    const double majorLen = std::hypot(EndpointOfMajorAxis.x(), EndpointOfMajorAxis.y());
+    if(qFuzzyIsNull(majorLen) || qFuzzyIsNull(ratioOfMinorAxisToMajorAxis))
+        return {};
+
+    const double minorLen = majorLen * ratioOfMinorAxisToMajorAxis;
+    const double rotation = std::atan2(EndpointOfMajorAxis.y(), EndpointOfMajorAxis.x());
+    const double cosR = std::cos(rotation);
+    const double sinR = std::sin(rotation);
+
+    auto pointAt = [&](double t) {
+        const double lx = majorLen * std::cos(t);
+        const double ly = minorLen * std::sin(t);
+        return QPointF{
+            CenterPoint.x() + lx * cosR - ly * sinR,
+            CenterPoint.y() + lx * sinR + ly * cosR,
+        };
+    };
+
+    double span = endParameter - startParameter;
+    const bool closed = qFuzzyIsNull(span) || span >= two_pi - 1.0e-9;
+    if(qFuzzyIsNull(span))
+        span = two_pi;
+
+    // Эллипс представляется цепочкой круговых дуг: на каждом малом участке подбирается
+    // окружность, проходящая через начало, середину и конец участка (как и Circle/Arc,
+    // Curve хранит именно круговые дуги, а не плотную ломаную).
+    const int segments = std::clamp(int(std::round(std::abs(span) / two_pi * 36.0)), 4, 72);
+
+    Curve curve;
+    QPointF prev = pointAt(startParameter);
+    curve.emplace_back(prev);
+    for(int i{}; i < segments; ++i) {
+        const double t0 = startParameter + span * i / segments;
+        const double t1 = startParameter + span * (i + 1) / segments;
+        const double tm = (t0 + t1) / 2;
+        const QPointF p0 = prev;
+        const QPointF pm = pointAt(tm);
+        const QPointF p1 = pointAt(t1);
+
+        const double ax = p0.x(), ay = p0.y();
+        const double bx = pm.x(), by = pm.y();
+        const double cx = p1.x(), cy = p1.y();
+        const double d = 2.0 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+
+        if(qFuzzyIsNull(d)) {
+            curve.emplace_back(p1); // вырожденный (почти прямой) участок
+        } else {
+            const double a2 = ax * ax + ay * ay, b2 = bx * bx + by * by, c2 = cx * cx + cy * cy;
+            const QPointF center{
+                (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
+                (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
+            };
+            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+        }
+        prev = p1;
+    }
+
+    if(closed) {
+        DxfGo go{id, Curve{curve}, {std::move(curve)}};
+        go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Elipse);
+        go.GraphicObject::pos = CenterPoint;
+        return go;
+    }
+
+    DxfGo go{id, std::move(curve)};
+    go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::Elipse);
+    return go;
+}
 
 void Ellipse::write(QDataStream& stream) const {
     stream << startParameter;

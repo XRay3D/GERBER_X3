@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -21,10 +21,12 @@ class ToolItem;
 class ToolDatabase : public QDialog {
     Q_OBJECT
 
+    static constexpr std::array all{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
+
 public:
     explicit ToolDatabase(
-        QWidget* parent = nullptr,
-        mvector<Tool::Type> types = mvector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser});
+        QWidget* parent                   = nullptr,
+        std::span<const Tool::Type> types = all);
 
     ~ToolDatabase() override;
 
@@ -35,7 +37,7 @@ private:
     Ui::ToolDatabase* ui;
     Tool tool_;
     ToolItem* item_;
-    const mvector<Tool::Type> types_;
+    std::span<const Tool::Type> types_;
 
 protected:
     void keyPressEvent(QKeyEvent* evt) override;

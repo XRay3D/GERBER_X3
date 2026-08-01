@@ -8,58 +8,41 @@
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.20)
+cmake_minimum_required(VERSION 4.00)
 
-project(file_TopoR LANGUAGES CXX)
+project(file LANGUAGES CXX)
 
-set(PLUG_NAME "TopoR")
-set(PLUG_INFO "Opening TopoR files")
-set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
-set(PLUG_LOCAL_VERSION "1")
-configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
+find_package(Qt6 COMPONENTS  Widgets Xml REQUIRED)
 
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
-file(GLOB JSONS *.json)
-file(GLOB UIS *.ui)
+file(GLOB_RECURSE HEADERS ${CMAKE_CURRENT_SOURCE_DIR}/*.h)
+file(GLOB_RECURSE JSONS ${CMAKE_CURRENT_SOURCE_DIR}/*.json)
+file(GLOB_RECURSE SOURCES ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
+file(GLOB_RECURSE UIS ${CMAKE_CURRENT_SOURCE_DIR}/*.ui)
 
-add_subdirectory(TopoR)
-add_subdirectory(XmlSerializer)
-target_link_libraries(TopoR PUBLIC XmlSerializer)
+add_library(${PROJECT_NAME} SHARED
+    ${HEADERS}
+    ${JSONS}
+    ${SOURCES}
+    ${UIS}
+ )
 
-include_directories(${CMAKE_STATIC_LIBS_DIR})
+target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${JSONS} ${UIS})
+add_definitions(-DQS_HAS_XML=1)
 
-add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
+target_link_libraries(${PROJECT_NAME} PRIVATE
+    geometry
+    common
+    filetree
+    gcode
+    gi
+    graphicsview
+    tooldatabase
+    file_plugins
+    Qt6::Widgets
+    Qt6::Xml
+)
 
-# target_precompile_headers(${PROJECT_NAME} PUBLIC ${HEADERS})
 
-target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE TopoR
-          clipper
-          common
-          file_plugins
-          filetree
-          gi
-          graphicsview
-          tooldatabase
-          Qt6::Widgets)
 
-set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
 
-set_source_files_properties(
-  ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
-
-if(6 GREATER_EQUAL 6) # Android
-  qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
-                 ${PROJECT_SOURCES})
-  # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
-  # QM_FILES_OUTPUT_VARIABLE QM_FILES)
-else()
-  qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt5_add_translation(${QM_FILES} ${TS_FILES})
-endif()

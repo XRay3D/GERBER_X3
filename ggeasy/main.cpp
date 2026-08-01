@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -14,7 +14,8 @@
 #include "mainwindow.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
-#include "stacktrace_and_output.h"
+#include "stacktrace_and_logs.h"
+#include "tool_database.h"
 #include "version.h"
 
 #include <QCommandLineParser>
@@ -22,97 +23,70 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
-#include <vector>
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-#include <QTextCodec>
-#endif
 
 int main(int argc, char* argv[]) {
     stacktraceAndOutput();
-    qSetMessagePattern(
-        u"%{if-critical}\x1b[38;2;255;0;0m"
-        "C %{endif}"
-        "%{if-debug}\x1b[38;2;196;196;196m"
-        "D %{endif}"
-        "%{if-fatal}\x1b[1;38;2;255;0;0m"
-        "F %{endif}"
-        "%{if-info}\x1b[38;2;128;255;255m"
-        "I %{endif}"
-        "%{if-warning}\x1b[38;2;255;128;0m"
-        "W %{endif}"
-        // "%{time HH:mm:ss.zzz} "
-        // "%{appname} %{pid} %{threadid} "
-        // "%{type} "
-        // "%{file}:%{line} %{function} "
-        "%{if-category}%{category}%{endif}%{message} "
-        "\x1b[38;2;64;64;64m <- %{function} <- %{file} : %{line}\x1b[0m"_s);
-
-    qputenv("QT_ENABLE_HIGHDPI_SCALING", "0");
-
-#ifdef Q_OS_WIN32
-    qputenv("QT_QPA_PLATFORM", "windows:darkmode=2"); //"windows:darkmode=[1|2]"
-#endif
 
     QApplication::setAttribute(Qt::AA_Use96Dpi);
 
+    qputenv("QT_ENABLE_HIGHDPI_SCALING", "0"_ba);
+
+    // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1"_ba); // 1|2
+
     Q_INIT_RESOURCE(resources);
 
-    QApplication app(argc, argv);
+    QApplication app{argc, argv};
 
     // #ifdef Q_OS_WIN
-    //     QSettings settings("HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize", QSettings::NativeFormat);
-    //     if (settings.value("AppsUseLightTheme") == 0) {
-    //         qApp->setStyleSheet("QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }");
-    //     }
+    // QSettings settings{u"HKEY_CURRENT_USER\\Software\\Microsoft\\Windows\\CurrentVersion\\Themes\\Personalize"_s, QSettings::NativeFormat};
+    // if (settings.value(u"AppsUseLightTheme"_s) == 0) {
+    // qApp->setStyleSheet(u"QToolTip { color: #ffffff; background-color: #2a82da; border: 1px solid white; }"_s);
+    // }
     // #endif
 
-#ifdef linux
+#ifdef Q_OS_UNIX
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     {
-        QSharedMemory nixFixSharedMemory{"AppSettings"};
+        QSharedMemory nixFixSharedMemory{u"AppSettings"_s};
         if(nixFixSharedMemory.attach())
             nixFixSharedMemory.detach();
     }
 #endif
-    QApplication::setApplicationName("GGEasy");
+    QApplication::setApplicationName(u"GGEasy"_s);
     QApplication::setOrganizationName(VER_COMPANYNAME_STR);
     QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
-
-#if QT_VERSION < QT_VERSION_CHECK(6, 0, 0)
-    QTextCodec::setCodecForLocale(QTextCodec::codecForName("UTF-8"));
-#endif
 
     [[maybe_unused]] App appSingleton;
     [[maybe_unused]] GCode::Settings gcSingleton;
     App::setGcSettings(&gcSingleton);
-    App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).front();
+    App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).constFirst();
     App::toolHolder().readTools();
 
     if(QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
-    QSettings::setDefaultFormat(QSettings::IniFormat);
-    // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, "");
+    // QSettings::setDefaultFormat(QSettings::IniFormat);
+    // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, {});
 
-    //  WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
-    //    glf.setSampleBuffers(true);
-    //    glf.setSamples(16);
-    //    QGLFormat::setDefaultFormat(glf);
+    // WTF ??? QGLFormat glf = QGLFormat::defaultFormat();
+    // glf.setSampleBuffers(true);
+    // glf.setSamples(16);
+    // QGLFormat::setDefaultFormat(glf);
 
     if constexpr(0) {
-        QSystemSemaphore semaphore("GGEasySemaphore", 1); // создаём семафор
-        semaphore.acquire();                              // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
-#ifdef linux
+        QSystemSemaphore semaphore{u"GGEasySemaphore"_s, 1}; // создаём семафор
+        semaphore.acquire();                                 // Поднимаем семафор, запрещая другим экземплярам работать с разделяемой памятью
+#ifdef Q_OS_UNIX
         // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
         // поэтому необходимо избавиться от данного мусора
-        QSharedMemory nix_fix_shared_memory("GGEasyMemory");
+        QSharedMemory nix_fix_shared_memory{u"GGEasyMemory"_s};
         if(nix_fix_shared_memory.attach())
             nix_fix_shared_memory.detach();
 #endif
         // MainWindow* mainWin = nullptr;
-        QSharedMemory sharedMemory("GGEasyMemory"); // Создаём экземпляр разделяемой памяти
+        QSharedMemory sharedMemory{u"GGEasyMemory"_s}; // Создаём экземпляр разделяемой памяти
         auto instance = [&sharedMemory]() -> MainWindow*& { return *static_cast<MainWindow**>(sharedMemory.data()); };
-        bool is_running = false;    // переменную для проверки ууже запущенного приложения
+        bool is_running{};          // переменную для проверки ууже запущенного приложения
         if(sharedMemory.attach()) { // пытаемся присоединить экземпляр разделяемой памяти к уже существующему сегменту
             is_running = true;      // Если успешно, то определяем, что уже есть запущенный экземпляр
         } else {
@@ -121,7 +95,7 @@ int main(int argc, char* argv[]) {
         }
         semaphore.release(); // Опускаем семафор
         QCommandLineParser parser;
-        parser.addPositionalArgument("url", "Url of file to open");
+        parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
         parser.process(app);
         if(is_running) {
             system("pause");
@@ -143,17 +117,19 @@ int main(int argc, char* argv[]) {
 
     { // Translate
         QSettings settings;
-        settings.beginGroup("MainWindow");
-        QString locale(settings.value("locale").toString());
+        settings.beginGroup(u"MainWindow"_s);
+        QString locale(settings.value(u"locale"_s).toString());
         if(locale.isEmpty())
             locale = QLocale().name().left(2);
-        settings.setValue("locale", locale);
+        settings.setValue(u"locale"_s, locale);
         settings.endGroup();
         MainWindow::translate(locale);
     }
 
+    if(0) return ToolDatabase{}.exec();
+
     MainWindow mainWin;
-    mainWin.setObjectName("MainWindow");
+    mainWin.setObjectName(u"MainWindow"_s);
 
     /*
     Platform        Valid suffixes
@@ -161,43 +137,51 @@ int main(int argc, char* argv[]) {
     Unix/Linux      .so
     AIX             .a
     HP-UX           .sl, .so (HP-UXi)
-    macOS and iOS	.dylib, .bundle, .so
+    macOS and iOS .dylib, .bundle, .so
     */
-#ifdef __unix__
-#ifdef QT_DEBUG
-    const QString suffix("*.so");
-#else
-    const QString suffix("*.so");
-#endif
-#elif _WIN32
+#ifdef Q_OS_UNIX
+    #ifdef QT_DEBUG
+    const QString suffix{u"*.so"_s};
+    #else
+    const QString suffix{u"*.so"_s};
+    #endif
+#elif defined(Q_OS_WIN)
     const auto suffix = u"*.dll"_s;
 #else
-    static_assert(false, "Select OS");
+    static_assert(false, u"Select OS"_s);
 #endif
 
     std::vector<std::unique_ptr<QPluginLoader>> loaders;
 
     // load plugins
-    QDir dir(QApplication::applicationDirPath() + "/plugins");
-    if(dir.exists()) { // Поиск всех файлов в папке "plugins"
+    QDir dir(QApplication::applicationDirPath() + u"/plugins"_s);
+    if(dir.exists()) { // Поиск всех файлов в папке u"plugins"_s
         QStringList listFiles(dir.entryList(QStringList(suffix), QDir::Files));
+        auto text = QObject::tr("Load plugin %1\n\n\n");
         for(const auto& str: listFiles) { // Проход по всем файлам
-            App::splashScreen().showMessage(QObject::tr("Load plugin %1\n\n\n").arg(str), Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
-            loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + "/" + str));
+            App::splashScreen().showMessage(text.arg(str),
+                Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+            loaders.emplace_back(std::make_unique<QPluginLoader>(dir.absolutePath() + u"/"_s + str));
             if(auto* pobj = loaders.back()->instance(); pobj) { // Загрузка плагина
-                if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj); gCode) {
-                    gCode->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::gCodePlugins().try_emplace(gCode->type(), gCode);
+                PluginData* pd{};
+                if(auto* gCode = qobject_cast<GCode::Plugin*>(pobj)) {
+                    pd = App::gCodePlugins()
+                             .try_emplace(gCode->type(), gCode)
+                             .first->second;
+                } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj)) {
+                    pd = App::filePlugins()
+                             .try_emplace(file->type(), file)
+                             .first->second;
+                } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj)) {
+                    pd = App::shapePlugins()
+                             .try_emplace(shape->type(), shape)
+                             .first->second;
+                } else
                     continue;
-                } else if(auto* file = qobject_cast<AbstractFilePlugin*>(pobj); file) {
-                    file->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::filePlugins().try_emplace(file->type(), file);
-                    continue;
-                } else if(auto* shape = qobject_cast<Shapes::Plugin*>(pobj); shape) {
-                    shape->setInfo(loaders.back()->metaData().value("MetaData").toObject());
-                    App::shapePlugins().try_emplace(shape->type(), shape);
-                    continue;
-                }
+                pd->setInfo(loaders.back()
+                        ->metaData()
+                        .value(u"MetaData"_s)
+                        .toObject());
             } else {
                 qDebug() << str << loaders.back()->errorString();
                 loaders.pop_back();
@@ -205,12 +189,17 @@ int main(int argc, char* argv[]) {
         }
     }
 
+    SettingsDialog();
+    MainWindow::updateTheme();
     mainWin.init(); // connect plugins
-    SettingsDialog().accept();
 
     QCommandLineParser parser;
-    parser.addPositionalArgument("url", "Url of file to open");
+    parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
     parser.process(app);
+    std::vector<std::string_view> cli{
+        std::from_range, std::span{++argv, static_cast<size_t>(--argc)}
+    };
+    mainWin.cli(cli);
 
     for(const QString& fileName: parser.positionalArguments())
         mainWin.loadFile(fileName);

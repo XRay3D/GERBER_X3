@@ -1,51 +1,39 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2025
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2025
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.0)
 
 project(common LANGUAGES CXX)
 
-find_package(
-  Qt6
-  COMPONENTS Qml
-  REQUIRED)
+find_package(Qt6 COMPONENTS Qml REQUIRED)
+find_package(ICU REQUIRED COMPONENTS uc i18n)
 
-# set(CMAKE_FIND_PACKAGE_TARGETS_GLOBAL ON) # fix Qml
-
-file(GLOB HEADERS *.h)
-file(GLOB SOURCES *.cpp)
+file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(
-  ${PROJECT_NAME}
-  PUBLIC filetree
-         shape
-         gi
-         graphicsview
-         tooldatabase
-         Qt6::Widgets
-         ${EXECUTION}
-         Qt6::Qml
-         $<$<PLATFORM_ID:Linux>:
-         # qcustomplot-qt6
-         tbb
-         >
-         $<$<PLATFORM_ID:Windows>:
-         # tbb12.dll QCustomPlot
-         >)
+    ${PROJECT_NAME}
+    PUBLIC ICU::i18n
+           ICU::uc
+           filetree
+           gi
+           shape
+           $<$<PLATFORM_ID:Linux>:tbb>
+           tooldatabase
+           Qt6::Qml
+           Qt6::Widgets)
+
+target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES})
 
 # add_subdirectory(doublespinbox)
-
-# add_module_library(QT qt.cpp)
-
-# target_compile_definitions(common PRIVATE COMMON_LIBRARY)

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,8 +15,9 @@
 #include <QSettings>
 
 #include <ranges>
-namespace ranges = std::ranges;
-namespace rviews = std::ranges::views;
+
+namespace v = std ::views;
+namespace r = std ::ranges;
 
 class Ruler;
 class QGridLayout;
@@ -30,7 +31,7 @@ struct EnumHelper2 : std::integral_constant<bool, N != 0> {
         : array{e...} { }
     std::array<int, N> array;
     constexpr bool operator()(auto* item) const {
-        return ranges::contains(array, item->type());
+        return r::contains(array, item->type());
     }
 };
 
@@ -46,7 +47,7 @@ class GraphicsView : public QGraphicsView {
 public:
     explicit GraphicsView(QWidget* parent = nullptr);
     ~GraphicsView() override;
-    //    void setScene(QGraphicsScene* Scene);
+    // void setScene(QGraphicsScene* Scene);
     void zoom100();
     void zoomFit();
     void zoomToSelected();
@@ -57,7 +58,10 @@ public:
     void setRuler(bool ruller);
 
     double scaleFactor() const noexcept { return 1.0 / getScale(); }
-    QPointF mappedPos(QMouseEvent* event) const;
+    QPointF toScenePos(QMouseEvent* event);
+    QPointF mapFromScene(const QPointF& point) const;
+    QPointF mapToScene(const QPointF& point) const;
+    using QGraphicsView::mapToScene;
 
     void setScale(double s) noexcept;
     double getScale() const noexcept { return transform().m11(); }
@@ -106,7 +110,6 @@ public:
 
 signals:
     void fileDroped(const QString&);
-    void mouseMove2(const QPointF&, const QPointF&);
     void mouseClickL(const QPointF&);
     void mouseClickR(const QPointF&);
     void mouseMove(const QPointF&);
@@ -116,7 +119,7 @@ private:
     std::vector<T*> getItemImpl(FilterInt&& et, Args&&... args) const {
         const auto items = (scene()->*Ptr)(std::forward<Args>(args)...); // get all items
         constexpr bool isQGraphicsItem = std::is_same_v<T, QGraphicsItem>;
-        if constexpr(isQGraphicsItem && !FilterInt::value) { //  вернуть все QGraphicsItem*
+        if constexpr(isQGraphicsItem && !FilterInt::value) { // вернуть все QGraphicsItem*
             return {items.begin(), items.end()};
         } else {
             // WARNING FilterInt faster than dynamic_cast
@@ -124,13 +127,13 @@ private:
             using FilterDyn = decltype([](auto* item) { return bool(dynamic_cast<T*>(item)); });
             using Transform = decltype([](auto* item) { return static_cast<T*>(item); });
             if constexpr(!isQGraphicsItem && !FilterInt::value) { // вернуть все T*
-                auto rview = items | rviews::filter(FilterDyn{}) | rviews::transform(Transform{});
+                auto rview = items | v::filter(FilterDyn{}) | v::transform(Transform{});
                 return {rview.begin(), rview.end()};
             } else if constexpr(!isQGraphicsItem && FilterInt::value) { // вернуть все T* отсортированные по type()
-                auto rview = items | rviews::filter(et) | rviews::filter(FilterDyn{}) | rviews::transform(Transform{});
+                auto rview = items | v::filter(et) | v::filter(FilterDyn{}) | v::transform(Transform{});
                 return {rview.begin(), rview.end()};
             } else if constexpr(isQGraphicsItem && FilterInt::value) { // вернуть все QGraphicsItem* отсортированные по type()
-                auto rview = items | rviews::filter(et);
+                auto rview = items | v::filter(et);
                 return {rview.begin(), rview.end()};
             }
         }
@@ -139,16 +142,14 @@ private:
     Ruler* const hRuler;
     Ruler* const vRuler;
     QGridLayout* const gridLayout;
-    //    Scene* scene_;
-    double gridStep_{1};
+    // Scene* scene_;
     bool ruler_{};
     int rulerCtr{};
     bool boundingRect_{};
     void updateRuler();
     template <class T>
     void animate(QObject* target, const QByteArray& propertyName, T begin, T end);
-    QPoint latPos;
-    QPointF point, rulPt1, rulPt2;
+    QPointF scenePos, rulPt1, rulPt2, pressPos;
 
     void drawRuller(QPainter* painter, const QRectF& rect) const;
     int timerId{};

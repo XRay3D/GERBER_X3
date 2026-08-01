@@ -24,10 +24,10 @@ namespace Gerber::Comp {
 
 sModel::sModel(int fileId, QObject* parent)
     : QAbstractItemModel{parent}
-    , rootItem(new sNode{""}) {
-    //    auto file = App::project().file<File>(fileId);
-    //    for (auto item : *file->itemGroup(File::Components))
-    //        scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
+    , rootItem(new sNode{u""_s}) {
+    // auto file = App::project().file<File>(fileId);
+    // for (auto item : *file->itemGroup(File::Components))
+    // scene->addRect(item->boundingRect(), Qt::NoPen, file->color());
 
     auto file = App::project().file<Gerber::File>(fileId);
 
@@ -37,9 +37,11 @@ sModel::sModel(int fileId, QObject* parent)
     auto unsorted = new sNode{GbrObj::tr("unsorted")};
 
     for(const auto& component: file->components()) {
-        static constexpr ctll::fixed_string pattern{R"((\D+)(\d+).*)"};
+        static constexpr ctll::fixed_string pattern{R"((\D+)(\d+).*)"}; // fixed_string(u"(\\D+)(\\d+).*"};
 
-        if(auto [whole, c1, c2] = ctre::match<pattern>(std::u16string_view{component.refdes()}); whole) {
+        if(auto [whole, c1, c2]
+            = ctre::match<pattern>(std::u16string_view(component.refdes()));
+            whole) {
             if(map[CtreCapTo(c1)].empty())
                 map[CtreCapTo(c1)].emplace_back(-1, new sNode{CtreCapTo{c1}});
             map[CtreCapTo(c1)].emplace_back(CtreCapTo(c2).toInt(), new sNode{component});
@@ -49,26 +51,26 @@ sModel::sModel(int fileId, QObject* parent)
     }
 
     for(auto& [key, value]: map) {
-        std::sort(value.begin(), value.end(), [](const pair& p1, const pair& p2) { return p1.first < p2.first; });
-        for(size_t i = 1; i < value.size(); ++i)
+        r::sort(value, {}, &pair::first);
+        for(size_t i = 1; i < value.size(); ++i) // TODO ranges
             value.front().second->append(value[i].second);
         rootItem->append(value.front().second);
     }
 
-    //    auto it = map.begin();
-    //    while (it != map.end()) {
-    //        std::sort(
-    //            it.value().begin(),
-    //            it.value().end(),
-    //            [](const QPair<int, sNode*>& p1, const QPair<int, sNode*>& p2) {
-    //                return p1.first < p2.first;
-    //            });
-    //        for (int i = 1; i < it.value().size(); ++i) {
-    //            it.value().first().second->append(it.value()[i].second);
-    //        }
-    //        rootItem->append(it.value().first().second);
-    //        ++it;
-    //    }
+    // auto it = map.begin();
+    // while (it != map.end()) {
+    // std::sort(
+    // it.value().begin(),
+    // it.value().end(),
+    // [](const QPair<int, sNode*>& p1, const QPair<int, sNode*>& p2) {
+    // return p1.first < p2.first;
+    // });
+    // for (int i = 1; i < it.value().size(); ++i) {
+    // it.value().first().second->append(it.value()[i].second);
+    // }
+    // rootItem->append(it.value().first().second);
+    // ++it;
+    // }
 
     if(unsorted->childCount() > 0)
         rootItem->append(unsorted);
@@ -78,7 +80,7 @@ sModel::sModel(int fileId, QObject* parent)
 
 sModel::~sModel() {
     delete rootItem;
-    //    App::app->sModel_ = nullptr;
+    // App::app->sModel_ = nullptr;
 }
 
 QModelIndex sModel::index(int row, int column, const QModelIndex& parent) const {
@@ -133,8 +135,7 @@ QVariant sModel::headerData(int section, Qt::Orientation orientation, int role) 
                               "name");
         case 7: /* <decimal> Height, in the unit of the file. */
             return GbrObj::tr("Height");
-        default:
-            return QString("");
+        default: return {};
         }
     return {};
 }

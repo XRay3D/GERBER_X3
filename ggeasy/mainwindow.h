@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -34,9 +34,10 @@ class File;
 
 class MainWindow : public QMainWindow {
     Q_OBJECT
-    //    friend void FileTree::View::on_doubleClicked(const QModelIndex&);
+    // friend void FileTree::View::on_doubleClicked(const QModelIndex&);
     friend class Recent;
     friend class Project;
+    friend int main(int, char*[]);
 
 public:
     explicit MainWindow(QWidget* parent = nullptr);
@@ -52,19 +53,20 @@ public:
     static void translate(const QString& locale) {
         static std::vector<std::unique_ptr<QTranslator>> translators;
         translators.clear();
-        QDir dir(qApp->applicationDirPath() + "/translations");
-        for(auto&& str: dir.entryList(QStringList{"*" + locale + ".qm"}, QDir::Files)) {
+        QDir dir(qApp->applicationDirPath() + u"/translations"_s);
+        for(auto&& str: dir.entryList(QStringList{u"*"_s + locale + u".qm"_s}, QDir::Files)) {
             translators.emplace_back(std::make_unique<QTranslator>());
             if(translators.back()->load(str, dir.path()))
                 qApp->installTranslator(translators.back().get());
         }
     }
     static void extracted(QtMsgType& type);
-    void messageHandler(QtMsgType type, const QStringList& context, const QString& message);
+    void loggingHandler(QtMsgType type, const QStringList& context, const QString& message);
     void loadFile(const QString& fileName);
     static void updateTheme() {
 
         static auto palette = qApp->style()->standardPalette();
+        static auto style = qApp->style()->name();
 
         if(App::settings().theme()) {
 
@@ -149,15 +151,15 @@ public:
             class Style : public QProxyStyle {
             public:
                 Style()
-                    : QProxyStyle{"Fusion"} { }
+                    : QProxyStyle{u"Fusion"_s} { }
 
                 QPixmap getPixmap(StandardPixmap standardPixmap) const {
                     switch(standardPixmap) {
-                    case SP_TitleBarNormalButton: return QPixmap{dwRestoreXpm};
-                    case SP_TitleBarMinButton: return QPixmap{dwMinimizeXpm};
-                    case SP_TitleBarCloseButton:
+                    case SP_TitleBarNormalButton : return QPixmap{dwRestoreXpm};
+                    case SP_TitleBarMinButton    : return QPixmap{dwMinimizeXpm};
+                    case SP_TitleBarCloseButton  :
                     case SP_DockWidgetCloseButton: return QPixmap{dwCloseXpm};
-                    default: return {};
+                    default                      : return {};
                     }
                 }
 
@@ -167,8 +169,8 @@ public:
                 }
 
                 // QPixmap standardPixmap(StandardPixmap standardPixmap, const QStyleOption* opt, const QWidget* widget) const override {
-                //     if(auto pix = getPixmap(standardPixmap); !pix.isNull()) return pix;
-                //     return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
+                // if(auto pix = getPixmap(standardPixmap); !pix.isNull()) return pix;
+                // return QProxyStyle::standardPixmap(standardPixmap, opt, widget);
                 // }
 
                 void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
@@ -185,38 +187,14 @@ public:
                                 painter->drawLine(c.x(), c.y(), r.right(), c.y());
                             }
                         }
-                        //                    if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
-                        //                        painter->fillRect(option->rect, Qt::blue);
-                        //                    if(option->state & State_Open) // The branch indicator has an opened sub-tree.
-                        //                        painter->fillRect(option->rect, Qt::yellow);
+                        // if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
+                        // painter->fillRect(option->rect, Qt::blue);
+                        // if(option->state & State_Open) // The branch indicator has an opened sub-tree.
+                        // painter->fillRect(option->rect, Qt::yellow);
                     }
                     QProxyStyle::drawPrimitive(element, option, painter, widget);
                 }
-
-                //            void drawPrimitive(PrimitiveElement element, const QStyleOption* option, QPainter* painter, const QWidget* widget = nullptr) const override {
-                //                if(element == QStyle::PE_IndicatorBranch) {
-                //                    auto r = option->rect;
-                //                    auto c = r.center();
-                //                    auto color = Qt::darkGray; // qApp->palette().color(QPalette::Highlight);
-                //                    painter->setPen(color);
-                //                    if(!(option->state & State_Children)) {
-                //                        if(option->state & State_Sibling) // The node in the tree has a sibling (i.e., there is another node in the same column).
-                //                            painter->drawLine(c.x(), r.top(), c.x(), r.bottom());
-                //                        if(option->state & State_Item) {  // This branch indicator has an item.
-                //                            painter->drawLine(c.x(), r.top(), c.x(), c.y());
-                //                            painter->drawLine(c.x(), c.y(), r.right(), c.y());
-                //                        }
-                //                    }
-                //                    //                    if(option->state & State_Children) // The branch has children (i.e., a new sub-tree can be opened at the branch).
-                //                    //                        painter->fillRect(option->rect, Qt::blue);
-                //                    //                    if(option->state & State_Open) // The branch indicator has an opened sub-tree.
-                //                    //                        painter->fillRect(option->rect, Qt::yellow);
-                //                }
-                //                QProxyStyle::drawPrimitive(element, option, painter, widget);
-                //            }
             };
-
-            qApp->setStyle(new Style);
 
             struct Color {
                 QColor base;
@@ -228,37 +206,33 @@ public:
             } const color = []() noexcept -> Color {
             switch(App::settings().theme()) {
             case LightBlue: return {
-                    {230, 230, 230}, // base
-                    {127, 127, 127}, // disabled
-                    { 61, 174, 233}, // highlight
-                    { 61, 174, 233}, // link
-                    {200, 200, 200}, // window
-                    {  0,   0,   0}  // windowText
-                };
+                    .base       {230, 230, 230},
+                    .disabled   {127, 127, 127},
+                    .highlight  { 61, 174, 233},
+                    .link       { 61, 174, 233},
+                    .window     {200, 200, 200},
+                    .windowText {  0,   0,   0}};
             case LightRed: return {
-                    {230, 230, 230}, // base
-                    {127, 127, 127}, // disabled
-                    {218,  68,  83}, // highlight
-                    { 61, 174, 233}, // link
-                    {200, 200, 200}, // window
-                    {  0,   0,   0}  // windowText
-                };
+                    .base       {230, 230, 230},
+                    .disabled   {127, 127, 127},
+                    .highlight  {218,  68,  83},
+                    .link       { 61, 174, 233},
+                    .window     {200, 200, 200},
+                    .windowText {  0,   0,   0}};
             case DarkBlue: return {
-                    { 20,  20,  20}, // base
-                    { 80,  80,  80}, // disabled
-                    { 61, 174, 233}, // highlight
-                    { 61, 174, 233}, // link
-                    { 30,  30,  30}, // window
-                    {220, 220, 220}  // windowText
-                };
+                    .base       { 20,  20,  20},
+                    .disabled   { 80,  80,  80},
+                    .highlight  { 61, 174, 233},
+                    .link       { 61, 174, 233},
+                    .window     { 30,  30,  30},
+                    .windowText {220, 220, 220}};
             case DarkRed: default: return {
-                    { 20,  20,  20}, // base
-                    { 80,  80,  80}, // disabled
-                    {218,  68,  83}, // highlight
-                    { 61, 174, 233}, // link
-                    { 30,  30,  30}, // window
-                    {220, 220, 220}  // windowText
-                };
+                    .base       { 20,  20,  20},
+                    .disabled   { 80,  80,  80},
+                    .highlight  {218,  68,  83},
+                    .link       { 61, 174, 233},
+                    .window     { 30,  30,  30},
+                    .windowText {220, 220, 220}};
             } }();
 
             QPalette palette;
@@ -287,21 +261,24 @@ public:
             palette.setBrush(QPalette::Disabled, QPalette::Text, color.disabled);
             palette.setBrush(QPalette::Disabled, QPalette::Shadow, color.disabled);
 
-            //        palette.setBrush(QPalette::Inactive, QPalette::ButtonText,color. disabled);
-            //        palette.setBrush(QPalette::Inactive, QPalette::HighlightedText,color. disabled);
-            //        palette.setBrush(QPalette::Inactive, QPalette::Text,color. disabled);
-            //        palette.setBrush(QPalette::Inactive, QPalette::Shadow,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::ButtonText,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::HighlightedText,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::Text,color. disabled);
+            // palette.setBrush(QPalette::Inactive, QPalette::Shadow,color. disabled);
 
             qApp->setPalette(palette);
+            qApp->setStyle(new Style);
         } else {
-            // qApp->setStyle(style);
-            qApp->setStyle(QStyleFactory::create("Fusion"));
-            qApp->setPalette(palette); // QApplication::style()->standardPalette());
+            qApp->setStyle(QStyleFactory::create(style));
+            // qApp->setStyle(QStyleFactory::create(u"Fusion"_s));
+            // qApp->setPalette(palette); // QApplication::style()->standardPalette());
         }
 
-        QIcon::setThemeName(App::settings().theme() < DarkBlue ? "ggeasy-light" : "ggeasy-dark");
-        if(App::mainWindowPtr() && App::mainWindow().isVisible())
-            SettingsDialog().show();
+        QIcon::setThemeName(
+            App::settings().theme() > LightRed
+                    || palette.text().color().red() > 128
+                ? u"ggeasy-light"_s
+                : u"ggeasy-dark"_s);
     }
 
     QUndoStack& undoStack() { return undoStack_; }
@@ -311,11 +288,11 @@ public:
             return;
         if(auto widget = dockWidget_->widget(); widget) {
             dockWidget_->setWidget(dwContent); // NOTE  заменяет виджет новым и сбрасывается предок
-            widget->setParent(nullptr);        //       так как виджет лежит полем класса плагина.
+            widget->setParent(nullptr);        // так как виджет лежит полем класса плагина.
         } else
             dockWidget_->setWidget(dwContent);
         dockWidget_->setWindowTitle(dwContent->windowTitle());
-        if(auto pbClose{dwContent->findChild<QPushButton*>("pbClose")}; pbClose)
+        if(auto pbClose{dwContent->findChild<QPushButton*>(u"pbClose"_s)}; pbClose)
             connect(pbClose, &QPushButton::clicked, this, &MainWindow::resetToolPathsActions);
         dockWidget_->show();
     }
@@ -329,7 +306,7 @@ private slots:
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
     void addFileToPro(class AbstractFile* file);
-    //    void setDockWidget(QWidget* dwContent);
+    // void setDockWidget(QWidget* dwContent);
 
 private:
     QDockWidget* dockWidget_ = nullptr;
@@ -379,7 +356,7 @@ private:
     void resetToolPathsActions() {
         if(auto widget = dockWidget_->widget(); widget) {
             dockWidget_->setWidget(new QWidget); // NOTE  заменяет виджет новым и сбрасывается предок
-            widget->setParent(nullptr);          //       так как виджет лежит полем класса плагина.
+            widget->setParent(nullptr);          // так как виджет лежит полем класса плагина.
         }
         dockWidget_->setVisible(false);
         if(auto action{actionGroup.checkedAction()}; action)
@@ -417,7 +394,7 @@ private:
 private:
     bool saveFile(const QString& fileName);
     void setCurrentFile(const QString& fileName);
-    bool debug();
+    bool cli(std::span<std::string_view> commands = {});
 
     // QWidget interface
 protected:

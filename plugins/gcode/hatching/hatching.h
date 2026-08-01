@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,13 +15,13 @@
 
 namespace CrossHatch {
 
-constexpr auto CROSS_HATCH = md5::hash32("CrossHatch");
+constexpr auto CROSS_HATCH = "CrossHatch"_hash32;
 
 class File final : public GCode::File {
 public:
     explicit File();
-    explicit File(GCode::Params&& gcp, Pathss&& toolPathss, Paths&& pocketPaths);
-    QIcon icon() const override { return QIcon::fromTheme("crosshatch-path"); }
+    explicit File(GCode::Params&& gcp);
+    QIcon icon() const override { return QIcon::fromTheme(u"crosshatch-path"_s); }
     uint32_t type() const override { return CROSS_HATCH; }
     void createGi() override;
     void genGcodeAndTile() override;
@@ -32,11 +32,9 @@ public:
     Creator() { }
     ~Creator() override = default;
 
-    enum {
-        UseAngle = GCode::Params::UserParam,
-        HathStep,
-        Pass
-    };
+    static inline const QString UseAngle = u"UseAngle"_s;
+    static inline const QString HathStep = u"HathStep"_s;
+    static inline const QString Pass     = u"Pass"_s;
 
     enum PassE {
         NoProfilePass,

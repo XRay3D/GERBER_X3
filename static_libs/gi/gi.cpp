@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -35,18 +35,18 @@ Item::Item(AbstractFile* file)
     , color_{Qt::white}
     , brushColor_{colorPtr_ ? *colorPtr_ : color_}
     , penColor_{Qt::transparent} {
-    //    animation(this, "bodyColor")
-    //    , visibleAnim(this, "opacity")     ,//    animation.setDuration(100);
-    //    animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    //    connect(this, &Item::colorChanged, [this] { update(); });
-    //    visibleAnim.setDuration(100);
-    //    visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
-    //    connect(&visibleAnim, &QAbstractAnimation::finished, [this] {
-    //    QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() >
-    //    0.9); });
+    // animation(this, u"bodyColor"_s)
+    // , visibleAnim(this, u"opacity"_s)     ,// animation.setDuration(100);
+    // animation.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    // connect(this, &Item::colorChanged, [this] { update(); });
+    // visibleAnim.setDuration(100);
+    // visibleAnim.setEasingCurve(QEasingCurve(QEasingCurve::Linear));
+    // connect(&visibleAnim, &QAbstractAnimation::finished, [this] {
+    // QGraphicsObject::setVisible(visibleAnim.currentValue().toDouble() >
+    // 0.9); });
     QGraphicsItem::setVisible(false);
-    //    connect(this, &QGraphicsObject::rotationChanged, [] {
-    //    qDebug("rotationChanged"); });
+    // connect(this, &QGraphicsObject::rotationChanged, [] {
+    // qDebug(u"rotationChanged"_s); });
 }
 
 bool Item::isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }
@@ -82,9 +82,29 @@ void Item::setPenColorPtr(const QColor* penColor) {
     colorChanged();
 }
 
-Paths Item::paths(int) const { return ~shape_.toSubpathPolygons(transform()); }
+Paths Item::paths(int /*param*/) const { return toPaths(transform().map(shape_)); }
 
-void Item::setPaths(Paths paths, int) {
+Curves Item::curves(int param) const {
+    Curves curves{curves_};
+    if(param) return curves;
+    auto tr = transform();
+    if(!tr.isIdentity())
+        r::for_each(curves, std::bind(TransformCurve, _1, std::move(tr)));
+    return curves;
+}
+
+void Item::setCurves(Curves curves, int /*param*/) {
+    curves_ = std::move(curves);
+    bool ok{};
+    auto tr = transform().inverted(&ok);
+    if(ok) {
+        r::for_each(curves_, std::bind(TransformCurve, _1, std::move(tr)));
+    } else
+        qCritical("transform().inverted(&ok); ok is false!!!");
+    redraw();
+}
+
+void Item::setPaths(Paths paths, int /*param*/) {
     auto t{transform()};
     auto a{qRadiansToDegrees(asin(t.m12()))};
     t = t.rotateRadians(-t.m12());
@@ -110,16 +130,16 @@ QRectF Item::boundingRect() const {
 QPainterPath Item::shape() const { return shape_; }
 
 void Item::setVisible(bool visible) {
-    //    if (visible == isVisible() && (visible && opacity() < 1.0))
-    //        return;
-    //    visibleAnim.setStartValue(visible ? 0.0 : 1.0);
-    //    visibleAnim.setEndValue(visible ? 1.0 : 0.0);
-    //    visibleAnim.start();
-    //    if (visible) {
-    //        setOpacity(0.0);
+    // if (visible == isVisible() && (visible && opacity() < 1.0))
+    // return;
+    // visibleAnim.setStartValue(visible ? 0.0 : 1.0);
+    // visibleAnim.setEndValue(visible ? 1.0 : 0.0);
+    // visibleAnim.start();
+    // if (visible) {
+    // setOpacity(0.0);
     setOpacity(1.0 * visible);
     QGraphicsItem /*QGraphicsObject*/ ::setVisible(visible);
-    //    }
+    // }
 }
 
 const AbstractFile* Item::file() const { return file_; }
@@ -127,6 +147,8 @@ const AbstractFile* Item::file() const { return file_; }
 int Item::id() const { return id_; }
 
 void Item::setId(int32_t id) { id_ = id; }
+
+Side Item::side() const { return file_ ? file_->side() : Side::Top; }
 
 double Item::scaleFactor() const {
     double scale = 1.0;
@@ -137,6 +159,45 @@ double Item::scaleFactor() const {
     return scale;
 }
 
+std::optional<QPainterPath> Item::updateArrows() {
+    if(auto sf = scaleFactor(); scar == sf)
+        return {};
+    else
+        scar = sf;
+
+    QPainterPath arrows;
+
+    using QPP = QPainterPath;
+    using El = QPP::Element;
+
+    const double length = std::clamp(30 * scar, 0.0, 0.5);
+
+    for(auto&& elements:
+        v::iota(0, shape_.elementCount())
+            | v::transform(std::bind(&QPP::elementAt, shape_, _1))          // to Element
+            | v::chunk_by([](const El&, const El& r) { return r.type; })) { // to Subpath Polygons
+
+        constexpr auto splitCurve = +[](const El&, const El& r) {
+            return r.type > QPP::CurveToElement;
+        };
+
+        for(auto&& [from, to]: v::pairwise(v::chunk_by(elements, splitCurve))) {
+            QLineF line{to.back(), to.front().type == QPP::CurveToElement ? to[1] : from.back()};
+            if(line.length() < length) continue;
+            const double angle = line.angle();
+            if(length > 0.) {
+                line.setLength(length);
+                line.setAngle(angle + 10);
+                arrows.moveTo(line.p2());
+                line.setAngle(angle - 10);
+                arrows.lineTo(line.p1());
+                arrows.lineTo(line.p2());
+            }
+        }
+    }
+    return arrows;
+}
+
 void Item::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
     colorState |= Hovered;
     changeColor();
@@ -144,9 +205,9 @@ void Item::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
 }
 
 // double Item::penWidth(double w) const {
-//     if(scene() && scene()->views().size())
-//         w /= scene()->views().front()->transform().m11();
-//     return w;
+// if(scene() && scene()->views().size())
+// w /= scene()->views().front()->transform().m11();
+// return w;
 // };
 
 void Item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {

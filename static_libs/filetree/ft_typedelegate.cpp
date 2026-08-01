@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -36,7 +36,7 @@ void TypeDelegate::setEditorData(QWidget* editor, const QModelIndex& index) cons
             continue;
         comboBox->addItem(name, id);
         comboBox->setItemData(ctr, comboBox->size(), Qt::SizeHintRole);
-        comboBox->setItemData(ctr, name + '\n' + toolTip, Qt::ToolTipRole);
+        comboBox->setItemData(ctr, {name + u'\n' + toolTip}, Qt::ToolTipRole);
         ++ctr;
     }
     comboBox->setCurrentIndex(index.data(Qt::EditRole).toInt());

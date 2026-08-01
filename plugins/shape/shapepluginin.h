@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,7 +12,7 @@
 
 #include "ft_view.h"
 #include "plugindata.h"
-#include "shape.h"
+#include "abstract_shape.h"
 
 namespace Shapes {
 class Node;
@@ -26,7 +26,7 @@ struct Editor : QWidget {
 class Plugin : public QObject, public PluginData {
     Q_OBJECT
 
-    //    std::atomic<AbstractShape*> item {};
+    // std::atomic<AbstractShape*> item {};
     friend class AbstractShape;
     AbstractShape* item{};
     void requestEditor() { emit showEditor(editor()); }

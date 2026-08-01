@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -12,38 +12,39 @@
 
 #include "datastream.h"
 #include <any>
+#include <curve.h>
 #include <myclipper.h>
 
 // struct Circle {
-//     QPointF center;
-//     double radius;
+// QPointF center;
+// double radius;
 // };
 // struct Ellipse {
-//     QPointF center;
-//     QPointF focus;
+// QPointF center;
+// QPointF focus;
 // };
 // struct ArcCircle {
-//     QPointF center;
-//     double radius;
-//     double angle1;
-//     double angle2;
+// QPointF center;
+// double radius;
+// double angle1;
+// double angle2;
 // };
 // struct ArcEllipse {
-//     QPointF center;
-//     QPointF focus;
-//     double angle1;
-//     double angle2;
+// QPointF center;
+// QPointF focus;
+// double angle1;
+// double angle2;
 // };
 
 // struct Polygon {
-//     QPolygonF points;
-//     bool open{};
+// QPolygonF points;
+// bool open{};
 // };
 
 // struct Rectangle {
-//     QPointF p1;
-//     QPointF p2;
-//     double angle;
+// QPointF p1;
+// QPointF p2;
+// double angle;
 // };
 
 struct Transform {
@@ -73,7 +74,8 @@ enum class GCType {
     Drill,
     Pocket,
     Profile,
-    Thermal
+    Thermal,
+    THread
 };
 
 struct GraphicObject {
@@ -110,10 +112,10 @@ struct GraphicObject {
     };
     // clang-format on
 
-    Paths fill;
-    Path path;
-    Point pos{std::numeric_limits</*Point::Type*/ int32_t>::lowest(), std::numeric_limits</*Point::Type*/ int32_t>::lowest()};
-    QByteArray name;
+    Curves fill;
+    Curve path;
+    QPointF pos{std::nanf(""), std::nanf("")};
+    QString name;
     Type type{Null};
     int32_t id{-1};
     std::any raw;
@@ -121,15 +123,15 @@ struct GraphicObject {
     inline bool isType(uint32_t t) const { return (t & 0xFF) ? (type & 0xFF) == (t & 0xFF) : true; }
     inline bool isFlags(uint32_t f) const { return (f & ~0xFF) ? (type & ~0xFF) & f : true; }
     inline bool test(uint32_t t) const { return isType(t) && isFlags(t); }
-    inline bool closed() const { return path.size() > 2 && path.front() == path.back(); }
-    bool positive() const { return Clipper2Lib::IsPositive(path); }
+    inline bool closed() const { return path.isClosed(); }
+    bool positive() const { return path.isPositive(); }
 };
 
 inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    for(auto& path: go.fill)
-        path = ~t.map(~path);
-    go.path = ~t.map(~go.path);
-    go.pos = ~t.map(~go.pos);
+    for(auto& curve: go.fill)
+        TransformCurve(curve, t);
+    TransformCurve(go.path, t);
+    go.pos = t.map(go.pos);
     return go;
 }
 
@@ -154,9 +156,9 @@ struct Criteria {
             if((fl = go.test(type)))
                 break;
         if(fl && !length.isNull())
-            fl &= length(Clipper2Lib::Length(go.path));
+            fl &= length(go.path.perimetr());
         if(fl && !area.isNull())
-            fl &= area(Clipper2Lib::Area(go.fill));
+            fl &= area(Area(go.fill));
         return fl;
     }
 };

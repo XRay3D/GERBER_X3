@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -28,6 +28,7 @@ class File;
 
 namespace Gi {
 class Item;
+class Debug_;
 } // namespace Gi
 
 namespace FileTree {
@@ -41,6 +42,7 @@ class Model : public QAbstractItemModel {
     friend class ::Project;
     friend class Node;
     friend class View;
+    friend class Gi::Debug_;
 
 signals:
     void updateActions();
@@ -72,20 +74,20 @@ public:
 
     int columnCount(const QModelIndex& parent) const override;
     int rowCount(const QModelIndex& parent) const override;
-    // костыли
-    inline void beginInsertRows_(const QModelIndex& parent, int first, int last) { QAbstractItemModel::beginInsertRows(parent, first, last); }
-    inline void endInsertRows_() { QAbstractItemModel::endInsertRows(); }
-    inline void beginRemoveRows_(const QModelIndex& parent, int first, int last) { QAbstractItemModel::beginRemoveRows(parent, first, last); }
-    inline void endRemoveRows_() { QAbstractItemModel::endRemoveRows(); }
-    inline QModelIndex createIndex_(int row, int column, quintptr id) const { return QAbstractItemModel::createIndex(row, column, id); }
+    // public protected method
+    using QAbstractItemModel::beginInsertRows;
+    using QAbstractItemModel::beginRemoveRows;
+    using QAbstractItemModel::createIndex;
+    using QAbstractItemModel::endInsertRows;
+    using QAbstractItemModel::endRemoveRows;
 
     // Drag and Drop
-    //    QStringList mimeTypes() const override;
-    //    QMimeData* mimeData(const QModelIndexList& indexes) const override;
-    //    bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
-    //    Qt::DropActions supportedDragActions() const override;
-    //    Qt::DropActions supportedDropActions() const override;
-    //    bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
+    // QStringList mimeTypes() const override;
+    // QMimeData* mimeData(const QModelIndexList& indexes) const override;
+    // bool dropMimeData(const QMimeData* data, Qt::DropAction action, int row, int column, const QModelIndex& parent) override;
+    // Qt::DropActions supportedDragActions() const override;
+    // Qt::DropActions supportedDropActions() const override;
+    // bool moveRows(const QModelIndex& sourceParent, int sourceRow, int count, const QModelIndex& destinationParent, int destinationChild) override;
     Node* getItem(const QModelIndex& index) const;
 
 private:

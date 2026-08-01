@@ -3,14 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "profile.h"
 #include <QToolBar>
@@ -26,11 +26,11 @@ class Bridge;
 
 namespace Profile {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form() override;
 
 private slots:
@@ -43,7 +43,7 @@ private:
     void rb_clicked();
 
     Ui::ProfileForm* ui;
-    //    Gi::Bridge* brItem = nullptr;
+    // Gi::Bridge* brItem = nullptr;
 
     const QStringList names{tr("Profile On"), tr("Profile Outside"), tr("Profile Inside")};
     static inline const std::array pixmaps{
@@ -94,10 +94,11 @@ class GCPluginImpl final : public GCode::Plugin {
 
 public:
     // GCode::Plugin interface
-    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+F"}; }
+    QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+F"_s}; }
     QWidget* createForm() override { return &form; }
-    uint32_t type() const override { return md5::hash32("Profile"); }
+    QString gcName() const override { return u"Profile"_s; }
+    uint32_t type() const override { return "Profile"_hash32; }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 
     // AbstractFilePlugin interface

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,16 +15,15 @@
 #include "settings.h"
 #include <QtWidgets>
 
-DepthForm::DepthForm(QWidget* parent)
+DepthForm::DepthForm(QString&& groupName_, QWidget* parent)
     : QWidget{parent}
-    , parentName_(parent->objectName()) {
+    , groupName{std::move(groupName_)} {
     setupUi(this);
     retranslateUi(this);
 
     connect(dsbx, &QDoubleSpinBox::valueChanged, this, &DepthForm::valueChanged);
     connect(dsbx, &QDoubleSpinBox::valueChanged, [this](double value) {
-        if(dsbx->isEnabled())
-            value_ = value;
+        if(dsbx->isEnabled()) value_ = value;
     });
     connect(rbCustom, &QRadioButton::toggled, [this](bool checked) {
         if(checked) {
@@ -46,7 +45,7 @@ DepthForm::DepthForm(QWidget* parent)
     });
 
     MySettings settings;
-    settings.beginGroup(parentName_);
+    settings.beginGroup(groupName);
     settings.getValue("dsbxDepth", value_);
     settings.getValue(rbBoard);
     settings.getValue(rbCopper);
@@ -56,12 +55,20 @@ DepthForm::DepthForm(QWidget* parent)
 
 DepthForm::~DepthForm() {
     MySettings settings;
-    settings.beginGroup(parentName_);
+    settings.beginGroup(groupName);
     settings.setValue("dsbxDepth", value_);
     settings.setValue(rbBoard);
     settings.setValue(rbCopper);
     settings.setValue(rbCustom);
     settings.endGroup();
+}
+
+void DepthForm::showEvent(QShowEvent* event) {
+    if(rbCopper->isChecked())
+        dsbx->setValue(App::project().copperThickness());
+    else if(rbBoard->isChecked())
+        dsbx->setValue(App::project().boardThickness());
+    QWidget::showEvent(event);
 }
 
 double DepthForm::value() const { return dsbx->value(); }
@@ -95,7 +102,7 @@ void DepthForm::setupUi(QWidget* Form) {
     horizontalLayout->addSpacing(6);
 
     {
-        QSizePolicy sizePolicy(QSizePolicy::Fixed, QSizePolicy::Fixed);
+        QSizePolicy sizePolicy{QSizePolicy::Fixed, QSizePolicy::Fixed};
         sizePolicy.setHorizontalStretch(0);
         sizePolicy.setVerticalStretch(0);
 
@@ -124,7 +131,7 @@ void DepthForm::setupUi(QWidget* Form) {
         dsbx->setDecimals(3);
         dsbx->setMaximum(100.0);
         dsbx->setSingleStep(0.005);
-        dsbx->setMinimumWidth(QFontMetrics(font()).boundingRect("10.000 mmm").width());
+        dsbx->setMinimumWidth(QFontMetrics(font()).boundingRect(u"10.000 mmm"_s).width());
         horizontalLayout->addWidget(dsbx);
         horizontalLayout->setStretchFactor(dsbx, 1);
     }

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -80,7 +80,7 @@ public:
 
     QModelIndex index(int column = 0) const;
 
-    const QStringList sideStrList{QObject::tr("Top|Bottom").split('|')};
+    const QStringList sideStrList{QObject::tr("Top|Bottom").split(u'|')};
     const Type type_;
 
 protected:

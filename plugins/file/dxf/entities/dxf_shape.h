@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  * * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
@@ -11,14 +11,13 @@
 #include "dxf_entity.h"
 namespace Dxf {
 struct AbstractShape final : Entity {
-    AbstractShape(SectionParser* sp);
+    using Entity::Entity;
     Type type() const override { return Type::SHAPE; }
     DxfGo toGo() const override {
-        qWarning("%s NOT IMPLEMENTED!", __FUNCTION__);
+        qWarning("%s NOT IMPLEMENTED!", __PRETTY_FUNCTION__);
         return {};
     }
-    // void write(QDataStream&) const override { }
-    // void read(QDataStream&) override { }
+
     void parse(CodeData& code) override {
         do {
             data.push_back(code);

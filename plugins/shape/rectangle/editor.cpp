@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,7 +27,7 @@ Model::Model(QObject* parent)
 Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array getter{&Shapes::Handle::x, &Shapes::Handle::y};
 
     auto set = [&] {
@@ -52,23 +52,21 @@ QVariant Model::data(const QModelIndex& index, int role) const {
                 set.emplace(tmp);
             }
             return set;
-        case Shape::Width:
-            return widthHeight(&Shapes::Handle::x);
-        case Shape::Height:
-            return widthHeight(&Shapes::Handle::y);
-        default: return set;
+        case Shape::Width : return widthHeight(&Shapes::Handle::x);
+        case Shape::Height: return widthHeight(&Shapes::Handle::y);
+        default           : return set;
         }
     };
 
     if(role == Qt::DisplayRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         QString ret;
         for(auto val: set())
-            ret += (ret.size() ? " | " : "") + QString::number(val);
+            ret += (ret.size() ? u" | " : u"") + QString::number(val);
         return ret;
     }
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         return QVariant::fromValue(set());
     }
     if(role == Qt::TextAlignmentRole)
@@ -82,17 +80,17 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         if(orientation == Qt::Vertical)
             return headerData_[section];
         else
-            return section ? "Y" : "X";
+            return section ? u"Y"_s : u"X"_s;
     }
     return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array setter{&Shapes::Handle::setX, &Shapes::Handle::setY};
 
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
 
         double val = value.toDouble();
 
@@ -101,7 +99,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
                 (((shape->handles[Shape::Point1].*get)() - (shape->handles[Shape::Point3].*get)()) < 0
                         ? (shape->handles[Shape::Point3].*set)((shape->handles[Shape::Point1].*get)() + val)
                         : (shape->handles[Shape::Point3].*set)((shape->handles[Shape::Point1].*get)() - val));
-                shape->curHandle = shape->handles.begin() + Shape::Point3;
+                shape->curHandle = shape->handles.data() + Shape::Point3;
                 shape->redraw();
             }
         };
@@ -114,16 +112,12 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Shape::Point4:
             for(auto* shape: sh) {
                 (shape->handles[index.row()].*setter[index.column()])(val);
-                shape->curHandle = shape->handles.begin() + index.row();
+                shape->curHandle = shape->handles.data() + index.row();
                 shape->redraw();
             }
             break;
-        case Shape::Width:
-            widthHeight(&Shapes::Handle::x, &Shapes::Handle::setX);
-            break;
-        case Shape::Height:
-            widthHeight(&Shapes::Handle::y, &Shapes::Handle::setY);
-            break;
+        case Shape::Width : widthHeight(&Shapes::Handle::x, &Shapes::Handle::setX); break;
+        case Shape::Height: widthHeight(&Shapes::Handle::y, &Shapes::Handle::setY); break;
         }
         return true;
     }
@@ -131,52 +125,52 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 }
 
 // class Delegate : public QStyledItemDelegate {
-//     mutable QComboBox* cbx{};
-//     mutable QString last;
+// mutable QComboBox* cbx{};
+// mutable QString last;
 
 // public:
-//     Delegate(QObject* parent)
-//         : QStyledItemDelegate{parent} { }
-//     ~Delegate() override = default;
+// Delegate(QObject* parent)
+// : QStyledItemDelegate{parent} { }
+// ~Delegate() override = default;
 
-//    // QAbstractItemDelegate interface
-//    QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
-//        qDebug(__FUNCTION__);
-//        // if(cbx) return cbx;
-//        cbx = new QComboBox{parent};
-//        cbx->setEditable(true);
-//        //        cbx->setCompleter(nullptr); //
-//        connect(cbx->lineEdit(), &QLineEdit::textChanged, this, &Delegate::emitCommitData);
-//        connect(cbx, &QObject::destroyed, this, [] { qDebug(__FUNCTION__); });
-//        return cbx;
-//    }
+// // QAbstractItemDelegate interface
+// QWidget* createEditor(QWidget* parent, const QStyleOptionViewItem& option, const QModelIndex& index) const override {
+// qDebug(__FUNCTION__);
+// // if(cbx) return cbx;
+// cbx = new QComboBox{parent};
+// cbx->setEditable(true);
+// // cbx->setCompleter(nullptr); //
+// connect(cbx->lineEdit(), &QLineEdit::textChanged, this, &Delegate::emitCommitData);
+// connect(cbx, &QObject::destroyed, this, [] { qDebug(__FUNCTION__); });
+// return cbx;
+// }
 
-//    void setEditorData(QWidget* editor, const QModelIndex& index) const override {
-//        auto cbx = static_cast<QComboBox*>(editor);
-//        for(auto val: index.data(Qt::EditRole).value<std::set<double>>())
-//            cbx->addItem(QString::number(val), val);
-//        last = cbx->currentText();
-//        cbx->lineEdit()->setValidator(new QDoubleValidator{cbx});
-//        cbx->installEventFilter(const_cast<Delegate*>(this));
-//    }
+// void setEditorData(QWidget* editor, const QModelIndex& index) const override {
+// auto cbx = static_cast<QComboBox*>(editor);
+// for(auto val: index.data(Qt::EditRole).value<std::set<double>>())
+// cbx->addItem(QString::number(val), val);
+// last = cbx->currentText();
+// cbx->lineEdit()->setValidator(new QDoubleValidator{cbx});
+// cbx->installEventFilter(const_cast<Delegate*>(this));
+// }
 
-//    void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
-//        if(last == cbx->currentText()) return;
-//        auto cbx = static_cast<QComboBox*>(editor);
-//        if(cbx->currentData().isValid()) model->setData(index, cbx->currentData().toDouble());
-//        else model->setData(index, cbx->currentText().toDouble());
-//    }
+// void setModelData(QWidget* editor, QAbstractItemModel* model, const QModelIndex& index) const override {
+// if(last == cbx->currentText()) return;
+// auto cbx = static_cast<QComboBox*>(editor);
+// if(cbx->currentData().isValid()) model->setData(index, cbx->currentData().toDouble());
+// else model->setData(index, cbx->currentText().toDouble());
+// }
 
-//    void emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
+// void emitCommitData() { emit commitData(qobject_cast<QWidget*>(sender())); }
 
-//    // QObject interface
-//    bool eventFilter(QObject* watched, QEvent* event) override {
-//        if(cbx == watched && event->type() == QEvent::Show) {
-//            if(cbx->count() > 1) cbx->showPopup();
-//            cbx->lineEdit()->selectAll();
-//        }
-//        return QStyledItemDelegate::eventFilter(watched, event);
-//    }
+// // QObject interface
+// bool eventFilter(QObject* watched, QEvent* event) override {
+// if(cbx == watched && event->type() == QEvent::Show) {
+// if(cbx->count() > 1) cbx->showPopup();
+// cbx->lineEdit()->selectAll();
+// }
+// return QStyledItemDelegate::eventFilter(watched, event);
+// }
 //};
 
 class Delegate : public QStyledItemDelegate {
@@ -248,22 +242,22 @@ Editor::Editor(Shapes::Plugin* plugin)
     vLayout->addWidget(view);
 
     auto pushButton = new QPushButton{tr("Apply"), this};
-    pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    pushButton->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
 
     pushButton = new QPushButton{tr("Add New"), this};
-    pushButton->setObjectName("pbAddNew");
-    pushButton->setIcon(QIcon::fromTheme("list-add"));
+    pushButton->setObjectName(u"pbAddNew"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"list-add"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
 
-    pushButton = new QPushButton{"Close", this};
-    pushButton->setObjectName("pbClose");
-    pushButton->setIcon(QIcon::fromTheme("window-close"));
+    pushButton = new QPushButton{u"Close"_s, this};
+    pushButton->setObjectName(u"pbClose"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"window-close"_s));
     vLayout->addWidget(pushButton);
 
     vLayout->setSpacing(6);
@@ -275,15 +269,15 @@ Editor::Editor(Shapes::Plugin* plugin)
     view->setSpan(Shape::Height, 0, 1, 2);
     view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
-    //    view->setEditTriggers(QAbstractItemView::AllEditTriggers);
-    //    connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-    //        view->edit(current);
-    //    });
+    // view->setEditTriggers(QAbstractItemView::AllEditTriggers);
+    // connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    // view->edit(current);
+    // });
 }
 
 void Editor::add(Shapes::AbstractShape* shape) {
     model->shapes.emplace_back(static_cast<Shape*>(shape));
-    
+
     view->reset();
 }
 

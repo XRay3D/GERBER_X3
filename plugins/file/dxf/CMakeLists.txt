@@ -1,14 +1,14 @@
 #[[
  Author    :  Damir Bakiev
  Version   :  na
- Date      :  ХХ ХХХ 2025
+ Date      :  ХХ ХХХ 2026
  Website   :  na
- Copyright :  Damir Bakiev 2016-2025
+ Copyright :  Damir Bakiev 2016-2026
  License   :
  Use, modification & distribution is subject to Boost Software License Ver 1.
  http://www.boost.org/LICENSE_1_0.txt
 ]]
-cmake_minimum_required(VERSION 3.30.0 FATAL_ERROR)
+cmake_minimum_required(VERSION 4.0)
 
 project(file_dxf LANGUAGES CXX)
 
@@ -17,40 +17,30 @@ set(PLUG_INFO "Opening DXF Files")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
 set(PLUG_LOCAL_VERSION "2")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
-               ${CMAKE_CURRENT_SOURCE_DIR}/description.json NEWLINE_STYLE UNIX)
+               ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
-file(GLOB_RECURSE HEADERS *.h)
-file(GLOB_RECURSE JSONS *.json)
-file(GLOB_RECURSE SOURCES *.cpp)
-file(GLOB_RECURSE UIS *.ui)
+file(GLOB_RECURSE HEADERS CONFIGURE_DEPENDS *.h)
+file(GLOB_RECURSE SOURCES CONFIGURE_DEPENDS *.cpp)
+file(GLOB_RECURSE UIS CONFIGURE_DEPENDS *.ui)
+file(GLOB JSONS CONFIGURE_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/*.json)
 
-set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${SOURCE} ${UIS})
+set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
+target_include_directories(${PROJECT_NAME}
+    PUBLIC ${CMAKE_CURRENT_LIST_DIR}
+    PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
+
 target_link_libraries(
-  ${PROJECT_NAME}
-  PRIVATE clipper
-          common
-          filetree
-          gi
-          graphicsview
-          tooldatabase
-          file_plugins
-          Qt6::Widgets)
+    ${PROJECT_NAME}
+    PRIVATE geometry
+            common
+            filetree
+            gi
+            graphicsview
+            tooldatabase
+            file_plugins
+            Qt6::Widgets)
 
-set(TS_FILES ${PROJECT_NAME}_ru.ts ${PROJECT_NAME}_en.ts)
-
-set_source_files_properties(
-  ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
-
-if(6 GREATER_EQUAL 6) # Android
-  qt_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES
-                 ${PROJECT_SOURCES})
-  # qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES}
-  # QM_FILES_OUTPUT_VARIABLE QM_FILES)
-else()
-  qt5_create_translation(QM_FILES ${PROJECT_SOURCES} ${TS_FILES})
-  qt5_add_translation(${QM_FILES} ${TS_FILES})
-endif()
+target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})

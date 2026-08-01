@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -17,7 +17,7 @@ class MainWindow;
 
 namespace Gi {
 
-class DataPath : public Item {
+class DataPath final : public Item {
     mutable QPainterPath selectionShape_;
     mutable double scale_ = std::numeric_limits<double>::max();
     void updateSelection() const;
@@ -27,8 +27,11 @@ class DataPath : public Item {
     friend class ::MainWindow;
 
 public:
-    DataPath(const Path& path, AbstractFile* file);
-    DataPath(const Paths& path, AbstractFile* file);
+    DataPath(Curves curves, AbstractFile* file);
+    DataPath(const Path& path, AbstractFile* file)
+        : DataPath{{toCurve(path)}, file} { }
+    DataPath(const Paths& paths, AbstractFile* file)
+        : DataPath{toCurves(paths), file} { }
 
 protected:
     // QGraphicsItem interface

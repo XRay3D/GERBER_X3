@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -65,63 +65,63 @@ struct Validator : QValidator {
         timer.start();
         if constexpr(0) {
             static const std::pair<QString, QString> array[]{
-                {      "E",       "Math.E"}, // const
-                {   "LN10",    "Math.LN10"}, // const
-                {    "LN2",     "Math.LN2"}, // const
-                { "LOG10E",  "Math.LOG10E"}, // const
-                {  "LOG2E",   "Math.LOG2E"}, // const
-                {     "PI",      "Math.PI"}, // const
-                {"SQRT1_2", "Math.SQRT1_2"}, // const
-                {  "SQRT2",   "Math.SQRT2"}, // const
-                {    "abs",     "Math.abs"}, // func
-                {   "acos",    "Math.acos"}, // func
-                {  "acosh",   "Math.acosh"}, // func
-                {   "asin",    "Math.asin"}, // func
-                {  "asinh",   "Math.asinh"}, // func
-                {   "atan",    "Math.atan"}, // func
-                {  "atan2",   "Math.atan2"}, // func
-                {  "atanh",   "Math.atanh"}, // func
-                {   "cbrt",    "Math.cbrt"}, // func
-                {   "ceil",    "Math.ceil"}, // func
-                {  "clz32",   "Math.clz32"}, // func
-                {    "cos",     "Math.cos"}, // func
-                {   "cosh",    "Math.cosh"}, // func
-                {    "exp",     "Math.exp"}, // func
-                {  "expm1",   "Math.expm1"}, // func
-                {  "floor",   "Math.floor"}, // func
-                { "fround",  "Math.fround"}, // func
-                {  "hypot",   "Math.hypot"}, // func
-                {   "imul",    "Math.imul"}, // func
-                {    "log",     "Math.log"}, // func
-                {  "log10",   "Math.log10"}, // func
-                {  "log1p",   "Math.log1p"}, // func
-                {   "log2",    "Math.log2"}, // func
-                {    "max",     "Math.max"}, // func
-                {    "min",     "Math.min"}, // func
-                {    "pow",     "Math.pow"}, // func
-                { "random",  "Math.random"}, // func
-                {  "round",   "Math.round"}, // func
-                {   "sign",    "Math.sign"}, // func
-                {    "sin",     "Math.sin"}, // func
-                {   "sinh",    "Math.sinh"}, // func
-                {   "sqrt",    "Math.sqrt"}, // func
-                {    "tan",     "Math.tan"}, // func
-                {   "tanh",    "Math.tanh"}, // func
-                {  "trunc",   "Math.trunc"}, // func
+                {      u"E"_s,       u"Math.E"_s}, // const
+                {   u"LN10"_s,    u"Math.LN10"_s}, // const
+                {    u"LN2"_s,     u"Math.LN2"_s}, // const
+                { u"LOG10E"_s,  u"Math.LOG10E"_s}, // const
+                {  u"LOG2E"_s,   u"Math.LOG2E"_s}, // const
+                {     u"PI"_s,      u"Math.PI"_s}, // const
+                {u"SQRT1_2"_s, u"Math.SQRT1_2"_s}, // const
+                {  u"SQRT2"_s,   u"Math.SQRT2"_s}, // const
+                {    u"abs"_s,     u"Math.abs"_s}, // func
+                {   u"acos"_s,    u"Math.acos"_s}, // func
+                {  u"acosh"_s,   u"Math.acosh"_s}, // func
+                {   u"asin"_s,    u"Math.asin"_s}, // func
+                {  u"asinh"_s,   u"Math.asinh"_s}, // func
+                {   u"atan"_s,    u"Math.atan"_s}, // func
+                {  u"atan2"_s,   u"Math.atan2"_s}, // func
+                {  u"atanh"_s,   u"Math.atanh"_s}, // func
+                {   u"cbrt"_s,    u"Math.cbrt"_s}, // func
+                {   u"ceil"_s,    u"Math.ceil"_s}, // func
+                {  u"clz32"_s,   u"Math.clz32"_s}, // func
+                {    u"cos"_s,     u"Math.cos"_s}, // func
+                {   u"cosh"_s,    u"Math.cosh"_s}, // func
+                {    u"exp"_s,     u"Math.exp"_s}, // func
+                {  u"expm1"_s,   u"Math.expm1"_s}, // func
+                {  u"floor"_s,   u"Math.floor"_s}, // func
+                { u"fround"_s,  u"Math.fround"_s}, // func
+                {  u"hypot"_s,   u"Math.hypot"_s}, // func
+                {   u"imul"_s,    u"Math.imul"_s}, // func
+                {    u"log"_s,     u"Math.log"_s}, // func
+                {  u"log10"_s,   u"Math.log10"_s}, // func
+                {  u"log1p"_s,   u"Math.log1p"_s}, // func
+                {   u"log2"_s,    u"Math.log2"_s}, // func
+                {    u"max"_s,     u"Math.max"_s}, // func
+                {    u"min"_s,     u"Math.min"_s}, // func
+                {    u"pow"_s,     u"Math.pow"_s}, // func
+                { u"random"_s,  u"Math.random"_s}, // func
+                {  u"round"_s,   u"Math.round"_s}, // func
+                {   u"sign"_s,    u"Math.sign"_s}, // func
+                {    u"sin"_s,     u"Math.sin"_s}, // func
+                {   u"sinh"_s,    u"Math.sinh"_s}, // func
+                {   u"sqrt"_s,    u"Math.sqrt"_s}, // func
+                {    u"tan"_s,     u"Math.tan"_s}, // func
+                {   u"tanh"_s,    u"Math.tanh"_s}, // func
+                {  u"trunc"_s,   u"Math.trunc"_s}, // func
             };
             for(auto&& [from, to]: array)
                 str.replace(from, to, Qt::CaseInsensitive);
         } else {
             static QRegularExpression re{
-                "(E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2|"
-                "abs|acos|acosh|asin|asinh|atan|atan2|atanh|"
-                "cbrt|ceil|clz32|cos|cosh|exp|expm1|floor|"
-                "fround|hypot|imul|log|log10|log1p|log2|max|"
-                "min|pow|random|round|sign|sin|sinh|sqrt|tan|tanh|trunc)",
+                u"(E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2|"_s
+                u"abs|acos|acosh|asin|asinh|atan|atan2|atanh|"_s
+                u"cbrt|ceil|clz32|cos|cosh|exp|expm1|floor|"_s
+                u"fround|hypot|imul|log|log10|log1p|log2|max|"_s
+                u"min|pow|random|round|sign|sin|sinh|sqrt|tan|tanh|trunc)"_s,
                 QRegularExpression::CaseInsensitiveOption};
-            str.replace(re, R"(Math.\1)");
+            str.replace(re, uR"(Math.\1)"_s);
         }
-        qWarning() << timer.nsecsElapsed() / 1000 << "us" << str;
+        qWarning() << timer.nsecsElapsed() / 1000 << u"us"_s << str;
         return str;
     }
     const std::set<QChar> set{'.', '/', '*', '-', '+'};
@@ -190,9 +190,9 @@ bool DoubleSpinBox::eventFilter(QObject* watched, QEvent* event) {
     return QDoubleSpinBox::eventFilter(watched, event);
 }
 
-void DoubleSpinBox::red() { setStyleSheet("QWidget{ background-color: red; }"); }
+void DoubleSpinBox::red() { setStyleSheet(u"QWidget{ background-color: red; }"_s); }
 
-void DoubleSpinBox::normal() { setStyleSheet(""); }
+void DoubleSpinBox::normal() { setStyleSheet({}); }
 
 void DoubleSpinBox::updateToolTip() {
     setToolTip(QString(QObject::tr("Range from %1 to %2.")).arg(minimum()).arg(maximum()));
@@ -206,8 +206,8 @@ void DoubleSpinBox::keyPressEvent(QKeyEvent* event) {
     if(event->modifiers().testFlag(Qt::ControlModifier)
         || event->modifiers().testFlag(Qt::ShiftModifier)) setSingleStep(0.01);
 #endif
-    if(event->text() == '.' || event->text() == ',') {
-        QKeyEvent ke{event->type(), decimalPoint == '.' ? Qt::Key_Period : Qt::Key_Comma, event->modifiers(), decimalPoint};
+    if(event->text() == u'.' || event->text() == u',') {
+        QKeyEvent ke{event->type(), decimalPoint == u'.' ? Qt::Key_Period : Qt::Key_Comma, event->modifiers(), decimalPoint};
         QDoubleSpinBox::keyPressEvent(&ke);
         event->accept();
     } else
@@ -230,93 +230,94 @@ double DoubleSpinBox::valueFromText(const QString& /*text*/) const {
 }
 
 // QString DoubleSpinBox::textFromValue(double value) const {
-//     return QDoubleSpinBox::textFromValue(value);
+// return QDoubleSpinBox::textFromValue(value);
 // }
 
 QValidator::State DoubleSpinBox::validate(QString& input, int& pos) const {
-
-    static const std::set<QChar> set{'.', ',', '/', '*', '-', '+'};
+    static const std::set set{u'.', u',', u'/', u'*', u'-', u'+'};
     // Invalid      0 Строка явно недействительна.
     // Intermediate 1 Строка является вероятным промежуточным значением.
     // Acceptable   2 Строка приемлема в качестве конечного результата; то есть это действительно.
-    auto fixMath = [this](QString& str) {
+    auto fixMath = [this](QString str) {
         QElapsedTimer timer;
         timer.start();
+        const QString sfx = suffix();
+        if(str.endsWith(sfx)) str.chop(sfx.size());
         if constexpr(0) {
             static const std::pair<QString, QString> array[]{
-                {      "E",       "Math.E"}, // const
-                {   "LN10",    "Math.LN10"}, // const
-                {    "LN2",     "Math.LN2"}, // const
-                { "LOG10E",  "Math.LOG10E"}, // const
-                {  "LOG2E",   "Math.LOG2E"}, // const
-                {     "PI",      "Math.PI"}, // const
-                {"SQRT1_2", "Math.SQRT1_2"}, // const
-                {  "SQRT2",   "Math.SQRT2"}, // const
-                {    "abs",     "Math.abs"}, // func
-                {   "acos",    "Math.acos"}, // func
-                {  "acosh",   "Math.acosh"}, // func
-                {   "asin",    "Math.asin"}, // func
-                {  "asinh",   "Math.asinh"}, // func
-                {   "atan",    "Math.atan"}, // func
-                {  "atan2",   "Math.atan2"}, // func
-                {  "atanh",   "Math.atanh"}, // func
-                {   "cbrt",    "Math.cbrt"}, // func
-                {   "ceil",    "Math.ceil"}, // func
-                {  "clz32",   "Math.clz32"}, // func
-                {    "cos",     "Math.cos"}, // func
-                {   "cosh",    "Math.cosh"}, // func
-                {    "exp",     "Math.exp"}, // func
-                {  "expm1",   "Math.expm1"}, // func
-                {  "floor",   "Math.floor"}, // func
-                { "fround",  "Math.fround"}, // func
-                {  "hypot",   "Math.hypot"}, // func
-                {   "imul",    "Math.imul"}, // func
-                {    "log",     "Math.log"}, // func
-                {  "log10",   "Math.log10"}, // func
-                {  "log1p",   "Math.log1p"}, // func
-                {   "log2",    "Math.log2"}, // func
-                {    "max",     "Math.max"}, // func
-                {    "min",     "Math.min"}, // func
-                {    "pow",     "Math.pow"}, // func
-                { "random",  "Math.random"}, // func
-                {  "round",   "Math.round"}, // func
-                {   "sign",    "Math.sign"}, // func
-                {    "sin",     "Math.sin"}, // func
-                {   "sinh",    "Math.sinh"}, // func
-                {   "sqrt",    "Math.sqrt"}, // func
-                {    "tan",     "Math.tan"}, // func
-                {   "tanh",    "Math.tanh"}, // func
-                {  "trunc",   "Math.trunc"}, // func
+                {u"E"_s,       u"Math.E"_s      }, // const
+                {u"LN10"_s,    u"Math.LN10"_s   }, // const
+                {u"LN2"_s,     u"Math.LN2"_s    }, // const
+                {u"LOG10E"_s,  u"Math.LOG10E"_s }, // const
+                {u"LOG2E"_s,   u"Math.LOG2E"_s  }, // const
+                {u"PI"_s,      u"Math.PI"_s     }, // const
+                {u"SQRT1_2"_s, u"Math.SQRT1_2"_s}, // const
+                {u"SQRT2"_s,   u"Math.SQRT2"_s  }, // const
+                {u"abs"_s,     u"Math.abs"_s    }, // func
+                {u"acos"_s,    u"Math.acos"_s   }, // func
+                {u"acosh"_s,   u"Math.acosh"_s  }, // func
+                {u"asin"_s,    u"Math.asin"_s   }, // func
+                {u"asinh"_s,   u"Math.asinh"_s  }, // func
+                {u"atan"_s,    u"Math.atan"_s   }, // func
+                {u"atan2"_s,   u"Math.atan2"_s  }, // func
+                {u"atanh"_s,   u"Math.atanh"_s  }, // func
+                {u"cbrt"_s,    u"Math.cbrt"_s   }, // func
+                {u"ceil"_s,    u"Math.ceil"_s   }, // func
+                {u"clz32"_s,   u"Math.clz32"_s  }, // func
+                {u"cos"_s,     u"Math.cos"_s    }, // func
+                {u"cosh"_s,    u"Math.cosh"_s   }, // func
+                {u"exp"_s,     u"Math.exp"_s    }, // func
+                {u"expm1"_s,   u"Math.expm1"_s  }, // func
+                {u"floor"_s,   u"Math.floor"_s  }, // func
+                {u"fround"_s,  u"Math.fround"_s }, // func
+                {u"hypot"_s,   u"Math.hypot"_s  }, // func
+                {u"imul"_s,    u"Math.imul"_s   }, // func
+                {u"log"_s,     u"Math.log"_s    }, // func
+                {u"log10"_s,   u"Math.log10"_s  }, // func
+                {u"log1p"_s,   u"Math.log1p"_s  }, // func
+                {u"log2"_s,    u"Math.log2"_s   }, // func
+                {u"max"_s,     u"Math.max"_s    }, // func
+                {u"min"_s,     u"Math.min"_s    }, // func
+                {u"pow"_s,     u"Math.pow"_s    }, // func
+                {u"random"_s,  u"Math.random"_s }, // func
+                {u"round"_s,   u"Math.round"_s  }, // func
+                {u"sign"_s,    u"Math.sign"_s   }, // func
+                {u"sin"_s,     u"Math.sin"_s    }, // func
+                {u"sinh"_s,    u"Math.sinh"_s   }, // func
+                {u"sqrt"_s,    u"Math.sqrt"_s   }, // func
+                {u"tan"_s,     u"Math.tan"_s    }, // func
+                {u"tanh"_s,    u"Math.tanh"_s   }, // func
+                {u"trunc"_s,   u"Math.trunc"_s  }, // func
             };
             for(auto&& [from, to]: array)
                 str.replace(from, to, Qt::CaseInsensitive);
         } else {
             static QRegularExpression re{
-                "(E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2|"
-                "abs|acos|acosh|asin|asinh|atan|atan2|atanh|"
-                "cbrt|ceil|clz32|cos|cosh|exp|expm1|floor|"
-                "fround|hypot|imul|log|log10|log1p|log2|max|"
-                "min|pow|random|round|sign|sin|sinh|sqrt|tan|tanh|trunc)",
+                u"(E|LN10|LN2|LOG10E|LOG2E|PI|SQRT1_2|SQRT2|"_s
+                u"abs|acos|acosh|asin|asinh|atan|atan2|atanh|"_s
+                u"cbrt|ceil|clz32|cos|cosh|exp|expm1|floor|"_s
+                u"fround|hypot|imul|log|log10|log1p|log2|max|"_s
+                u"min|pow|random|round|sign|sin|sinh|sqrt|tan|tanh|trunc)"_s,
                 QRegularExpression::CaseInsensitiveOption};
-            str.replace(re, R"(Math.\1)");
+            str.replace(re, uR"(Math.\1)"_s);
         }
-        str.replace(',', '.');
-        qWarning() << __FUNCTION__ << timer.nsecsElapsed() / 1000 << "us" << str;
-        return str.mid(0, str.size() - suffix().size());
+        str.replace(u',', u'.');
+        qWarning() << __FUNCTION__ << timer.nsecsElapsed() / 1000 << u"us"_s << str;
+        return str;
     };
     if(input.size() == 0) return QValidator::Intermediate;
-    if(input.count('(') != input.count(')')) return QValidator::Intermediate;
+    if(input.count(u'(') != input.count(u')')) return QValidator::Intermediate;
     if(pos) { // skip duplicates
         static QRegularExpression re{
-            R"(.*[\.\,\/\*\-\+]{2,}.*)",
+            uR"(.*[\.\,\/\*\-\+]{2,}.*)"_s,
             QRegularExpression::CaseInsensitiveOption};
         if(re.match(input).hasMatch()) return QValidator::Invalid;
 
         // auto ch = input[pos - 1];
         // if(pos > 1 && set.contains(ch) && input[pos - 2] == ch)
-        //     return QValidator::Invalid;
+        // return QValidator::Invalid;
         // if(pos < input.size() && set.contains(ch) && input[pos] == ch)
-        //     return QValidator::Invalid;
+        // return QValidator::Invalid;
     }
     auto val = jsEngine->evaluate(fixMath(input));
     auto error = val.errorType();

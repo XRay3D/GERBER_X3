@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -65,21 +65,21 @@ void View::on_doubleClicked(const QModelIndex& index) {
         menuIndex_ = index;
         if(index.data(Role::NodeType).toInt() != Type::Folder)
             hideOther();
-        //        if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
-        //            hideOther();
-        //        } else if (index.parent() == model_->index(Model::DrillFiles, 0, QModelIndex())) {
-        //            hideOther();
-        //        } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
-        //            hideOther();
-        //            {
-        //                const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
-        //                AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
-        //                App::project().showFiles(file->gcp_.params[GCode::Params::GrItems].value<UsedItems>().keys());
-        //                file->gcp_.fileId = file->id();
-        //                App::mainWindow().editGcFile(file);
-        //                updateTree();
-        //            }
-        //    }
+        // if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
+        // hideOther();
+        // } else if (index.parent() == model_->index(Model::DrillFiles, 0, QModelIndex())) {
+        // hideOther();
+        // } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
+        // hideOther();
+        // {
+        // const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
+        // AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
+        // App::project().showFiles(file->gcp.params[GCode::Params::GrItems].value<UsedItems>().keys());
+        // file->gcp.fileId = file->id();
+        // App::mainWindow().editGcFile(file);
+        // updateTree();
+        // }
+        // }
     }
 }
 
@@ -110,8 +110,8 @@ void View::hideOther() {
 
 void View::closeFile() {
     model_->removeRow(menuIndex_.row(), menuIndex_.parent());
-    //    if (App::drillForm())
-    //        App::drillForm().on_pbClose_clicked();
+    // if (App::drillForm())
+    // App::drillForm().on_pbClose_clicked();
 }
 
 void View::closeFiles() {
@@ -139,7 +139,7 @@ void View::setModel(QAbstractItemModel* model) {
 
     header()->setStretchLastSection(false);
     header()->setSectionResizeMode(QHeaderView::Fixed);
-    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, "123456789").width()); // ~6 символов и ...
+    header()->setDefaultSectionSize(QFontMetrics(font()).size(Qt::TextSingleLine, u"123456789"_s).width()); // ~6 символов и ...
     header()->setSectionResizeMode(0, QHeaderView::Stretch);
 
     setItemDelegateForColumn(0, new TextDelegate{this});
@@ -156,7 +156,7 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
     qDebug() << menuIndex_;
     if(!menuIndex_.isValid())
         return;
-    QMenu menu(this);
+    QMenu menu{this};
     childCount_ = static_cast<Node*>(menuIndex_.internalPointer())->childCount();
     if(menuIndex_.data(Role::NodeType).toInt() == Type::Folder) {
         const uint32_t type = menuIndex_.data(Role::Id).value<uint32_t>(); // File Type
@@ -174,8 +174,8 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         if(auto selectedRows{selectionModel()->selectedRows().toVector()}; selectedRows.count() > 1) {
             menu.addSeparator();
             // TODO rename Action in future.
-            menu.addAction(QIcon::fromTheme("edit-delete"), tr("Delete Selected"), [selectedRows, this]() mutable {
-                std::ranges::sort(selectedRows, std::greater{}, &QModelIndex::row);
+            menu.addAction(QIcon::fromTheme(u"edit-delete"_s), tr("Delete Selected"), [selectedRows, this]() mutable {
+                r::sort(selectedRows, std::greater{}, &QModelIndex::row);
                 for(auto&& index: selectedRows)
                     model_->removeRow(index.row(), index.parent());
             });
@@ -187,13 +187,13 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
             auto file = App::project().file(selectedRows.front().data(FileTree::Id).toInt());
             if(file) {
                 menu.addSeparator();
-                menu.addAction(QIcon::fromTheme(""), tr("Transform"), [selectedRows, this]() mutable {
+                menu.addAction(QIcon::fromTheme({}), tr("Transform"), [selectedRows, this]() mutable {
                     auto files = selectedRows
-                        | std::views::transform(
+                        | v::transform(
                             [](auto&& index) { return App::project().file(index.data(FileTree::Id).toInt()); })
-                        | std::views::filter(
+                        | v::filter(
                             [](auto&& file) { return file != nullptr; });
-                    if(!std::ranges::empty(files))
+                    if(!r::empty(files))
                         TransformDialog({files.begin(), files.end()}, this).exec();
                 });
             }

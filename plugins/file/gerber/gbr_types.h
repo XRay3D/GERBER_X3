@@ -22,7 +22,7 @@
 
 namespace Gerber {
 
-constexpr auto GERBER = md5::hash32("Gerber");
+constexpr auto GERBER = "Gerber"_hash32;
 
 class GbrObj : public QObject {
     Q_OBJECT
@@ -35,24 +35,24 @@ class AbstractAperture;
 
 using ApertureMap = std::map<int, std::shared_ptr<AbstractAperture>>;
 
-enum ZeroOmissionMode {
+enum ZeroOmissionMode : bool {
     OmitLeadingZeros,
 #ifdef DEPRECATED
     OmitTrailingZeros,
 #endif
 };
 
-enum UnitMode {
+enum UnitMode : bool {
     Inches,
     Millimeters,
 };
 
-enum ImagePolarity {
+enum ImagePolarity : bool {
     Positive,
     Negative,
 };
 
-enum CoordinateValuesNotation {
+enum CoordinateValuesNotation : bool {
     AbsoluteNotation,
 #ifdef DEPRECATED
     IncrementalNotation,
@@ -60,12 +60,12 @@ enum CoordinateValuesNotation {
 };
 
 enum InterpolationMode {
-    Linear = 1,
-    ClockwiseCircular = 2,
+    Linear                   = 1,
+    ClockwiseCircular        = 2,
     CounterClockwiseCircular = 3
 };
 
-enum RegionMode {
+enum RegionMode : bool {
     Off,
     On
 };
@@ -197,20 +197,20 @@ class State {
             state.rotating_);
     }
 
-    File* file_ = nullptr;
-    Operation dCode_ = D02;
-    GCode gCode_ = G01;
-    ImagePolarity imgPolarity_ = Positive;
+    File* file_                      = nullptr;
+    Operation dCode_                 = D02;
+    GCode gCode_                     = G01;
+    ImagePolarity imgPolarity_       = Positive;
     InterpolationMode interpolation_ = Linear;
-    PrimitiveType type_ = Aperture;
-    QuadrantMode quadrant_ = Undef;
-    RegionMode region_ = Off;
+    PrimitiveType type_              = Aperture;
+    QuadrantMode quadrant_           = Undef;
+    RegionMode region_               = Off;
     int aperture_{};
     int lineNum_{};
     Point curPos_;
     Mirroring mirroring_ = NoMirroring;
-    double scaling_ = 1.0;
-    double rotating_ = 0.0;
+    double scaling_      = 1.0;
+    double rotating_{};
 
 public:
     State(File* const file = nullptr)
@@ -256,14 +256,16 @@ public:
     inline void setRotating(double rotating) { rotating_ = rotating; }
 };
 
-struct GrObject : public GraphicObject {
+struct GrObject : GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        return ::Block{stream}.write(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        stream << go;
+        return ::Block{stream}.write(go.state);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        return ::Block{stream}.read(go.path, go.fill, go.state, go.type, go.name, go.pos);
+        stream >> go;
+        return ::Block{stream}.read(go.state);
     }
 
     File* gFile{nullptr};
@@ -271,10 +273,10 @@ struct GrObject : public GraphicObject {
 
     // public:
     GrObject() = default;
-    GrObject(int32_t id, const State& state, Paths&& paths, File* gFile, Type type, Path&& path = {})
+    GrObject(int32_t id, const State& state, Curves&& paths, File* gFile, Type type, Curve&& path = {})
         : gFile{gFile}
         , state{state} {
-        GraphicObject::id = id;
+        GraphicObject::id   = id;
         GraphicObject::fill = std::move(paths);
         GraphicObject::path = std::move(path);
         GraphicObject::type = type;
@@ -304,16 +306,12 @@ protected:
     static inline bool simplifyRegions_;
     static inline bool skipDuplicates_;
 
-    static inline bool wireMinkowskiSum_;
-
 public:
     static bool cleanPolygons() { return cleanPolygons_; }
     static double cleanPolygonsDist() { return cleanPolygonsDist_; }
 
     static bool simplifyRegions() { return simplifyRegions_; }
     static bool skipDuplicates() { return skipDuplicates_; }
-
-    static bool wireMinkowskiSum() { return wireMinkowskiSum_; }
 };
 
 } // namespace Gerber

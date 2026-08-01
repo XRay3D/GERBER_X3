@@ -3,14 +3,14 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "gc_baseform.h"
+#include "gc_form.h"
 #include "gc_plugin.h"
 #include "pocketraster.h"
 #include <QToolBar>
@@ -21,11 +21,11 @@ class PocketRasterForm;
 
 namespace PocketRaster {
 
-class Form : public GCode::BaseForm {
+class Form : public GCode::Form {
     Q_OBJECT
 
 public:
-    explicit Form(GCode::Plugin* plugin, QWidget* parent = nullptr);
+    explicit Form(GCode::Plugin* plugin);
     ~Form();
 
 private slots:
@@ -63,9 +63,10 @@ class GCPluginImpl final : public GCode::Plugin {
     Form form{this};
     // GCode::Plugin interface
 public:
-    QIcon icon() const override { return QIcon::fromTheme("raster-path"); }
-    QKeySequence keySequence() const override { return {"Ctrl+Shift+R"}; }
-    QWidget* createForm() override { return &form; };
+    QIcon icon() const override { return QIcon::fromTheme(u"raster-path"_s); }
+    QKeySequence keySequence() const override { return {u"Ctrl+Shift+R"_s}; }
+    QWidget* createForm() override { return &form; }
+    QString gcName() const override { return u"PocketRaster"_s; };
     uint32_t type() const override { return POCKET_RASTER; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
 };

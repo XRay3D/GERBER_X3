@@ -26,7 +26,7 @@ const Component dummy;
 sNode::sNode(const QString& name)
     : item(nullptr)
     , component{dummy}
-    , name(name) {
+    , name{name} {
 }
 
 sNode::sNode(const Component& component)
@@ -35,9 +35,7 @@ sNode::sNode(const Component& component)
           Qt::NoPen,
           component.componentitem()->file()->color()))
     , component{component}
-    , name("")
-
-{
+    , name{} {
 }
 
 sNode::~sNode() {
@@ -71,34 +69,30 @@ void sNode::append(sNode* item) {
 void sNode::remove(int row) { childItems.removeAt(row); }
 
 bool sNode::setData(const QModelIndex& /*index*/, const QVariant& /*value*/, int /*role*/) {
-    //    switch (index.column()) {
-    //        //    case Name_:
-    //        //        switch (role) {
-    //        //        case Qt::CheckStateRole:
-    //        //            file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
-    //        //            return true;
-    //        //        default:
-    //        //            return false;
-    //        //        }
-    //        //    case Layer_:
-    //        //        switch (role) {
-    //        //        case Qt::EditRole:
-    //        //            file()->setSide(static_cast<Side>(value.toBool()));
-    //        //            return true;
-    //        //        default:
-    //        //            return false;
-    //        //        }
-    //        //    case Other_:
-    //        //        switch (role) {
-    //        //        case Qt::CheckStateRole:
-    //        //            current_ = value.value<Qt::CheckState>();
-    //        //            return true;
-    //        //        default:
-    //        //            return false;
-    //        //        }
-    //    default:
-    //        return false;
-    //    }
+    // switch (index.column()) {
+    // case Name_:
+    // switch (role) {
+    // case Qt::CheckStateRole:
+    // file()->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+    // return true;
+    // default:  return false;
+    // }
+    // case Layer_:
+    // switch (role) {
+    // case Qt::EditRole:
+    // file()->setSide(static_cast<Side>(value.toBool()));
+    // return true;
+    // default:  return false;
+    // }
+    // case Other_:
+    // switch (role) {
+    // case Qt::CheckStateRole:
+    // current_ = value.value<Qt::CheckState>();
+    // return true;
+    // default:  return false;
+    // }
+    // default: // return false;
+    // }
     return false;
 }
 
@@ -114,7 +108,7 @@ QVariant sNode::data(const QModelIndex& index, int role) const {
         return {};
     }
 
-    static const QStringList mountType(GbrObj::tr("TH|SMD|BGA|Other").split('|'));
+    static const QStringList mountType(GbrObj::tr("TH|SMD|BGA|Other").split(u'|'));
     if(role == Qt::DisplayRole) {
         switch(index.column()) {
         case 0: /* <field> Manufacturer. */
@@ -133,8 +127,7 @@ QVariant sNode::data(const QModelIndex& index, int role) const {
             return component.package().description;
         case 7: /* <decimal> Height, in the unit of the file. */
             return component.height();
-        default:
-            return {};
+        default: return {};
         }
     }
     return {};

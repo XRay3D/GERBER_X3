@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -38,12 +38,22 @@ public:
     double radius() const;
     void setRadius(double radius);
 
-    enum PointEnum {
+    enum PointEnum : int {
         Center,
         Point1,
         PtCount,
         Radius = PtCount, // model
         Diameter,         // model
+    };
+
+    [[nodiscard]] std::any getVal(int id) const override {
+        switch(PointEnum{id}) {
+        case Center  : return static_cast<QPointF>(handles[Center]);
+        case Point1  : return static_cast<QPointF>(handles[Point1]);
+        case Radius  : return radius_;
+        case Diameter: return radius_ * 2;
+        default      : return {};
+        };
     };
 
 protected:
@@ -63,7 +73,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShCircle; }
-    QIcon icon() const override { return QIcon::fromTheme("draw-ellipse"); }
+    QIcon icon() const override { return QIcon::fromTheme(u"draw-ellipse"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{
             this,

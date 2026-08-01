@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -27,7 +27,7 @@ Model::Model(QObject* parent)
 Model::~Model() { }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array getter{&Shapes::Handle::x, &Shapes::Handle::y};
 
     auto set = [&] {
@@ -58,14 +58,14 @@ QVariant Model::data(const QModelIndex& index, int role) const {
     };
 
     if(role == Qt::DisplayRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         QString ret;
         for(auto val: set())
-            ret += (ret.size() ? " | " : "") + QString::number(val);
+            ret += (ret.size() ? u" | " : u"") + QString::number(val);
         return ret;
     }
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
         return QVariant::fromValue(set());
     }
     if(role == Qt::TextAlignmentRole)
@@ -79,17 +79,17 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
         if(orientation == Qt::Vertical)
             return headerData_[section];
         else
-            return section ? "Y" : "X";
+            return section ? u"Y"_s : u"X"_s;
     }
     return QAbstractTableModel::headerData(section, orientation, role);
 }
 
 bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
-    auto sh = shapes | std::views::filter([](Shape* sh) { return sh->isSelected(); });
+    auto sh = shapes | v::filter([](Shape* sh) { return sh->isSelected(); });
     static const std::array setter{&Shapes::Handle::setX, &Shapes::Handle::setY};
 
     if(role == Qt::EditRole) {
-        if(std::ranges::empty(sh)) return {};
+        if(r::empty(sh)) return {};
 
         double val = value.toDouble();
 
@@ -98,7 +98,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Shape::Point1:
             for(auto* shape: sh) {
                 (shape->handles[index.row()].*setter[index.column()])(val);
-                shape->curHandle = shape->handles.begin() + index.row();
+                shape->curHandle = shape->handles.data() + index.row();
                 shape->redraw();
             }
             break;
@@ -185,22 +185,22 @@ Editor::Editor(Shapes::Plugin* plugin)
     vLayout->addWidget(view);
 
     auto pushButton = new QPushButton{tr("Apply"), this};
-    pushButton->setIcon(QIcon::fromTheme("dialog-ok-apply"));
+    pushButton->setIcon(QIcon::fromTheme(u"dialog-ok-apply"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, plugin, &Shapes::Plugin::finalizeShape);
 
     pushButton = new QPushButton{tr("Add New"), this};
-    pushButton->setObjectName("pbAddNew");
-    pushButton->setIcon(QIcon::fromTheme("list-add"));
+    pushButton->setObjectName(u"pbAddNew"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"list-add"_s));
     vLayout->addWidget(pushButton);
     connect(pushButton, &QPushButton::clicked, this, [plugin] {
         plugin->finalizeShape();
         App::project().addShape(plugin->createShape());
     });
 
-    pushButton = new QPushButton{"Close", this};
-    pushButton->setObjectName("pbClose");
-    pushButton->setIcon(QIcon::fromTheme("window-close"));
+    pushButton = new QPushButton{u"Close"_s, this};
+    pushButton->setObjectName(u"pbClose"_s);
+    pushButton->setIcon(QIcon::fromTheme(u"window-close"_s));
     vLayout->addWidget(pushButton);
 
     vLayout->setSpacing(6);
@@ -213,9 +213,9 @@ Editor::Editor(Shapes::Plugin* plugin)
     view->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     view->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     // view->setEditTriggers(QAbstractItemView::CurrentChanged | QAbstractItemView::SelectedClicked);
-    //      connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
-    //          view->edit(current);
-    //      });
+    // connect(view->selectionModel(), &QItemSelectionModel::currentChanged, this, [this](const QModelIndex& current, const QModelIndex& previous) {
+    // view->edit(current);
+    // });
 }
 
 void Editor::add(Shapes::AbstractShape* shape) {

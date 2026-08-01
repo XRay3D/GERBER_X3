@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -15,24 +15,57 @@
 
 namespace Gi {
 
-class Debug : public Item {
+class Debug_ final : public Item {
+    friend struct Node;
+    friend struct Dymmy;
+    friend class std::unique_ptr<Debug_>;
+    struct Node* node;
+
+    Debug_(const QColor& color, double width);
+    Paths paths_;
+    std::set<QPointF> centers;
+
+    Debug_(const Path& path, const QColor& color = Qt::white, double width = {});
+    Debug_(const Paths& paths, const QColor& color = Qt::white, double width = {});
+    Debug_(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
+
 public:
-    Debug(const Paths& paths, const QPen& = {Qt::white, 1.0});
-    Debug(const Path& path, const QPen& = {Qt::white, 1.0});
-    Debug(const QPainterPath& path, const QPen& = {Qt::white, 1.0});
-    ~Debug() override = default;
+    ~Debug_() override;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     Paths paths(int alternate = {}) const override;
+    bool arrows{true};
+
+#if DEBUG
+    static Debug_* Debug(const QPainterPath& path, const QColor& color = Qt::white, double width = {}) {
+        return new Debug_{path, color, width};
+    }
+
+    static Debug_* Debug(const Curves& curves, const QColor& color = Qt::white, double width = {}) {
+        return new Debug_{toPPath(curves), color, width};
+    }
+
+    static Debug_* Debug(const Paths& paths, const QColor& color = Qt::white, double width = {}) {
+        return new Debug_{paths, color, width};
+    }
+#else
+    static auto Debug(auto&&... args) {
+        return std::unique_ptr<Debug_>(new Debug_{std::forward<decltype(args)>(args)...});
+    }
+#endif
 
 private:
     QPainterPath arrows_;
-    double sc_{};
-    void updateArrows();
 
 protected:
     void changeColor() override { }
 };
+
+#if DEBUG
+    #define Debug(...) Debug_::Debug(__VA_ARGS__)
+#else
+    #define Debug(...) Debug_::Debug(__VA_ARGS__).get()
+#endif
 
 } // namespace Gi

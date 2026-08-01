@@ -18,7 +18,7 @@ MathParser::MathParser(QMap<QString, double>& variables)
 
 double MathParser::getVariable(QString variableName) {
     if(!variables->contains(variableName)) {
-        qWarning() << "Error: Try get unexists variable '" + variableName + "'";
+        qWarning() << "Error: Try get unexists variable '" + variableName + u"'"_s;
         return 0.0;
     }
     return variables->value(variableName, 0.0);
@@ -30,7 +30,7 @@ double MathParser::parse(const QString& s) {
         result = plusMinus(s);
         if(!result.rest.isEmpty()) {
             qWarning() << "Error: can't full parse"
-                       << "\"" << s << "\"";
+                       << u"\"_s" << s << u"\"_s";
             qWarning() << "rest: " + result.rest;
         }
     } catch(const QString& str) {
@@ -77,7 +77,7 @@ Result MathParser::bracket(QString s) // throws Exception
 Result MathParser::functionVariable(QString s) // throws Exception
 {
     QString f;
-    int i = 0;
+    int i{};
     int sign = 1;
     if(s.startsWith('-')) {
         sign = -1;
@@ -127,9 +127,9 @@ Result MathParser::mulDiv(QString s) // throws Exception
 
 Result MathParser::num(QString s) // throws Exception
 {
-    int i = 0;
-    int dot_cnt = 0;
-    bool negative = false;
+    int i{};
+    int dot_cnt{};
+    bool negative{};
     // число также может начинаться с минуса
     if(s.at(0) == '-') {
         negative = true;
@@ -139,11 +139,11 @@ Result MathParser::num(QString s) // throws Exception
     while(i < s.length() && (s.at(i).isDigit() || s.at(i) == '.')) {
         // но также проверям, что в числе может быть только одна точка!
         if(s.at(i) == '.' && ++dot_cnt > 1)
-            throw "not valid number '" + s.mid(0, i + 1) + "'";
+            throw "not valid number '" + s.mid(0, i + 1) + u"'"_s;
         i++;
     }
     if(i == 0) // что-либо похожее на число мы не нашли
-        throw "can't get valid number in '" + s + "'";
+        throw "can't get valid number in '" + s + u"'"_s;
 
     double dPart = s.mid(0, i).toDouble();
     if(negative)
@@ -161,14 +161,10 @@ Result MathParser::processFunction(QString func, Result r) {
         tan
     };
     switch(QString("sin,cos,tan").split(',').indexOf(func)) {
-    case sin:
-        return Result(qSin(r.acc), r.rest);
-    case cos:
-        return Result(qCos(r.acc), r.rest);
-    case tan:
-        return Result(qTan(r.acc), r.rest);
-    default:
-        qWarning() << "function '" + func + "' is not defined";
+    case sin:return Result(qSin(r.acc), r.rest);
+    case cos:return Result(qCos(r.acc), r.rest);
+    case tan:return Result(qTan(r.acc), r.rest);
+    default: qWarning() << "function '" + func + "' is not defined";
         break;
     }
     return r;

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -20,7 +20,7 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
     ui->toolEdit->setDialog();
     connect(ui->buttonBox, &QDialogButtonBox::accepted, [this] {
         if(ui->toolEdit->tool_.isValid()) {
-            ui->toolEdit->tool_.setId(-1);
+            ui->toolEdit->tool_.setId(Tool::ID::Null);
             accept();
         } else {
             ui->toolEdit->on_pbApply_clicked();
@@ -31,8 +31,8 @@ ToolEditDialog::ToolEditDialog(QWidget* parent)
 
 ToolEditDialog::~ToolEditDialog() {
     QSettings settings;
-    settings.beginGroup("ToolEditDialog");
-    settings.setValue("geometry", saveGeometry());
+    settings.beginGroup(u"ToolEditDialog"_s);
+    settings.setValue(u"geometry"_s, saveGeometry());
     // qWarning() << geometry();
 }
 
@@ -43,8 +43,8 @@ void ToolEditDialog::setTool(const Tool& tool) { ui->toolEdit->setTool(tool); }
 void ToolEditDialog::showEvent(QShowEvent* event) {
     QDialog::showEvent(event);
     QSettings settings;
-    settings.beginGroup("ToolEditDialog");
-    restoreGeometry(settings.value("geometry", QByteArray()).toByteArray());
+    settings.beginGroup(u"ToolEditDialog"_s);
+    restoreGeometry(settings.value(u"geometry"_s, QByteArray()).toByteArray());
     // qWarning() << geometry();
 }
 

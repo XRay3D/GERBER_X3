@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -24,13 +24,13 @@ struct Settings {
 
 inline Settings settings;
 
-inline constexpr auto PROFILE = md5::hash32("Profile");
+inline constexpr auto PROFILE = "Profile"_hash32;
 
 class File final : public GCode::File {
 public:
     explicit File();
-    explicit File(GCode::Params&& gcp, Pathss&& toolPathss);
-    QIcon icon() const override { return QIcon::fromTheme("profile-path"); }
+    explicit File(GCode::Params&& gcp);
+    QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
     uint32_t type() const override { return PROFILE; }
     void createGi() override;
     void genGcodeAndTile() override;
@@ -42,14 +42,12 @@ public:
     Creator() = default;
     ~Creator() override = default;
 
-    enum {
-        BridgeLen = GCode::Params::UserParam,
-        TrimmingCorners,
-        TrimmingOpenPaths,
-        BridgeAlignType,
-        BridgeValue,
-        BridgeValue2,
-    };
+    static inline const QString BridgeLen        = u"BridgeLen"_s;
+    static inline const QString TrimmingCorners   = u"TrimmingCorners"_s;
+    static inline const QString TrimmingOpenPaths = u"TrimmingOpenPaths"_s;
+    static inline const QString BridgeAlignType   = u"BridgeAlignType"_s;
+    static inline const QString BridgeValue       = u"BridgeValue"_s;
+    static inline const QString BridgeValue2      = u"BridgeValue2"_s;
 
 private:
     void createProfile(const Tool& tool, const double depth);
@@ -68,9 +66,9 @@ private:
         ntClosed
     };
     void polyTreeToPaths(PolyTree& polytree, Paths& rpaths);
-    //    void addPolyNodeToPaths(PolyTree& polynode, NodeType nodetype, Paths& paths);
-    //    void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
-    //    void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
+    // void addPolyNodeToPaths(PolyTree& polynode, NodeType nodetype, Paths& paths);
+    // void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
+    // void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
 
 protected:
     void create() override; // Creator interface

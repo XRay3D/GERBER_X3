@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -60,7 +60,7 @@ void ToolTreeView::newTool() {
 
     if(item) {
         item->setIsTool();
-        item->tool().setName(tr("New Tool ") + QString::number(item->toolId()));
+        item->tool().setName(tr("New Tool ") + QString::number(+item->toolId()));
         index = model_->createIndex(item->row(), 0, item);
         selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
     }

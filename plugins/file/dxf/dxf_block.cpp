@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License:                                                                     *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -22,7 +22,7 @@ Block::Block(Blocks& blocks, SectionParser* sp)
     parseData(code);
     do {
         code = sp->nextCode();
-    } while(code != "BLOCK" && sp->hasNext());
+    } while(code != u"BLOCK"_s && sp->hasNext());
     code = sp->prevCode();
 }
 
@@ -33,21 +33,20 @@ void Block::parseHeader(CodeData& code) {
         case EntityType:
         case Handle:
         case StartOfApplication_definedGroup:
-            //        case EndOfGroup:
+            // case EndOfGroup: break;
         case SoftPointerID:
-        case SubclassMarker: break;
+        case SubclassMarker                 : break;
         case LayerName:
             layerName = code.string();
             break;
-
-            // case SubclassMarker_2: break;
-        case BlockName: blockName = code.string(); break;
-        case BlockTypeFlags: flags = code; break;
-        case BasePointX: basePoint.rx() = code; break;
-        case BasePointY: basePoint.ry() = code; break;
-        case BasePointZ: break;
-        case BlockName_2: blockName = code.string(); break;
-        case XrefPathName: xrefPathName = code.string(); break;
+            // case SubclassMarker_2:        break;
+        case BlockName       : blockName = code.string(); break;
+        case BlockTypeFlags  : flags = code; break;
+        case BasePointX      : basePoint.rx() = code; break;
+        case BasePointY      : basePoint.ry() = code; break;
+        case BasePointZ      : break;
+        case BlockName_2     : blockName = code.string(); break;
+        case XrefPathName    : xrefPathName = code.string(); break;
         case BlockDescription: blockDescription = code.string(); break;
         }
         code = sp->nextCode();
@@ -56,15 +55,15 @@ void Block::parseHeader(CodeData& code) {
 
 void Block::parseData(CodeData& code) {
     do {
-        if(code == "ENDBLK")
+        if(code == u"ENDBLK"_s)
             break;
-        //        sp->prevCode(); // unwind parser
+        // sp->prevCode(); // unwind parser
         SectionENTITIES se(blocks, code, sp);
         entities = std::move(se.entities);
-        if(code == "ENDBLK")
+        if(code == u"ENDBLK"_s)
             break;
         code = sp->nextCode();
-    } while(code != "ENDBLK");
+    } while(code != u"ENDBLK"_s);
 }
 
 } // namespace Dxf

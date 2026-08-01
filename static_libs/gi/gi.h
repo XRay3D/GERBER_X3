@@ -3,14 +3,16 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
 
+#include "curve.h"
 #include "myclipper.h"
+#include "plugintypes.h"
 
 #include <QAnimationGroup>
 #include <QGraphicsItem>
@@ -67,7 +69,7 @@ class Item : public /*QGraphicsObject*/ QGraphicsItem {
     friend class Group;
     friend class ::Project;
 
-    //    Q_OBJECT
+    // Q_OBJECT
     Q_GADGET
     Q_PROPERTY(QColor bodyColor READ bodyColor WRITE setBodyColor NOTIFY colorChanged FINAL)
     Q_PROPERTY(bool editable READ isEditable WRITE setEditable FINAL)
@@ -93,8 +95,10 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int /*alternate*/ = {}) const;
-    virtual void setPaths(Paths paths, int /*alternate*/ = {});
+    virtual Paths paths(int param = {}) const;
+    virtual Curves curves(int param = {}) const;
+    virtual void setPaths(Paths paths, int param = {});
+    virtual void setCurves(Curves curves, int param = {});
     virtual void redraw();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -109,15 +113,18 @@ public:
     void setId(int32_t id);
     virtual void changeColor() = 0;
 
+    virtual Side side() const;
+
 protected:
-    //    QPropertyAnimation animation;
-    //    QPropertyAnimation visibleAnim;
+    // QPropertyAnimation animation;
+    // QPropertyAnimation visibleAnim;
 
     mutable QRectF boundingRect_;
 
     const AbstractFile* file_;
     Group* itemGroup = nullptr;
     QPainterPath shape_;
+    Curves curves_;
 
     QPen pen_;
 
@@ -137,6 +144,8 @@ protected:
     };
 
     int colorState = Default;
+    double scar;
+    std::optional<QPainterPath> updateArrows();
 
     // QGraphicsItem interface
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;

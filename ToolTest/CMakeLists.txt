@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 3.5)
+cmake_minimum_required(VERSION 4.00)
 
 project(ToolTest VERSION 0.1 LANGUAGES CXX)
 
@@ -9,8 +9,8 @@ set(CMAKE_AUTORCC ON)
 set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 
-find_package(QT NAMES Qt5 Qt6 REQUIRED COMPONENTS Widgets)
-find_package(Qt${QT_VERSION_MAJOR} REQUIRED COMPONENTS Widgets)
+find_package(QT NAMES  Qt6 REQUIRED COMPONENTS Widgets)
+find_package(Qt6 REQUIRED COMPONENTS Widgets)
 
 file(GLOB PROJECT_SOURCES
     *.cpp
@@ -28,19 +28,14 @@ file(GLOB PROJECT_SOURCES
 #    ../static_libs/tooldatabase
 #)
 
-if(${QT_VERSION_MAJOR} GREATER_EQUAL 6)
     qt_add_executable(ToolTest
         MANUAL_FINALIZATION
         ${PROJECT_SOURCES}
     )
-else()
-    add_executable(ToolTest
-        ${PROJECT_SOURCES}
-    )
-endif()
+
 
 target_link_libraries(ToolTest PRIVATE
-    Qt${QT_VERSION_MAJOR}::Widgets
+    Qt6::Widgets
 )
 
 set_target_properties(ToolTest PROPERTIES
@@ -55,6 +50,5 @@ install(TARGETS ToolTest
     BUNDLE DESTINATION .
     LIBRARY DESTINATION ${CMAKE_INSTALL_LIBDIR})
 
-if(QT_VERSION_MAJOR EQUAL 6)
     qt_finalize_executable(ToolTest)
-endif()
+

@@ -3,7 +3,7 @@
  * Version   :  na                                                              *
  * Date      :  XXXXX XX, 2025                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2025                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
@@ -66,11 +66,11 @@ private:                                          \
     class TYPE* NAME##_ = nullptr;                \
                                                   \
 public:                                           \
-    static auto& NAME() {                         \
+    static TYPE& NAME() {                         \
         assert(app->NAME##_);                     \
         return *app->NAME##_;                     \
     }                                             \
-    static auto* NAME##Ptr() {                    \
+    static TYPE* NAME##Ptr() {                    \
         /*assert(app->NAME##_);*/                 \
         return app->NAME##_;                      \
     }                                             \
@@ -113,14 +113,14 @@ class App {
     AppSettings appSettings_;
 
     // handles handles_;
-    //    QSettings settings_;
+    // QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
     double dashOffset_{};
 
-    QSharedMemory sharedMemory{"AppSettings"};
+    QSharedMemory sharedMemory{u"AppSettings"_s};
 
-    const bool isDebug_{QCoreApplication::applicationDirPath().contains("GERBER_X3/bin")};
+    const bool isDebug_{QCoreApplication::applicationDirPath().contains(u"GERBER_X3/bin"_s)};
 
     bool drawPdf_{};
 
@@ -131,7 +131,7 @@ public:
         else if(sharedMemory.attach(QSharedMemory::ReadOnly))
             app = *reinterpret_cast<App**>(sharedMemory.data());
         else
-            qDebug() << "App" << app << sharedMemory.errorString();
+            qDebug() << u"App"_s << app << sharedMemory.errorString();
     }
     static auto& dashOffset() { return app->dashOffset_; }
 
@@ -170,7 +170,7 @@ public:
     static auto& settings() { return app->appSettings_; }
 
     static auto& toolHolder() { return app->toolHolder_; }
-    //    static auto* qSettings() { return &app->settings_; }
+    // static auto* qSettings() { return &app->settings_; }
 
     static bool drawPdf() { return app->drawPdf_; }
     static void setDrawPdf(bool newDrawPdf) { app->drawPdf_ = newDrawPdf; }
