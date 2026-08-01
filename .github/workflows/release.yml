@@ -1,0 +1,289 @@
+name: Build & Release
+
+# Собирает GGEasy для Linux (AppImage), Windows и macOS при пуше в master
+# и при пуше тега версии, затем публикует бинарники в GitHub Releases.
+#
+# ВНИМАНИЕ: проект использует экспериментальную статическую рефлексию C++26
+# (std::meta, -freflection), поэтому везде используется GCC 16. Это очень
+# свежий тулчейн — шаги установки GCC 16 могут потребовать корректировки,
+# если пакеты в репозиториях/Homebrew/MSYS2 изменятся.
+
+on:
+  push:
+    branches: [master]
+    tags: ["[0-9]+.[0-9]+*"]
+  workflow_dispatch:
+
+env:
+  QT_VERSION: "6.9.1"
+  BOOST_VERSION: "1.87.0"
+
+jobs:
+  build-linux:
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Install GCC 16
+        run: |
+          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
+          sudo apt-get update
+          sudo apt-get install -y gcc-16 g++-16 mold ninja-build \
+            libfuse2t64 libgl1-mesa-dev libxkbcommon-dev
+          echo "CC=gcc-16" >> "$GITHUB_ENV"
+          echo "CXX=g++-16" >> "$GITHUB_ENV"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: linux
+          target: desktop
+          arch: linux_gcc_64
+          modules: qtimageformats
+          cache: "true"
+
+      - name: Install Boost
+        uses: MarkusJx/install-boost@v2.5.0
+        id: install-boost
+        with:
+          boost_version: ${{ env.BOOST_VERSION }}
+          cache: "true"
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGERBER_NATIVE_MARCH=OFF \
+            -DGIT_REF_NAME=${{ github.ref_name }} \
+            -DGIT_SHA=${{ github.sha }} \
+            -DCMAKE_PREFIX_PATH="${{ steps.install-boost.outputs.BOOST_ROOT }}"
+
+      - name: Build
+        run: cmake --build build --config Release -j"$(nproc)"
+
+      - name: Package AppImage
+        run: |
+          set -eu
+          BIN_DIR="$(dirname "$(find bin -maxdepth 3 -type d -name plugins)")"
+          echo "BIN_DIR=$BIN_DIR"
+
+          curl -sL -o linuxdeploy \
+            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
+          curl -sL -o linuxdeploy-plugin-qt \
+            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
+          chmod +x linuxdeploy linuxdeploy-plugin-qt
+
+          cp ggeasy/myapp.png ggeasy.png
+
+          export QMAKE="$Qt6_DIR/bin/qmake6"
+          mkdir -p AppDir
+          ./linuxdeploy --appdir AppDir \
+            -e "$BIN_DIR/GGEasy" \
+            -d packaging/linux/ggeasy.desktop \
+            -i ggeasy.png \
+            --plugin qt
+
+          # плагины самого приложения (QPluginLoader) — докладываем отдельно,
+          # чтобы linuxdeploy подтянул их собственные Qt-зависимости
+          mkdir -p AppDir/usr/bin/plugins
+          find "$BIN_DIR/plugins" -maxdepth 1 -name "*.so" -exec cp -v {} AppDir/usr/bin/plugins/ \;
+          find AppDir/usr/bin/plugins -name "*.so" -exec ./linuxdeploy --appdir AppDir --plugin qt -l {} \;
+
+          VERSION="${{ github.ref_name }}"
+          ./linuxdeploy --appdir AppDir --output appimage
+          mv GGEasy*.AppImage "GGEasy-${VERSION}-linux-x86_64.AppImage"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GGEasy-linux-AppImage
+          path: GGEasy-*.AppImage
+          if-no-files-found: error
+
+  build-windows:
+    runs-on: windows-latest
+    defaults:
+      run:
+        shell: msys2 {0}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Setup MSYS2 (UCRT64, GCC 16)
+        uses: msys2/setup-msys2@v2
+        with:
+          msystem: UCRT64
+          update: true
+          install: >-
+            mingw-w64-ucrt-x86_64-gcc
+            mingw-w64-ucrt-x86_64-cmake
+            mingw-w64-ucrt-x86_64-ninja
+            mingw-w64-ucrt-x86_64-mold
+            mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-qt6-base
+            mingw-w64-ucrt-x86_64-qt6-declarative
+            mingw-w64-ucrt-x86_64-qt6-svg
+            mingw-w64-ucrt-x86_64-qt6-imageformats
+            mingw-w64-ucrt-x86_64-qt6-tools
+            git
+            zip
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGERBER_NATIVE_MARCH=OFF \
+            -DGIT_REF_NAME=${{ github.ref_name }} \
+            -DGIT_SHA=${{ github.sha }}
+
+      - name: Build
+        run: cmake --build build --config Release -j"$(nproc)"
+
+      - name: Package
+        run: |
+          set -eu
+          BIN_DIR="$(dirname "$(find bin -maxdepth 3 -type d -name plugins)")"
+          VERSION="${{ github.ref_name }}"
+          OUT="GGEasy-${VERSION}-windows-x64"
+          mkdir -p "$OUT"
+          cp -r "$BIN_DIR"/* "$OUT"/
+          zip -r "${OUT}.zip" "$OUT"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GGEasy-windows-zip
+          path: GGEasy-*-windows-x64.zip
+          if-no-files-found: error
+
+  build-macos:
+    runs-on: macos-14
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Install GCC 16 & tools
+        run: |
+          brew update
+          brew install gcc@16 ninja mold || brew install gcc ninja mold
+          GCC_BIN="$(brew --prefix gcc@16 2>/dev/null || brew --prefix gcc)/bin"
+          GCC=$(ls "$GCC_BIN"/gcc-16 2>/dev/null || ls "$GCC_BIN"/gcc-* | sort -V | tail -1)
+          GXX=$(ls "$GCC_BIN"/g++-16 2>/dev/null || ls "$GCC_BIN"/g++-* | sort -V | tail -1)
+          echo "CC=$GCC" >> "$GITHUB_ENV"
+          echo "CXX=$GXX" >> "$GITHUB_ENV"
+
+      - name: Install Qt
+        uses: jurplel/install-qt-action@v4
+        with:
+          version: ${{ env.QT_VERSION }}
+          host: mac
+          target: desktop
+          modules: qtimageformats
+          cache: "true"
+
+      - name: Install Boost
+        run: brew install boost
+
+      - name: Configure
+        run: |
+          cmake -S . -B build -G Ninja \
+            -DCMAKE_BUILD_TYPE=Release \
+            -DGERBER_NATIVE_MARCH=OFF \
+            -DGIT_REF_NAME=${{ github.ref_name }} \
+            -DGIT_SHA=${{ github.sha }}
+
+      - name: Build
+        run: cmake --build build --config Release -j"$(sysctl -n hw.ncpu)"
+
+      - name: Package
+        run: |
+          set -eu
+          APP_DIR="$(dirname "$(find bin -maxdepth 3 -type d -name plugins)")"
+          APP="$(find "$APP_DIR" -maxdepth 1 -name "*.app")"
+          "$Qt6_DIR/bin/macdeployqt" "$APP" -verbose=1
+          mkdir -p "$APP/Contents/PlugIns/ggeasy"
+          cp -R "$APP_DIR"/plugins/*.dylib "$APP/Contents/PlugIns/ggeasy/" 2>/dev/null || true
+
+          VERSION="${{ github.ref_name }}"
+          OUT="GGEasy-${VERSION}-macos"
+          mkdir -p "$OUT"
+          cp -R "$APP" "$OUT"/
+          ditto -c -k --sequesterRsrc --keepParent "$OUT" "${OUT}.zip"
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GGEasy-macos-zip
+          path: GGEasy-*-macos.zip
+          if-no-files-found: error
+
+  release:
+    needs: [build-linux, build-windows, build-macos]
+    if: github.event_name == 'push'
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Download artifacts
+        uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+
+      - name: Build changelog
+        id: changelog
+        run: |
+          set -eu
+          if [[ "${{ github.ref_type }}" == "tag" ]]; then
+            PREV_TAG="$(git tag --sort=-creatordate | grep -v "^${{ github.ref_name }}$" | head -n1 || true)"
+          else
+            PREV_TAG="$(git tag --sort=-creatordate | head -n1 || true)"
+          fi
+
+          {
+            echo "log<<EOF"
+            if [[ -n "$PREV_TAG" ]]; then
+              echo "Изменения с $PREV_TAG:"
+              echo
+              git log --no-merges --pretty="- %s (%h)" "$PREV_TAG"..HEAD
+            else
+              echo "Изменения:"
+              echo
+              git log --no-merges --pretty="- %s (%h)" -n 50
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Publish tagged release
+        if: github.ref_type == 'tag'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: GGEasy ${{ github.ref_name }}
+          body: ${{ steps.changelog.outputs.log }}
+          prerelease: false
+          files: dist/**
+
+      - name: Publish rolling master build
+        if: github.ref_type == 'branch'
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: continuous
+          name: "GGEasy (master, continuous build)"
+          body: ${{ steps.changelog.outputs.log }}
+          prerelease: true
+          target_commitish: ${{ github.sha }}
+          files: dist/**
