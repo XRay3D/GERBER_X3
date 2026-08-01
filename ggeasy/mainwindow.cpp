@@ -920,6 +920,7 @@ void MainWindow::saveSelectedGCodeFiles() {
             QFile file{name};
             if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 QTextStream out{&file};
+                out.setEncoding(QStringConverter::Utf8);
                 QString str;
                 for(QString& s: sl) {
                     if(!s.isEmpty())
