@@ -186,6 +186,7 @@ bool File::save(const QString& name) {
     QFile file{name_};
     if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out{&file};
+        out.setEncoding(QStringConverter::Utf8);
         QString str;
         for(QString& s: lines_) {
             if(!s.isEmpty())
