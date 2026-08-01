@@ -67,6 +67,35 @@ add_compile_definitions(
     saturate_cast=saturating_cast
     USINGZ=1)
 
+# FIND BOOST — version check is handled by find_package directly
+find_package(Boost 1.85 REQUIRED)
+message(STATUS "==> Boost ${Boost_VERSION} found")
+
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
+
+set(CLIPPER2_UTILS OFF)
+set(CLIPPER2_EXAMPLES OFF)
+set(CLIPPER2_TESTS OFF)
+set(CLIPPER2_USINGZ "ONLY")
+
+FetchContent_Declare(
+    ctre
+    GIT_REPOSITORY "https://github.com/hanickadot/compile-time-regular-expressions.git"
+    GIT_TAG main
+    GIT_SHALLOW ON)
+FetchContent_Declare(
+    clipper2
+    GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
+    GIT_TAG main
+    GIT_SHALLOW ON
+    SOURCE_SUBDIR CPP)
+FetchContent_MakeAvailable(ctre clipper2)
+
+# Compile options for our own code only — set after FetchContent so that
+# third-party targets (Clipper2, ctre) don't inherit them. Clipper2 builds
+# with its own -Werror, and it previously broke on -fhardened's
+# _FORTIFY_SOURCE diagnostic leaking in from here.
 set(COMMON_COMPILE_OPTIONS
     -fPIC
     -Wall
@@ -101,31 +130,6 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()
-
-# FIND BOOST — version check is handled by find_package directly
-find_package(Boost 1.85 REQUIRED)
-message(STATUS "==> Boost ${Boost_VERSION} found")
-
-include(FetchContent)
-set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
-
-set(CLIPPER2_UTILS OFF)
-set(CLIPPER2_EXAMPLES OFF)
-set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ "ONLY")
-
-FetchContent_Declare(
-    ctre
-    GIT_REPOSITORY "https://github.com/hanickadot/compile-time-regular-expressions.git"
-    GIT_TAG main
-    GIT_SHALLOW ON)
-FetchContent_Declare(
-    clipper2
-    GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
-    GIT_TAG main
-    GIT_SHALLOW ON
-    SOURCE_SUBDIR CPP)
-FetchContent_MakeAvailable(ctre clipper2)
 
 find_package(
     Qt6
