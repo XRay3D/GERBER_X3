@@ -86,15 +86,18 @@ if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(
         ${COMMON_COMPILE_OPTIONS}
-        -fhardened
         -freflection
         -fstack-protector-strong
         # -fvtable-verify=preinit
-        -fstack-clash-protection
         # -fcf-protection=full
     )
-    # Security hardening link flags (RELRO + BIND_NOW)
-    add_link_options(-Wl,-z,relro -Wl,-z,now)
+    # -fhardened, -fstack-clash-protection and RELRO/BIND_NOW target
+    # glibc/ELF specifics and are unsupported by mingw-w64 GCC (Windows)
+    # and Homebrew GCC (macOS), so keep them Linux-only.
+    if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+        add_compile_options(-fhardened -fstack-clash-protection)
+        add_link_options(-Wl,-z,relro -Wl,-z,now)
+    endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
 endif()

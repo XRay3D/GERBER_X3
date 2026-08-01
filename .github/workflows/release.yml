@@ -198,13 +198,19 @@ jobs:
       - name: Install Boost
         run: brew install boost
 
+      - name: Install ICU
+        run: |
+          brew install icu4c
+          echo "ICU_ROOT=$(brew --prefix icu4c)" >> "$GITHUB_ENV"
+
       - name: Configure
         run: |
           cmake -S . -B build -G Ninja \
             -DCMAKE_BUILD_TYPE=Release \
             -DGERBER_NATIVE_MARCH=OFF \
             -DGIT_REF_NAME=${{ github.ref_name }} \
-            -DGIT_SHA=${{ github.sha }}
+            -DGIT_SHA=${{ github.sha }} \
+            -DCMAKE_PREFIX_PATH="$ICU_ROOT"
 
       - name: Build
         run: cmake --build build --config Release -j"$(sysctl -n hw.ncpu)"
