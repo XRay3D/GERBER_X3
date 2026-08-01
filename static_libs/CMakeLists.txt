@@ -11,7 +11,7 @@
 cmake_minimum_required(VERSION 4.0)
 
 # static lib
-add_subdirectory(geometCry)
+add_subdirectory(geometry)
 add_subdirectory(filetree)
 add_subdirectory(gi)
 add_subdirectory(graphicsview)
