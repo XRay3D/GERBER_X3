@@ -116,10 +116,7 @@ constexpr uint32_t t(Fn f, uint32_t a, uint32_t b, uint32_t c, uint32_t d, uint3
 }
 
 constexpr uint32_t to_uint32(const unsigned char* data) noexcept {
-    return (static_cast<uint32_t>(data[3]) << 24)
-        | (static_cast<uint32_t>(data[2]) << 16)
-        | (static_cast<uint32_t>(data[1]) << 8)
-        | (static_cast<uint32_t>(data[0]) << 0);
+    return (static_cast<uint32_t>(data[3]) << 24) | (static_cast<uint32_t>(data[2]) << 16) | (static_cast<uint32_t>(data[1]) << 8) | (static_cast<uint32_t>(data[0]));
 }
 
 struct Context {

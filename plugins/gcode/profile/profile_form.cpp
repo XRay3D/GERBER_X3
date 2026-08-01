@@ -23,9 +23,7 @@
 template <>
 struct std::hash<QPointF> {
     size_t operator()(QPointF const& p) const noexcept {
-        size_t h
-            = std::bit_cast<size_t>(p.x())
-            ^ std::bit_cast<size_t>(p.y());
+        size_t h = (size_t)p.x() ^ (size_t)p.y();
         return h;
     }
 };
@@ -169,8 +167,8 @@ void Form::onAddBridgeClicked() {
 
     const double value = ui->dsbxBridgeValue->value();
 
-    auto addHorizontallyVertically = [value](BridgeAlign align) {
-        auto testAndAdd = [](QLineF testLineV, QLineF srcline) {
+    auto addHorizontallyVertically = [this, value](BridgeAlign align) {
+        auto testAndAdd = [this](QLineF testLineV, QLineF srcline) {
             QPointF intersects;
             if(auto is = testLineV.intersects(srcline, &intersects); is == QLineF::BoundedIntersection) {
                 qDebug() << u"intersects1"_s << is << intersects;
@@ -180,7 +178,8 @@ void Form::onAddBridgeClicked() {
                 brItem->setPos(brItem->snapedPos(intersects));
                 brItem->setVisible(true);
                 brItem->setOpacity(1.0);
-                if(!brItem->ok()) delete brItem;
+                if(!brItem->ok())
+                    delete brItem;
             }
         };
 
@@ -261,7 +260,7 @@ void Form::updateBridges() {
 }
 
 void Form::updatePixmap() {
-    int size = std::min(ui->lblPixmap->height(), ui->lblPixmap->width());
+    int size = qMin(ui->lblPixmap->height(), ui->lblPixmap->width());
     ui->lblPixmap->setPixmap(QIcon::fromTheme(pixmaps[side + direction * 3]).pixmap(QSize(size, size)));
 }
 

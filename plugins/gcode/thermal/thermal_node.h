@@ -36,7 +36,7 @@ class Node;
 // virtual int count() const = 0;
 //};
 
-#define OVERRIDE /**/
+#define override /**/
 
 class Node final /*: public NodeI*/ {
 public:
@@ -44,7 +44,7 @@ public:
     explicit Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model);
     explicit Node(Model* model);
 
-    ~Node() OVERRIDE;
+    ~Node() override;
 
     Node* child(int row) const;
 
@@ -62,22 +62,22 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex& index) const;
 
-    double angle() const OVERRIDE;
-    double tickness() const OVERRIDE;
-    int count() const OVERRIDE;
+    double angle() const override;
+    double tickness() const override;
+    int count() const override;
     ThParam getParam() const;
 
     Point pos() const;
     AbstractThermPrGi* item() const;
     bool loadFile(QDataStream& stream) const;
-    void disable() OVERRIDE;
-    void enable() OVERRIDE;
+    void disable() override;
+    void enable() override;
 
     Node(const Node&) = delete;
     Node& operator=(const Node&) = delete;
 
-    bool isChecked() const OVERRIDE;
-    QModelIndex index(int column = 0) const OVERRIDE;
+    bool isChecked() const override;
+    QModelIndex index(int column = 0) const override;
 
     ThParam getPar() const;
 
@@ -104,6 +104,6 @@ private:
     };
 };
 
-#undef OVERRIDE
+#undef override
 
 } // namespace Thermal

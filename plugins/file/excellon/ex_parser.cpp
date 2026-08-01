@@ -9,23 +9,26 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "ex_parser.h"
-#include "abstract_fileplugin.h"
 #include "ex_file.h"
-#include "utils.h"
+
+#include <ctre.hpp>
+
 #include <QFile>
 #include <cmath>
-#include <ctre.hpp>
+
+#include "abstract_fileplugin.h"
+#include "utils.h"
 
 namespace Excellon {
 
-Parser::Parser(AbstractFilePlugin* const filePlugin)
-    : filePlugin{filePlugin} { }
+Parser::Parser(AbstractFilePlugin* const afp)
+    : afp{afp} {
+}
 
 AbstractFile* Parser::parseFile(const QString& fileName) {
     QFile file_{fileName};
     if(!file_.open(QFile::ReadOnly | QFile::Text))
         return nullptr;
-    }
 
     file = new File;
     toolIt = file->tools_.end();
@@ -65,19 +68,9 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
         delete file;
         file = nullptr;
     } else {
-        emit filePlugin->fileReady(file);
+        emit afp->fileReady(this->file);
     }
     return file;
-} catch(const std::exception& ex) {
-    qCritical() << "exeption S:" << errno;
-    emit filePlugin->fileError(QFileInfo{fileName}.fileName(), ex.what());
-    delete file;
-    return file = nullptr;
-} catch(...) {
-    qCritical() << "exeption S:" << errno;
-    emit filePlugin->fileError(QFileInfo{fileName}.fileName(), "Unknown Error!");
-    delete file;
-    return file = nullptr;
 }
 
 bool Parser::parseComment(QString line) {
@@ -250,11 +243,11 @@ bool Parser::parsePos(const QString& line) {
 
         if(X) {
             state_.rawPos.x = CtreCapTo(X).toString();
-            parseNumber(X, state_.pos.rx());
+            parseNumber(CtreCapTo(X), state_.pos.rx());
         }
         if(Y) {
             state_.rawPos.y = CtreCapTo(Y).toString();
-            parseNumber(Y, state_.pos.ry());
+            parseNumber(CtreCapTo(Y), state_.pos.ry());
         }
         if(A)
             state_.rawPos.a = CtreCapTo(A).toString();
@@ -309,12 +302,12 @@ bool Parser::parseSlot(const QString& line) {
 
         if(X2) {
             state_.rawPos.x = QString{CtreCapTo(X2)};
-            parseNumber(X2, state_.pos.rx());
+            parseNumber(CtreCapTo(X2), state_.pos.rx());
         }
 
         if(Y2) {
             state_.rawPos.y = QString{CtreCapTo(Y2)};
-            parseNumber(Y2, state_.pos.ry());
+            parseNumber(CtreCapTo(Y2), state_.pos.ry());
         }
 
         state_.rawPosList.append(state_.rawPos);
@@ -391,16 +384,16 @@ bool Parser::parseNumber(QString Str, double& val) {
                 Str.remove(0, 1);
                 sign = -1;
             }
-            QString strVal;
-            if(str.length() < file->format_.integer + file->format_.decimal) {
+            if(Str.length() < file->format_.integer + file->format_.decimal) {
                 switch(file->format_.zeroMode) {
                 case LeadingZeros : Str = Str + QString(file->format_.integer + file->format_.decimal - Str.length(), u'0'); break;
                 case TrailingZeros: Str = QString(file->format_.integer + file->format_.decimal - Str.length(), u'0') + Str; break;
                 }
             }
-            val = strVal.toDouble() * pow(10.0, -file->format_.decimal) * sign;
+            val = Str.toDouble() * pow(10.0, -file->format_.decimal) * sign;
         }
-        if(file->format_.unitMode == Inches) val *= 25.4;
+        if(file->format_.unitMode == Inches)
+            val *= 25.4;
 
         val = std::clamp(val, -1000.0, +1000.0); // one meter
 

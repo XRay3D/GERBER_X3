@@ -9,7 +9,6 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "dxf_codedata.h"
-#include "dxf_types.h"
 
 namespace Dxf {
 

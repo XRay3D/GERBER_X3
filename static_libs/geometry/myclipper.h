@@ -47,8 +47,6 @@ using Clipper = Clipper2Lib::Clipper64;
 
 using Point = Clipper2Lib::Point64;
 
-inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
-
 using Path = Clipper2Lib::Path64;
 using Paths = Clipper2Lib::Paths64;
 using Pathss = std::vector<Paths>;

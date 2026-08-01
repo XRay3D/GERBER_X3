@@ -28,7 +28,7 @@ void SectionBLOCKS::parse() {
                 blocks[block->blockName] = block;
             } else {
                 delete block;
-                throw Exception{DxfObj::tr("blockName ERR!")};
+                throw DxfObj::tr("blockName ERR!");
             }
         }
     } while(code != u"ENDSEC"_s);

@@ -204,9 +204,6 @@ public:
         : tuple{args...} { }
     operator QDataStream&() & { return stream; }
 
-    template <typename T>
-    BlockRead& operator>>(T&& br) { return stream >> br, *this; }
-
     friend QDataStream& operator>>(QDataStream& stream, BlockRead<Args...>&& br) {
         return stream >> br;
     }
@@ -229,9 +226,6 @@ public:
         Block{stream}.write(args...);
     }
     operator QDataStream&() & { return stream; }
-
-    template <typename T>
-    BlockWrite& operator<<(T&& br) { return stream << br, *this; }
 
     friend QDataStream& operator<<(QDataStream& stream, BlockWrite&& br) {
         return stream << br;

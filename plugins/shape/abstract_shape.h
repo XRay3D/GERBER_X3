@@ -73,9 +73,9 @@ public:
     std::vector<AbstractShape*> static shapes();
 
     // QGraphicsItem interface
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) final;
-    QRectF boundingRect() const final;
-    QPainterPath shape() const final;
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) override;
+    QRectF boundingRect() const override;
+    QPainterPath shape() const override;
 
     // Gi::Item interface
     void changeColor() override;
@@ -93,8 +93,8 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     void menu(QMenu& menu, FileTree::View* tv) override;
 
-    int32_t id() const final { return Item::id(); }
-    void setId(int32_t id) final { Item::setId(id); }
+    int32_t id() const override { return Item::id(); }
+    void setId(int32_t id) override { Item::setId(id); }
 
 protected:
     double scale(bool* hasUpdate = nullptr) const;
