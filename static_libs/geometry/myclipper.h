@@ -99,6 +99,22 @@ void SetC(Point64& dst, const Point64& center);
 void SetCForce(Point64& dst, const Point64& center);
 void SetCSelf(Point64& dst);
 
+//----Индексное хранилище центров дуг (для конвертации Curve <-> Path64)--------------
+// Point64::z хранит пару 32-битных индексов (prev, next) в глобальном реестре центров
+// вместо самих координат: prev - индекс центра дуги, заканчивающейся в этой точке,
+// next - индекс центра дуги, начинающейся в этой точке. 0 означает "не дуга".
+// Индексы никогда не переиспользуются и не инвалидируются (append-only), начинаются с 1.
+enum class CenterKind {
+    Source,    // центр дуги исходной кривой (Curve -> Path64, CirclePath, arc())
+    RoundJoin, // новый центр скругления угла, созданный при офсетинге (ClipperOffset, JoinType::Round)
+};
+int32_t RegisterCenter(const QPointF& center, CenterKind kind = CenterKind::Source);
+QPointF CenterAt(int32_t index);
+CenterKind CenterKindAt(int32_t index);
+int32_t GetCPrevIndex(const Point64& dst);
+int32_t GetCNextIndex(const Point64& dst);
+void SetCIndices(Point64& dst, int32_t prevIndex, int32_t nextIndex);
+
 //------------------------------------------------------------------------------
 
 template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
