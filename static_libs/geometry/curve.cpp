@@ -62,7 +62,14 @@ constexpr auto DrawCross90 = std::bind(drawCross90, _1, Qt::red, 0.2);
 constexpr auto DrawCross45 = std::bind(drawCross45, _1, Qt::red, 0.2);
 
 //------------------------------------------------------------------------------
-static Path64 arcToPath(const Vertex& src, const Vertex& dst) {
+// если у сегмента есть точный индекс дуги - берём центр из реестра,
+// иначе (новые точки пересечения без индекса) восстанавливаем усреднением
+static QPointF reconstructCenter(Segment seg) {
+    if(const int32_t idx = GetCNextIndex(seg.front())) return CenterAt(idx);
+    return ~r::fold_left(v::transform(seg, GetC), Point64{}, std::plus<Point64>{}) / seg.size();
+}
+
+static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx) {
     constexpr double accuracy = 0.01;
 #if 1
     if(!dst.type) return {~dst.pt};
@@ -107,12 +114,12 @@ static Path64 arcToPath(const Vertex& src, const Vertex& dst) {
         double nx  = dst.center.x() + radius * cos(phi - dphi);
         double ny  = dst.center.y() + radius * sin(phi - dphi);
         p          = QPointF{nx, ny};
-        SetC(path.emplace_back(~p), ~dst.center);
+        SetCIndices(path.emplace_back(~p), centerIdx, centerIdx);
     }
     if(path.size()) {
         path.back() = ~dst.pt;
-        // SetCForce(path.front(), path.front());
-        // SetCForce(path.back(), path.back());
+        // индексы для конечной точки (стыка) выставляет вызывающий toPath(),
+        // т.к. он знает индекс дуги СЛЕДУЮЩЕГО сегмента
     }
     return path;
 #else
@@ -881,6 +888,11 @@ Curve toCurve(std::span<const Point64> path_) {
     if(path.empty()) return {};
 
     static auto eqCenter = +[](Point64& l, Point64& r) {
+        // точный путь: индекс дуги, начинающейся в l, должен совпасть с индексом
+        // дуги, заканчивающейся в r - если индексы известны, эпсилон не нужен
+        const int32_t ln = GetCNextIndex(l), rp = GetCPrevIndex(r);
+        if(ln || rp) return ln != 0 && ln == rp;
+
         constexpr double epsilon = 0.1; // mm
         static const Point64 null{};
         Point64 cl = !l, cr = !r;
@@ -900,26 +912,20 @@ Curve toCurve(std::span<const Point64> path_) {
     { // Исправление центров
         constexpr double epsilon = 0.001; // mm, допуск совпадения центров дуг
 
-#if 1
-      // Исправление пляшущих дуг после обединения отркрытых концов линий
+        // Исправление пляшущих дуг после объединения открытых концов линий:
+        // p2 - точка БЕЗ индекса (новая точка пересечения, добавленная клиппером),
+        // зажатая между p1 и p3, у которых индекс НЕИЗВЕСТНОЙ ими самими, но ОБЩЕЙ
+        // дуги уже точно известен - если p2 к тому же лежит на той же окружности,
+        // она однозначно (без гадания по координатам) принадлежит этой дуге
         auto fixClippedArcs = [](Point64& p1, Point64& p2, Point64& p3) {
-            const QPointF c1         = ~!p1,
-                          c2         = ~!p2,
-                          c3         = ~!p3,
-                          p          = ~p2;
-            if(c1 == c3 && c2.isNull()
-                && TEST(c1, ~p1, c1, p, epsilon)
-                && TEST(c3, ~p3, c3, p, epsilon))
-                SetCForce(p2, ~c1);
-            else if(0 && !c2.isNull() && c2 != ~p2) {
-                double a1 = angle_between_segments(~p1, ~p2, c2);
-                double a2 = angle_between_segments(c2, ~p2, ~p3);
-                qDebug() << a1 << a2;
-                if(a1 > 90 && a2 > 90) {
-                    SetCForce(p2, p2); // 100% это не центр
-                    qCritical() << a1 << a2;
-                }
-            }
+            if(GetCPrevIndex(p2) || GetCNextIndex(p2)) return; // у p2 уже есть точная информация
+
+            const int32_t idx = GetCNextIndex(p1);
+            if(!idx || idx != GetCPrevIndex(p3)) return; // p1/p3 - не одна и та же дуга
+
+            const QPointF c = CenterAt(idx), p = ~p2;
+            if(TEST(c, ~p1, c, p, epsilon) && TEST(c, ~p3, c, p, epsilon))
+                SetCIndices(p2, idx, idx);
         };
         for(auto&& [p1, p2, p3]: v::adjacent<3>(path))
             fixClippedArcs(p1, p2, p3);
@@ -928,26 +934,31 @@ Curve toCurve(std::span<const Point64> path_) {
             fixClippedArcs(path.end()[-2], path.back(), path[0]);
         }
         segments = v::chunk_by(path, eqCenter); // Update segments
-#endif
 
         using PSpan = std::span<Point64>;
 
-        // Исправление едничных центров рядом с дугами
-        auto fixCenterS2 = [set = std::set<void*>{}](PSpan s1, PSpan s2) mutable -> bool {
-            if(s1.size() > 1 && s2.size() == 1) {
-                QPointF c = ~!s1.back();
-                if(TEST(c, ~s1.back(), c, ~s2.front(), epsilon)
-                    && set.emplace(&s2.front()).second /* !s2.front() != !s1.back()*/) { // without != infinity do while
-                    SetCForce(s2.front(), !s1.back());
-                    return true;
+        // Исправление единичных точек без индекса рядом с дугой: если одиночная
+        // точка (новое пересечение) вплотную примыкает к известной дуге и лежит
+        // на той же окружности - присоединяем её к этой дуге по точному индексу
+        auto fixCenterS2 = [](PSpan s1, PSpan s2) -> bool {
+            if(s1.size() > 1 && s2.size() == 1
+                && !GetCPrevIndex(s2.front()) && !GetCNextIndex(s2.front())) {
+                if(const int32_t idx = GetCNextIndex(s1.back())) {
+                    const QPointF c = CenterAt(idx);
+                    if(TEST(c, ~s1.back(), c, ~s2.front(), epsilon)) {
+                        SetCIndices(s2.front(), idx, idx);
+                        return true;
+                    }
                 }
             }
-            if(s1.size() == 1 && s2.size() > 1) {
-                QPointF c = ~!s2.front();
-                if(TEST(c, ~s2.front(), c, ~s1.front(), epsilon)
-                    && set.emplace(&s1.front()).second /*!s1.front() != !s2.front()*/) { // without != infinity do while
-                    SetCForce(s1.front(), !s2.front());
-                    return true;
+            if(s1.size() == 1 && s2.size() > 1
+                && !GetCPrevIndex(s1.front()) && !GetCNextIndex(s1.front())) {
+                if(const int32_t idx = GetCPrevIndex(s2.front())) {
+                    const QPointF c = CenterAt(idx);
+                    if(TEST(c, ~s2.front(), c, ~s1.front(), epsilon)) {
+                        SetCIndices(s1.front(), idx, idx);
+                        return true;
+                    }
                 }
             }
             return false;
@@ -977,7 +988,7 @@ Curve toCurve(std::span<const Point64> path_) {
     struct SegData : Segment {
         SegData(Segment seg)
             : Segment{seg}
-            , center{~r::fold_left(v::transform(seg, GetC), Point64{}, std::plus<Point64>{}) / seg.size()} // reconstructed from PPath,
+            , center{reconstructCenter(seg)}
             , radius{get_roundest(v::transform(seg, Radius))} { assert(seg.size()); }                  // "denoised" radius
         QPointF center;
         double radius;
@@ -1177,11 +1188,24 @@ Path64 toPath(const Curve& curve) {
     // qInfo() << "toPath";
 
     const bool closed = curve.isClosed();
+    const size_t n     = curve.size();
+
+    // Индекс центра для каждого сегмента curve[i] -> curve[i+1] (0, если сегмент - отрезок).
+    // Регистрируется один раз на дугу и переиспользуется для всех её точек в arcToPath.
+    std::vector<int32_t> segCenter(n ? n - 1 : 0, 0);
+    for(size_t i{}; i + 1 < n; ++i)
+        if(curve[i + 1].type)
+            segCenter[i] = RegisterCenter(curve[i + 1].center);
 
     Path64 path{~curve.front().pt};
+    if(n > 1) SetCIndices(path.back(), 0, segCenter[0]); // дуга, начинающаяся в первой точке
 
-    for(auto&& [fr, to]: v::pairwise(curve))
-        path.append_range(arcToPath(fr, to));
+    for(size_t i{}; i + 1 < n; ++i) {
+        path.append_range(arcToPath(curve[i], curve[i + 1], segCenter[i]));
+        // точка стыка: индекс дуги, ЗАКОНЧИВШЕЙСЯ здесь, и индекс дуги, НАЧИНАЮЩЕЙСЯ здесь
+        const int32_t nextIdx = (i + 2 < n) ? segCenter[i + 1] : 0;
+        SetCIndices(path.back(), segCenter[i], nextIdx);
+    }
 
     // CL2::TrimCollinear(path, !closed);
     // CL2::StripDuplicates(path, closed);
@@ -1189,8 +1213,6 @@ Path64 toPath(const Curve& curve) {
 
     if(closed && path.back() != path.front())
         path.emplace_back(path.front());
-
-    r::for_each(path, SetCSelf);
 
     // Gi::Debug({path}, {255, 0, 255, 128});
 

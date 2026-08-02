@@ -26,6 +26,7 @@
 #include <QPixmap>
 #include <boost/range/combine.hpp>
 #include <forward_list>
+#include <map>
 #include <mutex>
 #include <qglobal.h>
 #include <set>
@@ -120,24 +121,101 @@ QDataStream& operator>>(QDataStream& stream, Point64& pt) {
         >> reinterpret_cast<qsizetype&>(pt.z);
 }
 
-Point64 GetC(const Point64& dst) {
-    auto array = std::bit_cast<std::array<int32_t, 2>>(dst.z);
-    return {array[0], array[1]};
+namespace {
+struct CIndices {
+    int32_t prev;
+    int32_t next;
+};
+
+inline CIndices decodeIndices(const Point64& p) { return std::bit_cast<CIndices>(p.z); }
+inline void encodeIndices(Point64& p, CIndices idx) { p.z = std::bit_cast<int64_t>(idx); }
+
+struct CenterEntry {
+    QPointF point;
+    CenterKind kind{CenterKind::Source};
+};
+
+std::vector<CenterEntry>& centerRegistry() {
+    static std::vector<CenterEntry> reg{CenterEntry{}}; // index 0 зарезервирован (не используется)
+    return reg;
 }
 
-void SetCSelf(Point64& dst) { SetC(dst, dst); }
+// координата центра -> уже выданный для неё индекс (исключает дублирование в реестре)
+std::map<std::pair<double, double>, int32_t>& centerDedup() {
+    static std::map<std::pair<double, double>, int32_t> m;
+    return m;
+}
 
-#define ASSERT_LIMIT_I32(VAL) assert(LimitI32.min() < VAL && VAL < LimitI32.max());
+std::mutex& centerRegistryMutex() {
+    static std::mutex m;
+    return m;
+}
+} // namespace
+
+int32_t RegisterCenter(const QPointF& center, CenterKind kind) {
+    std::lock_guard l{centerRegistryMutex()};
+    auto& dedup       = centerDedup();
+    const auto key    = std::pair{center.x(), center.y()};
+    if(auto it = dedup.find(key); it != dedup.end()) return it->second;
+
+    auto& reg = centerRegistry();
+    reg.push_back({center, kind});
+    const int32_t idx = static_cast<int32_t>(reg.size() - 1);
+    dedup.emplace(key, idx);
+    return idx;
+}
+
+QPointF CenterAt(int32_t index) {
+    if(index <= 0) return {};
+    std::lock_guard l{centerRegistryMutex()};
+    auto& reg = centerRegistry();
+    return static_cast<size_t>(index) < reg.size() ? reg[static_cast<size_t>(index)].point : QPointF{};
+}
+
+CenterKind CenterKindAt(int32_t index) {
+    if(index <= 0) return CenterKind::Source;
+    std::lock_guard l{centerRegistryMutex()};
+    auto& reg = centerRegistry();
+    return static_cast<size_t>(index) < reg.size() ? reg[static_cast<size_t>(index)].kind : CenterKind::Source;
+}
+
+static void SetCenterAt(int32_t index, const QPointF& center) {
+    if(index <= 0) return;
+    std::lock_guard l{centerRegistryMutex()};
+    auto& reg = centerRegistry();
+    if(static_cast<size_t>(index) >= reg.size()) return;
+
+    auto& entry = reg[static_cast<size_t>(index)];
+    auto& dedup = centerDedup();
+    // старый ключ дедупликации становится недействительным после сдвига центра
+    if(auto it = dedup.find(std::pair{entry.point.x(), entry.point.y()});
+        it != dedup.end() && it->second == index)
+        dedup.erase(it);
+
+    entry.point                                       = center;
+    dedup[std::pair{center.x(), center.y()}] = index;
+}
+
+int32_t GetCPrevIndex(const Point64& dst) { return decodeIndices(dst).prev; }
+int32_t GetCNextIndex(const Point64& dst) { return decodeIndices(dst).next; }
+
+void SetCIndices(Point64& dst, int32_t prevIndex, int32_t nextIndex) {
+    encodeIndices(dst, {prevIndex, nextIndex});
+}
+
+Point64 GetC(const Point64& dst) {
+    const CIndices idx = decodeIndices(dst);
+    if(idx.prev) return ~CenterAt(idx.prev);
+    if(idx.next) return ~CenterAt(idx.next);
+    return dst; // нет смежной дуги
+}
+
+void SetCSelf(Point64& dst) { dst.z = 0; }
 
 void SetCForce(Point64& dst, const Point64& center) {
-    // ASSERT_LIMIT_I32(center.x);// FIXME SetC
-    // ASSERT_LIMIT_I32(center.y);// FIXME SetC
-    if(LimitI32.min() < center.x && center.x < LimitI32.max()
-        && LimitI32.min() < center.y && center.y < LimitI32.max())
-        dst.z = std::bit_cast<int64_t>(std::array{
-            static_cast<int32_t>(center.x),
-            static_cast<int32_t>(center.y),
-        });
+    CIndices idx = decodeIndices(dst);
+    idx.next     = RegisterCenter(~center);
+    encodeIndices(dst, idx);
 }
 
 void SetC(Point64& dst, const Point64& center) {
@@ -157,7 +235,8 @@ Path64 CirclePath(double diametr, const Point64& center) {
             + center;
         ++i;
     };
-    r::for_each(polygon, std::bind(&SetC, _1, center));
+    const int32_t idx = RegisterCenter(~center);
+    for(auto& pt: polygon) SetCIndices(pt, 0, idx);
     return polygon;
 }
 
@@ -190,12 +269,17 @@ void RotatePath(Path64& path, double angle, const Point64& center) {
 }
 
 Path64& TranslatePath(Path64& path, const Point64& pos) {
-    if(pos.x || pos.y)
+    if(pos.x || pos.y) {
+        const QPointF d = ~pos;
+        std::set<int32_t> done;
         for(auto& pt: path) {
-            SetCForce(pt, GetC(pt) + pos);
+            for(int32_t idx: {GetCPrevIndex(pt), GetCNextIndex(pt)})
+                if(idx && done.insert(idx).second)
+                    SetCenterAt(idx, CenterAt(idx) + d);
             pt.x += pos.x;
             pt.y += pos.y;
         }
+    }
     return path;
 }
 
@@ -480,12 +564,13 @@ Path64 arc(const Point64& center, double radius, double start, double stop, int 
     double angle       = std::abs(stop - start);
     double steps       = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
+    const int32_t idx  = RegisterCenter(~center);
     for(int i{1}; i <= steps; i++) { // 1 skip first - back of paths item set center it self
         double theta = start + delta_angle * i;
-        SetC(points.emplace_back(
-                 center.x + radius * cos(theta),
-                 center.y + radius * sin(theta)),
-            center);
+        SetCIndices(points.emplace_back(
+                        center.x + radius * cos(theta),
+                        center.y + radius * sin(theta)),
+            idx, idx);
     }
 
     return points;
@@ -871,10 +956,12 @@ Pathss64& sortB(Pathss64& src, Point64 startPt) {
 
 Path64& TransformPath(Path64& path, const QTransform& m) {
     if(!m.type()) return path;
+    std::set<int32_t> done;
     for(Point64& point: path) {
-        QPointF center = m.map(~GetC(point));
-        point          = ~m.map(~point);
-        SetCForce(point, ~center);
+        for(int32_t idx: {GetCPrevIndex(point), GetCNextIndex(point)})
+            if(idx && done.insert(idx).second)
+                SetCenterAt(idx, m.map(CenterAt(idx)));
+        point = ~m.map(~point);
     }
     if((m.m11() < 0) ^ (m.m22() < 0)) ReversePath(path);
     return path;
@@ -964,20 +1051,76 @@ void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge)
     pPath.arcTo(rect, asource, span);
 }
 
+// индекс дуги, которой принадлежит ребро a->b (0, если ребро - отрезок
+// или его концы принадлежат разным дугам)
+static int32_t edgeCenterIndex(const Point64& a, const Point64& b) {
+    const int32_t idx = GetCNextIndex(a);
+    return (idx && idx == GetCPrevIndex(b)) ? idx : 0;
+}
+
+// кэш "исходная вершина угла -> индекс нового центра скругления", живёт на время
+// одного вызова InflatePathsZ: все точки веера скругления одного и того же угла
+// приходят в колбэк с одинаковыми e1top/e2bot, и должны получить ОДИН и тот же индекс
+thread_local std::unordered_map<Point64, int32_t> roundJoinCache;
+
 // option1 - static callback function
 static void UpdateCenter(
-    const Point64& /*e1bot*/, const Point64& /*e1top*/,
-    const Point64& /*e2bot*/, const Point64& /*e2top*/, Point64& pt) {
-    qCritical() << pt;
-    SetCForce(pt, pt);
+    const Point64& e1bot, const Point64& e1top,
+    const Point64& e2bot, const Point64& e2top, Point64& pt) {
+    int32_t prevIdx = edgeCenterIndex(e1bot, e1top);
+    int32_t nextIdx = edgeCenterIndex(e2bot, e2top);
+
+    // угол между отрезком и отрезком или отрезком и дугой (хотя бы одна из сторон -
+    // не продолжение уже известной дуги) при скруглении (JoinType::Round) порождает
+    // веер новых точек вокруг исходной (не смещённой) вершины угла - регистрируем
+    // её как центр новой дуги один раз на весь веер и переиспользуем индекс
+    if((!prevIdx || !nextIdx) && e1top == e2bot) {
+        auto [it, inserted] = roundJoinCache.try_emplace(e1top, 0);
+        if(inserted) it->second = RegisterCenter(~e1top, CenterKind::RoundJoin);
+        prevIdx = nextIdx = it->second;
+    }
+
+    SetCIndices(pt, prevIdx, nextIdx);
+}
+
+// ClipperOffset (DoMiter/DoSquare/DoBevel/DoRound) НЕ вызывает Z-колбэк при
+// построении самого смещённого контура - он просто копирует z исходной вершины
+// на ВСЕ новые точки угла/скругления без изменений. Поэтому для сочленений двух
+// отрезков, отрезка с дугой, двух разных дуг и концов открытых линий (т.е. везде,
+// кроме середины одной непрерывной дуги, где prevIdx==nextIdx!=0) нужно заранее,
+// до вызова offset.Execute(), принудительно проставить корректный индекс - иначе
+// он останется "старым" от исходной топологии и либо потеряется, либо (что хуже)
+// ложно совпадёт с соседями и дуга не восстановится в toCurve().
+static void PrepareCornersForOffset(Paths64& paths, JoinType jt) {
+    for(auto& path: paths) {
+        for(auto& pt: path) {
+            const int32_t prevIdx = GetCPrevIndex(pt), nextIdx = GetCNextIndex(pt);
+            if(prevIdx && prevIdx == nextIdx) continue; // середина дуги - не трогаем
+
+            if(jt == JoinType::Round) {
+                // угол будет скруглён веером новых точек вокруг ИСХОДНОЙ вершины -
+                // регистрируем её один раз как центр новой дуги, все точки веера
+                // унаследуют этот индекс через копирование z
+                const int32_t idx = RegisterCenter(~pt, CenterKind::RoundJoin);
+                SetCIndices(pt, idx, idx);
+            } else {
+                // митр/фаска/срез - реальной дуги здесь не будет, явно очищаем,
+                // чтобы устаревший индекс не протёк на новые точки угла
+                SetCIndices(pt, 0, 0);
+            }
+        }
+    }
 }
 
 Paths64 InflatePathsZ(const Paths64& paths, double delta, JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
     if(delta == 0.0) return paths;
+    roundJoinCache.clear();
+    Paths64 input = paths;
+    PrepareCornersForOffset(input, jt);
     CL2::ClipperOffset offset{miterLimit, arcTolerance};
     offset.SetZCallback(UpdateCenter);
-    offset.AddPaths(paths, jt, et);
+    offset.AddPaths(input, jt, et);
     Paths64 solution;
     offset.Execute(delta, solution);
     return solution;
