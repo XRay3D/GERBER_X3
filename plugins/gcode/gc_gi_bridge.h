@@ -27,12 +27,12 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     // Item interface
-    Paths paths(int alternate = {}) const override;
+    Curves curves(int alternate = {}) const override;
     void changeColor() override { }
 
     bool ok() const;
     void update();
-    bool test(const Path& path);
+    bool test(const Curve &curve);
     QPointF snapedPos(const QPointF& pos);
 
     static inline Bridge* moveBrPtr;           // NOTE приватизировать в будущем??
@@ -47,7 +47,7 @@ protected:
 
 private:
     QLineF testLine() const;
-    Point intersectPoint;
+    QPointF intersectPoint;
 
     double angle_{};
 

@@ -80,7 +80,7 @@ QVariant ItemNode::data(const QModelIndex& index, int role) const {
     if(!index.column()) {
         switch(role) {
         case Qt::DisplayRole   : return u"name"_s;
-        case Qt::DecorationRole: return drawIcon(item->paths(), item->color());
+        case Qt::DecorationRole: return drawIcon(item->curves(), item->color());
         default                : break;
         }
     }

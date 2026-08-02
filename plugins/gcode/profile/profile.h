@@ -51,24 +51,24 @@ public:
 
 private:
     void createProfile(const Tool& tool, const double depth);
-    void trimmingOpenPaths(Paths& paths);
+    void trimmingOpenPaths(Paths64& paths);
 
-    Point from;
+    Point64 from;
 
     void cornerTrimming();
     void makeBridges();
 
     void reorder();
-    void reduceDistance(Point& from, Path& to);
+    void reduceDistance(Point64& from, Path64& to);
     enum NodeType {
         ntAny,
         ntOpen,
         ntClosed
     };
-    void polyTreeToPaths(PolyTree& polytree, Paths& rpaths);
-    // void addPolyNodeToPaths(PolyTree& polynode, NodeType nodetype, Paths& paths);
-    // void closedPathsFromPolyTree(PolyTree& polytree, Paths& paths);
-    // void openPathsFromPolyTree(const PolyTree& polytree, Paths& paths);
+    void polyTreeToPaths(PolyTree& polytree, Paths64& rpaths);
+    // void addPolyNodeToPaths(PolyTree& polynode, NodeType nodetype, Paths64& paths);
+    // void closedPathsFromPolyTree(PolyTree& polytree, Paths64& paths);
+    // void openPathsFromPolyTree(const PolyTree& polytree, Paths64& paths);
 
 protected:
     void create() override; // Creator interface

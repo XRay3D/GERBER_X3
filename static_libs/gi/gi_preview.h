@@ -53,7 +53,7 @@ public:
     bool isUsed() const { return +(colorState & ColorState::Used); }
     virtual Tool::ID toolId() const      = 0;
     virtual void updateTool()            = 0;
-    virtual Paths paths() const          = 0;
+    // virtual Paths paths() const          = 0;
     virtual bool fit(double depth) const = 0;
 
     void changeColor();

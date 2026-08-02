@@ -15,11 +15,11 @@
 
 namespace Gi {
 
-GcPath::GcPath(Path path, AbstractFile* file)
-    : GcPath{Paths{std::move(path)}, file} { }
+// GcPath::GcPath(Path path, AbstractFile* file)
+//     : GcPath{Paths{std::move(path)}, file} { }
 
-GcPath::GcPath(Paths paths, AbstractFile* file)
-    : GcPath{toCurves(paths), file} { }
+// GcPath::GcPath(Paths paths, AbstractFile* file)
+//     : GcPath{toCurves(paths), file} { }
 
 GcPath::GcPath(Curves curves, AbstractFile* file)
     : gcFile_{file} {
@@ -60,6 +60,8 @@ void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/
 
 int GcPath::type() const { return Type::Path_; }
 
-Paths GcPath::paths(int) const { return {} /*paths_*/; }
+Curves GcPath::curves(int /*alternate*/) const { return {}; }
+
+// Paths GcPath::paths(int) const { return {} /*paths_*/; }
 
 } // namespace Gi

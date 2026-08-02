@@ -70,30 +70,35 @@ void DataFill::redraw() {
     // update();
 }
 
+void DataFill::setCurves(Curves paths, int alternate)// FIXME from setPaths
+{
+
+}
+
 // Paths& DataFill::getPaths() {
 //     return curves_;
 // }
 
-void DataFill::setPaths(Paths paths, int /*alternate*/) {
-    qCritical("setPaths");
-    auto t{transform()};
-    auto a{qRadiansToDegrees(asin(t.m12()))};
-    t = t.rotateRadians(-t.m12());
-    auto x{t.dx()};
-    auto y{t.dy()};
+// void DataFill::setPaths(Paths paths, int /*alternate*/) {
+//     qCritical("setPaths");
+//     auto t{transform()};
+//     auto a{qRadiansToDegrees(asin(t.m12()))};
+//     t = t.rotateRadians(-t.m12());
+//     auto x{t.dx()};
+//     auto y{t.dy()};
 
-    // reverse transform
-    t = {};
-    t.rotate(-a);
-    t.translate(-x, -y);
+//     // reverse transform
+//     t = {};
+//     t.rotate(-a);
+//     t.translate(-x, -y);
 
-    shape_ = {};
-    for(auto&& path: paths)
-        shape_.addPolygon(t.map(~path));
-    // paths_ = std::move(paths);
+//     shape_ = {};
+//     for(auto&& path: paths)
+//         shape_.addPolygon(t.map(~path));
+//     // paths_ = std::move(paths);
 
-    redraw();
-}
+//     redraw();
+// }
 
 void DataFill::changeColor() {
     //    auto animation = new QPropertyAnimation{this, "bodyColor"};

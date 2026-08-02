@@ -69,7 +69,7 @@ private:
         CopperGroup,
         CutoffGroup,
     };
-    Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
+    Curvess& groupedPaths(Group group = CopperGroup, bool fl = false);
     void grouping(PolyTree& node, Group group);
 
     // AbstractFile interface
@@ -86,7 +86,7 @@ public:
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    Paths merge() const override;
+    Curves merge() const override;
 };
 
 } // namespace Dxf

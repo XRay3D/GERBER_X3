@@ -58,7 +58,7 @@ public:
         // item->setPenColorPtr(&color);
         itemGroup()->push_back(item);
         // for(int i{}; i < pocketAreaPaths_.size() - 1; ++i)
-        // g0path_.emplace_back(Path{pocketAreaPaths_[i].back(), pocketAreaPaths_[i + 1].front()});
+        // g0path_.emplace_back(Path64{pocketAreaPaths_[i].back(), pocketAreaPaths_[i + 1].front()});
         // item = new Gi::GcPath{g0path_};
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         // itemGroup()->push_back(item);
@@ -68,13 +68,13 @@ public:
     // AbstractFile interface
 };
 
-void dbgPaths(Paths ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
-    std::erase_if(ps, [](const Path& path) { return path.size() < 2; });
+void dbgPaths(Paths64 ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
+    std::erase_if(ps, [](const Path64& path) { return path.size() < 2; });
     if(ps.empty())
         return;
     if(close)
-        r::for_each(ps, [](Path& p) { p.push_back(p.front()); });
-    GCode::Params gcp{tool, 0.0, std::move(ps)};
+        r::for_each(ps, [](Path64& p) { p.push_back(p.front()); });
+    GCode::Params gcp{tool, 0.0, toCurves(ps)};
     auto file = new GCDbgFile{std::move(gcp), color};
     file->setFileName(fileName);
     emit App::project().addFileDbg(file);
@@ -103,7 +103,7 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool skipFrame) {
+Pathss64 &Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool skipFrame) {
     PolyTree polyTree;
     {
         Timer t{"Union EvenOdd"};
@@ -119,7 +119,7 @@ Pathss& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool ski
     }
 
     if(group == Grouping::Copper)
-        for(Paths& paths: groupedPss)
+        for(auto& paths: groupedPss)
             ReversePaths(paths);
 
     if(skipFrame == false
@@ -132,7 +132,7 @@ Pathss& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool ski
 
 void Creator::grouping(Grouping group, PolyTree& node) {
     if((group == Grouping::Cutoff) ^ node.IsHole()) {
-        Paths paths;
+        Paths64 paths;
         paths.reserve(node.Count() + 1);
         paths.emplace_back(std::move(node.Polygon()));
         for(auto&& child: node) paths.emplace_back(std::move(child->Polygon()));
@@ -142,20 +142,20 @@ void Creator::grouping(Grouping group, PolyTree& node) {
     for(auto&& child: node) grouping(group, *child);
 }
 
-void Creator::addRawPaths(Paths&& rawPaths) {
+void Creator::addRawPaths(Paths64 &&rawPaths) {
     qCritical() << "addRawPaths" << rawPaths.size();
 
     if(rawPaths.empty()) return;
 
-    std::erase_if(rawPaths, [](Path& path) { return path.size() < 2; });
+    std::erase_if(rawPaths, [](Path64& path) { return path.size() < 2; });
 
     const double mergDist = App::project().glue() * uScale;
 
     Clipper clipper;
     for(size_t i{}; i < rawPaths.size(); ++i) { // find closed rawPaths
-        Path& path = rawPaths[i];
-        Point& pf = path.front();
-        Point& pl = path.back();
+        Path64& path = rawPaths[i];
+        Point64& pf = path.front();
+        Point64& pl = path.back();
         if(path.size() > 3 && (pf == pl || distTo(pf, pl) < mergDist)) {
             clipper.AddSubject({path});
             rawPaths.erase(rawPaths.begin() + i--);
@@ -164,16 +164,16 @@ void Creator::addRawPaths(Paths&& rawPaths) {
 
     mergePaths(rawPaths, mergDist); // attempt to glue
 
-    for(Path& path: rawPaths) { // find closed rawPaths
-        Point& pf = path.front();
-        Point& pl = path.back();
+    for(Path64& path: rawPaths) { // find closed rawPaths
+        Point64& pf = path.front();
+        Point64& pl = path.back();
         if(path.size() > 3 && (pf == pl || distTo(pf, pl) < mergDist))
             clipper.AddSubject({path});
         else
             openSrcPaths.emplace_back(path);
     }
 
-    Paths paths;
+    Paths64 paths;
     clipper.AddClip({boundOfPaths(rawPaths, uScale)});
     clipper.Execute(ClipType::Xor, FillRule::EvenOdd, paths);
 
@@ -228,7 +228,7 @@ std::pair<int, int> Creator::getProgress() {
     return {max(), current()};
 }
 
-void Creator::stacking(Paths& paths) {
+void Creator::stacking(Paths64 &paths) {
     qDebug(__FUNCTION__);
 
     if(paths.empty())
@@ -248,13 +248,13 @@ void Creator::stacking(Paths& paths) {
     returnPss.clear();
     /**************************************************************************************/
     // повернуть для уменшения дистанции между путями
-    auto rotateDiest = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
+    auto rotateDiest = [this](Paths64& paths, Path64& path, std::pair<size_t, size_t> idx) -> bool {
         std::forward_list<size_t> list;
         list.emplace_front(idx.first);
         for(size_t i = paths.size() - 1, index = idx.first; i; --i) {
             double minDist = std::numeric_limits<double>::max();
-            Point point;
-            for(Point pt: paths[i - 1]) {
+            Point64 point;
+            for(Point64 pt: paths[i - 1]) {
                 double dist = distTo(pt, paths[i][index]);
                 if(minDist >= dist) {
                     minDist = dist;
@@ -275,7 +275,7 @@ void Creator::stacking(Paths& paths) {
 
     std::function<void(PolyTree*, bool)> stacker = [&stacker, &rotateDiest, this](PolyTree* node, bool newPaths) {
         if(!returnPss.empty() || newPaths) {
-            Path path(node->Polygon());
+            Path64 path(node->Polygon());
             if(!(gcp.convent() ^ !node->IsHole()) ^ (gcp.side() == Outer))
                 ReversePath(path);
 
@@ -289,9 +289,9 @@ void Creator::stacking(Paths& paths) {
                 std::pair<size_t, size_t> idx;
                 double d = std::numeric_limits<double>::max();
                 // for(size_t id {}; id < returnPss.back().back().size(); ++id) {
-                // const Point& ptd = returnPss.back().back()[id];
+                // const Point64& ptd = returnPss.back().back()[id];
                 // for(size_t is {}; is < path.size(); ++is) {
-                // const Point& pts = path[is];
+                // const Point64& pts = path[is];
                 // const double l = distTo(ptdpts);
                 // if(d >= l) {
                 // d = l;
@@ -314,9 +314,9 @@ void Creator::stacking(Paths& paths) {
                 }
 
                 if(d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
-                    returnPss.back().emplace_back(std::move(path)); // append to last Paths
+                    returnPss.back().emplace_back(std::move(path)); // append to last Paths64
                 else
-                    returnPss.push_back({std::move(path)}); // new Paths
+                    returnPss.push_back({std::move(path)}); // new Paths64
             }
 
             for(size_t i{}; auto&& var: *node)
@@ -330,11 +330,11 @@ void Creator::stacking(Paths& paths) {
 
     stacker(polyTree.Count() == 1 ? polyTree[0] : &polyTree, false);
 
-    for(Paths& retPaths: returnPss) {
+    for(Paths64& retPaths: returnPss) {
         for(size_t i{}; i < retPaths.size(); ++i)
             if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
         r::reverse(retPaths);
-        for(Path& path: retPaths)
+        for(Path64& path: retPaths)
             path.emplace_back(path.front());
     }
 
@@ -342,10 +342,10 @@ void Creator::stacking(Paths& paths) {
 }
 
 #if 0
-void Creator::mergePaths(Paths& paths, const double maxDist) {
+void Creator::mergePaths(Paths64& paths, const double maxDist) {
     qDebug(__FUNCTION__);
 
-    msg = tr("Merge Paths");
+    msg = tr("Merge Paths64");
     size_t max;
 
     auto append = [&](size_t& i, size_t& j) {
@@ -467,15 +467,15 @@ bool Creator::checkMilling(SideOfMilling side) {
     QString last{msg};
     msg = tr("Check milling for errors");
 
-    auto createFrame = [toolRadius](auto& srcPaths) -> Paths {
+    auto createFrame = [toolRadius](auto& srcPaths) -> Paths64 {
         auto retPaths = InflateRoundPolygon(srcPaths, -toolRadius);
         CleanPaths(retPaths, uScale);
         return InflateRoundPolygon(retPaths, toolRadius + 10);
     };
 
-    auto testFrame = [](Paths& frames, Paths& sources, bool intersect = {}) {
+    auto testFrame = [](Paths64& frames, Paths64& sources, bool intersect = {}) {
         // Timer t{"testFrame"};
-        std::unordered_map<Path*, std::set<void*>> checker;
+        std::unordered_map<Path64*, std::set<void*>> checker;
         std::mutex m;
 
         // dbgPaths(frames, u"F"_s, Qt::green, true);
@@ -522,22 +522,22 @@ bool Creator::checkMilling(SideOfMilling side) {
     case Outer: {
         Timer t{"Outer"};
         if constexpr(1) {
-            Paths nonCutPaths;
+            Paths64 nonCutPaths;
             constexpr auto k = 1;
             groupedPaths(Grouping::Copper);
 
-            auto mill = [](Paths& paths, double offset1, double offset2) {
+            auto mill = [](Paths64& paths, double offset1, double offset2) {
                 Timer t{"mill"};
-                Paths retPaths;
+                Paths64 retPaths;
                 ReversePaths(paths);
                 retPaths = InflateRoundPolygon(paths, offset1);
                 retPaths = InflateRoundPolygon(retPaths, offset2);
                 return retPaths;
             };
 
-            auto nonCuts = [](const Paths& subject, const Paths& clip) {
+            auto nonCuts = [](const Paths64& subject, const Paths64& clip) {
                 Timer t{"nonCuts"};
-                Paths retPaths;
+                Paths64 retPaths;
                 retPaths = Clipper2Lib::Difference(subject, clip, FillRule::Positive);
                 retPaths = InflateMiterPolygon(retPaths, k);
                 return retPaths;
@@ -545,7 +545,7 @@ bool Creator::checkMilling(SideOfMilling side) {
 
             const double testArea = toolDiameter * toolDiameter - pi * toolRadius * toolRadius;
 
-            Paths srcPaths;
+            Paths64 srcPaths;
             mvector<QPainterPath> srcPPaths;
             mvector<QPainterPath> nonCutPPaths;
             srcPPaths.reserve(groupedPss.size());
@@ -588,15 +588,15 @@ bool Creator::checkMilling(SideOfMilling side) {
             for(auto&& frPath: nonCutPPaths)
                 if(!frPath.isEmpty())
                     nonCutPaths.emplace_back(~frPath.toFillPolygon());
-            std::erase_if(nonCutPaths, [](Path& path) { return path.empty(); }); // убрать пустые
+            std::erase_if(nonCutPaths, [](Path64& path) { return path.empty(); }); // убрать пустые
             r::for_each(nonCutPaths, [this](auto&& path) {
-                items.push_back(new Gi::Error{{path}, Area(path) * dScale * dScale});
+                items.push_back(new Gi::Error{{toCurve(path)}, Area(path) * dScale * dScale});
             });
         } else {
-            Paths srcPaths{closedSrcPaths};
+            Paths64 srcPaths{closedSrcPaths};
             srcPaths.emplace_back(boundOfPaths(closedSrcPaths, uScale));
 
-            Paths frPaths = createFrame(srcPaths);
+            Paths64 frPaths = createFrame(srcPaths);
             CleanPaths(frPaths, uScale * 0.0001);
             frPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
             if(frPaths.empty()) // ????
@@ -646,10 +646,10 @@ bool Creator::checkMilling(SideOfMilling side) {
 #endif
             std::begin(groupedPss), std::end(groupedPss), [&](auto&& srcPaths) {
                 // for (int i {}; auto&& srcPaths : groupedPss) {
-                Paths frPaths = createFrame(srcPaths);
+                Paths64 frPaths = createFrame(srcPaths);
                 if(frPaths.size() == 0) { // Doesn't fit at all
                     std::lock_guard guard{m};
-                    items.push_back(new Gi::Error{srcPaths, Area(srcPaths) * dScale * dScale});
+                    items.push_back(new Gi::Error{toCurves(srcPaths), Area(srcPaths) * dScale * dScale});
                 } else if(frPaths.size() > 1) { // Fits with breaks
                     srcPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
                     if(srcPaths.empty())
@@ -659,7 +659,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                     auto checker{testFrame(srcPaths, frPaths)};
                     std::lock_guard guard{m};
                     for(auto&& [frame, set]: checker)
-                        items.push_back(new Gi::Error{{*frame}, Area(*frame) * dScale * dScale});
+                        items.push_back(new Gi::Error{{toCurve(*frame)}, Area(*frame) * dScale * dScale});
                 }
             });
     } break;

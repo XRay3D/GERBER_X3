@@ -45,11 +45,11 @@ namespace CL2 = Clipper2Lib;
 using Clipper = Clipper2Lib::Clipper64;
 // using ClipperOffset = Clipper2Lib::ClipperOffset;
 
-using Point = Clipper2Lib::Point64;
+using Point64 = Clipper2Lib::Point64;
 
-using Path = Clipper2Lib::Path64;
-using Paths = Clipper2Lib::Paths64;
-using Pathss = std::vector<Paths>;
+using Path64 = Clipper2Lib::Path64;
+using Paths64 = Clipper2Lib::Paths64;
+using Pathss64 = std::vector<Paths64>;
 
 using PolyTree = Clipper2Lib::PolyTree64;
 using Rect = Clipper2Lib::Rect64;
@@ -68,63 +68,63 @@ using Clipper2Lib::JoinType;
 using Clipper2Lib::PathType;
 using Clipper2Lib::PointInPolygonResult;
 
-Q_DECLARE_METATYPE(Point)
+Q_DECLARE_METATYPE(Point64)
 
 constexpr bool operator<(const QPointF& r, const QPointF& l) noexcept {
     return std::tuple{r.x(), r.y()} < std::tuple{l.x(), l.y()};
 }
 
-constexpr bool operator<(const Point& r, const Point& l) noexcept {
+constexpr bool operator<(const Point64& r, const Point64& l) noexcept {
     return std::tuple{r.x, r.y} < std::tuple{l.x, l.y};
 }
 
-// constexpr bool operator<(const Point& l, const Point& r) noexcept {
+// constexpr bool operator<(const Point64& l, const Point64& r) noexcept {
 // return std::tie(l.x, l.y) < std::tie(r.x, r.y);
 // };
 
 // template <>
-// struct std::less<Point> : public std::binary_function<Point, Point, bool> {
-//     bool operator()(const Point& l, const Point& r) const {
+// struct std::less<Point64> : public std::binary_function<Point64, Point64, bool> {
+//     bool operator()(const Point64& l, const Point64& r) const {
 //         return std::tie(l.x, l.y) < std::tie(r.x, r.y);
 //     }
-//     bool operator()(Point& l, Point& r) const {
+//     bool operator()(Point64& l, Point64& r) const {
 //         return std::tie(l.x, l.y) < std::tie(r.x, r.y);
 //     }
 // };
 
-void TestPaths(const Paths& paths);
+void TestPaths(const Paths64& paths);
 
-Point GetC(const Point& dst);
-void SetC(Point& dst, const Point& center);
-void SetCForce(Point& dst, const Point& center);
-void SetCSelf(Point& dst);
+Point64 GetC(const Point64& dst);
+void SetC(Point64& dst, const Point64& center);
+void SetCForce(Point64& dst, const Point64& center);
+void SetCSelf(Point64& dst);
 
 //------------------------------------------------------------------------------
 
 template <typename T> concept Arithmetic = std::is_arithmetic_v<T>;
 
-inline Point& operator*=(Point& pt, Arithmetic auto v) noexcept {
+inline Point64& operator*=(Point64& pt, Arithmetic auto v) noexcept {
     return pt.x *= v, pt.y *= v, pt;
 }
 
-inline Path& operator*=(Path& path, Arithmetic auto v) noexcept {
-    for(Point& pt: path) pt *= v; // FIME maybe and center
+inline Path64& operator*=(Path64& path, Arithmetic auto v) noexcept {
+    for(Point64& pt: path) pt *= v; // FIME maybe and center
     return path;
 }
 
-constexpr Point toPoint(const QPointF& p) noexcept { return {
+constexpr Point64 toPoint(const QPointF& p) noexcept { return {
     p.x() * uScale,
     p.y() * uScale,
 }; }
-constexpr QPointF toQPointF(const Point& p) noexcept { return {
+constexpr QPointF toQPointF(const Point64& p) noexcept { return {
     p.x * dScale,
     p.y * dScale,
 }; }
 
-constexpr Point operator~(const QPointF& p) noexcept { return toPoint(p); }
-constexpr QPointF operator~(const Point& p) noexcept { return toQPointF(p); }
+constexpr Point64 operator~(const QPointF& p) noexcept { return toPoint(p); }
+constexpr QPointF operator~(const Point64& p) noexcept { return toQPointF(p); }
 
-constexpr Point operator!(const Point& p) noexcept { return GetC(p); }
+constexpr Point64 operator!(const Point64& p) noexcept { return GetC(p); }
 
 #define TRANSFORM(FROM, TO)                                           \
     inline TO operator~(std::span<const FROM> val) {                  \
@@ -135,74 +135,74 @@ constexpr Point operator!(const Point& p) noexcept { return GetC(p); }
         return ret;                                                   \
     }
 
-TRANSFORM(QPointF, Path)
-TRANSFORM(Point, QPolygonF)
+TRANSFORM(QPointF, Path64)
+TRANSFORM(Point64, QPolygonF)
 
-TRANSFORM(QPolygonF, Paths)
-TRANSFORM(Path, QList<QPolygonF>)
+TRANSFORM(QPolygonF, Paths64)
+TRANSFORM(Path64, QList<QPolygonF>)
 
 #undef TRANSFORM
 
 template <>
 template <>
-constexpr Cast<QPointF>::operator Point() const { return ~val; }
+constexpr Cast<QPointF>::operator Point64() const { return ~val; }
 
 template <>
 template <>
-constexpr Cast<Point>::operator QPointF() const { return ~val; }
+constexpr Cast<Point64>::operator QPointF() const { return ~val; }
 //------------------------------------------------------------------------------
 
-constexpr double Radius(Point p) {
-    Point c = GetC(p);
-    if(p == Point{}) return std::nan("");
+constexpr double Radius(Point64 p) {
+    Point64 c = GetC(p);
+    if(p == Point64{}) return std::nan("");
     p = p - c;
     return hypot(p.x, p.y) * dScale;
 }
 
-double Perimeter(std::span<const Point> path, bool open = {});
+double Perimeter(std::span<const Point64> path, bool open = {});
 //------------------------------------------------------------------------------
-Path CirclePath(double diametr, const Point& center = Point{});
-Path RectanglePath(double width, double height, const Point& center = Point{});
+Path64 CirclePath(double diametr, const Point64& center = Point64{});
+Path64 RectanglePath(double width, double height, const Point64& center = Point64{});
 //------------------------------------------------------------------------------
-void RotatePath(Path& path, double angle, const Point& center = Point{});
+void RotatePath(Path64& path, double angle, const Point64& center = Point64{});
 
-Path& TranslatePath(Path& path, const Point& pos);
-Paths& TranslatePaths(Paths& path, const Point& pos);
+Path64& TranslatePath(Path64& path, const Point64& pos);
+Paths64& TranslatePaths(Paths64& path, const Point64& pos);
 
-Path& TransformPath(Path& path, const QTransform& m);
-Paths& TransformPaths(Paths& paths, const QTransform& m);
+Path64& TransformPath(Path64& path, const QTransform& m);
+Paths64& TransformPaths(Paths64& paths, const QTransform& m);
 //------------------------------------------------------------------------------
 
-void mergeSegments(Paths& paths, double glue = {});
+void mergeSegments(Paths64& paths, double glue = {});
 
 /////////////////////////////////////////////////
 /// \brief склеивает пути при совпадении конечных точек
 /// \param paths - пути
 /// \param maxDist - максимальное расстояние между конечными точками
-void mergePaths(Paths& paths, const double dist = {});
+void mergePaths(Paths64& paths, const double dist = {});
 
 QIcon drawIcon(const QPainterPath& pPath, QColor color = Qt::black, bool stroke = false);
-QIcon drawIcon(const Paths& paths, QColor color = Qt::black);
+QIcon drawIcon(const Paths64& paths, QColor color = Qt::black);
 
 QIcon drawDrillIcon(QColor color = Qt::black);
 
-Paths& normalize(Paths& paths);
+Paths64& normalize(Paths64& paths);
 
 inline constexpr auto skipFront = v::drop(1);
 
 //------------------------------------------------------------------------------
-Paths InflatePathsZ(const Paths& paths, double delta,
+Paths64 InflatePathsZ(const Paths64& paths, double delta,
     JoinType jt, EndType et, double miterLimit = 2.0,
     double arcTolerance = 0.0);
 
-Paths Inflate(const Paths& paths, double delta,
+Paths64 Inflate(const Paths64& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit = 2.0, double arcTolerance = {});
 
-Paths InflateRoundPolygon(const Paths& paths, double delta,
+Paths64 InflateRoundPolygon(const Paths64& paths, double delta,
     double miterLimit = 2.0, double arcTolerance = {});
 
-Paths InflateMiterPolygon(const Paths& paths, double delta,
+Paths64 InflateMiterPolygon(const Paths64& paths, double delta,
     double miterLimit = 2.0, double arcTolerance = {});
 
 template <typename T>
@@ -230,9 +230,9 @@ inline Clipper2Lib::Paths<T>& ReversePaths(Clipper2Lib::Paths<T>& paths) {
     return paths;
 }
 
-QDataStream& operator<<(QDataStream& stream, const Point& pt);
-QDataStream& operator>>(QDataStream& stream, Point& pt);
-QDebug operator<<(QDebug d, const Point& p);
+QDataStream& operator<<(QDataStream& stream, const Point64& pt);
+QDataStream& operator>>(QDataStream& stream, Point64& pt);
+QDebug operator<<(QDebug d, const Point64& p);
 
 //----Container helpers----------------------------------------------------------------
 
@@ -299,21 +299,21 @@ auto operator-=(Container auto& c, size_t index) {
 
 //------------------------------------------------------------------------------
 
-inline void SimplifyPolygon(const Path& /*in_poly*/, Paths& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygon(const Path64& /*in_poly*/, Paths64& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
     //    Clipper c;
     //    c.StrictlySimple(true);
     //    c.AddPath(in_poly, PathType::Subject, true);
     //    c.Execute(ClipType::Union, out_polys, fillType, fillType);
 }
 
-inline void SimplifyPolygons(const Paths& /*in_polys*/, Paths& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygons(const Paths64& /*in_polys*/, Paths64& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
     //    Clipper c;
     //    c.StrictlySimple(true);
     //    c.AddPaths(in_polys, PathType::Subject, true);
     //    c.Execute(ClipType::Union, out_polys, fillType, fillType);
 }
 
-inline void SimplifyPolygons(Paths& polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygons(Paths64& polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
     SimplifyPolygons(polys, polys, fillType);
 }
 
@@ -335,27 +335,11 @@ struct LineABC {
     double lenght() const { return sqrt(a * a + b * b); }
 };
 
-void reductionOfDistance(Path& path, Point point = Point{});
+void reductionOfDistance(Path64& path, Point64 point = Point64{});
 
-inline bool pointOnPolygon(const QLineF& l2, const Path& path, Point* ret) {
-    const size_t cnt = path.size();
-    if(cnt < 2)
-        return false;
-    QPointF p;
-    for(size_t i{}; i < cnt; ++i) {
-        const Point& pt1 = path[(i + 1) % cnt];
-        const Point& pt2 = path[i];
-        QLineF l1(~pt1, ~pt2);
-        if(QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
-            if(ret)
-                *ret = ~p;
-            return true;
-        }
-    }
-    return false;
-}
+bool pointOnPolygon(const QLineF& l2, const struct Curve& curve, QPointF* ret);
 
-inline /*constexpr*/ double angleTo(const Point& pt1, const Point& pt2) noexcept {
+inline /*constexpr*/ double angleTo(const Point64& pt1, const Point64& pt2) noexcept {
     const double dx = static_cast<double>(pt2.x - pt1.x);
     const double dy = static_cast<double>(pt2.y - pt1.y);
     const double theta = atan2(-dy, dx) * 360.0 / (pi * 2);
@@ -366,7 +350,7 @@ inline /*constexpr*/ double angleTo(const Point& pt1, const Point& pt2) noexcept
         return theta_normalized;
 }
 
-inline /*constexpr*/ double angleRadTo(const Point& pt1, const Point& pt2) noexcept {
+inline /*constexpr*/ double angleRadTo(const Point64& pt1, const Point64& pt2) noexcept {
     const double dx = static_cast<double>(pt2.x - pt1.x);
     const double dy = static_cast<double>(pt2.y - pt1.y);
     const double theta = atan2(-dy, dx);
@@ -378,13 +362,13 @@ inline /*constexpr*/ double angleRadTo(const Point& pt1, const Point& pt2) noexc
         return theta_normalized;
 }
 
-inline /*constexpr*/ double distTo(const Point& pt1, const Point& pt2) noexcept {
+inline /*constexpr*/ double distTo(const Point64& pt1, const Point64& pt2) noexcept {
     double x_ = static_cast<double>(pt2.x - pt1.x);
     double y_ = static_cast<double>(pt2.y - pt1.y);
     return sqrt(x_ * x_ + y_ * y_);
 }
 
-inline constexpr double distToSq(const Point& pt1, const Point& pt2) noexcept {
+inline constexpr double distToSq(const Point64& pt1, const Point64& pt2) noexcept {
     double x_ = static_cast<double>(pt2.x - pt1.x);
     double y_ = static_cast<double>(pt2.y - pt1.y);
     return (x_ * x_ + y_ * y_);
@@ -392,19 +376,19 @@ inline constexpr double distToSq(const Point& pt1, const Point& pt2) noexcept {
 
 std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree);
 
-Path arc(const Point& center, double radius, double start, double stop, int interpolation);
-Path arc(Point p1, Point p2, Point center, int interpolation);
+Path64 arc(const Point64& center, double radius, double start, double stop, int interpolation);
+Path64 arc(Point64 p1, Point64 p2, Point64 center, int interpolation);
 
 void markPolyTreeDByNesting(PolyTree& polynode);
 void sortPolyTreeByNesting(PolyTree& polynode);
-Pathss stacking(Paths& paths);
+Pathss64 stacking(Paths64& paths);
 
-Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k);
+Path64 boundOfPaths(const Paths64& paths, /*PType*/ int32_t k);
 
-Paths& sortB(Paths& src, Point startPt);
-Paths& sortBeginEnd(Paths& src, Point startPt);
-Pathss& sortB(Pathss& src, Point startPt);
-Pathss& sortBeginEnd(Pathss& src, Point startPt);
+Paths64& sortB(Paths64& src, Point64 startPt);
+Paths64& sortBeginEnd(Paths64& src, Point64 startPt);
+Pathss64& sortB(Pathss64& src, Point64 startPt);
+Pathss64& sortBeginEnd(Pathss64& src, Point64 startPt);
 
 void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge);
 

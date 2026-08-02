@@ -34,7 +34,7 @@ namespace Dxf {
 
 File::File()
     : AbstractFile() {
-    itemsType_  = int(ItemsType::Normal);
+    itemsType_ = int(ItemsType::Normal);
     layerTypes_ = {
         {int(ItemsType::Normal), DxfObj::tr("Normal"), DxfObj::tr("Displays paths with pen width and fill.")   },
         {int(ItemsType::Paths),  DxfObj::tr("Paths"),  DxfObj::tr("Displays paths without pen width.")         },
@@ -57,30 +57,30 @@ void File::setItemType(int type) {
 
 int File::itemsType() const { return itemsType_; }
 
-Pathss& File::groupedPaths(File::Group group, bool fl) {
-    if(groupedPaths_.empty()) {
+Curvess& File::groupedPaths(File::Group group, bool fl) {
+    if(groupedCurves_.empty()) {
         PolyTree polyTree;
         Clipper clipper;
-        clipper.AddSubject(mergedPaths());
-        Rect r(GetBounds(mergedPaths()));
-        int k      = /*uScale*/ 1;
-        Path outer = {
-            Point(r.left - k, r.bottom + k),
-            Point(r.right + k, r.bottom + k),
-            Point(r.right + k, r.top - k),
-            Point(r.left - k, r.top - k)};
-        if(fl)
-            ReversePath(outer);
+        clipper.AddSubject(toPaths(mergedCurves()));
+        auto r = BoundingRect(mergedCurves());
+        int k = /*uScale*/ 1;
+        Path64 outer{
+            Point64{uScale + r.left() - k,  uScale + r.bottom() + k},
+            Point64{uScale + r.right() + k, uScale + r.bottom() + k},
+            Point64{uScale + r.right() + k, uScale + r.top() - k   },
+            Point64{uScale + r.left() - k,  uScale + r.top() - k   }
+        };
+        if(fl) ReversePath(outer);
         clipper.AddSubject({outer});
         clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
         grouping(polyTree, group);
     }
-    return groupedPaths_;
+    return groupedCurves_;
 }
 
 void File::grouping(PolyTree& node, File::Group group) {
-    Path path;
-    Paths paths;
+    Path64 path;
+    Paths64 paths;
     switch(group) {
     case CutoffGroup:
         if(!node.IsHole()) {
@@ -90,7 +90,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 path = node[i]->Polygon();
                 paths.push_back(path);
             }
-            groupedPaths_.push_back(paths);
+            groupedCurves_.push_back(toCurves(paths));
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -103,7 +103,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 path = node[i]->Polygon();
                 paths.push_back(path);
             }
-            groupedPaths_.push_back(paths);
+            groupedCurves_.push_back(toCurves(paths));
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -158,7 +158,7 @@ void File::createGi() {
             }
 
             Clipper clipper; // Clipper
-            const bool empty{layer->groupedPaths_.empty()};
+            const bool empty{layer->groupedCurves_.empty()};
             for(auto& go: layer->graphicObjects_) {
                 if(empty && go.fill.size()) {
                     // if(Area(go.fill) < 0.) ReversePaths(go.fill); // FIXME add settings
@@ -179,21 +179,18 @@ void File::createGi() {
             }
 
             if(empty) {
-                clipper.Execute(ClipType::Union, FillRule::NonZero, mergedPaths_);
-                CleanPaths(mergedPaths_, uScale * 0.0005);
+                auto paths = toPaths(mergedCurves_);
+                clipper.Execute(ClipType::Union, FillRule::NonZero, paths);
+                CleanPaths(paths, uScale * 0.0005);
 
-                for(Path& path: mergedPaths_)
+                for(Path64& path: paths)
                     if(path.back() != path.front())
                         path.emplace_back(path.front());
-
-                layer->groupedPaths_ = std::move(groupedPaths());
-
-                // Gi::Debug(mergedPaths_, Qt::red)->setZValue(100);
-
-                mergedPaths_.clear();
+                mergedCurves_ = toCurves(paths);
+                layer->groupedCurves_ = std::move(groupedPaths());
             }
 
-            for(Paths& paths: layer->groupedPaths_) {
+            for(auto& paths: layer->groupedCurves_) {
                 auto gItem = new Gi::DataFill{paths, this};
                 gItem->setColorPtr(&layer->colorNorm_);
                 igNorm->push_back(gItem);
@@ -271,7 +268,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
                         // drillDiameter = ap.minSize();
                         drillDiameter = std::min(rect.bottom() - rect.top(), rect.right() - rect.left());
                         // name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
-                        g.raw  = drillDiameter /** go.scaleX()*/;
+                        g.raw = drillDiameter /** go.scaleX()*/;
                         g.name = /*u"С Ø"_s +*/ QString::number(drillDiameter);
                     } break;
                     default: break;
@@ -337,6 +334,6 @@ void File::read(QDataStream& stream) {
     stream >> entities_;
 }
 
-Paths File::merge() const { return mergedPaths_; }
+Curves File::merge() const { return mergedCurves_; }
 
 } // namespace Dxf

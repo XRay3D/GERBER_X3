@@ -59,10 +59,10 @@ class AbstractFile {
         Block{out}.write(
             file.id_,
             file.date_,
-            file.groupedPaths_,
+            file.groupedCurves_,
             file.itemsType_,
             file.lines_,
-            file.mergedPaths_,
+            file.mergedCurves_,
             file.name_,
             file.side_,
             file.transform_,
@@ -81,10 +81,10 @@ class AbstractFile {
         Block{in}.read(
             file.id_,
             file.date_,
-            file.groupedPaths_,
+            file.groupedCurves_,
             file.itemsType_,
             file.lines_,
-            file.mergedPaths_,
+            file.mergedCurves_,
             file.name_,
             file.side_,
             file.transform_,
@@ -122,8 +122,8 @@ public:
 
     const mvector<Gi::Group*>& itemGroups() const;
 
-    Paths mergedPaths() const;
-    Pathss groupedPaths() const;
+    Curves mergedCurves() const;
+    Curvess groupedCurves() const;
 
     std::vector<QString>& lines();
     const std::vector<QString>& lines() const;
@@ -169,11 +169,11 @@ public:
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream) = 0;
-    virtual Paths merge() const = 0;
+    virtual Curves merge() const { return {}; };
 
     LayerTypes layerTypes_;
     FileTree::Node* node_ = nullptr;
-    Pathss groupedPaths_;
+    Curvess groupedCurves_;
     QColor color_;
     bool colorFlag_{};
     QDateTime date_;
@@ -181,7 +181,7 @@ protected:
     Side side_ = Top;
     int32_t id_ = -1;
     int itemsType_ = -1;
-    mutable Paths mergedPaths_;
+    mutable Curves mergedCurves_;
     mutable bool visible_{};
     mvector<Gi::Group*> itemGroups_{new Gi::Group};
     std::vector<QString> lines_;
@@ -217,9 +217,9 @@ inline Gi::Group* AbstractFile::itemGroup(int type) const {
 
 inline const mvector<Gi::Group*>& AbstractFile::itemGroups() const { return itemGroups_; }
 
-inline Paths AbstractFile::mergedPaths() const { return mergedPaths_.size() ? mergedPaths_ : merge(); }
+inline Curves AbstractFile::mergedCurves() const { return mergedCurves_.size() ? mergedCurves_ : merge(); }
 
-inline Pathss AbstractFile::groupedPaths() const { return groupedPaths_; }
+inline Curvess AbstractFile::groupedCurves() const { return groupedCurves_; }
 
 inline std::vector<QString>& AbstractFile::lines() { return lines_; }
 

@@ -146,8 +146,8 @@ void Hatch::parse(CodeData& code) {
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
 DxfGo Hatch::toGo() const {
-    qInfo("Hatch"); // TODO Hatch
-    Paths paths(edges.size());
+    qInfo("Hatch");              // TODO Hatch
+    Paths64 paths(edges.size()); // FIXME
     for(size_t i{}; i < edges.size(); ++i)
         for(auto&& edge: edges[i])
             paths[i].append_range(~edge->toPolygon());

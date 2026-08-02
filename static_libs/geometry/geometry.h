@@ -19,7 +19,7 @@ namespace v = std ::views;
 
 namespace geo {
 
-using Segment = std::span<Point>;
+using Segment = std::span<Point64>;
 
 /* ----------  Вспомогательные функции  ---------- */
 constexpr double norm(const QPointF& p) noexcept { return std::hypot(p.x(), p.y()); }
@@ -264,7 +264,7 @@ struct {
 
     template <typename... Pts>
     constexpr double operator()(const Pts... pts) const
-        requires(sizeof...(Pts) == 3) // && ((std::is_same_v<Point, Pts> || std::convertible_to<Pts, QPointF>) && ...)
+        requires(sizeof...(Pts) == 3) // && ((std::is_same_v<Point64, Pts> || std::convertible_to<Pts, QPointF>) && ...)
     {
         return angleBetweenSegments1(Cast{pts}...);
     }
@@ -356,11 +356,11 @@ struct {
         return Length(p1, p2) <= epsilon;
     }
 
-    constexpr bool operator()(const Point& p1, const Point& p2,
-        const Point& p3, const Point& p4,
+    constexpr bool operator()(const Point64& p1, const Point64& p2,
+        const Point64& p3, const Point64& p4,
         double epsilon = 0.001) const {
-        Point t1 = p2 - p1;
-        Point t2 = p4 - p3;
+        Point64 t1 = p2 - p1;
+        Point64 t2 = p4 - p3;
         double sql1 = t1.x * t1.x + t1.y * t1.y;
         double sql2 = t2.x * t2.x + t2.y * t2.y;
         return std::abs(sql1 - sql2) <= epsilon * uScale * uScale;
@@ -369,7 +369,7 @@ struct {
 } constexpr TEST;
 
 struct {
-    constexpr auto operator()(std::convertible_to<Point> auto&&... points) const
+    constexpr auto operator()(std::convertible_to<Point64> auto&&... points) const
         requires(sizeof...(points) > 3)
     {
         return Area({std::forward<decltype(points)>(points)...}) > .0 ? Vertex::Ccw : Vertex::Cw;

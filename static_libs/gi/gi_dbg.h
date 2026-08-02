@@ -22,11 +22,11 @@ class Debug_ final : public Item {
     struct Node* node;
 
     Debug_(const QColor& color, double width);
-    Paths paths_;
+    Paths64 paths_;
     std::set<QPointF> centers;
 
-    Debug_(const Path& path, const QColor& color = Qt::white, double width = {});
-    Debug_(const Paths& paths, const QColor& color = Qt::white, double width = {});
+    Debug_(const Path64& path, const QColor& color = Qt::white, double width = {});
+    Debug_(const Paths64& paths, const QColor& color = Qt::white, double width = {});
     Debug_(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
 
 public:
@@ -34,7 +34,7 @@ public:
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    Paths paths(int alternate = {}) const override;
+    // Paths paths(int alternate = {}) const override;
     bool arrows{true};
 
 #if DEBUG
@@ -46,7 +46,7 @@ public:
         return new Debug_{toPPath(curves), color, width};
     }
 
-    static Debug_* Debug(const Paths& paths, const QColor& color = Qt::white, double width = {}) {
+    static Debug_* Debug(const Paths64& paths, const QColor& color = Qt::white, double width = {}) {
         return new Debug_{paths, color, width};
     }
 #else

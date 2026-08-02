@@ -40,9 +40,9 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
 
-    Paths cutAreaPaths;
+    Paths64 cutAreaPaths;
 
-    auto calculate = [&cutAreaPaths, steps, this](Paths&& paths) {
+    auto calculate = [&cutAreaPaths, steps, this](Paths64&& paths) {
         cutAreaPaths.append_range(Inflate(paths, -dOffset * 2, JoinType::Round, EndType::Polygon, uScale)); // inner
         int counter = steps;
         do {
@@ -56,7 +56,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
 
     if(gcp.side() == GCode::Inner) {
         dOffset = -dOffset, stepOver = -stepOver;
-        for(Paths paths: groupedPaths(GCode::Grouping::Copper)) {
+        for(Paths64 paths: groupedPaths(GCode::Grouping::Copper)) {
             paths = Inflate(paths, dOffset * 2, JoinType::Round, EndType::Polygon, uScale);
             if(paths.empty())
                 continue;
@@ -64,7 +64,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
             calculate(std::move(paths));
         }
     } else { // Outer
-        Paths paths{Inflate(closedSrcPaths, +dOffset * 2, JoinType::Round, EndType::Polygon, uScale)};
+        Paths64 paths{Inflate(closedSrcPaths, +dOffset * 2, JoinType::Round, EndType::Polygon, uScale)};
         if(paths.empty()) {
             emit fileReady(nullptr);
             return;
@@ -96,7 +96,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
-    Paths cutAreaPaths;
+    Paths64 cutAreaPaths;
 
     if(gcp.side() == GCode::Outer)
         groupedPaths(GCode::Grouping::Cutoff, static_cast</*PType*/ int32_t>(toolDiameter * 1.005));
@@ -107,7 +107,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
 
     setCurrent(0);
 
-    for(Paths paths: groupedPss) {
+    for(Paths64 paths: groupedPss) {
         paths = InflateRoundPolygon(paths, -dOffset * 2, uScale);
         // if (App::settings().gbrCleanPolygons()) CleanPaths(paths, uScale * 0.0005);
         CleanPaths(paths, uScale * 0.001);
@@ -115,7 +115,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
 
         returnPs.append_range(paths);
         double step{};
-        Paths tmp;
+        Paths64 tmp;
         do {
             tmp = InflateMiterPolygon(paths, step += -stepOver * 2, uScale);
             returnPs.append_range(tmp);
@@ -147,7 +147,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
     else // Inner:
         groupedPaths(GCode::Grouping::Copper);
 
-    auto removeSmall = [](Paths& paths, double dOffset) {
+    auto removeSmall = [](Paths64& paths, double dOffset) {
         const auto ta = dOffset * dOffset * pi;
         const auto tp = dOffset * 4;
         std::erase_if(paths, [ta, tp](auto& path) {
@@ -157,7 +157,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         });
     };
 
-    Pathss fillPaths;
+    Pathss64 fillPaths;
     fillPaths.resize(tools.size());
 
     for(size_t tIdx{}, size = tools.size(); const auto& tool: tools) {
@@ -166,20 +166,20 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
         dOffset = toolDiameter / 2;
         stepOver = tool.stepover() * uScale;
 
-        Paths clipFrame; // u"обтравочная"_s рамка
+        Paths64 clipFrame; // u"обтравочная"_s рамка
         for(size_t i{}; tIdx && i <= tIdx; ++i) {
             // u"обтравочная"_s рамка для текущего инструмента и предыдущих УП
-            Paths tmp = Inflate(fillPaths[i], -dOffset + uScale * 0.001, JoinType::Round, EndType::Polygon, uScale);
+            Paths64 tmp = Inflate(fillPaths[i], -dOffset + uScale * 0.001, JoinType::Round, EndType::Polygon, uScale);
             // объединение рамок
             clipFrame = CL2::Union(clipFrame, tmp, FillRule::EvenOdd);
         }
 
-        Paths cutAreaPaths;
+        Paths64 cutAreaPaths;
 
         {
             Timer t{"groupedPss"};
-            for(size_t pIdx{}; const Paths& paths: groupedPss) {
-                Paths wp = Inflate(paths, -dOffset + 2, JoinType::Round, EndType::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
+            for(size_t pIdx{}; const Paths64& paths: groupedPss) {
+                Paths64 wp = Inflate(paths, -dOffset + 2, JoinType::Round, EndType::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
 
                 if(tIdx) // обрезка текущего пути предыдущим
                     wp = CL2::Difference(wp, clipFrame, FillRule::EvenOdd);
@@ -201,7 +201,7 @@ void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
                     wp = Inflate(wp, -stepOver * 2, JoinType::Miter, EndType::Polygon, uScale);
                 } while(wp.size());
                 ++pIdx;
-            } // for (const Paths& paths : groupedPss_) {
+            } // for (const Paths64& paths : groupedPss_) {
         }
 
         if(returnPs.empty()) {

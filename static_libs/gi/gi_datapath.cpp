@@ -31,7 +31,7 @@ void DataPath::updateSelection() const {
 #if 1
     str.setWidth(width * scale);
     selectionShape_ = str.createStroke(shape_);
-    boundingRect_   = selectionShape_.boundingRect();
+    boundingRect_ = selectionShape_.boundingRect();
 #else
     auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, JoinType::Miter, EndType::Square);
     selectionShape_.clear();
@@ -49,7 +49,7 @@ void DataPath::updateSelection() const {
 DataPath::DataPath(Curves curves, AbstractFile* file)
     : Item{file} {
     curves_ = std::move(curves);
-    shape_  = toPPath(curves_);
+    shape_ = toPPath(curves_);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -100,21 +100,19 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     std::function<void(Item*)> selector = [&](Item* item) {
         const auto& collidingItems = *itemGroup;
         // auto collidingItems = scene()->collidingItems(item, Qt::/*IntersectsItemBoundingRect*/ IntersectsItemBoundingRect/*IntersectsItemShape*/);
-        auto pathFrom = item->paths().front();
+        auto pathFrom = item->curves().front();
         for(auto&& item: collidingItems /*| filter | transform*/) {
-            auto pathTo = item->paths().front();
+            auto pathTo = item->curves().front();
             // if(/*itemGroup->contains(item) &&*/ !set.contains(item)) {
             if(set.insert(item.get()).second) {
                 // auto [i, _] = set.emplace(item, Path{pathTo.front(), pathTo.back()});
 
-                const double dists[]{
-                    distTo(pathFrom.back(), pathTo.back()) * dScale,
-                    distTo(pathFrom.back(), pathTo.front()) * dScale,
-                    distTo(pathFrom.front(), pathTo.back()) * dScale,
-                    distTo(pathFrom.front(), pathTo.front()) * dScale,
-                };
-
-                const double min = r::min(dists);
+                const double min = r::min({
+                    Length(pathFrom.back(), pathTo.back()),
+                    Length(pathFrom.back(), pathTo.front()),
+                    Length(pathFrom.front(), pathTo.back()),
+                    Length(pathFrom.front(), pathTo.front()),
+                });
 
                 if(min > glue) continue;
                 item->setSelected(true);
