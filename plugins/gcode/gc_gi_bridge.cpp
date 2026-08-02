@@ -77,15 +77,21 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
     auto transform = [](auto* item) { return static_cast<Item*>(item); };
 
     for(Item* gi: col | v::filter(filter) | v::transform(transform)) {
-        auto paths = gi->paths();
+        auto curves = gi->curves();
         if(gi->type() == Type::DataPath
-            && paths.size() == 1
-            && paths.front().front() == paths.front().back()
-            && IsPositive(paths.front())) // fix direction for drawing
-            ReversePath(paths.front());
-        for(Path& path: paths) {
-            for(size_t i{}, s = path.size(); i < s; ++i) {
-                QLineF tmpLine{~path[i], ~path[(i + 1) % s]};
+            && curves.size() == 1
+            && curves.front().front() == curves.front().back()
+            && curves.front().isPositive()) // fix direction for drawing
+            curves.front().reverse();
+        for(Curve& curve: curves) {
+            // for(size_t i{}, s = curve.size(); i < s; ++i) {
+            //     QLineF tmpLine{curve[i], curve[(i + 1) % s]};
+            //     double tmp = LineABC(tmpLine).distance(pos);
+            //     if(minLenght > tmp && tmp < lenght)
+            //         minLenght = tmp, line = tmpLine;
+            // }
+            for(auto [fr, to]: curve | v::pairwise) {
+                QLineF tmpLine{fr, to};
                 double tmp = LineABC(tmpLine).distance(pos);
                 if(minLenght > tmp && tmp < lenght)
                     minLenght = tmp, line = tmpLine;
@@ -166,7 +172,7 @@ void Bridge::update() {
     QGraphicsItem::update();
 }
 
-bool Bridge::test(const Path& path) { return pointOnPolygon(testLine(), path, &intersectPoint); }
+bool Bridge::test(const Curve& curve) { return pointOnPolygon(testLine(), curve, &intersectPoint); }
 
 QLineF Bridge::testLine() const {
     QLineF lTool2 = QLineF::fromPolar(toolDiam * 1.2, angle_ - 90);
@@ -190,6 +196,6 @@ void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 int Bridge::type() const { return Type::Bridge; }
 
-Paths Bridge::paths(int /*alternate*/) const { return {CirclePath((lenght + toolDiam) * uScale, intersectPoint)}; }
+Curves Bridge::curves(int /*alternate*/) const { return {CircleCurve((lenght + toolDiam), intersectPoint)}; }
 
 } // namespace Gi

@@ -25,7 +25,7 @@ namespace Dxf {
 class Layer : public AbstractTable {
     friend class File;
     friend QDataStream& operator<<(QDataStream& stream, const Layer& l) {
-        stream << l.groupedPaths_;
+        stream << l.groupedCurves_;
         stream << l.colorNorm_;
         stream << l.colorPath_;
         stream << l.name_;
@@ -40,7 +40,7 @@ class Layer : public AbstractTable {
     }
 
     friend QDataStream& operator>>(QDataStream& stream, Layer& l) {
-        stream >> l.groupedPaths_;
+        stream >> l.groupedCurves_;
         stream >> l.colorNorm_;
         stream >> l.colorPath_;
         stream >> l.name_;
@@ -88,7 +88,7 @@ private:
     Gi::Group* itemGroupNorm = nullptr;
     Gi::Group* itemGroupPath = nullptr;
     // File* fiGle_ = nullptr;
-    Pathss groupedPaths_;
+    Curvess groupedCurves_;
 
     QColor colorNorm_{Qt::darkGreen};
     QColor colorPath_{Qt::darkRed};

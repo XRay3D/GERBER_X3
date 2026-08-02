@@ -11,7 +11,7 @@
 // module;
 
 #include "myclipper.h"
-
+#include "curve.h"
 #include "app.h"
 #include "cancelation.h"
 #include "gi_dbg.h"
@@ -38,7 +38,7 @@
 
 // export namespace MC {
 
-QIcon drawIcon(const Paths& paths, QColor color) {
+QIcon drawIcon(const Paths64& paths, QColor color) {
     static std::mutex m;
     std::lock_guard l{m};
 
@@ -82,8 +82,8 @@ QIcon drawDrillIcon(QColor color) {
 using namespace std::placeholders;
 
 template <>
-struct std::hash<Point> {
-    std::size_t operator()(const Point& pt) const noexcept {
+struct std::hash<Point64> {
+    std::size_t operator()(const Point64& pt) const noexcept {
         // const std::pair pair{pt.x, pt.y};
         // return std::hash<decltype(pair)>{}(pair);
         std::size_t h1 = std::hash<int64_t>{}(pt.x);
@@ -92,7 +92,7 @@ struct std::hash<Point> {
     }
 };
 
-using CenterKey = std::pair<Point, const void*>;
+using CenterKey = std::pair<Point64, const void*>;
 
 template <>
 struct std::hash<CenterKey> {
@@ -106,30 +106,30 @@ struct std::hash<CenterKey> {
     }
 };
 
-QDataStream& operator<<(QDataStream& stream, const Point& pt) {
+QDataStream& operator<<(QDataStream& stream, const Point64& pt) {
     return stream
         << static_cast<int32_t>(pt.x)
         << static_cast<int32_t>(pt.y)
         << static_cast<qsizetype>(pt.z);
 }
 
-QDataStream& operator>>(QDataStream& stream, Point& pt) {
+QDataStream& operator>>(QDataStream& stream, Point64& pt) {
     return stream
         >> reinterpret_cast<int32_t&>(pt.x)
         >> reinterpret_cast<int32_t&>(pt.y)
         >> reinterpret_cast<qsizetype&>(pt.z);
 }
 
-Point GetC(const Point& dst) {
+Point64 GetC(const Point64& dst) {
     auto array = std::bit_cast<std::array<int32_t, 2>>(dst.z);
     return {array[0], array[1]};
 }
 
-void SetCSelf(Point& dst) { SetC(dst, dst); }
+void SetCSelf(Point64& dst) { SetC(dst, dst); }
 
 #define ASSERT_LIMIT_I32(VAL) assert(LimitI32.min() < VAL && VAL < LimitI32.max());
 
-void SetCForce(Point& dst, const Point& center) {
+void SetCForce(Point64& dst, const Point64& center) {
     // ASSERT_LIMIT_I32(center.x);// FIXME SetC
     // ASSERT_LIMIT_I32(center.y);// FIXME SetC
     if(LimitI32.min() < center.x && center.x < LimitI32.max()
@@ -140,17 +140,17 @@ void SetCForce(Point& dst, const Point& center) {
         });
 }
 
-void SetC(Point& dst, const Point& center) {
+void SetC(Point64& dst, const Point64& center) {
     if(dst.z == 0) SetCForce(dst, center);
 }
 
-Path CirclePath(double diametr, const Point& center) {
+Path64 CirclePath(double diametr, const Point64& center) {
     if(qFuzzyIsNull(diametr)) return {};
     const double radius = diametr * 0.5;
     const int intSteps  = App::settings().clpCircleSegments(radius * dScale);
-    Path polygon(intSteps);
+    Path64 polygon(intSteps);
     for(int i{}; auto&& pt: polygon) {
-        pt = Point{
+        pt = Point64{
                  cos(i * 2 * pi / intSteps) * radius,
                  sin(i * 2 * pi / intSteps) * radius,
              }
@@ -161,10 +161,10 @@ Path CirclePath(double diametr, const Point& center) {
     return polygon;
 }
 
-Path RectanglePath(double width, double height, const Point& center) {
+Path64 RectanglePath(double width, double height, const Point64& center) {
     const double halfWidth  = width * 0.5;
     const double halfHeight = height * 0.5;
-    Path polygon{
+    Path64 polygon{
         {-halfWidth + center.x, +halfHeight + center.y},
         {-halfWidth + center.x, -halfHeight + center.y},
         {+halfWidth + center.x, -halfHeight + center.y},
@@ -176,7 +176,7 @@ Path RectanglePath(double width, double height, const Point& center) {
     return polygon;
 }
 
-void RotatePath(Path& path, double angle, const Point& center) {
+void RotatePath(Path64& path, double angle, const Point64& center) {
     QTransform m;
     if(center.x || center.y)
         m.translate(
@@ -189,7 +189,7 @@ void RotatePath(Path& path, double angle, const Point& center) {
     if(m.type()) TransformPath(path, m);
 }
 
-Path& TranslatePath(Path& path, const Point& pos) {
+Path64& TranslatePath(Path64& path, const Point64& pos) {
     if(pos.x || pos.y)
         for(auto& pt: path) {
             SetCForce(pt, GetC(pt) + pos);
@@ -199,17 +199,17 @@ Path& TranslatePath(Path& path, const Point& pos) {
     return path;
 }
 
-Paths& TranslatePaths(Paths& paths, const Point& pos) {
+Paths64& TranslatePaths(Paths64& paths, const Point64& pos) {
     r::for_each(paths, std::bind(&TranslatePath, _1, pos));
     return paths;
 }
 
-double Perimeter(std::span<const Point> path, bool open) {
+double Perimeter(std::span<const Point64> path, bool open) {
     if(path.size() < 2 /*(open ? 2 : 3)*/) return std::nan("");
     while(path.back() == path.front()) path = path.subspan(1);
     double p{};
-    static constexpr auto dist = +[](const Point& from, const Point& to) {
-        Point v = to - from;
+    static constexpr auto dist = +[](const Point64& from, const Point64& to) {
+        Point64 v = to - from;
         return v.x * v.x + v.y * v.y;
     };
     // for(auto&& [from, to]: path | v::pairwise) p += dist(from, to);
@@ -218,7 +218,7 @@ double Perimeter(std::span<const Point> path, bool open) {
     return std::sqrt(p);
 }
 
-void mergeSegments(Paths& paths, double glue) {
+void mergeSegments(Paths64& paths, double glue) {
     size_t size;
     do {
         size = paths.size();
@@ -229,15 +229,15 @@ void mergeSegments(Paths& paths, double glue) {
                 if(i == j) continue;
                 if(i >= paths.size()) break;
                 auto& pj  = paths[j];
-                Point pib = pi.back();
-                Point pjf = pj.front();
+                Point64 pib = pi.back();
+                Point64 pjf = pj.front();
                 if(pib == pjf) {
                     pi.insert(pi.end(), ++pj.begin(), pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                Point pif = pi.front();
-                Point pjb = pj.back();
+                Point64 pif = pi.front();
+                Point64 pjb = pj.back();
                 if(pif == pjb) {
                     pj.insert(pj.end(), ++pi.begin(), pi.end());
                     paths.erase(paths.begin() + i--);
@@ -262,15 +262,15 @@ void mergeSegments(Paths& paths, double glue) {
                 auto& pj = paths[j];
                 if(i == j) continue;
                 if(i >= paths.size()) break;
-                Point pib = pi.back();
-                Point pjf = pj.front();
+                Point64 pib = pi.back();
+                Point64 pjf = pj.front();
                 if(distTo(pib, pjf) < glue) {
                     pi.insert(pi.end(), ++pj.begin(), pj.end());
                     paths.erase(paths.begin() + j--);
                     continue;
                 }
-                Point pif = pi.front();
-                Point pjb = pj.back();
+                Point64 pif = pi.front();
+                Point64 pjb = pj.back();
                 if(distTo(pif, pjb) < glue) {
                     pj.insert(pj.end(), ++pi.begin(), pi.end());
                     paths.erase(paths.begin() + i--);
@@ -287,8 +287,8 @@ void mergeSegments(Paths& paths, double glue) {
     } while(size != paths.size());
 }
 #if 0
-void mergePaths(Paths& paths, const double dist) {
-    //    msg = tr("Merge Paths");
+void mergePaths(Paths64& paths, const double dist) {
+    //    msg = tr("Merge Paths64");
     size_t max;
     do {
         max = paths.size();
@@ -345,16 +345,16 @@ void mergePaths(Paths& paths, const double dist) {
 }
 #endif
 
-Paths& normalize(Paths& paths) {
+Paths64& normalize(Paths64& paths) {
     PolyTree polyTree;
     Clipper clipper;
     clipper.AddSubject(paths); //    clipper.AddPaths(paths, PathType::Subject, true);
     Rect r(GetBounds(paths));
-    Path outer = {
-        Point(r.left - uScale, r.top - uScale),
-        Point(r.right + uScale, r.top - uScale),
-        Point(r.right + uScale, r.bottom + uScale),
-        Point(r.left - uScale, r.bottom + uScale),
+    Path64 outer = {
+        Point64(r.left - uScale, r.top - uScale),
+        Point64(r.right + uScale, r.top - uScale),
+        Point64(r.right + uScale, r.bottom + uScale),
+        Point64(r.left - uScale, r.bottom + uScale),
     };
     // ReversePath(outer);
     clipper.AddSubject({outer}); //      clipper.AddPath(outer, PathType::Subject, true);
@@ -363,10 +363,10 @@ Paths& normalize(Paths& paths) {
     ReversePaths(paths);
     //    /****************************/
     //    std::function<void(PolyTree*)> grouping = [&grouping](PolyTree* node) {
-    //         Paths paths;
+    //         Paths64 paths;
 
     //        if (node->IsHole()) {
-    //            Path& path = node->Polygon();
+    //            Path64& path = node->Polygon();
     //            paths.push_back(path);
     //            for (size_t i = 0, end = node->Count(); i < end; ++i) {
     //                path = node->Childs[i]->Polygon();
@@ -405,7 +405,7 @@ struct span {
     }
 };
 
-void reductionOfDistance(Path& path, Point point) {
+void reductionOfDistance(Path64& path, Point64 point) {
     if(point.x == 0 && point.y == 0) point = path.front();
     // sort by distance
 
@@ -461,14 +461,14 @@ std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree) {
     };
 }
 
-Path arc(const Point& center, double radius, double start, double stop, int interpolation) {
+Path64 arc(const Point64& center, double radius, double start, double stop, int interpolation) {
     enum { // interpolation
         Linear                   = 1,
         ClockwiseCircular        = 2,
         CounterClockwiseCircular = 3
     };
     const double da_sign[4]{0, 0, -1.0, +1.0};
-    Path points;
+    Path64 points;
 
     const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
 
@@ -491,14 +491,14 @@ Path arc(const Point& center, double radius, double start, double stop, int inte
     return points;
 }
 
-Path arc(Point p1, Point p2, Point center, int interpolation) {
+Path64 arc(Point64 p1, Point64 p2, Point64 center, int interpolation) {
     double radius = sqrt(pow((center.x - p1.x), 2) + pow((center.y - p1.y), 2));
     double start  = atan2(p1.y - center.y, p1.x - center.x);
     double stop   = atan2(p2.y - center.y, p2.x - center.x);
     return arc(center, radius, start, stop, interpolation);
 }
 
-void mergePaths(Paths& paths, const double maxDist) {
+void mergePaths(Paths64& paths, const double maxDist) {
     qDebug(__FUNCTION__);
 
     size_t max;
@@ -593,7 +593,7 @@ void sortPolyTreeByNesting(PolyTree& polynode) {
     sorter(polynode);
 }
 
-Pathss stacking(Paths& paths) {
+Pathss64 stacking(Paths64& paths) {
     qDebug(__FUNCTION__);
 
     if(paths.empty()) return {};
@@ -610,16 +610,16 @@ Pathss stacking(Paths& paths) {
     }
     sortPolyTreeByNesting(polyTree);
 
-    Pathss returnPss;
+    Pathss64 returnPss;
     /**************************************************************************************/
     // повернуть для уменшения дистанции между путями
-    auto rotateDiest = [this](Paths& paths, Path& path, std::pair<size_t, size_t> idx) -> bool {
+    auto rotateDiest = [this](Paths64& paths, Path64& path, std::pair<size_t, size_t> idx) -> bool {
         std::forward_list<size_t> list;
         list.emplace_front(idx.first);
         for(size_t i = paths.size() - 1, index = idx.first; i; --i) {
             double minDist = std::numeric_limits<double>::max();
-            Point point;
-            for(Point pt: paths[i - 1]) {
+            Point64 point;
+            for(Point64 pt: paths[i - 1]) {
                 double dist = distTo(pt, paths[i][index]);
                 if(minDist >= dist) {
                     minDist = dist;
@@ -640,7 +640,7 @@ Pathss stacking(Paths& paths) {
 
     std::function<void(PolyTree*, bool)> stacker = [&stacker, &rotateDiest, &returnPss](PolyTree* node, bool newPaths) {
         if(!returnPss.empty() || newPaths) {
-            Path path(node->Polygon());
+            Path64 path(node->Polygon());
             if(!(gcp.convent() ^ !node->IsHole()) ^ (gcp.side() == Outer))
                 ReversePath(path);
 
@@ -654,9 +654,9 @@ Pathss stacking(Paths& paths) {
                 std::pair<size_t, size_t> idx;
                 double d = std::numeric_limits<double>::max();
                 //                for(size_t id {}; id < returnPss.back().back().size(); ++id) {
-                //                    const Point& ptd = returnPss.back().back()[id];
+                //                    const Point64& ptd = returnPss.back().back()[id];
                 //                    for(size_t is {}; is < path.size(); ++is) {
-                //                        const Point& pts = path[is];
+                //                        const Point64& pts = path[is];
                 //                        const double l = distTo(ptdpts);
                 //                        if(d >= l) {
                 //                            d = l;
@@ -679,9 +679,9 @@ Pathss stacking(Paths& paths) {
                 }
 
                 if(d <= toolDiameter && rotateDiest(returnPss.back(), path, idx))
-                    returnPss.back().emplace_back(std::move(path)); // append to last Paths
+                    returnPss.back().emplace_back(std::move(path)); // append to last Paths64
                 else
-                    returnPss.push_back({std::move(path)}); // new Paths
+                    returnPss.push_back({std::move(path)}); // new Paths64
             }
 
             for(size_t i{}; auto&& var: *node)
@@ -695,18 +695,18 @@ Pathss stacking(Paths& paths) {
 
     stacker(polyTree.Count() == 1 ? polyTree[0] : &polyTree, false);
 
-    for(Paths& retPaths: returnPss) {
+    for(Paths64& retPaths: returnPss) {
         for(size_t i{}; i < retPaths.size(); ++i)
             if(retPaths[i].empty()) retPaths.erase(retPaths.begin() + i--);
         r::reverse(retPaths);
-        for(Path& path: retPaths)
+        for(Path64& path: retPaths)
             path.emplace_back(path.front());
     }
 
     sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
 }
 
-// Pathss& groupedPaths(Grouping group, int32_t offset, bool skipFrame) {
+// Pathss64& groupedPaths(Grouping group, int32_t offset, bool skipFrame) {
 //     PolyTree polyTree;
 //     {
 //         Timer t{"Union EvenOdd"};
@@ -731,7 +731,7 @@ Pathss stacking(Paths& paths) {
 // void grouping(Grouping group, PolyTree& node) {
 
 //     if((group == Grouping::Cutoff) ^ node.IsHole()) {
-//         Paths paths;
+//         Paths64 paths;
 //         paths.reserve(node.Count() + 1);
 //         paths.emplace_back(std::move(node.Polygon()));
 //         for(auto&& child: node)
@@ -744,7 +744,7 @@ Pathss stacking(Paths& paths) {
 
 #endif
 
-Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k) {
+Path64 boundOfPaths(const Paths64& paths, /*PType*/ int32_t k) {
     Rect rect = GetBounds(paths);
     rect.bottom += k;
     rect.left -= k;
@@ -754,9 +754,9 @@ Path boundOfPaths(const Paths& paths, /*PType*/ int32_t k) {
     return rect.AsPath();
 }
 
-Paths& sortB(Paths& src, Point startPt) {
+Paths64& sortB(Paths64& src, Point64 startPt) {
     qDebug(__FUNCTION__);
-    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    // Point64 startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -774,10 +774,10 @@ Paths& sortB(Paths& src, Point startPt) {
     return src;
 }
 
-Pathss& sortBeginEnd(Pathss& src, Point startPt) {
+Pathss64& sortBeginEnd(Pathss64& src, Point64 startPt) {
     qDebug(__FUNCTION__);
 
-    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    // Point64 startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
         size_t swapIdx = firstIdx;
         double destLen = std::numeric_limits<double>::max();
@@ -808,10 +808,10 @@ Pathss& sortBeginEnd(Pathss& src, Point startPt) {
     return src;
 }
 
-Paths& sortBeginEnd(Paths& src, Point startPt) {
+Paths64& sortBeginEnd(Paths64& src, Point64 startPt) {
     qDebug(__FUNCTION__);
 
-    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    // Point64 startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t firstIdx{}; firstIdx < src.size(); ++firstIdx) {
 
         size_t swapIdx = firstIdx;
@@ -843,10 +843,10 @@ Paths& sortBeginEnd(Paths& src, Point startPt) {
     return src;
 }
 
-Pathss& sortB(Pathss& src, Point startPt) {
+Pathss64& sortB(Pathss64& src, Point64 startPt) {
     qDebug(__FUNCTION__);
 
-    // Point startPt{~(App::home().pos() + App::zero().pos())};
+    // Point64 startPt{~(App::home().pos() + App::zero().pos())};
     for(size_t i{}; i < src.size(); ++i)
         if(src[i].empty())
             src.erase(src.begin() + i--);
@@ -869,9 +869,9 @@ Pathss& sortB(Pathss& src, Point startPt) {
 
 // } // namespace MC
 
-Path& TransformPath(Path& path, const QTransform& m) {
+Path64& TransformPath(Path64& path, const QTransform& m) {
     if(!m.type()) return path;
-    for(Point& point: path) {
+    for(Point64& point: path) {
         QPointF center = m.map(~GetC(point));
         point          = ~m.map(~point);
         SetCForce(point, ~center);
@@ -880,7 +880,7 @@ Path& TransformPath(Path& path, const QTransform& m) {
     return path;
 }
 
-Paths& TransformPaths(Paths& paths, const QTransform& m) {
+Paths64& TransformPaths(Paths64& paths, const QTransform& m) {
     for(auto&& path: paths) TransformPath(path, m);
     return paths;
 }
@@ -966,45 +966,64 @@ void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge)
 
 // option1 - static callback function
 static void UpdateCenter(
-    const Point& /*e1bot*/, const Point& /*e1top*/,
-    const Point& /*e2bot*/, const Point& /*e2top*/, Point& pt) {
+    const Point64& /*e1bot*/, const Point64& /*e1top*/,
+    const Point64& /*e2bot*/, const Point64& /*e2top*/, Point64& pt) {
     qCritical() << pt;
     SetCForce(pt, pt);
 }
 
-Paths InflatePathsZ(const Paths& paths, double delta, JoinType jt, EndType et,
+Paths64 InflatePathsZ(const Paths64& paths, double delta, JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
     if(delta == 0.0) return paths;
     CL2::ClipperOffset offset{miterLimit, arcTolerance};
     offset.SetZCallback(UpdateCenter);
     offset.AddPaths(paths, jt, et);
-    Paths solution;
+    Paths64 solution;
     offset.Execute(delta, solution);
     return solution;
 }
 
-Paths Inflate(const Paths& paths, double delta,
+Paths64 Inflate(const Paths64& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
     return InflatePathsZ(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
 }
 
-Paths InflateRoundPolygon(const Paths& paths,
+Paths64 InflateRoundPolygon(const Paths64& paths,
     double delta, double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
     return InflatePathsZ(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
 }
 
-Paths InflateMiterPolygon(const Paths& paths,
+Paths64 InflateMiterPolygon(const Paths64& paths,
     double delta, double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
     return InflatePathsZ(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
 }
 
-QDebug operator<<(QDebug d, const Point& p) {
-    Point c = GetC(p);
+QDebug operator<<(QDebug d, const Point64& p) {
+    Point64 c = GetC(p);
     if((~c).isNull())
-        return d << "Point(" << p.x << ", " << p.y << ')';
-    return d << "Point(" << p.x << ", " << p.y << ", " << c.x << ", " << c.y << ')';
+        return d << "Point64(" << p.x << ", " << p.y << ')';
+    return d << "Point64(" << p.x << ", " << p.y << ", " << c.x << ", " << c.y << ')';
+}
+
+bool pointOnPolygon(const QLineF &l2, const Curve &curve, QPointF *ret) {
+    const size_t cnt = curve.size();
+    qFatal();
+    // if(cnt < 2) FIXME
+    //     return false;
+    // QPointF p;
+    // for(size_t i{}; i < cnt; ++i) {
+    //     const Point64& pt1 = curve[(i + 1) % cnt];
+    //     const Point64& pt2 = curve[i];
+    //     QLineF l1(~pt1, ~pt2);
+    //     if(QLineF::BoundedIntersection == l1.intersects(l2, &p)) {
+    //         if(ret)
+    //             *ret = ~p;
+    //         return true;
+    //     }
+    // }
+    return false;
 }

@@ -28,6 +28,9 @@ struct Curve : std::vector<geo::Vertex> {
     double perimetr() const;
 };
 
+using Curves  = std::vector<Curve>;
+using Curvess = std::vector<Curves>;
+
 inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
     uint32_t n;
     stream >> n;
@@ -46,8 +49,7 @@ inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
     return stream;
 }
 
-using Curves  = std::vector<Curve>;
-using Curvess = std::vector<Curves>;
+
 
 QIcon drawIcon(const Curves& curves, QColor color = Qt::black);
 
@@ -77,23 +79,23 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {}, int arcLine
 QPainterPath toPPath(const Curves& curves);
 
 Curve toCurve(std::span<const QPointF> path);
-Curve toCurve(std::span<const Point> path);
-Curves toCurves(std::span<const Path> paths /*, bool closed = true*/);
-Curvess toCurvess(std::span<const Paths> pathss /*, bool closed = true*/);
+Curve toCurve(std::span<const Point64> path);
+Curves toCurves(std::span<const Path64> paths /*, bool closed = true*/);
+Curvess toCurvess(std::span<const Paths64> pathss /*, bool closed = true*/);
 
-Path toPath(const Curve& curve);
-Paths toPaths(const Curves& curves);
+Path64 toPath(const Curve& curve);
+Paths64 toPaths(const Curves& curves);
 
 Curves toCurves(const QPainterPath& pPath);
-inline Paths toPaths(const QPainterPath& pPath) {
+inline Paths64 toPaths(const QPainterPath& pPath) {
     return toPaths(toCurves(pPath));
-    // Paths paths;
-    // Point rpc;
+    // Paths64 paths;
+    // Point64 rpc;
     // for(const Curve& curve: curves) {
-    //     Path path{curve.front()};
+    //     Path64 path{curve.front()};
     //     for(auto&& [fr, to]: v::pairwise(curve)) {
     //         if(to.type) {
-    //             if(rpc != Point{})
+    //             if(rpc != Point64{})
     //                 SetCForce(path.back(),
     //                     rpc == ~to.center ? ~to.center
     //                                       : path.back()); // центр для смещения при смене направления дуги

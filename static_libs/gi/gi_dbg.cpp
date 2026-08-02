@@ -56,7 +56,6 @@ struct Dymmy final : AbstractFile {
 protected:
     void write(QDataStream& /*stream*/) const override { }
     void read(QDataStream& /*stream*/) override { }
-    Paths merge() const override { return {}; }
 };
 
 Debug_::Debug_(const QColor& color, double width) {
@@ -66,12 +65,12 @@ Debug_::Debug_(const QColor& color, double width) {
     setVisible(true);
 }
 
-Debug_::Debug_(const Path& path, const QColor& color, double width)
-    : Debug_{Paths{path}, color, width} { }
+Debug_::Debug_(const Path64& path, const QColor& color, double width)
+    : Debug_{Paths64{path}, color, width} { }
 
-Debug_::Debug_(const Paths& paths, const QColor& color, double width)
+Debug_::Debug_(const Paths64& paths, const QColor& color, double width)
     : Debug_{color, width} {
-    for(const Path& path: paths) {
+    for(const Path64& path: paths) {
         shape_.moveTo(~path.front());
         shape_.addPolygon(~path);
     }
@@ -150,7 +149,7 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     double len = 10 * scale;
 
-    for(const Point& pt: paths_ | v::join | v::filter(&Point::z)) {
+    for(const Point64& pt: paths_ | v::join | v::filter(&Point64::z)) {
         QPointF p = ~GetC(pt);
         painter->drawLine(p, ~pt);
     }
@@ -173,6 +172,6 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
 int Debug_::type() const { return Type::Debug; }
 
-Paths Debug_::paths(int) const { return {} /*paths_*/; }
+// Paths Debug_::paths(int) const { return {} /*paths_*/; }
 
 } // namespace Gi

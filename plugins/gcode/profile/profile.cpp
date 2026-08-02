@@ -45,11 +45,11 @@ void Creator::createProfile(const Tool& tool, const double depth) {
     } else {
         if(closedSrcPaths.size()) {
             // ClipperOffset offset;
-            // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
+            // for(Paths64& paths: groupedPaths(GCode::Grouping::Copper))
             // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
             // returnPs = offset.Execute(dOffset);
-            auto it  = v::join(groupedPaths(GCode::Grouping::Copper));
-            returnPs = Inflate(Paths{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
+            auto it = v::join(groupedPaths(GCode::Grouping::Copper));
+            returnPs = Inflate(Paths64{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
         }
         if(openSrcPaths.size()) {
             // ClipperOffset offset;
@@ -88,7 +88,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
     file_->setFileName(tool.nameEnc());
 }
 
-void Creator::trimmingOpenPaths(Paths& paths) {
+void Creator::trimmingOpenPaths(Paths64& paths) {
     const double dOffset = toolDiameter * uScale * 0.5;
     for(size_t i{}; i < paths.size(); ++i) {
         auto& p = paths[i];
@@ -102,12 +102,12 @@ void Creator::trimmingOpenPaths(Paths& paths) {
             QLineF e{~p.back(), ~p.front()};
             b.setLength(b.length() - toolDiameter * 0.5);
             e.setLength(e.length() - toolDiameter * 0.5);
-            p = Path{~b.p2(), ~e.p2()};
+            p = Path64{~b.p2(), ~e.p2()};
         } else if(double l = Perimeter(p); l <= toolDiameter * uScale) {
             paths -= i--;
             continue;
         } else {
-            Paths ps;
+            Paths64 ps;
             {
                 // ClipperOffset offset;
                 // offset.AddPath();
@@ -156,7 +156,7 @@ void Creator::cornerTrimming() {
 
     auto paths = v::join(returnPss);
 
-    std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path& path) {
+    std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path64& path) {
         path.reserve(path.size() * 3);
         for(auto corner = std::next(path.begin()); corner < std::prev(path.end()); ++corner)
             insert(path, std::prev(corner), corner, std::next(corner));
@@ -165,14 +165,14 @@ void Creator::cornerTrimming() {
         path.shrink_to_fit();
     });
 #else
-    auto insert = [=](Path& path, auto cornerPrev, auto&& corner, auto cornerNext) {
+    auto insert = [=](Path64& path, auto cornerPrev, auto&& corner, auto cornerNext) {
         QLineF l1{~*cornerPrev, ~*corner};
         QLineF l2{~*corner, ~*cornerNext};
         if(abs(l1.angleTo(l2) - testAngle) < 1.e-3                     // Angle is 90
             && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
             l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
             auto tmp = {~l2.p1(), ~l2.p2()};
-            auto it  = path.begin() + std::distance(path.data(), corner);
+            auto it = path.begin() + std::distance(path.data(), corner);
             path.insert(it, tmp.begin(), tmp.end());
             std::advance(corner, 2);
         }
@@ -184,9 +184,9 @@ void Creator::cornerTrimming() {
     #ifdef Q_OS_UNIX
         std::execution::par_unseq,
     #endif
-        std::begin(paths), std::end(paths), [insert](Path& path) {
+        std::begin(paths), std::end(paths), [insert](Path64& path) {
             path.reserve(path.size() * 3);
-            for(Point* corner = std::next(path.data()); corner < std::prev(path.data() + path.size()); ++corner)
+            for(Point64* corner = std::next(path.data()); corner < std::prev(path.data() + path.size()); ++corner)
                 insert(path, std::prev(corner), corner, std::next(corner));
             if(path.front() == path.back()) // for trimming between the beginning and the end of the path
                 insert(path, &path.back() - 1, &path.back(), &path.front() + 1);
@@ -204,17 +204,20 @@ void Creator::makeBridges() {
 #ifdef Q_OS_UNIX
         std::execution::par_unseq,
 #endif
-        returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths& rPaths) -> void {
+        returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths64& rPaths) -> void {
             // find Bridges
-            auto biStack = bridgeItems | v::filter([&rPaths](Gi::Bridge* bi) { return bi->test(rPaths.front()); });
+            auto biStack = bridgeItems
+                | v::filter([&rPaths](Gi::Bridge* bi) {
+                      return bi->test(toCurve(rPaths.front()));
+                  });
             if(r::empty(biStack)) return;
             auto isPositive1 = CL2::IsPositive(rPaths.front());
 
             // create frame
-            Paths frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JoinType::Miter, EndType::Butt, uScale);
-            Paths clip;
+            Paths64 frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JoinType::Miter, EndType::Butt, uScale);
+            Paths64 clip;
             for(Gi::Bridge* bip: biStack)
-                clip.append_range(bip->paths());
+                clip.append_range(toPaths(bip->curves()));
 
             frame = CL2::Intersect(frame, clip, FillRule::Positive);
 
@@ -231,7 +234,7 @@ void Creator::makeBridges() {
             mergePaths(rPaths);
             sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
 
-            auto IsPositive = [](Paths paths) {
+            auto IsPositive = [](Paths64 paths) {
                 for(auto&& path: paths | v::drop(1))
                     paths.front().append_range(std::move(path)); // NOTE  move?
                 return CL2::IsPositive(paths.front());
@@ -252,8 +255,8 @@ void Creator::reorder() {
         Clipper clipper;
         clipper.AddSubject(returnPs);
         Rect r(GetBounds(returnPs));
-        int k      = uScale;
-        Path outer = {
+        int k = uScale;
+        Path64 outer = {
             {r.left - k,  r.bottom + k},
             {r.right + k, r.bottom + k},
             {r.right + k, r.top - k   },
@@ -283,12 +286,12 @@ void Creator::reorder() {
     }
 }
 
-void Creator::reduceDistance(Point& from, Path& to) {
+void Creator::reduceDistance(Point64& from, Path64& to) {
     double d = std::numeric_limits<double>::max();
     int ctr2 = 0, idx = 0;
     for(auto pt2: to) {
         if(auto tmp = distToSq(from, pt2); d > tmp) {
-            d   = tmp;
+            d = tmp;
             idx = ctr2;
         }
         ++ctr2;
@@ -297,7 +300,7 @@ void Creator::reduceDistance(Point& from, Path& to) {
     from = to.back();
 }
 
-void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
+void Creator::polyTreeToPaths(PolyTree& polytree, Paths64& rpaths) {
     rpaths.clear();
 
     // auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
@@ -311,7 +314,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
 
         markPolyTreeDByNesting(polytree);
 
-        std::map<int, Paths> pathsMap;
+        std::map<int, Paths64> pathsMap;
         addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, Creator::NodeType nodetype) {
             bool match = true;
             if(nodetype == ntClosed)
@@ -337,7 +340,7 @@ void Creator::polyTreeToPaths(PolyTree& polytree, Paths& rpaths) {
         }
     } else { // Grouping by nesting depth
         sortPolyTreeByNesting(polytree);
-        Point from = ~App::settings().mkrZeroOffset();
+        Point64 from = ~App::settings().mkrZeroOffset();
         std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths =
             [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, Creator::NodeType nodetype) {
                 bool match = true;

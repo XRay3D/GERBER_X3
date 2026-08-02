@@ -62,7 +62,7 @@ constexpr auto DrawCross90 = std::bind(drawCross90, _1, Qt::red, 0.2);
 constexpr auto DrawCross45 = std::bind(drawCross45, _1, Qt::red, 0.2);
 
 //------------------------------------------------------------------------------
-static Path arcToPath(const Vertex& src, const Vertex& dst) {
+static Path64 arcToPath(const Vertex& src, const Vertex& dst) {
     constexpr double accuracy = 0.01;
 #if 1
     if(!dst.type) return {~dst.pt};
@@ -99,7 +99,7 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
 
     dphi = phit / Segments;
 
-    Path path; //{~src.pt};
+    Path64 path; //{~src.pt};
     QPointF p = src.pt;
     for(int i{1}; i <= Segments; i++) {
         d          = p - dst.center;
@@ -146,9 +146,9 @@ static Path arcToPath(const Vertex& src, const Vertex& dst) {
 
     int numPoints = ceil(std::abs(delta) / dphi) * 2;
 
-    Point center = ~dst.center;
+    Point64 center = ~dst.center;
     // Генерация точек
-    Path path;
+    Path64 path;
     if(numPoints > 1) {
         double step = delta / (numPoints - 1);
         path.reserve(numPoints);
@@ -864,7 +864,7 @@ Curve toCurve(std::span<const QPointF> path) {
     };
 }
 
-Curve toCurve(std::span<const Point> path_) {
+Curve toCurve(std::span<const Point64> path_) {
     if(path_.size() == 1
         || (path_.size() == 2 && path_.front() == path_.back()))
         return {
@@ -876,20 +876,20 @@ Curve toCurve(std::span<const Point> path_) {
     bool closed = path_.front() == path_.back();
     if(closed) path_ = path_.subspan(1); // FIXME
 
-    Path path{std::from_range, path_};
+    Path64 path{std::from_range, path_};
 
     if(path.empty()) return {};
 
-    static auto eqCenter = +[](Point& l, Point& r) {
+    static auto eqCenter = +[](Point64& l, Point64& r) {
         constexpr double epsilon = 0.1; // mm
-        static const Point null{};
-        Point cl = !l, cr = !r;
+        static const Point64 null{};
+        Point64 cl = !l, cr = !r;
         return cl == cr
             && cr != null
             && TEST(cl, l, cr, r, epsilon); // radius
     };
 
-    static auto notEqCenter = +[](Point& l, Point& r) { return !eqCenter(l, r); };
+    static auto notEqCenter = +[](Point64& l, Point64& r) { return !eqCenter(l, r); };
 
     auto segments = v::chunk_by(path, eqCenter);
 
@@ -902,7 +902,7 @@ Curve toCurve(std::span<const Point> path_) {
 
 #if 1
       // Исправление пляшущих дуг после обединения отркрытых концов линий
-        auto fixClippedArcs = [](Point& p1, Point& p2, Point& p3) {
+        auto fixClippedArcs = [](Point64& p1, Point64& p2, Point64& p3) {
             const QPointF c1         = ~!p1,
                           c2         = ~!p2,
                           c3         = ~!p3,
@@ -930,7 +930,7 @@ Curve toCurve(std::span<const Point> path_) {
         segments = v::chunk_by(path, eqCenter); // Update segments
 #endif
 
-        using PSpan = std::span<Point>;
+        using PSpan = std::span<Point64>;
 
         // Исправление едничных центров рядом с дугами
         auto fixCenterS2 = [set = std::set<void*>{}](PSpan s1, PSpan s2) mutable -> bool {
@@ -977,7 +977,7 @@ Curve toCurve(std::span<const Point> path_) {
     struct SegData : Segment {
         SegData(Segment seg)
             : Segment{seg}
-            , center{~r::fold_left(v::transform(seg, GetC), Point{}, std::plus<Point>{}) / seg.size()} // reconstructed from PPath,
+            , center{~r::fold_left(v::transform(seg, GetC), Point64{}, std::plus<Point64>{}) / seg.size()} // reconstructed from PPath,
             , radius{get_roundest(v::transform(seg, Radius))} { assert(seg.size()); }                  // "denoised" radius
         QPointF center;
         double radius;
@@ -1157,28 +1157,28 @@ Curve toCurve(std::span<const Point> path_) {
     return curve;
 }
 
-Curves toCurves(std::span<const Path> paths) {
-    constexpr auto size = std::bind(&Path::size, _1);
+Curves toCurves(std::span<const Path64> paths) {
+    constexpr auto size = std::bind(&Path64::size, _1);
     return {
         std::from_range,
-        v::transform(v::filter(paths, size), qOverload<std::span<const Point>>(toCurve)),
+        v::transform(v::filter(paths, size), qOverload<std::span<const Point64>>(toCurve)),
     };
 }
 
-Curvess toCurvess(std::span<const Paths> pathss) {
-    constexpr auto size = std::bind(&Paths::size, _1);
+Curvess toCurvess(std::span<const Paths64> pathss) {
+    constexpr auto size = std::bind(&Paths64::size, _1);
     return {
         std::from_range,
-        v::transform(v::filter(pathss, size), qOverload<std::span<const Path>>(toCurves)),
+        v::transform(v::filter(pathss, size), qOverload<std::span<const Path64>>(toCurves)),
     };
 }
 
-Path toPath(const Curve& curve) {
+Path64 toPath(const Curve& curve) {
     // qInfo() << "toPath";
 
     const bool closed = curve.isClosed();
 
-    Path path{~curve.front().pt};
+    Path64 path{~curve.front().pt};
 
     for(auto&& [fr, to]: v::pairwise(curve))
         path.append_range(arcToPath(fr, to));
@@ -1197,8 +1197,8 @@ Path toPath(const Curve& curve) {
     return path;
 }
 
-Paths toPaths(const Curves& curves) {
-    Paths paths{std::from_range, curves | v::transform(toPath)};
+Paths64 toPaths(const Curves& curves) {
+    Paths64 paths{std::from_range, curves | v::transform(toPath)};
     return paths;
 }
 
@@ -1216,7 +1216,7 @@ Curves toCurves(const QPainterPath& pPath) {
         auto subpaths             = v::chunk_by(elements, splitPaths); // separate Curves
 
         Curve curve;
-        for(auto&& [from, to]: v::pairwise(subpaths)) { // 'from' point to bezier Point in 'to' if
+        for(auto&& [from, to]: v::pairwise(subpaths)) { // 'from' point to bezier Point64 in 'to' if
             if(curve.empty()) curve.emplace_back(static_cast<QPointF>(from.front()));
             if(to.front().type == QPP::CurveToElement) { // is arcTo
                 // Проверка, является ли кривая Безье дугой окружности

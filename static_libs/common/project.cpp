@@ -99,13 +99,13 @@ QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
 
 QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
     stream << uint32_t(shape->type());
-    stream << shape->paths();
+    stream << shape->curves();
     return stream;
 }
 
 QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
     uint32_t type;
-    Paths paths;
+    Curves paths;
     stream >> type;
     stream >> paths;
     // if(App::shapePlugins().contains(type)) {
@@ -340,23 +340,20 @@ void Project::setModified(bool fl) { isModified_ = fl; }
 
 QRectF Project::getBoundingRect() {
     std::lock_guard _{mutex};
-    Point topLeft(std::numeric_limits</*PType*/ int32_t>::max(), std::numeric_limits</*PType*/ int32_t>::max());
-    Point botRight(std::numeric_limits</*PType*/ int32_t>::min(), std::numeric_limits</*PType*/ int32_t>::min());
+    QRectF rect;
     for(const auto& [id, filePtr]: files_) {
         if(filePtr && filePtr->itemGroup()->isVisible()) {
             for(auto&& item: *filePtr->itemGroup()) {
-                for(const Path& path: item->paths()) {
-                    for(const Point& pt: path) {
-                        topLeft.x = std::min(pt.x, topLeft.x);
-                        topLeft.y = std::min(pt.y, topLeft.y);
-                        botRight.x = std::max(pt.x, botRight.x);
-                        botRight.y = std::max(pt.y, botRight.y);
-                    }
+                for(const Curve& curve: item->curves()) {
+                    if(rect.isNull())
+                        rect = curve.boundingRect();
+                    else
+                        rect |= curve.boundingRect();
                 }
             }
         }
     }
-    return QRectF{~topLeft, ~botRight};
+    return rect;
 }
 
 // QString Project::fileNames() {

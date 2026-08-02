@@ -154,8 +154,6 @@ protected:
 
     bool runJsScript(const QString& scriptPath);
 
-    virtual Paths merge() const override { return {}; }
-
     // AbstractFile interfaces
     void write(QDataStream& stream) const override { stream << gcp; }
     void read(QDataStream& stream) override { stream >> gcp; }

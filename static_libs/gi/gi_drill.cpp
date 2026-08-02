@@ -111,7 +111,7 @@ void Drill::create() {
         shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
         curves_.emplace_back(CircleCurve(diameter_, path_.front()));
     } else {
-        Path path = ~path_;
+        auto path = ~path_; // FIXME to Curve
         r::for_each(path, SetCSelf);
         curves_ = toCurves(InflateRoundPolygon({path}, diameter_ * uScale));
         shape_  = toPPath(curves_);

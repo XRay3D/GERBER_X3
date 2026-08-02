@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "myclipper.h"
+#include "curve.h"
 
 #include <QGraphicsItem>
 
@@ -21,7 +21,7 @@ class Error final : public QGraphicsItem {
     const double area_;
 
 public:
-    Error(const Paths& paths, double area);
+    Error(const Curves& curves, double area);
     double area() const;
 
     // QGraphicsItem interface

@@ -259,10 +259,10 @@ void Form::computePaths() {
     // for (auto* gi : App::grView().selectedItems<Gi::Item>()) {
     // switch (gi->type()) {
     // case Gi::Type::DataSolid:
-    // wPaths.append(gi->paths());
+    // wPaths.append(gi->curves());
     // break;
     // case Gi::Type::DataPath: {
-    // auto paths = gi->paths();
+    // auto curves = gi->curves();
     // if (paths.front() == paths.back())
     // wPaths.append(paths);
     // else
@@ -278,19 +278,19 @@ void Form::computePaths() {
     // // }
     // // }
     // // if (gi->type() == Gi::Type::DataSolid)
-    // // wPaths.append(gi->paths());
+    // // wPaths.append(gi->curves());
     // // else
-    // // wRawPaths.append(gi->paths());
+    // // wRawPaths.append(gi->curves());
     // // break;
     // case Gi::Type::ShCircle:
     // case Gi::Type::ShRectangle:
     // case Gi::Type::ShText:
     // case Gi::Type::Drill:
-    // wPaths.append(gi->paths());
+    // wPaths.append(gi->curves());
     // break;
     // case Gi::Type::ShPolyLine:
     // case Gi::Type::ShCirArc:
-    // wRawPaths.append(gi->paths());
+    // wRawPaths.append(gi->curves());
     // break;
     // default: break;
     // }

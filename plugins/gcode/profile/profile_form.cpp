@@ -184,25 +184,30 @@ void Form::onAddBridgeClicked() {
         };
 
         for(Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
-            auto bounds = GetBounds(gi->paths());
-            int stepH = bounds.Width() / (value + 1);
-            int stepV = bounds.Height() / (value + 1);
+            auto bounds = BoundingRect(gi->curves());
+            int stepH = bounds.width() / (value + 1);
+            int stepV = bounds.height() / (value + 1);
             for(int var: v::iota(1, lround(value) + 1)) {
                 QLineF testLineH{
-                    ~Point{bounds.left + stepH * var, bounds.bottom + uScale},
-                    ~Point{bounds.left + stepH * var, bounds.top - uScale   }
+                    {bounds.left() + stepH * var, bounds.bottom() + 1},
+                    {bounds.left() + stepH * var, bounds.top() - 1   }
                 };
                 QLineF testLineV{
-                    ~Point{bounds.left - uScale,  bounds.top + stepV * var},
-                    ~Point{bounds.right + uScale, bounds.top + stepV * var}
+                    {bounds.left() - 1,  bounds.top() + stepV * var},
+                    {bounds.right() + 1, bounds.top() + stepV * var}
                 };
-                for(auto&& path: gi->paths()) {
+                for(auto&& curve: gi->curves()) {
                     // auto pathHash = path.hash();
-                    for(size_t i{}; i < path.size(); ++i) {
-                        QLineF srcline{~path[i], ~path[(i + 1) % path.size()]};
+                    for(auto [fr, to]: curve | v::pairwise) {
+                        QLineF srcline{fr, to};
                         if(align & Horizontally) testAndAdd(testLineH, srcline);
                         if(align & Vertically) testAndAdd(testLineV, srcline);
                     }
+                    // for(size_t i{}; i < path.size(); ++i) {
+                    //     QLineF srcline{~path[i], ~path[(i + 1) % path.size()]};
+                    //     if(align & Horizontally) testAndAdd(testLineH, srcline);
+                    //     if(align & Vertically) testAndAdd(testLineV, srcline);
+                    // }
                 }
             }
         }
@@ -233,9 +238,9 @@ void Form::onAddBridgeClicked() {
         // qDeleteAll(App::grView().items<Gi::Bridge>());
         std::unordered_set<QPointF> set;
         for(Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
-            for(auto&& path: gi->paths()) {
-                if(path.size() != 2) continue;
-                QLineF srcline{~path.front(), ~path.back()};
+            for(auto&& curve: gi->curves()) {
+                if(curve.size() != 2) continue;
+                QLineF srcline{curve.front(), curve.back()};
                 if(!set.emplace(srcline.center()).second) continue;
                 auto brItem = App::grView().addItem<Gi::Bridge>();
                 brItem->setPos(srcline.center()); // NOTE need to collidingItems in snapedPos

@@ -186,10 +186,10 @@ public:
         params[Params::Depth] = depth;
     }
 
-    Params(const Tool& tool, double depth, Paths&& toolPaths)
-        : Params{tool, depth} {
-        toolPathss /*supportCurvess*/.emplace_back(toCurves(toolPaths));
-    }
+    // Params(const Tool& tool, double depth, Paths&& toolPaths)
+    //     : Params{tool, depth} {
+    //     toolPathss /*supportCurvess*/.emplace_back(toCurves(toolPaths));
+    // }
 
     Params(const Tool& tool, double depth, Curves&& toolPaths)
         : Params{tool, depth} {

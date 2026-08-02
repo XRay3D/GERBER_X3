@@ -27,9 +27,13 @@ namespace v = r::views;
 // class Error;
 // }
 
-void dbgPaths(Paths ps, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.});
+void dbgPaths(Paths64 ps,
+    const QString& fileName,
+    QColor color = Qt::red,
+    bool closed = false,
+    const Tool& tool = {0.});
 
-inline void dbgPaths(Pathss pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
+inline void dbgPaths(Pathss64 pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
     if(pss.empty())
         return;
     for(auto&& paths: pss | v::drop(1))
@@ -54,7 +58,7 @@ public:
 
     std::pair<int, int> getProgress();
 
-    Pathss& groupedPaths(Grouping group, /*PType*/ int32_t offset = uScale, bool skipFrame = {});
+    Pathss64& groupedPaths(Grouping group, /*PType*/ int32_t offset = uScale, bool skipFrame = {});
     void grouping(Grouping group, PolyTree& node);
 
     void createGc(Params&& gcp);
@@ -72,7 +76,7 @@ public:
     bool checkMillingFl{};
 
 private:
-    void addRawPaths(Paths&& paths);
+    void addRawPaths(Paths64&& paths);
 
     Params getGcp() const;
     void setGcp(const Params& gcp);
@@ -85,7 +89,7 @@ signals:
 protected:
     bool checkMilling(SideOfMilling side);
 
-    void stacking(Paths& paths);
+    void stacking(Paths64& paths);
 
     /////////////////////////////////////////////////
     /// \brief склеивает пути при совпадении конечных точек
@@ -108,12 +112,12 @@ protected:
     // static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
-    Paths closedSrcPaths;
-    Paths openSrcPaths;
-    Paths returnPs;
-    Pathss returnPss;
-    Pathss supportPss;
-    Pathss groupedPss;
+    Paths64 closedSrcPaths;
+    Paths64 openSrcPaths;
+    Paths64 returnPs;
+    Pathss64 returnPss;
+    Pathss64 supportPss;
+    Pathss64 groupedPss;
 
     double toolDiameter{};
     double dOffset{};

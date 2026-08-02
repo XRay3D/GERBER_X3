@@ -21,8 +21,6 @@ class DataFill final : public Item {
 
 public:
     explicit DataFill(Curves curves, AbstractFile* file);
-    explicit DataFill(const Paths& paths, AbstractFile* file)
-        : DataFill{toCurves(paths), file} { }
 
     ~DataFill() override = default;
 
@@ -32,8 +30,8 @@ public:
     // Item interface
     void redraw() override;
 
-    // Paths& getPaths();
-    void setPaths(Paths paths, int alternate = {}) override;
+    // Curvess& getCurvess();
+    void setCurves(Curves paths, int alternate = {}) override;
     // Item interface
     void changeColor() override;
 };

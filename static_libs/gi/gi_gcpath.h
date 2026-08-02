@@ -19,14 +19,14 @@ namespace Gi {
 
 class GcPath final : public Item {
 public:
-    GcPath(Path path, AbstractFile* file = nullptr);
-    GcPath(Paths paths, AbstractFile* file = nullptr);
+    // GcPath(Path path, AbstractFile* file = nullptr);
+    // GcPath(Paths paths, AbstractFile* file = nullptr);
     GcPath(Curves curves, AbstractFile* file = nullptr);
     ~GcPath() override = default;
     QRectF boundingRect() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
-    Paths paths(int alternate = {}) const override;
+    Curves curves(int alternate = {}) const override;
 
 private:
     AbstractFile* gcFile_;

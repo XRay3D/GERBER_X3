@@ -356,10 +356,10 @@ const Params& Form::getNewGcpWithGi() {
         qDebug() << gi << gi->file();
         // switch(gi->type()) {
         // case Gi::Type::DataSolid:
-        // gcp.closedPaths.append(gi->paths());
+        // gcp.closedPaths.append(gi->curves());
         // break;
         // case Gi::Type::DataPath: {
-        // dbgPaths(gi->paths(), __FUNCTION__);
+        // dbgPaths(gi->curves(), __FUNCTION__);
         for(auto&& curve: gi->curves()) {
             // qWarning() << curve;
             curve.isClosed() ? gcp.closedCurves.emplace_back(std::move(curve))
@@ -377,19 +377,19 @@ const Params& Form::getNewGcpWithGi() {
         // // }
         // // }
         // // if (gi->type() == Gi::Type::DataSolid)
-        // // gcp.closedPaths.append(gi->paths());
+        // // gcp.closedPaths.append(gi->curves());
         // // else
-        // // gcp.openPaths.append(gi->paths());
+        // // gcp.openPaths.append(gi->curves());
         // // break;
         // case Gi::Type::ShCircle:
         // case Gi::Type::ShRectangle:
         // case Gi::Type::ShText:
         // case Gi::Type::Drill:
-        // gcp.closedPaths.append(gi->paths());
+        // gcp.closedPaths.append(gi->curves());
         // break;
         // case Gi::Type::ShPolyLine:
         // case Gi::Type::ShCirArc:
-        // gcp.openPaths.append(gi->paths());
+        // gcp.openPaths.append(gi->curves());
         // break;
         // default:  break;
         // }

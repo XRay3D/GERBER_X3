@@ -159,11 +159,14 @@ DxfGo LwPolyline::toGo() const {
 
     // r::for_each(curve, SetCSelf);
 
-    Paths paths = Inflate({toPath(curve)}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
+    Curves curves = toCurves(Inflate({toPath(curve)}, // TODO
+        constantWidth * uScale,
+        JoinType::Round,
+        EndType::Round, 2.0, uScale / 1000));
 
     // Gi::Debug(paths, Qt::red);
 
-    DxfGo go{id, std::move(curve), toCurves(paths)}; // return {id, ~p.value(0), paths};
+    DxfGo go{id, std::move(curve), std::move(curves)}; // return {id, ~p.value(0), paths};
 
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
 

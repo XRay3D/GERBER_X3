@@ -28,10 +28,10 @@ class DataPath final : public Item {
 
 public:
     DataPath(Curves curves, AbstractFile* file);
-    DataPath(const Path& path, AbstractFile* file)
-        : DataPath{{toCurve(path)}, file} { }
-    DataPath(const Paths& paths, AbstractFile* file)
-        : DataPath{toCurves(paths), file} { }
+    // DataPath(const Path& path, AbstractFile* file)
+    //     : DataPath{{toCurve(path)}, file} { }
+    // DataPath(const Paths& paths, AbstractFile* file)
+    //     : DataPath{toCurves(paths), file} { }
 
 protected:
     // QGraphicsItem interface

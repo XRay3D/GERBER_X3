@@ -95,9 +95,8 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Paths paths(int param = {}) const;
     virtual Curves curves(int param = {}) const;
-    virtual void setPaths(Paths paths, int param = {});
+    // virtual void setPaths(Paths paths, int param = {});
     virtual void setCurves(Curves curves, int param = {});
     virtual void redraw();
     // QGraphicsItem interface

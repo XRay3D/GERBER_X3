@@ -19,10 +19,9 @@
 
 namespace Gi {
 
-Error::Error(const Paths& paths, double area)
+Error::Error(const Curves& curves, double area)
     : area_{area} {
-    for(auto& path: paths)
-        shape_.addPolygon(~path);
+    shape_ = toPPath(curves);
     setFlag(ItemIsSelectable);
     setZValue(std::numeric_limits<double>::max());
 }

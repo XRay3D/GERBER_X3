@@ -82,8 +82,6 @@ void Item::setPenColorPtr(const QColor* penColor) {
     colorChanged();
 }
 
-Paths Item::paths(int /*param*/) const { return toPaths(transform().map(shape_)); }
-
 Curves Item::curves(int param) const {
     Curves curves{curves_};
     if(param) return curves;
@@ -101,23 +99,24 @@ void Item::setCurves(Curves curves, int /*param*/) {
         r::for_each(curves_, std::bind(TransformCurve, _1, std::move(tr)));
     } else
         qCritical("transform().inverted(&ok); ok is false!!!");
+    shape_ = toPPath(curves_);
     redraw();
 }
 
-void Item::setPaths(Paths paths, int /*param*/) {
-    auto t{transform()};
-    auto a{qRadiansToDegrees(asin(t.m12()))};
-    t = t.rotateRadians(-t.m12());
-    auto x{t.dx()};
-    auto y{t.dy()};
-    shape_ = {};
-    t = {};
-    t.translate(-x, -y);
-    t.rotate(-a);
-    for(auto&& path: ~paths)
-        shape_.addPolygon(t.map(path));
-    redraw();
-}
+// void Item::setPaths(Paths paths, int /*param*/) {
+//     auto t{transform()};
+//     auto a{qRadiansToDegrees(asin(t.m12()))};
+//     t = t.rotateRadians(-t.m12());
+//     auto x{t.dx()};
+//     auto y{t.dy()};
+//     shape_ = {};
+//     t = {};
+//     t.translate(-x, -y);
+//     t.rotate(-a);
+//     for(auto&& path: ~paths)
+//         shape_.addPolygon(t.map(path));
+//     redraw();
+// }
 
 void Item::redraw() { }
 
