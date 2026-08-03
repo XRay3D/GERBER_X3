@@ -22,6 +22,8 @@ file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 
 add_library(${PROJECT_NAME} STATIC ${HEADERS} ${SOURCES})
 
+target_enable_pch(${PROJECT_NAME})
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(${PROJECT_NAME} PRIVATE common Qt6::Widgets Qt6::OpenGL Qt6::OpenGLWidgets)

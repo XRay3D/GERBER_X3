@@ -39,6 +39,8 @@ add_library(hpgl SHARED
     ${SOURCE}
 )
 
+target_enable_pch(hpgl)
+
 link_directories(../../libs${SUFFIX})
 target_link_libraries(hpgl PRIVATE
     geometry

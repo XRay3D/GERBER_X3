@@ -178,13 +178,14 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
     QTimer::singleShot(time, this, [this] { selectAll(); });
 
     for(auto&& [name, func]: commandsMap)
-        if(r::find(commands, name) != commands.end())
+        if(r::find(commands, name) != commands.end()) {
             func();
 
-    QTimer::singleShot(time, this,
-        [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
+            QTimer::singleShot(time, this,
+                [this] { dockWidget_->findChild<QPushButton*>(u"pbCreate"_s)->click(); });
 
-    QTimer::singleShot(time, this, [] { App::grView().zoomFit(); });
+            QTimer::singleShot(time, this, [] { App::grView().zoomFit(); });
+        }
 
     // if (0) {
     // i = 1000;

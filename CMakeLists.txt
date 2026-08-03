@@ -23,49 +23,75 @@ set(CMAKE_CXX_SCAN_FOR_MODULES OFF)
 
 set(CMAKE_UNITY_BUILD ON)
 
-# Используем mold/lld, если они есть в системе и реально поддерживаются
-# текущим тулчейном (просто наличия бинарника недостаточно: например,
-# mold из Homebrew/MSYS2 может присутствовать, но не поддерживаться
-# CMAKE_LINKER_TYPE на конкретной платформе/компиляторе).
+# Используем mold/lld, если они есть в системе и реально поддерживаются текущим
+# тулчейном (просто наличия бинарника недостаточно: например, mold из
+# Homebrew/MSYS2 может присутствовать, но не поддерживаться CMAKE_LINKER_TYPE на
+# конкретной платформе/компиляторе).
 include(CheckLinkerFlag)
 find_program(MOLD_EXECUTABLE mold)
 if(MOLD_EXECUTABLE)
-    check_linker_flag(CXX "-fuse-ld=mold" CXX_LINKER_SUPPORTS_MOLD)
+  check_linker_flag(CXX "-fuse-ld=mold" CXX_LINKER_SUPPORTS_MOLD)
 endif()
 if(CXX_LINKER_SUPPORTS_MOLD)
-    set(CMAKE_LINKER_TYPE MOLD)
+  set(CMAKE_LINKER_TYPE MOLD)
 else()
-    find_program(LLD_EXECUTABLE NAMES ld.lld lld)
-    if(LLD_EXECUTABLE)
-        check_linker_flag(CXX "-fuse-ld=lld" CXX_LINKER_SUPPORTS_LLD)
-    endif()
-    if(CXX_LINKER_SUPPORTS_LLD)
-        set(CMAKE_LINKER_TYPE LLD)
-    endif()
+  find_program(LLD_EXECUTABLE NAMES ld.lld lld)
+  if(LLD_EXECUTABLE)
+    check_linker_flag(CXX "-fuse-ld=lld" CXX_LINKER_SUPPORTS_LLD)
+  endif()
+  if(CXX_LINKER_SUPPORTS_LLD)
+    set(CMAKE_LINKER_TYPE LLD)
+  endif()
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
-option(GERBER_NATIVE_MARCH "Optimize for host CPU architecture (disables portability)" ON)
+# ##############################################################################
+include(FetchContent)
+set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
+
+set(CLIPPER2_UTILS OFF)
+set(CLIPPER2_EXAMPLES OFF)
+set(CLIPPER2_TESTS OFF)
+set(CLIPPER2_USINGZ "ONLY")
+
+FetchContent_Declare(
+  ctre
+  GIT_REPOSITORY
+    "https://github.com/hanickadot/compile-time-regular-expressions.git"
+  GIT_TAG main
+  GIT_SHALLOW ON)
+FetchContent_Declare(
+  clipper2
+  GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
+  GIT_TAG main
+  GIT_SHALLOW ON
+  SOURCE_SUBDIR CPP)
+FetchContent_MakeAvailable(ctre clipper2)
+
+# ##############################################################################
+
+option(GERBER_NATIVE_MARCH
+       "Optimize for host CPU architecture (disables portability)" ON)
 
 if(CMAKE_BUILD_TYPE STREQUAL Debug)
-    add_compile_definitions(DEBUG=1)
+  add_compile_definitions(DEBUG=1)
 endif()
 
 # SET(CMAKE_FIND_PACKAGE_SORT_ORDER NATURAL)
 # SET(CMAKE_FIND_PACKAGE_SORT_DIRECTION DEC)
 
 add_compile_definitions(
-    QT_MESSAGELOGCONTEXT
-    QT_NO_CAST_TO_ASCII
-    QT_NO_CAST_FROM_ASCII
-    QT_NO_URL_CAST_FROM_STRING
-    QT_NO_CAST_FROM_BYTEARRAY
-    QT_USE_QSTRINGBUILDER
-    QT_USE_FAST_OPERATOR_PLUS
-    QT_DISABLE_DEPRECATED_BEFORE=0x070000
-    saturate_cast=saturating_cast
-    USINGZ=1)
+  QT_MESSAGELOGCONTEXT
+  QT_NO_CAST_TO_ASCII
+  QT_NO_CAST_FROM_ASCII
+  QT_NO_URL_CAST_FROM_STRING
+  QT_NO_CAST_FROM_BYTEARRAY
+  QT_USE_QSTRINGBUILDER
+  QT_USE_FAST_OPERATOR_PLUS
+  QT_DISABLE_DEPRECATED_BEFORE=0x070000
+  saturate_cast=saturating_cast
+  USINGZ=1)
 
 set(COMMON_COMPILE_OPTIONS
     -fPIC
@@ -78,56 +104,43 @@ set(COMMON_COMPILE_OPTIONS
     $<$<CONFIG:Debug>:-Og>)
 
 if(GERBER_NATIVE_MARCH)
-    list(APPEND COMMON_COMPILE_OPTIONS -march=native)
+  list(APPEND COMMON_COMPILE_OPTIONS -march=native)
 endif()
 
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
-    add_compile_options(${COMMON_COMPILE_OPTIONS})
+  add_compile_options(
+    ${COMMON_COMPILE_OPTIONS}
+    # -fcf-protection=full -fvtable-verify=preinit
+    -fhardened -freflection -fstack-clash-protection -fstack-protector-strong)
+  # Security hardening link flags (RELRO + BIND_NOW)
+  add_link_options(-Wl,-z,relro -Wl,-z,now)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
-    add_compile_options(
-        ${COMMON_COMPILE_OPTIONS}
-        -fhardened
-        -freflection
-        -fstack-protector-strong
-        # -fvtable-verify=preinit
-        -fstack-clash-protection
-        # -fcf-protection=full
-    )
-    # Security hardening link flags (RELRO + BIND_NOW)
-    add_link_options(-Wl,-z,relro -Wl,-z,now)
+  add_compile_options(
+    ${COMMON_COMPILE_OPTIONS}
+    # -fcf-protection=full -fvtable-verify=preinit
+    -fhardened -freflection -fstack-clash-protection -fstack-protector-strong)
+  # Security hardening link flags (RELRO + BIND_NOW)
+  add_link_options(-Wl,-z,relro -Wl,-z,now)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
+  # Classic icc/icpc: no C++26 reflection support, but the driver is
+  # GCC-compatible enough to accept the same hardening flags.
+  add_compile_options(${COMMON_COMPILE_OPTIONS} -fstack-protector-strong)
+  add_link_options(-Wl,-z,relro -Wl,-z,now)
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
+  # No C++26 reflection support yet. /GS (stack protector) is already on by
+  # default; approximate the rest of -fhardened with CFG + SDL checks.
+  add_compile_options(/sdl /guard:cf)
+  add_link_options(/DYNAMICBASE /NXCOMPAT /GUARD:CF)
 endif()
 
 # FIND BOOST — version check is handled by find_package directly
 find_package(Boost 1.85 REQUIRED)
 message(STATUS "==> Boost ${Boost_VERSION} found")
 
-include(FetchContent)
-set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
-
-set(CLIPPER2_UTILS OFF)
-set(CLIPPER2_EXAMPLES OFF)
-set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ "ONLY")
-
-FetchContent_Declare(
-    ctre
-    GIT_REPOSITORY "https://github.com/hanickadot/compile-time-regular-expressions.git"
-    GIT_TAG main
-    GIT_SHALLOW ON)
-FetchContent_Declare(
-    clipper2
-    GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
-    GIT_TAG main
-    GIT_SHALLOW ON
-    SOURCE_SUBDIR CPP)
-FetchContent_MakeAvailable(ctre clipper2)
-
 find_package(
-    Qt6
-    COMPONENTS Widgets LinguistTools Qml
-    REQUIRED)
+  Qt6
+  COMPONENTS Widgets LinguistTools Qml
+  REQUIRED)
 
 include(${CMAKE_SOURCE_DIR}/PATHS.cmake)
 

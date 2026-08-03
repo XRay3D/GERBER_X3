@@ -32,7 +32,7 @@ void drawCross90(const QPointF& cl, const QColor& color = Qt::red, double l = 0.
     pp.moveTo(cl + QPointF{0., -l});
     pp.lineTo(cl + QPointF{0., +l});
     pp.addEllipse(cl, l / 50, l / 50);
-    Gi::Debug(pp, color)->arrows = {};
+    // Gi::Debug(pp, color)->arrows = {};
 }
 
 void drawCross45(const QPointF& cl, const QColor& color = Qt::red, double l = 0.2) { // draw cross of center 90
@@ -42,7 +42,7 @@ void drawCross45(const QPointF& cl, const QColor& color = Qt::red, double l = 0.
     pp.moveTo(cl + QPointF{+l, -l});
     pp.lineTo(cl + QPointF{-l, +l});
     pp.addEllipse(cl, l / 50, l / 50);
-    Gi::Debug(pp, color)->arrows = {};
+    // Gi::Debug(pp, color)->arrows = {};
 }
 
 void drawCross(const QPointF& cl, QAnyStringView str, const QColor& color = Qt::red, double l = 0.2) { // draw cross of center 90
@@ -55,7 +55,7 @@ void drawCross(const QPointF& cl, QAnyStringView str, const QColor& color = Qt::
     pp.lineTo(cl + QPointF{0., +l});
     pp.addEllipse(cl, l / 50, l / 50);
     pp.addPath(QTransform::fromScale(+0.005, -0.005).map(ppText).translated(cl));
-    Gi::Debug(pp, color)->arrows = {};
+    // Gi::Debug(pp, color)->arrows = {};
 }
 
 constexpr auto DrawCross90 = std::bind(drawCross90, _1, Qt::red, 0.2);
@@ -67,6 +67,22 @@ constexpr auto DrawCross45 = std::bind(drawCross45, _1, Qt::red, 0.2);
 static QPointF reconstructCenter(Segment seg) {
     if(const int32_t idx = GetCNextIndex(seg.front())) return CenterAt(idx);
     return ~r::fold_left(v::transform(seg, GetC), Point64{}, std::plus<Point64>{}) / seg.size();
+}
+
+// максимально допустимый угол между соседними точками ОДНОЙ дуги (общий центр),
+// при котором это ещё шаг линейной аппроксимации дуги, а не отрезок, перекрывший
+// кусок дуги, вырезанный клиппером (в этом случае у центров - совпадение по
+// индексу, но геометрически это уже хорда/линия, а не продолжение дуги)
+static bool isArcStep(const QPointF& c, const QPointF& p1, const QPointF& p2) {
+    constexpr double tolerance = 2.0; // запас на дрожание координат при клиппинге
+    const double radius        = (Length(c, p1) + Length(c, p2)) * 0.5;
+    if(radius < 1e-9) return true;
+    const double maxAngle = (2.0 * pi / App::settings().clpCircleSegments(radius)) * tolerance;
+    double a1              = std::atan2(p1.y() - c.y(), p1.x() - c.x());
+    double a2               = std::atan2(p2.y() - c.y(), p2.x() - c.x());
+    double da               = std::abs(a2 - a1);
+    if(da > pi) da = 2.0 * pi - da;
+    return da <= maxAngle;
 }
 
 static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx) {
@@ -83,7 +99,7 @@ static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx)
     double ang1 = atan2(d.y(), d.x());
     if(ang1 < 0) ang1 += 2.0 * pi;
 
-    d           = (dst.pt - dst.center);
+    d = (dst.pt - dst.center);
     double ang2 = atan2(d.y(), d.x());
     if(ang2 < 0) ang2 += 2.0 * pi;
 
@@ -100,7 +116,7 @@ static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx)
     // // what is the delta phi to get an accuracy of aber
     // double phit = Span{src.pt, dst}.IncludedAngle();
     double radius = dst.radius();
-    double dphi   = 2 * acos((radius - accuracy) / radius);
+    double dphi = 2 * acos((radius - accuracy) / radius);
 
     int Segments = ceil(std::abs(phit) / dphi) * 2;
 
@@ -109,11 +125,11 @@ static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx)
     Path64 path; //{~src.pt};
     QPointF p = src.pt;
     for(int i{1}; i <= Segments; i++) {
-        d          = p - dst.center;
+        d = p - dst.center;
         double phi = atan2(d.y(), d.x());
-        double nx  = dst.center.x() + radius * cos(phi - dphi);
-        double ny  = dst.center.y() + radius * sin(phi - dphi);
-        p          = QPointF{nx, ny};
+        double nx = dst.center.x() + radius * cos(phi - dphi);
+        double ny = dst.center.y() + radius * sin(phi - dphi);
+        p = QPointF{nx, ny};
         SetCIndices(path.emplace_back(~p), centerIdx, centerIdx);
     }
     if(path.size()) {
@@ -128,7 +144,7 @@ static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx)
 
     // Углы концевых точек (в радианах)
     double startAngle = std::atan2(src.y() - dst.center.y(), src.x() - dst.center.x());
-    double endAngle   = std::atan2(dst.y() - dst.center.y(), dst.x() - dst.center.x());
+    double endAngle = std::atan2(dst.y() - dst.center.y(), dst.x() - dst.center.x());
 
     // Нормализация в диапазон [0, 2π)
     auto normalize = [](double a) {
@@ -137,7 +153,7 @@ static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx)
         return a;
     };
     startAngle = normalize(startAngle);
-    endAngle   = normalize(endAngle);
+    endAngle = normalize(endAngle);
 
     // Вычисляем угловое расстояние с учётом направления
     double delta = endAngle - startAngle;
@@ -187,7 +203,7 @@ Curve CircleCurve(double diametr, const QPointF& center) {
 }
 
 Curve RectangleCurve(double width, double height, const QPointF& center) {
-    const double halfWidth  = width * 0.5;
+    const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
     Curve curve{
         Vertex{{-halfWidth + center.x(), +halfHeight + center.y()}},
@@ -356,7 +372,7 @@ Curve Curve::reversed() const {
         PointF cp{};
         if(prev) {
             type = Vertex::Type{-prev->type};
-            cp   = prev->center;
+            cp = prev->center;
         }
         Vertex new_v(v.pt, cp, type);
         new_vertices.push_back(new_v);
@@ -411,10 +427,10 @@ bool circleCenter(
     if(std::abs(det) < 1e-12) return false; // Точки коллинеарны
 
     QPointF delta = M_bc - M_ab;
-    double t      = (delta.x() * n_bc.y() - delta.y() * n_bc.x()) / det;
-    center        = M_ab + t * n_ab;
-    PointF pt     = center - A;
-    radius        = pt.length();
+    double t = (delta.x() * n_bc.y() - delta.y() * n_bc.x()) / det;
+    center = M_ab + t * n_ab;
+    PointF pt = center - A;
+    radius = pt.length();
     return true;
 }
 
@@ -424,9 +440,9 @@ QPointF bezierPoint(
     const QPointF& P2, const QPointF& P3,
     double t) {
 
-    double u   = 1.0 - t;
-    double tt  = t * t;
-    double uu  = u * u;
+    double u = 1.0 - t;
+    double tt = t * t;
+    double uu = u * u;
     double uuu = uu * u;
     double ttt = tt * t;
 
@@ -463,22 +479,22 @@ bool isArcOfCircle(
 
     // Проверяем несколько точек на кривой
     for(double t: {0.0, /* 0.25,*/ 0.5, /*0.75,*/ 1.0}) {
-        QPointF pt  = bezierPoint(P0, P1, P2, P3, t) - center;
+        QPointF pt = bezierPoint(P0, P1, P2, P3, t) - center;
         double dist = QPointF::dotProduct(pt, pt);
-        dist        = std::sqrt(dist);
+        dist = std::sqrt(dist);
         if(!TEST(dist, radius, eps)) return false;
     }
 #elif 0 // точки на окружности
     const qreal epsilon = 1e-10;
 
     // Используем все 4 точки для нахождения центра методом наименьших квадратов
-    qreal sum_x   = P0.x() + P1.x() + P2.x() + P3.x();
-    qreal sum_y   = P0.y() + P1.y() + P2.y() + P3.y();
-    qreal sum_x2  = P0.x() * P0.x() + P1.x() * P1.x() + P2.x() * P2.x() + P3.x() * P3.x();
-    qreal sum_y2  = P0.y() * P0.y() + P1.y() * P1.y() + P2.y() * P2.y() + P3.y() * P3.y();
-    qreal sum_xy  = P0.x() * P0.y() + P1.x() * P1.y() + P2.x() * P2.y() + P3.x() * P3.y();
-    qreal sum_x3  = P0.x() * P0.x() * P0.x() + P1.x() * P1.x() * P1.x() + P2.x() * P2.x() * P2.x() + P3.x() * P3.x() * P3.x();
-    qreal sum_y3  = P0.y() * P0.y() * P0.y() + P1.y() * P1.y() * P1.y() + P2.y() * P2.y() * P2.y() + P3.y() * P3.y() * P3.y();
+    qreal sum_x = P0.x() + P1.x() + P2.x() + P3.x();
+    qreal sum_y = P0.y() + P1.y() + P2.y() + P3.y();
+    qreal sum_x2 = P0.x() * P0.x() + P1.x() * P1.x() + P2.x() * P2.x() + P3.x() * P3.x();
+    qreal sum_y2 = P0.y() * P0.y() + P1.y() * P1.y() + P2.y() * P2.y() + P3.y() * P3.y();
+    qreal sum_xy = P0.x() * P0.y() + P1.x() * P1.y() + P2.x() * P2.y() + P3.x() * P3.y();
+    qreal sum_x3 = P0.x() * P0.x() * P0.x() + P1.x() * P1.x() * P1.x() + P2.x() * P2.x() * P2.x() + P3.x() * P3.x() * P3.x();
+    qreal sum_y3 = P0.y() * P0.y() * P0.y() + P1.y() * P1.y() * P1.y() + P2.y() * P2.y() * P2.y() + P3.y() * P3.y() * P3.y();
     qreal sum_x2y = P0.x() * P0.x() * P0.y() + P1.x() * P1.x() * P1.y() + P2.x() * P2.x() * P2.y() + P3.x() * P3.x() * P3.y();
     qreal sum_xy2 = P0.x() * P0.y() * P0.y() + P1.x() * P1.y() * P1.y() + P2.x() * P2.y() * P2.y() + P3.x() * P3.y() * P3.y();
 
@@ -516,13 +532,13 @@ bool isArcOfCircle(
     // ===== МЕТОД 1: Использование касательных в конечных точках =====
 
     // Касательный вектор в начале (направление от P0 к P1)
-    qreal t0x    = P1.x() - P0.x();
-    qreal t0y    = P1.y() - P0.y();
+    qreal t0x = P1.x() - P0.x();
+    qreal t0y = P1.y() - P0.y();
     qreal t0_len = std::hypot(t0x, t0y);
 
     // Касательный вектор в конце (направление от P2 к P3)
-    qreal t3x    = P3.x() - P2.x();
-    qreal t3y    = P3.y() - P2.y();
+    qreal t3x = P3.x() - P2.x();
+    qreal t3y = P3.y() - P2.y();
     qreal t3_len = std::hypot(t3x, t3y);
 
     // Проверка на вырожденные случаи
@@ -567,7 +583,7 @@ bool isArcOfCircle(
 
     // Детерминант матрицы коэффициентов
     qreal det = r0x * (-r3y) - r0y * (-r3x);
-    det       = r0x * r3y - r0y * r3x;
+    det = r0x * r3y - r0y * r3x;
 
     if(std::abs(det) < epsilon) {
         qCritical() << "Перпендикулярные биссектрисы параллельны (точки коллинеарны или дуга вырождена)";
@@ -684,7 +700,7 @@ bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
     double tolerance = 1e-5) {
     // 1. Никакие контрольные векторы не нулевые
     const QPointF tanStart = ctrl1 - start;
-    const QPointF tanEnd   = end - ctrl2;
+    const QPointF tanEnd = end - ctrl2;
     if((tanStart - QPointF(0, 0)).manhattanLength() < tolerance || (tanEnd - QPointF(0, 0)).manhattanLength() < tolerance)
         return false; // это линия, а не круг
 
@@ -693,10 +709,10 @@ bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
     // Решаем 2x2 систему: A * (Cx, Cy)^T = b
     QMatrix2x2 A;
     A.setToIdentity();
-    A(0, 0)      = tanStart.x();
-    A(0, 1)      = tanStart.y();
-    A(1, 0)      = tanEnd.x();
-    A(1, 1)      = tanEnd.y();
+    A(0, 0) = tanStart.x();
+    A(0, 1) = tanStart.y();
+    A(1, 0) = tanEnd.x();
+    A(1, 1) = tanEnd.y();
     QVector2D b0 = -QVector2D(start.x() * tanStart.x() + start.y() * tanStart.y(), 0);
     QVector2D b1 = -QVector2D(end.x() * tanEnd.x() + end.y() * tanEnd.y(), 0);
     // Вектор b: ( -start·tanStart, -end·tanEnd )
@@ -719,15 +735,15 @@ bool circleArcFromCubic(const QPointF& start, const QPointF& ctrl1,
     // Проверяем, что расстояние до конца и до точки t=0.5
     // находятся на той же окружности (с заданной точностью)
     auto evaluateCubic = [&](qreal t) {
-        qreal u  = 1 - t;
+        qreal u = 1 - t;
         qreal tt = t * t, uu = u * u;
         return u * uu * start + 3 * u * tt * ctrl1 + 3 * tt * u * ctrl2 + t * t * t * end;
     };
     const int samples = 5;
     for(int i = 1; i < samples; ++i) {
-        qreal t    = i / static_cast<qreal>(samples + 1);
+        qreal t = i / static_cast<qreal>(samples + 1);
         QPointF pt = evaluateCubic(t);
-        double d   = Length(pt, center);
+        double d = Length(pt, center);
         if(qAbs(d - radius) > tolerance * radius) // относительная ошибка
             return false;
     }
@@ -772,8 +788,8 @@ std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start, QPointF en
         Tuple: (center, start_angle, end_angle, radius)
     */
 
-    double r  = signedBulgeRadius(start, end, bulge);
-    double a  = angle(start, end) + ((pi / 2.0 - atan(bulge) * 2.0));
+    double r = signedBulgeRadius(start, end, bulge);
+    double a = angle(start, end) + ((pi / 2.0 - atan(bulge) * 2.0));
     QPointF c = polar(start, a, r);
 
     double a1 = angle(c, end);
@@ -829,7 +845,7 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, int arcOnly) {
         // NOTE Qt stupid angles
         const double asource = ls.angle();
         const double atarget = ls.angleTo(QLineF{v.center, target});
-        double span          = atarget;
+        double span = atarget;
         // qCritical() << atarget << v.type;
         // drawCross(v.center, u"f%1 s%2 t%3"_s.arg(asource).arg(span).arg(v.type));
 
@@ -891,14 +907,20 @@ Curve toCurve(std::span<const Point64> path_) {
         // точный путь: индекс дуги, начинающейся в l, должен совпасть с индексом
         // дуги, заканчивающейся в r - если индексы известны, эпсилон не нужен
         const int32_t ln = GetCNextIndex(l), rp = GetCPrevIndex(r);
-        if(ln || rp) return ln != 0 && ln == rp;
+        if(ln || rp) {
+            if(!ln || ln != rp) return false;
+            // центры совпадают, но если между точками слишком большой угол
+            // (клиппер вырезал кусок дуги между ними) - это уже хорда, а не
+            // шаг аппроксимации: считаем стык линией, а не продолжением дуги
+            return isArcStep(CenterAt(ln), ~l, ~r);
+        }
 
         constexpr double epsilon = 0.1; // mm
         static const Point64 null{};
         Point64 cl = !l, cr = !r;
         return cl == cr
             && cr != null
-            && TEST(cl, l, cr, r, epsilon); // radius
+            && TEST(cl, l, cr, r, epsilon); // radiusz
     };
 
     static auto notEqCenter = +[](Point64& l, Point64& r) { return !eqCenter(l, r); };
@@ -909,7 +931,7 @@ Curve toCurve(std::span<const Point64> path_) {
         if(auto it = r::adjacent_find(path, notEqCenter); it != path.end())
             r::rotate(path, ++it);
 
-    { // Исправление центров
+    {                                     // Исправление центров
         constexpr double epsilon = 0.001; // mm, допуск совпадения центров дуг
 
         // Исправление пляшущих дуг после объединения открытых концов линий:
@@ -977,9 +999,9 @@ Curve toCurve(std::span<const Point64> path_) {
     if(closed && segments.front().size() == path.size()) { // Circle
         // qCritical() << "circle" << path.size();
         QPointF center = ~!path.front();
-        auto dir       = DIR(~path[0], ~path[1], center);
-        double radius  = get_roundest(v::transform(segments.front(), Radius));
-        curve          = CircleCurve(radius * 2, center);
+        auto dir = DIR(~path[0], center, ~path[1]);
+        double radius = get_roundest(v::transform(segments.front(), Radius));
+        curve = CircleCurve(radius * 2, center);
         if(dir == Vertex::Cw) curve.reverse();
         assert(closed && curve.isClosed());
         return curve;
@@ -989,7 +1011,7 @@ Curve toCurve(std::span<const Point64> path_) {
         SegData(Segment seg)
             : Segment{seg}
             , center{reconstructCenter(seg)}
-            , radius{get_roundest(v::transform(seg, Radius))} { assert(seg.size()); }                  // "denoised" radius
+            , radius{get_roundest(v::transform(seg, Radius))} { assert(seg.size()); } // "denoised" radius
         QPointF center;
         double radius;
         auto& operator[](int i) const noexcept {
@@ -1027,7 +1049,7 @@ Curve toCurve(std::span<const Point64> path_) {
     }
 
     // fix arcs
-    using VSpan  = std::span<Vertex>;
+    using VSpan = std::span<Vertex>;
     using SDSpan = std::span<const SegData>;
     // using SDSpan = decltype((tmp.cbegin()));
     // auto sd = tmp.begin();
@@ -1188,7 +1210,7 @@ Path64 toPath(const Curve& curve) {
     // qInfo() << "toPath";
 
     const bool closed = curve.isClosed();
-    const size_t n     = curve.size();
+    const size_t n = curve.size();
 
     // Индекс центра для каждого сегмента curve[i] -> curve[i+1] (0, если сегмент - отрезок).
     // Регистрируется один раз на дугу и переиспользуется для всех её точек в arcToPath.
@@ -1226,7 +1248,7 @@ Paths64 toPaths(const Curves& curves) {
 
 Curves toCurves(const QPainterPath& pPath) {
     using QPP = QPainterPath;
-    using El  = QPP::Element;
+    using El = QPP::Element;
     Curves curves;
     for(auto&& elements: v::iota(0, pPath.elementCount())
             | v::transform(std::bind(&QPP::elementAt, pPath, _1))            // to Element
@@ -1235,7 +1257,7 @@ Curves toCurves(const QPainterPath& pPath) {
         // qInfo() << "elements" << elements.size();                         // count of elements
 
         constexpr auto splitPaths = +[](const El&, const El& r) { return r.type > QPP::CurveToElement; };
-        auto subpaths             = v::chunk_by(elements, splitPaths); // separate Curves
+        auto subpaths = v::chunk_by(elements, splitPaths); // separate Curves
 
         Curve curve;
         for(auto&& [from, to]: v::pairwise(subpaths)) { // 'from' point to bezier Point64 in 'to' if
@@ -1266,4 +1288,40 @@ Curves& TransformCurves(Curves& curves, const QTransform& tr) {
 
 QIcon drawIcon(const Curves& curves, QColor color) {
     return drawIcon(toPPath(curves), color);
+}
+
+constexpr double kEps = 1e-12;
+
+std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, double bulge) {
+    if(std::abs(bulge) < kEps) return std::nullopt;
+
+    const double dx = p2.x() - p1.x();
+    const double dy = p2.y() - p1.y();
+    const double chord = std::sqrt(dx * dx + dy * dy);
+    if(chord < kEps) return std::nullopt;
+
+    // Signed sagitta: exact identity sagitta = (chord/2) * bulge.
+    // Знаковая стрела прогиба: точное тождество sagitta = (хорда/2) * bulge.
+    const double s = bulge * chord / 2.0;
+    // Signed radius: derived from right-triangle (chord/2, s, r-s).
+    // Знаковый радиус: выводится из прямоугольного треугольника (хорда/2, s, r-s).
+    const double halfChord = chord / 2.0;
+    const double radiusSigned = (halfChord * halfChord + s * s) / (2.0 * s);
+
+    const double ux = dx / chord, uy = dy / chord; // unit chord direction
+    // единичное направление хорды
+    const double nx = -uy, ny = ux; // left normal (+90 deg)
+    // левая нормаль (+90 град)
+
+    const double mx = (p1.x() + p2.x()) / 2.0;
+    const double my = (p1.y() + p2.y()) / 2.0;
+    const double apothem = radiusSigned - s; // signed midpoint->center distance along n
+    // знаковое расстояние от середины до центра вдоль n
+
+    ArcGeometry arc;
+    arc.center = {mx + nx * apothem, my + ny * apothem};
+    arc.radius = std::abs(radiusSigned);
+    arc.startAngle = std::atan2(p1.y() - arc.center.y(), p1.x() - arc.center.x());
+    arc.ccw = bulge > 0.0;
+    return arc;
 }

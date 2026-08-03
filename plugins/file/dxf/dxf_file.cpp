@@ -58,22 +58,42 @@ void File::setItemType(int type) {
 int File::itemsType() const { return itemsType_; }
 
 Curvess& File::groupedPaths(File::Group group, bool fl) {
+    // if(groupedCurves_.empty()) {
+    //     PolyTree polyTree;
+    //     Clipper clipper;
+    //     clipper.AddSubject(toPaths(mergedCurves()));
+    //     auto r = BoundingRect(mergedCurves());
+    //     int k = /*uScale*/ 1;
+    //     Path64 outer{
+    //         Point64{uScale + r.left() - k,  uScale + r.bottom() + k},
+    //         Point64{uScale + r.right() + k, uScale + r.bottom() + k},
+    //         Point64{uScale + r.right() + k, uScale + r.top() - k   },
+    //         Point64{uScale + r.left() - k,  uScale + r.top() - k   }
+    //     };
+    //     if(!fl) ReversePath(outer);
+    //     clipper.AddSubject({outer});
+    //     clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
+    //     grouping(polyTree, group);
+    // }
+    // return groupedCurves_;
     if(groupedCurves_.empty()) {
         PolyTree polyTree;
         Clipper clipper;
-        clipper.AddSubject(toPaths(mergedCurves()));
-        auto r = BoundingRect(mergedCurves());
+        auto paths = toPaths(mergedCurves());
+        clipper.AddSubject(paths);
+        Rect r = GetBounds(paths);
         int k = /*uScale*/ 1;
         Path64 outer{
-            Point64{uScale + r.left() - k,  uScale + r.bottom() + k},
-            Point64{uScale + r.right() + k, uScale + r.bottom() + k},
-            Point64{uScale + r.right() + k, uScale + r.top() - k   },
-            Point64{uScale + r.left() - k,  uScale + r.top() - k   }
-        };
-        if(fl) ReversePath(outer);
+            Point64(r.left - k, r.bottom + k),
+            Point64(r.right + k, r.bottom + k),
+            Point64(r.right + k, r.top - k),
+            Point64(r.left - k, r.top - k)};
+        if(fl)
+            ReversePath(outer);
         clipper.AddSubject({outer});
         clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
         grouping(polyTree, group);
+        Gi::Debug(groupedCurves_ | v::join | r::to<std::vector>());
     }
     return groupedCurves_;
 }
