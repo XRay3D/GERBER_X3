@@ -32,3 +32,16 @@ function(target_setup_translations TARGET)
     qt_add_lupdate(${TARGET} TS_FILES ${TS_FILES} SOURCES ${ARGN})
     qt_add_lrelease(${TARGET} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 endfunction()
+
+# Shared precompiled header (Qt + common STL) compiled once for the whole
+# project. Every other target reuses this binary via REUSE_FROM instead of
+# reparsing <QtCore>/<QtGui>/<QtWidgets> for itself.
+add_library(pch_qt OBJECT ${CMAKE_SOURCE_DIR}/pch_stub.cpp)
+target_link_libraries(pch_qt PRIVATE Qt6::Widgets Qt6::Qml)
+target_precompile_headers(pch_qt PRIVATE ${CMAKE_SOURCE_DIR}/qt_pch.h)
+
+# Helper: opt a target into the shared PCH above.
+# Usage: target_enable_pch(<target>)
+function(target_enable_pch TARGET)
+    target_precompile_headers(${TARGET} REUSE_FROM pch_qt)
+endfunction()

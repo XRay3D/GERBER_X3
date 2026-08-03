@@ -27,6 +27,8 @@ set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${JSONS})
 
 add_library(${PROJECT_NAME} SHARED ${PROJECT_SOURCES})
 
+target_enable_pch(${PROJECT_NAME})
+
 target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR})

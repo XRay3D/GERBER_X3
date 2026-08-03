@@ -33,15 +33,15 @@ struct Finaly final {
     ~Finaly() { func(); }
 };
 
-using nS   = std::nano;
-using uS   = std::micro;
-using mS   = std::milli;
-using Sec  = std::ratio<1>;
-using Min  = std::ratio<60>;
+using nS = std::nano;
+using uS = std::micro;
+using mS = std::milli;
+using Sec = std::ratio<1>;
+using Min = std::ratio<60>;
 using Hour = std::ratio<3600>;
 
 template <typename T, typename... Ts>
-constexpr bool contains_v                              = std::disjunction_v<std::is_same<T, Ts>...>; // Or
+constexpr bool contains_v = std::disjunction_v<std::is_same<T, Ts>...>; // Or
 template <typename T, typename... Ts> concept Contains = contains_v<T, Ts...>;
 
 namespace chr = std::chrono;
@@ -83,11 +83,11 @@ struct Timer {
     ~Timer() { now(); }
 };
 
-using Timer_nS  = Timer<nS>;
-using Timer_uS  = Timer<uS>;
-using Timer_mS  = Timer<mS>;
-using TimerSec  = Timer<Sec>;
-using TimerMin  = Timer<Min>;
+using Timer_nS = Timer<nS>;
+using Timer_uS = Timer<uS>;
+using Timer_mS = Timer<mS>;
+using TimerSec = Timer<Sec>;
+using TimerMin = Timer<Min>;
 using TimerHour = Timer<Hour>;
 
 //------------------------------------------------------------------------------
@@ -238,18 +238,18 @@ inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
         unsigned char ch = utf8[i++];
 
         if(ch <= 0x7F) { // 0b01111111
-            uni  = ch;
+            uni = ch;
             todo = 0;
         } else if(ch <= 0xBF) // 0b10111111
             throw error;
         else if(ch <= 0xDF) { // 0b11011111
-            uni  = ch & 0x1F; // 0b00011111
+            uni = ch & 0x1F;  // 0b00011111
             todo = 1;
         } else if(ch <= 0xEF) { // 0b11101111
-            uni  = ch & 0x0F;   // 0b00001111
+            uni = ch & 0x0F;    // 0b00001111
             todo = 2;
         } else if(ch <= 0xF7) { // 0b11110111
-            uni  = ch & 0x07;   // 0b00000111
+            uni = ch & 0x07;    // 0b00000111
             todo = 3;
         } else
             throw error;
@@ -338,7 +338,7 @@ template <class Ty>
 inline constexpr Ty Max = Ty{};
 template <class Ty>
 inline constexpr Ty Tokens = Ty{};
-using sv                   = std::string_view;
+using sv = std::string_view;
 consteval auto trim(sv str) {
     auto isSpaceOrSep = [](auto ch) {
         return ch == ' ' || ch == ','; // || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v';
@@ -634,4 +634,330 @@ static_assert([](E e) consteval { auto _ = e++; return e; }(E::B) == E::C);
 static_assert([](E e) consteval { auto _ = e--; return e; }(E::B) == E::A);
 
 } // namespace Test
+#endif
+//------------------------------------------------------------------------------
+// reflect_print.hpp — универсальный форматтер структур и классов
+// на рефлексии C++26 (P2996 + P3491 define_static_array).
+//
+// Компиляторы:
+//   * GCC trunk (16.x):    g++ -std=c++26
+//   * clang-p2996:         clang++ -std=c++26 -freflection-latest -stdlib=libc++
+//
+// Возможности:
+//   * произвольные структуры/классы, включая приватные поля и базовые классы;
+//   * enum / enum class — печать по имени енумератора;
+//   * контейнеры (ranges), map-подобные, tuple/pair, optional, variant,
+//     умные и сырые указатели;
+//   * плоский и многострочный (pretty) режимы;
+//   * интеграция со std::format / std::print: "{}" — плоско, "{:#}" — pretty.
+//
+// Ограничения (осознанные):
+//   * по умолчанию указатели (сырые и умные) печатаются адресом;
+//     options{.deref = true} (или спецификатор "{:*}") разыменовывает их
+//     и печатает поля как "0xADDR -> Type{...}"; от циклов защищает
+//     options::max_depth — глубже него снова печатается только адрес;
+//   * анонимные члены печатаются как <anon>, union — как <union>.
+// ============================================================================
+
+#include <cstdint>
+#include <format>
+#include <memory>
+#include <meta>
+#include <optional>
+#include <ranges>
+#include <string>
+#include <string_view>
+#include <tuple>
+#include <type_traits>
+#include <utility>
+#include <variant>
+
+namespace rfl {
+
+struct options {
+    bool pretty = false; // многострочный вывод с отступами
+    int indent = 2;      // ширина одного уровня отступа
+    bool deref = false;  // разыменовывать ненулевые указатели и
+                         // печатать поля: "0x... -> Type{...}"
+    int max_depth = 32;  // предохранитель: глубже этого указатели
+                         // печатаются адресом (защита от циклов)
+};
+
+// ---------------------------------------------------------------------------
+// Классификация типов
+// ---------------------------------------------------------------------------
+namespace detail {
+
+template <class T, template <class...> class P>
+inline constexpr bool is_specialization_v = false;
+template <template <class...> class P, class... A>
+inline constexpr bool is_specialization_v<P<A...>, P> = true;
+
+} // namespace detail
+
+template <class T> concept CharString = std::same_as<T, std::string> || std::same_as<T, std::string_view> || std::same_as<std::decay_t<T>, char*> || std::same_as<std::decay_t<T>, const char*>;
+
+template <class T> concept Range = std::ranges::input_range<T> && !CharString<T>;
+
+template <class T> concept TupleLike = requires { std::tuple_size<T>::value; } && !Range<T>;
+
+template <class T> concept OptionalLike = detail::is_specialization_v<T, std::optional>;
+
+template <class T> concept VariantLike = detail::is_specialization_v<T, std::variant>;
+
+template <class T> concept SmartPtr = detail::is_specialization_v<T, std::unique_ptr> || detail::is_specialization_v<T, std::shared_ptr>;
+
+// Класс, который печатаем через рефлексию (всё остальное отсеяно выше)
+template <class T> concept ReflectClass = std::is_class_v<T> && !CharString<T> && !Range<T> && !TupleLike<T> && !OptionalLike<T> && !VariantLike<T> && !SmartPtr<T>;
+
+// ---------------------------------------------------------------------------
+// Обход членов через рефлексию.
+// Вместо expansion statements (template for) — раскрытие пачки индексов,
+// а std::meta::info передаётся как NTTP (он structural). Работает и в GCC
+// trunk, и в clang-p2996.
+// ---------------------------------------------------------------------------
+namespace detail {
+
+// unchecked() — видим в т.ч. приватные члены; замените на
+// access_context::current(), если нужны только доступные из этого контекста.
+consteval auto ctx() { return std::meta::access_context::unchecked(); }
+
+template <class T, class F>
+constexpr void for_each_member(F&& f) {
+    constexpr auto members = std::define_static_array(
+        std::meta::nonstatic_data_members_of(^^T, ctx()));
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+        (f.template operator()<members[I]>(), ...);
+    }(std::make_index_sequence<members.size()>{});
+}
+
+template <class T, class F>
+constexpr void for_each_base(F&& f) {
+    constexpr auto bases = std::define_static_array(std::meta::bases_of(^^T, ctx()));
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+        (f.template operator()<bases[I]>(), ...);
+    }(std::make_index_sequence<bases.size()>{});
+}
+
+} // namespace detail
+
+// ---------------------------------------------------------------------------
+// Имя енумератора по значению
+// ---------------------------------------------------------------------------
+template <class E>
+    requires std::is_enum_v<E>
+std::string enum_to_string(E value) {
+    constexpr auto enums = std::define_static_array(std::meta::enumerators_of(^^E));
+    std::string result;
+    [&]<std::size_t... I>(std::index_sequence<I...>) {
+        (void)((value == [:enums[I]:]
+                   ? (result = std::meta::identifier_of(enums[I]), true)
+                   : false)
+            || ...);
+    }(std::make_index_sequence<enums.size()>{});
+    if(result.empty()) // значение вне списка енумераторов (флаги и т.п.)
+        return std::format("{}({})", std::meta::display_string_of(^^E),
+            std::to_underlying(value));
+    return std::format("{}::{}", std::meta::display_string_of(^^E), result);
+}
+
+// ---------------------------------------------------------------------------
+// Главный диспетчер
+// ---------------------------------------------------------------------------
+template <class T>
+std::string to_string(const T& value, options opt = {}, int depth = 0);
+
+namespace detail {
+
+inline std::string ind(const options& o, int depth) {
+    return o.pretty ? "\n" + std::string(std::size_t(depth) * o.indent, ' ')
+                    : std::string{};
+}
+
+template <class T>
+std::string class_to_string(const T& value, options opt, int depth) {
+    std::string out{std::meta::display_string_of(^^T)};
+    out += '{';
+    bool first = true;
+    auto sep = [&]() -> std::string {
+        std::string s = first ? "" : (opt.pretty ? "," : ", ");
+        first = false;
+        return s + ind(opt, depth + 1);
+    };
+
+    // Базовые классы — печатаем их поля как вложенный объект
+    for_each_base<T>([&]<std::meta::info B>() {
+        using Base = [:std::meta::type_of(B):];
+        out += sep();
+        out += class_to_string(static_cast<const Base&>(value), opt, depth + 1);
+    });
+
+    // Собственные нестатические члены
+    for_each_member<T>([&]<std::meta::info M>() {
+        out += sep();
+        if constexpr(std::meta::has_identifier(M))
+            out += std::meta::identifier_of(M);
+        else
+            out += "<anon>";
+        out += ": ";
+        out += rfl::to_string(value.[:M:], opt, depth + 1);
+    });
+
+    if(!first) out += ind(opt, depth);
+    out += '}';
+    return out;
+}
+
+} // namespace detail
+
+template <class T>
+std::string to_string(const T& value, options opt, int depth) {
+    if constexpr(std::same_as<T, bool>) {
+        return value ? "true" : "false";
+    } else if constexpr(std::same_as<T, char>) {
+        return std::format("'{}'", value);
+    } else if constexpr(std::is_arithmetic_v<T>) {
+        return std::format("{}", value);
+    } else if constexpr(CharString<T>) {
+        if constexpr(std::is_pointer_v<std::decay_t<T>>)
+            if(value == nullptr) return "null";
+        return std::format("\"{}\"", std::string_view(value));
+    } else if constexpr(std::is_enum_v<T>) {
+        return enum_to_string(value);
+    } else if constexpr(std::is_pointer_v<T>) {
+        using P = std::remove_cv_t<std::remove_pointer_t<T>>;
+        if(!value) return "null";
+        if constexpr(std::is_function_v<P>) {
+            // static_cast функционального указателя в void* нелегален
+            return std::format("{}", reinterpret_cast<const void*>(value));
+        } else {
+            std::string addr = std::format("{}", static_cast<const void*>(value));
+            if constexpr(!std::is_void_v<P>) {
+                if(opt.deref && depth < opt.max_depth)
+                    return addr + " -> " + to_string(*value, opt, depth + 1);
+            }
+            return addr;
+        }
+    } else if constexpr(SmartPtr<T>) {
+        if(!value) return "null";
+        std::string addr = std::format("{}", static_cast<const void*>(value.get()));
+        if(opt.deref && depth < opt.max_depth)
+            return addr + " -> " + to_string(*value, opt, depth + 1);
+        return addr;
+    } else if constexpr(OptionalLike<T>) {
+        return value ? to_string(*value, opt, depth) : "nullopt";
+    } else if constexpr(VariantLike<T>) {
+        return std::visit(
+            [&](const auto& v) { return to_string(v, opt, depth); }, value);
+    } else if constexpr(TupleLike<T>) {
+        std::string out = "(";
+        [&]<std::size_t... I>(std::index_sequence<I...>) {
+            ((out += (I ? ", " : "") + to_string(std::get<I>(value), opt, depth)),
+                ...);
+        }(std::make_index_sequence<std::tuple_size_v<T>>{});
+        return out + ")";
+    } else if constexpr(Range<T>) {
+        constexpr bool is_map = requires {
+            typename T::key_type;
+            typename T::mapped_type;
+        };
+        std::string out = is_map ? "{" : "[";
+        bool first = true;
+        for(const auto& e: value) {
+            if(!first) out += ", ";
+            first = false;
+            if constexpr(is_map) {
+                out += to_string(e.first, opt, depth) + ": " + to_string(e.second, opt, depth);
+            } else {
+                out += to_string(e, opt, depth);
+            }
+        }
+        return out + (is_map ? "}" : "]");
+    } else if constexpr(std::is_union_v<T>) {
+        return "<union>";
+    } else if constexpr(ReflectClass<T>) {
+        return detail::class_to_string(value, opt, depth);
+    } else {
+        return "<?>";
+    }
+}
+
+// ---------------------------------------------------------------------------
+// Интеграция со std::format / std::print
+//
+// По умолчанию включаем только для агрегатов, не являющихся диапазонами
+// и tuple-like — чтобы не конфликтовать со стандартными формattерами
+// диапазонов (C++23) и pair/tuple. Для неагрегатных классов можно явно
+// включить: template <> constexpr bool rfl::format_enabled<MyClass> = true;
+// ---------------------------------------------------------------------------
+template <class T>
+constexpr bool format_enabled = ReflectClass<T> && std::is_aggregate_v<T>;
+
+} // namespace rfl
+
+template <class T>
+    requires rfl::format_enabled<T>
+struct std::formatter<T, char> {
+    rfl::options opt{};
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        auto it = ctx.begin();
+        for(; it != ctx.end() && *it != '}'; ++it) {
+            if(*it == '#') opt.pretty = true;     // "{:#}" — pretty
+            else if(*it == '*') opt.deref = true; // "{:*}" — deref
+            else
+                throw std::format_error(
+                    "rfl: поддерживаются только '#' и '*'");
+        }
+        return it;
+    }
+
+    template <class FmtCtx>
+    auto format(const T& value, FmtCtx& ctx) const {
+        return std::ranges::copy(rfl::to_string(value, opt), ctx.out()).out;
+    }
+};
+
+// ---------------------------------------------------------------------------
+#if 0
+// Специализация std::formatter для ЛЮБОГО указателя на объект.
+// Делает легальным std::format("{}", ptr) для App* и т.п.
+//
+//   "{}"    -> адрес (или "null")
+//   "{:*}"  -> адрес -> Type{поля...} (рефлексия, рекурсивно)
+//   "{:#*}" -> то же, многострочно
+//
+// void*, const void*, char*, const char*, nullptr_t не задеваются: для них
+// в стандартной библиотеке есть ПОЛНЫЕ специализации, а полная
+// специализация всегда предпочтительнее частичной. Указатели на функции
+// исключены (их печатает ветка is_function_v в rfl::to_string при
+// необходимости, но formatter для них стандарт не разрешает подменять
+// осмысленно).
+// ---------------------------------------------------------------------------
+template <class T>
+    requires(!std::is_function_v<T>)
+struct std::formatter<T*, char> {
+    rfl::options opt{};
+
+    constexpr auto parse(std::format_parse_context& ctx) {
+        auto it = ctx.begin();
+        for(; it != ctx.end() && *it != '}'; ++it) {
+            if(*it == '#') opt.pretty = true;
+            else if(*it == '*') opt.deref = true;
+            else
+                throw std::format_error(
+                    "rfl: поддерживаются только '#' и '*'");
+        }
+        return it;
+    }
+
+    template <class FmtCtx>
+    auto format(T* value, FmtCtx& ctx) const {
+        return std::ranges::copy(rfl::to_string(value, opt), ctx.out()).out;
+    }
+};
+// template <typename T>
+// inline QDebug operator<<(QDebug debug, const T& data) {
+//     return debug.noquote() << std::format("{}", data);
+// }
 #endif

@@ -65,6 +65,18 @@ constexpr QRectF BoundingRect(const Curves& curves) {
         std::bit_or{});
 }
 
+struct ArcGeometry {
+    QPointF center;
+    double radius = 0.0;     // always >= 0
+    // всегда >= 0
+    double startAngle = 0.0; // atan2 at p1, radians
+    // atan2 в точке p1, радианы
+    bool ccw = true;         // sweep direction from p1 to p2 (matches sign of bulge)
+    // направление обхода от p1 к p2 (совпадает со знаком bulge)
+};
+
+std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, double bulge);
+
 Curve CircleCurve(double diametr, const QPointF& center = {});
 Curve RectangleCurve(double width, double height, const QPointF& center = {});
 
