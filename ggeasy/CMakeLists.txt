@@ -59,6 +59,8 @@ set_source_files_properties(${TS_FILES} PROPERTIES
 
 qt_add_executable(${PROJECT_NAME} MANUAL_FINALIZATION ${PROJECT_SOURCES})
 
+target_enable_pch(${PROJECT_NAME})
+
 qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${HEADERS} ${SOURCES} ${UIS})
 qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 

@@ -23,6 +23,8 @@ set(PROJECT_SOURCES ${HEADERS} ${SOURCES} ${UIS} ${QRC_SOURCES})
 
 add_library(${PROJECT_NAME} STATIC ${PROJECT_SOURCES})
 
+target_enable_pch(${PROJECT_NAME})
+
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
 target_link_libraries(${PROJECT_NAME} PUBLIC geometry ctre Qt6::Qml)
