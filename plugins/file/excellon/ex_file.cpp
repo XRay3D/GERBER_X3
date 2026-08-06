@@ -75,10 +75,10 @@ Tools File::tools() const {
     return tools;
 }
 
-Paths Excellon::File::merge() const {
+Curves Excellon::File::merge() const {
     for(auto&& item: *itemGroups_.back())
-        mergedPaths_.append_range(item->paths());
-    return mergedPaths_;
+        mergedCurves_.append_range(item->curves());
+    return mergedCurves_;
 }
 
 void File::write(QDataStream& stream) const {
@@ -133,7 +133,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
         } else {
             go.path = Curve{std::from_range, hole.state.path | v::transform([](const QPointF& pt) { return geo::Vertex{pt}; })};
             // go.pos = go.path.front();
-            go.fill = toCurves(Inflate({~hole.state.path}, diam * uScale, JoinType::Round, EndType::Round, uScale));
+            go.fill = toCurves(Inflate64({~hole.state.path}, diam * uScale, cl::JoinType::Round, cl::EndType::Round, uScale));
         }
         go.name = u"T%1|Ø%2"_s
                       .arg(+hole.state.toolId)

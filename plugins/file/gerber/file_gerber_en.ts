@@ -225,7 +225,7 @@ without width and without contacts</source>
     </message>
     <message>
         <location filename="gbr_plugin.cpp" line="281"/>
-        <source>Clipper Offset</source>
+        <source>cl::Clipper64 Offset</source>
         <translation type="unfinished"></translation>
     </message>
     <message>

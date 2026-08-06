@@ -136,7 +136,7 @@ void Form::computePaths() {
     for(auto& item: items_) {
         if(item->isValid()) {
             gcp.closedCurves.assign_range(item->curves());
-            if(Paths bridge = item->bridge(); bridge.size())
+            if(Paths64 bridge = item->bridge(); bridge.size())
                 gcp.supportCurvess.emplace_back(toCurves(item->bridge()));
         }
     }

@@ -47,7 +47,7 @@ int File::itemsType() const { return m_itemsType; }
 Pathss& File::groupedPaths(File::Group group, bool fl) {
     if(m_groupedPaths.empty()) {
         PolyTree polyTree;
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddPaths(mergedPaths(), ptSubject, true);
         IntRect r(clipper.GetBounds());
         int k = /*uScale*/ 1;
@@ -123,11 +123,11 @@ void File::createGi() {
     // itemGroups_.push_back(igPath = new ItemGroup);
     // }
 
-    // Clipper clipper; // Clipper
+    // cl::Clipper64 clipper; // cl::Clipper64
 
     // for (auto& go : layer->m_graphicObjects) {
     // if (layer->m_groupedPaths.empty() && go.paths().size())
-    // clipper.AddPaths(go.paths(), ptSubject, true); // Clipper
+    // clipper.AddPaths(go.paths(), ptSubject, true); // cl::Clipper64
 
     // if (go.path().size() > 1) {
     // auto gItem = new Gi::DataPath(go.path(), this);
@@ -142,7 +142,7 @@ void File::createGi() {
     // }
 
     // if (layer->m_groupedPaths.empty()) {
-    // clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // Clipper
+    // clipper.Execute(ctUnion, m_mergedPaths, pftNonZero); // cl::Clipper64
     // // dbgPaths(m_mergedPaths, u"m_mergedPaths"_s, true);
     // layer->m_groupedPaths = std::move(groupedPaths());
     // for (auto& paths : layer->m_groupedPaths)

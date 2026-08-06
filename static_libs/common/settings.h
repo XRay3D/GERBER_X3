@@ -188,7 +188,7 @@ public:
     bool scalePinMarkers();
     int theme();
 
-    /*Clipper*/
+    /*cl::Clipper64*/
     int clpCircleSegments(double radius);
 
     /*Markers*/
@@ -233,7 +233,7 @@ private:
     bool scalePinMarkers_{};
     int theme_{};
 
-    /*Clipper*/
+    /*cl::Clipper64*/
     double clpMinCircleSegmentLength_{0.5};
     int clpMinCircleSegments_{36};
 

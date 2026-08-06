@@ -170,10 +170,10 @@ DxfGo LwPolyline::toGo() const {
 
     if(polylineFlag == Closed) addSeg(poly.back(), poly.front());
 
-    Curves curves = toCurves(Inflate({toPath(curve)}, // TODO
-        constantWidth * uScale,
+    Curves curves = Inflate({curve}, // TODO
+        constantWidth,
         JoinType::Round,
-        EndType::Round, 2.0, uScale / 1000));
+        EndType::Round, 2.0, 1000);
 
     DxfGo go{id, std::move(curve), std::move(curves)}; // return {id, ~p.value(0), paths};
 

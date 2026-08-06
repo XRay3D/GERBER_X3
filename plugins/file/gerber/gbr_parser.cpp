@@ -145,7 +145,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             if(attFile.function_ && attFile.function_->function == Attr::File::Profile)
                 file->setItemType(File::ApPaths);
 
-            file->mergedPaths();
+            file->mergedCurves();
             file->components_ = components.values();
             file->groupedPaths();
             file->graphicObjects_.shrink_to_fit();
@@ -466,7 +466,7 @@ void Parser::addFlash() {
 
     AbstractAperture* ap = file->apertures_[state_.aperture()].get();
     ap->setUsed();
-    Paths paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
+    Paths64 paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
     if(ap->withHole())
         paths.emplace_back(ap->drawDrill(state_));
@@ -549,7 +549,7 @@ void Parser::resetStep() {
     path_.push_back(state_.curPos());
 }
 
-Point Parser::parsePosition(const QString& xyStr) {
+Point64 Parser::parsePosition(const QString& xyStr) {
     static constexpr ctll::fixed_string ptrnPosition{R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"};
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(std::u16string_view{xyStr}); whole) {
         /*PType*/ int32_t tmp{};
@@ -577,7 +577,7 @@ Point Parser::parsePosition(const QString& xyStr) {
 Curves Parser::createLine() {
     if(file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
         file->apertures_[state_.aperture()].get()->setUsed();
-    Paths solution;
+    Paths64 solution;
     if(!file->apertures_.contains(state_.aperture())) {
         QString str;
         for(const auto& [ap, apPtr]: file->apertures_)
@@ -586,7 +586,7 @@ Curves Parser::createLine() {
     }
 
     if(file->apertures_[state_.aperture()]->type() == Rectangle) {
-        solution = Clipper2Lib::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
+        solution = cl::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
         r::for_each(v::join(solution), SetCSelf);
         // auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
         // if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
@@ -597,13 +597,13 @@ Curves Parser::createLine() {
         // double size = rect->width_ * uScale * state_.scaling();
         // if(qFuzzyIsNull(size))
         //     return {};
-        // solution = Inflate({path_}, size, JoinType::Square, EndType::Square);
+        // solution = Inflate64({path_}, size, cl::JoinType::Square, cl::EndType::Square);
         // r::for_each(v::join(solution), SetCSelf);
     } else {
         double size = file->apertures_[state_.aperture()]->size() * uScale * state_.scaling();
         if(qFuzzyIsNull(size)) return {};
         r::for_each(path_, SetCSelf);
-        solution = Inflate({path_}, size, JoinType::Round, EndType::Round);
+        solution = Inflate64({path_}, size, cl::JoinType::Round, cl::EndType::Round);
     }
     if(state_.imgPolarity() == Negative) ReversePaths(solution);
 
@@ -969,18 +969,18 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         return true;
     }
 
-    const Point arcStartPos = state_.curPos();
+    const Point64 arcStartPos = state_.curPos();
 
     const std::array centerPos{
-        Point{arcStartPos.x + i, arcStartPos.y + j},
-        Point{arcStartPos.x - i, arcStartPos.y + j},
-        Point{arcStartPos.x + i, arcStartPos.y - j},
-        Point{arcStartPos.x - i, arcStartPos.y - j}
+        Point64{arcStartPos.x + i, arcStartPos.y + j},
+        Point64{arcStartPos.x - i, arcStartPos.y + j},
+        Point64{arcStartPos.x + i, arcStartPos.y - j},
+        Point64{arcStartPos.x - i, arcStartPos.y - j}
     };
 
     bool valid{};
 
-    auto constructArc = [this, x, y](Point center, double radius, double start, double stop) {
+    auto constructArc = [this, x, y](Point64 center, double radius, double start, double stop) {
         auto arcPath = arc(center, radius, start, stop, state_.interpolation());
         state_.setCurPos({x, y});
         // Последняя точка в вычисленной дуге может иметь числовые ошибки.
@@ -990,7 +990,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         return arcPath;
     };
 
-    Path arcPath;
+    Path64 arcPath;
     switch(state_.quadrant()) {
     case Multi: { // G75
         const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
@@ -998,7 +998,7 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         const auto& center   = centerPos.front();
         // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
         // Ч­то должно привести к образованию дуги в 360 градусов.
-        const double stop = (arcStartPos == Point{x, y})
+        const double stop = (arcStartPos == Point64{x, y})
             ? start
             : atan2(-center.y + y, -center.x + x); // Stop angle
 

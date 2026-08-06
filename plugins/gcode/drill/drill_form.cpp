@@ -41,12 +41,12 @@
 
 namespace Drilling {
 
-Paths offset(const Path& path, double offset, bool fl = false) {
+Paths64 offset(const Path64& path, double offset, bool fl = false) {
     // ClipperOffset cpOffset;
-    // cpOffset.AddPath(path, JoinType::Round, fl ? EndType::Round : EndType::Round);
-    // Paths tmpPpaths = cpOffset.Execute(offset * uScale);
-    Paths tmpPpaths = Inflate({path}, offset * uScale, JoinType::Round, fl ? EndType::Round : EndType::Round);
-    for(Path& tmpPath: tmpPpaths)
+    // cpOffset.AddPath(path, cl::JoinType::Round, fl ? cl::EndType::Round : cl::EndType::Round);
+    // Paths64 tmpPpaths = cpOffset.Execute(offset * uScale);
+    Paths64 tmpPpaths = Inflate64({path}, offset * uScale, cl::JoinType::Round, fl ? cl::EndType::Round : cl::EndType::Round);
+    for(Path64& tmpPath: tmpPpaths)
         tmpPath.push_back(tmpPath.front());
     return tmpPpaths;
 }
@@ -248,7 +248,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.isSlot   = key.second;
             for(auto* go: val)
                 new Gi::Preview{
-                    (go->path.size() > 1 ? toPath(go->path) : Path{~go->pos}),
+                    (go->path.size() > 1 ? toPath(go->path) : Path64{~go->pos}),
                     row.diameter,
                     data.back().toolId,
                     row,
@@ -490,7 +490,7 @@ void Form::computePaths() {
 
     if(worckType == GCType::Drill) { // slots only
         struct Data {
-            Paths paths;
+            Paths64 paths;
             mvector<int> toolsApertures;
         };
 
@@ -502,7 +502,7 @@ void Form::computePaths() {
                 for(auto& item: row.items) {
                     if(!item->isUsed()) continue;
                     if(item->fit(dsbxDepth->value()))
-                        for(Path& path: offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
+                        for(Path64& path: offset(item->paths().front(), item->sourceDiameter() - App::toolHolder().tool(item->toolId()).diameter()))
                             pathsMap[row.toolId].paths.push_back(path);
                     else
                         pathsMap[row.toolId].paths.push_back(item->paths().front());
@@ -517,7 +517,7 @@ void Form::computePaths() {
                     GCode::Params{
                                   App::toolHolder().tool(usedToolId),
                                   dsbxDepth->value(),
-                                  std::move(data.paths),
+                                  toCurves(data.paths),
                                   }
                 };
                 gcode->setFileName(
@@ -531,8 +531,8 @@ void Form::computePaths() {
 
     { // other
         struct Data {
-            Path drillPath;
-            Paths paths;
+            Path64 drillPath;
+            Paths64 paths;
             mvector<int> toolsApertures;
         };
 
@@ -597,7 +597,7 @@ void Form::computePaths() {
                     GCode::Params{
                                   App::toolHolder().tool(toolId),
                                   dsbxDepth->value(),
-                                  {val.drillPath},
+                                  Curves{toCurve(val.drillPath)},
                                   }
                 };
 

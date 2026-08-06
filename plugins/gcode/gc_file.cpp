@@ -609,7 +609,7 @@ void File::createGiLaser() {
     // item->setPenColorPtr(color);
     // itemGroup()->push_back(item);
     // // ClipperOffset offset;
-    // // offset.AddPaths(g0path_, JoinType::Round, EndType::Round);
+    // // offset.AddPaths(g0path_, cl::JoinType::Round, cl::EndType::Round);
     // // offset.Execute(g0path_,uScale*gcp.getToolDiameter());
     // // item = new GcPathItem{g0path_, this};
     // // item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
