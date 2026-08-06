@@ -44,7 +44,7 @@ public:
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    Paths merge() const override;
+    Curves merge() const override;
 };
 
 } // namespace Excellon

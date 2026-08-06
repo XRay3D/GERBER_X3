@@ -79,7 +79,7 @@ bool AppSettings::scaleHZMarkers() { return scaleHZMarkers_; }
 bool AppSettings::scalePinMarkers() { return scalePinMarkers_; }
 int AppSettings::theme() { return theme_; }
 
-/*Clipper*/
+/*cl::Clipper64*/
 int AppSettings::clpCircleSegments(double radius) {
     const double length = clpMinCircleSegmentLength_; // mm
     const int destSteps = static_cast<int>(pi / asin((length * 0.5) / (radius)));

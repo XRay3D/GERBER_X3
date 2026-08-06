@@ -47,10 +47,10 @@ void File::read(QDataStream& stream) {
     stream >> static_cast<QList<SvgElement>&>(*this);
 }
 
-Paths File::merge() const {
+Curves File::merge() const {
     for(const SvgElement& el: *this)
-        mergedPaths_.append_range(toPaths(el.painterPath));
-    return mergedPaths_;
+        mergedCurves_.append_range(toCurves(el.painterPath));
+    return mergedCurves_;
 }
 
 } // namespace Svg

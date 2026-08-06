@@ -60,7 +60,7 @@ int File::itemsType() const { return itemsType_; }
 Curvess& File::groupedPaths(File::Group group, bool fl) {
     // if(groupedCurves_.empty()) {
     //     PolyTree polyTree;
-    //     Clipper clipper;
+    //     cl::Clipper64 clipper;
     //     clipper.AddSubject(toPaths(mergedCurves()));
     //     auto r = BoundingRect(mergedCurves());
     //     int k = /*uScale*/ 1;
@@ -72,13 +72,13 @@ Curvess& File::groupedPaths(File::Group group, bool fl) {
     //     };
     //     if(!fl) ReversePath(outer);
     //     clipper.AddSubject({outer});
-    //     clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
+    //     clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, polyTree);
     //     grouping(polyTree, group);
     // }
     // return groupedCurves_;
     if(groupedCurves_.empty()) {
         PolyTree polyTree;
-        Clipper clipper;
+        cl::Clipper64 clipper;
         auto paths = toPaths(mergedCurves());
         clipper.AddSubject(paths);
         Rect r = GetBounds(paths);
@@ -91,9 +91,9 @@ Curvess& File::groupedPaths(File::Group group, bool fl) {
         if(fl)
             ReversePath(outer);
         clipper.AddSubject({outer});
-        clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, polyTree);
         grouping(polyTree, group);
-        Gi::Debug(groupedCurves_ | v::join | r::to<std::vector>());
+        // Gi::Debug(groupedCurves_ | v::join | r::to<std::vector>());
     }
     return groupedCurves_;
 }
@@ -111,6 +111,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 paths.push_back(path);
             }
             groupedCurves_.push_back(toCurves(paths));
+            r::for_each(groupedCurves_ | v::join, [](Curve& c) { c.emplace_back(c.front().pt); });
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -124,6 +125,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 paths.push_back(path);
             }
             groupedCurves_.push_back(toCurves(paths));
+            r::for_each(groupedCurves_ | v::join, [](Curve& c) { c.emplace_back(c.front().pt); });
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -205,7 +207,7 @@ void File::createGi() {
                 itemGroups_.push_back(igPath = new Gi::Group);
             }
 
-            Clipper clipper; // Clipper
+            cl::Clipper64 clipper; // cl::Clipper64
             const bool empty{layer->groupedCurves_.empty()};
             for(auto& go: layer->graphicObjects_) {
                 if(empty && go.fill.size()) {
@@ -228,7 +230,7 @@ void File::createGi() {
 
             if(empty) {
                 auto paths = toPaths(mergedCurves_);
-                clipper.Execute(ClipType::Union, FillRule::NonZero, paths);
+                clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths);
                 CleanPaths(paths, uScale * 0.0005);
 
                 for(Path64& path: paths)

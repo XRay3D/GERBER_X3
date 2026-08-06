@@ -33,7 +33,7 @@ public:
 
     const Format& format() const { return format_; }
     Format& format() { return format_; }
-    Pathss& groupedPaths(Group group = CopperGroup, bool fl = false);
+    Curvess& groupedPaths(Group group = CopperGroup, bool fl = false);
     bool flashedApertures() const;
     const ApertureMap* apertures() const;
 
@@ -57,13 +57,13 @@ public:
     const auto& graphicObjects2() const { return graphicObjects_; };
 
 protected:
-    Paths merge() const override;
+    Curves merge() const override;
 
 private:
     QList<Comp::Component> components_;
     mvector<GrObject> graphicObjects_;
     ApertureMap apertures_;
-    void grouping(PolyTree& node, Pathss* pathss);
+    void grouping(PolyTree& node, Curvess* curvess);
     Format format_;
     Group group_{};
     // Layer layer = Copper;

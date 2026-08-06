@@ -33,7 +33,7 @@ void DataPath::updateSelection() const {
     selectionShape_ = str.createStroke(shape_);
     boundingRect_ = selectionShape_.boundingRect();
 #else
-    auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, JoinType::Miter, EndType::Square);
+    auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, cl::JoinType::Miter, cl::EndType::Square);
     selectionShape_.clear();
     for(Path& path: tmpPpath) selectionShape_.addPolygon(~path);
     boundingRect_ = selectionShape_.boundingRect();

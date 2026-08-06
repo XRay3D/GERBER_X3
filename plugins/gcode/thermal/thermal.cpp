@@ -25,7 +25,7 @@ void Creator::create() {
 }
 
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
-    toolDiameter         = tool.getDiameter(depth);
+    toolDiameter = tool.getDiameter(depth);
     const double dOffset = toolDiameter * uScale * 0.5;
 
     dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
@@ -33,7 +33,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
     {     // create tool path
         { // execute offset
             // ClipperOffset offset;
-            // offset.AddPaths(closedSrcPaths, JoinType::Round, EndType::Polygon);
+            // offset.AddPaths(closedSrcPaths, cl::JoinType::Round, cl::EndType::Polygon);
             // returnPs = offset.Execute(dOffset);
             returnPs = InflateRoundPolygon(closedSrcPaths, dOffset * 2);
         }
@@ -45,7 +45,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         else if(gcp.side() == GCode::Inner && gcp.convent())
             ReversePaths(returnPs);
 
-        for(Path& path: returnPs)
+        for(Path64& path: returnPs)
             path.push_back(path.front());
 
         if(returnPs.empty()) {
@@ -54,43 +54,43 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         }
     }
 
-    Paths framePaths;
+    Paths64 framePaths;
     { // create frame
         const auto graphicObjects(file->graphicObjects());
-        Clipper clipper;
+        cl::Clipper64 clipper;
         {
-            Clipper2Lib::ClipperOffset offset;
+            cl::ClipperOffset offset;
             for(auto go: graphicObjects | v::filter([](auto* go) { return go->positive(); }))
-                offset.AddPaths(toPaths(go->fill) /*polyLineW()*/, JoinType::Round, EndType::Polygon);
+                offset.AddPaths(toPaths(go->fill) /*polyLineW()*/, cl::JoinType::Round, cl::EndType::Polygon);
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddSubject(framePaths);
         }
         if(!gcp.params[IgnoreCopper].toInt()) {
-            Clipper2Lib::ClipperOffset offset;
+            cl::ClipperOffset offset;
             for(auto go: graphicObjects) {
                 // if (go->closed()) {
                 // if (go->positive())
-                offset.AddPaths(toPaths(go->fill) /*polygonWholes()*/, JoinType::Round, EndType::Polygon);
+                offset.AddPaths(toPaths(go->fill) /*polygonWholes()*/, cl::JoinType::Round, cl::EndType::Polygon);
                 // else {
-                // Paths paths(go->polygonWholes());
+                // Paths64 paths(go->polygonWholes());
                 // ReversePaths(paths);
-                // offset.AddPaths(paths, JoinType::Miter, EndType::Polygon);
+                // offset.AddPaths(paths, cl::JoinType::Miter, cl::EndType::Polygon);
                 // }
                 // }
             }
             offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
             clipper.AddClip(framePaths);
         }
-        for(const Paths& paths: supportPss)
+        for(const Paths64& paths: supportPss)
             clipper.AddClip(paths);
-        clipper.Execute(ClipType::Union, FillRule::EvenOdd, framePaths);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, framePaths);
     }
 
     { // Execute
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddOpenSubject(returnPs);
         clipper.AddClip(framePaths);
-        clipper.Execute(ClipType::Difference, FillRule::Positive, framePaths, returnPs);
+        clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, framePaths, returnPs);
         sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()));
     }
 
@@ -100,7 +100,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
     if(returnPss.size()) {
         sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
         gcp.toolPathss = toCurvess(returnPss);
-        file_          = new File{std::move(gcp)};
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }
 }

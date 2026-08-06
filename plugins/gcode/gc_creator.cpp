@@ -103,14 +103,14 @@ void Creator::reset() {
 
 Creator::~Creator() { ProgressCancel::reset(); }
 
-Pathss64 &Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool skipFrame) {
+Pathss64& Creator::groupedPaths(Grouping group, /*PType*/ int32_t offset, bool skipFrame) {
     PolyTree polyTree;
     {
         Timer t{"Union EvenOdd"};
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddSubject(closedSrcPaths);
         clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
-        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, polyTree);
     }
     groupedPss.clear();
     {
@@ -142,7 +142,7 @@ void Creator::grouping(Grouping group, PolyTree& node) {
     for(auto&& child: node) grouping(group, *child);
 }
 
-void Creator::addRawPaths(Paths64 &&rawPaths) {
+void Creator::addRawPaths(Paths64&& rawPaths) {
     qCritical() << "addRawPaths" << rawPaths.size();
 
     if(rawPaths.empty()) return;
@@ -151,7 +151,7 @@ void Creator::addRawPaths(Paths64 &&rawPaths) {
 
     const double mergDist = App::project().glue() * uScale;
 
-    Clipper clipper;
+    cl::Clipper64 clipper;
     for(size_t i{}; i < rawPaths.size(); ++i) { // find closed rawPaths
         Path64& path = rawPaths[i];
         Point64& pf = path.front();
@@ -175,7 +175,7 @@ void Creator::addRawPaths(Paths64 &&rawPaths) {
 
     Paths64 paths;
     clipper.AddClip({boundOfPaths(rawPaths, uScale)});
-    clipper.Execute(ClipType::Xor, FillRule::EvenOdd, paths);
+    clipper.Execute(cl::ClipType::Xor, cl::FillRule::EvenOdd, paths);
 
     // Gi::Debug(paths, Qt::red);
     if(paths.size() > 1)
@@ -228,7 +228,7 @@ std::pair<int, int> Creator::getProgress() {
     return {max(), current()};
 }
 
-void Creator::stacking(Paths64 &paths) {
+void Creator::stacking(Paths64& paths) {
     qDebug(__FUNCTION__);
 
     if(paths.empty())
@@ -238,10 +238,10 @@ void Creator::stacking(Paths64 &paths) {
     PolyTree polyTree;
     {
         Timer t{"stacking 1"};
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddSubject(paths);
         clipper.AddSubject({boundOfPaths(paths, uScale)});
-        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, polyTree);
         paths.clear();
     }
     sortPolyTreeByNesting(polyTree);
@@ -423,14 +423,14 @@ void Creator::sortPolyTreeByNesting(PolyTree& polynode) {
         nesting[&polynode] = nestCtr;
         switch(polynode.Count()) {
         case 0: return nestCtr--;
-        case 1: return std::max(nestCtr--, sorter(*reinterpret_cast<CL2::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
+        case 1: return std::max(nestCtr--, sorter(*reinterpret_cast<cl::PolyPath64*>(polynode.begin()->get()))); // FIXME очень грязный хак
         default:
             std::map<int, std::vector<std::unique_ptr<PolyTree>>, std::greater<>> map;
             for(auto&& node: rwPolyTree(polynode))
                 map[sorter(*node)].emplace_back(std::move(node));
             // auto i = polynode.Count();
-            auto it_ = polynode.end();                                       // std::reverse_iterator(polynode);
-            auto it = reinterpret_cast<CL2::PolyPath64List::iterator&>(it_); // FIXME очень грязный хак
+            auto it_ = polynode.end();                                      // std::reverse_iterator(polynode);
+            auto it = reinterpret_cast<cl::PolyPath64List::iterator&>(it_); // FIXME очень грязный хак
             for(auto&& [nest, nodes]: map)
                 for(auto&& node: nodes)
                     *(--it) = std::move(node);
@@ -502,7 +502,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                         // }
                     } else {
                         for(auto&& pt: srcPath) {
-                            if(auto result = Clipper2Lib::PointInPolygon(pt, frame);
+                            if(auto result = cl::PointInPolygon(pt, frame);
                                 result == PointInPolygonResult::IsOn || result == PointInPolygonResult::IsInside) {
                                 std::lock_guard guard{m};
                                 checker[std::addressof(frame)].insert(srcPath.data());
@@ -538,7 +538,7 @@ bool Creator::checkMilling(SideOfMilling side) {
             auto nonCuts = [](const Paths64& subject, const Paths64& clip) {
                 Timer t{"nonCuts"};
                 Paths64 retPaths;
-                retPaths = Clipper2Lib::Difference(subject, clip, FillRule::Positive);
+                retPaths = cl::Difference(subject, clip, cl::FillRule::Positive);
                 retPaths = InflateMiterPolygon(retPaths, k);
                 return retPaths;
             };
@@ -598,7 +598,7 @@ bool Creator::checkMilling(SideOfMilling side) {
 
             Paths64 frPaths = createFrame(srcPaths);
             CleanPaths(frPaths, uScale * 0.0001);
-            frPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
+            frPaths = cl::Difference(srcPaths, frPaths, cl::FillRule::EvenOdd);
             if(frPaths.empty()) // ????
                 break;
 
@@ -608,16 +608,16 @@ bool Creator::checkMilling(SideOfMilling side) {
 #endif
                 std::begin(frPaths), std::end(frPaths), [](auto&& frPath) {
                     // ClipperOffset offset(uScale);
-                    // offset.AddPath(frPath, JoinType::Round, EndType::Polygon);
+                    // offset.AddPath(frPath, cl::JoinType::Round, cl::EndType::Polygon);
                     // frPath = offset.Execute(100).front();
                     frPath = InflateRoundPolygon(frPath, 100).front();
                 });
 
             // ClipperOffset offset(uScale);
-            // offset.AddPaths(frPaths, JoinType::Round, EndType::Polygon);
+            // offset.AddPaths(frPaths, cl::JoinType::Round, cl::EndType::Polygon);
             // frPaths = offset.Execute(100);
             // ClipperOffset offset(uScale);
-            // offset.AddPaths(srcPaths, JoinType::Miter, EndType::Polygon);
+            // offset.AddPaths(srcPaths, cl::JoinType::Miter, cl::EndType::Polygon);
             // srcPaths = offset.Execute(-1000);
             // ReversePaths(srcPaths);
 
@@ -651,7 +651,7 @@ bool Creator::checkMilling(SideOfMilling side) {
                     std::lock_guard guard{m};
                     items.push_back(new Gi::Error{toCurves(srcPaths), Area(srcPaths) * dScale * dScale});
                 } else if(frPaths.size() > 1) { // Fits with breaks
-                    srcPaths = Clipper2Lib::Difference(srcPaths, frPaths, FillRule::EvenOdd);
+                    srcPaths = cl::Difference(srcPaths, frPaths, cl::FillRule::EvenOdd);
                     if(srcPaths.empty())
                         return; //
                     setCurrent();

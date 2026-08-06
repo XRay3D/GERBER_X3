@@ -41,13 +41,13 @@ protected:
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths& src, const /*PType*/ int32_t accDistance);
+    void addAcc(Paths64& src, const /*PType*/ int32_t accDistance);
 
-    Paths calcScanLines(const Paths& src, const Path& frame);
-    Paths calcFrames(const Paths& src, const Path& frame);
-    Path calcZigzag(const Paths& src);
+    Paths64 calcScanLines(const Paths64& src, const Path64& frame);
+    Paths64 calcFrames(const Paths64& src, const Path64& frame);
+    Path64 calcZigzag(const Paths64& src);
 
-    Paths merge(const Paths& scanLines, const Paths& frames);
+    Paths64 merge(const Paths64& scanLines, const Paths64& frames);
 
     Rect rect;
 };

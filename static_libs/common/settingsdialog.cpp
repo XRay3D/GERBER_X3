@@ -199,8 +199,8 @@ void SettingsDialog::readSettings() {
     ui.cbxFontSize->setCurrentText(fontSize);
     settings.endGroup();
 
-    /*Clipper*/
-    settings.beginGroup(u"Clipper"_s);
+    /*cl::Clipper64*/
+    settings.beginGroup(u"cl::Clipper64"_s);
     App::settings().clpMinCircleSegmentLength_
         = settings.getValue(ui.dsbxMinCircleSegmentLength, App::settings().clpMinCircleSegmentLength_);
     App::settings().clpMinCircleSegments_
@@ -257,8 +257,8 @@ void SettingsDialog::saveSettings() {
     settings.setValue(u"FontSize"_s, ui.cbxFontSize->currentText());
     settings.endGroup();
 
-    /*Clipper*/
-    settings.beginGroup(u"Clipper"_s);
+    /*cl::Clipper64*/
+    settings.beginGroup(u"cl::Clipper64"_s);
     App::settings().clpMinCircleSegmentLength_ = settings.setValue(ui.dsbxMinCircleSegmentLength);
     App::settings().clpMinCircleSegments_ = settings.setValue(ui.sbxMinCircleSegments);
     settings.endGroup();

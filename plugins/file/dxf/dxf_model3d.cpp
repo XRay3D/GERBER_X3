@@ -136,9 +136,9 @@ Paths64 Model3D::project(View v) const {
     if(projected.empty()) return {};
 
     Paths64 silhouette;
-    Clipper clipper;
+    cl::Clipper64 clipper;
     clipper.AddSubject(projected);
-    clipper.Execute(ClipType::Union, FillRule::NonZero, silhouette);
+    clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, silhouette);
 
     CleanPaths(silhouette, uScale * 0.0005);
     // Слой ждёт замкнутые контуры (как в File::createGi).

@@ -36,27 +36,27 @@ public:
     //
     // Template arguments:
     // InCT: coordinate type of the input geometries (usually integer).
-    // Point: point type, should model point concept.
+    // Point64: point type, should model point concept.
     // Segment: segment type, should model segment concept.
     //
     // Important:
     // discretization should contain both edge endpoints initially.
     template <class InCT1, class InCT2,
-        template <class> class Point,
+        template <class> class Point64,
         template <class> class Segment>
     static
         typename enable_if<
             typename gtl_and<
                 typename gtl_if<
                     typename is_point_concept<
-                        typename geometry_concept<Point<InCT1>>::type>::type>::type,
+                        typename geometry_concept<Point64<InCT1>>::type>::type>::type,
                 typename gtl_if<
                     typename is_segment_concept<
                         typename geometry_concept<Segment<InCT2>>::type>::type>::type>::type,
             void>::type
-        discretize(const Point<InCT1>& point, const Segment<InCT2>& segment,
+        discretize(const Point64<InCT1>& point, const Segment<InCT2>& segment,
             const ClipType max_dist,
-            std::vector<Point<ClipType>>* discretization) {
+            std::vector<Point64<ClipType>>* discretization) {
         // Apply the linear transformation to move start point of the segment to
         // the point with coordinates (0, 0) and the direction of the segment to
         // coincide the positive direction of the x-axis.
@@ -78,7 +78,7 @@ public:
         ClipType rot_y = segvec_x_ * point_vec_y - segvec_y_ * point_vec_x;
 
         // Save the last point.
-        Point<ClipType> last_point = (*discretization)[1];
+        Point64<ClipType> last_point = (*discretization)[1];
         discretization->pop_back();
 
         // Use stack to avoid recursion.
@@ -107,7 +107,7 @@ public:
                 point_stack.pop();
                 ClipType inter_x = (segvec_x_ * new_x - segvec_y_ * new_y) / sqr_segment_length + cast(x(low(segment)));
                 ClipType inter_y = (segvec_x_ * new_y + segvec_y_ * new_x) / sqr_segment_length + cast(y(low(segment)));
-                discretization->push_back(Point<ClipType>(inter_x, inter_y));
+                discretization->push_back(Point64<ClipType>(inter_x, inter_y));
                 cur_x = new_x;
                 cur_y = new_y;
             } else {
@@ -133,19 +133,19 @@ private:
     // transformed one and vice versa. The assumption is made that projection of
     // the point lies between the start-point and endpoint of the segment.
     template <class InCT,
-        template <class> class Point,
+        template <class> class Point64,
         template <class> class Segment>
     static
         typename enable_if<
             typename gtl_and<
                 typename gtl_if<
                     typename is_point_concept<
-                        typename geometry_concept<Point<int>>::type>::type>::type,
+                        typename geometry_concept<Point64<int>>::type>::type>::type,
                 typename gtl_if<
                     typename is_segment_concept<
                         typename geometry_concept<Segment<long>>::type>::type>::type>::type,
             ClipType>::type
-        get_point_projection(const Point<ClipType>& point, const Segment<InCT>& segment) {
+        get_point_projection(const Point64<ClipType>& point, const Segment<InCT>& segment) {
         ClipType segment_vec_x = cast(x(high(segment))) - cast(x(low(segment)));
         ClipType segment_vec_y = cast(y(high(segment))) - cast(y(low(segment)));
         ClipType point_vec_x = x(point) - cast(x(low(segment)));

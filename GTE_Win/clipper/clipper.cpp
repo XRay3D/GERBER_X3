@@ -26,7 +26,7 @@
  *******************************************************************************/
 
 /*******************************************************************************
- * This is a translation of the Delphi Clipper library and the naming style     *
+ * This is a translation of the Delphi cl::Clipper64 library and the naming style     *
  * used has retained a Delphi flavour.                                          *
  *******************************************************************************/
 
@@ -1420,7 +1420,7 @@ bool ClipperBase::LocalMinimaPending() {
 // TClipper methods ...
 //------------------------------------------------------------------------------
 
-Clipper::Clipper(int initOptions)
+cl::Clipper64::cl::Clipper64(int initOptions)
     : ClipperBase() // constructor
 {
     m_ExecuteLocked = false;
@@ -1436,23 +1436,23 @@ Clipper::Clipper(int initOptions)
 //------------------------------------------------------------------------------
 
 #ifdef use_xyz
-void Clipper::ZFillFunction(ZFillCallback zFillFunc) {
+void cl::Clipper64::ZFillFunction(ZFillCallback zFillFunc) {
     m_ZFill = zFillFunc;
 }
 //------------------------------------------------------------------------------
 #endif
 
-bool Clipper::Execute(ClipType clipType, Paths& solution, PolyFillType fillType) {
+bool cl::Clipper64::Execute(ClipType clipType, Paths& solution, PolyFillType fillType) {
     return Execute(clipType, solution, fillType, fillType);
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::Execute(ClipType clipType, PolyTree& polytree, PolyFillType fillType) {
+bool cl::Clipper64::Execute(ClipType clipType, PolyTree& polytree, PolyFillType fillType) {
     return Execute(clipType, polytree, fillType, fillType);
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::Execute(ClipType clipType, Paths& solution,
+bool cl::Clipper64::Execute(ClipType clipType, Paths& solution,
     PolyFillType subjFillType, PolyFillType clipFillType) {
     if(m_ExecuteLocked)
         return false;
@@ -1475,7 +1475,7 @@ bool Clipper::Execute(ClipType clipType, Paths& solution,
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::Execute(ClipType clipType, PolyTree& polytree,
+bool cl::Clipper64::Execute(ClipType clipType, PolyTree& polytree,
     PolyFillType subjFillType, PolyFillType clipFillType) {
     if(m_ExecuteLocked)
         return false;
@@ -1493,7 +1493,7 @@ bool Clipper::Execute(ClipType clipType, PolyTree& polytree,
 }
 //------------------------------------------------------------------------------
 
-void Clipper::FixHoleLinkage(OutRec& outrec) {
+void cl::Clipper64::FixHoleLinkage(OutRec& outrec) {
     // skip OutRecs that (a) contain outermost polygons or
     //(b) already have the correct owner/child linkage ...
     if(!outrec.FirstLeft || (outrec.IsHole != outrec.FirstLeft->IsHole && outrec.FirstLeft->Pts))
@@ -1506,7 +1506,7 @@ void Clipper::FixHoleLinkage(OutRec& outrec) {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::ExecuteInternal() {
+bool cl::Clipper64::ExecuteInternal() {
     bool succeeded = true;
     try {
         Reset();
@@ -1570,7 +1570,7 @@ bool Clipper::ExecuteInternal() {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::SetWindingCount(TEdge& edge) {
+void cl::Clipper64::SetWindingCount(TEdge& edge) {
     TEdge* e = edge.PrevInAEL;
     // find the edge of the same polytype that immediately preceeds 'edge' in AEL
     while(e && ((e->PolyTyp != edge.PolyTyp) || (e->WindDelta == 0)))
@@ -1654,7 +1654,7 @@ void Clipper::SetWindingCount(TEdge& edge) {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::IsEvenOddFillType(const TEdge& edge) const {
+bool cl::Clipper64::IsEvenOddFillType(const TEdge& edge) const {
     if(edge.PolyTyp == ptSubject)
         return m_SubjFillType == pftEvenOdd;
     else
@@ -1662,7 +1662,7 @@ bool Clipper::IsEvenOddFillType(const TEdge& edge) const {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::IsEvenOddAltFillType(const TEdge& edge) const {
+bool cl::Clipper64::IsEvenOddAltFillType(const TEdge& edge) const {
     if(edge.PolyTyp == ptSubject)
         return m_ClipFillType == pftEvenOdd;
     else
@@ -1670,7 +1670,7 @@ bool Clipper::IsEvenOddAltFillType(const TEdge& edge) const {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::IsContributing(const TEdge& edge) const {
+bool cl::Clipper64::IsContributing(const TEdge& edge) const {
     PolyFillType pft, pft2;
     if(edge.PolyTyp == ptSubject) {
         pft = m_SubjFillType;
@@ -1748,7 +1748,7 @@ bool Clipper::IsContributing(const TEdge& edge) const {
 }
 //------------------------------------------------------------------------------
 
-OutPt* Clipper::AddLocalMinPoly(TEdge* e1, TEdge* e2, const IntPoint& Pt) {
+OutPt* cl::Clipper64::AddLocalMinPoly(TEdge* e1, TEdge* e2, const IntPoint& Pt) {
     OutPt* result;
     TEdge *e, *prevE;
     if(IsHorizontal(*e2) || (e1->Dx > e2->Dx)) {
@@ -1785,7 +1785,7 @@ OutPt* Clipper::AddLocalMinPoly(TEdge* e1, TEdge* e2, const IntPoint& Pt) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::AddLocalMaxPoly(TEdge* e1, TEdge* e2, const IntPoint& Pt) {
+void cl::Clipper64::AddLocalMaxPoly(TEdge* e1, TEdge* e2, const IntPoint& Pt) {
     AddOutPt(e1, Pt);
     if(e2->WindDelta == 0)
         AddOutPt(e2, Pt);
@@ -1799,7 +1799,7 @@ void Clipper::AddLocalMaxPoly(TEdge* e1, TEdge* e2, const IntPoint& Pt) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::AddEdgeToSEL(TEdge* edge) {
+void cl::Clipper64::AddEdgeToSEL(TEdge* edge) {
     // SEL pointers in PEdge are reused to build a list of horizontal edges.
     // However, we don't need to worry about order with horizontal edge processing.
     if(!m_SortedEdges) {
@@ -1815,7 +1815,7 @@ void Clipper::AddEdgeToSEL(TEdge* edge) {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::PopEdgeFromSEL(TEdge*& edge) {
+bool cl::Clipper64::PopEdgeFromSEL(TEdge*& edge) {
     if(!m_SortedEdges)
         return false;
     edge = m_SortedEdges;
@@ -1824,7 +1824,7 @@ bool Clipper::PopEdgeFromSEL(TEdge*& edge) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::CopyAELToSEL() {
+void cl::Clipper64::CopyAELToSEL() {
     TEdge* e = m_ActiveEdges;
     m_SortedEdges = e;
     while(e) {
@@ -1835,7 +1835,7 @@ void Clipper::CopyAELToSEL() {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::AddJoin(OutPt* op1, OutPt* op2, const IntPoint OffPt) {
+void cl::Clipper64::AddJoin(OutPt* op1, OutPt* op2, const IntPoint OffPt) {
     Join* j = new Join;
     j->OutPt1 = op1;
     j->OutPt2 = op2;
@@ -1844,21 +1844,21 @@ void Clipper::AddJoin(OutPt* op1, OutPt* op2, const IntPoint OffPt) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::ClearJoins() {
+void cl::Clipper64::ClearJoins() {
     for(JoinList::size_type i{}; i < m_Joins.size(); i++)
         delete m_Joins[i];
     m_Joins.resize(0);
 }
 //------------------------------------------------------------------------------
 
-void Clipper::ClearGhostJoins() {
+void cl::Clipper64::ClearGhostJoins() {
     for(JoinList::size_type i{}; i < m_GhostJoins.size(); i++)
         delete m_GhostJoins[i];
     m_GhostJoins.resize(0);
 }
 //------------------------------------------------------------------------------
 
-void Clipper::AddGhostJoin(OutPt* op, const IntPoint OffPt) {
+void cl::Clipper64::AddGhostJoin(OutPt* op, const IntPoint OffPt) {
     Join* j = new Join;
     j->OutPt1 = op;
     j->OutPt2 = 0;
@@ -1867,7 +1867,7 @@ void Clipper::AddGhostJoin(OutPt* op, const IntPoint OffPt) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::InsertLocalMinimaIntoAEL(const cInt botY) {
+void cl::Clipper64::InsertLocalMinimaIntoAEL(const cInt botY) {
     const LocalMinimum* lm;
     while(PopLocalMinima(botY, lm)) {
         TEdge* lb = lm->LeftBound;
@@ -1946,7 +1946,7 @@ void Clipper::InsertLocalMinimaIntoAEL(const cInt botY) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::DeleteFromSEL(TEdge* e) {
+void cl::Clipper64::DeleteFromSEL(TEdge* e) {
     TEdge* SelPrev = e->PrevInSEL;
     TEdge* SelNext = e->NextInSEL;
     if(!SelPrev && !SelNext && (e != m_SortedEdges))
@@ -1963,7 +1963,7 @@ void Clipper::DeleteFromSEL(TEdge* e) {
 //------------------------------------------------------------------------------
 
 #ifdef use_xyz
-void Clipper::SetZ(IntPoint& pt, TEdge& e1, TEdge& e2) {
+void cl::Clipper64::SetZ(IntPoint& pt, TEdge& e1, TEdge& e2) {
     if(pt.Z != 0 || !m_ZFill)
         return;
     else if(pt == e1.Bot)
@@ -1980,7 +1980,7 @@ void Clipper::SetZ(IntPoint& pt, TEdge& e1, TEdge& e2) {
 //------------------------------------------------------------------------------
 #endif
 
-void Clipper::IntersectEdges(TEdge* e1, TEdge* e2, IntPoint& Pt) {
+void cl::Clipper64::IntersectEdges(TEdge* e1, TEdge* e2, IntPoint& Pt) {
     bool e1Contributing = (e1->OutIdx >= 0);
     bool e2Contributing = (e2->OutIdx >= 0);
 
@@ -2142,7 +2142,7 @@ void Clipper::IntersectEdges(TEdge* e1, TEdge* e2, IntPoint& Pt) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::SetHoleState(TEdge* e, OutRec* outrec) {
+void cl::Clipper64::SetHoleState(TEdge* e, OutRec* outrec) {
     TEdge* e2 = e->PrevInAEL;
     TEdge* eTmp = 0;
     while(e2) {
@@ -2201,7 +2201,7 @@ bool OutRec1RightOfOutRec2(OutRec* outRec1, OutRec* outRec2) {
 }
 //------------------------------------------------------------------------------
 
-OutRec* Clipper::GetOutRec(int Idx) {
+OutRec* cl::Clipper64::GetOutRec(int Idx) {
     OutRec* outrec = m_PolyOuts[Idx];
     while(outrec != m_PolyOuts[outrec->Idx])
         outrec = m_PolyOuts[outrec->Idx];
@@ -2209,7 +2209,7 @@ OutRec* Clipper::GetOutRec(int Idx) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::AppendPolygon(TEdge* e1, TEdge* e2) {
+void cl::Clipper64::AppendPolygon(TEdge* e1, TEdge* e2) {
     // get the start and ends of both output polygons ...
     OutRec* outRec1 = m_PolyOuts[e1->OutIdx];
     OutRec* outRec2 = m_PolyOuts[e2->OutIdx];
@@ -2293,7 +2293,7 @@ void Clipper::AppendPolygon(TEdge* e1, TEdge* e2) {
 }
 //------------------------------------------------------------------------------
 
-OutPt* Clipper::AddOutPt(TEdge* e, const IntPoint& pt) {
+OutPt* cl::Clipper64::AddOutPt(TEdge* e, const IntPoint& pt) {
     if(e->OutIdx < 0) {
         OutRec* outRec = CreateOutRec();
         outRec->IsOpen = (e->WindDelta == 0);
@@ -2332,7 +2332,7 @@ OutPt* Clipper::AddOutPt(TEdge* e, const IntPoint& pt) {
 }
 //------------------------------------------------------------------------------
 
-OutPt* Clipper::GetLastOutPt(TEdge* e) {
+OutPt* cl::Clipper64::GetLastOutPt(TEdge* e) {
     OutRec* outRec = m_PolyOuts[e->OutIdx];
     if(e->Side == esLeft)
         return outRec->Pts;
@@ -2341,7 +2341,7 @@ OutPt* Clipper::GetLastOutPt(TEdge* e) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::ProcessHorizontals() {
+void cl::Clipper64::ProcessHorizontals() {
     TEdge* horzEdge;
     while(PopEdgeFromSEL(horzEdge))
         ProcessHorizontal(horzEdge);
@@ -2382,7 +2382,7 @@ TEdge* GetMaximaPairEx(TEdge* e) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::SwapPositionsInSEL(TEdge* Edge1, TEdge* Edge2) {
+void cl::Clipper64::SwapPositionsInSEL(TEdge* Edge1, TEdge* Edge2) {
     if(!(Edge1->NextInSEL) && !(Edge1->PrevInSEL))
         return;
     if(!(Edge2->NextInSEL) && !(Edge2->PrevInSEL))
@@ -2462,7 +2462,7 @@ void GetHorzDirection(TEdge& HorzEdge, Direction& Dir, cInt& Left, cInt& Right) 
  * the AEL. These 'promoted' edges may in turn intersect [%] with other HEs.    *
  *******************************************************************************/
 
-void Clipper::ProcessHorizontal(TEdge* horzEdge) {
+void cl::Clipper64::ProcessHorizontal(TEdge* horzEdge) {
     Direction dir;
     cInt horzLeft, horzRight;
     bool IsOpen = (horzEdge->WindDelta == 0);
@@ -2622,7 +2622,7 @@ void Clipper::ProcessHorizontal(TEdge* horzEdge) {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::ProcessIntersections(const cInt topY) {
+bool cl::Clipper64::ProcessIntersections(const cInt topY) {
     if(!m_ActiveEdges)
         return true;
     try {
@@ -2644,14 +2644,14 @@ bool Clipper::ProcessIntersections(const cInt topY) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::DisposeIntersectNodes() {
+void cl::Clipper64::DisposeIntersectNodes() {
     for(int i{}; i < m_IntersectList.size(); ++i)
         delete m_IntersectList[i];
     m_IntersectList.clear();
 }
 //------------------------------------------------------------------------------
 
-void Clipper::BuildIntersectList(const cInt topY) {
+void cl::Clipper64::BuildIntersectList(const cInt topY) {
     if(!m_ActiveEdges)
         return;
 
@@ -2697,7 +2697,7 @@ void Clipper::BuildIntersectList(const cInt topY) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::ProcessIntersectList() {
+void cl::Clipper64::ProcessIntersectList() {
     for(int i{}; i < m_IntersectList.size(); ++i) {
         IntersectNode* iNode = m_IntersectList[i];
         {
@@ -2720,7 +2720,7 @@ inline bool EdgesAdjacent(const IntersectNode& inode) {
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::FixupIntersectionOrder() {
+bool cl::Clipper64::FixupIntersectionOrder() {
     // pre-condition: intersections are sorted Bottom-most first.
     // Now it's crucial that intersections are made only between adjacent edges,
     // so to ensure this the order of intersections may need adjusting ...
@@ -2742,7 +2742,7 @@ bool Clipper::FixupIntersectionOrder() {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::DoMaxima(TEdge* e) {
+void cl::Clipper64::DoMaxima(TEdge* e) {
     TEdge* eMaxPair = GetMaximaPairEx(e);
     if(!eMaxPair) {
         if(e->OutIdx >= 0)
@@ -2787,7 +2787,7 @@ void Clipper::DoMaxima(TEdge* e) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::ProcessEdgesAtTopOfScanbeam(const cInt topY) {
+void cl::Clipper64::ProcessEdgesAtTopOfScanbeam(const cInt topY) {
     TEdge* e = m_ActiveEdges;
     while(e) {
         // 1. process maxima, treating them as if they're 'bent' horizontal edges,
@@ -2872,7 +2872,7 @@ void Clipper::ProcessEdgesAtTopOfScanbeam(const cInt topY) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::FixupOutPolyline(OutRec& outrec) {
+void cl::Clipper64::FixupOutPolyline(OutRec& outrec) {
     OutPt* pp = outrec.Pts;
     OutPt* lastPP = pp->Prev;
     while(pp != lastPP) {
@@ -2896,7 +2896,7 @@ void Clipper::FixupOutPolyline(OutRec& outrec) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::FixupOutPolygon(OutRec& outrec) {
+void cl::Clipper64::FixupOutPolygon(OutRec& outrec) {
     // FixupOutPolygon() - removes duplicate points and simplifies consecutive
     // parallel edges by removing the middle vertex.
     OutPt* lastOK = 0;
@@ -2944,7 +2944,7 @@ int PointCount(OutPt* Pts) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::BuildResult(Paths& polys) {
+void cl::Clipper64::BuildResult(Paths& polys) {
     polys.reserve(m_PolyOuts.size());
     for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         if(!m_PolyOuts[i]->Pts)
@@ -2964,7 +2964,7 @@ void Clipper::BuildResult(Paths& polys) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::BuildResult2(PolyTree& polytree) {
+void cl::Clipper64::BuildResult2(PolyTree& polytree) {
     polytree.Clear();
     polytree.AllNodes.reserve(m_PolyOuts.size());
     // add each output polygon/contour to polytree ...
@@ -3058,7 +3058,7 @@ inline void UpdateOutPtIdxs(OutRec& outrec) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::InsertEdgeIntoAEL(TEdge* edge, TEdge* startEdge) {
+void cl::Clipper64::InsertEdgeIntoAEL(TEdge* edge, TEdge* startEdge) {
     if(!m_ActiveEdges) {
         edge->PrevInAEL = 0;
         edge->NextInAEL = 0;
@@ -3176,7 +3176,7 @@ bool JoinHorz(OutPt* op1, OutPt* op1b, OutPt* op2, OutPt* op2b,
 }
 //------------------------------------------------------------------------------
 
-bool Clipper::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2) {
+bool cl::Clipper64::JoinPoints(Join* j, OutRec* outRec1, OutRec* outRec2) {
     OutPt *op1 = j->OutPt1, *op1b;
     OutPt *op2 = j->OutPt2, *op2b;
 
@@ -3334,7 +3334,7 @@ static OutRec* ParseFirstLeft(OutRec* FirstLeft) {
 }
 //------------------------------------------------------------------------------
 
-void Clipper::FixupFirstLefts1(OutRec* OldOutRec, OutRec* NewOutRec) {
+void cl::Clipper64::FixupFirstLefts1(OutRec* OldOutRec, OutRec* NewOutRec) {
     // tests if NewOutRec contains the polygon before reassigning FirstLeft
     for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         OutRec* outRec = m_PolyOuts[i];
@@ -3347,7 +3347,7 @@ void Clipper::FixupFirstLefts1(OutRec* OldOutRec, OutRec* NewOutRec) {
 }
 //----------------------------------------------------------------------
 
-void Clipper::FixupFirstLefts2(OutRec* InnerOutRec, OutRec* OuterOutRec) {
+void cl::Clipper64::FixupFirstLefts2(OutRec* InnerOutRec, OutRec* OuterOutRec) {
     // A polygon has split into two such that one is now the inner of the other.
     // It's possible that these polygons now wrap around other polygons, so check
     // every polygon that's also contained by OuterOutRec's FirstLeft container
@@ -3370,7 +3370,7 @@ void Clipper::FixupFirstLefts2(OutRec* InnerOutRec, OutRec* OuterOutRec) {
     }
 }
 //----------------------------------------------------------------------
-void Clipper::FixupFirstLefts3(OutRec* OldOutRec, OutRec* NewOutRec) {
+void cl::Clipper64::FixupFirstLefts3(OutRec* OldOutRec, OutRec* NewOutRec) {
     // reassigns FirstLeft WITHOUT testing if NewOutRec contains the polygon
     for(PolyOutList::size_type i{}; i < m_PolyOuts.size(); ++i) {
         OutRec* outRec = m_PolyOuts[i];
@@ -3381,7 +3381,7 @@ void Clipper::FixupFirstLefts3(OutRec* OldOutRec, OutRec* NewOutRec) {
 }
 //----------------------------------------------------------------------
 
-void Clipper::JoinCommonEdges() {
+void cl::Clipper64::JoinCommonEdges() {
     for(JoinList::size_type i{}; i < m_Joins.size(); i++) {
         Join* join = m_Joins[i];
 
@@ -3580,7 +3580,7 @@ void ClipperOffset::Execute(Paths& solution, double delta) {
     DoOffset(delta);
 
     // now clean up 'corners' ...
-    Clipper clpr;
+    cl::Clipper64 clpr;
     clpr.AddPaths(m_destPolys, ptSubject, true);
     if(delta > 0) {
         clpr.Execute(ctUnion, solution, pftPositive, pftPositive);
@@ -3607,7 +3607,7 @@ void ClipperOffset::Execute(PolyTree& solution, double delta) {
     DoOffset(delta);
 
     // now clean up 'corners' ...
-    Clipper clpr;
+    cl::Clipper64 clpr;
     clpr.AddPaths(m_destPolys, ptSubject, true);
     if(delta > 0) {
         clpr.Execute(ctUnion, solution, pftPositive, pftPositive);
@@ -3901,7 +3901,7 @@ void ClipperOffset::DoRound(int j, int k) {
 // Miscellaneous public functions
 //------------------------------------------------------------------------------
 
-void Clipper::DoSimplePolygons() {
+void cl::Clipper64::DoSimplePolygons() {
     PolyOutList::size_type i{};
     while(i < m_PolyOuts.size()) {
         OutRec* outrec = m_PolyOuts[i++];
@@ -3970,7 +3970,7 @@ Paths& ReversePaths(Paths& p) {
 //------------------------------------------------------------------------------
 
 void SimplifyPolygon(const Path& in_poly, Paths& out_polys, PolyFillType fillType) {
-    Clipper c;
+    cl::Clipper64 c;
     c.StrictlySimple(true);
     c.AddPath(in_poly, ptSubject, true);
     c.Execute(ctUnion, out_polys, fillType, fillType);
@@ -3978,7 +3978,7 @@ void SimplifyPolygon(const Path& in_poly, Paths& out_polys, PolyFillType fillTyp
 //------------------------------------------------------------------------------
 
 void SimplifyPolygons(const Paths& in_polys, Paths& out_polys, PolyFillType fillType) {
-    Clipper c;
+    cl::Clipper64 c;
     c.StrictlySimple(true);
     c.AddPaths(in_polys, ptSubject, true);
     c.Execute(ctUnion, out_polys, fillType, fillType);
@@ -4160,7 +4160,7 @@ void Minkowski(const Path& poly, const Path& path, Paths& solution, bool isSum, 
 
 void MinkowskiSum(const Path& pattern, const Path& path, Paths& solution, bool pathIsClosed) {
     Minkowski(pattern, path, solution, true, pathIsClosed);
-    Clipper c;
+    cl::Clipper64 c;
     c.AddPaths(solution, ptSubject, true);
     c.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }
@@ -4175,7 +4175,7 @@ void TranslatePath(const Path& input, Path& output, const IntPoint delta) {
 //------------------------------------------------------------------------------
 
 void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool pathIsClosed) {
-    Clipper c;
+    cl::Clipper64 c;
     for(int i{}; i < paths.size(); ++i) {
         Paths tmp;
         Minkowski(pattern, paths[i], tmp, true, pathIsClosed);
@@ -4192,7 +4192,7 @@ void MinkowskiSum(const Path& pattern, const Paths& paths, Paths& solution, bool
 
 void MinkowskiDiff(const Path& poly1, const Path& poly2, Paths& solution) {
     Minkowski(poly1, poly2, solution, false, true);
-    Clipper c;
+    cl::Clipper64 c;
     c.AddPaths(solution, ptSubject, true);
     c.Execute(ctUnion, solution, pftNonZero, pftNonZero);
 }

@@ -40,7 +40,7 @@ class Node;
 
 class Node final /*: public NodeI*/ {
 public:
-    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const Point& pos, AbstractThermPrGi* item, Model* model);
+    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, AbstractThermPrGi* item, Model* model);
     explicit Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model);
     explicit Node(Model* model);
 
@@ -67,7 +67,7 @@ public:
     int count() const override;
     ThParam getParam() const;
 
-    Point pos() const;
+    Point64 pos() const;
     AbstractThermPrGi* item() const;
     bool loadFile(QDataStream& stream) const;
     void disable() override;
@@ -85,7 +85,7 @@ private:
     const bool container{};
     const QIcon icon;
     const QString name;
-    const Point pos_;
+    const Point64 pos_;
 
     ThParam par;
 

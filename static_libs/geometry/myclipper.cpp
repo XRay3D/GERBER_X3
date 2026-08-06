@@ -11,9 +11,9 @@
 // module;
 
 #include "myclipper.h"
-#include "curve.h"
 #include "app.h"
 #include "cancelation.h"
+#include "curve.h"
 #include "gi_dbg.h"
 #include "graphicsview.h"
 
@@ -52,10 +52,10 @@ QIcon drawIcon(const Paths64& paths, QColor color) {
 }
 
 QIcon drawIcon(const QPainterPath& pPath, QColor color, bool stroke) {
-    auto rect    = pPath.boundingRect();
+    auto rect = pPath.boundingRect();
     double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
-    double ky    = rect.bottom() * scale;
-    double kx    = rect.left() * scale;
+    double ky = rect.bottom() * scale;
+    double kx = rect.left() * scale;
     QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;
@@ -154,8 +154,8 @@ std::mutex& centerRegistryMutex() {
 
 int32_t RegisterCenter(const QPointF& center, CenterKind kind) {
     std::lock_guard l{centerRegistryMutex()};
-    auto& dedup       = centerDedup();
-    const auto key    = std::pair{center.x(), center.y()};
+    auto& dedup = centerDedup();
+    const auto key = std::pair{center.x(), center.y()};
     if(auto it = dedup.find(key); it != dedup.end()) return it->second;
 
     auto& reg = centerRegistry();
@@ -192,7 +192,7 @@ static void SetCenterAt(int32_t index, const QPointF& center) {
         it != dedup.end() && it->second == index)
         dedup.erase(it);
 
-    entry.point                                       = center;
+    entry.point = center;
     dedup[std::pair{center.x(), center.y()}] = index;
 }
 
@@ -214,7 +214,7 @@ void SetCSelf(Point64& dst) { dst.z = 0; }
 
 void SetCForce(Point64& dst, const Point64& center) {
     CIndices idx = decodeIndices(dst);
-    idx.next     = RegisterCenter(~center);
+    idx.next = RegisterCenter(~center);
     encodeIndices(dst, idx);
 }
 
@@ -225,7 +225,7 @@ void SetC(Point64& dst, const Point64& center) {
 Path64 CirclePath(double diametr, const Point64& center) {
     if(qFuzzyIsNull(diametr)) return {};
     const double radius = diametr * 0.5;
-    const int intSteps  = App::settings().clpCircleSegments(radius * dScale);
+    const int intSteps = App::settings().clpCircleSegments(radius * dScale);
     Path64 polygon(intSteps);
     for(int i{}; auto&& pt: polygon) {
         pt = Point64{
@@ -241,7 +241,7 @@ Path64 CirclePath(double diametr, const Point64& center) {
 }
 
 Path64 RectanglePath(double width, double height, const Point64& center) {
-    const double halfWidth  = width * 0.5;
+    const double halfWidth = width * 0.5;
     const double halfHeight = height * 0.5;
     Path64 polygon{
         {-halfWidth + center.x, +halfHeight + center.y},
@@ -312,7 +312,7 @@ void mergeSegments(Paths64& paths, double glue) {
             for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j) continue;
                 if(i >= paths.size()) break;
-                auto& pj  = paths[j];
+                auto& pj = paths[j];
                 Point64 pib = pi.back();
                 Point64 pjf = pj.front();
                 if(pib == pjf) {
@@ -431,7 +431,7 @@ void mergePaths(Paths64& paths, const double dist) {
 
 Paths64& normalize(Paths64& paths) {
     PolyTree polyTree;
-    Clipper clipper;
+    cl::Clipper64 clipper;
     clipper.AddSubject(paths); //    clipper.AddPaths(paths, PathType::Subject, true);
     Rect r(GetBounds(paths));
     Path64 outer = {
@@ -442,7 +442,7 @@ Paths64& normalize(Paths64& paths) {
     };
     // ReversePath(outer);
     clipper.AddSubject({outer}); //      clipper.AddPath(outer, PathType::Subject, true);
-    clipper.Execute(ClipType::Difference, FillRule::EvenOdd, paths);
+    clipper.Execute(cl::ClipType::Difference, cl::FillRule::EvenOdd, paths);
     paths.erase(paths.begin());
     ReversePaths(paths);
     //    /****************************/
@@ -507,7 +507,7 @@ void reductionOfDistance(Path64& path, Point64 point) {
         for(size_t i = counter, end = path.size(); i < end; ++i) {
             double length2 = distTo(point, path[i]);
             if(length > length2) {
-                length   = length2;
+                length = length2;
                 selector = i;
             }
         }
@@ -536,19 +536,19 @@ void reductionOfDistance(Path64& path, Point64 point) {
     }
 }
 
-std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree) {
+std::span<std::unique_ptr<cl::PolyPath64>> rwPolyTree(PolyTree& polyTree) {
     auto itB = polyTree.begin();
     auto itE = polyTree.end();
     return {
-        reinterpret_cast<CL2::PolyPath64List::iterator&>(itB), // FIXME очень грязный хак
-        reinterpret_cast<CL2::PolyPath64List::iterator&>(itE), // FIXME очень грязный хак
+        reinterpret_cast<cl::PolyPath64List::iterator&>(itB), // FIXME очень грязный хак
+        reinterpret_cast<cl::PolyPath64List::iterator&>(itE), // FIXME очень грязный хак
     };
 }
 
 Path64 arc(const Point64& center, double radius, double start, double stop, int interpolation) {
     enum { // interpolation
-        Linear                   = 1,
-        ClockwiseCircular        = 2,
+        Linear = 1,
+        ClockwiseCircular = 2,
         CounterClockwiseCircular = 3
     };
     const double da_sign[4]{0, 0, -1.0, +1.0};
@@ -561,10 +561,10 @@ Path64 arc(const Point64& center, double radius, double start, double stop, int 
     else if(interpolation == CounterClockwiseCircular && stop <= start)
         stop += 2.0 * pi;
 
-    double angle       = std::abs(stop - start);
-    double steps       = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
+    double angle = std::abs(stop - start);
+    double steps = std::max(static_cast<int>(ceil(angle / (2.0 * pi) * intSteps)), 2);
     double delta_angle = da_sign[interpolation] * angle * 1.0 / steps;
-    const int32_t idx  = RegisterCenter(~center);
+    const int32_t idx = RegisterCenter(~center);
     for(int i{1}; i <= steps; i++) { // 1 skip first - back of paths item set center it self
         double theta = start + delta_angle * i;
         SetCIndices(points.emplace_back(
@@ -578,8 +578,8 @@ Path64 arc(const Point64& center, double radius, double start, double stop, int 
 
 Path64 arc(Point64 p1, Point64 p2, Point64 center, int interpolation) {
     double radius = sqrt(pow((center.x - p1.x), 2) + pow((center.y - p1.y), 2));
-    double start  = atan2(p1.y - center.y, p1.x - center.x);
-    double stop   = atan2(p2.y - center.y, p2.x - center.x);
+    double start = atan2(p1.y - center.y, p1.x - center.x);
+    double stop = atan2(p2.y - center.y, p2.x - center.x);
     return arc(center, radius, start, stop, interpolation);
 }
 
@@ -687,10 +687,10 @@ Pathss64 stacking(Paths64& paths) {
     PolyTree polyTree;
     {
         Timer t{"stacking 1"};
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddSubject(paths);
         clipper.AddSubject({boundOfPaths(paths, uScale)});
-        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, polyTree);
         paths.clear();
     }
     sortPolyTreeByNesting(polyTree);
@@ -795,10 +795,10 @@ Pathss64 stacking(Paths64& paths) {
 //     PolyTree polyTree;
 //     {
 //         Timer t{"Union EvenOdd"};
-//         Clipper clipper;
+//         cl::Clipper64 clipper;
 //         clipper.AddSubject(closedSrcPaths);
 //         clipper.AddSubject({boundOfPaths(closedSrcPaths, offset)});
-//         clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+//         clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, polyTree);
 //     }
 //     groupedPss.clear();
 //     {
@@ -869,7 +869,7 @@ Pathss64& sortBeginEnd(Pathss64& src, Point64 startPt) {
         bool reverse{};
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
             const double lenFirst = distTo(startPt, src[secondIdx].front().front());
-            const double lenLast  = distTo(startPt, src[secondIdx].back().back());
+            const double lenLast = distTo(startPt, src[secondIdx].back().back());
             if(lenFirst < lenLast) {
                 if(destLen > lenFirst) {
                     destLen = lenFirst;
@@ -904,7 +904,7 @@ Paths64& sortBeginEnd(Paths64& src, Point64 startPt) {
         bool reverse{};
         for(size_t secondIdx = firstIdx; secondIdx < src.size(); ++secondIdx) {
             const double lenFirst = distTo(startPt, src[secondIdx].front());
-            const double lenLast  = distTo(startPt, src[secondIdx].back());
+            const double lenLast = distTo(startPt, src[secondIdx].back());
             if(lenFirst < lenLast) {
                 if(destLen > lenFirst) {
                     destLen = lenFirst;
@@ -987,7 +987,7 @@ void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge)
     // radius = GetRadius(source, target, bulge);
 
     start_angle = qRadiansToDegrees(start_angle);
-    end_angle   = qRadiansToDegrees(end_angle);
+    end_angle = qRadiansToDegrees(end_angle);
 
     QLineF ls{center, source};
     // const double r = ls.length();
@@ -1091,13 +1091,13 @@ static void UpdateCenter(
 // до вызова offset.Execute(), принудительно проставить корректный индекс - иначе
 // он останется "старым" от исходной топологии и либо потеряется, либо (что хуже)
 // ложно совпадёт с соседями и дуга не восстановится в toCurve().
-static void PrepareCornersForOffset(Paths64& paths, JoinType jt) {
+static void PrepareCornersForOffset(Paths64& paths, cl::JoinType jt) {
     for(auto& path: paths) {
         for(auto& pt: path) {
             const int32_t prevIdx = GetCPrevIndex(pt), nextIdx = GetCNextIndex(pt);
             if(prevIdx && prevIdx == nextIdx) continue; // середина дуги - не трогаем
 
-            if(jt == JoinType::Round) {
+            if(jt == cl::JoinType::Round) {
                 // угол будет скруглён веером новых точек вокруг ИСХОДНОЙ вершины -
                 // регистрируем её один раз как центр новой дуги, все точки веера
                 // унаследуют этот индекс через копирование z
@@ -1112,13 +1112,13 @@ static void PrepareCornersForOffset(Paths64& paths, JoinType jt) {
     }
 }
 
-Paths64 InflatePathsZ(const Paths64& paths, double delta, JoinType jt, EndType et,
+Paths64 InflatePathsZ(const Paths64& paths, double delta, cl::JoinType jt, cl::EndType et,
     double miterLimit, double arcTolerance) {
     if(delta == 0.0) return paths;
     roundJoinCache.clear();
     Paths64 input = paths;
     PrepareCornersForOffset(input, jt);
-    CL2::ClipperOffset offset{miterLimit, arcTolerance};
+    cl::ClipperOffset offset{miterLimit, arcTolerance};
     offset.SetZCallback(UpdateCenter);
     offset.AddPaths(input, jt, et);
     Paths64 solution;
@@ -1126,8 +1126,8 @@ Paths64 InflatePathsZ(const Paths64& paths, double delta, JoinType jt, EndType e
     return solution;
 }
 
-Paths64 Inflate(const Paths64& paths, double delta,
-    JoinType jt, EndType et,
+Paths64 Inflate64(const Paths64& paths, double delta,
+    cl::JoinType jt, cl::EndType et,
     double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
     return InflatePathsZ(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
@@ -1136,13 +1136,13 @@ Paths64 Inflate(const Paths64& paths, double delta,
 Paths64 InflateRoundPolygon(const Paths64& paths,
     double delta, double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
-    return InflatePathsZ(paths, delta * 0.5, JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
+    return InflatePathsZ(paths, delta * 0.5, cl::JoinType::Round, cl::EndType::Polygon, miterLimit, arcTolerance);
 }
 
 Paths64 InflateMiterPolygon(const Paths64& paths,
     double delta, double miterLimit, double arcTolerance) {
     if(!arcTolerance) arcTolerance = delta * 1e-3;
-    return InflatePathsZ(paths, delta * 0.5, JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
+    return InflatePathsZ(paths, delta * 0.5, cl::JoinType::Miter, cl::EndType::Polygon, miterLimit, arcTolerance);
 }
 
 QDebug operator<<(QDebug d, const Point64& p) {
@@ -1152,7 +1152,7 @@ QDebug operator<<(QDebug d, const Point64& p) {
     return d << "Point64(" << p.x << ", " << p.y << ", " << c.x << ", " << c.y << ')';
 }
 
-bool pointOnPolygon(const QLineF &l2, const Curve &curve, QPointF *ret) {
+bool pointOnPolygon(const QLineF& l2, const Curve& curve, QPointF* ret) {
     const size_t cnt = curve.size();
     qFatal();
     // if(cnt < 2) FIXME

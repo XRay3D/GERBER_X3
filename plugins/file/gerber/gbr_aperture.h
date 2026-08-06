@@ -50,8 +50,8 @@ public:
     virtual QString name() const = 0;
     virtual bool fit(double toolDiam) const = 0;
 
-    Path drawDrill(const State& state);
-    Paths draw(const State& state, bool notApBlock = {});
+    Path64 drawDrill(const State& state);
+    Paths64 draw(const State& state, bool notApBlock = {});
 
     bool flashed() const noexcept { return isFlashed_; }
     bool used() const noexcept { return isUsed_; }
@@ -68,7 +68,7 @@ protected:
     double size_{};
     double minSize_{};
     const File* file_;
-    Paths paths_;
+    Paths64 paths_;
     bool isFlashed_{};
     bool isUsed_{};
 
@@ -203,7 +203,7 @@ private:
     QStringList modifiers_;
     VarMap coefficients_;
 
-    double Angle(const Point& pt1, const Point& pt2) {
+    double Angle(const Point64& pt1, const Point64& pt2) {
         const double dx = pt2.x - pt1.x;
         const double dy = pt2.y - pt1.y;
         const double theta = atan2(-dy, dx) * 360.0 / (2 * pi);
@@ -214,11 +214,11 @@ private:
             return theta_normalized;
     }
 
-    Path drawCenterLine(const mvector<double>& mod);
-    Path drawCircle(const mvector<double>& mod);
-    Path drawOutlineCustomPolygon(const mvector<double>& mod);
-    Path drawOutlineRegularPolygon(const mvector<double>& mod);
-    Path drawVectorLine(const mvector<double>& mod);
+    Path64 drawCenterLine(const mvector<double>& mod);
+    Path64 drawCircle(const mvector<double>& mod);
+    Path64 drawOutlineCustomPolygon(const mvector<double>& mod);
+    Path64 drawOutlineRegularPolygon(const mvector<double>& mod);
+    Path64 drawVectorLine(const mvector<double>& mod);
     void drawMoire(const mvector<double>& mod);
     void drawThermal(const mvector<double>& mod);
 };
