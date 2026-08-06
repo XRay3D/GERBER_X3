@@ -14,6 +14,7 @@
 #include "abstract_file.h"
 #include "dxf_block.h"
 #include "dxf_codedata.h"
+#include "dxf_model3d.h"
 #include "dxf_types.h"
 #include "gi_group.h"
 
@@ -55,8 +56,15 @@ public:
     void setItemType(int type) override;
     int itemsType() const override;
 
+    Model3D& mesh() { return mesh_; }
+    // Создаёт по слою на каждый включённый в настройках вид, кладя туда
+    // силуэт 3D-модели с этой стороны. Вызывается один раз после разбора файла;
+    // при загрузке проекта слои приходят уже готовыми из потока.
+    void createProjectionLayers();
+
 private:
     Sections sections_;
+    Model3D mesh_;
     Blocks blocks_;
     HeaderData header_;
     Layers layers_;
