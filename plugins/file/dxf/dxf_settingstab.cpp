@@ -63,6 +63,32 @@ SettingsTab::SettingsTab(QWidget* parent)
     formLayout->setWidget(3, QFormLayout::FieldRole, chbxOverrideFonts);
 
     verticalLayout->addWidget(groupBox);
+
+    // 3D-проекции: какие стороны 3D-модели превращать в слои.
+    auto groupBoxViews = new QGroupBox{this};
+    groupBoxViews->setObjectName(u"groupBoxViews"_s);
+    groupBoxViews->setTitle(QApplication::translate("SettingsDialog", "3D projections", nullptr));
+    groupBoxViews->setToolTip(QApplication::translate("SettingsDialog",
+        "For files with 3D geometry (polyface/polygon mesh, 3DFACE) a layer is created\n"
+        "per checked side, containing the silhouette of the model seen from that side.",
+        nullptr));
+
+    auto viewsLayout = new QFormLayout{groupBoxViews};
+    viewsLayout->setObjectName(u"viewsLayout"_s);
+    viewsLayout->setLabelAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+    viewsLayout->setContentsMargins(6, 6, 6, 6);
+
+    static constexpr const char* viewLabel[]{"Top:", "Bottom:", "Front:", "Back:", "Right:", "Left:"};
+    for(int i{}; i < int(View::Count); ++i) {
+        auto label = new QLabel{QApplication::translate("SettingsDialog", viewLabel[i], nullptr), groupBoxViews};
+        viewsLayout->setWidget(i, QFormLayout::LabelRole, label);
+        chbxView[i] = new QCheckBox{groupBoxViews};
+        chbxView[i]->setObjectName(u"chbxView%1"_s.arg(i));
+        viewsLayout->setWidget(i, QFormLayout::FieldRole, chbxView[i]);
+    }
+
+    verticalLayout->addWidget(groupBoxViews);
+
     auto verticalSpacer = new QSpacerItem{20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding};
     verticalLayout->addItem(verticalSpacer);
 
@@ -86,6 +112,10 @@ void SettingsTab::readSettings(MySettings& settings) {
     boldFont_ = settings.getValue(chbxBoldFont, false);
     italicFont_ = settings.getValue(chbxItalicFont, false);
     overrideFonts_ = settings.getValue(chbxOverrideFonts, false);
+    views_ = {};
+    for(int i{}; i < int(View::Count); ++i)
+        if(settings.getValue(chbxView[i], bool(AllViews & viewBit(View(i)))))
+            views_ |= viewBit(View(i));
     settings.endGroup();
 }
 
@@ -95,6 +125,10 @@ void SettingsTab::writeSettings(MySettings& settings) {
     boldFont_ = settings.setValue(chbxBoldFont);
     italicFont_ = settings.setValue(chbxItalicFont);
     overrideFonts_ = settings.setValue(chbxOverrideFonts);
+    views_ = {};
+    for(int i{}; i < int(View::Count); ++i)
+        if(settings.setValue(chbxView[i]))
+            views_ |= viewBit(View(i));
     settings.endGroup();
 }
 

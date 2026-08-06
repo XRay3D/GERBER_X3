@@ -11,8 +11,9 @@
 #include "dxf_entity.h"
 namespace Dxf {
 
-// Сущность 3DFACE (AcDbFace). Импортируется как плоский четырёхугольник в проекции XY;
-// координаты Z и признак невидимости рёбер (код 70) не влияют на 2D-геометрию.
+// Сущность 3DFACE (AcDbFace). Плоская грань импортируется как четырёхугольник в проекции XY;
+// грань с ненулевой Z (is3D()) уходит в Dxf::Model3D и попадает в проекционные слои.
+// Признак невидимости рёбер (код 70) на 2D-геометрию не влияет.
 struct Face3D final : Entity {
     using Entity::Entity;
 
@@ -62,6 +63,14 @@ struct Face3D final : Entity {
     QPointF secondCorner;
     QPointF thirdCorner;
     QPointF fourthCorner;
+
+    // Z углов. В поток не пишется (см. write/read): нужна только при разборе
+    // файла для сборки Model3D, в проект сохраняются уже готовые проекции.
+    double cornerZ[4]{};
+
+    bool is3D() const {
+        return r::any_of(cornerZ, [](double z) { return !qFuzzyIsNull(z); });
+    }
 
     int corners = NoCorner;
     int invisibleEdgeFlags{};

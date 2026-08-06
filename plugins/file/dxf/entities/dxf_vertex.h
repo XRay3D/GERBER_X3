@@ -12,6 +12,8 @@
 
 #include "dxf_entity.h"
 
+#include <QVector3D>
+
 namespace Dxf {
 
 struct Vertex final : Entity {
@@ -70,11 +72,20 @@ struct Vertex final : Entity {
     QPointF point() const { return {x, y}; };
     operator QPointF() const { return point(); };
 
+    QVector3D point3D() const { return {float(x), float(y), float(z)}; };
+
+    // Запись грани многогранной сети: флаг 128 без 64 (у вершин координат оба бита).
+    bool isFace() const { return vertexFlags & PolyfaceMeshVertex && !(vertexFlags & _3DPolygonMesh); }
+
     int vertexFlags{};
     double x{};
     double y{};
+    double z{};
     double bulge{};
     double curveFitTangentDirection{};
+    // Индексы вершин многогранной сети, 1-based; 0 — индекс отсутствует,
+    // отрицательное значение — ребро объявлено скрытым.
+    int faceIndex[4]{};
 };
 
 } // namespace Dxf

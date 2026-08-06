@@ -10,6 +10,7 @@
  *******************************************************************************/
 #pragma once
 
+#include "dxf_model3d.h"
 #include "entities/dxf_graphicobject.h"
 #include "md5.h"
 
@@ -72,12 +73,15 @@ protected:
     static inline bool boldFont_{false};
     static inline bool italicFont_{false};
     static inline bool overrideFonts_{false};
+    // Битовая маска видов (Dxf::viewBit), для которых строятся проекционные слои.
+    static inline uint8_t views_{AllViews};
 
 public:
     static QString defaultFont() { return defaultFont_; }
     static bool boldFont() { return boldFont_; }
     static bool italicFont() { return italicFont_; }
     static bool overrideFonts() { return overrideFonts_; }
+    static uint8_t views() { return views_; }
 };
 
 } // namespace Dxf

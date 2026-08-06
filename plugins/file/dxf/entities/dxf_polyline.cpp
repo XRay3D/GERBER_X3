@@ -23,6 +23,8 @@ void PolyLine::parse(CodeData& code) {
             case StartWidth  : startWidth = code; break;
             case EndWidth    : endWidth = code; break;
             case PolylineFlag: polylineFlags = code; break;
+            case VertexCountM: vertexCountM = code; break;
+            case VertexCountN: vertexCountN = code; break;
             default          : Entity::parse(code);
             }
         } else {
@@ -37,7 +39,17 @@ void PolyLine::parse(CodeData& code) {
 
 Entity::Type PolyLine::type() const { return Type::POLYLINE; }
 
+bool PolyLine::is3D() const {
+    if(polylineFlags & (_3DPolyline | _3DPolygonMesh | PolyfaceMesh))
+        return true;
+    return r::any_of(polyLine, [](const Vertex& v) { return !qFuzzyIsNull(v.z); });
+}
+
 DxfGo PolyLine::toGo() const {
+    // Сети рисуются не как контур: их геометрия собирается в Model3D файла
+    // и превращается в проекционные слои. См. Dxf::Model3D.
+    if(isMesh()) return {};
+
     qInfo("PolyLine");
 #if 1
     Curve path;
