@@ -21,16 +21,16 @@ void Face3D::parse(CodeData& code) {
         case InvisibleEdgeFlags: invisibleEdgeFlags = code; break;
         case FirstCornerX      : firstCorner.rx() = code, corners |= FirstCorner; break;
         case FirstCornerY      : firstCorner.ry() = code; break;
-        case FirstCornerZ      : break;
+        case FirstCornerZ      : cornerZ[0] = code; break;
         case SecondCornerX     : secondCorner.rx() = code, corners |= SecondCorner; break;
         case SecondCornerY     : secondCorner.ry() = code; break;
-        case SecondCornerZ     : break;
+        case SecondCornerZ     : cornerZ[1] = code; break;
         case ThirdCornerX      : thirdCorner.rx() = code, corners |= ThirdCorner; break;
         case ThirdCornerY      : thirdCorner.ry() = code; break;
-        case ThirdCornerZ      : break;
+        case ThirdCornerZ      : cornerZ[2] = code; break;
         case FourthCornerX     : fourthCorner.rx() = code, corners |= FourthCorner; break;
         case FourthCornerY     : fourthCorner.ry() = code; break;
-        case FourthCornerZ     : break;
+        case FourthCornerZ     : cornerZ[3] = code; break;
         default                : Entity::parse(code);
         }
         code = sp->nextCode();
@@ -38,6 +38,7 @@ void Face3D::parse(CodeData& code) {
     // Четвертая угловая точка не обязательна: если задано только три, она совпадает с третьей (треугольная грань).
     if(!(corners & FourthCorner)) {
         fourthCorner = thirdCorner;
+        cornerZ[3]   = cornerZ[2];
         corners |= FourthCorner;
     }
 }

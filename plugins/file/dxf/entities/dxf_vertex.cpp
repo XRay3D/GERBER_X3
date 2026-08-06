@@ -21,16 +21,16 @@ void Vertex::parse(Dxf::CodeData& code) {
         case SubclassMarker          : break;                                  // Маркер подкласса (AcDbVertex)
         case PointX                  : x = code; break;                        // Точка местоположения (ОСК в 2D-среде, МСК в 3D-среде)
         case PointY                  : y = code; break;                        // Файл DXF: значение X; приложение: 3D-точка
-        case PointZ                  : break;                                  // Файл DXF: значения Y и Z для точки местоположения (ОСК в 2D-среде, МСК в 3D-среде)
+        case PointZ                  : z = code; break;                        // Файл DXF: значения Y и Z для точки местоположения (ОСК в 2D-среде, МСК в 3D-среде)
         case StartingWidth           : break;                                  // Начальная ширина (необязательно; значение по умолчанию — 0)
         case EndingWidth             : break;                                  // Конечная ширина (необязательно; значение по умолчанию — 0)
         case Bulge                   : bulge = code; break;                    // Прогиб (необязательно; значение по умолчанию — 0). Прогиб — это касательная одной четвертой центрального угла к дуговому сегменту. Если дуга идет в направлении по часовой стрелке от начальной точки к конечной, то значение касательной будет отрицательным. Если значение прогиба равно 0, то сегмент прямой, а если 1, то полукруглый.
         case VertexFlags             : vertexFlags = code; break;              // Флаги вершин:
         case CurveFitTangentDirection: curveFitTangentDirection = code; break; // Направление касательной с дуговым сглаживанием
-        case PolyfaceMeshVertexIndex1:
-        case PolyfaceMeshVertexIndex2:
-        case PolyfaceMeshVertexIndex3:
-        case PolyfaceMeshVertexIndex4:
+        case PolyfaceMeshVertexIndex1: faceIndex[0] = code; break; // Индексы вершин многогранной сети (1-based, знак — признак скрытого ребра)
+        case PolyfaceMeshVertexIndex2: faceIndex[1] = code; break;
+        case PolyfaceMeshVertexIndex3: faceIndex[2] = code; break;
+        case PolyfaceMeshVertexIndex4: faceIndex[3] = code; break;
         case VertexIdentifier        : break;
         default                      : Entity::parse(code);
         }

@@ -88,7 +88,12 @@ double DxfGo::scaleY() const { return scaleY_; }
 
 // QPointF DxfGo::pos() const { return ~::GraphicObject::pos; }
 
-const Entity* DxfGo::entity() const { return file_ ? file_->entities().at(entityId_).get() : nullptr; }
+const Entity* DxfGo::entity() const {
+    // entityId_ < 0 — объект не порождён сущностью DXF (силуэт проекционного слоя).
+    if(!file_ || entityId_ < 0 || size_t(entityId_) >= file_->entities().size())
+        return nullptr;
+    return file_->entities()[entityId_].get();
+}
 
 #if 0
 Path GraphicObject::arc() const { return {}; }

@@ -150,6 +150,34 @@ Layer* File::layer(const QString& name) {
 
 uint32_t File::type() const { return DXF; }
 
+void File::createProjectionLayers() {
+    if(mesh_.empty()) return;
+
+    Timer t{__FUNCTION__};
+
+    for(int i{}; i < int(View::Count); ++i) {
+        auto view = View(i);
+        if(!(Settings::views() & viewBit(view))) continue;
+
+        Paths64 silhouette = mesh_.project(view);
+        if(silhouette.empty()) continue;
+
+        auto rect = GetBounds(silhouette);
+        qInfo("Dxf: %s - %zu contours, %g x %g mm",
+            qPrintable(viewName(view)), silhouette.size(),
+            std::abs(rect.right - rect.left) / double(uScale),
+            std::abs(rect.bottom - rect.top) / double(uScale));
+
+        Layer* l = layer(viewName(view));
+        l->setColor(viewColor(view));
+        // Только заливка: силуэт — это замкнутый контур с дырками, отдельных
+        // рёбер у него нет, поэтому path оставляем пустым.
+        l->addGraphicObject(DxfGo{-1, Curve{}, toCurves(silhouette)});
+    }
+
+    mesh_.clear();
+}
+
 void File::createGi() {
     Timer t{__FUNCTION__};
 
