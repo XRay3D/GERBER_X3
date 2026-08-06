@@ -15,7 +15,7 @@
 #include "project.h"
 
 // namespace ClipperLib {
-// inline size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
+// inline size_t qHash(const Point64& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point64))); }
 // } // namespace ClipperLib
 
 namespace Voronoi {
@@ -41,24 +41,24 @@ void Creator::create() {
         file_          = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     } else {
-        Paths copy{returnPs};
+        Paths64 copy{returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
 
         { // создание пермычек.
-            Clipper clipper;
+            cl::Clipper64 clipper;
             clipper.AddClip(openSrcPaths);
             clipper.AddOpenSubject(copy);
-            clipper.Execute(ClipType::Difference, FillRule::NonZero, copy, copy);
+            clipper.Execute(cl::ClipType::Difference, cl::FillRule::NonZero, copy, copy);
             sortBeginEnd(copy, ~(App::home().pos() + App::zero().pos()));
             for(auto&& p: copy)
-                returnPss.emplace_back(Paths{p});
+                returnPss.emplace_back(Paths64{p});
         }
         dbgPaths(returnPs, u"создание пермычек"_s);
         { // создание заливки.
-            Clipper2Lib::ClipperOffset offset(uScale);
-            offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Polygon);
-            offset.AddPaths(copy, JoinType::Round, EndType::Round);
+            cl::ClipperOffset offset(uScale);
+            offset.AddPaths(openSrcPaths, cl::JoinType::Round, cl::EndType::Polygon);
+            offset.AddPaths(copy, cl::JoinType::Round, cl::EndType::Round);
             offset.Execute(dOffset + 10, openSrcPaths); // FIXME maybe dOffset * 0.5
         }
         // erase empty paths
@@ -80,41 +80,41 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset      = toolDiameter / 2;
     stepOver     = tool.stepover() * uScale;
-    const Path frame{returnPs.back()};
+    const Path64 frame{returnPs.back()};
     // returnPs.pop_back();
     { // create offset
       // ClipperOffset offset;
-      // offset.AddPaths(returnPs, JoinType::Round /*JoinType::Miter*/, EndType::Round);
+      // offset.AddPaths(returnPs, cl::JoinType::Round /*cl::JoinType::Miter*/, cl::EndType::Round);
       // returnPs = offset.Execute(width * uScale * 0.5);
-        returnPs = Inflate(returnPs, width * uScale * 0.5, JoinType::Round /*JoinType::Miter*/, EndType::Round);
+        returnPs = Inflate64(returnPs, width * uScale * 0.5, cl::JoinType::Round /*cl::JoinType::Miter*/, cl::EndType::Round);
     }
     { // fit offset to copper
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddSubject(returnPs);
-        for(const Paths& paths: groupedPss)
+        for(const Paths64& paths: groupedPss)
             clipper.AddClip(paths);
         // clipper.Execute(ClipType::Difference, returnPs, FillRule::Positive, FillRule::Negative);
-        clipper.Execute(ClipType::Difference, FillRule::Positive, returnPs);
+        clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, returnPs);
     }
     if(0) { // cut to copper rect
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddSubject(returnPs);
         clipper.AddClip({frame});
-        clipper.Execute(ClipType::Intersection, FillRule::NonZero, returnPs);
+        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, returnPs);
         CleanPaths(returnPs, 0.001 * uScale);
     }
     { // create pocket
         // ClipperOffset offset(uScale);
-        // offset.AddPaths(returnPs, JoinType::Round, EndType::Polygon);
-        // Paths tmpPaths1;
+        // offset.AddPaths(returnPs, cl::JoinType::Round, cl::EndType::Polygon);
+        // Paths64 tmpPaths1;
         // tmpPaths1 = offset.Execute(-dOffset);
-        Paths tmpPaths1 = InflateRoundPolygon(returnPs, -dOffset);
+        Paths64 tmpPaths1 = InflateRoundPolygon(returnPs, -dOffset);
         openSrcPaths    = tmpPaths1;
-        Paths tmpPaths;
+        Paths64 tmpPaths;
         do {
             tmpPaths.append_range(tmpPaths1);
             // offset.Clear();
-            // offset.AddPaths(tmpPaths1, JoinType::Miter, EndType::Polygon);
+            // offset.AddPaths(tmpPaths1, cl::JoinType::Miter, cl::EndType::Polygon);
             // tmpPaths1 = offset.Execute(-stepOver);
             tmpPaths1 = InflateMiterPolygon(tmpPaths1, -stepOver);
         } while(tmpPaths1.size());

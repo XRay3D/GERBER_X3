@@ -196,7 +196,7 @@ center=QPointF{cx, cy};
 
     // r::for_each(path, SetCSelf);
 
-    // Paths paths = Inflate({path}, constantWidth * uScale, JoinType::Round, EndType::Round, 2.0, uScale / 1000);
+    // Paths paths = Inflate64({path}, constantWidth * uScale, cl::JoinType::Round, cl::EndType::Round, 2.0, uScale / 1000);
 
     // Gi::Debug(paths, Qt::red);
 

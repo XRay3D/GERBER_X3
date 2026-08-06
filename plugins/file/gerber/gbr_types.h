@@ -207,7 +207,7 @@ class State {
     RegionMode region_               = Off;
     int aperture_{};
     int lineNum_{};
-    Point curPos_;
+    Point64 curPos_;
     Mirroring mirroring_ = NoMirroring;
     double scaling_      = 1.0;
     double rotating_{};
@@ -244,7 +244,7 @@ public:
 
     inline auto& curPos() { return curPos_; }
     inline auto curPos() const { return curPos_; }
-    inline void setCurPos(const Point& curPos) { curPos_ = curPos; }
+    inline void setCurPos(const Point64& curPos) { curPos_ = curPos; }
 
     inline auto mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }

@@ -28,7 +28,7 @@ struct Curve : std::vector<geo::Vertex> {
     double perimetr() const;
 };
 
-using Curves  = std::vector<Curve>;
+using Curves = std::vector<Curve>;
 using Curvess = std::vector<Curves>;
 
 inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
@@ -49,8 +49,6 @@ inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
     return stream;
 }
 
-
-
 QIcon drawIcon(const Curves& curves, QColor color = Qt::black);
 
 constexpr double Area(const Curve& curve) { return curve.area(); }
@@ -67,11 +65,11 @@ constexpr QRectF BoundingRect(const Curves& curves) {
 
 struct ArcGeometry {
     QPointF center;
-    double radius = 0.0;     // always >= 0
+    double radius = 0.0; // always >= 0
     // всегда >= 0
     double startAngle = 0.0; // atan2 at p1, radians
     // atan2 в точке p1, радианы
-    bool ccw = true;         // sweep direction from p1 to p2 (matches sign of bulge)
+    bool ccw = true; // sweep direction from p1 to p2 (matches sign of bulge)
     // направление обхода от p1 к p2 (совпадает со знаком bulge)
 };
 
@@ -128,3 +126,84 @@ QPointF polar(QPointF p, double angle /*radians*/, double distance);
 double angle(QPointF p1, QPointF p2);
 double signedBulgeRadius(QPointF start, QPointF end, double bulge);
 std::tuple<QPointF, double, double, double> bulgeToArc(QPointF start, QPointF end, double bulge);
+
+struct CurveTree {
+};
+
+struct BoolOp_ {
+    enum class ClipType {
+        NoClip,
+        Intersection,
+        Union,
+        Difference,
+        Xor
+    };
+
+    enum class FillRule {
+        EvenOdd,
+        NonZero,
+        Positive,
+        Negative
+    };
+
+    Curves operator()(ClipType ct, FillRule fr, const Curves& subjects, const Curves& clips);
+
+    void operator()(ClipType ct, FillRule fr, const Curves& subjects, const Curves& clips, CurveTree& solution);
+
+    Curves Intersect(const Curves& subjects, const Curves& clips, FillRule fr);
+
+    Curves Union(const Curves& subjects, const Curves& clips, FillRule fr);
+
+    Curves Union(const Curves& subjects, FillRule fr);
+
+    Curves Difference(const Curves& subjects, const Curves& clips, FillRule fr);
+
+    Curves Xor(const Curves& subjects, const Curves& clips, FillRule fr);
+
+} inline BoolOp;
+
+using ClipType = BoolOp_::ClipType;
+using FillRule = BoolOp_::FillRule;
+
+struct Inflate64 {
+
+    enum class JoinType {
+        Square,
+        Bevel,
+        Round,
+        Miter
+    };
+    // Square : Joins are 'squared' at exactly the offset distance (more complex code)
+    // Bevel  : Similar to Square, but the offset distance varies with angle (simple code & faster)
+
+    enum class EndType {
+        Polygon,
+        Joined,
+        Butt,
+        Square,
+        Round
+    };
+    // Butt   : offsets both sides of a path, with square blunt ends
+    // Square : offsets both sides of a path, with square extended ends
+    // Round  : offsets both sides of a path, with round extended ends
+    // Joined : offsets both sides of a path, with joined ends
+    // Polygon: offsets only one side of a closed path
+
+    Curves operator()(const Curves& paths, double delta,
+        JoinType jt, EndType et, double miterLimit = 2.0,
+        double arcTolerance = 0.0);
+
+    Curves PathsZ(const Curves& paths, double delta,
+        JoinType jt, EndType et, double miterLimit = 2.0,
+        double arcTolerance = 0.0);
+
+    Curves RoundPolygon(const Curves& paths, double delta,
+        double miterLimit = 2.0, double arcTolerance = {});
+
+    Curves MiterPolygon(const Curves& paths, double delta,
+        double miterLimit = 2.0, double arcTolerance = {});
+
+} inline Inflate;
+
+using JoinType = Inflate64::JoinType;
+using EndType = Inflate64::EndType;

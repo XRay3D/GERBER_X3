@@ -39,34 +39,29 @@ constexpr double dScale = 1e-5;
 
 constexpr std::numeric_limits<int32_t> LimitI32;
 
-namespace CL2 = Clipper2Lib;
+namespace cl = Clipper2Lib;
 
 // type
-using Clipper = Clipper2Lib::Clipper64;
-// using ClipperOffset = Clipper2Lib::ClipperOffset;
-
-using Point64 = Clipper2Lib::Point64;
-
-using Path64 = Clipper2Lib::Path64;
-using Paths64 = Clipper2Lib::Paths64;
+using Point64 = cl::Point64;
+using Path64 = cl::Path64;
+using Paths64 = cl::Paths64;
 using Pathss64 = std::vector<Paths64>;
-
-using PolyTree = Clipper2Lib::PolyTree64;
-using Rect = Clipper2Lib::Rect64;
+using PolyTree = cl::PolyTree64;
+using Rect = cl::Rect64;
 
 // func
-using Clipper2Lib::Area;
-using Clipper2Lib::GetBounds;
-// using Clipper2Lib::InflatePaths;
-using Clipper2Lib::PointInPolygon;
+using cl::Area;
+using cl::GetBounds;
+// using cl::InflatePaths;
+using cl::PointInPolygon;
 
 // enum
-using Clipper2Lib::ClipType;
-using Clipper2Lib::EndType;
-using Clipper2Lib::FillRule;
-using Clipper2Lib::JoinType;
-using Clipper2Lib::PathType;
-using Clipper2Lib::PointInPolygonResult;
+// using cl::ClipType;
+// using cl::EndType;
+// using cl::FillRule;
+// using cl::JoinType;
+// using cl::PathType;
+using cl::PointInPolygonResult;
 
 Q_DECLARE_METATYPE(Point64)
 
@@ -106,7 +101,7 @@ void SetCSelf(Point64& dst);
 // Индексы никогда не переиспользуются и не инвалидируются (append-only), начинаются с 1.
 enum class CenterKind {
     Source,    // центр дуги исходной кривой (Curve -> Path64, CirclePath, arc())
-    RoundJoin, // новый центр скругления угла, созданный при офсетинге (ClipperOffset, JoinType::Round)
+    RoundJoin, // новый центр скругления угла, созданный при офсетинге (ClipperOffset, cl::JoinType::Round)
 };
 int32_t RegisterCenter(const QPointF& center, CenterKind kind = CenterKind::Source);
 QPointF CenterAt(int32_t index);
@@ -208,11 +203,11 @@ inline constexpr auto skipFront = v::drop(1);
 
 //------------------------------------------------------------------------------
 Paths64 InflatePathsZ(const Paths64& paths, double delta,
-    JoinType jt, EndType et, double miterLimit = 2.0,
+    cl::JoinType jt, cl::EndType et, double miterLimit = 2.0,
     double arcTolerance = 0.0);
 
-Paths64 Inflate(const Paths64& paths, double delta,
-    JoinType jt, EndType et,
+Paths64 Inflate64(const Paths64& paths, double delta,
+    cl::JoinType jt, cl::EndType et,
     double miterLimit = 2.0, double arcTolerance = {});
 
 Paths64 InflateRoundPolygon(const Paths64& paths, double delta,
@@ -222,26 +217,26 @@ Paths64 InflateMiterPolygon(const Paths64& paths, double delta,
     double miterLimit = 2.0, double arcTolerance = {});
 
 template <typename T>
-inline void CleanPaths(Clipper2Lib::Path<T>& path, double k) {
-    path = Clipper2Lib::RamerDouglasPeucker(path, k);
+inline void CleanPaths(cl::Path<T>& path, double k) {
+    path = cl::RamerDouglasPeucker(path, k);
 }
 
 template <typename T>
-inline void CleanPaths(Clipper2Lib::Paths<T>& paths, double k) {
-    paths = Clipper2Lib::RamerDouglasPeucker(paths, k);
+inline void CleanPaths(cl::Paths<T>& paths, double k) {
+    paths = cl::RamerDouglasPeucker(paths, k);
 }
 
 //------------------------------------------------------------------------------
 
 template <typename T>
-inline Clipper2Lib::Path<T>& ReversePath(Clipper2Lib::Path<T>& path) {
+inline cl::Path<T>& ReversePath(cl::Path<T>& path) {
     std::reverse(path.begin(), path.end());
     return path;
 }
 //------------------------------------------------------------------------------
 
 template <typename T>
-inline Clipper2Lib::Paths<T>& ReversePaths(Clipper2Lib::Paths<T>& paths) {
+inline cl::Paths<T>& ReversePaths(cl::Paths<T>& paths) {
     std::for_each(paths.begin(), paths.end(), ReversePath<T>);
     return paths;
 }
@@ -290,8 +285,8 @@ auto operator-=(Container auto& c, size_t index) {
 }
 
 // template <typename T>
-// inline Clipper2Lib::Rect<T> GetBounds(const Clipper2Lib::Paths<T>& paths) {
-//     Clipper2Lib::Rect<T> rect;
+// inline cl::Rect<T> GetBounds(const cl::Paths<T>& paths) {
+//     cl::Rect<T> rect;
 
 //    if (paths.size() == 0 || paths.front().size() == 0)
 //        return rect;
@@ -315,21 +310,21 @@ auto operator-=(Container auto& c, size_t index) {
 
 //------------------------------------------------------------------------------
 
-inline void SimplifyPolygon(const Path64& /*in_poly*/, Paths64& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
-    //    Clipper c;
+inline void SimplifyPolygon(const Path64& /*in_poly*/, Paths64& /*out_polys*/, cl::FillRule /*fillType*/ = cl::FillRule::EvenOdd) {
+    //    cl::Clipper64 c;
     //    c.StrictlySimple(true);
     //    c.AddPath(in_poly, PathType::Subject, true);
     //    c.Execute(ClipType::Union, out_polys, fillType, fillType);
 }
 
-inline void SimplifyPolygons(const Paths64& /*in_polys*/, Paths64& /*out_polys*/, Clipper2Lib::FillRule /*fillType*/ = Clipper2Lib::FillRule::EvenOdd) {
-    //    Clipper c;
+inline void SimplifyPolygons(const Paths64& /*in_polys*/, Paths64& /*out_polys*/, cl::FillRule /*fillType*/ = cl::FillRule::EvenOdd) {
+    //    cl::Clipper64 c;
     //    c.StrictlySimple(true);
     //    c.AddPaths(in_polys, PathType::Subject, true);
     //    c.Execute(ClipType::Union, out_polys, fillType, fillType);
 }
 
-inline void SimplifyPolygons(Paths64& polys, Clipper2Lib::FillRule fillType = Clipper2Lib::FillRule::EvenOdd) {
+inline void SimplifyPolygons(Paths64& polys, cl::FillRule fillType = cl::FillRule::EvenOdd) {
     SimplifyPolygons(polys, polys, fillType);
 }
 
@@ -390,7 +385,7 @@ inline constexpr double distToSq(const Point64& pt1, const Point64& pt2) noexcep
     return (x_ * x_ + y_ * y_);
 }
 
-std::span<std::unique_ptr<CL2::PolyPath64>> rwPolyTree(PolyTree& polyTree);
+std::span<std::unique_ptr<cl::PolyPath64>> rwPolyTree(PolyTree& polyTree);
 
 Path64 arc(const Point64& center, double radius, double start, double stop, int interpolation);
 Path64 arc(Point64 p1, Point64 p2, Point64 center, int interpolation);

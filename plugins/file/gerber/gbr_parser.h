@@ -45,7 +45,7 @@ protected:
     void reset();
     void resetStep();
 
-    Point parsePosition(const QString& xyStr);
+    Point64 parsePosition(const QString& xyStr);
 
     Curves createLine();
     Curves createPolygon();
@@ -64,7 +64,7 @@ protected:
 
     QStack<WorkingType> abSrIdStack_;
 
-    Path path_;
+    Path64 path_;
     State state_;
     QString currentGerbLine_;
 

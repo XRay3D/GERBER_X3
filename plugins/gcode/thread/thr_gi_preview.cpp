@@ -13,14 +13,14 @@
 
 namespace Threading {
 namespace Gi {
-Preview::Preview(Path&& path, double diameter, Tool::ID toolId, Row& row, const Paths& draw_)
+Preview::Preview(Path64&& path, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_)
     : path_{std::move(path)}
     , row{row}
     , toolId_{toolId} {
     sourceDiameter_ = diameter;
     if(path_.size() > 1) {
         Timer<mS> t{__FUNCTION__};
-        for(auto&& path_: Inflate(Paths{path_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale)
+        for(auto&& path_: Inflate64(Paths64{path_}, sourceDiameter_ * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)
             /*offset(path_, sourceDiameter_)*/)
             sourcePath_.addPolygon(~path_);
     } else {
@@ -41,7 +41,7 @@ void Preview::updateTool() {
                 auto& tool(App::toolHolder().tool(toolId()));
                 const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                for(Path& path_: Inflate(Paths{path_}, diameter * uScale, JoinType::Round, EndType::Round, uScale)) {
+                for(Path64& path_: Inflate64(Paths64{path_}, diameter * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)) {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(~path_);
                 }
@@ -77,7 +77,7 @@ void Preview::updateTool() {
     changeColor();
 }
 
-Paths Preview::paths() const {
+Paths64 Preview::paths() const {
     if(path_.size() > 1)
         return {path_};
     else
@@ -95,9 +95,9 @@ int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1)
 
 bool Preview::isSlot() const { return path_.size() > 1; }
 
-Paths Preview::offset() const {
+Paths64 Preview::offset() const {
     return ~sourcePath_.toSubpathPolygons();
-    /*Inflate(Paths {hv_}, sourceDiameter_ * uScale, JoinType::Round, EndType::Round, uScale);*/
+    /*Inflate64(Paths64 {hv_}, sourceDiameter_ * uScale, cl::JoinType::Round, cl::EndType::Round, uScale);*/
 }
 
 void Preview::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {

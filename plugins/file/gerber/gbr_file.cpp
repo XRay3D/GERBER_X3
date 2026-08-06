@@ -107,18 +107,18 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     return retData;
 }
 
-Paths File::merge() const {
+Curves File::merge() const {
     Timer t;
-    mergedPaths_.clear();
+    Paths64 mergedPaths;
 
     constexpr auto samePolarity = +[](const GrObject& l, const GrObject& r) {
         return l.state.imgPolarity() == r.state.imgPolarity();
     };
-    constexpr std::array CT{ClipType::Union, ClipType::Difference};
-    constexpr std::array FR{FillRule::Positive, FillRule::NonZero};
+    constexpr std::array CT{cl::ClipType::Union, cl::ClipType::Difference};
+    constexpr std::array FR{cl::FillRule::Positive, cl::FillRule::NonZero};
 #if DEBUG && 0
     for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity) | v::reverse) {
-        Paths clip{
+        Paths64 clip{
             std::from_range,
             v::join(v::transform(gObjects, &GrObject::fill)
                 // | v::counted(208 - 99 - 5, 5)
@@ -126,12 +126,12 @@ Paths File::merge() const {
                 | v::drop(208 - 99 - 5) | v::take(5)),
         };
         bool fl      = gObjects.front().state.imgPolarity();
-        mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
+        mergedPaths = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths, clip);
         break;
     }
 #else
     for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity)) {
-        Paths clip{
+        Paths64 clip{
             std::from_range,
             gObjects
                 | v::transform(&GrObject::fill)
@@ -139,76 +139,66 @@ Paths File::merge() const {
                 | v::join,
         };
         bool fl      = gObjects.front().state.imgPolarity();
-        mergedPaths_ = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths_, clip);
+        mergedPaths = cl::BooleanOp(CT[fl], FR[fl], mergedPaths, clip);
     }
-    // Gi::Debug(mergedPaths_, {255, 255, 255, 128}); //->arrows = {};
+    // Gi::Debug(mergedPaths, {255, 255, 255, 128}); //->arrows = {};
 #endif
     if(Settings::cleanPolygons())
-        CleanPaths(mergedPaths_, Settings::cleanPolygonsDist() * uScale);
+        CleanPaths(mergedPaths, Settings::cleanPolygonsDist() * uScale);
 
-    for(Path& path: mergedPaths_) // close paths
+    for(Path64& path: mergedPaths) // close paths
         path.emplace_back(path.front());
 
-    return mergedPaths_;
+    return mergedCurves_ = toCurves(mergedPaths);
 }
 
 const QList<Comp::Component>& File::components() const { return components_; }
 
-void File::grouping(PolyTree& node, Pathss* pathss) {
-    Path path;
-    Paths paths;
+void File::grouping(PolyTree& node, Curvess* curvess) {
+    // Узел вместе со своими прямыми потомками образует одну группу
+    // «контур + его дырки»; какой из уровней считать контуром, задаёт group_.
+    auto collect = [curvess](PolyTree& node) {
+        Paths64 paths{node.Polygon()};
+        for(size_t i{}; i < node.Count(); ++i)
+            paths.push_back(node[i]->Polygon());
+        for(Path64& path: paths) // close paths
+            path.emplace_back(path.front());
+        curvess->push_back(toCurves(paths));
+    };
+
     switch(group_) {
     case CutoffGroup:
-        if(!node.IsHole()) {
-            path = node.Polygon();
-            paths.push_back(path);
-            for(size_t i{}; i < node.Count(); ++i) {
-                path = node[i]->Polygon();
-                paths.push_back(path);
-            }
-            pathss->push_back(paths);
-        }
-        for(size_t i{}; i < node.Count(); ++i)
-            grouping(*node[i], pathss);
+        if(!node.IsHole()) collect(node);
         break;
     case CopperGroup:
-        if(node.IsHole()) {
-            path = node.Polygon();
-            paths.push_back(path);
-            for(size_t i{}; i < node.Count(); ++i) {
-                path = node[i]->Polygon();
-                paths.push_back(path);
-            }
-            pathss->push_back(paths);
-        }
-        for(size_t i{}; i < node.Count(); ++i)
-            grouping(*node[i], pathss);
+        if(node.IsHole()) collect(node);
         break;
     }
+    for(size_t i{}; i < node.Count(); ++i)
+        grouping(*node[i], curvess);
 }
 
-Pathss& File::groupedPaths(File::Group group, bool fl) {
-    if(groupedPaths_.empty()) {
+Curvess& File::groupedPaths(File::Group group, bool fl) {
+    if(groupedCurves_.empty()) {
         PolyTree polyTree;
-        Clipper clipper;
-        clipper.AddSubject(mergedPaths());
-        auto r{GetBounds(mergedPaths())};
-        int k      = uScale;
-        Path outer = {
-            Point(r.left - k, r.bottom + k),
-            Point(r.right + k, r.bottom + k),
-            Point(r.right + k, r.top - k),
-            Point(r.left - k, r.top - k)};
+        cl::Clipper64 clipper;
+        auto paths = toPaths(mergedCurves());
+        clipper.AddSubject(paths);
+        auto r{GetBounds(paths)};
+        int k = uScale;
+        Path64 outer = {
+            Point64(r.left - k, r.bottom + k),
+            Point64(r.right + k, r.bottom + k),
+            Point64(r.right + k, r.top - k),
+            Point64(r.left - k, r.top - k)};
         if(fl)
             ReversePath(outer);
         clipper.AddSubject({outer});
-        clipper.Execute(ClipType::Union, FillRule::NonZero, polyTree);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, polyTree);
         group_ = group;
-        grouping(polyTree, &groupedPaths_);
-        for(Path& path: v::join(groupedPaths_))
-            path.emplace_back(path.front()); // close paths
+        grouping(polyTree, &groupedCurves_);
     }
-    return groupedPaths_;
+    return groupedCurves_;
 }
 
 bool File::flashedApertures() const {
@@ -292,7 +282,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     if constexpr(1) { // fill copper
-        for(Paths& paths: groupedPaths()) {
+        for(Curves& paths: groupedPaths()) {
             // Gi::Debug(paths);
             Gi::Item* item = new Gi::DataFill{paths, this};
             itemGroups_[Normal]->push_back(item);

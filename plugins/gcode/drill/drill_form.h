@@ -26,7 +26,7 @@ namespace Drilling {
 // using Key = std::tuple<int, double, bool, QString>;
 // struct Val {
 // mvector<PosOrPath> posOrPath;
-// Paths draw;
+// Paths64 draw;
 // };
 // using Preview = std::map<Key, Val>;
 

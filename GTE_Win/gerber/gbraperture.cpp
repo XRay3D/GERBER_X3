@@ -185,7 +185,7 @@ ApertureType ApObround::type() const { return Obround; }
 bool ApObround::fit(double toolDiam) const { return qMin(m_height, m_width) > toolDiam; }
 
 void ApObround::draw() {
-    Clipper clipper;
+    cl::Clipper64 clipper;
     const cInt h = static_cast<cInt>(m_height * uScale);
     const cInt w = static_cast<cInt>(m_width * uScale);
     if(qFuzzyCompare(w + 1.0, h + 1.0)) {
@@ -334,7 +334,7 @@ void ApMacro::draw() {
     }
 
     if(items.size() > 1) {
-        Clipper clipper;
+        cl::Clipper64 clipper;
         for(int i{}; i < items.size();) {
             clipper.Clear();
             clipper.AddPaths(m_paths, ptSubject, true);
@@ -350,7 +350,7 @@ void ApMacro::draw() {
         m_paths.append(items.first().second);
 
     //    {
-    //        Clipper clipper;
+    //        cl::Clipper64 clipper;
     //        clipper.AddPaths(m_paths, ptSubject, true);
     //        IntRect r(clipper.GetBounds());
     //        int k = uScale ;
@@ -440,7 +440,7 @@ void ApMacro::drawMoire(const QList<double>& mod) {
         static_cast<cInt>(mod[CenterY] * uScale));
 
     {
-        Clipper clipper;
+        cl::Clipper64 clipper;
         if(thickness && gap) {
             for(int num{}; num < mod[NumberOfRings]; ++num) {
                 clipper.AddPath(CirclePath(diameter), ptClip, true);
@@ -541,7 +541,7 @@ void ApMacro::drawThermal(const QList<double>& mod) {
         static_cast<cInt>(mod[CenterY] * uScale));
 
     {
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddPath(CirclePath(outer), ptSubject, true);
         clipper.AddPath(CirclePath(inner), ptClip, true);
         clipper.AddPath(RectanglePath(gap, outer), ptClip, true);
@@ -608,7 +608,7 @@ void ApBlock::draw() {
     m_paths.clear();
     int i{};
     while(i < size()) {
-        Clipper clipper; //(ioStrictlySimple);
+        cl::Clipper64 clipper; //(ioStrictlySimple);
         clipper.AddPaths(m_paths, ptSubject, true);
         const int exp = at(i).state().imgPolarity();
         do {

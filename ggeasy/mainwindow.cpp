@@ -265,11 +265,8 @@ void MainWindow::open() {
                               | v::filter(&QString::size),
                           u";;")
         | r::to<QString>();
-    /*tr("Any (*.*)"
-                              ";;Gerber/Excellon (*.gbr *.exc *.drl)"
-                              ";;Project (*.g2g)"))*/
     QStringList files{QFileDialog::getOpenFileNames(
-        this, tr("Open File"), lastPath, extensions + tr(";;Any (*.*)"))};
+        this, tr("Open File"), lastPath, tr("Any (*.*);;Project (*.g2g);;") + extensions)};
 
     if(files.isEmpty()) return;
 
@@ -279,8 +276,6 @@ void MainWindow::open() {
     } else {
         for(QString& fileName: files) loadFile(fileName);
     }
-    // QString name(QFileInfo(files.first()).path());
-    // setCurrentFile(name + u"/"_s + name.split(u'/').back() + u".g2g"_s);
 }
 
 bool MainWindow::save() {
@@ -783,7 +778,7 @@ void MainWindow::createActionsShape() {
         for(QGraphicsItem* item: selectedItems) {
             if(item->type() == Gi::Type::DataSolid) {
                 auto gitem = static_cast<Gi::DataFill*>(item);
-                Clipper clipper;
+                cl::Clipper64 clipper;
                 clipper.AddSubject(gitem->paths());
                 clipper.AddClip(clipPaths);
                 Paths paths;

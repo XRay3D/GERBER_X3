@@ -58,11 +58,11 @@ public:
     //////////////////////////////////////////
     int type() const override;
 
-    Paths bridge() const { return bridge_; }
+    Paths64 bridge() const { return bridge_; }
     virtual bool isValid() const;
 
-    virtual Point pos() const = 0;
-    virtual Paths paths() const = 0;
+    virtual Point64 pos() const = 0;
+    virtual Paths64 paths() const = 0;
     virtual Curves curves() const = 0;
     virtual void redraw() = 0;
 
@@ -119,10 +119,10 @@ protected:
     QPainterPath sourcePath;
     QPainterPath painterPath;
 
-    Paths bridge_;
-    Paths previewPaths;
-    Paths cashedPath;
-    Paths cashedFrame;
+    Paths64 bridge_;
+    Paths64 previewPaths;
+    Paths64 cashedPath;
+    Paths64 cashedFrame;
 
     Node* node_{nullptr};
 
@@ -136,8 +136,8 @@ class PreviewItem final : public AbstractThermPrGi {
 
 public:
     PreviewItem(const Curves& paths, const QPointF pos, Tool& tool);
-    Point pos() const override;
-    Paths paths() const override;
+    Point64 pos() const override;
+    Paths64 paths() const override;
     void redraw() override;
 
     // QGraphicsItem interface
