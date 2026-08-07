@@ -27,6 +27,7 @@
 /.qmake.cache
 /.qmake.stash
 /.cache
+/third_party
 Makefile*
 moc_*.cpp
 moc_*.h

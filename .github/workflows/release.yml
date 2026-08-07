@@ -1,12 +1,15 @@
 name: Build & Release
 
-# Собирает GGEasy для Linux (AppImage), Windows и macOS при пуше в master
-# и при пуше тега версии, затем публикует бинарники в GitHub Releases.
+# Собирает GGEasy для Windows (MSYS2 UCRT64) при пуше в master и при пуше тега
+# версии, затем публикует zip-архив в GitHub Releases.
+#
+# Архив самодостаточен: рядом с бинарниками кладутся Qt-плагины (windeployqt)
+# и весь рантайм MSYS2/UCRT64 (libgcc, libstdc++, libwinpthread, Boost, ICU
+# и прочие транзитивные зависимости из /ucrt64/bin).
 #
 # ВНИМАНИЕ: проект использует экспериментальную статическую рефлексию C++26
-# (std::meta, -freflection), поэтому везде используется GCC 16. Это очень
-# свежий тулчейн — шаги установки GCC 16 могут потребовать корректировки,
-# если пакеты в репозиториях/Homebrew/MSYS2 изменятся.
+# (std::meta, -freflection), поэтому нужен GCC 16. Это очень свежий тулчейн —
+# шаг установки может потребовать корректировки, если пакеты MSYS2 изменятся.
 
 on:
   push:
@@ -14,99 +17,7 @@ on:
     tags: ["[0-9]+.[0-9]+*"]
   workflow_dispatch:
 
-env:
-  QT_VERSION: "6.9.1"
-  BOOST_VERSION: "1.87.0"
-
 jobs:
-  build-linux:
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: "true"
-
-      - name: Install recent CMake
-        uses: lukka/get-cmake@latest
-
-      - name: Install GCC 16
-        run: |
-          sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-          sudo apt-get update
-          sudo apt-get install -y gcc-16 g++-16 mold ninja-build \
-            libfuse2t64 libgl1-mesa-dev libxkbcommon-dev
-          echo "CC=gcc-16" >> "$GITHUB_ENV"
-          echo "CXX=g++-16" >> "$GITHUB_ENV"
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: linux
-          target: desktop
-          arch: linux_gcc_64
-          modules: qtimageformats
-          cache: "true"
-
-      - name: Install Boost
-        uses: MarkusJx/install-boost@v2.5.0
-        id: install-boost
-        with:
-          boost_version: ${{ env.BOOST_VERSION }}
-          cache: "true"
-
-      - name: Configure
-        run: |
-          cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DGERBER_NATIVE_MARCH=OFF \
-            -DGIT_REF_NAME=${{ github.ref_name }} \
-            -DGIT_SHA=${{ github.sha }} \
-            -DCMAKE_PREFIX_PATH="${{ steps.install-boost.outputs.BOOST_ROOT }}"
-
-      - name: Build
-        run: cmake --build build --config Release -j"$(nproc)"
-
-      - name: Package AppImage
-        run: |
-          set -eu
-          BIN_DIR="$(dirname "$(find bin -maxdepth 3 -type d -name plugins)")"
-          echo "BIN_DIR=$BIN_DIR"
-
-          curl -sL -o linuxdeploy \
-            https://github.com/linuxdeploy/linuxdeploy/releases/download/continuous/linuxdeploy-x86_64.AppImage
-          curl -sL -o linuxdeploy-plugin-qt \
-            https://github.com/linuxdeploy/linuxdeploy-plugin-qt/releases/download/continuous/linuxdeploy-plugin-qt-x86_64.AppImage
-          chmod +x linuxdeploy linuxdeploy-plugin-qt
-
-          cp ggeasy/myapp.png ggeasy.png
-
-          export QMAKE="$Qt6_DIR/bin/qmake6"
-          mkdir -p AppDir
-          ./linuxdeploy --appdir AppDir \
-            -e "$BIN_DIR/GGEasy" \
-            -d packaging/linux/ggeasy.desktop \
-            -i ggeasy.png \
-            --plugin qt
-
-          # плагины самого приложения (QPluginLoader) — докладываем отдельно,
-          # чтобы linuxdeploy подтянул их собственные Qt-зависимости
-          mkdir -p AppDir/usr/bin/plugins
-          find "$BIN_DIR/plugins" -maxdepth 1 -name "*.so" -exec cp -v {} AppDir/usr/bin/plugins/ \;
-          find AppDir/usr/bin/plugins -name "*.so" -exec ./linuxdeploy --appdir AppDir --plugin qt -l {} \;
-
-          VERSION="${{ github.ref_name }}"
-          ./linuxdeploy --appdir AppDir --output appimage
-          mv GGEasy*.AppImage "GGEasy-${VERSION}-linux-x86_64.AppImage"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: GGEasy-linux-AppImage
-          path: GGEasy-*.AppImage
-          if-no-files-found: error
-
   build-windows:
     runs-on: windows-latest
     defaults:
@@ -154,8 +65,49 @@ jobs:
           BIN_DIR="$(dirname "$(find bin -maxdepth 3 -type d -name plugins)")"
           VERSION="${{ github.ref_name }}"
           OUT="GGEasy-${VERSION}-windows-x64"
+
           mkdir -p "$OUT"
           cp -r "$BIN_DIR"/* "$OUT"/
+
+          # Qt-плагины (platforms/, styles/, imageformats/, iconengines/) и
+          # сами Qt6*.dll. Плагины приложения передаём windeployqt явно, иначе
+          # их собственные Qt-зависимости не попадут в архив: они грузятся
+          # через QPluginLoader и в импортах GGEasy.exe не видны.
+          windeployqt6 --release --no-translations --no-system-d3d-compiler \
+            "$OUT/GGEasy.exe" "$OUT"/plugins/*.dll
+
+          # Рантайм MSYS2/UCRT64. windeployqt тянет только Qt, поэтому
+          # libgcc_s_seh-1, libstdc++-6, libwinpthread-1, Boost, ICU, zlib и
+          # прочее добираем сами. Обход повторяем до фиксированной точки:
+          # у скопированных DLL есть свои зависимости.
+          # ldd в MSYS2 печатает путь то в POSIX-виде (/ucrt64/bin/...), то в
+          # Windows-виде (C:/msys64/ucrt64/bin/...) — принимаем оба и нормализуем
+          # через cygpath.
+          while :; do
+            BEFORE="$(find "$OUT" -name '*.dll' | wc -l)"
+            find "$OUT" \( -name '*.exe' -o -name '*.dll' \) -print0 \
+              | xargs -0 -r -n1 ldd 2>/dev/null \
+              | awk '{for (i = 1; i < NF; i++) if ($i == "=>") print $(i + 1)}' \
+              | grep -Ei 'ucrt64[/\\]bin' \
+              | sort -u \
+              | while read -r dll; do
+                  src="$(cygpath -u "$dll" 2>/dev/null || echo "$dll")"
+                  [ -f "$src" ] || continue
+                  [ -f "$OUT/$(basename "$src")" ] || cp -v "$src" "$OUT"/
+                done
+            AFTER="$(find "$OUT" -name '*.dll' | wc -l)"
+            if [ "$BEFORE" = "$AFTER" ]; then break; fi
+          done
+
+          # Страховка: без этих трёх приложение не стартует на машине без MSYS2.
+          for dll in libgcc_s_seh-1.dll libstdc++-6.dll libwinpthread-1.dll; do
+            if [ ! -f "$OUT/$dll" ]; then
+              echo "::error::рантайм MSYS2 не попал в архив: $dll"
+              exit 1
+            fi
+          done
+
+          echo "Файлов в архиве: $(find "$OUT" -type f | wc -l)"
           zip -r "${OUT}.zip" "$OUT"
 
       - name: Upload artifact
@@ -165,74 +117,8 @@ jobs:
           path: GGEasy-*-windows-x64.zip
           if-no-files-found: error
 
-  build-macos:
-    runs-on: macos-14
-    steps:
-      - name: Checkout
-        uses: actions/checkout@v4
-        with:
-          submodules: "true"
-
-      - name: Install recent CMake
-        uses: lukka/get-cmake@latest
-
-      - name: Install GCC 16 & tools
-        run: |
-          brew update
-          brew install gcc@16 ninja mold || brew install gcc ninja mold
-          GCC_BIN="$(brew --prefix gcc@16 2>/dev/null || brew --prefix gcc)/bin"
-          GCC=$(ls "$GCC_BIN"/gcc-16 2>/dev/null || ls "$GCC_BIN"/gcc-* | sort -V | tail -1)
-          GXX=$(ls "$GCC_BIN"/g++-16 2>/dev/null || ls "$GCC_BIN"/g++-* | sort -V | tail -1)
-          echo "CC=$GCC" >> "$GITHUB_ENV"
-          echo "CXX=$GXX" >> "$GITHUB_ENV"
-
-      - name: Install Qt
-        uses: jurplel/install-qt-action@v4
-        with:
-          version: ${{ env.QT_VERSION }}
-          host: mac
-          target: desktop
-          modules: qtimageformats
-          cache: "true"
-
-      - name: Install Boost
-        run: brew install boost
-
-      - name: Configure
-        run: |
-          cmake -S . -B build -G Ninja \
-            -DCMAKE_BUILD_TYPE=Release \
-            -DGERBER_NATIVE_MARCH=OFF \
-            -DGIT_REF_NAME=${{ github.ref_name }} \
-            -DGIT_SHA=${{ github.sha }}
-
-      - name: Build
-        run: cmake --build build --config Release -j"$(sysctl -n hw.ncpu)"
-
-      - name: Package
-        run: |
-          set -eu
-          APP_DIR="$(dirname "$(find bin -maxdepth 3 -type d -name plugins)")"
-          APP="$(find "$APP_DIR" -maxdepth 1 -name "*.app")"
-          "$Qt6_DIR/bin/macdeployqt" "$APP" -verbose=1
-          mkdir -p "$APP/Contents/PlugIns/ggeasy"
-          cp -R "$APP_DIR"/plugins/*.dylib "$APP/Contents/PlugIns/ggeasy/" 2>/dev/null || true
-
-          VERSION="${{ github.ref_name }}"
-          OUT="GGEasy-${VERSION}-macos"
-          mkdir -p "$OUT"
-          cp -R "$APP" "$OUT"/
-          ditto -c -k --sequesterRsrc --keepParent "$OUT" "${OUT}.zip"
-
-      - name: Upload artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: GGEasy-macos-zip
-          path: GGEasy-*-macos.zip
-          if-no-files-found: error
-
   release:
-    needs: [build-linux, build-windows, build-macos]
+    needs: [build-windows]
     if: github.event_name == 'push'
     runs-on: ubuntu-latest
     permissions:
