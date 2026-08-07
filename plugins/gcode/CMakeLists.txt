@@ -12,6 +12,11 @@ cmake_minimum_required(VERSION 4.0)
 
 project(gcode)
 
+find_package(
+    Qt6
+    COMPONENTS OpenGL OpenGLWidgets
+    REQUIRED)
+
 file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
 file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 file(GLOB UIS CONFIGURE_DEPENDS *.ui)
@@ -27,7 +32,8 @@ target_enable_pch(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC geometry ctre Qt6::Qml)
+target_link_libraries(${PROJECT_NAME} PUBLIC geometry ctre Qt6::Qml Qt6::OpenGL
+                                            Qt6::OpenGLWidgets)
 
 # Copy JS scripts to output directory so users can view and edit them
 add_custom_target(
