@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 4.0)
 set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
 add_subdirectory(shape)
 
-set(FILE_PLUGINS gerber excellon svg dxf)
+set(FILE_PLUGINS #[[gerber]] gerber2 excellon svg dxf)
 add_subdirectory(file)
 
 set(GCODE_PLUGINS
