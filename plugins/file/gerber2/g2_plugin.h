@@ -24,6 +24,7 @@ public:
     explicit Plugin(QObject* parent = nullptr);
 
     // AbstractFilePlugin interface
+    [[nodiscard]] AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     [[nodiscard]] QString folderName() const override { return tr("Gerber Files (editable)"); }
     [[nodiscard]] QIcon icon() const override;
     [[nodiscard]] AbstractFile* loadFile(QDataStream& stream) const override;
