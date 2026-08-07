@@ -22,6 +22,14 @@
 
 namespace GCode {
 
+// Цвета осей X/Y/Z. Те же, что у соответствующих букв в подсветке синтаксиса
+// УП, — так стрелки в 3D читаются заодно с текстом.
+inline const QColor axisColor[]{
+    {0xFF, 0x3F, 0x3F}, // X
+    {0x3F, 0xFF, 0x3F}, // Y
+    {0x3F, 0x3F, 0xFF}, // Z
+};
+
 // Отрезок траектории инструмента: концы в миллиметрах и номер строки УП
 // (нумерация с нуля, совпадает с номером блока QTextDocument), из которой
 // отрезок получен. Дуги G2/G3 разбиваются на несколько отрезков с одним и тем
@@ -38,8 +46,9 @@ struct PathSegment {
 // Все цвета берутся из настроек приложения (GuiColors):
 //   Background — фон, ToolPath — рабочие ходы, G0 — холостые ходы,
 //   Grid01/Grid05/Grid10 — сетка, CutArea — габаритный параллелепипед,
-//   Zero — маркер нуля, Pin — подсветка выбранных строк УП,
+//   Pin — подсветка выбранных строк УП,
 //   Home — маркер положения инструмента в начале подсвеченного участка.
+// Стрелки осей в начале координат раскрашены в axisColor.
 class Viewer3d : public QOpenGLWidget, protected QOpenGLFunctions {
     Q_OBJECT
 
@@ -68,6 +77,11 @@ public:
     void setRapidsVisible(bool visible);
     bool rapidsVisible() const { return rapidsVisible_; }
 
+    // Перспективная или ортогональная проекция; состояние запоминается в
+    // настройках приложения.
+    void setPerspective(bool enabled);
+    bool perspective() const { return perspective_; }
+
 signals:
     // Пользователь ткнул мышью в отрезок траектории.
     void lineSelected(int lineNo);
@@ -92,6 +106,7 @@ private:
 
     void buildPathVertices();
     void buildAuxVertices();
+    void buildGizmoVertices();
     void buildHighlightVertices();
     void drawVertices(QOpenGLBuffer& buffer, const std::vector<Vertex>& data, bool& dirty);
     // Единичный вектор от точки интереса к камере.
@@ -101,17 +116,20 @@ private:
     int pickLine(QPointF pos) const;
 
     std::vector<PathSegment> segments_;
-    std::vector<Vertex> pathVertices_; // траектория
-    std::vector<Vertex> auxVertices_;  // сетка, габариты, маркер нуля
-    std::vector<Vertex> hlVertices_;   // подсветка + маркер инструмента
+    std::vector<Vertex> pathVertices_;  // траектория
+    std::vector<Vertex> auxVertices_;   // сетка и габариты
+    std::vector<Vertex> gizmoVertices_; // стрелки осей с буквами
+    std::vector<Vertex> hlVertices_;    // подсветка + маркер инструмента
 
     QOpenGLShaderProgram program_;
     QOpenGLVertexArrayObject vao_;
     QOpenGLBuffer pathBuffer_{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer auxBuffer_{QOpenGLBuffer::VertexBuffer};
+    QOpenGLBuffer gizmoBuffer_{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer hlBuffer_{QOpenGLBuffer::VertexBuffer};
     bool pathDirty_{true};
     bool auxDirty_{true};
+    bool gizmoDirty_{true};
     bool hlDirty_{true};
 
     // Габариты траектории.
@@ -131,6 +149,7 @@ private:
     int hlLastLine_{-1};
 
     bool rapidsVisible_{true};
+    bool perspective_{true};
     bool viewTouched_{}; // пока камеру не крутили руками, вписываем при resize
     QPoint lastMousePos_;
     QPoint pressPos_;
