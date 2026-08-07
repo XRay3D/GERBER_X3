@@ -22,6 +22,20 @@
 #include <numbers>
 #include <optional>
 
+// Константы OpenGL 4.0: в заголовках GL, с которыми собран Qt, их может не быть.
+#ifndef GL_PATCHES
+    #define GL_PATCHES 0x000E
+#endif
+#ifndef GL_PATCH_VERTICES
+    #define GL_PATCH_VERTICES 0x8E72
+#endif
+#ifndef GL_MAX_TESS_GEN_LEVEL
+    #define GL_MAX_TESS_GEN_LEVEL 0x8E7E
+#endif
+#ifndef GL_ALIASED_LINE_WIDTH_RANGE
+    #define GL_ALIASED_LINE_WIDTH_RANGE 0x846E
+#endif
+
 namespace GCode {
 
 namespace {
@@ -55,8 +69,31 @@ enum GcvWord {
     GcvWordCount
 };
 
-void gcvAppendArc(std::vector<PathSegment>& out, const QVector3D& from, const QVector3D& to,
-    const QVector3D& center, const GcvArcPlane& pl, bool ccw, int lineNo) {
+// Число хорд, при котором прогиб дуги не превышает допуска, мм.
+int gcvArcSteps(const PathMove& move, double tolerance) {
+    const double maxAngle = move.radius > 1e-9
+        ? 2. * std::acos(std::clamp(1. - tolerance / move.radius, -1., 1.))
+        : 2. * gcvPi;
+    return std::clamp(int(std::ceil(std::abs(move.sweep) / std::max(maxAngle, 1e-4))), 1, 4096);
+}
+
+// Точка дуги по параметру t из [0, 1].
+QVector3D gcvArcPoint(const PathMove& move, double t) {
+    const auto& pl = gcvArcPlanes[move.plane];
+    const double angle = move.startAngle + move.sweep * t;
+    QVector3D pt;
+    pt[pl.a0] = float(move.center[pl.a0] + move.radius * std::cos(angle));
+    pt[pl.a1] = float(move.center[pl.a1] + move.radius * std::sin(angle));
+    pt[pl.an] = float(move.from[pl.an] + (move.to[pl.an] - move.from[pl.an]) * t);
+    return pt;
+}
+
+// Дуга -> одно или несколько перемещений не длиннее 90°. Ограничение по длине
+// нужно аппаратной тесселяции: уровень разбиения патча ограничен сверху, и на
+// четверти окружности его с запасом хватает на любое увеличение.
+void gcvAppendArc(std::vector<PathMove>& out, const QVector3D& from, const QVector3D& to,
+    const QVector3D& center, int planeIdx, bool ccw, int lineNo) {
+    const auto& pl = gcvArcPlanes[planeIdx];
     const double c0 = center[pl.a0];
     const double c1 = center[pl.a1];
     const double radius = std::hypot(from[pl.a0] - c0, from[pl.a1] - c1);
@@ -71,35 +108,43 @@ void gcvAppendArc(std::vector<PathSegment>& out, const QVector3D& from, const QV
     else
         while(sweep >= 0.0) sweep -= 2.0 * gcvPi;
 
-    // Шаг такой, чтобы стрелка прогиба хорды не превышала 0.05 мм.
-    constexpr double tolerance = 0.05;
-    const double maxAngle = radius > 1e-9
-        ? 2.0 * std::acos(std::clamp(1.0 - tolerance / radius, -1.0, 1.0))
-        : 2.0 * gcvPi;
-    const int steps = std::clamp(int(std::ceil(std::abs(sweep) / std::max(maxAngle, 1e-3))), 2, 2048);
+    const int parts = std::max(1, int(std::ceil(std::abs(sweep) / (gcvPi / 2))));
+    PathMove move{
+        .center{center},
+        .radius{float(radius)},
+        .lineNo{lineNo},
+        .plane{planeIdx},
+    };
+    for(int i{}; i < parts; ++i) {
+        const double a0 = startAngle + sweep * i / parts;
+        const double a1 = startAngle + sweep * (i + 1) / parts;
+        const double n0 = from[pl.an] + (to[pl.an] - from[pl.an]) * double(i) / parts;
+        const double n1 = from[pl.an] + (to[pl.an] - from[pl.an]) * double(i + 1) / parts;
 
-    QVector3D prev = from;
-    for(int i{1}; i <= steps; ++i) {
-        QVector3D pt;
-        if(i == steps) {
-            pt = to;
-        } else {
-            const double angle = startAngle + sweep * i / steps;
-            pt[pl.a0] = float(c0 + radius * std::cos(angle));
-            pt[pl.a1] = float(c1 + radius * std::sin(angle));
-            pt[pl.an] = float(from[pl.an] + (to[pl.an] - from[pl.an]) * double(i) / steps);
-        }
-        out.emplace_back(prev, pt, lineNo, false);
-        prev = pt;
+        QVector3D p0, p1;
+        p0[pl.a0] = float(c0 + radius * std::cos(a0));
+        p0[pl.a1] = float(c1 + radius * std::sin(a0));
+        p0[pl.an] = float(n0);
+        p1[pl.a0] = float(c0 + radius * std::cos(a1));
+        p1[pl.a1] = float(c1 + radius * std::sin(a1));
+        p1[pl.an] = float(n1);
+
+        move.startAngle = float(a0);
+        move.sweep = float(sweep / parts);
+        // Начало первой части и конец последней берём из УП как есть — без
+        // погрешности пересчёта через угол.
+        move.from = i ? p0 : from;
+        move.to = i + 1 == parts ? to : p1;
+        out.push_back(move);
     }
 }
 
 // Разбор текста УП. Поддерживаются G0..G3, G17..G19, G20/G21, G90/G91 и
 // G90.1/G91.1; строки без слов перемещения отрезков не дают.
-std::vector<PathSegment> gcvParseProgram(const QString& text) {
+std::vector<PathMove> gcvParseProgram(const QString& text) {
     static constexpr ctll::fixed_string wordPattern{R"(([A-Za-z])[ \t]*([\+\-]?(?:\d+\.?\d*|\.\d+)))"};
 
-    std::vector<PathSegment> result;
+    std::vector<PathMove> result;
     QVector3D pos{};
     int motion{-1}; // модальный код перемещения: 0..3, -1 — ещё не задан
     int plane{};
@@ -165,7 +210,13 @@ std::vector<PathSegment> gcvParseProgram(const QString& text) {
                 target[axis] = float(absolute ? *word[axis] * unit : pos[axis] + *word[axis] * unit);
 
         if(motion < 2) { // G0/G1
-            if(target != pos) result.emplace_back(pos, target, lineNo, motion == 0);
+            if(target != pos)
+                result.push_back(PathMove{
+                    .from{pos},
+                    .to{target},
+                    .lineNo{lineNo},
+                    .rapid{motion == 0},
+                });
             pos = target;
             continue;
         }
@@ -198,9 +249,9 @@ std::vector<PathSegment> gcvParseProgram(const QString& text) {
         }
 
         if(hasCenter)
-            gcvAppendArc(result, pos, target, center, pl, motion == 3, lineNo);
+            gcvAppendArc(result, pos, target, center, plane, motion == 3, lineNo);
         else if(target != pos) // дуга без центра — рисуем хордой
-            result.emplace_back(pos, target, lineNo, false);
+            result.push_back(PathMove{.from{pos}, .to{target}, .lineNo{lineNo}});
         pos = target;
     }
 
@@ -247,18 +298,131 @@ in vec4 vColor;
 out vec4 fragColor;
 void main() { fragColor = vColor; })";
 
+// Дуга целиком: одна вершина-патч со своими параметрами, разбиение считает
+// тесселятор. Вершинный шейдер только протаскивает атрибуты дальше.
+constexpr auto gcvArcVertexShader = R"(#version 400 core
+in vec3 aCenter;
+in vec4 aColor;
+in vec4 aArc;    // startAngle, sweep, radius, plane
+in vec2 aNormal; // координата по нормальной оси: начало и конец
+out vec3 vCenter;
+out vec4 vColor;
+out vec4 vArc;
+out vec2 vNormal;
+void main() {
+    vCenter = aCenter;
+    vColor = aColor;
+    vArc = aArc;
+    vNormal = aNormal;
+})";
+
+// Уровень разбиения — по экранной длине дуги: примерно один отрезок на три
+// пикселя, но не больше предела тесселятора.
+constexpr auto gcvArcTessControlShader = R"(#version 400 core
+layout(vertices = 1) out;
+in vec3 vCenter[];
+in vec4 vColor[];
+in vec4 vArc[];
+in vec2 vNormal[];
+out vec3 tcCenter[];
+out vec4 tcColor[];
+out vec4 tcArc[];
+out vec2 tcNormal[];
+uniform float uPixelsPerUnit;
+uniform float uMaxLevel;
+void main() {
+    tcCenter[gl_InvocationID] = vCenter[gl_InvocationID];
+    tcColor[gl_InvocationID] = vColor[gl_InvocationID];
+    tcArc[gl_InvocationID] = vArc[gl_InvocationID];
+    tcNormal[gl_InvocationID] = vNormal[gl_InvocationID];
+    float pixels = abs(vArc[0].y) * vArc[0].z * uPixelsPerUnit;
+    gl_TessLevelOuter[0] = 1.0;
+    gl_TessLevelOuter[1] = clamp(ceil(pixels / 3.0) + 1.0, 2.0, uMaxLevel);
+})";
+
+// Изолиния не даёт вершину при u == 1, поэтому параметр растягиваем: иначе
+// между соседними дугами оставался бы разрыв в один отрезок.
+constexpr auto gcvArcTessEvalShader = R"(#version 400 core
+layout(isolines, equal_spacing) in;
+in vec3 tcCenter[];
+in vec4 tcColor[];
+in vec4 tcArc[];
+in vec2 tcNormal[];
+out vec4 vColor;
+uniform mat4 uMvp;
+void main() {
+    float level = gl_TessLevelOuter[1];
+    float t = min(gl_TessCoord.x * level / max(level - 1.0, 1.0), 1.0);
+    vec4 arc = tcArc[0];
+    vec3 u, v, w;
+    if(arc.w < 0.5) {        // G17 XY
+        u = vec3(1.0, 0.0, 0.0); v = vec3(0.0, 1.0, 0.0); w = vec3(0.0, 0.0, 1.0);
+    } else if(arc.w < 1.5) { // G18 ZX
+        u = vec3(0.0, 0.0, 1.0); v = vec3(1.0, 0.0, 0.0); w = vec3(0.0, 1.0, 0.0);
+    } else {                 // G19 YZ
+        u = vec3(0.0, 1.0, 0.0); v = vec3(0.0, 0.0, 1.0); w = vec3(1.0, 0.0, 0.0);
+    }
+    float angle = arc.x + arc.y * t;
+    vec3 c = tcCenter[0];
+    vec3 p = u * (dot(c, u) + arc.z * cos(angle))
+           + v * (dot(c, v) + arc.z * sin(angle))
+           + w * mix(tcNormal[0].x, tcNormal[0].y, t);
+    vColor = tcColor[0];
+    gl_Position = uMvp * vec4(p, 1.0);
+})";
+
+constexpr auto gcvArcFragmentShader = R"(#version 400 core
+in vec4 vColor;
+out vec4 fragColor;
+void main() { fragColor = vColor; })";
+
 enum {
     AttrPos,
     AttrColor
 };
 
+enum {
+    AttrArcCenter,
+    AttrArcColor,
+    AttrArcParams,
+    AttrArcNormal
+};
+
+// Поддержку тесселяции проверяем отдельным закадровым контекстом: формат окна
+// нужно задать до его создания, а запрашивать 4.0 core вслепую нельзя — на
+// старом железе окно просто не создастся.
+bool gcvTessellationSupported() {
+    static const bool supported = [] {
+        // Аварийный выключатель на случай кривого драйвера.
+        if(qEnvironmentVariableIsSet("GGEASY_NO_TESSELLATION")) return false;
+        if(QOpenGLContext::openGLModuleType() != QOpenGLContext::LibGL)
+            return false; // OpenGL ES: тесселяция только с 3.2, не связываемся
+        QSurfaceFormat fmt;
+        fmt.setVersion(4, 0);
+        fmt.setProfile(QSurfaceFormat::CoreProfile);
+        QOpenGLContext ctx;
+        ctx.setFormat(fmt);
+        if(!ctx.create()) return false;
+        const auto& got = ctx.format();
+        return got.profile() == QSurfaceFormat::CoreProfile
+            && (got.majorVersion() > 4 || (got.majorVersion() == 4 && got.minorVersion() >= 0));
+    }();
+    return supported;
+}
+
 } // namespace
 
 Viewer3d::Viewer3d(QWidget* parent)
     : QOpenGLWidget{parent} {
+    tessellation_ = gcvTessellationSupported();
+
     QSurfaceFormat fmt = format();
     fmt.setDepthBufferSize(24);
     fmt.setSamples(4);
+    if(tessellation_) {
+        fmt.setVersion(4, 0);
+        fmt.setProfile(QSurfaceFormat::CoreProfile);
+    }
     setFormat(fmt);
     setMinimumSize(200, 200);
     setFocusPolicy(Qt::StrongFocus);
@@ -275,13 +439,19 @@ Viewer3d::~Viewer3d() {
     makeCurrent();
     pathBuffer_.destroy();
     auxBuffer_.destroy();
+    gizmoBuffer_.destroy();
     hlBuffer_.destroy();
+    arcBuffer_.destroy();
+    hlArcBuffer_.destroy();
     vao_.destroy();
     doneCurrent();
 }
 
 void Viewer3d::setProgramText(const QString& text) {
-    segments_ = gcvParseProgram(text);
+    moves_ = gcvParseProgram(text);
+    // Стартовое разбиение — под типовой масштаб; в программном режиме его
+    // уточнит updateTessellation, когда станут известны размеры окна.
+    tessellate(0.02);
 
     bbMin_ = bbMax_ = {};
     if(!segments_.empty()) {
@@ -299,6 +469,43 @@ void Viewer3d::setProgramText(const QString& text) {
     buildAuxVertices();
     buildHighlightVertices();
     update();
+}
+
+void Viewer3d::tessellate(double tolerance) {
+    tessTolerance_ = tolerance;
+    segments_.clear();
+    segments_.reserve(moves_.size());
+    for(auto&& move: moves_) {
+        if(!move.isArc()) {
+            segments_.emplace_back(move.from, move.to, move.lineNo, move.rapid);
+            continue;
+        }
+        const int steps = gcvArcSteps(move, tolerance);
+        QVector3D prev = move.from;
+        for(int i{1}; i <= steps; ++i) {
+            const QVector3D pt = i == steps ? move.to : gcvArcPoint(move, double(i) / steps);
+            segments_.emplace_back(prev, pt, move.lineNo, move.rapid);
+            prev = pt;
+        }
+    }
+    pathDirty_ = hlDirty_ = true;
+}
+
+void Viewer3d::updateTessellation() {
+    if(tessellation_ || moves_.empty()) return;
+    // Прогиб хорды держим в четверти пикселя, но не мельче микрона — иначе на
+    // сильном приближении число вершин уходит в никуда.
+    const double tolerance = std::clamp(worldPerPixel() * 0.25, 1e-3, 0.5);
+    if(tessTolerance_ > 0.
+        && tolerance < tessTolerance_ * 1.4 && tessTolerance_ < tolerance * 1.4)
+        return; // масштаб изменился незначительно — пересчёт не нужен
+    tessellate(tolerance);
+    buildPathVertices();
+    buildHighlightVertices();
+}
+
+float Viewer3d::worldPerPixel() const {
+    return 2.f * distance_ * std::tan(qDegreesToRadians(fov_ * 0.5f)) / std::max(1, height());
 }
 
 void Viewer3d::setHighlightedLines(int first, int last) {
@@ -378,17 +585,42 @@ void Viewer3d::setViewPreset(ViewPreset preset) {
 void Viewer3d::buildPathVertices() {
     const QColor cutColor = App::settings().guiColor(GuiColors::ToolPath);
     const QColor rapidColor = App::settings().guiColor(GuiColors::G0);
+    auto colorOf = [&](bool rapid) -> const QColor& { return rapid ? rapidColor : cutColor; };
+
+    auto addLine = [](std::vector<Vertex>& out, QVector3D a, QVector3D b, const QColor& c) {
+        const float r = float(c.redF()), g = float(c.greenF()), bl = float(c.blueF()), al = float(c.alphaF());
+        out.emplace_back(Vertex{a.x(), a.y(), a.z(), r, g, bl, al});
+        out.emplace_back(Vertex{b.x(), b.y(), b.z(), r, g, bl, al});
+    };
 
     pathVertices_.clear();
-    pathVertices_.reserve(segments_.size() * 2);
-    for(auto&& seg: segments_) {
-        if(seg.rapid && !rapidsVisible_) continue;
-        const QColor& c = seg.rapid ? rapidColor : cutColor;
-        const float r = float(c.redF()), g = float(c.greenF()), b = float(c.blueF()), a = float(c.alphaF());
-        for(const QVector3D& p: {seg.from, seg.to})
-            pathVertices_.emplace_back(Vertex{p.x(), p.y(), p.z(), r, g, b, a});
+    arcVertices_.clear();
+
+    if(tessellation_) {
+        // Прямые идут линиями, дуги — патчами: разобьёт тесселятор.
+        for(auto&& move: moves_) {
+            if(move.rapid && !rapidsVisible_) continue;
+            if(move.isArc()) addArcPatch(arcVertices_, move, colorOf(move.rapid));
+            else addLine(pathVertices_, move.from, move.to, colorOf(move.rapid));
+        }
+    } else {
+        pathVertices_.reserve(segments_.size() * 2);
+        for(auto&& seg: segments_) {
+            if(seg.rapid && !rapidsVisible_) continue;
+            addLine(pathVertices_, seg.from, seg.to, colorOf(seg.rapid));
+        }
     }
-    pathDirty_ = true;
+
+    pathDirty_ = arcDirty_ = true;
+}
+
+void Viewer3d::addArcPatch(std::vector<ArcVertex>& out, const PathMove& move, const QColor& c) {
+    const auto& pl = gcvArcPlanes[move.plane];
+    out.emplace_back(ArcVertex{
+        move.center.x(), move.center.y(), move.center.z(),
+        float(c.redF()), float(c.greenF()), float(c.blueF()), float(c.alphaF()),
+        move.startAngle, move.sweep, move.radius, float(move.plane),
+        move.from[pl.an], move.to[pl.an]});
 }
 
 void Viewer3d::buildAuxVertices() {
@@ -496,14 +728,15 @@ void Viewer3d::buildGizmoVertices() {
 
 void Viewer3d::buildHighlightVertices() {
     hlVertices_.clear();
-    hlDirty_ = true;
-    if(hlFirstLine_ < 0 || segments_.empty()) return;
+    hlArcVertices_.clear();
+    hlDirty_ = hlArcDirty_ = true;
+    if(hlFirstLine_ < 0 || moves_.empty()) return;
 
-    // lineNo по segments_ не убывает, так что нужные отрезки лежат подряд.
-    auto beg = std::lower_bound(segments_.begin(), segments_.end(), hlFirstLine_,
-        [](const PathSegment& s, int line) { return s.lineNo < line; });
-    auto end = std::upper_bound(beg, segments_.end(), hlLastLine_,
-        [](int line, const PathSegment& s) { return line < s.lineNo; });
+    // lineNo по moves_ не убывает, так что нужные перемещения лежат подряд.
+    auto beg = std::lower_bound(moves_.begin(), moves_.end(), hlFirstLine_,
+        [](const PathMove& m, int line) { return m.lineNo < line; });
+    auto end = std::upper_bound(beg, moves_.end(), hlLastLine_,
+        [](int line, const PathMove& m) { return line < m.lineNo; });
     if(beg == end) return;
 
     // Настроечная прозрачность подсветки может быть совсем низкой — поднимаем,
@@ -516,7 +749,21 @@ void Viewer3d::buildHighlightVertices() {
         hlVertices_.emplace_back(Vertex{b.x(), b.y(), b.z(), r, g, bl, al});
     };
 
-    for(auto it = beg; it != end; ++it) addLine(it->from, it->to, c);
+    for(auto it = beg; it != end; ++it) {
+        if(!it->isArc())
+            addLine(it->from, it->to, c);
+        else if(tessellation_)
+            addArcPatch(hlArcVertices_, *it, c);
+        else { // повторяем то же разбиение, что и у самой траектории
+            const int steps = gcvArcSteps(*it, tessTolerance_);
+            QVector3D prev = it->from;
+            for(int i{1}; i <= steps; ++i) {
+                const QVector3D pt = i == steps ? it->to : gcvArcPoint(*it, double(i) / steps);
+                addLine(prev, pt, c);
+                prev = pt;
+            }
+        }
+    }
 
     { // маркер инструмента в начале подсвеченного участка
         const QColor home = App::settings().guiColor(GuiColors::Home);
@@ -531,13 +778,57 @@ void Viewer3d::buildHighlightVertices() {
 void Viewer3d::initializeGL() {
     initializeOpenGLFunctions();
 
-    const bool core = context() && context()->format().profile() == QSurfaceFormat::CoreProfile;
+    const bool wanted = tessellation_;
+    const auto& fmt = context()->format();
+    const bool core = fmt.profile() == QSurfaceFormat::CoreProfile;
+    // Драйвер мог выдать контекст беднее запрошенного — проверяем ещё раз.
+    if(tessellation_ && !(core && fmt.majorVersion() >= 4)) tessellation_ = false;
+
     program_.addShaderFromSourceCode(QOpenGLShader::Vertex, core ? gcvVertexShader150 : gcvVertexShader110);
     program_.addShaderFromSourceCode(QOpenGLShader::Fragment, core ? gcvFragmentShader150 : gcvFragmentShader110);
     program_.bindAttributeLocation("aPos", AttrPos);
     program_.bindAttributeLocation("aColor", AttrColor);
     if(!program_.link())
         qWarning() << "GCode::Viewer3d: shader link failed:" << program_.log();
+
+    if(tessellation_) {
+        arcProgram_.addShaderFromSourceCode(QOpenGLShader::Vertex, gcvArcVertexShader);
+        arcProgram_.addShaderFromSourceCode(QOpenGLShader::TessellationControl, gcvArcTessControlShader);
+        arcProgram_.addShaderFromSourceCode(QOpenGLShader::TessellationEvaluation, gcvArcTessEvalShader);
+        arcProgram_.addShaderFromSourceCode(QOpenGLShader::Fragment, gcvArcFragmentShader);
+        arcProgram_.bindAttributeLocation("aCenter", AttrArcCenter);
+        arcProgram_.bindAttributeLocation("aColor", AttrArcColor);
+        arcProgram_.bindAttributeLocation("aArc", AttrArcParams);
+        arcProgram_.bindAttributeLocation("aNormal", AttrArcNormal);
+        if(!arcProgram_.link()) {
+            qWarning() << "GCode::Viewer3d: tessellation shader link failed:" << arcProgram_.log();
+            tessellation_ = false; // откатываемся на разбиение дуг на CPU
+        } else {
+            GLint maxLevel{64};
+            glGetIntegerv(GL_MAX_TESS_GEN_LEVEL, &maxLevel);
+            arcProgram_.bind();
+            arcProgram_.setUniformValue("uMaxLevel", float(maxLevel));
+            arcProgram_.release();
+            glPatchParameteri(GL_PATCH_VERTICES, 1);
+        }
+    }
+
+    // Буферы могли быть построены до создания контекста, когда способ отрисовки
+    // дуг ещё только предполагался.
+    if(wanted != tessellation_) {
+        buildPathVertices();
+        buildHighlightVertices();
+    }
+
+    // В core-профиле любая ширина линии, кроме единицы, — GL_INVALID_VALUE,
+    // поэтому подсветку там утолщать нельзя.
+    lineWidthMax_ = 1.f;
+    if(!core) {
+        GLfloat range[2]{1.f, 1.f};
+        glGetFloatv(GL_ALIASED_LINE_WIDTH_RANGE, range);
+        lineWidthMax_ = std::max(1.f, range[1]);
+    }
+
     vao_.create();
 
     glEnable(GL_DEPTH_TEST);
@@ -557,28 +848,58 @@ void Viewer3d::paintGL() {
 
     if(!program_.isLinked()) return;
 
+    updateTessellation(); // масштаб мог измениться — дуги пересчитываются на CPU
+
+    const QMatrix4x4 mvp = mvpMatrix();
     QOpenGLVertexArrayObject::Binder vaoBinder{&vao_};
-    program_.bind();
-    program_.setUniformValue("uMvp", mvpMatrix());
+
+    // Пикселей на миллиметр в плоскости точки интереса — по этой величине
+    // тесселятор выбирает частоту разбиения дуг.
+    const float pixelsPerUnit = 1.f / std::max(worldPerPixel(), 1e-6f);
+
+    auto drawPath = [&] {
+        program_.bind();
+        program_.setUniformValue("uMvp", mvp);
+        drawVertices(pathBuffer_, pathVertices_, pathDirty_);
+        program_.release();
+        if(!arcVertices_.empty()) {
+            arcProgram_.bind();
+            arcProgram_.setUniformValue("uMvp", mvp);
+            arcProgram_.setUniformValue("uPixelsPerUnit", pixelsPerUnit);
+            drawArcs(arcBuffer_, arcVertices_, arcDirty_);
+            arcProgram_.release();
+        }
+    };
 
     glEnable(GL_DEPTH_TEST);
     // Сетку и габариты рисуем без записи глубины, иначе они закрывают
     // траекторию, лежащую под плоскостью Z0, при взгляде сверху.
     glDepthMask(GL_FALSE);
+    program_.bind();
+    program_.setUniformValue("uMvp", mvp);
     drawVertices(auxBuffer_, auxVertices_, auxDirty_);
+    program_.release();
     glDepthMask(GL_TRUE);
-    drawVertices(pathBuffer_, pathVertices_, pathDirty_);
+    drawPath();
 
     // Стрелки осей и подсветку рисуем последними и без теста глубины, чтобы их
     // не закрывала траектория.
     glDisable(GL_DEPTH_TEST);
+    program_.bind();
+    program_.setUniformValue("uMvp", mvp);
     buildGizmoVertices(); // зависит от положения камеры — строим каждый кадр
     drawVertices(gizmoBuffer_, gizmoVertices_, gizmoDirty_);
-    glLineWidth(2.f);
+    glLineWidth(std::min(2.f, lineWidthMax_));
     drawVertices(hlBuffer_, hlVertices_, hlDirty_);
-    glLineWidth(1.f);
-
     program_.release();
+    if(!hlArcVertices_.empty()) {
+        arcProgram_.bind();
+        arcProgram_.setUniformValue("uMvp", mvp);
+        arcProgram_.setUniformValue("uPixelsPerUnit", pixelsPerUnit);
+        drawArcs(hlArcBuffer_, hlArcVertices_, hlArcDirty_);
+        arcProgram_.release();
+    }
+    glLineWidth(1.f);
 }
 
 void Viewer3d::drawVertices(QOpenGLBuffer& buffer, const std::vector<Vertex>& data, bool& dirty) {
@@ -594,6 +915,33 @@ void Viewer3d::drawVertices(QOpenGLBuffer& buffer, const std::vector<Vertex>& da
     program_.setAttributeBuffer(AttrPos, GL_FLOAT, 0, 3, sizeof(Vertex));
     program_.setAttributeBuffer(AttrColor, GL_FLOAT, 3 * sizeof(float), 4, sizeof(Vertex));
     glDrawArrays(GL_LINES, 0, int(data.size()));
+    program_.disableAttributeArray(AttrPos);
+    program_.disableAttributeArray(AttrColor);
+    buffer.release();
+}
+
+void Viewer3d::drawArcs(QOpenGLBuffer& buffer, const std::vector<ArcVertex>& data, bool& dirty) {
+    if(data.empty() || !arcProgram_.isLinked()) return;
+    if(!buffer.isCreated()) buffer.create(), dirty = true;
+    buffer.bind();
+    if(dirty) {
+        buffer.allocate(data.data(), int(data.size() * sizeof(ArcVertex)));
+        dirty = false;
+    }
+    constexpr int stride = sizeof(ArcVertex);
+    arcProgram_.enableAttributeArray(AttrArcCenter);
+    arcProgram_.enableAttributeArray(AttrArcColor);
+    arcProgram_.enableAttributeArray(AttrArcParams);
+    arcProgram_.enableAttributeArray(AttrArcNormal);
+    arcProgram_.setAttributeBuffer(AttrArcCenter, GL_FLOAT, 0, 3, stride);
+    arcProgram_.setAttributeBuffer(AttrArcColor, GL_FLOAT, 3 * sizeof(float), 4, stride);
+    arcProgram_.setAttributeBuffer(AttrArcParams, GL_FLOAT, 7 * sizeof(float), 4, stride);
+    arcProgram_.setAttributeBuffer(AttrArcNormal, GL_FLOAT, 11 * sizeof(float), 2, stride);
+    glDrawArrays(GL_PATCHES, 0, int(data.size()));
+    arcProgram_.disableAttributeArray(AttrArcCenter);
+    arcProgram_.disableAttributeArray(AttrArcColor);
+    arcProgram_.disableAttributeArray(AttrArcParams);
+    arcProgram_.disableAttributeArray(AttrArcNormal);
     buffer.release();
 }
 
