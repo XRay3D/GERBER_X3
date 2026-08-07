@@ -93,6 +93,9 @@ add_compile_definitions(
   saturate_cast=saturating_cast
   USINGZ=1)
 
+# Compile options for our own code only — заданы после FetchContent, чтобы
+# сторонние цели (Clipper2, ctre) их не наследовали. Clipper2 собирается со
+# своим -Werror и ломался на диагностике _FORTIFY_SOURCE, протекавшей отсюда.
 set(COMMON_COMPILE_OPTIONS
     -fPIC
     -Wall
@@ -107,25 +110,34 @@ if(GERBER_NATIVE_MARCH)
   list(APPEND COMMON_COMPILE_OPTIONS -march=native)
 endif()
 
+# -fhardened, -fstack-clash-protection и RELRO/BIND_NOW завязаны на специфику
+# glibc/ELF и не поддерживаются mingw-w64 GCC (Windows) и Homebrew GCC (macOS),
+# поэтому включаем их только под Linux.
 if(CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
   add_compile_options(
     ${COMMON_COMPILE_OPTIONS}
     # -fcf-protection=full -fvtable-verify=preinit
-    -fhardened -freflection -fstack-clash-protection -fstack-protector-strong)
-  # Security hardening link flags (RELRO + BIND_NOW)
-  add_link_options(-Wl,-z,relro -Wl,-z,now)
+    -freflection -fstack-protector-strong)
+  if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    add_compile_options(-fhardened -fstack-clash-protection)
+    add_link_options(-Wl,-z,relro -Wl,-z,now)
+  endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   add_compile_options(
     ${COMMON_COMPILE_OPTIONS}
     # -fcf-protection=full -fvtable-verify=preinit
-    -fhardened -freflection -fstack-clash-protection -fstack-protector-strong)
-  # Security hardening link flags (RELRO + BIND_NOW)
-  add_link_options(-Wl,-z,relro -Wl,-z,now)
+    -freflection -fstack-protector-strong)
+  if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    add_compile_options(-fhardened -fstack-clash-protection)
+    add_link_options(-Wl,-z,relro -Wl,-z,now)
+  endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   # Classic icc/icpc: no C++26 reflection support, but the driver is
   # GCC-compatible enough to accept the same hardening flags.
   add_compile_options(${COMMON_COMPILE_OPTIONS} -fstack-protector-strong)
-  add_link_options(-Wl,-z,relro -Wl,-z,now)
+  if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    add_link_options(-Wl,-z,relro -Wl,-z,now)
+  endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   # No C++26 reflection support yet. /GS (stack protector) is already on by
   # default; approximate the rest of -fhardened with CFG + SDL checks.
