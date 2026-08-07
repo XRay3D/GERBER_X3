@@ -72,6 +72,11 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
+    { // Пользователь мог переключить обработку герберов на плагин file_gerber2.
+        MySettings settings;
+        settings.beginGroup(u"Gerber2"_s);
+        if(settings.value(u"chbxPreferred"_s, false).toBool()) return false;
+    }
     QFile file{fileName};
     if(file.open(QFile::ReadOnly | QFile::Text)) {
         QTextStream in{&file};
