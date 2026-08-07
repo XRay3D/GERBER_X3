@@ -12,7 +12,7 @@
 
 #include <QMatrix4x4>
 #include <QOpenGLBuffer>
-#include <QOpenGLFunctions>
+#include <QOpenGLExtraFunctions>
 #include <QOpenGLShaderProgram>
 #include <QOpenGLVertexArrayObject>
 #include <QOpenGLWidget>
@@ -30,10 +30,27 @@ inline const QColor axisColor[]{
     {0x3F, 0x3F, 0xFF}, // Z
 };
 
+// Перемещение УП: прямая (G0/G1) или дуга (G2/G3). Дуги хранятся
+// параметрически, чтобы разбивать их на хорды под текущий масштаб, а не раз и
+// навсегда. Дуга длиннее 90° разрезается парсером на части — так ограничен и
+// шаг аппаратной тесселяции.
+struct PathMove {
+    QVector3D from;
+    QVector3D to;
+    QVector3D center;   // центр дуги; по нормальной оси совпадает с from
+    float startAngle{}; // рад, отсчёт в плоскости дуги
+    float sweep{};      // рад со знаком; 0 — прямая
+    float radius{};
+    int lineNo{}; // номер строки УП, нумерация с нуля
+    int plane{};  // 0 — G17 XY, 1 — G18 ZX, 2 — G19 YZ
+    bool rapid{}; // G0 — холостой ход
+    bool isArc() const { return sweep != 0.f; }
+};
+
 // Отрезок траектории инструмента: концы в миллиметрах и номер строки УП
 // (нумерация с нуля, совпадает с номером блока QTextDocument), из которой
-// отрезок получен. Дуги G2/G3 разбиваются на несколько отрезков с одним и тем
-// же lineNo, поэтому lineNo по вектору не убывает — на этом построен поиск
+// отрезок получен. Дуги разбиваются на несколько отрезков с одним и тем же
+// lineNo, поэтому lineNo по вектору не убывает — на этом построен поиск
 // диапазона подсветки.
 struct PathSegment {
     QVector3D from;
@@ -49,7 +66,14 @@ struct PathSegment {
 //   Pin — подсветка выбранных строк УП,
 //   Home — маркер положения инструмента в начале подсвеченного участка.
 // Стрелки осей в начале координат раскрашены в axisColor.
-class Viewer3d : public QOpenGLWidget, protected QOpenGLFunctions {
+//
+// Дуги G2/G3 рисуются одним из двух способов. Если видеокарта даёт контекст
+// OpenGL 4.0 core, дуга уходит на GPU одним патчем и разбивается тесселятором
+// под экранную длину — кривая гладкая на любом увеличении. Иначе дуга бьётся на
+// хорды на CPU, а разбиение пересчитывается при изменении масштаба, чтобы
+// прогиб хорды оставался меньше пикселя. Способ выбирается в конструкторе:
+// формат контекста нужно запросить до создания окна.
+class Viewer3d : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
 
 public:
@@ -82,6 +106,9 @@ public:
     void setPerspective(bool enabled);
     bool perspective() const { return perspective_; }
 
+    // Дуги считает GPU (аппаратная тесселяция), а не CPU.
+    bool hardwareTessellation() const { return tessellation_; }
+
 signals:
     // Пользователь ткнул мышью в отрезок траектории.
     void lineSelected(int lineNo);
@@ -104,33 +131,65 @@ private:
         float r, g, b, a;
     };
 
+    // Патч дуги для аппаратной тесселяции: одна вершина на дугу.
+    struct ArcVertex {
+        float cx, cy, cz; // центр
+        float r, g, b, a; // цвет
+        float start;      // начальный угол, рад
+        float sweep;      // разворот со знаком, рад
+        float radius;     //
+        float plane;      // индекс плоскости дуги
+        float n0, n1;     // координата по нормальной оси: начало и конец
+    };
+
     void buildPathVertices();
+    void addArcPatch(std::vector<ArcVertex>& out, const PathMove& move, const QColor& color);
     void buildAuxVertices();
     void buildGizmoVertices();
     void buildHighlightVertices();
+    // moves_ -> segments_ с заданным допуском на прогиб хорды, мм.
+    void tessellate(double tolerance);
+    // Пересчитать разбиение дуг под текущий масштаб (только программный режим).
+    void updateTessellation();
+    // Размер экранного пикселя в мм на расстоянии точки интереса.
+    float worldPerPixel() const;
+
     void drawVertices(QOpenGLBuffer& buffer, const std::vector<Vertex>& data, bool& dirty);
+    void drawArcs(QOpenGLBuffer& buffer, const std::vector<ArcVertex>& data, bool& dirty);
     // Единичный вектор от точки интереса к камере.
     QVector3D cameraDir() const;
     QMatrix4x4 mvpMatrix() const;
     // Номер строки ближайшего к точке pos отрезка или -1.
     int pickLine(QPointF pos) const;
 
-    std::vector<PathSegment> segments_;
-    std::vector<Vertex> pathVertices_;  // траектория
-    std::vector<Vertex> auxVertices_;   // сетка и габариты
-    std::vector<Vertex> gizmoVertices_; // стрелки осей с буквами
-    std::vector<Vertex> hlVertices_;    // подсветка + маркер инструмента
+    std::vector<PathMove> moves_;          // разобранная УП
+    std::vector<PathSegment> segments_;    // разбиение moves_ на хорды: пикинг и линии
+    std::vector<Vertex> pathVertices_;     // траектория
+    std::vector<Vertex> auxVertices_;      // сетка и габариты
+    std::vector<Vertex> gizmoVertices_;    // стрелки осей с буквами
+    std::vector<Vertex> hlVertices_;       // подсветка + маркер инструмента
+    std::vector<ArcVertex> arcVertices_;   // дуги траектории (патчи)
+    std::vector<ArcVertex> hlArcVertices_; // подсвеченные дуги (патчи)
 
     QOpenGLShaderProgram program_;
+    QOpenGLShaderProgram arcProgram_; // с тесселяцией; пуста в программном режиме
     QOpenGLVertexArrayObject vao_;
     QOpenGLBuffer pathBuffer_{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer auxBuffer_{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer gizmoBuffer_{QOpenGLBuffer::VertexBuffer};
     QOpenGLBuffer hlBuffer_{QOpenGLBuffer::VertexBuffer};
+    QOpenGLBuffer arcBuffer_{QOpenGLBuffer::VertexBuffer};
+    QOpenGLBuffer hlArcBuffer_{QOpenGLBuffer::VertexBuffer};
     bool pathDirty_{true};
     bool auxDirty_{true};
     bool gizmoDirty_{true};
     bool hlDirty_{true};
+    bool arcDirty_{true};
+    bool hlArcDirty_{true};
+
+    bool tessellation_{};     // дуги считает GPU
+    double tessTolerance_{};  // текущий допуск программного разбиения, мм
+    float lineWidthMax_{1.f}; // предел glLineWidth у контекста
 
     // Габариты траектории.
     QVector3D bbMin_{};
