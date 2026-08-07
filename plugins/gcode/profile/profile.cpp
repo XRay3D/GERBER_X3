@@ -46,16 +46,16 @@ void Creator::createProfile(const Tool& tool, const double depth) {
         if(closedSrcPaths.size()) {
             // ClipperOffset offset;
             // for(Paths64& paths: groupedPaths(GCode::Grouping::Copper))
-            // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+            // offset.AddPaths(paths, cl::JoinType::Round, cl::EndType::Polygon);
             // returnPs = offset.Execute(dOffset);
             auto it = v::join(groupedPaths(GCode::Grouping::Copper));
-            returnPs = Inflate(Paths64{it.begin(), it.end()}, dOffset, JoinType::Round, EndType::Polygon);
+            returnPs = Inflate64(Paths64{it.begin(), it.end()}, dOffset, cl::JoinType::Round, cl::EndType::Polygon);
         }
         if(openSrcPaths.size()) {
             // ClipperOffset offset;
-            // offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
+            // offset.AddPaths(openSrcPaths, cl::JoinType::Round, cl::EndType::Round);
             // openSrcPaths = offset.Execute(dOffset);
-            openSrcPaths = Inflate(openSrcPaths, dOffset, JoinType::Round, EndType::Round);
+            openSrcPaths = Inflate64(openSrcPaths, dOffset, cl::JoinType::Round, cl::EndType::Round);
             if(!openSrcPaths.empty())
                 returnPs.append_range(openSrcPaths);
         }
@@ -112,22 +112,22 @@ void Creator::trimmingOpenPaths(Paths64& paths) {
                 // ClipperOffset offset;
                 // offset.AddPath();
                 // ps = offset.Execute(dOffset + 100);
-                ps = Inflate({p}, dOffset + 100, JoinType::Miter, EndType::Butt);
+                ps = Inflate64({p}, dOffset + 100, cl::JoinType::Miter, cl::EndType::Butt);
 
                 // offset.Clear();
-                // offset.AddPath(ps.front(), JoinType::Miter, EndType::Polygon);
+                // offset.AddPath(ps.front(), cl::JoinType::Miter, cl::EndType::Polygon);
                 // ps = offset.Execute(-dOffset);
-                ps = Inflate({ps.front()}, -dOffset, JoinType::Miter, EndType::Polygon);
+                ps = Inflate64({ps.front()}, -dOffset, cl::JoinType::Miter, cl::EndType::Polygon);
                 if(ps.empty()) {
                     paths -= i--;
                     continue;
                 }
             }
             {
-                Clipper clipper;
+                cl::Clipper64 clipper;
                 clipper.AddOpenSubject({p});
                 clipper.AddClip(ps);
-                clipper.Execute(ClipType::Intersection, FillRule::Positive, ps, ps); // FIXME open paths ???
+                clipper.Execute(cl::ClipType::Intersection, cl::FillRule::Positive, ps, ps); // FIXME open paths ???
                 p = ps.front();
             }
         }
@@ -211,22 +211,22 @@ void Creator::makeBridges() {
                       return bi->test(toCurve(rPaths.front()));
                   });
             if(r::empty(biStack)) return;
-            auto isPositive1 = CL2::IsPositive(rPaths.front());
+            auto isPositive1 = cl::IsPositive(rPaths.front());
 
             // create frame
-            Paths64 frame = Inflate(rPaths, toolDiameter * uScale * 0.1, JoinType::Miter, EndType::Butt, uScale);
+            Paths64 frame = Inflate64(rPaths, toolDiameter * uScale * 0.1, cl::JoinType::Miter, cl::EndType::Butt, uScale);
             Paths64 clip;
             for(Gi::Bridge* bip: biStack)
                 clip.append_range(toPaths(bip->curves()));
 
-            frame = CL2::Intersect(frame, clip, FillRule::Positive);
+            frame = cl::Intersect(frame, clip, cl::FillRule::Positive);
 
             // cut toolPath
-            Clipper clipper;
+            cl::Clipper64 clipper;
             clipper.AddOpenSubject(rPaths);
             clipper.AddClip(frame);
             PolyTree polytree;
-            clipper.Execute(ClipType::Difference, FillRule::Positive, frame, rPaths);
+            clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, frame, rPaths);
 
             if(rPaths.empty())
                 return;
@@ -237,7 +237,7 @@ void Creator::makeBridges() {
             auto IsPositive = [](Paths64 paths) {
                 for(auto&& path: paths | v::drop(1))
                     paths.front().append_range(std::move(path)); // NOTE  move?
-                return CL2::IsPositive(paths.front());
+                return cl::IsPositive(paths.front());
             };
 
             if(isPositive1 ^ IsPositive(rPaths)) // Вернуть исходное направление пути
@@ -252,7 +252,7 @@ void Creator::reorder() {
     // return;
     PolyTree polyTree;
     {
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddSubject(returnPs);
         Rect r(GetBounds(returnPs));
         int k = uScale;
@@ -263,7 +263,7 @@ void Creator::reorder() {
             {r.left - k,  r.top - k   }
         };
         clipper.AddSubject({outer});
-        clipper.Execute(ClipType::Union, FillRule::EvenOdd, polyTree);
+        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, polyTree);
         returnPs.clear();
     }
 
@@ -278,8 +278,8 @@ void Creator::reorder() {
 
     for(auto&& path: returnPs) {
 
-        CL2::StripDuplicates(path, true);
-        CL2::SimplifyPath(path, uScale / 100);
+        cl::StripDuplicates(path, true);
+        cl::SimplifyPath(path, uScale / 100);
         path.push_back(path.front());
 
         returnPss.push_back({path});

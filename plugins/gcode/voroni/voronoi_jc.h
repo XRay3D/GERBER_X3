@@ -18,8 +18,8 @@ class VoronoiJc : public virtual GCode::Creator {
 
 protected:
     struct Pair {
-        Point first;
-        Point second;
+        Point64 first;
+        Point64 second;
         int32_t id;
         bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
         friend size_t qHash(const Pair& tag, uint = 0) {
@@ -31,7 +31,7 @@ protected:
     using Pairss = mvector<Pairs>;
     struct OrdPath {
         int count = 1;
-        Point Pt;
+        Point64 Pt;
         OrdPath* Next = nullptr;
         OrdPath* Prev = nullptr;
         OrdPath* Last = nullptr;
@@ -41,8 +41,8 @@ protected:
             Last = opt->Prev->Last;
             opt->Prev = this;
         }
-        Path toPath() {
-            Path rp;
+        Path64 toPath() {
+            Path64 rp;
             rp.reserve(count);
             rp.push_back(Pt);
             OrdPath* next = Next;
@@ -55,7 +55,7 @@ protected:
     };
 
     void jcVoronoi();
-    Paths toPath(const Pairs& pairs);
+    Paths64 toPath(const Pairs& pairs);
 };
 
 } // namespace Voronoi

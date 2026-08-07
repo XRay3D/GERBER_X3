@@ -74,27 +74,27 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
 
-    Paths profilePaths;
+    Paths64 profilePaths;
 
-    auto calcScanLines = [](const Paths& src, const Path& frame) {
-        Paths sl; // Scan Lines
+    auto calcScanLines = [](const Paths64& src, const Path64& frame) {
+        Paths64 sl; // Scan Lines
 
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddClip(src);
         clipper.AddOpenSubject({frame});
-        clipper.Execute(ClipType::Intersection, FillRule::NonZero, sl, sl);
+        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, sl, sl);
         if(!sl.size())
             return sl;
 
-        r::sort(sl, {}, [](const Path& p) { return p.front().y; }); // vertical sort
+        r::sort(sl, {}, [](const Path64& p) { return p.front().y; }); // vertical sort
 
         /*PType*/ int32_t start = sl.front().front().y;
         bool fl = {};
         for(size_t i{}, last{}; i < sl.size(); ++i) {
             if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
 
-                fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path& p) { return p.front().x; }) :           // horizontal sort
-                    r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path& p) { return p.front().x; }); // horizontal sort
+                fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path64& p) { return p.front().x; }) :           // horizontal sort
+                    r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path64& p) { return p.front().x; }); // horizontal sort
 
                 for(size_t k = last; k < i; ++k) // fix direction
                     if(fl ^ (sl[k].front().x < sl[k].back().x))
@@ -107,31 +107,31 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         }
         return sl;
     };
-    auto calcFrames = [](const Paths& src, const Path& frame) {
-        Paths frames;
+    auto calcFrames = [](const Paths64& src, const Path64& frame) {
+        Paths64 frames;
         {
-            Paths tmp;
-            Clipper clipper;
+            Paths64 tmp;
+            cl::Clipper64 clipper;
             clipper.AddOpenSubject(src);
             clipper.AddClip({frame});
-            clipper.Execute(ClipType::Intersection, FillRule::NonZero, tmp, tmp); // FillRule::NonZero
+            clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, tmp, tmp); // FillRule::NonZero
             // dbgPaths(tmp, u"ClipType::Intersection"_s);
             frames.append_range(std::move(tmp));
-            clipper.Execute(ClipType::Difference, FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
+            clipper.Execute(cl::ClipType::Difference, cl::FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
             // dbgPaths(tmp, u"ClipType::Difference"_s);
             frames.append_range(std::move(tmp));
 
-            r::sort(frames, {}, [](const Path& p) { return p.front().y; }); // vertical sort
+            r::sort(frames, {}, [](const Path64& p) { return p.front().y; }); // vertical sort
 
-            std::sort(frames.begin(), frames.end(), [](const Path& l, const Path& r) { return l.front().y < r.front().y; }); // vertical sort
+            std::sort(frames.begin(), frames.end(), [](const Path64& l, const Path64& r) { return l.front().y < r.front().y; }); // vertical sort
             for(auto& path: frames)
                 if(path.front().y > path.back().y)
                     ReversePath(path); // fix vertical direction
         }
         return frames;
     };
-    auto calcZigzag = [hatchStep](const Paths& src) -> std::optional<Path> {
-        Clipper clipper;
+    auto calcZigzag = [hatchStep](const Paths64& src) -> std::optional<Path64> {
+        cl::Clipper64 clipper;
         clipper.AddClip(src);
         Rect rect(GetBounds(src));
         /*PType*/ int32_t o = uScale - (rect.Height() % static_cast</*PType*/ int32_t>(hatchStep * uScale)) / 2;
@@ -139,7 +139,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         rect.bottom += o;
         rect.left -= uScale;
         rect.right += uScale;
-        Path zigzag;
+        Path64 zigzag;
         auto step = hatchStep * uScale;
         auto start = rect.top;
         bool fl{};
@@ -159,14 +159,14 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         return zigzag;
     };
 
-    auto merge = [](const Paths& scanLines, const Paths& frames) {
-        Paths merged;
+    auto merge = [](const Paths64& scanLines, const Paths64& frames) {
+        Paths64 merged;
         merged.reserve(scanLines.size() / 10);
-        std::list<Path> bList;
+        std::list<Path64> bList;
         for(auto&& path: scanLines)
             bList.emplace_back(std::move(path));
 
-        std::list<Path> fList;
+        std::list<Path64> fList;
         for(auto&& path: frames)
             fList.emplace_back(std::move(path));
 
@@ -208,7 +208,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         return merged;
     };
 
-    for(Paths src: groupedPss) {
+    for(Paths64 src: groupedPss) {
         {
             src = InflateRoundPolygon(src, -dOffset * 2);
             for(auto& path: src)
@@ -258,7 +258,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
         if(gcp.convent())
             ReversePaths(profilePaths);
-        for(Path& path: profilePaths)
+        for(Path64& path: profilePaths)
             path.push_back(path.front());
     }
 

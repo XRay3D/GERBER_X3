@@ -36,12 +36,12 @@ void Creator::createThread(const Tool& tool, const double depth) {
         // if(closedSrcPaths.size()) {
         // ClipperOffset offset;
         // for(Paths& paths: groupedPaths(GCode::Grouping::Copper))
-        // offset.AddPaths(paths, JoinType::Round, EndType::Polygon);
+        // offset.AddPaths(paths, cl::JoinType::Round, cl::EndType::Polygon);
         // returnPs = offset.Execute(dOffset);
         // }
         // if(openSrcPaths.size()) {
         // ClipperOffset offset;
-        // offset.AddPaths(openSrcPaths, JoinType::Round, EndType::Round);
+        // offset.AddPaths(openSrcPaths, cl::JoinType::Round, cl::EndType::Round);
         // openSrcPaths = offset.Execute(dOffset);
         // if(!openSrcPaths.empty())
         // returnPs.append(openSrcPaths);

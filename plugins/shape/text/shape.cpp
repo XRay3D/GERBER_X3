@@ -95,10 +95,10 @@ void Shape::redraw() {
     shape_ = transform.map(painterPath);
 #else
     shape_.clear();
-    Paths paths;
-    Clipper clipper;
+    Paths64 paths;
+    cl::Clipper64 clipper;
     clipper.AddClip(~painterPath.toSubpathPolygons(transform));
-    clipper.Execute(ClipType::Union, FillRule::NonZero, paths);
+    clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths);
     for(auto& sp: paths) {
         sp.emplace_back(sp.front());
         shape_.addPolygon(~sp);

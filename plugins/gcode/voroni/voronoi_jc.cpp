@@ -12,7 +12,7 @@
 #include "jc_voronoi.h"
 #include "types.h"
 
-size_t qHash(const Point& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point))); }
+size_t qHash(const Point64& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point64))); }
 
 namespace Voronoi {
 
@@ -24,21 +24,21 @@ void VoronoiJc::jcVoronoi() {
     CleanPaths(closedSrcPaths, tolerance * 0.1 * uScale);
     groupedPaths(GCode::Grouping::Copper);
     int32_t id{};
-    auto condei = [&points, tolerance, &id](Point tmp, Point point) { // split long segments
+    auto condei = [&points, tolerance, &id](Point64 tmp, Point64 point) { // split long segments
         QLineF line{~tmp, ~point};
         if(line.length() > tolerance) {
             for(size_t i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
                 line.setLength(i * tolerance);
-                Point pt{~line.p2()};
+                Point64 pt{~line.p2()};
                 points.push_back({static_cast<jcv_real>(pt.x), static_cast<jcv_real>(pt.y), id});
             }
         }
     };
 
-    for(const Paths& paths: groupedPss) {
-        for(const Path& path: paths) {
-            Point tmp(path.front());
-            for(const Point& point: path) {
+    for(const Paths64& paths: groupedPss) {
+        for(const Path64& path: paths) {
+            Point64 tmp(path.front());
+            for(const Point64& point: path) {
                 condei(tmp, point);
                 points.push_back({static_cast<jcv_real>(point.x), static_cast<jcv_real>(point.y), id});
                 tmp = point;
@@ -48,9 +48,9 @@ void VoronoiJc::jcVoronoi() {
         ++id;
     }
 
-    for(const Path& path: openSrcPaths) {
-        Point tmp(path.front());
-        for(const Point& point: path) {
+    for(const Path64& path: openSrcPaths) {
+        Point64 tmp(path.front());
+        for(const Point64& point: path) {
             condei(tmp, point);
             points.push_back({static_cast<jcv_real>(point.x), static_cast<jcv_real>(point.y), id});
             tmp = point;
@@ -59,8 +59,8 @@ void VoronoiJc::jcVoronoi() {
         ++id;
     }
 
-    Clipper clipper;
-    for(const Paths& paths: groupedPss)
+    cl::Clipper64 clipper;
+    for(const Paths64& paths: groupedPss)
         clipper.AddClip(paths);
     clipper.AddClip(openSrcPaths);
     const Rect r(/*GetBounds(groupedPss) +*/ GetBounds(openSrcPaths)); // FIXME
@@ -74,7 +74,7 @@ void VoronoiJc::jcVoronoi() {
         };
         jcv_diagram diagram;
         jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
-        auto toPoint = [](const jcv_edge* edge, int num) -> const Point {
+        auto toPoint = [](const jcv_edge* edge, int num) -> const Point64 {
             return {static_cast</*PType*/ int32_t>(edge->pos[num].x), static_cast</*PType*/ int32_t>(edge->pos[num].y)};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
@@ -102,7 +102,7 @@ void VoronoiJc::jcVoronoi() {
             returnPs -= i--;
 }
 
-Paths VoronoiJc::toPath(const Pairs& pairs) {
+Paths64 VoronoiJc::toPath(const Pairs& pairs) {
     msg = QObject::tr("Merge Segments");
 
     mvector<Pair> pairsVec;
@@ -147,14 +147,14 @@ Paths VoronoiJc::toPath(const Pairs& pairs) {
         }
     }
 
-    Paths paths;
+    Paths64 paths;
     paths.reserve(merge.size());
     for(auto&& path: merge)
         paths.emplace_back(path->toPath());
 
     mergePaths(paths, 0.005 * uScale);
 
-    auto clean = [this, kAngle = 2.0](Path& path) {
+    auto clean = [this, kAngle = 2.0](Path64& path) {
         for(size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line{~path[i], ~path[i + 1]};
             if(line.length() < gcp.params[Tolerance].toDouble()) {

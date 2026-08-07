@@ -54,8 +54,17 @@ void SectionENTITIES::parse() {
         file->entities_.back()->parse(code);
         file->entities_.back()->id = file->entities_.size() - 1;
     } while(hasNext());
-    for(size_t i = first; i < file->entities_.size(); ++i)
-        file->entities_[i]->draw();
+    for(size_t i = first; i < file->entities_.size(); ++i) {
+        Entity* entity = file->entities_[i].get();
+        // 3D-геометрия не рисуется в слой напрямую: она копится в Model3D файла
+        // и превращается в проекционные слои-силуэты (File::createProjectionLayers).
+        if(auto pl = dynamic_cast<PolyLine*>(entity); pl && pl->isMesh())
+            file->mesh_.addPolyLine(*pl);
+        else if(auto face = dynamic_cast<Face3D*>(entity); face && face->is3D())
+            file->mesh_.addFace3D(*face);
+        else
+            entity->draw();
+    }
 }
 
 std::shared_ptr<Entity> SectionENTITIES::entityParse(CodeData& code) {

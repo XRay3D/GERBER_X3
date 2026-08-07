@@ -236,7 +236,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.diameter = std::any_cast<double>(val.front()->raw);
             for(auto* go: val)
                 new Gi::Preview{
-                    (go->path.size() > 1 ? toPath(go->path) : Path{~go->pos}),
+                    (go->path.size() > 1 ? toPath(go->path) : Path64{~go->pos}),
                     row.diameter,
                     data.back().toolId,
                     row,
@@ -433,7 +433,7 @@ void Form::computePaths() {
     };
 
     struct Data {
-        Paths paths;
+        Paths64 paths;
         mvector<int> toolsApertures;
     };
 
@@ -449,7 +449,7 @@ void Form::computePaths() {
                 if(!item->isUsed()) continue;
                 const QPointF center{item->pos()};
                 const double radius{item->sourceDiameter() * 0.5};
-                pathsMap[row.toolId].paths.push_back(Path{
+                pathsMap[row.toolId].paths.push_back(Path64{
                     ~center, ~QPointF{center.x() + radius, center.y()}
                 });
             }
@@ -459,7 +459,7 @@ void Form::computePaths() {
 
     for(auto [usedToolId, data]: pathsMap) {
         if(data.paths.size()) {
-            GCode::Params gcp{App::toolHolder().tool(usedToolId), dsbxDepth->value(), std::move(data.paths)};
+            GCode::Params gcp{App::toolHolder().tool(usedToolId), dsbxDepth->value(), toCurves(data.paths)};
             gcp.setSide(ui->rbInside->isChecked() ? GCode::Inner : GCode::Outer);
             gcp.setConvent(!ui->rbClimb->isChecked());
             gcp.setLeftHand(ui->rbLeft->isChecked());

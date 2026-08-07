@@ -68,14 +68,19 @@ struct PolyLine final : Entity {
         ClosedPolyline = 1,    // 1 = замкнутая полилиния (или полигональная сеть, замкнутая в направлении М)
         CurveFitVertices = 2,  // 2 = добавлены сглаженные по кривой вершины
         SplineFitVertices = 4, // 4 = добавлены сглаженные по сплайну вершины
-        // 8 = 3D-полилиния
-        // 16 = полигональная 3D-сеть
-        // 32 = полигональная сеть замкнута в направлении N
-        // 64 = полилиния является многогранной сетью
+        _3DPolyline = 8,       // 8 = 3D-полилиния
+        _3DPolygonMesh = 16,   // 16 = полигональная 3D-сеть
+        ClosedInN = 32,        // 32 = полигональная сеть замкнута в направлении N
+        PolyfaceMesh = 64,     // 64 = полилиния является многогранной сетью
         // 128 = образец типа линий непрерывно формируется по периметру вершин этой полилинии
     };
 
     std::vector<struct Vertex> polyLine;
+
+    // Сеть (многогранная или полигональная) — не плоский контур,
+    // такая геометрия уходит в Mesh файла, а не в слой напрямую.
+    bool isMesh() const { return polylineFlags & (_3DPolygonMesh | PolyfaceMesh); }
+    bool is3D() const;
 
     DxfGo toGo() const override;
     void write(QDataStream& stream) const override;
@@ -84,6 +89,10 @@ struct PolyLine final : Entity {
     int polylineFlags{};
     double startWidth{};
     double endWidth{};
+    // Размеры сетки для полигональной 3D-сети (флаг 16). В поток не пишутся:
+    // нужны только при разборе, в проект сохраняются готовые проекции.
+    int vertexCountM{};
+    int vertexCountN{};
 };
 
 } // namespace Dxf

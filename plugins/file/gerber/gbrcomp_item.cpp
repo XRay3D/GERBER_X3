@@ -127,6 +127,6 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
                 scale_);
 }
 
-Paths Item::paths(int) const { return {}; }
+Curves Item::curves(int) const { return {}; }
 
 } // namespace Gerber::Comp

@@ -75,12 +75,12 @@ static QPointF reconstructCenter(Segment seg) {
 // индексу, но геометрически это уже хорда/линия, а не продолжение дуги)
 static bool isArcStep(const QPointF& c, const QPointF& p1, const QPointF& p2) {
     constexpr double tolerance = 2.0; // запас на дрожание координат при клиппинге
-    const double radius        = (Length(c, p1) + Length(c, p2)) * 0.5;
+    const double radius = (Length(c, p1) + Length(c, p2)) * 0.5;
     if(radius < 1e-9) return true;
     const double maxAngle = (2.0 * pi / App::settings().clpCircleSegments(radius)) * tolerance;
-    double a1              = std::atan2(p1.y() - c.y(), p1.x() - c.x());
-    double a2               = std::atan2(p2.y() - c.y(), p2.x() - c.x());
-    double da               = std::abs(a2 - a1);
+    double a1 = std::atan2(p1.y() - c.y(), p1.x() - c.x());
+    double a2 = std::atan2(p2.y() - c.y(), p2.x() - c.x());
+    double da = std::abs(a2 - a1);
     if(da > pi) da = 2.0 * pi - da;
     return da <= maxAngle;
 }
@@ -1324,4 +1324,135 @@ std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, doub
     arc.startAngle = std::atan2(p1.y() - arc.center.y(), p1.x() - arc.center.x());
     arc.ccw = bulge > 0.0;
     return arc;
+}
+
+namespace cl = Clipper2Lib;
+
+// Clipper отдаёт полигоны с неявным замыканием (последняя точка != первой).
+// Замыкаем явно: иначе toCurve() сочтёт контур открытым и результат нельзя
+// будет подать обратно ни в булеву операцию, ни в offset.
+static Paths64& closePaths(Paths64& paths) {
+    for(Path64& path: paths)
+        if(path.size() > 2 && path.front() != path.back())
+            path.emplace_back(path.front());
+    return paths;
+}
+
+Curves BoolOp_::operator()(ClipType ct, FillRule fr,
+    const Curves& subjects, const Curves& clips) {
+    Paths64 result;
+    cl::Clipper64 clipper;
+    clipper.AddSubject({
+        std::from_range,
+        subjects | v::filter(&Curve::isClosed) | v::transform(toPath),
+    });
+    clipper.AddOpenSubject({
+        std::from_range,
+        subjects | v::filter(std::not_fn(&Curve::isClosed)) | v::transform(toPath),
+    });
+    clipper.AddClip(toPaths(clips));
+    clipper.Execute(
+        static_cast<cl::ClipType>(ct),
+        static_cast<cl::FillRule>(fr), result);
+    return toCurves(closePaths(result));
+}
+
+void BoolOp_::operator()(ClipType ct, FillRule fr,
+    const Curves& subjects, const Curves& clips, CurveTree& solution) {
+    Paths64 sol_open;
+    cl::Clipper64 clipper;
+    clipper.AddSubject({
+        std::from_range,
+        subjects | v::filter(&Curve::isClosed) | v::transform(toPath),
+    });
+    clipper.AddOpenSubject({
+        std::from_range,
+        subjects | v::filter(std::not_fn(&Curve::isClosed)) | v::transform(toPath),
+    });
+    clipper.AddClip(toPaths(clips));
+    cl::PolyTree64 polytree; // solution
+    clipper.Execute(
+        static_cast<cl::ClipType>(ct),
+        static_cast<cl::FillRule>(fr), polytree, sol_open);
+}
+
+Curves BoolOp_::Intersect(const Curves& subjects, const Curves& clips,
+    FillRule fr) {
+    return operator()(ClipType::Intersection, fr, subjects, clips);
+}
+
+Curves BoolOp_::Union(const Curves& subjects, const Curves& clips,
+    FillRule fr) {
+    return operator()(ClipType::Union, fr, subjects, clips);
+}
+
+Curves BoolOp_::Union(const Curves& subjects, FillRule fr) {
+    Paths64 result;
+    cl::Clipper64 clipper;
+    clipper.AddSubject({
+        std::from_range,
+        subjects | v::filter(&Curve::isClosed) | v::transform(toPath),
+    });
+    clipper.Execute(cl::ClipType::Union, static_cast<cl::FillRule>(fr), result);
+    return toCurves(closePaths(result));
+}
+
+Curves BoolOp_::Difference(const Curves& subjects, const Curves& clips,
+    FillRule fr) {
+
+    return operator()(ClipType::Difference, fr, subjects, clips);
+}
+
+Curves BoolOp_::Xor(const Curves& subjects, const Curves& clips, FillRule fr) {
+
+    return operator()(ClipType::Xor, fr, subjects, clips);
+}
+
+Curves Inflate64::operator()(const Curves& paths, double delta,
+    JoinType jt, EndType et,
+    double miterLimit, double arcTolerance) {
+
+    if(delta == 0.0) return paths;
+    if(!arcTolerance) arcTolerance = delta * 1e-3;
+    return PathsZ(paths, delta * 0.5, jt, et, miterLimit, arcTolerance);
+
+    // cl::ClipperOffset clip_offset(miter_limit, arcTolerance);
+    // clip_offset.AddPaths(toPaths(paths), static_cast<cl::JoinType>(jt), static_cast<cl::EndType>(et));
+    // Paths64 solution;
+    // clip_offset.Execute(delta * uScale, solution);
+    // return toCurves(solution);
+}
+
+Curves Inflate64::PathsZ(const Curves& paths, double delta,
+    JoinType jt, EndType et,
+    double miterLimit, double arcTolerance) {
+    // roundJoinCache.clear();
+    // Paths64 input = paths;
+    // PrepareCornersForOffset(input, jt);
+    // cl::ClipperOffset offset{miterLimit, arcTolerance};
+    // offset.SetZCallback(UpdateCenter);
+    // offset.AddPaths(input, jt, et);
+    // Paths64 solution;
+    // offset.Execute(delta, solution);
+    // return solution;
+
+    cl::ClipperOffset clip_offset(miterLimit * uScale, arcTolerance * uScale);
+    clip_offset.AddPaths(toPaths(paths), static_cast<cl::JoinType>(jt), static_cast<cl::EndType>(et));
+    Paths64 solution;
+    clip_offset.Execute(delta * uScale, solution);
+    return toCurves(closePaths(solution));
+}
+
+Curves Inflate64::RoundPolygon(const Curves& paths,
+    double delta, double miterLimit, double arcTolerance) {
+
+    return PathsZ(paths, delta * 0.5,
+        JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
+}
+
+Curves Inflate64::MiterPolygon(const Curves& paths,
+    double delta, double miterLimit, double arcTolerance) {
+
+    return PathsZ(paths, delta * 0.5,
+        JoinType::Miter, EndType::Polygon, miterLimit, arcTolerance);
 }

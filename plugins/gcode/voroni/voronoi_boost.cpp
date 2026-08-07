@@ -76,7 +76,7 @@ point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_t
     return category == boost::polygon::SOURCE_CATEGORY_SEGMENT_START_POINT ? low(segment_data_[index]) : high(segment_data_[index]);
 }
 
-Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
+Path64 sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
     std::vector sampled_edge{
         point_type{edge.vertex0()->x(), edge.vertex0()->y()},
         point_type{edge.vertex1()->x(), edge.vertex1()->y()}
@@ -87,7 +87,7 @@ Path sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_typ
     segment_type segment     = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
-    Path path;
+    Path64 path;
     path.reserve(sampled_edge.size());
     for(const auto& p: sampled_edge)
         path.emplace_back(static_cast</*PType*/ int32_t>(p.x()), static_cast</*PType*/ int32_t>(p.y()));
@@ -114,7 +114,7 @@ void VoronoiBoost::outside() {
 
     size_t max{};
 
-    for(const Path& path: v::join(groupedPss))
+    for(const Path64& path: v::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -125,13 +125,13 @@ void VoronoiBoost::outside() {
     std::vector<int> vecId;
     srcSegments.reserve(max);
 
-    for(const Paths& paths: groupedPss) {
+    for(const Paths64& paths: groupedPss) {
         ++id;
-        for(const Path& path: paths) {
+        for(const Path64& path: paths) {
             for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 throwIfCancel();
-                const Point& point = path[i];
+                const Point64& point = path[i];
                 vecId.emplace_back(id);
                 // !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
                 // : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
@@ -172,10 +172,10 @@ void VoronoiBoost::outside() {
         point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
     qDebug() << u"max id:"_s << id;
-    // const /*Point::Type*/int32_t kx = (maxX - minX) * 2;
-    // const /*Point::Type*/int32_t ky = (maxY - minY) * 2;
+    // const /*Point64::Type*/int32_t kx = (maxX - minX) * 2;
+    // const /*Point64::Type*/int32_t ky = (maxY - minY) * 2;
 
-    Paths segments;
+    Paths64 segments;
     {
         voronoi_diagram<double> vd;
         construct_voronoi(srcSegments.begin(), srcSegments.end(), &vd);
@@ -190,11 +190,11 @@ void VoronoiBoost::outside() {
         // }
 
         struct Pair {
-            Point p1, p2;
+            Point64 p1, p2;
             constexpr auto operator<=>(const Pair&) const = default;
         };
 
-        std::set<std::pair<Point, Point>> set;
+        std::set<std::pair<Point64, Point64>> set;
 
         for(auto& edge: vd.edges()) {
             auto v0 = edge.vertex0();
@@ -207,15 +207,15 @@ void VoronoiBoost::outside() {
             auto color2 = id1(edge);
 
             if(v0 && v1) {
-                Point p0{static_cast</*PType*/ int32_t>(v0->x()), static_cast</*PType*/ int32_t>(v0->y())};
-                Point p1{static_cast</*PType*/ int32_t>(v1->x()), static_cast</*PType*/ int32_t>(v1->y())};
+                Point64 p0{static_cast</*PType*/ int32_t>(v0->x()), static_cast</*PType*/ int32_t>(v0->y())};
+                Point64 p1{static_cast</*PType*/ int32_t>(v1->x()), static_cast</*PType*/ int32_t>(v1->y())};
                 if(color1 != color2 && color1 && color2) {
                     if(set.emplace(p0, p1).second && set.emplace(p1, p0).second) {
                         if(edge.is_curved() && distTo(p0, p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
-                            // segments.emplace_back(Path { p0, p1 });
+                            // segments.emplace_back(Path64 { p0, p1 });
                         } else {
-                            segments.emplace_back(Path{p0, p1});
+                            segments.emplace_back(Path64{p0, p1});
                         }
                     }
                 }
@@ -226,7 +226,7 @@ void VoronoiBoost::outside() {
     mergeSegments(segments, 0.005 * uScale);
 
     const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
-    Path frame{
+    Path64 frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
         {maxX + fo, maxY + fo},
@@ -234,14 +234,14 @@ void VoronoiBoost::outside() {
         {minX - fo, minY - fo},
     };
     {
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddOpenSubject(segments);
         clipper.AddClip({frame});
-        clipper.Execute(ClipType::Intersection, FillRule::NonZero, segments, segments);
+        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, segments, segments);
     }
 
     // dbgPaths(segments, u"segments"_s);
-    auto clean = [kAngle = 2.0](Path& path) {
+    auto clean = [kAngle = 2.0](Path64& path) {
         for(size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = angleTo(path[i - 1], path[i + 0]);
             const double a2 = angleTo(path[i + 0], path[i + 1]);
@@ -271,7 +271,7 @@ void VoronoiBoost::inside() {
 
     size_t max{};
 
-    for(const Path& path: v::join(groupedPss))
+    for(const Path64& path: v::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -282,13 +282,13 @@ void VoronoiBoost::inside() {
     std::vector<int> vecId;
     srcSegments.reserve(max);
 
-    for(const Paths& paths: groupedPss) {
+    for(const Paths64& paths: groupedPss) {
         ++id;
-        for(const Path& path: paths) {
+        for(const Path64& path: paths) {
             for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 throwIfCancel();
-                const Point& point = path[i];
+                const Point64& point = path[i];
                 vecId.emplace_back(id);
                 // !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
                 // : srcSegments.emplace_back(path[i - 1].x, path[i - 1].y, point.x, point.y /*, id, id2++*/);
@@ -329,10 +329,10 @@ void VoronoiBoost::inside() {
         point_type{static_cast<coordinate_type>(minX - kx), static_cast<coordinate_type>(maxY + ky)});
 
     qDebug() << u"max id:"_s << id;
-    // const /*Point::Type*/int32_t kx = (maxX - minX) * 2;
-    // const /*Point::Type*/int32_t ky = (maxY - minY) * 2;
+    // const /*Point64::Type*/int32_t kx = (maxX - minX) * 2;
+    // const /*Point64::Type*/int32_t ky = (maxY - minY) * 2;
 
-    Paths segments;
+    Paths64 segments;
     {
         voronoi_diagram<double> vd;
         construct_voronoi(srcSegments.begin(), srcSegments.end(), &vd);
@@ -347,11 +347,11 @@ void VoronoiBoost::inside() {
         // }
 
         struct Pair {
-            Point p1, p2;
+            Point64 p1, p2;
             constexpr auto operator<=>(const Pair&) const = default;
         };
 
-        std::set<std::pair<Point, Point>> set;
+        std::set<std::pair<Point64, Point64>> set;
 
         for(auto& edge: vd.edges()) {
             auto v0 = edge.vertex0();
@@ -364,15 +364,15 @@ void VoronoiBoost::inside() {
             auto color2 = id1(edge);
 
             if(v0 && v1) {
-                Point p0{static_cast</*PType*/ int32_t>(v0->x()), static_cast</*PType*/ int32_t>(v0->y())};
-                Point p1{static_cast</*PType*/ int32_t>(v1->x()), static_cast</*PType*/ int32_t>(v1->y())};
+                Point64 p0{static_cast</*PType*/ int32_t>(v0->x()), static_cast</*PType*/ int32_t>(v0->y())};
+                Point64 p1{static_cast</*PType*/ int32_t>(v1->x()), static_cast</*PType*/ int32_t>(v1->y())};
                 if(color1 == color2 && color1 && color2) {
                     if(set.emplace(p0, p1).second && set.emplace(p1, p0).second) {
                         if(edge.is_curved() && distTo(p0, p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
-                            // segments.emplace_back(Path { p0, p1 });
+                            // segments.emplace_back(Path64 { p0, p1 });
                         } else {
-                            segments.emplace_back(Path{p0, p1});
+                            segments.emplace_back(Path64{p0, p1});
                         }
                     }
                 }
@@ -385,7 +385,7 @@ void VoronoiBoost::inside() {
     mergeSegments(segments, 0.005 * uScale);
 
     const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
-    Path frame{
+    Path64 frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
         {maxX + fo, maxY + fo},
@@ -393,14 +393,14 @@ void VoronoiBoost::inside() {
         {minX - fo, minY - fo},
     };
     {
-        Clipper clipper;
+        cl::Clipper64 clipper;
         clipper.AddOpenSubject(segments);
         clipper.AddClip({frame});
-        clipper.Execute(ClipType::Intersection, FillRule::NonZero, segments, segments);
+        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, segments, segments);
     }
 
     // dbgPaths(segments, u"segments"_s);
-    auto clean = [kAngle = 2.0](Path& path) {
+    auto clean = [kAngle = 2.0](Path64& path) {
         for(size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = angleTo(path[i - 1], path[i + 0]);
             const double a2 = angleTo(path[i + 0], path[i + 1]);
