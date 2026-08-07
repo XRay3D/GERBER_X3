@@ -10,8 +10,10 @@
  ********************************************************************************/
 #include "g2_plugin.h"
 
-#include <QFile>
-#include <QTextStream>
+#include "doublespinbox.h"
+#include "settings.h"
+
+#include <QtWidgets>
 
 namespace Gerber2 {
 
@@ -22,10 +24,68 @@ QIcon Plugin::icon() const { return decoration(Qt::darkCyan, u'2'); }
 
 AbstractFile* Plugin::loadFile(QDataStream& stream) const { return AbstractFile::load<File>(stream); }
 
-bool Plugin::thisIsIt(const QString&) {
-    // Плагин альтернативный: файл ему отдают только по явному выбору
-    // пользователя, иначе гербер перехватил бы основной плагин.
+namespace {
+
+bool preferred() {
+    MySettings settings;
+    settings.beginGroup(u"Gerber2"_s);
+    return settings.value(u"chbxPreferred"_s, false).toBool();
+}
+
+bool isGerber(const QString& fileName) {
+    static const QRegularExpression re{uR"(%FS[LTD]?[AI]X\d{2}Y\d{2}\*)"_s};
+    QFile file{fileName};
+    if(!file.open(QFile::ReadOnly | QFile::Text)) return false;
+    QTextStream in{&file};
+    QString line;
+    while(in.readLineInto(&line))
+        if(re.match(line).hasMatch()) return true;
     return false;
+}
+
+} // namespace
+
+bool Plugin::thisIsIt(const QString& fileName) {
+    if(!isGerber(fileName)) return false;
+    // Оба гербер-плагина читают один формат, а хост отдаёт файл первому
+    // откликнувшемуся. Если основной плагин собран - уступаем ему, пока
+    // пользователь не выберет этот флажком в настройках.
+    return preferred() || !App::filePlugin("Gerber"_hash32);
+}
+
+AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
+    class Tab : public AbstractFileSettings {
+        QCheckBox* chbxPreferred;
+
+    public:
+        explicit Tab(QWidget* parent)
+            : AbstractFileSettings{parent} {
+            setObjectName(u"tabGerber2"_s);
+
+            chbxPreferred = new QCheckBox{tr("Open Gerber files with this plugin"), this};
+            chbxPreferred->setObjectName(u"chbxPreferred"_s);
+            chbxPreferred->setToolTip(tr("Otherwise Gerber files are handled by the main Gerber X3 plugin.\n"
+                                         "Takes effect for files opened after the change."));
+
+            auto layout = new QVBoxLayout{this};
+            layout->setContentsMargins(6, 6, 6, 6);
+            layout->addWidget(chbxPreferred);
+            layout->addItem(new QSpacerItem{20, 40, QSizePolicy::Minimum, QSizePolicy::Expanding});
+        }
+        void readSettings(MySettings& settings) override {
+            settings.beginGroup(u"Gerber2"_s);
+            settings.getValue(chbxPreferred, false);
+            settings.endGroup();
+        }
+        void writeSettings(MySettings& settings) override {
+            settings.beginGroup(u"Gerber2"_s);
+            settings.setValue(chbxPreferred);
+            settings.endGroup();
+        }
+    };
+    auto tab = new Tab{parent};
+    tab->setWindowTitle(u"Gerber X3 (editable)"_s);
+    return tab;
 }
 
 AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
@@ -50,7 +110,11 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     for(const QString& warning: file->parsed().warnings)
         emit fileWarning(fileName, warning);
 
-    return file.release();
+    // parseFile вызывается через QueuedConnection - возвращаемое значение
+    // теряется, файл попадает в проект только через этот сигнал.
+    auto* result = file.release();
+    emit fileReady(result);
+    return result;
 }
 
 } // namespace Gerber2
