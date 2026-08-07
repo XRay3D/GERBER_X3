@@ -14,14 +14,27 @@
 #include <QSyntaxHighlighter>
 
 class QTextDocument;
+class QTextBrowser;
 
 namespace GCode {
 
+class Viewer3d;
+
+// Просмотр УП: слева текст с подсветкой синтаксиса, справа 3D-вид траектории.
+// Подсветка отрезков в 3D и выделение в тексте синхронизированы в обе стороны.
 class Dialog : public QDialog {
     Q_OBJECT
 public:
     Dialog(const QString& text, const QString& windowTitle, QWidget* parent = nullptr);
     ~Dialog() override = default;
+
+private:
+    QTextBrowser* tbCode;
+    Viewer3d* viewer;
+
+    void syncViewerFromText();
+    void syncTextFromViewer(int lineNo);
+    void updateExtraSelections();
 };
 
 class Highlighter final : public QSyntaxHighlighter {
