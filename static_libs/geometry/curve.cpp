@@ -1328,6 +1328,16 @@ std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, doub
 
 namespace cl = Clipper2Lib;
 
+// Clipper отдаёт полигоны с неявным замыканием (последняя точка != первой).
+// Замыкаем явно: иначе toCurve() сочтёт контур открытым и результат нельзя
+// будет подать обратно ни в булеву операцию, ни в offset.
+static Paths64& closePaths(Paths64& paths) {
+    for(Path64& path: paths)
+        if(path.size() > 2 && path.front() != path.back())
+            path.emplace_back(path.front());
+    return paths;
+}
+
 Curves BoolOp_::operator()(ClipType ct, FillRule fr,
     const Curves& subjects, const Curves& clips) {
     Paths64 result;
@@ -1344,7 +1354,7 @@ Curves BoolOp_::operator()(ClipType ct, FillRule fr,
     clipper.Execute(
         static_cast<cl::ClipType>(ct),
         static_cast<cl::FillRule>(fr), result);
-    return toCurves(result);
+    return toCurves(closePaths(result));
 }
 
 void BoolOp_::operator()(ClipType ct, FillRule fr,
@@ -1384,7 +1394,7 @@ Curves BoolOp_::Union(const Curves& subjects, FillRule fr) {
         subjects | v::filter(&Curve::isClosed) | v::transform(toPath),
     });
     clipper.Execute(cl::ClipType::Union, static_cast<cl::FillRule>(fr), result);
-    return toCurves(result);
+    return toCurves(closePaths(result));
 }
 
 Curves BoolOp_::Difference(const Curves& subjects, const Curves& clips,
@@ -1430,7 +1440,7 @@ Curves Inflate64::PathsZ(const Curves& paths, double delta,
     clip_offset.AddPaths(toPaths(paths), static_cast<cl::JoinType>(jt), static_cast<cl::EndType>(et));
     Paths64 solution;
     clip_offset.Execute(delta * uScale, solution);
-    return toCurves(solution);
+    return toCurves(closePaths(solution));
 }
 
 Curves Inflate64::RoundPolygon(const Curves& paths,
