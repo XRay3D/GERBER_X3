@@ -28,6 +28,9 @@ namespace {
 
 constexpr double gcvPi = std::numbers::pi;
 
+const QString gcvSettingsGroup = u"GCodeViewer3d"_s;
+const QString gcvPerspectiveKey = u"perspective"_s;
+
 // Плоскость дуги: индексы осей плоскости (a0, a1) и нормали (an).
 struct GcvArcPlane {
     int a0, a1, an;
@@ -260,6 +263,11 @@ Viewer3d::Viewer3d(QWidget* parent)
     setMinimumSize(200, 200);
     setFocusPolicy(Qt::StrongFocus);
     setMouseTracking(false);
+
+    MySettings settings;
+    settings.beginGroup(gcvSettingsGroup);
+    settings.getValue(gcvPerspectiveKey, perspective_, true);
+    settings.endGroup();
 }
 
 Viewer3d::~Viewer3d() {
@@ -313,6 +321,18 @@ void Viewer3d::setRapidsVisible(bool visible) {
     if(rapidsVisible_ == visible) return;
     rapidsVisible_ = visible;
     buildPathVertices();
+    update();
+}
+
+void Viewer3d::setPerspective(bool enabled) {
+    if(perspective_ == enabled) return;
+    perspective_ = enabled;
+
+    MySettings settings;
+    settings.beginGroup(gcvSettingsGroup);
+    settings.setValue(gcvPerspectiveKey, perspective_);
+    settings.endGroup();
+
     update();
 }
 
@@ -419,15 +439,59 @@ void Viewer3d::buildAuxVertices() {
             }
     }
 
-    { // маркер нуля детали
-        const QColor c = App::settings().guiColor(GuiColors::Zero);
-        const float len = std::max(sceneRadius_ * 0.15f, float(step));
-        addLine({}, {len, 0.f, 0.f}, c);
-        addLine({}, {0.f, len, 0.f}, c);
-        addLine({}, {0.f, 0.f, len}, c);
-    }
-
     auxDirty_ = true;
+}
+
+// Начало координат: стрелки по осям с буквами X/Y/Z. Буквы развёрнуты к
+// камере, поэтому геометрия пересобирается на каждый кадр.
+void Viewer3d::buildGizmoVertices() {
+    // Штрихи букв в квадрате [-0.5, 0.5]: {x0, y0, x1, y1}.
+    static const std::vector<std::array<float, 4>> glyph[]{
+        {{-.4f, -.5f, .4f, .5f}, {-.4f, .5f, .4f, -.5f}}, // X
+        {{-.4f, .5f, 0.f, 0.f}, {.4f, .5f, 0.f, 0.f}, {0.f, 0.f, 0.f, -.5f}}, // Y
+        {{-.4f, .5f, .4f, .5f}, {.4f, .5f, -.4f, -.5f}, {-.4f, -.5f, .4f, -.5f}}  // Z
+    };
+
+    gizmoVertices_.clear();
+    gizmoDirty_ = true;
+
+    const QVector3D dir = cameraDir();
+    const QVector3D right = QVector3D::crossProduct({0.f, 0.f, 1.f}, dir).normalized();
+    const QVector3D up = QVector3D::crossProduct(dir, right).normalized();
+
+    // Длину стрелок держим постоянной на экране (доля от высоты кадра), иначе
+    // на крупной программе они превращаются в точку, а при зуме — в частокол.
+    const float len = distance_ * std::tan(qDegreesToRadians(fov_ * 0.5f)) * 0.18f;
+    const float head = len * 0.15f; // длина наконечника
+    const float rad = len * 0.05f;  // радиус наконечника
+    const float size = len * 0.22f; // размер буквы
+
+    auto addLine = [this](QVector3D a, QVector3D b, const QColor& c) {
+        const float r = float(c.redF()), g = float(c.greenF()), bl = float(c.blueF()), al = float(c.alphaF());
+        gizmoVertices_.emplace_back(Vertex{a.x(), a.y(), a.z(), r, g, bl, al});
+        gizmoVertices_.emplace_back(Vertex{b.x(), b.y(), b.z(), r, g, bl, al});
+    };
+
+    for(int i{}; i < 3; ++i) {
+        QVector3D axis, p, q;
+        axis[i] = p[(i + 1) % 3] = q[(i + 2) % 3] = 1.f;
+        const QColor& color = axisColor[i];
+
+        const QVector3D tip = axis * len;
+        const QVector3D base = axis * (len - head);
+        addLine({}, tip, color);
+
+        const QVector3D ring[]{p * rad, q * rad, -p * rad, -q * rad};
+        for(int k{}; k < 4; ++k) {
+            addLine(tip, base + ring[k], color);
+            addLine(base + ring[k], base + ring[(k + 1) % 4], color);
+        }
+
+        const QVector3D letter = axis * (len + size * 1.5f);
+        for(auto&& [x0, y0, x1, y1]: glyph[i])
+            addLine(letter + right * (x0 * size) + up * (y0 * size),
+                letter + right * (x1 * size) + up * (y1 * size), color);
+    }
 }
 
 void Viewer3d::buildHighlightVertices() {
@@ -505,9 +569,11 @@ void Viewer3d::paintGL() {
     glDepthMask(GL_TRUE);
     drawVertices(pathBuffer_, pathVertices_, pathDirty_);
 
-    // Подсветку рисуем последней и без теста глубины, чтобы она была видна
-    // сквозь остальную траекторию.
+    // Стрелки осей и подсветку рисуем последними и без теста глубины, чтобы их
+    // не закрывала траектория.
     glDisable(GL_DEPTH_TEST);
+    buildGizmoVertices(); // зависит от положения камеры — строим каждый кадр
+    drawVertices(gizmoBuffer_, gizmoVertices_, gizmoDirty_);
     glLineWidth(2.f);
     drawVertices(hlBuffer_, hlVertices_, hlDirty_);
     glLineWidth(1.f);
@@ -539,9 +605,18 @@ QVector3D Viewer3d::cameraDir() const {
 
 QMatrix4x4 Viewer3d::mvpMatrix() const {
     QMatrix4x4 proj;
-    const float nearPlane = std::max(0.01f, distance_ * 0.005f);
-    const float farPlane = distance_ + sceneRadius_ * 20.f + 1000.f;
-    proj.perspective(fov_, float(width()) / std::max(1, height()), nearPlane, farPlane);
+    const float aspect = float(width()) / std::max(1, height());
+    const float span = sceneRadius_ * 20.f + 1000.f;
+    const float farPlane = distance_ + span;
+    if(perspective_) {
+        proj.perspective(fov_, aspect, std::max(0.01f, distance_ * 0.005f), farPlane);
+    } else {
+        // Полувысота кадра та же, что и у перспективы на расстоянии distance_,
+        // поэтому масштаб при переключении проекции не скачет, а зум, вписывание
+        // и панорамирование считаются одинаково для обоих режимов.
+        const float halfH = distance_ * std::tan(qDegreesToRadians(fov_ * 0.5f));
+        proj.ortho(-halfH * aspect, halfH * aspect, -halfH, halfH, distance_ - span, farPlane);
+    }
     QMatrix4x4 view;
     view.lookAt(center_ + cameraDir() * distance_, center_, {0.f, 0.f, 1.f});
     return proj * view;

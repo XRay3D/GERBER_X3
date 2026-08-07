@@ -49,9 +49,9 @@ void Highlighter::highlightBlock(const QString& text) {
             case 'J': txtChF.setForeground(QColor{0x3F, 0x3F, 0xFF}); break;
             case 'M': txtChF.setForeground(QColor{0x7F, 0x7F, 0x7F}); break;
             case 'S': txtChF.setForeground(QColor{0xFF, 0x3F, 0xFF}); break;
-            case 'X': txtChF.setForeground(QColor{0xFF, 0x3F, 0x3F}); break;
-            case 'Y': txtChF.setForeground(QColor{0x3F, 0xFF, 0x3F}); break;
-            case 'Z': txtChF.setForeground(QColor{0x3F, 0x3F, 0xFF}); break;
+            case 'X': txtChF.setForeground(axisColor[0]); break;
+            case 'Y': txtChF.setForeground(axisColor[1]); break;
+            case 'Z': txtChF.setForeground(axisColor[2]); break;
             default : txtChF.setForeground(QColor{0x7F, 0x7F, 0x7F}); break;
             }
             // txtChF.setForeground(color[key.indexOf(*m.data())]);
@@ -142,6 +142,12 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
         chbxRapids->setFocusPolicy(Qt::NoFocus);
         connect(chbxRapids, &QCheckBox::toggled, viewer, [this](bool checked) { viewer->setRapidsVisible(checked); });
         toolLayout->addWidget(chbxRapids);
+
+        auto chbxPerspective = new QCheckBox{tr("Perspective"), viewPane};
+        chbxPerspective->setChecked(viewer->perspective()); // состояние из настроек
+        chbxPerspective->setFocusPolicy(Qt::NoFocus);
+        connect(chbxPerspective, &QCheckBox::toggled, viewer, [this](bool checked) { viewer->setPerspective(checked); });
+        toolLayout->addWidget(chbxPerspective);
         toolLayout->addStretch();
 
         viewLayout->addLayout(toolLayout);
