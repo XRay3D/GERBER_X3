@@ -967,12 +967,15 @@ struct std::formatter<T*, char> {
 #endif
 // ---------------------------------------------------------------------------
 
+// Ищет val в range. Работает как по значениям, так и по контейнерам умных
+// указателей (сравнение идёт с elem.get()). Возвращает -1, если не найдено.
 constexpr std::ptrdiff_t indexOf(const std::ranges::range auto& range, const auto& val) {
-    decltype(r::begin(range)) it;
-    if constexpr(requires { it = r::find(range | v::transform(&decltype(range[])::get), val); })
-        it = r::find(range | v::transform(&decltype(range[])::get), val);
-    else if constexpr(requires { it = r::find(range, val); })
-        it = r::find(range, val);
+    auto it = r::find_if(range, [&val](const auto& elem) -> bool {
+        if constexpr(requires { { elem.get() == val } -> std::convertible_to<bool>; })
+            return elem.get() == val;
+        else
+            return elem == val;
+    });
     return (it != r::end(range)) ? std::distance(r::begin(range), it) : -1;
 }
 
