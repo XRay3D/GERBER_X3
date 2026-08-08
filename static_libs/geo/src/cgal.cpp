@@ -19,12 +19,19 @@ namespace Geo::Cgal {
 
 namespace {
 
-// Середина bulge-дуги (в double) -- третья точка для построения дуги через
-// три точки: окружность через три рациональные точки сама рациональна, и
-// кривая ТОЧНО проходит через свои концы (CGAL требует, чтобы концы лежали
+// Точка bulge-дуги на параметре t (0, 1) -- третья точка для построения дуги
+// через три точки: окружность через три рациональные точки сама рациональна,
+// и кривая ТОЧНО проходит через свои концы (CGAL требует, чтобы концы лежали
 // на опорной окружности ровно). Цена -- отклонение самой окружности от
 // идеальной в пределах double-эпсилона; дальше всё точно.
-QPointF arcMidpoint(QPointF from, QPointF to, double bulge) {
+//
+// t параметризуем не просто из общности: изредка (см. toGPoly) сама тройка
+// точек по СЕРЕДИНЕ дуги (t=0.5) заставляет конструктор CGAL собрать
+// большую дугу вместо малой -- независимо подтверждённый эффект, причина
+// внутри CGAL не найдена. Другое t -- другая тройка точек и другая опорная
+// окружность (все верны с точностью до double-эпсилона), и на практике
+// достаточно взять НЕ середину, чтобы обойти эту конкретную неудачу.
+QPointF arcPointAt(QPointF from, QPointF to, double bulge, double t) {
     const double dx      = to.x() - from.x();
     const double dy      = to.y() - from.y();
     const double chord   = std::hypot(dx, dy);
@@ -35,7 +42,7 @@ QPointF arcMidpoint(QPointF from, QPointF to, double bulge) {
     const QPointF mid((from + to) / 2.0);
     const QPointF center = mid + n * (sagitta - std::copysign(radius, bulge));
     const double a0      = std::atan2(from.y() - center.y(), from.x() - center.x());
-    const double am      = a0 + theta / 2.0;
+    const double am      = a0 + theta * t;
     return QPointF(center.x() + radius * std::cos(am), center.y() + radius * std::sin(am));
 }
 
@@ -193,33 +200,53 @@ void appendCapsules(Polylines& out, const XCurve& xc, double d) {
         out.push_back(std::move(capsule));
 }
 
+// Соседние вершины ЗАМКНУТОГО контура, легшие в одну точку (в том числе
+// первая с последней -- на стыке замыкания), схлопываются в одну: нулевой
+// сегмент между ними не несёт ни длины, ни площади, зато его прогиб --
+// ПРИЗРАЧНОЕ ребро вперёд-и-обратно, из-за которого простая по сути фигура
+// (окружность из двух дуг, каждая дуга -- половина) не проходит проверку
+// простоты CGAL (`is_valid_unknown_polygon`), потому что видна четырьмя
+// вершинами вместо канонических двух, и путь через Offset::fullCircleOf её
+// не узнаёт.
+//
+// Источник -- сам Gerber: область (G36...G37) закрывается явным D02 в
+// стартовую точку ПЕРЕД первой дугой, и тот же D02 уже был отмечен при
+// входе в область -- отсюда дубль. У прогиба схлопнутой вершины прока нет
+// (сегмент, который он описывал, исчез вместе с ней), остаётся прогиб
+// СЛЕДУЮЩЕЙ -- он описывает уже настоящий, ненулевой сегмент.
+Polyline weldClosedDuplicates(const Polyline& poly) {
+    if(!poly.closed || poly.size() < 3) return poly;
+
+    Polyline out;
+    out.closed = poly.closed;
+    out.width  = poly.width;
+    out.reserve(poly.size());
+    for(const Vertex& v: poly) {
+        if(!out.empty() && static_cast<QPointF>(out.back()) == static_cast<QPointF>(v)) {
+            out.back().bulge = v.bulge; // прогиб исчезнувшего ребра теряется, следующего -- остаётся
+            continue;
+        }
+        out.push_back(v);
+    }
+    // Замыкающий стык: последняя вершина может лечь на первую точно так же.
+    // Прогиб первой уже описывает ЕЁ СОБСТВЕННЫЙ (настоящий) исходящий
+    // сегмент и трогать его незачем -- отбрасывается только сама
+    // последняя вершина: ребро от неё к первой всё равно нулевое.
+    if(out.size() > 1 && static_cast<QPointF>(out.back()) == static_cast<QPointF>(out.front()))
+        out.pop_back();
+    return out;
+}
+
 } // namespace
 
-std::optional<GPoly> toGPoly(const Polyline& poly) {
-    if(!poly.closed || poly.size() < 2) return std::nullopt;
+namespace {
 
-    // Двумя вершинами замкнутый контур задают только дуги: у окружности
-    // это два полукруга, у линзы -- две дуги навстречу. Те же две вершины
-    // без прогибов -- отрезок, пройденный туда и обратно; площади у него
-    // нет, а точный свип на такой «границе» падает изнутри CGAL, не
-    // доходя до нашей же проверки валидности.
-    if(poly.size() == 2 && poly[0].bulge == 0.0 && poly[1].bulge == 0.0) return std::nullopt;
-
-    // Сливер разбиения, доживший до double. Точное разбиение упирается в
-    // касания (окружность, задевающая грань выреза, -- обычное дело у
-    // апертур-макросов), и на выдаче наружу такое касание округляется в
-    // микроконтур шириной в наноны. Площади у него нет, зато точная кривая,
-    // построенная по трём почти совпавшим точкам, вырождается -- и CGAL
-    // падает на ней ИЗНУТРИ orientation(), не доходя до проверки валидности
-    // ниже.
-    //
-    // Отбор именно по ПЛОЩАДИ, а не по нулевому прогибу или размаху: у
-    // сливера и то и другое ненулевое, просто ничтожное, а порог в квадрат
-    // допуска сварки (1e-18 мм², то есть аттометр в квадрате) ни одну
-    // настоящую деталь не заденет.
-    constexpr double degenerateArea = weldTolerance * weldTolerance;
-    if(std::abs(poly.signedArea()) < degenerateArea) return std::nullopt;
-
+// Одна попытка сборки: третья точка каждой дуги берётся на параметре `t`
+// вместо жёсткой середины. Возвращает nullopt, если сборка в принципе
+// невозможна (вырожденный контур) -- отдельно от того, вышел ли результат
+// ПРАВИЛЬНЫМ: это проверяет уже toGPoly, у которого есть с чем сравнить
+// (bulge-вид), а не эта функция.
+std::optional<GPoly> buildGPoly(const Polyline& poly, double t) {
     const Traits traits;
     auto makeX = traits.make_x_monotone_2_object();
 
@@ -258,7 +285,7 @@ std::optional<GPoly> toGPoly(const Polyline& poly) {
             || std::hypot(to.x() - from.x(), to.y() - from.y()) < weldTolerance) {
             addCurve(Curve(K::Segment_2(src, tgt)));
         } else {
-            const QPointF m = arcMidpoint(from, to, from.bulge);
+            const QPointF m = arcPointAt(from, to, from.bulge, t);
             addCurve(Curve(src, K::Point_2(m.x(), m.y()), tgt));
         }
     }
@@ -266,32 +293,74 @@ std::optional<GPoly> toGPoly(const Polyline& poly) {
 
     GPoly pgn(xcurves.begin(), xcurves.end());
     if(pgn.orientation() == CGAL::CLOCKWISE) pgn.reverse_orientation();
-
-    // Контур, прошедший round-trip через double (например, поданный обратно
-    // результат прежней операции), может нести микросамокасание -- точный
-    // свип такого ввода не переживает и падает внутри CGAL. Валидируем сами
-    // и отбраковываем заранее: вызвавший решит, что с контуром делать.
-    // Именно от этого и спасает хранение геометрии в точном домене --
-    // обёртки Polygon/Polygons (DxfPolygon.h) существуют ради него.
-    if(!CGAL::is_valid_unknown_polygon(pgn, traits)) return std::nullopt;
-
-    // Редкий, но настоящий сбой построения дуги по трём точкам: третья точка
-    // (arcMidpoint) сама по себе верна, но конструктор CGAL, получив её
-    // вместе с концами, изредка собирает БОЛЬШУЮ дугу вместо малой --
-    // почему именно, не выяснено, воспроизводится только на некоторых
-    // контурах после переноса. Результат остаётся ПРОСТЫМ многоугольником
-    // (is_valid его не ловит), но с площадью, разительно отличной от той,
-    // что даёт сам bulge-вид его же собственной, не зависящей от CGAL
-    // формулой (Polyline::area()). Несовпадение -- сигнал, что построение
-    // сорвалось; отбраковываем контур тем же путём, что и невалидный, --
-    // лучше потерять деталь, чем залить чужую дырку медью.
-    const double exactArea  = std::abs(Cgal::signedArea(pgn));
-    const double bulgeArea  = std::abs(poly.area());
-    const double areaScale  = std::max(exactArea, bulgeArea);
-    if(areaScale > 0.0 && std::abs(exactArea - bulgeArea) > 1e-6 * areaScale)
-        return std::nullopt;
-
     return pgn;
+}
+
+} // namespace
+
+std::optional<GPoly> toGPoly(const Polyline& rawPoly) {
+    const Polyline poly = weldClosedDuplicates(rawPoly);
+    if(!poly.closed || poly.size() < 2) return std::nullopt;
+
+    // Двумя вершинами замкнутый контур задают только дуги: у окружности
+    // это два полукруга, у линзы -- две дуги навстречу. Те же две вершины
+    // без прогибов -- отрезок, пройденный туда и обратно; площади у него
+    // нет, а точный свип на такой «границе» падает изнутри CGAL, не
+    // доходя до нашей же проверки валидности.
+    if(poly.size() == 2 && poly[0].bulge == 0.0 && poly[1].bulge == 0.0) return std::nullopt;
+
+    // Сливер разбиения, доживший до double. Точное разбиение упирается в
+    // касания (окружность, задевающая грань выреза, -- обычное дело у
+    // апертур-макросов), и на выдаче наружу такое касание округляется в
+    // микроконтур шириной в наноны. Площади у него нет, зато точная кривая,
+    // построенная по трём почти совпавшим точкам, вырождается -- и CGAL
+    // падает на ней ИЗНУТРИ orientation(), не доходя до проверки валидности
+    // ниже.
+    //
+    // Отбор именно по ПЛОЩАДИ, а не по нулевому прогибу или размаху: у
+    // сливера и то и другое ненулевое, просто ничтожное, а порог в квадрат
+    // допуска сварки (1e-18 мм², то есть аттометр в квадрате) ни одну
+    // настоящую деталь не заденет.
+    constexpr double degenerateArea = weldTolerance * weldTolerance;
+    if(std::abs(poly.signedArea()) < degenerateArea) return std::nullopt;
+
+    const double bulgeArea = std::abs(poly.area());
+
+    // Редкий, но настоящий сбой построения дуги по трём точкам: третья
+    // точка (arcPointAt) сама по себе верна, но конструктор CGAL, получив
+    // её вместе с концами, изредка собирает БОЛЬШУЮ дугу вместо малой --
+    // почему именно, не выяснено, воспроизводится независимо от переноса,
+    // на самой ПЕРВОЙ сборке контура. Результат остаётся ПРОСТЫМ
+    // многоугольником (is_valid его не ловит), но с площадью, разительно
+    // отличной от той, что даёт сам bulge-вид собственной, не зависящей от
+    // CGAL формулой (Polyline::area()).
+    //
+    // Средство -- взять третью точку НЕ на середине дуги: другая точка --
+    // другая тройка координат, и практика показывает, что CGAL с ней
+    // справляется. Перебор из пяти точек на gerber1.gbr вытащил все контуры
+    // до единого; если и он не помог, контур бракуется тем же путём, что и
+    // невалидный -- лучше потерять деталь, чем залить чужую дырку медью.
+    for(const double t: {0.5, 0.35, 0.65, 0.2, 0.8}) {
+        std::optional<GPoly> pgn = buildGPoly(poly, t);
+        if(!pgn) return std::nullopt; // вырожден -- другая точка дуги тут не поможет
+
+        // Контур, прошедший round-trip через double (например, поданный
+        // обратно результат прежней операции), может нести микросамокасание
+        // -- точный свип такого ввода не переживает и падает внутри CGAL.
+        // Валидируем сами и отбраковываем заранее: вызвавший решит, что с
+        // контуром делать. Именно от этого и спасает хранение геометрии в
+        // точном домене -- обёртки Polygon/Polygons (DxfPolygon.h)
+        // существуют ради него.
+        const Traits traits;
+        if(!CGAL::is_valid_unknown_polygon(*pgn, traits)) continue;
+
+        const double exactArea = std::abs(Cgal::signedArea(*pgn));
+        const double areaScale = std::max(exactArea, bulgeArea);
+        if(areaScale > 0.0 && std::abs(exactArea - bulgeArea) > 1e-6 * areaScale) continue;
+
+        return pgn;
+    }
+    return std::nullopt;
 }
 
 Polyline toPolyline(const GPoly& pgn) {
