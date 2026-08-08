@@ -14,7 +14,6 @@
 using namespace Geo;
 
 namespace {
-constexpr double pi = std::numbers::pi;
 constexpr double eps = 1e-9;
 
 bool near(double a, double b, double tolerance = eps) { return std::abs(a - b) <= tolerance; }

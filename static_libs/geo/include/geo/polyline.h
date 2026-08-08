@@ -6,8 +6,10 @@
 
 class QPainterPath; // forward-declared at global scope: Qt puts it there, not in namespace Geo
 class QDataStream;
-
 class QPolygonF;
+
+using std::numbers::pi;
+
 namespace Geo {
 
 // A single vertex of a polyline. `bulge` describes the curvature of the
@@ -19,9 +21,9 @@ struct Vertex : QPointF {
     // знаковые: направление -- это знак прогиба (и знак угла дуги), а не
     // произвольная метка, поэтому им можно домножать.
     enum Dir {
-        Cw = -1,  // по часовой стрелке
-        Line = 0, // прямой сегмент
-        Ccw = 1   // против часовой стрелки
+        Cw   = -1, // по часовой стрелке
+        Line = 0,  // прямой сегмент
+        Ccw  = 1   // против часовой стрелки
     };
 
     Vertex(double x, double y, double b = {}): QPointF{x, y}, bulge{b} { }
