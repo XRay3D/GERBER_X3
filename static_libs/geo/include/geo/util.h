@@ -130,8 +130,32 @@ Polylines& rotate(Polylines& polylines, double angle, QPointF center = {});
 // из контуров тем же свипом, что и при любом другом входе. Зеркало вдобавок
 // разворачивает обход каждого контура, и канон ориентаций (внешняя против
 // часовой, дырки по часовой) восстанавливается явно.
+//
+// Чистый перенос (QTransform::TxTranslate) уходит в Geo::translated и
+// остаётся точным до бита -- ни double, ни повторная сборка дуг тут не
+// участвуют. Поворот и масштаб точного пути не имеют (иррациональный
+// cos/sin негде хранить в рациональном домене CGAL) и проходят через
+// bulge-вид -- ровно тем же transform(), что и выше, с тем же контрактом:
+// дуга требует подобия (поворот + равномерный масштаб, возможно с
+// зеркалом), неравномерный масштаб для контуров с дугами не определён.
 Polygon transformed(const Polygon& polygon, const QTransform& tr);
 Polygons transformed(const Polygons& polygons, const QTransform& tr);
+
+//------------------------------------------------------------------------------
+// Операторы: тонкая обёртка над функциями выше, для тех, кому естественнее
+// писать `contour * tr`, чем `Geo::transform(contour, tr)`. `*=` -- на
+// месте (bulge-вид это умеет буквально), `*` -- копией. У Polygon/Polygons
+// «на месте» иллюзорно -- точный домен пересобирается всегда, `*=` там
+// просто присваивает результат обратно, -- но синтаксис одинаков везде.
+Polyline operator*(Polyline polyline, const QTransform& tr);
+Polyline& operator*=(Polyline& polyline, const QTransform& tr);
+Polylines operator*(Polylines polylines, const QTransform& tr);
+Polylines& operator*=(Polylines& polylines, const QTransform& tr);
+
+Polygon operator*(const Polygon& polygon, const QTransform& tr);
+Polygon& operator*=(Polygon& polygon, const QTransform& tr);
+Polygons operator*(const Polygons& polygons, const QTransform& tr);
+Polygons& operator*=(Polygons& polygons, const QTransform& tr);
 
 //------------------------------------------------------------------------------
 

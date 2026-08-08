@@ -149,15 +149,23 @@ Polyline obround(double width, double height, QPointF center) {
 }
 
 Polyline arc(QPointF center, double radius, double startAngle, double sweep) {
-    if(std::abs(sweep) >= 2.0 * pi - eps) {
-        Polyline polyline = circle(radius * 2.0, center);
-        if(sweep < 0.0) polyline.reverse();
-        return polyline;
-    }
-
     auto at = [&](double angle) {
         return center + QPointF{radius * std::cos(angle), radius * std::sin(angle)};
     };
+
+    if(std::abs(sweep) >= 2.0 * pi - eps) {
+        // Полный оборот -- те же две полуокружности, что и у circle(), но
+        // обойдённые ОТ ЗАДАННОГО УГЛА: вызывающий стыкует с началом обхода
+        // остальной контур (в Gerber дуга приходит серединой пути), и
+        // подменять его точкой на оси незачем.
+        const double half = sweep < 0.0 ? -pi : pi;
+        Polyline polyline{
+            Vertex{at(startAngle), bulgeOf(half)},
+            Vertex{at(startAngle + half), bulgeOf(half)},
+        };
+        polyline.closed = true;
+        return polyline;
+    }
 
     const int segments = std::max(1, static_cast<int>(std::ceil(std::abs(sweep) / pi)));
     const double step  = sweep / segments;
@@ -244,21 +252,51 @@ void restoreOrientation(Polylines& contours, const QTransform& tr) {
 } // namespace
 
 Polygon transformed(const Polygon& polygon, const QTransform& tr) {
+    // Чистый перенос -- САМЫЙ частый случай (вспышка апертуры в точку на
+    // плате) -- считается точно, без выхода в double и обратно: см.
+    // Geo::translated. Остаток (поворот, масштаб, зеркало) через double
+    // пройти вынужден -- у CGAL-домена этой библиотеки нет представления
+    // для иррационального cos/sin произвольного угла.
+    if(tr.type() <= QTransform::TxTranslate)
+        return translated(polygon, QPointF{tr.dx(), tr.dy()});
+
     Polylines outer{polygon.outer()};
     Polylines holes{polygon.holes()};
     transform(outer, tr);
     transform(holes, tr);
     restoreOrientation(outer, tr);
     restoreOrientation(holes, tr);
-    return Polygon{outer.front(), holes};
+    // Конструктор приводит обход к канону сам, так что развёрнутые контуры
+    // помеченного пустотой дадут то же самое тело; пометку переносим отдельно.
+    Polygon result{outer.front(), holes};
+    if(polygon.isInverted()) result.invert();
+    return result;
 }
 
 Polygons transformed(const Polygons& polygons, const QTransform& tr) {
-    Polylines contours = polygons.contours();
-    transform(contours, tr);
-    restoreOrientation(contours, tr);
-    return Polygons{contours};
+    if(tr.type() <= QTransform::TxTranslate)
+        return translated(polygons, QPointF{tr.dx(), tr.dy()});
+
+    // Поштучно, а не общим списком контуров: у каждого тела свои дырки, и в
+    // плоском списке вложенность выражена одной ориентацией -- дырка одного
+    // тела вычла бы чужое тело, лежащее внутри неё, и оно бы пропало.
+    std::vector<Polygon> parts;
+    parts.reserve(polygons.size());
+    for(const Polygon& polygon: polygons) parts.push_back(transformed(polygon, tr));
+    return Polygons{std::span<const Polygon>{parts}};
 }
+
+//------------------------------------------------------------------------------
+
+Polyline operator*(Polyline polyline, const QTransform& tr) { return transform(polyline, tr), polyline; }
+Polyline& operator*=(Polyline& polyline, const QTransform& tr) { return transform(polyline, tr); }
+Polylines operator*(Polylines polylines, const QTransform& tr) { return transform(polylines, tr), polylines; }
+Polylines& operator*=(Polylines& polylines, const QTransform& tr) { return transform(polylines, tr); }
+
+Polygon operator*(const Polygon& polygon, const QTransform& tr) { return transformed(polygon, tr); }
+Polygon& operator*=(Polygon& polygon, const QTransform& tr) { return polygon = transformed(polygon, tr); }
+Polygons operator*(const Polygons& polygons, const QTransform& tr) { return transformed(polygons, tr); }
+Polygons& operator*=(Polygons& polygons, const QTransform& tr) { return polygons = transformed(polygons, tr); }
 
 //------------------------------------------------------------------------------
 

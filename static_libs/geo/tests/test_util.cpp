@@ -81,6 +81,17 @@ void UtilTest::arcSplitsSweepAndClosesFullCircle() {
     const Polyline reversedFull = arc({}, r, 0.0, -2.0 * pi);
     QVERIFY(reversedFull.isClosed());
     QVERIFY(!reversedFull.isPositive()); // отрицательный размах -- обход по часовой
+
+    // Полный оборот начинается ТАМ, ГДЕ ЗАКАЗАНО: вызывающий стыкует с началом
+    // обхода остальной контур (в Gerber окружность приходит серединой пути), и
+    // подменять его точкой на оси нельзя.
+    for(const double start: {0.0, pi / 3.0, -2.0}) {
+        const Polyline turn = arc({3.0, -1.0}, r, start, 2.0 * pi);
+        const QPointF expected{3.0 + r * std::cos(start), -1.0 + r * std::sin(start)};
+        QVERIFY(near(QPointF(turn.front()).x(), expected.x(), 1e-9));
+        QVERIFY(near(QPointF(turn.front()).y(), expected.y(), 1e-9));
+        QVERIFY(near(turn.area(), pi * r * r, 1e-9));
+    }
 }
 
 void UtilTest::bulgeMathRoundTrips() {
