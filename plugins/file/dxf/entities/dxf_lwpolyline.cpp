@@ -131,8 +131,7 @@ DxfGo LwPolyline::toGo() const {
         QPointF center = (poly.front() + poly.back()) / 2;
         Curve circle = CircleCurve((geo::Length(poly.front(), poly.back()) + constantWidth), center);
 
-        auto arc = BulgeToArc(poly.front(), poly.back(), poly.front().bulge);
-        // if(arc && !arc->ccw) circle.reverse();
+        // if(auto arc = geo::arcOf(poly.front(), poly.back(), poly.front().bulge); arc && arc->theta < 0) circle.reverse();
 
         DxfGo go{
             id,
@@ -145,30 +144,15 @@ DxfGo LwPolyline::toGo() const {
         return go;
     }
 
-    Curve curve;
-    auto addSeg = [&curve](const Segment& source, const Segment& target) {
-        if(curve.empty())
-            curve.emplace_back(source);
-
-        if(qFuzzyIsNull(source.bulge)) {
-            curve.emplace_back(target);
-            return;
-        }
-
-        auto arc = BulgeToArc(source, target, source.bulge);
-        if(!arc) {
-            curve.emplace_back(target);
-            return;
-        }
-
-        curve.emplace_back(target,
-            arc->center,
-            arc->ccw ? geo::Vertex::Ccw : geo::Vertex::Cw);
+    // Прогиб LWPOLYLINE и прогиб Curve -- одно и то же и лежат на одной и той
+    // же (начальной) вершине сегмента, так что переводить нечего: вершины
+    // переносятся как есть.
+    Curve curve{
+        std::from_range,
+        poly | v::transform([](const Segment& v) { return geo::Vertex{v, v.bulge}; }),
     };
 
-    for(auto&& [from, to]: poly | v::pairwise) addSeg(from, to);
-
-    if(polylineFlag == Closed) addSeg(poly.back(), poly.front());
+    if(polylineFlag == Closed) curve.close();
 
     Curves curves = Inflate({curve}, // TODO
         constantWidth,

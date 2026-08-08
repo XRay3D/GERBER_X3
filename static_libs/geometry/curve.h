@@ -16,8 +16,20 @@
 using namespace std::literals;
 using namespace std::placeholders;
 
+// Ломаная с дугами: прогиб вершины i описывает сегмент i -> i+1.
+//
+// Замкнутость -- ФЛАГ, а не повтор первой точки в конце: у замкнутой кривой
+// есть ещё и сегмент back -> front, и прогиб последней вершины описывает
+// именно его. Повторять первую точку не нужно и вредно -- получился бы лишний
+// вырожденный сегмент, а сама «замкнута ли» пришлось бы каждый раз угадывать
+// сравнением координат.
+//
+// Единственный правильный способ обойти кривую -- segments(): он и сегмент
+// замыкания не потеряет, и о том, где лежит прогиб, помнить не заставит.
 struct Curve : std::vector<geo::Vertex> {
     using std::vector<geo::Vertex>::vector;
+
+    bool closed{};
 
     QRectF boundingRect() const;
     Curve& reverse();
@@ -26,6 +38,36 @@ struct Curve : std::vector<geo::Vertex> {
     bool isClosed() const;
     bool isPositive() const;
     double perimetr() const;
+
+    // Замкнуть кривую. Повторную первую точку в конце (как её принято писать
+    // в DXF/Gerber/клиппере) при этом убираем: замыкающий сегмент теперь есть
+    // сам по себе, а её дубликат стал бы вырожденным сегментом нулевой длины.
+    Curve& close() {
+        if(size() > 1 && front().pt == back().pt) pop_back();
+        closed = true;
+        return *this;
+    }
+
+    // Число сегментов: у замкнутой кривой на один больше -- замыкающий.
+    size_t segmentCount() const noexcept {
+        return empty() ? 0 : size() - !closed;
+    }
+
+    using SegmentRef = std::pair<const geo::Vertex&, const geo::Vertex&>;
+
+    // Сегменты парами (начальная вершина, конечная), включая замыкающий.
+    auto segments() const {
+        return v::iota(size_t{}, segmentCount())
+            | v::transform([this](size_t i) -> SegmentRef {
+                  return {at(i), at((i + 1) % size())};
+              });
+    }
+
+    // Геометрия сегмента, начинающегося в вершине i; nullopt -- отрезок.
+    std::optional<geo::Arc> arcAt(size_t i) const {
+        if(i >= segmentCount()) return {};
+        return geo::arcOf(at(i).pt, at((i + 1) % size()).pt, at(i).bulge);
+    }
 };
 
 using Curves = std::vector<Curve>;
@@ -33,7 +75,7 @@ using Curvess = std::vector<Curves>;
 
 inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
     uint32_t n;
-    stream >> n;
+    stream >> n >> container.closed;
     container.resize(n);
     for(auto& var: container) {
         stream >> var;
@@ -44,7 +86,7 @@ inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
 }
 
 inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
-    stream << uint32_t(container.size());
+    stream << uint32_t(container.size()) << container.closed;
     for(const auto& var: container) stream << var;
     return stream;
 }
@@ -63,20 +105,14 @@ constexpr QRectF BoundingRect(const Curves& curves) {
         std::bit_or{});
 }
 
-struct ArcGeometry {
-    QPointF center;
-    double radius = 0.0; // always >= 0
-    // всегда >= 0
-    double startAngle = 0.0; // atan2 at p1, radians
-    // atan2 в точке p1, радианы
-    bool ccw = true; // sweep direction from p1 to p2 (matches sign of bulge)
-    // направление обхода от p1 к p2 (совпадает со знаком bulge)
-};
-
-std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, double bulge);
-
 Curve CircleCurve(double diametr, const QPointF& center = {});
 Curve RectangleCurve(double width, double height, const QPointF& center = {});
+
+// Дуга «центр + радиус + углы» в вершины с прогибами. Сегменты не длиннее
+// полуокружности: прогиб растёт как tan(theta/4) и у почти полного оборота
+// улетает в бесконечность, поэтому крупные дуги приходится резать. Полный
+// оборот (|sweep| >= 2*pi) даёт замкнутую окружность из трёх вершин.
+Curve ArcCurve(const QPointF& center, double radius, double startAngle, double sweep);
 
 Curve& TransformCurve(Curve& curve, const QTransform& tr);
 Curves& TransformCurves(Curves& curve, const QTransform& tr);

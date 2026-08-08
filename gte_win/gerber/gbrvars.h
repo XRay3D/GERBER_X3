@@ -13,7 +13,6 @@
     #define GERBER_H
 
     #include <QObject>
-    #include <myclipper.h>
 
     #define DEPRECATED
 

@@ -82,7 +82,7 @@ DxfGo Text::toGo() const {
     QSizeF size;
     if(sp->file->styles().contains(textStyleName)) {
         Style* style = sp->file->styles()[textStyleName];
-        font         = style->font;
+        font = style->font;
         if(Settings::overrideFonts()) {
             font.setFamily(Settings::defaultFont());
             font.setBold(Settings::boldFont());
@@ -90,9 +90,9 @@ DxfGo Text::toGo() const {
         }
         QFontMetricsF fm{font};
         scaleX = scaleY = std::max(style->fixedTextHeight, textHeight) / fm.capHeight();
-        ascent          = fm.ascent();
-        descent         = fm.descent();
-        size            = fm.size(0, text);
+        ascent = fm.ascent();
+        descent = fm.descent();
+        size = fm.size(0, text);
     } else {
         font.setFamily(Settings::defaultFont());
         font.setPointSize(100);
@@ -102,9 +102,9 @@ DxfGo Text::toGo() const {
         }
         QFontMetricsF fm{font};
         scaleX = scaleY = textHeight / fm.capHeight();
-        ascent          = fm.ascent();
-        descent         = fm.descent();
-        size            = fm.size(0, text);
+        ascent = fm.ascent();
+        descent = fm.descent();
+        size = fm.size(0, text);
     }
     // qDebug(u"scale X %f Y %f"_s, scaleX, scaleY);
     switch(horizontalJustType) {

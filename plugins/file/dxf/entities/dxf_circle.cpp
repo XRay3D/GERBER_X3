@@ -14,7 +14,6 @@
 #include "section/dxf_entities.h"
 #include <QGraphicsEllipseItem>
 #include <gi_dbg.h>
-#include <myclipper.h>
 
 namespace Dxf {
 

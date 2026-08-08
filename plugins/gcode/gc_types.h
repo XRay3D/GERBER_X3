@@ -10,10 +10,9 @@
  ********************************************************************************/
 #pragma once
 
-#include "curve.h"
 #include "datastream.h"
+#include "geo/polygon.h"
 #include "md5.h"
-#include "myclipper.h"
 
 #include "tool.h"
 
@@ -24,7 +23,7 @@
 #include <algorithm>
 #include <variant>
 
-constexpr auto G_CODE      = "GCode"_hash32;
+constexpr auto G_CODE = "GCode"_hash32;
 constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
@@ -46,10 +45,10 @@ namespace GCode {
 
 enum Code {
     GNull = -1,
-    G00   = 0,
-    G01   = 1,
-    G02   = 2, // cw
-    G03   = 3, // ccw
+    G00 = 0,
+    G01 = 1,
+    G02 = 2, // cw
+    G03 = 3, // ccw
 };
 
 enum SideOfMilling {
@@ -164,17 +163,17 @@ public:
     // Parameter keys are names, not an enum: each plugin can add its own
     // (see e.g. Profile::Creator::BridgeLen) without needing a shared numeric
     // range to avoid collisions, and a serialized/dumped Params reads as text.
-    static inline const QString Convent        = u"Convent"_s;
-    static inline const QString Depth          = u"Depth"_s;
-    static inline const QString GrItems        = u"GrItems"_s;
+    static inline const QString Convent = u"Convent"_s;
+    static inline const QString Depth = u"Depth"_s;
+    static inline const QString GrItems = u"GrItems"_s;
     static inline const QString MultiToolIndex = u"MultiToolIndex"_s; // need for Pocket
-    static inline const QString NotTile        = u"NotTile"_s;        // не раскладывать если даже раскладка включена
-    static inline const QString Side           = u"Side"_s;
-    static inline const QString FileSide       = u"FileSide"_s;
-    static inline const QString LeftHand       = u"LeftHand"_s; // need for Threading
-    static inline const QString Circle         = u"Circle"_s;   // need for Threading
-    static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
-    static inline const QString Starts         = u"Starts"_s;   // need for Threading
+    static inline const QString NotTile = u"NotTile"_s;               // не раскладывать если даже раскладка включена
+    static inline const QString Side = u"Side"_s;
+    static inline const QString FileSide = u"FileSide"_s;
+    static inline const QString LeftHand = u"LeftHand"_s; // need for Threading
+    static inline const QString Circle = u"Circle"_s;     // need for Threading
+    static inline const QString Chamfer = u"Chamfer"_s;   // need for Threading
+    static inline const QString Starts = u"Starts"_s;     // need for Threading
 
     Params() {
         if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;

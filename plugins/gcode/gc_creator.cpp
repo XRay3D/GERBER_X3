@@ -21,7 +21,6 @@
 #include "gi_gcpath.h"
 #include "gi_point.h"
 #include "md5.h"
-#include "myclipper.h"
 
 #include "project.h"
 #include "utils.h"

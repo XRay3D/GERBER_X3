@@ -11,9 +11,8 @@
 #pragma once
 
 #include "datastream.h"
+#include "geo/polygon.h"
 #include <any>
-#include <curve.h>
-#include <myclipper.h>
 
 // struct Circle {
 // QPointF center;
@@ -112,8 +111,8 @@ struct GraphicObject {
     };
     // clang-format on
 
-    Curves fill;
-    Curve path;
+    Geo::Polygon fill;
+    Geo::Polyline path;
     QPointF pos{std::nanf(""), std::nanf("")};
     QString name;
     Type type{Null};
@@ -128,10 +127,10 @@ struct GraphicObject {
 };
 
 inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    for(auto& curve: go.fill)
-        TransformCurve(curve, t);
-    TransformCurve(go.path, t);
-    go.pos = t.map(go.pos);
+    // for(auto& curve: go.fill)
+    //     TransformCurve(curve, t);
+    // TODO TransformCurve(go.path, t);
+    // go.pos = t.map(go.pos);
     return go;
 }
 
@@ -156,9 +155,9 @@ struct Criteria {
             if((fl = go.test(type)))
                 break;
         if(fl && !length.isNull())
-            fl &= length(go.path.perimetr());
+            fl &= length(go.path.perimeter());
         if(fl && !area.isNull())
-            fl &= area(Area(go.fill));
+            fl &= area(go.fill.area());
         return fl;
     }
 };

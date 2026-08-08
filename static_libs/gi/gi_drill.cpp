@@ -11,7 +11,6 @@
 #include "gi_drill.h"
 
 #include "app.h"
-#include "myclipper.h"
 
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
@@ -61,7 +60,7 @@ void Drill::setDiameter(double diameter) {
 
 void Drill::updatePath(const QPolygonF& path, double diameter) {
     diameter_ = diameter;
-    path_     = path;
+    path_ = path;
     create();
     update();
 }
@@ -114,7 +113,7 @@ void Drill::create() {
         auto path = ~path_; // FIXME to Curve
         r::for_each(path, SetCSelf);
         curves_ = toCurves(InflateRoundPolygon({path}, diameter_ * uScale));
-        shape_  = toPPath(curves_);
+        shape_ = toPPath(curves_);
     }
     boundingRect_ = shape_.boundingRect();
 }

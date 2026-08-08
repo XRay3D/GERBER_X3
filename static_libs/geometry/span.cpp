@@ -57,68 +57,59 @@ static PointF QuadrantEndPoint(int i) {
 }
 
 PointF Span::NearestPointNotOnSpan(const PointF& p) const {
-    if(!vx.type) {
-        PointF Vs{vx.pt - pt};
+    auto arc = this->arc();
+    if(!arc) {
+        PointF Vs{pe - vs.pt};
         Vs.normalize();
-        double dp = PointF::dotProduct((p - pt), Vs);
-        return (Vs * dp) + pt;
-    } else {
-        double radius = pt.dist(vx.center);
-        double r = p.dist(vx.center);
-        if(r < PointF::tolerance) return pt;
-        PointF vc{vx.center - p};
-        return p + vc * ((r - radius) / r);
+        double dp = PointF::dotProduct((p - vs.pt), Vs);
+        return (Vs * dp) + vs.pt;
     }
+    double r = p.dist(arc->center);
+    if(r < PointF::tolerance) return vs.pt;
+    PointF vc{arc->center - p};
+    return p + vc * ((r - arc->radius) / r);
 }
 
 PointF Span::NearestPoint(const PointF& p) const {
     PointF np = NearestPointNotOnSpan(p);
     double t = Parameter(np);
     if(0.0 <= t && t <= 1.0) return np;
-    double d1 = p.dist(pt);
-    double d2 = p.dist(vx.pt);
-    return (d1 < d2) ? pt : vx.pt;
+    double d1 = p.dist(vs.pt);
+    double d2 = p.dist(pe);
+    return (d1 < d2) ? vs.pt : pe;
 }
 
 PointF Span::MidPerim(double d) const {
     /// returns a point which is 0-d along span
-    PointF p;
-    if(vx.type == 0) {
-        PointF vs{vx.pt - pt};
-        vs.normalize();
-        p = vs * d + pt;
-    } else {
-        PointF v{pt - vx.center};
-        double radius = v.length();
-        v.Rotate(d * int(vx.type) / radius);
-        p = v + vx.center;
+    auto arc = this->arc();
+    if(!arc) {
+        PointF v{pe - vs.pt};
+        v.normalize();
+        return v * d + vs.pt;
     }
-    return p;
+    // длина дуги = радиус * угол, отсюда и угол, на который нужно повернуть
+    // радиус-вектор начала; знак -- направление обхода
+    PointF v{vs.pt - arc->center};
+    v.Rotate(d * (arc->theta < 0.0 ? -1.0 : 1.0) / arc->radius);
+    return v + arc->center;
 }
 
 PointF Span::MidParam(double param) const {
     /// returns a point which is 0-1 along span
-    if(qFuzzyIsNull(param)) return pt;
+    if(qFuzzyIsNull(param)) return vs.pt;
 
-    if(qFuzzyIsNull(param - 1.0)) return vx.pt;
+    if(qFuzzyIsNull(param - 1.0)) return pe;
 
-    PointF p;
-    if(vx.type == 0) {
-        PointF vs{vx.pt - pt};
-        p = vs * param + pt;
-    } else {
-        PointF v{pt - vx.center};
-        v.Rotate(param * IncludedAngle());
-        p = v + vx.center;
-    }
-    return p;
+    auto arc = this->arc();
+    if(!arc) return PointF{pe - vs.pt} * param + vs.pt;
+    return arc->pointAt(param);
 }
 
 PointF Span::NearestPointToSpan(const Span& p, double& d) const {
     PointF midpoint = MidParam(0.5);
-    PointF np = p.NearestPoint(pt);
-    PointF best_point = pt;
-    double dist = np.dist(pt);
+    PointF np = p.NearestPoint(vs.pt);
+    PointF best_point = vs.pt;
+    double dist = np.dist(vs.pt);
     if(p.m_start_span) {
         dist -= (PointF::tolerance * 2); // give start of curve most priority
     }
@@ -129,11 +120,11 @@ PointF Span::NearestPointToSpan(const Span& p, double& d) const {
         dist = dm;
         best_point = midpoint;
     }
-    PointF np2 = p.NearestPoint(vx.pt);
-    double dp2 = np2.dist(vx.pt);
+    PointF np2 = p.NearestPoint(pe);
+    double dp2 = np2.dist(pe);
     if(dp2 < dist) {
         dist = dp2;
-        best_point = vx.pt;
+        best_point = pe;
     }
     d = dist;
     return best_point;
@@ -158,90 +149,60 @@ PointF Span::NearestPoint(const Span& p, double* d) const {
 }
 
 QRectF Span::boundingRect() {
-    QPolygonF box{pt, vx.pt};
+    QPolygonF box{vs.pt, pe};
 
-    if(this->vx.type) {
-        // arc, add quadrant points
-        PointF vs = pt - vx.center;
-        PointF ve = vx.pt - vx.center;
-        int qs = GetQuadrant(vs);
-        int qe = GetQuadrant(ve);
-        if(vx.type == -1) {
-            // swap qs and qe
-            int t = qs;
-            qs = qe;
-            qe = t;
-        }
+    if(auto arc = this->arc()) {
+        // дуга выпирает за хорду: добавляем те крайние по осям точки
+        // окружности, что попали в её размах
+        PointF vStart = vs.pt - arc->center;
+        PointF vEnd = pe - arc->center;
+        int qs = GetQuadrant(vStart);
+        int qe = GetQuadrant(vEnd);
+        if(arc->theta > 0.0) std::swap(qs, qe); // против часовой -- квадранты в обратном порядке
 
         if(qe < qs) qe = qe + 4;
 
-        double rad = vx.pt.dist(vx.center);
-
         for(int i = qs; i < qe; i++)
-            box.emplace_back(vx.center + QuadrantEndPoint(i) * rad);
+            box.emplace_back(arc->center + QuadrantEndPoint(i) * arc->radius);
     }
     return box.boundingRect();
 }
 
 double Span::IncludedAngle() const {
-    if(vx.type) {
-        PointF vs = pt - vx.center;
-        PointF ve = vx.pt - vx.center;
-        vs.ry() *= -1.;
-        ve.ry() *= -1.;
-
-        if(vx.type == -1) {
-            vs = -vs;
-            ve = -ve;
-        }
-        vs.normalize();
-        ve.normalize();
-
-        return ::IncludedAngle(vs, ve, vx.type);
-    }
-
-    return 0.0;
+    auto arc = this->arc();
+    return arc ? arc->theta : 0.0;
 }
 
 double Span::GetArea() const {
-    if(vx.type) {
-        double angle = IncludedAngle();
-        double radius = pt.dist(vx.center);
-        return (
-            0.5
-            * ((vx.center.x() - pt.x()) * (vx.center.y() + pt.y())
-                - (vx.center.x() - vx.pt.x()) * (vx.center.y() + vx.pt.y()) - angle * radius * radius));
+    if(auto arc = this->arc()) {
+        const auto& c = arc->center;
+        return 0.5
+            * ((c.x() - vs.x()) * (c.y() + vs.y())
+                - (c.x() - pe.x()) * (c.y() + pe.y())
+                - arc->theta * arc->radius * arc->radius);
     }
 
-    return 0.5 * (vx.pt.x() - pt.x()) * (pt.y() + vx.pt.y());
+    return 0.5 * (pe.x() - vs.x()) * (vs.y() + pe.y());
 }
 
 double Span::Parameter(const PointF& p) const {
-    double t;
-    if(vx.type == 0) {
-        PointF v0{p - pt};
-        PointF vs{vx.pt - pt};
-        double length = vs.length();
-        vs.normalize();
-        t = PointF::dotProduct(vs, v0);
-        t = t / length;
-    } else {
-        // true if p lies on arc span sp (p must be on circle of span)
-        PointF vs{pt - vx.center};
-        PointF v{p - vx.center};
-        vs.ry() *= -1.;
-        v.ry() *= -1.;
-        vs.normalize();
+    auto arc = this->arc();
+    if(!arc) {
+        PointF v0{p - vs.pt};
+        PointF v{pe - vs.pt};
+        double length = v.length();
         v.normalize();
-        if(vx.type == -1) {
-            vs = -vs;
-            v = -v;
-        }
-        double ang = ::IncludedAngle(vs, v, vx.type);
-        double angle = IncludedAngle();
-        t = ang / angle;
+        return PointF::dotProduct(v, v0) / length;
     }
-    return t;
+    // доля пройденного угла: точка должна лежать на окружности дуги
+    const double a = std::atan2(p.y() - arc->center.y(), p.x() - arc->center.x());
+    double delta = std::remainder(a - arc->startAngle, 2.0 * pi);
+    if(arc->theta > 0.0) {
+        if(delta < 0.0) delta += 2.0 * pi;
+    } else {
+        if(delta > 0.0) delta -= 2.0 * pi;
+    }
+    return delta / arc->theta;
 }
 
 bool Span::On(const PointF& p, double* t) const {
@@ -255,25 +216,23 @@ bool Span::On(const PointF& p, double* t) const {
 }
 
 double Span::Length() const {
-    if(vx.type)
-        return std::abs(IncludedAngle()) * vx.radius();
-    return pt % vx.pt;
+    auto arc = this->arc();
+    return arc ? arc->length() : vs.pt % pe;
 }
 
 PointF Span::GetVector(double fraction) const {
     /// returns the direction vector at point which is 0-1 along span
-    if(vx.type == 0) {
-        PointF v{vx.pt - pt};
+    auto arc = this->arc();
+    if(!arc) {
+        PointF v{pe - vs.pt};
         v.normalize();
         return v;
     }
 
     PointF p = MidParam(fraction);
-    PointF v{p - vx.center};
+    PointF v{p - arc->center};
     v.normalize();
-    if(vx.type == 1) {
-        return PointF(-v.y(), v.x());
-    } else {
-        return PointF(v.y(), -v.x());
-    }
+    // касательная -- радиус, повёрнутый на 90 градусов в сторону обхода
+    if(arc->theta > 0.0) return PointF(-v.y(), v.x());
+    return PointF(v.y(), -v.x());
 }

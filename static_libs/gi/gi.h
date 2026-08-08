@@ -10,8 +10,8 @@
  ********************************************************************************/
 #pragma once
 
-#include "curve.h"
-#include "myclipper.h"
+#include "geo/polygon.h"
+
 #include "plugintypes.h"
 
 #include <QAnimationGroup>
@@ -95,9 +95,9 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Curves curves(int param = {}) const;
+    virtual Geo::Polygon curves(int param = {}) const;
     // virtual void setPaths(Paths paths, int param = {});
-    virtual void setCurves(Curves curves, int param = {});
+    virtual void setCurves(Geo::Polygon curves, int param = {});
     virtual void redraw();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -123,7 +123,7 @@ protected:
     const AbstractFile* file_;
     Group* itemGroup = nullptr;
     QPainterPath shape_;
-    Curves curves_;
+    Geo::Polygon curves_;
 
     QPen pen_;
 

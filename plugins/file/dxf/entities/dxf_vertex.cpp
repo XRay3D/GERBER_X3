@@ -27,7 +27,7 @@ void Vertex::parse(Dxf::CodeData& code) {
         case Bulge                   : bulge = code; break;                    // Прогиб (необязательно; значение по умолчанию — 0). Прогиб — это касательная одной четвертой центрального угла к дуговому сегменту. Если дуга идет в направлении по часовой стрелке от начальной точки к конечной, то значение касательной будет отрицательным. Если значение прогиба равно 0, то сегмент прямой, а если 1, то полукруглый.
         case VertexFlags             : vertexFlags = code; break;              // Флаги вершин:
         case CurveFitTangentDirection: curveFitTangentDirection = code; break; // Направление касательной с дуговым сглаживанием
-        case PolyfaceMeshVertexIndex1: faceIndex[0] = code; break; // Индексы вершин многогранной сети (1-based, знак — признак скрытого ребра)
+        case PolyfaceMeshVertexIndex1: faceIndex[0] = code; break;             // Индексы вершин многогранной сети (1-based, знак — признак скрытого ребра)
         case PolyfaceMeshVertexIndex2: faceIndex[1] = code; break;
         case PolyfaceMeshVertexIndex3: faceIndex[2] = code; break;
         case PolyfaceMeshVertexIndex4: faceIndex[3] = code; break;

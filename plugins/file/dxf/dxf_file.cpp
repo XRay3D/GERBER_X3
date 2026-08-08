@@ -111,7 +111,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 paths.push_back(path);
             }
             groupedCurves_.push_back(toCurves(paths));
-            r::for_each(groupedCurves_ | v::join, [](Curve& c) { c.emplace_back(c.front().pt); });
+            r::for_each(groupedCurves_ | v::join, &Curve::close);
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -125,7 +125,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 paths.push_back(path);
             }
             groupedCurves_.push_back(toCurves(paths));
-            r::for_each(groupedCurves_ | v::join, [](Curve& c) { c.emplace_back(c.front().pt); });
+            r::for_each(groupedCurves_ | v::join, &Curve::close);
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -211,7 +211,7 @@ void File::createGi() {
             const bool empty{layer->groupedCurves_.empty()};
             for(auto& go: layer->graphicObjects_) {
                 if(empty && go.fill.size()) {
-                    // if(Area(go.fill) < 0.) ReversePaths(go.fill); // FIXME add settings
+                    // if(go.fill.area() < 0.) ReversePaths(go.fill); // FIXME add settings
                     clipper.AddSubject(toPaths(go.fill));
                 }
 

@@ -21,10 +21,10 @@ struct ParseResult {
     Format format;
     ApertureMap apertures;
     std::map<QString, Macro> macros;
-    Objects objects;         // изображение в порядке наложения
-    Curves strokes;          // осевые линии draw/arc — для отображения «путей»
-    QStringList warnings;    // нереализованные/подозрительные команды
-    QString error;           // фатальная ошибка (пусто — всё хорошо)
+    Objects objects;      // изображение в порядке наложения
+    Curves strokes;       // осевые линии draw/arc — для отображения «путей»
+    QStringList warnings; // нереализованные/подозрительные команды
+    QString error;        // фатальная ошибка (пусто — всё хорошо)
     bool valid() const { return error.isEmpty(); }
 };
 

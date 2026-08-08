@@ -44,22 +44,22 @@ using boost::polygon::voronoi_diagram;
 using boost::polygon::x;
 using boost::polygon::y;
 
-using coordinate_type       = double;
-using point_type            = boost::polygon::point_data<coordinate_type>;
-using segment_type          = boost::polygon::segment_data<coordinate_type>;
-using rect_type             = boost::polygon::rectangle_data<coordinate_type>;
-using VB                    = voronoi_builder<int>;
-using VD                    = voronoi_diagram<coordinate_type>;
-using cell_type             = VD::cell_type;
-using source_index_type     = VD::cell_type::source_index_type;
-using source_category_type  = VD::cell_type::source_category_type;
-using edge_type             = VD::edge_type;
-using cell_container_type   = VD::cell_container_type;
+using coordinate_type = double;
+using point_type = boost::polygon::point_data<coordinate_type>;
+using segment_type = boost::polygon::segment_data<coordinate_type>;
+using rect_type = boost::polygon::rectangle_data<coordinate_type>;
+using VB = voronoi_builder<int>;
+using VD = voronoi_diagram<coordinate_type>;
+using cell_type = VD::cell_type;
+using source_index_type = VD::cell_type::source_index_type;
+using source_category_type = VD::cell_type::source_category_type;
+using edge_type = VD::edge_type;
+using cell_container_type = VD::cell_container_type;
 using vertex_container_type = VD::cell_container_type;
-using edge_container_type   = VD::edge_container_type;
-using const_cell_iterator   = VD::const_cell_iterator;
+using edge_container_type = VD::edge_container_type;
+using const_cell_iterator = VD::const_cell_iterator;
 using const_vertex_iterator = VD::const_vertex_iterator;
-using const_edge_iterator   = VD::const_edge_iterator;
+using const_edge_iterator = VD::const_edge_iterator;
 
 segment_type retrieve_segment(std::vector<segment_type>& segment_data_, const cell_type& cell) {
     source_index_type index = cell.source_index(); // - point_data_.size();
@@ -67,7 +67,7 @@ segment_type retrieve_segment(std::vector<segment_type>& segment_data_, const ce
 }
 
 point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_type& cell) {
-    source_index_type index       = cell.source_index();
+    source_index_type index = cell.source_index();
     source_category_type category = cell.source_category();
     // if (category == boost::polygon::SOURCE_CATEGORY_SINGLE_POINT) {
     // return point_data_[index];
@@ -83,8 +83,8 @@ Path64 sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_t
     };
 
     coordinate_type max_dist = uScale * 0.00001; //* 1E-3* (xh(brect_) - xl(brect_));
-    point_type point         = edge.cell()->contains_point() ? retrieve_point(segment_data_, *edge.cell()) : retrieve_point(segment_data_, *edge.twin()->cell());
-    segment_type segment     = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
+    point_type point = edge.cell()->contains_point() ? retrieve_point(segment_data_, *edge.cell()) : retrieve_point(segment_data_, *edge.twin()->cell());
+    segment_type segment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
     Path64 path;

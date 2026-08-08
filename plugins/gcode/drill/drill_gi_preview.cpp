@@ -39,7 +39,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter  = tool.getDiameter(tool.getDepth());
+                const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 for(Path64& path_: Inflate64(Paths64{path_}, diameter * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)) {
                     path_.push_back(path_.front());
@@ -61,7 +61,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPointF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter  = tool.getDiameter(tool.getDepth());
+                const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 painterPath.moveTo(-QPointF(0.0, lineKoeff));
                 painterPath.lineTo(+QPointF(0.0, lineKoeff));

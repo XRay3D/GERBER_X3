@@ -156,11 +156,11 @@ DxfGo MText::toGo() const {
 #if 1 // Left-выравнивание не должно центрировать строки внутри блока — раньше при разной
       // длине строк более короткие строки "уезжали" к центру вместо выравнивания по левому краю.
         switch(attachmentPoint) {
-        case TopLeft     : // вверху слева
-        case MiddleLeft  :                                                                                                   // посередине слева
-        case BottomLeft  : x = 0; break;                                                                                     // снизу слева
-        case TopCenter   :                                                                                                   // вверху по центру
-        case MiddleCenter:                                                                                                   // посередине по центру
+        case TopLeft:                                                                                                       // вверху слева
+        case MiddleLeft:                                                                                                    // посередине слева
+        case BottomLeft  : x = 0; break;                                                                                    // снизу слева
+        case TopCenter   :                                                                                                  // вверху по центру
+        case MiddleCenter:                                                                                                  // посередине по центру
         case BottomCenter: x = (size.width() - QFontMetricsF(font).size(Qt::TextSingleLine, list[i]).width()) * 0.5; break; // снизу по центру
         case TopRight    :                                                                                                  // вверху справа
         case MiddleRight :                                                                                                  // посередине справа

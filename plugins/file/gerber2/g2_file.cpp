@@ -24,7 +24,7 @@ File::File()
     : AbstractFile{} {
     itemGroups_.push_back(new Gi::Group); // ApPaths (Normal создаёт база)
     layerTypes_ = {
-        {Normal,  QObject::tr("Normal"),         QObject::tr("Filled copper")                        },
+        {Normal,  QObject::tr("Normal"),         QObject::tr("Filled copper")                      },
         {ApPaths, QObject::tr("Aperture paths"), QObject::tr("Centre lines of draws and arcs only")},
     };
 }

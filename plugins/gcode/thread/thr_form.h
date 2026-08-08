@@ -45,7 +45,7 @@ public:
 
 private:
     Ui::ThreadForm* ui;
-    class Model* model       = nullptr;
+    class Model* model = nullptr;
     class AbstractFile* file = nullptr;
     class Header* header;
     class QCheckBox* checkBox;

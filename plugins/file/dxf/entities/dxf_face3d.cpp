@@ -38,7 +38,7 @@ void Face3D::parse(CodeData& code) {
     // Четвертая угловая точка не обязательна: если задано только три, она совпадает с третьей (треугольная грань).
     if(!(corners & FourthCorner)) {
         fourthCorner = thirdCorner;
-        cornerZ[3]   = cornerZ[2];
+        cornerZ[3] = cornerZ[2];
         corners |= FourthCorner;
     }
 }
@@ -56,8 +56,8 @@ DxfGo Face3D::toGo() const {
         {secondCorner},
         {thirdCorner},
         {fourthCorner},
-        {firstCorner},
     };
+    poly.close();
 
     if(!poly.isPositive())
         poly.reverse();

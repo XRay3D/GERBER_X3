@@ -93,7 +93,7 @@ void File::read(QDataStream& stream) {
     stream >> format_;
     format_.file = this;
     for(Hole& hole: *this) {
-        hole.file         = this;
+        hole.file = this;
         hole.state.format = &format_;
     }
 }

@@ -34,7 +34,7 @@ public:
 
     static inline const QString UseAngle = u"UseAngle"_s;
     static inline const QString HathStep = u"HathStep"_s;
-    static inline const QString Pass     = u"Pass"_s;
+    static inline const QString Pass = u"Pass"_s;
 
     enum PassE {
         NoProfilePass,

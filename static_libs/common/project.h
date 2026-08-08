@@ -32,7 +32,8 @@ enum FileVersion {
     ProVer_5,
     ProVer_6,
     ProVer_7,
-    CurrentVer = ProVer_7,
+    ProVer_8, // Curve: точка + прогиб вместо центра дуги, замкнутость -- флагом
+    CurrentVer = ProVer_8,
 };
 
 namespace GCode {
@@ -54,7 +55,7 @@ class QFileSystemWatcher;
 using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
 // using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
 using ShapesMap = std::map<int, Shapes::AbstractShape*>;
-using ItemMap   = std::map<int, Gi::Item*>;
+using ItemMap = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT

@@ -67,11 +67,11 @@ struct Spline final : Entity {
     };
 
     enum SplineFlagBits {
-        Closed = 1,     // замкнутый сплайн
-        Periodic = 2,   // периодический сплайн
-        Rational = 4,   // рациональный сплайн
-        Planar = 8,     // плоский
-        Linear = 16,    // линейный (также задается бит 8 — плоский)
+        Closed = 1,   // замкнутый сплайн
+        Periodic = 2, // периодический сплайн
+        Rational = 4, // рациональный сплайн
+        Planar = 8,   // плоский
+        Linear = 16,  // линейный (также задается бит 8 — плоский)
     };
 
     QPolygonF FitPoints;

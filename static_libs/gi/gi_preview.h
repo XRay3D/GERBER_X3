@@ -51,8 +51,8 @@ public:
     // Признак "участвует в построении G-кода" для конкретного экземпляра превью
     // (в отличие от Row::useForCalc, который включает/выключает сразу всю строку).
     bool isUsed() const { return +(colorState & ColorState::Used); }
-    virtual Tool::ID toolId() const      = 0;
-    virtual void updateTool()            = 0;
+    virtual Tool::ID toolId() const = 0;
+    virtual void updateTool() = 0;
     // virtual Paths paths() const          = 0;
     virtual bool fit(double depth) const = 0;
 
@@ -74,14 +74,14 @@ protected:
 
     enum class ColorState : unsigned {
         Default,
-        Hovered  = 1,
+        Hovered = 1,
         Selected = 2,
-        Used     = 4,
-        Tool     = 8,
+        Used = 4,
+        Tool = 8,
     } colorState{ColorState::Used};
     using CS = ColorState;
 
-    static constexpr int dark  = 180; // обычная (невыделенная, ненаведённая) насыщенность
+    static constexpr int dark = 180;  // обычная (невыделенная, ненаведённая) насыщенность
     static constexpr int light = 255; // Selected — самое яркое состояние
     static constexpr int hover = 120; // любое наведение мышью — тусклее Selected (и обычного состояния тоже)
 

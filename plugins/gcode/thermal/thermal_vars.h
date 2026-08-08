@@ -10,8 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "curve.h"
-#include "myclipper.h"
+#include "geo/polygon.h"
 
 #include <QString>
 #include <map>
@@ -22,12 +21,12 @@ namespace Thermal {
 struct ThParam {
     double angle{};
     double tickness = 0.5;
-    int count       = 4;
+    int count = 4;
 };
 
 class Model;
 
 using PreviewGiMapValVec = mvector<std::pair<Curves, QPointF>>;
-using PreviewGiMap       = std::map<QString, PreviewGiMapValVec>;
+using PreviewGiMap = std::map<QString, PreviewGiMapValVec>;
 
 } // namespace Thermal

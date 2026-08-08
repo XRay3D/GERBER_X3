@@ -234,18 +234,18 @@ void Form::on_cbxFileCurrentIndexChanged() {
             map[Key{var.name, var.path.size() > 1}].emplace_back(&var);
         }
 
-        model      = new Model{map.size(), ui->toolTable};
+        model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
         QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
-            row.icon  = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
-            row.name  = QString(key.first).split(u'|');
+            row.icon = !key.second ? drawIcon(val.front()->fill, color) : drawDrillIcon(key.second ? Qt::red : color);
+            row.name = QString(key.first).split(u'|');
             row.name.back() += u": Ø"_s + QString::number(std::any_cast<double>(val.front()->raw));
             row.diameter = std::any_cast<double>(val.front()->raw);
-            row.isSlot   = key.second;
+            row.isSlot = key.second;
             for(auto* go: val)
                 new Gi::Preview{
                     (go->path.size() > 1 ? toPath(go->path) : Path64{~go->pos}),
@@ -267,15 +267,15 @@ void Form::on_cbxFileCurrentIndexChanged() {
             if(shape->isVisible())
                 map[Key{shape->name(), std::any_cast<double>(shape->getVal(ShCirc::Shape::Diameter))}].emplace_back(shape);
 
-        model      = new Model{map.size(), ui->toolTable};
+        model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
         QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, shapes]: map) {
-            auto& row    = data[i++];
-            row.icon     = shapes.front()->icon();
-            row.name     = QString(key.first).split(u'|');
+            auto& row = data[i++];
+            row.icon = shapes.front()->icon();
+            row.name = QString(key.first).split(u'|');
             row.diameter = std::any_cast<double>(shapes.front()->getVal(ShCirc::Shape::Diameter));
             row.name.back() += u": Ø%1"_s.arg(row.diameter);
             row.isSlot = false;
@@ -444,7 +444,7 @@ void Form::pickUpTool() {
             const auto diameter = tool.getDiameter(dsbxDepth->value());
             return drillDiameterMin <= diameter && drillDiameterMax >= diameter;
         };
-        auto set    = !row.isSlot ? std::set{Tool::Drill, Tool::EndMill} : std::set{Tool::EndMill};
+        auto set = !row.isSlot ? std::set{Tool::Drill, Tool::EndMill} : std::set{Tool::EndMill};
         auto filter = v::filter([&set](auto& t) { return set.contains(t.second.type()); });
         for(auto& [id, tool]: App::toolHolder().tools() | filter) {
             qWarning() << tool;
@@ -611,7 +611,7 @@ void Form::computePaths() {
                     gcp = {};
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(side);
-                    gcp.tools                        = {App::toolHolder().tool(toolId)};
+                    gcp.tools = {App::toolHolder().tool(toolId)};
                     gcp.params[GCode::Params::Depth] = dsbxDepth->value();
                     gcp.closedCurves.append_range(toCurves(val.paths)); // FIXME
                     setCreator(new Profile::Creator);
@@ -622,7 +622,7 @@ void Form::computePaths() {
                     gcp = {};
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
-                    gcp.tools                        = {App::toolHolder().tool(toolId)};
+                    gcp.tools = {App::toolHolder().tool(toolId)};
                     gcp.params[GCode::Params::Depth] = dsbxDepth->value();
                     gcp.closedCurves.append_range(toCurves(val.paths)); // FIXME
                     setCreator(new PocketOffset::Creator);

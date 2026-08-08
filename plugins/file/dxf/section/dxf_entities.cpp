@@ -40,8 +40,8 @@ SectionENTITIES::~SectionENTITIES() {
 
 void SectionENTITIES::parse() {
     CodeData code = nextCode();
-    code          = nextCode();
-    code          = nextCode();
+    code = nextCode();
+    code = nextCode();
     // К этому моменту file->entities_ уже может содержать сущности, разобранные
     // при чтении секции BLOCKS (они хранятся там же, чтобы id оставался индексом
     // в общем векторе). Их рисовать здесь нельзя: они будут отрисованы через

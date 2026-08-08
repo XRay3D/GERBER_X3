@@ -14,7 +14,7 @@
 // Вся геометрия строится исключительно средствами curve.h (Curve/Curves,
 // BoolOp, Inflate) — myclipper.h здесь напрямую не используется.
 
-#include "curve.h"
+#include "geo/polygon.h"
 
 #include <QPointF>
 #include <QString> // QStringView

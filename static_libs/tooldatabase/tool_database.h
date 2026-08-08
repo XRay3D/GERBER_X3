@@ -25,7 +25,7 @@ class ToolDatabase : public QDialog {
 
 public:
     explicit ToolDatabase(
-        QWidget* parent                   = nullptr,
+        QWidget* parent = nullptr,
         std::span<const Tool::Type> types = all);
 
     ~ToolDatabase() override;

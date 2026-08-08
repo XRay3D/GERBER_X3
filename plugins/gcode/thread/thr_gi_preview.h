@@ -1,8 +1,8 @@
 #pragma once
 
+#include "gi_preview.h"
 #include "thr_form.h"
 #include "thr_model.h"
-#include "gi_preview.h"
 
 namespace Threading {
 
@@ -14,7 +14,7 @@ class Preview final : public ::Gi::AbstractPreview {
     Tool::ID toolId_{};
 
 public:
-    explicit Preview(Path64&& hv, double diameter, Tool::ID  toolId, Row& row, const Paths64& draw_ = {}); // FIXME to Curve
+    explicit Preview(Path64&& hv, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_ = {}); // FIXME to Curve
 
     // AbstractPreview interface
     void updateTool() override;
@@ -30,7 +30,7 @@ public:
 
     Paths64 offset() const;
     QPointF pos() const { return ~path_.front(); }; // NOTE shadow base class pos func
-    Path64 hv() const { return path_; };              // NOTE shadow base class pos func
+    Path64 hv() const { return path_; };            // NOTE shadow base class pos func
 
 protected:
     // Двойной клик по превью переключает использование этого отверстия/паза

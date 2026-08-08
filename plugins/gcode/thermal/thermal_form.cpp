@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal_form.h"
-#include "curve.h"
+#include "geo/polygon.h"
 #include "ui_thermalform.h"
 
 #include "thermal.h"
@@ -144,10 +144,10 @@ void Form::computePaths() {
     gcp.setConvent(true);
     gcp.setSide(GCode::Outer);
     gcp.tools.push_back(tool);
-    gcp.params[GCode::Params::Depth]  = dsbxDepth->value();
-    gcp.params[Creator::FileId]       = ui->cbxFile->currentData().value<AbstractFile*>()->id();
+    gcp.params[GCode::Params::Depth] = dsbxDepth->value();
+    gcp.params[Creator::FileId] = ui->cbxFile->currentData().value<AbstractFile*>()->id();
     gcp.params[Creator::IgnoreCopper] = ui->chbxIgnoreCopper->isChecked();
-    fileCount                         = 1;
+    fileCount = 1;
     emit createToolpath(&gcp);
 }
 

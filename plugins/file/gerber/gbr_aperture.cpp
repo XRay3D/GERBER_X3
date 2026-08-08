@@ -103,7 +103,7 @@ Path64 AbstractAperture::drawDrill(const State& state) {
 ///
 ApCircle::ApCircle(double diam, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    diam_      = diam;
+    diam_ = diam;
     drillDiam_ = drillDiam;
     // GerberAperture interface
 }
@@ -145,8 +145,8 @@ void ApCircle::draw() {
 ///
 ApRectangle::ApRectangle(double width, double height, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    width_     = width;
-    height_    = height;
+    width_ = width;
+    height_ = height;
     drillDiam_ = drillDiam;
 }
 
@@ -183,7 +183,7 @@ void ApRectangle::write(QDataStream& stream) const {
 
 void ApRectangle::draw() {
     paths_.emplace_back(RectanglePath(width_ * uScale, height_ * uScale));
-    size_    = std::sqrt(width_ * width_ + height_ * height_);
+    size_ = std::sqrt(width_ * width_ + height_ * height_);
     minSize_ = std::min(width_, height_);
 }
 
@@ -196,8 +196,8 @@ void ApRectangle::draw() {
 ///
 ApObround::ApObround(double width, double height, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    width_     = width;
-    height_    = height;
+    width_ = width;
+    height_ = height;
     drillDiam_ = drillDiam;
 }
 
@@ -253,7 +253,7 @@ void ApObround::draw() {
         // clipper.Execute(ClipType::Union, paths_, FillRule::NonZero, FillRule::NonZero);
         clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths_);
     }
-    size_    = std::max(height_, width_);
+    size_ = std::max(height_, width_);
     minSize_ = std::min(width_, height_);
 }
 
@@ -267,10 +267,10 @@ void ApObround::draw() {
 ///
 ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    diam_          = diam;
+    diam_ = diam;
     verticesCount_ = nVertices;
-    rotation_      = rotation;
-    drillDiam_     = drillDiam;
+    rotation_ = rotation;
+    drillDiam_ = drillDiam;
 }
 
 double ApPolygon::rotation() const { return rotation_; }
@@ -361,14 +361,14 @@ void ApMacro::write(QDataStream& stream) const {
 
 void ApMacro::draw() {
     enum {
-        Comment               = 0,
-        Circle                = 1,
-        OutlineCustomPolygon  = 4, // MAXIMUM 5000 POINTS
+        Comment = 0,
+        Circle = 1,
+        OutlineCustomPolygon = 4,  // MAXIMUM 5000 POINTS
         OutlineRegularPolygon = 5, // 3-12 POINTS
-        Moire                 = 6,
-        Thermal               = 7,
-        VectorLine            = 20,
-        CenterLine            = 21,
+        Moire = 6,
+        Thermal = 7,
+        VectorLine = 20,
+        CenterLine = 21,
     };
 
     VarMap macroCoefficients{coefficients_};
@@ -448,7 +448,7 @@ void ApMacro::draw() {
         for(auto&& item: v::chunk_by(items, sameExp)) {
             Paths64 clip{std::from_range, v::transform(item, &pair::second)};
             bool fl = item.front().first;
-            paths_  = cl::BooleanOp(CT[fl], cl::FillRule::NonZero, paths_, clip);
+            paths_ = cl::BooleanOp(CT[fl], cl::FillRule::NonZero, paths_, clip);
         }
     } else
         paths_.push_back(items.front().second);
@@ -462,8 +462,8 @@ void ApMacro::draw() {
         rect.top -= rect.bottom;
         const double x = rect.right * dScale;
         const double y = rect.top * dScale;
-        size_          = std::sqrt(x * x + y * y);
-        minSize_       = std::min(x, y);
+        size_ = std::sqrt(x * x + y * y);
+        minSize_ = std::min(x, y);
     }
 }
 
@@ -521,11 +521,11 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
         RotationAngle,
     };
 
-    /*PType*/ int32_t diameter        = static_cast</*PType*/ int32_t>(mod[Diameter] * uScale);
+    /*PType*/ int32_t diameter = static_cast</*PType*/ int32_t>(mod[Diameter] * uScale);
     const /*PType*/ int32_t thickness = static_cast</*PType*/ int32_t>(mod[Thickness] * uScale);
-    const /*PType*/ int32_t gap       = static_cast</*PType*/ int32_t>(mod[Gap] * uScale);
-    const /*PType*/ int32_t ct        = static_cast</*PType*/ int32_t>(mod[CrossThickness] * uScale);
-    const /*PType*/ int32_t cl        = static_cast</*PType*/ int32_t>(mod[CrossLength] * uScale);
+    const /*PType*/ int32_t gap = static_cast</*PType*/ int32_t>(mod[Gap] * uScale);
+    const /*PType*/ int32_t ct = static_cast</*PType*/ int32_t>(mod[CrossThickness] * uScale);
+    const /*PType*/ int32_t cl = static_cast</*PType*/ int32_t>(mod[CrossLength] * uScale);
 
     const Point64 center(
         static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
@@ -627,7 +627,7 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
 
     const /*PType*/ int32_t outer = static_cast</*PType*/ int32_t>(mod[OuterDiameter] * uScale);
     const /*PType*/ int32_t inner = static_cast</*PType*/ int32_t>(mod[InnerDiameter] * uScale);
-    const /*PType*/ int32_t gap   = static_cast</*PType*/ int32_t>(mod[GapThickness] * uScale);
+    const /*PType*/ int32_t gap = static_cast</*PType*/ int32_t>(mod[GapThickness] * uScale);
 
     const Point64 center(
         static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
@@ -733,8 +733,8 @@ void ApBlock::draw() {
         rect.top -= rect.bottom;
         const double x = rect.right * dScale;
         const double y = rect.top * dScale;
-        size_          = std::sqrt(x * x + y * y);
-        minSize_       = std::min(x, y);
+        size_ = std::sqrt(x * x + y * y);
+        minSize_ = std::min(x, y);
     }
 }
 

@@ -10,9 +10,9 @@
  *******************************************************************************/
 #include "svg_node.h"
 
-#include "svg_file.h"
 #include "ft_view.h"
 #include "project.h"
+#include "svg_file.h"
 
 #include <QMenu>
 

@@ -179,7 +179,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         c.AddOpenSubject({zPath});
         c.AddClip(laserPath);
         c.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, laserPath, laserPath); // laser on
-        addAcc(laserPath, gcp.params[AccDistance].toDouble() * uScale);             // add laser off paths
+        addAcc(laserPath, gcp.params[AccDistance].toDouble() * uScale);                     // add laser off paths
     }
 
     if(!qFuzzyIsNull(angle)) // Rotate Paths64

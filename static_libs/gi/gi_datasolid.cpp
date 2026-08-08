@@ -41,7 +41,7 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->strokePath(shape_, pen_);
 #else
     #if DEBUG
-    brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
+    // brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
     #endif
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
@@ -70,9 +70,8 @@ void DataFill::redraw() {
     // update();
 }
 
-void DataFill::setCurves(Curves paths, int alternate)// FIXME from setPaths
+void DataFill::setCurves(Curves paths, int alternate) // FIXME from setPaths
 {
-
 }
 
 // Paths& DataFill::getPaths() {
