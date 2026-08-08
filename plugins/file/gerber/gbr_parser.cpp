@@ -10,6 +10,9 @@
  *******************************************************************************/
 #include "gbr_parser.h"
 
+#include "geo/boolean.h"
+#include "geo/util.h"
+
 #include "abstract_fileplugin.h"
 #include "gbr_aperture.h"
 #include "gbr_attraperfunction.h"
@@ -48,6 +51,96 @@ Internal Plane Layer1,2,...,16  .GP1, .GP2, ... , .GP16
 *The GTP file isn’t necessary for the PCB fabrication, because it is used to create a stencil(if your design had SMD parts).
 */
 namespace Gerber {
+
+namespace {
+
+// Точки контура: дуги дробятся на хорды. Нужно лишь для следа ПРЯМОУГОЛЬНОЙ
+// апертуры -- у круглой след строится точно, суммой Минковского с диском
+// (Geo::Inflate), и дробить там нечего.
+std::vector<QPointF> flatten(const Geo::Polyline& path) {
+    std::vector<QPointF> points;
+    if(path.empty()) return points;
+
+    points.push_back(path.front());
+    for(auto&& [from, to]: Geo::segments(path)) {
+        if(const auto arc = Geo::arcOf(from, to, from.bulge)) {
+            const int steps = std::max(2, static_cast<int>(std::ceil(std::abs(arc->theta) / (pi / 8))));
+            for(int i = 1; i <= steps; ++i) points.push_back(arc->pointAt(double(i) / steps));
+        } else
+            points.push_back(to);
+    }
+    return points;
+}
+
+// Выпуклая оболочка (обход Эндрю), против часовой стрелки.
+Geo::Polyline convexHull(std::vector<QPointF> points) {
+    std::ranges::sort(points, [](QPointF l, QPointF r) {
+        return l.x() != r.x() ? l.x() < r.x() : l.y() < r.y();
+    });
+    points.erase(std::unique(points.begin(), points.end()), points.end());
+    if(points.size() < 3) return {};
+
+    auto cross = [](QPointF o, QPointF a, QPointF b) {
+        return (a.x() - o.x()) * (b.y() - o.y()) - (a.y() - o.y()) * (b.x() - o.x());
+    };
+
+    std::vector<QPointF> hull(points.size() * 2);
+    std::size_t k{};
+    for(QPointF p: points) {
+        while(k >= 2 && cross(hull[k - 2], hull[k - 1], p) <= 0.0) --k;
+        hull[k++] = p;
+    }
+    for(std::size_t i = points.size() - 1, lower = k + 1; i > 0; --i) {
+        QPointF p = points[i - 1];
+        while(k >= lower && cross(hull[k - 2], hull[k - 1], p) <= 0.0) --k;
+        hull[k++] = p;
+    }
+    hull.resize(k - 1);
+
+    Geo::Polyline contour{std::from_range, hull};
+    contour.closed = true;
+    return contour;
+}
+
+// Сумма Минковского контура с ПРЯМОУГОЛЬНОЙ апертурой: каждый отрезок
+// заметает выпуклую оболочку прямоугольника, поставленного в оба его конца, --
+// шестиугольник, который заодно накрывает и стык. Круглым офсетом такое не
+// заменить: у квадратной апертуры след шире по диагоналям, чем полоса
+// постоянной ширины.
+Geo::Polygons sweepRectangle(const Geo::Polyline& path, double width, double height) {
+    const std::vector<QPointF> points = flatten(path);
+    if(points.empty() || width <= 0.0 || height <= 0.0) return {};
+
+    const double w = width / 2.0, h = height / 2.0;
+    auto corners = [w, h](QPointF c) {
+        return std::array{
+            QPointF{c.x() - w, c.y() - h},
+            QPointF{c.x() + w, c.y() - h},
+            QPointF{c.x() + w, c.y() + h},
+            QPointF{c.x() - w, c.y() + h}
+        };
+    };
+
+    Geo::Polylines swept;
+    if(points.size() == 1) {
+        swept.push_back(Geo::rectangle(width, height, points.front()));
+    } else {
+        swept.reserve(points.size() - 1);
+        for(std::size_t i = 1; i < points.size(); ++i) {
+            std::vector<QPointF> box;
+            box.reserve(8);
+            for(QPointF p: corners(points[i - 1])) box.push_back(p);
+            for(QPointF p: corners(points[i])) box.push_back(p);
+            if(Geo::Polyline hull = convexHull(std::move(box)); !hull.empty())
+                swept.push_back(std::move(hull));
+        }
+    }
+    // Все куски -- тела, так что регион собирается одним объединением, а не
+    // цепочкой из стольких же булевых операций.
+    return Geo::Polygons{swept};
+}
+
+} // namespace
 
 QDebug operator<<(QDebug debug, const std::string_view& sw) {
     QDebugStateSaver saver{debug};
@@ -267,12 +360,12 @@ std::vector<QString> Parser::cleanAndFormatFile(QString data) {
             continue;
         } else if(line.startsWith(u"%AM"_s)) {
             lastLineClose(state, lastLine);
-            state = Macro;
+            state    = Macro;
             lastLine = line;
             continue;
         } else if(line.startsWith(u'%')) {
             lastLineClose(state, lastLine);
-            state = Param;
+            state    = Param;
             lastLine = line;
             continue;
         } else if(line.endsWith(u'*') && line.length() > 1) {
@@ -314,12 +407,10 @@ double Parser::toDouble(const QString& Str, bool scale, bool inchControl) {
     double d = Str.toDouble(&ok);
     if(state_.file()->format().unitMode == Inches && inchControl)
         d *= 25.4;
-    if(scale)
-        d *= uScale;
     return d;
 }
 
-bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
+bool Parser::parseNumber(QString Str, /*PType*/ double& val, FormatDir dir) {
     bool flag{};
     int sign = 1;
     if(!Str.isEmpty()) {
@@ -327,7 +418,7 @@ bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
                                                  : file->format().yDecimal;
         const auto integer = dir == FormatDir::X ? file->format().xInteger
                                                  : file->format().yInteger;
-        const auto maxLen = integer + decimal;
+        const auto maxLen  = integer + decimal;
 
         if(Str.indexOf(u"+"_s) == 0) {
             Str.remove(0, 1);
@@ -357,7 +448,7 @@ bool Parser::parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir) {
 #endif
             }
         }
-        val = static_cast</*PType*/ int32_t>(toDouble(Str, true) * pow(10.0, -decimal) * sign);
+        val = toDouble(Str, true) * pow(10.0, -decimal) * sign;
         return true;
     }
     return flag;
@@ -373,7 +464,7 @@ void Parser::addPath() {
 
     if(aperFunctionMap.contains(state_.aperture())
         && aperFunctionMap[state_.aperture()].function_->function == Attr::Aperture::ComponentOutline)
-        components[refDes].addFootprint(~path_);
+        components[refDes].addFootprint(path_);
 
     switch(state_.region()) {
     case On:
@@ -387,9 +478,9 @@ void Parser::addPath() {
                 createPolygon(),
                 file,
                 GrObject::Type(type),
-                toCurve(path_),
+                std::move(path_),
             });
-            go.name = u"D%1|Polygon"_s.arg(state_.aperture());
+            go.name  = u"D%1|Polygon"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject{
@@ -398,7 +489,7 @@ void Parser::addPath() {
                 createPolygon(),
                 file,
                 GrObject::Type(type),
-                toCurve(path_),
+                std::move(path_),
             });
             break;
         case WorkingType::ApertureBlock:
@@ -408,7 +499,7 @@ void Parser::addPath() {
                 createPolygon(),
                 file,
                 GrObject::Type(type),
-                toCurve(path_),
+                std::move(path_),
             });
             break;
         }
@@ -424,9 +515,9 @@ void Parser::addPath() {
                 createLine(),
                 file,
                 GrObject::Type(type),
-                toCurve(path_),
+                std::move(path_),
             });
-            go.name = u"D%1|PolyLine"_s.arg(state_.aperture());
+            go.name  = u"D%1|PolyLine"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject{
@@ -435,7 +526,7 @@ void Parser::addPath() {
                 createLine(),
                 file,
                 GrObject::Type(type),
-                toCurve(path_),
+                std::move(path_),
             });
             break;
         case WorkingType::ApertureBlock:
@@ -445,7 +536,7 @@ void Parser::addPath() {
                 createLine(),
                 file,
                 GrObject::Type(type),
-                toCurve(path_),
+                std::move(path_),
             });
             break;
         }
@@ -466,10 +557,15 @@ void Parser::addFlash() {
 
     AbstractAperture* ap = file->apertures_[state_.aperture()].get();
     ap->setUsed();
-    Paths64 paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
+    Geo::Polygons paths(ap->draw(state_, abSrIdStack_.top().workingType != WorkingType::ApertureBlock));
     ////////////////////////////////// Draw Drill //////////////////////////////////
+
+    // Отверстие апертуры -- дырка в её собственном теле, поэтому вычитается
+    // всегда, независимо от полярности кадра: полярность применяется уже ко
+    // всей вспышке при слиянии слоя. Прежде это выражалось контуром обратного
+    // обхода, подложенным в общий плоский список.
     if(ap->withHole())
-        paths.emplace_back(ap->drawDrill(state_));
+        paths -= Geo::Polygons{Geo::Polylines{ap->drawDrill(state_)}};
 
     int type = GrObject::FlStamp;
 
@@ -489,19 +585,19 @@ void Parser::addFlash() {
             GrObject{
                 goId_++,
                 state_,
-                toCurves(paths),
+                std::move(paths),
                 file,
                 GrObject::Type(type),
             });
         go.name = u"D%1|%2"_s.arg(state_.aperture()).arg(ap->name());
-        go.pos = ~state_.curPos();
+        go.pos  = state_.curPos();
     } break;
     case WorkingType::StepRepeat:
         stepRepeat_.storage.append(
             GrObject{
                 static_cast<int32_t>(stepRepeat_.storage.size()),
                 state_,
-                toCurves(paths),
+                std::move(paths),
                 file,
                 GrObject::Type(type),
             });
@@ -510,7 +606,7 @@ void Parser::addFlash() {
         apBlock(abSrIdStack_.top().apertureBlockId)->append(GrObject{
             static_cast<int32_t>(apBlock(abSrIdStack_.top().apertureBlockId)->ApBlock::V::size()), //
             state_,
-            toCurves(paths),
+            std::move(paths),
             file,
             GrObject::Type(type),
         });
@@ -518,8 +614,8 @@ void Parser::addFlash() {
     }
     if(aperFunctionMap.contains(state_.aperture()) && !refDes.isEmpty()) {
         switch(aperFunctionMap[state_.aperture()].function_->function) {
-        case Attr::Aperture::ComponentPin : components[refDes].pins().back().pos = ~state_.curPos(); break;
-        case Attr::Aperture::ComponentMain: components[refDes].setReferencePoint(~state_.curPos()); break;
+        case Attr::Aperture::ComponentPin : components[refDes].pins().back().pos = state_.curPos(); break;
+        case Attr::Aperture::ComponentMain: components[refDes].setReferencePoint(state_.curPos()); break;
         default                           : break;
         }
     }
@@ -545,39 +641,47 @@ void Parser::reset() {
 
 void Parser::resetStep() {
     currentGerbLine_.clear();
-    path_.clear();
+    // path_.clear() -- метод БАЗОВОГО std::vector, свои поля Polyline
+    // (closed, width) не трогает. Область (G36...G37) помечает path_
+    // замкнутым через close() (см. createPolygon); без явного сброса здесь
+    // эта отметка переживала бы clear() и утекала в КАЖДЫЙ следующий трек
+    // до конца файла -- один closed=true на всё, что после первой область.
+    // Тогда штрих накопленного пути читается как готовое тело контура
+    // (Polygons(Polylines) в Geo::Inflate), и след трассы вместо тонкой
+    // ленты вдоль пути заливается целиком, будто она сама была областью.
+    path_ = Geo::Polyline{};
     path_.push_back(state_.curPos());
 }
 
-Point64 Parser::parsePosition(const QString& xyStr) {
+QPointF Parser::parsePosition(const QString& xyStr) {
     static constexpr ctll::fixed_string ptrnPosition{R"((?:G[01]{1,2})?(?:X([\+\-]?\d*\.?\d+))?(?:Y([\+\-]?\d*\.?\d+))?.+)"};
     if(auto [whole, x, y] = ctre::match<ptrnPosition>(std::u16string_view{xyStr}); whole) {
-        /*PType*/ int32_t tmp{};
+        double tmp{};
         if(x && parseNumber(CtreCapTo(x), tmp, FormatDir::X))
             file->format().coordValueNotation == AbsoluteNotation
-                ? state_.curPos().x = tmp
-                : state_.curPos().x += tmp;
+                ? state_.curPos().rx() = tmp
+                : state_.curPos().rx() += tmp;
         tmp = 0;
         if(y && parseNumber(CtreCapTo(y), tmp, FormatDir::Y))
             file->format().coordValueNotation == AbsoluteNotation
-                ? state_.curPos().y = tmp
-                : state_.curPos().y += tmp;
+                ? state_.curPos().ry() = tmp
+                : state_.curPos().ry() += tmp;
     }
 
-    if(2.0e-310 > state_.curPos().x && state_.curPos().x > 0.0)
+    if(2.0e-310 > state_.curPos().x() && state_.curPos().x() > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.")
             .arg(QString::number(lineNum_), QString(currentGerbLine_));
-    if(2.0e-310 > state_.curPos().y && state_.curPos().y > 0.0)
+    if(2.0e-310 > state_.curPos().y() && state_.curPos().y() > 0.0)
         throw GbrObj::tr("line num %1: '%2', error value.")
             .arg(QString::number(lineNum_), QString(currentGerbLine_));
 
     return state_.curPos();
 }
 
-Geo::Polygon Parser::createLine() {
+Geo::Polygons Parser::createLine() {
     if(file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
         file->apertures_[state_.aperture()].get()->setUsed();
-    Paths64 solution;
+    Geo::Polygons solution;
     if(!file->apertures_.contains(state_.aperture())) {
         QString str;
         for(const auto& [ap, apPtr]: file->apertures_)
@@ -585,43 +689,42 @@ Geo::Polygon Parser::createLine() {
         throw GbrObj::tr("Aperture %1 not found! Available %2").arg(state_.aperture()).arg(str);
     }
 
-    if(file->apertures_[state_.aperture()]->type() == Rectangle) {
-        solution = cl::MinkowskiSum(file->apertures_[state_.aperture()]->draw(State{file}).front(), path_, {});
-        r::for_each(v::join(solution), SetCSelf);
-        // auto rect = std::static_pointer_cast<ApRectangle>(file->apertures_[state_.aperture()]);
-        // if(!qFuzzyCompare(rect->width_, rect->height_)) // only square Aperture
-        //     throw GbrObj::tr("Aperture D%1 (%2) not supported!\n"
-        //                      "Only square Aperture or use Minkowski Sum")
-        //         .arg(state_.aperture())
-        //         .arg(rect->name());
-        // double size = rect->width_ * uScale * state_.scaling();
-        // if(qFuzzyIsNull(size))
-        //     return {};
-        // solution = Inflate64({path_}, size, cl::JoinType::Square, cl::EndType::Square);
-        // r::for_each(v::join(solution), SetCSelf);
+    AbstractAperture* ap = file->apertures_[state_.aperture()].get();
+    if(ap->type() == Rectangle) {
+        auto rect       = static_cast<ApRectangle*>(ap);
+        const double sc = state_.scaling();
+        solution        = sweepRectangle(path_, rect->width_ * sc, rect->height_ * sc);
     } else {
-        double size = file->apertures_[state_.aperture()]->size() * uScale * state_.scaling();
+        // Круглая апертура: след -- сумма Минковского контура с диском, а это
+        // ровно раздувание. delta у Geo::Inflate -- ПОЛНАЯ ширина, как и у
+        // прежнего Inflate64, который делил её пополам внутри.
+        const double size = ap->size() * state_.scaling();
         if(qFuzzyIsNull(size)) return {};
-        r::for_each(path_, SetCSelf);
-        solution = Inflate64({path_}, size, cl::JoinType::Round, cl::EndType::Round);
+        solution = Geo::Inflate(Geo::Polylines{path_}, size);
     }
-    if(state_.imgPolarity() == Negative) ReversePaths(solution);
+
+    // Полярность здесь НЕ применяется -- ровно как у вспышек
+    // (AbstractAperture::draw): она живёт в state графического объекта, и
+    // вычитание отрицательных штрихов делает слой при слиянии (File::merge).
+    //
+    // Прежний разворот контуров выражал то же самое в плоском списке и был
+    // безобиден. Инверсия точного региона -- НЕ он: она считает настоящее
+    // дополнение и уходит в неограниченную часть плоскости, у которой нет
+    // внешней границы. Такой объект merge() потом разбирает по контурам,
+    // видит одни лишь дырки -- и не вычитает ничего вовсе.
 
     // new Gi::Debug{solution};
 
-    return toCurves(solution);
+    return {solution};
 }
 
-Geo::Polygon Parser::createPolygon() {
-    if(Area(path_) > 0.0) {
-        if(state_.imgPolarity() == Negative)
-            ReversePath(path_);
-    } else {
-        if(state_.imgPolarity() == Positive)
-            ReversePath(path_);
-    }
-    r::for_each(path_, SetCSelf);
-    return {toCurve(path_)};
+Geo::Polygons Parser::createPolygon() {
+    // Ориентацию контура приводит к канону сам конструктор Polygon, а
+    // полярность применяет слой при слиянии -- разворачивать здесь нечего.
+    path_.close();
+    Geo::Polygon polygon{path_};
+    // polygon.invert();
+    return {polygon};
 }
 
 bool Parser::parseAperture(const QString& gLine) {
@@ -740,14 +843,14 @@ bool Parser::parseStepRepeat(const QString& gLine) {
      */
     std::u16string_view data{gLine};
     static constexpr ctll::fixed_string ptrnStepRepeat{R"(^%SRX(\d+)Y(\d+)I(.\d*\.?\d*)J(.\d*\.?\d*)\*%$)"};
-    if(auto [whole, srx, sry, sri, srj] = ctre::match<ptrnStepRepeat>(data); whole) {
+    if(auto [whole, x, y, i, j] = ctre::match<ptrnStepRepeat>(data); whole) {
         if(abSrIdStack_.top().workingType == WorkingType::StepRepeat)
             closeStepRepeat();
         stepRepeat_.reset();
-        stepRepeat_.x = CtreCapTo(srx);
-        stepRepeat_.y = CtreCapTo(sry);
-        stepRepeat_.i = CtreCapTo(sri), stepRepeat_.i *= uScale;
-        stepRepeat_.j = CtreCapTo(srj), stepRepeat_.j *= uScale;
+        stepRepeat_.x = CtreCapTo(x);
+        stepRepeat_.y = CtreCapTo(y);
+        stepRepeat_.i = CtreCapTo(i);
+        stepRepeat_.j = CtreCapTo(j);
         if(file->format().unitMode == Inches) {
             stepRepeat_.i *= 25.4;
             stepRepeat_.j *= 25.4;
@@ -769,21 +872,26 @@ bool Parser::parseStepRepeat(const QString& gLine) {
 
 void Parser::closeStepRepeat() {
     addPath();
+
     for(int y{}; y < stepRepeat_.y; ++y) {
         for(int x{}; x < stepRepeat_.x; ++x) {
             const QPointF pt{stepRepeat_.i * x, stepRepeat_.j * y};
+            const QTransform shift = QTransform::fromTranslate(pt.x(), pt.y());
             for(GrObject& go: stepRepeat_.storage) {
-                auto paths{go.fill};
-                for(auto&& path: paths)
-                    TranslateCurve(path, pt);
-                auto path{go.path};
-                TranslateCurve(path, pt);
-                auto state = go.state;
-                state.setCurPos({state.curPos().x + pt.x(), state.curPos().y + pt.y()});
+                // Заливка живёт в точном домене и на месте не правится --
+                // пересобирается из перенесённых контуров; контур же обычная
+                // полилиния, ему хватает сдвига.
+                Geo::Polygons fill = Geo::transformed(go.fill, shift);
+                Geo::Polyline path = go.path;
+                Geo::translate(path, pt);
+
+                State state = go.state;
+                state.setCurPos(state.curPos() + pt);
+
                 file->graphicObjects_.emplace_back(GrObject{
                     goId_++,
                     state,
-                    std::move(paths),
+                    std::move(fill),
                     go.gFile,
                     go.type,
                     std::move(path),
@@ -791,6 +899,7 @@ void Parser::closeStepRepeat() {
             }
         }
     }
+
     stepRepeat_.reset();
     abSrIdStack_.pop();
 }
@@ -919,11 +1028,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     if(!whole) return false;
 
     if(!cg && state_.gCode() != G02 && state_.gCode() != G03) return false;
-    int32_t x{}, y{}, i{}, j{};
+    double x{}, y{}, i{}, j{};
     cx ? parseNumber(CtreCapTo(cx), x, FormatDir::X)
-       : x = state_.curPos().x;
+       : x = state_.curPos().x();
     cy ? parseNumber(CtreCapTo(cy), y, FormatDir::Y)
-       : y = state_.curPos().y;
+       : y = state_.curPos().y();
     parseNumber(CtreCapTo(ci), i, FormatDir::X);
     parseNumber(CtreCapTo(cj), j, FormatDir::Y);
     // Set operation code if provided
@@ -969,57 +1078,80 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         return true;
     }
 
-    const Point64 arcStartPos = state_.curPos();
+    const QPointF arcStartPos = state_.curPos();
 
     const std::array centerPos{
-        Point64{arcStartPos.x + i, arcStartPos.y + j},
-        Point64{arcStartPos.x - i, arcStartPos.y + j},
-        Point64{arcStartPos.x + i, arcStartPos.y - j},
-        Point64{arcStartPos.x - i, arcStartPos.y - j}
+        QPointF{arcStartPos.x() + i, arcStartPos.y() + j},
+        QPointF{arcStartPos.x() - i, arcStartPos.y() + j},
+        QPointF{arcStartPos.x() + i, arcStartPos.y() - j},
+        QPointF{arcStartPos.x() - i, arcStartPos.y() - j}
     };
 
     bool valid{};
 
-    auto constructArc = [this, x, y](Point64 center, double radius, double start, double stop) {
-        auto arcPath = arc(center, radius, start, stop, state_.interpolation());
+    auto constructArc = [this, x, y](QPointF center, double radius, double start, double stop) {
+        // Geo::arc ждёт ЗНАКОВЫЙ размах, а у Gerber направление задано режимом
+        // интерполяции отдельно от углов. Совпадение начала с концом -- полный
+        // оборот, а не вырожденная дуга: нормализация в непустой полуинтервал
+        // даёт ровно это.
+        double sweep = stop - start;
+        if(state_.interpolation() == CounterClockwiseCircular)
+            while(sweep <= 0.0) sweep += 2.0 * pi;
+        else
+            while(sweep >= 0.0) sweep -= 2.0 * pi;
+
+        Geo::Polyline arcPath = Geo::arc(center, radius, start, sweep);
+
         state_.setCurPos({x, y});
-        // Последняя точка в вычисленной дуге может иметь числовые ошибки.
-        // Точной конечной точкой является указанная (x, y). Замена.
-        if(arcPath.size()) arcPath.back() = state_.curPos(); // set center it self
-        else arcPath.emplace_back(state_.curPos());          // set center it self
+        // Последняя точка вычисленной дуги может нести числовую погрешность --
+        // точный конец задан в кадре.
+        //
+        // Полный оборот приходит ЗАМКНУТЫМ, а замкнутость у полилинии -- флаг,
+        // и он потеряется: дуга уходит в общий путь кадра (path_) простым
+        // добавлением вершин, а тот замкнут не всегда. Поэтому оборот здесь
+        // размыкается явно -- повтором начальной точки, чтобы оба полукруга
+        // остались сегментами пути; иначе от окружности доезжает половина.
+        if(arcPath.closed) {
+            arcPath.closed = false;
+            arcPath.emplace_back(static_cast<const QPointF&>(arcPath.front()));
+        } else if(arcPath.size())
+            static_cast<QPointF&>(arcPath.back()) = state_.curPos();
+        else
+            arcPath.emplace_back(state_.curPos());
+
         return arcPath;
     };
 
-    Path64 arcPath;
+    Geo::Polyline arcPath;
     switch(state_.quadrant()) {
     case Multi: { // G75
         const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
-        const double start = atan2(-j, -i); // Start angle
-        const auto& center = centerPos.front();
+        const double start   = atan2(-j, -i); // Start angle
+        const auto& center   = centerPos.front();
         // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
         // Ч­то должно привести к образованию дуги в 360 градусов.
-        const double stop = (arcStartPos == Point64{x, y})
+        const double stop = (arcStartPos == QPointF{x, y})
             ? start
-            : atan2(-center.y + y, -center.x + x); // Stop angle
+            : atan2(-center.y() + y, -center.x() + x); // Stop angle
 
         arcPath = constructArc(center, radius1, start, stop);
     } break;
     case Single: // G74
         for(auto&& center: centerPos) {
             const double radius1 = sqrt(static_cast<double>(i) * i + static_cast<double>(j) * j);
-            const double radius2 = sqrt(pow(center.x - x, 2.0) + pow(center.y - y, 2.0));
+            const double radius2 = sqrt(pow(center.x() - x, 2.0) + pow(center.y() - y, 2.0));
             // Убеждаемся, что радиус начала совпадает с радиусом конца.
-            if(abs(radius2 - radius1) > (5e-4 * uScale)) continue; // Недействительный центр.
+            if(abs(radius2 - radius1) > 5e-4) continue; // Недействительный центр.
             // Correct i and j and return true; as with multi-quadrant.
-            i = center.x - arcStartPos.x;
-            j = center.y - arcStartPos.y;
+            i = center.x() - arcStartPos.x();
+            j = center.y() - arcStartPos.y();
             // Углы
             const double start = atan2(-j, -i);
-            const double stop = atan2(-center.y + y, -center.x + x);
+            const double stop  = atan2(-center.y() + y, -center.x() + x);
             const double angle = arcAngle(start, stop);
             if(angle < (pi + 1e-5) * 0.5) {
                 arcPath = constructArc(center, radius1, start, stop);
-                valid = true;
+                valid   = true;
                 break;
             }
         }
@@ -1028,10 +1160,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     default:
         if((path_.size() && (path_.back() != arcStartPos)) || path_.empty())
             path_.emplace_back(arcStartPos);
-        SetCSelf(path_.back());
         state_.setCurPos({x, y});
         path_.emplace_back(state_.curPos());
-        SetCSelf(path_.back());
         qWarning() << u"Invalid arc in line %1."_s.arg(lineNum_) << gLine;
     }
 
@@ -1171,7 +1301,7 @@ bool Parser::parseImagePolarity(const QString& gLine) {
     if(auto [whole, c1]
         = ctre::match<ptrnImagePolarity>(std::u16string_view{gLine});
         whole) {
-        switch(slImagePolarity.indexOf(CtreCapTo(c1))) {
+        switch(indexOf(slImagePolarity, CtreCapTo(c1))) {
         case Positive: state_.setImgPolarity(Positive); break;
         case Negative: state_.setImgPolarity(Negative); break;
         }

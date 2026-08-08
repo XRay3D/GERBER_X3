@@ -32,7 +32,7 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     // Gi::Item interface
-    Geo::Polygon curves(int alternate = {}) const override;
+    Geo::Polylines curves(int alternate = {}) const override;
     void changeColor() override { }
 
     void setSelected(bool selected) { selected_ = selected; }

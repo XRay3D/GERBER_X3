@@ -46,12 +46,12 @@ public:
     AbstractAperture(const File* file);
     virtual ~AbstractAperture() = default;
 
-    virtual ApertureType type() const = 0;
-    virtual QString name() const = 0;
+    virtual ApertureType type() const       = 0;
+    virtual QString name() const            = 0;
     virtual bool fit(double toolDiam) const = 0;
 
-    Path64 drawDrill(const State& state);
-    Paths64 draw(const State& state, bool notApBlock = {});
+    Geo::Polyline drawDrill(const State& state);
+    Geo::Polygons draw(const State& state, bool notApBlock = {});
 
     bool flashed() const noexcept { return isFlashed_; }
     bool used() const noexcept { return isUsed_; }
@@ -68,12 +68,12 @@ protected:
     double size_{};
     double minSize_{};
     const File* file_;
-    Paths64 paths_;
+    Geo::Polygons paths_;
     bool isFlashed_{};
     bool isUsed_{};
 
-    virtual void draw() = 0;
-    virtual void read(QDataStream& stream) = 0;
+    virtual void draw()                           = 0;
+    virtual void read(QDataStream& stream)        = 0;
     virtual void write(QDataStream& stream) const = 0;
 };
 
@@ -203,10 +203,9 @@ private:
     QStringList modifiers_;
     VarMap coefficients_;
 
-    double Angle(const Point64& pt1, const Point64& pt2) {
-        const double dx = pt2.x - pt1.x;
-        const double dy = pt2.y - pt1.y;
-        const double theta = atan2(-dy, dx) * 360.0 / (2 * pi);
+    double Angle(const QPointF& pt1, const QPointF& pt2) {
+        const QPointF d               = pt2 - pt1;
+        const double theta            = atan2(-d.y(), d.x()) * 360.0 / (2 * pi);
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
         if(qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;
@@ -214,11 +213,11 @@ private:
             return theta_normalized;
     }
 
-    Path64 drawCenterLine(const std::vector<double>& mod);
-    Path64 drawCircle(const std::vector<double>& mod);
-    Path64 drawOutlineCustomPolygon(const std::vector<double>& mod);
-    Path64 drawOutlineRegularPolygon(const std::vector<double>& mod);
-    Path64 drawVectorLine(const std::vector<double>& mod);
+    Geo::Polyline drawCenterLine(const std::vector<double>& mod);
+    Geo::Polyline drawCircle(const std::vector<double>& mod);
+    Geo::Polyline drawOutlineCustomPolygon(const std::vector<double>& mod);
+    Geo::Polyline drawOutlineRegularPolygon(const std::vector<double>& mod);
+    Geo::Polyline drawVectorLine(const std::vector<double>& mod);
     void drawMoire(const std::vector<double>& mod);
     void drawThermal(const std::vector<double>& mod);
 };
