@@ -59,8 +59,8 @@ enum CoordinateValuesNotation : bool {
 };
 
 enum InterpolationMode {
-    Linear = 1,
-    ClockwiseCircular = 2,
+    Linear                   = 1,
+    ClockwiseCircular        = 2,
     CounterClockwiseCircular = 3
 };
 
@@ -196,19 +196,19 @@ class State {
             state.rotating_);
     }
 
-    File* file_ = nullptr;
-    Operation dCode_ = D02;
-    GCode gCode_ = G01;
-    ImagePolarity imgPolarity_ = Positive;
+    File* file_                      = nullptr;
+    Operation dCode_                 = D02;
+    GCode gCode_                     = G01;
+    ImagePolarity imgPolarity_       = Positive;
     InterpolationMode interpolation_ = Linear;
-    PrimitiveType type_ = Aperture;
-    QuadrantMode quadrant_ = Undef;
-    RegionMode region_ = Off;
+    PrimitiveType type_              = Aperture;
+    QuadrantMode quadrant_           = Undef;
+    RegionMode region_               = Off;
     int aperture_{};
     int lineNum_{};
-    Point64 curPos_;
+    QPointF curPos_;
     Mirroring mirroring_ = NoMirroring;
-    double scaling_ = 1.0;
+    double scaling_      = 1.0;
     double rotating_{};
 
 public:
@@ -243,7 +243,7 @@ public:
 
     inline auto& curPos() { return curPos_; }
     inline auto curPos() const { return curPos_; }
-    inline void setCurPos(const Point64& curPos) { curPos_ = curPos; }
+    inline void setCurPos(const QPointF& curPos) { curPos_ = curPos; }
 
     inline auto mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
@@ -272,10 +272,10 @@ struct GrObject : GraphicObject {
 
     // public:
     GrObject() = default;
-    GrObject(int32_t id, const State& state, Geo::Polygon&& paths, File* gFile, Type type, Geo::Polyline&& path = {})
+    GrObject(int32_t id, const State& state, Geo::Polygons&& paths, File* gFile, Type type, Geo::Polyline&& path = {})
         : gFile{gFile}
         , state{state} {
-        GraphicObject::id = id;
+        GraphicObject::id   = id;
         GraphicObject::fill = std::move(paths);
         GraphicObject::path = std::move(path);
         GraphicObject::type = type;

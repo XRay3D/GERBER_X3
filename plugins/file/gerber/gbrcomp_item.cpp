@@ -75,7 +75,7 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
 
     painter->setBrush(Qt::NoBrush);
     double min = std::min(shape_.boundingRect().width(), shape_.boundingRect().height());
-    double k = std::min(min, scale_ * s);
+    double k   = std::min(min, scale_ * s);
     painter->drawLine(
         component_.referencePoint() + QPointF{k, k},
         component_.referencePoint() - QPointF{k, k});
@@ -127,6 +127,6 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
                 scale_);
 }
 
-Geo::Polygon Item::curves(int) const { return {}; }
+Geo::Polylines Item::curves(int) const { return {}; }
 
 } // namespace Gerber::Comp

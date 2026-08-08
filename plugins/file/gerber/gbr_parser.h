@@ -37,7 +37,7 @@ protected:
         X,
         Y
     };
-    bool parseNumber(QString Str, /*PType*/ int32_t& val, FormatDir dir);
+    bool parseNumber(QString Str, /*PType*/ double& val, FormatDir dir);
 
     void addPath();
     void addFlash();
@@ -45,10 +45,10 @@ protected:
     void reset();
     void resetStep();
 
-    Point64 parsePosition(const QString& xyStr);
+    QPointF parsePosition(const QString& xyStr);
 
-    Geo::Polygon createLine();
-    Geo::Polygon createPolygon();
+    Geo::Polygons createLine();
+    Geo::Polygons createPolygon();
 
     std::map<QString, QString> apertureMacro_;
 
@@ -64,7 +64,7 @@ protected:
 
     QStack<WorkingType> abSrIdStack_;
 
-    Path64 path_;
+    Geo::Polyline path_;
     State state_;
     QString currentGerbLine_;
 

@@ -63,7 +63,7 @@ private:
     QList<Comp::Component> components_;
     std::vector<GrObject> graphicObjects_;
     ApertureMap apertures_;
-    void grouping(PolyTree& node, Geo::Polygons* curvess);
+
     Format format_;
     Group group_{};
     // Layer layer = Copper;
