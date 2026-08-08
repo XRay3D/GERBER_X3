@@ -104,6 +104,16 @@ QRectF Polygon::boundingRect() const {
     return QRectF(QPointF(box.xmin(), box.ymin()), QPointF(box.xmax(), box.ymax()));
 }
 
+bool Polygon::isUnbounded() const { return impl_->exact.is_unbounded(); }
+
+Polygons Polygon::inverted() const {
+    // Через регион, а не напрямую: у Polygon_with_holes_2 дополнения нет и
+    // быть не может -- кусков в нём столько же, сколько дырок, плюс один
+    // неограниченный.
+    Polygons region{*this};
+    return region.invert();
+}
+
 bool Polygon::contains(QPointF point) const {
     // Габарит отсекает заведомо чужие точки одним сравнением; остальное --
     // счёт пересечений по точным кривым, без QPainterPath.
@@ -284,6 +294,21 @@ Polygons& Polygons::operator^=(const Polygons& other) {
     impl_->exact.symmetric_difference(other.impl_->exact);
     impl_->invalidate();
     return *this;
+}
+
+Polygons& Polygons::invert() {
+    checkCancelled();
+    impl_->exact.complement();
+    impl_->invalidate();
+    return *this;
+}
+
+bool Polygons::isUnbounded() const {
+    // По разбиению, а не по арифметике над габаритом: неограниченный кусок
+    // приходит в нём отдельным полигоном без внешней границы, а разбиение
+    // всё равно кэшировано.
+    const std::vector<Polygon>& parts = all();
+    return std::ranges::any_of(parts, [](const Polygon& part) { return part.isUnbounded(); });
 }
 
 // ---------------------------------------------------------------------------
