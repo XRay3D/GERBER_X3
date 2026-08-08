@@ -56,8 +56,8 @@ DxfGo Trace::toGo() const {
         {secondCorner},
         {fourthCorner},
         {thirdCorner},
-        {firstCorner},
     };
+    poly.close();
 
     if(!poly.isPositive())
         poly.reverse();

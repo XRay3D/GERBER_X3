@@ -38,7 +38,7 @@ void Creator::create() {
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
         gcp.toolPathss = toCurvess(std::array{sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))});
-        file_          = new File{std::move(gcp)};
+        file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     } else {
         Paths64 copy{returnPs};
@@ -76,10 +76,10 @@ void Creator::create() {
 }
 
 void Creator::createOffset(const Tool& tool, double depth, const double width) {
-    msg          = tr("Create Offset");
+    msg = tr("Create Offset");
     toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset      = toolDiameter / 2;
-    stepOver     = tool.stepover() * uScale;
+    dOffset = toolDiameter / 2;
+    stepOver = tool.stepover() * uScale;
     const Path64 frame{returnPs.back()};
     // returnPs.pop_back();
     { // create offset
@@ -109,7 +109,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
         // Paths64 tmpPaths1;
         // tmpPaths1 = offset.Execute(-dOffset);
         Paths64 tmpPaths1 = InflateRoundPolygon(returnPs, -dOffset);
-        openSrcPaths    = tmpPaths1;
+        openSrcPaths = tmpPaths1;
         Paths64 tmpPaths;
         do {
             tmpPaths.append_range(tmpPaths1);

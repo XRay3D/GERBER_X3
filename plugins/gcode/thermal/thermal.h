@@ -23,7 +23,7 @@ class Creator : public ::GCode::Creator {
 public:
     Creator();
     ~Creator() override = default;
-    static inline const QString FileId       = u"FileId"_s;
+    static inline const QString FileId = u"FileId"_s;
     static inline const QString IgnoreCopper = u"IgnoreCopper"_s;
 
 private:

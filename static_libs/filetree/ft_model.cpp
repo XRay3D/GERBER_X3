@@ -13,10 +13,10 @@
 
 #include "abstract_file.h"
 #include "abstract_fileplugin.h"
+#include "abstract_shape.h"
 #include "gc_types.h"
 #include "md5.h"
 #include "project.h"
-#include "abstract_shape.h"
 
 #include <QTimer>
 

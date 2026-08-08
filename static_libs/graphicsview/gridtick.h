@@ -23,7 +23,8 @@
 // dedup pass.
 template <typename Fn>
 void forEachGridTick(double origin, double rangeStart, double rangeEnd, double step, Fn&& fn) {
-    if(!(step > 0.0)) [[unlikely]] return;
+    if(!(step > 0.0)) [[unlikely]]
+        return;
 
     const auto firstIndex = static_cast<int64_t>(std::ceil((rangeStart - origin) / step));
     const auto lastIndex = static_cast<int64_t>(std::floor((rangeEnd - origin) / step));

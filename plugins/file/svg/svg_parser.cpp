@@ -33,10 +33,16 @@ static double readNum(QStringView s, int& i) {
     if(i < (int)s.size() && (s[i] == u'-' || s[i] == u'+')) ++i;
     while(i < (int)s.size()) {
         QChar c = s[i];
-        if(c.isDigit() || c == u'.') { ++i; continue; }
+        if(c.isDigit() || c == u'.') {
+            ++i;
+            continue;
+        }
         if((c == u'e' || c == u'E') && i + 1 < (int)s.size()) {
             QChar next = s[i + 1];
-            if(next.isDigit() || next == u'-' || next == u'+') { ++i; continue; }
+            if(next.isDigit() || next == u'-' || next == u'+') {
+                ++i;
+                continue;
+            }
         }
         break;
     }

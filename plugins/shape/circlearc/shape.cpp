@@ -87,16 +87,12 @@ void Shape::redraw() {
     }
 
     Curve curve{
-        {{
-             handles[Point1],
-         },
-         {
-                handles[Point2],
-                handles[Center],
-                geo::DIR(handles[Point1], handles[Center], handles[Point2]),
-            }}
+        {handles[Point1],
+         geo::bulgeOf(handles[Point1], handles[Point2], handles[Center],
+         geo::DIR(handles[Point1], handles[Center], handles[Point2]))},
+        {handles[Point2]},
     };
-    if(closed) curve.emplace_back(curve.front().pt);
+    if(closed) curve.close(); // замыкает хордой
     curves_ = {std::move(curve)};
     shape_ = toPPath(curves_);
 

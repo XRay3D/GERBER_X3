@@ -55,7 +55,7 @@ public:
         setSide(gcp.params[Params::FileSide]);
     }
 
-    File()           = default;
+    File() = default;
     ~File() override = default;
 
     std::vector<QString> gCodeText() const { return lines_; }
@@ -126,7 +126,7 @@ protected:
     QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
 
-    std::vector<QString> savePath(const Curve& curve, double perimetr = {}, double depth = {});
+    std::vector<QString> savePath(const Curve& curve, double perimeter = {}, double depth = {});
 
     QString formated(const std::vector<QString>& data);
 

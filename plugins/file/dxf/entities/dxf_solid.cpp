@@ -56,8 +56,8 @@ DxfGo Solid::toGo() const {
         {secondCorner},
         {fourthCorner},
         {thirdCorner},
-        {firstCorner},
     };
+    poly.close();
 
     // Path path{~poly};
     // r::for_each(path, SetCSelf);

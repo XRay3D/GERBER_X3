@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "curve.h"
+#include "geo/polygon.h"
 
 #include <QGraphicsItem>
 

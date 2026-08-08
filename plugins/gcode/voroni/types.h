@@ -18,9 +18,9 @@ namespace Voronoi {
 constexpr auto VORONOI = "Voronoi"_hash32;
 
 inline const QString FrameOffset = u"FrameOffset"_s;
-inline const QString Tolerance   = u"Tolerance"_s;
+inline const QString Tolerance = u"Tolerance"_s;
 inline const QString VoronoiType = u"VoronoiType"_s;
-inline const QString Width       = u"Width"_s;
+inline const QString Width = u"Width"_s;
 
 class File final : public GCode::File {
 

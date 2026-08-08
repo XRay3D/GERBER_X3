@@ -10,10 +10,9 @@
  ********************************************************************************/
 // module;
 
-#include "myclipper.h"
 #include "app.h"
 #include "cancelation.h"
-#include "curve.h"
+#include "geo/polygon.h"
 #include "gi_dbg.h"
 #include "graphicsview.h"
 

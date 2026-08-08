@@ -1,7 +1,7 @@
 #pragma once
 
-#include "thr_form.h"
 #include "qwidget.h"
+#include "thr_form.h"
 
 namespace Threading {
 

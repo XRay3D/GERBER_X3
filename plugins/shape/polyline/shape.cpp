@@ -67,7 +67,7 @@ void Shape::redraw() {
             | v::transform([](QPointF& pt) { return geo::Vertex{pt}; }),
     };
 
-    if(closed && !curve.isClosed()) curve.emplace_back(curve.front().pt);
+    if(closed) curve.close();
     curves_ = {std::move(curve)};
     shape_ = toPPath(curves_);
 

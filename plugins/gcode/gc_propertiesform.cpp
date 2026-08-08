@@ -110,21 +110,21 @@ PropertiesForm::~PropertiesForm() {
 void PropertiesForm::showEvent(QShowEvent* event) {
     QWidget::showEvent(event);
     committed_ = false;
-    snapshot_  = {
-         .safeZ           = ui->dsbxSafeZ->value(),
-         .clearence       = ui->dsbxClearence->value(),
-         .plunge          = ui->dsbxPlunge->value(),
-         .thickness       = ui->dsbxThickness->value(),
-         .copperThickness = ui->dsbxCopperThickness->value(),
-         .glue            = ui->dsbxGlue->value(),
-         .spaceX          = ui->dsbxSpaceX->value(),
-         .spaceY          = ui->dsbxSpaceY->value(),
-         .stepsX          = ui->sbxStepsX->value(),
-         .stepsY          = ui->sbxStepsY->value(),
-         .homeX           = ui->dsbxHomeX->value(),
-         .homeY           = ui->dsbxHomeY->value(),
-         .zeroX           = ui->dsbxZeroX->value(),
-         .zeroY           = ui->dsbxZeroY->value(),
+    snapshot_ = {
+        .safeZ = ui->dsbxSafeZ->value(),
+        .clearence = ui->dsbxClearence->value(),
+        .plunge = ui->dsbxPlunge->value(),
+        .thickness = ui->dsbxThickness->value(),
+        .copperThickness = ui->dsbxCopperThickness->value(),
+        .glue = ui->dsbxGlue->value(),
+        .spaceX = ui->dsbxSpaceX->value(),
+        .spaceY = ui->dsbxSpaceY->value(),
+        .stepsX = ui->sbxStepsX->value(),
+        .stepsY = ui->sbxStepsY->value(),
+        .homeX = ui->dsbxHomeX->value(),
+        .homeY = ui->dsbxHomeY->value(),
+        .zeroX = ui->dsbxZeroX->value(),
+        .zeroY = ui->dsbxZeroY->value(),
     };
 }
 

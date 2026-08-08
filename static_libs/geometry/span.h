@@ -14,6 +14,8 @@
 
 namespace geo {
 
+// Один сегмент кривой: начальная вершина (её прогиб описывает ЭТОТ сегмент)
+// и конечная точка. Дуга -- свойство пары, поэтому одной вершины мало.
 struct Span {
     //     PointF NearestPointNotOnSpan(const PointF& p) const;
     //     double Parameter(const PointF& p) const;
@@ -23,9 +25,12 @@ struct Span {
     //     static const Vertex null_vertex;
 
     // public:
-    geo::PointF pt;
-    geo::Vertex vx;
+    geo::Vertex vs;
+    geo::PointF pe;
     bool m_start_span{};
+
+    // Геометрия дуги сегмента; nullopt -- отрезок.
+    std::optional<Arc> arc() const { return arcOf(vs.pt, pe, vs.bulge); }
     //     Span();
     //     Span(const PointF& p, const Vertex& v, bool start_span = false)
     //         : m_start_span(start_span)

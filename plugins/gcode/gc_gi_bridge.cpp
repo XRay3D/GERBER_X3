@@ -11,7 +11,6 @@
 #include "gc_gi_bridge.h"
 
 #include "gcode.h"
-#include "geometry.h"
 #include "graphicsview.h"
 
 #include <QPainter>

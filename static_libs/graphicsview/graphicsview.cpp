@@ -14,7 +14,7 @@
 #include "gi_drill.h"
 #include "gi_point.h"
 #include "gridtick.h"
-#include "myclipper.h"
+
 #include "project.h"
 #include "ruler.h"
 #include "utils.h"

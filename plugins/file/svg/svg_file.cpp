@@ -10,7 +10,7 @@
  *******************************************************************************/
 #include "svg_file.h"
 
-#include "curve.h"
+#include "geo/polygon.h"
 #include "gi_datapath.h"
 #include "svg_node.h"
 

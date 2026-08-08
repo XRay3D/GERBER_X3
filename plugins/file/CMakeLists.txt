@@ -24,10 +24,11 @@ target_enable_pch(${PROJECT_NAME})
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
 
-target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets common)
+target_link_libraries(${PROJECT_NAME} PUBLIC Qt6::Widgets common geometry)
 
 target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})
 
 foreach(SUBDIRECTORY ${FILE_PLUGINS})
-    add_subdirectory(${SUBDIRECTORY})
+  add_subdirectory(${SUBDIRECTORY})
+  target_link_libraries(file_${SUBDIRECTORY} PUBLIC file_plugins)
 endforeach()

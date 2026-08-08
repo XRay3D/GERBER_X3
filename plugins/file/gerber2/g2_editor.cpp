@@ -38,11 +38,11 @@ const std::vector<Rule>& rules() {
             return Rule{QRegularExpression{pattern.toString()}, f};
         };
         return std::vector<Rule>{
-            make(uR"(G04[^*]*)", Qt::darkGreen),                    // комментарий
-            make(uR"(%[A-Z]{2})", QColor{0x80, 0x00, 0x80}, true),  // расширенная команда
-            make(uR"(\b[DGM]\d{2,}\b)", QColor{0x00, 0x00, 0xC0}),  // коды
-            make(uR"([XYIJ][+-]?\d+)", QColor{0x80, 0x40, 0x00}),   // координаты
-            make(uR"([*%])", Qt::darkGray),                         // разделители
+            make(uR"(G04[^*]*)", Qt::darkGreen),                   // комментарий
+            make(uR"(%[A-Z]{2})", QColor{0x80, 0x00, 0x80}, true), // расширенная команда
+            make(uR"(\b[DGM]\d{2,}\b)", QColor{0x00, 0x00, 0xC0}), // коды
+            make(uR"([XYIJ][+-]?\d+)", QColor{0x80, 0x40, 0x00}),  // координаты
+            make(uR"([*%])", Qt::darkGray),                        // разделители
         };
     }();
     return value;

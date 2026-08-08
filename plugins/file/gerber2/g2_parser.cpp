@@ -156,8 +156,8 @@ Curves thickLine(QPointF p1, QPointF p2, double width) {
         geo::Vertex{p2 + n},
         geo::Vertex{p2 - n},
         geo::Vertex{p1 - n},
-        geo::Vertex{p1 + n},
     };
+    c.closed = true;
     return {std::move(c)};
 }
 
@@ -166,10 +166,11 @@ Curves regularPolygon(double dia, int vertices, double rotDeg, QPointF c = {}) {
     if(dia <= 0.0 || vertices < 3) return {};
     Curve curve;
     const double r = dia * 0.5;
-    for(int i = 0; i <= vertices; ++i) {
+    for(int i = 0; i < vertices; ++i) {
         double a = (rotDeg + 360.0 * i / vertices) * deg2rad;
         curve.emplace_back(QPointF{c.x() + r * std::cos(a), c.y() + r * std::sin(a)});
     }
+    curve.closed = true;
     return {std::move(curve)};
 }
 
@@ -444,7 +445,10 @@ private:
         const int n = w.size();
         for(int i = 0; i < n;) {
             QChar c = w[i];
-            if(!c.isLetter()) { ++i; continue; }
+            if(!c.isLetter()) {
+                ++i;
+                continue;
+            }
             int start = ++i;
             while(i < n && (w[i].isDigit() || w[i] == u'+' || w[i] == u'-' || w[i] == u'.')) ++i;
             QStringView num = QStringView{w}.sliced(start, i - start);
@@ -478,27 +482,32 @@ private:
             if(st.region) closeContour();
             st.current = pt;
             break;
-        case 3: flash(pt); break;
+        case 3 : flash(pt); break;
         default: st.current = pt; break; // координаты без D-кода (устар.)
         }
     }
 
     void plot(QPointF to, std::optional<double> I, std::optional<double> J) {
         Curve seg{
-            geo::Vertex{st.current}
-        };
+            geo::Vertex{st.current}};
         if(st.plot == PlotMode::Linear || !I || !J) {
             seg.emplace_back(to);
         } else {
+            // Дуга приходит в виде «центр + направление», Curve хранит прогиб:
+            // он и пишется на НАЧАЛЬНОЙ вершине сегмента, то есть на уже
+            // лежащей в seg.
             QPointF center = arcCenter(st.current, to, *I, *J);
-            auto type = st.plot == PlotMode::Cw ? geo::Vertex::Cw : geo::Vertex::Ccw;
+            auto dir = st.plot == PlotMode::Cw ? geo::Vertex::Cw : geo::Vertex::Ccw;
             if(st.multiQuadrant && QLineF{st.current, to}.length() < 1e-9) {
-                // start == end → полная окружность, делим пополам
+                // start == end → полная окружность, делим пополам:
+                // прогибом полный оборот не выражается
                 QPointF mid = center * 2.0 - st.current;
-                seg.emplace_back(mid, center, type);
-                seg.emplace_back(to, center, type);
+                seg.back().bulge = geo::bulgeOf(st.current, mid, center, dir);
+                seg.emplace_back(mid, geo::bulgeOf(mid, to, center, dir));
+                seg.emplace_back(to);
             } else {
-                seg.emplace_back(to, center, type);
+                seg.back().bulge = geo::bulgeOf(st.current, to, center, dir);
+                seg.emplace_back(to);
             }
         }
 
@@ -550,8 +559,7 @@ private:
 
     void closeContour() {
         if(regionCurve.size() > 2) {
-            if(QLineF{regionCurve.front().pt, regionCurve.back().pt}.length() > 1e-9)
-                regionCurve.push_back(regionCurve.front()); // страховка от незамкнутости
+            regionCurve.close(); // замыкание -- флагом, лишний повтор точки уберётся
             regionContours.push_back(regionCurve);
         }
         regionCurve.clear();
@@ -655,7 +663,7 @@ private:
                 for(int k = 0; k <= nv && 3 + k * 2 + 1 < parts.size(); ++k)
                     c.emplace_back(QPointF{arg(3 + k * 2), arg(4 + k * 2)});
                 if(c.size() > 2) {
-                    if(QLineF{c.front().pt, c.back().pt}.length() > 1e-9) c.push_back(c.front());
+                    c.close();
                     shape = {std::move(c)};
                 }
                 rot = raw(5 + nv * 2);

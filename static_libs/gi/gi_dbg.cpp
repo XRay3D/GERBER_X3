@@ -90,7 +90,7 @@ Debug_::Debug_(const Paths64& paths, const QColor& color, double width)
 
 Debug_::Debug_(const QPainterPath& path, const QColor& color, double width)
     : Debug_{color, width} {
-    shape_        = path;
+    shape_ = path;
     boundingRect_ = shape_.boundingRect();
 
     if(shape_.isEmpty()) {

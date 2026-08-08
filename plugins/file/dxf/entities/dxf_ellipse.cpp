@@ -104,12 +104,15 @@ DxfGo Ellipse::toGo() const {
                 (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
                 (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
             };
-            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+            // прогиб пишется на НАЧАЛЬНОЙ вершине дуги -- она уже в кривой
+            curve.back().bulge = geo::bulgeOf(p0, p1, center, geo::DIR(p0, center, p1));
+            curve.emplace_back(p1);
         }
         prev = p1;
     }
 
     if(closed) {
+        curve.close();
         DxfGo go{id, Curve{curve}, {std::move(curve)}};
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Elipse);
         go.GraphicObject::pos = CenterPoint;

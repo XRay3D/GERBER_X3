@@ -125,7 +125,7 @@ Curves File::merge() const {
                 // | v::take(5)),
                 | v::drop(208 - 99 - 5) | v::take(5)),
         };
-        bool fl      = gObjects.front().state.imgPolarity();
+        bool fl = gObjects.front().state.imgPolarity();
         mergedPaths = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths, clip);
         break;
     }
@@ -138,7 +138,7 @@ Curves File::merge() const {
                 | v::transform(qOverload<const Curves&>(toPaths))
                 | v::join,
         };
-        bool fl      = gObjects.front().state.imgPolarity();
+        bool fl = gObjects.front().state.imgPolarity();
         mergedPaths = cl::BooleanOp(CT[fl], FR[fl], mergedPaths, clip);
     }
     // Gi::Debug(mergedPaths, {255, 255, 255, 128}); //->arrows = {};
@@ -275,7 +275,7 @@ void File::read(QDataStream& stream) {
         components_);
 
     for(GrObject& go: graphicObjects_) {
-        go.gFile       = this;
+        go.gFile = this;
         go.state.file_ = this;
     }
 }
@@ -358,8 +358,8 @@ void File::createGi() {
 
     setColor(color_);
 
-    layerTypes_[Normal].id     = itemGroups_[Normal]->size() ? Normal : NullType;
-    layerTypes_[ApPaths].id    = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
+    layerTypes_[Normal].id = itemGroups_[Normal]->size() ? Normal : NullType;
+    layerTypes_[ApPaths].id = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
     layerTypes_[Components].id = itemGroups_[Components]->size() ? Components : NullType;
 
     itemGroups_[ApPaths]->setVisible(false);

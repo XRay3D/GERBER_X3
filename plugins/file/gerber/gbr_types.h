@@ -16,7 +16,6 @@
 
 #include <QDebug>
 #include <QObject>
-#include <myclipper.h>
 
 #define DEPRECATED
 
@@ -60,8 +59,8 @@ enum CoordinateValuesNotation : bool {
 };
 
 enum InterpolationMode {
-    Linear                   = 1,
-    ClockwiseCircular        = 2,
+    Linear = 1,
+    ClockwiseCircular = 2,
     CounterClockwiseCircular = 3
 };
 
@@ -197,19 +196,19 @@ class State {
             state.rotating_);
     }
 
-    File* file_                      = nullptr;
-    Operation dCode_                 = D02;
-    GCode gCode_                     = G01;
-    ImagePolarity imgPolarity_       = Positive;
+    File* file_ = nullptr;
+    Operation dCode_ = D02;
+    GCode gCode_ = G01;
+    ImagePolarity imgPolarity_ = Positive;
     InterpolationMode interpolation_ = Linear;
-    PrimitiveType type_              = Aperture;
-    QuadrantMode quadrant_           = Undef;
-    RegionMode region_               = Off;
+    PrimitiveType type_ = Aperture;
+    QuadrantMode quadrant_ = Undef;
+    RegionMode region_ = Off;
     int aperture_{};
     int lineNum_{};
     Point64 curPos_;
     Mirroring mirroring_ = NoMirroring;
-    double scaling_      = 1.0;
+    double scaling_ = 1.0;
     double rotating_{};
 
 public:
@@ -276,7 +275,7 @@ struct GrObject : GraphicObject {
     GrObject(int32_t id, const State& state, Curves&& paths, File* gFile, Type type, Curve&& path = {})
         : gFile{gFile}
         , state{state} {
-        GraphicObject::id   = id;
+        GraphicObject::id = id;
         GraphicObject::fill = std::move(paths);
         GraphicObject::path = std::move(path);
         GraphicObject::type = type;

@@ -10,9 +10,9 @@
  ********************************************************************************/
 #pragma once
 
+#include "abstract_shape.h"
 #include "ft_view.h"
 #include "plugindata.h"
-#include "abstract_shape.h"
 
 namespace Shapes {
 class Node;

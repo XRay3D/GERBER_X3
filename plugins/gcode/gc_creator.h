@@ -12,7 +12,6 @@
 
 #include "gc_types.h"
 #include "gi_error.h"
-#include "myclipper.h"
 
 #include <QObject>
 

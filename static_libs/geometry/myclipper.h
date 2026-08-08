@@ -403,4 +403,4 @@ Pathss64& sortBeginEnd(Pathss64& src, Point64 startPt);
 
 void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge);
 
-// #include "curve.h"
+// #include "geo/polygon.h"

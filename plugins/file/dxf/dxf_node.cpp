@@ -90,7 +90,7 @@ public:
             size_t ctr{};
             for(auto& [name, color]: colors) {
                 const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * ctr++ : 0);
-                auto layer  = file->layers().at(name);
+                auto layer = file->layers().at(name);
                 layer->setColor(QColor::fromHsv(k, 255, 255));
                 for(auto&& gi: *layer->itemGroup())
                     gi->changeColor();
@@ -245,7 +245,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme(u"color-management"_s), DxfObj::tr("Colorize"), [this] {
         const int count = childCount();
         for(int row{}; row < count; ++row) {
-            const int k   = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
+            const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
             NodeLayer* nl = reinterpret_cast<NodeLayer*>(child(row));
             nl->layer->setColor(QColor::fromHsv(k, 255, 255));
             for(auto&& gi: *nl->layer->itemGroup())

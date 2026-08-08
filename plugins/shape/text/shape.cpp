@@ -36,7 +36,7 @@ void Shape::redraw() {
 
     QFontMetrics fm{txtData.font};
     const double capHeight = fm.capHeight();
-    const double scale     = txtData.height / capHeight;
+    const double scale = txtData.height / capHeight;
 
     QPainterPath painterPath; // TODO align multiline text
     for(double i{}; auto&& txt: txtData.text.split(u'\n'))

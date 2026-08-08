@@ -32,7 +32,7 @@ public:
 
     bool ok() const;
     void update();
-    bool test(const Curve &curve);
+    bool test(const Curve& curve);
     QPointF snapedPos(const QPointF& pos);
 
     static inline Bridge* moveBrPtr;           // NOTE приватизировать в будущем??

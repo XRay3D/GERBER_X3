@@ -12,7 +12,7 @@
 
 #include "geometry.h"
 
-// #include <curve.h>
+// #include "geo/polygon.h"
 
 namespace geo::circle {
 
@@ -25,7 +25,12 @@ struct Circle {
         : center{center}, radius{radius} { }
     constexpr Circle(const QPointF& center, const QPointF& ptOn)
         : center{center}, radius{Length(center, ptOn)} { }
-    constexpr Circle(const Vertex& vertex)
+    // Из любой вершины, которая ЗНАЕТ свой центр. Vertex такой не является:
+    // он хранит прогиб, а центр -- свойство пары вершин (см. arcOf). Шаблон
+    // же принимает промежуточные «центровые» вершины разбора дуг.
+    template <class V>
+        requires requires(V v) { v.center; v.pt; }
+    constexpr Circle(const V& vertex)
         : Circle{vertex.center, vertex.pt} { }
 };
 
@@ -263,8 +268,8 @@ struct name {
 
         return result;
     }
-    constexpr QPolygonF operator()(const Vertex& v, QPointF segStart, QPointF segEnd) {
-        return (*this)(v.center, v.radius(), segStart, segEnd);
+    constexpr QPolygonF operator()(const Circle& c, QPointF segStart, QPointF segEnd) {
+        return (*this)(c.center, c.radius, segStart, segEnd);
     }
 } segment_intersection;
 

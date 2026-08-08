@@ -23,7 +23,6 @@
 #include "math.h"
 #include "plugintypes.h"
 #include "project.h"
-#include "span.h"
 
 #include <QCoreApplication>
 #include <QDir>
@@ -36,8 +35,6 @@
 #undef emit
 #include <execution>
 #define emit
-
-using namespace geo;
 
 namespace GCode {
 
@@ -312,14 +309,12 @@ Curves File::mirrorAndOffsetCurves(const QPointF& offset, Curves curves) {
         if(toolType != Tool::Laser) r::for_each(curves, &Curve::reverse);
         for(Vertex& v: v::join(curves)) {
             v.pt.rx() = -v.pt.x() + k;
-            if(v) v.center.rx() = -v.center.x() + k;
+            v.bulge = -v.bulge; // зеркало разворачивает обход дуги
         }
     }
 
-    for(Vertex& v: v::join(curves)) { // FIXME ^^^^^^^^^
+    for(Vertex& v: v::join(curves)) // FIXME ^^^^^^^^^
         v.pt -= App::zero().pos();
-        if(v) v.center -= App::zero().pos();
-    }
 
     return curves;
 }
@@ -330,7 +325,7 @@ mvector<double> File::getDepths() {
     if(gDepth < tool.passDepth() || qFuzzyCompare(gDepth, tool.passDepth()))
         return {-gDepth - tool.getDepth()};
 
-    const int count    = static_cast<int>(ceil(gDepth / tool.passDepth()));
+    const int count = static_cast<int>(ceil(gDepth / tool.passDepth()));
     const double depth = gDepth / count;
     mvector<double> depths(count);
     for(int i{}; i < count; ++i)
@@ -339,26 +334,29 @@ mvector<double> File::getDepths() {
     return depths;
 }
 
-std::vector<QString> File::savePath(const Curve& curve, double perimetr, double depth) {
+std::vector<QString> File::savePath(const Curve& curve, double perimeter, double depth) {
     std::vector<QString> lines;
     lines.reserve(curve.size());
 
+    // Дуга -- свойство пары вершин: центр (а с ним I/J и выбор G2/G3) считается
+    // по прогибу НАЧАЛЬНОЙ вершины сегмента, отдельно взятая вершина о дуге
+    // ничего не знает.
     auto getLine = [this](const Vertex& fr, const Vertex& to) -> QString {
-        if(to.type) {
-            auto [I, J] = to.center - fr.pt;
-            return formated({g(to), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle});
+        if(auto arc = geo::arcOf(fr.pt, to.pt, fr.bulge)) {
+            auto [I, J] = arc->center - fr.pt;
+            return formated({g(fr), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle});
         } else
             return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
     };
-    if(depth && perimetr) {
-        double zk       = depth - z_;
-        double perimetr = curve.perimetr();
-        for(auto&& [fr, to]: v::pairwise(curve)) {
-            z_ += Span{fr.pt, to}.Length() / perimetr * zk;
+    if(depth && perimeter) {
+        double zk = depth - z_;
+        double perimeter = curve.perimeter();
+        for(auto&& [fr, to]: curve.segments()) {
+            z_ += Span{fr, to.pt}.Length() / perimeter * zk;
             lines.emplace_back(getLine(fr, to));
         }
     } else {
-        for(auto&& [fr, to]: curve | v::pairwise)
+        for(auto&& [fr, to]: curve.segments())
             lines.emplace_back(getLine(fr, to));
     }
     return lines;
@@ -387,13 +385,14 @@ QString File::g2() { return gCode_ = G02, u"G2"_s; }
 
 QString File::g3() { return gCode_ = G03, u"G3"_s; }
 
+// Направление обхода задаёт знак прогиба сегмента, начинающегося в вершине.
 QString File::g(const Vertex& v) {
-    switch(v.type) {
+    switch(v.dir()) {
     case Vertex::Line: return g1();
     case Vertex::Ccw : return g3();
     case Vertex::Cw  : return g2();
-    default          : return {};
     }
+    return {};
 }
 
 QString File::format(double val) {
@@ -473,7 +472,7 @@ void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
 
     const mvector<double> depths = getDepths();
-    double diameter              = tool().diameter();
+    double diameter = tool().diameter();
 
     Curvess pathss = mirrorAndOffsetCurves(offset);
 
@@ -490,7 +489,7 @@ void File::saveMillingPocket(const QPointF& offset) {
                 }
                 // if(first || (paths.front().front().pt == path.front().pt)) {
                 //     lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
-                //     lines_.append_range(savePath(path, path.perimetr(), zd));
+                //     lines_.append_range(savePath(path, path.perimeter(), zd));
                 //     // lines_.append_range(savePath(path));
                 // } else {
                 lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
@@ -510,11 +509,11 @@ void File::saveMillingProfile(const QPointF& offset) {
     for(const Curves& paths: pathss) {
         if(paths.size() == 1) {
             const Curve& path = paths.front();
-            double perimetr   = path.perimetr();
+            double perimeter = path.perimeter();
             if(paths.front().isClosed()) { // Spiral
                 startPath(path.front().pt);
                 for(double depth: depths)
-                    lines_.append_range(savePath(path, perimetr, depth));
+                    lines_.append_range(savePath(path, perimeter, depth));
                 lines_.append_range(savePath(path)); // Проход без спирали.
                 endPath();
             } else { // Zigzag
@@ -522,14 +521,14 @@ void File::saveMillingProfile(const QPointF& offset) {
                 const Curve reversed = paths.front().reversed();
                 uint i{};
                 for(double depth: depths)
-                    lines_.append_range(savePath(i++ & 1u ? reversed : path, perimetr, depth));
+                    lines_.append_range(savePath(i++ & 1u ? reversed : path, perimeter, depth));
                 lines_.append_range(savePath(i & 1u ? reversed : path)); // Проход без спирали.
                 endPath();
             }
         } else {
             // tool().diameter();
-            // double perimetr = r::fold_left(
-            //     v::transform(paths, std::bind(&Curve::perimetr, _1)),
+            // double perimeter = r::fold_left(
+            //     v::transform(paths, std::bind(&Curve::perimeter, _1)),
             //     0.0, std::plus<double>{});
             startPath(paths.front().front().pt);
             for(double zd: depths) {
@@ -649,11 +648,12 @@ void File::createGiPocket() {
             itemGroup()->push_back(item);
         }
 
-        Curve g1path;
+        // перебежки между соседними путями -- каждая отдельным отрезком
+        Curves g1path;
         g1path.reserve(paths.size());
         for(auto&& [fr, to]: v::pairwise(paths))
-            g1path.push_back({{fr.back().pt}, {to.front().pt}});
-        item = new Gi::GcPath{{g1path}};
+            g1path.push_back(Curve{{fr.back().pt}, {to.front().pt}});
+        item = new Gi::GcPath{g1path};
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setPen({Qt::magenta, 0.0});
         itemGroup()->push_back(item);

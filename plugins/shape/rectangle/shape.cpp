@@ -71,9 +71,9 @@ void Shape::redraw() {
          {handles[Point2]},
          {handles[Point3]},
          {handles[Point4]},
-         {handles[Point1]},
          }
     };
+    curves_.front().close();
     closed = true;
     if(curves_.front().area() < 0) curves_.front().reverse();
     shape_ = toPPath(curves_);

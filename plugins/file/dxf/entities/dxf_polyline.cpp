@@ -52,31 +52,14 @@ DxfGo PolyLine::toGo() const {
 
     qInfo("PolyLine");
 #if 1
-    Curve path;
-
-    auto addArcTo = [&path](QPointF source, QPointF target, double bulge) {
-        if(path.empty())
-            path.emplace_back(source);
-
-        if(qFuzzyIsNull(bulge)) {
-            path.emplace_back(target);
-            return;
-        }
-
-        auto [center, _ /*start_angle*/, _ /*end_angle*/, radius] = bulgeToArc(source, target, bulge);
-        path.emplace_back(geo::Vertex{
-            target,
-            center,
-            bulge > 0 ? geo::Vertex::Ccw : geo::Vertex::Cw,
-        });
-    };
-    auto addSeg = [&addArcTo](const Vertex& source, const Vertex& target) mutable {
-        addArcTo(source, target, source.bulge);
+    // Прогиб POLYLINE и прогиб Curve -- одно и то же и лежат на одной и той же
+    // (начальной) вершине сегмента, так что переводить нечего.
+    Curve path{
+        std::from_range,
+        polyLine | v::transform([](const Vertex& v) { return geo::Vertex{v, v.bulge}; }),
     };
 
-    for(auto&& [from, to]: polyLine | v::pairwise) addSeg(from, to);
-
-    if(polylineFlags & ClosedPolyline) addSeg(polyLine.back(), polyLine.front());
+    if(polylineFlags & ClosedPolyline) path.close();
 
     // QTransform m;
     // m.scale(u, u);

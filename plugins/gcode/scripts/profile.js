@@ -28,7 +28,7 @@ function millingTile(file, pathss, depths) {
         var paths = pathss[i];
         if (paths.length === 1) {
             var path  = paths[0];
-            var perim = path.perimetr;
+            var perim = path.perimeter;
             file.startPath(path[0].x, path[0].y);
             if (path.closed) {
                 // Spiral: ramp down through each depth pass, then one flat finishing pass

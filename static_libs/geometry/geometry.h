@@ -10,8 +10,8 @@
  ********************************************************************************/
 #pragma once
 
-#include "myclipper.h"
 #include <any>
+#include <optional>
 
 using namespace std::placeholders;
 namespace r = std ::ranges;
@@ -86,27 +86,40 @@ struct PointF : QPointF {
     }
 };
 
+// Вершина кривой: точка плюс ПРОГИБ (bulge) сегмента, НАЧИНАЮЩЕГОСЯ в ней.
+//
+// Прогиб -- тангенс четверти угла дуги: b = tan(theta/4), где theta --
+// знаковый угол дуги (против часовой стрелки положителен). b == 0 -- прямой
+// сегмент, b == 1 -- полуокружность, |b| > 1 -- дуга больше полукруга.
+// Прогиб последней вершины не описывает ничего (сегмента за ней нет).
+//
+// Центр и радиус здесь НЕ хранятся: они однозначно восстанавливаются из пары
+// соседних точек и прогиба (arcOf), и потому не могут разъехаться с ними при
+// правке координат -- ровно ради этого DXF хранит дуги именно так. Обратная
+// сторона: одна вершина сама по себе о дуге ничего не знает, дуга -- всегда
+// свойство ПАРЫ вершин.
 struct Vertex {
-    geo::PointF pt{}, center{};
-    enum Type : int {
+    enum Dir : int {
+        Cw = -1,
         Line = 0,
         Ccw = 1,
-        Cw = -1,
-    } type{};
+    };
+
+    geo::PointF pt{};
+    double bulge{};
     const void* userData{};
-    constexpr double radius() const {
-        if(type) return geo::Length(center, pt);
-        return std::nan("");
+
+    constexpr Vertex() noexcept = default;
+    constexpr Vertex(const QPointF& pt, double bulge = {}) noexcept
+        : pt{pt}, bulge{bulge} { }
+
+    constexpr Dir dir() const noexcept {
+        return bulge > 0.0 ? Ccw : bulge < 0.0 ? Cw
+                                               : Line;
     }
-    constexpr Vertex& setRadius(double r) {
-        if(type) {
-            QLineF l{center, pt};
-            l.setLength(r);
-            pt = l.p2();
-        }
-        return *this;
-    }
-    constexpr operator bool() const { return type != Line; }
+    constexpr bool isArc() const noexcept { return bulge != 0.0; }
+
+    constexpr operator bool() const { return isArc(); }
 
     constexpr operator QPointF() const { return pt; }
 
@@ -114,26 +127,109 @@ struct Vertex {
 
     constexpr inline qreal y() const noexcept { return pt.y(); }
 
-    friend QDebug operator<<(QDebug dbg, const Vertex& v) { // cross product m0.m1.sin a = v0 ^ v1
+    friend QDebug operator<<(QDebug dbg, const Vertex& v) {
         constexpr std::array types{
             "CW"sv,
             "LINE"sv,
             "CCW"sv,
         };
-        return dbg.noquote() << "\nVertex(" << v.pt << v.center << types[v.type + 1] << ')';
+        return dbg.noquote() << "\nVertex(" << v.pt << types[v.dir() + 1] << v.bulge << ')';
     }
 };
 
 inline QDataStream& operator>>(QDataStream& ds, Vertex& val) {
-    ds >> val.pt >> val.type;
-    if(val.type) ds >> val.center;
-    return ds;
+    return ds >> val.pt >> val.bulge;
 }
 
 inline QDataStream& operator<<(QDataStream& ds, const Vertex val) {
-    ds << val.pt << val.type;
-    if(val.type) ds << val.center;
-    return ds;
+    return ds << val.pt << val.bulge;
+}
+
+//------------------------------------------------------------------------------
+
+// Дуга, восстановленная из пары точек и прогиба между ними, -- то самое, что
+// Vertex умышленно не хранит. Существует ровно на время расчёта: рисования,
+// длины, площади, вывода G2/G3.
+struct Arc {
+    QPointF center;
+    double radius{};     // всегда > 0
+    double startAngle{}; // atan2 в начальной точке, радианы
+    double theta{};      // знаковый угол дуги, радианы: > 0 -- против часовой
+
+    constexpr Vertex::Dir dir() const noexcept {
+        return theta > 0.0 ? Vertex::Ccw : theta < 0.0 ? Vertex::Cw
+                                                       : Vertex::Line;
+    }
+    constexpr double endAngle() const noexcept { return startAngle + theta; }
+    double length() const noexcept { return radius * std::abs(theta); }
+    // Точка на дуге, 0 -- начало, 1 -- конец.
+    QPointF pointAt(double t) const noexcept {
+        const double a = startAngle + theta * t;
+        return center + QPointF{radius * std::cos(a), radius * std::sin(a)};
+    }
+    // Знаковая площадь кругового сегмента -- «довеска» между дугой и её
+    // хордой. Знак совпадает со знаком theta, так что её достаточно просто
+    // прибавить к обычной знаковой площади по вершинам.
+    double segmentArea() const noexcept {
+        return 0.5 * radius * radius * (theta - std::sin(theta));
+    }
+};
+
+// Геометрия сегмента p1 -> p2 с прогибом bulge; nullopt -- сегмент прямой
+// (bulge == 0) или вырожденный (точки совпали).
+inline std::optional<Arc> arcOf(const QPointF& p1, const QPointF& p2, double bulge) {
+    constexpr double eps = 1e-12;
+    if(std::abs(bulge) < eps) return {};
+
+    const double dx = p2.x() - p1.x(), dy = p2.y() - p1.y();
+    const double chord = std::hypot(dx, dy);
+    if(chord < eps) return {};
+
+    // Знаковая стрела прогиба -- точное тождество sagitta = (хорда/2) * bulge,
+    // из него же знаковый радиус по прямоугольному треугольнику
+    // (хорда/2, sagitta, radius - sagitta).
+    const double halfChord = chord / 2.0;
+    const double sagitta = bulge * halfChord;
+    const double radiusSigned = (halfChord * halfChord + sagitta * sagitta) / (2.0 * sagitta);
+
+    // Левая нормаль к хорде: центр лежит на ней, на знаковом расстоянии
+    // (radius - sagitta) от середины -- знак сам разворачивает центр на нужную
+    // сторону хорды, отдельной ветки для отрицательного прогиба не нужно.
+    const QPointF n{-dy / chord, dx / chord};
+    const QPointF mid{(p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0};
+
+    Arc arc;
+    arc.center = mid + n * (radiusSigned - sagitta);
+    arc.radius = std::abs(radiusSigned);
+    arc.startAngle = std::atan2(p1.y() - arc.center.y(), p1.x() - arc.center.x());
+    arc.theta = 4.0 * std::atan(bulge);
+    return arc;
+}
+
+// Знаковый угол дуги p1 -> p2 вокруг центра в заданном направлении:
+// (0, 2*pi] для Ccw, [-2*pi, 0) для Cw. Обратная задача к arcOf -- нужна там,
+// где дуга приходит извне в виде «центр + направление» (DXF ARC, G2/G3,
+// восстановление дуг после клиппера).
+inline double arcSweep(const QPointF& p1, const QPointF& p2,
+    const QPointF& center, Vertex::Dir dir) {
+    if(dir == Vertex::Line) return 0.0;
+    const double a1 = std::atan2(p1.y() - center.y(), p1.x() - center.x());
+    const double a2 = std::atan2(p2.y() - center.y(), p2.x() - center.x());
+    double theta = a2 - a1;
+    if(dir == Vertex::Ccw)
+        while(theta <= 0.0) theta += 2.0 * pi;
+    else
+        while(theta >= 0.0) theta -= 2.0 * pi;
+    return theta;
+}
+
+// Прогиб по знаковому углу дуги. Полный оборот (|theta| == 2*pi) прогибом не
+// выражается вовсе -- окружность приходится резать хотя бы надвое (CircleCurve).
+constexpr double bulgeOf(double theta) { return std::tan(theta / 4.0); }
+
+inline double bulgeOf(const QPointF& p1, const QPointF& p2,
+    const QPointF& center, Vertex::Dir dir) {
+    return bulgeOf(arcSweep(p1, p2, center, dir));
 }
 
 #if 1
