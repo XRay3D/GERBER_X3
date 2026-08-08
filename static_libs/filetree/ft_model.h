@@ -93,6 +93,13 @@ public:
 private:
     const QString mimeType;
 
+    // Индекс узла в модели. Для rootItem — невалидный индекс (корень дерева).
+    QModelIndex nodeIndex(Node* node) const;
+    // Папка верхнего уровня для типа type. Создаётся при первом обращении.
+    Node* folderNode(uint32_t type, const QString& name);
+    // Добавляет node последним потомком folder, возвращает его строку.
+    int appendChild(Node* folder, Node* node);
+
     int addFile(Node* item, AbstractFile* file);
     void addFile(AbstractFile* file);
     void addShape(Shapes::AbstractShape* shape);
