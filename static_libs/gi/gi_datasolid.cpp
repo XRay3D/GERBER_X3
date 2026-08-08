@@ -19,11 +19,11 @@
 
 namespace Gi {
 
-DataFill::DataFill(Curves curves, AbstractFile* file)
+DataFill::DataFill(Geo::Polylines curves, AbstractFile* file)
     : Item{file} {
     curves_ = std::move(curves);
     // shape_ = toPPath(toCurves(toPaths(curves_)));
-    shape_ = toPPath(curves_);
+    shape_ = Geo::toPath(curves_);
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -70,7 +70,7 @@ void DataFill::redraw() {
     // update();
 }
 
-void DataFill::setCurves(Curves paths, int alternate) // FIXME from setPaths
+void DataFill::setCurves(Geo::Polylines paths, int alternate) // FIXME from setPaths
 {
 }
 

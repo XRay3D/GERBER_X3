@@ -33,7 +33,7 @@ protected:
 
 private:
     int flag = Qt::Unchecked;
-    mutable mvector<QRect> checkRect_;
+    mutable std::vector<QRect> checkRect_;
     void setChecked(int index, bool ch);
     bool checked(int index) const;
     Model* model() const;

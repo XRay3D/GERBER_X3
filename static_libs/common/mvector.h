@@ -12,9 +12,9 @@ namespace r = std ::ranges;
 using namespace std ::placeholders;
 
 template <class T>
-struct mvector : std::vector<T> {
+struct std::vector : std::vector<T> {
     using V = std::vector<T>;
-    using M = mvector<T>;
+    using M = std::vector<T>;
 
     using V::V;
 
@@ -48,8 +48,8 @@ struct mvector : std::vector<T> {
         return true;
     }
 
-    mvector mid(size_t idx, size_t len) const {
-        mvector v;
+    std::vector mid(size_t idx, size_t len) const {
+        std::vector v;
         if(idx >= V::size())
             return v;
         typename V::const_iterator end;
@@ -79,8 +79,8 @@ struct mvector : std::vector<T> {
         return {begin, end};
     }
 
-    mvector mid(size_t idx) const {
-        mvector v;
+    std::vector mid(size_t idx) const {
+        std::vector v;
         if(idx >= V::size())
             return v;
         v.insert(v.end(), V::cbegin() + idx, V::cend());
@@ -93,9 +93,9 @@ struct mvector : std::vector<T> {
         return std::span{V::cbegin() + idx, V::cend()};
     }
 
-    // mvector mid(size_t idx, size_t len = 0)
+    // std::vector mid(size_t idx, size_t len = 0)
     // {
-    // mvector v;
+    // std::vector v;
     // if (idx >= V::size())
     // return v;
     // typename V::iterator end;
@@ -126,12 +126,12 @@ struct mvector : std::vector<T> {
         return rt;
     }
 
-    friend inline mvector& operator<<(mvector& v, const T& t) {
+    friend inline std::vector& operator<<(std::vector& v, const T& t) {
         v.push_back(t);
         return v;
     }
 
-    friend inline mvector& operator<<(mvector& v, T&& t) {
+    friend inline std::vector& operator<<(std::vector& v, T&& t) {
         v.push_back(std::move(t));
         return v;
     }

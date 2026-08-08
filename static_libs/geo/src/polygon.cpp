@@ -2,6 +2,7 @@
 #include "cgal.h"
 #include "geo/cancel.h"
 
+#include <QDataStream>
 #include <QPainterPath>
 
 namespace Geo {
@@ -45,8 +46,6 @@ Polygon& Polygon::operator=(const Polygon& other) {
 }
 Polygon& Polygon::operator=(Polygon&&) noexcept = default;
 
-Polygon::Polygon(std::unique_ptr<Impl> impl): impl_{std::move(impl)} { }
-
 Polygon::Polygon(const Polyline& outer, const Polylines& holes)
     : impl_{std::make_unique<Impl>()} {
     auto boundary = toGPoly(outer);
@@ -66,6 +65,10 @@ Polygon::Polygon(const Polyline& outer, const Polylines& holes)
 bool Polygon::empty() const {
     return impl_->exact.outer_boundary().is_empty() && !impl_->exact.is_unbounded();
 }
+
+// std::size_t Polygon::size() const {
+//     return impl_->exact.number_of_holes()+impl_->exact.;
+// }
 
 const Polyline& Polygon::outer() const {
     impl_->materialize();
@@ -140,7 +143,7 @@ struct Polygons::Impl {
         std::vector<Polygon> polygons;
         polygons.reserve(parts.size());
         for(GPolyWH& part: parts) {
-            auto impl = std::make_unique<Polygon::Impl>();
+            auto impl   = std::make_unique<Polygon::Impl>();
             impl->exact = std::move(part);
             polygons.push_back(Polygon{std::move(impl)});
         }
@@ -184,7 +187,7 @@ Polygons::Polygons(const Polylines& contours): impl_{std::make_unique<Impl>()} {
         const Polyline& contour = contours[i];
         if(!contour.closed || contour.size() < 2) return;
         isVoid[i] = contour.signedArea() < 0.0;
-        exact[i] = toGPoly(contour);
+        exact[i]  = toGPoly(contour);
     });
 
     std::vector<GPoly> solids, voids;
@@ -251,28 +254,75 @@ Polygons Polygons::boundaryBand(double radius) const {
     return band;
 }
 
+// Отмена проверяется ПЕРЕД операцией: сам свип CGAL прервать нечем, он
+// атомарен для вызывающего. Зато в цепочке (раздуть -> объединить -> вычесть)
+// проверок оказывается столько же, сколько звеньев, и отмена срабатывает на
+// ближайшей границе, а не по завершении всей цепочки.
 Polygons& Polygons::operator|=(const Polygons& other) {
+    checkCancelled();
     impl_->exact.join(other.impl_->exact);
     impl_->invalidate();
     return *this;
 }
 
 Polygons& Polygons::operator&=(const Polygons& other) {
+    checkCancelled();
     impl_->exact.intersection(other.impl_->exact);
     impl_->invalidate();
     return *this;
 }
 
 Polygons& Polygons::operator-=(const Polygons& other) {
+    checkCancelled();
     impl_->exact.difference(other.impl_->exact);
     impl_->invalidate();
     return *this;
 }
 
 Polygons& Polygons::operator^=(const Polygons& other) {
+    checkCancelled();
     impl_->exact.symmetric_difference(other.impl_->exact);
     impl_->invalidate();
     return *this;
+}
+
+// ---------------------------------------------------------------------------
+// Сериализация
+// ---------------------------------------------------------------------------
+
+QDataStream& operator<<(QDataStream& stream, const Polygon& polygon) {
+    return stream << polygon.outer() << polygon.holes();
+}
+
+QDataStream& operator>>(QDataStream& stream, Polygon& polygon) {
+    Polyline outer;
+    Polylines holes;
+    stream >> outer >> holes;
+    polygon = Polygon{outer, holes};
+    return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Polygons& polygons) {
+    const std::vector<Polygon>& all = polygons.all();
+    stream << quint32(all.size());
+    for(const Polygon& polygon: all) stream << polygon;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, Polygons& polygons) {
+    quint32 count{};
+    stream >> count;
+    Polygons result;
+    while(count--) {
+        Polygon polygon;
+        stream >> polygon;
+        if(stream.status() != QDataStream::Ok) return polygons = Polygons{}, stream;
+        // Сразу в точный домен, минуя разбор по ориентациям: структура
+        // полигона известна точно, объединять их между собой -- вся работа.
+        if(!polygon.empty()) result.impl().exact.join(polygon.impl().exact);
+    }
+    polygons = std::move(result);
+    return stream;
 }
 
 #else
@@ -292,11 +342,11 @@ struct Polygon::Impl {
 
 // Impl здесь уже полон, поэтому все пять специальных функций-членов
 // std::indirect выписывает сам -- включая ГЛУБОКУЮ копию.
-Polygon::Polygon() = default;
-Polygon::~Polygon() = default;
-Polygon::Polygon(const Polygon&) = default;
-Polygon::Polygon(Polygon&&) noexcept = default;
-Polygon& Polygon::operator=(const Polygon&) = default;
+Polygon::Polygon()                              = default;
+Polygon::~Polygon()                             = default;
+Polygon::Polygon(const Polygon&)                = default;
+Polygon::Polygon(Polygon&&) noexcept            = default;
+Polygon& Polygon::operator=(const Polygon&)     = default;
 Polygon& Polygon::operator=(Polygon&&) noexcept = default;
 
 Polygon::Polygon(Impl&& impl): impl_{std::in_place, std::move(impl)} { }
@@ -337,11 +387,11 @@ struct Polygons::Impl {
     }
 };
 
-Polygons::Polygons() = default;
-Polygons::~Polygons() = default;
-Polygons::Polygons(const Polygons&) = default;
-Polygons::Polygons(Polygons&&) noexcept = default;
-Polygons& Polygons::operator=(const Polygons&) = default;
+Polygons::Polygons()                               = default;
+Polygons::~Polygons()                              = default;
+Polygons::Polygons(const Polygons&)                = default;
+Polygons::Polygons(Polygons&&) noexcept            = default;
+Polygons& Polygons::operator=(const Polygons&)     = default;
 Polygons& Polygons::operator=(Polygons&&) noexcept = default;
 
 Polygons::Polygons(const Polylines& contours) {
@@ -359,7 +409,7 @@ Polygons::Polygons(const Polylines& contours) {
         const Polyline& contour = contours[i];
         if(!contour.closed || contour.size() < 2) return;
         isVoid[i] = contour.signedArea() < 0.0;
-        exact[i] = toGPoly(contour);
+        exact[i]  = toGPoly(contour);
     });
 
     std::vector<GPoly> solids, voids;
@@ -419,5 +469,7 @@ Polygons& Polygons::operator^=(const Polygons& other) {
     return *this;
 }
 #endif
+
+Polygon::Polygon(std::unique_ptr<Impl> impl): impl_{std::move(impl)} { }
 
 } // namespace Geo

@@ -19,9 +19,9 @@
 
 namespace Gi {
 
-Error::Error(const Curves& curves, double area)
+Error::Error(const Geo::Polylines& curves, double area)
     : area_{area} {
-    shape_ = toPPath(curves);
+    shape_ = Geo::toPath(curves);
     setFlag(ItemIsSelectable);
     setZValue(std::numeric_limits<double>::max());
 }
@@ -34,7 +34,7 @@ void Error::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/,
     painter->setPen(Qt::NoPen);
     if(isSelected()) {
         static QTime t(QTime::currentTime());
-        painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * pi * 8)) * 30 + 30, 255, 255, 255));
+        painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * std::numbers::pi * 8)) * 30 + 30, 255, 255, 255));
     } else {
         QBrush br(QColor(255, 0, 255));
         // br.setStyle(Qt::Dense4Pattern);

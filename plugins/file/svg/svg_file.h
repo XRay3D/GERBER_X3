@@ -34,7 +34,7 @@ public:
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    Curves merge() const override;
+    Geo::Polygons merge() const override;
 };
 
 } // namespace Svg

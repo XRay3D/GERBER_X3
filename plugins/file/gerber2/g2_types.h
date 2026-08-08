@@ -11,7 +11,7 @@
 #pragma once
 
 // Альтернативная реализация Gerber X3.
-// Вся геометрия строится исключительно средствами curve.h (Curve/Curves,
+// Вся геометрия строится исключительно средствами curve.h (Geo::Polyline/Geo::Polygon,
 // BoolOp, Inflate) — myclipper.h здесь напрямую не используется.
 
 #include "geo/polygon.h"
@@ -77,7 +77,7 @@ enum class PlotMode {
 
 // Один готовый графический объект изображения: набор контуров и полярность.
 struct Object {
-    Curves curves;
+    Geo::Polygon curves;
     Polarity polarity = Polarity::Dark;
 };
 
@@ -108,7 +108,7 @@ struct ApTransform {
 // (4.4.6), поэтому вычитается только из тела самой апертуры.
 struct Aperture {
     QString source;   // исходный текст AD для повторного сохранения
-    Curves body;      // тело апертуры с уже вычтенным отверстием
+    Geo::Polygon body;      // тело апертуры с уже вычтенным отверстием
     double holeDia{}; // диаметр отверстия, мм (0 — сплошная)
     bool isBlock{};   // апертура-блок (AB)
     Objects block;    // содержимое блока

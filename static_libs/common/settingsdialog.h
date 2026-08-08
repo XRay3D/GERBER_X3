@@ -12,7 +12,7 @@
 // #include "a_pch.h"
 
 #include "doublespinbox.h"
-#include "mvector.h"
+
 #include "settings.h"
 #include <QtCore>
 #include <QtWidgets>
@@ -24,7 +24,7 @@ class SettingsDialog : public QDialog {
 
     int langIndex;
     MySettings settings;
-    mvector<AbstractFileSettings*> tabs;
+    std::vector<AbstractFileSettings*> tabs;
     QPushButton* button;
 
 public:

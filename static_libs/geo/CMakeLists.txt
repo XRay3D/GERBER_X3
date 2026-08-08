@@ -18,6 +18,7 @@ add_library(
   include/geo/cancel.h
   include/geo/polygon.h
   include/geo/polyline.h
+  include/geo/util.h
   src/arcrecovery.cpp
   src/boolean.cpp
   src/cancel.cpp
@@ -25,7 +26,8 @@ add_library(
   src/cgal.h
   src/offsetcapsules.h
   src/polygon.cpp
-  src/polyline.cpp)
+  src/polyline.cpp
+  src/util.cpp)
 add_library(Geo::Geo ALIAS Geo)
 
 # include/ -- наружу, src/ -- только своим: cgal.h и offsetcapsules.h
@@ -36,9 +38,14 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Qt6::Gui, а не Widgets: из Qt здесь только QPointF/QRectF и QPainterPath.
-# STDCXX_EXP_LIB -- обработчик нарушений контрактов, нужен и тем, кто
-# инстанцирует pre()/post() из заголовков Geo, поэтому PUBLIC.
-target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads ${STDCXX_EXP_LIB})
+target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads)
+
+# Обработчик нарушений контрактов (pre()/post()) живёт в libstdc++exp, и без
+# него не слинкуется НИЧТО, что тянет заголовки Geo: контракты инстанцируются
+# у вызывающего. Потому PUBLIC, а не PRIVATE.
+if(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
+  target_link_libraries(Geo PUBLIC stdc++exp)
+endif()
 
 if(CGAL_FOUND)
   target_link_libraries(Geo PRIVATE CGAL::CGAL)

@@ -52,11 +52,11 @@ DxfGo PolyLine::toGo() const {
 
     qInfo("PolyLine");
 #if 1
-    // Прогиб POLYLINE и прогиб Curve -- одно и то же и лежат на одной и той же
+    // Прогиб POLYLINE и прогиб Geo::Polyline -- одно и то же и лежат на одной и той же
     // (начальной) вершине сегмента, так что переводить нечего.
-    Curve path{
+    Geo::Polyline path{
         std::from_range,
-        polyLine | v::transform([](const Vertex& v) { return geo::Vertex{v, v.bulge}; }),
+        polyLine | v::transform([](const Vertex& v) { return Geo::Vertex{v, v.bulge}; }),
     };
 
     if(polylineFlags & ClosedPolyline) path.close();
@@ -74,7 +74,7 @@ DxfGo PolyLine::toGo() const {
     // auto polygon(path2.toSubpathPolygons(m2));
 
     if(polylineFlags & ClosedPolyline) // FIXME
-        return DxfGo{id, Curve{path}, {std::move(path)}};
+        return DxfGo{id, Geo::Polyline{path}, {std::move(path)}};
     else
         return DxfGo{id, std::move(path)};
 #else // TODO direct construct path

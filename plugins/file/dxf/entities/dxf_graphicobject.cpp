@@ -34,7 +34,7 @@ QDataStream& operator>>(QDataStream& stream, DxfGo& go) {
 
 size_t DxfGo::entityId() const { return entityId_; }
 
-DxfGo::DxfGo(int entityId, Curve&& curve, Curves&& curves)
+DxfGo::DxfGo(int entityId, Geo::Polyline&& curve, Geo::Polygon&& curves)
     : entityId_{entityId} {
     fill = std::move(curves);
     ::GraphicObject::path = std::move(curve);

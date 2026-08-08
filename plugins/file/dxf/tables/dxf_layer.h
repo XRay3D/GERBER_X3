@@ -88,7 +88,7 @@ private:
     Gi::Group* itemGroupNorm = nullptr;
     Gi::Group* itemGroupPath = nullptr;
     // File* fiGle_ = nullptr;
-    Curvess groupedCurves_;
+    Geo::Polygons groupedCurves_;
 
     QColor colorNorm_{Qt::darkGreen};
     QColor colorPath_{Qt::darkRed};

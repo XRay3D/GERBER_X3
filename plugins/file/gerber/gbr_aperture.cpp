@@ -385,7 +385,7 @@ void ApMacro::draw() {
             if(var.at(0) == u'0') // Skip Comment
                 continue;
 
-            mvector<double> mod;
+            std::vector<double> mod;
 
             if(var.contains(u'=')) {
                 QStringList stringList = var.split(u'=');
@@ -467,7 +467,7 @@ void ApMacro::draw() {
     }
 }
 
-Path64 ApMacro::drawCenterLine(const mvector<double>& mod) {
+Path64 ApMacro::drawCenterLine(const std::vector<double>& mod) {
     enum {
         Width = 2,
         Height,
@@ -488,7 +488,7 @@ Path64 ApMacro::drawCenterLine(const mvector<double>& mod) {
     return polygon;
 }
 
-Path64 ApMacro::drawCircle(const mvector<double>& mod) {
+Path64 ApMacro::drawCircle(const std::vector<double>& mod) {
     enum {
         Diameter = 2,
         CenterX,
@@ -508,7 +508,7 @@ Path64 ApMacro::drawCircle(const mvector<double>& mod) {
     return polygon;
 }
 
-void ApMacro::drawMoire(const mvector<double>& mod) {
+void ApMacro::drawMoire(const std::vector<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -556,7 +556,7 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
             RotatePath(path, mod[RotationAngle]);
 }
 
-Path64 ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
+Path64 ApMacro::drawOutlineCustomPolygon(const std::vector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         X,
@@ -577,7 +577,7 @@ Path64 ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
     return polygon;
 }
 
-Path64 ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
+Path64 ApMacro::drawOutlineRegularPolygon(const std::vector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         CenterX,
@@ -612,7 +612,7 @@ Path64 ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     return polygon;
 }
 
-void ApMacro::drawThermal(const mvector<double>& mod) {
+void ApMacro::drawThermal(const std::vector<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -652,7 +652,7 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
             RotatePath(path, mod[RotationAngle]);
 }
 
-Path64 ApMacro::drawVectorLine(const mvector<double>& mod) {
+Path64 ApMacro::drawVectorLine(const std::vector<double>& mod) {
     enum {
         Width = 2,
         StartX,

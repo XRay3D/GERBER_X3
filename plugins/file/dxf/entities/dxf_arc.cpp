@@ -54,7 +54,7 @@ DxfGo Arc::toGo() const {
 
     // ArcCurve режет размах на куски не длиннее полуокружности: прогиб
     // почти полного оборота уходит в бесконечность.
-    Curve curve = ArcCurve(centerPoint, radius, a1, sweep);
+    Geo::Polyline curve = ArcCurve(centerPoint, radius, a1, sweep);
 
     DxfGo go{id, std::move(curve)};
     return go;

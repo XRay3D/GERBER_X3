@@ -23,7 +23,7 @@
 #include <algorithm>
 #include <variant>
 
-constexpr auto G_CODE = "GCode"_hash32;
+constexpr auto G_CODE      = "GCode"_hash32;
 constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
@@ -45,10 +45,10 @@ namespace GCode {
 
 enum Code {
     GNull = -1,
-    G00 = 0,
-    G01 = 1,
-    G02 = 2, // cw
-    G03 = 3, // ccw
+    G00   = 0,
+    G01   = 1,
+    G02   = 2, // cw
+    G03   = 3, // ccw
 };
 
 enum SideOfMilling {
@@ -163,17 +163,17 @@ public:
     // Parameter keys are names, not an enum: each plugin can add its own
     // (see e.g. Profile::Creator::BridgeLen) without needing a shared numeric
     // range to avoid collisions, and a serialized/dumped Params reads as text.
-    static inline const QString Convent = u"Convent"_s;
-    static inline const QString Depth = u"Depth"_s;
-    static inline const QString GrItems = u"GrItems"_s;
+    static inline const QString Convent        = u"Convent"_s;
+    static inline const QString Depth          = u"Depth"_s;
+    static inline const QString GrItems        = u"GrItems"_s;
     static inline const QString MultiToolIndex = u"MultiToolIndex"_s; // need for Pocket
-    static inline const QString NotTile = u"NotTile"_s;               // не раскладывать если даже раскладка включена
-    static inline const QString Side = u"Side"_s;
-    static inline const QString FileSide = u"FileSide"_s;
-    static inline const QString LeftHand = u"LeftHand"_s; // need for Threading
-    static inline const QString Circle = u"Circle"_s;     // need for Threading
-    static inline const QString Chamfer = u"Chamfer"_s;   // need for Threading
-    static inline const QString Starts = u"Starts"_s;     // need for Threading
+    static inline const QString NotTile        = u"NotTile"_s;        // не раскладывать если даже раскладка включена
+    static inline const QString Side           = u"Side"_s;
+    static inline const QString FileSide       = u"FileSide"_s;
+    static inline const QString LeftHand       = u"LeftHand"_s; // need for Threading
+    static inline const QString Circle         = u"Circle"_s;   // need for Threading
+    static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
+    static inline const QString Starts         = u"Starts"_s;   // need for Threading
 
     Params() {
         if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;
@@ -190,12 +190,12 @@ public:
     //     toolPathss /*supportCurvess*/.emplace_back(toCurves(toolPaths));
     // }
 
-    Params(const Tool& tool, double depth, Curves&& toolPaths)
+    Params(const Tool& tool, double depth, Geo::Polylines&& toolPaths)
         : Params{tool, depth} {
-        toolPathss /*supportCurvess*/.emplace_back(std::move(toolPaths));
+        toolPathss.emplace_back(std::move(toolPaths));
     }
 
-    mvector<Tool> tools;
+    std::vector<Tool> tools;
     std::map<QString, Variant> params;
 
     // GCodeType gcType = Null;
@@ -217,7 +217,7 @@ public:
     }
 
     explicit operator bool() const {
-        return openCurves.size() || closedCurves.size();
+        return !openCurves.empty() || !closedCurves.empty();
     }
 
     const Tool& tool() const { return tools[params.at(MultiToolIndex).toInt()]; }
@@ -239,13 +239,16 @@ public:
     void setChamfer(bool val) { params[Chamfer] = val; }
     void setStarts(int val) { params[Starts] = val; }
 
-    Curves closedCurves; // pocketAreaPaths
-    Curves openCurves;
-    Curvess supportCurvess; // toolCurvess
-    Curvess toolPathss;     // toolCurvess
+    // Замкнутое -- регион в точном домене: над ним и идут булевы с офсетом.
+    // Открытое -- просто набор линий, площади у них нет.
+    Geo::Polygons closedCurves; // pocketAreaPaths
+    Geo::Polylines openCurves;
+    // Траектории -- наборы линий, сгруппированные по проходам, а не регионы.
+    std::vector<Geo::Polylines> supportCurvess;
+    std::vector<Geo::Polylines> toolPathss;
 
-    const Curves& pocketAreaCurves() const { return closedCurves; }
-    void setPocketAreaCurves(Curves&& arg) { closedCurves = std::move(arg); }
+    const Geo::Polygons& pocketAreaCurves() const { return closedCurves; }
+    void setPocketAreaCurves(Geo::Polygons&& arg) { closedCurves = std::move(arg); }
 
     auto feedRate() const -> double { return tool().feedRate(); }
     auto plungeRate() const -> double { return tool().plungeRate(); }

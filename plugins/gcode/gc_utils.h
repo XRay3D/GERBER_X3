@@ -67,9 +67,9 @@
 
 // static inline QString lastDir;
 // static inline bool redirected;
-// inline static const mvector<QChar> cmdList {'G', 'X', 'Y', 'Z', 'F', 'S'};
+// inline static const std::vector<QChar> cmdList {'G', 'X', 'Y', 'Z', 'F', 'S'};
 
-// mvector<double> getDepths();
+// std::vector<double> getDepths();
 
 // bool formatFlags[Size];
 // QString lastValues[6];

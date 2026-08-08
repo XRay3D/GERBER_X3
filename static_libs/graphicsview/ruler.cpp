@@ -252,7 +252,7 @@ void Ruler::DrawAScaleMeter(QPainter* painter, QRectF rulerRect, double scaleMet
 
     painter->setFont(font());
 
-    mvector<QLineF> lines;
+    std::vector<QLineF> lines;
     lines.reserve(static_cast<size_t>(std::ceil((rulerEndMark - rulerStartMark) / step)) + 2);
 
     // tick position = origin_ + index * step, computed by multiplication (not

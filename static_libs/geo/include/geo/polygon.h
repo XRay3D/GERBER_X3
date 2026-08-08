@@ -30,6 +30,7 @@
 #include <vector>
 
 class QPainterPath;
+class QDataStream;
 
 namespace Geo {
 #if 1
@@ -65,6 +66,7 @@ public:
     explicit Polygon(const Polyline& outer, const Polylines& holes = {});
 
     bool empty() const;
+    // std::size_t size() const;
 
     // Внешняя граница и отверстия в Dxf-виде -- материализуются из точного
     // представления при первом обращении и кэшируются.
@@ -158,6 +160,20 @@ public:
 private:
     std::unique_ptr<Impl> impl_;
 };
+
+// Сериализация -- через КОНТУРЫ, а не через точное представление: последнее
+// рационально (числа неограниченной длины), и укладывать его в поток незачем
+// -- при чтении оно всё равно строится заново тем же свипом, что и при любом
+// другом входе. Плата -- округление координат до double, ровно то же, что и
+// при всякой выдаче геометрии наружу.
+//
+// Полигоны пишутся поштучно (граница + свои дырки), а не плоским списком
+// контуров: в плоском виде вложенность выражена одной ориентацией, и остров
+// внутри дырки при чтении вычелся бы вместе с ней.
+QDataStream& operator<<(QDataStream& stream, const Polygon& polygon);
+QDataStream& operator>>(QDataStream& stream, Polygon& polygon);
+QDataStream& operator<<(QDataStream& stream, const Polygons& polygons);
+QDataStream& operator>>(QDataStream& stream, Polygons& polygons);
 
 #else
 // Возьмёт ли точная геометрия такой контур: замкнут, невырожден и не

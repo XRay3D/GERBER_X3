@@ -18,7 +18,7 @@ namespace ShCirc {
 
 Shape::Shape(Shapes::Plugin* plugin, QPointF center, QPointF pt)
     : AbstractShape{plugin}
-    , radius_(geo::Length(center, pt)) {
+    , radius_(Geo::distance(center, pt)) {
     // paths_.resize(1);
 
     if(!std::isnan(center.x())) {
@@ -41,11 +41,11 @@ void Shape::redraw() {
         handles[Point1] = radLine.p2();
     } break;
     case Point1:
-    default    : radius_ = geo::Length(handles[Center], handles[Point1]);
+    default    : radius_ = Geo::distance(handles[Center], handles[Point1]);
     }
     closed = true;
-    curves_ = {CircleCurve(radius_ * 2., handles[Center])};
-    shape_ = toPPath(curves_);
+    curves_ = {Geo::circle(radius_ * 2., handles[Center])};
+    shape_ = Geo::toPath(curves_);
     assert(handles.size() == PtCount);
 }
 
@@ -71,7 +71,7 @@ void Shape::setRadius(double radius) {
 }
 
 void Shape::readAndInit(QDataStream& /*stream*/) {
-    radius_ = geo::Length(handles.front(), handles.back());
+    radius_ = Geo::distance(handles.front(), handles.back());
     curHandle = handles.data();
     AbstractShape::redraw();
 }

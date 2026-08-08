@@ -59,7 +59,8 @@ int Node::childCount() const { return static_cast<int>(childs.size()); }
 
 int Node::row() const {
     if(parent_)
-        return parent_->childs.indexOf(this);
+        return indexOf(parent_->childs, this);
+
     // for (int i = 0, size = parent_->childs.size(); i < size; ++i)
     // if (parent_->childs[i].get() == this)
     // return i;
@@ -67,7 +68,7 @@ int Node::row() const {
 }
 
 void Node::addChild(Node* item, Deleter::Polycy delPolycy) {
-    item->parent_ = this;
+    item->parent_                               = this;
     childs.emplace_back(item).get_deleter().del = delPolycy;
 
     // childs.resize(childs.size() + 1);
@@ -75,7 +76,7 @@ void Node::addChild(Node* item, Deleter::Polycy delPolycy) {
     // childs.back().get_deleter().del = delPolycy; // swap(std::unique_ptr<Node, Deleter>(item, Deleter {!dontDelete}));
 }
 
-void Node::remove(int row) { childs.takeAt(row); }
+void Node::remove(int row) { takeAt(childs, row); }
 
 QModelIndex Node::index(int column) const {
     return App::fileModel().createIndex(row(), column, reinterpret_cast<quintptr>(this));

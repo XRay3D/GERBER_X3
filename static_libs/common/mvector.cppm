@@ -6,25 +6,25 @@
 #include <vector>
 
 template <class T>
-struct mvector : std::vector<T> {
+struct std::vector : std::vector<T> {
     using V = std::vector<T>;
-    using M = mvector<T>;
+    using M = std::vector<T>;
     // clang-format off
-    mvector() {}
-    mvector(size_t size) : V(size) {}
-    mvector(size_t size, const T& t) : V(size, t) {}
-    mvector(const V& v) : V(v) {}
-    mvector(V&& v) : V(std::move(v)) {}
-    mvector(const M& v) : V(v) {}
-    mvector(M&& v) : V(std::move(v)) {}
-    mvector(const std::initializer_list<T>& v) : V(v) {}
+    std::vector() {}
+    std::vector(size_t size) : V(size) {}
+    std::vector(size_t size, const T& t) : V(size, t) {}
+    std::vector(const V& v) : V(v) {}
+    std::vector(V&& v) : V(std::move(v)) {}
+    std::vector(const M& v) : V(v) {}
+    std::vector(M&& v) : V(std::move(v)) {}
+    std::vector(const std::initializer_list<T>& v) : V(v) {}
     // clang-format on
 
-    mvector& operator=(const M& v) {
+    std::vector& operator=(const M& v) {
         V::operator=(v);
         return *this;
     }
-    mvector& operator=(M&& v) {
+    std::vector& operator=(M&& v) {
         V::operator=(std::move(v));
         return *this;
     }
@@ -41,8 +41,8 @@ struct mvector : std::vector<T> {
         return true;
     }
 
-    mvector mid(size_t idx, size_t len = 0) const {
-        mvector v;
+    std::vector mid(size_t idx, size_t len = 0) const {
+        std::vector v;
         if(idx >= V::size())
             return v;
         typename V::const_iterator end;
@@ -58,9 +58,9 @@ struct mvector : std::vector<T> {
         return v;
     }
 
-    //    mvector mid(size_t idx, size_t len = 0)
+    //    std::vector mid(size_t idx, size_t len = 0)
     //    {
-    //        mvector v;
+    //        std::vector v;
     //        if (idx >= V::size())
     //            return v;
     //        typename V::iterator end;
@@ -91,12 +91,12 @@ struct mvector : std::vector<T> {
         return rt;
     }
 
-    friend inline mvector& operator<<(mvector& v, const T& t) {
+    friend inline std::vector& operator<<(std::vector& v, const T& t) {
         v.push_back(t);
         return v;
     }
 
-    friend inline mvector& operator<<(mvector& v, T&& t) {
+    friend inline std::vector& operator<<(std::vector& v, T&& t) {
         v.push_back(std::move(t));
         return v;
     }

@@ -100,7 +100,7 @@ void ToolTreeView::updateActions() {
     expandAll();
 }
 
-void ToolTreeView::setButtons(const mvector<QPushButton*>& buttons) {
+void ToolTreeView::setButtons(const std::vector<QPushButton*>& buttons) {
     buttons_ = buttons;
     connect(buttons_[Copy], &QPushButton::clicked, this, &ToolTreeView::copyTool);
     connect(buttons_[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);

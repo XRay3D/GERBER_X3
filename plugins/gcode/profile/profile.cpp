@@ -405,21 +405,21 @@ void File::genGcodeAndTile() {
 
 void File::createGi() {
     Gi::Item* item;
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Geo::Polygon& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
 
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Geo::Polygon& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
     }
 
     for(auto&& [from, to]: gcp.toolPathss | v::join | v::pairwise)
-        g0path_.push_back(Curve{{from.back().pt}, {to.front().pt}});
+        g0path_.push_back(Geo::Polyline{{from.back().pt}, {to.front().pt}});
 
     item = new Gi::GcPath{g0path_};
     // item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));

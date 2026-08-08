@@ -27,12 +27,12 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     int type() const override;
     // Item interface
-    Curves curves(int alternate = {}) const override;
+    Geo::Polylines curves(int alternate = {}) const override;
     void changeColor() override { }
 
     bool ok() const;
     void update();
-    bool test(const Curve& curve);
+    bool test(const Geo::Polyline& curve);
     QPointF snapedPos(const QPointF& pos);
 
     static inline Bridge* moveBrPtr;           // NOTE приватизировать в будущем??

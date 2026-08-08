@@ -65,15 +65,13 @@ Debug_::Debug_(const QColor& color, double width) {
     setVisible(true);
 }
 
-Debug_::Debug_(const Path64& path, const QColor& color, double width)
-    : Debug_{Paths64{path}, color, width} { }
+Debug_::Debug_(const Geo::Polyline& polyline, const QColor& color, double width)
+    : Debug_{Geo::Polylines{polyline}, color, width} { }
 
-Debug_::Debug_(const Paths64& paths, const QColor& color, double width)
+Debug_::Debug_(const Geo::Polylines& polylines, const QColor& color, double width)
     : Debug_{color, width} {
-    for(const Path64& path: paths) {
-        shape_.moveTo(~path.front());
-        shape_.addPolygon(~path);
-    }
+    curves_ = polylines;
+    shape_ = Geo::toPath(curves_);
     boundingRect_ = shape_.boundingRect();
 
     if(shape_.isEmpty()) {
@@ -149,10 +147,18 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
 
     double len = 10 * scale;
 
-    for(const Point64& pt: paths_ | v::join | v::filter(&Point64::z)) {
-        QPointF p = ~GetC(pt);
-        painter->drawLine(p, ~pt);
-    }
+    // Центры дуг. В bulge-виде они не хранятся, а восстанавливаются из пары
+    // точек и прогиба -- ровно то, что раньше приезжало в Z-координате
+    // клипперовской точки и доставалось через GetC.
+    for(const Geo::Polyline& polyline: curves_)
+        for(std::size_t i{}; i < polyline.size(); ++i) {
+            const Geo::Vertex& from = polyline[i];
+            if(!from.isArc()) continue;
+            if(i + 1 == polyline.size() && !polyline.closed) break;
+            const QPointF to = polyline[(i + 1) % polyline.size()];
+            if(auto a = Geo::arcOf(from, to, from.bulge))
+                painter->drawLine(a->center, static_cast<const QPointF&>(from));
+        }
 
     for(const QPointF& p: centers) {
         painter->drawLines({

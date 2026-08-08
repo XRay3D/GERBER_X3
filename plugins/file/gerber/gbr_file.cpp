@@ -73,8 +73,8 @@ File::~File() { }
 
 const ApertureMap* File::apertures() const { return &apertures_; }
 
-mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
-    mvector<GraphicObject> retData;
+std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
+    std::vector<GraphicObject> retData;
     auto t = transform_.toQTransform(); // cached  QTransform
     for(auto&& criterion: criterias) {
         for(const GrObject& go: graphicObjects_) {
@@ -107,7 +107,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     return retData;
 }
 
-Curves File::merge() const {
+Geo::Polygon File::merge() const {
     Timer t;
     Paths64 mergedPaths;
 
@@ -135,7 +135,7 @@ Curves File::merge() const {
             std::from_range,
             gObjects
                 | v::transform(&GrObject::fill)
-                | v::transform(qOverload<const Curves&>(toPaths))
+                | v::transform(qOverload<const Geo::Polygon&>(toPaths))
                 | v::join,
         };
         bool fl = gObjects.front().state.imgPolarity();
@@ -154,7 +154,7 @@ Curves File::merge() const {
 
 const QList<Comp::Component>& File::components() const { return components_; }
 
-void File::grouping(PolyTree& node, Curvess* curvess) {
+void File::grouping(PolyTree& node, Geo::Polygons* curvess) {
     // Узел вместе со своими прямыми потомками образует одну группу
     // «контур + его дырки»; какой из уровней считать контуром, задаёт group_.
     auto collect = [curvess](PolyTree& node) {
@@ -178,7 +178,7 @@ void File::grouping(PolyTree& node, Curvess* curvess) {
         grouping(*node[i], curvess);
 }
 
-Curvess& File::groupedPaths(File::Group group, bool fl) {
+Geo::Polygons& File::groupedPaths(File::Group group, bool fl) {
     if(groupedCurves_.empty()) {
         PolyTree polyTree;
         cl::Clipper64 clipper;
@@ -214,8 +214,8 @@ void File::setColor(const QColor& color) {
     itemGroups_[ApPaths]->setPen(QPen(color_, 0.0));
 }
 
-mvector<const ::GraphicObject*> File::graphicObjects() const {
-    mvector<const ::GraphicObject*> go(graphicObjects_.size());
+std::vector<const ::GraphicObject*> File::graphicObjects() const {
+    std::vector<const ::GraphicObject*> go(graphicObjects_.size());
     size_t i{};
     for(auto& refGo: graphicObjects_)
         go[i++] = &refGo;
@@ -282,7 +282,7 @@ void File::read(QDataStream& stream) {
 
 void File::createGi() {
     if constexpr(1) { // fill copper
-        for(Curves& paths: groupedPaths()) {
+        for(Geo::Polygon& paths: groupedPaths()) {
             // Gi::Debug(paths);
             Gi::Item* item = new Gi::DataFill{paths, this};
             itemGroups_[Normal]->push_back(item);
@@ -296,7 +296,7 @@ void File::createGi() {
         itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr(1) { // add aperture paths
-        auto contains = [&](const Curve& path) -> bool {
+        auto contains = [&](const Geo::Polyline& path) -> bool {
             constexpr double k = 0.001 * uScale;
             for(const auto& chPath: checkList) { // find copy
                 size_t counter{};
@@ -319,7 +319,7 @@ void File::createGi() {
         for(const GrObject& go: graphicObjects_) {
             if(!go.path.empty()) {
                 if(Settings::simplifyRegions() && go.path.front() == go.path.back()) {
-                    Curves paths;
+                    Geo::Polygon paths;
                     // FIXME SimplifyPolygon(toPath(go.path), paths);
                     for(auto&& path: paths) {
                         path.push_back(path.front());

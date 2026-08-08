@@ -10,15 +10,18 @@
  ********************************************************************************/
 #pragma once
 
-#include "geo/polygon.h"
-
-#include "plugintypes.h"
-
+// Заголовки Qt -- первыми: на gcc-16 наши заголовки, попав раньше ядра QtCore,
+// сбивают разбор его внутренних (qmath.h, qfunctionaltools_impl.h).
 #include <QAnimationGroup>
 #include <QGraphicsItem>
 #include <QPen>
 #include <QPropertyAnimation>
 #include <qmath.h>
+
+#include "geo/polygon.h"
+#include "geo/util.h"
+
+#include "plugintypes.h"
 
 class AbstractFile;
 namespace Shapes {
@@ -95,9 +98,11 @@ public:
     void setPen(const QPen& pen);
     void setPenColorPtr(const QColor* penColor);
 
-    virtual Geo::Polygon curves(int param = {}) const;
-    // virtual void setPaths(Paths paths, int param = {});
-    virtual void setCurves(Geo::Polygon curves, int param = {});
+    // Контуры элемента -- НАБОР полилиний, а не тело с дырками: у трассы
+    // (DataPath) они открытые, у траектории (GcPath) -- тем более. Тела с
+    // дырками живут выше, в самом файле (AbstractFile::mergedCurves).
+    virtual Geo::Polylines curves(int param = {}) const;
+    virtual void setCurves(Geo::Polylines curves, int param = {});
     virtual void redraw();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -123,7 +128,7 @@ protected:
     const AbstractFile* file_;
     Group* itemGroup = nullptr;
     QPainterPath shape_;
-    Geo::Polygon curves_;
+    Geo::Polylines curves_;
 
     QPen pen_;
 

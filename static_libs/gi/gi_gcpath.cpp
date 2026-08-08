@@ -21,13 +21,13 @@ namespace Gi {
 // GcPath::GcPath(Paths paths, AbstractFile* file)
 //     : GcPath{toCurves(paths), file} { }
 
-GcPath::GcPath(Curves curves, AbstractFile* file)
+GcPath::GcPath(Geo::Polylines curves, AbstractFile* file)
     : gcFile_{file} {
 
     // Gi::Debug(paths, Qt::magenta)->arrows = {};
     // Gi::Debug(toPaths(toCurves(paths)), Qt::green)->arrows = {};
 
-    shape_ = toPPath(curves);
+    shape_ = Geo::toPath(curves);
 
     // for(const Path& path: paths) shape_.addPolygon(~path);
     double k;
@@ -60,7 +60,7 @@ void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/
 
 int GcPath::type() const { return Type::Path_; }
 
-Curves GcPath::curves(int /*alternate*/) const { return {}; }
+Geo::Polylines GcPath::curves(int /*alternate*/) const { return {}; }
 
 // Paths GcPath::paths(int) const { return {} /*paths_*/; }
 

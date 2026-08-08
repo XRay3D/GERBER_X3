@@ -20,7 +20,7 @@ namespace Gi {
 class DataFill final : public Item {
 
 public:
-    explicit DataFill(Geo::Polygon curves, AbstractFile* file);
+    explicit DataFill(Geo::Polylines curves, AbstractFile* file);
 
     ~DataFill() override = default;
 
@@ -30,8 +30,8 @@ public:
     // Item interface
     void redraw() override;
 
-    // Curvess& getCurvess();
-    void setCurves(Geo::Polygon paths, int alternate = {}) override;
+    // Geo::Polygons& getCurvess();
+    void setCurves(Geo::Polylines paths, int alternate = {}) override;
     // Item interface
     void changeColor() override;
 };

@@ -136,35 +136,35 @@ double eval(QStringView e, const std::map<int, double>& vars) {
 // -----------------------------------------------------------------------------
 // Геометрические помощники (только curve.h).
 
-Curves circle(double dia, QPointF c = {}) {
+Geo::Polygon circle(double dia, QPointF c = {}) {
     if(dia <= 0.0) return {};
     return {CircleCurve(dia, c)};
 }
 
-Curves rect(double w, double h, QPointF c = {}) {
+Geo::Polygon rect(double w, double h, QPointF c = {}) {
     if(w <= 0.0 || h <= 0.0) return {};
     return {RectangleCurve(w, h, c)};
 }
 
 // Прямоугольник, заданный отрезком и шириной (примитив 20 / трассы).
-Curves thickLine(QPointF p1, QPointF p2, double width) {
+Geo::Polygon thickLine(QPointF p1, QPointF p2, double width) {
     QLineF l{p1, p2};
     if(qFuzzyIsNull(l.length()) || width <= 0.0) return {};
     QPointF n = QPointF{-l.dy(), l.dx()} / l.length() * (width * 0.5);
-    Curve c{
-        geo::Vertex{p1 + n},
-        geo::Vertex{p2 + n},
-        geo::Vertex{p2 - n},
-        geo::Vertex{p1 - n},
+    Geo::Polyline c{
+        Geo::Vertex{p1 + n},
+        Geo::Vertex{p2 + n},
+        Geo::Vertex{p2 - n},
+        Geo::Vertex{p1 - n},
     };
     c.closed = true;
     return {std::move(c)};
 }
 
 // Правильный многоугольник по описанной окружности.
-Curves regularPolygon(double dia, int vertices, double rotDeg, QPointF c = {}) {
+Geo::Polygon regularPolygon(double dia, int vertices, double rotDeg, QPointF c = {}) {
     if(dia <= 0.0 || vertices < 3) return {};
-    Curve curve;
+    Geo::Polyline curve;
     const double r = dia * 0.5;
     for(int i = 0; i < vertices; ++i) {
         double a = (rotDeg + 360.0 * i / vertices) * deg2rad;
@@ -174,7 +174,7 @@ Curves regularPolygon(double dia, int vertices, double rotDeg, QPointF c = {}) {
     return {std::move(curve)};
 }
 
-Curves obround(double w, double h, QPointF c = {}) {
+Geo::Polygon obround(double w, double h, QPointF c = {}) {
     if(w <= 0.0 || h <= 0.0) return {};
     if(qFuzzyCompare(w, h)) return circle(w, c);
     const double d = std::min(w, h);
@@ -184,14 +184,14 @@ Curves obround(double w, double h, QPointF c = {}) {
         a.rx() -= len * 0.5, b.rx() += len * 0.5;
     else
         a.ry() -= len * 0.5, b.ry() += len * 0.5;
-    Curves line{
-        Curve{geo::Vertex{a}, geo::Vertex{b}}
+    Geo::Polygon line{
+        Geo::Polyline{Geo::Vertex{a}, Geo::Vertex{b}}
     };
     // Inflate трактует delta как диаметр (радиус = delta/2)
     return Inflate(line, d, JoinType::Round, EndType::Round);
 }
 
-Curves subtractHole(Curves body, double holeDia) {
+Geo::Polygon subtractHole(Geo::Polygon body, double holeDia) {
     if(holeDia <= 0.0 || body.empty()) return body;
     return BoolOp.Difference(body, circle(holeDia), FillRule::NonZero);
 }
@@ -211,8 +211,8 @@ private:
     Objects* sink() { return sinks.back(); }
 
     // регион
-    Curves regionContours;
-    Curve regionCurve;
+    Geo::Polygon regionContours;
+    Geo::Polyline regionCurve;
 
     // блок-апертура: код + собственное хранилище объектов блока
     std::vector<std::pair<int, std::unique_ptr<Objects>>> abStack;
@@ -433,7 +433,7 @@ private:
         sinks.push_back(&srObjects);
     }
 
-    void addObject(Curves curves) {
+    void addObject(Geo::Polygon curves) {
         if(curves.empty()) return;
         sink()->push_back({std::move(curves), st.polarity});
     }
@@ -488,16 +488,16 @@ private:
     }
 
     void plot(QPointF to, std::optional<double> I, std::optional<double> J) {
-        Curve seg{
-            geo::Vertex{st.current}};
+        Geo::Polyline seg{
+            Geo::Vertex{st.current}};
         if(st.plot == PlotMode::Linear || !I || !J) {
             seg.emplace_back(to);
         } else {
-            // Дуга приходит в виде «центр + направление», Curve хранит прогиб:
+            // Дуга приходит в виде «центр + направление», Geo::Polyline хранит прогиб:
             // он и пишется на НАЧАЛЬНОЙ вершине сегмента, то есть на уже
             // лежащей в seg.
             QPointF center = arcCenter(st.current, to, *I, *J);
-            auto dir = st.plot == PlotMode::Cw ? geo::Vertex::Cw : geo::Vertex::Ccw;
+            auto dir = st.plot == PlotMode::Cw ? Geo::Vertex::Cw : Geo::Vertex::Ccw;
             if(st.multiQuadrant && QLineF{st.current, to}.length() < 1e-9) {
                 // start == end → полная окружность, делим пополам:
                 // прогибом полный оборот не выражается
@@ -551,10 +551,10 @@ private:
         return std::min(r.width(), r.height());
     }
 
-    Curves stroke(const Curve& seg) const {
+    Geo::Polygon stroke(const Geo::Polyline& seg) const {
         double dia = strokeDia() * st.tr.scale;
         if(dia <= 0.0) return {}; // апертура нулевого размера изображения не даёт
-        return Inflate(Curves{seg}, dia, JoinType::Round, EndType::Round);
+        return Inflate(Geo::Polygon{seg}, dia, JoinType::Round, EndType::Round);
     }
 
     void closeContour() {
@@ -595,18 +595,18 @@ private:
             }
             return;
         }
-        Curves body = ap.body;
+        Geo::Polygon body = ap.body;
         TransformCurves(body, tr);
         addObject(std::move(body));
     }
 
     // ----------------------------------------------------------------- макрос
-    Curves buildMacro(const Macro& macro, const std::vector<double>& args) {
+    Geo::Polygon buildMacro(const Macro& macro, const std::vector<double>& args) {
         // $1..$n — параметры вызывающей команды AD (4.5.4.1)
         auto vars = v::zip(v::iota(1), args) | r::to<std::map<int, double>>();
 
-        Curves result;
-        auto apply = [&](Curves shape, bool exposureOn) {
+        Geo::Polygon result;
+        auto apply = [&](Geo::Polygon shape, bool exposureOn) {
             if(shape.empty()) return;
             if(exposureOn)
                 result = result.empty() ? std::move(shape)
@@ -636,7 +636,7 @@ private:
             };
             auto on = [&](int i) { return i < parts.size() && eval(parts[i], vars) > 0.5; };
 
-            Curves shape;
+            Geo::Polygon shape;
             double rot = 0.0;
             switch(code) {
             case 0: continue; // комментарий
@@ -659,7 +659,7 @@ private:
                 break;
             case 4: { // контур
                 int nv = int(std::lround(raw(2)));
-                Curve c;
+                Geo::Polyline c;
                 for(int k = 0; k <= nv && 3 + k * 2 + 1 < parts.size(); ++k)
                     c.emplace_back(QPointF{arg(3 + k * 2), arg(4 + k * 2)});
                 if(c.size() > 2) {
@@ -678,7 +678,7 @@ private:
                 rot = raw(6);
                 if(od <= 0.0) break;
                 shape = BoolOp.Difference(circle(od, c), circle(id, c), FillRule::NonZero);
-                Curves cross = rect(gap, od * 1.5, c);
+                Geo::Polygon cross = rect(gap, od * 1.5, c);
                 for(auto&& cc: rect(od * 1.5, gap, c)) cross.push_back(std::move(cc));
                 shape = BoolOp.Difference(shape, cross, FillRule::NonZero);
             } break;
@@ -722,15 +722,15 @@ double Format::toMm(QStringView token, int intDigits, int decDigits) const {
     return unit == Unit::Inches ? v * 25.4 : v;
 }
 
-Curves flatten(const Objects& objects) {
-    Curves result;
+Geo::Polygon flatten(const Objects& objects) {
+    Geo::Polygon result;
     // Подряд идущие объекты одной полярности объединяются за одну операцию.
     auto samePolarity = [](const Object& l, const Object& r) { return l.polarity == r.polarity; };
     for(auto&& group: objects | v::chunk_by(samePolarity)) {
-        Curves batch = group
+        Geo::Polygon batch = group
             | v::transform(&Object::curves)
             | v::join
-            | r::to<Curves>();
+            | r::to<Geo::Polygon>();
         if(batch.empty()) continue;
         batch = BoolOp.Union(batch, FillRule::NonZero);
         if(r::begin(group)->polarity == Polarity::Dark)

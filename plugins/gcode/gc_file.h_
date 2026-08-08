@@ -42,8 +42,8 @@ private:
     Paths pocketAreaPaths_; /////
     Pathss toolPathss_; /////
 
-    mvector<mvector<QPolygonF>> normalizedPathss(const QPointF& offset);
-    mvector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
+    std::vector<std::vector<QPolygonF>> normalizedPathss(const QPointF& offset);
+    std::vector<QPolygonF> normalizedPaths(const QPointF& offset, const Paths& paths_ = {});
 
     void initSave();
     void genGcodeAndTile();
@@ -71,7 +71,7 @@ private:
     void saveMillingRaster(const QPointF& offset);
 
     void saveLaserHLDI(const QPointF& offset);
-    mvector<QSharedPointer<QColor>> debugColor;
+    std::vector<QSharedPointer<QColor>> debugColor;
 
     // FileInterface interfaces
 protected:

@@ -14,7 +14,7 @@ class Preview final : public ::Gi::AbstractPreview {
     Tool::ID toolId_{};
 
 public:
-    explicit Preview(Path64&& hv, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_ = {}); // FIXME to Curve
+    explicit Preview(Path64&& hv, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_ = {}); // FIXME to Geo::Polyline
 
     // AbstractPreview interface
     void updateTool() override;

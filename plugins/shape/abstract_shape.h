@@ -19,6 +19,10 @@ using namespace std::placeholders;
 
 namespace Shapes {
 
+// Объявление, а не включение: shapepluginin.h включает этот заголовок, и при
+// входе в цепочку с его стороны Plugin иначе оказывается ещё неизвестен.
+class Plugin;
+
 struct Handle final : QPointF {
     enum Type : int {
         Adder,

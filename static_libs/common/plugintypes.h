@@ -14,6 +14,12 @@
 #include "geo/polygon.h"
 #include <any>
 
+// Только объявление: <QTransform> -- заголовок QtGui, и втянутый сюда, в
+// заголовок, который подключают все, он оказывается раньше ядра QtCore. На
+// gcc-16 такой порядок ломает разбор qmath.h. Тела, которым нужен полный тип,
+// уехали в plugintypes.cpp.
+class QTransform;
+
 // struct Circle {
 // QPointF center;
 // double radius;
@@ -58,14 +64,8 @@ struct Transform {
         return Block{stream}.read(tr);
     }
 
-    QTransform toQTransform() const {
-        QTransform t;
-        t.translate(translate.x(), translate.y());
-        t.rotate(angle);
-        t.scale(scale.x(), scale.y());
-        return t;
-    }
-    operator QTransform() const { return toQTransform(); }
+    QTransform toQTransform() const;
+    operator QTransform() const;
 };
 
 enum class GCType {
@@ -126,13 +126,9 @@ struct GraphicObject {
     bool positive() const { return path.isPositive(); }
 };
 
-inline GraphicObject operator*(GraphicObject go, const QTransform& t) {
-    // for(auto& curve: go.fill)
-    //     TransformCurve(curve, t);
-    // TODO TransformCurve(go.path, t);
-    // go.pos = t.map(go.pos);
-    return go;
-}
+// Перенос графического объекта преобразованием: заливка пересобирается в
+// точном домене, контур правится на месте.
+GraphicObject operator*(GraphicObject go, const QTransform& t);
 
 struct Range {
     double min{-std::numeric_limits<double>::max()};

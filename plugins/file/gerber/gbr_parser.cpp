@@ -574,7 +574,7 @@ Point64 Parser::parsePosition(const QString& xyStr) {
     return state_.curPos();
 }
 
-Curves Parser::createLine() {
+Geo::Polygon Parser::createLine() {
     if(file->apertures_.contains(state_.aperture()) && file->apertures_[state_.aperture()].get())
         file->apertures_[state_.aperture()].get()->setUsed();
     Paths64 solution;
@@ -612,7 +612,7 @@ Curves Parser::createLine() {
     return toCurves(solution);
 }
 
-Curves Parser::createPolygon() {
+Geo::Polygon Parser::createPolygon() {
     if(Area(path_) > 0.0) {
         if(state_.imgPolarity() == Negative)
             ReversePath(path_);
@@ -1166,7 +1166,7 @@ bool Parser::parseGCode(const QString& gLine) {
 }
 
 bool Parser::parseImagePolarity(const QString& gLine) {
-    static const mvector<QString> slImagePolarity{u"POS"_s, u"NEG"_s};
+    static const std::vector<QString> slImagePolarity{u"POS"_s, u"NEG"_s};
     static constexpr ctll::fixed_string ptrnImagePolarity{R"(^%IP(POS|NEG)\*%$)"};
     if(auto [whole, c1]
         = ctre::match<ptrnImagePolarity>(std::u16string_view{gLine});

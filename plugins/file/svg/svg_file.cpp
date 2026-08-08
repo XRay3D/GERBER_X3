@@ -11,6 +11,7 @@
 #include "svg_file.h"
 
 #include "geo/polygon.h"
+#include "geo/util.h"
 #include "gi_datapath.h"
 #include "svg_node.h"
 
@@ -23,7 +24,7 @@ File::File()
 void File::createGi() {
     for(const SvgElement& el: *this) {
         if(el.painterPath.isEmpty()) continue;
-        Curves curves = toCurves(el.painterPath);
+        Geo::Polylines curves = Geo::fromPath(el.painterPath);
         if(!curves.empty())
             itemGroup()->push_back(new Gi::DataPath{std::move(curves), this});
     }
@@ -47,9 +48,14 @@ void File::read(QDataStream& stream) {
     stream >> static_cast<QList<SvgElement>&>(*this);
 }
 
-Curves File::merge() const {
+Geo::Polygons File::merge() const {
+    // Все контуры файла собираются плоским списком и становятся регионом одним
+    // вызовом: вложенность в нём выражена ориентацией, и подавать контуры
+    // порознь нельзя -- дырка, поданная отдельно, вычитать будет не из чего.
+    Geo::Polylines contours;
     for(const SvgElement& el: *this)
-        mergedCurves_.append_range(toCurves(el.painterPath));
+        contours.append_range(Geo::fromPath(el.painterPath));
+    mergedCurves_ = Geo::Polygons{contours};
     return mergedCurves_;
 }
 

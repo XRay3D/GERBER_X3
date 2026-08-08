@@ -10,7 +10,7 @@
  *******************************************************************************/
 #pragma once
 
-#include "mvector.h"
+
 #include "tool.h"
 #include <QAbstractTableModel>
 #include <QIcon>
@@ -39,13 +39,13 @@ struct Row {
     /*const*/ bool isSlot;
     bool useForCalc{};
     Tool::ID toolId{};
-    mvector<Gi::Preview*> items;
+    std::vector<Gi::Preview*> items;
 };
 
 class Model : public QAbstractTableModel {
     Q_OBJECT
 
-    mvector<Row> data_;
+    std::vector<Row> data_;
 
     enum {
         Name,
@@ -77,8 +77,8 @@ public:
     QVariant headerData(int section, Qt::Orientation orientation, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;
 
-    mvector<Row>& data() { return data_; }
-    const mvector<Row>& data() const { return data_; }
+    std::vector<Row>& data() { return data_; }
+    const std::vector<Row>& data() const { return data_; }
     auto begin() { return data_.begin(); }
     auto end() { return data_.end(); }
 };

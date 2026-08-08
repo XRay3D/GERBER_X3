@@ -129,13 +129,13 @@ DxfGo LwPolyline::toGo() const {
         && qFuzzyCompare(poly.front().bulge, 1.)
         && qFuzzyCompare(poly.back().bulge, 1.)) {
         QPointF center = (poly.front() + poly.back()) / 2;
-        Curve circle = CircleCurve((geo::Length(poly.front(), poly.back()) + constantWidth), center);
+        Geo::Polyline circle = CircleCurve((geo::Length(poly.front(), poly.back()) + constantWidth), center);
 
         // if(auto arc = geo::arcOf(poly.front(), poly.back(), poly.front().bulge); arc && arc->theta < 0) circle.reverse();
 
         DxfGo go{
             id,
-            Curve{circle},
+            Geo::Polyline{circle},
             {std::move(circle)},
         };
         go.GraphicObject::pos = center;
@@ -144,17 +144,17 @@ DxfGo LwPolyline::toGo() const {
         return go;
     }
 
-    // Прогиб LWPOLYLINE и прогиб Curve -- одно и то же и лежат на одной и той
+    // Прогиб LWPOLYLINE и прогиб Geo::Polyline -- одно и то же и лежат на одной и той
     // же (начальной) вершине сегмента, так что переводить нечего: вершины
     // переносятся как есть.
-    Curve curve{
+    Geo::Polyline curve{
         std::from_range,
-        poly | v::transform([](const Segment& v) { return geo::Vertex{v, v.bulge}; }),
+        poly | v::transform([](const Segment& v) { return Geo::Vertex{v, v.bulge}; }),
     };
 
     if(polylineFlag == Closed) curve.close();
 
-    Curves curves = Inflate({curve}, // TODO
+    Geo::Polygon curves = Inflate({curve}, // TODO
         constantWidth,
         JoinType::Round,
         EndType::Round, 2.0, 1000);

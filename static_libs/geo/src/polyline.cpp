@@ -1,5 +1,6 @@
 #include "geo/polyline.h"
 
+#include <QDataStream>
 #include <QPainterPath>
 
 #include <algorithm>
@@ -26,7 +27,7 @@ std::optional<std::pair<double, double>> bulgeRadiusAndTheta(const Vertex& from,
     if(from.bulge == 0.0) return std::nullopt;
     const double chord = std::hypot(to.x() - from.x(), to.y() - from.y());
     if(chord <= 0.0) return std::nullopt;
-    const double theta = 4.0 * std::atan(from.bulge);
+    const double theta  = 4.0 * std::atan(from.bulge);
     const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
     return std::pair{radius, theta};
 }
@@ -68,17 +69,17 @@ void appendBulgeArc(QPainterPath& path, QPointF from, QPointF to, double bulge)
     pre(bulge != 0.0) {
     constexpr double pi = std::numbers::pi;
 
-    const double dx = to.x() - from.x();
-    const double dy = to.y() - from.y();
+    const double dx    = to.x() - from.x();
+    const double dy    = to.y() - from.y();
     const double chord = std::hypot(dx, dy);
     if(chord <= 0.0) {
         path.lineTo(to);
         return;
     }
 
-    const double theta = 4.0 * std::atan(bulge);
+    const double theta   = 4.0 * std::atan(bulge);
     const double sagitta = bulge * chord / 2.0;
-    const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
+    const double radius  = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
 
     const QPointF n(dy / chord, -dx / chord); // chord rotated -90 degrees
     const QPointF mid((from.x() + to.x()) / 2.0, (from.y() + to.y()) / 2.0);
@@ -92,9 +93,13 @@ void appendBulgeArc(QPainterPath& path, QPointF from, QPointF to, double bulge)
     const double a2 = a1 + theta;
 
     const int segments = std::max(1, static_cast<int>(std::ceil(std::abs(theta) / (pi / 2.0))));
-    const double step = theta / segments;
+    const double step  = theta / segments;
     for(int i = 0; i < segments; ++i)
         appendArcSegment2(path, center, radius, a1 + i * step, a1 + (i + 1) * step);
+}
+
+Polyline::Polyline(const QPolygonF& pgn)
+    : vector{std::from_range, pgn} {
 }
 
 QPainterPath Polyline::toPath() const {
@@ -154,6 +159,22 @@ void Polyline::reverse() {
 
     for(auto&& [vertex, b]: v::zip(*this, bulge))
         vertex.bulge = b;
+}
+
+Polyline Polyline::reversed() const {
+    Polyline copy{*this};
+    copy.reverse();
+    return copy;
+}
+
+Polyline& Polyline::close() {
+    // Прогиб последнего сегмента лежит на ПРЕДпоследней вершине (он всегда на
+    // исходящей), так что замыкающая дуга переживает удаление дубля сама. У
+    // самого же дубля прогиб не описывает никакого сегмента -- он уходит.
+    if(size() > 1 && static_cast<const QPointF&>(front()) == static_cast<const QPointF&>(back()))
+        pop_back();
+    closed = true;
+    return *this;
 }
 
 double Polyline::signedArea() const pre(closed) {
@@ -235,6 +256,58 @@ double Polyline::perimeter() const {
         total += segmentLength(back(), front());
 
     return total;
+}
+
+// ---------------------------------------------------------------------------
+// Сериализация
+// ---------------------------------------------------------------------------
+
+QDataStream& operator<<(QDataStream& stream, const Vertex& vertex) {
+    return stream << static_cast<const QPointF&>(vertex) << vertex.bulge;
+}
+
+QDataStream& operator>>(QDataStream& stream, Vertex& vertex) {
+    return stream >> static_cast<QPointF&>(vertex) >> vertex.bulge;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Polyline& polyline) {
+    stream << quint32(polyline.size()) << polyline.closed << polyline.width;
+    for(const Vertex& vertex: polyline) stream << vertex;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, Polyline& polyline) {
+    quint32 count{};
+    stream >> count >> polyline.closed >> polyline.width;
+    // Не resize: Vertex по умолчанию не создаётся вовсе -- прогиб без точки
+    // ничего не значит, и «пустая» вершина типу не нужна.
+    polyline.clear();
+    while(count--) {
+        Vertex vertex{0.0, 0.0};
+        stream >> vertex;
+        if(stream.status() != QDataStream::Ok) return polyline.clear(), stream;
+        polyline.push_back(vertex);
+    }
+    return stream;
+}
+
+QDataStream& operator<<(QDataStream& stream, const Polylines& polylines) {
+    stream << quint32(polylines.size());
+    for(const Polyline& polyline: polylines) stream << polyline;
+    return stream;
+}
+
+QDataStream& operator>>(QDataStream& stream, Polylines& polylines) {
+    quint32 count{};
+    stream >> count;
+    polylines.clear();
+    while(count--) {
+        Polyline polyline;
+        stream >> polyline;
+        if(stream.status() != QDataStream::Ok) return polylines.clear(), stream;
+        polylines.push_back(std::move(polyline));
+    }
+    return stream;
 }
 
 } // namespace Geo

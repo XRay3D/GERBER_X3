@@ -10,6 +10,9 @@
  ********************************************************************************/
 #include "gi_drill.h"
 
+#include "geo/boolean.h"
+#include "geo/util.h"
+
 #include "app.h"
 
 #include <QPainter>
@@ -108,12 +111,12 @@ void Drill::create() {
 
     if(path_.size() == 1) {
         shape_.addEllipse(path_.front(), diameter_ * 0.5, diameter_ * 0.5);
-        curves_.emplace_back(CircleCurve(diameter_, path_.front()));
+        curves_.emplace_back(Geo::circle(diameter_, path_.front()));
     } else {
-        auto path = ~path_; // FIXME to Curve
-        r::for_each(path, SetCSelf);
-        curves_ = toCurves(InflateRoundPolygon({path}, diameter_ * uScale));
-        shape_ = toPPath(curves_);
+        // Паз: полоса вдоль ломаной прохода шириной ровно в диаметр сверла --
+        // delta у Geo::Inflate это ПОЛНАЯ ширина, а не радиус офсета.
+        curves_ = Geo::Inflate(Geo::Polylines{Geo::Polyline{path_}}, diameter_).contours();
+        shape_ = Geo::toPath(curves_);
     }
     boundingRect_ = shape_.boundingRect();
 }
