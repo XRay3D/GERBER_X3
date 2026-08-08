@@ -70,8 +70,8 @@ struct Curve : std::vector<geo::Vertex> {
     }
 };
 
-using Curves = std::vector<Curve>;
-using Curvess = std::vector<Curves>;
+using Geo::Polygon = std::vector<Curve>;
+using Geo::Polygons = std::vector<Geo::Polygon>;
 
 inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
     uint32_t n;
@@ -91,13 +91,13 @@ inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
     return stream;
 }
 
-QIcon drawIcon(const Curves& curves, QColor color = Qt::black);
+QIcon drawIcon(const Geo::Polygon& curves, QColor color = Qt::black);
 
 constexpr double Area(const Curve& curve) { return curve.area(); }
-constexpr double Area(const Curves& curves) {
+constexpr double Area(const Geo::Polygon& curves) {
     return r::fold_left(curves | v::transform(&Curve::area), 0.0, std::plus{});
 }
-constexpr QRectF BoundingRect(const Curves& curves) {
+constexpr QRectF BoundingRect(const Geo::Polygon& curves) {
     if(curves.empty()) return {};
     return r::fold_left(
         curves | v::transform(&Curve::boundingRect),
@@ -115,24 +115,24 @@ Curve RectangleCurve(double width, double height, const QPointF& center = {});
 Curve ArcCurve(const QPointF& center, double radius, double startAngle, double sweep);
 
 Curve& TransformCurve(Curve& curve, const QTransform& tr);
-Curves& TransformCurves(Curves& curve, const QTransform& tr);
-Curves& ReverseCurves(Curves& curves);
+Geo::Polygon& TransformCurves(Geo::Polygon& curve, const QTransform& tr);
+Geo::Polygon& ReverseCurves(Geo::Polygon& curves);
 Curve& TranslateCurve(Curve& curve, const QPointF& pos = {});
 void RotateCurve(Curve& curve, double angle, const QPointF& center = {});
 //------------------------------------------------------------------------------
 
 QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {}, int arcLine = {});
-QPainterPath toPPath(const Curves& curves);
+QPainterPath toPPath(const Geo::Polygon& curves);
 
 Curve toCurve(std::span<const QPointF> path);
 Curve toCurve(std::span<const Point64> path);
-Curves toCurves(std::span<const Path64> paths /*, bool closed = true*/);
-Curvess toCurvess(std::span<const Paths64> pathss /*, bool closed = true*/);
+Geo::Polygon toCurves(std::span<const Path64> paths /*, bool closed = true*/);
+Geo::Polygons toCurvess(std::span<const Paths64> pathss /*, bool closed = true*/);
 
 Path64 toPath(const Curve& curve);
-Paths64 toPaths(const Curves& curves);
+Paths64 toPaths(const Geo::Polygon& curves);
 
-Curves toCurves(const QPainterPath& pPath);
+Geo::Polygon toCurves(const QPainterPath& pPath);
 inline Paths64 toPaths(const QPainterPath& pPath) {
     return toPaths(toCurves(pPath));
     // Paths64 paths;
@@ -182,19 +182,19 @@ struct BoolOp_ {
         Negative
     };
 
-    Curves operator()(ClipType ct, FillRule fr, const Curves& subjects, const Curves& clips);
+    Geo::Polygon operator()(ClipType ct, FillRule fr, const Geo::Polygon& subjects, const Geo::Polygon& clips);
 
-    void operator()(ClipType ct, FillRule fr, const Curves& subjects, const Curves& clips, CurveTree& solution);
+    void operator()(ClipType ct, FillRule fr, const Geo::Polygon& subjects, const Geo::Polygon& clips, CurveTree& solution);
 
-    Curves Intersect(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Intersect(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
-    Curves Union(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Union(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
-    Curves Union(const Curves& subjects, FillRule fr);
+    Geo::Polygon Union(const Geo::Polygon& subjects, FillRule fr);
 
-    Curves Difference(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Difference(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
-    Curves Xor(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Xor(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
 } inline BoolOp;
 
@@ -225,18 +225,18 @@ struct Inflate64 {
     // Joined : offsets both sides of a path, with joined ends
     // Polygon: offsets only one side of a closed path
 
-    Curves operator()(const Curves& paths, double delta,
+    Geo::Polygon operator()(const Geo::Polygon& paths, double delta,
         JoinType jt, EndType et, double miterLimit = 2.0,
         double arcTolerance = 0.0);
 
-    Curves PathsZ(const Curves& paths, double delta,
+    Geo::Polygon PathsZ(const Geo::Polygon& paths, double delta,
         JoinType jt, EndType et, double miterLimit = 2.0,
         double arcTolerance = 0.0);
 
-    Curves RoundPolygon(const Curves& paths, double delta,
+    Geo::Polygon RoundPolygon(const Geo::Polygon& paths, double delta,
         double miterLimit = 2.0, double arcTolerance = {});
 
-    Curves MiterPolygon(const Curves& paths, double delta,
+    Geo::Polygon MiterPolygon(const Geo::Polygon& paths, double delta,
         double miterLimit = 2.0, double arcTolerance = {});
 
 } inline Inflate;

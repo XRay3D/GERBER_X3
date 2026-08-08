@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "ex_highlighter.h"
-#include "mvector.h"
+
 #include <ctre.hpp>
 
 namespace Excellon {

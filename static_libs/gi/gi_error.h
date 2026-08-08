@@ -21,7 +21,7 @@ class Error final : public QGraphicsItem {
     const double area_;
 
 public:
-    Error(const Curves& curves, double area);
+    Error(const Geo::Polylines& curves, double area);
     double area() const;
 
     // QGraphicsItem interface

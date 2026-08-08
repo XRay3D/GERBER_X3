@@ -110,7 +110,7 @@ public:
     Q_INVOKABLE void addLine(const QString& line);
 
     // Generate gcode lines for one curve from the last getToolPaths() result.
-    // pathssIdx / pathIdx select the Curvess[i][j] curve.
+    // pathssIdx / pathIdx select the Geo::Polygons[i][j] curve.
     // reversed = true uses the curve in reverse direction (zigzag alternate pass).
     // perimeter > 0 && depth != 0 enables spiral ramp; otherwise flat cut.
     // Returns JS array of strings.
@@ -135,7 +135,7 @@ public:
 private:
     File* file_;
     QJSEngine* engine_;
-    Curvess cachedPathss_;
+    std::vector<Geo::Polylines> cachedPathss_;
 };
 
 } // namespace GCode

@@ -36,7 +36,7 @@ public:
     QIcon icon() const override;
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     void addToGcForm(AbstractFile* file, QComboBox* cbx) override;
-    // DrillPreviewGiMap createDrillPreviewGi(AbstractFile* file, mvector<Row>& data) override;
+    // DrillPreviewGiMap createDrillPreviewGi(AbstractFile* file, std::vector<Row>& data) override;
 
     // public slots:
     AbstractFile* parseFile(const QString& fileName, int type) override;

@@ -19,7 +19,7 @@ public:
     // ~Group();
     void push_back(Item* item);
     void setVisible(bool visible);
-    void setSelected(const mvector<int>& ids);
+    void setSelected(const std::vector<int>& ids);
     bool isVisible() { return visible_; }
     void addToScene(QGraphicsScene* scene = nullptr);
     QColor brushColor() const { return brushColor_; }

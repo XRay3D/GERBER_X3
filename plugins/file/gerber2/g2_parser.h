@@ -22,7 +22,7 @@ struct ParseResult {
     ApertureMap apertures;
     std::map<QString, Macro> macros;
     Objects objects;      // изображение в порядке наложения
-    Curves strokes;       // осевые линии draw/arc — для отображения «путей»
+    Geo::Polygon strokes;       // осевые линии draw/arc — для отображения «путей»
     QStringList warnings; // нереализованные/подозрительные команды
     QString error;        // фатальная ошибка (пусто — всё хорошо)
     bool valid() const { return error.isEmpty(); }
@@ -32,6 +32,6 @@ struct ParseResult {
 ParseResult parse(const QString& source);
 
 // Схлопывание потока объектов в итоговые контуры с учётом полярности (2.3.2).
-Curves flatten(const Objects& objects);
+Geo::Polygon flatten(const Objects& objects);
 
 } // namespace Gerber2

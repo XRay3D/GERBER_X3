@@ -32,7 +32,7 @@ sModel::sModel(int fileId, QObject* parent)
     auto file = App::project().file<Gerber::File>(fileId);
 
     using pair = std::pair<int, sNode*>;
-    std::map<QString, mvector<pair>> map;
+    std::map<QString, std::vector<pair>> map;
 
     auto unsorted = new sNode{GbrObj::tr("unsorted")};
 

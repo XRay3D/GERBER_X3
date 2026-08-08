@@ -140,7 +140,7 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     file_->setFileName(tool.nameEnc());
 }
 
-void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
+void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
 
     if(gcp.side() == GCode::Outer)
         groupedPaths(GCode::Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005 * uScale);

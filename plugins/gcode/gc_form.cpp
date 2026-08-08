@@ -64,10 +64,10 @@ inline QIcon errorIcon(const QPainterPath& path) {
 }
 
 class ErrorModel : public QAbstractTableModel {
-    mvector<Gi::Error*> items;
+    std::vector<Gi::Error*> items;
 
 public:
-    ErrorModel(mvector<Gi::Error*>&& items, QObject* parent = nullptr)
+    ErrorModel(std::vector<Gi::Error*>&& items, QObject* parent = nullptr)
         : QAbstractTableModel{parent}
         , items(std::move(items)) {
     }
@@ -352,6 +352,11 @@ const Params& Form::getNewGcpWithGi() {
     // bool skip{true};
 
     int side{};
+    // Замкнутые контуры копятся плоским списком и лишь в конце становятся
+    // регионом: вложенность в нём выражена ориентацией, и подать контуры надо
+    // одним вызовом -- дырка, поданная отдельно от своего тела, вычтется не из
+    // чего.
+    Geo::Polylines closedContours;
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         qDebug() << gi << gi->file();
         // switch(gi->type()) {
@@ -362,7 +367,7 @@ const Params& Form::getNewGcpWithGi() {
         // dbgPaths(gi->curves(), __FUNCTION__);
         for(auto&& curve: gi->curves()) {
             // qWarning() << curve;
-            curve.isClosed() ? gcp.closedCurves.emplace_back(std::move(curve))
+            curve.isClosed() ? closedContours.emplace_back(std::move(curve))
                              : gcp.openCurves.emplace_back(std::move(curve));
         }
         gi->side() == Side::Bottom ? --side : ++side;
@@ -395,6 +400,9 @@ const Params& Form::getNewGcpWithGi() {
         // }
         addUsedGi(gi);
     }
+    if(!closedContours.empty())
+        gcp.closedCurves = Geo::Polygons{closedContours};
+
     qCritical() << "side" << side;
     gcp.params[Params::FileSide].setValue(side < 0 ? Side::Bottom : Side::Top);
     gcp.params[Params::GrItems].setValue(usedItems_);

@@ -272,7 +272,7 @@ struct GrObject : GraphicObject {
 
     // public:
     GrObject() = default;
-    GrObject(int32_t id, const State& state, Curves&& paths, File* gFile, Type type, Curve&& path = {})
+    GrObject(int32_t id, const State& state, Geo::Polygon&& paths, File* gFile, Type type, Geo::Polyline&& path = {})
         : gFile{gFile}
         , state{state} {
         GraphicObject::id = id;

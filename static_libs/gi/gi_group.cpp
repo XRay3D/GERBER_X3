@@ -35,9 +35,9 @@ void Group::setVisible(bool visible) {
     }
 }
 
-void Group::setSelected(const mvector<int>& ids) {
+void Group::setSelected(const std::vector<int>& ids) {
     for(auto&& item: *this)
-        item->setSelected(ids.contains(item->id()));
+        item->setSelected(r::contains(ids, item->id()));
 }
 
 void Group::addToScene(QGraphicsScene* scene) {

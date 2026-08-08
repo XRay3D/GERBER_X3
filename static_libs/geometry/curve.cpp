@@ -174,7 +174,7 @@ Curve& TransformCurve(Curve& curve, const QTransform& tr) {
     return curve;
 }
 
-// Curves& ReverseCurves(Curves& curves) {
+// Geo::Polygon& ReverseCurves(Geo::Polygon& curves) {
 //     r::for_each(curves.centerurves, &Curve::Reverse);
 //     return curves;
 // }
@@ -755,7 +755,7 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, int arcOnly) {
     return pPath;
 }
 
-QPainterPath toPPath(const Curves& curves) {
+QPainterPath toPPath(const Geo::Polygon& curves) {
     if(curves.empty()) return {};
     QPainterPath pPath;
     for(auto&& curve: curves) pPath.addPath(toPPath(curve));
@@ -1120,7 +1120,7 @@ Curve toCurve(std::span<const Point64> path_) {
     return result;
 }
 
-Curves toCurves(std::span<const Path64> paths) {
+Geo::Polygon toCurves(std::span<const Path64> paths) {
     constexpr auto size = std::bind(&Path64::size, _1);
     return {
         std::from_range,
@@ -1128,7 +1128,7 @@ Curves toCurves(std::span<const Path64> paths) {
     };
 }
 
-Curvess toCurvess(std::span<const Paths64> pathss) {
+Geo::Polygons toCurvess(std::span<const Paths64> pathss) {
     constexpr auto size = std::bind(&Paths64::size, _1);
     return {
         std::from_range,
@@ -1182,15 +1182,15 @@ Path64 toPath(const Curve& curve) {
     return path;
 }
 
-Paths64 toPaths(const Curves& curves) {
+Paths64 toPaths(const Geo::Polygon& curves) {
     Paths64 paths{std::from_range, curves | v::transform(toPath)};
     return paths;
 }
 
-Curves toCurves(const QPainterPath& pPath) {
+Geo::Polygon toCurves(const QPainterPath& pPath) {
     using QPP = QPainterPath;
     using El = QPP::Element;
-    Curves curves;
+    Geo::Polygon curves;
     for(auto&& elements: v::iota(0, pPath.elementCount())
             | v::transform(std::bind(&QPP::elementAt, pPath, _1))            // to Element
             | v::chunk_by(+[](const El&, const El& r) { return r.type; })) { // to Subpath Polygons
@@ -1198,7 +1198,7 @@ Curves toCurves(const QPainterPath& pPath) {
         // qInfo() << "elements" << elements.size();                         // count of elements
 
         constexpr auto splitPaths = +[](const El&, const El& r) { return r.type > QPP::CurveToElement; };
-        auto subpaths = v::chunk_by(elements, splitPaths); // separate Curves
+        auto subpaths = v::chunk_by(elements, splitPaths); // separate Geo::Polygon
 
         Curve curve;
         for(auto&& [from, to]: v::pairwise(subpaths)) { // 'from' point to bezier Point64 in 'to' if
@@ -1225,12 +1225,12 @@ Curves toCurves(const QPainterPath& pPath) {
     return curves;
 }
 
-Curves& TransformCurves(Curves& curves, const QTransform& tr) {
+Geo::Polygon& TransformCurves(Geo::Polygon& curves, const QTransform& tr) {
     r::for_each(curves, std::bind(TransformCurve, _1, tr));
     return curves;
 }
 
-QIcon drawIcon(const Curves& curves, QColor color) {
+QIcon drawIcon(const Geo::Polygon& curves, QColor color) {
     return drawIcon(toPPath(curves), color);
 }
 
@@ -1246,8 +1246,8 @@ static Paths64& closePaths(Paths64& paths) {
     return paths;
 }
 
-Curves BoolOp_::operator()(ClipType ct, FillRule fr,
-    const Curves& subjects, const Curves& clips) {
+Geo::Polygon BoolOp_::operator()(ClipType ct, FillRule fr,
+    const Geo::Polygon& subjects, const Geo::Polygon& clips) {
     Paths64 result;
     cl::Clipper64 clipper;
     clipper.AddSubject({
@@ -1266,7 +1266,7 @@ Curves BoolOp_::operator()(ClipType ct, FillRule fr,
 }
 
 void BoolOp_::operator()(ClipType ct, FillRule fr,
-    const Curves& subjects, const Curves& clips, CurveTree& solution) {
+    const Geo::Polygon& subjects, const Geo::Polygon& clips, CurveTree& solution) {
     Paths64 sol_open;
     cl::Clipper64 clipper;
     clipper.AddSubject({
@@ -1284,17 +1284,17 @@ void BoolOp_::operator()(ClipType ct, FillRule fr,
         static_cast<cl::FillRule>(fr), polytree, sol_open);
 }
 
-Curves BoolOp_::Intersect(const Curves& subjects, const Curves& clips,
+Geo::Polygon BoolOp_::Intersect(const Geo::Polygon& subjects, const Geo::Polygon& clips,
     FillRule fr) {
     return operator()(ClipType::Intersection, fr, subjects, clips);
 }
 
-Curves BoolOp_::Union(const Curves& subjects, const Curves& clips,
+Geo::Polygon BoolOp_::Union(const Geo::Polygon& subjects, const Geo::Polygon& clips,
     FillRule fr) {
     return operator()(ClipType::Union, fr, subjects, clips);
 }
 
-Curves BoolOp_::Union(const Curves& subjects, FillRule fr) {
+Geo::Polygon BoolOp_::Union(const Geo::Polygon& subjects, FillRule fr) {
     Paths64 result;
     cl::Clipper64 clipper;
     clipper.AddSubject({
@@ -1305,18 +1305,18 @@ Curves BoolOp_::Union(const Curves& subjects, FillRule fr) {
     return toCurves(closePaths(result));
 }
 
-Curves BoolOp_::Difference(const Curves& subjects, const Curves& clips,
+Geo::Polygon BoolOp_::Difference(const Geo::Polygon& subjects, const Geo::Polygon& clips,
     FillRule fr) {
 
     return operator()(ClipType::Difference, fr, subjects, clips);
 }
 
-Curves BoolOp_::Xor(const Curves& subjects, const Curves& clips, FillRule fr) {
+Geo::Polygon BoolOp_::Xor(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr) {
 
     return operator()(ClipType::Xor, fr, subjects, clips);
 }
 
-Curves Inflate64::operator()(const Curves& paths, double delta,
+Geo::Polygon Inflate64::operator()(const Geo::Polygon& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
 
@@ -1331,7 +1331,7 @@ Curves Inflate64::operator()(const Curves& paths, double delta,
     // return toCurves(solution);
 }
 
-Curves Inflate64::PathsZ(const Curves& paths, double delta,
+Geo::Polygon Inflate64::PathsZ(const Geo::Polygon& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
     // roundJoinCache.clear();
@@ -1351,14 +1351,14 @@ Curves Inflate64::PathsZ(const Curves& paths, double delta,
     return toCurves(closePaths(solution));
 }
 
-Curves Inflate64::RoundPolygon(const Curves& paths,
+Geo::Polygon Inflate64::RoundPolygon(const Geo::Polygon& paths,
     double delta, double miterLimit, double arcTolerance) {
 
     return PathsZ(paths, delta * 0.5,
         JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
 }
 
-Curves Inflate64::MiterPolygon(const Curves& paths,
+Geo::Polygon Inflate64::MiterPolygon(const Geo::Polygon& paths,
     double delta, double miterLimit, double arcTolerance) {
 
     return PathsZ(paths, delta * 0.5,

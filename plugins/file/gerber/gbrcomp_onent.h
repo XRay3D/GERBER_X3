@@ -12,7 +12,7 @@
 
 #include "datastream.h"
 #include "gbr_attributes.h"
-#include "mvector.h"
+
 #include <QMap>
 #include <QObject>
 #include <QPolygonF>
@@ -143,12 +143,12 @@ public:
     Package package() const { return package_; }
     void setPackage(const Package& package) { package_ = package; }
 
-    mvector<Pin> pins() const { return pins_; }
-    mvector<Pin>& pins() { return pins_; }
+    std::vector<Pin> pins() const { return pins_; }
+    std::vector<Pin>& pins() { return pins_; }
     void addPin(Pin&& pins) { pins_.emplace_back(pins); }
 
-    mvector<Supplier> suppliers() const { return suppliers_; }
-    void setSuppliers(const mvector<Supplier>& suppliers) { suppliers_ = suppliers; }
+    std::vector<Supplier> suppliers() const { return suppliers_; }
+    void setSuppliers(const std::vector<Supplier>& suppliers) { suppliers_ = suppliers; }
 
     QPointF referencePoint() const { return referencePoint_; }
     void setReferencePoint(const QPointF& referencePoint) { referencePoint_ = referencePoint; }
@@ -181,8 +181,8 @@ private:
     Manufacturer manufacturer_;
     MountType mount_ = Other; /* (TH|SMD|BGA|Other) Mount type. */
     Package package_;
-    mvector<Pin> pins_;
-    mvector<Supplier> suppliers_;
+    std::vector<Pin> pins_;
+    std::vector<Supplier> suppliers_;
     QPointF referencePoint_;
     QList<QPolygonF> footprint_;
     QString footprintName_; /* <field> Footprint name. It is strongly recommended to comply with the IPC-7351 footprint names and pin numbering for all standard components. */

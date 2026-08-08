@@ -291,35 +291,34 @@ void File::endPath() {
     }
 }
 
-Curvess File::mirrorAndOffsetCurves(const QPointF& offset) {
-    Curvess curvess;
+std::vector<Geo::Polylines> File::mirrorAndOffsetCurves(const QPointF& offset) {
+    std::vector<Geo::Polylines> curvess;
     curvess.reserve(gcp.toolPathss.size());
-    for(Curves curves: gcp.toolPathss)
+    for(const Geo::Polylines& curves: gcp.toolPathss)
         curvess.emplace_back(mirrorAndOffsetCurves(offset, curves));
     return curvess;
 }
 
-Curves File::mirrorAndOffsetCurves(const QPointF& offset, Curves curves) {
+Geo::Polylines File::mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines curves) {
     if(curves.empty()) curves = gcp.toolPathss.front(); // FIXME wtf
 
-    r::for_each(curves, std::bind(TranslateCurve, _1, offset /*- App::zero().pos()*/));
+    Geo::translate(curves, offset /*- App::zero().pos()*/);
 
     if(side_ == Bottom) {
         const double k = Gi::Pin::minX() + Gi::Pin::maxX();
-        if(toolType != Tool::Laser) r::for_each(curves, &Curve::reverse);
-        for(Vertex& v: v::join(curves)) {
-            v.pt.rx() = -v.pt.x() + k;
+        if(toolType != Tool::Laser) r::for_each(curves, &Geo::Polyline::reverse);
+        for(Geo::Vertex& v: v::join(curves)) {
+            v.rx() = -v.x() + k;
             v.bulge = -v.bulge; // зеркало разворачивает обход дуги
         }
     }
 
-    for(Vertex& v: v::join(curves)) // FIXME ^^^^^^^^^
-        v.pt -= App::zero().pos();
+    Geo::translate(curves, -App::zero().pos());
 
     return curves;
 }
 
-mvector<double> File::getDepths() {
+std::vector<double> File::getDepths() {
     auto& tool = gcp.tool();
     const auto gDepth{gcp.getDepth()};
     if(gDepth < tool.passDepth() || qFuzzyCompare(gDepth, tool.passDepth()))
@@ -327,23 +326,23 @@ mvector<double> File::getDepths() {
 
     const int count = static_cast<int>(ceil(gDepth / tool.passDepth()));
     const double depth = gDepth / count;
-    mvector<double> depths(count);
+    std::vector<double> depths(count);
     for(int i{}; i < count; ++i)
         depths[i] = (i + 1) * -depth;
     depths.back() = -gDepth - tool.depth();
     return depths;
 }
 
-std::vector<QString> File::savePath(const Curve& curve, double perimeter, double depth) {
+std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter, double depth) {
     std::vector<QString> lines;
     lines.reserve(curve.size());
 
     // Дуга -- свойство пары вершин: центр (а с ним I/J и выбор G2/G3) считается
     // по прогибу НАЧАЛЬНОЙ вершины сегмента, отдельно взятая вершина о дуге
     // ничего не знает.
-    auto getLine = [this](const Vertex& fr, const Vertex& to) -> QString {
-        if(auto arc = geo::arcOf(fr.pt, to.pt, fr.bulge)) {
-            auto [I, J] = arc->center - fr.pt;
+    auto getLine = [this](const Geo::Vertex& fr, const Geo::Vertex& to) -> QString {
+        if(auto arc = Geo::arcOf(fr, to, fr.bulge)) {
+            auto [I, J] = arc->center - static_cast<const QPointF&>(fr);
             return formated({g(fr), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle});
         } else
             return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
@@ -351,12 +350,12 @@ std::vector<QString> File::savePath(const Curve& curve, double perimeter, double
     if(depth && perimeter) {
         double zk = depth - z_;
         double perimeter = curve.perimeter();
-        for(auto&& [fr, to]: curve.segments()) {
-            z_ += Span{fr, to.pt}.Length() / perimeter * zk;
+        for(auto&& [fr, to]: Geo::segments(curve)) {
+            z_ += Geo::segmentLength(fr, to) / perimeter * zk;
             lines.emplace_back(getLine(fr, to));
         }
     } else {
-        for(auto&& [fr, to]: curve.segments())
+        for(auto&& [fr, to]: Geo::segments(curve))
             lines.emplace_back(getLine(fr, to));
     }
     return lines;
@@ -386,11 +385,11 @@ QString File::g2() { return gCode_ = G02, u"G2"_s; }
 QString File::g3() { return gCode_ = G03, u"G3"_s; }
 
 // Направление обхода задаёт знак прогиба сегмента, начинающегося в вершине.
-QString File::g(const Vertex& v) {
+QString File::g(const Geo::Vertex& v) {
     switch(v.dir()) {
-    case Vertex::Line: return g1();
-    case Vertex::Ccw : return g3();
-    case Vertex::Cw  : return g2();
+    case Geo::Vertex::Line: return g1();
+    case Geo::Vertex::Ccw : return g3();
+    case Geo::Vertex::Cw  : return g2();
     }
     return {};
 }
@@ -406,7 +405,7 @@ QString File::format(double val) {
 /////////////////////////////////////////////////////////////
 void File::saveDrill(const QPointF& offset) {
     if(gcp.toolPathss.empty()) return;
-    Curve path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
+    Geo::Polyline path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
     const std::vector<double> depths(getDepths());
     for(auto&& point: path) {
         startPath(point);
@@ -426,13 +425,13 @@ void File::saveDrill(const QPointF& offset) {
 void File::saveLaserHLDI(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().laserConstOn());
 
-    Curvess pathss = mirrorAndOffsetCurves(offset);
+    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
     int i{};
 
     lines_.emplace_back(formated({g0(), x(pathss.front().front().front().x()), y(pathss.front().front().front().y()), z(0.0)}));
 
-    for(Curve& path: pathss.front()) {
+    for(Geo::Polyline& path: pathss.front()) {
         if(i++ % 2) {
             lines_.append_range(savePath(path, spindleSpeed));
         } else {
@@ -441,7 +440,7 @@ void File::saveLaserHLDI(const QPointF& offset) {
     }
     if(pathss.size() > 1) {
         lines_.emplace_back(App::gcSettings().laserDynamOn());
-        for(Curve& path: pathss.back()) {
+        for(Geo::Polyline& path: pathss.back()) {
             startPath(path.front());
             lines_.append_range(savePath(path, spindleSpeed));
             endPath();
@@ -456,10 +455,10 @@ void File::saveLaserPocket(const QPointF& offset) {
 void File::saveLaserProfile(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().laserDynamOn());
 
-    Curvess pathss = mirrorAndOffsetCurves(offset);
+    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
-    for(Curves& paths: pathss) {
-        for(Curve& path: paths) {
+    for(Geo::Polylines& paths: pathss) {
+        for(Geo::Polyline& path: paths) {
             startPath(path.front());
             auto sp(savePath(path, spindleSpeed));
             lines_.append_range(sp);
@@ -471,23 +470,25 @@ void File::saveLaserProfile(const QPointF& offset) {
 void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
 
-    const mvector<double> depths = getDepths();
+    const std::vector<double> depths = getDepths();
     double diameter = tool().diameter();
 
-    Curvess pathss = mirrorAndOffsetCurves(offset);
+    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
-    QPointF point = pathss.front().front().front().pt;
+    QPointF point = pathss.front().front().front();
 
     startPath(point);
-    for(const Curves& paths: pathss) {
+    for(const Geo::Polylines& paths: pathss) {
         for(double zd: depths) {
-            for(const Curve& path: paths) {
-                bool first = !geo::TEST(std::exchange(point, path.front().pt), path.front().pt, diameter, diameter * 2);
+            for(const Geo::Polyline& path: paths) {
+                // Прежний критерий: |расстояние - diameter| <= 2*diameter, то есть
+                // переезд длиннее трёх диаметров -- разрыв, нужен подъём.
+                bool first = Geo::distance(std::exchange(point, path.front()), path.front()) > diameter * 3.0;
                 if(first) {
                     endPath();
                     startPath(point);
                 }
-                // if(first || (paths.front().front().pt == path.front().pt)) {
+                // if(first || (paths.front().front() == path.front())) {
                 //     lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
                 //     lines_.append_range(savePath(path, path.perimeter(), zd));
                 //     // lines_.append_range(savePath(path));
@@ -503,22 +504,22 @@ void File::saveMillingPocket(const QPointF& offset) {
 }
 
 void File::saveMillingProfile(const QPointF& offset) {
-    const mvector<double> depths(getDepths());
-    Curvess pathss = mirrorAndOffsetCurves(offset);
+    const std::vector<double> depths(getDepths());
+    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
-    for(const Curves& paths: pathss) {
+    for(const Geo::Polylines& paths: pathss) {
         if(paths.size() == 1) {
-            const Curve& path = paths.front();
+            const Geo::Polyline& path = paths.front();
             double perimeter = path.perimeter();
             if(paths.front().isClosed()) { // Spiral
-                startPath(path.front().pt);
+                startPath(path.front());
                 for(double depth: depths)
                     lines_.append_range(savePath(path, perimeter, depth));
                 lines_.append_range(savePath(path)); // Проход без спирали.
                 endPath();
             } else { // Zigzag
-                startPath(path.front().pt);
-                const Curve reversed = paths.front().reversed();
+                startPath(path.front());
+                const Geo::Polyline reversed = paths.front().reversed();
                 uint i{};
                 for(double depth: depths)
                     lines_.append_range(savePath(i++ & 1u ? reversed : path, perimeter, depth));
@@ -528,12 +529,12 @@ void File::saveMillingProfile(const QPointF& offset) {
         } else {
             // tool().diameter();
             // double perimeter = r::fold_left(
-            //     v::transform(paths, std::bind(&Curve::perimeter, _1)),
+            //     v::transform(paths, std::bind(&Geo::Polyline::perimeter, _1)),
             //     0.0, std::plus<double>{});
-            startPath(paths.front().front().pt);
+            startPath(paths.front().front());
             for(double zd: depths) {
-                for(const Curve& path: paths) {
-                    PointF point = path.front().pt;
+                for(const Geo::Polyline& path: paths) {
+                    QPointF point = path.front();
                     lines_.emplace_back(formated({g0(), x(point.x()), y(point.y())})); // start xy
                     lines_.emplace_back(formated({g1(), z(z_ = zd), strPlungeFeed}));  // start z0 surface
                     lines_.append_range(savePath(path));
@@ -548,10 +549,10 @@ void File::saveMillingProfile(const QPointF& offset) {
 void File::saveMillingRaster(const QPointF& offset) {
     lines_.emplace_back(App::gcSettings().spindleOn());
 
-    Curvess pathss = mirrorAndOffsetCurves(offset);
-    const mvector<double> depths(getDepths());
+    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
+    const std::vector<double> depths(getDepths());
 
-    for(Curves& paths: pathss) {
+    for(Geo::Polylines& paths: pathss) {
         for(size_t i{}; i < depths.size(); ++i) {
             for(auto& path: paths) {
                 startPath(path.front());
@@ -579,7 +580,7 @@ void File::createGiDrill() {
 }
 
 void File::createGiLaser() {
-    Curves paths;
+    Geo::Polylines paths;
 
     paths.reserve(gcp.toolPathss.front().size() / 2 + 1);
     g0path_.reserve(paths.size());
@@ -630,7 +631,7 @@ void File::createGiPocket() {
 
     Gi::Item* item;
     if(pocketAreaCurves.size()) {
-        item = new Gi::DataFill{pocketAreaCurves, nullptr};
+        item = new Gi::DataFill{pocketAreaCurves.contours(), nullptr};
         item->setPen(Qt::NoPen);
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setAcceptHoverEvents(false);
@@ -638,21 +639,21 @@ void File::createGiPocket() {
         itemGroup()->push_back(item);
     }
 
-    for(size_t i{}; const Curves& paths: gcp.toolPathss) {
+    for(size_t i{}; const Geo::Polylines& paths: gcp.toolPathss) {
         int k = static_cast<int>((gcp.toolPathss.size() > 1) ? (300.0 / (gcp.toolPathss.size() - 1)) * i : 0);
         debugColor.emplace_back(QSharedPointer<QColor>(new QColor{QColor::fromHsv(k, 255, 255, 255)}));
 
-        for(const Curve& path: paths) {
+        for(const Geo::Polyline& path: paths) {
             item = new Gi::GcPath{{path}, this};
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
             itemGroup()->push_back(item);
         }
 
         // перебежки между соседними путями -- каждая отдельным отрезком
-        Curves g1path;
+        Geo::Polylines g1path;
         g1path.reserve(paths.size());
         for(auto&& [fr, to]: v::pairwise(paths))
-            g1path.push_back(Curve{{fr.back().pt}, {to.front().pt}});
+            g1path.push_back(Geo::Polyline{{fr.back()}, {to.front()}});
         item = new Gi::GcPath{g1path};
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setPen({Qt::magenta, 0.0});
@@ -661,7 +662,7 @@ void File::createGiPocket() {
 
     g0path_.reserve(gcp.toolPathss.size());
     for(auto&& [fr, to]: v::pairwise(gcp.toolPathss))
-        g0path_.push_back({{fr.back().back().pt}, {to.front().front().pt}});
+        g0path_.push_back({{fr.back().back()}, {to.front().front()}});
 
     item = new Gi::GcPath{g0path_};
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
@@ -671,7 +672,7 @@ void File::createGiPocket() {
 void File::createGiProfile() {
 
     Gi::Item* item;
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Geo::Polylines& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -680,7 +681,7 @@ void File::createGiProfile() {
 
     g0path_.clear();
 
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Geo::Polylines& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
@@ -706,7 +707,7 @@ void File::createGiRaster() {
     g0path_.reserve(gcp.toolPathss.size());
 
     if(pocketAreaCurves.size()) {
-        item = new Gi::DataFill{pocketAreaCurves, nullptr}; // FIXME const_cast
+        item = new Gi::DataFill{pocketAreaCurves.contours(), nullptr}; // FIXME const_cast
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -714,7 +715,7 @@ void File::createGiRaster() {
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->push_back(item);
     } else {
-        for(const Curves& paths: gcp.toolPathss) {
+        for(const Geo::Polylines& paths: gcp.toolPathss) {
             item = new Gi::GcPath{paths, this};
             item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
             item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
@@ -725,7 +726,7 @@ void File::createGiRaster() {
 
     // for (int i {}; auto& path : v::join(gcp.toolPathss)) { }
 
-    for(const Curves& paths: gcp.toolPathss) {
+    for(const Geo::Polylines& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);

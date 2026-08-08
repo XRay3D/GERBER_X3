@@ -12,7 +12,7 @@
 
 #include "abstract_shape.h"
 #include "datastream.h"
-#include "mvector.h"
+
 #include "utils.h"
 
 #include <QFileSystemWatcher>
@@ -32,7 +32,7 @@ enum FileVersion {
     ProVer_5,
     ProVer_6,
     ProVer_7,
-    ProVer_8, // Curve: точка + прогиб вместо центра дуги, замкнутость -- флагом
+    ProVer_8, // Geo::Polyline: точка + прогиб вместо центра дуги, замкнутость -- флагом
     CurrentVer = ProVer_8,
 };
 
@@ -75,9 +75,9 @@ public:
     }
 
     template <typename T = AbstractFile>
-    mvector<T*> files() {
+    std::vector<T*> files() {
         QMutexLocker locker(&mutex);
-        mvector<T*> rfiles;
+        std::vector<T*> rfiles;
         for(const auto& [id, sp]: files_) {
             T* file = dynamic_cast<T*>(sp.get());
             if(file) rfiles.emplace_back(file);
@@ -98,7 +98,7 @@ public:
     }
 
     template <typename T>
-    mvector<T*> count() {
+    std::vector<T*> count() {
         QMutexLocker locker(&mutex);
         int count{};
         for(const auto& [id, sp]: files_)
@@ -110,8 +110,8 @@ public:
     int addFile(AbstractFile* const file);
     int addFile(GCode::File* const file);
     bool contains(AbstractFile* file);
-    mvector<AbstractFile*> files(uint32_t type);
-    mvector<AbstractFile*> files(const mvector<uint32_t>& types);
+    std::vector<AbstractFile*> files(uint32_t type);
+    std::vector<AbstractFile*> files(const std::vector<uint32_t>& types);
     void deleteFile(int32_t id);
     // QString fileNames();
     int contains(const QString& name);

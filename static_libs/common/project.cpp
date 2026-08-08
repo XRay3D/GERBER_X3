@@ -105,7 +105,7 @@ QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
 
 QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
     uint32_t type;
-    Curves paths;
+    Geo::Polygon paths;
     stream >> type;
     stream >> paths;
     // if(App::shapePlugins().contains(type)) {
@@ -345,7 +345,7 @@ QRectF Project::getBoundingRect() {
     for(const auto& [id, filePtr]: files_) {
         if(filePtr && filePtr->itemGroup()->isVisible()) {
             for(auto&& item: *filePtr->itemGroup()) {
-                for(const Curve& curve: item->curves()) {
+                for(const Geo::Polyline& curve: item->curves()) {
                     if(rect.isNull())
                         rect = curve.boundingRect();
                     else
@@ -393,9 +393,9 @@ bool Project::reload(int32_t id, AbstractFile* file) {
     return false;
 }
 
-mvector<AbstractFile*> Project::files(uint32_t type) {
+std::vector<AbstractFile*> Project::files(uint32_t type) {
     std::lock_guard _{mutex};
-    mvector<AbstractFile*> rfiles;
+    std::vector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for(const auto& [id, sp]: files_)
         if(sp && sp->type() == type)
@@ -404,9 +404,9 @@ mvector<AbstractFile*> Project::files(uint32_t type) {
     return rfiles;
 }
 
-mvector<AbstractFile*> Project::files(const mvector<uint32_t>& types) {
+std::vector<AbstractFile*> Project::files(const std::vector<uint32_t>& types) {
     std::lock_guard _{mutex};
-    mvector<AbstractFile*> rfiles;
+    std::vector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for(auto type: types) {
         for(const auto& [id, sp]: files_)

@@ -42,7 +42,7 @@ DxfGo Line::toGo() const {
     // TODO ClipperOffset offset;
     // offset.AddPath(p, cl::JoinType::Round, cl::EndType::Round);
     // paths = offset.Execute(thickness * uScale);
-    Curve curve{{startPoint}, {endPoint}};
+    Geo::Polyline curve{{startPoint}, {endPoint}};
     DxfGo go{
         id, std::move(curve)
         //, paths

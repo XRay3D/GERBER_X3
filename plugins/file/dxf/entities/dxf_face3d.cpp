@@ -51,7 +51,7 @@ DxfGo Face3D::toGo() const {
 
     // В отличие от SOLID/TRACE, третья и четвертая точки 3DFACE идут по периметру грани друг за другом,
     // а не по диагонали, поэтому порядок обхода естественный: 1-2-3-4.
-    Curve poly{
+    Geo::Polyline poly{
         {firstCorner},
         {secondCorner},
         {thirdCorner},
@@ -62,7 +62,7 @@ DxfGo Face3D::toGo() const {
     if(!poly.isPositive())
         poly.reverse();
 
-    DxfGo go{id, Curve{poly}, {std::move(poly)}};
+    DxfGo go{id, Geo::Polyline{poly}, {std::move(poly)}};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Rect);
     return go;
 }

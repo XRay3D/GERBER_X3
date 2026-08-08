@@ -12,7 +12,6 @@
 
 #include "utils.h"
 #include <memory>
-#include <mvector.h>
 
 #include <QChar>
 #include <QModelIndex>
@@ -50,10 +49,10 @@ enum Type : int {
 };
 
 class Node {
-    Node& operator=(Node&&) = delete;
+    Node& operator=(Node&&)      = delete;
     Node& operator=(const Node&) = delete;
-    Node(Node&&) = delete;
-    Node(const Node&) = delete;
+    Node(Node&&)                 = delete;
+    Node(const Node&)            = delete;
 
 public:
     explicit Node(Type type);
@@ -70,10 +69,10 @@ public:
     void addChild(Node* item, Deleter::Polycy delPolycy = Deleter::Delete);
     void remove(int row);
 
-    virtual QVariant data(const QModelIndex& index, int role) const = 0;
+    virtual QVariant data(const QModelIndex& index, int role) const                 = 0;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
-    virtual void menu(QMenu& menu, View* tv) = 0;
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const                     = 0;
+    virtual void menu(QMenu& menu, View* tv)                                        = 0;
 
     virtual int32_t id() const { return id__; }
     virtual void setId(int32_t id) { id__ = id; }
@@ -86,7 +85,7 @@ public:
 protected:
     int32_t id__{-1};
     Node* parent_{nullptr};
-    mvector<std::unique_ptr<Node, Deleter>> childs;
+    std::vector<std::unique_ptr<Node, Deleter>> childs;
 };
 
 } // namespace FileTree

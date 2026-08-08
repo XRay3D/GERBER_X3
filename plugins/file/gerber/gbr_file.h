@@ -33,7 +33,7 @@ public:
 
     const Format& format() const { return format_; }
     Format& format() { return format_; }
-    Curvess& groupedPaths(Group group = CopperGroup, bool fl = false);
+    Geo::Polygons& groupedPaths(Group group = CopperGroup, bool fl = false);
     bool flashedApertures() const;
     const ApertureMap* apertures() const;
 
@@ -44,7 +44,7 @@ public:
         Components,
     };
     // AbstractFile interface
-    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
+    std::vector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
     void setItemType(int type) override;
     int32_t itemsType() const override;
     void initFrom(AbstractFile* file) override;
@@ -53,23 +53,23 @@ public:
     uint32_t type() const override { return GERBER; }
     void setColor(const QColor& color) override;
 
-    mvector<const ::GraphicObject*> graphicObjects() const override;
+    std::vector<const ::GraphicObject*> graphicObjects() const override;
     const auto& graphicObjects2() const { return graphicObjects_; };
 
 protected:
-    Curves merge() const override;
+    Geo::Polygons merge() const override;
 
 private:
     QList<Comp::Component> components_;
-    mvector<GrObject> graphicObjects_;
+    std::vector<GrObject> graphicObjects_;
     ApertureMap apertures_;
-    void grouping(PolyTree& node, Curvess* curvess);
+    void grouping(PolyTree& node, Geo::Polygons* curvess);
     Format format_;
     Group group_{};
     // Layer layer = Copper;
 
     QVector<int> rawIndex;
-    std::forward_list<Curve> checkList;
+    std::forward_list<Geo::Polyline> checkList;
     static inline File* crutch;
 
     // FileTree::Node interface

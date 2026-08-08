@@ -217,15 +217,15 @@ void Form::on_cbxFileCurrentIndexChanged() {
         qDebug() << file << file->id();
         if(!App::project().contains(file)) return;
         // auto peview = std::any_cast<Preview>(App::filePlugin(int(file->type()))->getDataForGC(file, plugin));
-        // auto peview = ui->cbxFile->currentData().value<mvector<const GraphicObject*>>();
+        // auto peview = ui->cbxFile->currentData().value<std::vector<const GraphicObject*>>();
         // for (auto* var : peview)
         // qDebug() << var->name << var->pos;
 
         using Key = std::pair<QString, bool>;
-        using Val = mvector<const GraphicObject*>;
+        using Val = std::vector<const GraphicObject*>;
         std::map<Key, Val> map;
 
-        static mvector<GraphicObject> gos;
+        static std::vector<GraphicObject> gos;
         gos = file->getDataForGC(criterias, GCType::Drill);
 
         for(auto& var: gos) {
@@ -318,8 +318,8 @@ void Form::on_cbxFileCurrentIndexChanged() {
 
 void Form::on_doubleClicked(const QModelIndex& current) {
     if(current.column() == 1) {
-        mvector<Tool::Type> tools;
-        // FIXME       tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == GCType::Profile || worckType == GCType::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
+        std::vector<Tool::Type> tools;
+        // FIXME       tools = model->isSlot(current.row()) ? std::vector<Tool::Type> {Tool::EndMill} : ((worckType == GCType::Profile || worckType == GCType::Pocket) ? std::vector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : std::vector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
         if(tdb.exec()) {
             const Tool tool(tdb.tool());
@@ -351,11 +351,11 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
                 break;
         }
 
-        mvector<Tool::Type> tools;
+        std::vector<Tool::Type> tools;
         if(flag)
-            tools = mvector<Tool::Type>{Tool::EndMill};
+            tools = std::vector<Tool::Type>{Tool::EndMill};
         else
-            tools = (worckType == GCType::Drill) ? mvector<Tool::Type>{Tool::Drill, Tool::EndMill} : mvector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
+            tools = (worckType == GCType::Drill) ? std::vector<Tool::Type>{Tool::Drill, Tool::EndMill} : std::vector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
 
         ToolDatabase tdb(this, tools);
         if(tdb.exec()) {
@@ -397,11 +397,11 @@ void Form::customContextMenuRequested(const QPoint& pos) {
             if(!fl)
                 break;
         }
-        mvector<Tool::Type> tools;
+        std::vector<Tool::Type> tools;
         if(fl)
-            tools = mvector<Tool::Type>{Tool::EndMill};
+            tools = std::vector<Tool::Type>{Tool::EndMill};
         else
-            tools = (worckType == GCType::Drill) ? mvector<Tool::Type>{Tool::Drill, Tool::EndMill} : mvector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
+            tools = (worckType == GCType::Drill) ? std::vector<Tool::Type>{Tool::Drill, Tool::EndMill} : std::vector<Tool::Type>{Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser};
         ToolDatabase tdb(this, tools);
         if(tdb.exec()) {
             const Tool tool(tdb.tool());
@@ -491,7 +491,7 @@ void Form::computePaths() {
     if(worckType == GCType::Drill) { // slots only
         struct Data {
             Paths64 paths;
-            mvector<int> toolsApertures;
+            std::vector<int> toolsApertures;
         };
 
         std::map<Tool::ID, Data> pathsMap;
@@ -533,7 +533,7 @@ void Form::computePaths() {
         struct Data {
             Path64 drillPath;
             Paths64 paths;
-            mvector<int> toolsApertures;
+            std::vector<int> toolsApertures;
         };
 
         std::map<Tool::ID, Data> pathsMap;
@@ -597,7 +597,7 @@ void Form::computePaths() {
                     GCode::Params{
                                   App::toolHolder().tool(toolId),
                                   dsbxDepth->value(),
-                                  Curves{toCurve(val.drillPath)},
+                                  Geo::Polygon{toCurve(val.drillPath)},
                                   }
                 };
 

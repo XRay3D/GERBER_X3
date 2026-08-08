@@ -86,10 +86,10 @@ protected:
     void startPath(const QPointF& point);
     void endPath();
 
-    Curvess mirrorAndOffsetCurves(const QPointF& offset);
-    Curves mirrorAndOffsetCurves(const QPointF& offset, Curves paths_);
+    std::vector<Geo::Polylines> mirrorAndOffsetCurves(const QPointF& offset);
+    Geo::Polylines mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines paths_);
 
-    mvector<QSharedPointer<QColor>> debugColor;
+    std::vector<QSharedPointer<QColor>> debugColor;
 
     enum {
         AlwaysG,
@@ -113,20 +113,20 @@ protected:
         Size
     };
 
-    Curves g0path_;
+    Geo::Polylines g0path_;
     double z_{};
 
     static inline QString lastDir;
     static inline bool redirected;
     static inline constexpr auto CMD_LIST = u"GXYZIJSF"_sv;
 
-    mvector<double> getDepths();
+    std::vector<double> getDepths();
 
     bool formatFlags[Size]{};
     QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
 
-    std::vector<QString> savePath(const Curve& curve, double perimeter = {}, double depth = {});
+    std::vector<QString> savePath(const Geo::Polyline& curve, double perimeter = {}, double depth = {});
 
     QString formated(const std::vector<QString>& data);
 
@@ -140,8 +140,8 @@ protected:
     QString g1();
     QString g2();
     QString g3();
-    void extracted(const geo::Vertex& v);
-    QString g(const geo::Vertex& v);
+    void extracted(const Geo::Vertex& v);
+    QString g(const Geo::Vertex& v);
 
     // QString i(double val) { return u'I' + format(val); }
     // QString j(double val) { return u'J' + format(val); }

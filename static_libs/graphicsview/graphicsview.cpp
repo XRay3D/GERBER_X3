@@ -710,7 +710,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     // Single pass over the finest grid: every 5th tick also belongs to the
     // medium grid, every 10th also to the coarse grid, so classifying by
     // index replaces the old float-hashed dedup set entirely.
-    mvector<QLineF> lines[3]; // 0 = Grid01, 1 = Grid05, 2 = Grid10
+    std::vector<QLineF> lines[3]; // 0 = Grid01, 1 = Grid05, 2 = Grid10
     const auto gridStep = App::settings().gridStep(getScale());
 
     const auto tickCountX = static_cast<size_t>(std::floor((rect.right() - rect.left()) / gridStep)) + 2;
