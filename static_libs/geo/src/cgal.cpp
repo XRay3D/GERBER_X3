@@ -2,6 +2,7 @@
 #include "geo/cancel.h"
 #include "offsetcapsules.h"
 
+#include <QDebug>
 #include <QPainterPath>
 
 #include <algorithm>
@@ -127,10 +128,19 @@ unsigned workerCount() {
 // связную кляксу вместо россыпи по всему чертежу, а слияние двух соседних
 // листьев правит лишь узкую полосу на их стыке. На тестовом чертеже один
 // только порядок снимает четверть времени даже в один поток.
-void sortSpatially(std::vector<GPoly>& parts) {
+//
+// Кусок -- контур (GPoly) либо целое тело с дырками (GPolyWH); габарит у
+// второго берётся по внешней границе, дырки его расширить не могут.
+CGAL::Bbox_2 boxOf(const GPoly& part) { return part.bbox(); }
+CGAL::Bbox_2 boxOf(const GPolyWH& part) {
+    return part.is_unbounded() ? CGAL::Bbox_2{} : part.outer_boundary().bbox();
+}
+
+template <typename Part>
+void sortSpatially(std::vector<Part>& parts) {
     std::vector<CGAL::Bbox_2> boxes;
     boxes.reserve(parts.size());
-    for(const GPoly& part: parts) boxes.push_back(part.bbox());
+    for(const Part& part: parts) boxes.push_back(boxOf(part));
 
     CGAL::Bbox_2 total = boxes.front();
     for(const CGAL::Bbox_2& box: boxes) total += box;
@@ -161,14 +171,14 @@ void sortSpatially(std::vector<GPoly>& parts) {
     }
     std::ranges::sort(order);
 
-    std::vector<GPoly> sorted;
+    std::vector<Part> sorted;
     sorted.reserve(parts.size());
     for(const auto& [key, index]: order) sorted.push_back(std::move(parts[index]));
     parts = std::move(sorted);
 }
 
 // Куски Минковского ОДНОЙ кривой точного контура с кругом радиуса d.
-void appendCapsules(std::vector<Polyline>& out, const XCurve& xc, double d) {
+void appendCapsules(Polylines& out, const XCurve& xc, double d) {
     const CurveGeometry curve = geometryOf(xc);
 
     // Диск в начале кривой -- скругление стыка. Конец каждой кривой
@@ -194,6 +204,21 @@ std::optional<GPoly> toGPoly(const Polyline& poly) {
     // нет, а точный свип на такой «границе» падает изнутри CGAL, не
     // доходя до нашей же проверки валидности.
     if(poly.size() == 2 && poly[0].bulge == 0.0 && poly[1].bulge == 0.0) return std::nullopt;
+
+    // Сливер разбиения, доживший до double. Точное разбиение упирается в
+    // касания (окружность, задевающая грань выреза, -- обычное дело у
+    // апертур-макросов), и на выдаче наружу такое касание округляется в
+    // микроконтур шириной в наноны. Площади у него нет, зато точная кривая,
+    // построенная по трём почти совпавшим точкам, вырождается -- и CGAL
+    // падает на ней ИЗНУТРИ orientation(), не доходя до проверки валидности
+    // ниже.
+    //
+    // Отбор именно по ПЛОЩАДИ, а не по нулевому прогибу или размаху: у
+    // сливера и то и другое ненулевое, просто ничтожное, а порог в квадрат
+    // допуска сварки (1e-18 мм², то есть аттометр в квадрате) ни одну
+    // настоящую деталь не заденет.
+    constexpr double degenerateArea = weldTolerance * weldTolerance;
+    if(std::abs(poly.signedArea()) < degenerateArea) return std::nullopt;
 
     const Traits traits;
     auto makeX = traits.make_x_monotone_2_object();
@@ -249,6 +274,23 @@ std::optional<GPoly> toGPoly(const Polyline& poly) {
     // Именно от этого и спасает хранение геометрии в точном домене --
     // обёртки Polygon/Polygons (DxfPolygon.h) существуют ради него.
     if(!CGAL::is_valid_unknown_polygon(pgn, traits)) return std::nullopt;
+
+    // Редкий, но настоящий сбой построения дуги по трём точкам: третья точка
+    // (arcMidpoint) сама по себе верна, но конструктор CGAL, получив её
+    // вместе с концами, изредка собирает БОЛЬШУЮ дугу вместо малой --
+    // почему именно, не выяснено, воспроизводится только на некоторых
+    // контурах после переноса. Результат остаётся ПРОСТЫМ многоугольником
+    // (is_valid его не ловит), но с площадью, разительно отличной от той,
+    // что даёт сам bulge-вид его же собственной, не зависящей от CGAL
+    // формулой (Polyline::area()). Несовпадение -- сигнал, что построение
+    // сорвалось; отбраковываем контур тем же путём, что и невалидный, --
+    // лучше потерять деталь, чем залить чужую дырку медью.
+    const double exactArea  = std::abs(Cgal::signedArea(pgn));
+    const double bulgeArea  = std::abs(poly.area());
+    const double areaScale  = std::max(exactArea, bulgeArea);
+    if(areaScale > 0.0 && std::abs(exactArea - bulgeArea) > 1e-6 * areaScale)
+        return std::nullopt;
+
     return pgn;
 }
 
@@ -317,7 +359,11 @@ void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body
         if(failure) std::rethrow_exception(failure);
 }
 
-void joinAll(PolySet& region, std::vector<GPoly> parts) {
+// Куски бывают двух видов -- голые контуры и целые тела с дырками, -- а
+// разбор один и тот же: у General_polygon_set_2 join() принимает и то и
+// другое. Отсюда шаблон с двумя тонкими обёртками ниже.
+template <typename Part>
+void joinAllImpl(PolySet& region, std::vector<Part> parts) {
     if(parts.empty()) return;
 
     const std::size_t n      = parts.size();
@@ -386,6 +432,77 @@ void joinAll(PolySet& region, std::vector<GPoly> parts) {
         if(failure) std::rethrow_exception(failure);
 }
 
+void joinAll(PolySet& region, std::vector<GPoly> parts) {
+    joinAllImpl(region, std::move(parts));
+}
+
+void joinAll(PolySet& region, std::vector<GPolyWH> parts) {
+    joinAllImpl(region, std::move(parts));
+}
+
+namespace {
+
+// Точка кривой (source()/target()) хранит координаты как Sqrt_extension --
+// у пересечения дуги с дугой они, вообще говоря, иррациональны (корень из
+// рационального). Сдвиг на рациональные (dx, dy) складывается с этим числом
+// как есть, не трогая сам корень: a + b*sqrt(r) + dx = (a+dx) + b*sqrt(r).
+Traits::Point_2 shiftPoint(const Traits::Point_2& p, const K::FT& dx, const K::FT& dy) {
+    return Traits::Point_2(p.x() + dx, p.y() + dy);
+}
+
+// Одна x-монотонная кривая точного контура, сдвинутая на (dx, dy). Прямая
+// пересобирается по СВОИМ коэффициентам (a*x+b*y+c=0 переходит в
+// a*x+b*y+(c-a*dx-b*dy)=0 -- школьная подстановка x=x'-dx, y=y'-dy), дуга --
+// по центру опорной окружности; радиус, ориентация и то, какая это ветвь
+// окружности, переносятся без изменений -- сдвиг их не трогает вовсе.
+XCurve translateCurve(const XCurve& xc, const K::FT& dx, const K::FT& dy) {
+    const Traits::Point_2 src = shiftPoint(xc.source(), dx, dy);
+    const Traits::Point_2 tgt = shiftPoint(xc.target(), dx, dy);
+
+    if(xc.is_linear()) {
+        const K::Line_2& line = xc.supporting_line();
+        const K::Line_2 shifted(line.a(), line.b(), line.c() - line.a() * dx - line.b() * dy);
+        return XCurve(shifted, src, tgt);
+    }
+
+    const K::Circle_2& circ = xc.supporting_circle();
+    const K::Point_2 center(circ.center().x() + dx, circ.center().y() + dy);
+    const K::Circle_2 shifted(center, circ.squared_radius(), circ.orientation());
+    return XCurve(shifted, src, tgt, xc.orientation());
+}
+
+GPoly translatePoly(const GPoly& pgn, const K::FT& dx, const K::FT& dy) {
+    std::vector<XCurve> shifted;
+    shifted.reserve(pgn.size());
+    for(auto it = pgn.curves_begin(); it != pgn.curves_end(); ++it)
+        shifted.push_back(translateCurve(*it, dx, dy));
+    return GPoly(shifted.begin(), shifted.end());
+}
+
+} // namespace
+
+GPolyWH translate(const GPolyWH& pgn, double dx, double dy) {
+    const K::FT fdx(dx), fdy(dy);
+
+    std::vector<GPoly> holes;
+    holes.reserve(pgn.number_of_holes());
+    for(auto it = pgn.holes_begin(); it != pgn.holes_end(); ++it)
+        holes.push_back(translatePoly(*it, fdx, fdy));
+
+    // Неограниченный кусок (дополнение региона) внешней границы не имеет --
+    // сдвигать нечего, дырки при этом переносятся как обычно: они и задают
+    // собой всё, чем такой кусок отличается от целой плоскости.
+    // is_unbounded() -- это и есть пустая внешняя граница, поэтому её
+    // достаточно оставить пустой (конструктор по умолчанию).
+    if(pgn.is_unbounded()) {
+        GPolyWH result;
+        for(GPoly& hole: holes) result.add_hole(std::move(hole));
+        return result;
+    }
+
+    return GPolyWH(translatePoly(pgn.outer_boundary(), fdx, fdy), holes.begin(), holes.end());
+}
+
 void appendToPath(QPainterPath& path, const GPoly& pgn) {
     bool first = true;
     for(auto it = pgn.curves_begin(); it != pgn.curves_end(); ++it) {
@@ -409,6 +526,45 @@ void appendToPath(QPainterPath& path, const GPoly& pgn) {
         path.arcTo(box, -start * toDeg, -curve.sweep * toDeg);
     }
     if(!first) path.closeSubpath();
+}
+
+QRectF boundingRect(const GPoly& pgn) {
+    // Габарит СВОЙ, а не CGAL-овский. У того (Circle_segment_2::bbox) дуга
+    // всегда растянута до края опорной окружности: у верхней дуги верх
+    // берётся по макушке круга, у нижней низ -- по донышку, попадают они в
+    // саму дугу или нет. Четверть окружности отдаёт габарит целого круга --
+    // и штрих вдоль дуги «вырастает» на её радиус, хотя на экране его там
+    // нет.
+    //
+    // Здесь x-монотонность кривой доведена до конца: по x крайние точки --
+    // это концы, а по y к ним добавляется макушка (или донышко) окружности,
+    // и только если она попала в размах кривой по x.
+    bool empty = true;
+    double xmin{}, xmax{}, ymin{}, ymax{};
+    auto grow = [&](QPointF point) {
+        if(empty) {
+            xmin = xmax = point.x(), ymin = ymax = point.y(), empty = false;
+            return;
+        }
+        xmin = std::min(xmin, point.x()), xmax = std::max(xmax, point.x());
+        ymin = std::min(ymin, point.y()), ymax = std::max(ymax, point.y());
+    };
+
+    for(auto it = pgn.curves_begin(); it != pgn.curves_end(); ++it) {
+        const CurveGeometry curve = geometryOf(*it);
+        grow(curve.from);
+        grow(curve.to);
+        if(curve.linear) continue;
+        const double left  = std::min(curve.from.x(), curve.to.x());
+        const double right = std::max(curve.from.x(), curve.to.x());
+        if(curve.center.x() <= left || curve.center.x() >= right) continue;
+        // Какая из ветвей -- тем же признаком, что и в crossesRayUp.
+        const bool upper = (curve.sweep > 0.0) == (curve.to.x() < curve.from.x());
+        grow({curve.center.x(), curve.center.y() + (upper ? curve.radius : -curve.radius)});
+    }
+
+    if(empty) return {};
+    return QRectF{QPointF{xmin, ymin}, QPointF{xmax, ymax}};
 }
 
 double signedArea(const GPoly& pgn) {
@@ -470,7 +626,7 @@ std::vector<GPoly> boundaryCapsules(const PolySet& region, double d) {
     std::vector<GPolyWH> parts;
     region.polygons_with_holes(std::back_inserter(parts));
 
-    std::vector<Polyline> capsules;
+    Polylines capsules;
     auto addContour = [&](const GPoly& contour) {
         for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it)
             appendCapsules(capsules, *it, d);

@@ -27,13 +27,13 @@
 #include "geo/polyline.h"
 
 #include <memory>
+#include <span>
 #include <vector>
 
 class QPainterPath;
 class QDataStream;
 
 namespace Geo {
-#if 1
 
 // Возьмёт ли точная геометрия такой контур: замкнут, невырожден и не
 // касается сам себя. Ровно этот отбор идёт внутри Polygons -- контур, не
@@ -84,27 +84,53 @@ public:
     QRectF boundingRect() const;
     bool contains(QPointF point) const;
 
-    // Покрывает ли полигон всю плоскость за вычетом своих дырок. Таким его
-    // делает инверсия; внешней границы у него нет, а с ней нет ни габарита,
-    // ни пути Qt (см. inverted()).
+    // Покрывает ли полигон всю плоскость за вычетом своих дырок. Внешней
+    // границы у него нет, а с ней нет ни габарита, ни пути Qt.
     bool isUnbounded() const;
 
-    // Дополнение: всё, что ВНЕ полигона. Результат -- регион, а не полигон:
-    // дополнение тела с дырками -- это неограниченная часть плоскости ПЛЮС
-    // по отдельному телу на каждую дырку, а одним Polygon_with_holes_2
-    // столько кусков не выразить.
-    Polygons inverted() const;
+    // Дополнение, посчитанное честно: всё, что ВНЕ полигона. Результат --
+    // РЕГИОН, а не полигон: дополнение тела с дырками -- это неограниченная
+    // часть плоскости ПЛЮС по отдельному телу на каждую дырку, а одним
+    // Polygon_with_holes_2 столько кусков не выразить.
+    Polygons complement() const;
+
+    // Пометка «это ПУСТОТА, а не тело» -- ленивая инверсия. Ничего не
+    // считает: invert() только переключает флаг, поэтому она бесплатна и
+    // обратима без потерь.
+    //
+    // Флаг видно снаружи всюду, где форма покидает точный домен:
+    //   * outer()/holes()/contours() отдают контуры ОБРАТНОГО обхода --
+    //     именно так плоский список полилиний и выражает пустоту, так что
+    //     Polygons{polygon.contours()} разберёт её сам, без особого случая;
+    //   * при сборке региона (конструкторы Polygons) такой полигон
+    //     ВЫЧИТАЕТСЯ из прочих, а не объединяется с ними;
+    //   * contains() отвечает наоборот;
+    //   * toPath() строит путь встречного направления -- добавленный к
+    //     чужому пути с WindingFill, он из него вычтется;
+    //   * сериализация флаг сохраняет.
+    // Габарит, периметр и площадь не меняются: граница-то та же самая, и
+    // empty() тоже говорит о ХРАНИМОМ теле, а не о том, что оно означает.
+    //
+    // Это НЕ ленивый Polygons::invert(). Тот считает настоящее дополнение и
+    // уходит в неограниченный регион, а здесь помечена пустота -- и регион
+    // из одной лишь пустоты пуст, вычитать её не из чего. Разница
+    // неустранима: обратный обход контура означает «дырка внутри чьего-то
+    // тела», а не «вся плоскость снаружи», и в плоский список полилиний
+    // настоящее дополнение не укладывается вовсе. Нужно именно оно --
+    // complement().
+    bool isInverted() const;
+    Polygon& invert();
 
     // Путь с WindingFill: дырки идут навстречу внешней границе и
     // вычитаются сами.
     QPainterPath toPath() const;
 
     struct Impl;
-    explicit Polygon(std::unique_ptr<Impl> impl); // из точного представления, внутренний
+    explicit Polygon(Impl&& impl); // из точного представления, внутренний
     const Impl& impl() const { return *impl_; }
 
 private:
-    std::unique_ptr<Impl> impl_;
+    std::indirect<Impl> impl_;
 };
 
 // Набор полигонов -- регион (в терминах CGAL, General_polygon_set_2), а не
@@ -122,6 +148,17 @@ public:
 
     Polygons(std::initializer_list<Polygon> polygons);
     explicit Polygons(const Polygon& polygon);
+
+    // Из готовых полигонов -- объединением, деревом слияний и в несколько
+    // потоков. Это ЕДИНСТВЕННЫЙ способ собрать регион из многих кусков, не
+    // теряя их вложенности: у каждого полигона его дырки известны точно, а
+    // в плоском списке контуров (конструктор ниже) вложенность выражена одной
+    // ориентацией -- и дырка одного тела вычитает чужое тело, лежащее внутри
+    // неё. Кольцо с окружностью внутри (репер на плате) так и пропадает.
+    //
+    // Помеченные пустотой (isInverted) ВЫЧИТАЮТСЯ, и все разом после тел --
+    // как и в конструкторе от initializer_list.
+    explicit Polygons(std::span<const Polygon> polygons);
 
     // Из плоского списка контуров: вложенность задаёт ориентация (контур с
     // отрицательной площадью -- пустота внутри чьего-то тела), ровно как
@@ -186,13 +223,26 @@ public:
     bool isUnbounded() const;
 
     struct Impl;
-    explicit Polygons(std::unique_ptr<Impl> impl); // из точного представления, внутренний
+    explicit Polygons(Impl&& impl); // из точного представления, внутренний
     Impl& impl() { return *impl_; }
     const Impl& impl() const { return *impl_; }
 
 private:
-    std::unique_ptr<Impl> impl_;
+    std::indirect<Impl> impl_;
 };
+
+// Перенос ТЕЛА в точном домене -- без выхода в double и обратно: прямые и
+// окружности сдвигаются по своим коэффициентам (по центру у окружности), а
+// не пересчитываются заново из округлённых координат. У Geo::transformed()
+// (geo/util.h) на редких контурах (три опорные точки дуги почти
+// коллинеарны) обратная сборка дуги по трём точкам после округления в
+// double изредка берёт не ту ветвь окружности -- Geo::transformed() сама
+// пользуется этим путём, когда трансформация оказывается чистым переносом
+// (самый частый случай -- перенос вспышки апертуры в точку на плате), так
+// что вызывать эти функции напрямую нужно только тем, кому нужен именно
+// перенос, а не общая трансформация.
+Polygon translated(const Polygon& polygon, QPointF offset);
+Polygons translated(const Polygons& polygons, QPointF offset);
 
 // Сериализация -- через КОНТУРЫ, а не через точное представление: последнее
 // рационально (числа неограниченной длины), и укладывать его в поток незачем
@@ -208,96 +258,5 @@ QDataStream& operator>>(QDataStream& stream, Polygon& polygon);
 QDataStream& operator<<(QDataStream& stream, const Polygons& polygons);
 QDataStream& operator>>(QDataStream& stream, Polygons& polygons);
 
-#else
-// Возьмёт ли точная геометрия такой контур: замкнут, невырожден и не
-// касается сам себя. Ровно этот отбор идёт внутри Polygons -- контур, не
-// прошедший его, в регион просто не попадает.
-//
-// Наружу вынесено ради тех, кто контуры ПРАВИТ (см. geo/arcrecovery.h): им
-// нужно узнать, не сделала ли правка контур непригодным, не таща к себе
-// заголовки CGAL.
-bool isExactContour(const Polyline& contour);
-
-// Полигон с отверстиями: одна внешняя граница плюс сколько угодно дырок
-// внутри неё. Плоский список полилиний такого не выражает -- там дырка
-// такой же контур, как всё прочее, и связывать её со «своим» телом
-// приходится вызывающему.
-//
-// Канон плоского вида: внешняя граница обходится против часовой стрелки
-// (signedArea > 0), дырки -- по часовой. При нём toPath() с WindingFill
-// заливает ровно тело полигона.
-class Polygon {
-public:
-    Polygon();
-    ~Polygon();
-    Polygon(const Polygon&);
-    Polygon(Polygon&&) noexcept;
-    Polygon& operator=(const Polygon&);
-    Polygon& operator=(Polygon&&) noexcept;
-
-    // Путь с WindingFill: дырки идут навстречу внешней границе и
-    // вычитаются сами.
-    QPainterPath toPath() const;
-
-    struct Impl;
-    explicit Polygon(Impl&& impl); // из точного представления, внутренний
-
-private:
-    std::indirect<Impl> impl_;
-};
-
-// Набор полигонов -- регион (в терминах CGAL, General_polygon_set_2), а не
-// просто вектор: булевы операции над ним точные и выполняются НЕ выходя из
-// CGAL-домена, поэтому цепочку операций можно строить сколь угодно длинной
-// без потери точности.
-class Polygons {
-public:
-    Polygons();
-    ~Polygons();
-    Polygons(const Polygons&);
-    Polygons(Polygons&&) noexcept;
-    Polygons& operator=(const Polygons&);
-    Polygons& operator=(Polygons&&) noexcept;
-
-    // Из плоского списка контуров: вложенность задаёт ориентация (контур с
-    // отрицательной площадью -- пустота внутри чьего-то тела), ровно как
-    // её и выражает DXF.
-    explicit Polygons(const Polylines& contours);
-
-    // Разложение региона на полигоны с отверстиями -- материализуется при
-    // первом обращении и кэшируется.
-    const std::vector<Polygon>& all() const;
-    auto begin() const { return all().begin(); }
-    auto end() const { return all().end(); }
-
-    QPainterPath toPath() const;
-
-    // Сумма Минковского ГРАНИЦЫ региона с кругом радиуса `radius` -- полоса
-    // толщиной 2*radius вдоль всей границы, и внешней, и границ отверстий.
-    //
-    // Это общий кирпич обоих офсетов сразу (см. geo/boolean.h): раздутый
-    // регион -- это он же, объединённый с самим регионом, а сжатый --
-    // вычтенный из него. Точка остаётся в сжатом регионе ровно тогда, когда
-    // она в регионе и дальше radius от его границы, то есть вне полосы, --
-    // так что вычитание и есть эрозия, без всякого приближения.
-    Polygons boundaryBand(double radius) const;
-
-    // Булевы операции -- точные, целиком внутри CGAL-домена.
-    Polygons& operator|=(const Polygons& other); // объединение
-    Polygons& operator&=(const Polygons& other); // пересечение
-    Polygons& operator-=(const Polygons& other); // разность
-    Polygons& operator^=(const Polygons& other); // симметрическая разность
-
-    friend Polygons operator|(Polygons l, const Polygons& r) { return l |= r; }
-    friend Polygons operator&(Polygons l, const Polygons& r) { return l &= r; }
-    friend Polygons operator-(Polygons l, const Polygons& r) { return l -= r; }
-    friend Polygons operator^(Polygons l, const Polygons& r) { return l ^= r; }
-
-    struct Impl;
-
-private:
-    std::indirect<Impl> impl_;
-};
-#endif
 
 } // namespace Geo

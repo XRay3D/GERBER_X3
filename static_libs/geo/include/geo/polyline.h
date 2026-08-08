@@ -54,6 +54,7 @@ struct Polyline : std::vector<Vertex> {
 
     // Builds the QPainterPath for this polyline, expanding bulges into arcs.
     QPainterPath toPath() const;
+    operator QPolygonF() const;
 
     // Разворачивает полилинию в обратном направлении на месте: порядок
     // вершин переворачивается, а прогибы (bulge) переносятся на новый
@@ -93,7 +94,13 @@ struct Polyline : std::vector<Vertex> {
     bool isPositive() const { return signedArea() > 0; }
 };
 
-using Polylines = std::vector<Polyline>;
+struct Polylines : std::vector<Polyline> {
+    using vector = std::vector<Polyline>;
+    using vector::vector;
+    using vector::operator=;
+
+    QPainterPath toPath() const;
+};
 
 // Сериализация. Формат -- ровно хранимое состояние: вершина это точка плюс
 // прогиб, полилиния -- счётчик, флаги и вершины. Ни габарит, ни площадь не

@@ -128,6 +128,11 @@ QPainterPath Polyline::toPath() const {
     return path;
 }
 
+Polyline::operator QPolygonF() const {
+    auto tr = QTransform::fromScale(100, 100);
+    return tr.inverted().map(toPath().toFillPolygon(tr));
+}
+
 void Polyline::reverse() {
     if(size() < 2) return;
 
@@ -256,6 +261,13 @@ double Polyline::perimeter() const {
         total += segmentLength(back(), front());
 
     return total;
+}
+
+QPainterPath Polylines::toPath() const {
+    QPainterPath path;
+    for(const Polyline& polyline: *this)
+        path.addPath(polyline.toPath());
+    return path;
 }
 
 // ---------------------------------------------------------------------------

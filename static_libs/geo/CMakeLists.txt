@@ -54,6 +54,17 @@ else()
   target_link_libraries(Geo PRIVATE gmp mpfr)
 endif()
 
+# CGAL 6.2 вставляет в объектный файл inline-скрипт автозагрузки своих
+# печатальщиков для gdb (include/CGAL/gdb_autoload.h) -- секцией
+# .debug_gdb_scripts с флагами MERGE|STRINGS, но БЕЗ завершающего нуля.
+# GNU ld и lld это терпят, а mold отказывается линковать вовсе:
+# "string is not null terminated". Поскольку CGAL компилируется только здесь,
+# хватает выключателя на этой цели -- и только для mold, чтобы на прочих
+# линкерах печатальщики остались на месте. Убрать, когда CGAL починит секцию.
+if(CMAKE_LINKER_TYPE STREQUAL "MOLD")
+  target_compile_definitions(Geo PRIVATE CGAL_NO_GDB_AUTOLOAD)
+endif()
+
 # Объединение регионов идёт в несколько потоков (joinAll в src/cgal.cpp).
 # Без CGAL_HAS_THREADS CGAL считает себя однопоточным и правит счётчики
 # ссылок точных чисел без атомарности -- гонка на ровном месте. Boost обычно

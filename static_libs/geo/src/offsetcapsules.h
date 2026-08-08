@@ -65,10 +65,10 @@ inline std::optional<std::pair<QPointF, double>> fullCircleOf(const Polyline& po
 
 // Тело одного ребра (from -> to, прогиб у from), раздутое на d. Торцы --
 // прямые; скругления концов дают диски вершин, см. capsulesFor(poly, d).
-inline std::vector<Polyline> capsulesFor(const Vertex& from, QPointF to, double d) {
-    std::vector<Polyline> out;
-    const double dx = to.x() - from.x();
-    const double dy = to.y() - from.y();
+inline Polylines capsulesFor(const Vertex& from, QPointF to, double d) {
+    Polylines out;
+    const double dx    = to.x() - from.x();
+    const double dy    = to.y() - from.y();
     const double chord = std::hypot(dx, dy);
 
     if(chord < 1e-12) return out; // вырожденное ребро: хватит дисков вершин
@@ -88,9 +88,9 @@ inline std::vector<Polyline> capsulesFor(const Vertex& from, QPointF to, double 
     }
 
     // Дуговое ребро -- кольцевой сектор между R0 - d и R0 + d.
-    const double theta = 4.0 * std::atan(from.bulge);
+    const double theta   = 4.0 * std::atan(from.bulge);
     const double sagitta = from.bulge * chord / 2.0;
-    const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
+    const double radius  = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
     const QPointF n(dy / chord, -dx / chord);
     const QPointF mid((QPointF(from) + to) / 2.0);
     const QPointF center = mid + n * (sagitta - std::copysign(radius, from.bulge));
@@ -100,10 +100,10 @@ inline std::vector<Polyline> capsulesFor(const Vertex& from, QPointF to, double 
         // раздуваем каждую прямым ребром; диски промежуточных стыков --
         // явно, их больше некому добавить.
         const int pieces = std::max(2, static_cast<int>(std::ceil(std::abs(theta) / 0.3)));
-        const double a0 = std::atan2(from.y() - center.y(), from.x() - center.x());
+        const double a0  = std::atan2(from.y() - center.y(), from.x() - center.x());
         QPointF prev{from};
         for(int i = 1; i <= pieces; ++i) {
-            const double a = a0 + theta * i / pieces;
+            const double a  = a0 + theta * i / pieces;
             const QPointF p = i == pieces
                 ? to
                 : QPointF(center.x() + radius * std::cos(a), center.y() + radius * std::sin(a));
@@ -116,7 +116,7 @@ inline std::vector<Polyline> capsulesFor(const Vertex& from, QPointF to, double 
 
     const double a0 = std::atan2(from.y() - center.y(), from.x() - center.x());
     const double a1 = a0 + theta;
-    auto at = [&](double a, double r) {
+    auto at         = [&](double a, double r) {
         return QPointF(center.x() + r * std::cos(a), center.y() + r * std::sin(a));
     };
 
@@ -132,8 +132,8 @@ inline std::vector<Polyline> capsulesFor(const Vertex& from, QPointF to, double 
 
 // Все куски офсета одной полилинии: тела рёбер плюс диск вокруг КАЖДОЙ
 // вершины. Сам полигон замкнутой полилинии вызывающий добавляет отдельно.
-inline std::vector<Polyline> capsulesFor(const Polyline& poly, double d) {
-    std::vector<Polyline> out;
+inline Polylines capsulesFor(const Polyline& poly, double d) {
+    Polylines out;
     if(poly.empty()) return out;
     for(const Vertex& v: poly) out.push_back(disc(v, d));
     for(std::size_t i = 0; i + 1 < poly.size(); ++i)
