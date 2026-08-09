@@ -308,7 +308,7 @@ Geo::Polylines File::mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines
         const double k = Gi::Pin::minX() + Gi::Pin::maxX();
         if(toolType != Tool::Laser) r::for_each(curves, &Geo::Polyline::reverse);
         for(Geo::Vertex& v: v::join(curves)) {
-            v.rx() = -v.x() + k;
+            v.rx()  = -v.x() + k;
             v.bulge = -v.bulge; // зеркало разворачивает обход дуги
         }
     }
@@ -324,7 +324,7 @@ std::vector<double> File::getDepths() {
     if(gDepth < tool.passDepth() || qFuzzyCompare(gDepth, tool.passDepth()))
         return {-gDepth - tool.getDepth()};
 
-    const int count = static_cast<int>(ceil(gDepth / tool.passDepth()));
+    const int count    = static_cast<int>(ceil(gDepth / tool.passDepth()));
     const double depth = gDepth / count;
     std::vector<double> depths(count);
     for(int i{}; i < count; ++i)
@@ -347,16 +347,30 @@ std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter
         } else
             return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
     };
-    if(depth && perimeter) {
-        double zk = depth - z_;
-        double perimeter = curve.perimeter();
-        for(auto&& [fr, to]: Geo::segments(curve)) {
-            z_ += Geo::segmentLength(fr, to) / perimeter * zk;
-            lines.emplace_back(getLine(fr, to));
-        }
-    } else {
-        for(auto&& [fr, to]: Geo::segments(curve))
-            lines.emplace_back(getLine(fr, to));
+    // Ход, не выражающийся в выводе, ПРОПУСКАЕТСЯ, а не пишется как есть.
+    // format даёт три значащие цифры, и у сегмента короче этого разрешения
+    // (точный домен, переведённый в прогибы, оставляет обрывки в десятки
+    // нанометров) X и Y округляются до прежних, formated их подавляет как
+    // неизменившиеся -- и от дуги остаются одни I/J. Строка `G2 I.. J..` без
+    // координат означает для станка ПОЛНЫЙ КРУГ: это и есть завитки на стыках.
+    //
+    // Сравнение идёт с последней НАПИСАННОЙ точкой, а не с началом сегмента:
+    // подряд идущие обрывки иначе накопились бы в заметный сдвиг.
+    QPointF last = curve.front();
+    auto representable = [&last](const Geo::Vertex& to) {
+        return format(to.x()) != format(last.x()) || format(to.y()) != format(last.y());
+    };
+
+    // Z по спирали набирается на ВСЕХ сегментах, включая пропущенные, иначе
+    // проход не дойдёт до нужной глубины.
+    const double zk = depth && perimeter ? depth - z_ : 0.0;
+    const double len = zk ? curve.perimeter() : 0.0;
+
+    for(auto&& [fr, to]: Geo::segments(curve)) {
+        if(zk) z_ += Geo::segmentLength(fr, to) / len * zk;
+        if(!representable(to)) continue;
+        lines.emplace_back(getLine(fr, to));
+        last = to;
     }
     return lines;
 }
@@ -471,7 +485,7 @@ void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
 
     const std::vector<double> depths = getDepths();
-    double diameter = tool().diameter();
+    double diameter                  = tool().diameter();
 
     std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
@@ -507,23 +521,42 @@ void File::saveMillingProfile(const QPointF& offset) {
     const std::vector<double> depths(getDepths());
     std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
+    // Спиральное врезание можно выключить: тогда на каждый уровень идёт
+    // вертикальный плунж, а финальной подчистки дна не нужно вовсе -- уступа от
+    // спирали не остаётся.
+    const bool spiral = gcp.spiralRamp();
+
     for(const Geo::Polylines& paths: pathss) {
         if(paths.size() == 1) {
             const Geo::Polyline& path = paths.front();
-            double perimeter = path.perimeter();
+            double perimeter          = path.perimeter();
             if(paths.front().isClosed()) { // Spiral
                 startPath(path.front());
                 for(double depth: depths)
-                    lines_.append_range(savePath(path, perimeter, depth));
-                lines_.append_range(savePath(path)); // Проход без спирали.
+                    if(spiral)
+                        lines_.append_range(savePath(path, perimeter, depth));
+                    else {
+                        lines_.emplace_back(formated({g1(), z(z_ = depth), strPlungeFeed}));
+                        lines_.append_range(savePath(path));
+                    }
+                if(spiral)
+                    lines_.append_range(savePath(path)); // Проход без спирали.
                 endPath();
             } else { // Zigzag
                 startPath(path.front());
                 const Geo::Polyline reversed = paths.front().reversed();
                 uint i{};
                 for(double depth: depths)
-                    lines_.append_range(savePath(i++ & 1u ? reversed : path, perimeter, depth));
-                lines_.append_range(savePath(i & 1u ? reversed : path)); // Проход без спирали.
+                    if(spiral)
+                        lines_.append_range(savePath(i++ & 1u ? reversed : path, perimeter, depth));
+                    else {
+                        // Направление всё равно чередуем: врезаться дешевле там,
+                        // где инструмент уже стоит.
+                        lines_.emplace_back(formated({g1(), z(z_ = depth), strPlungeFeed}));
+                        lines_.append_range(savePath(i++ & 1u ? reversed : path));
+                    }
+                if(spiral)
+                    lines_.append_range(savePath(i & 1u ? reversed : path)); // Проход без спирали.
                 endPath();
             }
         } else {
@@ -631,7 +664,7 @@ void File::createGiPocket() {
 
     Gi::Item* item;
     if(pocketAreaCurves.size()) {
-        item = new Gi::DataFill{pocketAreaCurves.contours(), nullptr};
+        item = new Gi::DataFill{pocketAreaCurves, nullptr};
         item->setPen(Qt::NoPen);
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setAcceptHoverEvents(false);
@@ -707,7 +740,7 @@ void File::createGiRaster() {
     g0path_.reserve(gcp.toolPathss.size());
 
     if(pocketAreaCurves.size()) {
-        item = new Gi::DataFill{pocketAreaCurves.contours(), nullptr}; // FIXME const_cast
+        item = new Gi::DataFill{pocketAreaCurves, nullptr}; // FIXME const_cast
         item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));

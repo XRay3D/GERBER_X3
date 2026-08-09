@@ -19,11 +19,16 @@
 
 namespace Gi {
 
-DataFill::DataFill(Geo::Polylines curves, AbstractFile* file)
+DataFill::DataFill(Geo::Polygons curves, AbstractFile* file)
     : Item{file} {
-    curves_ = std::move(curves);
-    // shape_ = toPPath(toCurves(toPaths(curves_)));
-    shape_ = Geo::toPath(curves_);
+    // Polygons::toPath идёт прямо по точным кривым и выставляет WindingFill,
+    // при котором дырки (они канонически обходятся навстречу телу) вычитаются
+    // сами, а законный остров внутри дырки остаётся.
+    shape_ = curves.toPath();
+    // Контуры -- для базового curves(), сам регион -- для region(): собрать
+    // его обратно из плоского списка нельзя, острова в дырках теряются.
+    curves_       = curves.contours();
+    region_       = std::move(curves);
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -72,6 +77,11 @@ void DataFill::redraw() {
 
 void DataFill::setCurves(Geo::Polylines paths, int alternate) // FIXME from setPaths
 {
+}
+
+Geo::Polygons DataFill::region() const {
+    // Хранится в своей системе координат, наружу -- в сценовой, как и curves().
+    return Geo::transformed(region_, transform());
 }
 
 // Paths& DataFill::getPaths() {

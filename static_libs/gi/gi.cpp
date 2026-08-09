@@ -88,17 +88,26 @@ Geo::Polylines Item::curves(int param) const {
     return Geo::transform(curves, transform());
 }
 
+Geo::Polygons Item::region() const {
+    // У элемента, который хранит только контуры, вложенность и правда выражена
+    // их ориентацией -- других сведений о ней просто нет. Тем, у кого регион
+    // есть (DataFill), метод переопределён и отдаёт его точно.
+    return Geo::Polygons{curves()};
+}
+
 void Item::setCurves(Geo::Polylines curves, int /*param*/) {
-    curves_ = std::move(curves);
     bool ok{};
     auto tr = transform().inverted(&ok);
     if(ok)
         // Хранятся контуры в своей системе координат, а приходят в сценовой --
         // отсюда обратное преобразование, парное тому, что делает curves().
-        Geo::transform(curves_, tr);
+        Geo::transform(curves, tr);
     else
         qCritical("transform().inverted(&ok); ok is false!!!");
-    shape_ = Geo::toPath(curves_);
+
+    shape_ = Geo::toPath(curves);
+    curves_ = std::move(curves);
+
     redraw();
 }
 

@@ -24,6 +24,8 @@
 #include <QPushButton>
 #include <QTableView>
 #include <QtWidgets>
+#include <span>
+#include <vector>
 
 // #include <condition_variable>
 // #include <mutex>
@@ -352,11 +354,13 @@ const Params& Form::getNewGcpWithGi() {
     // bool skip{true};
 
     int side{};
-    // Замкнутые контуры копятся плоским списком и лишь в конце становятся
-    // регионом: вложенность в нём выражена ориентацией, и подать контуры надо
-    // одним вызовом -- дырка, поданная отдельно от своего тела, вычтется не из
-    // чего.
-    Geo::Polylines closedContours;
+    // Замкнутое копится ПОЛИГОНАМИ, а не контурами. Плоский список выражает
+    // вложенность одной ориентацией, и Geo::Polygons{контуры} теряет тело,
+    // лежащее внутри чужой дырки: на реальной плате это срезало 52 тела до 8 и
+    // раздувало площадь на 18%. Собранные полигоны отдаются точному домену
+    // одним вызовом -- конструктор из span сохраняет вложенность и сливает
+    // куски деревом слияния, попутно объединяя пересечения разных элементов.
+    std::vector<Geo::Polygon> closedParts;
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         qDebug() << gi << gi->file();
         // switch(gi->type()) {
@@ -365,11 +369,11 @@ const Params& Form::getNewGcpWithGi() {
         // break;
         // case Gi::Type::DataPath: {
         // dbgPaths(gi->curves(), __FUNCTION__);
-        for(auto&& curve: gi->curves()) {
-            // qWarning() << curve;
-            curve.isClosed() ? closedContours.emplace_back(std::move(curve))
-                             : gcp.openCurves.emplace_back(std::move(curve));
-        }
+        // Разомкнутое -- отдельно: площади у линии нет, в регион ей не попасть.
+        for(auto&& curve: gi->curves())
+            if(!curve.isClosed())
+                gcp.openCurves.emplace_back(std::move(curve));
+        closedParts.append_range(gi->region().all());
         gi->side() == Side::Bottom ? --side : ++side;
 
         // } break;
@@ -400,8 +404,8 @@ const Params& Form::getNewGcpWithGi() {
         // }
         addUsedGi(gi);
     }
-    if(!closedContours.empty())
-        gcp.closedCurves = Geo::Polygons{closedContours};
+    if(!closedParts.empty())
+        gcp.closedCurves = Geo::Polygons{std::span<const Geo::Polygon>{closedParts}};
 
     qCritical() << "side" << side;
     gcp.params[Params::FileSide].setValue(side < 0 ? Side::Bottom : Side::Top);

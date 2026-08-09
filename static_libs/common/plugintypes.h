@@ -111,7 +111,7 @@ struct GraphicObject {
     };
     // clang-format on
 
-    Geo::Polygon fill;
+    Geo::Polygons fill;
     Geo::Polyline path;
     QPointF pos{std::nanf(""), std::nanf("")};
     QString name;

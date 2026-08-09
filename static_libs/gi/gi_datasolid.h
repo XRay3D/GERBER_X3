@@ -20,7 +20,7 @@ namespace Gi {
 class DataFill final : public Item {
 
 public:
-    explicit DataFill(Geo::Polylines curves, AbstractFile* file);
+    explicit DataFill(Geo::Polygons curves, AbstractFile* file);
 
     ~DataFill() override = default;
 
@@ -32,7 +32,14 @@ public:
 
     // Geo::Polygons& getCurvess();
     void setCurves(Geo::Polylines paths, int alternate = {}) override;
+    Geo::Polygons region() const override;
     // Item interface
     void changeColor() override;
+
+private:
+    // Заливка -- единственный элемент, у которого вложенность известна точно:
+    // она пришла из файла разобранным регионом. Плоские контуры (curves_) её
+    // теряют, поэтому регион хранится отдельно, а не выводится из них.
+    Geo::Polygons region_;
 };
 } // namespace Gi

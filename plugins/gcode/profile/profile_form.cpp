@@ -38,6 +38,12 @@ Form::Form(GCode::Plugin* plugin)
 
     ui->pbAddBridge->setIcon(QIcon::fromTheme(u"edit-cut"_s));
 
+    // Мосты отключены до отдельного захода: Creator::makeBridges режет ОТКРЫТЫЙ
+    // путь замкнутой областью, а такого примитива в Geo нет (у Clipper2 он был
+    // -- Clipper64::AddOpenSubject + Difference). Ставить мосты, которые потом
+    // никак не попадут в траекторию, хуже, чем не давать их ставить вовсе.
+    ui->groupBox_3->setEnabled(false); // группа «Bridges»
+
     ui->cbxBridgeAlignType->addItems({
         tr("Manually"),                    // Вручную.
         tr("Horizontally"),                // По Горизонтали.
@@ -59,14 +65,20 @@ Form::Form(GCode::Plugin* plugin)
     settings.getValue(ui->cbxTrimming);
     settings.getValue(ui->dsbxBridgeValue, 1.0);
     settings.getValue(ui->cbxBridgeAlignType, 1.0);
+    settings.getValue(ui->dsbxAllowance, 0.0);
+    settings.getValue(ui->cbxSpiral, true);
     settings.getValue(varName(trimming_), 0);
     settings.endGroup();
+
+    updateAllowanceLimits();
 
     rb_clicked();
 
     // clang-format off
     connect(App::grViewPtr(),     &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
     connect(dsbxDepth,            &DepthForm::valueChanged,      this, &Form::updateBridges);
+    connect(dsbxDepth,            &DepthForm::valueChanged,      this, &Form::updateAllowanceLimits);
+    connect(ui->toolHolder,       &ToolSelectorForm::updateName, this, &Form::updateAllowanceLimits);
     connect(leName,               &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
     connect(ui->dsbxBridgeLenght, &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);
     connect(ui->pbAddBridge,      &QPushButton::clicked,         this, &Form::onAddBridgeClicked);
@@ -98,6 +110,8 @@ Form::~Form() {
     settings.setValue(ui->cbxTrimming);
     settings.setValue(ui->cbxBridgeAlignType);
     settings.setValue(ui->dsbxBridgeValue);
+    settings.setValue(ui->dsbxAllowance);
+    settings.setValue(ui->cbxSpiral);
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
@@ -122,23 +136,18 @@ void Form::computePaths() {
     gcp.tools.push_back(tool);
     gcp.params[GCode::Params::Depth] = dsbxDepth->value();
 
-    gcp.params[Creator::BridgeAlignType] = ui->cbxBridgeAlignType->currentIndex();
-    gcp.params[Creator::BridgeValue] = ui->dsbxBridgeValue->value();
-    // NOTE reserve   gcp.params[Creator::BridgeValue2] = ui->dsbxBridgeValue->value();
+    gcp.params[GCode::Params::SpiralRamp] = ui->cbxSpiral->isChecked();
 
     if(side == GCode::On)
         gcp.params[Creator::TrimmingOpenPaths] = ui->cbxTrimming->isChecked();
-    else
+    else {
         gcp.params[Creator::TrimmingCorners] = ui->cbxTrimming->isChecked();
-
-    QPolygonF brv;
-    for(QGraphicsItem* item: App::grView().items())
-        if(item->type() == Gi::Type::Bridge)
-            brv.push_back(item->pos());
-    if(!brv.isEmpty()) {
-        // gcp.params[GCode::Params::Bridges].fromValue(brv);
-        gcp.params[Creator::BridgeLen] = ui->dsbxBridgeLenght->value();
+        // При On офсета нет вовсе -- припуску там негде жить, виджет погашен.
+        gcp.params[Creator::Allowance] = ui->dsbxAllowance->value();
     }
+
+    // BridgeAlignType/BridgeValue/BridgeLen не кладутся: Creator их всё равно
+    // не читает, пока makeBridges отключён (см. конструктор).
 
     fileCount = 1;
     emit createToolpath(&gcp);
@@ -183,6 +192,8 @@ void Form::onAddBridgeClicked() {
             }
         };
 
+#if 0 // FIXME
+
         for(Gi::Item* gi: App::grView().selectedItems<Gi::Item>()) {
             auto bounds = BoundingRect(gi->curves());
             int stepH = bounds.width() / (value + 1);
@@ -211,6 +222,7 @@ void Form::onAddBridgeClicked() {
                 }
             }
         }
+#endif
     };
 
     auto at = BridgeAlign(ui->cbxBridgeAlignType->currentIndex());
@@ -257,9 +269,9 @@ void Form::onAddBridgeClicked() {
 }
 
 void Form::updateBridges() {
-    Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
+    Gi::Bridge::lenght   = ui->dsbxBridgeLenght->value();
     Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    Gi::Bridge::side = side;
+    Gi::Bridge::side     = side;
     for(Gi::Bridge* item: App::grView().items<Gi::Bridge>())
         item->update();
 }
@@ -291,8 +303,27 @@ void Form::rb_clicked() {
 
     updateName();
     updateButtonIconSize();
+    updateAllowanceLimits();
 
     updatePixmap();
+}
+
+void Form::updateAllowanceLimits() {
+    // При On контур не смещается вовсе, чистовому проходу неоткуда взяться.
+    ui->dsbxAllowance->setEnabled(side != GCode::On);
+
+    const double radius = ui->toolHolder->tool().getDiameter(dsbxDepth->value()) * 0.5;
+    if(radius <= 0.0) return;
+
+    // Больше половины радиуса за один чистовой проход не снять -- дальше это уже
+    // не зачистка, а второй черновой.
+    ui->dsbxAllowance->setMaximum(radius * 0.5);
+
+    // Разумная величина -- десятая радиуса; всё, что больше, приводим к ней при
+    // смене инструмента или глубины. Ноль не трогаем: это «чистового не надо».
+    const double sane = radius * 0.1;
+    if(!qFuzzyIsNull(ui->dsbxAllowance->value()) && ui->dsbxAllowance->value() > sane)
+        ui->dsbxAllowance->setValue(sane);
 }
 
 void Form::updateBridgePos(QPointF pos) {

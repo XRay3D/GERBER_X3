@@ -31,15 +31,33 @@ function millingTile(file, pathss, depths) {
             var perim = path.perimeter;
             file.startPath(path[0].x, path[0].y);
             if (path.closed) {
-                // Spiral: ramp down through each depth pass, then one flat finishing pass
-                for (var d = 0; d < depths.length; d++)
-                    appendLines(file, file.savePathLines(i, 0, false, perim, depths[d]));
-                appendLines(file, file.savePathLines(i, 0, false, 0, 0));
+                if (file.spiralRamp) {
+                    // Spiral: ramp down through each depth pass, then one flat finishing pass
+                    for (var d = 0; d < depths.length; d++)
+                        appendLines(file, file.savePathLines(i, 0, false, perim, depths[d]));
+                    appendLines(file, file.savePathLines(i, 0, false, 0, 0));
+                } else {
+                    // Plunge straight down at each step; no spiral step left to clean up
+                    for (var d = 0; d < depths.length; d++) {
+                        file.z = depths[d];
+                        file.addLine(file.formatted([file.g1(), file.fmtZ(depths[d]), file.strPlungeFeed]));
+                        appendLines(file, file.savePathLines(i, 0, false, 0, 0));
+                    }
+                }
             } else {
-                // Zigzag: alternate direction on each depth pass
-                for (var d = 0; d < depths.length; d++)
-                    appendLines(file, file.savePathLines(i, 0, (d & 1) !== 0, perim, depths[d]));
-                appendLines(file, file.savePathLines(i, 0, (depths.length & 1) !== 0, 0, 0));
+                if (file.spiralRamp) {
+                    // Zigzag: alternate direction on each depth pass
+                    for (var d = 0; d < depths.length; d++)
+                        appendLines(file, file.savePathLines(i, 0, (d & 1) !== 0, perim, depths[d]));
+                    appendLines(file, file.savePathLines(i, 0, (depths.length & 1) !== 0, 0, 0));
+                } else {
+                    // Still alternate: plunging where the tool already stands is cheaper
+                    for (var d = 0; d < depths.length; d++) {
+                        file.z = depths[d];
+                        file.addLine(file.formatted([file.g1(), file.fmtZ(depths[d]), file.strPlungeFeed]));
+                        appendLines(file, file.savePathLines(i, 0, (d & 1) !== 0, 0, 0));
+                    }
+                }
             }
             file.endPath();
         } else {

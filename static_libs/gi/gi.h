@@ -55,7 +55,7 @@ enum /*class*/ Type : int {
     Error = QGraphicsItem::UserType + 400, // Form
 
     ShapeBegin = QGraphicsItem::UserType + 500,
-    ShCircle = ShapeBegin,
+    ShCircle   = ShapeBegin,
     ShRectangle,
     ShPolyLine,
     ShCirArc,
@@ -103,6 +103,13 @@ public:
     // дырками живут выше, в самом файле (AbstractFile::mergedCurves).
     virtual Geo::Polylines curves(int param = {}) const;
     virtual void setCurves(Geo::Polylines curves, int param = {});
+
+    // Замкнутая геометрия элемента РЕГИОНОМ. Собрать её из curves() нельзя:
+    // в плоском списке вложенность выражена одной лишь ориентацией, и тело,
+    // лежащее внутри чужой дырки (репер в кольце, пятак в вырезе полигона),
+    // из региона пропадает вместе с самой дыркой. Разомкнутые контуры сюда не
+    // попадают -- площади у линии нет.
+    virtual Geo::Polygons region() const;
     virtual void redraw();
     // QGraphicsItem interface
     QRectF boundingRect() const override;
@@ -128,12 +135,18 @@ protected:
     const AbstractFile* file_;
     Group* itemGroup = nullptr;
     QPainterPath shape_;
+    // Плоский список -- ровно то, что объявляет curves(). Регион здесь не
+    // хранится даже у DataFill: тело с дырками нужно ему на один вызов, чтобы
+    // построить shape_ по WindingFill, и живёт оно выше -- в самом файле
+    // (AbstractFile::mergedCurves). Вариант из Polylines и Polygons стоил
+    // дорого: на нём не собирались ни Drill, ни отладочная отрисовка, ни
+    // shape-плагины -- все они правят curves_ как обычный вектор.
     Geo::Polylines curves_;
 
     QPen pen_;
 
     const QColor* pnColorPrt_ = nullptr;
-    const QColor* colorPtr_ = nullptr;
+    const QColor* colorPtr_   = nullptr;
 
     QColor color_;
     QColor brushColor_;
@@ -143,7 +156,7 @@ protected:
     double scaleFactor() const;
     enum ColorState {
         Default,
-        Hovered = 1,
+        Hovered  = 1,
         Selected = 2,
     };
 

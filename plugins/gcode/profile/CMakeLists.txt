@@ -21,7 +21,9 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
 add_library(gc_profile STATIC profile.cpp profile.h)
-target_link_libraries(gc_profile PUBLIC geometry)
+# Clipper2 (geometry) плагину больше не нужен: вся геометрия профиля считается
+# в точном домене, а маршрут -- в gc_pathutils, оба живут в gcode.
+target_link_libraries(gc_profile PUBLIC gcode)
 
 file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
 file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)

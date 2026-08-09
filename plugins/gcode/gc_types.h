@@ -174,6 +174,9 @@ public:
     static inline const QString Circle         = u"Circle"_s;   // need for Threading
     static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
     static inline const QString Starts         = u"Starts"_s;   // need for Threading
+    // Спиральное врезание. Ключ общий, а не плагинный: читает его
+    // File::saveMillingProfile, который живёт здесь же, в общем слое.
+    static inline const QString SpiralRamp = u"SpiralRamp"_s;
 
     Params() {
         if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;
@@ -231,6 +234,26 @@ public:
     bool circle() const { return params.contains(Circle) && params.at(Circle).toBool(); }
     bool chamfer() const { return params.contains(Chamfer) && params.at(Chamfer).toBool(); }
     int starts() const { return params.contains(Starts) ? std::max(1, static_cast<int>(params.at(Starts).toInt())) : 1; }
+    // Отсутствие ключа == спираль включена: проекты, сохранённые до её
+    // появления, ведут себя как раньше.
+    bool spiralRamp() const { return !params.contains(SpiralRamp) || params.at(SpiralRamp).toBool(); }
+
+    // Надо ли развернуть контур, пришедший из точного домена, чтобы обход стал
+    // тем, что просит пользователь.
+    //
+    // Geo::Polygons::contours() отдаёт канон: внешняя граница против часовой,
+    // дырки по часовой -- то есть регион ВСЕГДА слева по ходу. Фрезеровать же
+    // надо попутно или встречно, а это зависит ещё и от стороны: снаружи
+    // детали попутный ход -- один обход, внутри -- обратный.
+    //
+    // Живёт здесь, а не в плагине, по двум причинам. Во-первых, потребителей
+    // уже двое: Profile::Creator::orderContours и Creator::stacking (там к
+    // этому добавляется поправка на дырку -- см. там же). Во-вторых, от
+    // направления обхода зависят вещи, которые ломаются МОЛЧА: подрезка углов
+    // ищет внутренние стыки по 90 или 270 градусам, и стоит развернуть обход
+    // в одном месте, забыв про другое, -- она просто перестаёт что-либо
+    // находить, без единой жалобы.
+    bool reversedTravel() const { return (side() == Outer) ^ convent(); }
 
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }

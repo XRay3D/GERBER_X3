@@ -36,6 +36,8 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     if(gcp.side() == GCode::On)
         return;
 
+#if 0 // FIXME
+
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
@@ -85,10 +87,13 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     file_ = new File{std::move(gcp)};
 
     file_->setFileName(tool.nameEnc());
+#endif
 }
 
 void Creator::createStdFull(const Tool& tool, const double depth) {
-    Timer t{__FUNCTION__};
+
+#if 0 // FIXME
+  Timer t{__FUNCTION__};
 
     if(gcp.side() == GCode::On)
         return;
@@ -138,9 +143,12 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     file_ = new File{std::move(gcp)};
 
     file_->setFileName(tool.nameEnc());
+#endif
 }
 
 void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
+
+#if 0 // FIXME
 
     if(gcp.side() == GCode::Outer)
         groupedPaths(GCode::Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005 * uScale);
@@ -229,6 +237,7 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
 
         if(++tIdx < tools.size()) emit fileReady(file_); // NOTE skip last
     } // for (int tIdx{}; tIdx < tools.size(); ++tIdx) {
+#endif
 }
 
 File::File()
@@ -246,7 +255,7 @@ File::File(GCode::Params&& newGcp)
 }
 
 void File::genGcodeAndTile() {
-    auto& proj = App::project();
+    auto& proj        = App::project();
     const QRectF rect = proj.worckRect();
     for(size_t x{}; x < proj.stepsX(); ++x) {
         for(size_t y{}; y < proj.stepsY(); ++y) {

@@ -23,6 +23,16 @@ class File;
 class GcFileProxy : public QObject {
     Q_OBJECT
 
+    // Инструмент целиком, полями как они лежат в Tool: name, note, angle,
+    // diameter, feedRate, oneTurnCut, passDepth, plungeRate, spindleSpeed,
+    // stepover, lenght, id, type, autoName. Список берётся рефлексией, так что
+    // новое поле у Tool появляется здесь само.
+    //
+    // Это СЫРЫЕ поля, и они не заменяют свойства ниже: toolDiameter -- это
+    // эффективный диаметр на глубине (у гравера конус), а threadPitch и
+    // threadHoleDiam -- переиспользованные passDepth и angle.
+    Q_PROPERTY(QJSValue tool READ toolObject CONSTANT)
+
     // Tool and feed properties
     Q_PROPERTY(bool laser READ laser CONSTANT)
     Q_PROPERTY(double toolDiameter READ toolDiameter CONSTANT)
@@ -41,6 +51,7 @@ class GcFileProxy : public QObject {
     Q_PROPERTY(bool leftHand READ leftHand CONSTANT)               // true: left-hand thread
     Q_PROPERTY(double threadPitch READ threadPitch CONSTANT)       // Tool::passDepth() repurposed as thread pitch P
     Q_PROPERTY(double threadHoleDiam READ threadHoleDiam CONSTANT) // Tool::holeDiam(), pre-machined hole/rod diameter m
+    Q_PROPERTY(bool spiralRamp READ spiralRamp CONSTANT)           // ramp down along the contour instead of plunging
     Q_PROPERTY(bool circle READ circle CONSTANT)                   // add a full circle pass at thread bottom
     Q_PROPERTY(bool chamfer READ chamfer CONSTANT)                 // cut a chamfer with the thread mill after threading
     Q_PROPERTY(int starts READ starts CONSTANT)                    // number of thread starts N (multi-start thread)
@@ -62,7 +73,9 @@ class GcFileProxy : public QObject {
 public:
     explicit GcFileProxy(File* file, QJSEngine* engine, QObject* parent = nullptr);
 
+    QJSValue toolObject() const;
     bool laser() const;
+    bool spiralRamp() const;
     double toolDiameter() const;
     double toolLength() const;
     double toolOneTurnCut() const;

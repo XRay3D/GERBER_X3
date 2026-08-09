@@ -63,7 +63,7 @@ void Drill::setDiameter(double diameter) {
 
 void Drill::updatePath(const QPolygonF& path, double diameter) {
     diameter_ = diameter;
-    path_ = path;
+    path_     = path;
     create();
     update();
 }
@@ -118,6 +118,7 @@ void Drill::create() {
         curves_ = Geo::Inflate(Geo::Polylines{Geo::Polyline{path_}}, diameter_).contours();
         shape_ = Geo::toPath(curves_);
     }
+
     boundingRect_ = shape_.boundingRect();
 }
 
