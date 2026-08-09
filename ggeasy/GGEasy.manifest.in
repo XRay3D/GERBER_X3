@@ -1,0 +1,36 @@
+<?xml version="1.0" encoding="UTF-8" standalone="yes"?>
+<!--
+  Манифест приложения. Вшивается в exe ресурсом RT_MANIFEST (см. versioninfo.rc.in).
+
+  Главное здесь - requestedExecutionLevel=asInvoker. MinGW/GCC, в отличие от MSVC,
+  манифест по умолчанию не вшивает, а exe без requestedExecutionLevel Windows считает
+  legacy-приложением: включает эвристику UAC Installer Detection (ищет install/setup/
+  update/patch в имени файла и полях VERSIONINFO) и вешает Program Compatibility
+  Assistant, из-за чего программа может просить права администратора на ровном месте.
+
+  Секции windowsSettings/dpiAware здесь намеренно нет: DPI настраивается из кода
+  (AA_Use96Dpi и QT_ENABLE_HIGHDPI_SCALING=0 в main.cpp), объявление в манифесте
+  это поведение перебьёт.
+-->
+<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0">
+    <assemblyIdentity
+        type="win32"
+        name="@SOFTDEVELOPER@.@PROJECT_NAME@"
+        version="@PROJECT_VERSION_MAJOR@.@PROJECT_VERSION_MINOR@.@PROJECT_VERSION_PATCH@.0"
+        processorArchitecture="*"/>
+    <trustInfo xmlns="urn:schemas-microsoft-com:asm.v3">
+        <security>
+            <requestedPrivileges>
+                <requestedExecutionLevel level="asInvoker" uiAccess="false"/>
+            </requestedPrivileges>
+        </security>
+    </trustInfo>
+    <compatibility xmlns="urn:schemas-microsoft-com:compatibility.v1">
+        <application>
+            <!-- Windows 10 / 11 -->
+            <supportedOS Id="{8e0f7a12-bfb3-4fe8-b9a5-48fd50a15a9a}"/>
+            <!-- Windows 8.1 -->
+            <supportedOS Id="{1f676c76-80e1-4239-95bb-83d0f6d0da78}"/>
+        </application>
+    </compatibility>
+</assembly>

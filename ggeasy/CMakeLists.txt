@@ -29,6 +29,12 @@ set(SOFTDEVELOPER X-Ray)
 configure_file(
     versioninfo.rc.in ${CMAKE_CURRENT_BINARY_DIR}/versioninfo.rc
     NEWLINE_STYLE WIN32)
+# Манифест приложения (asInvoker), вшивается ресурсом из versioninfo.rc.
+# Лежит рядом с versioninfo.rc, поэтому CMAKE_CURRENT_BINARY_DIR ниже добавлен
+# в include-пути таргета: windres ищет файлы ресурсов именно по ним.
+configure_file(
+    ${PROJECT_NAME}.manifest.in ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.manifest
+    NEWLINE_STYLE WIN32)
 
 find_package(
     Qt6 REQUIRED
@@ -65,6 +71,7 @@ qt_add_lupdate(${PROJECT_NAME} TS_FILES ${TS_FILES} SOURCES ${HEADERS} ${SOURCES
 qt_add_lrelease(${PROJECT_NAME} TS_FILES ${TS_FILES} QM_FILES_OUTPUT_VARIABLE QM_FILES)
 
 target_include_directories(${PROJECT_NAME} PUBLIC ${CMAKE_CURRENT_LIST_DIR})
+target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(
     ${PROJECT_NAME}
