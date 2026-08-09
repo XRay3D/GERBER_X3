@@ -162,6 +162,13 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
     add_compile_options(-fhardened -fstack-clash-protection)
     add_link_options(-Wl,-z,relro -Wl,-z,now)
   endif()
+  # У COFF предел в 65535 секций на объектный файл, и unity-сборка вместе с
+  # шаблонами CGAL/Qt к нему вплотную подходит: ассемблер падает с "too many
+  # sections". У ELF такого предела нет, флага там тоже нет -- потому только
+  # для mingw.
+  if(MINGW)
+    add_compile_options(-Wa,-mbig-obj)
+  endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   # Classic icc/icpc: no C++26 reflection support, but the driver is
   # GCC-compatible enough to accept the same hardening flags.

@@ -10,6 +10,11 @@ name: Build & Release
 # ВНИМАНИЕ: проект использует экспериментальную статическую рефлексию C++26
 # (std::meta, -freflection), поэтому нужен GCC 16. Это очень свежий тулчейн —
 # шаг установки может потребовать корректировки, если пакеты MSYS2 изменятся.
+#
+# Точная геометрия (static_libs/geo) собирается на CGAL, поэтому в списке
+# пакетов он обязателен: без него find_package(CGAL) молча не находит ничего
+# (он QUIET), конфигурация проходит, а сборка падает уже на <CGAL/...>.
+# Пакет тянет за собой boost, eigen3, gmp и mpfr.
 
 on:
   push:
@@ -25,7 +30,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: "true"
 
@@ -40,6 +45,7 @@ jobs:
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-mold
             mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-cgal
             mingw-w64-ucrt-x86_64-qt6-base
             mingw-w64-ucrt-x86_64-qt6-declarative
             mingw-w64-ucrt-x86_64-qt6-svg
@@ -125,7 +131,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 
