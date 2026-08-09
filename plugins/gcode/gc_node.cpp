@@ -27,7 +27,11 @@ Node::Node(AbstractFile* file)
     , file(file) {
 }
 
-Node::~Node() { App::project().deleteFile(file->id()); }
+Node::~Node() {
+    // Файла больше нет -- смотреть в окне просмотра нечего.
+    Dialog::programClosed(file->id());
+    App::project().deleteFile(file->id());
+}
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
@@ -123,23 +127,17 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
-    static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme(u"document-save"_s), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(id());
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"hint"_s), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    if(!dialog[id()])
-        menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-            dialog[id()] = new Dialog{file->lines2(), file->name(), tv};
-            auto destroy = [this] {
-                delete dialog[id()];
-                dialog[id()] = nullptr;
-            };
-            QObject::connect(dialog[id()], &QDialog::finished, destroy);
-            dialog[id()]->show();
-        });
+    // Реестр окон держит сам Dialog: одно окно на файл, оно же обновляется при
+    // перегенерации и закрывается при удалении.
+    menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
+        Dialog::showFor(id(), file->lines2(), file->name(), tv);
+    });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"edit-delete"_s), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
 }

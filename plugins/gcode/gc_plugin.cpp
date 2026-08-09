@@ -13,6 +13,7 @@
 #include "app.h"
 #include "ft_model.h"
 #include "gc_form.h"
+#include "gc_highlighter.h"
 #include "gc_node.h"
 
 #include <QAction>
@@ -71,6 +72,8 @@ void Plugin::updateFileModel(AbstractFile* file) {
     auto* node = static_cast<Node*>(file->node());
     node->setFile(file);
     App::fileModel().updateNode(node);
+    // id прежний, объект новый: открытое окно просмотра держит текст старого.
+    Dialog::programChanged(file->id(), file->lines2(), file->name());
 }
 
 // AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {

@@ -26,9 +26,22 @@ class Dialog : public QDialog {
     Q_OBJECT
 public:
     Dialog(const QString& text, const QString& windowTitle, QWidget* parent = nullptr);
-    ~Dialog() override = default;
+    ~Dialog() override;
+
+    // Окно на файл ровно одно. Реестр держит сам Dialog, а не место вызова:
+    // обновлять и закрывать его надо из File::regenerate и из деструктора узла,
+    // и обоим неоткуда узнать про чужую статическую карту.
+    static Dialog* showFor(int32_t fileId, const QString& text, const QString& windowTitle, QWidget* parent);
+    // Текст УП пересобран -- показать новый, сохранив позицию курсора.
+    static void programChanged(int32_t fileId, const QString& text, const QString& windowTitle);
+    // Файл удалён -- смотреть больше нечего.
+    static void programClosed(int32_t fileId);
+
+    void setProgram(const QString& text, const QString& windowTitle);
 
 private:
+    int32_t fileId_{-1};
+    QTextEdit* tbLine;
     QTextBrowser* tbCode;
     Viewer3d* viewer;
 
