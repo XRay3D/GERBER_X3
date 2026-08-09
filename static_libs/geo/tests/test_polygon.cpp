@@ -44,6 +44,7 @@ private slots:
     void polygonFlagSurvivesSerializationAndTransform();
     void regionWithIslandInHoleSurvivesSerialization();
     void denseRegionWithArcIslandsSurvivesSerialization();
+    void smallHolesSurviveSerialization();
     void spanConstructorKeepsBodyNestedInsideHole();
     void translationPreservesAreaOfComplexArcBoundary();
 };
@@ -271,6 +272,36 @@ void PolygonTest::denseRegionWithArcIslandsSurvivesSerialization() {
 
     QCOMPARE(restored.all().size(), region.all().size());
     QVERIFY(near(restored.area(), region.area(), 1e-6));
+}
+
+// Граница разрешения кругового обхода. Запись идёт через Dxf-вид (double +
+// прогиб), чтение -- обратно в точный домен, и достаточно мелкая деталь по
+// дороге сваривается в точку.
+//
+// Замерено: дырка диаметром 0.01 мм цела, 0.001 мм пропадает. Порог -- около
+// микрона, то есть на порядки мельче всего, что бывает на плате: типовой зазор
+// 0.1-0.2 мм, самая мелкая вскрышка -- десятки микрон. Тест держит именно
+// плато-реалистичный диапазон; если порог уползёт вверх, он это заметит.
+void PolygonTest::smallHolesSurviveSerialization() {
+    for(double d: {1.0, 0.1, 0.05, 0.01}) {
+        Polygons region = Polygons{Polylines{rectangle(20.0, 20.0)}};
+        region -= Polygons{Polylines{circle(d)}};
+
+        QByteArray buffer;
+        {
+            QDataStream out{&buffer, QIODevice::WriteOnly};
+            out << region;
+        }
+        Polygons restored;
+        {
+            QDataStream in{&buffer, QIODevice::ReadOnly};
+            in >> restored;
+        }
+
+        QVERIFY2(restored.all().size() == 1 && restored.all().front().holes().size() == 1,
+            qPrintable(QStringLiteral("дырка d=%1 не пережила сериализацию").arg(d)));
+        QVERIFY(near(restored.area(), region.area(), 1e-6));
+    }
 }
 
 void PolygonTest::polygonFlagSurvivesSerializationAndTransform() {
