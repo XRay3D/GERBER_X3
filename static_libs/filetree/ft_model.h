@@ -63,6 +63,13 @@ public:
 
     void closeProject();
 
+    // Перерисовать строку узла. Нужно, когда данные за узлом сменились мимо
+    // setData -- например при замене файла на месте.
+    void updateNode(Node* node);
+    // Убрать строку узла вместе с самим узлом. Файл удаляется следом: его время
+    // жизни привязано к узлу (см. деструкторы узлов, зовущие deleteFile).
+    void removeNode(Node* node);
+
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
     QModelIndex parent(const QModelIndex& index) const override;

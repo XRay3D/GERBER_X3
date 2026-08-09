@@ -33,7 +33,8 @@ enum FileVersion {
     ProVer_6,
     ProVer_7,
     ProVer_8, // Geo::Polyline: точка + прогиб вместо центра дуги, замкнутость -- флагом
-    CurrentVer = ProVer_8,
+    ProVer_9, // УП: имя программы и снимок видимости, траектория и открытые контуры
+    CurrentVer = ProVer_9,
 };
 
 namespace GCode {
@@ -109,6 +110,8 @@ public:
 
     int addFile(AbstractFile* const file);
     int addFile(GCode::File* const file);
+    // Заменить УП с данным id новой, сохранив узел дерева, id и сторону.
+    int replaceFile(int32_t id, GCode::File* file);
     bool contains(AbstractFile* file);
     std::vector<AbstractFile*> files(uint32_t type);
     std::vector<AbstractFile*> files(const std::vector<uint32_t>& types);

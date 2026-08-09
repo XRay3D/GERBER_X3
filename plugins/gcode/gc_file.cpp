@@ -236,10 +236,31 @@ void File::statFile() {
     }
 }
 
+// Из чего посчитана программа: по строке на исходный файл с числом взятых из
+// него элементов. Ключ UsedItems -- пара {id файла, тип элементов}, поэтому один
+// и тот же файл может дать несколько строк, если брали из разных его слоёв.
+void File::addSourceInfo() {
+    auto it = gcp.params.find(Params::GrItems);
+    if(it == gcp.params.end()) return;
+
+    for(auto&& [key, ids]: it->second.value<UsedItems>()) {
+        if(key.empty()) continue;
+        // Файл мог быть удалён уже после расчёта: addInfo() зовётся при каждом
+        // regenerate(), в том числе после перезагрузки проекта.
+        auto* source = App::project().file(key.front());
+        lines_.emplace_back(QObject::tr(";\t         Source: %1 [%2]")
+                .arg(source ? source->shortName() : QObject::tr("#%1 (deleted)").arg(key.front()))
+                .arg(ids.size()));
+    }
+}
+
 void File::addInfo() {
     const static auto side_{QObject::tr("Top|Bottom").split(u'|')};
     if(App::gcSettings().info()) {
         lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
+        if(!programName_.isEmpty())
+            lines_.emplace_back(QObject::tr(";\t        Program: %1").arg(programName_));
+        addSourceInfo();
         lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp.tool().name()));
         lines_.emplace_back(QObject::tr(";\t  Tool Stepover: %1").arg(gcp.tool().stepover()));
         lines_.emplace_back(QObject::tr(";\t Feed Rate mm/s: %1").arg(gcp.tool().feedRate_mmPerSec()));

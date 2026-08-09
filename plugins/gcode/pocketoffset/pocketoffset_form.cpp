@@ -181,8 +181,6 @@ void Form::showEvent(QShowEvent* event) {
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void Form::editFile(GCode::File* /*file*/) { }
-
 } // namespace PocketOffset
 
 #include "moc_pocketoffset_form.cpp"

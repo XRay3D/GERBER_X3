@@ -105,6 +105,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui.treeView->setModel(new FileTree::Model{ui.treeView});
 
     connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui.treeView, &FileTree::View::editGCodeFile, this, &MainWindow::editGcFile);
     connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
     connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
@@ -964,23 +965,16 @@ bool MainWindow::maybeSave() {
     return true;
 }
 
-void MainWindow::editGcFile(GCode::File* /*file*/) { // TODO editGcFile
-    qWarning(__FUNCTION__);
-    // TODO   switch (file->gtype()) {
-    // case GCode::Null:
-    // case "Profile"_hash32:
-    // // toolpathActions["Profile"_hash32]->triggered();
-    // // reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
-    // break;
-    // case GCode::Pocket:
-    // case GCode::Voronoi:
-    // case GCode::Thermal:
-    // case GCode::Drill:
-    // case G_CODE_PROPERTIES:
-    // case GCode::Raster:
-    // case GCode::LaserHLDI:
-    // default: break;
-    // }
+void MainWindow::editGcFile(int32_t id) {
+    auto* file = dynamic_cast<GCode::File*>(App::project().file(id));
+    if(!file) return;
+    auto* plugin = App::gCodePlugin(file->type());
+    if(!plugin) return;
+    // Отметить действие на панели: его toggled и покажет форму в доке. Если оно
+    // уже отмечено, сигнал не придёт -- форму покажет сам plugin->editFile.
+    if(auto it = toolpathActions.find(file->type()); it != toolpathActions.end())
+        it->second->setChecked(true);
+    plugin->editFile(file);
 }
 
 #if __has_include("xrstyle.h") && 0

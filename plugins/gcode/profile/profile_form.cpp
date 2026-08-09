@@ -333,69 +333,39 @@ void Form::updateBridgePos(QPointF pos) {
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
 
-void Form::editFile(GCode::File* /*file*/) {
+void Form::editFile(GCode::File* file) {
+    const GCode::Params& gcp = file->params();
 
-    // GCode::Params gcp {file->gcp()};
+    // Радиокнопки первыми: их rb_clicked() зовёт updateName() и updateAllowanceLimits(),
+    // то есть перебивает и имя, и припуск. База ставит имя после этого.
+    if(gcp.params.contains(GCode::Params::Side))
+        switch(gcp.side()) {
+        case GCode::On   : ui->rbOn->setChecked(true); break;
+        case GCode::Outer: ui->rbOutside->setChecked(true); break;
+        case GCode::Inner: ui->rbInside->setChecked(true); break;
+        }
+    if(gcp.params.contains(GCode::Params::Convent))
+        (gcp.convent() ? ui->rbConventional : ui->rbClimb)->setChecked(true);
 
-    // fileId = gcp.fileId;
-    // editMode_ = true;
+    // Инструмент -- копия, снятая при расчёте: в базе инструментов его могло уже
+    // не остаться, поэтому ставим как есть, не разыскивая по id.
+    if(!gcp.tools.empty()) ui->toolHolder->setTool(gcp.tool());
 
-    // { // GUI
-    // side = gcp.side();
-    // direction = static_cast<GCode::Direction>(gcp.convent());
-    // ui->toolHolder->setTool(gcp.tools.front());
-    // dsbxDepth->setValue(gcp.params[GCode::Params::Depth].toDouble());
+    ui->cbxSpiral->setChecked(gcp.spiralRamp());
 
-    // switch (side) {
-    // case GCode::On:
-    // ui->rbOn->setChecked(true);
-    // break;
-    // case GCode::Outer:
-    // ui->rbOutside->setChecked(true);
-    // break;
-    // case GCode::Inner:
-    // ui->rbInside->setChecked(true);
-    // break;
-    // }
+    auto value = [&gcp](const QString& key) {
+        auto it = gcp.params.find(key);
+        return it == gcp.params.end() ? GCode::Variant{} : it->second;
+    };
 
-    // switch (direction) {
-    // case GCode::Climb:
-    // ui->rbClimb->setChecked(true);
-    // break;
-    // case GCode::Conventional:
-    // ui->rbConventional->setChecked(true);
-    // break;
-    // }
-    // }
+    ui->cbxTrimming->setChecked(gcp.params.contains(Creator::TrimmingOpenPaths)
+            ? value(Creator::TrimmingOpenPaths).toBool()
+            : value(Creator::TrimmingCorners).toBool());
+    ui->dsbxAllowance->setValue(value(Creator::Allowance).toDouble());
 
-    // { // GrItems
-    // usedItems_.clear();
-    // auto items {gcp.params[GCode::Params::GrItems].value<UsedItems>()};
-
-    // auto i = items.cbegin();
-    // while (i != items.cend()) {
-
-    // // auto [_fileId, _] = i.key();
-    // // Q_UNUSED(_)
-    // // App::project().file(_fileId)->itemGroup()->setSelected(i.value());
-    // // ++i;
-    // }
-    // }
-
-    // { // Bridges
-    // if (gcp.params.contains(GCode::Params::Bridges)) {
-    // ui->dsbxBridgeLenght->setValue(gcp.params[GCode::Params::BridgeLen].toDouble());
-    // // for (auto& pos : gcp.params[GCode::Params::Bridges].value<QPolygonF>()) {
-    // // brItem = new BridgeItem{lenght_, size_, side, brItem};
-    // // App::grView().addItem(brItem);
-    // // brItem->setPos(pos);
-    // // brItem->lastPos_ = pos;
-    // // }
-    // updateBridge();
-    // brItem = new Gi::Bridge{lenght_, size_, side, brItem};
-    // // delete item;
-    // }
-    // }
+    // База ставит глубину, имя, сторону платы и восстанавливает сцену. Припуск
+    // после неё уже не тронется: updateAllowanceLimits() зовут только виджеты.
+    GCode::Form::editFile(file);
 }
 
 } // namespace Profile
