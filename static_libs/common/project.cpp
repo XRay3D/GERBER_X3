@@ -256,7 +256,7 @@ bool Project::open(const QString& fileName) {
 
         isModified_ = false;
 
-        App::grView().fitInView(sceneRect, false);
+        App::grView().setViewRectDeferred(sceneRect);
 
         return true;
     } catch(const QString& ex) {

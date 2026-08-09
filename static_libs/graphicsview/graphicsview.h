@@ -55,6 +55,14 @@ public:
     void zoomOut();
     void fitInView(QRectF destRect, bool withBorders = true);
 
+    // Показать этот участок сцены, когда виджет получит НАСТОЯЩИЙ размер.
+    // Проект грузится из loadSettings() -- до show(), -- и обычный fitInView
+    // считает трансформацию по начальной геометрии viewport'а, а следующий
+    // resize её уже не пересчитывает: масштаб и положение остаются чужими.
+    // Применяется следующим тактом цикла событий -- к тому моменту раскладка
+    // досчитана и viewport имеет настоящий размер.
+    void setViewRectDeferred(QRectF rect);
+
     void setRuler(bool ruller);
 
     double scaleFactor() const noexcept { return 1.0 / getScale(); }
@@ -171,6 +179,11 @@ protected:
     // QObject interface
 protected:
     void timerEvent(QTimerEvent* event) override;
+
+private:
+    // Отложенный вид: пуст, пока восстанавливать нечего.
+    QRectF pendingViewRect_;
+    void applyPendingViewRect();
 };
 
 #include "app.h"
