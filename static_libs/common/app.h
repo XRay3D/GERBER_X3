@@ -70,9 +70,11 @@ public:                                           \
         assert(app->NAME##_);                     \
         return *app->NAME##_;                     \
     }                                             \
+    /* Проверка app обязательна: указатели спрашивают и до создания App        \
+     * (выбор режима OpenGL в main), и после её разрушения -- туда ходит       \
+     * обработчик сообщений Qt, и на нулевом app он ронял процесс. */          \
     static TYPE* NAME##Ptr() {                    \
-        /*assert(app->NAME##_);*/                 \
-        return app->NAME##_;                      \
+        return app ? app->NAME##_ : nullptr;      \
     }                                             \
     static void SET(TYPE* NAME) {                 \
         if(app->NAME##_ && NAME)                  \
