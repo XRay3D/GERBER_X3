@@ -34,6 +34,10 @@ public:
     static inline const QString OffsetSteps = u"OffsetSteps"_s;
 
 private:
+    // Общий хвост всех трёх режимов: разложить петли по группам «одна врезка --
+    // один проход» и собрать файл. cutArea -- область, заметённая фрезой.
+    void finishPocket(const Tool& tool, Geo::Polygons&& cutArea);
+
     void createFixedSteps(const Tool& tool, const double depth, int steps);
     void createStdFull(const Tool& tool, const double depth);
     void createMultiTool(const std::vector<Tool>& tools, double depth);

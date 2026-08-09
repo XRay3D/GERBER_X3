@@ -54,8 +54,7 @@ protected:
     void updateName() override;
 
 public:
-    // editFile не переопределяется: базовой реализации (имя, глубина, сторона,
-    // выделение и видимость) для этого плагина достаточно.
+    void editFile(GCode::File* file) override;
 };
 
 class Plugin final : public GCode::Plugin {

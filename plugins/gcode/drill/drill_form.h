@@ -76,7 +76,9 @@ protected:
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
-        event->accept();
+        // Базовая, а не event->accept(): в GCode::Form::showEvent сбрасывается
+        // режим правки, иначе форма молча перепишет УП из прошлого сеанса.
+        GCode::Form::showEvent(event);
     }
     void hideEvent(QHideEvent* event) override;
 
