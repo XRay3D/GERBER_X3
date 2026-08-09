@@ -52,6 +52,9 @@ void mergePolylines(Geo::Polylines& polylines, double maxDist);
 // Жадный обход «от ближайшего к ближайшему»: каждый следующий путь тот, чьё
 // начало ближе к концу предыдущего. Не оптимум коммивояжёра, но именно так
 // маршрут строился и раньше.
+// Порядок обхода ТОЧЕК одной полилинии -- центров отверстий у сверловки.
+// Ближайший сосед от start, как и у вариантов ниже.
+void sortByProximity(Geo::Polyline& points, QPointF start);
 void sortByProximity(Geo::Polylines& polylines, QPointF start);
 void sortByProximity(std::vector<Geo::Polylines>& groups, QPointF start);
 

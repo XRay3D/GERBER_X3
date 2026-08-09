@@ -73,6 +73,16 @@ protected:
     // FormsUtil interface
     void computePaths() override;
     void updateName() override;
+    // Файлы, созданные чужим Creator'ом (Profile/PocketOffset), тоже должны
+    // унести с собой строки таблицы -- поэтому обработчик расширяется.
+    void fileHandler(GCode::File* file) override;
+
+    // Строки таблицы с данными индексами -- в том виде, в каком их надо будет
+    // восстановить при правке.
+    std::vector<RowRef> rowRefs(const std::vector<int>& indexes) const;
+    // Строки текущего прогона: их нечем передать через Creator, поэтому лежат
+    // здесь между emit createToolpath и приходом файла.
+    std::vector<RowRef> pendingRows_;
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
