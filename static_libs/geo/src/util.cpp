@@ -85,17 +85,52 @@ double segmentLength(const Vertex& from, const Vertex& to) {
     return distance(from, to);
 }
 
-std::vector<std::pair<Vertex, Vertex>> segments(const Polyline& polyline) {
-    std::vector<std::pair<Vertex, Vertex>> result;
-    if(polyline.size() < 2) return result;
+// Второй заход -- уже по ГОТОВОЙ полилинии и с допуском сварки.
+//
+// Первый (sameSupport) сшивает то, что и в точном домене одно: куски одной
+// кривой. Сюда доходит другое -- дуги из РАЗНЫХ построений, совпавшие лишь
+// численно: две половины одной исходной окружности дают две капсулы, у каждой
+// свой центр, и разойтись они успевают на пару последних цифр. Для вывода это
+// одна дуга, и мерить её надо тем же допуском, каким меряется всё на выходе.
+//
+// Замыкающая пара (последняя вершина -- первая) намеренно не трогается: сшивка
+// там означала бы сдвиг начала контура, а начало у него задаёт врезку.
+void stitchArcs(Polyline& poly, double tolerance) {
+    if(poly.size() < 3) return;
 
-    result.reserve(polyline.size());
-    for(std::size_t i{}; i + 1 < polyline.size(); ++i)
-        result.emplace_back(polyline[i], polyline[i + 1]);
-    if(polyline.closed)
-        result.emplace_back(polyline.back(), polyline.front());
-    return result;
+    Polyline out;
+    out.reserve(poly.size());
+    double keptSweep{}; // размах дуги, накопленный последней вершиной out
+
+    for(std::size_t i{}; i < poly.size(); ++i) {
+        const Vertex& vertex = poly[i];
+        const Vertex& next   = poly[(i + 1) % poly.size()];
+
+        if(!out.empty() && out.back().isArc() && vertex.isArc()) {
+            const auto prev = arcOf(out.back(), vertex, out.back().bulge);
+            const auto curr = arcOf(vertex, next, vertex.bulge);
+            const double sweep = keptSweep + (curr ? curr->theta : 0.0);
+            if(prev && curr
+                && (prev->theta > 0.0) == (curr->theta > 0.0)
+                && std::abs(sweep) < maxBulgeSweep
+                && distance(prev->center, curr->center) <= tolerance
+                && std::abs(prev->radius - curr->radius) <= tolerance) {
+                out.back().bulge = bulgeOf(sweep);
+                keptSweep        = sweep;
+                continue; // вершина между двумя кусками одной дуги не нужна
+            }
+        }
+
+        out.push_back(vertex);
+        const auto arc = vertex.isArc() ? arcOf(vertex, next, vertex.bulge) : std::nullopt;
+        keptSweep      = arc ? arc->theta : 0.0;
+    }
+
+    out.closed = poly.closed;
+    out.width  = poly.width;
+    poly       = std::move(out);
 }
+
 
 //------------------------------------------------------------------------------
 

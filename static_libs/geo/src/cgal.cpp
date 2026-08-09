@@ -1,5 +1,6 @@
 #include "cgal.h"
 #include "geo/cancel.h"
+#include "geo/util.h"
 #include "offsetcapsules.h"
 
 #include <QDebug>
@@ -11,6 +12,7 @@
 #include <cstdint>
 #include <exception>
 #include <numbers>
+#include <optional>
 #include <thread>
 #include <variant>
 #include <vector>
@@ -363,13 +365,70 @@ std::optional<GPoly> toGPoly(const Polyline& rawPoly) {
     return std::nullopt;
 }
 
+// Куски ОДНОЙ дуги: свип рубит границу по вертикальным касательным, и целая
+// дуга выходит из него двумя-тремя x-монотонными кусками.
+//
+// Сперва спрашиваем точный домен: у кусков, нарезанных из одной кривой,
+// опорная окружность буквально одна и та же, и предикат CGAL отвечает без
+// всяких допусков.
+//
+// Но одной окружности мало быть одной ГЕОМЕТРИЧЕСКИ -- надо, чтобы она была
+// одной и по числам. Соседние дуги приходят из РАЗНЫХ капсул (см.
+// offsetcapsules.h), у каждой центр посчитан своей арифметикой в double, и
+// две половины одной исходной окружности дают центры, совпадающие лишь до
+// последних битов. Точный предикат такие честно разводит, а это одна дуга --
+// потому вторым заходом сверяем центр и радиус с тем же допуском, каким
+// свариваются микрокривые на выходе. Дальше этого допуска геометрия всё
+// равно не живёт.
+// Запас на «одну и ту же окружность, посчитанную дважды». Точный домен хранит
+// числа алгебраически, но СРАВНИВАТЬ их здесь приходится уже в double: центр
+// капсулы (offsetcapsules.h) и сам считался в double, и до предиката CGAL
+// доезжает через перевод. Каждый перевод и каждое действие съедают младшие
+// биты, поэтому берётся относительный запас в пару десятков бит -- заведомо
+// больше этого шума и заведомо меньше любой настоящей геометрии, где даже
+// микрон это 1e-3.
+constexpr double exactCircleTolerance = 1e-12;
+
+bool sameSupport(const XCurve& a, const CurveGeometry& ga, const XCurve& b, const CurveGeometry& gb) {
+    if(a.is_linear() || b.is_linear()) return false;
+    if(a.orientation() != b.orientation()) return false;
+    // Точный путь: у кусков, нарезанных свипом из ОДНОЙ кривой, опорная
+    // окружность буквально одна и та же -- предикат CGAL, без допусков вовсе.
+    if(a.supporting_circle() == b.supporting_circle()) return true;
+    // Иначе -- окружности, построенные порознь. Масштаб берётся по самой
+    // геометрии: у дуги радиусом в метр и шум крупнее, чем у дуги в микрон.
+    const double scale = std::max({1.0, ga.radius, std::hypot(ga.center.x(), ga.center.y())});
+    return std::hypot(ga.center.x() - gb.center.x(), ga.center.y() - gb.center.y()) <= exactCircleTolerance * scale
+        && std::abs(ga.radius - gb.radius) <= exactCircleTolerance * scale;
+}
+
 Polyline toPolyline(const GPoly& pgn) {
     Polyline out;
     out.closed = true;
+
+    // Опорная кривая последней вершины и её НАКОПЛЕННЫЙ размах: к ним и
+    // прирастают следующие куски той же дуги. Кривая держится КОПИЕЙ -- что
+    // отдаёт итератор кривых, ссылку или значение, зависит от представления
+    // полигона, и указателю тут доверять нельзя.
+    std::optional<XCurve> lastCurve;
+    CurveGeometry lastGeom;
+    double lastSweep{};
+
     for(auto it = pgn.curves_begin(); it != pgn.curves_end(); ++it) {
         const CurveGeometry curve = geometryOf(*it);
         const QPointF src         = curve.from;
         const double bulge        = curve.linear ? 0.0 : std::tan(curve.sweep / 4.0);
+
+        // Продолжение той же дуги: своей вершины ему не нужно, у предыдущей
+        // просто растёт размах. Прогиб больше единицы -- законная дуга больше
+        // полуокружности, центр у неё берётся ровно так же (Geo::arcOf).
+        if(lastCurve && sameSupport(*lastCurve, lastGeom, *it, curve)
+            && std::abs(lastSweep + curve.sweep) < maxBulgeSweep) {
+            lastSweep += curve.sweep;
+            out.back().bulge = std::tan(lastSweep / 4.0);
+            lastCurve = *it, lastGeom = curve;
+            continue;
+        }
         // Микрокривая точного разбиения после округления в double
         // вырождается. Схлопываем МИКРОКРИВУЮ: если предыдущая вершина
         // легла вплотную, текущая забирает её позицию и прогиб -- выбросить
@@ -379,9 +438,11 @@ Polyline toPolyline(const GPoly& pgn) {
             && std::hypot(src.x() - QPointF(out.back()).x(), src.y() - QPointF(out.back()).y())
                 < exitWeldTolerance) {
             out.back().bulge = bulge;
+            lastCurve = *it, lastGeom = curve, lastSweep = curve.sweep;
             continue;
         }
         out.emplace_back(src, bulge);
+        lastCurve = *it, lastGeom = curve, lastSweep = curve.sweep;
     }
     // Микрокривая могла оказаться и замыкающей: последняя вершина вплотную
     // к первой -- это её же дубль.
@@ -390,6 +451,8 @@ Polyline toPolyline(const GPoly& pgn) {
                QPointF(out.back()).y() - QPointF(out.front()).y())
             < exitWeldTolerance)
         out.pop_back();
+
+    stitchArcs(out);
     return out;
 }
 

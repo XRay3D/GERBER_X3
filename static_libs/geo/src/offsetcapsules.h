@@ -95,36 +95,48 @@ inline Polylines capsulesFor(const Vertex& from, QPointF to, double d) {
     const QPointF mid((QPointF(from) + to) / 2.0);
     const QPointF center = mid + n * (sagitta - std::copysign(radius, from.bulge));
 
-    if(radius - d < 1e-9) {
-        // Внутренняя окружность вырождается: режем дугу на короткие хорды и
-        // раздуваем каждую прямым ребром; диски промежуточных стыков --
-        // явно, их больше некому добавить.
-        const int pieces = std::max(2, static_cast<int>(std::ceil(std::abs(theta) / 0.3)));
-        const double a0  = std::atan2(from.y() - center.y(), from.x() - center.x());
-        QPointF prev{from};
-        for(int i = 1; i <= pieces; ++i) {
-            const double a  = a0 + theta * i / pieces;
-            const QPointF p = i == pieces
-                ? to
-                : QPointF(center.x() + radius * std::cos(a), center.y() + radius * std::sin(a));
-            for(auto& s: capsulesFor(Vertex(prev, 0.0), p, d)) out.push_back(std::move(s));
-            if(i != pieces) out.push_back(disc(p, d));
-            prev = p;
-        }
-        return out;
-    }
-
     const double a0 = std::atan2(from.y() - center.y(), from.x() - center.x());
     const double a1 = a0 + theta;
     auto at         = [&](double a, double r) {
         return QPointF(center.x() + r * std::cos(a), center.y() + r * std::sin(a));
     };
 
+    if(radius - d < 1e-9) {
+        // Внутренняя окружность вырождается (R0 <= d): до дуги достаёт и сам
+        // центр, так что дырке взяться неоткуда. Тело такого ребра -- СЕКТОР:
+        // внешняя дуга R0 + d того же размаха, замкнутая на центр двумя
+        // радиусами.
+        //
+        // Он и есть точная часть суммы Минковского. Точка внутри сектора лежит
+        // под тем же углом, что и дуга, на расстоянии r <= R0 + d от центра, а
+        // значит не дальше |r - R0| <= d от самой дуги (при R0 <= d нижняя
+        // граница не мешает: r >= 0 >= R0 - d). Всё, что осталось -- точки ВНЕ
+        // углового размаха, -- накрыто дисками вершин, а их вызывающий ставит
+        // на каждый конец ребра.
+        //
+        // Прежде дугу здесь резали на хорды по 0.3 рад и раздували каждую как
+        // прямую. Это и было то самое крошево: вместо одной дуги R0 + d --
+        // цепочка колпачков радиуса d вокруг точек разбиения, разделённых
+        // прямыми (gerber1.gbr, фреза 0.5 мм: исходная дуга R = 0.127 в 36
+        // градусов выходила ЧЕТЫРЬМЯ дугами радиуса 0.25 с прямыми между
+        // ними). Ради этого точный домен и заводили.
+        //
+        // Прогиб берётся ИСХОДНЫЙ: theta = 4*atan(bulge), обратное к нему
+        // tan(theta/4) -- он же и есть, только через два округления.
+        Polyline pie;
+        pie.closed = true;
+        pie.emplace_back(at(a0, radius + d), from.bulge); // внешняя дуга
+        pie.emplace_back(at(a1, radius + d), 0.0);        // радиус к центру
+        pie.emplace_back(center, 0.0);                    // и обратно к началу
+        out.push_back(ccw(std::move(pie)));
+        return out;
+    }
+
     Polyline sector;
     sector.closed = true;
-    sector.emplace_back(at(a0, radius + d), std::tan(theta / 4.0));  // внешняя дуга (тот же размах)
-    sector.emplace_back(at(a1, radius + d), 0.0);                    // торец у to
-    sector.emplace_back(at(a1, radius - d), std::tan(-theta / 4.0)); // внутренняя дуга (обратно)
+    sector.emplace_back(at(a0, radius + d), from.bulge);  // внешняя дуга (тот же размах)
+    sector.emplace_back(at(a1, radius + d), 0.0);        // торец у to
+    sector.emplace_back(at(a1, radius - d), -from.bulge); // внутренняя дуга (обратно)
     sector.emplace_back(at(a0, radius - d), 0.0);                    // торец у from
     out.push_back(ccw(std::move(sector)));
     return out;

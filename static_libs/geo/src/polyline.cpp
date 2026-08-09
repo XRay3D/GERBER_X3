@@ -33,7 +33,12 @@ std::optional<std::pair<double, double>> bulgeRadiusAndTheta(const Vertex& from,
 }
 
 // Длина одного сегмента полилинии (прямого или дугового) от `from` к `to`.
-double segmentLength(const Vertex& from, const Vertex& to) {
+//
+// Имя своё, не Geo::segmentLength (geo/util.h): тот считает ровно то же, но
+// через Geo::arcOf, а этот файл держится на одном geo/polyline.h и тащить
+// сюда util.h незачем. Два ОДИНАКОВЫХ имени в одном пространстве при
+// unity-сборке склеиваются в неоднозначность -- отсюда и разные.
+double segmentLen(const Vertex& from, const Vertex& to) {
     if(const auto rt = bulgeRadiusAndTheta(from, to))
         return rt->first * std::abs(rt->second);             // длина дуги = радиус * |угол|
     return std::hypot(to.x() - from.x(), to.y() - from.y()); // прямой сегмент -- длина хорды
@@ -256,9 +261,9 @@ double Polyline::perimeter() const {
     double total = 0.0;
 
     for(auto&& [from, to]: *this | v::pairwise)
-        total += segmentLength(from, to);
+        total += segmentLen(from, to);
     if(closed)
-        total += segmentLength(back(), front());
+        total += segmentLen(back(), front());
 
     return total;
 }
