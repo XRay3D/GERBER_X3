@@ -10,367 +10,433 @@
  *******************************************************************************/
 #include "profile.h"
 #include "app.h"
-#include "gc_gi_bridge.h"
+#include "gc_pathutils.h"
 #include "gi_gcpath.h"
 #include "gi_point.h"
-#include "graphicsview.h"
 #include "project.h"
-#include "utils.h"
-#include <gi_dbg.h>
+#include "settings.h"
 
-#ifdef Q_OS_UNIX
-    #undef emit
-    #include <execution>
-    #define emit
-#endif
+#include "geo/boolean.h"
+#include "geo/util.h"
+
+#include <map>
+#include <optional>
 
 namespace Profile {
 
+namespace {
+
+// Жил в myclipper.h вместе с целочисленным клиппером; здесь он нужен сам по
+// себе -- половина стороны квадрата, вписанного в пятно фрезы.
+constexpr double sqrt1_2 = sqrt2 * 0.5;
+
+// Контур отдельной группой: одна врезка -- один проход. Через emplace_back, а
+// не список инициализации: тот всегда копирует.
+constexpr auto intoOwnGroup = [](Geo::Polyline&& path) {
+    Geo::Polylines group;
+    group.emplace_back(std::move(path));
+    return group;
+};
+
+// Укорачивает полилинию с НАЧАЛА на `length` вдоль пути. Длина считается по
+// дуге, а не по хорде, поэтому на скруглении обрезка не промахивается.
+// Возвращает false, если укорачивать оказалось нечего -- путь короче.
+bool trimFront(Geo::Polyline& path, double length) {
+    if(path.size() < 2) return false;
+    if(length <= 0.0) return true;
+
+    // Сколько вершин уходит целиком и сколько длины остаётся добрать на
+    // сегменте, где лимит исчерпался.
+    std::size_t drop{};
+    double rest = length;
+    for(; drop + 1 < path.size(); ++drop) {
+        const double len = Geo::segmentLength(path[drop], path[drop + 1]);
+        if(rest < len) break;
+        rest -= len;
+    }
+
+    if(drop + 1 >= path.size()) return false; // съели весь путь
+
+    const Geo::Vertex from = path[drop];
+    const Geo::Vertex to   = path[drop + 1];
+    const double len       = Geo::segmentLength(from, to);
+    const double t         = len > 0.0 ? rest / len : 0.0;
+
+    Geo::Vertex cut{from};
+    if(auto arc = Geo::arcOf(from, to, from.bulge)) {
+        // У оставшегося куска дуги свой прогиб: угол сократился в (1 - t) раз.
+        static_cast<QPointF&>(cut) = arc->pointAt(t);
+        cut.bulge                  = Geo::bulgeOf(arc->theta * (1.0 - t));
+    } else {
+        static_cast<QPointF&>(cut) = from + (to - from) * t;
+        cut.bulge                  = 0.0;
+    }
+
+    path.erase(path.begin(), path.begin() + drop);
+    path.front() = cut;
+    return path.size() >= 2;
+}
+
+#if 0 // TODO касательный подвод/отвод чистового прохода
+// Отложено. Геометрия отлажена и проверена численно (см. ниже), но на реальной
+// плате остаются вырожденные перемычки: там зазор между черновым и целевым
+// контуром уже припуска, параллельного соответствия между ними нет вовсе, и
+// дуга подвода начинается в материале. Прежде чем включать -- нужна проверка
+// кандидата и пропуск таких контуров.
+//
+// Что уже подтверждено замерами (scratchpad/side.cpp, lead.cpp):
+//   * сторона: канонически Outer -- вправо по ходу, Inner -- влево, одинаково
+//     для тел и для дырок; с учётом разворота в orderContours это ровно
+//     left == gcp.convent();
+//   * касательность дуги в точке входа и длина её хорды (== припуск) точны до
+//     1e-16, перебег == pi*A/2 точно;
+//   * врезаться надо в СЕРЕДИНЕ сегмента (rotateByLength): в вершине с изломом
+//     нормали нет, и дуга уходит не туда.
+
+// Направление движения в вершине: у дугового сегмента хорда врёт, его задаёт
+// касательная. `atEnd` -- касательная в конце сегмента, иначе в начале.
+QPointF tangentOf(const Geo::Vertex& from, const Geo::Vertex& to, bool atEnd) {
+    QPointF dir;
+    if(auto arc = Geo::arcOf(from, to, from.bulge)) {
+        const double s = arc->theta > 0.0 ? 1.0 : -1.0;
+        const double a = atEnd ? arc->endAngle() : arc->startAngle;
+        dir = {-std::sin(a) * s, std::cos(a) * s};
+    } else
+        dir = to - from;
+
+    const double len = std::hypot(dir.x(), dir.y());
+    return len > 0.0 ? dir / len : QPointF{};
+}
+
+// Единичная нормаль к ходу: влево при left, вправо иначе. Влево -- это поворот
+// касательной на +90 в сырых координатах.
+QPointF normalOf(QPointF tangent, bool left) {
+    return left ? QPointF{-tangent.y(), tangent.x()} : QPointF{tangent.y(), -tangent.x()};
+}
+
+// Замкнутый контур, начинающийся в точке на расстоянии `length` вдоль него от
+// прежнего начала.
+//
+// Нужен, чтобы врезаться в СЕРЕДИНЕ сегмента. В вершине контур может иметь
+// излом, а у излома нормали нет: параллельная кривая там не параллельна, у
+// выпуклого угла она скругляется, у вогнутого срезается. Дуга подвода,
+// построенная по нормали одного из сегментов, в обоих случаях начинается не на
+// черновом контуре, а в материале.
+Geo::Polyline rotateByLength(const Geo::Polyline& contour, double length) {
+    const std::size_t count = contour.size();
+    if(count < 2 || length <= 0.0) return contour;
+
+    double rest = length;
+    for(std::size_t i{}; i < count; ++i) {
+        const Geo::Vertex& from = contour[i];
+        const Geo::Vertex& to   = contour[(i + 1) % count];
+
+        const double len = Geo::segmentLength(from, to);
+        if(rest >= len) {
+            rest -= len;
+            continue;
+        }
+
+        // Точка реза внутри сегмента i: он разваливается на хвост (from -> cut)
+        // и голову (cut -> to), между которыми и проходит весь остальной контур.
+        const double t = len > 0.0 ? rest / len : 0.0;
+        Geo::Vertex cut{from};
+        double tailBulge{};
+        if(auto arc = Geo::arcOf(from, to, from.bulge)) {
+            static_cast<QPointF&>(cut) = arc->pointAt(t);
+            cut.bulge                  = Geo::bulgeOf(arc->theta * (1.0 - t));
+            tailBulge                  = Geo::bulgeOf(arc->theta * t);
+        } else
+            static_cast<QPointF&>(cut) = from + (to - from) * t;
+
+        Geo::Polyline out;
+        out.reserve(count + 1);
+        out.closed = true;
+        out.width  = contour.width;
+
+        out.push_back(cut);
+        for(std::size_t k = i + 1; k < count; ++k) out.push_back(contour[k]);
+        for(std::size_t k = 0; k <= i; ++k) out.push_back(contour[k]);
+        out.back().bulge = tailBulge; // замыкающий сегмент from -> cut
+
+        return out;
+    }
+
+    return contour;
+}
+
+// Первые `length` длины ЗАМКНУТОГО контура, начиная с его первой вершины.
+// Зеркало trimFront: тот отрезает начало, этот его и берёт.
+Geo::Polyline headOf(const Geo::Polyline& contour, double length) {
+    Geo::Polyline head;
+    if(contour.size() < 2 || length <= 0.0) return head;
+
+    double rest = length;
+    for(auto&& [from, to]: Geo::segments(contour)) {
+        const double len = Geo::segmentLength(from, to);
+        if(rest >= len) { // сегмент целиком, вместе с его прогибом
+            head.push_back(from);
+            rest -= len;
+            continue;
+        }
+        // Лимит исчерпался внутри сегмента -- режем его.
+        const double t = len > 0.0 ? rest / len : 0.0;
+        if(auto arc = Geo::arcOf(from, to, from.bulge)) {
+            head.emplace_back(static_cast<const QPointF&>(from), Geo::bulgeOf(arc->theta * t));
+            head.emplace_back(arc->pointAt(t));
+        } else {
+            head.push_back(from);
+            head.emplace_back(from + (to - from) * t);
+        }
+        return head;
+    }
+
+    // Длины контура не хватило -- отдаём весь виток, замкнув его явной вершиной.
+    head.emplace_back(static_cast<const QPointF&>(contour.front()));
+    return head;
+}
+#endif
+
+} // namespace
+
 void Creator::create() {
-    // WARNING App::fileTreeView().closeFiles();
     createProfile(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 
 void Creator::createProfile(const Tool& tool, const double depth) {
-    Finaly _{[this] { emit fileReady(file_); }};
-
+    // Сигнал о готовности испускает сам Creator::createGc -- прежний Finaly
+    // здесь давал вторую отправку того же файла.
     toolDiameter = tool.getDiameter(depth);
 
-    const double dOffset = ((gcp.side() == GCode::Outer) ? +toolDiameter : -toolDiameter) /** 0.5*/ * uScale;
+    const double allowance = gcp.params.contains(Allowance) ? gcp.params[Allowance].toDouble() : 0.0;
+    // Припуску есть где жить только там, где вообще делается офсет, и только
+    // пока чистовой снимает не больше радиуса фрезы. Ноль -- ничего не делаем:
+    // всё ниже вырождается в прежнее поведение.
+    const bool finishing = allowance > 0.0
+        && gcp.side() != GCode::On
+        && allowance <= toolDiameter * 0.5;
 
     if(gcp.side() == GCode::On) {
         if(gcp.params[TrimmingOpenPaths].toBool())
             trimmingOpenPaths(openSrcPaths);
-        returnPs = std::move(closedSrcPaths);
+        returnPs = closedSrc.contours();
     } else {
-        if(closedSrcPaths.size()) {
-            // ClipperOffset offset;
-            // for(Paths64& paths: groupedPaths(GCode::Grouping::Copper))
-            // offset.AddPaths(paths, cl::JoinType::Round, cl::EndType::Polygon);
-            // returnPs = offset.Execute(dOffset);
-            auto it = v::join(groupedPaths(GCode::Grouping::Copper));
-            returnPs = Inflate64(Paths64{it.begin(), it.end()}, dOffset, cl::JoinType::Round, cl::EndType::Polygon);
-        }
-        if(openSrcPaths.size()) {
-            // ClipperOffset offset;
-            // offset.AddPaths(openSrcPaths, cl::JoinType::Round, cl::EndType::Round);
-            // openSrcPaths = offset.Execute(dOffset);
-            openSrcPaths = Inflate64(openSrcPaths, dOffset, cl::JoinType::Round, cl::EndType::Round);
-            if(!openSrcPaths.empty())
-                returnPs.append_range(openSrcPaths);
-        }
+        // delta у Geo::Inflate -- ПОЛНАЯ ширина, контур уезжает на её
+        // половину, то есть ровно на радиус фрезы. Прежний Inflate64 смещал
+        // контур НА delta, и с закомментированным `* 0.5` профиль уходил на
+        // целый диаметр -- вдвое дальше нужного.
+        //
+        // С припуском черновой уходит ещё на allowance: его кромка встаёт не на
+        // целевой контур, а на allowance дальше от детали, оставляя этот слой
+        // чистовому проходу.
+        const double sign  = gcp.side() == GCode::Outer ? +1.0 : -1.0;
+        const double delta = sign * (toolDiameter + 2.0 * (finishing ? allowance : 0.0));
+
+        // Разбор на тела с отверстиями (groupedPaths) больше не нужен:
+        // раздувается сразу весь регион, вложенность у него своя.
+        if(!closedSrc.empty())
+            returnPs = Geo::Inflate(closedSrc, delta).contours();
+
+        // У линии площади нет: снаружи она обрастает штрихом шириной в
+        // диаметр, а внутрь сжимать нечего -- см. geo/boolean.h. Припуск к ней
+        // не применяется: у разомкнутого пути нет стороны, с которой заходить.
+        if(openSrcPaths.size() && gcp.side() == GCode::Outer)
+            returnPs.append_range(Geo::Inflate(openSrcPaths, toolDiameter).contours());
     }
 
     if(returnPs.empty() && openSrcPaths.empty()) return;
 
     reorder();
 
+    if(finishing && !closedSrc.empty())
+        makeFinishing();
+
     if(gcp.side() == GCode::On && openSrcPaths.size()) {
-        returnPss.reserve(returnPss.size() + openSrcPaths.size());
-        mergePaths(openSrcPaths);
-        sortBeginEnd(openSrcPaths, ~(App::home().pos() + App::zero().pos()));
-        for(auto&& path: openSrcPaths)
-            returnPss.push_back({std::move(path)});
+        GCode::mergePolylines(openSrcPaths, App::project().glue());
+        GCode::sortByProximity(openSrcPaths, App::home().pos() + App::zero().pos());
+        // Каждый открытый путь -- своя группа: одна врезка, один проход.
+        returnPss.append_range(openSrcPaths | v::as_rvalue | v::transform(intoOwnGroup));
     }
 
-    makeBridges();
+    // TODO makeBridges(): мосты режут ОТКРЫТЫЙ путь замкнутой областью, а это
+    // единственная операция, которой в Geo нет вовсе (у Clipper2 она была --
+    // Clipper64::AddOpenSubject + Difference). Нужен примитив «вычесть регион
+    // из открытой полилинии»: резать сегмент (отрезок или дугу) границей
+    // региона и оставлять куски, чья середина вне его. Всё прочее для мостов
+    // уже на Geo -- Gi::Bridge::curves() и Bridge::test(const Geo::Polyline&).
+    // До тех пор группа виджетов «Bridges» в форме отключена.
 
     if(gcp.params.contains(TrimmingCorners) && gcp.params[TrimmingCorners].toInt())
         cornerTrimming();
 
     if(returnPss.empty()) return;
 
-    // Gi::Debug(returnPss | v::join | r::to<std::vector>(), Qt::yellow);
-
-    gcp.toolPathss = toCurvess(returnPss);
+    gcp.toolPathss = std::move(returnPss);
 
     file_ = new File{std::move(gcp)};
     file_->setFileName(tool.nameEnc());
 }
 
-void Creator::trimmingOpenPaths(Paths64& paths) {
-    const double dOffset = toolDiameter * uScale * 0.5;
-    for(size_t i{}; i < paths.size(); ++i) {
-        auto& p = paths[i];
-        if(p.size() == 2) {
-            double l = distTo(p.front(), p.back());
-            if(l <= toolDiameter * uScale) {
-                paths -= i--;
-                continue;
-            }
-            QLineF b{~p.front(), ~p.back()};
-            QLineF e{~p.back(), ~p.front()};
-            b.setLength(b.length() - toolDiameter * 0.5);
-            e.setLength(e.length() - toolDiameter * 0.5);
-            p = Path64{~b.p2(), ~e.p2()};
-        } else if(double l = Perimeter(p); l <= toolDiameter * uScale) {
-            paths -= i--;
-            continue;
-        } else {
-            Paths64 ps;
-            {
-                // ClipperOffset offset;
-                // offset.AddPath();
-                // ps = offset.Execute(dOffset + 100);
-                ps = Inflate64({p}, dOffset + 100, cl::JoinType::Miter, cl::EndType::Butt);
+void Creator::trimmingOpenPaths(Geo::Polylines& paths) {
+    // Прежде то же самое делалось морфологически: путь раздувался в капсулу
+    // (Miter/Butt), сжимался обратно и обрезал сам себя как открытый субъект.
+    // Ни таких стыков, ни обрезки открытого пути в Geo нет, да и незачем --
+    // трюк сводился к «укоротить на радиус с каждого конца».
+    const double radius = toolDiameter * 0.5;
 
-                // offset.Clear();
-                // offset.AddPath(ps.front(), cl::JoinType::Miter, cl::EndType::Polygon);
-                // ps = offset.Execute(-dOffset);
-                ps = Inflate64({ps.front()}, -dOffset, cl::JoinType::Miter, cl::EndType::Polygon);
-                if(ps.empty()) {
-                    paths -= i--;
-                    continue;
-                }
-            }
-            {
-                cl::Clipper64 clipper;
-                clipper.AddOpenSubject({p});
-                clipper.AddClip(ps);
-                clipper.Execute(cl::ClipType::Intersection, cl::FillRule::Positive, ps, ps); // FIXME open paths ???
-                p = ps.front();
-            }
-        }
-    }
+    auto trimBothEnds = [radius, this](Geo::Polyline& path) {
+        if(path.perimeter() <= toolDiameter) return false; // после обрезки не осталось бы ничего
+        if(!trimFront(path, radius)) return false;
+        path.reverse();
+        const bool ok = trimFront(path, radius);
+        path.reverse();
+        return ok;
+    };
+
+    // Обрезка и выбрасывание -- разными проходами: предикату erase_if менять
+    // элементы не положено, он вызывается через remove_if.
+    for(Geo::Polyline& path: paths)
+        if(!trimBothEnds(path)) path.clear();
+    std::erase_if(paths, [](const Geo::Polyline& path) { return path.empty(); });
 }
 
 void Creator::cornerTrimming() {
-    Timer_mS t{};
     const double trimDepth = (toolDiameter - toolDiameter * sqrt1_2) * sqrt1_2;
     const double sqareSide = toolDiameter * sqrt1_2 * 0.5;
+
+    // Угол ВНУТРЕННЕГО стыка в том направлении обхода, которое выставил
+    // orderContours, то есть в согласии с Params::reversedTravel. Перевернёшь
+    // разворот там -- углы здесь станут дополнительными, и подрезка перестанет
+    // находить хоть что-то, МОЛЧА. Знак нырка идёт за testAngle, а не за
+    // convent сам по себе: 90 -- поворот налево, кость ныряет направо.
     const double testAngle = gcp.convent() ? 90.0 : 270.0;
-    const double trimAngle = gcp.convent() ? -45.0 : +45;
+    const double trimAngle = gcp.convent() ? -45.0 : +45.0;
 
-#if _ITERATOR_DEBUG_LEVEL == /*0*/ 100 // FIXME
-    auto insert = [=](auto& path, auto cornerPrev, auto&& corner, auto cornerNext) {
-        QLineF l1{~*cornerPrev, ~*corner};
-        QLineF l2{~*corner, ~*cornerNext};
-        if(abs(l1.angleTo(l2) - testAngle) < 1.e-3                     // Angle is 90
-            && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
-            l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
-            auto it = std::find(path.begin(), path.end(), *corner);
-            path.insert(it, {l2.p1(), l2.p2()});
-            std::advance(corner, 2);
-        }
+    // Вершина нырка или nullopt, если угол не тот или кость в него не влезает.
+    auto dogBone = [=](const Geo::Vertex& prev, const Geo::Vertex& corner,
+                       const Geo::Vertex& next) -> std::optional<QPointF> {
+        // Стык с дугой пропускается: QLineF по вершинам даёт угол ХОРДЫ, а не
+        // касательной, и нырок ушёл бы не туда. Прежде дуг здесь не было вовсе
+        // -- всё приходило ломаными из целочисленного клиппера.
+        if(prev.isArc() || corner.isArc()) return {};
+
+        QLineF l1{prev, corner};
+        QLineF l2{corner, next};
+        if(std::abs(l1.angleTo(l2) - testAngle) > 1.e-3) return {};       // угол не прямой
+        if(l1.length() < sqareSide || l2.length() < sqareSide) return {}; // кость не влезает
+
+        l2.setAngle(l1.angle() + trimAngle);
+        l2.setLength(trimDepth);
+        return l2.p2();
     };
 
-    auto paths = v::join(returnPss);
+    // Прежний обход шёл сырыми указателями по path.data() и вставлял вершины в
+    // середину, держась на заранее выданном reserve. Здесь путь собирается
+    // заново -- то же самое, но без зависимости от перевыделения.
+    for(Geo::Polyline& path: returnPss | v::join) {
+        const std::size_t count = path.size();
+        if(count < 3) continue;
 
-    std::for_each(std::execution::par_unseq, std::begin(paths), std::end(paths), [insert](Path64& path) {
-        path.reserve(path.size() * 3);
-        for(auto corner = std::next(path.begin()); corner < std::prev(path.end()); ++corner)
-            insert(path, std::prev(corner), corner, std::next(corner));
-        if(path.front() == path.back()) // for trimming between the beginning and the end of the path
-            insert(path, std::prev(path.end(), 2), std::prev(path.end()), std::next(path.begin()));
-        path.shrink_to_fit();
-    });
-#else
-    auto insert = [=](Path64& path, auto cornerPrev, auto&& corner, auto cornerNext) {
-        QLineF l1{~*cornerPrev, ~*corner};
-        QLineF l2{~*corner, ~*cornerNext};
-        if(abs(l1.angleTo(l2) - testAngle) < 1.e-3                     // Angle is 90
-            && sqareSide <= l1.length() && sqareSide <= l2.length()) { // Dog bone fit in
-            l2.setAngle(l1.angle() + trimAngle), l2.setLength(trimDepth);
-            auto tmp = {~l2.p1(), ~l2.p2()};
-            auto it = path.begin() + std::distance(path.data(), corner);
-            path.insert(it, tmp.begin(), tmp.end());
-            std::advance(corner, 2);
+        Geo::Polyline out;
+        out.closed = path.closed;
+        out.width  = path.width;
+        out.reserve(count * 3);
+
+        // У разомкнутого пути крайние вершины углами не бывают: соседа с
+        // одной стороны просто нет.
+        const std::size_t first = path.closed ? 0 : 1;
+        const std::size_t last  = path.closed ? count : count - 1;
+
+        // Индексами, а не рэнджами: соседей у замкнутого пути надо брать по
+        // кругу, и v::pairwise/adjacent последнюю пару (back -> front) не дают.
+        for(std::size_t i{}; i < count; ++i) {
+            const Geo::Vertex& corner = path[i];
+            std::optional<QPointF> trim;
+            if(first <= i && i < last)
+                trim = dogBone(path[(i + count - 1) % count], corner, path[(i + 1) % count]);
+            if(trim) // дойти до угла, нырнуть и вернуться (прогиб у них нулевой)
+                out.append_range(std::array{corner, Geo::Vertex{*trim}});
+            out.push_back(corner); // прогиб исходящего сегмента остаётся на ней
         }
-    };
 
-    auto paths = v::join(returnPss);
-
-    std::for_each(
-    #ifdef Q_OS_UNIX
-        std::execution::par_unseq,
-    #endif
-        std::begin(paths), std::end(paths), [insert](Path64& path) {
-            path.reserve(path.size() * 3);
-            for(Point64* corner = std::next(path.data()); corner < std::prev(path.data() + path.size()); ++corner)
-                insert(path, std::prev(corner), corner, std::next(corner));
-            if(path.front() == path.back()) // for trimming between the beginning and the end of the path
-                insert(path, &path.back() - 1, &path.back(), &path.front() + 1);
-            path.shrink_to_fit();
-        });
-#endif
+        path = std::move(out);
+    }
 }
 
-void Creator::makeBridges() {
-    auto bridgeItems{App::grView().items<Gi::Bridge>(Gi::Type::Bridge)};
-    if(bridgeItems.empty())
-        return;
+Geo::Polylines Creator::orderContours(Geo::Polylines contours) {
+    if(contours.empty()) return contours;
 
-    std::for_each(
-#ifdef Q_OS_UNIX
-        std::execution::par_unseq,
-#endif
-        returnPss.begin(), returnPss.end(), [&bridgeItems, this](Paths64& rPaths) -> void {
-            // find Bridges
-            auto biStack = bridgeItems
-                | v::filter([&rPaths](Gi::Bridge* bi) {
-                      return bi->test(toCurve(rPaths.front()));
-                  });
-            if(r::empty(biStack)) return;
-            auto isPositive1 = cl::IsPositive(rPaths.front());
+    // Вложенность концентрических контуров -- то, ради чего прежде строился
+    // PolyTree: объединение по EvenOdd вместе с синтетической рамкой вокруг
+    // всего. Рамка была нужна лишь затем, чтобы у реальных контуров глубина
+    // считалась от единицы; у nestingForest она 0-базовая, так что ни рамки,
+    // ни отбрасывания её ветки (`nesting > 2`) больше нет.
+    const GCode::NestingForest forest = GCode::nestingForest(contours);
 
-            // create frame
-            Paths64 frame = Inflate64(rPaths, toolDiameter * uScale * 0.1, cl::JoinType::Miter, cl::EndType::Butt, uScale);
-            Paths64 clip;
-            for(Gi::Bridge* bip: biStack)
-                clip.append_range(toPaths(bip->curves()));
+    Geo::Polylines ordered;
+    ordered.reserve(contours.size());
 
-            frame = cl::Intersect(frame, clip, cl::FillRule::Positive);
+    if(!settings.sort) { // Grouping by nesting
+        std::map<int, Geo::Polylines> byDepth;
+        for(auto&& [i, path]: v::enumerate(contours))
+            byDepth[forest.depth[i]].emplace_back(std::move(path));
 
-            // cut toolPath
-            cl::Clipper64 clipper;
-            clipper.AddOpenSubject(rPaths);
-            clipper.AddClip(frame);
-            PolyTree polytree;
-            clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, frame, rPaths);
+        const QPointF start = App::home().pos() + App::zero().pos();
+        for(auto& [depth, paths]: byDepth) {
+            if(paths.size() > 1)
+                GCode::sortByProximity(paths, start);
+            ordered.append_range(paths | v::as_rvalue); // именно as_rvalue: иначе копия
+        }
+    } else { // Grouping by nesting depth
+        QPointF from = App::settings().mkrZeroOffset();
+        auto walk    = [&](this auto&& walk, std::size_t idx) -> void {
+            Geo::Polyline path = std::move(contours[idx]);
+            // Врезаться дешевле там, где инструмент уже оказался.
+            GCode::rotateToNearest(path, from);
+            from = path.back();
+            ordered.emplace_back(std::move(path));
+            for(std::size_t child: forest.children[idx])
+                walk(child);
+        };
+        for(std::size_t root: forest.roots)
+            walk(root);
+    }
 
-            if(rPaths.empty())
-                return;
+    // Изнутри наружу: обход строился от объемлющих контуров к вложенным, а
+    // снимать материал начинают с внутренних.
+    r::reverse(ordered);
 
-            mergePaths(rPaths);
-            sortBeginEnd(rPaths, ~(App::home().pos() + App::zero().pos()));
+    if(gcp.reversedTravel())
+        r::for_each(ordered, &Geo::Polyline::reverse);
 
-            auto IsPositive = [](Paths64 paths) {
-                for(auto&& path: paths | v::drop(1))
-                    paths.front().append_range(std::move(path)); // NOTE  move?
-                return cl::IsPositive(paths.front());
-            };
-
-            if(isPositive1 ^ IsPositive(rPaths)) // Вернуть исходное направление пути
-                ReversePaths(rPaths), r::reverse(rPaths);
-        });
-
-    std::erase_if(returnPss, [](auto&& paths) { return paths.empty(); });
+    // Чистки StripDuplicates/SimplifyPath не стало: они убирали шум
+    // целочисленного клиппера, которого у точного домена нет.
+    r::for_each(ordered, &Geo::Polyline::close); // замкнутость -- ФЛАГ, а не повтор вершины
+    return ordered;
 }
 
 void Creator::reorder() {
-    // returnPss = {returnPs};
-    // return;
-    PolyTree polyTree;
-    {
-        cl::Clipper64 clipper;
-        clipper.AddSubject(returnPs);
-        Rect r(GetBounds(returnPs));
-        int k = uScale;
-        Path64 outer = {
-            {r.left - k,  r.bottom + k},
-            {r.right + k, r.bottom + k},
-            {r.right + k, r.top - k   },
-            {r.left - k,  r.top - k   }
-        };
-        clipper.AddSubject({outer});
-        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, polyTree);
-        returnPs.clear();
-    }
-
-    polyTreeToPaths(polyTree, returnPs);
-
-    std::reverse(returnPs.begin(), returnPs.end());
-
-    if((gcp.side() == GCode::Inner) ^ gcp.convent())
-        ReversePaths(returnPs);
-
-    returnPss.reserve(returnPs.size());
-
-    for(auto&& path: returnPs) {
-
-        cl::StripDuplicates(path, true);
-        cl::SimplifyPath(path, uScale / 100);
-        path.push_back(path.front());
-
-        returnPss.push_back({path});
-    }
+    returnPs = orderContours(std::move(returnPs));
+    returnPss.append_range(returnPs | v::as_rvalue | v::transform(intoOwnGroup));
+    returnPs.clear();
 }
 
-void Creator::reduceDistance(Point64& from, Path64& to) {
-    double d = std::numeric_limits<double>::max();
-    int ctr2 = 0, idx = 0;
-    for(auto pt2: to) {
-        if(auto tmp = distToSq(from, pt2); d > tmp) {
-            d = tmp;
-            idx = ctr2;
-        }
-        ++ctr2;
-    }
-    std::rotate(to.begin(), to.begin() + idx, to.end());
-    from = to.back();
+void Creator::makeFinishing() {
+    // Целевой контур -- тот самый, что раньше был единственным: офсет ровно на
+    // радиус фрезы. Порядок и направление те же, что у чернового, иначе проходы
+    // не будут соответствовать друг другу.
+    const double sign     = gcp.side() == GCode::Outer ? +1.0 : -1.0;
+    Geo::Polylines target = orderContours(Geo::Inflate(closedSrc, sign * toolDiameter).contours());
+    if(target.empty()) return;
+
+    // Пока чистовой -- обычный проход, ничем не отличающийся от чернового: своя
+    // группа на контур, а значит спираль и финальная подчистка дна достаются ему
+    // от saveMillingProfile даром. Дописывается ПОСЛЕ чернового, потому и
+    // фрезеруется после него.
+    //
+    // Касательный подвод/отвод отложен -- см. #if 0 в начале файла.
+    returnPss.append_range(target | v::as_rvalue | v::transform(intoOwnGroup));
 }
-
-void Creator::polyTreeToPaths(PolyTree& polytree, Paths64& rpaths) {
-    rpaths.clear();
-
-    // auto Total = [i = 0](this auto&& total, PolyTree& polytree) mutable {
-    // return i;
-    // };
-    // rpaths.reserve(Total(polytree));
-
-    std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths;
-
-    if(!settings.sort) { // Grouping by nesting
-
-        markPolyTreeDByNesting(polytree);
-
-        std::map<int, Paths64> pathsMap;
-        addPolyNodeToPaths = [&addPolyNodeToPaths, &pathsMap, this](PolyTree& polynode, Creator::NodeType nodetype) {
-            bool match = true;
-            if(nodetype == ntClosed)
-                match = true; // NOTE ! polynode.IsOpen();
-            else if(nodetype == ntOpen)
-                return;
-
-            if(!polynode.Polygon().empty() && match)
-                pathsMap[nesting[&polynode]].emplace_back(std::move(polynode.Polygon()));
-
-            for(auto&& node: polynode)
-                addPolyNodeToPaths(*node, nodetype);
-        };
-        addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
-
-        pathsMap.extract(pathsMap.begin());
-
-        for(auto& [nest, paths]: pathsMap) {
-            qDebug() << u"nest"_s << nest << paths.size();
-            if(paths.size() > 1)
-                sortB(paths, ~(App::home().pos() + App::zero().pos()));
-            rpaths.append_range(std::move(paths)); // NOTE move?
-        }
-    } else { // Grouping by nesting depth
-        sortPolyTreeByNesting(polytree);
-        Point64 from = ~App::settings().mkrZeroOffset();
-        std::function<void(PolyTree&, Creator::NodeType)> addPolyNodeToPaths =
-            [&addPolyNodeToPaths, &rpaths, &from, this](PolyTree& polynode, Creator::NodeType nodetype) {
-                bool match = true;
-                if(nodetype == ntClosed)
-                    match = true; // NOTE ! polynode.IsOpen();
-                else if(nodetype == ntOpen)
-                    return;
-
-                if(!polynode.Polygon().empty() && match && nesting[std::addressof(polynode)] > 2) {
-                    auto path{polynode.Polygon()};
-                    reduceDistance(from, path);
-                    rpaths.emplace_back(std::move(path));
-                }
-
-                // std::map<int, std::vector<PolyTree*>, std::greater<>> map;
-                // for (auto node : polynode.Childs)
-                // map[node->Nesting].emplace_back(node);
-                // size_t i = polynode.Count();
-                // for (auto& [nest, nodes] : map) {
-                // for (auto node : nodes)
-                // polynode.Childs[--i] = node;
-                // }
-                for(auto&& node: rwPolyTree(polynode))
-                    addPolyNodeToPaths(*node, nodetype);
-            };
-
-        addPolyNodeToPaths(polytree, ntClosed /*ntAny*/);
-    }
-}
-////////////////////////////////////////////////////////
 
 File::File()
     : GCode::File() { }
@@ -405,26 +471,30 @@ void File::genGcodeAndTile() {
 
 void File::createGi() {
     Gi::Item* item;
-    for(const Geo::Polygon& paths: gcp.toolPathss) {
+
+    // Полоса снятого материала: тот же путь, но пером в диаметр фрезы.
+    for(const Geo::Polylines& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
-        item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
+        item->setPen(QPen{Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin});
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
     }
 
-    for(const Geo::Polygon& paths: gcp.toolPathss) {
+    // Поверх неё -- сама траектория, волосяной линией.
+    for(const Geo::Polylines& paths: gcp.toolPathss) {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
     }
 
+    // Переезды: от конца одного прохода к началу следующего.
     for(auto&& [from, to]: gcp.toolPathss | v::join | v::pairwise)
-        g0path_.push_back(Geo::Polyline{{from.back().pt}, {to.front().pt}});
+        g0path_.emplace_back(QPolygonF{from.back(), to.front()});
 
-    item = new Gi::GcPath{g0path_};
-    // item->setPen(QPen(Qt::black, 0.0)); //, Qt::DotLine, Qt::FlatCap, Qt::MiterJoin));
+    item = new Gi::GcPath{g0path_, this};
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
     itemGroup()->push_back(item);
+
     itemGroup()->setVisible(true);
 }
 

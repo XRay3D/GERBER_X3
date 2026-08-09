@@ -15,6 +15,7 @@
 #include "project.h"
 
 #include <QJSEngine>
+#include <QJsonObject>
 
 namespace GCode {
 
@@ -24,7 +25,16 @@ GcFileProxy::GcFileProxy(File* file, QJSEngine* engine, QObject* parent)
     , engine_{engine} {
 }
 
+QJSValue GcFileProxy::toolObject() const {
+    // Tool::write обходит поля рефлексией (см. tool.cpp), ключи -- имена самих
+    // членов. Наружу уходит снимок: писать в него из скрипта смысла нет.
+    QJsonObject json;
+    file_->gcp.tool().write(json);
+    return engine_->toScriptValue(json.toVariantMap());
+}
+
 bool GcFileProxy::laser() const { return file_->toolType == Tool::Laser; }
+bool GcFileProxy::spiralRamp() const { return file_->gcp.spiralRamp(); }
 double GcFileProxy::toolDiameter() const { return file_->gcp.getToolDiameter(); }
 double GcFileProxy::toolLength() const { return file_->gcp.tool().lenght(); }
 double GcFileProxy::toolOneTurnCut() const { return file_->gcp.tool().oneTurnCut(); }

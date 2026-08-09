@@ -58,7 +58,7 @@ public:
         // item->setPenColorPtr(&color);
         itemGroup()->push_back(item);
         // for(int i{}; i < pocketAreaPaths_.size() - 1; ++i)
-        // g0path_.emplace_back(Path64{pocketAreaPaths_[i].back(), pocketAreaPaths_[i + 1].front()});
+        // g0path_.emplace_back(Geo::Polyline{pocketAreaPaths_[i].back(), pocketAreaPaths_[i + 1].front()});
         // item = new Gi::GcPath{g0path_};
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
         // itemGroup()->push_back(item);
@@ -221,11 +221,18 @@ void Creator::stacking(Geo::Polylines& paths) {
     const NestingForest forest = nestingForest(paths);
     returnPss.clear();
 
-    // Направление фрезерования: зависит от чётности вложенности (тело это или
-    // дырка), от попутного/встречного хода и от стороны обработки.
+    // Направление фрезерования -- общее правило Params::reversedTravel плюс
+    // поправка на дырку. Поправка нужна именно здесь: петли офсета приходят
+    // все одной ориентации, и тело от дырки отличает не она, а чётность
+    // вложенности. Там, где контуры приходят из точного домена в каноне
+    // (Geo::Polygons::contours), о теле и дырке говорит сама ориентация, и
+    // поправка не нужна -- см. Profile::Creator::orderContours.
+    //
+    // Прежняя запись `!(convent ^ !isHole) ^ (side == Outer)` -- то же самое:
+    // !(c ^ !h) сводится к c ^ h, и всё выражение к (side == Outer) ^ c ^ h.
     auto orient = [this](Geo::Polyline& path, int depth) {
         const bool isHole = depth % 2 != 0;
-        if(!(gcp.convent() ^ !isHole) ^ (gcp.side() == Outer))
+        if(gcp.reversedTravel() ^ isHole)
             path.reverse();
     };
 

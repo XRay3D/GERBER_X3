@@ -70,8 +70,8 @@ Debug_::Debug_(const Geo::Polyline& polyline, const QColor& color, double width)
 
 Debug_::Debug_(const Geo::Polylines& polylines, const QColor& color, double width)
     : Debug_{color, width} {
-    curves_ = polylines;
-    shape_ = Geo::toPath(curves_);
+    curves_       = polylines;
+    shape_        = Geo::toPath(curves_);
     boundingRect_ = shape_.boundingRect();
 
     if(shape_.isEmpty()) {
@@ -88,7 +88,7 @@ Debug_::Debug_(const Geo::Polylines& polylines, const QColor& color, double widt
 
 Debug_::Debug_(const QPainterPath& path, const QColor& color, double width)
     : Debug_{color, width} {
-    shape_ = path;
+    shape_        = path;
     boundingRect_ = shape_.boundingRect();
 
     if(shape_.isEmpty()) {
@@ -150,6 +150,7 @@ void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
     // Центры дуг. В bulge-виде они не хранятся, а восстанавливаются из пары
     // точек и прогиба -- ровно то, что раньше приезжало в Z-координате
     // клипперовской точки и доставалось через GetC.
+
     for(const Geo::Polyline& polyline: curves_)
         for(std::size_t i{}; i < polyline.size(); ++i) {
             const Geo::Vertex& from = polyline[i];
