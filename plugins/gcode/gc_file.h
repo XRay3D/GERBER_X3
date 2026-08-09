@@ -174,7 +174,7 @@ protected:
     bool lastWritten[SpaceG]{};
     QString lastValues[SpaceG];
 
-    std::vector<QString> savePath(const Geo::Polyline& curve, double perimeter = {}, double depth = {});
+    std::vector<QString> savePath(const Geo::Polyline& srcCurve, double perimeter = {}, double depth = {});
 
     QString formated(const std::vector<Word>& data);
     // Готовые слова из JS-скрипта. Координатные разбираются обратно в число

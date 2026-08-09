@@ -362,9 +362,17 @@ std::vector<double> File::getDepths() {
     return depths;
 }
 
-std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter, double depth) {
+std::vector<QString> File::savePath(const Geo::Polyline& srcCurve, double perimeter, double depth) {
     std::vector<QString> lines;
-    lines.reserve(curve.size());
+    lines.reserve(srcCurve.size());
+
+    // Дуга, разрезанная на куски, -- по-прежнему одна дуга, и станку она
+    // говорится одной строкой. Geo сшивает их у себя (Geo::stitchArcs в
+    // toPolyline), но путь до вывода идёт не только оттуда: его перебирают и
+    // складывают плагины, зеркалят по стороне платы, сдвигают по тайлам. Здесь
+    // последняя точка перед станком -- тут и проверяем.
+    Geo::Polyline curve = srcCurve;
+    Geo::stitchArcs(curve);
 
     // Дуга -- свойство пары вершин: центр (а с ним I/J и выбор G2/G3) считается
     // по прогибу НАЧАЛЬНОЙ вершины сегмента, отдельно взятая вершина о дуге
@@ -394,6 +402,25 @@ std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter
     // проход не дойдёт до нужной глубины.
     const double zk = depth && perimeter ? depth - z_ : 0.0;
     const double len = zk ? curve.perimeter() : 0.0;
+
+    // ОКРУЖНОСТЬ -- одной командой. Прогибом полный оборот не выражается, и в
+    // геометрии она живёт двумя половинами (две вершины с прогибом +-1);
+    // станку же её говорят строкой «G2/G3 I.. J..» без координат конца -- конец
+    // и есть начало. Координаты не пишутся сами: они не изменились, и formated
+    // подавит их как неизменившиеся.
+    //
+    // На спуске по спирали (zk) круг остаётся двумя половинами: одной командой
+    // Z по дуге не набрать.
+    if(!zk && curve.closed && curve.size() == 2
+        && curve.front().bulge == curve.back().bulge
+        && std::abs(std::abs(curve.front().bulge) - 1.0) < 1e-9) {
+        const Geo::Vertex& start = curve.front();
+        if(auto arc = Geo::arcOf(start, curve.back(), start.bulge)) {
+            auto [I, J] = arc->center - static_cast<const QPointF&>(start);
+            lines.emplace_back(formated({g(start), x(start.x()), y(start.y()), z(z_), i(I), j(J), strFeed, strSpindle}));
+            return lines;
+        }
+    }
 
     for(auto&& [fr, to]: Geo::segments(curve)) {
         if(zk) z_ += Geo::segmentLength(fr, to) / len * zk;
