@@ -13,11 +13,13 @@
 
 namespace Drilling {
 namespace Gi {
-Preview::Preview(Path64&& path, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_)
+Preview::Preview(Geo::Polyline&& path, double diameter, Tool::ID toolId, Row& row, const Geo::Polylines& draw_)
     : path_{std::move(path)}
     , row{row}
     , toolId_{toolId} {
-    sourceDiameter_ = diameter;
+
+#if 0 // FIXME
+   sourceDiameter_ = diameter;
     if(path_.size() > 1) {
         Timer<mS> t{__FUNCTION__};
         for(auto&& path_: Inflate64(Paths64{path_}, sourceDiameter_ * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)
@@ -29,19 +31,23 @@ Preview::Preview(Path64&& path, double diameter, Tool::ID toolId, Row& row, cons
         // setPos(hv_.front());
     }
     row.items.emplace_back(this);
+#endif
+
     update();
 }
 
 void Preview::updateTool() {
-    if(toolId() > Tool::ID{}) {
+
+#if 0 // FIXME
+  if(toolId() > Tool::ID{}) {
         colorState |= ColorState::Tool;
         if(path_.size() > 1)
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter = tool.getDiameter(tool.getDepth());
+                const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                for(Path64& path_: Inflate64(Paths64{path_}, diameter * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)) {
+                for(Geo::Polyline& path_: Inflate64(Paths64{path_}, diameter * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)) {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(~path_);
                 }
@@ -61,7 +67,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPointF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter = tool.getDiameter(tool.getDepth());
+                const double diameter  = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 painterPath.moveTo(-QPointF(0.0, lineKoeff));
                 painterPath.lineTo(+QPointF(0.0, lineKoeff));
@@ -74,14 +80,19 @@ void Preview::updateTool() {
         colorState &= ~ColorState::Tool;
         toolPath_ = {};
     }
+#endif
+
     changeColor();
 }
 
-Paths64 Preview::paths() const {
+Geo::Polylines Preview::paths() const {
     if(path_.size() > 1)
         return {path_};
+
+#if 0 // FIXME
     else
         return ~sourcePath_.toSubpathPolygons();
+#endif
 }
 
 bool Preview::fit(double depth) const {
@@ -95,8 +106,12 @@ int Preview::type() const { return int(::Gi::Type::Preview) + (path_.size() > 1)
 
 bool Preview::isSlot() const { return path_.size() > 1; }
 
-Paths64 Preview::offset() const {
+Geo::Polylines Preview::offset() const {
+
+#if 0 // FIXME
     return ~sourcePath_.toSubpathPolygons();
+
+#endif
     /*Inflate(Paths64 {hv_}, sourceDiameter_ * uScale, cl::JoinType::Round, cl::EndType::Round, uScale);*/
 }
 

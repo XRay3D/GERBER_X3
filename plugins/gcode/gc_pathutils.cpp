@@ -120,6 +120,18 @@ void mergePolylines(Geo::Polylines& polylines, double maxDist) {
             polyline.close();
 }
 
+void sortByProximity(Geo::Polyline& points, QPointF start) {
+    for(std::size_t first{}; first < points.size(); ++first) {
+        std::size_t nearest = first;
+        double best = std::numeric_limits<double>::max();
+        for(std::size_t i = first; i < points.size(); ++i)
+            if(const double d = Geo::distance(start, points[i]); d < best)
+                best = d, nearest = i;
+        start = points[nearest];
+        if(nearest != first) std::swap(points[first], points[nearest]);
+    }
+}
+
 void sortByProximity(Geo::Polylines& polylines, QPointF start) {
     std::erase_if(polylines, [](const Geo::Polyline& p) { return p.empty(); });
 

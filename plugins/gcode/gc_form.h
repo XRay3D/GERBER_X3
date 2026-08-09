@@ -44,7 +44,7 @@ signals:
     void createToolpath(Params* gcp);
 
 protected:
-    void fileHandler(File* file);
+    virtual void fileHandler(File* file);
     void updateButtonIconSize() {
         for(auto* button: findChildren<QPushButton*>())
             button->setIconSize({16, 16});
