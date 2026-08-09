@@ -41,8 +41,8 @@ protected:
             Last = opt->Prev->Last;
             opt->Prev = this;
         }
-        Path64 toPath() {
-            Path64 rp;
+        Geo::Polyline toPath() {
+            Geo::Polyline rp;
             rp.reserve(count);
             rp.push_back(Pt);
             OrdPath* next = Next;

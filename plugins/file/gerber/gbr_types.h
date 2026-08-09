@@ -258,12 +258,12 @@ public:
 struct GrObject : GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        stream << go;
+        stream << static_cast<GraphicObject>(go);
         return ::Block{stream}.write(go.state);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        stream >> go;
+        stream >> static_cast<GraphicObject&>(go);
         return ::Block{stream}.read(go.state);
     }
 

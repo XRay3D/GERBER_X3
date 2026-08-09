@@ -36,7 +36,7 @@ void VoronoiJc::jcVoronoi() {
     };
 
     for(const Paths64& paths: groupedPss) {
-        for(const Path64& path: paths) {
+        for(const Geo::Polyline& path: paths) {
             Point64 tmp(path.front());
             for(const Point64& point: path) {
                 condei(tmp, point);
@@ -48,7 +48,7 @@ void VoronoiJc::jcVoronoi() {
         ++id;
     }
 
-    for(const Path64& path: openSrcPaths) {
+    for(const Geo::Polyline& path: openSrcPaths) {
         Point64 tmp(path.front());
         for(const Point64& point: path) {
             condei(tmp, point);
@@ -154,7 +154,7 @@ Paths64 VoronoiJc::toPath(const Pairs& pairs) {
 
     mergePaths(paths, 0.005 * uScale);
 
-    auto clean = [this, kAngle = 2.0](Path64& path) {
+    auto clean = [this, kAngle = 2.0](Geo::Polyline& path) {
         for(size_t i = 1; i < path.size() - 2; ++i) {
             QLineF line{~path[i], ~path[i + 1]};
             if(line.length() < gcp.params[Tolerance].toDouble()) {

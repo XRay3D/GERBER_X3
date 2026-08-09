@@ -64,7 +64,7 @@ Geo::Polygons& File::groupedPaths(File::Group group, bool fl) {
     //     clipper.AddSubject(toPaths(mergedCurves()));
     //     auto r = BoundingRect(mergedCurves());
     //     int k = /*uScale*/ 1;
-    //     Path64 outer{
+    //     Geo::Polyline outer{
     //         Point64{uScale + r.left() - k,  uScale + r.bottom() + k},
     //         Point64{uScale + r.right() + k, uScale + r.bottom() + k},
     //         Point64{uScale + r.right() + k, uScale + r.top() - k   },
@@ -83,7 +83,7 @@ Geo::Polygons& File::groupedPaths(File::Group group, bool fl) {
         clipper.AddSubject(paths);
         Rect r = GetBounds(paths);
         int k = /*uScale*/ 1;
-        Path64 outer{
+        Geo::Polyline outer{
             Point64(r.left - k, r.bottom + k),
             Point64(r.right + k, r.bottom + k),
             Point64(r.right + k, r.top - k),
@@ -99,7 +99,7 @@ Geo::Polygons& File::groupedPaths(File::Group group, bool fl) {
 }
 
 void File::grouping(PolyTree& node, File::Group group) {
-    Path64 path;
+    Geo::Polyline path;
     Paths64 paths;
     switch(group) {
     case CutoffGroup:
@@ -233,7 +233,7 @@ void File::createGi() {
                 clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths);
                 CleanPaths(paths, uScale * 0.0005);
 
-                for(Path64& path: paths)
+                for(Geo::Polyline& path: paths)
                     if(path.back() != path.front())
                         path.emplace_back(path.front());
                 mergedCurves_ = toCurves(paths);

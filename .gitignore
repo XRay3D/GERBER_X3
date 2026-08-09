@@ -144,3 +144,4 @@ bin
 # folders
 /third_party/
 /bin/
+**/CMakeFiles/**

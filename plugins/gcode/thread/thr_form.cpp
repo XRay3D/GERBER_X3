@@ -236,7 +236,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.diameter = std::any_cast<double>(val.front()->raw);
             for(auto* go: val)
                 new Gi::Preview{
-                    (go->path.size() > 1 ? toPath(go->path) : Path64{~go->pos}),
+                    (go->path.size() > 1 ? toPath(go->path) : Geo::Polyline{~go->pos}),
                     row.diameter,
                     data.back().toolId,
                     row,
@@ -449,7 +449,7 @@ void Form::computePaths() {
                 if(!item->isUsed()) continue;
                 const QPointF center{item->pos()};
                 const double radius{item->sourceDiameter() * 0.5};
-                pathsMap[row.toolId].paths.push_back(Path64{
+                pathsMap[row.toolId].paths.push_back(Geo::Polyline{
                     ~center, ~QPointF{center.x() + radius, center.y()}
                 });
             }
