@@ -59,9 +59,9 @@ public:
         , plungeRate{newGcp.plungeRate()}
         , spindleSpeed{newGcp.spindleSpeed()}
         , toolType{newGcp.toolType()}
-        , strFeed{u'F' + format(feedRate)}
-        , strPlungeFeed{u'F' + format(plungeRate)}
-        , strSpindle{u'S' + format(spindleSpeed)}
+        , strFeed{u'F' + formatValue(feedRate)}
+        , strPlungeFeed{u'F' + formatValue(plungeRate)}
+        , strSpindle{u'S' + formatValue(spindleSpeed)}
         , gcp{std::move(newGcp)} {
         setSide(gcp.params[Params::FileSide]);
     }
@@ -138,22 +138,55 @@ protected:
     static inline QString lastDir;
     static inline bool redirected;
     static inline constexpr auto CMD_LIST = u"GXYZIJSF"_sv;
+    // Из них координатные -- те, что живут на сетке вывода (GCode::Units).
+    static inline constexpr auto COORD_LIST = u"XYZIJ"_sv;
 
     std::vector<double> getDepths();
 
     bool formatFlags[Size]{};
-    QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
+
+    // Слово УП: буква и то, что за ней. Координатные несут с собой своё ЧИСЛО
+    // в единицах вывода -- повтор подавляется по нему, а не по тексту: текст
+    // это лишь запись числа, и решать по записи значит решать по округлению.
+    struct Word {
+        QString text;
+        Units units{};
+        bool numeric{};
+        Word(QString text)
+            : text{std::move(text)} { }
+        Word(QChar letter, Units units)
+            : text{letter + format(units)}
+            , units{units}
+            , numeric{true} { }
+        operator const QString&() const { return text; }
+    };
+
+    // Последнее НАПИСАННОЕ значение каждого слова: у координатных числом, у
+    // прочих (G, S, F -- там значение и есть текст) текстом.
+    Units lastUnits[SpaceG /*6*/]{};
+    bool lastWritten[SpaceG]{};
+    QString lastValues[SpaceG];
 
     std::vector<QString> savePath(const Geo::Polyline& curve, double perimeter = {}, double depth = {});
 
-    QString formated(const std::vector<QString>& data);
+    QString formated(const std::vector<Word>& data);
+    // Готовые слова из JS-скрипта. Координатные разбираются обратно в число
+    // и печатаются заново -- чтобы вывод скрипта шёл по той же сетке и с тем
+    // же подавлением повторов, что и вывод C++.
+    QString formatedText(const std::vector<QString>& data);
 
+    struct Coord {
+        QChar c;
+        Word operator()(double mm) const { return {c, toUnits(mm)}; }
+        operator Word() const { return {c, Units{}}; }
+    } static constexpr i{u'I'}, j{u'J'}, x{u'X'}, y{u'Y'}, z{u'Z'};
+
+    // Обороты шпинделя длиной не являются -- своя запись, не по сетке вывода.
     struct {
         QChar c;
-        constexpr QString operator()(double val) const { return c + format(val); }
-        constexpr operator QString() const { return c + u"0"_s; }
-    } static constexpr i{u'I'}, j{u'J'}, x{u'X'}, y{u'Y'}, z{u'Z'}, speed{u'S'};
+        Word operator()(double val) const { return {c + formatValue(val)}; }
+    } static constexpr speed{u'S'};
 
     QString g0();
     QString g1();
@@ -169,7 +202,15 @@ protected:
     // QString z(double val) { return u'Z' + format(val); }
     // QString speed(int val) { return u'S' + QString::number(val); }
 
-    static QString format(double val);
+    // Текст координаты -- ровно запись её числа: цифры до точки, значащие
+    // после и ни одного хвостового нуля.
+    static QString format(Units units);
+    static QString format(double mm) { return format(toUnits(mm)); }
+
+    // Число, длиной НЕ являющееся: подача (мм/мин), обороты. Сетка вывода
+    // задана допуском геометрии, и к минутам с оборотами он отношения не
+    // имеет -- у них своя запись, до трёх знаков без хвостовых нулей.
+    static QString formatValue(double val);
 
     bool runJsScript(const QString& scriptPath);
 

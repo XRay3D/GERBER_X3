@@ -103,7 +103,7 @@ void VoronoiJc::jcVoronoi() {
 }
 
 Paths64 VoronoiJc::toPath(const Pairs& pairs) {
-    msg = QObject::tr("Merge Segments");
+    setMsg(QObject::tr("Merge Segments"));
 
     mvector<Pair> pairsVec;
     pairsVec.reserve(pairs.size());
@@ -131,7 +131,7 @@ Paths64 VoronoiJc::toPath(const Pairs& pairs) {
     for(int i{}; i < merge.size(); ++i) {
         setMax(max);
         setCurrent(max - merge.size());
-        throwIfCancel();
+        Geo::checkCancelled();
         for(int j{}; j < merge.size(); ++j) {
             if(i == j)
                 continue;

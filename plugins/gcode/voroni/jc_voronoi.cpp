@@ -1174,7 +1174,7 @@
 #include "memory.h"
 // NOTE ???
 
-#include <cancelation.h>
+#include <progress.h>
 
 // INTERNAL FUNCTIONS
 
@@ -1885,7 +1885,7 @@ static jcv_edge* jcv_create_gap_edge(jcv_context_internal* internal, jcv_site* s
 static void jcv_fillgaps(jcv_diagram* diagram) {
     jcv_context_internal* internal = diagram->internal;
     for(int i{}; i < internal->numsites; ++i) {
-        ProgressCancel::incCurrent();
+        Progress::incCurrent();
         jcv_site* site = &internal->sites[i];
 
         // They're sorted CCW, so if the current->pos[1] != next->pos[0], then we have a gap
@@ -2122,8 +2122,8 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
         sites[i - offset] = sites[i];
     }
     nupoints_ -= offset;
-    ProgressCancel::setMax(nupoints_ * 3);
-    ProgressCancel::setCurrent(0);
+    Progress::setMax(nupoints_ * 3);
+    Progress::setCurrent(0);
     if(rect == 0) {
         _jcv_calc_bounds(nupoints_, points, &d->min, &d->max);
         d->min.x -= 10;
@@ -2155,7 +2155,7 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
 
     int finished{};
     while(!finished) {
-        ProgressCancel::incCurrent();
+        Progress::incCurrent();
         jcv_point lowest_pq_point;
         if(!jcv_pq_empty(pq)) {
             jcv_halfedge* he = (jcv_halfedge*)jcv_pq_top(pq);
@@ -2174,7 +2174,7 @@ void jcv_diagragenerate_useralloc_(size_t nupoints_, const jcv_point* points, co
     }
 
     for(jcv_halfedge* he = internal->beachline_start->right; he != internal->beachline_end; he = he->right) {
-        ProgressCancel::incCurrent();
+        Progress::incCurrent();
         jcv_finishline(internal, he->edge);
     }
 

@@ -76,7 +76,7 @@ void Creator::create() {
 }
 
 void Creator::createOffset(const Tool& tool, double depth, const double width) {
-    msg = tr("Create Offset");
+    setMsg(tr("Create Offset"));
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;

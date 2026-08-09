@@ -138,7 +138,7 @@ QString GcFileProxy::formatted(const QJSValue& parts) {
     data.reserve(len);
     for(uint i{}; i < len; ++i)
         data.emplace_back(parts.property(i).toString());
-    return file_->formated(data);
+    return file_->formatedText(data);
 }
 
 QString GcFileProxy::g0() { return file_->g0(); }
@@ -152,6 +152,6 @@ QString GcFileProxy::fmtZ(double v) { return File::z(v); }
 QString GcFileProxy::fmtI(double v) { return File::i(v); }
 QString GcFileProxy::fmtJ(double v) { return File::j(v); }
 QString GcFileProxy::fmtS(int v) { return File::speed(static_cast<double>(v)); }
-QString GcFileProxy::fmtF(double v) { return u'F' + File::format(v); }
+QString GcFileProxy::fmtF(double v) { return u'F' + File::formatValue(v); }
 
 } // namespace GCode

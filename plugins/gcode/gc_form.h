@@ -10,13 +10,12 @@
  ********************************************************************************/
 #pragma once
 
-#include "cancelation.h"
 #include "depthform.h"
 #include "gcode.h"
 
 #include <QButtonGroup>
-#include <QThread>
 #include <QtWidgets>
+#include <thread>
 
 namespace GCode {
 
@@ -131,37 +130,40 @@ private:
 
     void startProgress();
     void stopProgress();
+    // Форма на время счёта и обратно.
+    void setComputing(bool on);
 
-    // QThread thread;
-    class Runer : public QThread {
-        // Q_OBJECT
-        Form* const form;
-        Params gcp{};
+    // Прогон отменён пользователем. Расчёт узнаёт об этом не мгновенно, и всё,
+    // что он успеет прислать следом, форма выбрасывает.
+    bool canceled_{};
+    bool computing_{};
+    // Кнопку запуска плагины гасят по своим условиям -- на время счёта она
+    // нужна включённой (это «Cancel»), потом состояние возвращается.
+    bool createEnabled_{true};
 
-    public:
-        Runer(Form* form)
-            : form{form} { }
-        virtual ~Runer() { }
-        void createGc(Params* newGcp) {
-            if(0) { // FIXME
-                gcp = std::move(*newGcp);
-                start();
-            } else {
-                form->creator_->createGc(std::move(*newGcp));
-            }
-        }
+    // Расчёт идёт ОТДЕЛЬНЫМ потоком, и иначе нельзя: считает он секунды и
+    // минуты, а прогрессбар с отменой -- обычные виджеты, и живут они ровно
+    // тем, что GUI-поток свободен. Прямой вызов (он тут и был) не только
+    // морозил окно на всё время счёта, но и намертво вешал программу на
+    // найденных ошибках: Creator::isContinueCalc ждёт ответа «Continue/Break»
+    // на условной переменной, а нажать было некому.
+    //
+    // jthread выбран за то, ради чего он и сделан: у него есть стоп-токен --
+    // тот самый, которым отменяются вычисления Geo, -- а деструктор сам
+    // просит остановиться и дожидается. Отдельный QThread ради этого не
+    // нужен: Creator ничьих сигналов не ПРИНИМАЕТ, а его собственные Qt
+    // доставит в GUI-поток очередью, откуда бы их ни послали.
+    //
+    // Сцены и дерева проекта расчёт не касается вовсе -- готовый File уезжает
+    // в GUI-поток сигналом fileReady, и уже там ему строят Gi и добавляют в
+    // проект.
+    std::jthread worker;
 
-    protected:
-        // QThread interface
-        void run() override {
-            // setTerminationEnabled(true);
-            form->creator_->createGc(std::move(gcp));
-            // setTerminationEnabled(false);
-        }
-    } runer{this};
+    // Запустить расчёт (слот сигнала createToolpath) и дождаться его конца.
+    void startCompute(Params* gcp);
+    void stopWorker();
 
-    File* file_;
-    class QProgressDialog* progressDialog;
+    class QProgressBar* progressBar;
     int progressTimerId{};
 };
 

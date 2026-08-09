@@ -13,6 +13,28 @@ bool isExactContour(const Polyline& contour) {
     return contour.closed && contour.size() >= 2 && toGPoly(contour).has_value();
 }
 
+namespace {
+
+// Контур, СХЛОПНУВШИЙСЯ при материализации. В точном представлении он был
+// настоящим, но состоял из микрокривых: toPolyline сваривает их по
+// exitWeldTolerance, и от целого контура остаётся точка либо волосок между
+// двумя вершинами.
+//
+// Родина таких -- офсет: там, где граница подходит к себе вплотную, сжатие
+// сводит целый кусок региона в ниточку. Наружу его отдавать нельзя. Обратно
+// в точную геометрию он не пройдёт (isExactContour выше), в дереве
+// вложенности ничего не ограничивает, а в траектории фрезы это врезка,
+// подъём и ни одного миллиметра хода.
+bool isCollapsed(const Polyline& contour) {
+    if(contour.size() < 2) return true;
+    // Две вершины -- контур только с прогибом: окружность. Без него это ход
+    // туда и обратно по одному отрезку.
+    if(contour.size() == 2 && !contour.front().isArc() && !contour.back().isArc()) return true;
+    return contour.perimeter() <= exitWeldTolerance;
+}
+
+} // namespace
+
 // ---------------------------------------------------------------------------
 // Polygon
 // ---------------------------------------------------------------------------
@@ -115,8 +137,9 @@ const Polylines& Polygon::holes() const {
 Polylines Polygon::contours() const {
     Polylines all;
     all.reserve(1 + holes().size());
-    if(!outer().empty()) all.push_back(outer());
-    all.insert(all.end(), holes().begin(), holes().end());
+    if(!isCollapsed(outer())) all.push_back(outer());
+    for(const Polyline& hole: holes())
+        if(!isCollapsed(hole)) all.push_back(hole);
     return all;
 }
 
@@ -311,10 +334,8 @@ const std::vector<Polygon>& Polygons::all() const {
 
 Polylines Polygons::contours() const {
     Polylines all;
-    for(const Polygon& polygon: *this) {
-        if(!polygon.outer().empty()) all.push_back(polygon.outer());
-        all.insert(all.end(), polygon.holes().begin(), polygon.holes().end());
-    }
+    for(const Polygon& polygon: *this)
+        all.append_range(polygon.contours());
     return all;
 }
 

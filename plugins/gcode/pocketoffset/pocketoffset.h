@@ -34,9 +34,22 @@ public:
     static inline const QString OffsetSteps = u"OffsetSteps"_s;
 
 private:
-    // Общий хвост всех трёх режимов: разложить петли по группам «одна врезка --
-    // один проход» и собрать файл. cutArea -- область, заметённая фрезой.
+    // Общий хвост всех режимов: разложить петли по группам «одна врезка -- один
+    // проход» и собрать файл. cutArea -- область, заметённая фрезой.
     void finishPocket(const Tool& tool, Geo::Polygons&& cutArea);
+
+    // Тела, внутри которых и ходит фреза. Результат живёт в groupedPss.
+    const std::vector<Geo::Polygon>& pocketBodies(const double depth);
+
+    // Силуэт детали -- медь без дырок.
+    Geo::Polygons solidBodies() const;
+
+    // Обход детали по внешнему контуру -- снаружи и не фиксированными шагами.
+    // Петли кладёт в returnPs, возвращает заметённую ими полосу.
+    Geo::Polygons outerContourPass();
+
+    // Заливка одного тела концентрическими петлями.
+    Geo::Polylines fillBody(const Geo::Polygon& body, const Geo::Polygons& forbidden, double minFeature);
 
     void createFixedSteps(const Tool& tool, const double depth, int steps);
     void createStdFull(const Tool& tool, const double depth);

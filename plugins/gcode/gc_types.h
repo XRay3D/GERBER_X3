@@ -21,12 +21,49 @@
 #include <QMap>
 #include <QVariant>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <variant>
 
 constexpr auto G_CODE      = "GCode"_hash32;
 constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
+
+// Координата в УП -- ЦЕЛОЕ число единиц вывода, а не double и не текст.
+//
+// Единица -- Geo::exitWeldTolerance, тот самый допуск, на котором точная
+// геометрия считает две точки одной. Мельче писать нечего (для домена этой
+// разницы нет), грубее нельзя (разница есть, а в тексте её не видно -- и
+// целый ход пропадает молча). Один и тот же порог с обеих сторон -- это и
+// значит, что сетка вывода и сетка геометрии совпадают.
+//
+// Тип -- int: при шаге 0.1 мкм это +-214 метра, чего станку хватит с любым
+// запасом, а габарит УП, в него не влезающий, ловится заранее (fitsOutput).
+using Units = int;
+
+inline constexpr Units unitsPerMm = static_cast<Units>(1.0 / Geo::exitWeldTolerance + 0.5);
+static_assert(unitsPerMm >= 10 && 1.0 / unitsPerMm == Geo::exitWeldTolerance,
+    "единица вывода должна быть ровно допуском сварки и степенью десяти");
+
+// Число дробных знаков, которые несёт единица, -- ими и печатается число.
+inline constexpr int unitDecimals = [] {
+    int decimals{};
+    for(Units units = unitsPerMm; units > 1; units /= 10) ++decimals;
+    return decimals;
+}();
+
+inline Units toUnits(double mm) { return static_cast<Units>(std::llround(mm * unitsPerMm)); }
+inline double fromUnits(Units units) { return static_cast<double>(units) / unitsPerMm; }
+
+// Влезет ли габарит в вывод. Проверяется ДО счёта: координата, не влезшая в
+// Units, переполнилась бы молча и уехала на другой конец стола.
+inline bool fitsOutput(const QRectF& rect) {
+    constexpr double limit = std::numeric_limits<Units>::max() / static_cast<double>(unitsPerMm);
+    for(double value: {rect.left(), rect.right(), rect.top(), rect.bottom()})
+        if(!(std::abs(value) < limit)) return false; // NaN сюда же
+    return true;
+}
 
 // enum GCodeType : int {
 // Null = -1,
@@ -255,10 +292,13 @@ public:
     // надо попутно или встречно, а это зависит ещё и от стороны: снаружи
     // детали попутный ход -- один обход, внутри -- обратный.
     //
-    // Живёт здесь, а не в плагине, по двум причинам. Во-первых, потребителей
-    // уже двое: Profile::Creator::orderContours и Creator::stacking (там к
-    // этому добавляется поправка на дырку -- см. там же). Во-вторых, от
-    // направления обхода зависят вещи, которые ломаются МОЛЧА: подрезка углов
+    // Правило это для контуров, построенных ОТ ДЕТАЛИ (Profile::Creator::
+    // orderContours). Петлям кармана оно не годится: те приходят границами
+    // области, которую фреза выбирает, и сторону материала выражает уже сама
+    // их ориентация -- см. Creator::stacking.
+    //
+    // Живёт здесь, а не в плагине, потому что от направления обхода зависят
+    // вещи, которые ломаются МОЛЧА: подрезка углов
     // ищет внутренние стыки по 90 или 270 градусам, и стоит развернуть обход
     // в одном месте, забыв про другое, -- она просто перестаёт что-либо
     // находить, без единой жалобы.

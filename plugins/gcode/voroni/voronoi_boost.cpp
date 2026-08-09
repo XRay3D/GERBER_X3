@@ -110,7 +110,7 @@ void VoronoiBoost::outside() {
 
     int32_t id{}, id2{};
     // add line segments to diagram
-    msg = QObject::tr("Calc BOOST Voronoi");
+    setMsg(QObject::tr("Calc BOOST Voronoi"));
 
     size_t max{};
 
@@ -130,7 +130,7 @@ void VoronoiBoost::outside() {
         for(const Geo::Polyline& path: paths) {
             for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
-                throwIfCancel();
+                Geo::checkCancelled();
                 const Point64& point = path[i];
                 vecId.emplace_back(id);
                 // !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)
@@ -267,7 +267,7 @@ void VoronoiBoost::inside() {
 
     int32_t id{}, id2{};
     // add line segments to diagram
-    msg = QObject::tr("Calc BOOST Voronoi");
+    setMsg(QObject::tr("Calc BOOST Voronoi"));
 
     size_t max{};
 
@@ -287,7 +287,7 @@ void VoronoiBoost::inside() {
         for(const Geo::Polyline& path: paths) {
             for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
-                throwIfCancel();
+                Geo::checkCancelled();
                 const Point64& point = path[i];
                 vecId.emplace_back(id);
                 // !i ? srcSegments.emplace_back(path.back().x, path.back().y, point.x, point.y /*, id, id2++*/)

@@ -22,16 +22,18 @@ namespace PocketOffset {
 // //dbgPaths(clipFrame, u"clipFrame %1"_s.arg(tIdx), Qt::red);
 
 void Creator::create() {
-    setMax(10000);
-
     assert(gcp.side() != GCode::On);
 
+    const double depth = gcp.params[GCode::Params::Depth].toDouble();
+
+    // Число шагов офсета берётся только у одной фрезы: с несколькими create()
+    // всегда уходит в createMultiTool. FIXME inside steps
     if(gcp.tools.size() > 1)
-        createMultiTool(gcp.tools, gcp.params[GCode::Params::Depth].toDouble());
-    else if(gcp.params.contains(OffsetSteps) && gcp.params[OffsetSteps].toInt() > 0) // FIXME inside steps
-        createFixedSteps(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble(), gcp.params[OffsetSteps].toInt());
+        createMultiTool(gcp.tools, depth);
+    else if(gcp.params.contains(OffsetSteps) && gcp.params[OffsetSteps].toInt() > 0)
+        createFixedSteps(gcp.tools.front(), depth, gcp.params[OffsetSteps].toInt());
     else
-        createStdFull(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
+        createStdFull(gcp.tools.front(), depth);
 }
 
 namespace {
@@ -41,11 +43,27 @@ namespace {
 // уезжает на её половину, отсюда удвоение. Отрицательный шаг идёт внутрь и
 // кончается сам, когда сжимать нечего; положительный не кончится никогда, там
 // limit обязателен.
-Geo::Polylines concentricLoops(Geo::Polygons region, double step, int limit = {}) {
+//
+// Каждая петля считается офсетом ИСХОДНОЙ области на суммарную глубину, а НЕ
+// офсетом предыдущей петли. Результат тот же -- офсеты диском складываются,
+// (X ⊖ D(a)) ⊖ D(b) = X ⊖ D(a+b), -- а цена разная, и разная катастрофически:
+// цепочка каждый раз подаёт на вход результат прошлого офсета, у которого дуг
+// уже вдвое больше, и растёт это геометрически. На меди gerber1.gbr фрезой
+// 0.5 мм седьмой виток занимал 8.8 с и 2.6 ГБ (первый -- 0.4 с), а восьмой
+// падал с bad_alloc; от исходной области все 22 витка идут по 80-130 мс при
+// ровных 150 МБ.
+Geo::Polylines concentricLoops(const Geo::Polygons& region, double step, int limit = {}) {
     Geo::Polylines loops;
-    for(int i{}; !region.empty() && (!limit || i < limit); ++i) {
-        loops.append_range(region.contours());
-        region = Geo::Inflate(region, 2.0 * step);
+    for(int i{}; !limit || i < limit; ++i) {
+        // Точка отмены: витков заранее не знает никто, и один Inflate большой
+        // области -- уже заметное время. Прогресс здесь не двигают, его шаг --
+        // тело целиком.
+        Geo::checkCancelled();
+        const Geo::Polygons loop = i ? Geo::Inflate(region, 2.0 * step * i) : region;
+        if(loop.empty()) break;
+        // contours() отдаёт уже без вырожденного: схлопнувшиеся в точку
+        // куски офсета Geo отсеивает при материализации сама.
+        loops.append_range(loop.contours());
     }
     return loops;
 }
@@ -64,15 +82,110 @@ void removeSmall(Geo::Polygons& region, double dOffset) {
 
 } // namespace
 
+// Что выбирает фреза: изнутри -- саму медь, снаружи -- всё, что медью НЕ
+// занято, то есть поле вокруг детали ВМЕСТЕ с дырками в ней. Отсюда и общий
+// вид «граница минус медь»: разность сама разложит вложенность, и остров в
+// дырке останется нетронутым.
+//
+// Различаются случаи только самой границей.
+//
+// Наружных контуров НЕСКОЛЬКО -- граница габаритная рамка с отступом в диаметр
+// САМОЙ ШИРОКОЙ фрезы набора (инструменты приходят отсортированными по
+// убыванию диаметра): ей врезаться в поле первой, и меньшего отступа ей не
+// хватит. Запас чуть больше диаметра -- иначе поле пережимается в ноль там,
+// где деталь касается своего же габарита.
+//
+// Контур ОДИН -- рамки нет вовсе: материал за деталью не кончается, границу
+// там задавать нечем и незачем. Снаружи остаётся один проход вокруг детали
+// (outerContourPass), а карман сводится к её дыркам -- границей служит её же
+// внешний контур.
+//
+// groupedPaths(Grouping::Cutoff) для этого не годится, хотя прежде звался
+// именно он: тот выбрасывает поле, стоит появиться хоть одной дырке в меди.
+const std::vector<Geo::Polygon>& Creator::pocketBodies(const double depth) {
+    if(gcp.side() != GCode::Outer)
+        return groupedPaths(GCode::Grouping::Copper);
+
+    groupedPss.clear();
+    if(closedSrc.empty()) return groupedPss;
+
+    const Geo::Polygons solid = solidBodies();
+
+    Geo::Polylines bound;
+    if(solid.all().size() == 1)
+        bound.push_back(solid.all().front().outer());
+    else {
+        const double margin = gcp.tools.front().getDiameter(depth) * 1.005;
+        bound.push_back(GCode::boundingFrame(closedSrc.boundingRect(), margin));
+    }
+
+    // Вычитается медь КАК ЕСТЬ, со всей своей вложенностью: остров в дырке --
+    // материал, и трогать его нельзя.
+    groupedPss = (Geo::Polygons{bound} - closedSrc).all();
+    return groupedPss;
+}
+
+// Деталь снаружи -- это её силуэт: дырка границей детали не является, а остров
+// в дырке -- не наружный контур. Объединение сплошных границ разбирает и то, и
+// другое разом: контуры острова и его носителя сливаются в один.
+Geo::Polygons Creator::solidBodies() const {
+    Geo::Polylines outers;
+    for(const Geo::Polygon& body: closedSrc.all())
+        outers.push_back(body.outer());
+    return Geo::Polygons{outers};
+}
+
+// Явный проход вокруг детали -- ровно на радиус от её внешнего контура.
+// Заливка сама его не даёт: снаружи поле зажато между деталью и рамкой, а та
+// отстоит всего на диаметр -- после сжатия на радиус с каждой стороны от поля
+// остаётся волосяной след, при единственном же контуре рамки нет вовсе.
+// Фиксированные шаги -- другое дело: там витки и так обходят деталь кругом,
+// туда этот проход не идёт.
+//
+// Возвращает заметённую полосу: её вычитают из поля, чтобы фреза не прошла по
+// одному месту дважды. Изнутри детали проходу этому места нет -- там первая
+// петля заливки и есть обход по контуру.
+Geo::Polygons Creator::outerContourPass() {
+    if(gcp.side() != GCode::Outer || closedSrc.empty()) return {};
+
+    Geo::Polylines loops;
+    for(const Geo::Polygon& body: Geo::Inflate(solidBodies(), +toolDiameter).all())
+        loops.push_back(body.outer());
+    if(loops.empty()) return {};
+
+    // Заметённое -- полоса шириной в диаметр вдоль самой траектории. Раздуть
+    // петлю как область здесь нельзя: она ТЕЛО, и внутри неё лежит деталь, к
+    // которой фреза не прикасалась.
+    Geo::Polygons band = Geo::Polygons{loops}.boundaryBand(dOffset);
+
+    // Материал у этой петли ВНУТРИ: это обход детали, а не стенка кармана. Для
+    // stacking() сторону материала выражает ориентация контура (см. там же),
+    // отсюда разворот -- и попутный ход получается тот же, что у Profile
+    // снаружи.
+    for(Geo::Polyline& loop: loops)
+        loop.reverse();
+
+    returnPs.append_range(std::move(loops));
+    return band;
+}
+
+// Заливка одного тела концентрическими петлями с вычетом уже выбранного.
+// forbidden -- куда нельзя вести ЦЕНТР фрезы; minFeature -- порог отсева
+// мелочи (0 -- не отсеивать).
+Geo::Polylines Creator::fillBody(const Geo::Polygon& body, const Geo::Polygons& forbidden, double minFeature) {
+    Geo::Polygons region = Geo::Inflate(Geo::Polygons{body}, -toolDiameter);
+    if(!forbidden.empty()) region -= forbidden;
+    if(minFeature > 0.0) removeSmall(region, minFeature);
+    if(region.empty()) return {};
+    return concentricLoops(region, -stepOver);
+}
+
 // Область, которую фреза заметает вдоль траектории. Прежде она собиралась
 // отдельными офсетами внутрь и наружу; в точном домене это ровно раздувание
 // самой траектории на диаметр.
 void Creator::finishPocket(const Tool& tool, Geo::Polygons&& cutArea) {
     stacking(returnPs);
-    if(returnPss.empty()) {
-        emit fileReady(nullptr);
-        return;
-    }
+    if(returnPss.empty()) return; // пустой файл отправит createGc
     gcp.toolPathss = std::move(returnPss);
     gcp.setPocketAreaCurves(std::move(cutArea));
     file_ = new File{std::move(gcp)};
@@ -88,20 +201,25 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     stepOver = tool.stepover();
 
     if(gcp.side() == GCode::Inner) {
-        for(const Geo::Polygon& body: groupedPaths(GCode::Grouping::Copper))
+        const std::vector<Geo::Polygon>& bodies = groupedPaths(GCode::Grouping::Copper);
+        setMax(bodies.size());
+        setCurrent();
+        for(const Geo::Polygon& body: bodies) {
             returnPs.append_range(concentricLoops(
                 Geo::Inflate(Geo::Polygons{body}, -toolDiameter), -stepOver, steps));
+            incCurrent();
+        }
     } else {
+        setMax(1);
+        setCurrent();
         // Снаружи петли идут ОТ детали наружу и сами кончиться не могут:
         // ограничение по числу шагов здесь единственное.
         returnPs.append_range(concentricLoops(
             Geo::Inflate(closedSrc, +toolDiameter), +stepOver, steps));
+        incCurrent();
     }
 
-    if(returnPs.empty()) {
-        emit fileReady(nullptr);
-        return;
-    }
+    if(returnPs.empty()) return; // пустой файл отправит createGc
     finishPocket(tool, Geo::Inflate(returnPs, toolDiameter));
 }
 
@@ -113,33 +231,44 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     dOffset = toolDiameter * 0.5;
     stepOver = tool.stepover();
 
-    // Снаружи карман -- то, что осталось от габаритной рамки после вычитания
-    // детали, изнутри -- сама медь. Запас рамки чуть больше диаметра, чтобы
-    // фреза прошла по внешнему контуру целиком.
-    const auto& bodies = gcp.side() == GCode::Outer
-        ? groupedPaths(GCode::Grouping::Cutoff, toolDiameter * 1.005)
-        : groupedPaths(GCode::Grouping::Copper);
+    // Снаружи первым идёт обход детали по контуру, и заливка начинается уже за
+    // заметённой им полосой.
+    Geo::Polygons cutArea = outerContourPass();
+    const Geo::Polygons forbidden = cutArea.empty()
+        ? Geo::Polygons{}
+        : Geo::Inflate(cutArea, -toolDiameter);
 
-    // Первая петля отстоит от границы на РАДИУС: центр круглой фрезы ближе не
-    // подойдёт. delta -- полная ширина, отсюда целый диаметр.
-    for(const Geo::Polygon& body: bodies)
-        returnPs.append_range(concentricLoops(
-            Geo::Inflate(Geo::Polygons{body}, -toolDiameter), -stepOver));
+    // Первая петля заливки отстоит от границы на РАДИУС: центр круглой фрезы
+    // ближе не подойдёт. delta -- полная ширина, отсюда целый диаметр.
+    const std::vector<Geo::Polygon>& bodies = pocketBodies(depth);
+    setMax(bodies.size() + 1);
+    setCurrent(1); // контурный проход позади
 
-    if(returnPs.empty()) {
-        emit fileReady(nullptr);
-        return;
+    Geo::Polylines fill;
+    for(const Geo::Polygon& body: bodies) {
+        // Мелочь отсеивается только там, где поле резал контурный проход:
+        // после него у самой полосы остаются обрывки в волос толщиной.
+        fill.append_range(fillBody(body, forbidden, forbidden.empty() ? 0.0 : dOffset * 0.5));
+        incCurrent();
     }
-    finishPocket(tool, Geo::Inflate(returnPs, toolDiameter));
+
+    if(!fill.empty()) {
+        cutArea |= Geo::Inflate(fill, toolDiameter);
+        returnPs.append_range(std::move(fill));
+    }
+
+    if(returnPs.empty()) return; // пустой файл отправит createGc
+    finishPocket(tool, std::move(cutArea));
 }
 
 void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
     Timer t{__FUNCTION__};
     if(gcp.side() == GCode::On) return;
 
-    const auto& bodies = gcp.side() == GCode::Outer
-        ? groupedPaths(GCode::Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005)
-        : groupedPaths(GCode::Grouping::Copper);
+    const auto& bodies = pocketBodies(depth);
+
+    setMax((bodies.size() + 1) * tools.size());
+    setCurrent();
 
     // Выбранное предыдущими, более крупными фрезами: инструменты приходят
     // отсортированными по убыванию диаметра, и каждый следующий дорабатывает
@@ -149,52 +278,58 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
     for(size_t tIdx{}, size = tools.size(); const Tool& tool: tools) {
         returnPs.clear();
         returnPss.clear();
+        // Файл прошлой фрезы больше не наш: не обнулив его, пустая последняя
+        // итерация отправила бы его вторично -- createGc в конце шлёт file_
+        // как есть.
+        file_ = nullptr;
         toolDiameter = tool.getDiameter(depth);
         dOffset = toolDiameter * 0.5;
         stepOver = tool.stepover();
 
+        // Обход детали по контуру достаётся САМОЙ ШИРОКОЙ фрезе -- она идёт
+        // первой, и поле у самой детали её же и ждёт. Прочим там делать
+        // нечего: заметённую полосу они обходят, как и всё уже выбранное.
+        Geo::Polygons cutArea = tIdx == 0 ? outerContourPass() : Geo::Polygons{};
+        incCurrent();
+
         // Куда нельзя вести ЦЕНТР этой фрезы: вглубь уже выбранного, отступив
         // от его края на радиус. Ближе к краю фреза ещё снимает материал.
-        const Geo::Polygons forbidden = cleared.empty()
+        const Geo::Polygons obstacles = cleared | cutArea;
+        const Geo::Polygons forbidden = obstacles.empty()
             ? Geo::Polygons{}
-            : Geo::Inflate(cleared, -toolDiameter);
+            : Geo::Inflate(obstacles, -toolDiameter);
 
+        Geo::Polylines fill;
         for(const Geo::Polygon& body: bodies) {
-            Geo::Polygons region = Geo::Inflate(Geo::Polygons{body}, -toolDiameter);
-            if(!forbidden.empty()) region -= forbidden;
             // Последней фрезе мелочь оставляем: дочищать после неё уже некому.
-            removeSmall(region, tIdx + 1 == size ? dOffset * 0.5 : dOffset * 2.0);
-            if(region.empty()) continue;
-            returnPs.append_range(concentricLoops(std::move(region), -stepOver));
+            fill.append_range(fillBody(body, forbidden, tIdx + 1 == size ? dOffset * 0.5 : dOffset * 2.0));
+            incCurrent();
         }
 
-        if(returnPs.empty()) {
-            emit fileReady(nullptr);
-            ++tIdx;
-            continue;
+        if(!fill.empty()) {
+            cutArea |= Geo::Inflate(fill, toolDiameter);
+            returnPs.append_range(std::move(fill));
         }
 
-        Geo::Polygons cutArea = Geo::Inflate(returnPs, toolDiameter);
-        cleared |= cutArea;
-
-        stacking(returnPs);
-        if(returnPss.empty()) {
-            emit fileReady(nullptr);
-            ++tIdx;
-            continue;
+        if(!returnPs.empty()) {
+            stacking(returnPs);
+            if(!returnPss.empty()) {
+                cleared |= cutArea;
+                // Параметры КОПИРУЮТСЯ, а не переносятся: прежний код делал
+                // File{std::move(gcp)} прямо в цикле, и второму инструменту
+                // доставался уже выпотрошенный gcp -- ни инструментов, ни
+                // исходной геометрии.
+                GCode::Params toolGcp = gcp;
+                toolGcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
+                toolGcp.toolPathss = std::move(returnPss);
+                toolGcp.setPocketAreaCurves(std::move(cutArea));
+                file_ = new File{std::move(toolGcp)};
+                file_->setFileName(tool.nameEnc());
+            }
         }
 
-        // Параметры КОПИРУЮТСЯ, а не переносятся: прежний код делал
-        // File{std::move(gcp)} прямо в цикле, и второму инструменту доставался
-        // уже выпотрошенный gcp -- ни инструментов, ни исходной геометрии.
-        GCode::Params toolGcp = gcp;
-        toolGcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
-        toolGcp.toolPathss = std::move(returnPss);
-        toolGcp.setPocketAreaCurves(std::move(cutArea));
-        file_ = new File{std::move(toolGcp)};
-        file_->setFileName(tool.nameEnc());
-
-        // Последний файл отправит сам Creator::createGc.
+        // Последний файл -- хоть готовый, хоть пустой -- отправит сам
+        // Creator::createGc.
         if(++tIdx < size) emit fileReady(file_);
     }
 }

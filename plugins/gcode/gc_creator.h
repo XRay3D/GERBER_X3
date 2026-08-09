@@ -19,9 +19,13 @@
 
 #include <QObject>
 
-#include <cancelation.h>
+#include "geo/cancel.h"
+
+#include <atomic>
 #include <condition_variable>
 #include <mutex>
+#include <progress.h>
+#include <stop_token>
 
 namespace ranges = r;
 namespace v = r::views;
@@ -48,7 +52,7 @@ namespace GCode {
 
 class File;
 
-class Creator : public QObject, public ProgressCancel {
+class Creator : public QObject, public Progress {
     Q_OBJECT
 
 public:
@@ -67,21 +71,30 @@ public:
     // после вычитания меди.
     std::vector<Geo::Polygon>& groupedPaths(Grouping group, double margin = 1.0, bool skipFrame = {});
 
-    void createGc(Params&& gcp);
+    // Весь расчёт целиком. Зовётся из РАБОЧЕГО потока, а token -- его же
+    // стоп-токен: под него ставится Geo::CancelScope, и отмена начинает
+    // действовать на все операции Geo этого потока, включая те, что идут
+    // внутри одного вызова (см. geo/cancel.h). Без токена считает до конца.
+    void createGc(Params&& gcp, std::stop_token token = {});
 
-    void continueCalc(bool fl = true);
+    // Ответ на вопрос, заданный isContinueCalc: расчётный поток спит, пока
+    // GUI не нажмёт «Continue» или «Break». Зовётся ПРЯМО из GUI-потока и
+    // только будит; отменяет («Break») стоп-токен, а не этот вызов.
+    void continueCalc();
 
-    // static void //PROG .3setProgMax(int progressMax);
-    // static void //PROG //PROG .3setProgMaxAndVal(int progressMax, int progressVal);
-    // static void //PROG setProgInc();
-
-    QString msg;
+    // Надпись в прогрессбаре. Пишет её расчётный поток, читает GUI -- отсюда
+    // мьютекс, а не голое поле: QString неявно разделяемая, и гонка на ней --
+    // не мусор в надписи, а падение на счётчике ссылок.
+    void setMsg(const QString& text);
+    QString message() const;
 
     std::vector<Gi::Error*> items;
 
-    bool checkMillingFl{};
+    // Идёт проверка фрезеруемости. Ставит расчётный поток, читает GUI.
+    std::atomic_bool checkMillingFl{};
 
 private:
+    QRectF sourceExtent() const;
     void addRawPaths(Geo::Polylines&& paths);
 
     Params getGcp() const;
@@ -89,7 +102,6 @@ private:
 
 signals:
     void fileReady(File* file);
-    void canceled();
     void errorOccurred(int = 0);
 
 protected:
@@ -128,8 +140,15 @@ protected:
     void isContinueCalc();
 
 private:
+    // Ожидание ответа на найденные ошибки: расчётный поток спит на cv, GUI
+    // будит его из continueCalc. Поля именно ЭТОГО Creator'а, а не общие на
+    // всех: форм с расчётом может идти несколько разом.
     std::mutex mutex;
     std::condition_variable cv;
+    bool answered_{};
+
+    mutable std::mutex msgMutex;
+    QString msg_;
 };
 
 } // namespace GCode
