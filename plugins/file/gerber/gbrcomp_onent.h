@@ -10,8 +10,8 @@
  *******************************************************************************/
 #pragma once
 
-#include "datastream.h"
 #include "gbr_attributes.h"
+#include "serial.h"
 
 #include <QMap>
 #include <QObject>
@@ -28,17 +28,14 @@ class Item;
 struct Library {
     QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
-    SERIALIZE_POD(Library)
 };
 struct Manufacturer {
     QString name;       /* <field> Manufacturer. */
     QString partNumber; /* <field> Manufacturer part number. */
-    SERIALIZE_POD(Manufacturer)
 };
 struct Package {
     QString name;        /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
     QString description; /* <field> Package description. */
-    SERIALIZE_POD(Package)
 };
 struct Pin {
     /*
@@ -48,20 +45,15 @@ struct Pin {
     QString number;
     QString description;
     QPointF pos;
-    SERIALIZE_POD(Pin)
 };
 struct Supplier {
     QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
-    SERIALIZE_POD(Supplier)
 };
 
 class Component {
     Q_GADGET
     // friend Item;
-    friend QDataStream& operator<<(QDataStream& stream, const Component& c);
-    friend QDataStream& operator>>(QDataStream& stream, Component& c);
-
 public:
     enum MountType {
         TH,
@@ -176,7 +168,7 @@ public:
 private:
     double rotation_{}; /* <decimal> The rotation angle of the component.*/
     double height_{};   /* <decimal> Height, in the unit of the file. */
-    mutable Item* componentitem_ = nullptr;
+    [[= Serial::skip]] mutable Item* componentitem_ = nullptr;
     Library library_;
     Manufacturer manufacturer_;
     MountType mount_ = Other; /* (TH|SMD|BGA|Other) Mount type. */

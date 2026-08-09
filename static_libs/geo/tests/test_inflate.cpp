@@ -12,6 +12,7 @@
 #include <QPainterPath>
 #include <QTest>
 
+#include <algorithm>
 #include <cmath>
 #include <numbers>
 
@@ -70,7 +71,39 @@ private slots:
     void closingRestoresOriginalArea();
     void zeroDeltaIsIdentity();
     void erosionThickerThanBodyEmptiesIt();
+    void arcSmallerThanOffsetStaysOneArc();
 };
+
+// Дуга РАДИУСОМ МЕНЬШЕ офсета -- случай, на котором внутренняя окружность
+// вырождается. Прежде её резали на хорды и раздували каждую отдельно: вместо
+// одной дуги на выходе была цепочка колпачков, разделённых прямыми. Проверяем
+// обе стороны дела -- и форму (площадь полукруга считается точно), и то, что
+// дуга осталась ОДНОЙ.
+void InflateTest::arcSmallerThanOffsetStaysOneArc() {
+    constexpr double R = 1.0, delta = 6.0, r = delta / 2; // r = 3 > R
+    // Полукруг: две вершины, дуга сверху (прогиб +1 -- полуокружность) и
+    // прямая обратно.
+    Polyline half{Vertex(-R, 0.0, 1.0), Vertex(R, 0.0)};
+    half.closed = true;
+    const Polygons base{Polylines{half}};
+    QVERIFY(std::abs(rasterArea(base) - std::numbers::pi * R * R / 2) < areaTolerance);
+
+    const Polygons grown = Inflate(base, +delta);
+
+    // Раздутый полукруг: круг радиуса R + r сверху, снизу -- прямоугольник
+    // 2R x r и два четвертькруга по концам диаметра.
+    const double expected = std::numbers::pi * (R + r) * (R + r) / 2 // верх
+        + 2 * R * r                                                  // полоса под диаметром
+        + std::numbers::pi * r * r / 2;                              // два конца
+    QVERIFY(std::abs(rasterArea(grown) - expected) < areaTolerance);
+
+    // Дуг в контуре ровно столько, сколько их в фигуре: одна снаружи и по
+    // одной на конец диаметра. Цепочка хорд дала бы их десятки.
+    const Polylines contours = grown.contours(); // отдаётся ЗНАЧЕНИЕМ
+    QCOMPARE(contours.size(), 1u);
+    const auto arcs = std::ranges::count_if(contours.front(), &Vertex::isArc);
+    QVERIFY2(arcs <= 3, qPrintable(QString::number(arcs)));
+}
 
 void InflateTest::outwardGrowsByMinkowskiDisc() {
     constexpr double side = 20.0, delta = 4.0, r = delta / 2;

@@ -43,7 +43,7 @@ GCode::Tab::Tab(QWidget* parent)
     // Инфо в УП
     chbxInfo = new QCheckBox{tabCommon};
     chbxInfo->setObjectName(u"chbxInfo"_s);
-    chbxInfo->setText(QApplication::translate("GCodeSettings", "Add a comment with the parameters G-\320\241ode", nullptr));
+    chbxInfo->setText(QApplication::translate("GCodeSettings", "Add a comment with the parameters G-Code", nullptr));
     vLayout->addWidget(chbxInfo);
 
     // File Extension

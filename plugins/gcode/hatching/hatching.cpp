@@ -177,7 +177,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             merged.resize(merged.size() + 1);
             auto& path = merged.back();
             for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
-                throwIfCancel();
+                Geo::checkCancelled();
                 if(path.empty() || path.back() == bit->front()) {
                     path.empty() ? path.append_range(*bit)
                                  : path.append_range(*bit | skipFront);

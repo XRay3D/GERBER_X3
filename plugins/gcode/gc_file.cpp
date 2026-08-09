@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_file.h"
-#include "gc_highlighter.h"
+#include "gc_programdialog.h"
 #include "gc_jsproxy.h"
 #include "gc_node.h"
 #include "gc_plugin.h"
@@ -153,6 +153,11 @@ void File::setLastDir(QString dirPath) {
     }
 }
 
+void File::setSide(Side side) {
+    AbstractFile::setSide(side);
+    gcp.params[Params::FileSide].setValue(side);
+}
+
 void File::regenerate() {
     initSave();
     addInfo();
@@ -217,6 +222,8 @@ void File::initSave() {
 
     for(QString& str: lastValues)
         str.clear();
+    for(bool& written: lastWritten)
+        written = false;
 
     // setFeedRate(gcp.getTool().feedRate);
     // setPlungeRate(gcp.getTool().plungeRate());
@@ -355,9 +362,17 @@ std::vector<double> File::getDepths() {
     return depths;
 }
 
-std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter, double depth) {
+std::vector<QString> File::savePath(const Geo::Polyline& srcCurve, double perimeter, double depth) {
     std::vector<QString> lines;
-    lines.reserve(curve.size());
+    lines.reserve(srcCurve.size());
+
+    // Дуга, разрезанная на куски, -- по-прежнему одна дуга, и станку она
+    // говорится одной строкой. Geo сшивает их у себя (Geo::stitchArcs в
+    // toPolyline), но путь до вывода идёт не только оттуда: его перебирают и
+    // складывают плагины, зеркалят по стороне платы, сдвигают по тайлам. Здесь
+    // последняя точка перед станком -- тут и проверяем.
+    Geo::Polyline curve = srcCurve;
+    Geo::stitchArcs(curve);
 
     // Дуга -- свойство пары вершин: центр (а с ним I/J и выбор G2/G3) считается
     // по прогибу НАЧАЛЬНОЙ вершины сегмента, отдельно взятая вершина о дуге
@@ -370,23 +385,42 @@ std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter
             return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
     };
     // Ход, не выражающийся в выводе, ПРОПУСКАЕТСЯ, а не пишется как есть.
-    // format даёт три значащие цифры, и у сегмента короче этого разрешения
-    // (точный домен, переведённый в прогибы, оставляет обрывки в десятки
-    // нанометров) X и Y округляются до прежних, formated их подавляет как
-    // неизменившиеся -- и от дуги остаются одни I/J. Строка `G2 I.. J..` без
-    // координат означает для станка ПОЛНЫЙ КРУГ: это и есть завитки на стыках.
+    // Сегмент короче единицы вывода (точный домен, переведённый в прогибы,
+    // оставляет обрывки в десятки нанометров) даёт те же X и Y, formated
+    // подавляет их как неизменившиеся -- и от дуги остаются одни I/J. Строка
+    // `G2 I.. J..` без координат означает для станка ПОЛНЫЙ КРУГ: это и есть
+    // завитки на стыках.
     //
     // Сравнение идёт с последней НАПИСАННОЙ точкой, а не с началом сегмента:
     // подряд идущие обрывки иначе накопились бы в заметный сдвиг.
     QPointF last = curve.front();
     auto representable = [&last](const Geo::Vertex& to) {
-        return format(to.x()) != format(last.x()) || format(to.y()) != format(last.y());
+        return toUnits(to.x()) != toUnits(last.x()) || toUnits(to.y()) != toUnits(last.y());
     };
 
     // Z по спирали набирается на ВСЕХ сегментах, включая пропущенные, иначе
     // проход не дойдёт до нужной глубины.
     const double zk = depth && perimeter ? depth - z_ : 0.0;
     const double len = zk ? curve.perimeter() : 0.0;
+
+    // ОКРУЖНОСТЬ -- одной командой. Прогибом полный оборот не выражается, и в
+    // геометрии она живёт двумя половинами (две вершины с прогибом +-1);
+    // станку же её говорят строкой «G2/G3 I.. J..» без координат конца -- конец
+    // и есть начало. Координаты не пишутся сами: они не изменились, и formated
+    // подавит их как неизменившиеся.
+    //
+    // На спуске по спирали (zk) круг остаётся двумя половинами: одной командой
+    // Z по дуге не набрать.
+    if(!zk && curve.closed && curve.size() == 2
+        && curve.front().bulge == curve.back().bulge
+        && std::abs(std::abs(curve.front().bulge) - 1.0) < 1e-9) {
+        const Geo::Vertex& start = curve.front();
+        if(auto arc = Geo::arcOf(start, curve.back(), start.bulge)) {
+            auto [I, J] = arc->center - static_cast<const QPointF&>(start);
+            lines.emplace_back(formated({g(start), x(start.x()), y(start.y()), z(z_), i(I), j(J), strFeed, strSpindle}));
+            return lines;
+        }
+    }
 
     for(auto&& [fr, to]: Geo::segments(curve)) {
         if(zk) z_ += Geo::segmentLength(fr, to) / len * zk;
@@ -397,16 +431,43 @@ std::vector<QString> File::savePath(const Geo::Polyline& curve, double perimeter
     return lines;
 }
 
-QString File::formated(const std::vector<QString>& data) {
+QString File::formatedText(const std::vector<QString>& data) {
+    std::vector<Word> words;
+    words.reserve(data.size());
+    for(const QString& text: data) {
+        if(text.isEmpty()) continue;
+        const QChar letter = text.front();
+        bool isNumber{};
+        const double value = QStringView{text}.sliced(1).toDouble(&isNumber);
+        // Координата от скрипта -- такое же число на сетке вывода, как и своя:
+        // и сравнивается по нему, и печатается из него. Прочие слова (G, F, S,
+        // да и всё, что скрипт придумает сам) идут как написаны.
+        if(isNumber && COORD_LIST.contains(letter.toUpper()))
+            words.emplace_back(letter, toUnits(value));
+        else
+            words.emplace_back(text);
+    }
+    return formated(words);
+}
+
+QString File::formated(const std::vector<Word>& data) {
     QString ret;
-    for(const QString& str: data | v::filter(&QString::size)) {
-        // if(str.isEmpty())continue
-        ssize_t index = CMD_LIST.indexOf(str.front(), 0, Qt::CaseInsensitive);
-        if(index != -1) {
-            if(formatFlags[AlwaysG + index] || lastValues[index] != str) {
-                lastValues[index] = str;
-                ret += str + (formatFlags[SpaceG + index] ? u" " : u"");
-            }
+    for(const Word& word: data) {
+        if(word.text.isEmpty()) continue;
+        const ssize_t index = CMD_LIST.indexOf(word.text.front(), 0, Qt::CaseInsensitive);
+        if(index == -1) continue;
+        // Слово пишется, если формат требует его всегда либо если оно
+        // ИЗМЕНИЛОСЬ. У координатных изменение -- это другое ЧИСЛО: сравнивать
+        // их записи значило бы сравнивать округления, а на сетке вывода число
+        // и есть окончательное значение.
+        const bool same = word.numeric
+            ? lastWritten[index] && lastUnits[index] == word.units
+            : lastValues[index] == word.text;
+        if(formatFlags[AlwaysG + index] || !same) {
+            lastUnits[index] = word.units;
+            lastWritten[index] = true;
+            lastValues[index] = word.text;
+            ret += word.text + (formatFlags[SpaceG + index] ? u" " : u"");
         }
     }
     return ret.trimmed();
@@ -430,12 +491,26 @@ QString File::g(const Geo::Vertex& v) {
     return {};
 }
 
-QString File::format(double val) {
-    QString str(QString::number(val, 'g', (abs(val) < 1 ? 3 : (abs(val) < 10 ? 4 : (abs(val) < 100 ? 5 : 6)))));
-    if(str.contains(u'e'))
-        return QString::number(val, 'f', 3);
+QString File::format(Units units) {
+    const bool negative = units < 0;
+    const Units magnitude = negative ? -units : units;
+
+    QString str = QString::number(magnitude / unitsPerMm);
+    if(const Units fraction = magnitude % unitsPerMm) {
+        QString digits = QString::number(fraction).rightJustified(unitDecimals, u'0');
+        while(digits.endsWith(u'0')) digits.chop(1);
+        str += u'.' + digits;
+    }
+    return negative ? u'-' + str : str;
+}
+
+QString File::formatValue(double val) {
+    QString str = QString::number(val, 'f', 3);
+    if(str.contains(u'.')) {
+        while(str.endsWith(u'0')) str.chop(1);
+        if(str.endsWith(u'.')) str.chop(1);
+    }
     return str;
-    // return QString::fromStdString(std::format("{:1.3f}", val));
 }
 
 /////////////////////////////////////////////////////////////
@@ -620,6 +695,17 @@ void File::saveMillingRaster(const QPointF& offset) {
     }
 }
 
+namespace {
+
+// Переезд -- отрезок между двумя точками, и только. Вершины путей берутся БЕЗ
+// прогиба: у конца прохода он описывает дугу САМОГО прохода (Geo::Vertex::bulge
+// -- кривизна сегмента, начинающегося в вершине), и, скопированный в переезд,
+// рисует холостой ход дугой. Отсюда QPointF: до полилинии он доезжает уже
+// голой точкой.
+Geo::Polyline travel(QPointF from, QPointF to) { return Geo::Polyline{QPolygonF{from, to}}; }
+
+} // namespace
+
 void File::createGiDrill() {
     if(!gcp.toolPathss.size()) return;
     Gi::Item* item;
@@ -646,9 +732,9 @@ void File::createGiLaser() {
             g0path_.push_back(gcp.toolPathss.front()[i]);
     if(gcp.toolPathss.size() > 1) {
         paths.insert(paths.end(), gcp.toolPathss[1].begin(), gcp.toolPathss[1].end());
-        g0path_.push_back({gcp.toolPathss[0].back().back(), gcp.toolPathss[1].front().front()});
+        g0path_.push_back(travel(gcp.toolPathss[0].back().back(), gcp.toolPathss[1].front().front()));
         for(size_t i{}; i < gcp.toolPathss[1].size() - 1; ++i)
-            g0path_.push_back({gcp.toolPathss[1][i].back(), gcp.toolPathss[1][i + 1].front()});
+            g0path_.push_back(travel(gcp.toolPathss[1][i].back(), gcp.toolPathss[1][i + 1].front()));
     }
 
     auto item = new Gi::GcPath{paths, this};
@@ -708,7 +794,7 @@ void File::createGiPocket() {
         Geo::Polylines g1path;
         g1path.reserve(paths.size());
         for(auto&& [fr, to]: v::pairwise(paths))
-            g1path.push_back(Geo::Polyline{{fr.back()}, {to.front()}});
+            g1path.push_back(travel(fr.back(), to.front()));
         item = new Gi::GcPath{g1path};
         // item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         item->setPen({Qt::magenta, 0.0});
@@ -717,7 +803,7 @@ void File::createGiPocket() {
 
     g0path_.reserve(gcp.toolPathss.size());
     for(auto&& [fr, to]: v::pairwise(gcp.toolPathss))
-        g0path_.push_back({{fr.back().back()}, {to.front().front()}});
+        g0path_.push_back(travel(fr.back().back(), to.front().front()));
 
     item = new Gi::GcPath{g0path_};
     item->setPenColorPtr(&App::settings().guiColor(GuiColors::G0));
@@ -740,9 +826,9 @@ void File::createGiProfile() {
         item = new Gi::GcPath{paths, this};
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
-        if(g0path_.size()) g0path_.back().emplace_back(paths.front().front());
-        for(auto&& [fr, to]: v::pairwise(paths)) g0path_.push_back({fr.back(), to.front()});
-        g0path_.push_back({paths.back().back()});
+        if(g0path_.size()) g0path_.back().emplace_back(QPointF{paths.front().front()});
+        for(auto&& [fr, to]: v::pairwise(paths)) g0path_.push_back(travel(fr.back(), to.front()));
+        g0path_.push_back({Geo::Vertex{QPointF{paths.back().back()}}});
     }
 
     // item = new Gi::GcPath{g0path_};
@@ -786,9 +872,9 @@ void File::createGiRaster() {
         item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
         itemGroup()->push_back(item);
         for(size_t j{}; j < paths.size() - 1; ++j)
-            g0path_.push_back({paths[j].back(), paths[j + 1].front()});
+            g0path_.push_back(travel(paths[j].back(), paths[j + 1].front()));
         if(i < gcp.toolPathss.size() - 1)
-            g0path_.push_back({gcp.toolPathss[i].back().back(), gcp.toolPathss[++i].front().front()});
+            g0path_.push_back(travel(gcp.toolPathss[i].back().back(), gcp.toolPathss[++i].front().front()));
     }
 
     item = new Gi::GcPath{g0path_};

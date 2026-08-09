@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "tool.h"
-#include "datastream.h"
+#include "reflection.h"
 #include "settings.h"
 #include <QApplication>
 #include <QDebug>
@@ -23,42 +23,6 @@
 #include <app.h>
 
 int toolId = qRegisterMetaType<Tool>("Tool");
-
-QDataStream& operator<<(QDataStream& stream, const Tool& tool) {
-    return Block{stream}.write(
-        tool.data.id,
-        tool.data.type,
-        tool.data.angle,
-        tool.data.autoName,
-        tool.data.diameter,
-        tool.data.feedRate,
-        tool.data.name,
-        tool.data.note,
-        tool.data.oneTurnCut,
-        tool.data.passDepth,
-        tool.data.plungeRate,
-        tool.data.spindleSpeed,
-        tool.data.stepover,
-        tool.data.lenght);
-}
-
-QDataStream& operator>>(QDataStream& stream, Tool& tool) {
-    return Block{stream}.read(
-        tool.data.id,
-        tool.data.type,
-        tool.data.angle,
-        tool.data.autoName,
-        tool.data.diameter,
-        tool.data.feedRate,
-        tool.data.name,
-        tool.data.note,
-        tool.data.oneTurnCut,
-        tool.data.passDepth,
-        tool.data.plungeRate,
-        tool.data.spindleSpeed,
-        tool.data.stepover,
-        tool.data.lenght);
-}
 
 QDebug operator<<(QDebug debug, const Tool& t) {
     QDebugStateSaver saver{debug};

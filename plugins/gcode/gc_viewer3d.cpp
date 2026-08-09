@@ -14,6 +14,7 @@
 
 #include <QMouseEvent>
 #include <QOpenGLContext>
+#include <QPropertyAnimation>
 #include <QSurfaceFormat>
 #include <QWheelEvent>
 #include <ctre.hpp>
@@ -510,6 +511,34 @@ float Viewer3d::worldPerPixel() const {
     return 2.f * distance_ * std::tan(qDegreesToRadians(fov_ * 0.5f)) / std::max(1, height());
 }
 
+void Viewer3d::setCameraCenter(const QVector3D& center) {
+    if(center_ == center) return;
+    center_ = center;
+    // viewTouched_ намеренно не трогаем: подвод камеры к курсору -- это не
+    // "покрутили руками", и вписывание при изменении размера должно остаться.
+    update();
+}
+
+void Viewer3d::centerOnHighlight() {
+    if(!hlAnchorValid_ || center_ == hlAnchor_) return;
+
+    if(centerAnimation_) centerAnimation_->stop();
+
+    if(!App::settings().guiSmoothScSh()) {
+        setCameraCenter(hlAnchor_);
+        return;
+    }
+
+    if(!centerAnimation_) {
+        centerAnimation_ = new QPropertyAnimation{this, "cameraCenter", this};
+        centerAnimation_->setEasingCurve(QEasingCurve::InOutSine);
+        centerAnimation_->setDuration(200); // как у плавного fitInView в GraphicsView
+    }
+    centerAnimation_->setStartValue(center_);
+    centerAnimation_->setEndValue(hlAnchor_);
+    centerAnimation_->start();
+}
+
 void Viewer3d::setHighlightedLines(int first, int last) {
     if(first > last) std::swap(first, last);
     if(hlFirstLine_ == first && hlLastLine_ == last) return;
@@ -738,6 +767,7 @@ void Viewer3d::buildHighlightVertices() {
     hlVertices_.clear();
     hlArcVertices_.clear();
     hlDirty_ = hlArcDirty_ = true;
+    hlAnchorValid_ = false;
     if(hlFirstLine_ < 0 || moves_.empty()) return;
 
     // lineNo по moves_ не убывает, так что нужные перемещения лежат подряд.
@@ -776,6 +806,8 @@ void Viewer3d::buildHighlightVertices() {
     { // маркер инструмента в начале подсвеченного участка
         const QColor home = App::settings().guiColor(GuiColors::Home);
         const QVector3D p = beg->from;
+        hlAnchor_ = p;
+        hlAnchorValid_ = true;
         const float len = std::max(sceneRadius_ * 0.03f, 0.5f);
         addLine(p - QVector3D{len, 0.f, 0.f}, p + QVector3D{len, 0.f, 0.f}, home);
         addLine(p - QVector3D{0.f, len, 0.f}, p + QVector3D{0.f, len, 0.f}, home);

@@ -70,10 +70,10 @@ void Shape::setRadius(double radius) {
     AbstractShape::redraw();
 }
 
-void Shape::readAndInit(QDataStream& /*stream*/) {
+void Shape::postLoad() {
     radius_ = Geo::distance(handles.front(), handles.back());
     curHandle = handles.data();
-    AbstractShape::redraw();
+    AbstractShape::postLoad();
 }
 
 } // namespace ShCirc

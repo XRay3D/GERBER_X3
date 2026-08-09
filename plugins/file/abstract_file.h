@@ -11,10 +11,10 @@
 #pragma once
 
 #include "app.h"
-#include "datastream.h"
 #include "ft_node.h"
 #include "gi_group.h"
 #include "plugintypes.h"
+#include "serial.h"
 
 #include "doublespinbox.h"
 
@@ -53,59 +53,24 @@ class Node;
 
 class AbstractFile {
 
-    friend QDataStream& operator<<(QDataStream& stream, const AbstractFile& file) {
-        QByteArray data;
-        QDataStream out(&data, QIODevice::WriteOnly);
-        Block{out}.write(
-            file.id_,
-            file.date_,
-            file.groupedCurves_,
-            file.itemsType_,
-            file.lines_,
-            file.mergedCurves_,
-            file.name_,
-            file.side_,
-            file.transform_,
-            file.isVisible(),
-            file.color_,
-            file.colorFlag_);
-        file.write(out);
-        return stream << data;
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, AbstractFile& file) {
-        QByteArray data;
-        stream >> data;
-        QDataStream in(&data, QIODevice::ReadOnly);
-        bool visible{};
-        Block{in}.read(
-            file.id_,
-            file.date_,
-            file.groupedCurves_,
-            file.itemsType_,
-            file.lines_,
-            file.mergedCurves_,
-            file.name_,
-            file.side_,
-            file.transform_,
-            visible,
-            file.color_,
-            file.colorFlag_);
-        file.read(in);
-        if(App::splashScreenPtr())
-            App::splashScreen().showMessage(QObject::tr("Preparing: ") + file.shortName() + u"\n\n\n"_s, Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
-        file.createGi();
-        file.setTransform(file.transform_);
-        file.setVisible(visible);
-        return stream;
-    }
-
 public:
-    template <typename T>
-    static inline T* load(QDataStream& stream) {
-        auto* file = new T;
-        stream >> *file;
-        return file;
+    // Поля конкретного класса (свои + унаследованные, flatten) в открытый
+    // элемент "files" — после "type", который пишет Project::save.
+    // Реализация в конкретном классе — однострочник:
+    //     void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    virtual void serialize(Serial::Writer& sb) const = 0;
+
+    // Актуализировать кэш-поля перед записью (зовёт движок Serial).
+    void preSave() const { isVisible(); } // обновляет visible_ из itemGroup
+
+    // Восстановление после чтения (зовёт движок Serial): хвост прежнего
+    // operator>> — splash, createGi, transform, видимость.
+    void postLoad() {
+        if(App::splashScreenPtr())
+            App::splashScreen().showMessage(QObject::tr("Preparing: ") + shortName() + u"\n\n\n"_s, Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+        createGi();
+        setTransform(transform_);
+        setVisible(visible_);
     }
 
     AbstractFile() = default;
@@ -137,7 +102,9 @@ public:
 
     const LayerTypes& displayedTypes() const;
     Side side() const;
-    void setSide(Side side);
+    // Виртуальный: у УП сторона живёт не только здесь, и смена её значит
+    // больше, чем поле (см. GCode::File::setSide).
+    virtual void setSide(Side side);
 
     virtual std::vector<GraphicObject> getDataForGC(
         std::span<Criteria> criterias [[maybe_unused]],
@@ -145,7 +112,7 @@ public:
         bool test [[maybe_unused]] = {}) const { return {}; };
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
-    virtual void createGi()       = 0;
+    virtual void createGi() = 0;
     virtual void setItemType([[maybe_unused]] int type);
     virtual int itemsType() const;
 
@@ -155,7 +122,7 @@ public:
     virtual void setColor(const QColor& color);
 
     virtual FileTree::Node* node() = 0;
-    virtual QIcon icon() const     = 0;
+    virtual QIcon icon() const = 0;
 
     void setTransform([[maybe_unused]] const Transform& transform);
     const Transform& transform() const;
@@ -167,23 +134,21 @@ public:
     void setUserColor(bool userColor);
 
 protected:
-    virtual void write(QDataStream& stream) const = 0;
-    virtual void read(QDataStream& stream)        = 0;
     virtual Geo::Polygons merge() const { return {}; };
 
-    LayerTypes layerTypes_;
-    FileTree::Node* node_ = nullptr;
+    [[= Serial::skip]] LayerTypes layerTypes_;
+    [[= Serial::skip]] FileTree::Node* node_ = nullptr;
     Geo::Polygons groupedCurves_;
     QColor color_;
     bool colorFlag_{};
     QDateTime date_;
     QString name_;
-    Side side_     = Top;
-    int32_t id_    = -1;
+    Side side_ = Top;
+    int32_t id_ = -1;
     int itemsType_ = -1;
     mutable Geo::Polygons mergedCurves_;
-    mutable bool visible_{};
-    std::vector<Gi::Group*> itemGroups_{new Gi::Group};
+    mutable bool visible_{}; // preSave актуализирует, postLoad применяет
+    [[= Serial::skip]] std::vector<Gi::Group*> itemGroups_{new Gi::Group};
     std::vector<QString> lines_;
     // QTransform transform_;
     Transform transform_;
@@ -234,9 +199,9 @@ inline const QString AbstractFile::lines2() const {
 inline std::vector<const GraphicObject*> AbstractFile::graphicObjects() const { return {}; }
 
 inline void AbstractFile::initFrom(AbstractFile* file) {
-    id_        = file->id_;
-    node_      = file->node_;
-    side_      = file->side_;
+    id_ = file->id_;
+    node_ = file->node_;
+    side_ = file->side_;
     colorFlag_ = file->colorFlag_;
     setColor(file->color_);
     setItemType(file->itemsType_);

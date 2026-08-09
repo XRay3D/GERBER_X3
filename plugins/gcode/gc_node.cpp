@@ -11,7 +11,10 @@
 #include "gc_node.h"
 #include "abstract_file.h"
 #include "gc_file.h"
-#include "gc_highlighter.h"
+#include "gc_programdialog.h"
+
+#include "app.h"
+#include "ft_model.h"
 #include "project.h"
 
 #include <QFileInfo>
@@ -64,8 +67,20 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Qt::EditRole: {
             const auto newSide = static_cast<Side>(value.toBool());
             if(newSide == file->side()) return true; // холостой выбор той же стороны
-            file->setSide(newSide);
-            static_cast<File*>(file)->regenerate(); // lines_ устарели при смене стороны платы
+
+            auto* gcFile = static_cast<File*>(file);
+            gcFile->setSide(newSide);
+            // Текст УП стороной и задан: снизу он зеркальный (см.
+            // File::mirrorAndOffsetCurves), сверху идёт как есть. Пересобрать
+            // его надо ЗДЕСЬ -- иначе до следующего «Save Toolpath» файл
+            // остался бы с чужой стороной, а окно просмотра показывало бы её
+            // же. Сама геометрия на сцене не меняется: зеркалит вывод, а не
+            // чертёж.
+            gcFile->regenerate();
+            Dialog::programChanged(file->id(), gcFile->lines2(), file->name());
+            // Подпись в дереве несёт сторону суффиксом (_TS/_BS), и её строка
+            // тоже устарела.
+            App::fileModel().updateNode(this);
             return true;
         }
         default:;

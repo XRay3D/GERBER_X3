@@ -22,31 +22,6 @@ namespace Shapes {
 
 static constexpr int HandleSize = 20;
 
-QDataStream& operator<<(QDataStream& stream, const Handle& handle) {
-    return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_};
-}
-
-QDataStream& operator>>(QDataStream& stream, Handle& handle) {
-    return stream >> BlockRead{static_cast<QPointF&>(handle), handle.type_};
-}
-
-QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
-    BlockWrite write{shape.id_, shape.isVisible(), shape.isEditable(), shape.handles};
-    shape.write(write);
-    return stream << write;
-}
-
-QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
-    bool bFlag[2];
-    shape.readAndInit(stream >> BlockRead{shape.id_, bFlag[0], bFlag[1], shape.handles});
-    assert(shape.handles.size());
-    shape.setVisible(bFlag[0]);
-    shape.setEditable(bFlag[1]);
-    shape.setToolTip(shape.name() % QString::number(shape.id_));
-    shape.setZValue(shape.id_);
-    return stream;
-}
-
 enum Move : bool {
     SimgleMove,
     MultipleMove,
@@ -348,7 +323,7 @@ double AbstractShape::scale(bool* hasUpdate) const {
 }
 
 bool AbstractShape::inHandle(const QPointF& point) {
-    curHandle        = {};
+    curHandle = {};
     const auto hSize = HandleSize * 0.5 * scale();
     for(auto& var: handles)
         // TODO if(Geo::distance(point, var) <= hSize)

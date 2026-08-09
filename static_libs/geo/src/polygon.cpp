@@ -1,8 +1,8 @@
 #include "geo/polygon.h"
 #include "cgal.h"
 #include "geo/cancel.h"
+#include "geo/geo_json.h"
 
-#include <QDataStream>
 #include <QPainterPath>
 
 namespace Geo {
@@ -12,6 +12,28 @@ using namespace Cgal;
 bool isExactContour(const Polyline& contour) {
     return contour.closed && contour.size() >= 2 && toGPoly(contour).has_value();
 }
+
+namespace {
+
+// Контур, СХЛОПНУВШИЙСЯ при материализации. В точном представлении он был
+// настоящим, но состоял из микрокривых: toPolyline сваривает их по
+// exitWeldTolerance, и от целого контура остаётся точка либо волосок между
+// двумя вершинами.
+//
+// Родина таких -- офсет: там, где граница подходит к себе вплотную, сжатие
+// сводит целый кусок региона в ниточку. Наружу его отдавать нельзя. Обратно
+// в точную геометрию он не пройдёт (isExactContour выше), в дереве
+// вложенности ничего не ограничивает, а в траектории фрезы это врезка,
+// подъём и ни одного миллиметра хода.
+bool isCollapsed(const Polyline& contour) {
+    if(contour.size() < 2) return true;
+    // Две вершины -- контур только с прогибом: окружность. Без него это ход
+    // туда и обратно по одному отрезку.
+    if(contour.size() == 2 && !contour.front().isArc() && !contour.back().isArc()) return true;
+    return contour.perimeter() <= exitWeldTolerance;
+}
+
+} // namespace
 
 // ---------------------------------------------------------------------------
 // Polygon
@@ -115,8 +137,9 @@ const Polylines& Polygon::holes() const {
 Polylines Polygon::contours() const {
     Polylines all;
     all.reserve(1 + holes().size());
-    if(!outer().empty()) all.push_back(outer());
-    all.insert(all.end(), holes().begin(), holes().end());
+    if(!isCollapsed(outer())) all.push_back(outer());
+    for(const Polyline& hole: holes())
+        if(!isCollapsed(hole)) all.push_back(hole);
     return all;
 }
 
@@ -206,7 +229,7 @@ struct Polygons::Impl {
             // Единственное место, где неограниченность БЕРЁТСЯ ИЗ CGAL: только
             // разбиение региона и может отдать кусок без внешней границы.
             impl.unbounded = part.is_unbounded();
-            impl.exact     = std::move(part);
+            impl.exact = std::move(part);
             polygons.push_back(Polygon{std::move(impl)});
         }
         view = std::move(polygons);
@@ -286,7 +309,7 @@ Polygons::Polygons(const Polylines& contours) {
         const Polyline& contour = contours[i];
         if(!contour.closed || contour.size() < 2) return;
         isVoid[i] = contour.signedArea() < 0.0;
-        exact[i]  = toGPoly(contour);
+        exact[i] = toGPoly(contour);
     });
 
     std::vector<GPoly> solids, voids;
@@ -311,10 +334,8 @@ const std::vector<Polygon>& Polygons::all() const {
 
 Polylines Polygons::contours() const {
     Polylines all;
-    for(const Polygon& polygon: *this) {
-        if(!polygon.outer().empty()) all.push_back(polygon.outer());
-        all.insert(all.end(), polygon.holes().begin(), polygon.holes().end());
-    }
+    for(const Polygon& polygon: *this)
+        all.append_range(polygon.contours());
     return all;
 }
 
@@ -418,8 +439,8 @@ bool Polygons::isUnbounded() const {
 
 Polygon translated(const Polygon& polygon, QPointF offset) {
     Polygon::Impl impl;
-    impl.exact     = Cgal::translate(polygon.impl().exact, offset.x(), offset.y());
-    impl.inverted  = polygon.isInverted();
+    impl.exact = Cgal::translate(polygon.impl().exact, offset.x(), offset.y());
+    impl.inverted = polygon.isInverted();
     impl.unbounded = polygon.isUnbounded();
     return Polygon{std::move(impl)};
 }
@@ -435,47 +456,82 @@ Polygons translated(const Polygons& polygons, QPointF offset) {
 // Сериализация
 // ---------------------------------------------------------------------------
 
-QDataStream& operator<<(QDataStream& stream, const Polygon& polygon) {
-    // Пишется КАНОНИЧЕСКОЕ тело плюс флаг, а не то, что отдают outer()/holes():
-    // у помеченного пустотой они уже развёрнуты, и запись их вместе с флагом
-    // развернула бы контуры вторично.
+// ---------------------------------------------------------------------------
+// JSON (см. кодировку в geo_json.h)
+// ---------------------------------------------------------------------------
+
+} // namespace Geo
+
+using namespace Serial;
+using Geo::Polygon, Geo::Polygons, Geo::Polyline, Geo::Polylines;
+
+void Serial::Adapter<Geo::Polygon>::write(simdjson::builder::string_builder& sb, const Geo::Polygon& polygon) {
+    // Пишется КАНОНИЧЕСКОЕ тело плюс флаг, а не то, что отдают
+    // outer()/holes(): у помеченного пустотой они уже развёрнуты, и запись их
+    // вместе с флагом развернула бы контуры вторично.
     const Polylines contours = polygon.impl().canonicalContours();
     const Polyline outer = contours.empty() ? Polyline{} : contours.front();
     const Polylines holes{contours.empty() ? contours.begin() : contours.begin() + 1, contours.end()};
-    return stream << quint8(polygon.isInverted()) << outer << holes;
+    sb.start_object();
+    sb.append_raw("\"o\":");
+    Adapter<Geo::Polyline>::write(sb, outer);
+    if(!holes.empty()) {
+        sb.append_raw(",\"h\":");
+        Adapter<Geo::Polylines>::write(sb, holes);
+    }
+    if(polygon.isInverted()) sb.append_raw(",\"i\":true");
+    sb.end_object();
 }
 
-QDataStream& operator>>(QDataStream& stream, Polygon& polygon) {
-    quint8 inverted{};
+simdjson::error_code Serial::Adapter<Geo::Polygon>::read(simdjson::ondemand::value& val, Geo::Polygon& polygon) {
+    simdjson::ondemand::object obj;
+    if(auto err = val.get_object().get(obj); err) return err;
     Polyline outer;
     Polylines holes;
-    stream >> inverted >> outer >> holes;
+    bool inverted{};
+    for(auto field: obj) {
+        std::string_view key;
+        if(auto err = field.unescaped_key().get(key); err) return err;
+        simdjson::ondemand::value v;
+        if(auto err = field.value().get(v); err) return err;
+        if(key == "o") {
+            if(auto err = Adapter<Geo::Polyline>::read(v, outer); err) return err;
+        } else if(key == "h") {
+            if(auto err = Adapter<Geo::Polylines>::read(v, holes); err) return err;
+        } else if(key == "i") {
+            if(auto err = v.get_bool().get(inverted); err) return err;
+        }
+    }
     polygon = Polygon{outer, holes};
     if(inverted) polygon.invert();
-    return stream;
+    return simdjson::SUCCESS;
 }
 
-QDataStream& operator<<(QDataStream& stream, const Polygons& polygons) {
-    const std::vector<Polygon>& all = polygons.all();
-    stream << quint32(all.size());
-    for(const Polygon& polygon: all) stream << polygon;
-    return stream;
+void Serial::Adapter<Geo::Polygons>::write(simdjson::builder::string_builder& sb, const Geo::Polygons& polygons) {
+    sb.start_array();
+    bool first = true;
+    for(const Polygon& polygon: polygons.all()) {
+        if(!first) sb.append_comma();
+        first = false;
+        Adapter<Geo::Polygon>::write(sb, polygon);
+    }
+    sb.end_array();
 }
 
-QDataStream& operator>>(QDataStream& stream, Polygons& polygons) {
-    quint32 count{};
-    stream >> count;
+simdjson::error_code Serial::Adapter<Geo::Polygons>::read(simdjson::ondemand::value& val, Geo::Polygons& polygons) {
+    simdjson::ondemand::array arr;
+    if(auto err = val.get_array().get(arr); err) return err;
     Polygons result;
-    while(count--) {
+    for(auto elem: arr) {
+        simdjson::ondemand::value v;
+        if(auto err = elem.get(v); err) return err;
         Polygon polygon;
-        stream >> polygon;
-        if(stream.status() != QDataStream::Ok) return polygons = Polygons{}, stream;
+        if(auto err = Adapter<Geo::Polygon>::read(v, polygon); err)
+            return polygons = Polygons{}, err;
         // Сразу в точный домен, минуя разбор по ориентациям: структура
         // полигона известна точно, объединять их между собой -- вся работа.
         if(!polygon.empty()) result.impl().exact.join(polygon.impl().exact);
     }
     polygons = std::move(result);
-    return stream;
+    return simdjson::SUCCESS;
 }
-
-} // namespace Geo

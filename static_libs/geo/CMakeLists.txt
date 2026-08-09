@@ -38,7 +38,7 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Qt6::Gui, а не Widgets: из Qt здесь только QPointF/QRectF и QPainterPath.
-target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads)
+target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads simdjson)
 
 # Обработчик нарушений контрактов (pre()/post()) живёт в libstdc++exp, и без
 # него не слинкуется НИЧТО, что тянет заголовки Geo: контракты инстанцируются
@@ -50,7 +50,33 @@ endif()
 if(CGAL_FOUND)
   target_link_libraries(Geo PRIVATE CGAL::CGAL)
 else()
-  # CGAL header-only: достаточно самих gmp/mpfr.
+  # CGAL header-only: достаточно самих gmp/mpfr -- но только если заголовки
+  # реально лежат в путях компилятора по умолчанию. find_package зовём QUIET
+  # (config-файла может не быть вовсе), и без этой проверки отсутствие CGAL
+  # ничем не проявляется до самой сборки: конфигурация проходит, а потом
+  # каждый .cpp падает на <CGAL/...> -- ровно так и сломался Windows-раннер.
+  #
+  # Проба ТОЛЬКО компилирует (STATIC_LIBRARY): линковать её нечем и незачем.
+  # Заголовок ядра инстанцирует обёртки над gmp, так что пробе понадобились бы
+  # -lgmp -lmpfr, а с mold она вдобавок утыкается в .debug_gdb_scripts (см.
+  # ниже) -- и «нет CGAL» получалось бы там, где он есть. Спрашиваем ровно то,
+  # что ломается: видны ли заголовки.
+  block()
+    include(CheckIncludeFileCXX)
+    set(CMAKE_TRY_COMPILE_TARGET_TYPE STATIC_LIBRARY)
+    check_include_file_cxx("CGAL/Exact_predicates_exact_constructions_kernel.h"
+                           HAVE_CGAL_HEADERS)
+    set(HAVE_CGAL_HEADERS "${HAVE_CGAL_HEADERS}" PARENT_SCOPE)
+  endblock()
+  if(NOT HAVE_CGAL_HEADERS)
+    message(
+      FATAL_ERROR
+        "Не найден CGAL -- без него static_libs/geo не собрать.\n"
+        "  MSYS2/UCRT64: pacman -S mingw-w64-ucrt-x86_64-cgal\n"
+        "  Debian/Ubuntu: apt install libcgal-dev\n"
+        "  ALT/Fedora: dnf install CGAL-devel\n"
+        "  macOS: brew install cgal")
+  endif()
   target_link_libraries(Geo PRIVATE gmp mpfr)
 endif()
 

@@ -10,8 +10,9 @@
  ********************************************************************************/
 #pragma once
 
-#include "datastream.h"
+#include "geo/geo_json.h"
 #include "geo/polygon.h"
+#include "serial.h"
 #include <any>
 
 // Только объявление: <QTransform> -- заголовок QtGui, и втянутый сюда, в
@@ -57,13 +58,6 @@ struct Transform {
     QPointF translate{};
     QPointF scale{1, 1};
 
-    friend QDataStream& operator<<(QDataStream& stream, const Transform& tr) {
-        return Block{stream}.write(tr);
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Transform& tr) {
-        return Block{stream}.read(tr);
-    }
-
     QTransform toQTransform() const;
     operator QTransform() const;
 };
@@ -78,14 +72,6 @@ enum class GCType {
 };
 
 struct GraphicObject {
-
-    friend QDataStream& operator<<(QDataStream& stream, const GraphicObject& go) {
-        return Block{stream}.write(go.id, go.type, go.pos, go.path, go.fill, go.name);
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
-        return Block{stream}.read(go.id, go.type, go.pos, go.path, go.fill, go.name);
-    }
 
     // clang-format off
     enum Type:uint32_t {
@@ -117,7 +103,7 @@ struct GraphicObject {
     QString name;
     Type type{Null};
     int32_t id{-1};
-    std::any raw;
+    [[= Serial::skip]] std::any raw; // транзиент
 
     inline bool isType(uint32_t t) const { return (t & 0xFF) ? (type & 0xFF) == (t & 0xFF) : true; }
     inline bool isFlags(uint32_t f) const { return (f & ~0xFF) ? (type & ~0xFF) & f : true; }
@@ -169,13 +155,6 @@ struct LayerType {
     QString actName;
     QString actToolTip;
     QString shortActName() const { return actName; }
-
-    friend QDataStream& operator<<(QDataStream& stream, const LayerType& layer) {
-        return Block{stream}.write(layer);
-    }
-    friend QDataStream& operator>>(QDataStream& stream, LayerType& layer) {
-        return Block{stream}.read(layer);
-    }
 };
 
 Q_DECLARE_METATYPE(LayerType)

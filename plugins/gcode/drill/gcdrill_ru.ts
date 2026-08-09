@@ -82,65 +82,104 @@
 <context>
     <name>DrillPlugin::Form</name>
     <message>
-        <location filename="drill_form.cpp" line="90"/>
         <source>Drill Toolpath</source>
-        <translation>Сверловка</translation>
+        <translation type="vanished">Сверловка</translation>
     </message>
     <message>
-        <location filename="drill_form.cpp" line="138"/>
         <source>No data to process.</source>
-        <translation>Нет данных для расчёта.</translation>
+        <translation type="vanished">Нет данных для расчёта.</translation>
     </message>
     <message>
-        <location filename="drill_form.cpp" line="263"/>
         <source>&amp;Select Tool</source>
-        <translation>&amp;Выбрать инструмент</translation>
+        <translation type="vanished">&amp;Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="drill_form.cpp" line="284"/>
-        <location filename="drill_form.cpp" line="329"/>
         <source>&quot; not suitable for T</source>
-        <translation>&quot; не подходит для Т</translation>
+        <translation type="vanished">&quot; не подходит для Т</translation>
     </message>
     <message>
-        <location filename="drill_form.cpp" line="296"/>
         <source>&amp;Remove Tool</source>
-        <translation>&amp;Убрать инструмент</translation>
+        <translation type="vanished">&amp;Убрать инструмент</translation>
     </message>
     <message>
-        <location filename="drill_form.cpp" line="309"/>
         <source>&amp;Choose a Tool for everyone</source>
-        <translation>&amp;Выбрать инструмент для всех</translation>
+        <translation type="vanished">&amp;Выбрать инструмент для всех</translation>
     </message>
     <message>
-        <location filename="drill_form.cpp" line="338"/>
         <source>&amp;Remove Tool for everyone</source>
-        <translation>&amp;Удалить инструмент для всех</translation>
+        <translation type="vanished">&amp;Удалить инструмент для всех</translation>
     </message>
 </context>
 <context>
     <name>DrillPlugin::Model</name>
     <message>
-        <location filename="drill_model.cpp" line="72"/>
-        <location filename="drill_model.cpp" line="136"/>
-        <location filename="drill_model.cpp" line="138"/>
         <source>Tool</source>
-        <translation>Инструмент</translation>
+        <translation type="vanished">Инструмент</translation>
     </message>
     <message>
-        <location filename="drill_model.cpp" line="72"/>
         <source>Slot</source>
-        <translation>Слот</translation>
+        <translation type="vanished">Слот</translation>
     </message>
     <message>
-        <location filename="drill_model.cpp" line="107"/>
+        <source>Select Tool</source>
+        <translation type="vanished">Выбрать инструмент</translation>
+    </message>
+    <message>
+        <source>Aperture</source>
+        <translation type="vanished">Апертура</translation>
+    </message>
+</context>
+<context>
+    <name>Drilling::Form</name>
+    <message>
+        <location filename="drill_form.cpp" line="93"/>
+        <source>GCType::Drill Toolpath</source>
+        <translation>УП сверловки</translation>
+    </message>
+    <message>
+        <location filename="drill_form.cpp" line="343"/>
+        <source>&amp;Select Tool</source>
+        <translation>&amp;Выбрать инструмент</translation>
+    </message>
+    <message>
+        <location filename="drill_form.cpp" line="364"/>
+        <location filename="drill_form.cpp" line="409"/>
+        <source>&quot; not suitable for Tu</source>
+        <translation>» не подходит для Tu</translation>
+    </message>
+    <message>
+        <location filename="drill_form.cpp" line="376"/>
+        <source>&amp;Remove Tool</source>
+        <translation>&amp;Убрать инструмент</translation>
+    </message>
+    <message>
+        <location filename="drill_form.cpp" line="389"/>
+        <source>&amp;Choose a Tool for everyone</source>
+        <translation>&amp;Выбрать инструмент для всех</translation>
+    </message>
+    <message>
+        <location filename="drill_form.cpp" line="418"/>
+        <source>&amp;Remove Tool for everyone</source>
+        <translation>&amp;Удалить инструмент для всех</translation>
+    </message>
+</context>
+<context>
+    <name>Drilling::Model</name>
+    <message>
+        <location filename="drill_model.cpp" line="103"/>
         <source>Select Tool</source>
         <translation>Выбрать инструмент</translation>
     </message>
     <message>
-        <location filename="drill_model.cpp" line="136"/>
+        <location filename="drill_model.cpp" line="124"/>
         <source>Aperture</source>
         <translation>Апертура</translation>
+    </message>
+    <message>
+        <location filename="drill_model.cpp" line="124"/>
+        <location filename="drill_model.cpp" line="126"/>
+        <source>Tool</source>
+        <translation>Инструмент</translation>
     </message>
 </context>
 </TS>

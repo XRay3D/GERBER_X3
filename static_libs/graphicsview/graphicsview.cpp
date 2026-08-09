@@ -16,6 +16,7 @@
 #include "gridtick.h"
 
 #include "project.h"
+#include "openglcheck.h"
 #include "ruler.h"
 #include "utils.h"
 
@@ -274,6 +275,13 @@ void GraphicsView::scale(double sx, double sy) {
 }
 
 void GraphicsView::setOpenGL(bool useOpenGL) {
+    // Настройка могла остаться включённой с машины, где GL работал, поэтому
+    // последнее слово за проверкой драйвера: без неё QOpenGLWidget уронил бы
+    // приложение прямо здесь, ещё до появления окна.
+    if(useOpenGL && !OpenGlCheck::available()) {
+        qWarning().noquote() << "GraphicsView: OpenGL отключён --" << OpenGlCheck::report();
+        useOpenGL = false;
+    }
     // do {
     if(useOpenGL) {
         // if(dynamic_cast<QOpenGLWidget*>(viewport())) break;

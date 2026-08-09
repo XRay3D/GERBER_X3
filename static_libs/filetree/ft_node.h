@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "serial.h"
 #include "utils.h"
 #include <memory>
 
@@ -48,11 +49,13 @@ enum Type : int {
     PathGroup
 };
 
-class Node {
-    Node& operator=(Node&&)      = delete;
+// Узел дерева файлов -- целиком рантайм-структура (родитель, дети, модель):
+// движок сериализации в него не заходит, хотя AbstractShape его наследует.
+class[[= Serial::skip]] Node {
+    Node& operator=(Node&&) = delete;
     Node& operator=(const Node&) = delete;
-    Node(Node&&)                 = delete;
-    Node(const Node&)            = delete;
+    Node(Node&&) = delete;
+    Node(const Node&) = delete;
 
 public:
     explicit Node(Type type);
@@ -75,10 +78,10 @@ public:
     std::unique_ptr<Node, Deleter> takeChild(int row);
     void adoptChild(std::unique_ptr<Node, Deleter>&& child);
 
-    virtual QVariant data(const QModelIndex& index, int role) const                 = 0;
+    virtual QVariant data(const QModelIndex& index, int role) const = 0;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
-    virtual Qt::ItemFlags flags(const QModelIndex& index) const                     = 0;
-    virtual void menu(QMenu& menu, View* tv)                                        = 0;
+    virtual Qt::ItemFlags flags(const QModelIndex& index) const = 0;
+    virtual void menu(QMenu& menu, View* tv) = 0;
 
     // Двойной клик по колонке имени. Вернуть true, если узел обработал его сам;
     // иначе View гасит остальные файлы (поведение по умолчанию для всех файлов,

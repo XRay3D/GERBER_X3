@@ -68,40 +68,6 @@ QString Component::toolTip() const {
     return tt;
 }
 
-QDataStream& operator<<(QDataStream& stream, const Component& c) {
-    return ::Block{stream}.write(
-        c.rotation_,
-        c.height_,
-        c.mount_,
-        c.footprintName_,
-        c.refdes_,
-        c.value_,
-        c.referencePoint_,
-        c.footprint_,
-        c.library_,
-        c.manufacturer_,
-        c.package_,
-        c.suppliers_,
-        c.pins_);
-}
-
-QDataStream& operator>>(QDataStream& stream, Component& c) {
-    return ::Block{stream}.read(
-        c.rotation_,
-        c.height_,
-        c.mount_,
-        c.footprintName_,
-        c.refdes_,
-        c.value_,
-        c.referencePoint_,
-        c.footprint_,
-        c.library_,
-        c.manufacturer_,
-        c.package_,
-        c.suppliers_,
-        c.pins_);
-}
-
 } // namespace Gerber::Comp
 
 #include "moc_gbrcomp_onent.cpp"

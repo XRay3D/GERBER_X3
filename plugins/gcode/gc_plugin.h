@@ -27,7 +27,6 @@ public:
     explicit Plugin(QObject* parent = nullptr);
     virtual ~Plugin() = default;
 
-    // [[nodiscard]] virtual GCode::File* loadFile(QDataStream& stream) const = 0;
     // [[nodiscard]] virtual QIcon icon() const = 0;
     // [[nodiscard]] virtual uint32_t type() const = 0;
     [[nodiscard]] virtual QKeySequence keySequence() const = 0;
@@ -42,7 +41,6 @@ public:
 
     //////////////////////
 
-    // AbstractFile* loadFile(QDataStream& stream) constoverride { return nullptr /*new File()*/; }
     // QIcon icon() const override { return decoration(Qt::lightGray, u'G'); }
     // uint32_t type() const override { return "GCode"_hash32; }
     // AbstractFileSettings* createSettingsTab(QWidget* parent) override;

@@ -10,6 +10,11 @@ name: Build & Release
 # ВНИМАНИЕ: проект использует экспериментальную статическую рефлексию C++26
 # (std::meta, -freflection), поэтому нужен GCC 16. Это очень свежий тулчейн —
 # шаг установки может потребовать корректировки, если пакеты MSYS2 изменятся.
+#
+# Точная геометрия (static_libs/geo) собирается на CGAL, поэтому в списке
+# пакетов он обязателен: без него find_package(CGAL) молча не находит ничего
+# (он QUIET), конфигурация проходит, а сборка падает уже на <CGAL/...>.
+# Пакет тянет за собой boost, eigen3, gmp и mpfr.
 
 on:
   push:
@@ -25,7 +30,7 @@ jobs:
         shell: msys2 {0}
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           submodules: "true"
 
@@ -40,11 +45,13 @@ jobs:
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-mold
             mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-cgal
             mingw-w64-ucrt-x86_64-qt6-base
             mingw-w64-ucrt-x86_64-qt6-declarative
             mingw-w64-ucrt-x86_64-qt6-svg
             mingw-w64-ucrt-x86_64-qt6-imageformats
             mingw-w64-ucrt-x86_64-qt6-tools
+            mingw-w64-ucrt-x86_64-mesa
             git
             zip
 
@@ -75,6 +82,17 @@ jobs:
           # через QPluginLoader и в импортах GGEasy.exe не видны.
           windeployqt6 --release --no-translations --no-system-d3d-compiler \
             "$OUT/GGEasy.exe" "$OUT"/plugins/*.dll
+
+          # Программный OpenGL (Mesa llvmpipe) под именем, которое ищет Qt.
+          # Нужен машинам с битым драйвером видеокарты: OpenGlCheck переводит
+          # их в режим software, и без этой библиотеки переводить не на что --
+          # останется растровый вывод без 3D-просмотра. Кладём до обхода
+          # зависимостей ниже, чтобы её собственные DLL тоже подтянулись.
+          if [ -f /ucrt64/bin/opengl32.dll ]; then
+            cp -v /ucrt64/bin/opengl32.dll "$OUT/opengl32sw.dll"
+          else
+            echo "::warning::Mesa opengl32.dll не найдена -- программный OpenGL в архив не попадёт"
+          fi
 
           # Рантайм MSYS2/UCRT64. windeployqt тянет только Qt, поэтому
           # libgcc_s_seh-1, libstdc++-6, libwinpthread-1, Boost, ICU, zlib и
@@ -107,7 +125,7 @@ jobs:
             fi
           done
 
-          echo "Файлов в архиве: $(find "$OUT" -type f | wc -l)"
+          echo "Файлов в архиве: $(find "$OUT" -type f | wc -l), размер: $(du -sh "$OUT" | cut -f1)"
           zip -r "${OUT}.zip" "$OUT"
 
       - name: Upload artifact
@@ -125,7 +143,7 @@ jobs:
       contents: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v5
         with:
           fetch-depth: 0
 

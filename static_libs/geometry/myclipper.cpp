@@ -11,7 +11,8 @@
 // module;
 
 #include "app.h"
-#include "cancelation.h"
+#include "geo/cancel.h"
+#include "progress.h"
 #include "geo/polygon.h"
 #include "gi_dbg.h"
 #include "graphicsview.h"
@@ -376,9 +377,9 @@ void mergePaths(Paths64& paths, const double dist) {
     do {
         max = paths.size();
         for(size_t i{}; i < paths.size(); ++i) {
-            ProgressCancel::setMax(max);
-            ProgressCancel::setCurrent(max - paths.size());
-            throwIfCancel();
+            Progress::setMax(max);
+            Progress::setCurrent(max - paths.size());
+            Geo::checkCancelled();
             auto& pi = paths[i];
             for(size_t j = i + 1; j < paths.size(); ++j) {
                 if(i == j) continue;
@@ -595,9 +596,9 @@ void mergePaths(Paths64& paths, const double maxDist) {
     do {
         max = paths.size();
         for(size_t i{}; i < paths.size(); ++i) {
-            ProgressCancel::setMax(max);
-            ProgressCancel::setCurrent(max - paths.size());
-            throwIfCancel();
+            Progress::setMax(max);
+            Progress::setCurrent(max - paths.size());
+            Geo::checkCancelled();
             for(size_t j{}; j < paths.size(); ++j) {
                 if(i == j)
                     continue;

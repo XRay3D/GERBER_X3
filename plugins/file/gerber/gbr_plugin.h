@@ -31,7 +31,8 @@ public:
     [[nodiscard]] AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     [[nodiscard]] QString folderName() const override { return tr("Gerber Files"); }
     [[nodiscard]] QIcon icon() const override;
-    [[nodiscard]] AbstractFile* loadFile(QDataStream& stream) const override;
+    [[nodiscard]] AbstractFile* loadFile(std::string_view json) const override;
+    [[nodiscard]] std::string_view typeName() const override;
     [[nodiscard]] bool thisIsIt(const QString& fileName) override;
     [[nodiscard]] uint32_t type() const override { return GERBER; }
     [[nodiscard]] virtual QString extension() const override { return tr("Gerber (*.gbr)"); }

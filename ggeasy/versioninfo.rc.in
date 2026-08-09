@@ -1,4 +1,6 @@
-1 TYPELIB "versioninfo.rc"
+// CREATEPROCESS_MANIFEST_RESOURCE_ID (1) / RT_MANIFEST (24).
+// Без этого exe остаётся без манифеста и попадает под эвристику UAC.
+1 24 "@PROJECT_NAME@.manifest"
 
 IDI_ICON1 ICON DISCARDABLE "myapp.ico"
 

@@ -39,15 +39,12 @@ class ApRectangle;
 
 class AbstractAperture {
     Q_DISABLE_COPY(AbstractAperture)
-    friend QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture);
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
-
 public:
     AbstractAperture(const File* file);
     virtual ~AbstractAperture() = default;
 
-    virtual ApertureType type() const       = 0;
-    virtual QString name() const            = 0;
+    virtual ApertureType type() const = 0;
+    virtual QString name() const = 0;
     virtual bool fit(double toolDiam) const = 0;
 
     Geo::Polyline drawDrill(const State& state);
@@ -63,38 +60,36 @@ public:
 
     void setUsed(bool isUsed = true) noexcept { isUsed_ = isUsed; }
 
+public:
+    // Восстановить геометрию после чтения полей (зовёт движок Serial).
+    void postLoad() { draw(); }
+
 protected:
     double drillDiam_{};
     double size_{};
-    double minSize_{};
-    const File* file_;
-    Geo::Polygons paths_;
+    [[= Serial::skip]] double minSize_{};    // пересчитывает draw()
+    [[= Serial::skip]] const File* file_;    // задаёт конструктор (crutch)
+    [[= Serial::skip]] Geo::Polygons paths_; // кэш геометрии, пересоберёт draw()
     bool isFlashed_{};
-    bool isUsed_{};
+    [[= Serial::skip]] bool isUsed_{}; // рантайм-флаг использования
 
-    virtual void draw()                           = 0;
-    virtual void read(QDataStream& stream)        = 0;
-    virtual void write(QDataStream& stream) const = 0;
+    virtual void draw() = 0;
 };
 
 /////////////////////////////////////////////////////
 /// \brief The GACircular class
 ///
-class ApCircle final : public AbstractAperture {
+class[[= Serial::name("Circle")]] ApCircle final : public AbstractAperture {
 public:
     ApCircle(double diam, double drillDiam, const File* file);
-    ApCircle(QDataStream& stream, const File* file)
-        : AbstractAperture{file} {
-        read(stream);
-    }
+    explicit ApCircle(const File* file)
+        : AbstractAperture{file} { }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
-    void read(QDataStream& stream) override;
-    void write(QDataStream& stream) const override;
 
 private:
     double diam_{};
@@ -103,23 +98,19 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GARectangle class
 ///
-class ApRectangle final : public AbstractAperture {
+class[[= Serial::name("Rectangle")]] ApRectangle final : public AbstractAperture {
     friend class Parser;
 
 public:
     ApRectangle(double width, double height, double drillDiam, const File* file);
-    ApRectangle(QDataStream& stream, const File* file)
-        : AbstractAperture{file} {
-        read(stream);
-    }
+    explicit ApRectangle(const File* file)
+        : AbstractAperture{file} { }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
-    void read(QDataStream& stream) override;
-    void write(QDataStream& stream) const override;
 
 private:
     double height_{};
@@ -129,21 +120,17 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAObround class
 ///
-class ApObround final : public AbstractAperture {
+class[[= Serial::name("Obround")]] ApObround final : public AbstractAperture {
 public:
     ApObround(double width, double height, double drillDiam, const File* file);
-    ApObround(QDataStream& stream, const File* file)
-        : AbstractAperture{file} {
-        read(stream);
-    }
+    explicit ApObround(const File* file)
+        : AbstractAperture{file} { }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double toolDiam) const override;
 
 protected:
     void draw() override;
-    void read(QDataStream& stream) override;
-    void write(QDataStream& stream) const override;
 
 private:
     double height_{};
@@ -153,13 +140,11 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The GAPolygon class
 ///
-class ApPolygon final : public AbstractAperture {
+class[[= Serial::name("Polygon")]] ApPolygon final : public AbstractAperture {
 public:
     ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* file);
-    ApPolygon(QDataStream& stream, const File* file)
-        : AbstractAperture{file} {
-        read(stream);
-    }
+    explicit ApPolygon(const File* file)
+        : AbstractAperture{file} { }
     double rotation() const;
     int verticesCount() const;
 
@@ -169,8 +154,6 @@ public:
 
 protected:
     void draw() override;
-    void read(QDataStream& stream) override;
-    void write(QDataStream& stream) const override;
 
 private:
     double diam_{};
@@ -182,21 +165,17 @@ private:
 /// \brief The GAMacro class
 ///
 using VarMap = std::map<QString, double>;
-class ApMacro final : public AbstractAperture {
+class[[= Serial::name("Macro")]] ApMacro final : public AbstractAperture {
 public:
     ApMacro(const QString& macro, const QStringList& modifiers, const VarMap& coefficients, const File* file);
-    ApMacro(QDataStream& stream, const File* file)
-        : AbstractAperture{file} {
-        read(stream);
-    }
+    explicit ApMacro(const File* file)
+        : AbstractAperture{file} { }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double) const override;
 
 protected:
     void draw() override;
-    void read(QDataStream& stream) override;
-    void write(QDataStream& stream) const override;
 
 private:
     QString macro_;
@@ -204,8 +183,8 @@ private:
     VarMap coefficients_;
 
     double Angle(const QPointF& pt1, const QPointF& pt2) {
-        const QPointF d               = pt2 - pt1;
-        const double theta            = atan2(-d.y(), d.x()) * 360.0 / (2 * pi);
+        const QPointF d = pt2 - pt1;
+        const double theta = atan2(-d.y(), d.x()) * 360.0 / (2 * pi);
         const double theta_normalized = theta < 0 ? theta + 360 : theta;
         if(qFuzzyCompare(theta_normalized, double(360)))
             return 0.0;
@@ -224,24 +203,27 @@ private:
 /////////////////////////////////////////////////////
 /// \brief The ApBlock class
 ///
-class ApBlock final : public AbstractAperture, public QVector<GrObject> {
+class[[= Serial::name("Block")]] ApBlock final : public AbstractAperture, public QVector<GrObject> {
 public:
     using V = QVector<GrObject>;
     ApBlock(const File* file);
-    ApBlock(QDataStream& stream, const File* file)
-        : AbstractAperture{file} {
-        read(stream);
-    }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double) const override;
 
 protected:
     void draw() override;
-    void read(QDataStream& stream) override;
-    void write(QDataStream& stream) const override;
 };
 
 using ApertureV = std::variant<ApCircle, ApRectangle, ApObround, ApPolygon, ApMacro, ApBlock>;
 
 } // namespace Gerber
+
+// Полиморфные апертуры: {"type":"Circle", <поля flatten>}; имя типа — из
+// [[=Serial::name]] на конкретном классе, создание — фабрикой по имени.
+// Тела в gbr_aperture.cpp.
+template <>
+struct Serial::Adapter<std::shared_ptr<Gerber::AbstractAperture>> {
+    static void write(Writer& sb, const std::shared_ptr<Gerber::AbstractAperture>& aperture);
+    static simdjson::error_code read(simdjson::ondemand::value& val, std::shared_ptr<Gerber::AbstractAperture>& aperture);
+};

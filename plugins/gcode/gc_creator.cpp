@@ -47,8 +47,7 @@ public:
         genGcodeAndTile();
         endFile();
     }
-    void write(QDataStream& stream [[maybe_unused]]) const override { }
-    void read(QDataStream& stream [[maybe_unused]]) override { }
+    void serialize(Serial::Writer& /*sb*/) const override { } // отладочный, не сохраняется
     void initFrom(AbstractFile* file [[maybe_unused]]) override { qWarning(__FUNCTION__); }
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
     uint32_t type() const override { return GC_DBG_FILE; }
@@ -85,7 +84,7 @@ namespace GCode {
 Creator::Creator() { }
 
 void Creator::reset() {
-    ProgressCancel::reset();
+    Progress::reset();
 
     file_ = nullptr;
 
@@ -101,7 +100,7 @@ void Creator::reset() {
     stepOver = 0.0;
 }
 
-Creator::~Creator() { ProgressCancel::reset(); }
+Creator::~Creator() { Progress::reset(); }
 
 std::vector<Geo::Polygon>& Creator::groupedPaths(Grouping group, double margin, bool skipFrame) {
     Timer t{"grouping"};
@@ -126,6 +125,15 @@ std::vector<Geo::Polygon>& Creator::groupedPaths(Grouping group, double margin, 
     }
 
     return groupedPss;
+}
+
+// Габарит всего, из чего строится УП. Открытые пути идут наравне с
+// замкнутыми: профиль по разомкнутой линии -- такая же траектория.
+QRectF Creator::sourceExtent() const {
+    QRectF extent = closedSrc.boundingRect();
+    for(const Geo::Polyline& path: openSrcPaths)
+        extent = extent.united(path.boundingRect());
+    return extent;
 }
 
 void Creator::addRawPaths(Geo::Polylines&& rawPaths) {
@@ -162,8 +170,13 @@ void Creator::addRawPaths(Geo::Polylines&& rawPaths) {
         closedSrc |= Geo::Polygons{closed};
 }
 
-void Creator::createGc(Params&& newGcp) {
+void Creator::createGc(Params&& newGcp, std::stop_token token) {
     qDebug(__FUNCTION__);
+
+    // Отмена -- на весь расчёт разом: под этой областью её видят и наши
+    // проверки (Geo::checkCancelled), и сами операции Geo, включая рабочие
+    // потоки, которые они заводят себе внутри.
+    Geo::CancelScope cancelScope{std::move(token)};
 
     reset();
 
@@ -174,35 +187,52 @@ void Creator::createGc(Params&& newGcp) {
     supportPss.append_range(gcp.supportCurvess);
 
     try {
+        // Габарит проверяется ПЕРВЫМ делом: координаты УП пишутся целыми (см.
+        // GCode::Units), и то, что в них не влезло, переполнилось бы молча --
+        // фреза уехала бы на другой конец стола. Считать такое незачем.
+        if(const QRectF extent = sourceExtent(); !fitsOutput(extent))
+            throw std::runtime_error{
+                u"Габарит %1 x %2 мм не представим в выводе"_s
+                    .arg(extent.width())
+                    .arg(extent.height())
+                    .toStdString()};
+
         if(possibleTest() && !App::isDebug()) {
-            try {
-                checkMillingFl = true;
-                checkMilling(gcp.side());
-            } catch(const Cancel& e) {
-                ProgressCancel::reset();
-                qWarning() << u"checkMilling canceled:"_s << e.what();
-            } catch(...) {
-                throw;
-            }
-        }
-        if(!isCancel()) {
+            checkMillingFl = true;
+            checkMilling(gcp.side());
             checkMillingFl = false;
-            msg = tr("createGc");
-            Timer t{"createGc"};
-            create();
         }
+        // «Break» в таблице ошибок отменяет весь прогон, а не одну проверку.
+        Geo::checkCancelled();
+        setMsg(tr("createGc"));
+        Timer t{"createGc"};
+        create();
         qWarning() << u"Creator finish"_s << file_;
-    } catch(const Cancel& e) {
-        qWarning() << u"Creator canceled:"_s << e.what();
+    } catch(const Geo::Cancelled&) {
+        qWarning() << u"Creator canceled"_s;
     } catch(const std::exception& e) {
         qWarning() << u"Creator exeption:"_s << e.what();
     } catch(...) {
         qWarning() << u"Creator exeption:"_s << errno;
     }
+    checkMillingFl = false;
+    // Файл отдают всегда -- хоть готовый, хоть пустой: форма считает по нему
+    // законченные инструменты и без него прогон не закроет. Отменённый прогон
+    // она узнаёт сама и присланное выбрасывает.
     emit fileReady(file_);
 }
 
 File* Creator::file() const { return file_; }
+
+void Creator::setMsg(const QString& text) {
+    std::lock_guard lk{msgMutex};
+    msg_ = text;
+}
+
+QString Creator::message() const {
+    std::lock_guard lk{msgMutex};
+    return msg_;
+}
 
 std::pair<int, int> Creator::getProgress() {
     return {max(), current()};
@@ -221,24 +251,27 @@ void Creator::stacking(Geo::Polylines& paths) {
     const NestingForest forest = nestingForest(paths);
     returnPss.clear();
 
-    // Направление фрезерования -- общее правило Params::reversedTravel плюс
-    // поправка на дырку. Поправка нужна именно здесь: петли офсета приходят
-    // все одной ориентации, и тело от дырки отличает не она, а чётность
-    // вложенности. Там, где контуры приходят из точного домена в каноне
-    // (Geo::Polygons::contours), о теле и дырке говорит сама ориентация, и
-    // поправка не нужна -- см. Profile::Creator::orderContours.
+    // Направление фрезерования задаёт САМ контур. Петли приходят из точного
+    // домена в каноне (Geo::Polygons::contours: внешняя граница против часовой,
+    // дырки по часовой), а канон здесь и есть ПОПУТНЫЙ ход: материал по нему
+    // всегда справа -- у стенки кармана он снаружи петли, у острова внутри.
+    // Встречный ход -- разворот всех петель разом, и сторона фрезерования на
+    // это не влияет: её роль (Params::reversedTravel) уже сыграна тем, с какой
+    // стороны от детали построена сама область.
     //
-    // Прежняя запись `!(convent ^ !isHole) ^ (side == Outer)` -- то же самое:
-    // !(c ^ !h) сводится к c ^ h, и всё выражение к (side == Outer) ^ c ^ h.
-    auto orient = [this](Geo::Polyline& path, int depth) {
-        const bool isHole = depth % 2 != 0;
-        if(gcp.reversedTravel() ^ isHole)
-            path.reverse();
+    // Чётность вложенности, которую брали прежде, для этого не годится:
+    // концентрические петли лежат одна в другой, и глубина растёт с каждым
+    // витком офсета -- направление чередовалось бы от прохода к проходу, и
+    // попутным выходил бы лишь каждый второй. Ср. Profile::Creator::
+    // orderContours: там на каждую границу приходится один контур, и общее
+    // правило Params::reversedTravel работает как есть.
+    auto orient = [convent = gcp.convent()](Geo::Polyline& path) {
+        if(convent) path.reverse();
     };
 
     std::function<void(std::size_t, bool)> walk = [&](std::size_t idx, bool newGroup) {
         Geo::Polyline path = paths[idx];
-        orient(path, forest.depth[idx]);
+        orient(path);
 
         if(newGroup || returnPss.empty()) {
             returnPss.push_back({std::move(path)});
@@ -277,21 +310,29 @@ void Creator::stacking(Geo::Polylines& paths) {
     sortByProximity(returnPss, App::home().pos() + App::zero().pos());
 }
 
-
-static int condition{};
-
 void Creator::isContinueCalc() {
-    condition = 0;
-    emit errorOccurred();
-    std::unique_lock lk(mutex);
-    cv.wait(lk, [] { return condition == 1; });
+    {
+        std::lock_guard lk{mutex};
+        answered_ = false;
+    }
+    emit errorOccurred(); // очередью в GUI-поток: там покажут таблицу ошибок
+    std::unique_lock lk{mutex};
+    cv.wait(lk, [this] { return answered_; });
     items.clear();
-    lk.unlock();
 }
 
-void Creator::continueCalc(bool fl) { // direct connection!!
-    setCancel(!fl);
-    condition = 1;
+// Мьютекс тут обязателен: без него «answered_ = true» может лечь между
+// проверкой предиката и засыпанием, и пробуждение потеряется -- расчётный
+// поток уснёт навсегда, а с ним и весь прогон.
+//
+// Отмену («Break») этот вызов НЕ делает -- её просят у стоп-токена, и делает
+// это форма перед тем, как разбудить: проснувшийся поток упрётся в ближайшую
+// Geo::checkCancelled и свернётся сам.
+void Creator::continueCalc() {
+    {
+        std::lock_guard lk{mutex};
+        answered_ = true;
+    }
     cv.notify_all();
 }
 
@@ -302,8 +343,8 @@ bool Creator::checkMilling(SideOfMilling side) {
     // Диаметр -- в миллиметрах: uScale ушёл вместе с целочисленным клиппером.
     const double toolDiameter = gcp.tools.back().getDiameter(gcp.getDepth());
 
-    QString last{msg};
-    msg = tr("Check milling for errors");
+    const QString last{message()};
+    setMsg(tr("Check milling for errors"));
 
     // Морфологическое открытие: сжать на диаметр инструмента и раздуть обратно.
     // Что при этом не восстановилось -- туда фреза не входит. Обе операции
@@ -335,7 +376,7 @@ bool Creator::checkMilling(SideOfMilling side) {
         setCurrent();
         for(const Geo::Polygon& polygon: polygons) {
             incCurrent();
-            throwIfCancel();
+            Geo::checkCancelled();
             if(polygon.area() >= testArea)
                 report(polygon);
         }
@@ -348,7 +389,7 @@ bool Creator::checkMilling(SideOfMilling side) {
         setCurrent();
         for(const Geo::Polygon& group: groupedPss) {
             incCurrent();
-            throwIfCancel();
+            Geo::checkCancelled();
 
             const Geo::Polygons body{group};
             const Geo::Polygons reachable = opening(body);
@@ -363,7 +404,7 @@ bool Creator::checkMilling(SideOfMilling side) {
     } break;
     case On: break;
     }
-    msg = last;
+    setMsg(last);
 
     if(items.size())
         isContinueCalc();

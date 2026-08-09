@@ -78,7 +78,7 @@ void VoronoiCgal::cgalVoronoi() {
     SDG2 sdg;
     int32_t id{};
     // add line segments to diagram
-    msg = QObject::tr("Calc CGAL Voronoi");
+    setMsg(QObject::tr("Calc CGAL Voronoi"));
 
     size_t max{};
     for(const Paths64& paths: groupedPss_)

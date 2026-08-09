@@ -42,6 +42,10 @@ public:
     virtual QIcon icon() const = 0;
     [[nodiscard]] virtual AbstractShape* createShape(const QPointF& point = {}) = 0;
     virtual uint32_t type() const = 0;
+    // Стабильное имя типа для "type" в JSON-проекте: "Circle", "Rectangle"...
+    // Диспетчеризация при загрузке — сканом App::shapePlugins() по этому имени
+    // (у шейпов type() — маленький int из Gi::Type, а не хэш имени).
+    [[nodiscard]] virtual std::string_view typeName() const { return {}; }
     virtual Editor* editor() = 0;
 
     void createMainMenu(QMenu& menu, FileTree::View* tv);

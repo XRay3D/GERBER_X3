@@ -26,8 +26,9 @@ inline Settings settings;
 
 inline constexpr auto PROFILE = "Profile"_hash32;
 
-class File final : public GCode::File {
+class[[= Serial::name("Profile")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();
     explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
@@ -39,16 +40,16 @@ public:
 class Creator : public GCode::Creator {
 
 public:
-    Creator()           = default;
+    Creator() = default;
     ~Creator() override = default;
 
-    static inline const QString BridgeLen         = u"BridgeLen"_s;
-    static inline const QString TrimmingCorners   = u"TrimmingCorners"_s;
+    static inline const QString BridgeLen = u"BridgeLen"_s;
+    static inline const QString TrimmingCorners = u"TrimmingCorners"_s;
     static inline const QString TrimmingOpenPaths = u"TrimmingOpenPaths"_s;
-    static inline const QString BridgeAlignType   = u"BridgeAlignType"_s;
-    static inline const QString BridgeValue       = u"BridgeValue"_s;
-    static inline const QString BridgeValue2      = u"BridgeValue2"_s;
-    static inline const QString Allowance         = u"Allowance"_s;
+    static inline const QString BridgeAlignType = u"BridgeAlignType"_s;
+    static inline const QString BridgeValue = u"BridgeValue"_s;
+    static inline const QString BridgeValue2 = u"BridgeValue2"_s;
+    static inline const QString Allowance = u"Allowance"_s;
 
 private:
     void createProfile(const Tool& tool, const double depth);

@@ -8,13 +8,15 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "gc_highlighter.h"
+#include "gc_programdialog.h"
 #include "gc_viewer3d.h"
 
 #include "app.h"
+#include "openglcheck.h"
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QScrollBar>
 #include <QSplitter>
@@ -75,6 +77,11 @@ std::map<int32_t, Dialog*>& openDialogs() {
     static std::map<int32_t, Dialog*> dialogs;
     return dialogs;
 }
+
+// Геометрия окна общая для всех файлов: окно на файл своё, но подгонять размер
+// каждому отдельно бессмысленно -- человек настраивает его один раз под экран.
+const QString gchSettingsGroup = u"GCodeViewerDialog"_s;
+const QString gchGeometryKey = u"geometry"_s;
 } // namespace
 
 Dialog* Dialog::showFor(int32_t fileId, const QString& text, const QString& windowTitle, QWidget* parent) {
@@ -113,6 +120,11 @@ void Dialog::programClosed(int32_t fileId) {
 }
 
 Dialog::~Dialog() {
+    MySettings settings;
+    settings.beginGroup(gchSettingsGroup);
+    settings.setValue(gchGeometryKey, saveGeometry());
+    settings.endGroup();
+
     if(fileId_ > -1) openDialogs().erase(fileId_);
 }
 
@@ -137,13 +149,24 @@ void Dialog::setProgram(const QString& text, const QString& windowTitle) {
         tbCode->setTextCursor(cursor);
     }
 
-    viewer->setProgramText(text);
+    // Новая программа -- камера уже вписана в её габариты, и уводить её на
+    // первую строку незачем: слежение включаем только после первой синхронизации.
+    centeringArmed_ = false;
+    if(viewer) viewer->setProgramText(text);
     syncViewerFromText();
+    centeringArmed_ = true;
 }
 
 Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     : QDialog{parent} {
-    resize(1200, 700);
+    { // размер и положение с прошлого раза; restoreGeometry сам отсечёт
+      // геометрию с экрана, которого больше нет
+        MySettings settings;
+        settings.beginGroup(gchSettingsGroup);
+        if(!restoreGeometry(settings.value(gchGeometryKey).toByteArray()))
+            resize(1200, 700);
+        settings.endGroup();
+    }
     setWindowTitle(windowTitle);
 
     QFont font{
@@ -177,8 +200,17 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     }
 
     auto viewPane = new QWidget{this};
-    viewer = new Viewer3d{viewPane};
-    {
+    // Без рабочего OpenGL 3D-панель не создаём вовсе: QOpenGLWidget на битом
+    // драйвере утащил бы за собой всё приложение. Текстовая часть диалога
+    // остаётся полностью рабочей.
+    if(!OpenGlCheck::available()) {
+        auto viewLayout = new QVBoxLayout{viewPane};
+        auto label = new QLabel{tr("3D preview is unavailable.\n\n%1").arg(OpenGlCheck::howToEnable()), viewPane};
+        label->setAlignment(Qt::AlignCenter);
+        label->setWordWrap(true);
+        viewLayout->addWidget(label);
+    } else {
+        viewer = new Viewer3d{viewPane};
         auto viewLayout = new QVBoxLayout{viewPane};
         viewLayout->setContentsMargins(0, 0, 0, 0);
         viewLayout->setSpacing(4);
@@ -222,7 +254,7 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     // Текст -> 3D и 3D -> текст.
     connect(tbCode, &QTextEdit::cursorPositionChanged, this, &Dialog::syncViewerFromText);
     connect(tbCode, &QTextEdit::selectionChanged, this, &Dialog::syncViewerFromText);
-    connect(viewer, &Viewer3d::lineSelected, this, &Dialog::syncTextFromViewer);
+    if(viewer) connect(viewer, &Viewer3d::lineSelected, this, &Dialog::syncTextFromViewer);
 
     auto splitter = new QSplitter{Qt::Horizontal, this};
     splitter->addWidget(textPane);
@@ -241,9 +273,14 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
 void Dialog::syncViewerFromText() {
     const QTextCursor cursor = tbCode->textCursor();
     const auto* doc = tbCode->document();
-    viewer->setHighlightedLines(
-        doc->findBlock(cursor.selectionStart()).blockNumber(),
-        doc->findBlock(cursor.selectionEnd()).blockNumber());
+    if(viewer) {
+        const int first = doc->findBlock(cursor.selectionStart()).blockNumber();
+        viewer->setHighlightedLines(first, doc->findBlock(cursor.selectionEnd()).blockNumber());
+        // Камера идёт за курсором, но только когда тот сменил строку: внутри
+        // одной строки точка та же, и дёргать анимацию на каждый символ незачем.
+        if(centeringArmed_ && first != centeredLine_) viewer->centerOnHighlight();
+        centeredLine_ = first;
+    }
     updateExtraSelections();
 }
 
@@ -273,4 +310,4 @@ void Dialog::updateExtraSelections() {
 
 } // namespace GCode
 
-#include "moc_gc_highlighter.cpp"
+#include "moc_gc_programdialog.cpp"

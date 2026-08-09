@@ -11,7 +11,7 @@
 #pragma once
 
 #include "abstract_shape.h"
-#include "datastream.h"
+#include "serial.h"
 
 #include "utils.h"
 
@@ -23,19 +23,6 @@
 #include <QRectF>
 #include <memory>
 // #include <shape.h>
-
-enum FileVersion {
-    ProVer_1 = 1,
-    ProVer_2,
-    ProVer_3,
-    ProVer_4,
-    ProVer_5,
-    ProVer_6,
-    ProVer_7,
-    ProVer_8, // Geo::Polyline: точка + прогиб вместо центра дуги, замкнутость -- флагом
-    ProVer_9, // УП: имя программы и снимок видимости, траектория и открытые контуры
-    CurrentVer = ProVer_9,
-};
 
 namespace GCode {
 class File;
@@ -60,7 +47,6 @@ using ItemMap = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file);
 
 public:
     explicit Project(QObject* parent = nullptr);
@@ -137,8 +123,6 @@ public:
     bool save(const QString& fileName);
     bool open(const QString& fileName);
     void close();
-
-    int ver() const;
 
     int size();
 
@@ -220,8 +204,6 @@ private:
     // File Watcher
     QFileSystemWatcher watcher;
 
-    int ver_;
-
     FilesMap files_;
     ShapesMap shapes_;
     ItemMap items_;
@@ -252,6 +234,27 @@ private:
         double spacingY{};
         uint stepsX{1};
         uint stepsY{1};
-        SERIALIZE_POD(Tailing)
     } tailing;
+
+    // Снимок шапки проекта для сериализации: поля Project раскиданы по классу
+    // (и сам он QObject), а движку Serial нужен простой агрегат — объект
+    // "ggeasy" пишется/читается рефлексией по этой структуре.
+    struct Header {
+        bool pinsPlaced{};
+        Tailing tailing{};
+        QPointF home;
+        QPointF zero;
+        QPointF pins[4];
+        bool pinsUsed[4]{true, true, true, true};
+        QRectF workRect;
+        double safeZ{};
+        double boardThickness{};
+        double copperThickness{};
+        double clearence{};
+        double plunge{};
+        double glue{};
+        QRectF viewRect;
+    };
+    Header header() const;           // снимок (viewRect — из graphicsview)
+    void applyHeader(const Header&); // применить всё, кроме viewRect
 };

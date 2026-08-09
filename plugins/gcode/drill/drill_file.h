@@ -24,20 +24,11 @@ struct RowRef {
     QString name;
     Tool::ID toolId{};
     bool useForCalc{};
-
-    friend QDataStream& operator<<(QDataStream& stream, const RowRef& row) {
-        return stream << row.name << static_cast<int32_t>(row.toolId) << row.useForCalc;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, RowRef& row) {
-        int32_t toolId{};
-        stream >> row.name >> toolId >> row.useForCalc;
-        row.toolId = static_cast<Tool::ID>(toolId);
-        return stream;
-    }
 };
 
-class File final : public GCode::File {
+class[[= Serial::name("Drilling")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     using GCode::File::File;
     explicit File(GCode::Params&& newGcp)
         : GCode::File{std::move(newGcp)} {
@@ -62,8 +53,6 @@ public:
     uint32_t type() const override { return DRILLING; }
     void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
 
-    void write(QDataStream& stream) const override { GCode::File::write(stream), stream << rows_ << worckType_ << srcFileId_; }
-    void read(QDataStream& stream) override { GCode::File::read(stream), stream >> rows_ >> worckType_ >> srcFileId_; }
     void genGcodeAndTile() override {
         const QRectF rect = App::project().worckRect();
         for(size_t x{}; x < App::project().stepsX(); ++x) {

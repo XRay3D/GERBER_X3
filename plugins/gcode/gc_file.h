@@ -33,13 +33,15 @@ class File : public AbstractFile {
     friend class GcFileProxy;
 
 protected:
-    double feedRate{};
-    double plungeRate{};
-    int spindleSpeed{};
-    int toolType{};
-    QString strFeed;
-    QString strPlungeFeed;
-    QString strSpindle;
+    // Производные от gcp (заполняет конструктор от Params) — не сериализуются,
+    // как и раньше: после загрузки их восстанавливает regenerate().
+    [[= Serial::skip]] double feedRate{};
+    [[= Serial::skip]] double plungeRate{};
+    [[= Serial::skip]] int spindleSpeed{};
+    [[= Serial::skip]] int toolType{};
+    [[= Serial::skip]] QString strFeed;
+    [[= Serial::skip]] QString strPlungeFeed;
+    [[= Serial::skip]] QString strSpindle;
     Params gcp; ////
 
     // Имя, которое дал программе пользователь (текст поля Name в форме), без
@@ -59,9 +61,9 @@ public:
         , plungeRate{newGcp.plungeRate()}
         , spindleSpeed{newGcp.spindleSpeed()}
         , toolType{newGcp.toolType()}
-        , strFeed{u'F' + format(feedRate)}
-        , strPlungeFeed{u'F' + format(plungeRate)}
-        , strSpindle{u'S' + format(spindleSpeed)}
+        , strFeed{u'F' + formatValue(feedRate)}
+        , strPlungeFeed{u'F' + formatValue(plungeRate)}
+        , strSpindle{u'S' + formatValue(spindleSpeed)}
         , gcp{std::move(newGcp)} {
         setSide(gcp.params[Params::FileSide]);
     }
@@ -101,6 +103,12 @@ public:
 
     FileTree::Node* node() override;
 
+    // Сторона хранится ДВАЖДЫ: полем файла и параметром УП. Поле читают все, а
+    // параметр переживает сохранение проекта -- из него сторону берёт
+    // конструктор при загрузке. Разъехаться им нельзя: выбор в дереве иначе не
+    // дожил бы до следующего открытия.
+    void setSide(Side side) override;
+
 protected:
     void startPath(const QPointF& point);
     void endPath();
@@ -108,7 +116,7 @@ protected:
     std::vector<Geo::Polylines> mirrorAndOffsetCurves(const QPointF& offset);
     Geo::Polylines mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines paths_);
 
-    std::vector<QSharedPointer<QColor>> debugColor;
+    [[= Serial::skip]] std::vector<QSharedPointer<QColor>> debugColor;
 
     enum {
         AlwaysG,
@@ -132,28 +140,63 @@ protected:
         Size
     };
 
-    Geo::Polylines g0path_;
-    double z_{};
+    // Рабочее состояние генератора текста УП: пересобирается regenerate(),
+    // в проект не пишется.
+    [[= Serial::skip]] Geo::Polylines g0path_;
+    [[= Serial::skip]] double z_{};
 
     static inline QString lastDir;
     static inline bool redirected;
     static inline constexpr auto CMD_LIST = u"GXYZIJSF"_sv;
+    // Из них координатные -- те, что живут на сетке вывода (GCode::Units).
+    static inline constexpr auto COORD_LIST = u"XYZIJ"_sv;
 
     std::vector<double> getDepths();
 
-    bool formatFlags[Size]{};
-    QString lastValues[SpaceG /*6*/];
-    Code gCode_ = GNull;
+    [[= Serial::skip]] bool formatFlags[Size]{};
+    [[= Serial::skip]] Code gCode_ = GNull;
 
-    std::vector<QString> savePath(const Geo::Polyline& curve, double perimeter = {}, double depth = {});
+    // Слово УП: буква и то, что за ней. Координатные несут с собой своё ЧИСЛО
+    // в единицах вывода -- повтор подавляется по нему, а не по тексту: текст
+    // это лишь запись числа, и решать по записи значит решать по округлению.
+    struct Word {
+        QString text;
+        Units units{};
+        bool numeric{};
+        Word(QString text)
+            : text{std::move(text)} { }
+        Word(QChar letter, Units units)
+            : text{letter + format(units)}
+            , units{units}
+            , numeric{true} { }
+        operator const QString&() const { return text; }
+    };
 
-    QString formated(const std::vector<QString>& data);
+    // Последнее НАПИСАННОЕ значение каждого слова: у координатных числом, у
+    // прочих (G, S, F -- там значение и есть текст) текстом.
+    [[= Serial::skip]] Units lastUnits[SpaceG /*6*/]{};
+    [[= Serial::skip]] bool lastWritten[SpaceG]{};
+    [[= Serial::skip]] QString lastValues[SpaceG];
 
+    std::vector<QString> savePath(const Geo::Polyline& srcCurve, double perimeter = {}, double depth = {});
+
+    QString formated(const std::vector<Word>& data);
+    // Готовые слова из JS-скрипта. Координатные разбираются обратно в число
+    // и печатаются заново -- чтобы вывод скрипта шёл по той же сетке и с тем
+    // же подавлением повторов, что и вывод C++.
+    QString formatedText(const std::vector<QString>& data);
+
+    struct Coord {
+        QChar c;
+        Word operator()(double mm) const { return {c, toUnits(mm)}; }
+        operator Word() const { return {c, Units{}}; }
+    } static constexpr i{u'I'}, j{u'J'}, x{u'X'}, y{u'Y'}, z{u'Z'};
+
+    // Обороты шпинделя длиной не являются -- своя запись, не по сетке вывода.
     struct {
         QChar c;
-        constexpr QString operator()(double val) const { return c + format(val); }
-        constexpr operator QString() const { return c + u"0"_s; }
-    } static constexpr i{u'I'}, j{u'J'}, x{u'X'}, y{u'Y'}, z{u'Z'}, speed{u'S'};
+        Word operator()(double val) const { return {c + formatValue(val)}; }
+    } static constexpr speed{u'S'};
 
     QString g0();
     QString g1();
@@ -169,13 +212,19 @@ protected:
     // QString z(double val) { return u'Z' + format(val); }
     // QString speed(int val) { return u'S' + QString::number(val); }
 
-    static QString format(double val);
+    // Текст координаты -- ровно запись её числа: цифры до точки, значащие
+    // после и ни одного хвостового нуля.
+    static QString format(Units units);
+    static QString format(double mm) { return format(toUnits(mm)); }
+
+    // Число, длиной НЕ являющееся: подача (мм/мин), обороты. Сетка вывода
+    // задана допуском геометрии, и к минутам с оборотами он отношения не
+    // имеет -- у них своя запись, до трёх знаков без хвостовых нулей.
+    static QString formatValue(double val);
 
     bool runJsScript(const QString& scriptPath);
 
     // AbstractFile interfaces
-    void write(QDataStream& stream) const override { stream << gcp << programName_ << visibility_; }
-    void read(QDataStream& stream) override { stream >> gcp >> programName_ >> visibility_; }
     // initFrom не переопределяется: базовая реализация переносит ровно то, что
     // нужно при замене УП на месте (id, узел дерева, сторону, цвет, тип, трансформ),
     // а programName_ и visibility_ переносить как раз НЕЛЬЗЯ -- у нового файла они

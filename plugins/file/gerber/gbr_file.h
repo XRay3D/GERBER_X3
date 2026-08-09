@@ -17,10 +17,11 @@
 
 namespace Gerber {
 
-class File : public AbstractFile {
+class[[= Serial::name("Gerber")]] File : public AbstractFile {
     friend class Parser;
     friend class Plugin;
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture); // NOTE use private crutch
+    // NOTE use private crutch
+    friend struct Serial::Adapter<std::shared_ptr<AbstractAperture>>; // NOTE use private crutch
 
 public:
     explicit File();
@@ -65,17 +66,26 @@ private:
     ApertureMap apertures_;
 
     Format format_;
-    Group group_{};
+    [[= Serial::skip]] Group group_{};
     // Layer layer = Copper;
 
     QVector<int> rawIndex;
-    std::forward_list<Geo::Polyline> checkList;
+    [[= Serial::skip]] std::forward_list<Geo::Polyline> checkList; // рабочий список парсера
     static inline File* crutch;
 
     // FileTree::Node interface
 protected:
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
+public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    // Апертуры при чтении цепляются к текущему файлу — крюк ДО чтения полей.
+    void preLoad() { crutch = this; }
+    void postLoad() {
+        for(GrObject& go: graphicObjects_) {
+            go.gFile = this;
+            go.state.file_ = this;
+        }
+        AbstractFile::postLoad();
+    }
 
     // FileTree::Node interface
 public:

@@ -10,17 +10,15 @@
  ********************************************************************************/
 #pragma once
 
+#include "serial.h"
 #include "utils.h"
 #include <QObject>
 #include <QPainterPath>
 
 class QWidget;
 class QIcon;
-class QDataStream;
 
 class Tool {
-    friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
-    friend QDataStream& operator>>(QDataStream& stream, Tool& tool);
     friend QDebug operator<<(QDebug debug, const Tool& t);
 
 public:
@@ -132,10 +130,10 @@ public:
 private:
     static inline double depth_;
 
-    mutable size_t hash_{};
-    mutable size_t hash2_{};
+    [[= Serial::skip]] mutable size_t hash_{};
+    [[= Serial::skip]] mutable size_t hash2_{};
 
-    QPainterPath path_;
+    [[= Serial::skip]] QPainterPath path_;
 };
 
 using Tools = std::map<Tool::ID, Tool, std::greater<Tool::ID>>;

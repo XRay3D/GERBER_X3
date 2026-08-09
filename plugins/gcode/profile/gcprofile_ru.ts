@@ -2,6 +2,101 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU" sourcelanguage="en_US">
 <context>
+    <name>Profile</name>
+    <message>
+        <location filename="profile_form.h" line="117"/>
+        <source>Milling sequence:</source>
+        <translation>Порядок фрезерования:</translation>
+    </message>
+    <message>
+        <location filename="profile_form.h" line="121"/>
+        <source>Grouping by nesting</source>
+        <translation>Группировка по вложенности</translation>
+    </message>
+    <message>
+        <location filename="profile_form.h" line="122"/>
+        <source>Grouping by nesting depth</source>
+        <translation>Группировка по глубине вложенности</translation>
+    </message>
+</context>
+<context>
+    <name>Profile::Form</name>
+    <message>
+        <location filename="profile_form.cpp" line="37"/>
+        <source>Profile Toolpath</source>
+        <translation>Профиль</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="48"/>
+        <source>Manually</source>
+        <translation>Вручную</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="49"/>
+        <source>Horizontally</source>
+        <translation>По горизонтали</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="50"/>
+        <source>Vertically</source>
+        <translation>По вертикали</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="51"/>
+        <source>Horizontally and vertically</source>
+        <translation>По горизонтали и вертикали</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="52"/>
+        <source>Through the distance</source>
+        <translation>Через расстояние</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="53"/>
+        <source>Evenly around the perimeter</source>
+        <translation>Равномерно по периметру</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="54"/>
+        <source>Split</source>
+        <translation>Разделить</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="288"/>
+        <source>Trimming</source>
+        <translation>Обрезка</translation>
+    </message>
+    <message>
+        <location filename="profile_form.cpp" line="292"/>
+        <location filename="profile_form.cpp" line="296"/>
+        <source>Corner Trimming</source>
+        <translation>Подрезка углов</translation>
+    </message>
+    <message>
+        <location filename="profile_form.h" line="51"/>
+        <source>Profile On</source>
+        <translation>Профиль поверху</translation>
+    </message>
+    <message>
+        <location filename="profile_form.h" line="51"/>
+        <source>Profile Outside</source>
+        <translation>Профиль снаружи</translation>
+    </message>
+    <message>
+        <location filename="profile_form.h" line="51"/>
+        <source>Profile Inside</source>
+        <translation>Профиль внутри</translation>
+    </message>
+</context>
+<context>
+    <name>Profile::GCPluginImpl</name>
+    <message>
+        <location filename="profile_form.h" line="116"/>
+        <source>Profile</source>
+        <translation>Профиль</translation>
+    </message>
+</context>
+<context>
     <name>ProfileForm</name>
     <message>
         <location filename="profileform.ui" line="20"/>
@@ -9,156 +104,168 @@
         <translation>Форма</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="41"/>
+        <location filename="profileform.ui" line="244"/>
+        <source>Allowance:</source>
+        <translation>Припуск:</translation>
+    </message>
+    <message>
+        <location filename="profileform.ui" line="254"/>
+        <source>Stock left by the roughing pass for the finishing pass. 0 disables the finishing pass.</source>
+        <translation>Припуск, оставляемый черновым проходом для чистового. 0 отключает чистовой проход.</translation>
+    </message>
+    <message>
+        <location filename="profileform.ui" line="273"/>
         <source>Trimming??? Corner Trimming</source>
         <translation>Подрезка??? Подрезка углов</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="48"/>
+        <location filename="profileform.ui" line="159"/>
         <source>Aligin</source>
         <translation>Расположение</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="66"/>
+        <location filename="profileform.ui" line="177"/>
         <source>Outside</source>
         <translation>Снаружи</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="76"/>
+        <location filename="profileform.ui" line="187"/>
         <source>Inside</source>
         <translation>Внутри</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="83"/>
+        <location filename="profileform.ui" line="194"/>
         <source>On</source>
         <translation>Поверху</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="93"/>
+        <location filename="profileform.ui" line="51"/>
         <source>Bridges</source>
         <translation>Мостики</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="111"/>
+        <location filename="profileform.ui" line="72"/>
         <source>Lenght:</source>
         <translation>Длина:</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="121"/>
+        <location filename="profileform.ui" line="82"/>
+        <location filename="profileform.ui" line="257"/>
         <source> mm</source>
         <translation> мм</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="143"/>
+        <location filename="profileform.ui" line="104"/>
+        <source>Value:</source>
+        <translation>Значение:</translation>
+    </message>
+    <message>
+        <location filename="profileform.ui" line="121"/>
         <source>Add Bridge</source>
         <translation>Добавить мостик</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="153"/>
+        <location filename="profileform.ui" line="128"/>
+        <source>Clear</source>
+        <translation>Очистить</translation>
+    </message>
+    <message>
+        <location filename="profileform.ui" line="204"/>
         <source>Direction</source>
         <translation>Направление</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="171"/>
+        <location filename="profileform.ui" line="222"/>
         <source>Climb</source>
         <translation>Попутное</translation>
     </message>
     <message>
-        <location filename="profileform.ui" line="181"/>
+        <location filename="profileform.ui" line="232"/>
         <source>Conventional</source>
         <translation>Встречное</translation>
     </message>
     <message>
-        <location filename="profile_form.h" line="44"/>
+        <location filename="profileform.ui" line="280"/>
+        <source>Ramp down along the contour. When off, the tool plunges straight down at each depth step.</source>
+        <translation>Врезание по контуру. Если выключено, инструмент опускается вертикально на каждом шаге глубины.</translation>
+    </message>
+    <message>
+        <location filename="profileform.ui" line="283"/>
+        <source>Spiral ramp</source>
+        <translation>Спиральное врезание</translation>
+    </message>
+    <message>
         <source>Profile On</source>
-        <translation>Профиль поверху</translation>
+        <translation type="vanished">Профиль поверху</translation>
     </message>
     <message>
-        <location filename="profile_form.h" line="44"/>
         <source>Profile Outside</source>
-        <translation>Профиль снаружи</translation>
+        <translation type="vanished">Профиль снаружи</translation>
     </message>
     <message>
-        <location filename="profile_form.h" line="44"/>
         <source>Profile Inside</source>
-        <translation>Профиль внутри</translation>
+        <translation type="vanished">Профиль внутри</translation>
     </message>
     <message>
-        <location filename="profile_form.cpp" line="26"/>
         <source>Profile Toolpath</source>
-        <translation>Профиль</translation>
+        <translation type="vanished">Профиль</translation>
     </message>
     <message>
-        <location filename="profile_form.cpp" line="111"/>
-        <location filename="profile_form.cpp" line="137"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="profile_form.cpp" line="111"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="profile_form.cpp" line="137"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
     <message>
-        <location filename="profile_form.cpp" line="209"/>
         <source>Trimming</source>
-        <translation>Обрезка</translation>
+        <translation type="vanished">Обрезка</translation>
     </message>
     <message>
-        <location filename="profile_form.cpp" line="213"/>
-        <location filename="profile_form.cpp" line="217"/>
         <source>Corner Trimming</source>
-        <translation>Подрезка углов</translation>
+        <translation type="vanished">Подрезка углов</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="prof_file.cpp" line="441"/>
         <source>Top|Bottom</source>
-        <translation>Верх|Низ</translation>
+        <translation type="vanished">Верх|Низ</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="443"/>
         <source>;	           Name: %1</source>
-        <translation>;	            Название: %1</translation>
+        <translation type="vanished">;	            Название: %1</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="444"/>
         <source>;	           Tool: %1</source>
-        <translation>;	          Инструмент: %1</translation>
+        <translation type="vanished">;	          Инструмент: %1</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="445"/>
         <source>;	  Tool Stepover: %1</source>
-        <translation>;	  Отступ инструмента: %1</translation>
+        <translation type="vanished">;	  Отступ инструмента: %1</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="446"/>
         <source>;	 Feed Rate mm/s: %1</source>
-        <translation>;	Скорость подачи мм/с: %1</translation>
+        <translation type="vanished">;	Скорость подачи мм/с: %1</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="447"/>
         <source>;	Tool Pass Depth: %1</source>
-        <translation>;	     Глубина прохода: %1</translation>
+        <translation type="vanished">;	     Глубина прохода: %1</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="448"/>
         <source>;	          Depth: %1</source>
-        <translation>;	             Глубина: %1</translation>
+        <translation type="vanished">;	             Глубина: %1</translation>
     </message>
     <message>
-        <location filename="prof_file.cpp" line="449"/>
         <source>;	           Side: %1</source>
-        <translation>;	             Сторона: %1</translation>
+        <translation type="vanished">;	             Сторона: %1</translation>
     </message>
 </context>
 </TS>

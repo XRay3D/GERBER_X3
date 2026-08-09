@@ -244,7 +244,7 @@ Geo::Polygons& File::groupedPaths(File::Group group, bool /*fl*/) {
     if(!groupedCurves_.empty() && group_ == group)
         return groupedCurves_;
 
-    group_                     = group;
+    group_ = group;
     const Geo::Polygons region = mergedCurves();
 
     if(group == CopperGroup) {
@@ -253,7 +253,7 @@ Geo::Polygons& File::groupedPaths(File::Group group, bool /*fl*/) {
         // Поле рамки вокруг детали: миллиметр с каждой стороны, лишь бы вырезы
         // оказались внутри неё и отделились от бесконечности.
         constexpr double margin = 1.0;
-        QRectF box              = region.boundingRect();
+        QRectF box = region.boundingRect();
         box.adjust(-margin, -margin, margin, margin);
         const Geo::Polygons frame{Geo::Polylines{Geo::rectangle(box.width(), box.height(), box.center())}};
         groupedCurves_ = frame - region;
@@ -314,32 +314,6 @@ void File::setItemType(int type) {
 }
 
 int File::itemsType() const { return itemsType_; }
-
-void File::write(QDataStream& stream) const {
-    ::Block{stream}.write(
-        graphicObjects_,
-        apertures_,
-        format_,
-        rawIndex,
-        itemsType_,
-        components_);
-}
-
-void File::read(QDataStream& stream) {
-    crutch = this; // NOTE
-    ::Block{stream}.read(
-        graphicObjects_,
-        apertures_,
-        format_,
-        rawIndex,
-        itemsType_,
-        components_);
-
-    for(GrObject& go: graphicObjects_) {
-        go.gFile       = this;
-        go.state.file_ = this;
-    }
-}
 
 void File::createGi() {
 
@@ -410,8 +384,8 @@ void File::createGi() {
 
     setColor(color_);
 
-    layerTypes_[Normal].id     = itemGroups_[Normal]->size() ? Normal : NullType;
-    layerTypes_[ApPaths].id    = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
+    layerTypes_[Normal].id = itemGroups_[Normal]->size() ? Normal : NullType;
+    layerTypes_[ApPaths].id = itemGroups_[ApPaths]->size() ? ApPaths : NullType;
     layerTypes_[Components].id = itemGroups_[Components]->size() ? Components : NullType;
 
     itemGroups_[ApPaths]->setVisible(false);

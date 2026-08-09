@@ -2,6 +2,7 @@
 // внимание -- инверсии: она единственная из булевых уводит регион в
 // неограниченный, и почти всё остальное ведёт себя на нём иначе.
 
+#include "geo/geo_json.h"
 #include "geo/polygon.h"
 #include "geo/util.h"
 
@@ -10,6 +11,27 @@
 
 #include <cmath>
 #include <numbers>
+
+// Round-trip через JSON-адаптеры Geo (Serial::Adapter + simdjson): пишем и
+// читаем обратно тем же кодом, которым проект сохраняет геометрию. Тесты ниже
+// проверяют, что переживает эта дорога -- Dxf-вид с прогибами наружу и точный
+// домен обратно.
+template <typename T>
+static T serialRoundTrip(const T& source) {
+    simdjson::builder::string_builder sb;
+    Serial::Adapter<T>::write(sb, source);
+    std::string_view json;
+    if(sb.view().get(json)) return {};
+    simdjson::padded_string padded{json};
+    simdjson::ondemand::parser parser;
+    simdjson::ondemand::document doc;
+    if(parser.iterate(padded).get(doc)) return {};
+    simdjson::ondemand::value value;
+    if(doc.get_value().get(value)) return {};
+    T restored;
+    Serial::Adapter<T>::read(value, restored);
+    return restored;
+}
 
 using namespace Geo;
 
@@ -138,8 +160,8 @@ void PolygonTest::invertOfBodyWithHoleGivesBodyPerHole() {
 
     QVERIFY(inverted.isUnbounded());
     QCOMPARE(inverted.size(), std::size_t(2));
-    QVERIFY(inverted.contains({0.0, 0.0}));   // бывшая дырка стала телом
-    QVERIFY(!inverted.contains({9.0, 0.0}));  // бывшее тело стало пустотой
+    QVERIFY(inverted.contains({0.0, 0.0}));  // бывшая дырка стала телом
+    QVERIFY(!inverted.contains({9.0, 0.0})); // бывшее тело стало пустотой
     QVERIFY(inverted.contains({50.0, 0.0})); // снаружи
 
     // Площадь считается по ограниченным кускам: неограниченный даёт ноль.
@@ -230,16 +252,7 @@ void PolygonTest::regionWithIslandInHoleSurvivesSerialization() {
     Polygons source = Polygons{squareWithHole()} | square(4.0);
     QCOMPARE(source.all().size(), 2u);
 
-    QByteArray buffer;
-    {
-        QDataStream out{&buffer, QIODevice::WriteOnly};
-        out << source;
-    }
-    Polygons restored;
-    {
-        QDataStream in{&buffer, QIODevice::ReadOnly};
-        in >> restored;
-    }
+    const Polygons restored = serialRoundTrip(source);
 
     QCOMPARE(restored.all().size(), source.all().size());
     QVERIFY(near(restored.area(), source.area(), 1e-6));
@@ -259,16 +272,7 @@ void PolygonTest::denseRegionWithArcIslandsSurvivesSerialization() {
     // 1 тело + 16 островов.
     QCOMPARE(region.all().size(), 17u);
 
-    QByteArray buffer;
-    {
-        QDataStream out{&buffer, QIODevice::WriteOnly};
-        out << region;
-    }
-    Polygons restored;
-    {
-        QDataStream in{&buffer, QIODevice::ReadOnly};
-        in >> restored;
-    }
+    const Polygons restored = serialRoundTrip(region);
 
     QCOMPARE(restored.all().size(), region.all().size());
     QVERIFY(near(restored.area(), region.area(), 1e-6));
@@ -287,16 +291,7 @@ void PolygonTest::smallHolesSurviveSerialization() {
         Polygons region = Polygons{Polylines{rectangle(20.0, 20.0)}};
         region -= Polygons{Polylines{circle(d)}};
 
-        QByteArray buffer;
-        {
-            QDataStream out{&buffer, QIODevice::WriteOnly};
-            out << region;
-        }
-        Polygons restored;
-        {
-            QDataStream in{&buffer, QIODevice::ReadOnly};
-            in >> restored;
-        }
+        const Polygons restored = serialRoundTrip(region);
 
         QVERIFY2(restored.all().size() == 1 && restored.all().front().holes().size() == 1,
             qPrintable(QStringLiteral("дырка d=%1 не пережила сериализацию").arg(d)));
@@ -308,16 +303,7 @@ void PolygonTest::polygonFlagSurvivesSerializationAndTransform() {
     Polygon source = squareWithHole();
     source.invert();
 
-    QByteArray buffer;
-    {
-        QDataStream out{&buffer, QIODevice::WriteOnly};
-        out << source;
-    }
-    Polygon restored;
-    {
-        QDataStream in{&buffer, QIODevice::ReadOnly};
-        in >> restored;
-    }
+    const Polygon restored = serialRoundTrip(source);
 
     QVERIFY(restored.isInverted());
     QVERIFY(near(restored.area(), source.area(), 1e-6));
@@ -369,12 +355,18 @@ void PolygonTest::translationPreservesAreaOfComplexArcBoundary() {
     // разного радиуса подряд), на котором ломалась сборка по трём точкам.
     Polygons thermal{Polylines{circle(0.2)}};
     thermal -= Polygons{Polylines{circle(0.1)}};
-    thermal -= Polygons{Polylines{rectangle(0.02, 0.2), rectangle(0.2, 0.02)}};
+    thermal -= Polygons{
+        Polylines{rectangle(0.02, 0.2), rectangle(0.2, 0.02)}
+    };
 
     const double before = thermal.area();
     QVERIFY(before > 0.0);
 
-    for(const QPointF offset: {QPointF{0.4, 1.4}, QPointF{-3.0, 7.5}, QPointF{1000.0, -1000.0}}) {
+    for(const QPointF offset: {
+            QPointF{0.4,    1.4    },
+            QPointF{-3.0,   7.5    },
+            QPointF{1000.0, -1000.0}
+    }) {
         const Polygons moved = transformed(thermal, QTransform::fromTranslate(offset.x(), offset.y()));
         QVERIFY(near(moved.area(), before, 1e-9));
         QVERIFY(near(moved.boundingRect().center().x() - thermal.boundingRect().center().x(), offset.x(), 1e-6));

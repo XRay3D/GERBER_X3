@@ -49,9 +49,9 @@ QIcon drawApertureIcon(AbstractAperture* aperture) {
     QPainterPath painterPath{aperture->draw(State()).toPath()};
     painterPath.addEllipse(QPointF(0, 0), aperture->drillDiameter() * 0.5, aperture->drillDiameter() * 0.5);
     const QRectF rect = painterPath.boundingRect();
-    double scale      = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
-    double ky         = -rect.top() * scale;
-    double kx         = rect.left() * scale;
+    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
+    double ky = -rect.top() * scale;
+    double kx = rect.left() * scale;
     if(rect.width() > rect.height())
         ky += (static_cast<double>(IconSize) - rect.height() * scale) / 2;
     else
@@ -89,7 +89,10 @@ bool Plugin::thisIsIt(const QString& fileName) {
     return false;
 }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
+AbstractFile* Plugin::loadFile(std::string_view json) const { return Serial::load<File>(json); }
+
+// Имя типа — из аннотации на классе File: один источник истины.
+std::string_view Plugin::typeName() const { return Serial::typeNameOf<File>(); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'G'); }
 
@@ -147,19 +150,19 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
         virtual ~Tab() override { }
         virtual void readSettings(MySettings& settings) override {
             settings.beginGroup(u"Gerber"_s);
-            cleanPolygons_     = settings.getValue(chbxCleanPolygons, cleanPolygons_);
+            cleanPolygons_ = settings.getValue(chbxCleanPolygons, cleanPolygons_);
             cleanPolygonsDist_ = settings.getValue(dsbxCleanPolygonsDist, cleanPolygonsDist_);
-            simplifyRegions_   = settings.getValue(chbxSimplifyRegions, simplifyRegions_);
-            skipDuplicates_    = settings.getValue(chbxSkipDuplicates, skipDuplicates_);
+            simplifyRegions_ = settings.getValue(chbxSimplifyRegions, simplifyRegions_);
+            skipDuplicates_ = settings.getValue(chbxSkipDuplicates, skipDuplicates_);
 
             settings.endGroup();
         }
         virtual void writeSettings(MySettings& settings) override {
             settings.beginGroup(u"Gerber"_s);
-            cleanPolygons_     = settings.setValue(chbxCleanPolygons);
+            cleanPolygons_ = settings.setValue(chbxCleanPolygons);
             cleanPolygonsDist_ = settings.setValue(dsbxCleanPolygonsDist);
-            simplifyRegions_   = settings.setValue(chbxSimplifyRegions);
-            skipDuplicates_    = settings.setValue(chbxSkipDuplicates);
+            simplifyRegions_ = settings.setValue(chbxSimplifyRegions);
+            skipDuplicates_ = settings.setValue(chbxSkipDuplicates);
 
             settings.endGroup();
         }

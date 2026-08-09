@@ -116,7 +116,8 @@ public:
     QString gcName() const override { return u"Drilling"_s; }
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return DRILLING; }
-    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+    AbstractFile* loadFile(std::string_view json) const override { return Serial::load<File>(json); }
+    std::string_view typeName() const override { return Serial::typeNameOf<File>(); }
 };
 
 } // namespace Drilling

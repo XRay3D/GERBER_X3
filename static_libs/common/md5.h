@@ -24,6 +24,7 @@
 #include <climits>
 #include <cstdint>
 #include <cstring>
+#include <string_view>
 
 namespace md5 {
 
@@ -212,6 +213,14 @@ constexpr Digest compute(const char* s) noexcept {
     // Don't hash the null-terminator
     c.append(s, details::const_strlen(s));
     return c.final();
+}
+
+// Рантайм-вариант для диспетчеризации по строке-имени из JSON-проекта:
+// hash32("Gerber") == "Gerber"_hash32 — ключи реестров App::*Plugins().
+constexpr uint32_t hash32(std::string_view s) noexcept {
+    details::Context c;
+    c.append(s.data(), s.size());
+    return details::to_uint32(c.final().data());
 }
 } // namespace md5
 

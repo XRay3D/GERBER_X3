@@ -5,12 +5,33 @@
 #include <vector>
 
 class QPainterPath; // forward-declared at global scope: Qt puts it there, not in namespace Geo
-class QDataStream;
 class QPolygonF;
 
 using std::numbers::pi;
 
 namespace Geo {
+
+// Расстояние, ниже которого две точки одной полилинии считаются ОДНОЙ, --
+// на выходе из точного домена и во всём, что идёт следом.
+//
+// Свип режет границу на x-монотонные куски и в местах касания рождает
+// обрывки в десятки нанометров: для самого домена они безобидны, но в
+// bulge-виде это сегменты, которых нет ни на экране, ни в любом выводе.
+// Хуже того, у такого обрывка есть ПРОГИБ, и в G-коде он превращается в
+// дугу, чьи X и Y после округления совпадают с предыдущими. Координаты
+// подавляются как неизменившиеся, остаются одни I/J -- а строка вида
+// «G2 I.. J..» означает для станка ПОЛНЫЙ КРУГ.
+//
+// Величина выбрана по замеру, а не на глаз: в распределении длин сегментов
+// (gerber1.gbr, фреза 1 мм) шум разбиения занимает 1e-9..1e-5 мм, настоящая
+// геометрия начинается с 1e-3 мм, а на 1e-4 у офсетных контуров пусто. Порог
+// стоит ровно в этом промежутке и вдесятеро мельче разрешения вывода.
+//
+// Живёт в публичном заголовке, потому что этим же числом задан ШАГ СЕТКИ
+// вывода: G-код пишет координаты целыми в единицах этого допуска (см.
+// GCode::Units). Иначе домен и вывод разошлись бы -- одно считает точки
+// разными, другое пишет их одинаково, и ход пропадает.
+inline constexpr double exitWeldTolerance = 1e-4;
 
 // A single vertex of a polyline. `bulge` describes the curvature of the
 // segment that starts at this vertex (0 == straight line to the next
@@ -21,9 +42,9 @@ struct Vertex : QPointF {
     // знаковые: направление -- это знак прогиба (и знак угла дуги), а не
     // произвольная метка, поэтому им можно домножать.
     enum Dir {
-        Cw   = -1, // по часовой стрелке
-        Line = 0,  // прямой сегмент
-        Ccw  = 1   // против часовой стрелки
+        Cw = -1,  // по часовой стрелке
+        Line = 0, // прямой сегмент
+        Ccw = 1   // против часовой стрелки
     };
 
     Vertex(double x, double y, double b = {}): QPointF{x, y}, bulge{b} { }
@@ -43,10 +64,10 @@ struct Polyline : std::vector<Vertex> {
     using vector::operator=;
     Polyline(const QPolygonF& pgn);
 
-    Polyline()                           = default;
-    Polyline(Polyline&&)                 = default;
-    Polyline(const Polyline&)            = default;
-    Polyline& operator=(Polyline&&)      = default;
+    Polyline() = default;
+    Polyline(Polyline&&) = default;
+    Polyline(const Polyline&) = default;
+    Polyline& operator=(Polyline&&) = default;
     Polyline& operator=(const Polyline&) = default;
 
     bool closed{};
@@ -105,11 +126,4 @@ struct Polylines : std::vector<Polyline> {
 // Сериализация. Формат -- ровно хранимое состояние: вершина это точка плюс
 // прогиб, полилиния -- счётчик, флаги и вершины. Ни габарит, ни площадь не
 // пишутся: они целиком выводятся из вершин.
-QDataStream& operator<<(QDataStream& stream, const Vertex& vertex);
-QDataStream& operator>>(QDataStream& stream, Vertex& vertex);
-QDataStream& operator<<(QDataStream& stream, const Polyline& polyline);
-QDataStream& operator>>(QDataStream& stream, Polyline& polyline);
-QDataStream& operator<<(QDataStream& stream, const Polylines& polylines);
-QDataStream& operator>>(QDataStream& stream, Polylines& polylines);
-
 } // namespace Geo

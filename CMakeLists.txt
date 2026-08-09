@@ -13,7 +13,9 @@ cmake_minimum_required(VERSION 4.0 FATAL_ERROR)
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-project(GERBER_X3 VERSION 0.9.9)
+# Единственное место, где задаётся версия продукта: отсюда её берут
+# подпроект GGEasy, ресурсы Windows (versioninfo.rc) и version.h.
+project(GERBER_X3 VERSION 0.9.5.0)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -86,6 +88,13 @@ set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
 set(CLIPPER2_USINGZ "ONLY")
 
+# Сериализация проекта (.g2g) — JSON через статическую рефлексию C++26.
+# Именно CACHE: у simdjson cmake_minimum_required 3.14 (CMP0126 OLD), его
+# собственный set(... CACHE STRING) снёс бы обычную переменную и оставил AUTO,
+# а AUTO-детект гоняет try_compile без нашего directory-флага -freflection.
+set(SIMDJSON_STATIC_REFLECTION_MODE ON CACHE STRING "" FORCE)
+set(SIMDJSON_DEVELOPER_MODE OFF)
+
 fetchcontent_declare(
   ctre
   GIT_REPOSITORY
@@ -98,7 +107,18 @@ fetchcontent_declare(
   GIT_TAG main
   GIT_SHALLOW ON
   SOURCE_SUBDIR CPP)
-fetchcontent_makeavailable(ctre clipper2)
+  # Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
+  # v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
+  fetchcontent_declare(
+    simdjson
+    GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
+    GIT_TAG 20b28712ffce8320237b75a587d35a2e89140577
+    GIT_SHALLOW ON)
+fetchcontent_makeavailable(ctre clipper2 simdjson)
+
+# Статический libsimdjson.a влинковывается в плагины (.so) — без PIC не
+# слинкуется.
+set_target_properties(simdjson PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # ##############################################################################
 
@@ -161,6 +181,13 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "GNU")
   if(CMAKE_SYSTEM_NAME STREQUAL Linux)
     add_compile_options(-fhardened -fstack-clash-protection)
     add_link_options(-Wl,-z,relro -Wl,-z,now)
+  endif()
+  # У COFF предел в 65535 секций на объектный файл, и unity-сборка вместе с
+  # шаблонами CGAL/Qt к нему вплотную подходит: ассемблер падает с "too many
+  # sections". У ELF такого предела нет, флага там тоже нет -- потому только
+  # для mingw.
+  if(MINGW)
+    add_compile_options(-Wa,-mbig-obj)
   endif()
 elseif(CMAKE_CXX_COMPILER_ID STREQUAL "Intel")
   # Classic icc/icpc: no C++26 reflection support, but the driver is

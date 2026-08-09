@@ -21,7 +21,7 @@
 #include <QHeaderView>
 #include <QIcon>
 #include <QPainter>
-#include <QProgressDialog>
+#include <QProgressBar>
 #include <QPushButton>
 #include <QRegularExpression>
 #include <QTableView>
@@ -158,8 +158,7 @@ protected:
 Form::Form(Plugin* plugin, Creator* tpc)
     : /*QWidget{this}
     ,*/
-    plugin{plugin}
-    , progressDialog(new QProgressDialog{this}) {
+    plugin{plugin} {
 
     auto vLayout = new QVBoxLayout{this};
     vLayout->addWidget(ctrWidget = new QWidget{this});
@@ -182,7 +181,25 @@ Form::Form(Plugin* plugin, Creator* tpc)
         pbCreate = new QPushButton{tr("Create"), ctrWidget};
         pbCreate->setIcon(QIcon::fromTheme(u"document-export"_s));
         pbCreate->setObjectName(u"pbCreate"_s);
-        connect(pbCreate, &QPushButton::clicked, this, &Form::computePaths);
+        // На время счёта эта же кнопка становится «Cancel»: место одно, а
+        // состояния взаимоисключающие -- пока считаем, запускать нечего.
+        connect(pbCreate, &QPushButton::clicked, this, [this] {
+            computing_ ? cancel() : computePaths();
+        });
+
+        // Прогресс лежит ПОВЕРХ кнопки «Close»: он её ребёнок, и растянут по
+        // ней своей компоновкой -- кнопка ездит вместе с доком, а полоса за
+        // ней сама. В сетку формы полоса не входит вовсе, так что зазоры между
+        // кнопками остаются те же, что были. На время счёта она закрывает
+        // кнопку собой -- заодно и от нажатия.
+        progressBar = new QProgressBar{pbClose};
+        progressBar->setObjectName(u"progressBar"_s);
+        progressBar->setTextVisible(true);
+        progressBar->setVisible({});
+
+        auto closeLayout = new QHBoxLayout{pbClose};
+        closeLayout->setContentsMargins({});
+        closeLayout->addWidget(progressBar);
 
         auto line = [this] {
             auto line = new QFrame{ctrWidget};
@@ -229,51 +246,57 @@ Form::Form(Plugin* plugin, Creator* tpc)
         errWidget->setVisible({});
     }
 
-    progressDialog->setMinimumDuration(100);
-    progressDialog->setModal(true);
-    progressDialog->setWindowFlag(Qt::WindowCloseButtonHint, false);
-    progressDialog->setAutoClose(false);
-    progressDialog->setAutoReset(false);
-    progressDialog->reset();
-    connect(progressDialog, &QProgressDialog::canceled, this, &Form::cancel);
+    // Связка «нажали Create -> считаем» от Creator'а не зависит и живёт
+    // ровно столько, сколько форма. В setCreator ей не место: drill меняет
+    // Creator на ходу, и связка удваивалась бы с каждой сменой -- а с ней и
+    // сам расчёт.
+    connect(this, &Form::createToolpath, this, &Form::startCompute);
+
     setCreator(tpc);
 }
 
 Form::~Form() {
+    // Поток может спать в isContinueCalc, ожидая ответа по найденным ошибкам:
+    // не ответив, его не дождаться.
     if(errWidget->isVisible()) errBreak();
-    ProgressCancel::cancel();
-    if(runer.isRunning())
-        // runer.terminate();
-        // runer.quit();
-        runer.wait();
+    stopWorker();
     delete creator_;
     qDebug(__FUNCTION__);
 }
 
+// Запуск расчёта: своё состояние потоку отдают ЦЕЛИКОМ (Params переезжают в
+// лямбду), так что делить с ним после старта нечего.
+void Form::startCompute(Params* newGcp) {
+    if(creator_ == nullptr) return;
+    // Прошлый прогон мог ещё доживать свои мгновения после отмены. Ждать его
+    // здесь -- единственное место, где GUI замирает, и ровно на то время,
+    // которое отменённому счёту нужно, чтобы упереться в ближайшую точку.
+    stopWorker();
+
+    startProgress();
+
+    worker = std::jthread{[this, gcp = std::move(*newGcp)](std::stop_token token) mutable {
+        creator_->createGc(std::move(gcp), std::move(token));
+    }};
+}
+
+// Попросить остановиться и дождаться. Ровно это делает и деструктор jthread,
+// но здесь оно нужно по имени -- перед перезапуском и перед сменой Creator'а.
+void Form::stopWorker() { worker = {}; }
+
 void Form::setCreator(Creator* newCreator) {
     // qDebug() << __FUNCTION__ << creator_ << newCreator;
-    ProgressCancel::cancel();
-    if(runer.isRunning()) {
-        // runer.terminate();
-        // runer.quit();
-        runer.wait();
-    }
-    ProgressCancel::reset();
+    stopWorker();
+    Progress::reset();
     if(creator_ != newCreator && newCreator) {
-        // qDebug(__FUNCTION__);
         delete creator_;
         creator_ = newCreator;
-        creator_->moveToThread(&runer);
-        // clang-format off
-        // connect(&runer,  &QThread::finished,        creator_, &QObject::deleteLater                        );
-        connect(creator_, &Creator::canceled,        this,     &Form::stopProgress                      );
-        connect(creator_, &Creator::errorOccurred,   this,     &Form::errorHandler                      );
-        connect(creator_, &Creator::fileReady,       this,     &Form::fileHandler                       );
-         // connect(this,     &BaseForm::createToolpath, creator_, &Creator::createGc,      Qt::QueuedConnection);
-        connect(this,     &Form::createToolpath, &runer,   &Runer::createGc,          Qt::QueuedConnection);
-        connect(this,     &Form::createToolpath, this,     &Form::startProgress                     );
-        // clang-format on
-        // runer.start(QThread::LowPriority /*HighestPriority*/);
+        // Creator остаётся в GUI-потоке: принадлежность нужна тому, кто
+        // сигналы ПОЛУЧАЕТ, а ему их никто не шлёт. Свои же он посылает из
+        // рабочего потока, и Qt доставит их сюда очередью -- как раз потому,
+        // что живёт эта форма здесь.
+        connect(creator_, &Creator::errorOccurred, this, &Form::errorHandler);
+        connect(creator_, &Creator::fileReady, this, &Form::fileHandler);
     } else if(creator_ && !newCreator) {
         creator_ = nullptr;
     }
@@ -281,8 +304,17 @@ void Form::setCreator(Creator* newCreator) {
 
 void Form::fileHandler(File* file) {
     qDebug() << __FUNCTION__ << file;
+
+    // Прогон отменён: расчёт узнаёт об этом на ближайшей своей точке отмены и
+    // до тех пор шлёт файлы как ни в чём не бывало. Они уже не наши -- ни в
+    // проект, ни в дерево им не надо, а удалить их, кроме нас, некому.
+    if(canceled_) {
+        delete file;
+        return;
+    }
+
     if(--fileCount == 0)
-        cancel();
+        stopProgress();
 
     if(file == nullptr) {
         auto message = tr("The tool doesn`t fit in the Working items!");
@@ -361,7 +393,8 @@ void Form::showEvent(QShowEvent* event) {
 
 void Form::setEditMode(bool on) {
     editMode_ = on;
-    pbCreate->setText(on ? tr("Update") : tr("Create"));
+    // Пока считаем, на кнопке «Cancel»: надпись вернёт setComputing.
+    if(!computing_) pbCreate->setText(on ? tr("Update") : tr("Create"));
 }
 
 void Form::restoreContext(File* file) {
@@ -385,11 +418,13 @@ void Form::restoreContext(File* file) {
 }
 
 void Form::timerEvent(QTimerEvent* event) {
-    if(event->timerId() == progressTimerId && progressDialog && creator_) {
+    if(event->timerId() == progressTimerId && creator_) {
         const auto [max, val] = creator_->getProgress();
-        progressDialog->setMaximum(max);
-        progressDialog->setValue(val);
-        progressDialog->setLabelText(creator_->msg);
+        // Нулевой максимум для QProgressBar -- «шагов не знаю»: полоса бежит
+        // сама. Врать долей выполненного там, где её никто не считал, хуже.
+        progressBar->setMaximum(max);
+        progressBar->setValue(val);
+        progressBar->setFormat(max ? creator_->message() + u" %p%"_s : creator_->message());
     }
 }
 
@@ -608,18 +643,20 @@ void Form::addUsedGi(Gi::Item* gi) {
         usedItems_[{file->id(), file->itemsType()}].push_back(gi->id());
 }
 
+// Отмена: кнопка «Cancel» на месте «Create» либо «Break» в таблице ошибок.
+// Ждать здесь поток нельзя -- отменяют как раз затем, чтобы окно ожило, а
+// расчёт свернётся сам, упёршись в ближайшую единицу работы Geo. Прежде тут
+// стоял terminate() -- убийство потока посреди CGAL, то есть повреждённая
+// куча и утечки.
 void Form::cancel() {
     if(creator_ == nullptr) return;
 
-    creator_->continueCalc(false);
-    ProgressCancel::cancel();
-    if(runer.isRunning()) {
-        // runer.quit();
-        // runer.wait();
-        runer.terminate();
-        runer.wait();
-    }
-    // runer.start(QThread::LowPriority /*HighestPriority*/);
+    canceled_ = true;
+    // Счёт этого прогона больше никого не интересует, и файлов от него не
+    // ждут: следующий запуск назначит своё число сам.
+    fileCount = 0;
+    worker.request_stop();    // Geo свернёт счёт на ближайшей единице работы
+    creator_->continueCalc(); // если поток спит на ошибках -- разбудить
     stopProgress();
 }
 
@@ -657,7 +694,7 @@ void Form::errContinue() {
     errWidget->setVisible({});
 
     startProgress();
-    creator_->continueCalc(true);
+    creator_->continueCalc();
 }
 
 void Form::errBreak() {
@@ -671,17 +708,24 @@ void Form::errBreak() {
     ctrWidget->setVisible(true);
     errWidget->setVisible({});
 
-    creator_->continueCalc(false);
+    // «Break» -- та же отмена: расчётный поток ждёт ответа, и ответ ему
+    // «дальше не считаем».
+    cancel();
 }
 
 void Form::startProgress() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
+    canceled_ = false;
     if(!fileCount)
         fileCount = 1;
-    creator_->msg = fileName_;
-    progressDialog->setLabelText(creator_->msg);
+    creator_->setMsg(fileName_);
+    if(progressTimerId) killTimer(progressTimerId); // перезапуск поверх прошлого
+    progressBar->setFormat(fileName_);
+    progressBar->setMaximum(0);
+    progressBar->setValue(0);
+    setComputing(true);
     progressTimerId = startTimer(100);
 }
 
@@ -691,10 +735,33 @@ void Form::stopProgress() {
     qDebug() << __FUNCTION__ << creator_->checkMillingFl;
     if(creator_->checkMillingFl)
         return;
-    killTimer(progressTimerId);
+    if(progressTimerId) killTimer(progressTimerId);
     progressTimerId = 0;
-    progressDialog->reset();
-    progressDialog->hide();
+    setComputing(false);
+}
+
+// Форма на время счёта: кнопка запуска становится отменой, а прогресс занимает
+// место «Close». Закрывать форму, пока считает её же Creator, нельзя -- на
+// выходе ~Form дождётся потока, а до тех пор окно всё равно стоит.
+void Form::setComputing(bool on) {
+    if(computing_ == on) return;
+    computing_ = on;
+
+    if(on) {
+        createEnabled_ = pbCreate->isEnabled();
+        // Плагины гасят кнопку по своим условиям (drill, thread): отменять
+        // счёт это мешать не должно.
+        pbCreate->setEnabled(true);
+    } else
+        pbCreate->setEnabled(createEnabled_);
+
+    if(on)
+        pbCreate->setText(tr("Cancel"));
+    else
+        pbCreate->setText(editMode_ ? tr("Update") : tr("Create"));
+    pbCreate->setIcon(QIcon::fromTheme(on ? u"process-stop"_s : u"document-export"_s));
+
+    progressBar->setVisible(on);
 }
 
 } // namespace GCode

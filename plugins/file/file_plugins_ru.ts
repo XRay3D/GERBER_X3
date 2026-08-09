@@ -2,24 +2,24 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU">
 <context>
-    <name>FilePlugin</name>
+    <name>AbstractFilePlugin</name>
     <message>
-        <location filename="file_plugin.h" line="62"/>
+        <location filename="abstract_fileplugin.h" line="65"/>
         <source>&amp;Close All Files</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Закрыть все файлы</translation>
     </message>
     <message>
-        <location filename="file_plugin.h" line="63"/>
+        <location filename="abstract_fileplugin.h" line="66"/>
         <source>Really?</source>
-        <translation type="unfinished"></translation>
+        <translation>Вы уверены?</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="file.h" line="70"/>
+        <location filename="abstract_file.h" line="70"/>
         <source>Preparing: </source>
-        <translation type="unfinished"></translation>
+        <translation>Подготовка: </translation>
     </message>
 </context>
 </TS>

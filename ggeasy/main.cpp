@@ -12,6 +12,7 @@
 #include "gc_plugin.h"
 #include "gc_types.h"
 #include "mainwindow.h"
+#include "openglcheck.h"
 #include "settingsdialog.h"
 #include "shapepluginin.h"
 #include "stacktrace_and_logs.h"
@@ -23,6 +24,7 @@
 #include <QPluginLoader>
 #include <QStandardPaths>
 #include <QSystemSemaphore>
+#include <QTimer>
 
 int main(int argc, char* argv[]) {
     stacktraceAndOutput();
@@ -34,6 +36,16 @@ int main(int argc, char* argv[]) {
     // qputenv("QT_QPA_PLATFORM", "windows:darkmode=1"_ba); // 1|2
 
     Q_INIT_RESOURCE(resources);
+
+    // Имена нужны до QApplication: по ним OpenGlCheck ищет QSettings и каталог
+    // для маркера незавершённого старта.
+    QApplication::setApplicationName(u"GGEasy"_s);
+    QApplication::setOrganizationName(VER_COMPANYNAME_STR);
+    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
+
+    // Выбор режима OpenGL. Только до QApplication: атрибуты Qt::AA_Use*OpenGL
+    // и QT_OPENGL читаются при её конструировании.
+    OpenGlCheck::selectMode(argc, argv);
 
     QApplication app{argc, argv};
 
@@ -53,10 +65,6 @@ int main(int argc, char* argv[]) {
             nixFixSharedMemory.detach();
     }
 #endif
-    QApplication::setApplicationName(u"GGEasy"_s);
-    QApplication::setOrganizationName(VER_COMPANYNAME_STR);
-    QApplication::setApplicationVersion(VER_PRODUCTVERSION_STR);
-
     [[maybe_unused]] App appSingleton;
     [[maybe_unused]] GCode::Settings gcSingleton;
     App::setGcSettings(&gcSingleton);
@@ -65,6 +73,10 @@ int main(int argc, char* argv[]) {
 
     if(QDir dir(App::settingsPath()); !dir.exists())
         dir.mkpath(App::settingsPath());
+
+    // Закадровая проверка драйвера -- до первого QOpenGLWidget: он создаётся
+    // уже в конструкторе GraphicsView внутри MainWindow.
+    OpenGlCheck::probe();
     // QSettings::setDefaultFormat(QSettings::IniFormat);
     // QSettings::setPath(QSettings::IniFormat, QSettings::UserScope, {});
 
@@ -195,6 +207,10 @@ int main(int argc, char* argv[]) {
 
     QCommandLineParser parser;
     parser.addPositionalArgument(u"url"_s, u"Url of file to open"_s);
+    // Значение читает OpenGlCheck::selectMode ещё до QApplication; здесь ключ
+    // объявлен, чтобы process() не отверг его как неизвестный и чтобы он попал
+    // в --help.
+    parser.addOption(OpenGlCheck::commandLineOption());
     parser.process(app);
     std::vector<std::string_view> cli{
         std::from_range, std::span{++argv, static_cast<size_t>(--argc)}
@@ -206,6 +222,15 @@ int main(int argc, char* argv[]) {
 
     mainWin.show();
     App::splashScreen().finish(&mainWin);
+
+    // Только теперь: окно с логом появилось вместе с mainWin, а проверка
+    // графики отработала задолго до неё.
+    OpenGlCheck::logStatus();
+
+    // Маркер снимаем с задержкой: контекст GL создаётся и первый кадр рисуется
+    // уже после show(), и валится драйвер обычно именно там. Снять маркер
+    // раньше -- значит не заметить падение и загрузиться так же в следующий раз.
+    QTimer::singleShot(5000, &mainWin, [] { OpenGlCheck::markStartupSucceeded(); });
 
     int retCode = app.exec();
 

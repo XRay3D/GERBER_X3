@@ -10,9 +10,10 @@
  ********************************************************************************/
 #pragma once
 
-#include "datastream.h"
+#include "geo/geo_json.h"
 #include "geo/polygon.h"
 #include "md5.h"
+#include "serial.h"
 
 #include "tool.h"
 
@@ -21,12 +22,49 @@
 #include <QMap>
 #include <QVariant>
 #include <algorithm>
+#include <cmath>
+#include <limits>
 #include <variant>
 
-constexpr auto G_CODE      = "GCode"_hash32;
+constexpr auto G_CODE = "GCode"_hash32;
 constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
+
+// Координата в УП -- ЦЕЛОЕ число единиц вывода, а не double и не текст.
+//
+// Единица -- Geo::exitWeldTolerance, тот самый допуск, на котором точная
+// геометрия считает две точки одной. Мельче писать нечего (для домена этой
+// разницы нет), грубее нельзя (разница есть, а в тексте её не видно -- и
+// целый ход пропадает молча). Один и тот же порог с обеих сторон -- это и
+// значит, что сетка вывода и сетка геометрии совпадают.
+//
+// Тип -- int: при шаге 0.1 мкм это +-214 метра, чего станку хватит с любым
+// запасом, а габарит УП, в него не влезающий, ловится заранее (fitsOutput).
+using Units = int;
+
+inline constexpr Units unitsPerMm = static_cast<Units>(1.0 / Geo::exitWeldTolerance + 0.5);
+static_assert(unitsPerMm >= 10 && 1.0 / unitsPerMm == Geo::exitWeldTolerance,
+    "единица вывода должна быть ровно допуском сварки и степенью десяти");
+
+// Число дробных знаков, которые несёт единица, -- ими и печатается число.
+inline constexpr int unitDecimals = [] {
+    int decimals{};
+    for(Units units = unitsPerMm; units > 1; units /= 10) ++decimals;
+    return decimals;
+}();
+
+inline Units toUnits(double mm) { return static_cast<Units>(std::llround(mm * unitsPerMm)); }
+inline double fromUnits(Units units) { return static_cast<double>(units) / unitsPerMm; }
+
+// Влезет ли габарит в вывод. Проверяется ДО счёта: координата, не влезшая в
+// Units, переполнилась бы молча и уехала на другой конец стола.
+inline bool fitsOutput(const QRectF& rect) {
+    constexpr double limit = std::numeric_limits<Units>::max() / static_cast<double>(unitsPerMm);
+    for(double value: {rect.left(), rect.right(), rect.top(), rect.bottom()})
+        if(!(std::abs(value) < limit)) return false; // NaN сюда же
+    return true;
+}
 
 // enum GCodeType : int {
 // Null = -1,
@@ -45,10 +83,10 @@ namespace GCode {
 
 enum Code {
     GNull = -1,
-    G00   = 0,
-    G01   = 1,
-    G02   = 2, // cw
-    G03   = 3, // ccw
+    G00 = 0,
+    G01 = 1,
+    G02 = 2, // cw
+    G03 = 3, // ccw
 };
 
 enum SideOfMilling {
@@ -73,23 +111,6 @@ using V = std::variant<qsizetype, double, UsedItems>;
 
 struct Variant : V {
     using V::V;
-
-    friend QDataStream& operator>>(QDataStream& stream, V& v) {
-        uint8_t index;
-        stream >> index;
-        switch(index) {
-        case 0: stream >> v.emplace<0>(); break;
-        case 1: stream >> v.emplace<1>(); break;
-        case 2: stream >> v.emplace<2>(); break;
-        }
-        return stream;
-    }
-
-    friend QDataStream& operator<<(QDataStream& stream, const V& v) {
-        stream << uint8_t(v.index());
-        std::visit([&stream](auto&& val) { stream << val; }, v);
-        return stream;
-    }
 
     qsizetype toInt() const {
         return std::visit([](auto&& val) -> int {
@@ -163,17 +184,17 @@ public:
     // Parameter keys are names, not an enum: each plugin can add its own
     // (see e.g. Profile::Creator::BridgeLen) without needing a shared numeric
     // range to avoid collisions, and a serialized/dumped Params reads as text.
-    static inline const QString Convent        = u"Convent"_s;
-    static inline const QString Depth          = u"Depth"_s;
-    static inline const QString GrItems        = u"GrItems"_s;
+    static inline const QString Convent = u"Convent"_s;
+    static inline const QString Depth = u"Depth"_s;
+    static inline const QString GrItems = u"GrItems"_s;
     static inline const QString MultiToolIndex = u"MultiToolIndex"_s; // need for Pocket
-    static inline const QString NotTile        = u"NotTile"_s;        // не раскладывать если даже раскладка включена
-    static inline const QString Side           = u"Side"_s;
-    static inline const QString FileSide       = u"FileSide"_s;
-    static inline const QString LeftHand       = u"LeftHand"_s; // need for Threading
-    static inline const QString Circle         = u"Circle"_s;   // need for Threading
-    static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
-    static inline const QString Starts         = u"Starts"_s;   // need for Threading
+    static inline const QString NotTile = u"NotTile"_s;               // не раскладывать если даже раскладка включена
+    static inline const QString Side = u"Side"_s;
+    static inline const QString FileSide = u"FileSide"_s;
+    static inline const QString LeftHand = u"LeftHand"_s; // need for Threading
+    static inline const QString Circle = u"Circle"_s;     // need for Threading
+    static inline const QString Chamfer = u"Chamfer"_s;   // need for Threading
+    static inline const QString Starts = u"Starts"_s;     // need for Threading
     // Спиральное врезание. Ключ общий, а не плагинный: читает его
     // File::saveMillingProfile, который живёт здесь же, в общем слое.
     static inline const QString SpiralRamp = u"SpiralRamp"_s;
@@ -202,7 +223,7 @@ public:
     std::map<QString, Variant> params;
 
     // GCodeType gcType = Null;
-    mutable int fileId = -1;
+    [[= Serial::skip]] mutable int fileId = -1;
     // QColor color;
 
     // toolPathss и openCurves сохраняются наравне с исходной геометрией. Без них
@@ -210,24 +231,6 @@ public:
     // концовкой: генератор берёт траекторию именно из toolPathss. А regenerate()
     // зовётся не только из save(), но и при смене стороны платы в дереве -- то
     // есть УП молча превращалась в пустую от одного щелчка по «Сторона».
-    friend QDataStream& operator>>(QDataStream& stream, Params& par) {
-        return stream >> par.tools
-            >> par.params
-            >> par.closedCurves
-            >> par.supportCurvess
-            >> par.toolPathss
-            >> par.openCurves;
-    }
-
-    friend QDataStream& operator<<(QDataStream& stream, const Params& par) {
-        return stream << par.tools
-                      << par.params
-                      << par.closedCurves
-                      << par.supportCurvess
-                      << par.toolPathss
-                      << par.openCurves;
-    }
-
     explicit operator bool() const {
         return !openCurves.empty() || !closedCurves.empty();
     }
@@ -255,10 +258,13 @@ public:
     // надо попутно или встречно, а это зависит ещё и от стороны: снаружи
     // детали попутный ход -- один обход, внутри -- обратный.
     //
-    // Живёт здесь, а не в плагине, по двум причинам. Во-первых, потребителей
-    // уже двое: Profile::Creator::orderContours и Creator::stacking (там к
-    // этому добавляется поправка на дырку -- см. там же). Во-вторых, от
-    // направления обхода зависят вещи, которые ломаются МОЛЧА: подрезка углов
+    // Правило это для контуров, построенных ОТ ДЕТАЛИ (Profile::Creator::
+    // orderContours). Петлям кармана оно не годится: те приходят границами
+    // области, которую фреза выбирает, и сторону материала выражает уже сама
+    // их ориентация -- см. Creator::stacking.
+    //
+    // Живёт здесь, а не в плагине, потому что от направления обхода зависят
+    // вещи, которые ломаются МОЛЧА: подрезка углов
     // ищет внутренние стыки по 90 или 270 градусам, и стоит развернуть обход
     // в одном месте, забыв про другое, -- она просто перестаёт что-либо
     // находить, без единой жалобы.
@@ -334,5 +340,56 @@ public:
 };
 
 } // namespace GCode
+
+// Variant — наследник std::variant: рефлексией не взять, поэтому Adapter.
+// Объект с одним ключом-дискриминатором: {"i": целое} | {"f": число} |
+// {"u": UsedItems массивом пар}. Явный тег вместо угадывания по виду
+// значения — JSON размывает int и double (1 против 1.0).
+template <>
+struct Serial::Adapter<GCode::Variant> {
+    static void write(Writer& sb, const GCode::Variant& var) {
+        sb.start_object();
+        switch(var.index()) {
+        case 0:
+            sb.append_raw("\"i\":");
+            sb.append(static_cast<int64_t>(std::get<0>(var)));
+            break;
+        case 1:
+            sb.append_raw("\"f\":");
+            Serial::write(sb, std::get<1>(var)); // NaN → null
+            break;
+        case 2:
+            sb.append_raw("\"u\":");
+            Serial::write(sb, std::get<2>(var));
+            break;
+        }
+        sb.end_object();
+    }
+
+    static simdjson::error_code read(simdjson::ondemand::value& val, GCode::Variant& var) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        for(auto field: obj) {
+            std::string_view key;
+            if(auto err = field.unescaped_key().get(key); err) return err;
+            simdjson::ondemand::value v;
+            if(auto err = field.value().get(v); err) return err;
+            if(key == "i") {
+                int64_t i{};
+                if(auto err = v.get_int64().get(i); err) return err;
+                var.emplace<0>(static_cast<qsizetype>(i));
+            } else if(key == "f") {
+                double d{};
+                if(auto err = Serial::read(v, d); err) return err;
+                var.emplace<1>(d);
+            } else if(key == "u") {
+                GCode::UsedItems u;
+                if(auto err = Serial::read(v, u); err) return err;
+                var.emplace<2>(std::move(u));
+            }
+        }
+        return simdjson::SUCCESS;
+    }
+};
 
 Q_DECLARE_METATYPE(GCode::Params*)
