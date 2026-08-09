@@ -70,6 +70,14 @@ public:
     // жизни привязано к узлу (см. деструкторы узлов, зовущие deleteFile).
     void removeNode(Node* node);
 
+    // Разложить узлы одной УП. Несколько файлов (у многоинструментного плагина
+    // один запуск даёт по файлу на инструмент) уходят в подпапку с именем
+    // программы; одиночный лежит прямо в «GCode». Подпапка заводится и убирается
+    // по надобности -- когда инструментов стало меньше или больше.
+    void groupProgram(const QString& programName, const std::vector<Node*>& nodes);
+    // Перенести узел в другую папку, не разрушая его.
+    void moveNode(Node* node, Node* newParent);
+
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
     QModelIndex parent(const QModelIndex& index) const override;

@@ -230,6 +230,20 @@ bool Project::open(const QString& fileName) {
         // in >> items_;
         for(const auto& [id, filePtr]: files_)
             App::fileModel().addFile(filePtr.get());
+
+        // Иерархия УП не пишется в файл отдельно: она однозначно выводится из
+        // имён программ. Многофайловая (несколько инструментов за один запуск)
+        // складывается обратно в подпапку своего имени, одиночная остаётся
+        // рядом со всеми -- ровно то же правило, что и при расчёте.
+        {
+            std::map<QString, std::vector<FileTree::Node*>> programs;
+            for(const auto& [id, filePtr]: files_)
+                if(auto* gc = dynamic_cast<GCode::File*>(filePtr.get()); gc && !gc->programName().isEmpty())
+                    programs[gc->programName()].push_back(gc->node());
+            for(const auto& [name, nodes]: programs)
+                App::fileModel().groupProgram(name, nodes);
+        }
+
         for(const auto& [id, shPtr]: shapes_)
             App::fileModel().addShape(shPtr);
         for(const auto& [id, itemPtr]: items_)

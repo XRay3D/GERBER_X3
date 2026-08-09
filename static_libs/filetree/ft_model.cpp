@@ -116,6 +116,49 @@ void Model::updateNode(Node* node) {
     emit dataChanged(node->index(0), node->index(Column::Count - 1));
 }
 
+namespace {
+
+// Подпапка с таким именем среди детей folder.
+FolderNode* findSubFolder(Node* folder, const QString& name) {
+    for(int i{}; i < folder->childCount(); ++i)
+        if(auto* sub = dynamic_cast<FolderNode*>(folder->child(i)); sub && sub->folderName() == name)
+            return sub;
+    return nullptr;
+}
+
+} // namespace
+
+void Model::moveNode(Node* node, Node* newParent) {
+    Node* oldParent = node->parent();
+    if(!node || !newParent || !oldParent || oldParent == newParent) return;
+    const int from = node->row();
+    const int to = newParent->childCount();
+    beginMoveRows(nodeIndex(oldParent), from, from, nodeIndex(newParent), to);
+    newParent->adoptChild(oldParent->takeChild(from));
+    endMoveRows();
+}
+
+void Model::groupProgram(const QString& programName, const std::vector<Node*>& nodes) {
+    auto it = fileFolders.find(static_cast<int>(G_CODE));
+    if(it == fileFolders.end() || !it->second || nodes.empty()) return;
+    Node* root = it->second;
+
+    FolderNode* sub = findSubFolder(root, programName);
+
+    if(nodes.size() > 1) {
+        if(!sub) {
+            sub = new FolderNode{programName};
+            appendChild(root, sub);
+        }
+        for(Node* node: nodes)
+            if(node && node->parent() != sub) moveNode(node, sub);
+    } else {
+        if(nodes.front() && nodes.front()->parent() != root) moveNode(nodes.front(), root);
+        // Подпапка на один файл не нужна: инструментов стало меньше.
+        if(sub && !sub->childCount()) removeNode(sub);
+    }
+}
+
 void Model::removeNode(Node* node) {
     if(!node || !node->parent()) return;
     removeRows(node->row(), 1, node->parent()->index(0));
