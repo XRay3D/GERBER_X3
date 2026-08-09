@@ -14,7 +14,7 @@
 #include "gi_drill.h"
 #include "gi_point.h"
 #include "gridtick.h"
-#include "myclipper.h"
+
 #include "project.h"
 #include "ruler.h"
 #include "utils.h"
@@ -546,6 +546,24 @@ void GraphicsView::dropEvent(QDropEvent* event) {
     event->accept();
 }
 
+void GraphicsView::setViewRectDeferred(QRectF rect) {
+    if(rect.isNull()) return;
+    pendingViewRect_ = rect;
+    // Следующим тактом цикла событий, а не сразу: проект грузится из
+    // loadSettings() -- до show(), -- и на этот момент viewport ещё имеет
+    // начальный размер. Раскладка досчитывается уже после показа, а очередь
+    // событий заведомо разбирается после неё.
+    QTimer::singleShot(0, this, &GraphicsView::applyPendingViewRect);
+}
+
+void GraphicsView::applyPendingViewRect() {
+    if(pendingViewRect_.isNull()) return;
+    // Без анимации: восстановление -- не переход из осмысленного вида, а
+    // установка нужного, и анимировать её не от чего.
+    QGraphicsView::fitInView(std::exchange(pendingViewRect_, {}), Qt::KeepAspectRatio);
+    updateRuler();
+}
+
 void GraphicsView::resizeEvent(QResizeEvent* event) {
     QGraphicsView::resizeEvent(event);
     updateRuler();
@@ -710,7 +728,7 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
     // Single pass over the finest grid: every 5th tick also belongs to the
     // medium grid, every 10th also to the coarse grid, so classifying by
     // index replaces the old float-hashed dedup set entirely.
-    mvector<QLineF> lines[3]; // 0 = Grid01, 1 = Grid05, 2 = Grid10
+    std::vector<QLineF> lines[3]; // 0 = Grid01, 1 = Grid05, 2 = Grid10
     const auto gridStep = App::settings().gridStep(getScale());
 
     const auto tickCountX = static_cast<size_t>(std::floor((rect.right() - rect.left()) / gridStep)) + 2;

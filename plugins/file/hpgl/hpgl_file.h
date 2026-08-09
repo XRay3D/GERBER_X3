@@ -29,7 +29,7 @@ class LayerModel;
 class NodeLayer;
 struct SectionParser;
 
-class File : public AbstractFile, public mvector<GraphicObject> {
+class File : public AbstractFile, public std::vector<GraphicObject> {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Plugin;

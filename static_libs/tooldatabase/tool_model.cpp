@@ -190,9 +190,9 @@ bool ToolModel::dropMimeData(const QMimeData* data, Qt::DropAction action, int r
         beginRow = rowCount(QModelIndex());
 
     QString encodedData = QString::fromUtf8(data->data(mimeType)); // FIXME
-    QStringList list    = encodedData.split(u'|', Qt::SkipEmptyParts);
+    QStringList list = encodedData.split(u'|', Qt::SkipEmptyParts);
     for(QString& item: list) {
-        ToolItem* copyItem   = reinterpret_cast<ToolItem*>(item.toLongLong());
+        ToolItem* copyItem = reinterpret_cast<ToolItem*>(item.toLongLong());
         ToolItem* parentItem = static_cast<ToolItem*>(parent.internalPointer());
         if(copyItem) {
             if(!parentItem)
@@ -251,7 +251,7 @@ void ToolModel::saveTools() {
                 treeNode[u"note"_s] = item->note();
             }
             treeNode[u"tool"_s] = item->isTool();
-            treeNode[u"tab"_s]  = row.size() - 1;
+            treeNode[u"tab"_s] = row.size() - 1;
             treeArray.push_back(treeNode);
             if(item->childCount()) {
                 stack.push_back(item);
@@ -291,7 +291,7 @@ void ToolModel::loadTools() {
     for(int treelIndex{}; treelIndex < treeArray.size(); ++treelIndex) {
 
         QJsonObject json = treeArray[treelIndex].toObject();
-        int nesting      = json[u"tab"_s].toInt();
+        int nesting = json[u"tab"_s].toInt();
 
         if(nesting > nestingStack.last()) {
             // The last child of the current parent is now the new parent unless the current parent has no children.

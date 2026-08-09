@@ -82,24 +82,32 @@ void Item::setPenColorPtr(const QColor* penColor) {
     colorChanged();
 }
 
-Curves Item::curves(int param) const {
-    Curves curves{curves_};
-    if(param) return curves;
-    auto tr = transform();
-    if(!tr.isIdentity())
-        r::for_each(curves, std::bind(TransformCurve, _1, std::move(tr)));
-    return curves;
+Geo::Polylines Item::curves(int param) const {
+    Geo::Polylines curves{curves_};
+    if(param) return curves; // сырые, в системе координат самого элемента
+    return Geo::transform(curves, transform());
 }
 
-void Item::setCurves(Curves curves, int /*param*/) {
-    curves_ = std::move(curves);
+Geo::Polygons Item::region() const {
+    // У элемента, который хранит только контуры, вложенность и правда выражена
+    // их ориентацией -- других сведений о ней просто нет. Тем, у кого регион
+    // есть (DataFill), метод переопределён и отдаёт его точно.
+    return Geo::Polygons{curves()};
+}
+
+void Item::setCurves(Geo::Polylines curves, int /*param*/) {
     bool ok{};
     auto tr = transform().inverted(&ok);
-    if(ok) {
-        r::for_each(curves_, std::bind(TransformCurve, _1, std::move(tr)));
-    } else
+    if(ok)
+        // Хранятся контуры в своей системе координат, а приходят в сценовой --
+        // отсюда обратное преобразование, парное тому, что делает curves().
+        Geo::transform(curves, tr);
+    else
         qCritical("transform().inverted(&ok); ok is false!!!");
-    shape_ = toPPath(curves_);
+
+    shape_ = Geo::toPath(curves);
+    curves_ = std::move(curves);
+
     redraw();
 }
 
@@ -167,7 +175,7 @@ std::optional<QPainterPath> Item::updateArrows() {
     QPainterPath arrows;
 
     using QPP = QPainterPath;
-    using El = QPP::Element;
+    using El  = QPP::Element;
 
     const double length = std::clamp(30 * scar, 0.0, 0.5);
 

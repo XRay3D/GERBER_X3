@@ -13,7 +13,6 @@
 #include "datastream.h"
 // #include "dxf_entity.h"
 #include "plugintypes.h"
-#include <myclipper.h>
 
 namespace Dxf {
 
@@ -37,7 +36,7 @@ class DxfGo final : public ::GraphicObject {
 
 public:
     DxfGo() = default;
-    DxfGo(int entityId,  Curve&& path,  Curves&& paths = {});
+    DxfGo(int entityId, Geo::Polyline&& path, Geo::Polygon&& paths = {});
 
     void setRotation(double rotationAngle);
     double rotationAngle() const;

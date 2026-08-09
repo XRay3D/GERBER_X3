@@ -10,7 +10,7 @@
  ********************************************************************************/
 #pragma once
 
-#include "curve.h"
+#include "geo/polygon.h"
 #include <QJSValue>
 #include <QObject>
 
@@ -22,6 +22,16 @@ class File;
 
 class GcFileProxy : public QObject {
     Q_OBJECT
+
+    // Инструмент целиком, полями как они лежат в Tool: name, note, angle,
+    // diameter, feedRate, oneTurnCut, passDepth, plungeRate, spindleSpeed,
+    // stepover, lenght, id, type, autoName. Список берётся рефлексией, так что
+    // новое поле у Tool появляется здесь само.
+    //
+    // Это СЫРЫЕ поля, и они не заменяют свойства ниже: toolDiameter -- это
+    // эффективный диаметр на глубине (у гравера конус), а threadPitch и
+    // threadHoleDiam -- переиспользованные passDepth и angle.
+    Q_PROPERTY(QJSValue tool READ toolObject CONSTANT)
 
     // Tool and feed properties
     Q_PROPERTY(bool laser READ laser CONSTANT)
@@ -36,14 +46,15 @@ class GcFileProxy : public QObject {
     Q_PROPERTY(QString strSpindle READ strSpindle CONSTANT)
 
     // Threading (Tool::ThreadMill) properties
-    Q_PROPERTY(bool inside READ inside CONSTANT)     // true: internal thread (hole), false: external thread (rod)
-    Q_PROPERTY(bool climb READ climb CONSTANT)       // true: climb milling, false: conventional milling
-    Q_PROPERTY(bool leftHand READ leftHand CONSTANT) // true: left-hand thread
+    Q_PROPERTY(bool inside READ inside CONSTANT)                   // true: internal thread (hole), false: external thread (rod)
+    Q_PROPERTY(bool climb READ climb CONSTANT)                     // true: climb milling, false: conventional milling
+    Q_PROPERTY(bool leftHand READ leftHand CONSTANT)               // true: left-hand thread
     Q_PROPERTY(double threadPitch READ threadPitch CONSTANT)       // Tool::passDepth() repurposed as thread pitch P
     Q_PROPERTY(double threadHoleDiam READ threadHoleDiam CONSTANT) // Tool::holeDiam(), pre-machined hole/rod diameter m
-    Q_PROPERTY(bool circle READ circle CONSTANT)   // add a full circle pass at thread bottom
-    Q_PROPERTY(bool chamfer READ chamfer CONSTANT) // cut a chamfer with the thread mill after threading
-    Q_PROPERTY(int starts READ starts CONSTANT)    // number of thread starts N (multi-start thread)
+    Q_PROPERTY(bool spiralRamp READ spiralRamp CONSTANT)           // ramp down along the contour instead of plunging
+    Q_PROPERTY(bool circle READ circle CONSTANT)                   // add a full circle pass at thread bottom
+    Q_PROPERTY(bool chamfer READ chamfer CONSTANT)                 // cut a chamfer with the thread mill after threading
+    Q_PROPERTY(int starts READ starts CONSTANT)                    // number of thread starts N (multi-start thread)
 
     // Project settings
     Q_PROPERTY(double safeZ READ safeZ CONSTANT)
@@ -62,7 +73,9 @@ class GcFileProxy : public QObject {
 public:
     explicit GcFileProxy(File* file, QJSEngine* engine, QObject* parent = nullptr);
 
+    QJSValue toolObject() const;
     bool laser() const;
+    bool spiralRamp() const;
     double toolDiameter() const;
     double toolLength() const;
     double toolOneTurnCut() const;
@@ -94,7 +107,7 @@ public:
 
     // Return all tool paths transformed for tile offset (ox, oy).
     // Result: array[pathssIdx][pathIdx][vertexIdx] = {x, y, type, cx, cy}
-    // Each inner array also has .closed (bool) and .perimetr (double) properties.
+    // Each inner array also has .closed (bool) and .perimeter (double) properties.
     Q_INVOKABLE QJSValue getToolPaths(double ox, double oy);
 
     // Return array of cut depths (negative values, deepest last).
@@ -110,11 +123,11 @@ public:
     Q_INVOKABLE void addLine(const QString& line);
 
     // Generate gcode lines for one curve from the last getToolPaths() result.
-    // pathssIdx / pathIdx select the Curvess[i][j] curve.
+    // pathssIdx / pathIdx select the Geo::Polygons[i][j] curve.
     // reversed = true uses the curve in reverse direction (zigzag alternate pass).
-    // perimetr > 0 && depth != 0 enables spiral ramp; otherwise flat cut.
+    // perimeter > 0 && depth != 0 enables spiral ramp; otherwise flat cut.
     // Returns JS array of strings.
-    Q_INVOKABLE QJSValue savePathLines(int pathssIdx, int pathIdx, bool reversed, double perimetr, double depth);
+    Q_INVOKABLE QJSValue savePathLines(int pathssIdx, int pathIdx, bool reversed, double perimeter, double depth);
 
     // Format a list of gcode tokens, suppressing unchanged values per format flags.
     // parts: JS array of strings such as [g0(), fmtX(1.0), fmtY(2.0)].
@@ -135,7 +148,7 @@ public:
 private:
     File* file_;
     QJSEngine* engine_;
-    Curvess cachedPathss_;
+    std::vector<Geo::Polylines> cachedPathss_;
 };
 
 } // namespace GCode

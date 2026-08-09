@@ -16,6 +16,8 @@
 #include <QtQml/QJSEngine>
 #include <QtQml/QJSValue>
 
+using namespace std::numbers;
+
 namespace Gerber {
 
 QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture) {
@@ -41,39 +43,42 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
 AbstractAperture::AbstractAperture(const File* file)
     : file_{file} { }
 
-Paths64 AbstractAperture::draw(const State& state, bool notApBlock) {
+Geo::Polygons AbstractAperture::draw(const State& state, bool notApBlock) {
     if(state.dCode() == D03 && state.imgPolarity() == Positive && notApBlock)
         isFlashed_ = true;
 
     if(paths_.empty())
         draw();
 
-    Paths64 retPaths(paths_);
+    Geo::Polygons retPaths{paths_};
 
-    for(Path64& path: retPaths) {
-        if(state.imgPolarity() == Negative)
-            ReversePath(path);
+    // Апертура нарисована один раз в своей системе координат; здесь она лишь
+    // переносится в точку вспышки с поправками кадра. Методы QTransform
+    // домножают справа, поэтому записанное ПОЗЖЕ применяется к точке РАНЬШЕ --
+    // отсюда обратный порядок: сначала дюймы, потом зеркало с масштабом,
+    // поворот и лишь затем перенос.
+    QTransform m;
 
-        if(file_->format().unitMode == Inches && type() == Macro)
-            path *= 25.4;
+    if(!state.curPos().isNull())
+        m.translate(state.curPos().x(), state.curPos().y());
 
-        QTransform m;
+    if(!qFuzzyIsNull(state.rotating()))
+        m.rotate(state.rotating());
 
-        if(state.curPos().x || state.curPos().y)
-            m.translate(
-                dScale * state.curPos().x,
-                dScale * state.curPos().y);
+    if(!qFuzzyCompare(state.scaling(), 1.0) || state.mirroring())
+        m.scale(
+            state.mirroring() & X_Mirroring ? -state.scaling() : state.scaling(),
+            state.mirroring() & Y_Mirroring ? -state.scaling() : state.scaling());
 
-        if(!qFuzzyIsNull(state.rotating()))
-            m.rotate(state.rotating());
+    // Модификаторы макроса задаются в единицах файла, а тело апертуры мы держим
+    // в миллиметрах: дюймовый файл приводится здесь.
+    if(file_->format().unitMode == Inches && type() == Macro)
+        m.scale(25.4, 25.4);
 
-        if(!qFuzzyCompare(state.scaling(), 1.0) || state.mirroring())
-            m.scale(
-                state.mirroring() & X_Mirroring ? -state.scaling() : state.scaling(),
-                state.mirroring() & Y_Mirroring ? -state.scaling() : state.scaling());
-
-        if(m.type()) TransformPath(path, m);
-    }
+    // Полярность здесь НЕ применяется: она живёт в state графического объекта,
+    // и вычитание отрицательных вспышек делает слой при слиянии (File::merge).
+    // Прежний разворот контуров выражал то же самое в плоском списке.
+    if(m.type()) retPaths = Geo::transformed(retPaths, m);
 
     return retPaths;
 }
@@ -84,15 +89,11 @@ double AbstractAperture::size() {
     return size_;
 }
 
-Path64 AbstractAperture::drawDrill(const State& state) {
+// Тело отверстия, а не пустота: разворачивать контур незачем, вызывающий
+// вычитает его из апертуры сам (см. Parser::addFlash).
+Geo::Polyline AbstractAperture::drawDrill(const State& state) {
     if(qFuzzyIsNull(drillDiam_)) return {};
-
-    Path64 drill = CirclePath(drillDiam_ * uScale);
-
-    if(state.imgPolarity() == Positive) ReversePath(drill);
-
-    TranslatePath(drill, state.curPos());
-    return drill;
+    return Geo::circle(drillDiam_, state.curPos());
 }
 
 /////////////////////////////////////////////////////
@@ -132,7 +133,7 @@ void ApCircle::write(QDataStream& stream) const {
 }
 
 void ApCircle::draw() {
-    paths_.emplace_back(CirclePath(diam_ * uScale));
+    paths_   = Geo::Polygons{Geo::Polylines{Geo::circle(diam_)}};
     minSize_ = size_ = diam_;
 }
 
@@ -182,7 +183,7 @@ void ApRectangle::write(QDataStream& stream) const {
 }
 
 void ApRectangle::draw() {
-    paths_.emplace_back(RectanglePath(width_ * uScale, height_ * uScale));
+    paths_   = Geo::Polygons{Geo::Polylines{Geo::rectangle(width_, height_)}};
     size_    = std::sqrt(width_ * width_ + height_ * height_);
     minSize_ = std::min(width_, height_);
 }
@@ -227,31 +228,10 @@ void ApObround::write(QDataStream& stream) const {
 }
 
 void ApObround::draw() {
-    cl::Clipper64 clipper;
-    const /*PType*/ int32_t h = static_cast</*PType*/ int32_t>(height_ * uScale);
-    const /*PType*/ int32_t w = static_cast</*PType*/ int32_t>(width_ * uScale);
-    if(qFuzzyCompare(w + 1.0, h + 1.0)) {
-        paths_.emplace_back(CirclePath(w));
+    if(qFuzzyCompare(width_, height_)) {
+        paths_ = Geo::Polygons{Geo::Polylines{Geo::circle(width_)}};
     } else {
-        if(w > h) {
-            clipper.AddSubject({//
-                CirclePath(h, Point64(-(w - h) / 2., 0.)),
-                CirclePath(h, Point64((w - h) / 2., 0.)),
-                RectanglePath(w - h, h)});
-            // clipper.AddPath(CirclePath(h, Point64(-(w - h) / 2, 0)), PathType::Clip, true);
-            // clipper.AddPath(c PathType::Clip, true);
-            // clipper.AddPath(RectanglePath(w - h, h), PathType::Clip, true);
-        } else if(w < h) {
-            clipper.AddSubject({//
-                CirclePath(w, Point64(0., -(h - w) / 2.)),
-                CirclePath(w, Point64(0., (h - w) / 2.)),
-                RectanglePath(w, h - w)});
-            // clipper.AddPath(CirclePath(w, Point64(0, -(h - w) / 2)), PathType::Clip, true);
-            // clipper.AddPath(CirclePath(w, Point64(0, (h - w) / 2)), PathType::Clip, true);
-            // clipper.AddPath(RectanglePath(w, h - w), PathType::Clip, true);
-        }
-        // clipper.Execute(ClipType::Union, paths_, FillRule::NonZero, FillRule::NonZero);
-        clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths_);
+        paths_ = Geo::Polygons{Geo::Polylines{Geo::obround(width_, height_)}};
     }
     size_    = std::max(height_, width_);
     minSize_ = std::min(width_, height_);
@@ -305,16 +285,18 @@ void ApPolygon::write(QDataStream& stream) const {
 }
 
 void ApPolygon::draw() {
-    Path64 polygon;
+    Geo::Polyline polygon;
     const double step = 360.0 / verticesCount_;
-    const double diam = diam_ * uScale;
-    for(int i{}; i < verticesCount_; ++i)
-        polygon.emplace_back(Point64(
-            static_cast</*PType*/ int32_t>(qCos(qDegreesToRadians(step * i)) * diam * 0.5),
-            static_cast</*PType*/ int32_t>(qSin(qDegreesToRadians(step * i)) * diam * 0.5)));
-    if(rotation_ > 0.1) RotatePath(polygon, rotation_);
-    r::for_each(polygon, SetCSelf);
-    paths_.push_back(polygon);
+    const double diam = diam_;
+    for(int i: v::iota(0, verticesCount_))
+        polygon.emplace_back(
+            std::cos(qDegreesToRadians(step * i)) * diam * 0.5,
+            std::sin(qDegreesToRadians(step * i)) * diam * 0.5);
+    if(!qFuzzyIsNull(rotation_)) rotate(polygon, rotation_);
+    // Замкнутость -- ФЛАГ, и без него точный домен контур просто не возьмёт
+    // (Polygons отбрасывает незамкнутые), а апертура пропадёт из слоя.
+    polygon.close();
+    paths_   = Geo::Polygons{Geo::Polylines{polygon}};
     minSize_ = size_ = diam_;
 }
 
@@ -372,7 +354,7 @@ void ApMacro::draw() {
     };
 
     VarMap macroCoefficients{coefficients_};
-    using pair = std::pair<bool, Path64>;
+    using pair = std::pair<bool, Geo::Polyline>;
     std::vector<pair> items;
     try {
         // for (int i{}; i < modifiers_.size(); ++i) {
@@ -385,7 +367,7 @@ void ApMacro::draw() {
             if(var.at(0) == u'0') // Skip Comment
                 continue;
 
-            mvector<double> mod;
+            std::vector<double> mod;
 
             if(var.contains(u'=')) {
                 QStringList stringList = var.split(u'=');
@@ -411,7 +393,7 @@ void ApMacro::draw() {
                 continue;
 
             const bool exposure = !qFuzzyIsNull(mod[1]);
-            Path64 path;
+            Geo::Polyline path;
 
             switch(static_cast<int>(mod[0])) {
             case Comment:
@@ -429,11 +411,11 @@ void ApMacro::draw() {
             case CenterLine: path = drawCenterLine(mod); break;
             }
 
-            const double area = Area(path);
-            if(area < 0 && exposure)
-                ReversePath(path);
-            else if(area > 0 && !exposure)
-                ReversePath(path);
+            // Все примитивы копим ТЕЛАМИ, обходом против часовой стрелки:
+            // добавляет примитив материал или вычитает, говорит exposure, а не
+            // ориентация контура. В точном домене это разные вещи.
+            if(path.size() > 2 && !path.isPositive())
+                path.reverse();
 
             items.emplace_back(exposure, path);
         }
@@ -442,32 +424,31 @@ void ApMacro::draw() {
         throw u"Macro draw error"_s;
     }
 
-    if(items.size() > 1) {
-        constexpr auto sameExp = +[](pair& l, pair& r) { return l.first == r.first; };
-        constexpr std::array CT{cl::ClipType::Difference, cl::ClipType::Union};
-        for(auto&& item: v::chunk_by(items, sameExp)) {
-            Paths64 clip{std::from_range, v::transform(item, &pair::second)};
-            bool fl = item.front().first;
-            paths_  = cl::BooleanOp(CT[fl], cl::FillRule::NonZero, paths_, clip);
-        }
-    } else
-        paths_.push_back(items.front().second);
+    if(items.empty()) return;
 
-    /// ReversePaths(paths_);
-    /// normalize(paths_);
+    // Примитивы накладываются по порядку: exposure == 1 добавляет материал,
+    // exposure == 0 вычитает. Идущие подряд с одинаковым знаком собираются
+    // пачкой -- одна булева операция вместо цепочки из стольких же.
+    constexpr auto sameExp = +[](const pair& l, const pair& r) { return l.first == r.first; };
+    for(auto&& chunk: v::chunk_by(items, sameExp)) {
+        Geo::Polylines contours{std::from_range, v::transform(chunk, &pair::second)};
+        const Geo::Polygons part{contours};
+        if(chunk.front().first)
+            paths_ |= part;
+        else
+            paths_ -= part;
+    }
 
     {
-        auto rect = GetBounds(paths_);
-        rect.right -= rect.left;
-        rect.top -= rect.bottom;
-        const double x = rect.right * dScale;
-        const double y = rect.top * dScale;
+        auto rect      = paths_.boundingRect();
+        const double x = rect.width();
+        const double y = rect.height();
         size_          = std::sqrt(x * x + y * y);
         minSize_       = std::min(x, y);
     }
 }
 
-Path64 ApMacro::drawCenterLine(const mvector<double>& mod) {
+Geo::Polyline ApMacro::drawCenterLine(const std::vector<double>& mod) {
     enum {
         Width = 2,
         Height,
@@ -476,19 +457,19 @@ Path64 ApMacro::drawCenterLine(const mvector<double>& mod) {
         RotationAngle
     };
 
-    const Point64 center(
-        static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[CenterY] * uScale));
+    const QPointF center(
+        mod[CenterX],
+        mod[CenterY]);
 
-    Path64 polygon = RectanglePath(mod[Width] * uScale, mod[Height] * uScale, center);
+    Geo::Polyline polygon = Geo::rectangle(mod[Width], mod[Height], center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        Geo::rotate(polygon, mod[RotationAngle]);
 
     return polygon;
 }
 
-Path64 ApMacro::drawCircle(const mvector<double>& mod) {
+Geo::Polyline ApMacro::drawCircle(const std::vector<double>& mod) {
     enum {
         Diameter = 2,
         CenterX,
@@ -496,19 +477,17 @@ Path64 ApMacro::drawCircle(const mvector<double>& mod) {
         RotationAngle
     };
 
-    const Point64 center(
-        static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[CenterY] * uScale));
+    const QPointF center(mod[CenterX], mod[CenterY]);
 
-    Path64 polygon = CirclePath(mod[Diameter] * uScale, center);
+    Geo::Polyline polygon = Geo::circle(mod[Diameter], center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        Geo::rotate(polygon, mod[RotationAngle]);
 
     return polygon;
 }
 
-void ApMacro::drawMoire(const mvector<double>& mod) {
+void ApMacro::drawMoire(const std::vector<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -521,42 +500,45 @@ void ApMacro::drawMoire(const mvector<double>& mod) {
         RotationAngle,
     };
 
-    /*PType*/ int32_t diameter        = static_cast</*PType*/ int32_t>(mod[Diameter] * uScale);
-    const /*PType*/ int32_t thickness = static_cast</*PType*/ int32_t>(mod[Thickness] * uScale);
-    const /*PType*/ int32_t gap       = static_cast</*PType*/ int32_t>(mod[Gap] * uScale);
-    const /*PType*/ int32_t ct        = static_cast</*PType*/ int32_t>(mod[CrossThickness] * uScale);
-    const /*PType*/ int32_t cl        = static_cast</*PType*/ int32_t>(mod[CrossLength] * uScale);
+    double diameter        = mod[Diameter];
+    const double thickness = mod[Thickness];
+    const double gap       = mod[Gap];
+    const double ct        = mod[CrossThickness];
+    const double cl        = mod[CrossLength];
 
-    const Point64 center(
-        static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[CenterY] * uScale));
+    const QPointF center(
+        mod[CenterX],
+        mod[CenterY]);
 
-    {
-        cl::Clipper64 clipper;
-        if(thickness && gap) {
-            for(int num{}; num < mod[NumberOfRings]; ++num) {
-                clipper.AddClip({CirclePath(diameter)});
-                diameter -= thickness * 2;
-                Path64 polygon(CirclePath(diameter));
-                ReversePath(polygon);
-                clipper.AddClip({polygon});
-                diameter -= gap * 2;
-            }
+    Geo::Polygons moire;
+
+    // Кольца: каждое -- разность двух окружностей, следующее меньше на две
+    // толщины и два зазора. Прежде кольцо собиралось из внешней окружности и
+    // развёрнутой внутренней в общей куче; теперь это прямая разность.
+    if(thickness > 0.0 && gap > 0.0)
+        for(int num{}; num < mod[NumberOfRings] && diameter > 0.0; ++num) {
+            Geo::Polygons ring{Geo::Polylines{Geo::circle(diameter)}};
+            diameter -= thickness * 2;
+            if(diameter > 0.0)
+                ring -= Geo::Polygons{Geo::Polylines{Geo::circle(diameter)}};
+            moire |= ring;
+            diameter -= gap * 2;
         }
-        if(cl && ct)
-            clipper.AddClip({RectanglePath(cl, ct), RectanglePath(ct, cl)});
-        clipper.Execute(cl::ClipType::Union, cl::FillRule::Positive, paths_);
-    }
 
-    for(Path64& path: paths_)
-        TranslatePath(path, center);
+    if(cl > 0.0 && ct > 0.0) // перекрестье -- два прямоугольника внахлёст
+        moire |= Geo::Polygons{Geo::Polylines{Geo::rectangle(cl, ct), Geo::rectangle(ct, cl)}};
 
+    // Поворот -- вокруг начала координат макроса, уже ПОСЛЕ сдвига в центр
+    // примитива. QTransform домножает справа, так что записывается наоборот.
+    QTransform m;
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        for(Path64& path: paths_)
-            RotatePath(path, mod[RotationAngle]);
+        m.rotate(mod[RotationAngle]);
+    m.translate(center.x(), center.y());
+
+    paths_ = m.type() ? Geo::transformed(moire, m) : moire;
 }
 
-Path64 ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
+Geo::Polyline ApMacro::drawOutlineCustomPolygon(const std::vector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         X,
@@ -565,19 +547,21 @@ Path64 ApMacro::drawOutlineCustomPolygon(const mvector<double>& mod) {
 
     const size_t num = mod[NumberOfVertices];
 
-    Path64 polygon;
-    for(size_t j{}; j < num; ++j)
-        polygon.emplace_back(Point64(
-            static_cast</*PType*/ int32_t>(mod[X + j * 2] * uScale),
-            static_cast</*PType*/ int32_t>(mod[Y + j * 2] * uScale)));
-    r::for_each(polygon, SetCSelf);
+    Geo::Polyline polygon;
+    for(size_t j: v::iota(0u, num))
+        polygon.emplace_back(mod[X + j * 2], mod[Y + j * 2]);
     if(mod.size() > (num * 2u + 3u) && mod.back() > 0)
-        RotatePath(polygon, mod.back());
+        Geo::rotate(polygon, mod.back());
+
+    // Контур примитива 4 по спецификации приходит с повтором первой точки в
+    // конце; close() снимает повтор и ставит флаг -- без него точный домен
+    // контур отбросит, а signedArea() и вовсе нарушит контракт.
+    polygon.close();
 
     return polygon;
 }
 
-Path64 ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
+Geo::Polyline ApMacro::drawOutlineRegularPolygon(const std::vector<double>& mod) {
     enum {
         NumberOfVertices = 2,
         CenterX,
@@ -590,29 +574,31 @@ Path64 ApMacro::drawOutlineRegularPolygon(const mvector<double>& mod) {
     if(3 > num || num > 12)
         throw GbrObj::tr("Bad outline (regular polygon) macro!");
 
-    const /*PType*/ int32_t diameter = static_cast</*PType*/ int32_t>(mod[Diameter] * uScale * 0.5);
-    const Point64 center(
-        static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[CenterY] * uScale));
+    // Именно double: радиус здесь в миллиметрах, и целочисленный тип,
+    // оставшийся от uScale, обращал любой реальный многоугольник в точку.
+    const double radius = mod[Diameter] * 0.5;
+    const QPointF center(
+        mod[CenterX],
+        mod[CenterY]);
 
-    Path64 polygon;
+    Geo::Polyline polygon;
     for(int j{}; j < num; ++j) {
         auto angle = qDegreesToRadians(j * 360.0 / num);
-        polygon.emplace_back(Point64(
-            static_cast</*PType*/ int32_t>(qCos(angle) * diameter),
-            static_cast</*PType*/ int32_t>(qSin(angle) * diameter)));
+        polygon.emplace_back(QPointF(
+            qCos(angle) * radius,
+            qSin(angle) * radius));
     }
-    r::for_each(polygon, SetCSelf);
+    polygon.close();
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        Geo::rotate(polygon, mod[RotationAngle]);
 
-    TranslatePath(polygon, center);
+    Geo::translate(polygon, center);
 
     return polygon;
 }
 
-void ApMacro::drawThermal(const mvector<double>& mod) {
+void ApMacro::drawThermal(const std::vector<double>& mod) {
     enum {
         CenterX = 1,
         CenterY,
@@ -625,34 +611,33 @@ void ApMacro::drawThermal(const mvector<double>& mod) {
     if(mod[OuterDiameter] <= mod[InnerDiameter] || mod[InnerDiameter] < 0.0 || mod[GapThickness] >= (mod[OuterDiameter] / qPow(2.0, 0.5)))
         throw GbrObj::tr("Bad thermal macro!");
 
-    const /*PType*/ int32_t outer = static_cast</*PType*/ int32_t>(mod[OuterDiameter] * uScale);
-    const /*PType*/ int32_t inner = static_cast</*PType*/ int32_t>(mod[InnerDiameter] * uScale);
-    const /*PType*/ int32_t gap   = static_cast</*PType*/ int32_t>(mod[GapThickness] * uScale);
+    // Именно double: диаметры здесь в миллиметрах, и целочисленный тип,
+    // оставшийся от uScale, обращал термал в 1 мм на любом реальном размере.
+    const double outer = mod[OuterDiameter];
+    const double inner = mod[InnerDiameter];
+    const double gap   = mod[GapThickness];
 
-    const Point64 center(
-        static_cast</*PType*/ int32_t>(mod[CenterX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[CenterY] * uScale));
+    const QPointF center(
+        mod[CenterX],
+        mod[CenterY]);
 
-    {
-        cl::Clipper64 clipper;
-        clipper.AddSubject({CirclePath(outer)});
-        clipper.AddClip({CirclePath(inner), RectanglePath(gap, outer), RectanglePath(outer, gap)});
-        // clipper.AddPath(CirclePath(outer), PathType::Subject, true);
-        // clipper.AddPath(CirclePath(inner), PathType::Clip, true);
-        // clipper.AddPath(RectanglePath(gap, outer), PathType::Clip, true);
-        // clipper.AddPath(RectanglePath(outer, gap), PathType::Clip, true);
-        clipper.Execute(cl::ClipType::Difference, cl::FillRule::NonZero, paths_);
-    }
+    // Термал -- кольцо, разрезанное крестом на четыре сектора: из внешней
+    // окружности вычитается внутренняя и две полосы перекрестья.
+    Geo::Polygons thermal{Geo::Polylines{Geo::circle(outer)}};
+    thermal -= Geo::Polygons{Geo::Polylines{Geo::circle(inner)}};
+    thermal -= Geo::Polygons{Geo::Polylines{Geo::rectangle(gap, outer), Geo::rectangle(outer, gap)}};
 
-    for(Path64& path: paths_)
-        TranslatePath(path, center);
-
+    // Как и у moire: сдвиг в центр примитива, затем поворот вокруг начала
+    // координат макроса -- в записи QTransform обратным порядком.
+    QTransform m;
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        for(Path64& path: paths_)
-            RotatePath(path, mod[RotationAngle]);
+        m.rotate(mod[RotationAngle]);
+    m.translate(center.x(), center.y());
+
+    paths_ = m.type() ? Geo::transformed(thermal, m) : thermal;
 }
 
-Path64 ApMacro::drawVectorLine(const mvector<double>& mod) {
+Geo::Polyline ApMacro::drawVectorLine(const std::vector<double>& mod) {
     enum {
         Width = 2,
         StartX,
@@ -662,23 +647,23 @@ Path64 ApMacro::drawVectorLine(const mvector<double>& mod) {
         RotationAngle,
     };
 
-    const Point64 start(
-        static_cast</*PType*/ int32_t>(mod[StartX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[StartY] * uScale));
-    const Point64 end(
-        static_cast</*PType*/ int32_t>(mod[EndX] * uScale),
-        static_cast</*PType*/ int32_t>(mod[EndY] * uScale));
-    const Point64 center(
-        static_cast</*PType*/ int32_t>(0.5 * start.x + 0.5 * end.x),
-        static_cast</*PType*/ int32_t>(0.5 * start.y + 0.5 * end.y));
+    const QPointF start(
+        mod[StartX],
+        mod[StartY]);
+    const QPointF end(
+        mod[EndX],
+        mod[EndY]);
+    const QPointF center(
+        0.5 * start.x() + 0.5 * end.x(),
+        0.5 * start.y() + 0.5 * end.y());
 
-    Path64 polygon = RectanglePath(distTo(start, end), mod[Width] * uScale);
-    double angle = 180 - (angleTo(start, end) - 360); // FIXME ???
-    RotatePath(polygon, angle);
-    TranslatePath(polygon, center);
+    Geo::Polyline polygon = Geo::rectangle(Geo::distance(start, end), mod[Width]);
+    double angle          = 180 - (Geo::angleTo(start, end) - 360); // FIXME ???
+    Geo::rotate(polygon, angle);
+    Geo::translate(polygon, center);
 
     if(mod.size() > RotationAngle && mod[RotationAngle] != 0.0)
-        RotatePath(polygon, mod[RotationAngle]);
+        Geo::rotate(polygon, mod[RotationAngle]);
 
     return polygon;
 }
@@ -710,32 +695,28 @@ void ApBlock::write(QDataStream& stream) const {
 }
 
 void ApBlock::draw() {
-    paths_.clear();
-    int i{};
-    while(i < V::size()) {
-        cl::Clipper64 clipper; //(ioStrictlySimple);
-        clipper.AddSubject(paths_);
-        const int exp = at(i).state.imgPolarity();
-        do {
-            clipper.AddClip(toPaths(at(i++).fill));
-        } while(i < V::size() && exp == at(i).state.imgPolarity());
-        if(at(i - 1).state.imgPolarity() == Positive)
-            clipper.Execute(cl::ClipType::Union, cl::FillRule::Positive, paths_);
+
+    paths_ = {};
+
+    // Блок -- последовательность вспышек со своей полярностью: положительные
+    // добавляют материал, отрицательные вычитают. Идущие подряд с одинаковой
+    // полярностью собираются пачкой -- по одной булевой операции на пачку.
+    for(std::size_t i{}; i < V::size();) {
+        const auto polarity = at(i).state.imgPolarity();
+        Geo::Polygons part;
+        do
+            part |= at(i++).fill;
+        while(i < V::size() && at(i).state.imgPolarity() == polarity);
+
+        if(polarity == Positive)
+            paths_ |= part;
         else
-            clipper.Execute(cl::ClipType::Difference, cl::FillRule::NonZero, paths_);
+            paths_ -= part;
     }
-    // CleanPaths(paths_, 0.0009 * uScale);
-    {
-        cl::Clipper64 clipperBase;
-        clipperBase.AddSubject(paths_);
-        auto rect{GetBounds(paths_)};
-        rect.right -= rect.left;
-        rect.top -= rect.bottom;
-        const double x = rect.right * dScale;
-        const double y = rect.top * dScale;
-        size_          = std::sqrt(x * x + y * y);
-        minSize_       = std::min(x, y);
-    }
+
+    const QRectF rect = paths_.boundingRect();
+    size_             = std::hypot(rect.width(), rect.height());
+    minSize_          = std::min(rect.width(), rect.height());
 }
 
 } // namespace Gerber

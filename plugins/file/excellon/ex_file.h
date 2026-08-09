@@ -37,14 +37,14 @@ public:
     void createGi() override;
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
-    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
+    std::vector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
 
     QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
 
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    Curves merge() const override;
+    Geo::Polygons merge() const override;
 };
 
 } // namespace Excellon

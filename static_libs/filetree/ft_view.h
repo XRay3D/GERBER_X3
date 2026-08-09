@@ -35,13 +35,13 @@ signals:
     void saveGCodeFile(int32_t id);
     void saveGCodeFiles(); // NOTE unused
     void saveSelectedGCodeFiles();
+    void editGCodeFile(int32_t id);
 
 private:
     void updateTree();
     void updateIcons();
     Model* model_;
 
-    void on_doubleClicked(const QModelIndex& index);
     void onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected);
     int childCount_{};
     QModelIndex menuIndex_;

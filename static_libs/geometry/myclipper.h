@@ -11,7 +11,7 @@
 #pragma once
 
 // #include "cancelation.h"
-#include "mvector.h"
+
 #include "utils.h"
 #include <QDebug>
 #include <QIcon>
@@ -403,4 +403,4 @@ Pathss64& sortBeginEnd(Pathss64& src, Point64 startPt);
 
 void addArcTo(QPainterPath& pPath, QPointF source, QPointF target, double bulge);
 
-// #include "curve.h"
+// #include "geo/polygon.h"

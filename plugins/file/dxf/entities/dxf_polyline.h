@@ -58,7 +58,7 @@ struct PolyLine final : Entity {
 
     enum PolylineFlags {
         // 1 = This is a  (or a polygon mesh closed in the M direction)
-        // 2 = Curve-fit vertices have been added
+        // 2 = Geo::Polyline-fit vertices have been added
         // 4 = Spline-fit vertices have been added
         // 8 = This is a 3D polyline
         // 16 = This is a 3D polygon mesh

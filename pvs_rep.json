@@ -9874,7 +9874,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 16,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 16,
           "navigation": {
             "columns": 0,
@@ -9901,7 +9901,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 16,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 16,
           "navigation": {
             "columns": 0,
@@ -9928,7 +9928,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 19,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 19,
           "navigation": {
             "columns": 0,
@@ -9955,7 +9955,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 19,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 19,
           "navigation": {
             "columns": 0,
@@ -9982,7 +9982,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 18,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 18,
           "navigation": {
             "columns": 0,
@@ -10009,7 +10009,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 24,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 24,
           "navigation": {
             "columns": 0,
@@ -10036,7 +10036,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 24,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 24,
           "navigation": {
             "columns": 0,
@@ -10063,7 +10063,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 27,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 27,
           "navigation": {
             "columns": 0,
@@ -10090,7 +10090,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 27,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 27,
           "navigation": {
             "columns": 0,
@@ -10117,7 +10117,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 26,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 26,
           "navigation": {
             "columns": 0,
@@ -10144,7 +10144,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 31,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 31,
           "navigation": {
             "columns": 0,
@@ -10171,7 +10171,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 31,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 31,
           "navigation": {
             "columns": 0,
@@ -10198,7 +10198,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 33,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 33,
           "navigation": {
             "columns": 0,
@@ -10225,7 +10225,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 33,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 33,
           "navigation": {
             "columns": 0,
@@ -10252,7 +10252,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 36,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 36,
           "navigation": {
             "columns": 0,
@@ -10279,7 +10279,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 36,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 36,
           "navigation": {
             "columns": 0,
@@ -10306,7 +10306,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -10333,7 +10333,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -10360,7 +10360,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 30,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 30,
           "navigation": {
             "columns": 0,
@@ -10373,7 +10373,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 32,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 32
         }
       ],
@@ -10394,7 +10394,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 39,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 39,
           "navigation": {
             "columns": 0,
@@ -10421,7 +10421,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 39,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 39,
           "navigation": {
             "columns": 0,
@@ -10448,7 +10448,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 43,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 43,
           "navigation": {
             "columns": 0,
@@ -10475,7 +10475,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 43,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 43,
           "navigation": {
             "columns": 0,
@@ -10502,7 +10502,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 45,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 45,
           "navigation": {
             "columns": 0,
@@ -10529,7 +10529,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 45,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 45,
           "navigation": {
             "columns": 0,
@@ -10556,7 +10556,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 41,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 41,
           "navigation": {
             "columns": 0,
@@ -10569,14 +10569,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 44,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 44
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 46,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 46
         }
       ],
@@ -10597,7 +10597,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 51,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 51,
           "navigation": {
             "columns": 0,
@@ -10624,7 +10624,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 51,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 51,
           "navigation": {
             "columns": 0,
@@ -10651,7 +10651,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 59,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 59,
           "navigation": {
             "columns": 0,
@@ -10678,7 +10678,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 59,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 59,
           "navigation": {
             "columns": 0,
@@ -10705,7 +10705,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 57,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 57,
           "navigation": {
             "columns": 0,
@@ -10732,7 +10732,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 57,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 57,
           "navigation": {
             "columns": 0,
@@ -10759,7 +10759,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 55,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 55,
           "navigation": {
             "columns": 0,
@@ -10786,7 +10786,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 55,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 55,
           "navigation": {
             "columns": 0,
@@ -10813,7 +10813,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 62,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 62,
           "navigation": {
             "columns": 0,
@@ -10840,7 +10840,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 62,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 62,
           "navigation": {
             "columns": 0,
@@ -10867,7 +10867,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 49,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 49,
           "navigation": {
             "columns": 0,
@@ -10880,14 +10880,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 52,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 52
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 63,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 63
         }
       ],
@@ -10908,7 +10908,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 67,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 67,
           "navigation": {
             "columns": 0,
@@ -10935,7 +10935,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 67,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 67,
           "navigation": {
             "columns": 0,
@@ -10962,7 +10962,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 75,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 75,
           "navigation": {
             "columns": 0,
@@ -10989,7 +10989,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 75,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 75,
           "navigation": {
             "columns": 0,
@@ -11016,7 +11016,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 73,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 73,
           "navigation": {
             "columns": 0,
@@ -11043,7 +11043,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 73,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 73,
           "navigation": {
             "columns": 0,
@@ -11070,7 +11070,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 71,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 71,
           "navigation": {
             "columns": 0,
@@ -11097,7 +11097,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 71,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 71,
           "navigation": {
             "columns": 0,
@@ -11124,7 +11124,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 66,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 66,
           "navigation": {
             "columns": 0,
@@ -11137,14 +11137,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 68,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 68
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 77,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 77
         }
       ],
@@ -11165,7 +11165,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 82,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 82,
           "navigation": {
             "columns": 0,
@@ -11192,7 +11192,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 82,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 82,
           "navigation": {
             "columns": 0,
@@ -11219,7 +11219,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 84,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 84,
           "navigation": {
             "columns": 0,
@@ -11246,7 +11246,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 84,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 84,
           "navigation": {
             "columns": 0,
@@ -11273,7 +11273,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 80,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 80,
           "navigation": {
             "columns": 0,
@@ -11286,14 +11286,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 83,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 83
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 85,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 85
         }
       ],
@@ -11314,7 +11314,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 89,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 89,
           "navigation": {
             "columns": 0,
@@ -11341,7 +11341,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 89,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 89,
           "navigation": {
             "columns": 0,
@@ -11368,7 +11368,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 88,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 88,
           "navigation": {
             "columns": 0,
@@ -11381,14 +11381,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 90,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 90
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 91,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 91
         }
       ],
@@ -11409,7 +11409,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 112,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 112,
           "navigation": {
             "columns": 0,
@@ -11436,7 +11436,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 112,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 112,
           "navigation": {
             "columns": 0,
@@ -11463,7 +11463,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 113,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 113,
           "navigation": {
             "columns": 0,
@@ -11490,7 +11490,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 113,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 113,
           "navigation": {
             "columns": 0,
@@ -11517,7 +11517,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 117,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 117,
           "navigation": {
             "columns": 0,
@@ -11544,7 +11544,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 117,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 117,
           "navigation": {
             "columns": 0,
@@ -11571,7 +11571,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 123,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 123,
           "navigation": {
             "columns": 0,
@@ -11598,7 +11598,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 123,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 123,
           "navigation": {
             "columns": 0,
@@ -11625,7 +11625,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 140,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 140,
           "navigation": {
             "columns": 0,
@@ -11652,7 +11652,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 140,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 140,
           "navigation": {
             "columns": 0,
@@ -11679,7 +11679,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 138,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 138,
           "navigation": {
             "columns": 0,
@@ -11706,7 +11706,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 138,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 138,
           "navigation": {
             "columns": 0,
@@ -11733,7 +11733,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 137,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 137,
           "navigation": {
             "columns": 0,
@@ -11746,14 +11746,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 139,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 139
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 141,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 141
         }
       ],
@@ -11774,7 +11774,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 153,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 153,
           "navigation": {
             "columns": 0,
@@ -11801,7 +11801,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 153,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 153,
           "navigation": {
             "columns": 0,
@@ -11828,7 +11828,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 151,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 151,
           "navigation": {
             "columns": 0,
@@ -11855,7 +11855,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 151,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 151,
           "navigation": {
             "columns": 0,
@@ -11882,7 +11882,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 145,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 145,
           "navigation": {
             "columns": 0,
@@ -11895,14 +11895,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 152,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 152
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 154,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 154
         }
       ],
@@ -11923,7 +11923,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 165,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 165,
           "navigation": {
             "columns": 0,
@@ -11950,7 +11950,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 165,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 165,
           "navigation": {
             "columns": 0,
@@ -11977,7 +11977,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 163,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 163,
           "navigation": {
             "columns": 0,
@@ -12004,7 +12004,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 163,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 163,
           "navigation": {
             "columns": 0,
@@ -12031,7 +12031,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 158,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 158,
           "navigation": {
             "columns": 0,
@@ -12044,14 +12044,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 164,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 164
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 166,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 166
         }
       ],
@@ -12072,7 +12072,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 171,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 171,
           "navigation": {
             "columns": 0,
@@ -12099,7 +12099,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 171,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 171,
           "navigation": {
             "columns": 0,
@@ -12126,7 +12126,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 174,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 174,
           "navigation": {
             "columns": 0,
@@ -12153,7 +12153,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 174,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 174,
           "navigation": {
             "columns": 0,
@@ -12180,7 +12180,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 169,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 169,
           "navigation": {
             "columns": 0,
@@ -12193,14 +12193,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 172,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 172
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 175,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 175
         }
       ],
@@ -12221,7 +12221,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 179,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 179,
           "navigation": {
             "columns": 0,
@@ -12248,7 +12248,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 179,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 179,
           "navigation": {
             "columns": 0,
@@ -12275,7 +12275,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 182,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 182,
           "navigation": {
             "columns": 0,
@@ -12302,7 +12302,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 182,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 182,
           "navigation": {
             "columns": 0,
@@ -12329,7 +12329,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 178,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 178,
           "navigation": {
             "columns": 0,
@@ -12342,14 +12342,14 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 180,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 180
         },
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 183,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 183
         }
       ],
@@ -12418,13 +12418,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < unique_ptr < Node, Deleter > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < unique_ptr < Node, Deleter > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -12445,13 +12445,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < unique_ptr < Node, Deleter > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < unique_ptr < Node, Deleter > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -13099,7 +13099,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 10,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 10,
           "navigation": {
             "columns": 0,
@@ -13126,7 +13126,7 @@
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 10,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 10,
           "navigation": {
             "columns": 0,
@@ -16135,13 +16135,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Handle* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Handle* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -16162,13 +16162,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Handle* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Handle* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -19942,13 +19942,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < AbstractFileSettings* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < AbstractFileSettings* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -19969,13 +19969,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < AbstractFileSettings* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < AbstractFileSettings* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -44435,13 +44435,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Paths >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Paths >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -44462,13 +44462,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Paths >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Paths >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -47461,13 +47461,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Item* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Item* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -47488,13 +47488,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Item* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Item* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -47515,13 +47515,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < int >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < int >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -47542,13 +47542,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < int >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < int >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48433,13 +48433,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Group* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Group* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48460,13 +48460,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Group* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Group* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48487,13 +48487,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QString >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QString >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48514,13 +48514,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QString >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QString >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48541,13 +48541,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < const GraphicObject* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < const GraphicObject* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48568,13 +48568,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < const GraphicObject* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < const GraphicObject* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48595,13 +48595,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < GraphicObject >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < GraphicObject >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -48622,13 +48622,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < GraphicObject >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < GraphicObject >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -60929,13 +60929,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < AbstractFile* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < AbstractFile* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -60956,13 +60956,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < AbstractFile* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < AbstractFile* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -62104,13 +62104,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < unique_ptr < Handle, default_delete < Handle > > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < unique_ptr < Handle, default_delete < Handle > > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -62131,13 +62131,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < unique_ptr < Handle, default_delete < Handle > > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < unique_ptr < Handle, default_delete < Handle > > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -62158,13 +62158,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPointF >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPointF >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -62185,13 +62185,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPointF >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPointF >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -65724,13 +65724,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Tool >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Tool >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -65751,13 +65751,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Tool >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Tool >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69621,13 +69621,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Error* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Error* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69648,13 +69648,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Error* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Error* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69729,13 +69729,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QList < QPolygonF > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QList < QPolygonF > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69756,13 +69756,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QList < QPolygonF > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QList < QPolygonF > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69783,13 +69783,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QSharedPointer < QColor > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QSharedPointer < QColor > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69810,13 +69810,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QSharedPointer < QColor > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QSharedPointer < QColor > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69837,13 +69837,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QChar >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QChar >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69864,13 +69864,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QChar >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QChar >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69891,13 +69891,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < double >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < double >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -69918,13 +69918,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < double >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < double >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -70377,13 +70377,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < enum Type >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < enum Type >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -70404,13 +70404,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < enum Type >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < enum Type >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -79837,13 +79837,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < File* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < File* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -79864,13 +79864,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < File* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < File* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -79891,13 +79891,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < File >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < File >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -79918,13 +79918,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < File >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < File >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -111987,13 +111987,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Segment >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Segment >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -112014,13 +112014,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Segment >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Segment >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -113844,13 +113844,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Edge* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Edge* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -113871,13 +113871,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Edge* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Edge* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -113898,13 +113898,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < mvector < Edge* > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < std::vector < Edge* > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -113925,13 +113925,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < mvector < Edge* > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < std::vector < Edge* > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -218831,13 +218831,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Pin >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Pin >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -218858,13 +218858,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Pin >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Pin >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -218885,13 +218885,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Supplier >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Supplier >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -218912,13 +218912,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Supplier >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Supplier >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -219182,13 +219182,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < GrObject >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < GrObject >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -219209,13 +219209,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < GrObject >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < GrObject >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -224286,13 +224286,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPair < bool, Path > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPair < bool, Path > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -224313,13 +224313,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPair < bool, Path > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPair < bool, Path > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -232253,13 +232253,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPair < QPainterPath, QPointF > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPair < QPainterPath, QPointF > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -232280,13 +232280,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPair < QPainterPath, QPointF > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPair < QPainterPath, QPointF > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -263342,13 +263342,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < pair >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < pair >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -263369,13 +263369,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < pair >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < pair >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -266452,13 +266452,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < char16_t >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < char16_t >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -266479,13 +266479,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < char16_t >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < char16_t >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -266506,13 +266506,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < enum GlobalColor >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < enum GlobalColor >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -266533,13 +266533,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < enum GlobalColor >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < enum GlobalColor >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -267979,13 +267979,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QRect >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QRect >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -268006,13 +268006,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QRect >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QRect >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -268033,13 +268033,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Preview* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Preview* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -268060,13 +268060,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Preview* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Preview* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -268087,13 +268087,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Row >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Row >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -268114,13 +268114,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Row >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Row >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -282427,13 +282427,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPushButton* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPushButton* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -282454,13 +282454,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPushButton* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPushButton* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -308344,13 +308344,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPainterPath >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPainterPath >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -308371,13 +308371,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QPainterPath >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QPainterPath >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -378991,13 +378991,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < pair < Paths, Point > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < pair < Paths, Point > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -379018,13 +379018,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < pair < Paths, Point > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < pair < Paths, Point > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -379045,13 +379045,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Node* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Node* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -379072,13 +379072,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Node* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Node* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -380964,13 +380964,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < AbstractThermPrGi* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < AbstractThermPrGi* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -380991,13 +380991,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < AbstractThermPrGi* >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < AbstractThermPrGi* >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -381207,13 +381207,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < shared_ptr < Node > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < shared_ptr < Node > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -381234,13 +381234,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < shared_ptr < Node > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < shared_ptr < Node > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -421085,13 +421085,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < shared_ptr < AbstractThermPrGi > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < shared_ptr < AbstractThermPrGi > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -421112,13 +421112,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < shared_ptr < AbstractThermPrGi > >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < shared_ptr < AbstractThermPrGi > >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -429648,13 +429648,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Pairs >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Pairs >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -429675,13 +429675,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Pairs >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Pairs >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -436244,13 +436244,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < jcv_point >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < jcv_point >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -436271,13 +436271,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < jcv_point >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < jcv_point >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -437648,13 +437648,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Pair >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Pair >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -437675,13 +437675,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < Pair >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < Pair >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -437756,13 +437756,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < OrdPath >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < OrdPath >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -437783,13 +437783,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < OrdPath >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < OrdPath >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -556239,13 +556239,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QLineF >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QLineF >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,
@@ -556266,13 +556266,13 @@
       "falseAlarm": false,
       "favorite": false,
       "level": 1,
-      "message": "Instantiation of mvector < QLineF >: The body of the 'for' statement should be enclosed in braces.",
+      "message": "Instantiation of std::vector < QLineF >: The body of the 'for' statement should be enclosed in braces.",
       "positions": [
         {
           "column": 1,
           "endColumn": 2147483647,
           "endLine": 35,
-          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/mvector.h",
+          "file": "/home/x-ray/projects/qt/GERBER_X3/static_libs/common/std::vector.h",
           "line": 35,
           "navigation": {
             "columns": 0,

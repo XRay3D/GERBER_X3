@@ -144,3 +144,16 @@ bin
 # folders
 /third_party/
 /bin/
+**/CMakeFiles/**
+
+# Вывод CMake при сборке в дереве исходников
+CMakeCache.txt
+CTestTestfile.cmake
+cmake_install.cmake
+Makefile
+
+# Кэши инструментов Qt: автомок/автоuic и lupdate
+**/*_autogen/
+**/.qt/
+**/.lupdate/
+*.qrc.depends

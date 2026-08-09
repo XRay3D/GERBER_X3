@@ -18,7 +18,7 @@
 
 ToolItem::ToolItem(const ToolItem& item) {
     if(item.id > Tool::ID{}) {
-        id      = item.id;
+        id = item.id;
         item.id = Tool::ID::Folder;
     } else {
         name_ = item.name_;

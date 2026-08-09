@@ -10,9 +10,12 @@
  ********************************************************************************/
 #pragma once
 
+#include "gc_pathutils.h"
 #include "gc_types.h"
 #include "gi_error.h"
-#include "myclipper.h"
+
+#include "geo/boolean.h"
+#include "geo/util.h"
 
 #include <QObject>
 
@@ -27,13 +30,13 @@ namespace v = r::views;
 // class Error;
 // }
 
-void dbgPaths(Paths64 ps,
+void dbgPaths(Geo::Polylines ps,
     const QString& fileName,
     QColor color = Qt::red,
     bool closed = false,
     const Tool& tool = {0.});
 
-inline void dbgPaths(Pathss64 pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
+inline void dbgPaths(std::vector<Geo::Polylines> pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
     if(pss.empty())
         return;
     for(auto&& paths: pss | v::drop(1))
@@ -58,8 +61,11 @@ public:
 
     std::pair<int, int> getProgress();
 
-    Pathss64& groupedPaths(Grouping group, /*PType*/ int32_t offset = uScale, bool skipFrame = {});
-    void grouping(Grouping group, PolyTree& node);
+    // Разбор исходного региона на тела с отверстиями. PolyTree для этого больше
+    // не нужен: Geo::Polygons и ЕСТЬ разобранная вложенность -- медь это его
+    // собственные полигоны, а вырезы -- полигоны того, что осталось от рамки
+    // после вычитания меди.
+    std::vector<Geo::Polygon>& groupedPaths(Grouping group, double margin = 1.0, bool skipFrame = {});
 
     void createGc(Params&& gcp);
 
@@ -71,12 +77,12 @@ public:
 
     QString msg;
 
-    mvector<Gi::Error*> items;
+    std::vector<Gi::Error*> items;
 
     bool checkMillingFl{};
 
 private:
-    void addRawPaths(Paths64&& paths);
+    void addRawPaths(Geo::Polylines&& paths);
 
     Params getGcp() const;
     void setGcp(const Params& gcp);
@@ -89,18 +95,11 @@ signals:
 protected:
     bool checkMilling(SideOfMilling side);
 
-    void stacking(Paths64& paths);
-
-    /////////////////////////////////////////////////
-    /// \brief склеивает пути при совпадении конечных точек
-    /// \param paths - пути
-    /// \param maxDist - максимальное расстояние между конечными точками
-    // void mergePaths(Paths& paths, const double maxDist = 0.0);
-
-    void markPolyTreeDByNesting(PolyTree& polynode);
-    void sortPolyTreeByNesting(PolyTree& polynode);
-
-    std::unordered_map<void*, int> nesting;
+    // Раскладывает замкнутые петли по группам «одна врезка -- один проход»:
+    // вложенные друг в друга петли, отстоящие не дальше диаметра инструмента,
+    // идут одной цепочкой и разворачиваются так, чтобы переезд между ними был
+    // кратчайшим. Результат -- в returnPss.
+    void stacking(Geo::Polylines& paths);
 
     virtual void create() { }             /* = 0; */
     virtual uint32_t type() { return 0; } /* = 0; */
@@ -112,16 +111,18 @@ protected:
     // static inline int //PROG progressVal_;
 
     File* file_ = nullptr;
-    Paths64 closedSrcPaths;
-    Paths64 openSrcPaths;
-    Paths64 returnPs;
-    Pathss64 returnPss;
-    Pathss64 supportPss;
-    Pathss64 groupedPss;
+    // Замкнутое -- регион в точном домене, открытое -- просто набор линий:
+    // площади у линии нет, и в CGAL ей делать нечего.
+    Geo::Polygons closedSrc;
+    Geo::Polylines openSrcPaths;
+    Geo::Polylines returnPs;
+    std::vector<Geo::Polylines> returnPss;
+    std::vector<Geo::Polylines> supportPss;
+    std::vector<Geo::Polygon> groupedPss;
 
     double toolDiameter{};
     double dOffset{};
-    /*PType*/ int32_t stepOver{};
+    double stepOver{};
     Params gcp;
 
     void isContinueCalc();

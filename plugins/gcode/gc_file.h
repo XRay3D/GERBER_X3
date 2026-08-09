@@ -42,6 +42,17 @@ protected:
     QString strSpindle;
     Params gcp; ////
 
+    // Имя, которое дал программе пользователь (текст поля Name в форме), без
+    // суффикса инструмента. Отдельно от name_, потому что тот работает на две
+    // ставки: до сохранения это метка в дереве, после save() -- путь на диске.
+    // Опираться на name_ при поиске коллизий и при восстановлении формы нельзя.
+    QString programName_;
+
+    // Видимость файлов проекта на момент расчёта: id файла -> был ли видим.
+    // Снимок, а не список использованных: восстановить надо ровно ту картину,
+    // которая была перед нажатием Create, включая погашенные файлы.
+    std::map<int32_t, bool> visibility_;
+
 public:
     File(Params&& newGcp)
         : feedRate{newGcp.feedRate()}
@@ -55,11 +66,18 @@ public:
         setSide(gcp.params[Params::FileSide]);
     }
 
-    File()           = default;
+    File() = default;
     ~File() override = default;
 
     std::vector<QString> gCodeText() const { return lines_; }
     const Tool& tool() const { return gcp.tool(); }
+    const Params& params() const { return gcp; }
+
+    const QString& programName() const { return programName_; }
+    void setProgramName(const QString& name) { programName_ = name; }
+
+    const std::map<int32_t, bool>& visibility() const { return visibility_; }
+    void setVisibility(std::map<int32_t, bool> visibility) { visibility_ = std::move(visibility); }
 
     static QString getLastDir();
     static void setLastDir(QString dirPath);
@@ -76,6 +94,7 @@ public:
 
     void initSave();
     void statFile();
+    void addSourceInfo();
     void addInfo();
     virtual void genGcodeAndTile() = 0;
     void endFile();
@@ -86,10 +105,10 @@ protected:
     void startPath(const QPointF& point);
     void endPath();
 
-    Curvess mirrorAndOffsetCurves(const QPointF& offset);
-    Curves mirrorAndOffsetCurves(const QPointF& offset, Curves paths_);
+    std::vector<Geo::Polylines> mirrorAndOffsetCurves(const QPointF& offset);
+    Geo::Polylines mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines paths_);
 
-    mvector<QSharedPointer<QColor>> debugColor;
+    std::vector<QSharedPointer<QColor>> debugColor;
 
     enum {
         AlwaysG,
@@ -113,20 +132,20 @@ protected:
         Size
     };
 
-    Curves g0path_;
+    Geo::Polylines g0path_;
     double z_{};
 
     static inline QString lastDir;
     static inline bool redirected;
     static inline constexpr auto CMD_LIST = u"GXYZIJSF"_sv;
 
-    mvector<double> getDepths();
+    std::vector<double> getDepths();
 
     bool formatFlags[Size]{};
     QString lastValues[SpaceG /*6*/];
     Code gCode_ = GNull;
 
-    std::vector<QString> savePath(const Curve& curve, double perimetr = {}, double depth = {});
+    std::vector<QString> savePath(const Geo::Polyline& curve, double perimeter = {}, double depth = {});
 
     QString formated(const std::vector<QString>& data);
 
@@ -140,8 +159,8 @@ protected:
     QString g1();
     QString g2();
     QString g3();
-    void extracted(const geo::Vertex& v);
-    QString g(const geo::Vertex& v);
+    void extracted(const Geo::Vertex& v);
+    QString g(const Geo::Vertex& v);
 
     // QString i(double val) { return u'I' + format(val); }
     // QString j(double val) { return u'J' + format(val); }
@@ -155,9 +174,12 @@ protected:
     bool runJsScript(const QString& scriptPath);
 
     // AbstractFile interfaces
-    void write(QDataStream& stream) const override { stream << gcp; }
-    void read(QDataStream& stream) override { stream >> gcp; }
-    void initFrom(AbstractFile* /*file*/) override { qWarning(__FUNCTION__); }
+    void write(QDataStream& stream) const override { stream << gcp << programName_ << visibility_; }
+    void read(QDataStream& stream) override { stream >> gcp >> programName_ >> visibility_; }
+    // initFrom не переопределяется: базовая реализация переносит ровно то, что
+    // нужно при замене УП на месте (id, узел дерева, сторону, цвет, тип, трансформ),
+    // а programName_ и visibility_ переносить как раз НЕЛЬЗЯ -- у нового файла они
+    // уже свои, выставленные формой до замены.
     // FileTree::Node* node() override;
 
     /////////////////////////////////////////////////////////////

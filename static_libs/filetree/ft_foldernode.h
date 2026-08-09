@@ -27,6 +27,8 @@ public:
     explicit FolderNode(const QString& name, int32_t id);
     ~FolderNode() override;
 
+    const QString& folderName() const { return name; }
+
     // Node interface
     QVariant data(const QModelIndex& index, int role) const override;
     Qt::ItemFlags flags(const QModelIndex& index) const override;

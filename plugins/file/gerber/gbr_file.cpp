@@ -15,6 +15,7 @@
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "graphicsview.h"
+#include <QElapsedTimer>
 #include <algorithm>
 #include <cassert>
 #include <forward_list>
@@ -73,8 +74,8 @@ File::~File() { }
 
 const ApertureMap* File::apertures() const { return &apertures_; }
 
-mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
-    mvector<GraphicObject> retData;
+std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
+    std::vector<GraphicObject> retData;
     auto t = transform_.toQTransform(); // cached  QTransform
     for(auto&& criterion: criterias) {
         for(const GrObject& go: graphicObjects_) {
@@ -107,97 +108,157 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType 
     return retData;
 }
 
-Curves File::merge() const {
+Geo::Polygons File::merge() const {
     Timer t;
-    Paths64 mergedPaths;
 
+    // Слой -- последовательность вспышек: положительные добавляют медь,
+    // отрицательные её вычитают. Идущие подряд с одинаковой полярностью
+    // собираются в одну пачку -- по булевой операции на пачку, а не на вспышку.
     constexpr auto samePolarity = +[](const GrObject& l, const GrObject& r) {
         return l.state.imgPolarity() == r.state.imgPolarity();
     };
-    constexpr std::array CT{cl::ClipType::Union, cl::ClipType::Difference};
-    constexpr std::array FR{cl::FillRule::Positive, cl::FillRule::NonZero};
-#if DEBUG && 0
-    for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity) | v::reverse) {
-        Paths64 clip{
-            std::from_range,
-            v::join(v::transform(gObjects, &GrObject::fill)
-                // | v::counted(208 - 99 - 5, 5)
-                // | v::take(5)),
-                | v::drop(208 - 99 - 5) | v::take(5)),
-        };
-        bool fl      = gObjects.front().state.imgPolarity();
-        mergedPaths = CL2::BooleanOp(CT[fl], FR[fl], mergedPaths, clip);
-        break;
-    }
+
+#if 0 // FIXME
+  auto gbgImage = [](QPainterPath&& path, QString&& out, bool hole) {
+        QRectF box = path.boundingRect();
+        if(box.isEmpty()) {
+            qWarning() << "empty path";
+            return;
+        }
+        const double margin = std::max(box.width(), box.height()) * 0.05;
+        box.adjust(-margin, -margin, margin, margin);
+
+        const int side     = qEnvironmentVariableIntValue("DUMP_SIDE") ?: 1200;
+        const double scale = side / std::max(box.width(), box.height());
+
+        QImage image{QSize(int(box.width() * scale), int(box.height() * scale)), QImage::Format_RGB32};
+        image.fill(Qt::white);
+        QPainter painter{&image};
+        painter.setRenderHint(QPainter::Antialiasing);
+        // Gerber Y goes up, raster Y goes down.
+        painter.translate(0, image.height());
+        painter.scale(scale, -scale);
+        painter.translate(-box.left(), -box.top());
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(hole ? QColor(0, 0, 120) : QColor(0, 120, 0));
+        painter.drawPath(path);
+        painter.end();
+
+        out = out + u".png"_s;
+        image.save(out);
+    };
+#endif
+
+    mergedCurves_ = {};
+    for(int i{}; auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity)) {
+        // Пачка собирается ГОТОВЫМИ ПОЛИГОНАМИ, а не плоским списком контуров:
+        // union всё так же идёт разом, в несколько потоков и с пространственной
+        // сортировкой (вспышек в слое десятки тысяч, и цепочка из стольких же
+        // точных операций была бы неподъёмной), но вложенность каждого тела
+        // остаётся при нём.
+        //
+        // Плоский список её терял: там вложенность выражена одной ориентацией
+        // контура, и дырка одного объекта вычитала чужой объект, лежащий внутри
+        // неё. Кольцевой штрих с окружностями внутри (репер на плате) так и
+        // пропадал целиком -- дырка внешнего кольца съедала оба вложенных.
+
+#if 0 // FIXME
+        std::vector<Geo::Polygon> parts;
+        for(int j{}; const GrObject& go: gObjects) {
+            gbgImage(go.fill.toPath(), u"%1_3_go%2"_s.arg(i).arg(j), gObjects.front().state.imgPolarity());
+            if(qEnvironmentVariableIsSet("GBR_DEBUG_MERGE")) {
+                std::size_t holes{};
+                for(const Geo::Polygon& p: go.fill.all()) holes += p.holes().size();
+                qInfo().noquote() << u"%1_3_go%2"_s.arg(i).arg(j) << go.name
+                                  << u"id"_s << go.id
+                                  << u"ap"_s << go.state.aperture()
+                                  << u"pol"_s << go.state.imgPolarity()
+                                  << u"pos"_s << go.state.curPos()
+                                  << u"n"_s << go.fill.size()
+                                  << u"holes"_s << holes
+                                  << u"bbox"_s << go.fill.boundingRect()
+                                  << u"path.size"_s << go.path.size()
+                                  << u"path.closed"_s << go.path.closed
+                                  << u"path.width"_s << go.path.width;
+                if(qEnvironmentVariableIsSet("GBR_DEBUG_MERGE_PATH")) {
+                    QStringList sel = QString::fromLocal8Bit(qgetenv("GBR_DEBUG_MERGE_PATH")).split(u',');
+                    if(sel.contains(u"%1_3_go%2"_s.arg(i).arg(j)))
+                        for(const Geo::Vertex& v: go.path)
+                            qInfo().noquote() << u"   "_s << v.x() << v.y() << u"b"_s << v.bulge;
+                }
+            }
+            ++j;
+            // if((i < 2) | go.fill.all().front().holes().size())
+            parts.append_range(go.fill.all());
+        }
+
+        const Geo::Polygons part{std::span<const Geo::Polygon>{parts}};
 #else
-    for(auto&& gObjects: v::chunk_by(graphicObjects_, samePolarity)) {
-        Paths64 clip{
-            std::from_range,
+        // std::vector<Geo::Polygon> parts;
+        // for(const GrObject& go: gObjects)
+        //     parts.append_range(go.fill.all());
+
+        std::vector parts{std::from_range,
             gObjects
                 | v::transform(&GrObject::fill)
-                | v::transform(qOverload<const Curves&>(toPaths))
-                | v::join,
-        };
-        bool fl      = gObjects.front().state.imgPolarity();
-        mergedPaths = cl::BooleanOp(CT[fl], FR[fl], mergedPaths, clip);
-    }
-    // Gi::Debug(mergedPaths, {255, 255, 255, 128}); //->arrows = {};
+                | v::transform(&Geo::Polygons::all)
+                | v::join};
+
 #endif
-    if(Settings::cleanPolygons())
-        CleanPaths(mergedPaths, Settings::cleanPolygonsDist() * uScale);
+        QElapsedTimer chunkTimer;
+        if(qEnvironmentVariableIsSet("GBR_DEBUG_MERGE_TIME")) chunkTimer.start();
 
-    for(Path64& path: mergedPaths) // close paths
-        path.emplace_back(path.front());
+        const Geo::Polygons part{std::span<const Geo::Polygon>{parts}};
 
-    return mergedCurves_ = toCurves(mergedPaths);
+        if(qEnvironmentVariableIsSet("GBR_DEBUG_MERGE_TIME"))
+            qInfo() << "chunk" << i << "objs" << gObjects.size() << "parts" << parts.size()
+                    << "buildPart(ms)" << chunkTimer.restart();
+
+        // gbgImage(mergedCurves_.toPath(), u"%1_0_merged"_s.arg(i), gObjects.front().state.imgPolarity());
+
+        // gbgImage(part.toPath(), u"%1_1_part"_s.arg(i), gObjects.front().state.imgPolarity());
+
+        if(gObjects.front().state.imgPolarity() == Positive)
+            mergedCurves_ |= part;
+        else
+            mergedCurves_ -= part;
+
+        if(qEnvironmentVariableIsSet("GBR_DEBUG_MERGE_TIME"))
+            qInfo() << "chunk" << i << "union(ms)" << chunkTimer.elapsed();
+
+        // gbgImage(mergedCurves_.toPath(), u"%1_2_merged"_s.arg(i), gObjects.front().state.imgPolarity());
+
+        ++i;
+    }
+
+    return mergedCurves_;
 }
 
 const QList<Comp::Component>& File::components() const { return components_; }
 
-void File::grouping(PolyTree& node, Curvess* curvess) {
-    // Узел вместе со своими прямыми потомками образует одну группу
-    // «контур + его дырки»; какой из уровней считать контуром, задаёт group_.
-    auto collect = [curvess](PolyTree& node) {
-        Paths64 paths{node.Polygon()};
-        for(size_t i{}; i < node.Count(); ++i)
-            paths.push_back(node[i]->Polygon());
-        for(Path64& path: paths) // close paths
-            path.emplace_back(path.front());
-        curvess->push_back(toCurves(paths));
-    };
+// Разбор вложенности вручную больше не нужен: Geo::Polygons и ЕСТЬ разобранный
+// регион -- его собственные полигоны это медь, а полигоны того, что осталось от
+// габаритной рамки после вычитания меди, -- вырезы. Прежде то же самое
+// получалось объединением с рамкой по NonZero и обходом PolyTree.
+Geo::Polygons& File::groupedPaths(File::Group group, bool /*fl*/) {
+    if(!groupedCurves_.empty() && group_ == group)
+        return groupedCurves_;
 
-    switch(group_) {
-    case CutoffGroup:
-        if(!node.IsHole()) collect(node);
-        break;
-    case CopperGroup:
-        if(node.IsHole()) collect(node);
-        break;
-    }
-    for(size_t i{}; i < node.Count(); ++i)
-        grouping(*node[i], curvess);
-}
+    group_                     = group;
+    const Geo::Polygons region = mergedCurves();
 
-Curvess& File::groupedPaths(File::Group group, bool fl) {
-    if(groupedCurves_.empty()) {
-        PolyTree polyTree;
-        cl::Clipper64 clipper;
-        auto paths = toPaths(mergedCurves());
-        clipper.AddSubject(paths);
-        auto r{GetBounds(paths)};
-        int k = uScale;
-        Path64 outer = {
-            Point64(r.left - k, r.bottom + k),
-            Point64(r.right + k, r.bottom + k),
-            Point64(r.right + k, r.top - k),
-            Point64(r.left - k, r.top - k)};
-        if(fl)
-            ReversePath(outer);
-        clipper.AddSubject({outer});
-        clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, polyTree);
-        group_ = group;
-        grouping(polyTree, &groupedCurves_);
+    if(group == CopperGroup) {
+        groupedCurves_ = region;
+    } else {
+        // Поле рамки вокруг детали: миллиметр с каждой стороны, лишь бы вырезы
+        // оказались внутри неё и отделились от бесконечности.
+        constexpr double margin = 1.0;
+        QRectF box              = region.boundingRect();
+        box.adjust(-margin, -margin, margin, margin);
+        const Geo::Polygons frame{Geo::Polylines{Geo::rectangle(box.width(), box.height(), box.center())}};
+        groupedCurves_ = frame - region;
     }
+
     return groupedCurves_;
 }
 
@@ -214,8 +275,8 @@ void File::setColor(const QColor& color) {
     itemGroups_[ApPaths]->setPen(QPen(color_, 0.0));
 }
 
-mvector<const ::GraphicObject*> File::graphicObjects() const {
-    mvector<const ::GraphicObject*> go(graphicObjects_.size());
+std::vector<const ::GraphicObject*> File::graphicObjects() const {
+    std::vector<const ::GraphicObject*> go(graphicObjects_.size());
     size_t i{};
     for(auto& refGo: graphicObjects_)
         go[i++] = &refGo;
@@ -281,10 +342,11 @@ void File::read(QDataStream& stream) {
 }
 
 void File::createGi() {
+
     if constexpr(1) { // fill copper
-        for(Curves& paths: groupedPaths()) {
+        for(const Geo::Polygon& paths: groupedPaths()) {
             // Gi::Debug(paths);
-            Gi::Item* item = new Gi::DataFill{paths, this};
+            Gi::Item* item = new Gi::DataFill{Geo::Polygons{paths}, this};
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();
@@ -296,8 +358,8 @@ void File::createGi() {
         itemGroups_[Components]->shrink_to_fit();
     }
     if constexpr(1) { // add aperture paths
-        auto contains = [&](const Curve& path) -> bool {
-            constexpr double k = 0.001 * uScale;
+        auto contains = [&](const Geo::Polyline& path) -> bool {
+            constexpr double k = 0.001;
             for(const auto& chPath: checkList) { // find copy
                 size_t counter{};
                 if(chPath.size() == path.size()) {
@@ -316,29 +378,19 @@ void File::createGi() {
             return false;
         };
 
+        // Ветка упрощения регионов ушла: SimplifyPolygon был заглушкой и
+        // наполнял пустой список, то есть контуры замкнутых регионов просто
+        // терялись. Теперь они добавляются наравне с прочими.
         for(const GrObject& go: graphicObjects_) {
-            if(!go.path.empty()) {
-                if(Settings::simplifyRegions() && go.path.front() == go.path.back()) {
-                    Curves paths;
-                    // FIXME SimplifyPolygon(toPath(go.path), paths);
-                    for(auto&& path: paths) {
-                        path.push_back(path.front());
-                        if(!Settings::skipDuplicates()) {
-                            checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{{checkList.front()}, this});
-                        } else if(!contains(path)) {
-                            checkList.push_front(path);
-                            itemGroups_[ApPaths]->push_back(new Gi::DataPath{{checkList.front()}, this});
-                        }
-                    }
-                } else if(!Settings::skipDuplicates()) {
-                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
-                } else if(!contains(go.path)) {
-                    itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
-                    checkList.push_front(go.path);
-                }
+            if(go.path.empty()) continue;
+            if(!Settings::skipDuplicates()) {
+                itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
+            } else if(!contains(go.path)) {
+                itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
+                checkList.push_front(go.path);
             }
         }
+
         itemGroups_[ApPaths]->shrink_to_fit();
     }
 

@@ -16,8 +16,20 @@
 using namespace std::literals;
 using namespace std::placeholders;
 
+// Ломаная с дугами: прогиб вершины i описывает сегмент i -> i+1.
+//
+// Замкнутость -- ФЛАГ, а не повтор первой точки в конце: у замкнутой кривой
+// есть ещё и сегмент back -> front, и прогиб последней вершины описывает
+// именно его. Повторять первую точку не нужно и вредно -- получился бы лишний
+// вырожденный сегмент, а сама «замкнута ли» пришлось бы каждый раз угадывать
+// сравнением координат.
+//
+// Единственный правильный способ обойти кривую -- segments(): он и сегмент
+// замыкания не потеряет, и о том, где лежит прогиб, помнить не заставит.
 struct Curve : std::vector<geo::Vertex> {
     using std::vector<geo::Vertex>::vector;
+
+    bool closed{};
 
     QRectF boundingRect() const;
     Curve& reverse();
@@ -26,14 +38,44 @@ struct Curve : std::vector<geo::Vertex> {
     bool isClosed() const;
     bool isPositive() const;
     double perimetr() const;
+
+    // Замкнуть кривую. Повторную первую точку в конце (как её принято писать
+    // в DXF/Gerber/клиппере) при этом убираем: замыкающий сегмент теперь есть
+    // сам по себе, а её дубликат стал бы вырожденным сегментом нулевой длины.
+    Curve& close() {
+        if(size() > 1 && front().pt == back().pt) pop_back();
+        closed = true;
+        return *this;
+    }
+
+    // Число сегментов: у замкнутой кривой на один больше -- замыкающий.
+    size_t segmentCount() const noexcept {
+        return empty() ? 0 : size() - !closed;
+    }
+
+    using SegmentRef = std::pair<const geo::Vertex&, const geo::Vertex&>;
+
+    // Сегменты парами (начальная вершина, конечная), включая замыкающий.
+    auto segments() const {
+        return v::iota(size_t{}, segmentCount())
+            | v::transform([this](size_t i) -> SegmentRef {
+                  return {at(i), at((i + 1) % size())};
+              });
+    }
+
+    // Геометрия сегмента, начинающегося в вершине i; nullopt -- отрезок.
+    std::optional<geo::Arc> arcAt(size_t i) const {
+        if(i >= segmentCount()) return {};
+        return geo::arcOf(at(i).pt, at((i + 1) % size()).pt, at(i).bulge);
+    }
 };
 
-using Curves = std::vector<Curve>;
-using Curvess = std::vector<Curves>;
+using Geo::Polygon = std::vector<Curve>;
+using Geo::Polygons = std::vector<Geo::Polygon>;
 
 inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
     uint32_t n;
-    stream >> n;
+    stream >> n >> container.closed;
     container.resize(n);
     for(auto& var: container) {
         stream >> var;
@@ -44,18 +86,18 @@ inline QDataStream& operator>>(QDataStream& stream, Curve& container) {
 }
 
 inline QDataStream& operator<<(QDataStream& stream, const Curve& container) {
-    stream << uint32_t(container.size());
+    stream << uint32_t(container.size()) << container.closed;
     for(const auto& var: container) stream << var;
     return stream;
 }
 
-QIcon drawIcon(const Curves& curves, QColor color = Qt::black);
+QIcon drawIcon(const Geo::Polygon& curves, QColor color = Qt::black);
 
 constexpr double Area(const Curve& curve) { return curve.area(); }
-constexpr double Area(const Curves& curves) {
+constexpr double Area(const Geo::Polygon& curves) {
     return r::fold_left(curves | v::transform(&Curve::area), 0.0, std::plus{});
 }
-constexpr QRectF BoundingRect(const Curves& curves) {
+constexpr QRectF BoundingRect(const Geo::Polygon& curves) {
     if(curves.empty()) return {};
     return r::fold_left(
         curves | v::transform(&Curve::boundingRect),
@@ -63,40 +105,34 @@ constexpr QRectF BoundingRect(const Curves& curves) {
         std::bit_or{});
 }
 
-struct ArcGeometry {
-    QPointF center;
-    double radius = 0.0; // always >= 0
-    // всегда >= 0
-    double startAngle = 0.0; // atan2 at p1, radians
-    // atan2 в точке p1, радианы
-    bool ccw = true; // sweep direction from p1 to p2 (matches sign of bulge)
-    // направление обхода от p1 к p2 (совпадает со знаком bulge)
-};
-
-std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, double bulge);
-
 Curve CircleCurve(double diametr, const QPointF& center = {});
 Curve RectangleCurve(double width, double height, const QPointF& center = {});
 
+// Дуга «центр + радиус + углы» в вершины с прогибами. Сегменты не длиннее
+// полуокружности: прогиб растёт как tan(theta/4) и у почти полного оборота
+// улетает в бесконечность, поэтому крупные дуги приходится резать. Полный
+// оборот (|sweep| >= 2*pi) даёт замкнутую окружность из трёх вершин.
+Curve ArcCurve(const QPointF& center, double radius, double startAngle, double sweep);
+
 Curve& TransformCurve(Curve& curve, const QTransform& tr);
-Curves& TransformCurves(Curves& curve, const QTransform& tr);
-Curves& ReverseCurves(Curves& curves);
+Geo::Polygon& TransformCurves(Geo::Polygon& curve, const QTransform& tr);
+Geo::Polygon& ReverseCurves(Geo::Polygon& curves);
 Curve& TranslateCurve(Curve& curve, const QPointF& pos = {});
 void RotateCurve(Curve& curve, double angle, const QPointF& center = {});
 //------------------------------------------------------------------------------
 
 QPainterPath toPPath(Curve curve, std::optional<QTransform> tr = {}, int arcLine = {});
-QPainterPath toPPath(const Curves& curves);
+QPainterPath toPPath(const Geo::Polygon& curves);
 
 Curve toCurve(std::span<const QPointF> path);
 Curve toCurve(std::span<const Point64> path);
-Curves toCurves(std::span<const Path64> paths /*, bool closed = true*/);
-Curvess toCurvess(std::span<const Paths64> pathss /*, bool closed = true*/);
+Geo::Polygon toCurves(std::span<const Path64> paths /*, bool closed = true*/);
+Geo::Polygons toCurvess(std::span<const Paths64> pathss /*, bool closed = true*/);
 
 Path64 toPath(const Curve& curve);
-Paths64 toPaths(const Curves& curves);
+Paths64 toPaths(const Geo::Polygon& curves);
 
-Curves toCurves(const QPainterPath& pPath);
+Geo::Polygon toCurves(const QPainterPath& pPath);
 inline Paths64 toPaths(const QPainterPath& pPath) {
     return toPaths(toCurves(pPath));
     // Paths64 paths;
@@ -146,19 +182,19 @@ struct BoolOp_ {
         Negative
     };
 
-    Curves operator()(ClipType ct, FillRule fr, const Curves& subjects, const Curves& clips);
+    Geo::Polygon operator()(ClipType ct, FillRule fr, const Geo::Polygon& subjects, const Geo::Polygon& clips);
 
-    void operator()(ClipType ct, FillRule fr, const Curves& subjects, const Curves& clips, CurveTree& solution);
+    void operator()(ClipType ct, FillRule fr, const Geo::Polygon& subjects, const Geo::Polygon& clips, CurveTree& solution);
 
-    Curves Intersect(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Intersect(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
-    Curves Union(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Union(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
-    Curves Union(const Curves& subjects, FillRule fr);
+    Geo::Polygon Union(const Geo::Polygon& subjects, FillRule fr);
 
-    Curves Difference(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Difference(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
-    Curves Xor(const Curves& subjects, const Curves& clips, FillRule fr);
+    Geo::Polygon Xor(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr);
 
 } inline BoolOp;
 
@@ -189,18 +225,18 @@ struct Inflate64 {
     // Joined : offsets both sides of a path, with joined ends
     // Polygon: offsets only one side of a closed path
 
-    Curves operator()(const Curves& paths, double delta,
+    Geo::Polygon operator()(const Geo::Polygon& paths, double delta,
         JoinType jt, EndType et, double miterLimit = 2.0,
         double arcTolerance = 0.0);
 
-    Curves PathsZ(const Curves& paths, double delta,
+    Geo::Polygon PathsZ(const Geo::Polygon& paths, double delta,
         JoinType jt, EndType et, double miterLimit = 2.0,
         double arcTolerance = 0.0);
 
-    Curves RoundPolygon(const Curves& paths, double delta,
+    Geo::Polygon RoundPolygon(const Geo::Polygon& paths, double delta,
         double miterLimit = 2.0, double arcTolerance = {});
 
-    Curves MiterPolygon(const Curves& paths, double delta,
+    Geo::Polygon MiterPolygon(const Geo::Polygon& paths, double delta,
         double miterLimit = 2.0, double arcTolerance = {});
 
 } inline Inflate;

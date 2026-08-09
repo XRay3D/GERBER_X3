@@ -15,7 +15,7 @@
 #include <QObject>
 #include <QSharedMemory>
 
-#include "mvector.h"
+
 #include "settings.h"
 #include "tool.h"
 #include "utils.h" //using namespace Qt::Literals;
@@ -55,7 +55,7 @@ class Plugin;
 // class Handle;
 } // namespace Shapes
 
-// using handles = mvector<Shapes::Handle*>;
+// using handles = std::vector<Shapes::Handle*>;
 
 using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;

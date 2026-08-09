@@ -15,6 +15,7 @@
 #include "graphicsview.h"
 #include "settings.h"
 #include <QMessageBox>
+#include <span>
 
 namespace PocketOffset {
 
@@ -87,7 +88,11 @@ void Form::computePaths() {
         ui->toolHolder4->tool(),
     };
 
-    for(const Tool& t: tool) {
+    // Проверяются только задействованные держатели. Прежде проверялись все
+    // четыре, и расчёт с одним инструментом не запускался вовсе: пустые
+    // держатели 2..4 невалидны, а их виджеты при этом скрыты (см. rb_clicked).
+    const auto qty = std::min<size_t>(std::max(ui->sbxToolQty->value(), 1), std::size(tool));
+    for(const Tool& t: std::span{tool}.first(qty)) {
         if(!t.isValid()) {
             t.errorMessageBox(this);
             return;
@@ -96,11 +101,7 @@ void Form::computePaths() {
 
     if(!getNewGcpWithGi()) return;
 
-    for(const Tool& t: tool) {
-        gcp.tools.push_back(t);
-        if(gcp.tools.size() == static_cast<size_t>(ui->sbxToolQty->value()))
-            break;
-    }
+    gcp.tools.append_range(std::span{tool}.first(qty));
 
     { // sort and unique
         auto cmp = [this](const Tool& t1, const Tool& t2) -> bool {
@@ -176,12 +177,35 @@ void Form::resizeEvent(QResizeEvent* event) {
 
 void Form::showEvent(QShowEvent* event) {
     updatePixmap();
-    QWidget::showEvent(event);
+    // Базовая, а не QWidget: в GCode::Form::showEvent сбрасывается режим правки.
+    GCode::Form::showEvent(event);
+}
+
+void Form::editFile(GCode::File* file) {
+    const GCode::Params& gcp = file->params();
+
+    // Радиокнопки и число инструментов первыми: их rb_clicked() зовёт
+    // updateName() и перебил бы имя. Базовая ставит имя после этого.
+    if(gcp.params.contains(GCode::Params::Side))
+        (gcp.side() == GCode::Inner ? ui->rbInside : ui->rbOutside)->setChecked(true);
+    if(gcp.params.contains(GCode::Params::Convent))
+        (gcp.convent() ? ui->rbConventional : ui->rbClimb)->setChecked(true);
+
+    // Инструменты -- копии, снятые при расчёте, уже отсортированные по убыванию
+    // диаметра и без дублей. В базе инструментов их могло уже не остаться,
+    // поэтому ставим как есть, не разыскивая по id.
+    ToolSelectorForm* holders[]{ui->toolHolder1, ui->toolHolder2, ui->toolHolder3, ui->toolHolder4};
+    const auto qty = std::min(gcp.tools.size(), std::size(holders));
+    for(size_t i{}; i < qty; ++i) holders[i]->setTool(gcp.tools[i]);
+    if(qty) ui->sbxToolQty->setValue(static_cast<int>(qty));
+
+    if(auto it = gcp.params.find(Creator::OffsetSteps); it != gcp.params.end())
+        ui->sbxSteps->setValue(static_cast<int>(it->second.toInt()));
+
+    GCode::Form::editFile(file);
 }
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }
-
-void Form::editFile(GCode::File* /*file*/) { }
 
 } // namespace PocketOffset
 

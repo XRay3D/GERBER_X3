@@ -77,10 +77,10 @@ DxfGo Ellipse::toGo() const {
 
     // Эллипс представляется цепочкой круговых дуг: на каждом малом участке подбирается
     // окружность, проходящая через начало, середину и конец участка (как и Circle/Arc,
-    // Curve хранит именно круговые дуги, а не плотную ломаную).
+    // Geo::Polyline хранит именно круговые дуги, а не плотную ломаную).
     const int segments = std::clamp(int(std::round(std::abs(span) / two_pi * 36.0)), 4, 72);
 
-    Curve curve;
+    Geo::Polyline curve;
     QPointF prev = pointAt(startParameter);
     curve.emplace_back(prev);
     for(int i{}; i < segments; ++i) {
@@ -104,13 +104,16 @@ DxfGo Ellipse::toGo() const {
                 (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
                 (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
             };
-            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+            // прогиб пишется на НАЧАЛЬНОЙ вершине дуги -- она уже в кривой
+            curve.back().bulge = geo::bulgeOf(p0, p1, center, geo::DIR(p0, center, p1));
+            curve.emplace_back(p1);
         }
         prev = p1;
     }
 
     if(closed) {
-        DxfGo go{id, Curve{curve}, {std::move(curve)}};
+        curve.close();
+        DxfGo go{id, Geo::Polyline{curve}, {std::move(curve)}};
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Elipse);
         go.GraphicObject::pos = CenterPoint;
         return go;

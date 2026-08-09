@@ -57,14 +57,14 @@ void File::setItemType(int type) {
 
 int File::itemsType() const { return itemsType_; }
 
-Curvess& File::groupedPaths(File::Group group, bool fl) {
+Geo::Polygons& File::groupedPaths(File::Group group, bool fl) {
     // if(groupedCurves_.empty()) {
     //     PolyTree polyTree;
     //     cl::Clipper64 clipper;
     //     clipper.AddSubject(toPaths(mergedCurves()));
     //     auto r = BoundingRect(mergedCurves());
     //     int k = /*uScale*/ 1;
-    //     Path64 outer{
+    //     Geo::Polyline outer{
     //         Point64{uScale + r.left() - k,  uScale + r.bottom() + k},
     //         Point64{uScale + r.right() + k, uScale + r.bottom() + k},
     //         Point64{uScale + r.right() + k, uScale + r.top() - k   },
@@ -83,7 +83,7 @@ Curvess& File::groupedPaths(File::Group group, bool fl) {
         clipper.AddSubject(paths);
         Rect r = GetBounds(paths);
         int k = /*uScale*/ 1;
-        Path64 outer{
+        Geo::Polyline outer{
             Point64(r.left - k, r.bottom + k),
             Point64(r.right + k, r.bottom + k),
             Point64(r.right + k, r.top - k),
@@ -99,7 +99,7 @@ Curvess& File::groupedPaths(File::Group group, bool fl) {
 }
 
 void File::grouping(PolyTree& node, File::Group group) {
-    Path64 path;
+    Geo::Polyline path;
     Paths64 paths;
     switch(group) {
     case CutoffGroup:
@@ -111,7 +111,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 paths.push_back(path);
             }
             groupedCurves_.push_back(toCurves(paths));
-            r::for_each(groupedCurves_ | v::join, [](Curve& c) { c.emplace_back(c.front().pt); });
+            r::for_each(groupedCurves_ | v::join, &Geo::Polyline::close);
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -125,7 +125,7 @@ void File::grouping(PolyTree& node, File::Group group) {
                 paths.push_back(path);
             }
             groupedCurves_.push_back(toCurves(paths));
-            r::for_each(groupedCurves_ | v::join, [](Curve& c) { c.emplace_back(c.front().pt); });
+            r::for_each(groupedCurves_ | v::join, &Geo::Polyline::close);
         }
         for(size_t i{}; i < node.Count(); ++i)
             grouping(*node[i], group);
@@ -174,7 +174,7 @@ void File::createProjectionLayers() {
         l->setColor(viewColor(view));
         // Только заливка: силуэт — это замкнутый контур с дырками, отдельных
         // рёбер у него нет, поэтому path оставляем пустым.
-        l->addGraphicObject(DxfGo{-1, Curve{}, toCurves(silhouette)});
+        l->addGraphicObject(DxfGo{-1, Geo::Polyline{}, toCurves(silhouette)});
     }
 
     mesh_.clear();
@@ -211,7 +211,7 @@ void File::createGi() {
             const bool empty{layer->groupedCurves_.empty()};
             for(auto& go: layer->graphicObjects_) {
                 if(empty && go.fill.size()) {
-                    // if(Area(go.fill) < 0.) ReversePaths(go.fill); // FIXME add settings
+                    // if(go.fill.area() < 0.) ReversePaths(go.fill); // FIXME add settings
                     clipper.AddSubject(toPaths(go.fill));
                 }
 
@@ -233,7 +233,7 @@ void File::createGi() {
                 clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths);
                 CleanPaths(paths, uScale * 0.0005);
 
-                for(Path64& path: paths)
+                for(Geo::Polyline& path: paths)
                     if(path.back() != path.front())
                         path.emplace_back(path.front());
                 mergedCurves_ = toCurves(paths);
@@ -289,9 +289,9 @@ void File::setVisible(bool visible) {
     }
 }
 
-mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
+std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test) const {
 
-    mvector<GraphicObject> retData;
+    std::vector<GraphicObject> retData;
     auto t = transform_.toQTransform(); // cached  QTransform
     for(auto&& criterion: criterias) {
         for(auto&& [name, layer]: layers()) {
@@ -384,6 +384,6 @@ void File::read(QDataStream& stream) {
     stream >> entities_;
 }
 
-Curves File::merge() const { return mergedCurves_; }
+Geo::Polygon File::merge() const { return mergedCurves_; }
 
 } // namespace Dxf

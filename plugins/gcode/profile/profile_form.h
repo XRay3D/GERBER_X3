@@ -41,6 +41,9 @@ private:
     void updateBridges();
     void updatePixmap();
     void rb_clicked();
+    // Припуск зависит от инструмента и глубины: потолок -- половина радиуса,
+    // разумная величина -- его десятая.
+    void updateAllowanceLimits();
 
     Ui::ProfileForm* ui;
     // Gi::Bridge* brItem = nullptr;

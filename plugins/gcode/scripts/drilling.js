@@ -7,7 +7,7 @@ function generate(file) {
     var toolOneTurnCut = file.toolOneTurnCut;
 
     forEachTile(file, function(file, pathss) {
-        var path = pathss[0][0]; // drill points are in the first Curve of the first Curvess
+        var path = pathss[0][0]; // drill points are in the first Geo::Polyline of the first Geo::Polygons
         for (var k = 0; k < path.length; k++) {
             var pt = path[k];
             file.startPath(pt.x, pt.y);

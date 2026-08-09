@@ -19,7 +19,7 @@ class Item final : public Gi::Item {
     const Component& component_;
     QVector<QRectF> pins;
     mutable QPainterPath pathRefDes;
-    mutable mvector<QPair<QPainterPath, QPointF>> pathPins;
+    mutable std::vector<QPair<QPainterPath, QPointF>> pathPins;
     mutable double scale_ = std::numeric_limits<double>::max();
     mutable QPointF pt;
     bool selected_{};
@@ -32,7 +32,7 @@ public:
     QPainterPath shape() const override;
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     // Gi::Item interface
-    Curves curves(int alternate = {}) const override;
+    Geo::Polylines curves(int alternate = {}) const override;
     void changeColor() override { }
 
     void setSelected(bool selected) { selected_ = selected; }

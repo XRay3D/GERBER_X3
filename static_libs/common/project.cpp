@@ -105,7 +105,7 @@ QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
 
 QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
     uint32_t type;
-    Curves paths;
+    Geo::Polygon paths;
     stream >> type;
     stream >> paths;
     // if(App::shapePlugins().contains(type)) {
@@ -204,7 +204,8 @@ bool Project::open(const QString& fileName) {
             case ProVer_4:
             case ProVer_5:
             case ProVer_6:
-            case ProVer_7: QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s)); break;
+            case ProVer_7:
+            case ProVer_8: QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s)); break;
             }
             return false;
         }
@@ -229,6 +230,20 @@ bool Project::open(const QString& fileName) {
         // in >> items_;
         for(const auto& [id, filePtr]: files_)
             App::fileModel().addFile(filePtr.get());
+
+        // Иерархия УП не пишется в файл отдельно: она однозначно выводится из
+        // имён программ. Многофайловая (несколько инструментов за один запуск)
+        // складывается обратно в подпапку своего имени, одиночная остаётся
+        // рядом со всеми -- ровно то же правило, что и при расчёте.
+        {
+            std::map<QString, std::vector<FileTree::Node*>> programs;
+            for(const auto& [id, filePtr]: files_)
+                if(auto* gc = dynamic_cast<GCode::File*>(filePtr.get()); gc && !gc->programName().isEmpty())
+                    programs[gc->programName()].push_back(gc->node());
+            for(const auto& [name, nodes]: programs)
+                App::fileModel().groupProgram(name, nodes);
+        }
+
         for(const auto& [id, shPtr]: shapes_)
             App::fileModel().addShape(shPtr);
         for(const auto& [id, itemPtr]: items_)
@@ -241,7 +256,7 @@ bool Project::open(const QString& fileName) {
 
         isModified_ = false;
 
-        App::grView().fitInView(sceneRect, false);
+        App::grView().setViewRectDeferred(sceneRect);
 
         return true;
     } catch(const QString& ex) {
@@ -344,7 +359,7 @@ QRectF Project::getBoundingRect() {
     for(const auto& [id, filePtr]: files_) {
         if(filePtr && filePtr->itemGroup()->isVisible()) {
             for(auto&& item: *filePtr->itemGroup()) {
-                for(const Curve& curve: item->curves()) {
+                for(const Geo::Polyline& curve: item->curves()) {
                     if(rect.isNull())
                         rect = curve.boundingRect();
                     else
@@ -385,16 +400,34 @@ bool Project::reload(int32_t id, AbstractFile* file) {
     if(files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
-        App::filePlugin(file->type())->updateFileModel(file);
+        // Плагины g-кода лежат в отдельной карте: App::filePlugin() для них
+        // возвращает нуль, и разыменование роняло бы замену УП на месте.
+        AbstractFilePlugin* plugin = App::filePlugin(file->type());
+        if(!plugin) plugin = App::gCodePlugin(file->type());
+        if(plugin) plugin->updateFileModel(file);
         setChanged();
         return true;
     }
     return false;
 }
 
-mvector<AbstractFile*> Project::files(uint32_t type) {
+// Заменить УП на месте: узел дерева, id и сторона остаются прежними, меняется
+// только содержимое. Отдельно от addFile, потому что там проверка на дубль имени
+// отключена намеренно и попасть в ветку reload оттуда нельзя.
+int Project::replaceFile(int32_t id, GCode::File* file) {
     std::lock_guard _{mutex};
-    mvector<AbstractFile*> rfiles;
+    if(!file) return -1;
+    isPinsPlaced_ = false;
+    file->createGi();
+    file->addToScene();
+    file->setVisible(true);
+    if(!reload(id, file)) return -1;
+    return file->id();
+}
+
+std::vector<AbstractFile*> Project::files(uint32_t type) {
+    std::lock_guard _{mutex};
+    std::vector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for(const auto& [id, sp]: files_)
         if(sp && sp->type() == type)
@@ -403,9 +436,9 @@ mvector<AbstractFile*> Project::files(uint32_t type) {
     return rfiles;
 }
 
-mvector<AbstractFile*> Project::files(const mvector<uint32_t>& types) {
+std::vector<AbstractFile*> Project::files(const std::vector<uint32_t>& types) {
     std::lock_guard _{mutex};
-    mvector<AbstractFile*> rfiles;
+    std::vector<AbstractFile*> rfiles;
     rfiles.reserve(files_.size());
     for(auto type: types) {
         for(const auto& [id, sp]: files_)

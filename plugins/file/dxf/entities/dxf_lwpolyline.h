@@ -66,7 +66,7 @@ struct LwPolyline final : Entity {
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 
-    mvector<Segment> poly;
+    std::vector<Segment> poly;
     int16_t counter{};
     int16_t polylineFlag{};
     int32_t numberOfVertices{};

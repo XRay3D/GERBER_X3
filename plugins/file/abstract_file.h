@@ -120,15 +120,15 @@ public:
 
     Gi::Group* itemGroup(int type = -1) const;
 
-    const mvector<Gi::Group*>& itemGroups() const;
+    const std::vector<Gi::Group*>& itemGroups() const;
 
-    Curves mergedCurves() const;
-    Curvess groupedCurves() const;
+    Geo::Polygons mergedCurves() const;
+    Geo::Polygons groupedCurves() const;
 
     std::vector<QString>& lines();
     const std::vector<QString>& lines() const;
     const QString lines2() const;
-    virtual mvector<const GraphicObject*> graphicObjects() const;
+    virtual std::vector<const GraphicObject*> graphicObjects() const;
 
     enum Group {
         CopperGroup,
@@ -139,13 +139,13 @@ public:
     Side side() const;
     void setSide(Side side);
 
-    virtual mvector<GraphicObject> getDataForGC(
+    virtual std::vector<GraphicObject> getDataForGC(
         std::span<Criteria> criterias [[maybe_unused]],
         GCType gcType [[maybe_unused]],
         bool test [[maybe_unused]] = {}) const { return {}; };
     virtual void initFrom(AbstractFile* file);
     virtual uint32_t type() const = 0;
-    virtual void createGi() = 0;
+    virtual void createGi()       = 0;
     virtual void setItemType([[maybe_unused]] int type);
     virtual int itemsType() const;
 
@@ -155,7 +155,7 @@ public:
     virtual void setColor(const QColor& color);
 
     virtual FileTree::Node* node() = 0;
-    virtual QIcon icon() const = 0;
+    virtual QIcon icon() const     = 0;
 
     void setTransform([[maybe_unused]] const Transform& transform);
     const Transform& transform() const;
@@ -168,22 +168,22 @@ public:
 
 protected:
     virtual void write(QDataStream& stream) const = 0;
-    virtual void read(QDataStream& stream) = 0;
-    virtual Curves merge() const { return {}; };
+    virtual void read(QDataStream& stream)        = 0;
+    virtual Geo::Polygons merge() const { return {}; };
 
     LayerTypes layerTypes_;
     FileTree::Node* node_ = nullptr;
-    Curvess groupedCurves_;
+    Geo::Polygons groupedCurves_;
     QColor color_;
     bool colorFlag_{};
     QDateTime date_;
     QString name_;
-    Side side_ = Top;
-    int32_t id_ = -1;
+    Side side_     = Top;
+    int32_t id_    = -1;
     int itemsType_ = -1;
-    mutable Curves mergedCurves_;
+    mutable Geo::Polygons mergedCurves_;
     mutable bool visible_{};
-    mvector<Gi::Group*> itemGroups_{new Gi::Group};
+    std::vector<Gi::Group*> itemGroups_{new Gi::Group};
     std::vector<QString> lines_;
     // QTransform transform_;
     Transform transform_;
@@ -215,11 +215,11 @@ inline Gi::Group* AbstractFile::itemGroup(int type) const {
     return itemGroups_.front();
 }
 
-inline const mvector<Gi::Group*>& AbstractFile::itemGroups() const { return itemGroups_; }
+inline const std::vector<Gi::Group*>& AbstractFile::itemGroups() const { return itemGroups_; }
 
-inline Curves AbstractFile::mergedCurves() const { return mergedCurves_.size() ? mergedCurves_ : merge(); }
+inline Geo::Polygons AbstractFile::mergedCurves() const { return !mergedCurves_.empty /*size*/ () ? mergedCurves_ : merge(); }
 
-inline Curvess AbstractFile::groupedCurves() const { return groupedCurves_; }
+inline Geo::Polygons AbstractFile::groupedCurves() const { return groupedCurves_; }
 
 inline std::vector<QString>& AbstractFile::lines() { return lines_; }
 
@@ -231,12 +231,12 @@ inline const QString AbstractFile::lines2() const {
     return rstr;
 }
 
-inline mvector<const GraphicObject*> AbstractFile::graphicObjects() const { return {}; }
+inline std::vector<const GraphicObject*> AbstractFile::graphicObjects() const { return {}; }
 
 inline void AbstractFile::initFrom(AbstractFile* file) {
-    id_ = file->id_;
-    node_ = file->node_;
-    side_ = file->side_;
+    id_        = file->id_;
+    node_      = file->node_;
+    side_      = file->side_;
     colorFlag_ = file->colorFlag_;
     setColor(file->color_);
     setItemType(file->itemsType_);
@@ -374,4 +374,4 @@ public:
 };
 
 Q_DECLARE_METATYPE(AbstractFile*)
-// Q_DECLARE_METATYPE(mvector<const GraphicObject*>)
+// Q_DECLARE_METATYPE(std::vector<const GraphicObject*>)

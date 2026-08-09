@@ -19,6 +19,10 @@ using namespace std::placeholders;
 
 namespace Shapes {
 
+// Объявление, а не включение: shapepluginin.h включает этот заголовок, и при
+// входе в цепочку с его стороны Plugin иначе оказывается ещё неизвестен.
+class Plugin;
+
 struct Handle final : QPointF {
     enum Type : int {
         Adder,
@@ -55,7 +59,7 @@ struct Handle final : QPointF {
     bool operator==(Type type) const noexcept { return type_ == type; }
 };
 
-using UndoPair    = std::pair<AbstractShape*, std::vector<Handle>>;
+using UndoPair = std::pair<AbstractShape*, std::vector<Handle>>;
 using UndoHandles = std::vector<UndoPair>;
 
 class AbstractShape : public Gi::Item, public ::FileTree::Node {
@@ -82,7 +86,7 @@ public:
     void redraw() override;
     // AbstractShape interface
     virtual QString name() const = 0;
-    virtual QIcon icon() const   = 0;
+    virtual QIcon icon() const = 0;
     virtual std::any getVal(int id [[maybe_unused]]) const { return {}; };
     virtual bool addPt(const QPointF& point [[maybe_unused]]) { return curHandle = {}, false; };
     virtual void setPt(const QPointF& point [[maybe_unused]]) = 0;

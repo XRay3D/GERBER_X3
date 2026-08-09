@@ -240,7 +240,7 @@ struct Hatch final : Entity {
         }
     };
 
-    mvector<mvector<std::unique_ptr<Edge>>> edges;
+    std::vector<std::vector<std::unique_ptr<Edge>>> edges;
 
     std::vector<QString> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
 

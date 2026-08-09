@@ -63,6 +63,21 @@ public:
 
     void closeProject();
 
+    // Перерисовать строку узла. Нужно, когда данные за узлом сменились мимо
+    // setData -- например при замене файла на месте.
+    void updateNode(Node* node);
+    // Убрать строку узла вместе с самим узлом. Файл удаляется следом: его время
+    // жизни привязано к узлу (см. деструкторы узлов, зовущие deleteFile).
+    void removeNode(Node* node);
+
+    // Разложить узлы одной УП. Несколько файлов (у многоинструментного плагина
+    // один запуск даёт по файлу на инструмент) уходят в подпапку с именем
+    // программы; одиночный лежит прямо в «GCode». Подпапка заводится и убирается
+    // по надобности -- когда инструментов стало меньше или больше.
+    void groupProgram(const QString& programName, const std::vector<Node*>& nodes);
+    // Перенести узел в другую папку, не разрушая его.
+    void moveNode(Node* node, Node* newParent);
+
     // QAbstractItemModel interface
     QModelIndex index(int row, int column, const QModelIndex& parent) const override;
     QModelIndex parent(const QModelIndex& index) const override;
@@ -92,6 +107,13 @@ public:
 
 private:
     const QString mimeType;
+
+    // Индекс узла в модели. Для rootItem — невалидный индекс (корень дерева).
+    QModelIndex nodeIndex(Node* node) const;
+    // Папка верхнего уровня для типа type. Создаётся при первом обращении.
+    Node* folderNode(uint32_t type, const QString& name);
+    // Добавляет node последним потомком folder, возвращает его строку.
+    int appendChild(Node* folder, Node* node);
 
     int addFile(Node* item, AbstractFile* file);
     void addFile(AbstractFile* file);

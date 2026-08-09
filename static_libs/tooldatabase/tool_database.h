@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
-#include "mvector.h"
+
 #include "tool.h"
 #include <QDialog>
 
@@ -25,7 +25,7 @@ class ToolDatabase : public QDialog {
 
 public:
     explicit ToolDatabase(
-        QWidget* parent                   = nullptr,
+        QWidget* parent = nullptr,
         std::span<const Tool::Type> types = all);
 
     ~ToolDatabase() override;

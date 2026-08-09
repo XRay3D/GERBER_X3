@@ -10,8 +10,8 @@
  ********************************************************************************/
 // module;
 
-#include "curve.h"
 #include "circle.h"
+#include "geo/polygon.h"
 #include "gi_dbg.h"
 #include "span.h"
 #include <QMatrix2x2>
@@ -85,120 +85,63 @@ static bool isArcStep(const QPointF& c, const QPointF& p1, const QPointF& p2) {
     return da <= maxAngle;
 }
 
-static Path64 arcToPath(const Vertex& src, const Vertex& dst, int32_t centerIdx) {
+// Линейная аппроксимация дугового сегмента: точки ПОСЛЕ начальной и по
+// конечную включительно. Индекс центра в реестре один на всю дугу -- по нему
+// обратный перевод (toCurve) и узнаёт, что цепочка точек была одной дугой,
+// а не ломаной.
+static Path64 arcToPath(const QPointF& to, const geo::Arc& arc, int32_t centerIdx) {
     constexpr double accuracy = 0.01;
-#if 1
-    if(!dst.type) return {~dst.pt};
 
-    if(dst.pt == src.pt) return {~dst.pt};
+    if(arc.radius <= accuracy) return {~to};
 
-    // if(Length(src.pt, dst.pt) < 0.05) return {~dst.pt};//
+    const double dphi = 2.0 * acos((arc.radius - accuracy) / arc.radius);
+    const int segments = std::max(1, int(ceil(std::abs(arc.theta) / dphi) * 2));
 
-    PointF d = src.pt - dst.center;
-
-    double ang1 = atan2(d.y(), d.x());
-    if(ang1 < 0) ang1 += 2.0 * pi;
-
-    d = (dst.pt - dst.center);
-    double ang2 = atan2(d.y(), d.x());
-    if(ang2 < 0) ang2 += 2.0 * pi;
-
-    double phit;
-    if(dst.type == geo::Vertex::Cw)
-        // clockwise
-        phit = ang2 > ang1 ? 2.0 * pi - ang2 + ang1
-                           : phit = ang1 - ang2;
-    else
-        // counter_clockwise
-        phit = ang1 > ang2 ? -(2.0 * pi - ang1 + ang2)
-                           : -(ang2 - ang1);
-
-    // // what is the delta phi to get an accuracy of aber
-    // double phit = Span{src.pt, dst}.IncludedAngle();
-    double radius = dst.radius();
-    double dphi = 2 * acos((radius - accuracy) / radius);
-
-    int Segments = ceil(std::abs(phit) / dphi) * 2;
-
-    dphi = phit / Segments;
-
-    Path64 path; //{~src.pt};
-    QPointF p = src.pt;
-    for(int i{1}; i <= Segments; i++) {
-        d = p - dst.center;
-        double phi = atan2(d.y(), d.x());
-        double nx = dst.center.x() + radius * cos(phi - dphi);
-        double ny = dst.center.y() + radius * sin(phi - dphi);
-        p = QPointF{nx, ny};
-        SetCIndices(path.emplace_back(~p), centerIdx, centerIdx);
-    }
-    if(path.size()) {
-        path.back() = ~dst.pt;
-        // индексы для конечной точки (стыка) выставляет вызывающий toPath(),
-        // т.к. он знает индекс дуги СЛЕДУЮЩЕГО сегмента
-    }
-    return path;
-#else
-
-    double radius = dst.radius();
-
-    // Углы концевых точек (в радианах)
-    double startAngle = std::atan2(src.y() - dst.center.y(), src.x() - dst.center.x());
-    double endAngle = std::atan2(dst.y() - dst.center.y(), dst.x() - dst.center.x());
-
-    // Нормализация в диапазон [0, 2π)
-    auto normalize = [](double a) {
-        a = std::fmod(a, 2.0 * pi);
-        if(a < 0) a += 2.0 * pi;
-        return a;
-    };
-    startAngle = normalize(startAngle);
-    endAngle = normalize(endAngle);
-
-    // Вычисляем угловое расстояние с учётом направления
-    double delta = endAngle - startAngle;
-    if(dst.type == Vertex::Cw) {
-        // По часовой стрелке: идём в сторону уменьшения угла
-        if(delta > 0) delta -= 2.0 * pi;
-    } else {
-        // Против часовой стрелки: идём в сторону увеличения угла
-        if(delta < 0) delta += 2.0 * pi;
-    }
-
-    double dphi = 2 * acos((radius - accuracy) / radius);
-
-    int numPoints = ceil(std::abs(delta) / dphi) * 2;
-
-    Point64 center = ~dst.center;
-    // Генерация точек
     Path64 path;
-    if(numPoints > 1) {
-        double step = delta / (numPoints - 1);
-        path.reserve(numPoints);
-        for(int i = 1; i < numPoints; ++i) {
-            double angle = startAngle + i * step;
-            SetC(path.emplace_back(~(dst.center + QPointF{radius * std::cos(angle), radius * std::sin(angle)})), center);
-        }
-        path.back() = ~dst.pt;
-    } else {
-        path.emplace_back(~dst.pt);
-    }
-#endif
+    path.reserve(segments);
+    for(int i{1}; i <= segments; ++i)
+        SetCIndices(path.emplace_back(~arc.pointAt(double(i) / segments)), centerIdx, centerIdx);
 
+    // конечную точку не пересчитываем, а берём как есть -- она общая со
+    // следующим сегментом; индексы стыка выставляет вызывающий toPath(),
+    // т.к. он знает индекс дуги СЛЕДУЮЩЕГО сегмента
+    path.back() = ~to;
     return path;
 }
 
 //------------------------------------------------------------------------------
 
 Curve CircleCurve(double diametr, const QPointF& center) {
+    // Прогибом полный оборот не выразить (tan(2*pi/4) -- бесконечность),
+    // поэтому окружность -- две полуокружности: прогиб 1 у каждой.
+    Curve curve{
+        Vertex{{center.x() - diametr / 2, center.y()}, 1.0},
+        Vertex{{center.x() + diametr / 2, center.y()}, 1.0},
+    };
+    curve.closed = true;
+    return curve;
+}
+
+Curve ArcCurve(const QPointF& center, double radius, double startAngle, double sweep) {
+    if(std::abs(sweep) >= 2.0 * pi - 1e-12) {
+        Curve curve = CircleCurve(radius * 2.0, center);
+        if(sweep < 0.0) curve.reverse();
+        return curve;
+    }
+
+    auto at = [&](double angle) {
+        return center + QPointF{radius * cos(angle), radius * sin(angle)};
+    };
+
+    const int segments = std::max(1, int(ceil(std::abs(sweep) / pi)));
+    const double step = sweep / segments;
+    const double bulge = geo::bulgeOf(step);
+
     Curve curve;
-    QPointF pt{center};
-    pt.rx() -= diametr / 2;
-    curve.emplace_back(pt, center, Vertex::Ccw);
-    pt.rx() += diametr;
-    curve.emplace_back(pt, center, Vertex::Ccw);
-    pt.rx() -= diametr;
-    curve.emplace_back(pt, center, Vertex::Ccw);
+    curve.reserve(segments + 1);
+    for(int i{}; i < segments; ++i)
+        curve.emplace_back(at(startAngle + step * i), bulge);
+    curve.emplace_back(at(startAngle + sweep));
     return curve;
 }
 
@@ -210,8 +153,8 @@ Curve RectangleCurve(double width, double height, const QPointF& center) {
         Vertex{{-halfWidth + center.x(), -halfHeight + center.y()}},
         Vertex{{+halfWidth + center.x(), -halfHeight + center.y()}},
         Vertex{{+halfWidth + center.x(), +halfHeight + center.y()}},
-        Vertex{{-halfWidth + center.x(), +halfHeight + center.y()}},
     };
+    curve.closed = true;
     return curve;
 }
 
@@ -220,108 +163,34 @@ Curve& TransformCurve(Curve& curve, const QTransform& tr) {
 
     if(tr.isIdentity()) return curve;
 
-    for(auto& v: curve) {
-        if(v.type) v.center = tr.map(v.center);
-        v.pt = tr.map(v.pt);
-    }
+    // Прогиб -- величина безразмерная (отношение стрелы к полухорде), так что
+    // перенос, поворот и равномерный масштаб его не трогают вовсе. Зеркальное
+    // же отражение разворачивает обход дуги -- знак прогиба меняется.
+    for(auto& v: curve) v.pt = tr.map(v.pt);
 
     if((tr.m11() < .0) ^ (tr.m22() < .0))
-        for(auto&& v: curve) v.type = Vertex::Type{-v.type};
+        for(auto&& v: curve) v.bulge = -v.bulge;
 
     return curve;
 }
 
-// Curves& ReverseCurves(Curves& curves) {
+// Geo::Polygon& ReverseCurves(Geo::Polygon& curves) {
 //     r::for_each(curves.centerurves, &Curve::Reverse);
 //     return curves;
 // }
 
 Curve& TranslateCurve(Curve& curve, const QPointF& pos) {
     if(!pos.isNull())
-        for(auto& pt: curve) {
-            pt.center += pos;
-            pt.pt += pos;
-        }
+        for(auto& v: curve) v.pt += pos;
     return curve;
 }
 
 void RotateCurve(Curve& curve, double angle, const QPointF& center) {
-    // const bool fl = curve.GetArea() < 0;
-
-    auto rot = [center, angle](PointF& pt) {
-        pt.Rotate(qDegreesToRadians(angle));
-        pt += center;
-    };
-
-    for(auto&& pt: curve) {
-        if(pt.type) rot(pt.center);
-        rot(pt.pt);
+    for(auto&& v: curve) {
+        v.pt.Rotate(qDegreesToRadians(angle));
+        v.pt += center;
     }
-
-    // if(fl != (curve.GetArea() < 0))
-    //     curve.Reverse();
 }
-
-QDataStream& operator<<(QDataStream& stream, const Vertex& vert) {
-    return stream << vert.type
-                  << vert.pt
-                  << vert.center;
-}
-
-QDataStream& operator>>(QDataStream& stream, Vertex& vert) {
-    return stream >> vert.type
-        >> vert.pt
-        >> vert.center;
-}
-
-/*
-Curve& TransformCurve(Curve& curve, const QTransform& tr) {
-    qInfo() << tr;
-
-    if(tr.isIdentity()) return curve;
-
-    for(auto& v: curve) {
-        if(v.type) v.center = tr.map(v.center);
-        v.pt = tr.map(v.pt);
-    }
-
-    if((tr.m11() < .0) ^ (tr.m22() < .0))
-        for(auto&& v: curve) v.type = Vertex::Type{-v.type};
-
-    return curve;
-}
-
-Curves& ReverseCurves(Curves& curves) {
-    r::for_each(curves, &Curve::reverse);
-    return curves;
-}
-
-Curve& TranslateCurve(Curve& curve, const QPointF& pos) {
-    if(!pos.isNull())
-        for(auto& pt: curve) {
-            pt.center += pos;
-            pt.pt += pos;
-        }
-    return curve;
-}
-
-void RotateCurve(Curve& curve, double angle, const PointF& center) {
-    // const bool fl = curve.GetArea() < 0;
-
-    auto rot = [center, angle](PointF& pt) {
-        pt.Rotate(qDegreesToRadians(angle));
-        pt += center;
-    };
-
-    for(auto&& pt: curve) {
-        if(pt.type) (rot(pt.center));
-        rot(pt.pt);
-    }
-
-    // if(fl != (curve.GetArea() < 0))
-    //     curve.Reverse();
-}
-*/
 
 double Angle(double a, double b, double c) {
     // double c = Length(~*it, ~side);
@@ -339,58 +208,86 @@ double Angle(double a, double b, double c) {
 //------------------------------------------------------------------------------
 
 QRectF Curve::boundingRect() const {
-    QRectF rect;
-    // PointF prev_p{};
-    // bool prev_p_valid = false;
-    // for(auto It = begin(); It != end(); It++) {
-    //     Vertex& vertex = *It;
-    //     if(prev_p_valid) {
-    //         rect = rect | Span{prev_p, vertex}.boundingRect();
-    //     }
-    //     prev_p = vertex.pt;
-    //     prev_p_valid = true;
-    // }
+    if(empty()) return {};
 
-    for(auto&& [s, d]: *this | v::pairwise)
-        rect = rect | Span{s.pt, d}.boundingRect();
-    return rect;
+    double xMin = front().x(), xMax = xMin;
+    double yMin = front().y(), yMax = yMin;
+    auto include = [&](QPointF p) {
+        xMin = std::min(xMin, p.x()), xMax = std::max(xMax, p.x());
+        yMin = std::min(yMin, p.y()), yMax = std::max(yMax, p.y());
+    };
+
+    for(auto&& [fr, to]: segments()) {
+        include(to.pt);
+        auto arc = geo::arcOf(fr.pt, to.pt, fr.bulge);
+        if(!arc) continue;
+        // Дуга выпирает за хорду, так что одних концов мало: крайние по осям
+        // точки окружности (0, 90, 180, 270 градусов) попадают в габарит,
+        // только когда лежат внутри размаха самой дуги.
+        for(int quadrant{}; quadrant < 4; ++quadrant) {
+            const double angle = quadrant * pi / 2.0;
+            // смещение от начала дуги в сторону обхода: внутри размаха,
+            // если не превосходит |theta|
+            double delta = std::remainder(angle - arc->startAngle, 2.0 * pi);
+            if(arc->theta >= 0.0) {
+                if(delta < 0.0) delta += 2.0 * pi;
+                if(delta > arc->theta) continue;
+            } else {
+                if(delta > 0.0) delta -= 2.0 * pi;
+                if(delta < arc->theta) continue;
+            }
+            include(arc->center + QPointF{arc->radius * cos(angle), arc->radius * sin(angle)});
+        }
+    }
+
+    return QRectF{
+        QPointF{xMin, yMin},
+        QPointF{xMax, yMax}
+    };
 }
 
 Curve& Curve::reverse() {
-    Curve newreversed = reversed();
-    swap(newreversed);
+    // Прогиб живёт на НАЧАЛЬНОЙ вершине сегмента, поэтому при развороте он не
+    // просто едет вместе с точкой: сегмент i -> i+1 становится сегментом
+    // (n-1-i) -> (n-i), а обход дуги разворачивается -- отсюда и смена знака.
+    if(size() < 2) return *this;
+
+    std::vector<double> bulge{std::from_range, *this | v::transform(&Vertex::bulge)};
+
+    if(!closed) bulge.pop_back(); // последний сегмента за собой не имеет
+    r::reverse(bulge);
+    // У замкнутой кривой прогиб замыкающего сегмента после разворота
+    // оказывается на новой ПЕРВОЙ вершине, а не последней -- отсюда сдвиг.
+    if(closed) r::rotate(bulge, bulge.begin() + 1);
+
+    r::reverse(*this);
+
+    for(auto&& [vertex, b]: v::zip(*this, bulge)) vertex.bulge = -b;
+    if(!closed) back().bulge = {};
+
     return *this;
 }
 
 Curve Curve::reversed() const {
-    Curve new_vertices;
-    const Vertex* prev{};
-    // qWarning() << *this;
-
-    for(const Vertex& v: *this | v::reverse) {
-        Vertex::Type type{};
-        PointF cp{};
-        if(prev) {
-            type = Vertex::Type{-prev->type};
-            cp = prev->center;
-        }
-        Vertex new_v(v.pt, cp, type);
-        new_vertices.push_back(new_v);
-        prev = &v;
-    }
-    return new_vertices;
+    Curve curve{*this};
+    return curve.reverse(), curve;
 }
 
 double Curve::area() const {
+    // Знак -- как у прежней (обратной формуле шнурков) реализации через Span:
+    // у обхода против часовой стрелки в математических координатах площадь
+    // ОТРИЦАТЕЛЬНА. От этого зависит isPositive() и все его читатели.
     double area{};
-    for(auto&& [fr, to]: *this | v::pairwise)
-        area += Span{fr.pt, to}.GetArea();
-    return area;
+    for(auto&& [fr, to]: segments()) {
+        area += fr.x() * to.y() - to.x() * fr.y(); // шнурки (делим на 2 в конце)
+        if(auto arc = geo::arcOf(fr.pt, to.pt, fr.bulge))
+            area += 2.0 * arc->segmentArea(); // «довесок» дуги над хордой
+    }
+    return -area / 2.0;
 }
 
 bool Curve::isClosed() const {
-    if(empty()) return false;
-    return front().pt == back().pt;
+    return closed;
 }
 
 bool Curve::isPositive() const {
@@ -399,8 +296,10 @@ bool Curve::isPositive() const {
 
 double Curve::perimetr() const {
     double perimetr{};
-    for(auto&& [fr, to]: *this | v::pairwise)
-        perimetr += Span{fr.pt, to}.Length();
+    for(auto&& [fr, to]: segments()) {
+        auto arc = geo::arcOf(fr.pt, to.pt, fr.bulge);
+        perimetr += arc ? arc->length() : Length(fr.pt, to.pt);
+    }
     return perimetr;
 }
 
@@ -807,73 +706,56 @@ QPainterPath toPPath(Curve curve, std::optional<QTransform> tr, int arcOnly) {
 
     if(tr) TransformCurve(curve, *tr);
 
-    QPointF source = curve.front().pt;
-
     QPainterPath pPath;
-    pPath.moveTo(source);
+    pPath.moveTo(curve.front().pt);
 
-    for(auto&& v: curve | v::drop(1)) {
+    for(auto&& [fr, to]: curve.segments()) {
+        // слишком короткую дугу рисуем хордой: и незаметно, и устойчивее
+        auto arc = Length(fr.pt, to.pt) < 0.1
+            ? std::nullopt
+            : geo::arcOf(fr.pt, to.pt, fr.bulge);
+
         switch(arcOnly) {
         case 1: // Arc
-            if(!v.type) {
-                pPath.moveTo(source = v.pt);
+            if(!arc) {
+                pPath.moveTo(to.pt);
                 continue;
             }
             break;
         case 2: // Line
-            (v.type) ? pPath.moveTo(source = v.pt)
-                     : pPath.lineTo(source = v.pt);
+            arc ? pPath.moveTo(to.pt)
+                : pPath.lineTo(to.pt);
             continue;
         default:
-            if(!v.type) {
-                pPath.lineTo(source = v.pt);
+            if(!arc) {
+                pPath.lineTo(to.pt);
                 continue;
             }
             break;
         }
 
-        const QPointF target = v.pt;
-
-        if(Length(source, target) < 0.1) {
-            pPath.lineTo(source = v.pt);
-            continue;
-        }
-
-        QLineF ls{v.center, source};
-        const double r = ls.length();
-
-        // NOTE Qt stupid angles
-        const double asource = ls.angle();
-        const double atarget = ls.angleTo(QLineF{v.center, target});
-        double span = atarget;
-        // qCritical() << atarget << v.type;
-        // drawCross(v.center, u"f%1 s%2 t%3"_s.arg(asource).arg(span).arg(v.type));
+        drawCross45(arc->center);
 
         QRectF rect{
-            v.center.x() - r,
-            v.center.y() - r,
-            r * 2,
-            r * 2,
+            arc->center.x() - arc->radius,
+            arc->center.y() - arc->radius,
+            arc->radius * 2,
+            arc->radius * 2,
         };
 
-        drawCross45(v.center);
-
-        if(v.type == Vertex::Ccw) span = span - 360.;
-
-        pPath.arcTo(rect, asource, span);
-
-        source = v.pt;
+        // NOTE Qt stupid angles: у Qt угол растёт в сторону, противоположную
+        // математической (ось Y смотрит вниз), поэтому знак размаха обратный.
+        pPath.arcTo(rect,
+            QLineF{arc->center, fr.pt}.angle(),
+            -qRadiansToDegrees(arc->theta));
     }
 
-    if(curve.isClosed()
-        && static_cast<QPointF>(pPath.elementAt(0)) != static_cast<QPointF>(pPath.elementAt(pPath.elementCount() - 1))
-        && !arcOnly) // NOTE force close
-        pPath.lineTo(curve.front());
+    if(curve.closed && !arcOnly) pPath.closeSubpath();
 
     return pPath;
 }
 
-QPainterPath toPPath(const Curves& curves) {
+QPainterPath toPPath(const Geo::Polygon& curves) {
     if(curves.empty()) return {};
     QPainterPath pPath;
     for(auto&& curve: curves) pPath.addPath(toPPath(curve));
@@ -881,20 +763,63 @@ QPainterPath toPPath(const Curves& curves) {
 }
 
 Curve toCurve(std::span<const QPointF> path) {
-    return {
+    Curve curve{
         std::from_range,
         v ::transform(path, [](const QPointF& p) -> Vertex { return {p}; }),
     };
+    // повтор первой точки в конце -- как контур замыкают снаружи; у Curve для
+    // этого флаг
+    if(curve.size() > 2 && curve.front().pt == curve.back().pt) curve.close();
+    return curve;
 }
+
+namespace {
+
+// Промежуточное представление ТОЛЬКО для восстановления дуг из Path64.
+//
+// Клиппер отдаёт дуги россыпью точек с общим центром, и весь разбор ниже
+// (склейка кусков, подгонка стыков) устроен вокруг «центр + направление» --
+// на прогибе он бы не сошёлся: прогиб про ПАРУ точек, а тут центр известен
+// раньше, чем ясно, где у дуги концы. Поэтому центр живёт до самого конца
+// разбора, а в прогиб всё переводится один раз, на выходе (toBulgeCurve).
+struct AVertex {
+    PointF pt{}, center{};
+    Vertex::Dir dir{};
+
+    double radius() const { return dir ? Length(center, pt) : std::nan(""); }
+    AVertex& setRadius(double r) {
+        if(dir) {
+            QLineF l{center, pt};
+            l.setLength(r);
+            pt = l.p2();
+        }
+        return *this;
+    }
+    operator bool() const { return dir != Vertex::Line; }
+    operator QPointF() const { return pt; }
+};
+
+using ACurve = std::vector<AVertex>;
+
+// Дуга у AVertex записана на КОНЕЧНОЙ вершине сегмента, у Vertex прогиб -- на
+// начальной; здесь этот сдвиг и происходит.
+Curve toBulgeCurve(const ACurve& acurve) {
+    Curve curve;
+    curve.reserve(acurve.size());
+    for(auto&& [fr, to]: acurve | v::pairwise)
+        curve.emplace_back(fr.pt,
+            to.dir ? geo::bulgeOf(fr.pt, to.pt, to.center, to.dir) : 0.0);
+    if(acurve.size()) curve.emplace_back(acurve.back().pt);
+    return curve;
+}
+
+} // namespace
 
 Curve toCurve(std::span<const Point64> path_) {
     if(path_.size() == 1
         || (path_.size() == 2 && path_.front() == path_.back()))
         return {
-            geo::Vertex{~path_.front(), ~GetC(path_.front())}
-        };
-
-    Curve curve;
+            geo::Vertex{~path_.front()}};
 
     bool closed = path_.front() == path_.back();
     if(closed) path_ = path_.subspan(1); // FIXME
@@ -1001,7 +926,7 @@ Curve toCurve(std::span<const Point64> path_) {
         QPointF center = ~!path.front();
         auto dir = DIR(~path[0], center, ~path[1]);
         double radius = get_roundest(v::transform(segments.front(), Radius));
-        curve = CircleCurve(radius * 2, center);
+        Curve curve = CircleCurve(radius * 2, center);
         if(dir == Vertex::Cw) curve.reverse();
         assert(closed && curve.isClosed());
         return curve;
@@ -1020,15 +945,15 @@ Curve toCurve(std::span<const Point64> path_) {
         };
         bool isArc() const noexcept { return size() > 1; }
         operator bool() const noexcept { return isArc(); }
-        Vertex vtx() const noexcept { return {~front()}; }
-        Vertex vtx1() const noexcept {
+        AVertex vtx() const noexcept { return {~front()}; }
+        AVertex vtx1() const noexcept {
             if(!isArc()) return {~front()};
             QLineF l{center, ~front()};
             l.setLength(radius);
             return {l.p2()};
         }
-        Vertex vtx2() const noexcept {
-            if(isArc()) return Vertex{~back(), center, DIR(*this)}.setRadius(radius);
+        AVertex vtx2() const noexcept {
+            if(isArc()) return AVertex{~back(), center, DIR(*this)}.setRadius(radius);
             return {~front()};
         }
     };
@@ -1039,6 +964,7 @@ Curve toCurve(std::span<const Point64> path_) {
     };
 
     // fill curve
+    ACurve curve;
     for(const SegData& sd: sds) {
         if(sd) { // arcTo
             curve.emplace_back(sd.vtx());
@@ -1049,11 +975,11 @@ Curve toCurve(std::span<const Point64> path_) {
     }
 
     // fix arcs
-    using VSpan = std::span<Vertex>;
+    using VSpan = std::span<AVertex>;
     using SDSpan = std::span<const SegData>;
     // using SDSpan = decltype((tmp.cbegin()));
     // auto sd = tmp.begin();
-    // for(VSpan vs: v::chunk_by(curve, [](Vertex&, Vertex& r) -> bool { return r; })) {
+    // for(VSpan vs: v::chunk_by(curve, [](AVertex&, AVertex& r) -> bool { return r; })) {
     //     // qWarning() << vs.size() << !!vs.front() << !!vs.back();
     // }
 
@@ -1097,16 +1023,20 @@ Curve toCurve(std::span<const Point64> path_) {
         }
     };
 
-    constexpr static auto fixLCL = +[](Vertex& Cir, Vertex& fixC,
-                                        Vertex& L0, Vertex& fixL, double radius) {
+    constexpr static auto fixLCL = +[](AVertex& Cir, AVertex& fixC,
+                                        AVertex& L0, AVertex& fixL, double radius) {
         QPolygonF pts = c::line_intersection(Cir, L0, fixL);
-        QPointF pt;
-        if(pts.size()) pt = r::min(pts, {}, std::bind(Length, _1, fixL));
         // for(QPointF pt: pts) drawCross(pt, "LCL", Qt::white);
-        if(TEST(pt, fixL, 0.01)) { // FIXME
-            fixL.pt = fixC.pt = pt;
-            // drawCross(fixC, "LCL", Qt::yellow);
-            return true;
+        // Пересечений может не быть вовсе -- тогда подгонять стык не к чему.
+        // (Раньше в этом случае в дело шла точка по умолчанию, то есть начало
+        // координат, и стык рядом с ним «притягивался» к нулю.)
+        if(pts.size()) {
+            QPointF pt = r::min(pts, {}, std::bind(Length, _1, fixL));
+            if(TEST(pt, fixL, 0.01)) { // FIXME
+                fixL.pt = fixC.pt = pt;
+                // drawCross(fixC, "LCL", Qt::yellow);
+                return true;
+            }
         }
         if(TEST(Cir.center, fixL, Cir.radius(), 0.01)) {
             // drawCross(fixC, "LCL", Qt::magenta);
@@ -1162,7 +1092,7 @@ Curve toCurve(std::span<const Point64> path_) {
 
     if(1) {
         bool fl{};
-        auto adjacent = v::adjacent<3>(v::chunk_by(curve, [](Vertex&, Vertex& r) -> bool { return r; }));
+        auto adjacent = v::adjacent<3>(v::chunk_by(curve, [](AVertex&, AVertex& r) -> bool { return r; }));
         for(auto* sd = sds.data(); auto [v0, v1, v2]: adjacent)
             fl |= 1, fixers[joinKind(v0, v1, v2)](v0, v1, v2, {sd, sd++ + 3});
 
@@ -1177,20 +1107,20 @@ Curve toCurve(std::span<const Point64> path_) {
         do { // clean duplicates after fixers
             s = curve.size();
             for(auto it = curve.begin(); it != curve.end();) {
-                Vertex& v1 = *it++;
+                AVertex& v1 = *it++;
                 if(it == curve.end()) break;
-                Vertex& v2 = *it;
+                AVertex& v2 = *it;
                 if(v1.pt == v2.pt) it = curve.erase(v1 ? it : (--it));
             }
         } while(s != curve.size());
     }
 
-    if(closed && !curve.isClosed()) curve.emplace_back(curve.front());
-
-    return curve;
+    Curve result = toBulgeCurve(curve);
+    result.closed = closed;
+    return result;
 }
 
-Curves toCurves(std::span<const Path64> paths) {
+Geo::Polygon toCurves(std::span<const Path64> paths) {
     constexpr auto size = std::bind(&Path64::size, _1);
     return {
         std::from_range,
@@ -1198,7 +1128,7 @@ Curves toCurves(std::span<const Path64> paths) {
     };
 }
 
-Curvess toCurvess(std::span<const Paths64> pathss) {
+Geo::Polygons toCurvess(std::span<const Paths64> pathss) {
     constexpr auto size = std::bind(&Paths64::size, _1);
     return {
         std::from_range,
@@ -1209,23 +1139,32 @@ Curvess toCurvess(std::span<const Paths64> pathss) {
 Path64 toPath(const Curve& curve) {
     // qInfo() << "toPath";
 
-    const bool closed = curve.isClosed();
-    const size_t n = curve.size();
+    if(curve.empty()) return {};
 
-    // Индекс центра для каждого сегмента curve[i] -> curve[i+1] (0, если сегмент - отрезок).
-    // Регистрируется один раз на дугу и переиспользуется для всех её точек в arcToPath.
-    std::vector<int32_t> segCenter(n ? n - 1 : 0, 0);
-    for(size_t i{}; i + 1 < n; ++i)
-        if(curve[i + 1].type)
-            segCenter[i] = RegisterCenter(curve[i + 1].center);
+    const bool closed = curve.closed;
+    const size_t n = curve.size();
+    const size_t segs = curve.segmentCount();
+
+    // Геометрия и индекс центра каждого сегмента (nullopt/0, если сегмент --
+    // отрезок). Центр регистрируется один раз на дугу и переиспользуется для
+    // всех её точек в arcToPath: по нему обратный перевод и опознаёт дугу.
+    std::vector<std::optional<geo::Arc>> segArc(segs);
+    std::vector<int32_t> segCenter(segs, 0);
+    for(size_t i{}; i < segs; ++i)
+        if((segArc[i] = curve.arcAt(i)))
+            segCenter[i] = RegisterCenter(segArc[i]->center);
 
     Path64 path{~curve.front().pt};
-    if(n > 1) SetCIndices(path.back(), 0, segCenter[0]); // дуга, начинающаяся в первой точке
+    if(segs) SetCIndices(path.back(), 0, segCenter[0]); // дуга, начинающаяся в первой точке
 
-    for(size_t i{}; i + 1 < n; ++i) {
-        path.append_range(arcToPath(curve[i], curve[i + 1], segCenter[i]));
+    for(size_t i{}; i < segs; ++i) {
+        const QPointF& to = curve[(i + 1) % n].pt;
+        if(segArc[i])
+            path.append_range(arcToPath(to, *segArc[i], segCenter[i]));
+        else
+            path.emplace_back(~to);
         // точка стыка: индекс дуги, ЗАКОНЧИВШЕЙСЯ здесь, и индекс дуги, НАЧИНАЮЩЕЙСЯ здесь
-        const int32_t nextIdx = (i + 2 < n) ? segCenter[i + 1] : 0;
+        const int32_t nextIdx = (i + 1 < segs) ? segCenter[i + 1] : 0;
         SetCIndices(path.back(), segCenter[i], nextIdx);
     }
 
@@ -1233,6 +1172,8 @@ Path64 toPath(const Curve& curve) {
     // CL2::StripDuplicates(path, closed);
     // CL2::StripNearEqual(path, uScale, closed);
 
+    // Замкнутость выражена повтором первой точки: другого способа сообщить её
+    // клипперу (и обратному переводу toCurve) в Path64 просто нет.
     if(closed && path.back() != path.front())
         path.emplace_back(path.front());
 
@@ -1241,15 +1182,15 @@ Path64 toPath(const Curve& curve) {
     return path;
 }
 
-Paths64 toPaths(const Curves& curves) {
+Paths64 toPaths(const Geo::Polygon& curves) {
     Paths64 paths{std::from_range, curves | v::transform(toPath)};
     return paths;
 }
 
-Curves toCurves(const QPainterPath& pPath) {
+Geo::Polygon toCurves(const QPainterPath& pPath) {
     using QPP = QPainterPath;
     using El = QPP::Element;
-    Curves curves;
+    Geo::Polygon curves;
     for(auto&& elements: v::iota(0, pPath.elementCount())
             | v::transform(std::bind(&QPP::elementAt, pPath, _1))            // to Element
             | v::chunk_by(+[](const El&, const El& r) { return r.type; })) { // to Subpath Polygons
@@ -1257,7 +1198,7 @@ Curves toCurves(const QPainterPath& pPath) {
         // qInfo() << "elements" << elements.size();                         // count of elements
 
         constexpr auto splitPaths = +[](const El&, const El& r) { return r.type > QPP::CurveToElement; };
-        auto subpaths = v::chunk_by(elements, splitPaths); // separate Curves
+        auto subpaths = v::chunk_by(elements, splitPaths); // separate Geo::Polygon
 
         Curve curve;
         for(auto&& [from, to]: v::pairwise(subpaths)) { // 'from' point to bezier Point64 in 'to' if
@@ -1268,7 +1209,10 @@ Curves toCurves(const QPainterPath& pPath) {
                 double radius;
                 if(isArcOfCircle(from.back(), to[0], to[1], to[2], center, radius, 5e-3)) {
                     // qInfo() << "Arc 1" << radius << center;
-                    curve.emplace_back(static_cast<QPointF>(to.back()), center, DIR(from.back(), center, to.back()));
+                    // прогиб пишется на НАЧАЛЬНОЙ вершине дуги - она уже в кривой
+                    curve.back().bulge = geo::bulgeOf(curve.back().pt, to.back(), center,
+                        DIR(from.back(), center, to.back()));
+                    curve.emplace_back(static_cast<QPointF>(to.back()));
                 } else {                          // is lineTo
                     drawCross45(center, Qt::red); // debug
                     curve.emplace_back(static_cast<QPointF>(to.back()));
@@ -1281,49 +1225,13 @@ Curves toCurves(const QPainterPath& pPath) {
     return curves;
 }
 
-Curves& TransformCurves(Curves& curves, const QTransform& tr) {
+Geo::Polygon& TransformCurves(Geo::Polygon& curves, const QTransform& tr) {
     r::for_each(curves, std::bind(TransformCurve, _1, tr));
     return curves;
 }
 
-QIcon drawIcon(const Curves& curves, QColor color) {
+QIcon drawIcon(const Geo::Polygon& curves, QColor color) {
     return drawIcon(toPPath(curves), color);
-}
-
-constexpr double kEps = 1e-12;
-
-std::optional<ArcGeometry> BulgeToArc(const QPointF& p1, const QPointF& p2, double bulge) {
-    if(std::abs(bulge) < kEps) return std::nullopt;
-
-    const double dx = p2.x() - p1.x();
-    const double dy = p2.y() - p1.y();
-    const double chord = std::sqrt(dx * dx + dy * dy);
-    if(chord < kEps) return std::nullopt;
-
-    // Signed sagitta: exact identity sagitta = (chord/2) * bulge.
-    // Знаковая стрела прогиба: точное тождество sagitta = (хорда/2) * bulge.
-    const double s = bulge * chord / 2.0;
-    // Signed radius: derived from right-triangle (chord/2, s, r-s).
-    // Знаковый радиус: выводится из прямоугольного треугольника (хорда/2, s, r-s).
-    const double halfChord = chord / 2.0;
-    const double radiusSigned = (halfChord * halfChord + s * s) / (2.0 * s);
-
-    const double ux = dx / chord, uy = dy / chord; // unit chord direction
-    // единичное направление хорды
-    const double nx = -uy, ny = ux; // left normal (+90 deg)
-    // левая нормаль (+90 град)
-
-    const double mx = (p1.x() + p2.x()) / 2.0;
-    const double my = (p1.y() + p2.y()) / 2.0;
-    const double apothem = radiusSigned - s; // signed midpoint->center distance along n
-    // знаковое расстояние от середины до центра вдоль n
-
-    ArcGeometry arc;
-    arc.center = {mx + nx * apothem, my + ny * apothem};
-    arc.radius = std::abs(radiusSigned);
-    arc.startAngle = std::atan2(p1.y() - arc.center.y(), p1.x() - arc.center.x());
-    arc.ccw = bulge > 0.0;
-    return arc;
 }
 
 namespace cl = Clipper2Lib;
@@ -1338,8 +1246,8 @@ static Paths64& closePaths(Paths64& paths) {
     return paths;
 }
 
-Curves BoolOp_::operator()(ClipType ct, FillRule fr,
-    const Curves& subjects, const Curves& clips) {
+Geo::Polygon BoolOp_::operator()(ClipType ct, FillRule fr,
+    const Geo::Polygon& subjects, const Geo::Polygon& clips) {
     Paths64 result;
     cl::Clipper64 clipper;
     clipper.AddSubject({
@@ -1358,7 +1266,7 @@ Curves BoolOp_::operator()(ClipType ct, FillRule fr,
 }
 
 void BoolOp_::operator()(ClipType ct, FillRule fr,
-    const Curves& subjects, const Curves& clips, CurveTree& solution) {
+    const Geo::Polygon& subjects, const Geo::Polygon& clips, CurveTree& solution) {
     Paths64 sol_open;
     cl::Clipper64 clipper;
     clipper.AddSubject({
@@ -1376,17 +1284,17 @@ void BoolOp_::operator()(ClipType ct, FillRule fr,
         static_cast<cl::FillRule>(fr), polytree, sol_open);
 }
 
-Curves BoolOp_::Intersect(const Curves& subjects, const Curves& clips,
+Geo::Polygon BoolOp_::Intersect(const Geo::Polygon& subjects, const Geo::Polygon& clips,
     FillRule fr) {
     return operator()(ClipType::Intersection, fr, subjects, clips);
 }
 
-Curves BoolOp_::Union(const Curves& subjects, const Curves& clips,
+Geo::Polygon BoolOp_::Union(const Geo::Polygon& subjects, const Geo::Polygon& clips,
     FillRule fr) {
     return operator()(ClipType::Union, fr, subjects, clips);
 }
 
-Curves BoolOp_::Union(const Curves& subjects, FillRule fr) {
+Geo::Polygon BoolOp_::Union(const Geo::Polygon& subjects, FillRule fr) {
     Paths64 result;
     cl::Clipper64 clipper;
     clipper.AddSubject({
@@ -1397,18 +1305,18 @@ Curves BoolOp_::Union(const Curves& subjects, FillRule fr) {
     return toCurves(closePaths(result));
 }
 
-Curves BoolOp_::Difference(const Curves& subjects, const Curves& clips,
+Geo::Polygon BoolOp_::Difference(const Geo::Polygon& subjects, const Geo::Polygon& clips,
     FillRule fr) {
 
     return operator()(ClipType::Difference, fr, subjects, clips);
 }
 
-Curves BoolOp_::Xor(const Curves& subjects, const Curves& clips, FillRule fr) {
+Geo::Polygon BoolOp_::Xor(const Geo::Polygon& subjects, const Geo::Polygon& clips, FillRule fr) {
 
     return operator()(ClipType::Xor, fr, subjects, clips);
 }
 
-Curves Inflate64::operator()(const Curves& paths, double delta,
+Geo::Polygon Inflate64::operator()(const Geo::Polygon& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
 
@@ -1423,7 +1331,7 @@ Curves Inflate64::operator()(const Curves& paths, double delta,
     // return toCurves(solution);
 }
 
-Curves Inflate64::PathsZ(const Curves& paths, double delta,
+Geo::Polygon Inflate64::PathsZ(const Geo::Polygon& paths, double delta,
     JoinType jt, EndType et,
     double miterLimit, double arcTolerance) {
     // roundJoinCache.clear();
@@ -1443,14 +1351,14 @@ Curves Inflate64::PathsZ(const Curves& paths, double delta,
     return toCurves(closePaths(solution));
 }
 
-Curves Inflate64::RoundPolygon(const Curves& paths,
+Geo::Polygon Inflate64::RoundPolygon(const Geo::Polygon& paths,
     double delta, double miterLimit, double arcTolerance) {
 
     return PathsZ(paths, delta * 0.5,
         JoinType::Round, EndType::Polygon, miterLimit, arcTolerance);
 }
 
-Curves Inflate64::MiterPolygon(const Curves& paths,
+Geo::Polygon Inflate64::MiterPolygon(const Geo::Polygon& paths,
     double delta, double miterLimit, double arcTolerance) {
 
     return PathsZ(paths, delta * 0.5,

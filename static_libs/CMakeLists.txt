@@ -11,7 +11,13 @@
 cmake_minimum_required(VERSION 4.0)
 
 # static lib
-add_subdirectory(geometry)
+#
+# geo -- точная геометрия на CGAL, новая. geometry -- старая, на Clipper2:
+# myclipper.h/geometry.h/circle.h/span.h ещё держат на себе полпроекта, так
+# что до конца переезда живут обе, и geometry зависит от Geo, а не наоборот.
+add_subdirectory(geo)
+add_library(geometry ALIAS Geo)
+
 add_subdirectory(filetree)
 add_subdirectory(gi)
 add_subdirectory(graphicsview)

@@ -13,7 +13,7 @@
 
 namespace Threading {
 namespace Gi {
-Preview::Preview(Path64&& path, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_)
+Preview::Preview(Geo::Polyline&& path, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_)
     : path_{std::move(path)}
     , row{row}
     , toolId_{toolId} {
@@ -39,9 +39,9 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPolygonF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter  = tool.getDiameter(tool.getDepth());
+                const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
-                for(Path64& path_: Inflate64(Paths64{path_}, diameter * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)) {
+                for(Geo::Polyline& path_: Inflate64(Paths64{path_}, diameter * uScale, cl::JoinType::Round, cl::EndType::Round, uScale)) {
                     path_.push_back(path_.front());
                     painterPath.addPolygon(~path_);
                 }
@@ -61,7 +61,7 @@ void Preview::updateTool() {
             toolPath_ = [this](const QPointF& val) {
                 QPainterPath painterPath;
                 auto& tool(App::toolHolder().tool(toolId()));
-                const double diameter  = tool.getDiameter(tool.getDepth());
+                const double diameter = tool.getDiameter(tool.getDepth());
                 const double lineKoeff = diameter * 0.7;
                 painterPath.moveTo(-QPointF(0.0, lineKoeff));
                 painterPath.lineTo(+QPointF(0.0, lineKoeff));

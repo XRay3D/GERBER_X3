@@ -45,18 +45,16 @@ Entity::Type Arc::type() const { return Type::ARC; }
 DxfGo Arc::toGo() const {
     assert(thickness == 0); // TODO thickness
 
-    QPointF
-        p1{cos(qDegreesToRadians(startAngle)), sin(qDegreesToRadians(startAngle))},
-        p2{cos(qDegreesToRadians(endAngle)), sin(qDegreesToRadians(endAngle))};
     // По спецификации DXF дуга ARC всегда идёт против часовой стрелки (Ccw) от
-    // startAngle к endAngle, независимо от величины дуги. geo::DIR() определяет
-    // направление по кратчайшему углу между точками и для дуг больше 180° даёт
-    // неверный результат (Cw вместо Ccw) — направление здесь не вычисляется,
-    // а фиксировано согласно спецификации.
-    Curve curve{
-        {p1 * radius + centerPoint},
-        {p2 * radius + centerPoint, centerPoint, geo::Vertex::Ccw}
-    };
+    // startAngle к endAngle, независимо от величины дуги -- размах здесь не
+    // вычисляется по кратчайшему углу, а берётся согласно спецификации.
+    const double a1 = qDegreesToRadians(startAngle);
+    double sweep = qDegreesToRadians(endAngle) - a1;
+    while(sweep <= 0.0) sweep += 2.0 * pi;
+
+    // ArcCurve режет размах на куски не длиннее полуокружности: прогиб
+    // почти полного оборота уходит в бесконечность.
+    Geo::Polyline curve = ArcCurve(centerPoint, radius, a1, sweep);
 
     DxfGo go{id, std::move(curve)};
     return go;

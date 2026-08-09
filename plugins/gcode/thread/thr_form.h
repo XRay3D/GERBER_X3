@@ -45,7 +45,7 @@ public:
 
 private:
     Ui::ThreadForm* ui;
-    class Model* model       = nullptr;
+    class Model* model = nullptr;
     class AbstractFile* file = nullptr;
     class Header* header;
     class QCheckBox* checkBox;
@@ -75,7 +75,9 @@ protected:
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
-        event->accept();
+        // Базовая, а не event->accept(): в GCode::Form::showEvent сбрасывается
+        // режим правки, иначе форма молча перепишет УП из прошлого сеанса.
+        GCode::Form::showEvent(event);
     }
     void hideEvent(QHideEvent* event) override;
 

@@ -79,7 +79,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
         if(gcp.convent())
             ReversePaths(profilePaths);
-        for(Path64& path: profilePaths)
+        for(Geo::Polyline& path: profilePaths)
             path.push_back(path.front());
     }
 
@@ -148,7 +148,7 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     Paths64 laserPath(profilePaths);
 
     if(!qFuzzyIsNull(angle)) { // Rotate Paths64
-        for(Path64& path: laserPath)
+        for(Geo::Polyline& path: laserPath)
             RotatePath(path, angle, center);
         // get bounds of frames if angle > 0.0
         rect = GetBounds(laserPath);
@@ -157,16 +157,16 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
     rect.left -= uScale;
     rect.right += uScale;
 
-    Path64 zPath;
+    Geo::Polyline zPath;
     { // create u"snake"_s
         auto y = rect.top;
         while(y < rect.bottom) {
-            zPath.append_range(Path64{
+            zPath.append_range(Geo::Polyline{
                 Point64{rect.left,  y},
                 Point64{rect.right, y},
             });
             y += stepOver;
-            zPath.append_range(Path64{
+            zPath.append_range(Geo::Polyline{
                 Point64{rect.right, y},
                 Point64{rect.left,  y},
             });
@@ -179,11 +179,11 @@ void Creator::createRasterAccLaser(const Tool& tool, const double depth, const d
         c.AddOpenSubject({zPath});
         c.AddClip(laserPath);
         c.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, laserPath, laserPath); // laser on
-        addAcc(laserPath, gcp.params[AccDistance].toDouble() * uScale);             // add laser off paths
+        addAcc(laserPath, gcp.params[AccDistance].toDouble() * uScale);                     // add laser off paths
     }
 
     if(!qFuzzyIsNull(angle)) // Rotate Paths64
-        for(Path64& path: laserPath)
+        for(Geo::Polyline& path: laserPath)
             RotatePath(path, -angle, center);
 
     returnPss.push_back(laserPath);
@@ -212,10 +212,10 @@ void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
 #ifdef Q_OS_UNIX
         std::execution::par,
 #endif
-        src.begin(), src.end(), [](const Path64& p1, const Path64& p2) -> bool { return p1.front().y > p2.front().y; });
+        src.begin(), src.end(), [](const Geo::Polyline& p1, const Geo::Polyline& p2) -> bool { return p1.front().y > p2.front().y; });
     bool reverse{};
 
-    auto format = [&reverse](Path64& src) -> Path64& {
+    auto format = [&reverse](Geo::Polyline& src) -> Geo::Polyline& {
         if(reverse)
             std::sort(src.begin(), src.end(), [](const Point64& p1, const Point64& p2) -> bool { return p1.x > p2.x; });
         else
@@ -224,48 +224,48 @@ void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
     };
 
     auto adder = [&reverse, &pPath, accDistance](Paths64& paths) {
-        std::sort(paths.begin(), paths.end(), [reverse](const Path64& p1, const Path64& p2) -> bool {
+        std::sort(paths.begin(), paths.end(), [reverse](const Geo::Polyline& p1, const Geo::Polyline& p2) -> bool {
             if(reverse)
                 return p1.front().x > p2.front().x;
             else
                 return p1.front().x < p2.front().x;
         });
         if(pPath.size()) { // acc
-            Path64 acc;
+            Geo::Polyline acc;
             {
-                const Path64& path = pPath.back();
+                const Geo::Polyline& path = pPath.back();
                 if(path.front().x < path.back().x) // acc
-                    acc.append_range(Path64{
+                    acc.append_range(Geo::Polyline{
                         path.back(), {path.back().x + accDistance, path.front().y}
                     });
                 else
-                    acc.append_range(Path64{
+                    acc.append_range(Geo::Polyline{
                         path.back(), {path.back().x - accDistance, path.front().y}
                     });
             }
             {
-                const Path64& path = paths.front();
+                const Geo::Polyline& path = paths.front();
                 if(path.front().x > path.back().x) // acc
-                    acc.append_range(Path64{
+                    acc.append_range(Geo::Polyline{
                         {path.front().x + accDistance, path.front().y},
                         path.front()
                     });
                 else
-                    acc.append_range(Path64{
+                    acc.append_range(Geo::Polyline{
                         {path.front().x - accDistance, path.front().y},
                         path.front()
                     });
             }
             pPath.push_back(acc);
         } else { // acc first
-            pPath.emplace_back(Path64{
+            pPath.emplace_back(Geo::Polyline{
                 {paths.front().front().x - accDistance, paths.front().front().y},
                 paths.front().front()
             });
         }
         for(size_t j{}; j < paths.size(); ++j) {
             if(j) // acc
-                pPath.emplace_back(Path64{paths[j - 1].back(), paths[j].front()});
+                pPath.emplace_back(Geo::Polyline{paths[j - 1].back(), paths[j].front()});
             pPath.push_back(paths[j]);
         }
     };
@@ -290,13 +290,13 @@ void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
     }
 
     { // acc last
-        Path64& path = pPath.back();
+        Geo::Polyline& path = pPath.back();
         if(path.front().x < path.back().x)
-            pPath.emplace_back(Path64{
+            pPath.emplace_back(Geo::Polyline{
                 path.back(), {path.back().x + accDistance, path.front().y}
             });
         else
-            pPath.emplace_back(Path64{
+            pPath.emplace_back(Geo::Polyline{
                 path.back(), {path.back().x - accDistance, path.front().y}
             });
     }
@@ -304,7 +304,7 @@ void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
     src = std::move(pPath);
 }
 
-Paths64 Creator::calcScanLines(const Paths64& src, const Path64& frame) {
+Paths64 Creator::calcScanLines(const Paths64& src, const Geo::Polyline& frame) {
     Paths64 scanLines;
     cl::Clipper64 clipper;
     // clipper.AddOpenSubject(src);
@@ -313,12 +313,12 @@ Paths64 Creator::calcScanLines(const Paths64& src, const Path64& frame) {
     clipper.AddOpenSubject({frame});
     clipper.Execute(cl::ClipType::Intersection, cl::FillRule::Positive, scanLines, scanLines);
     if(!scanLines.size()) return scanLines;
-    std::sort(scanLines.begin(), scanLines.end(), [](const Path64& l, const Path64& r) { return l.front().y < r.front().y; }); // vertical sort
+    std::sort(scanLines.begin(), scanLines.end(), [](const Geo::Polyline& l, const Geo::Polyline& r) { return l.front().y < r.front().y; }); // vertical sort
     /*PType*/ int32_t start = scanLines.front().front().y;
     bool fl = {};
     for(size_t i{}, last{}; i < scanLines.size(); ++i) {
         if(auto y = scanLines[i].front().y; y != start || i - 1 == scanLines.size()) {
-            std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Path64& l, const Path64& r) { // horizontal sort
+            std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Geo::Polyline& l, const Geo::Polyline& r) { // horizontal sort
                 return fl ? l.front().x < r.front().x : l.front().x > r.front().x;
             });
             for(size_t k = last; k < i; ++k) // fix direction
@@ -332,7 +332,7 @@ Paths64 Creator::calcScanLines(const Paths64& src, const Path64& frame) {
     return scanLines;
 }
 
-Paths64 Creator::calcFrames(const Paths64& src, const Path64& frame) {
+Paths64 Creator::calcFrames(const Paths64& src, const Geo::Polyline& frame) {
     Paths64 frames;
 
     Paths64 tmp;
@@ -345,7 +345,7 @@ Paths64 Creator::calcFrames(const Paths64& src, const Path64& frame) {
     clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, tmp, tmp); // FillRule::Positive
     // dbgPaths(tmp, u"ClipType::Difference"_s);
     frames.append_range(std::move(tmp));
-    std::sort(frames.begin(), frames.end(), [](const Path64& l, const Path64& r) { return l.front().y < r.front().y; }); // vertical sort
+    std::sort(frames.begin(), frames.end(), [](const Geo::Polyline& l, const Geo::Polyline& r) { return l.front().y < r.front().y; }); // vertical sort
     for(auto& path: frames)
         if(path.front().y > path.back().y)
             ReversePath(path); // fix vertical direction
@@ -353,7 +353,7 @@ Paths64 Creator::calcFrames(const Paths64& src, const Path64& frame) {
     return frames;
 }
 
-Path64 Creator::calcZigzag(const Paths64& src) {
+Geo::Polyline Creator::calcZigzag(const Paths64& src) {
     cl::Clipper64 clipper;
     clipper.AddClip(src);
     Rect rect(GetBounds(src));
@@ -362,7 +362,7 @@ Path64 Creator::calcZigzag(const Paths64& src) {
     rect.bottom += o;
     rect.left -= uScale;
     rect.right += uScale;
-    Path64 zigzag;
+    Geo::Polyline zigzag;
     auto start = rect.top;
     bool fl{};
 
@@ -384,11 +384,11 @@ Path64 Creator::calcZigzag(const Paths64& src) {
 Paths64 Creator::merge(const Paths64& scanLines, const Paths64& frames) {
     Paths64 merged;
     merged.reserve(scanLines.size() / 10);
-    std::list<Path64> bList;
+    std::list<Geo::Polyline> bList;
     for(auto&& path: scanLines)
         bList.emplace_back(std::move(path));
 
-    std::list<Path64> fList;
+    std::list<Geo::Polyline> fList;
     for(auto&& path: frames)
         fList.emplace_back(std::move(path));
 

@@ -69,6 +69,78 @@ void Highlighter::highlightBlock(const QString& text) {
     }
 }
 
+namespace {
+// Открытые окна просмотра, по одному на файл.
+std::map<int32_t, Dialog*>& openDialogs() {
+    static std::map<int32_t, Dialog*> dialogs;
+    return dialogs;
+}
+} // namespace
+
+Dialog* Dialog::showFor(int32_t fileId, const QString& text, const QString& windowTitle, QWidget* parent) {
+    auto& dialogs = openDialogs();
+    if(auto it = dialogs.find(fileId); it != dialogs.end()) {
+        it->second->setProgram(text, windowTitle);
+        it->second->raise();
+        it->second->activateWindow();
+        return it->second;
+    }
+    auto* dialog = new Dialog{text, windowTitle, parent};
+    dialog->fileId_ = fileId;
+    dialog->setAttribute(Qt::WA_DeleteOnClose);
+    dialogs.emplace(fileId, dialog);
+    dialog->show();
+    return dialog;
+}
+
+void Dialog::programChanged(int32_t fileId, const QString& text, const QString& windowTitle) {
+    auto& dialogs = openDialogs();
+    if(auto it = dialogs.find(fileId); it != dialogs.end())
+        it->second->setProgram(text, windowTitle);
+}
+
+void Dialog::programClosed(int32_t fileId) {
+    auto& dialogs = openDialogs();
+    if(auto it = dialogs.find(fileId); it != dialogs.end()) {
+        Dialog* dialog = it->second;
+        // Из реестра убираем СРАЗУ: close() при WA_DeleteOnClose удаляет окно
+        // отложенно, и до этого момента id успел бы достаться новому файлу --
+        // тот получил бы уже закрывающееся окно.
+        dialogs.erase(it);
+        dialog->fileId_ = -1; // деструктору искать больше нечего
+        dialog->close();
+    }
+}
+
+Dialog::~Dialog() {
+    if(fileId_ > -1) openDialogs().erase(fileId_);
+}
+
+void Dialog::setProgram(const QString& text, const QString& windowTitle) {
+    setWindowTitle(windowTitle);
+
+    // Позиция курсора сохраняется: при перегенерации текст обычно тот же по
+    // смыслу, и терять место, на которое человек смотрел, незачем.
+    const int cursorPos = tbCode->textCursor().position();
+
+    tbCode->setPlainText(text);
+
+    const int lineCount = text.count(u'\n') + 3;
+    tbLine->setPlainText(v::iota(1, lineCount)
+        | v::transform(std::bind(qOverload<int, int>(QString::number), _1, 10))
+        | v::join_with(u'\n')
+        | r::to<QString>());
+    tbLine->setFixedWidth(QFontMetrics{tbLine->font()}.boundingRect(QString::number(lineCount * 10)).width());
+
+    if(QTextCursor cursor = tbCode->textCursor(); cursorPos > 0) {
+        cursor.setPosition(std::min(cursorPos, tbCode->document()->characterCount() - 1));
+        tbCode->setTextCursor(cursor);
+    }
+
+    viewer->setProgramText(text);
+    syncViewerFromText();
+}
+
 Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     : QDialog{parent} {
     resize(1200, 700);
@@ -86,19 +158,10 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     // Курсор должен ходить и с клавиатуры — иначе не отследить текущую строку.
     tbCode->setTextInteractionFlags(Qt::TextSelectableByMouse | Qt::TextSelectableByKeyboard);
     new Highlighter{tbCode->document()};
-    tbCode->setPlainText(text);
 
-    int lineCount = text.count(u'\n') + 3;
-
-    auto tbLine = new QTextEdit{textPane};
+    tbLine = new QTextEdit{textPane};
     tbLine->setFont(font);
     tbLine->setReadOnly(true);
-    tbLine->setPlainText(v::iota(1, lineCount)
-        | v::transform(std::bind(qOverload<int, int>(QString::number), _1, 10))
-        | v::join_with(u'\n')
-        | r::to<QString>());
-    tbLine->setFixedWidth(QFontMetrics{font}.boundingRect(QString::number(lineCount * 10)).width());
-
     tbLine->setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
 
     connect(
@@ -154,7 +217,7 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
         viewLayout->addWidget(viewer);
     }
 
-    viewer->setProgramText(text);
+    setProgram(text, windowTitle);
 
     // Текст -> 3D и 3D -> текст.
     connect(tbCode, &QTextEdit::cursorPositionChanged, this, &Dialog::syncViewerFromText);

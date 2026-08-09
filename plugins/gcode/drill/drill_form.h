@@ -25,7 +25,7 @@ namespace Drilling {
 // using PosOrPath = std::variant<const QPointF, const QPolygonF>;
 // using Key = std::tuple<int, double, bool, QString>;
 // struct Val {
-// mvector<PosOrPath> posOrPath;
+// std::vector<PosOrPath> posOrPath;
 // Paths64 draw;
 // };
 // using Preview = std::map<Key, Val>;
@@ -73,10 +73,22 @@ protected:
     // FormsUtil interface
     void computePaths() override;
     void updateName() override;
+    // Файлы, созданные чужим Creator'ом (Profile/PocketOffset), тоже должны
+    // унести с собой строки таблицы -- поэтому обработчик расширяется.
+    void fileHandler(GCode::File* file) override;
+
+    // Строки таблицы с данными индексами -- в том виде, в каком их надо будет
+    // восстановить при правке.
+    std::vector<RowRef> rowRefs(const std::vector<int>& indexes) const;
+    // Строки текущего прогона: их нечем передать через Creator, поэтому лежат
+    // здесь между emit createToolpath и приходом файла.
+    std::vector<RowRef> pendingRows_;
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
-        event->accept();
+        // Базовая, а не event->accept(): в GCode::Form::showEvent сбрасывается
+        // режим правки, иначе форма молча перепишет УП из прошлого сеанса.
+        GCode::Form::showEvent(event);
     }
     void hideEvent(QHideEvent* event) override;
 

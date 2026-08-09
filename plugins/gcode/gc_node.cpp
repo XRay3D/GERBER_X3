@@ -27,7 +27,11 @@ Node::Node(AbstractFile* file)
     , file(file) {
 }
 
-Node::~Node() { App::project().deleteFile(file->id()); }
+Node::~Node() {
+    // Файла больше нет -- смотреть в окне просмотра нечего.
+    Dialog::programClosed(file->id());
+    App::project().deleteFile(file->id());
+}
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
 
@@ -37,19 +41,36 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         case Qt::CheckStateRole:
             file->itemGroup()->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
             return true;
-        case Qt::EditRole:
-            file->setFileName(value.toString());
+        case Qt::EditRole: {
+            // Переименование по F2 меняет имя ПРОГРАММЫ, а отображаемое имя
+            // пересобирается из него так же, как это делает Form::fileHandler.
+            // Иначе programName_ разъехался бы с меткой в дереве, и поиск
+            // коллизий начал бы срабатывать не на то.
+            auto* gcFile = static_cast<File*>(file);
+            gcFile->setProgramName(value.toString());
+            // Params::tool() индексирует tools без проверки: у УП без инструмента
+            // (отладочные файлы) суффикса просто не будет.
+            const auto& params = gcFile->params();
+            gcFile->setFileName(params.tools.empty()
+                    ? gcFile->programName()
+                    : gcFile->programName() + u'_' + params.tool().nameEnc());
             return true;
+        }
         default:;
         }
+        [[fallthrough]]; // роль FileTree::Select обрабатывается ниже, в default
     case FileTree::Column::Side:
         switch(role) {
-        case Qt::EditRole:
-            file->setSide(static_cast<Side>(value.toBool()));
+        case Qt::EditRole: {
+            const auto newSide = static_cast<Side>(value.toBool());
+            if(newSide == file->side()) return true; // холостой выбор той же стороны
+            file->setSide(newSide);
             static_cast<File*>(file)->regenerate(); // lines_ устарели при смене стороны платы
             return true;
+        }
         default:;
         }
+        [[fallthrough]];
     default:
         if(role == FileTree::Select) {
             file->itemGroup()->setZValue((value.toBool() ? +(file->id() + 1) : -(file->id() + 1)) * 1000);
@@ -106,25 +127,24 @@ Qt::ItemFlags Node::flags(const QModelIndex& index) const {
 }
 
 void Node::menu(QMenu& menu, FileTree::View* tv) {
-    static std::unordered_map<int, Dialog*> dialog;
     menu.addAction(QIcon::fromTheme(u"document-save"_s), QObject::tr("&Save Toolpath"), [tv, this] {
         emit tv->saveGCodeFile(id());
     });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"hint"_s), QObject::tr("&Hide other"),
         tv, &FileTree::View::hideOther);
-    if(!dialog[id()])
-        menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
-            dialog[id()] = new Dialog{file->lines2(), file->name(), tv};
-            auto destroy = [this] {
-                delete dialog[id()];
-                dialog[id()] = nullptr;
-            };
-            QObject::connect(dialog[id()], &QDialog::finished, destroy);
-            dialog[id()]->show();
-        });
+    // Реестр окон держит сам Dialog: одно окно на файл, оно же обновляется при
+    // перегенерации и закрывается при удалении.
+    menu.addAction(QIcon(), QObject::tr("&Show source"), [tv, this] {
+        Dialog::showFor(id(), file->lines2(), file->name(), tv);
+    });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"edit-delete"_s), QObject::tr("&Delete Toolpath"), tv, &FileTree::View::closeFile);
+}
+
+bool Node::doubleClicked(FileTree::View* tv) {
+    emit tv->editGCodeFile(id());
+    return true;
 }
 
 int Node::id() const { return file->id(); }

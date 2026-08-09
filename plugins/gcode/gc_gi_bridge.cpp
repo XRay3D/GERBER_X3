@@ -11,7 +11,6 @@
 #include "gc_gi_bridge.h"
 
 #include "gcode.h"
-#include "geometry.h"
 #include "graphicsview.h"
 
 #include <QPainter>
@@ -22,6 +21,21 @@
 #include <vector>
 
 namespace Gi {
+
+namespace {
+
+// Расстояние от точки до БЕСКОНЕЧНОЙ прямой, заданной отрезком, -- прежний
+// LineABC из myclipper.h в виде одной формулы: |a*x + b*y + c| / sqrt(a^2+b^2).
+double distanceToLine(const QLineF& line, QPointF point) {
+    const double a = line.p1().y() - line.p2().y();
+    const double b = line.p2().x() - line.p1().x();
+    const double c = line.p1().x() * line.p2().y() - line.p2().x() * line.p1().y();
+    const double norm = std::hypot(a, b);
+    return norm > 0.0 ? std::abs(a * point.x() + b * point.y() + c) / norm
+                      : std::numeric_limits<double>::max();
+}
+
+} // namespace
 
 Bridge::Bridge() {
     pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
@@ -83,7 +97,7 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
             && curves.front().front() == curves.front().back()
             && curves.front().isPositive()) // fix direction for drawing
             curves.front().reverse();
-        for(Curve& curve: curves) {
+        for(Geo::Polyline& curve: curves) {
             // for(size_t i{}, s = curve.size(); i < s; ++i) {
             //     QLineF tmpLine{curve[i], curve[(i + 1) % s]};
             //     double tmp = LineABC(tmpLine).distance(pos);
@@ -92,7 +106,7 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
             // }
             for(auto [fr, to]: curve | v::pairwise) {
                 QLineF tmpLine{fr, to};
-                double tmp = LineABC(tmpLine).distance(pos);
+                double tmp = distanceToLine(tmpLine, pos);
                 if(minLenght > tmp && tmp < lenght)
                     minLenght = tmp, line = tmpLine;
             }
@@ -102,12 +116,12 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
     if(!line.isNull()) {
         minLenght = line.length() - lenght / 2;
         angle_ = line.angle();
-        if(geo::Length(line.center(), pos) < lenght / 2 && line.length() < lenght) {
+        if(Geo::distance(line.center(), pos) < lenght / 2 && line.length() < lenght) {
             // точка центра прямой
             retPos = line.center();
             ok_ = true;
             update(); // Cutoff
-        } else if(geo::Length(line.p1(), pos) < minLenght && geo::Length(line.p2(), pos) < minLenght) {
+        } else if(Geo::distance(line.p1(), pos) < minLenght && Geo::distance(line.p2(), pos) < minLenght) {
             // точка пересечения на прямой перпендикуляра из 3 точки
             auto k1 = (line.p2().x() - line.p1().x());
             auto k2 = (line.p2().y() - line.p1().y());
@@ -172,7 +186,26 @@ void Bridge::update() {
     QGraphicsItem::update();
 }
 
-bool Bridge::test(const Curve& curve) { return pointOnPolygon(testLine(), curve, &intersectPoint); }
+// Пересекает ли пробная линия контур, и если да -- где. Прежний pointOnPolygon
+// из myclipper.h к этому моменту был уже мёртв (qFatal с закомментированным
+// телом), так что здесь восстановлено то, что он собирался делать.
+bool Bridge::test(const Geo::Polyline& curve) {
+    if(curve.size() < 2) return false;
+
+    const QLineF probe = testLine();
+    const std::size_t count = curve.size();
+    const std::size_t last = curve.closed ? count : count - 1;
+
+    QPointF point;
+    for(std::size_t i{}; i < last; ++i) {
+        const QLineF edge{curve[i], curve[(i + 1) % count]};
+        if(edge.intersects(probe, &point) == QLineF::BoundedIntersection) {
+            intersectPoint = point;
+            return true;
+        }
+    }
+    return false;
+}
 
 QLineF Bridge::testLine() const {
     QLineF lTool2 = QLineF::fromPolar(toolDiam * 1.2, angle_ - 90);
@@ -196,6 +229,6 @@ void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 int Bridge::type() const { return Type::Bridge; }
 
-Curves Bridge::curves(int /*alternate*/) const { return {CircleCurve((lenght + toolDiam), intersectPoint)}; }
+Geo::Polylines Bridge::curves(int /*alternate*/) const { return {Geo::circle(lenght + toolDiam, intersectPoint)}; }
 
 } // namespace Gi

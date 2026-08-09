@@ -15,6 +15,7 @@
 #include <QGraphicsSceneMouseEvent>
 #include <QPainter>
 #include <QStyleOptionGraphicsItem>
+#include <numbers>
 #include <set>
 
 namespace Gi {
@@ -31,7 +32,7 @@ void DataPath::updateSelection() const {
 #if 1
     str.setWidth(width * scale);
     selectionShape_ = str.createStroke(shape_);
-    boundingRect_ = selectionShape_.boundingRect();
+    boundingRect_   = selectionShape_.boundingRect();
 #else
     auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, cl::JoinType::Miter, cl::EndType::Square);
     selectionShape_.clear();
@@ -46,10 +47,10 @@ void DataPath::updateSelection() const {
     // FIXME dont create empty assert(selectionShape_.elementCount() > 1);
 }
 
-DataPath::DataPath(Curves curves, AbstractFile* file)
+DataPath::DataPath(Geo::Polylines curves, AbstractFile* file)
     : Item{file} {
     curves_ = std::move(curves);
-    shape_ = toPPath(curves_);
+    shape_  = Geo::toPath(curves_);
     updateSelection();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -108,10 +109,10 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
                 // auto [i, _] = set.emplace(item, Path{pathTo.front(), pathTo.back()});
 
                 const double min = r::min({
-                    Length(pathFrom.back(), pathTo.back()),
-                    Length(pathFrom.back(), pathTo.front()),
-                    Length(pathFrom.front(), pathTo.back()),
-                    Length(pathFrom.front(), pathTo.front()),
+                    Geo::distance(pathFrom.back(), pathTo.back()),
+                    Geo::distance(pathFrom.back(), pathTo.front()),
+                    Geo::distance(pathFrom.front(), pathTo.back()),
+                    Geo::distance(pathFrom.front(), pathTo.front()),
                 });
 
                 if(min > glue) continue;
@@ -145,7 +146,7 @@ void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
         pen.setWidthF(2 * scaleFactor());
         pen.setStyle(Qt::CustomDashLine);
         pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({pi * 2, pi * 2 - 1});
+        pen.setDashPattern({std::numbers::pi * 2, std::numbers::pi * 2 - 1});
     }
     if(option->state & QStyle::State_MouseOver) {
         painter->setPen(Qt::NoPen);

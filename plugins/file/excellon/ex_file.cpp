@@ -75,7 +75,7 @@ Tools File::tools() const {
     return tools;
 }
 
-Curves Excellon::File::merge() const {
+Geo::Polygon Excellon::File::merge() const {
     for(auto&& item: *itemGroups_.back())
         mergedCurves_.append_range(item->curves());
     return mergedCurves_;
@@ -93,7 +93,7 @@ void File::read(QDataStream& stream) {
     stream >> format_;
     format_.file = this;
     for(Hole& hole: *this) {
-        hole.file         = this;
+        hole.file = this;
         hole.state.format = &format_;
     }
 }
@@ -119,8 +119,8 @@ FileTree::Node* File::node() {
     return node_ ? node_ : node_ = new Excellon::Node{this};
 }
 
-mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCType /*gcType*/, bool /*test*/) const {
-    mvector<GraphicObject> retData;
+std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCType /*gcType*/, bool /*test*/) const {
+    std::vector<GraphicObject> retData;
     // QTransform t = transform_;
     for(const Excellon::Hole& hole: *this) {
         double diam = tools_.at(hole.state.toolId);
@@ -131,7 +131,7 @@ mvector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCT
             go.path.emplace_back(go.pos = hole.state.pos);
             go.fill.emplace_back(CircleCurve(diam, go.pos));
         } else {
-            go.path = Curve{std::from_range, hole.state.path | v::transform([](const QPointF& pt) { return geo::Vertex{pt}; })};
+            go.path = Geo::Polyline{std::from_range, hole.state.path | v::transform([](const QPointF& pt) { return Geo::Vertex{pt}; })};
             // go.pos = go.path.front();
             go.fill = toCurves(Inflate64({~hole.state.path}, diam * uScale, cl::JoinType::Round, cl::EndType::Round, uScale));
         }

@@ -19,11 +19,16 @@
 
 namespace Gi {
 
-DataFill::DataFill(Curves curves, AbstractFile* file)
+DataFill::DataFill(Geo::Polygons curves, AbstractFile* file)
     : Item{file} {
-    curves_ = std::move(curves);
-    // shape_ = toPPath(toCurves(toPaths(curves_)));
-    shape_ = toPPath(curves_);
+    // Polygons::toPath идёт прямо по точным кривым и выставляет WindingFill,
+    // при котором дырки (они канонически обходятся навстречу телу) вычитаются
+    // сами, а законный остров внутри дырки остаётся.
+    shape_ = curves.toPath();
+    // Контуры -- для базового curves(), сам регион -- для region(): собрать
+    // его обратно из плоского списка нельзя, острова в дырках теряются.
+    curves_       = curves.contours();
+    region_       = std::move(curves);
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -41,7 +46,7 @@ void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, 
     painter->strokePath(shape_, pen_);
 #else
     #if DEBUG
-    brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
+    // brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
     #endif
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
@@ -70,9 +75,13 @@ void DataFill::redraw() {
     // update();
 }
 
-void DataFill::setCurves(Curves paths, int alternate)// FIXME from setPaths
+void DataFill::setCurves(Geo::Polylines paths, int alternate) // FIXME from setPaths
 {
+}
 
+Geo::Polygons DataFill::region() const {
+    // Хранится в своей системе координат, наружу -- в сценовой, как и curves().
+    return Geo::transformed(region_, transform());
 }
 
 // Paths& DataFill::getPaths() {

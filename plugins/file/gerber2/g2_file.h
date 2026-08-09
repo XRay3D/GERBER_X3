@@ -52,10 +52,10 @@ public:
     void setColor(const QColor& color) override;
     FileTree::Node* node() override;
     QIcon icon() const override;
-    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
+    std::vector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
 
 protected:
-    Curves merge() const override;
+    Geo::Polygons merge() const override;
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
 

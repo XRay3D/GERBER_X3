@@ -39,36 +39,41 @@ public:
 class Creator : public GCode::Creator {
 
 public:
-    Creator() = default;
+    Creator()           = default;
     ~Creator() override = default;
 
-    static inline const QString BridgeLen        = u"BridgeLen"_s;
+    static inline const QString BridgeLen         = u"BridgeLen"_s;
     static inline const QString TrimmingCorners   = u"TrimmingCorners"_s;
     static inline const QString TrimmingOpenPaths = u"TrimmingOpenPaths"_s;
     static inline const QString BridgeAlignType   = u"BridgeAlignType"_s;
     static inline const QString BridgeValue       = u"BridgeValue"_s;
     static inline const QString BridgeValue2      = u"BridgeValue2"_s;
+    static inline const QString Allowance         = u"Allowance"_s;
 
 private:
     void createProfile(const Tool& tool, const double depth);
-    void trimmingOpenPaths(Paths64& paths);
 
-    Point64 from;
+    // Порядок обхода и направление фрезерования. Вынесено из reorder(), потому
+    // что черновой и чистовой наборы обязаны обходиться одинаково -- иначе
+    // проходы не будут соответствовать друг другу.
+    Geo::Polylines orderContours(Geo::Polylines contours);
 
+    // Чистовой проход по целевому контуру -- пока такой же, как черновой, и
+    // дописывается в те же returnPss. Касательный подвод/отвод отложен, см.
+    // #if 0 в начале profile.cpp.
+    void makeFinishing();
+
+    // Укорачивает открытые пути на радиус фрезы с каждого конца: инструмент
+    // круглый, и на самом конце линии он бы залез за неё. Путь короче
+    // диаметра после такой обрезки не остался бы вовсе -- он выбрасывается.
+    void trimmingOpenPaths(Geo::Polylines& paths);
+
+    // «Собачьи кости» во внутренних прямых углах: круглая фреза угол не
+    // выбирает, и в него добавляется нырок по биссектрисе.
     void cornerTrimming();
-    void makeBridges();
 
+    // Порядок обхода контуров по вложенности и направление фрезерования.
     void reorder();
-    void reduceDistance(Point64& from, Path64& to);
-    enum NodeType {
-        ntAny,
-        ntOpen,
-        ntClosed
-    };
-    void polyTreeToPaths(PolyTree& polytree, Paths64& rpaths);
-    // void addPolyNodeToPaths(PolyTree& polynode, NodeType nodetype, Paths64& paths);
-    // void closedPathsFromPolyTree(PolyTree& polytree, Paths64& paths);
-    // void openPathsFromPolyTree(const PolyTree& polytree, Paths64& paths);
 
 protected:
     void create() override; // Creator interface

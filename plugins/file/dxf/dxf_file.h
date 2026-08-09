@@ -77,7 +77,7 @@ private:
         CopperGroup,
         CutoffGroup,
     };
-    Curvess& groupedPaths(Group group = CopperGroup, bool fl = false);
+    Geo::Polygons& groupedPaths(Group group = CopperGroup, bool fl = false);
     void grouping(PolyTree& node, Group group);
 
     // AbstractFile interface
@@ -88,13 +88,13 @@ public:
     void createGi() override;
     bool isVisible() const override;
     void setVisible(bool visible) override;
-    mvector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
+    std::vector<GraphicObject> getDataForGC(std::span<Criteria> criterias, GCType gcType, bool test = {}) const override;
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
 
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
-    Curves merge() const override;
+    Geo::Polygons merge() const override;
 };
 
 } // namespace Dxf

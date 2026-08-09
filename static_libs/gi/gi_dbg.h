@@ -22,11 +22,10 @@ class Debug_ final : public Item {
     struct Node* node;
 
     Debug_(const QColor& color, double width);
-    Paths64 paths_;
     std::set<QPointF> centers;
 
-    Debug_(const Path64& path, const QColor& color = Qt::white, double width = {});
-    Debug_(const Paths64& paths, const QColor& color = Qt::white, double width = {});
+    Debug_(const Geo::Polyline& polyline, const QColor& color = Qt::white, double width = {});
+    Debug_(const Geo::Polylines& polylines, const QColor& color = Qt::white, double width = {});
     Debug_(const QPainterPath& path, const QColor& color = Qt::white, double width = {});
 
 public:
@@ -42,12 +41,12 @@ public:
         return new Debug_{path, color, width};
     }
 
-    static Debug_* Debug(const Curves& curves, const QColor& color = Qt::white, double width = {}) {
-        return new Debug_{toPPath(curves), color, width};
+    static Debug_* Debug(const Geo::Polygons& polygons, const QColor& color = Qt::white, double width = {}) {
+        return new Debug_{polygons.toPath(), color, width};
     }
 
-    static Debug_* Debug(const Paths64& paths, const QColor& color = Qt::white, double width = {}) {
-        return new Debug_{paths, color, width};
+    static Debug_* Debug(const Geo::Polylines& polylines, const QColor& color = Qt::white, double width = {}) {
+        return new Debug_{polylines, color, width};
     }
 #else
     static auto Debug(auto&&... args) {

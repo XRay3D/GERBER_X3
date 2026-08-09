@@ -15,6 +15,7 @@
 #include "project.h"
 
 #include <QJSEngine>
+#include <QJsonObject>
 
 namespace GCode {
 
@@ -24,7 +25,16 @@ GcFileProxy::GcFileProxy(File* file, QJSEngine* engine, QObject* parent)
     , engine_{engine} {
 }
 
+QJSValue GcFileProxy::toolObject() const {
+    // Tool::write обходит поля рефлексией (см. tool.cpp), ключи -- имена самих
+    // членов. Наружу уходит снимок: писать в него из скрипта смысла нет.
+    QJsonObject json;
+    file_->gcp.tool().write(json);
+    return engine_->toScriptValue(json.toVariantMap());
+}
+
 bool GcFileProxy::laser() const { return file_->toolType == Tool::Laser; }
+bool GcFileProxy::spiralRamp() const { return file_->gcp.spiralRamp(); }
 double GcFileProxy::toolDiameter() const { return file_->gcp.getToolDiameter(); }
 double GcFileProxy::toolLength() const { return file_->gcp.tool().lenght(); }
 double GcFileProxy::toolOneTurnCut() const { return file_->gcp.tool().oneTurnCut(); }
@@ -59,21 +69,26 @@ QJSValue GcFileProxy::getToolPaths(double ox, double oy) {
 
     QJSValue outerArr = engine_->newArray(static_cast<uint>(cachedPathss_.size()));
     for(uint i{}; i < cachedPathss_.size(); ++i) {
-        const Curves& paths = cachedPathss_[i];
+        const Geo::Polylines& paths = cachedPathss_[i];
         QJSValue pathsArr = engine_->newArray(static_cast<uint>(paths.size()));
         for(uint j{}; j < paths.size(); ++j) {
-            const Curve& curve = paths[j];
+            const Geo::Polyline& curve = paths[j];
             QJSValue curveArr = engine_->newArray(static_cast<uint>(curve.size()));
             curveArr.setProperty(u"closed"_s, curve.isClosed());
-            curveArr.setProperty(u"perimetr"_s, curve.perimetr());
+            curveArr.setProperty(u"perimeter"_s, curve.perimeter());
             for(uint k{}; k < curve.size(); ++k) {
-                const geo::Vertex& v = curve[k];
+                const Geo::Vertex& v = curve[k];
                 QJSValue vtx = engine_->newObject();
-                vtx.setProperty(u"x"_s, v.pt.x());
-                vtx.setProperty(u"y"_s, v.pt.y());
-                vtx.setProperty(u"type"_s, int(v.type));
-                vtx.setProperty(u"cx"_s, v.center.x());
-                vtx.setProperty(u"cy"_s, v.center.y());
+                vtx.setProperty(u"x"_s, v.x());
+                vtx.setProperty(u"y"_s, v.y());
+                vtx.setProperty(u"bulge"_s, v.bulge);
+                // type/cx/cy описывают сегмент, ПРИХОДЯЩИЙ в вершину -- так их
+                // и видели скрипты, когда дуга хранилась центром на конечной
+                // вершине; менять контракт из-за смены внутреннего вида нельзя
+                auto arc = k ? Geo::arcOf(curve[k - 1], curve[k], curve[k - 1].bulge) : std::nullopt;
+                vtx.setProperty(u"type"_s, arc ? int(arc->dir()) : 0);
+                vtx.setProperty(u"cx"_s, arc ? arc->center.x() : 0.0);
+                vtx.setProperty(u"cy"_s, arc ? arc->center.y() : 0.0);
                 curveArr.setProperty(k, vtx);
             }
             pathsArr.setProperty(j, curveArr);
@@ -103,13 +118,13 @@ void GcFileProxy::addLine(const QString& line) {
     file_->lines_.emplace_back(line);
 }
 
-QJSValue GcFileProxy::savePathLines(int pi, int ci, bool rev, double perimetr, double depth) {
+QJSValue GcFileProxy::savePathLines(int pi, int ci, bool rev, double perimeter, double depth) {
     if(pi < 0 || pi >= static_cast<int>(cachedPathss_.size())) return {};
-    const Curves& paths = cachedPathss_[static_cast<size_t>(pi)];
+    const Geo::Polylines& paths = cachedPathss_[static_cast<size_t>(pi)];
     if(ci < 0 || ci >= static_cast<int>(paths.size())) return {};
 
-    const Curve& orig = paths[static_cast<size_t>(ci)];
-    auto lines = file_->savePath(rev ? orig.reversed() : orig, perimetr, depth);
+    const Geo::Polyline& orig = paths[static_cast<size_t>(ci)];
+    auto lines = file_->savePath(rev ? orig.reversed() : orig, perimeter, depth);
 
     QJSValue arr = engine_->newArray(static_cast<uint>(lines.size()));
     for(uint i{}; i < lines.size(); ++i)

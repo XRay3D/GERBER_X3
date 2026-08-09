@@ -164,7 +164,8 @@ GCode::Tab::Tab(QWidget* parent)
         auto svLayout = new QVBoxLayout{tabScripts};
         svLayout->setContentsMargins(6, 6, 6, 6);
         svLayout->addWidget(new QLabel{QApplication::translate("GCodeSettings",
-            "JavaScript file to use for G-code generation (leave blank to use built-in C++ logic):", nullptr), tabScripts});
+                                           "JavaScript file to use for G-code generation (leave blank to use built-in C++ logic):", nullptr),
+            tabScripts});
         for(auto& [type, ptr]: App::gCodePlugins()) {
             const QString name = ptr->gcName();
             if(name.isEmpty()) continue;

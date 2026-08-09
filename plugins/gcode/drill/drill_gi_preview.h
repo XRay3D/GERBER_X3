@@ -9,16 +9,16 @@ namespace Drilling {
 namespace Gi {
 
 class Preview final : public ::Gi::AbstractPreview {
-    Path64 path_;
+    Geo::Polyline path_;
     Row& row;
     Tool::ID toolId_{};
 
 public:
-    explicit Preview(Path64&& hv, double diameter, Tool::ID  toolId, Row& row, const Paths64& draw_ = {}); // FIXME to Curve
+    explicit Preview(Geo::Polyline&& hv, double diameter, Tool::ID toolId, Row& row, const Geo::Polylines& draw_ = {}); // FIXME to Geo::Polyline
 
     // AbstractPreview interface
     void updateTool() override;
-    Paths64 paths() const;
+    Geo::Polylines paths() const;
     bool fit(double depth) const override;
 
     // AbstractDrillPrGI interface
@@ -28,9 +28,9 @@ public:
     int type() const override;
     bool isSlot() const;
 
-    Paths64 offset() const;
-    QPointF pos() const { return ~path_.front(); }; // NOTE shadow base class pos func
-    Path64 hv() const { return path_; };              // NOTE shadow base class pos func
+    Geo::Polylines offset() const;
+    QPointF pos() const { return path_.front(); }; // NOTE shadow base class pos func
+    Geo::Polyline hv() const { return path_; };    // NOTE shadow base class pos func
 
 protected:
     // Двойной клик по превью переключает использование этого отверстия/паза

@@ -12,7 +12,7 @@
 
 #include "abstract_shape.h"
 #include "datastream.h"
-#include "mvector.h"
+
 #include "utils.h"
 
 #include <QFileSystemWatcher>
@@ -32,7 +32,9 @@ enum FileVersion {
     ProVer_5,
     ProVer_6,
     ProVer_7,
-    CurrentVer = ProVer_7,
+    ProVer_8, // Geo::Polyline: точка + прогиб вместо центра дуги, замкнутость -- флагом
+    ProVer_9, // УП: имя программы и снимок видимости, траектория и открытые контуры
+    CurrentVer = ProVer_9,
 };
 
 namespace GCode {
@@ -54,7 +56,7 @@ class QFileSystemWatcher;
 using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
 // using ShapesMap = std::map<int, std::shared_ptr<Shapes::AbstractShape>>;
 using ShapesMap = std::map<int, Shapes::AbstractShape*>;
-using ItemMap   = std::map<int, Gi::Item*>;
+using ItemMap = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
@@ -74,9 +76,9 @@ public:
     }
 
     template <typename T = AbstractFile>
-    mvector<T*> files() {
+    std::vector<T*> files() {
         QMutexLocker locker(&mutex);
-        mvector<T*> rfiles;
+        std::vector<T*> rfiles;
         for(const auto& [id, sp]: files_) {
             T* file = dynamic_cast<T*>(sp.get());
             if(file) rfiles.emplace_back(file);
@@ -97,7 +99,7 @@ public:
     }
 
     template <typename T>
-    mvector<T*> count() {
+    std::vector<T*> count() {
         QMutexLocker locker(&mutex);
         int count{};
         for(const auto& [id, sp]: files_)
@@ -108,9 +110,11 @@ public:
 
     int addFile(AbstractFile* const file);
     int addFile(GCode::File* const file);
+    // Заменить УП с данным id новой, сохранив узел дерева, id и сторону.
+    int replaceFile(int32_t id, GCode::File* file);
     bool contains(AbstractFile* file);
-    mvector<AbstractFile*> files(uint32_t type);
-    mvector<AbstractFile*> files(const mvector<uint32_t>& types);
+    std::vector<AbstractFile*> files(uint32_t type);
+    std::vector<AbstractFile*> files(const std::vector<uint32_t>& types);
     void deleteFile(int32_t id);
     // QString fileNames();
     int contains(const QString& name);

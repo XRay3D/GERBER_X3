@@ -10,10 +10,9 @@
  ********************************************************************************/
 #pragma once
 
-#include "curve.h"
 #include "datastream.h"
+#include "geo/polygon.h"
 #include "md5.h"
-#include "myclipper.h"
 
 #include "tool.h"
 
@@ -175,6 +174,9 @@ public:
     static inline const QString Circle         = u"Circle"_s;   // need for Threading
     static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
     static inline const QString Starts         = u"Starts"_s;   // need for Threading
+    // Спиральное врезание. Ключ общий, а не плагинный: читает его
+    // File::saveMillingProfile, который живёт здесь же, в общем слое.
+    static inline const QString SpiralRamp = u"SpiralRamp"_s;
 
     Params() {
         if(!params.contains(MultiToolIndex)) params[MultiToolIndex] = 0;
@@ -191,34 +193,43 @@ public:
     //     toolPathss /*supportCurvess*/.emplace_back(toCurves(toolPaths));
     // }
 
-    Params(const Tool& tool, double depth, Curves&& toolPaths)
+    Params(const Tool& tool, double depth, Geo::Polylines&& toolPaths)
         : Params{tool, depth} {
-        toolPathss /*supportCurvess*/.emplace_back(std::move(toolPaths));
+        toolPathss.emplace_back(std::move(toolPaths));
     }
 
-    mvector<Tool> tools;
+    std::vector<Tool> tools;
     std::map<QString, Variant> params;
 
     // GCodeType gcType = Null;
     mutable int fileId = -1;
     // QColor color;
 
+    // toolPathss и openCurves сохраняются наравне с исходной геометрией. Без них
+    // у загруженной из проекта УП regenerate() вычищает текст до заголовка с
+    // концовкой: генератор берёт траекторию именно из toolPathss. А regenerate()
+    // зовётся не только из save(), но и при смене стороны платы в дереве -- то
+    // есть УП молча превращалась в пустую от одного щелчка по «Сторона».
     friend QDataStream& operator>>(QDataStream& stream, Params& par) {
         return stream >> par.tools
             >> par.params
             >> par.closedCurves
-            >> par.supportCurvess;
+            >> par.supportCurvess
+            >> par.toolPathss
+            >> par.openCurves;
     }
 
     friend QDataStream& operator<<(QDataStream& stream, const Params& par) {
         return stream << par.tools
                       << par.params
                       << par.closedCurves
-                      << par.supportCurvess;
+                      << par.supportCurvess
+                      << par.toolPathss
+                      << par.openCurves;
     }
 
     explicit operator bool() const {
-        return openCurves.size() || closedCurves.size();
+        return !openCurves.empty() || !closedCurves.empty();
     }
 
     const Tool& tool() const { return tools[params.at(MultiToolIndex).toInt()]; }
@@ -232,6 +243,26 @@ public:
     bool circle() const { return params.contains(Circle) && params.at(Circle).toBool(); }
     bool chamfer() const { return params.contains(Chamfer) && params.at(Chamfer).toBool(); }
     int starts() const { return params.contains(Starts) ? std::max(1, static_cast<int>(params.at(Starts).toInt())) : 1; }
+    // Отсутствие ключа == спираль включена: проекты, сохранённые до её
+    // появления, ведут себя как раньше.
+    bool spiralRamp() const { return !params.contains(SpiralRamp) || params.at(SpiralRamp).toBool(); }
+
+    // Надо ли развернуть контур, пришедший из точного домена, чтобы обход стал
+    // тем, что просит пользователь.
+    //
+    // Geo::Polygons::contours() отдаёт канон: внешняя граница против часовой,
+    // дырки по часовой -- то есть регион ВСЕГДА слева по ходу. Фрезеровать же
+    // надо попутно или встречно, а это зависит ещё и от стороны: снаружи
+    // детали попутный ход -- один обход, внутри -- обратный.
+    //
+    // Живёт здесь, а не в плагине, по двум причинам. Во-первых, потребителей
+    // уже двое: Profile::Creator::orderContours и Creator::stacking (там к
+    // этому добавляется поправка на дырку -- см. там же). Во-вторых, от
+    // направления обхода зависят вещи, которые ломаются МОЛЧА: подрезка углов
+    // ищет внутренние стыки по 90 или 270 градусам, и стоит развернуть обход
+    // в одном месте, забыв про другое, -- она просто перестаёт что-либо
+    // находить, без единой жалобы.
+    bool reversedTravel() const { return (side() == Outer) ^ convent(); }
 
     void setSide(SideOfMilling val) { params[Side] = val; }
     void setConvent(bool val) { params[Convent] = val; }
@@ -240,13 +271,16 @@ public:
     void setChamfer(bool val) { params[Chamfer] = val; }
     void setStarts(int val) { params[Starts] = val; }
 
-    Curves closedCurves; // pocketAreaPaths
-    Curves openCurves;
-    Curvess supportCurvess; // toolCurvess
-    Curvess toolPathss;     // toolCurvess
+    // Замкнутое -- регион в точном домене: над ним и идут булевы с офсетом.
+    // Открытое -- просто набор линий, площади у них нет.
+    Geo::Polygons closedCurves; // pocketAreaPaths
+    Geo::Polylines openCurves;
+    // Траектории -- наборы линий, сгруппированные по проходам, а не регионы.
+    std::vector<Geo::Polylines> supportCurvess;
+    std::vector<Geo::Polylines> toolPathss;
 
-    const Curves& pocketAreaCurves() const { return closedCurves; }
-    void setPocketAreaCurves(Curves&& arg) { closedCurves = std::move(arg); }
+    const Geo::Polygons& pocketAreaCurves() const { return closedCurves; }
+    void setPocketAreaCurves(Geo::Polygons&& arg) { closedCurves = std::move(arg); }
 
     auto feedRate() const -> double { return tool().feedRate(); }
     auto plungeRate() const -> double { return tool().plungeRate(); }

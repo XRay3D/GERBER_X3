@@ -154,7 +154,7 @@ void Spline::parse(CodeData& code) {
         case EndTangentY          : EndTangent.setY(code); break;        // 23
         case EndTangentZ          : break;                               // 33
         case KnotValue            : KnotValues << double(code); break;   // 40
-        case Weight               : Weights << double(code); break;     // 41, одна запись на управляющую точку
+        case Weight               : Weights << double(code); break;                     // 41, одна запись на управляющую точку
         case ControlPointsX:                                             // 10
             ControlPoints.resize(ControlPoints.size() + 1);
             ControlPoints.last().setX(code);
@@ -206,8 +206,8 @@ QPointF nurbsPoint(double u, int degree, const QVector<double>& U, const QPolygo
 
 // Аппроксимация плотно выбранных точек кривой цепочкой круговых дуг: на каждом малом
 // участке подбирается окружность, проходящая через его начало, середину и конец —
-// так же, как это сделано для ELLIPSE, чтобы Curve всюду хранила дуги, а не ломаную.
-void appendArcChain(Curve& curve, const std::function<QPointF(double)>& pointAt, double tFrom, double tTo, int segments) {
+// так же, как это сделано для ELLIPSE, чтобы Geo::Polyline всюду хранила дуги, а не ломаную.
+void appendArcChain(Geo::Polyline& curve, const std::function<QPointF(double)>& pointAt, double tFrom, double tTo, int segments) {
     QPointF prev = pointAt(tFrom);
     if(curve.empty())
         curve.emplace_back(prev);
@@ -232,7 +232,9 @@ void appendArcChain(Curve& curve, const std::function<QPointF(double)>& pointAt,
                 (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
                 (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
             };
-            curve.emplace_back(p1, center, geo::DIR(p0, center, p1));
+            // прогиб пишется на НАЧАЛЬНОЙ вершине дуги -- она уже в кривой
+            curve.back().bulge = geo::bulgeOf(p0, p1, center, geo::DIR(p0, center, p1));
+            curve.emplace_back(p1);
         }
         prev = p1;
     }
@@ -245,7 +247,7 @@ DxfGo Spline::toGo() const {
         && degreeOfTheSplineCurve > 0
         && KnotValues.size() == ControlPoints.size() + degreeOfTheSplineCurve + 1;
 
-    Curve curve;
+    Geo::Polyline curve;
     const bool closed = (splineFlag & Closed) != 0;
 
     if(haveNurbs) {
@@ -275,7 +277,8 @@ DxfGo Spline::toGo() const {
     }
 
     if(closed) {
-        DxfGo go{id, Curve{curve}, {std::move(curve)}};
+        curve.close();
+        DxfGo go{id, Geo::Polyline{curve}, {std::move(curve)}};
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::PolyLine);
         return go;
     }

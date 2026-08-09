@@ -16,7 +16,6 @@
 
 #include <QDebug>
 #include <QObject>
-#include <myclipper.h>
 
 #define DEPRECATED
 
@@ -207,7 +206,7 @@ class State {
     RegionMode region_               = Off;
     int aperture_{};
     int lineNum_{};
-    Point64 curPos_;
+    QPointF curPos_;
     Mirroring mirroring_ = NoMirroring;
     double scaling_      = 1.0;
     double rotating_{};
@@ -244,7 +243,7 @@ public:
 
     inline auto& curPos() { return curPos_; }
     inline auto curPos() const { return curPos_; }
-    inline void setCurPos(const Point64& curPos) { curPos_ = curPos; }
+    inline void setCurPos(const QPointF& curPos) { curPos_ = curPos; }
 
     inline auto mirroring() const { return mirroring_; }
     inline void setMirroring(Mirroring mirroring) { mirroring_ = mirroring; }
@@ -259,12 +258,12 @@ public:
 struct GrObject : GraphicObject {
 
     friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        stream << go;
+        stream << static_cast<GraphicObject>(go);
         return ::Block{stream}.write(go.state);
     }
 
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        stream >> go;
+        stream >> static_cast<GraphicObject&>(go);
         return ::Block{stream}.read(go.state);
     }
 
@@ -273,7 +272,7 @@ struct GrObject : GraphicObject {
 
     // public:
     GrObject() = default;
-    GrObject(int32_t id, const State& state, Curves&& paths, File* gFile, Type type, Curve&& path = {})
+    GrObject(int32_t id, const State& state, Geo::Polygons&& paths, File* gFile, Type type, Geo::Polyline&& path = {})
         : gFile{gFile}
         , state{state} {
         GraphicObject::id   = id;

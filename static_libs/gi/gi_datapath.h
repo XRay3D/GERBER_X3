@@ -27,7 +27,7 @@ class DataPath final : public Item {
     friend class ::MainWindow;
 
 public:
-    DataPath(Curves curves, AbstractFile* file);
+    DataPath(Geo::Polylines curves, AbstractFile* file);
     // DataPath(const Path& path, AbstractFile* file)
     //     : DataPath{{toCurve(path)}, file} { }
     // DataPath(const Paths& paths, AbstractFile* file)

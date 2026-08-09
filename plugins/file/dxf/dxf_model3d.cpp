@@ -116,7 +116,7 @@ Paths64 Model3D::project(View v) const {
     projected.reserve(faces.size());
 
     for(const auto& face: faces) {
-        Path64 path;
+        Geo::Polyline path;
         path.reserve(4);
         for(int idx: face) {
             if(idx < 0) continue;
@@ -142,11 +142,11 @@ Paths64 Model3D::project(View v) const {
 
     CleanPaths(silhouette, uScale * 0.0005);
     // Слой ждёт замкнутые контуры (как в File::createGi).
-    for(Path64& path: silhouette)
+    for(Geo::Polyline& path: silhouette)
         if(path.size() && path.back() != path.front())
             path.push_back(path.front());
 
-    std::erase_if(silhouette, [](const Path64& p) { return p.size() < 4; });
+    std::erase_if(silhouette, [](const Geo::Polyline& p) { return p.size() < 4; });
 
     return silhouette;
 }

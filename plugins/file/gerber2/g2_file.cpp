@@ -24,7 +24,7 @@ File::File()
     : AbstractFile{} {
     itemGroups_.push_back(new Gi::Group); // ApPaths (Normal создаёт база)
     layerTypes_ = {
-        {Normal,  QObject::tr("Normal"),         QObject::tr("Filled copper")                        },
+        {Normal,  QObject::tr("Normal"),         QObject::tr("Filled copper")                      },
         {ApPaths, QObject::tr("Aperture paths"), QObject::tr("Centre lines of draws and arcs only")},
     };
 }
@@ -76,13 +76,13 @@ void File::rebuild() {
 }
 
 void File::createGi() {
-    if(Curves image = flatten(parsed_.objects); !image.empty()) {
+    if(Geo::Polygon image = flatten(parsed_.objects); !image.empty()) {
         groupedCurves_ = {image};
         mergedCurves_ = image;
         itemGroups_[Normal]->push_back(new Gi::DataFill{std::move(image), this});
     }
 
-    for(const Curve& stroke: parsed_.strokes)
+    for(const Geo::Polyline& stroke: parsed_.strokes)
         itemGroups_[ApPaths]->push_back(new Gi::DataPath{{stroke}, this});
 
     if(itemsType_ == NullType)
@@ -110,16 +110,16 @@ void File::setColor(const QColor& color) {
     itemGroups_[ApPaths]->setPen(QPen{color_, 0.0});
 }
 
-Curves File::merge() const { return mergedCurves_ = flatten(parsed_.objects); }
+Geo::Polygon File::merge() const { return mergedCurves_ = flatten(parsed_.objects); }
 
 FileTree::Node* File::node() { return node_ ? node_ : node_ = new Node{this}; }
 
 QIcon File::icon() const { return decoration(color_, u'2'); }
 
-mvector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType, bool test) const {
+std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType, bool test) const {
     // Плагин отдаёт итоговую заливку как один составной объект: этого хватает
     // для профиля/кармана, а пооперационные данные — задача основного плагина.
-    mvector<GraphicObject> data;
+    std::vector<GraphicObject> data;
     GraphicObject go;
     go.fill = mergedCurves();
     TransformCurves(go.fill, transform_.toQTransform());

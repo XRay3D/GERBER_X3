@@ -51,13 +51,13 @@ DxfGo Solid::toGo() const {
     if(corners != 0xF)
         throw DxfObj::tr("Unsupported type Solid: corners %1!").arg(corners, 2);
 
-    Curve poly{
+    Geo::Polyline poly{
         {firstCorner},
         {secondCorner},
         {fourthCorner},
         {thirdCorner},
-        {firstCorner},
     };
+    poly.close();
 
     // Path path{~poly};
     // r::for_each(path, SetCSelf);
@@ -65,7 +65,7 @@ DxfGo Solid::toGo() const {
     if(!poly.isPositive())
         poly.reverse();
 
-    DxfGo go{id, Curve{poly}, {std::move(poly)}}; // return {id, path, {path}};
+    DxfGo go{id, Geo::Polyline{poly}, {std::move(poly)}}; // return {id, path, {path}};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Rect);
     return go;
 }

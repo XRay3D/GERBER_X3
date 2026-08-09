@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>407</height>
+    <height>502</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -38,10 +38,10 @@
    <item row="1" column="0" colspan="2">
     <widget class="QFrame" name="frame">
      <property name="frameShape">
-      <enum>QFrame::HLine</enum>
+      <enum>QFrame::Shape::HLine</enum>
      </property>
      <property name="frameShadow">
-      <enum>QFrame::Plain</enum>
+      <enum>QFrame::Shadow::Plain</enum>
      </property>
     </widget>
    </item>
@@ -72,7 +72,7 @@
          <string>Lenght:</string>
         </property>
         <property name="alignment">
-         <set>Qt::AlignBottom|Qt::AlignLeading|Qt::AlignLeft</set>
+         <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
         </property>
        </widget>
       </item>
@@ -132,16 +132,6 @@
      </layout>
     </widget>
    </item>
-   <item row="6" column="0" colspan="2">
-    <widget class="QCheckBox" name="cbxTrimming">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="text">
-      <string>Trimming??? Corner Trimming</string>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0" colspan="2">
     <widget class="QLabel" name="lblPixmap">
      <property name="minimumSize">
@@ -157,7 +147,7 @@
       <pixmap>:/toolpath/outside_climb.png</pixmap>
      </property>
      <property name="alignment">
-      <set>Qt::AlignCenter</set>
+      <set>Qt::AlignmentFlag::AlignCenter</set>
      </property>
     </widget>
    </item>
@@ -254,12 +244,48 @@
       <string>Allowance:</string>
      </property>
      <property name="alignment">
-      <set>Qt::AlignRight|Qt::AlignTrailing|Qt::AlignVCenter</set>
+      <set>Qt::AlignmentFlag::AlignRight|Qt::AlignmentFlag::AlignTrailing|Qt::AlignmentFlag::AlignVCenter</set>
      </property>
     </widget>
    </item>
    <item row="3" column="1">
-    <widget class="QDoubleSpinBox" name="dsbxAllowance"/>
+    <widget class="DoubleSpinBox" name="dsbxAllowance">
+     <property name="toolTip">
+      <string>Stock left by the roughing pass for the finishing pass. 0 disables the finishing pass.</string>
+     </property>
+     <property name="suffix">
+      <string> mm</string>
+     </property>
+     <property name="decimals">
+      <number>3</number>
+     </property>
+     <property name="singleStep">
+      <double>0.010000000000000</double>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <widget class="QCheckBox" name="cbxTrimming">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Trimming??? Corner Trimming</string>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="1">
+    <widget class="QCheckBox" name="cbxSpiral">
+     <property name="toolTip">
+      <string>Ramp down along the contour. When off, the tool plunges straight down at each depth step.</string>
+     </property>
+     <property name="text">
+      <string>Spiral ramp</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
    </item>
   </layout>
  </widget>

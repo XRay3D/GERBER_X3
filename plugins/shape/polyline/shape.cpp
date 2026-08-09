@@ -61,15 +61,15 @@ void Shape::redraw() {
         }
     }
 
-    Curve curve{
+    Geo::Polyline curve{
         std::from_range,
         v::filter(handles, std::bind(std::equal_to{}, Handle::Corner, _1))
-            | v::transform([](QPointF& pt) { return geo::Vertex{pt}; }),
+            | v::transform([](QPointF& pt) { return Geo::Vertex{pt}; }),
     };
 
-    if(closed && !curve.isClosed()) curve.emplace_back(curve.front().pt);
+    if(closed) curve.close();
     curves_ = {std::move(curve)};
-    shape_ = toPPath(curves_);
+    shape_ = Geo::toPath(curves_);
 
     if(handles.size() > 4) {
         QPointF c = centroidFast();
@@ -107,7 +107,7 @@ QPointF Shape::centroid() {
     QPointF centroid;
     double signedArea{};
     double a{}; // Partial signed area
-    mvector<QPointF> vertices;
+    std::vector<QPointF> vertices;
     vertices.reserve(handles.size() / 2);
     for(auto& h: handles)
         if(h.type() == Handle::Corner)
@@ -133,7 +133,7 @@ QPointF Shape::centroidFast() {
 
     auto filter = [](const auto& h) { return h.type() == Handle::Corner; };
     auto path = handles | v::filter(filter);
-    mvector<QPointF> vertices{path.begin(), path.end()};
+    std::vector<QPointF> vertices{path.begin(), path.end()};
 
     auto calc = [&](const QPointF& p0, const QPointF& p1) {
         a = p0.x() * p1.y() - p1.x() * p0.y();

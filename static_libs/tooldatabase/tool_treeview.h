@@ -9,7 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
-#include "mvector.h"
+
 #include "tool_model.h"
 #include <QTreeView>
 
@@ -21,7 +21,7 @@ public:
     explicit ToolTreeView(QWidget* parent = nullptr);
     ~ToolTreeView() override = default;
     void updateItem();
-    void setButtons(const mvector<QPushButton*>& buttons);
+    void setButtons(const std::vector<QPushButton*>& buttons);
 
 signals:
     void itemSelected(ToolItem* item);
@@ -40,5 +40,5 @@ private:
         New,
         NewGroup,
     };
-    mvector<QPushButton*> buttons_;
+    std::vector<QPushButton*> buttons_;
 };

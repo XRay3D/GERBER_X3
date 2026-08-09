@@ -12,6 +12,9 @@
 #include "project.h"
 
 #include <gi_dbg.h>
+
+#include <numbers>
+#include <span>
 // #include <QStringBuilder>
 
 namespace PocketOffset {
@@ -31,204 +34,169 @@ void Creator::create() {
         createStdFull(gcp.tools.front(), gcp.params[GCode::Params::Depth].toDouble());
 }
 
+namespace {
+
+// Концентрические петли от region с шагом step: первая -- сам region, каждая
+// следующая смещена на step. delta у Geo::Inflate -- ПОЛНАЯ ширина, а контур
+// уезжает на её половину, отсюда удвоение. Отрицательный шаг идёт внутрь и
+// кончается сам, когда сжимать нечего; положительный не кончится никогда, там
+// limit обязателен.
+Geo::Polylines concentricLoops(Geo::Polygons region, double step, int limit = {}) {
+    Geo::Polylines loops;
+    for(int i{}; !region.empty() && (!limit || i < limit); ++i) {
+        loops.append_range(region.contours());
+        region = Geo::Inflate(region, 2.0 * step);
+    }
+    return loops;
+}
+
+// Мелочь, которую фреза всё равно не выберет: обрывок, у которого и площадь, и
+// периметр меньше самой фрезы, -- это не карман, а шум офсета.
+void removeSmall(Geo::Polygons& region, double dOffset) {
+    const double minArea = dOffset * dOffset * std::numbers::pi;
+    const double minPerimeter = dOffset * 4.0;
+    std::vector<Geo::Polygon> kept;
+    for(const Geo::Polygon& polygon: region.all())
+        if(std::abs(polygon.area()) >= minArea || polygon.perimeter() >= minPerimeter)
+            kept.push_back(polygon);
+    region = kept.empty() ? Geo::Polygons{} : Geo::Polygons{std::span<const Geo::Polygon>{kept}};
+}
+
+} // namespace
+
+// Область, которую фреза заметает вдоль траектории. Прежде она собиралась
+// отдельными офсетами внутрь и наружу; в точном домене это ровно раздувание
+// самой траектории на диаметр.
+void Creator::finishPocket(const Tool& tool, Geo::Polygons&& cutArea) {
+    stacking(returnPs);
+    if(returnPss.empty()) {
+        emit fileReady(nullptr);
+        return;
+    }
+    gcp.toolPathss = std::move(returnPss);
+    gcp.setPocketAreaCurves(std::move(cutArea));
+    file_ = new File{std::move(gcp)};
+    file_->setFileName(tool.nameEnc());
+}
+
 void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) {
     Timer t{__FUNCTION__};
-    if(gcp.side() == GCode::On)
-        return;
+    if(gcp.side() == GCode::On) return;
 
-    toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset = toolDiameter / 2;
-    stepOver = tool.stepover() * uScale;
-
-    Paths64 cutAreaPaths;
-
-    auto calculate = [&cutAreaPaths, steps, this](Paths64&& paths) {
-        cutAreaPaths.append_range(Inflate64(paths, -dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale)); // inner
-        int counter = steps;
-        do {
-            if(counter == 1)
-                cutAreaPaths.append_range(Inflate64(paths, dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale)); // outer
-            returnPs.append_range(paths);
-            CleanPaths(paths, uScale * 0.001);
-            paths = Inflate64(paths, stepOver, cl::JoinType::Miter, cl::EndType::Polygon, uScale);
-        } while(paths.size() && --counter);
-    };
+    toolDiameter = tool.getDiameter(depth);
+    dOffset = toolDiameter * 0.5;
+    stepOver = tool.stepover();
 
     if(gcp.side() == GCode::Inner) {
-        dOffset = -dOffset, stepOver = -stepOver;
-        for(Paths64 paths: groupedPaths(GCode::Grouping::Copper)) {
-            paths = Inflate64(paths, dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale);
-            if(paths.empty())
-                continue;
-            // if (App::settings().gbrCleanPolygons()) CleanPaths(paths, uScale * 0.0005);
-            calculate(std::move(paths));
-        }
-    } else { // Outer
-        Paths64 paths{Inflate64(closedSrcPaths, +dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale)};
-        if(paths.empty()) {
-            emit fileReady(nullptr);
-            return;
-        }
-        calculate(std::move(paths));
+        for(const Geo::Polygon& body: groupedPaths(GCode::Grouping::Copper))
+            returnPs.append_range(concentricLoops(
+                Geo::Inflate(Geo::Polygons{body}, -toolDiameter), -stepOver, steps));
+    } else {
+        // Снаружи петли идут ОТ детали наружу и сами кончиться не могут:
+        // ограничение по числу шагов здесь единственное.
+        returnPs.append_range(concentricLoops(
+            Geo::Inflate(closedSrc, +toolDiameter), +stepOver, steps));
     }
 
     if(returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }
-
-    stacking(returnPs);
-    assert(returnPss.size());
-
-    gcp.toolPathss = toCurvess(returnPss);
-    gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
-    file_ = new File{std::move(gcp)};
-
-    file_->setFileName(tool.nameEnc());
+    finishPocket(tool, Geo::Inflate(returnPs, toolDiameter));
 }
 
 void Creator::createStdFull(const Tool& tool, const double depth) {
     Timer t{__FUNCTION__};
+    if(gcp.side() == GCode::On) return;
 
-    if(gcp.side() == GCode::On)
-        return;
+    toolDiameter = tool.getDiameter(depth);
+    dOffset = toolDiameter * 0.5;
+    stepOver = tool.stepover();
 
-    toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset = toolDiameter / 2;
-    stepOver = tool.stepover() * uScale;
-    Paths64 cutAreaPaths;
+    // Снаружи карман -- то, что осталось от габаритной рамки после вычитания
+    // детали, изнутри -- сама медь. Запас рамки чуть больше диаметра, чтобы
+    // фреза прошла по внешнему контуру целиком.
+    const auto& bodies = gcp.side() == GCode::Outer
+        ? groupedPaths(GCode::Grouping::Cutoff, toolDiameter * 1.005)
+        : groupedPaths(GCode::Grouping::Copper);
 
-    if(gcp.side() == GCode::Outer)
-        groupedPaths(GCode::Grouping::Cutoff, static_cast</*PType*/ int32_t>(toolDiameter * 1.005));
-    else // Inner:
-        groupedPaths(GCode::Grouping::Copper);
-
-    // dbgPaths(groupedPss, u"groupedPss"_s, Qt::red);
-
-    setCurrent(0);
-
-    for(Paths64 paths: groupedPss) {
-        paths = InflateRoundPolygon(paths, -dOffset * 2, uScale);
-        // if (App::settings().gbrCleanPolygons()) CleanPaths(paths, uScale * 0.0005);
-        CleanPaths(paths, uScale * 0.001);
-        cutAreaPaths.append_range(paths);
-
-        returnPs.append_range(paths);
-        double step{};
-        Paths64 tmp;
-        do {
-            tmp = InflateMiterPolygon(paths, step += -stepOver * 2, uScale);
-            returnPs.append_range(tmp);
-        } while(tmp.size());
-    }
+    // Первая петля отстоит от границы на РАДИУС: центр круглой фрезы ближе не
+    // подойдёт. delta -- полная ширина, отсюда целый диаметр.
+    for(const Geo::Polygon& body: bodies)
+        returnPs.append_range(concentricLoops(
+            Geo::Inflate(Geo::Polygons{body}, -toolDiameter), -stepOver));
 
     if(returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }
-
-    stacking(returnPs);
-
-    assert(returnPss.size());
-
-    cutAreaPaths = InflateRoundPolygon(cutAreaPaths, dOffset * 2, uScale);
-
-    gcp.toolPathss = toCurvess(returnPss);
-    gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
-    file_ = new File{std::move(gcp)};
-
-    file_->setFileName(tool.nameEnc());
+    finishPocket(tool, Geo::Inflate(returnPs, toolDiameter));
 }
 
-void Creator::createMultiTool(const mvector<Tool>& tools, double depth) {
+void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
+    Timer t{__FUNCTION__};
+    if(gcp.side() == GCode::On) return;
 
-    if(gcp.side() == GCode::Outer)
-        groupedPaths(GCode::Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005 * uScale);
-    else // Inner:
-        groupedPaths(GCode::Grouping::Copper);
+    const auto& bodies = gcp.side() == GCode::Outer
+        ? groupedPaths(GCode::Grouping::Cutoff, tools.front().getDiameter(depth) * 1.005)
+        : groupedPaths(GCode::Grouping::Copper);
 
-    auto removeSmall = [](Paths64& paths, double dOffset) {
-        const auto ta = dOffset * dOffset * pi;
-        const auto tp = dOffset * 4;
-        std::erase_if(paths, [ta, tp](auto& path) {
-            const auto a = abs(Area(path));
-            const auto p = Perimeter(path);
-            return a < ta && p < tp;
-        });
-    };
+    // Выбранное предыдущими, более крупными фрезами: инструменты приходят
+    // отсортированными по убыванию диаметра, и каждый следующий дорабатывает
+    // только то, куда предыдущий не дотянулся.
+    Geo::Polygons cleared;
 
-    Pathss64 fillPaths;
-    fillPaths.resize(tools.size());
-
-    for(size_t tIdx{}, size = tools.size(); const auto& tool: tools) {
+    for(size_t tIdx{}, size = tools.size(); const Tool& tool: tools) {
         returnPs.clear();
-        toolDiameter = tool.getDiameter(depth) * uScale;
-        dOffset = toolDiameter / 2;
-        stepOver = tool.stepover() * uScale;
+        returnPss.clear();
+        toolDiameter = tool.getDiameter(depth);
+        dOffset = toolDiameter * 0.5;
+        stepOver = tool.stepover();
 
-        Paths64 clipFrame; // u"обтравочная"_s рамка
-        for(size_t i{}; tIdx && i <= tIdx; ++i) {
-            // u"обтравочная"_s рамка для текущего инструмента и предыдущих УП
-            Paths64 tmp = Inflate64(fillPaths[i], -dOffset + uScale * 0.001, cl::JoinType::Round, cl::EndType::Polygon, uScale);
-            // объединение рамок
-            clipFrame = cl::Union(clipFrame, tmp, cl::FillRule::EvenOdd);
-        }
+        // Куда нельзя вести ЦЕНТР этой фрезы: вглубь уже выбранного, отступив
+        // от его края на радиус. Ближе к краю фреза ещё снимает материал.
+        const Geo::Polygons forbidden = cleared.empty()
+            ? Geo::Polygons{}
+            : Geo::Inflate(cleared, -toolDiameter);
 
-        Paths64 cutAreaPaths;
-
-        {
-            Timer t{"groupedPss"};
-            for(size_t pIdx{}; const Paths64& paths: groupedPss) {
-                Paths64 wp = Inflate64(paths, -dOffset + 2, cl::JoinType::Round, cl::EndType::Polygon, uScale); // + 2 <- поправка при расчёте впритык.
-
-                if(tIdx) // обрезка текущего пути предыдущим
-                    wp = cl::Difference(wp, clipFrame, cl::FillRule::EvenOdd);
-
-                if(tIdx == size - 1)
-                    removeSmall(wp, dOffset * 0.5); // последний
-                else if(tIdx /*+ 1 != size*/)
-                    removeSmall(wp, dOffset * 2.0); // остальные
-
-                // //dbgPaths(wp, u"wp %1"_s.arg(pIdx), Qt::red);
-
-                fillPaths[tIdx].append_range(wp);
-
-                cutAreaPaths.append_range(wp);
-
-                do {
-                    returnPs.append_range(std::move(wp));
-                    CleanPaths(wp, uScale * 0.0005); //-V1030
-                    wp = Inflate64(wp, -stepOver * 2, cl::JoinType::Miter, cl::EndType::Polygon, uScale);
-                } while(wp.size());
-                ++pIdx;
-            } // for (const Paths64& paths : groupedPss_) {
+        for(const Geo::Polygon& body: bodies) {
+            Geo::Polygons region = Geo::Inflate(Geo::Polygons{body}, -toolDiameter);
+            if(!forbidden.empty()) region -= forbidden;
+            // Последней фрезе мелочь оставляем: дочищать после неё уже некому.
+            removeSmall(region, tIdx + 1 == size ? dOffset * 0.5 : dOffset * 2.0);
+            if(region.empty()) continue;
+            returnPs.append_range(concentricLoops(std::move(region), -stepOver));
         }
 
         if(returnPs.empty()) {
             emit fileReady(nullptr);
+            ++tIdx;
             continue;
         }
 
-        // make a fill box for the toolpath and create a file
-        Timer t{"cutAreaPaths"};
-        // //dbgPaths(cutAreaPaths, u"cutAreaPaths"_s, Qt::green);
-        cutAreaPaths = Inflate64(cutAreaPaths, dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale);
+        Geo::Polygons cutArea = Geo::Inflate(returnPs, toolDiameter);
+        cleared |= cutArea;
 
         stacking(returnPs);
-        assert(returnPss.size());
+        if(returnPss.empty()) {
+            emit fileReady(nullptr);
+            ++tIdx;
+            continue;
+        }
 
-        gcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
-
-        gcp.toolPathss = toCurvess(returnPss);
-        gcp.setPocketAreaCurves(toCurves(cutAreaPaths));
-        file_ = new File{std::move(gcp)};
+        // Параметры КОПИРУЮТСЯ, а не переносятся: прежний код делал
+        // File{std::move(gcp)} прямо в цикле, и второму инструменту доставался
+        // уже выпотрошенный gcp -- ни инструментов, ни исходной геометрии.
+        GCode::Params toolGcp = gcp;
+        toolGcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
+        toolGcp.toolPathss = std::move(returnPss);
+        toolGcp.setPocketAreaCurves(std::move(cutArea));
+        file_ = new File{std::move(toolGcp)};
         file_->setFileName(tool.nameEnc());
 
-        // make a bounding box for the next tool
-        fillPaths[tIdx] = Inflate64(fillPaths[tIdx], dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale);
-
-        if(++tIdx < tools.size()) emit fileReady(file_); // NOTE skip last
-    } // for (int tIdx{}; tIdx < tools.size(); ++tIdx) {
+        // Последний файл отправит сам Creator::createGc.
+        if(++tIdx < size) emit fileReady(file_);
+    }
 }
 
 File::File()
@@ -246,7 +214,7 @@ File::File(GCode::Params&& newGcp)
 }
 
 void File::genGcodeAndTile() {
-    auto& proj = App::project();
+    auto& proj        = App::project();
     const QRectF rect = proj.worckRect();
     for(size_t x{}; x < proj.stepsX(); ++x) {
         for(size_t y{}; y < proj.stepsY(); ++y) {

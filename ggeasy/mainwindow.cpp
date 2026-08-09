@@ -92,8 +92,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui.grView, &GraphicsView::mouseMove, [this](const QPointF& point) {
         auto gpoint = point - App::project().zeroPos();
-        auto str = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
-            point.x(), point.y(), gpoint.x(), gpoint.y());
+        auto str    = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
+               point.x(), point.y(), gpoint.x(), gpoint.y());
         ui.statusbar->showMessage(QString::fromStdString(str));
         // ui.statusbar->showMessage(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s
         // .arg(point.x(), 8, 'f', 3)
@@ -105,6 +105,7 @@ MainWindow::MainWindow(QWidget* parent)
     ui.treeView->setModel(new FileTree::Model{ui.treeView});
 
     connect(ui.treeView, &FileTree::View::saveGCodeFile, this, &MainWindow::saveGCodeFile);
+    connect(ui.treeView, &FileTree::View::editGCodeFile, this, &MainWindow::editGcFile);
     connect(ui.treeView, &FileTree::View::saveGCodeFiles, this, &MainWindow::saveGCodeFiles); // NOTE unused
     connect(ui.treeView, &FileTree::View::saveSelectedGCodeFiles, this, &MainWindow::saveSelectedGCodeFiles);
 
@@ -766,8 +767,8 @@ void MainWindow::createActionsShape() {
 
     toolBar->addSeparator();
 
-    static constexpr auto executor = +[](ClipType type) {
 #if 0 // FIXME
+    static constexpr auto executor = +[](ClipType type) {
         auto selectedItems = App::grView().selectedItems();
         Paths clipPaths;
         for(QGraphicsItem* clipItem: selectedItems)
@@ -800,7 +801,6 @@ void MainWindow::createActionsShape() {
                     rmi.erase(it);
                     return fl;
                 });
-#endif
     };
     toolBar->addAction(QIcon::fromTheme(u"path-union"_s), tr("Union"),
         [] { executor(ClipType::Union); });
@@ -812,6 +812,7 @@ void MainWindow::createActionsShape() {
         [] { executor(ClipType::Intersection); });
 
     toolBar->addSeparator();
+#endif
 
     // toolBar->addAction(QIcon::fromTheme({}), tr("Create Group"), this, [] {
     //     Paths p{CirclePath(100 * uScale, {100 * uScale, 100 * uScale})};
@@ -857,12 +858,12 @@ void MainWindow::saveSelectedGCodeFiles() {
     if(project_->pinsPlacedMessage())
         return;
 
-    mvector<GCode::File*> gcFiles(project_->files<GCode::File>());
+    std::vector<GCode::File*> gcFiles(project_->files<GCode::File>());
     for(size_t i{}; i < gcFiles.size(); ++i)
         if(!gcFiles[i]->itemGroup()->isVisible())
-            gcFiles.remove(i--);
+            gcFiles.erase(gcFiles.begin() + i--);
 
-    using Key = std::pair<size_t, Side>;
+    using Key     = std::pair<size_t, Side>;
     using GcFiles = QList<GCode::File*>;
 
     std::map<Key, GcFiles> gcFilesMap;
@@ -964,23 +965,16 @@ bool MainWindow::maybeSave() {
     return true;
 }
 
-void MainWindow::editGcFile(GCode::File* /*file*/) { // TODO editGcFile
-    qWarning(__FUNCTION__);
-    // TODO   switch (file->gtype()) {
-    // case GCode::Null:
-    // case "Profile"_hash32:
-    // // toolpathActions["Profile"_hash32]->triggered();
-    // // reinterpret_cast<FormsUtil*>(dockWidget_->widget())->editFile(file);
-    // break;
-    // case GCode::Pocket:
-    // case GCode::Voronoi:
-    // case GCode::Thermal:
-    // case GCode::Drill:
-    // case G_CODE_PROPERTIES:
-    // case GCode::Raster:
-    // case GCode::LaserHLDI:
-    // default: break;
-    // }
+void MainWindow::editGcFile(int32_t id) {
+    auto* file = dynamic_cast<GCode::File*>(App::project().file(id));
+    if(!file) return;
+    auto* plugin = App::gCodePlugin(file->type());
+    if(!plugin) return;
+    // Отметить действие на панели: его toggled и покажет форму в доке. Если оно
+    // уже отмечено, сигнал не придёт -- форму покажет сам plugin->editFile.
+    if(auto it = toolpathActions.find(file->type()); it != toolpathActions.end())
+        it->second->setChecked(true);
+    plugin->editFile(file);
 }
 
 #if __has_include("xrstyle.h") && 0

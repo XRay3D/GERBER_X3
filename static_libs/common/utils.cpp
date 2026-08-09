@@ -1,5 +1,7 @@
 #include "utils.h"
 
+#include "geo/util.h"
+
 #include <unicode/ucnv.h>   // ICU Conversion (для преобразования)
 #include <unicode/ucsdet.h> // ICU Charset Detection
 #include <unicode/unistr.h>
@@ -21,7 +23,7 @@ QString toQString(std::string_view cp1251Str) {
 }
 
 std::string toCp1251(const QString& utf16Str) {
-    UErrorCode error = U_ZERO_ERROR;
+    UErrorCode error       = U_ZERO_ERROR;
     const UChar* utf16Data = reinterpret_cast<const UChar*>(utf16Str.utf16());
     std::string cp1251Buf(utf16Str.size() * 2, '\0');
     auto ucnv = ucnv_open("windows-1251", &error);
@@ -99,7 +101,7 @@ bool hasBom(std::string_view data) {
 }
 
 bool isValidUtf8(std::string_view data) noexcept {
-    std::size_t i = 0;
+    std::size_t i       = 0;
     const std::size_t n = std::size(data);
 
     while(i < n) {
@@ -154,4 +156,42 @@ bool isValidUtf8(std::string_view data) noexcept {
         return false;
     }
     return true;
+}
+
+QIcon drawIcon(const QPainterPath& pPath, QColor color, bool stroke) {
+    auto rect    = pPath.boundingRect();
+    double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
+    double ky    = rect.bottom() * scale;
+    double kx    = rect.left() * scale;
+    QPixmap pixmap{IconSize, IconSize};
+    pixmap.fill(Qt::transparent);
+    QPainter painter;
+    painter.begin(&pixmap);
+    painter.setRenderHint(QPainter::Antialiasing);
+    //    painter.translate(tr);
+    painter.translate(-kx, ky);
+    painter.scale(scale, -scale);
+    if(stroke) {
+        painter.strokePath(pPath, {color, 0.0});
+    } else {
+        painter.setPen(Qt::NoPen);
+        painter.setBrush(color);
+        painter.drawPath(pPath);
+    }
+    return pixmap;
+}
+
+QIcon drawIcon(const Geo::Polylines& polylines, QColor color, bool stroke) {
+    return drawIcon(Geo::toPath(polylines), color, stroke);
+}
+
+QIcon drawIcon(const Geo::Polygons& polygons, QColor color) {
+    // Путь региона уже несёт правило заполнения, при котором дырки вычитаются.
+    return drawIcon(polygons.toPath(), color);
+}
+
+QIcon drawDrillIcon(QColor color) {
+    QPainterPath painterPath;
+    painterPath.addEllipse(QRect(0, 0, IconSize - 1, IconSize - 1));
+    return drawIcon(painterPath, color);
 }

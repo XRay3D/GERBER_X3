@@ -21,7 +21,7 @@ namespace ShArc {
 Shape::Shape(Shapes::Plugin* plugin,
     QPointF center, QPointF pt1, QPointF pt2)
     : AbstractShape{plugin}
-    , radius_{geo::Length(center, pt1)} {
+    , radius_{Geo::distance(center, pt1)} {
     if(!std::isnan(center.x())) {
         handles = {
             Handle{pt1},
@@ -74,7 +74,7 @@ void Shape::redraw() {
             }
             handles[Center] = radius ? QLineF::fromPolar(radius * tmp, angle - 90).translated(center).p2() : center;
             if(isCenter)
-                radius_ = geo::Length(handles[Center], handles[Point1]);
+                radius_ = Geo::distance(handles[Center], handles[Point1]);
         };
 
         switch(std::distance(handles.data(), curHandle)) {
@@ -83,22 +83,18 @@ void Shape::redraw() {
         case Point2: updateCenter(); break;
         }
     } else {
-        radius_ = geo::Length(handles[Center], handles[Point1]);
+        radius_ = Geo::distance(handles[Center], handles[Point1]);
     }
 
-    Curve curve{
-        {{
-             handles[Point1],
-         },
-         {
-                handles[Point2],
-                handles[Center],
-                geo::DIR(handles[Point1], handles[Center], handles[Point2]),
-            }}
+    Geo::Polyline curve{
+        {handles[Point1],
+         Geo::bulgeOf(handles[Point1], handles[Point2], handles[Center],
+         geo::DIR(handles[Point1], handles[Center], handles[Point2]))},
+        {handles[Point2]},
     };
-    if(closed) curve.emplace_back(curve.front().pt);
+    if(closed) curve.close(); // замыкает хордой
     curves_ = {std::move(curve)};
-    shape_ = toPPath(curves_);
+    shape_ = Geo::toPath(curves_);
 
     // shape_.clear();
     // shape_.moveTo(handles[Point1]);
@@ -172,7 +168,7 @@ void Shape::setAngle(int i, double radius) {
 
 void Shape::readAndInit(QDataStream& stream [[maybe_unused]]) {
     curHandle = handles.data() + Center;
-    radius_ = geo::Length(handles[Center], handles[Point1]);
+    radius_ = Geo::distance(handles[Center], handles[Point1]);
     redraw();
 }
 

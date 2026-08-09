@@ -11,7 +11,7 @@
 #pragma once
 
 #include "doublespinbox.h"
-#include "mvector.h"
+
 #include "tool.h"
 #include <QWidget>
 #include <array>
@@ -81,5 +81,5 @@ private:
     std::array<std::pair<DoubleSpinBox*, decltype(&Tool::angle)>, 12> get;
     std::array<std::pair<DoubleSpinBox*, decltype(&Tool::setAngle)>, 12> set;
 
-    // mvector<DoubleSpinBox*> update;
+    // std::vector<DoubleSpinBox*> update;
 };
