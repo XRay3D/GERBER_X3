@@ -25,7 +25,8 @@ Component placement from a Gerber X3 file (component attributes).
 
 ![Components](Components.PNG)
 
-* Windows: [x86](https://github.com/XRay3D/GERBER_X2/releases)
-* Windows: [amd64](https://github.com/XRay3D/GERBER_X2/releases)
+Скачать сборки — на вкладке [Releases](https://github.com/XRay3D/GERBER_X3/releases).
+
+Downloads are on the [Releases](https://github.com/XRay3D/GERBER_X3/releases) tab.
 
 Поддержать автора https://boosty.to/x-ray_3d
