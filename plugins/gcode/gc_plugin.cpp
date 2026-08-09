@@ -13,7 +13,7 @@
 #include "app.h"
 #include "ft_model.h"
 #include "gc_form.h"
-#include "gc_highlighter.h"
+#include "gc_programdialog.h"
 #include "gc_node.h"
 
 #include <QAction>

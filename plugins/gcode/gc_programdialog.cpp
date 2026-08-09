@@ -8,7 +8,7 @@
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
-#include "gc_highlighter.h"
+#include "gc_programdialog.h"
 #include "gc_viewer3d.h"
 
 #include "app.h"
@@ -273,4 +273,4 @@ void Dialog::updateExtraSelections() {
 
 } // namespace GCode
 
-#include "moc_gc_highlighter.cpp"
+#include "moc_gc_programdialog.cpp"

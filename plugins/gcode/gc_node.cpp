@@ -11,7 +11,7 @@
 #include "gc_node.h"
 #include "abstract_file.h"
 #include "gc_file.h"
-#include "gc_highlighter.h"
+#include "gc_programdialog.h"
 #include "project.h"
 
 #include <QFileInfo>
