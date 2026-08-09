@@ -21,7 +21,8 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
 add_library(gc_pocketoffset STATIC pocketoffset.h pocketoffset.cpp)
-target_link_libraries(gc_pocketoffset PUBLIC geometry)
+# Clipper2 (geometry) плагину больше не нужен: карман считается в точном домене.
+target_link_libraries(gc_pocketoffset PUBLIC gcode)
 
 file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
 file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)

@@ -165,7 +165,8 @@ void Form::resizeEvent(QResizeEvent* event) {
 
 void Form::showEvent(QShowEvent* event) {
     updatePixmap();
-    QWidget::showEvent(event);
+    // Базовая, а не QWidget: в GCode::Form::showEvent сбрасывается режим правки.
+    GCode::Form::showEvent(event);
 }
 
 void Form::onAddBridgeClicked() {
