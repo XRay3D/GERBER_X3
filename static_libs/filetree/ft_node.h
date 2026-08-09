@@ -69,6 +69,12 @@ public:
     void addChild(Node* item, Deleter::Polycy delPolycy = Deleter::Delete);
     void remove(int row);
 
+    // Перенос узла между папками. remove() ребёнка УДАЛЯЕТ (владение живёт в
+    // unique_ptr), поэтому забирать его надо отдельной парой: takeChild отдаёт
+    // владение наружу, adoptChild принимает вместе с прежней политикой удаления.
+    std::unique_ptr<Node, Deleter> takeChild(int row);
+    void adoptChild(std::unique_ptr<Node, Deleter>&& child);
+
     virtual QVariant data(const QModelIndex& index, int role) const                 = 0;
     virtual bool setData(const QModelIndex& index, const QVariant& value, int role) = 0;
     virtual Qt::ItemFlags flags(const QModelIndex& index) const                     = 0;

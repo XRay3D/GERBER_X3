@@ -316,6 +316,14 @@ void Form::fileHandler(File* file) {
             if(auto* stale = App::project().file(id); stale)
                 App::fileModel().removeNode(stale->node());
         replacedIds_.clear();
+
+        // Многофайловая УП уезжает в подпапку своего имени, одиночная остаётся
+        // рядом со всеми. Порядок важен: лишние узлы уже убраны, так что счёт
+        // здесь -- окончательный.
+        std::vector<FileTree::Node*> nodes;
+        for(int32_t id: programIds(fileName_))
+            if(auto* f = App::project().file(id); f) nodes.push_back(f->node());
+        App::fileModel().groupProgram(fileName_, nodes);
         // Форма остаётся в режиме правки: повторный расчёт под тем же именем
         // снова перезапишет ту же УП, не задавая вопросов.
         if(fileId < 0) setEditMode(false);

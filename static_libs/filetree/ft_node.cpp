@@ -78,6 +78,17 @@ void Node::addChild(Node* item, Deleter::Polycy delPolycy) {
 
 void Node::remove(int row) { takeAt(childs, row); }
 
+std::unique_ptr<Node, Deleter> Node::takeChild(int row) {
+    if(row < 0 || std::cmp_greater_equal(row, childs.size())) return {};
+    return takeAt(childs, row);
+}
+
+void Node::adoptChild(std::unique_ptr<Node, Deleter>&& child) {
+    if(!child) return;
+    child->parent_ = this;
+    childs.emplace_back(std::move(child));
+}
+
 QModelIndex Node::index(int column) const {
     return App::fileModel().createIndex(row(), column, reinterpret_cast<quintptr>(this));
 }
