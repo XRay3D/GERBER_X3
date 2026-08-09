@@ -9,12 +9,18 @@ namespace Drilling {
 namespace Gi {
 
 class Preview final : public ::Gi::AbstractPreview {
+    // Осевая линия: одна вершина у отверстия, две и больше у паза.
     Geo::Polyline path_;
+    // Контуры самого тела превью (отверстие как оно есть, паз -- раздутая
+    // осевая). Хранятся рядом с sourcePath_ базового класса, потому что тот
+    // существует только для рисования: обратного пути из QPainterPath в
+    // bulge-вид нет, а paths()/offset() отдают наружу именно контуры.
+    Geo::Polylines source_;
     Row& row;
     Tool::ID toolId_{};
 
 public:
-    explicit Preview(Geo::Polyline&& hv, double diameter, Tool::ID toolId, Row& row, const Geo::Polylines& draw_ = {}); // FIXME to Geo::Polyline
+    explicit Preview(Geo::Polyline&& hv, double diameter, Tool::ID toolId, Row& row, const Geo::Polylines& draw_ = {});
 
     // AbstractPreview interface
     void updateTool() override;
