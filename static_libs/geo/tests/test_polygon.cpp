@@ -42,6 +42,8 @@ private slots:
     void polygonFlagReversesContoursAndMembership();
     void flaggedPolygonSubtractsWhenRegionIsBuilt();
     void polygonFlagSurvivesSerializationAndTransform();
+    void regionWithIslandInHoleSurvivesSerialization();
+    void denseRegionWithArcIslandsSurvivesSerialization();
     void spanConstructorKeepsBodyNestedInsideHole();
     void translationPreservesAreaOfComplexArcBoundary();
 };
@@ -219,6 +221,56 @@ void PolygonTest::flaggedPolygonSubtractsWhenRegionIsBuilt() {
 
     // А вот честное дополнение -- это другое: оно неограничено.
     QVERIFY(hole.complement().isUnbounded());
+}
+
+// Тело с дыркой, а в дырке -- отдельный островок. Ровно та расстановка, на
+// которой плоский список контуров теряет островок вместе с дыркой.
+void PolygonTest::regionWithIslandInHoleSurvivesSerialization() {
+    Polygons source = Polygons{squareWithHole()} | square(4.0);
+    QCOMPARE(source.all().size(), 2u);
+
+    QByteArray buffer;
+    {
+        QDataStream out{&buffer, QIODevice::WriteOnly};
+        out << source;
+    }
+    Polygons restored;
+    {
+        QDataStream in{&buffer, QIODevice::ReadOnly};
+        in >> restored;
+    }
+
+    QCOMPARE(restored.all().size(), source.all().size());
+    QVERIFY(near(restored.area(), source.area(), 1e-6));
+}
+
+// Плотный случай, ближе к реальной плате: решётка круглых дырок, в каждой --
+// круглый островок. Границы дугами, вложенность на два уровня.
+void PolygonTest::denseRegionWithArcIslandsSurvivesSerialization() {
+    Polygons region = Polygons{Polylines{rectangle(100.0, 100.0)}};
+    for(int x{}; x < 4; ++x)
+        for(int y{}; y < 4; ++y) {
+            const QPointF at{x * 22.0 - 33.0, y * 22.0 - 33.0};
+            region -= Polygons{Polylines{circle(10.0, at)}}; // дырка
+            region |= Polygons{Polylines{circle(4.0, at)}};  // островок в ней
+        }
+
+    // 1 тело + 16 островов.
+    QCOMPARE(region.all().size(), 17u);
+
+    QByteArray buffer;
+    {
+        QDataStream out{&buffer, QIODevice::WriteOnly};
+        out << region;
+    }
+    Polygons restored;
+    {
+        QDataStream in{&buffer, QIODevice::ReadOnly};
+        in >> restored;
+    }
+
+    QCOMPARE(restored.all().size(), region.all().size());
+    QVERIFY(near(restored.area(), region.area(), 1e-6));
 }
 
 void PolygonTest::polygonFlagSurvivesSerializationAndTransform() {
