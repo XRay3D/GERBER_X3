@@ -1,0 +1,31 @@
+CompileFlags:
+  Compiler: /opt/clang-p2996/bin/clang++
+  Remove:
+    # GCC-специфичные флаги, которые clang не знает
+    - -fcontracts*              # -fcontracts, -fcontract-evaluation-semantic=... и т.п.
+    - -fmodules                 # у clang -fmodules означает совсем другое (Clang header modules)
+    - -fmodule-mapper*
+    - -fmodule-only
+    - -fdeps-*                  # p1689-сканирование от CMake/GCC
+    - -fconcepts-diagnostics-depth*
+    - -flto*
+    - -mcpu=*                   # если тянутся embedded-флаги, чужие для clang
+  Add:
+    - -std=c++26
+    # Рефлексия: -freflection у GCC и p2996 совпадает по написанию,
+    # но добавляем расширенный набор форка
+    - -freflection-latest
+    - -fexpansion-statements
+    # Контракты: p2996 их не знает — гасим синтаксис для LSP.
+    # Реальную семантику проверяет только g++-16.
+    - "-Dpre(...)="
+    - "-Dpost(...)="
+    - "-Dcontract_assert(...)=[](bool){}(__VA_ARGS__)"
+    - -isystem/opt/gcc-16/include/c++/16.1.1
+    # - -isystem/opt/gcc-16/include/c++/16.1.0/x86_64-pc-linux-gnu
+    - -isystem/opt/gcc-16/include/c++/16.1.1/backward
+    - -isystem/opt/gcc-16/lib/gcc/x86_64-pc-linux-gnu/16.1.1/include/
+  # BuiltinHeaders: QueryDriver   # clangd >= 21: брать системные заголовки из query-driver
+
+Diagnostics:
+  UnusedIncludes: None          # <contracts> будет казаться «неиспользуемым» из-за макросов

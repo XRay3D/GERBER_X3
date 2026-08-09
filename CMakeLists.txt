@@ -114,7 +114,22 @@ fetchcontent_declare(
     GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
     GIT_TAG 20b28712ffce8320237b75a587d35a2e89140577
     GIT_SHALLOW ON)
+# Сторонние цели собираются БЕЗ LTO под mingw. Наш код идёт с -Wa,-mbig-obj
+# (у COFF предел в 65535 секций, см. ниже), и объектные файлы получают иную
+# разновидность контейнера COFF. Сторонние цели наших флагов не наследуют --
+# они объявлены до add_compile_options ниже, -- поэтому при LTO их объекты
+# приезжают в общий мердж в другом формате, и lto1 падает с "COFF object
+# format mismatch". Без LTO их объекты несут готовый код, lto1 в них не
+# заглядывает, а линкер спокойно сливает оба формата.
+if(MINGW)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE OFF)
+endif()
+
 fetchcontent_makeavailable(ctre clipper2 simdjson)
+
+if(MINGW)
+  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
+endif()
 
 # Статический libsimdjson.a влинковывается в плагины (.so) — без PIC не
 # слинкуется.
