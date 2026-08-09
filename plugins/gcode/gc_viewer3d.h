@@ -20,6 +20,8 @@
 
 #include <vector>
 
+class QPropertyAnimation;
+
 namespace GCode {
 
 // Цвета осей X/Y/Z. Те же, что у соответствующих букв в подсветке синтаксиса
@@ -75,6 +77,9 @@ struct PathSegment {
 // формат контекста нужно запросить до создания окна.
 class Viewer3d : public QOpenGLWidget, protected QOpenGLExtraFunctions {
     Q_OBJECT
+    // Точка интереса камеры вынесена в свойство ради QPropertyAnimation:
+    // плавный подвод к подсвеченному месту -- это её анимация.
+    Q_PROPERTY(QVector3D cameraCenter READ cameraCenter WRITE setCameraCenter)
 
 public:
     enum ViewPreset {
@@ -98,6 +103,14 @@ public:
 
     void fitToView();
     void setViewPreset(ViewPreset preset);
+
+    QVector3D cameraCenter() const { return center_; }
+    void setCameraCenter(const QVector3D& center);
+
+    // Подвести камеру к началу подсвеченного участка, не меняя ни ракурса, ни
+    // масштаба. Плавно или рывком -- по настройке "Smooth scaling / shearing".
+    // Без подсветки не делает ничего.
+    void centerOnHighlight();
     void setRapidsVisible(bool visible);
     bool rapidsVisible() const { return rapidsVisible_; }
 
@@ -206,6 +219,14 @@ private:
     // Подсвеченные строки УП.
     int hlFirstLine_{-1};
     int hlLastLine_{-1};
+    // Начало подсвеченного участка -- туда же поставлен маркер инструмента и
+    // туда ведёт centerOnHighlight. Считается в buildHighlightVertices, чтобы
+    // не искать нужные перемещения второй раз.
+    QVector3D hlAnchor_{};
+    bool hlAnchorValid_{};
+    // Одна анимация на всё время жизни: перезапуск на каждом шаге курсора
+    // дешевле, чем плодить объекты, и старая анимация не тянет камеру назад.
+    QPropertyAnimation* centerAnimation_{};
 
     bool rapidsVisible_{true};
     bool perspective_{true};

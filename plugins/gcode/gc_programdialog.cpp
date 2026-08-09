@@ -77,6 +77,11 @@ std::map<int32_t, Dialog*>& openDialogs() {
     static std::map<int32_t, Dialog*> dialogs;
     return dialogs;
 }
+
+// Геометрия окна общая для всех файлов: окно на файл своё, но подгонять размер
+// каждому отдельно бессмысленно -- человек настраивает его один раз под экран.
+const QString gchSettingsGroup = u"GCodeViewerDialog"_s;
+const QString gchGeometryKey = u"geometry"_s;
 } // namespace
 
 Dialog* Dialog::showFor(int32_t fileId, const QString& text, const QString& windowTitle, QWidget* parent) {
@@ -115,6 +120,11 @@ void Dialog::programClosed(int32_t fileId) {
 }
 
 Dialog::~Dialog() {
+    MySettings settings;
+    settings.beginGroup(gchSettingsGroup);
+    settings.setValue(gchGeometryKey, saveGeometry());
+    settings.endGroup();
+
     if(fileId_ > -1) openDialogs().erase(fileId_);
 }
 
@@ -139,13 +149,24 @@ void Dialog::setProgram(const QString& text, const QString& windowTitle) {
         tbCode->setTextCursor(cursor);
     }
 
+    // Новая программа -- камера уже вписана в её габариты, и уводить её на
+    // первую строку незачем: слежение включаем только после первой синхронизации.
+    centeringArmed_ = false;
     if(viewer) viewer->setProgramText(text);
     syncViewerFromText();
+    centeringArmed_ = true;
 }
 
 Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     : QDialog{parent} {
-    resize(1200, 700);
+    { // размер и положение с прошлого раза; restoreGeometry сам отсечёт
+      // геометрию с экрана, которого больше нет
+        MySettings settings;
+        settings.beginGroup(gchSettingsGroup);
+        if(!restoreGeometry(settings.value(gchGeometryKey).toByteArray()))
+            resize(1200, 700);
+        settings.endGroup();
+    }
     setWindowTitle(windowTitle);
 
     QFont font{
@@ -252,10 +273,14 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
 void Dialog::syncViewerFromText() {
     const QTextCursor cursor = tbCode->textCursor();
     const auto* doc = tbCode->document();
-    if(viewer)
-        viewer->setHighlightedLines(
-            doc->findBlock(cursor.selectionStart()).blockNumber(),
-            doc->findBlock(cursor.selectionEnd()).blockNumber());
+    if(viewer) {
+        const int first = doc->findBlock(cursor.selectionStart()).blockNumber();
+        viewer->setHighlightedLines(first, doc->findBlock(cursor.selectionEnd()).blockNumber());
+        // Камера идёт за курсором, но только когда тот сменил строку: внутри
+        // одной строки точка та же, и дёргать анимацию на каждый символ незачем.
+        if(centeringArmed_ && first != centeredLine_) viewer->centerOnHighlight();
+        centeredLine_ = first;
+    }
     updateExtraSelections();
 }
 
