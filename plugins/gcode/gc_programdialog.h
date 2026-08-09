@@ -43,7 +43,7 @@ private:
     int32_t fileId_{-1};
     QTextEdit* tbLine;
     QTextBrowser* tbCode;
-    Viewer3d* viewer;
+    Viewer3d* viewer{}; // nullptr, если OpenGL недоступен
 
     void syncViewerFromText();
     void syncTextFromViewer(int lineNo);

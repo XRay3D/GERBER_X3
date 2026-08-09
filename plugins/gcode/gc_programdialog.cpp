@@ -12,9 +12,11 @@
 #include "gc_viewer3d.h"
 
 #include "app.h"
+#include "openglcheck.h"
 
 #include <QBoxLayout>
 #include <QCheckBox>
+#include <QLabel>
 #include <QPushButton>
 #include <QScrollBar>
 #include <QSplitter>
@@ -137,7 +139,7 @@ void Dialog::setProgram(const QString& text, const QString& windowTitle) {
         tbCode->setTextCursor(cursor);
     }
 
-    viewer->setProgramText(text);
+    if(viewer) viewer->setProgramText(text);
     syncViewerFromText();
 }
 
@@ -177,8 +179,17 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     }
 
     auto viewPane = new QWidget{this};
-    viewer = new Viewer3d{viewPane};
-    {
+    // Без рабочего OpenGL 3D-панель не создаём вовсе: QOpenGLWidget на битом
+    // драйвере утащил бы за собой всё приложение. Текстовая часть диалога
+    // остаётся полностью рабочей.
+    if(!OpenGlCheck::available()) {
+        auto viewLayout = new QVBoxLayout{viewPane};
+        auto label = new QLabel{tr("3D preview is unavailable.\n\n%1").arg(OpenGlCheck::howToEnable()), viewPane};
+        label->setAlignment(Qt::AlignCenter);
+        label->setWordWrap(true);
+        viewLayout->addWidget(label);
+    } else {
+        viewer = new Viewer3d{viewPane};
         auto viewLayout = new QVBoxLayout{viewPane};
         viewLayout->setContentsMargins(0, 0, 0, 0);
         viewLayout->setSpacing(4);
@@ -222,7 +233,7 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
     // Текст -> 3D и 3D -> текст.
     connect(tbCode, &QTextEdit::cursorPositionChanged, this, &Dialog::syncViewerFromText);
     connect(tbCode, &QTextEdit::selectionChanged, this, &Dialog::syncViewerFromText);
-    connect(viewer, &Viewer3d::lineSelected, this, &Dialog::syncTextFromViewer);
+    if(viewer) connect(viewer, &Viewer3d::lineSelected, this, &Dialog::syncTextFromViewer);
 
     auto splitter = new QSplitter{Qt::Horizontal, this};
     splitter->addWidget(textPane);
@@ -241,9 +252,10 @@ Dialog::Dialog(const QString& text, const QString& windowTitle, QWidget* parent)
 void Dialog::syncViewerFromText() {
     const QTextCursor cursor = tbCode->textCursor();
     const auto* doc = tbCode->document();
-    viewer->setHighlightedLines(
-        doc->findBlock(cursor.selectionStart()).blockNumber(),
-        doc->findBlock(cursor.selectionEnd()).blockNumber());
+    if(viewer)
+        viewer->setHighlightedLines(
+            doc->findBlock(cursor.selectionStart()).blockNumber(),
+            doc->findBlock(cursor.selectionEnd()).blockNumber());
     updateExtraSelections();
 }
 

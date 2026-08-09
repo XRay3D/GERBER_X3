@@ -16,6 +16,7 @@
 #include "gc_settings.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
+#include "openglcheck.h"
 
 #include <QDesktopServices>
 #include <QtWidgets>
@@ -79,7 +80,13 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     : QDialog{parent} {
     ui.setupUi(this);
 
-    ui.chbxOpenGl->setEnabled(QOpenGLContext::supportsThreadedOpenGL());
+    // Порядок важен: available() короткозамыкает проверку, чтобы на машине с
+    // битым драйвером не дёргать GL из-за одной галочки в настройках.
+    ui.chbxOpenGl->setEnabled(OpenGlCheck::available() && QOpenGLContext::supportsThreadedOpenGL());
+    if(const auto hint = OpenGlCheck::howToEnable(); !hint.isEmpty())
+        ui.chbxOpenGl->setToolTip(hint);
+    else
+        ui.chbxOpenGl->setToolTip(OpenGlCheck::report());
 
     for(int i{}; i < GuiColors::Count; ++i) {
         ui.formLayout->setWidget(i, QFormLayout::FieldRole, new ColorSelector{App::settings().guiColor_[i], defaultColor[i], ui.gbxColor});
