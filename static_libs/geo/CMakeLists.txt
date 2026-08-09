@@ -50,7 +50,17 @@ endif()
 if(CGAL_FOUND)
   target_link_libraries(Geo PRIVATE CGAL::CGAL)
 else()
-  # CGAL header-only: достаточно самих gmp/mpfr.
+  # CGAL header-only: достаточно самих gmp/mpfr. Но раз CGALConfig.cmake не
+  # нашёлся, заголовки могут не найтись тоже -- а узнаётся это иначе только
+  # на десятой минуте сборки, невнятным "CGAL/... No such file or directory"
+  # из первого же включения в src/cgal.h. Проверяем здесь и вслух.
+  find_path(CGAL_FALLBACK_INCLUDE_DIR CGAL/version.h)
+  if(NOT CGAL_FALLBACK_INCLUDE_DIR)
+    message(
+      FATAL_ERROR
+        "CGAL не найден: нет ни CGALConfig.cmake, ни заголовков CGAL/version.h. "
+        "MSYS2/UCRT64: mingw-w64-ucrt-x86_64-cgal, Debian/Ubuntu: libcgal-dev.")
+  endif()
   target_link_libraries(Geo PRIVATE gmp mpfr)
 endif()
 

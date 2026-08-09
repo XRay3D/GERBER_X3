@@ -40,6 +40,7 @@ jobs:
             mingw-w64-ucrt-x86_64-ninja
             mingw-w64-ucrt-x86_64-mold
             mingw-w64-ucrt-x86_64-boost
+            mingw-w64-ucrt-x86_64-cgal
             mingw-w64-ucrt-x86_64-qt6-base
             mingw-w64-ucrt-x86_64-qt6-declarative
             mingw-w64-ucrt-x86_64-qt6-svg
