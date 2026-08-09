@@ -76,7 +76,7 @@ point_type retrieve_point(std::vector<segment_type>& segment_data_, const cell_t
     return category == boost::polygon::SOURCE_CATEGORY_SEGMENT_START_POINT ? low(segment_data_[index]) : high(segment_data_[index]);
 }
 
-Path64 sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
+Geo::Polyline sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_type& edge) {
     std::vector sampled_edge{
         point_type{edge.vertex0()->x(), edge.vertex0()->y()},
         point_type{edge.vertex1()->x(), edge.vertex1()->y()}
@@ -87,7 +87,7 @@ Path64 sample_curved_edge(std::vector<segment_type>& segment_data_, const edge_t
     segment_type segment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
     boost::polygon::voronoi_visual_utils<coordinate_type>::discretize(point, segment, max_dist, &sampled_edge);
 
-    Path64 path;
+    Geo::Polyline path;
     path.reserve(sampled_edge.size());
     for(const auto& p: sampled_edge)
         path.emplace_back(static_cast</*PType*/ int32_t>(p.x()), static_cast</*PType*/ int32_t>(p.y()));
@@ -114,7 +114,7 @@ void VoronoiBoost::outside() {
 
     size_t max{};
 
-    for(const Path64& path: v::join(groupedPss))
+    for(const Geo::Polyline& path: v::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -127,7 +127,7 @@ void VoronoiBoost::outside() {
 
     for(const Paths64& paths: groupedPss) {
         ++id;
-        for(const Path64& path: paths) {
+        for(const Geo::Polyline& path: paths) {
             for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 throwIfCancel();
@@ -213,9 +213,9 @@ void VoronoiBoost::outside() {
                     if(set.emplace(p0, p1).second && set.emplace(p1, p0).second) {
                         if(edge.is_curved() && distTo(p0, p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
-                            // segments.emplace_back(Path64 { p0, p1 });
+                            // segments.emplace_back(Geo::Polyline { p0, p1 });
                         } else {
-                            segments.emplace_back(Path64{p0, p1});
+                            segments.emplace_back(Geo::Polyline{p0, p1});
                         }
                     }
                 }
@@ -226,7 +226,7 @@ void VoronoiBoost::outside() {
     mergeSegments(segments, 0.005 * uScale);
 
     const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
-    Path64 frame{
+    Geo::Polyline frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
         {maxX + fo, maxY + fo},
@@ -241,7 +241,7 @@ void VoronoiBoost::outside() {
     }
 
     // dbgPaths(segments, u"segments"_s);
-    auto clean = [kAngle = 2.0](Path64& path) {
+    auto clean = [kAngle = 2.0](Geo::Polyline& path) {
         for(size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = angleTo(path[i - 1], path[i + 0]);
             const double a2 = angleTo(path[i + 0], path[i + 1]);
@@ -271,7 +271,7 @@ void VoronoiBoost::inside() {
 
     size_t max{};
 
-    for(const Path64& path: v::join(groupedPss))
+    for(const Geo::Polyline& path: v::join(groupedPss))
         max += path.size();
 
     max *= 1.5;
@@ -284,7 +284,7 @@ void VoronoiBoost::inside() {
 
     for(const Paths64& paths: groupedPss) {
         ++id;
-        for(const Path64& path: paths) {
+        for(const Geo::Polyline& path: paths) {
             for(size_t i{}; i < path.size(); ++i) {
                 incCurrent();
                 throwIfCancel();
@@ -370,9 +370,9 @@ void VoronoiBoost::inside() {
                     if(set.emplace(p0, p1).second && set.emplace(p1, p0).second) {
                         if(edge.is_curved() && distTo(p0, p1) < tolerance) {
                             segments.emplace_back(sample_curved_edge(srcSegments, edge));
-                            // segments.emplace_back(Path64 { p0, p1 });
+                            // segments.emplace_back(Geo::Polyline { p0, p1 });
                         } else {
-                            segments.emplace_back(Path64{p0, p1});
+                            segments.emplace_back(Geo::Polyline{p0, p1});
                         }
                     }
                 }
@@ -385,7 +385,7 @@ void VoronoiBoost::inside() {
     mergeSegments(segments, 0.005 * uScale);
 
     const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
-    Path64 frame{
+    Geo::Polyline frame{
         {minX - fo, minY - fo},
         {minX - fo, maxY + fo},
         {maxX + fo, maxY + fo},
@@ -400,7 +400,7 @@ void VoronoiBoost::inside() {
     }
 
     // dbgPaths(segments, u"segments"_s);
-    auto clean = [kAngle = 2.0](Path64& path) {
+    auto clean = [kAngle = 2.0](Geo::Polyline& path) {
         for(size_t i = 1; i < path.size() - 1; ++i) {
             const double a1 = angleTo(path[i - 1], path[i + 0]);
             const double a2 = angleTo(path[i + 0], path[i + 1]);

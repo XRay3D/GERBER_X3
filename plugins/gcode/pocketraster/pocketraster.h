@@ -43,9 +43,9 @@ private:
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
     void addAcc(Paths64& src, const /*PType*/ int32_t accDistance);
 
-    Paths64 calcScanLines(const Paths64& src, const Path64& frame);
-    Paths64 calcFrames(const Paths64& src, const Path64& frame);
-    Path64 calcZigzag(const Paths64& src);
+    Paths64 calcScanLines(const Paths64& src, const Geo::Polyline& frame);
+    Paths64 calcFrames(const Paths64& src, const Geo::Polyline& frame);
+    Geo::Polyline calcZigzag(const Paths64& src);
 
     Paths64 merge(const Paths64& scanLines, const Paths64& frames);
 

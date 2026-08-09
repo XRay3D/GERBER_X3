@@ -377,7 +377,7 @@ Polyline toPolyline(const GPoly& pgn) {
         // дуги, начинающейся сразу за микрофрагментом.
         if(!out.empty()
             && std::hypot(src.x() - QPointF(out.back()).x(), src.y() - QPointF(out.back()).y())
-                < weldTolerance) {
+                < exitWeldTolerance) {
             out.back().bulge = bulge;
             continue;
         }
@@ -388,7 +388,7 @@ Polyline toPolyline(const GPoly& pgn) {
     if(out.size() > 1
         && std::hypot(QPointF(out.back()).x() - QPointF(out.front()).x(),
                QPointF(out.back()).y() - QPointF(out.front()).y())
-            < weldTolerance)
+            < exitWeldTolerance)
         out.pop_back();
     return out;
 }
@@ -633,7 +633,10 @@ QRectF boundingRect(const GPoly& pgn) {
     }
 
     if(empty) return {};
-    return QRectF{QPointF{xmin, ymin}, QPointF{xmax, ymax}};
+    return QRectF{
+        QPointF{xmin, ymin},
+        QPointF{xmax, ymax}
+    };
 }
 
 double signedArea(const GPoly& pgn) {

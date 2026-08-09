@@ -45,7 +45,7 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
         else if(gcp.side() == GCode::Inner && gcp.convent())
             ReversePaths(returnPs);
 
-        for(Path64& path: returnPs)
+        for(Geo::Polyline& path: returnPs)
             path.push_back(path.front());
 
         if(returnPs.empty()) {

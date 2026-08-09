@@ -10,12 +10,12 @@
  *******************************************************************************/
 #include "gbr_file.h"
 #include "gbr_node.h"
-#include <QElapsedTimer>
 #include "gbrcomp_item.h"
 #include "gbrcomp_onent.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "graphicsview.h"
+#include <QElapsedTimer>
 #include <algorithm>
 #include <cassert>
 #include <forward_list>
@@ -357,7 +357,7 @@ void File::createGi() {
                 itemGroups_[Components]->push_back(new Comp::Item{component, this});
         itemGroups_[Components]->shrink_to_fit();
     }
-    if constexpr(0) { // add aperture paths
+    if constexpr(1) { // add aperture paths
         auto contains = [&](const Geo::Polyline& path) -> bool {
             constexpr double k = 0.001;
             for(const auto& chPath: checkList) { // find copy

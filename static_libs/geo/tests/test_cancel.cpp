@@ -18,7 +18,7 @@ namespace {
 // общее объединение. Размер подобран так, чтобы полный счёт занимал около
 // секунды: меньше -- и отмену некуда было бы вклинить, больше -- тест стал
 // бы неприлично долгим.
-constexpr int gridSide = 22;
+constexpr int gridSide = 56;
 
 Polylines workload() {
     Polylines out;

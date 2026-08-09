@@ -76,7 +76,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     Paths64 profilePaths;
 
-    auto calcScanLines = [](const Paths64& src, const Path64& frame) {
+    auto calcScanLines = [](const Paths64& src, const Geo::Polyline& frame) {
         Paths64 sl; // Scan Lines
 
         cl::Clipper64 clipper;
@@ -86,15 +86,15 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         if(!sl.size())
             return sl;
 
-        r::sort(sl, {}, [](const Path64& p) { return p.front().y; }); // vertical sort
+        r::sort(sl, {}, [](const Geo::Polyline& p) { return p.front().y; }); // vertical sort
 
         /*PType*/ int32_t start = sl.front().front().y;
         bool fl = {};
         for(size_t i{}, last{}; i < sl.size(); ++i) {
             if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
 
-                fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Path64& p) { return p.front().x; }) :           // horizontal sort
-                    r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Path64& p) { return p.front().x; }); // horizontal sort
+                fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Geo::Polyline& p) { return p.front().x; }) :           // horizontal sort
+                    r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Geo::Polyline& p) { return p.front().x; }); // horizontal sort
 
                 for(size_t k = last; k < i; ++k) // fix direction
                     if(fl ^ (sl[k].front().x < sl[k].back().x))
@@ -107,7 +107,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         }
         return sl;
     };
-    auto calcFrames = [](const Paths64& src, const Path64& frame) {
+    auto calcFrames = [](const Paths64& src, const Geo::Polyline& frame) {
         Paths64 frames;
         {
             Paths64 tmp;
@@ -121,16 +121,16 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
             // dbgPaths(tmp, u"ClipType::Difference"_s);
             frames.append_range(std::move(tmp));
 
-            r::sort(frames, {}, [](const Path64& p) { return p.front().y; }); // vertical sort
+            r::sort(frames, {}, [](const Geo::Polyline& p) { return p.front().y; }); // vertical sort
 
-            std::sort(frames.begin(), frames.end(), [](const Path64& l, const Path64& r) { return l.front().y < r.front().y; }); // vertical sort
+            std::sort(frames.begin(), frames.end(), [](const Geo::Polyline& l, const Geo::Polyline& r) { return l.front().y < r.front().y; }); // vertical sort
             for(auto& path: frames)
                 if(path.front().y > path.back().y)
                     ReversePath(path); // fix vertical direction
         }
         return frames;
     };
-    auto calcZigzag = [hatchStep](const Paths64& src) -> std::optional<Path64> {
+    auto calcZigzag = [hatchStep](const Paths64& src) -> std::optional<Geo::Polyline> {
         cl::Clipper64 clipper;
         clipper.AddClip(src);
         Rect rect(GetBounds(src));
@@ -139,7 +139,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         rect.bottom += o;
         rect.left -= uScale;
         rect.right += uScale;
-        Path64 zigzag;
+        Geo::Polyline zigzag;
         auto step = hatchStep * uScale;
         auto start = rect.top;
         bool fl{};
@@ -162,11 +162,11 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
     auto merge = [](const Paths64& scanLines, const Paths64& frames) {
         Paths64 merged;
         merged.reserve(scanLines.size() / 10);
-        std::list<Path64> bList;
+        std::list<Geo::Polyline> bList;
         for(auto&& path: scanLines)
             bList.emplace_back(std::move(path));
 
-        std::list<Path64> fList;
+        std::list<Geo::Polyline> fList;
         for(auto&& path: frames)
             fList.emplace_back(std::move(path));
 
@@ -258,7 +258,7 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
         sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
         if(gcp.convent())
             ReversePaths(profilePaths);
-        for(Path64& path: profilePaths)
+        for(Geo::Polyline& path: profilePaths)
             path.push_back(path.front());
     }
 

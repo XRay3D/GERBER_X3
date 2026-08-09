@@ -210,7 +210,7 @@ void PreviewItem::redraw() {
         // offset.AddPaths(cashedPath, cl::JoinType::Miter, cl::EndType::Round);
         // cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
         cashedFrame = Inflate64(cashedPath, diameter * uScale * 0.1, cl::JoinType::Miter, cl::EndType::Round);
-        for(Path64& path: cashedPath)
+        for(Geo::Polyline& path: cashedPath)
             path.push_back(path.front());
     }
     if(qFuzzyIsNull(node_->tickness()) && node_->count()) {

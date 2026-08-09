@@ -80,7 +80,7 @@ void Creator::createOffset(const Tool& tool, double depth, const double width) {
     toolDiameter = tool.getDiameter(depth) * uScale;
     dOffset = toolDiameter / 2;
     stepOver = tool.stepover() * uScale;
-    const Path64 frame{returnPs.back()};
+    const Geo::Polyline frame{returnPs.back()};
     // returnPs.pop_back();
     { // create offset
       // ClipperOffset offset;
