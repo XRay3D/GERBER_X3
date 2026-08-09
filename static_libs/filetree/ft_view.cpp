@@ -60,29 +60,6 @@ void View::updateIcons() {
         update(model_->index(r, 0, index));
 }
 
-void View::on_doubleClicked(const QModelIndex& index) {
-    if(!index.column()) {
-        menuIndex_ = index;
-        if(index.data(Role::NodeType).toInt() != Type::Folder)
-            hideOther();
-        // if (index.parent() == model_->index(Model::GerberFiles, 0, QModelIndex())) {
-        // hideOther();
-        // } else if (index.parent() == model_->index(Model::DrillFiles, 0, QModelIndex())) {
-        // hideOther();
-        // } else if (index.parent() == model_->index(Model::ToolPath, 0, QModelIndex())) {
-        // hideOther();
-        // {
-        // const int32_t id = menuIndex_.data(Qt::UserRole).toInt();
-        // AbstractFile* file = static_cast<AbstractFile*>(App::project().file(id));
-        // App::project().showFiles(file->gcp.params[GCode::Params::GrItems].value<UsedItems>().keys());
-        // file->gcp.fileId = file->id();
-        // App::mainWindow().editGcFile(file);
-        // updateTree();
-        // }
-        // }
-    }
-}
-
 void View::onSelectionChanged(const QItemSelection& selected, const QItemSelection& deselected) {
     if(!selected.indexes().isEmpty())
         for(auto& index: selected.indexes())
@@ -135,7 +112,10 @@ void View::setModel(QAbstractItemModel* model) {
 
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &View::onSelectionChanged);
     connect(selectionModel(), &QItemSelectionModel::selectionChanged, this, &View::updateTree);
-    connect(this, &View::doubleClicked, this, &View::on_doubleClicked);
+    // Только F2. Умолчания (DoubleClicked, SelectedClicked) дрались бы с
+    // mouseDoubleClickEvent: двойной клик по имени открывает форму плагина, а не
+    // редактор, а одиночный по выделенной строке не должен делать ничего.
+    setEditTriggers(QAbstractItemView::EditKeyPressed);
 
     header()->setStretchLastSection(false);
     header()->setSectionResizeMode(QHeaderView::Fixed);
@@ -204,26 +184,26 @@ void View::contextMenuEvent(QContextMenuEvent* event) {
         menu.exec(viewport()->mapToGlobal(event->pos()));
 }
 
-void View::mousePressEvent(QMouseEvent* event) {
-    QTreeView::mousePressEvent(event);
-    if(event->button() == Qt::LeftButton) {
-        QModelIndex index = indexAt(event->pos());
-        if(index.isValid()) {
-            if(index.column() == 0) {
-                if(event->pos().x() > visualRect(index).left() + 44)
-                    edit(index);
-            } else
-                edit(index);
-        }
-    }
-}
+// Редактор по одиночному клику здесь больше не открывается: он занимал место
+// двойного клика по имени, а тот теперь открывает форму плагина. Переименование
+// осталось на F2 (QAbstractItemView::EditKeyPressed, см. setModel), комбобоксы
+// «Сторона» и «Тип» открываются двойным кликом ниже.
+void View::mousePressEvent(QMouseEvent* event) { QTreeView::mousePressEvent(event); }
 
 void View::mouseDoubleClickEvent(QMouseEvent* event) {
     menuIndex_ = indexAt(event->pos());
-    if(menuIndex_.isValid() && menuIndex_.parent().row() > -1)
-        hideOther();
-    else
-        QTreeView::mouseDoubleClickEvent(event);
+    if(!menuIndex_.isValid()) return QTreeView::mouseDoubleClickEvent(event);
+
+    if(menuIndex_.column() != Column::NameColorVisible)
+        return edit(menuIndex_), void(); // «Сторона» и «Тип» -- выпадающие списки
+
+    // Файловый узел: его родитель -- папка типа, лежащая строкой в корне.
+    if(menuIndex_.parent().row() > -1) {
+        if(static_cast<Node*>(menuIndex_.internalPointer())->doubleClicked(this)) return;
+        return hideOther();
+    }
+
+    QTreeView::mouseDoubleClickEvent(event);
 }
 
 } // namespace FileTree

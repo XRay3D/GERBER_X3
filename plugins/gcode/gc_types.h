@@ -205,18 +205,27 @@ public:
     mutable int fileId = -1;
     // QColor color;
 
+    // toolPathss и openCurves сохраняются наравне с исходной геометрией. Без них
+    // у загруженной из проекта УП regenerate() вычищает текст до заголовка с
+    // концовкой: генератор берёт траекторию именно из toolPathss. А regenerate()
+    // зовётся не только из save(), но и при смене стороны платы в дереве -- то
+    // есть УП молча превращалась в пустую от одного щелчка по «Сторона».
     friend QDataStream& operator>>(QDataStream& stream, Params& par) {
         return stream >> par.tools
             >> par.params
             >> par.closedCurves
-            >> par.supportCurvess;
+            >> par.supportCurvess
+            >> par.toolPathss
+            >> par.openCurves;
     }
 
     friend QDataStream& operator<<(QDataStream& stream, const Params& par) {
         return stream << par.tools
                       << par.params
                       << par.closedCurves
-                      << par.supportCurvess;
+                      << par.supportCurvess
+                      << par.toolPathss
+                      << par.openCurves;
     }
 
     explicit operator bool() const {

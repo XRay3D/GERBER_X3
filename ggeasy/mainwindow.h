@@ -387,7 +387,9 @@ private:
     void documentWasModified();
     bool maybeSave();
 
-    void editGcFile(GCode::File* file);
+    // Открыть УП на правку: показать форму её плагина, заполненную параметрами,
+    // с которыми УП была создана.
+    void editGcFile(int32_t id);
 
 private:
     bool saveFile(const QString& fileName);

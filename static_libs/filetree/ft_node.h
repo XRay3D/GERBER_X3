@@ -74,6 +74,11 @@ public:
     virtual Qt::ItemFlags flags(const QModelIndex& index) const                     = 0;
     virtual void menu(QMenu& menu, View* tv)                                        = 0;
 
+    // Двойной клик по колонке имени. Вернуть true, если узел обработал его сам;
+    // иначе View гасит остальные файлы (поведение по умолчанию для всех файлов,
+    // кроме УП -- та открывает форму своего плагина).
+    virtual bool doubleClicked(View* /*tv*/) { return false; }
+
     virtual int32_t id() const { return id__; }
     virtual void setId(int32_t id) { id__ = id; }
 

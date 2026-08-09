@@ -111,6 +111,16 @@ void Model::addItem(Gi::Item* item) {
     emit select(createIndex(rowCount, 0, node));
 }
 
+void Model::updateNode(Node* node) {
+    if(!node) return;
+    emit dataChanged(node->index(0), node->index(Column::Count - 1));
+}
+
+void Model::removeNode(Node* node) {
+    if(!node || !node->parent()) return;
+    removeRows(node->row(), 1, node->parent()->index(0));
+}
+
 void Model::closeProject() {
     Node* item;
     for(int i{}; i < rootItem->childCount(); ++i) {

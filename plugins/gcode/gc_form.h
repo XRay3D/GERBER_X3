@@ -28,7 +28,13 @@ class Form : public QWidget {
 public:
     explicit Form(Plugin* plugin, Creator* tpc);
     ~Form() override;
-    virtual void editFile(File* file) = 0;
+
+    // Заполнить форму параметрами уже созданной УП и вернуть сцену в то
+    // состояние, из которого её считали. Базовая реализация делает всё, что
+    // живёт в самой базе: имя, глубину, сторону, выделение и видимость.
+    // Плагину остаётся восстановить только свои виджеты -- инструмент,
+    // переключатели, галочки, -- вызвав сначала эту.
+    virtual void editFile(File* file);
 
     Creator* creator() const { return creator_; }
 
@@ -46,8 +52,27 @@ protected:
     void addUsedGi(class ::Gi::Item* gi);
     QWidget* widget() const { return ctrWidget; }
 
+    // Уже существующая в проекте УП с таким именем программы, кроме exceptId.
+    File* findProgram(const QString& programName, int32_t exceptId = -1) const;
+    // Все УП с таким именем программы. Их может быть несколько: многоинструментные
+    // плагины (PocketOffset) делают из одного запуска по файлу на инструмент.
+    std::vector<int32_t> programIds(const QString& programName) const;
+    // "Profile" -> "Profile (2)"; хвостовой номер наращивается, а не вкладывается.
+    QString uniqueProgramName(QString name) const;
+    // Спрашивает пользователя про коллизию имени и переименование при правке.
+    // Возвращает false, если тот отказался считать вовсе.
+    bool resolveFileName();
+    // Вернуть сцену в состояние, из которого УП считали: видимость файлов по
+    // снимку и выделение исходных элементов по Params::GrItems.
+    void restoreContext(File* file);
+    // Режим правки существующей УП. Меняет заодно надпись на кнопке -- иначе
+    // «Create» врёт: файл будет перезаписан, а не создан.
+    void setEditMode(bool on);
+
     // QObject interface
     virtual void timerEvent(QTimerEvent* event) override;
+    // QWidget interface
+    void showEvent(QShowEvent* event) override;
     // Form interface
     virtual void computePaths() = 0;
     virtual void updateName() = 0;
@@ -58,6 +83,15 @@ protected:
     SideOfMilling side = Outer;
     UsedItems usedItems_;
     Side boardSide = Top;
+
+    // Снимок видимости файлов проекта на момент нажатия Create. Уезжает в
+    // созданную УП, чтобы её открытие на правку вернуло ту же картину.
+    std::map<int32_t, bool> visibility_;
+
+    // УП, которые текущий прогон должен заменить собой. Список, а не один id:
+    // один запуск может дать несколько файлов, и прежних могло быть другое
+    // число. Лишние удаляются в конце прогона, недостающие просто добавляются.
+    std::vector<int32_t> replacedIds_;
 
     QString fileName_;
 

@@ -386,11 +386,29 @@ bool Project::reload(int32_t id, AbstractFile* file) {
     if(files_.contains(id)) {
         file->initFrom(files_[id].get());
         files_[id].reset(file);
-        App::filePlugin(file->type())->updateFileModel(file);
+        // Плагины g-кода лежат в отдельной карте: App::filePlugin() для них
+        // возвращает нуль, и разыменование роняло бы замену УП на месте.
+        AbstractFilePlugin* plugin = App::filePlugin(file->type());
+        if(!plugin) plugin = App::gCodePlugin(file->type());
+        if(plugin) plugin->updateFileModel(file);
         setChanged();
         return true;
     }
     return false;
+}
+
+// Заменить УП на месте: узел дерева, id и сторона остаются прежними, меняется
+// только содержимое. Отдельно от addFile, потому что там проверка на дубль имени
+// отключена намеренно и попасть в ветку reload оттуда нельзя.
+int Project::replaceFile(int32_t id, GCode::File* file) {
+    std::lock_guard _{mutex};
+    if(!file) return -1;
+    isPinsPlaced_ = false;
+    file->createGi();
+    file->addToScene();
+    file->setVisible(true);
+    if(!reload(id, file)) return -1;
+    return file->id();
 }
 
 std::vector<AbstractFile*> Project::files(uint32_t type) {

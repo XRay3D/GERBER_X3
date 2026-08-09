@@ -36,6 +36,10 @@ public:
     [[nodiscard]] virtual bool canToShow() const { return true; }
     [[nodiscard]] virtual QAction* addAction(QMenu* menu, QToolBar* toolbar);
 
+    // Показать форму плагина и заполнить её параметрами уже созданной УП.
+    // Метод, а не сигнал: setDockWidget снаружи класса не испустить.
+    void editFile(File* file);
+
     //////////////////////
 
     // AbstractFile* loadFile(QDataStream& stream) constoverride { return nullptr /*new File()*/; }
@@ -45,6 +49,7 @@ public:
     QString folderName() const override { return tr("Tool Paths"); }
     bool thisIsIt(const QString& /*fileName*/) override { return false; }
     void createMainMenu(QMenu& menu, FileTree::View* tv) override;
+    void updateFileModel(AbstractFile* file) override;
 
     AbstractFile* parseFile(const QString& /*fileName*/, uint32_t /*type*/) override { return nullptr; }
 public slots:
