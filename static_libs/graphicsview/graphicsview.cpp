@@ -546,6 +546,24 @@ void GraphicsView::dropEvent(QDropEvent* event) {
     event->accept();
 }
 
+void GraphicsView::setViewRectDeferred(QRectF rect) {
+    if(rect.isNull()) return;
+    pendingViewRect_ = rect;
+    // Следующим тактом цикла событий, а не сразу: проект грузится из
+    // loadSettings() -- до show(), -- и на этот момент viewport ещё имеет
+    // начальный размер. Раскладка досчитывается уже после показа, а очередь
+    // событий заведомо разбирается после неё.
+    QTimer::singleShot(0, this, &GraphicsView::applyPendingViewRect);
+}
+
+void GraphicsView::applyPendingViewRect() {
+    if(pendingViewRect_.isNull()) return;
+    // Без анимации: восстановление -- не переход из осмысленного вида, а
+    // установка нужного, и анимировать её не от чего.
+    QGraphicsView::fitInView(std::exchange(pendingViewRect_, {}), Qt::KeepAspectRatio);
+    updateRuler();
+}
+
 void GraphicsView::resizeEvent(QResizeEvent* event) {
     QGraphicsView::resizeEvent(event);
     updateRuler();
