@@ -153,6 +153,11 @@ void File::setLastDir(QString dirPath) {
     }
 }
 
+void File::setSide(Side side) {
+    AbstractFile::setSide(side);
+    gcp.params[Params::FileSide].setValue(side);
+}
+
 void File::regenerate() {
     initSave();
     addInfo();

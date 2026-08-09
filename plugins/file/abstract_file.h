@@ -137,7 +137,9 @@ public:
 
     const LayerTypes& displayedTypes() const;
     Side side() const;
-    void setSide(Side side);
+    // Виртуальный: у УП сторона живёт не только здесь, и смена её значит
+    // больше, чем поле (см. GCode::File::setSide).
+    virtual void setSide(Side side);
 
     virtual std::vector<GraphicObject> getDataForGC(
         std::span<Criteria> criterias [[maybe_unused]],
