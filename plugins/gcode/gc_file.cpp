@@ -9,6 +9,7 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_file.h"
+#include "gc_highlighter.h"
 #include "gc_jsproxy.h"
 #include "gc_node.h"
 #include "gc_plugin.h"

@@ -44,6 +44,7 @@ constexpr double gcvPi = std::numbers::pi;
 
 const QString gcvSettingsGroup = u"GCodeViewer3d"_s;
 const QString gcvPerspectiveKey = u"perspective"_s;
+const QString gcvRapidsKey = u"rapidsVisible"_s;
 
 // Плоскость дуги: индексы осей плоскости (a0, a1) и нормали (an).
 struct GcvArcPlane {
@@ -431,6 +432,7 @@ Viewer3d::Viewer3d(QWidget* parent)
     MySettings settings;
     settings.beginGroup(gcvSettingsGroup);
     settings.getValue(gcvPerspectiveKey, perspective_, true);
+    settings.getValue(gcvRapidsKey, rapidsVisible_, true);
     settings.endGroup();
 }
 
@@ -527,6 +529,12 @@ void Viewer3d::updateColors() {
 void Viewer3d::setRapidsVisible(bool visible) {
     if(rapidsVisible_ == visible) return;
     rapidsVisible_ = visible;
+
+    MySettings settings;
+    settings.beginGroup(gcvSettingsGroup);
+    settings.setValue(gcvRapidsKey, rapidsVisible_);
+    settings.endGroup();
+
     buildPathVertices();
     update();
 }
