@@ -1,5 +1,5 @@
 # GGEasy
-V0.8.0
+V0.9.5.0
 
 Программа для подготовки Г-кода из файлов Gerber (RS-274X Revision 2020.09) для фрезеровки плат на ЧПУ.
 Частичная поддержка файлов DXF.
@@ -12,6 +12,18 @@ Program for preparing G-code from Gerber (RS-274X Revision 2020.09) files for CN
 Partial support for DXF files.
 
 ![Window](Window.PNG)
+
+Просмотр управляющей программы: текст G-кода и траектория в 3D.
+
+3D preview of the toolpath alongside the G-code text.
+
+![3D](3D.png)
+
+Раскладка компонентов из файла Gerber X3 (атрибуты компонентов).
+
+Component placement from a Gerber X3 file (component attributes).
+
+![Components](Components.PNG)
 
 * Windows: [x86](https://github.com/XRay3D/GERBER_X2/releases)
 * Windows: [amd64](https://github.com/XRay3D/GERBER_X2/releases)

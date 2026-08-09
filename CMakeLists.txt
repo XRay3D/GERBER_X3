@@ -13,7 +13,9 @@ cmake_minimum_required(VERSION 4.0 FATAL_ERROR)
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_COMPILE "${CMAKE_COMMAND} -E time")
 # set_property(GLOBAL PROPERTY RULE_LAUNCH_LINK "${CMAKE_COMMAND} -E time")
 
-project(GERBER_X3 VERSION 0.9.9)
+# Единственное место, где задаётся версия продукта: отсюда её берут
+# подпроект GGEasy, ресурсы Windows (versioninfo.rc) и version.h.
+project(GERBER_X3 VERSION 0.9.5.0)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)

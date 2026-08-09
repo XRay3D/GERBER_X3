@@ -4,17 +4,22 @@
 <context>
     <name>FileTree::Model</name>
     <message>
-        <location filename="ft_model.cpp" line="158"/>
+        <location filename="ft_model.cpp" line="79"/>
+        <source>GCode</source>
+        <translation>G-код</translation>
+    </message>
+    <message>
+        <location filename="ft_model.cpp" line="232"/>
         <source>Name</source>
         <translation>Название</translation>
     </message>
     <message>
-        <location filename="ft_model.cpp" line="160"/>
+        <location filename="ft_model.cpp" line="232"/>
         <source>Side</source>
         <translation>Сторона</translation>
     </message>
     <message>
-        <location filename="ft_model.cpp" line="162"/>
+        <location filename="ft_model.cpp" line="232"/>
         <source>Type</source>
         <translation>Тип</translation>
     </message>
@@ -22,7 +27,7 @@
 <context>
     <name>FileTree::SideDelegate</name>
     <message>
-        <location filename="ft_sidedelegate.cpp" line="25"/>
+        <location filename="ft_sidedelegate.cpp" line="23"/>
         <source>Top|Bottom</source>
         <translation>Верх|Низ</translation>
     </message>
@@ -30,57 +35,52 @@
 <context>
     <name>FileTree::View</name>
     <message>
-        <location filename="ft_view.cpp" line="198"/>
+        <location filename="ft_view.cpp" line="157"/>
         <source>Delete Selected</source>
         <translation>Удалить (закрыть) выбраннное</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="211"/>
-        <location filename="ft_view.cpp" line="214"/>
+        <location filename="ft_view.cpp" line="170"/>
+        <source>Transform</source>
+        <translation>Преобразование</translation>
+    </message>
+    <message>
         <source>Affine Transform</source>
-        <translation>Аффинно преобразовать</translation>
+        <translation type="vanished">Аффинно преобразовать</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="215"/>
         <source>Angle:</source>
-        <translation>Угол:</translation>
+        <translation type="vanished">Угол:</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="216"/>
         <source>Translate X:</source>
-        <translation>Смещение по X:</translation>
+        <translation type="vanished">Смещение по X:</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="217"/>
         <source>Translate Y:</source>
-        <translation>Смещение по Y:</translation>
+        <translation type="vanished">Смещение по Y:</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="218"/>
         <source>Scale X:</source>
-        <translation>Масштаб по X:</translation>
+        <translation type="vanished">Масштаб по X:</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="219"/>
         <source>Scale Y:</source>
-        <translation>Масштаб по Y:</translation>
+        <translation type="vanished">Масштаб по Y:</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="226"/>
         <source> °</source>
-        <translation> °</translation>
+        <translation type="vanished"> °</translation>
     </message>
     <message>
-        <location filename="ft_view.cpp" line="230"/>
-        <location filename="ft_view.cpp" line="232"/>
         <source> mm</source>
-        <translation>мм</translation>
+        <translation type="vanished">мм</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="ft_node.h" line="97"/>
+        <location filename="ft_node.h" line="96"/>
         <source>Top|Bottom</source>
         <translation>Верх|Низ</translation>
     </message>

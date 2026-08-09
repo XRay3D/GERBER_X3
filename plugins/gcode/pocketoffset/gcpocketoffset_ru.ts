@@ -2,6 +2,35 @@
 <!DOCTYPE TS>
 <TS version="2.1" language="ru_RU" sourcelanguage="en_US">
 <context>
+    <name>PocketOffset::Form</name>
+    <message>
+        <location filename="pocketoffset_form.cpp" line="30"/>
+        <source>Pocket On</source>
+        <translation>Карман сверху</translation>
+    </message>
+    <message>
+        <location filename="pocketoffset_form.cpp" line="30"/>
+        <source>Pocket Outside</source>
+        <translation>Карман снаружи</translation>
+    </message>
+    <message>
+        <location filename="pocketoffset_form.cpp" line="30"/>
+        <source>Pocket Inside</source>
+        <translation>Карман внутри</translation>
+    </message>
+    <message>
+        <location filename="pocketoffset_form.cpp" line="37"/>
+        <source>Pocket Offset Toolpath</source>
+        <translation>Карман</translation>
+    </message>
+    <message>
+        <location filename="pocketoffset_form.cpp" line="66"/>
+        <location filename="pocketoffset_form.cpp" line="129"/>
+        <source> - Infinity</source>
+        <translation> - До заполнения</translation>
+    </message>
+</context>
+<context>
     <name>PocketOffsetForm</name>
     <message>
         <location filename="pocketoffsetform.ui" line="20"/>
@@ -51,48 +80,38 @@ tools:</source>
         <translation>Шаги:</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="29"/>
         <source>Pocket On</source>
-        <translation>Карман сверху</translation>
+        <translation type="vanished">Карман сверху</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="29"/>
         <source>Pocket Outside</source>
-        <translation>Карман снаружи</translation>
+        <translation type="vanished">Карман снаружи</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="29"/>
         <source>Pocket Inside</source>
-        <translation>Карман внутри</translation>
+        <translation type="vanished">Карман внутри</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="36"/>
         <source>Pocket Offset Toolpath</source>
-        <translation type="unfinished">Карман</translation>
+        <translation type="obsolete">Карман</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="67"/>
-        <location filename="pocketoffset_form.cpp" line="181"/>
         <source> - Infinity</source>
-        <translation> - До заполнения</translation>
+        <translation type="vanished"> - До заполнения</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="118"/>
-        <location filename="pocketoffset_form.cpp" line="144"/>
         <source>Warning</source>
-        <translation>Предупреждение</translation>
+        <translation type="vanished">Предупреждение</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="118"/>
         <source>Work items from different files!
 Would you like to continue?</source>
-        <translation>Задание из разных файлов!
+        <translation type="vanished">Задание из разных файлов!
 Желаете ли вы продолжить?</translation>
     </message>
     <message>
-        <location filename="pocketoffset_form.cpp" line="144"/>
         <source>No selected items for working...</source>
-        <translation>Нет выбранных элементов для работы...</translation>
+        <translation type="vanished">Нет выбранных элементов для работы...</translation>
     </message>
 </context>
 </TS>

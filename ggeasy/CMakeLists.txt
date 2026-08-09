@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 4.0)
 
 project(
     GGEasy
-    VERSION 0.9.0.0
+    VERSION ${GERBER_X3_VERSION}
     LANGUAGES C CXX)
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${OUTPUT_DIRECTORY})
@@ -25,6 +25,7 @@ add_compile_definitions(
     GIT_SHA="${GIT_SHA}")
 
 set(SOFTDEVELOPER X-Ray)
+configure_file(version.h.in ${CMAKE_CURRENT_BINARY_DIR}/version.h)
 # Write to build dir so the source tree stays clean
 configure_file(
     versioninfo.rc.in ${CMAKE_CURRENT_BINARY_DIR}/versioninfo.rc

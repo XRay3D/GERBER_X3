@@ -4,244 +4,212 @@
 <context>
     <name>Dialog</name>
     <message>
-        <location filename="gbrcomp_dialog.cpp" line="81"/>
+        <location filename="gbrcomp_dialog.cpp" line="80"/>
         <source>Dialog</source>
-        <translation type="unfinished"></translation>
+        <translation>Dialog</translation>
     </message>
 </context>
 <context>
     <name>Gerber::GbrObj</name>
     <message>
-        <location filename="gbrcomp_onent.cpp" line="70"/>
+        <location filename="gbrcomp_onent.cpp" line="65"/>
         <source>Rotation: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Rotation: %1
+</translation>
     </message>
     <message>
-        <location filename="gbrcomp_onent.cpp" line="71"/>
+        <location filename="gbrcomp_onent.cpp" line="66"/>
         <source>Value: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Value: %1
+</translation>
     </message>
     <message>
-        <location filename="gbrcomp_onent.cpp" line="72"/>
+        <location filename="gbrcomp_onent.cpp" line="67"/>
         <source>Footprint: %1
 </source>
-        <translation type="unfinished"></translation>
+        <translation>Footprint: %1
+</translation>
     </message>
     <message>
-        <location filename="gbrcomp_node.cpp" line="119"/>
+        <location filename="gbrcomp_node.cpp" line="111"/>
         <source>TH|SMD|BGA|Other</source>
-        <translation type="unfinished"></translation>
+        <translation>TH|SMD|BGA|Other</translation>
     </message>
     <message>
-        <location filename="gbrcomp_model.cpp" line="39"/>
+        <location filename="gbrcomp_model.cpp" line="37"/>
         <source>unsorted</source>
-        <translation type="unfinished"></translation>
+        <translation>unsorted</translation>
+    </message>
+    <message>
+        <location filename="gbrcomp_model.cpp" line="117"/>
+        <source>Ref Des</source>
+        <translation>Ref Des</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="119"/>
-        <source>Ref Des</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbrcomp_model.cpp" line="121"/>
         <source>Manufacturer
 part
 number</source>
-        <translation type="unfinished"></translation>
+        <translation>Manufacturer
+part
+number</translation>
+    </message>
+    <message>
+        <location filename="gbrcomp_model.cpp" line="123"/>
+        <source>Value</source>
+        <translation>Value</translation>
     </message>
     <message>
         <location filename="gbrcomp_model.cpp" line="125"/>
-        <source>Value</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbrcomp_model.cpp" line="127"/>
         <source>Mount
 type</source>
-        <translation type="unfinished"></translation>
+        <translation>Mount
+type</translation>
     </message>
     <message>
-        <location filename="gbrcomp_model.cpp" line="130"/>
+        <location filename="gbrcomp_model.cpp" line="128"/>
         <source>Footprint
 name</source>
-        <translation type="unfinished"></translation>
+        <translation>Footprint
+name</translation>
     </message>
     <message>
-        <location filename="gbrcomp_model.cpp" line="133"/>
-        <location filename="gbrcomp_model.cpp" line="136"/>
+        <location filename="gbrcomp_model.cpp" line="131"/>
+        <location filename="gbrcomp_model.cpp" line="134"/>
         <source>Package
 name</source>
-        <translation type="unfinished"></translation>
+        <translation>Package
+name</translation>
     </message>
     <message>
-        <location filename="gbrcomp_model.cpp" line="139"/>
+        <location filename="gbrcomp_model.cpp" line="137"/>
         <source>Height</source>
-        <translation type="unfinished"></translation>
+        <translation>Height</translation>
     </message>
     <message>
-        <location filename="gbr_parser.cpp" line="423"/>
-        <location filename="gbr_parser.cpp" line="542"/>
+        <location filename="gbr_parser.cpp" line="555"/>
+        <location filename="gbr_parser.cpp" line="689"/>
         <source>Aperture %1 not found! Available %2</source>
-        <translation type="unfinished"></translation>
+        <translation>Aperture %1 not found! Available %2</translation>
     </message>
     <message>
-        <location filename="gbr_parser.cpp" line="496"/>
-        <location filename="gbr_parser.cpp" line="498"/>
+        <location filename="gbr_parser.cpp" line="672"/>
+        <location filename="gbr_parser.cpp" line="675"/>
         <source>line num %1: &apos;%2&apos;, error value.</source>
-        <translation type="unfinished"></translation>
+        <translation>line num %1: &apos;%2&apos;, error value.</translation>
     </message>
     <message>
-        <location filename="gbr_parser.cpp" line="551"/>
-        <source>Aperture D%1 (%2) not supported!
-Only square Aperture or use Minkowski Sum</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_node.cpp" line="157"/>
+        <location filename="gbr_node.cpp" line="126"/>
         <source>&amp;Hide other</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Hide other</translation>
     </message>
     <message>
-        <location filename="gbr_node.cpp" line="160"/>
+        <location filename="gbr_node.cpp" line="129"/>
         <source>&amp;Show source</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Show source</translation>
     </message>
     <message>
-        <location filename="gbr_node.cpp" line="183"/>
+        <location filename="gbr_node.cpp" line="152"/>
         <source>Show &amp;Components</source>
-        <translation type="unfinished"></translation>
+        <translation>Show &amp;Components</translation>
     </message>
     <message>
-        <location filename="gbr_node.cpp" line="190"/>
+        <location filename="gbr_node.cpp" line="158"/>
         <source>Change color</source>
-        <translation type="unfinished"></translation>
+        <translation>Change color</translation>
     </message>
     <message>
-        <location filename="gbr_node.cpp" line="202"/>
+        <location filename="gbr_node.cpp" line="169"/>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Close</translation>
     </message>
     <message>
-        <location filename="gbr_file.cpp" line="66"/>
+        <location filename="gbr_file.cpp" line="67"/>
         <source>Normal</source>
-        <translation type="unfinished"></translation>
+        <translation>Normal</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="67"/>
         <source>Normal view</source>
-        <translation type="unfinished"></translation>
+        <translation>Normal view</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="68"/>
         <source>Aperture paths</source>
-        <translation type="unfinished"></translation>
+        <translation>Aperture paths</translation>
+    </message>
+    <message>
+        <location filename="gbr_file.cpp" line="68"/>
+        <source>Displays only aperture paths of copper
+without width and without contacts</source>
+        <translation>Displays only aperture paths of copper
+without width and without contacts</translation>
     </message>
     <message>
         <location filename="gbr_file.cpp" line="69"/>
-        <source>Displays only aperture paths of copper
-without width and without contacts</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_file.cpp" line="70"/>
         <source>Components</source>
-        <translation type="unfinished"></translation>
+        <translation>Components</translation>
     </message>
     <message>
-        <location filename="gbr_file.cpp" line="71"/>
+        <location filename="gbr_file.cpp" line="69"/>
         <source>Show components</source>
-        <translation type="unfinished"></translation>
+        <translation>Show components</translation>
     </message>
     <message>
-        <location filename="gbr_aperture.cpp" line="614"/>
+        <location filename="gbr_aperture.cpp" line="462"/>
         <source>Bad outline (regular polygon) macro!</source>
-        <translation type="unfinished"></translation>
+        <translation>Bad outline (regular polygon) macro!</translation>
     </message>
     <message>
-        <location filename="gbr_aperture.cpp" line="648"/>
+        <location filename="gbr_aperture.cpp" line="499"/>
         <source>Bad thermal macro!</source>
-        <translation type="unfinished"></translation>
+        <translation>Bad thermal macro!</translation>
     </message>
 </context>
 <context>
     <name>Gerber::Plugin</name>
     <message>
-        <location filename="gbr_plugin.cpp" line="78"/>
-        <source>, drill Ø%1mm</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="130"/>
-        <source>Lines</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="142"/>
-        <source>Regions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="205"/>
+        <location filename="gbr_plugin.h" line="32"/>
         <source>Gerber Files</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerber Files</translation>
+    </message>
+    <message>
+        <location filename="gbr_plugin.h" line="38"/>
+        <source>Gerber (*.gbr)</source>
+        <translation>Gerber (*.gbr)</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="../../../static_libs/tooldatabase/tool.h" line="111"/>
-        <source>Default</source>
-        <translation type="unfinished"></translation>
+        <location filename="gbr_file.cpp" line="99"/>
+        <source>, drill Ø%1mm</source>
+        <translation>, drill Ø%1mm</translation>
     </message>
 </context>
 <context>
     <name>SettingsDialog</name>
     <message>
-        <location filename="gbr_plugin.cpp" line="233"/>
+        <location filename="gbr_plugin.cpp" line="118"/>
         <source>Gerber</source>
-        <translation type="unfinished"></translation>
+        <translation>Gerber</translation>
     </message>
     <message>
-        <location filename="gbr_plugin.cpp" line="262"/>
-        <source>Wire Creation Method</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="277"/>
+        <location filename="gbr_plugin.cpp" line="146"/>
         <source>Cleaning Polygons</source>
-        <translation type="unfinished"></translation>
+        <translation>Cleaning Polygons</translation>
     </message>
     <message>
-        <location filename="gbr_plugin.cpp" line="278"/>
+        <location filename="gbr_plugin.cpp" line="147"/>
         <source>Skip duplicates</source>
-        <translation type="unfinished"></translation>
+        <translation>Skip duplicates</translation>
     </message>
     <message>
-        <location filename="gbr_plugin.cpp" line="279"/>
+        <location filename="gbr_plugin.cpp" line="148"/>
         <source>Simplify Regions</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="281"/>
-        <source>cl::Clipper64 Offset</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="282"/>
-        <source>Faster</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="283"/>
-        <source>Minkowski Sum</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="gbr_plugin.cpp" line="284"/>
-        <source>Better, can cause glitches</source>
-        <translation type="unfinished"></translation>
+        <translation>Simplify Regions</translation>
     </message>
 </context>
 </TS>
