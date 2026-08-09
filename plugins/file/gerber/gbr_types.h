@@ -158,6 +158,8 @@ struct Format {
     friend QDataStream& operator>>(QDataStream& stream, Format& format) {
         return ::Block{stream}.read(format);
     }
+
+    JSON_POD(Format)
 };
 
 class State {
@@ -194,6 +196,43 @@ class State {
             state.mirroring_,
             state.scaling_,
             state.rotating_);
+    }
+
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const State& state) {
+        Json::write(sb,
+            "dCode", state.dCode_,
+            "gCode", state.gCode_,
+            "imgPolarity", state.imgPolarity_,
+            "interpolation", state.interpolation_,
+            "type", state.type_,
+            "quadrant", state.quadrant_,
+            "region", state.region_,
+            "aperture", state.aperture_,
+            "lineNum", state.lineNum_,
+            "curPos", state.curPos_,
+            "mirroring", state.mirroring_,
+            "scaling", state.scaling_,
+            "rotating", state.rotating_);
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, State& state) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        Json::read(obj,
+            "dCode", state.dCode_,
+            "gCode", state.gCode_,
+            "imgPolarity", state.imgPolarity_,
+            "interpolation", state.interpolation_,
+            "type", state.type_,
+            "quadrant", state.quadrant_,
+            "region", state.region_,
+            "aperture", state.aperture_,
+            "lineNum", state.lineNum_,
+            "curPos", state.curPos_,
+            "mirroring", state.mirroring_,
+            "scaling", state.scaling_,
+            "rotating", state.rotating_);
+        return simdjson::SUCCESS;
     }
 
     File* file_                      = nullptr;
@@ -265,6 +304,22 @@ struct GrObject : GraphicObject {
     friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
         stream >> static_cast<GraphicObject&>(go);
         return ::Block{stream}.read(go.state);
+    }
+
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const GrObject& go) {
+        sb.start_object();
+        sb.append_raw("\"go\":");
+        Json::append(sb, static_cast<const GraphicObject&>(go));
+        sb.append_raw(",\"state\":");
+        Json::append(sb, go.state);
+        sb.end_object();
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, GrObject& go) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        Json::read(obj, "go", static_cast<GraphicObject&>(go), "state", go.state);
+        return simdjson::SUCCESS;
     }
 
     File* gFile{nullptr};

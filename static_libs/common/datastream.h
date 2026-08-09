@@ -10,16 +10,19 @@
  ********************************************************************************/
 #pragma once
 
-// #include <boost/pfr.hpp>
+// ВНИМАНИЕ: живой код на QDataStream больше не сериализуется — проект пишется
+// в JSON (см. json_io.h). Этот заголовок оставлен запаркованным плагинам
+// (dxf, excellon, svg, shape/* и т.д.), чей QDataStream-код заглушен #if 0
+// до портирования на JSON.
 
 #include <QByteArray>
 #include <QDataStream>
 #include <map>
-#include <meta>
 #include <ranges>
 #include <type_traits>
 
-// namespace pfr = boost ::pfr;
+#include "reflection.h"
+
 namespace v = std ::views;
 namespace r = std ::ranges;
 
@@ -105,42 +108,6 @@ inline QDataStream& operator<<(QDataStream& stream, const std::map<Key, Val, Com
         stream << key << val;
 
     return stream;
-}
-
-static constexpr auto CTX = std::meta::access_context::current();
-
-template <typename T>
-consteval auto fields_count() {
-    return nonstatic_data_members_of(^^T, CTX).size();
-}
-
-template <typename T, typename Func>
-    requires(is_class_type(^^std::remove_cvref_t<T>))
-constexpr auto for_each_field(T&& str, Func&& func) {
-    static constexpr auto MEMBERS = std::define_static_array(
-        nonstatic_data_members_of(^^std::remove_cvref_t<T>, CTX));
-
-    template for(constexpr auto MEMBER: MEMBERS) {
-        if constexpr(
-            requires {
-                func(std::forward<T>(str).[:MEMBER:]);
-            })
-            func(std::forward<T>(str).[:MEMBER:]);
-        else if constexpr(
-            requires {
-                func(std::forward<T>(str).[:MEMBER:], identifier_of(MEMBER));
-            })
-            func(std::forward<T>(str).[:MEMBER:], identifier_of(MEMBER));
-        else
-            static_assert("no mach func!");
-        // else if constexpr(requires { func(std::forward<T>(str).[:MEMBER:], i++); })
-        // func(std::forward<T>(str).[:MEMBER:], i++);
-    }
-}
-
-template <size_t I, typename T>
-constexpr auto get_name() {
-    return identifier_of(nonstatic_data_members_of(^^T, CTX)[I]);
 }
 
 // порционное сохранение для гибкости.

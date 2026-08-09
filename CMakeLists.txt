@@ -86,6 +86,13 @@ set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
 set(CLIPPER2_USINGZ "ONLY")
 
+# Сериализация проекта (.g2g) — JSON через статическую рефлексию C++26.
+# Именно CACHE: у simdjson cmake_minimum_required 3.14 (CMP0126 OLD), его
+# собственный set(... CACHE STRING) снёс бы обычную переменную и оставил AUTO,
+# а AUTO-детект гоняет try_compile без нашего directory-флага -freflection.
+set(SIMDJSON_STATIC_REFLECTION_MODE ON CACHE STRING "" FORCE)
+set(SIMDJSON_DEVELOPER_MODE OFF)
+
 fetchcontent_declare(
   ctre
   GIT_REPOSITORY
@@ -98,7 +105,17 @@ fetchcontent_declare(
   GIT_TAG main
   GIT_SHALLOW ON
   SOURCE_SUBDIR CPP)
-fetchcontent_makeavailable(ctre clipper2)
+# Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
+# v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
+fetchcontent_declare(
+  simdjson
+  GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
+  GIT_TAG 20b28712ffce8320237b75a587d35a2e89140577)
+fetchcontent_makeavailable(ctre clipper2 simdjson)
+
+# Статический libsimdjson.a влинковывается в плагины (.so) — без PIC не
+# слинкуется.
+set_target_properties(simdjson PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
 # ##############################################################################
 

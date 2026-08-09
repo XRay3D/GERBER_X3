@@ -21,6 +21,7 @@ class File : public AbstractFile {
     friend class Parser;
     friend class Plugin;
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture); // NOTE use private crutch
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, std::shared_ptr<AbstractAperture>& aperture); // NOTE use private crutch
 
 public:
     explicit File();
@@ -76,6 +77,8 @@ private:
 protected:
     void write(QDataStream& stream) const override;
     void read(QDataStream& stream) override;
+    void write(Json::Writer& sb) const override;
+    void read(Json::Reader& data) override;
 
     // FileTree::Node interface
 public:

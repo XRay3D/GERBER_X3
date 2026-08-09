@@ -223,6 +223,12 @@ protected:
     // AbstractFile interfaces
     void write(QDataStream& stream) const override { stream << gcp << programName_ << visibility_; }
     void read(QDataStream& stream) override { stream >> gcp >> programName_ >> visibility_; }
+    void write(Json::Writer& sb) const override {
+        Json::write(sb, "gcp", gcp, "programName", programName_, "visibility", visibility_);
+    }
+    void read(Json::Reader& data) override {
+        Json::read(data, "gcp", gcp, "programName", programName_, "visibility", visibility_);
+    }
     // initFrom не переопределяется: базовая реализация переносит ровно то, что
     // нужно при замене УП на месте (id, узел дерева, сторону, цвет, тип, трансформ),
     // а programName_ и visibility_ переносить как раз НЕЛЬЗЯ -- у нового файла они

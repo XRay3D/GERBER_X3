@@ -1,4 +1,5 @@
 #include "geo/polygon.h"
+#include "geo/geo_json.h"
 #include "cgal.h"
 #include "geo/cancel.h"
 
@@ -497,6 +498,79 @@ QDataStream& operator>>(QDataStream& stream, Polygons& polygons) {
     }
     polygons = std::move(result);
     return stream;
+}
+
+// ---------------------------------------------------------------------------
+// JSON (см. кодировку в geo_json.h)
+// ---------------------------------------------------------------------------
+
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polygon& polygon) {
+    // Как и в QDataStream выше: КАНОНИЧЕСКОЕ тело плюс флаг, а не то, что
+    // отдают outer()/holes() — у помеченного пустотой они уже развёрнуты.
+    const Polylines contours = polygon.impl().canonicalContours();
+    const Polyline outer     = contours.empty() ? Polyline{} : contours.front();
+    const Polylines holes{contours.empty() ? contours.begin() : contours.begin() + 1, contours.end()};
+    sb.start_object();
+    sb.append_raw("\"o\":");
+    tag_invoke(simdjson::serialize_tag{}, sb, outer);
+    if(!holes.empty()) {
+        sb.append_raw(",\"h\":");
+        tag_invoke(simdjson::serialize_tag{}, sb, holes);
+    }
+    if(polygon.isInverted()) sb.append_raw(",\"i\":true");
+    sb.end_object();
+}
+
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polygon& polygon) {
+    simdjson::ondemand::object obj;
+    if(auto err = val.get_object().get(obj); err) return err;
+    Polyline outer;
+    Polylines holes;
+    bool inverted{};
+    for(auto field: obj) {
+        std::string_view key;
+        if(auto err = field.unescaped_key().get(key); err) return err;
+        simdjson::ondemand::value v;
+        if(auto err = field.value().get(v); err) return err;
+        if(key == "o") {
+            if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, outer); err) return err;
+        } else if(key == "h") {
+            if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, holes); err) return err;
+        } else if(key == "i") {
+            if(auto err = v.get_bool().get(inverted); err) return err;
+        }
+    }
+    polygon = Polygon{outer, holes};
+    if(inverted) polygon.invert();
+    return simdjson::SUCCESS;
+}
+
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polygons& polygons) {
+    sb.start_array();
+    bool first = true;
+    for(const Polygon& polygon: polygons.all()) {
+        if(!first) sb.append_comma();
+        first = false;
+        tag_invoke(simdjson::serialize_tag{}, sb, polygon);
+    }
+    sb.end_array();
+}
+
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polygons& polygons) {
+    simdjson::ondemand::array arr;
+    if(auto err = val.get_array().get(arr); err) return err;
+    Polygons result;
+    for(auto elem: arr) {
+        simdjson::ondemand::value v;
+        if(auto err = elem.get(v); err) return err;
+        Polygon polygon;
+        if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, polygon); err)
+            return polygons = Polygons{}, err;
+        // Сразу в точный домен, минуя разбор по ориентациям (см. QDataStream выше).
+        if(!polygon.empty()) result.impl().exact.join(polygon.impl().exact);
+    }
+    polygons = std::move(result);
+    return simdjson::SUCCESS;
 }
 
 } // namespace Geo

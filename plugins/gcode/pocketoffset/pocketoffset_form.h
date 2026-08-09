@@ -71,6 +71,8 @@ public:
     QString gcName() const override { return u"PocketOffset"_s; };
     uint32_t type() const override { return POCKET_OFFSET; }
     AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+    AbstractFile* loadFile(std::string_view json) const override { return File::load<File>(json); }
+    std::string_view typeName() const override { return "PocketOffset"; }
 };
 
 } // namespace PocketOffset

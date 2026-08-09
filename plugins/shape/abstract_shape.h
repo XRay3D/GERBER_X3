@@ -11,6 +11,7 @@
 #pragma once
 
 #include "gi.h"
+#include "json_io.h"
 #include "shapepluginin.h"
 #include <QModelIndex>
 #include <ft_node.h>
@@ -58,6 +59,10 @@ struct Handle final : QPointF {
 
     bool operator==(Type type) const noexcept { return type_ == type; }
 };
+
+// JSON: Handle ↔ [x, y, type]
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Handle& handle);
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Handle& handle);
 
 using UndoPair = std::pair<AbstractShape*, std::vector<Handle>>;
 using UndoHandles = std::vector<UndoPair>;
@@ -126,6 +131,17 @@ protected:
     // AbstractShape interface
     virtual void write(QDataStream& stream [[maybe_unused]]) const { };                          // write to project
     virtual void readAndInit(QDataStream& stream [[maybe_unused]]) { AbstractShape::redraw(); }; // read from project
+    // JSON-payload подкласса ("data"): write пишет законченный объект.
+    virtual void write(Json::Writer& sb) const { sb.append_raw("{}"); };
+    virtual void readAndInit(Json::Reader& data [[maybe_unused]]) { AbstractShape::redraw(); };
+
+public:
+    // Своя часть элемента "shapes" (без "type" — его пишет Project::save).
+    void toJson(Json::Writer& sb) const;
+    // Элемент "shapes" после диспетчеризации по "type".
+    void fromJson(Json::Reader& shapeObj);
+
+protected:
 
     // групповое перемещение
     int moveFlag{};

@@ -27,99 +27,6 @@
 
 const int isadfsdfg = qRegisterMetaType<AbstractFile*>("AbstractFile*");
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractFile>& file) {
-    if(file->type() == G_CODE)
-        return stream;
-    if(file->type()) {
-        uint32_t type = file->type();
-        stream << type;
-        if(App::gCodePlugins().contains(type))
-            stream << App::gCodePlugin(type)->info()[u"Name"_s].toString();
-        else if(App::filePlugins().contains(type))
-            stream << App::filePlugin(type)->info()[u"Name"_s].toString();
-        else
-            stream << u"QString"_s;
-        stream << *file;
-    }
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file) {
-    uint32_t type;
-    QString loadErrorMessage;
-    stream >> type;
-    stream >> loadErrorMessage;
-    qDebug() << __FUNCTION__ << u"type"_s << type << loadErrorMessage;
-    if(App::gCodePlugins().contains(type))
-        file.reset(App::gCodePlugin(type)->loadFile(stream));
-    else if(App::filePlugins().contains(type)) {
-        file.reset(App::filePlugin(type)->loadFile(stream));
-        if(!App::project().watcher.files().contains(file->name()))
-            App::project().watcher.addPath(file->name());
-    } else {
-        QByteArray data;
-        return stream >> data;
-    }
-
-    file->addToScene();
-    return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, Shapes::AbstractShape* shape) {
-    stream << shape->type();
-    stream << shape->name();
-    stream << *shape;
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Shapes::AbstractShape*& shape) {
-    uint32_t type;
-    QString name;
-    stream >> type;
-    stream >> name;
-    try {
-        if(App::shapePlugins().contains(type)) {
-            shape = App::shapePlugin(type)->createShape({std::nan(""), std::nan("")});
-            stream >> *shape;
-            shape->name() = name;
-        } else { // skip shape data
-            shape = nullptr;
-            QByteArray data;
-            stream >> data;
-            qDebug() << type << name << data;
-        }
-    } catch(const std::exception& ex) {
-        qCritical() << type << name << ex.what();
-    } catch(...) {
-        qCritical();
-    }
-
-    return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, Gi::Item* shape) {
-    stream << uint32_t(shape->type());
-    stream << shape->curves();
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Gi::Item*& /*shape*/) {
-    uint32_t type;
-    Geo::Polygon paths;
-    stream >> type;
-    stream >> paths;
-    // if(App::shapePlugins().contains(type)) {
-    // shape = App::shapePlugin(type)->createShape();
-    // stream >> *shape;
-    // App::grView().addItem(shape);
-    // } else {
-    // QByteArray data;
-    // stream >> data;
-    // qDebug() << type << loadErrorMessage << data;
-    // }
-    return stream;
-}
-
 Project::Project(QObject* parent)
     : QObject{parent}
     , watcher(this) {
@@ -150,32 +57,89 @@ bool Project::save(const QString& fileName) {
         qDebug() << file.errorString();
         return false;
     }
-    QDataStream out{&file};
     try {
-        out << (ver_ = CurrentVer);
-        Block{out}.write(
-            isPinsPlaced_,
-            tailing,
-            home_,
-            zero_,
-            pins_,
-            pinsUsed_,
-            worckRect_,
-            safeZ_,
-            boardThickness_,
-            copperThickness_,
-            clearence_,
-            plunge_,
-            glue_,
-            App::grView().getViewRect());
-        out << files_;
-        out << shapes_;
-        out << items_;
+        Json::Writer sb;
+        sb.start_object();
+        sb.append_raw("\"ggeasy\":");
+        Json::write(sb,
+            "pinsPlaced", isPinsPlaced_,
+            "tailing", tailing,
+            "home", home_,
+            "zero", zero_,
+            "pins", pins_,
+            "pinsUsed", pinsUsed_,
+            "workRect", worckRect_,
+            "safeZ", safeZ_,
+            "boardThickness", boardThickness_,
+            "copperThickness", copperThickness_,
+            "clearence", clearence_,
+            "plunge", plunge_,
+            "glue", glue_,
+            "viewRect", App::grView().getViewRect());
+
+        sb.append_raw(",\"files\":[");
+        bool first = true;
+        for(const auto& [id, filePtr]: files_) {
+            const uint32_t type = filePtr->type();
+            if(type == G_CODE || !type) continue; // база УП без операции не пишется (как раньше)
+            std::string_view typeName;
+            if(App::gCodePlugins().contains(type))
+                typeName = App::gCodePlugin(type)->typeName();
+            else if(App::filePlugins().contains(type))
+                typeName = App::filePlugin(type)->typeName();
+            if(typeName.empty()) {
+                qWarning() << "file id" << id << "type" << type << "без typeName — пропущен";
+                continue;
+            }
+            if(!first) sb.append_comma();
+            first = false;
+            sb.start_object();
+            sb.append_raw("\"type\":");
+            sb.escape_and_append_with_quotes(typeName);
+            sb.append_comma();
+            filePtr->toJson(sb);
+            sb.end_object();
+        }
+
+        sb.append_raw("],\"shapes\":[");
+        first = true;
+        for(const auto& [id, shape]: shapes_) {
+            if(!shape) continue;
+            std::string_view typeName;
+            if(auto* plugin = App::shapePlugin(int(shape->type())); plugin)
+                typeName = plugin->typeName();
+            if(typeName.empty()) {
+                qWarning() << "shape id" << id << "type" << shape->type() << "без typeName — пропущен";
+                continue;
+            }
+            if(!first) sb.append_comma();
+            first = false;
+            sb.start_object();
+            sb.append_raw("\"type\":");
+            sb.escape_and_append_with_quotes(typeName);
+            sb.append_comma();
+            shape->toJson(sb);
+            sb.end_object();
+        }
+        sb.append_raw("]");
+        sb.end_object();
+
+        std::string_view view;
+        if(auto err = sb.view().get(view); err) {
+            qCritical() << simdjson::error_message(err);
+            return false;
+        }
+        if(file.write(view.data(), qint64(view.size())) != qint64(view.size())) {
+            qDebug() << file.errorString();
+            return false;
+        }
         isModified_ = false;
         emit changed();
         return true;
+    } catch(const std::exception& ex) {
+        qDebug() << ex.what();
     } catch(...) {
-        qDebug() << out.status();
+        qDebug() << "Project::save failed";
     }
     return false;
 }
@@ -186,48 +150,114 @@ bool Project::open(const QString& fileName) {
         qDebug() << file.errorString();
         return false;
     }
-    QDataStream in{&file};
+    const QByteArray raw = file.readAll();
     try {
-        in >> ver_;
-        if(ver_ < CurrentVer) {
-            auto message = tr("Unable to load project version %1 in\n"
-                              "the current version(%3) of the program.\n"
-                              "Use version %2.");
-            if(App::isDebug()) {
-                qWarning() << message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s);
-                return false;
-            }
-            switch(ver_) {
-            case ProVer_1:
-            case ProVer_2:
-            case ProVer_3:
-            case ProVer_4:
-            case ProVer_5:
-            case ProVer_6:
-            case ProVer_7:
-            case ProVer_8: QMessageBox::information(nullptr, tr("Project loading error"), message.arg(ver_).arg(u"???"_s, u"VERSION_STR"_s)); break;
-            }
+        Json::Parsed parsed{std::string_view{raw.constData(), size_t(raw.size())}};
+        Json::Reader root;
+        if(parsed.error || parsed.doc.get_object().get(root)) {
+            const auto message = tr("The file is not a JSON project\n"
+                                    "(the old binary format is not supported)\n"
+                                    "or is corrupted.");
+            qWarning() << fileName << message;
+            if(!App::isDebug()) // headless/отладочный прогон не блокировать модальным окном
+                QMessageBox::information(nullptr, tr("Project loading error"), message);
             return false;
         }
+
         QRectF sceneRect;
-        Block{in}.read(
-            isPinsPlaced_,
-            tailing,
-            home_,
-            zero_,
-            pins_,
-            pinsUsed_,
-            worckRect_,
-            safeZ_,
-            boardThickness_,
-            copperThickness_,
-            clearence_,
-            plunge_,
-            glue_,
-            sceneRect);
-        in >> files_;
-        in >> shapes_;
-        // in >> items_;
+        {
+            Json::Reader header;
+            if(!root["ggeasy"].get_object().get(header))
+                Json::read(header,
+                    "pinsPlaced", isPinsPlaced_,
+                    "tailing", tailing,
+                    "home", home_,
+                    "zero", zero_,
+                    "pins", pins_,
+                    "pinsUsed", pinsUsed_,
+                    "workRect", worckRect_,
+                    "safeZ", safeZ_,
+                    "boardThickness", boardThickness_,
+                    "copperThickness", copperThickness_,
+                    "clearence", clearence_,
+                    "plunge", plunge_,
+                    "glue", glue_,
+                    "viewRect", sceneRect);
+        }
+
+        {
+            simdjson::ondemand::array arr;
+            if(!root["files"].get_array().get(arr))
+                for(auto elem: arr) {
+                    simdjson::ondemand::value v;
+                    if(elem.get(v)) continue;
+                    std::string_view slice; // сырой текст элемента — им же кормится плагин
+                    if(simdjson::to_json_string(v).get(slice)) continue;
+                    Json::Parsed peek{slice};
+                    Json::Reader obj;
+                    if(peek.error || peek.doc.get_object().get(obj)) continue;
+                    std::string_view typeName;
+                    if(obj["type"].get_string().get(typeName)) continue;
+                    const uint32_t type = md5::hash32(typeName);
+                    AbstractFile* loaded{};
+                    bool isFilePlugin{};
+                    if(App::gCodePlugins().contains(type))
+                        loaded = App::gCodePlugin(type)->loadFile(slice);
+                    else if(App::filePlugins().contains(type))
+                        loaded = App::filePlugin(type)->loadFile(slice), isFilePlugin = true;
+                    else { // неизвестный тип: элемент просто пропускается
+                        qWarning() << "unknown file type" << QLatin1StringView{typeName};
+                        continue;
+                    }
+                    if(!loaded) {
+                        qCritical() << "loadFile failed" << QLatin1StringView{typeName};
+                        continue;
+                    }
+                    std::shared_ptr<AbstractFile> filePtr{loaded};
+                    if(isFilePlugin && !watcher.files().contains(filePtr->name()))
+                        watcher.addPath(filePtr->name());
+                    filePtr->addToScene();
+                    files_.emplace(filePtr->id(), std::move(filePtr));
+                }
+        }
+
+        {
+            simdjson::ondemand::array arr;
+            if(!root["shapes"].get_array().get(arr))
+                for(auto elem: arr) {
+                    simdjson::ondemand::value v;
+                    if(elem.get(v)) continue;
+                    std::string_view slice;
+                    if(simdjson::to_json_string(v).get(slice)) continue;
+                    Json::Parsed peek{slice};
+                    Json::Reader obj;
+                    if(peek.error || peek.doc.get_object().get(obj)) continue;
+                    std::string_view typeName;
+                    if(obj["type"].get_string().get(typeName)) continue;
+                    // У шейпов type() — маленький int (Gi::Type), не хэш имени:
+                    // плагин ищется сканом реестра по typeName.
+                    Shapes::Plugin* plugin{};
+                    for(auto& [t, p]: App::shapePlugins())
+                        if(p->typeName() == typeName) {
+                            plugin = p;
+                            break;
+                        }
+                    if(!plugin) { // неизвестный тип: элемент просто пропускается
+                        qWarning() << "unknown shape type" << QLatin1StringView{typeName};
+                        continue;
+                    }
+                    try {
+                        auto* shape = plugin->createShape({std::nan(""), std::nan("")});
+                        shape->fromJson(obj);
+                        shapes_.emplace(shape->id(), shape);
+                    } catch(const std::exception& ex) {
+                        qCritical() << QLatin1StringView{typeName} << ex.what();
+                    } catch(...) {
+                        qCritical();
+                    }
+                }
+        }
+
         for(const auto& [id, filePtr]: files_)
             App::fileModel().addFile(filePtr.get());
 
@@ -246,8 +276,6 @@ bool Project::open(const QString& fileName) {
 
         for(const auto& [id, shPtr]: shapes_)
             App::fileModel().addShape(shPtr);
-        for(const auto& [id, itemPtr]: items_)
-            App::fileModel().addItem(itemPtr);
 
         emit homePosChanged(home_);
         emit zeroPosChanged(zero_);
@@ -264,7 +292,6 @@ bool Project::open(const QString& fileName) {
     } catch(const std::exception& ex) {
         qDebug() << ex.what();
     } catch(...) {
-        qDebug() << in.status();
         qDebug() << errno;
     }
     return false;
@@ -652,8 +679,6 @@ void Project::setPinUsed(bool used, int idx) {
     pinsUsed_[idx] = used;
     setChanged();
 }
-
-int Project::ver() const { return ver_; }
 
 double Project::safeZ() const { return safeZ_; }
 void Project::setSafeZ(double safeZ) {

@@ -5,6 +5,7 @@
 #include "graphicsview.h"
 #include "mainwindow.h"
 #include "md5.h"
+#include "project.h"
 
 //// #include <QAction>
 //// #include <QDockWidget>
@@ -186,6 +187,23 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
 
             QTimer::singleShot(time, this, [] { App::grView().zoomFit(); });
         }
+
+    // Проектные команды сценария: сохранение/открытие .g2g и выход — для
+    // headless-проверки сериализации (jq/diff поверх сохранённого JSON).
+    // Шаг крупнее: генерация УП асинхронная, надо дождаться Creator finish.
+    time.delay = 15'000;
+    for(auto&& cmd: commands) {
+        constexpr auto SAVE = "SaveProject="sv;
+        constexpr auto OPEN = "OpenProject="sv;
+        if(cmd.starts_with(SAVE)) {
+            const auto path = QString::fromUtf8(cmd.data() + SAVE.size(), qsizetype(cmd.size() - SAVE.size()));
+            QTimer::singleShot(time, this, [path] { qInfo() << "cli: save" << path << App::project().save(path); });
+        } else if(cmd.starts_with(OPEN)) {
+            const auto path = QString::fromUtf8(cmd.data() + OPEN.size(), qsizetype(cmd.size() - OPEN.size()));
+            QTimer::singleShot(time, this, [path] { qInfo() << "cli: open" << path << App::project().open(path); });
+        } else if(cmd == "Quit"sv)
+            QTimer::singleShot(time, this, [] { QApplication::quit(); });
+    }
 
     // if (0) {
     // i = 1000;

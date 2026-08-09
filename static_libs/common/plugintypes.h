@@ -11,7 +11,9 @@
 #pragma once
 
 #include "datastream.h"
+#include "geo/geo_json.h"
 #include "geo/polygon.h"
+#include "json_io.h"
 #include <any>
 
 // Только объявление: <QTransform> -- заголовок QtGui, и втянутый сюда, в
@@ -64,6 +66,8 @@ struct Transform {
         return Block{stream}.read(tr);
     }
 
+    JSON_POD(Transform)
+
     QTransform toQTransform() const;
     operator QTransform() const;
 };
@@ -85,6 +89,20 @@ struct GraphicObject {
 
     friend QDataStream& operator>>(QDataStream& stream, GraphicObject& go) {
         return Block{stream}.read(go.id, go.type, go.pos, go.path, go.fill, go.name);
+    }
+
+    // Сериализуются 6 полей; raw (std::any) — транзиент.
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const GraphicObject& go) {
+        Json::write(sb, "id", go.id, "type", go.type, "pos", go.pos,
+            "path", go.path, "fill", go.fill, "name", go.name);
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, GraphicObject& go) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        Json::read(obj, "id", go.id, "type", go.type, "pos", go.pos,
+            "path", go.path, "fill", go.fill, "name", go.name);
+        return simdjson::SUCCESS;
     }
 
     // clang-format off
@@ -176,6 +194,8 @@ struct LayerType {
     friend QDataStream& operator>>(QDataStream& stream, LayerType& layer) {
         return Block{stream}.read(layer);
     }
+
+    JSON_POD(LayerType)
 };
 
 Q_DECLARE_METATYPE(LayerType)

@@ -23,6 +23,7 @@
 #include <QMessageBox>
 #include <any>
 #include <memory>
+#include <string_view>
 
 class AbstractFile;
 
@@ -48,6 +49,13 @@ public:
     [[nodiscard]] virtual QString folderName() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
     [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) const = 0;
+    // Загрузка из JSON-проекта: json — сырой текст одного элемента "files"
+    // ({"type":...,"base":{...},"data":{...}}); плагин парсит свой срез сам,
+    // simdjson-типы через границу .so не гуляют.
+    [[nodiscard]] virtual AbstractFile* loadFile([[maybe_unused]] std::string_view json) const { return nullptr; }
+    // Стабильное имя типа, чей hash32 равен type(): "Gerber", "Drilling"...
+    // (НЕ display-имя из description.json). Пишется в "type" JSON-проекта.
+    [[nodiscard]] virtual std::string_view typeName() const { return {}; }
     [[nodiscard]] virtual bool thisIsIt(const QString& fileName) = 0;
     [[nodiscard]] virtual uint32_t type() const = 0;
     [[nodiscard]] virtual QString extension() const { return {}; } // = 0;

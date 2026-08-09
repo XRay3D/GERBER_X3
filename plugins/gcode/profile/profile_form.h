@@ -103,6 +103,8 @@ public:
     QString gcName() const override { return u"Profile"_s; }
     uint32_t type() const override { return "Profile"_hash32; }
     AbstractFile* /*GCode::File*/ loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+    AbstractFile* loadFile(std::string_view json) const override { return File::load<File>(json); }
+    std::string_view typeName() const override { return "Profile"; }
 
     // AbstractFilePlugin interface
     AbstractFileSettings* createSettingsTab(QWidget* parent) override {

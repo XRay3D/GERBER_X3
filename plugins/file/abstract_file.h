@@ -108,6 +108,72 @@ public:
         return file;
     }
 
+    // Загрузка из JSON-проекта: json — текст одного элемента "files".
+    template <typename T>
+    static inline T* load(std::string_view json) {
+        auto* file = new T;
+        Json::Parsed parsed{json};
+        Json::Reader obj;
+        if(parsed.error || parsed.doc.get_object().get(obj))
+            return delete file, nullptr;
+        file->fromJson(obj);
+        return file;
+    }
+
+    // Пишет свою часть элемента "files": "base":{...},"data":{...}.
+    // Объект-обёртку с "type" открывает и закрывает Project::save.
+    void toJson(Json::Writer& sb) const {
+        sb.append_raw("\"base\":");
+        Json::write(sb,
+            "id", id_,
+            "date", date_,
+            "groupedCurves", groupedCurves_,
+            "itemsType", itemsType_,
+            "lines", lines_,
+            "mergedCurves", mergedCurves_,
+            "name", name_,
+            "side", side_,
+            "transform", transform_,
+            "visible", isVisible(),
+            "color", color_,
+            "colorFlag", colorFlag_);
+        sb.append_raw(",\"data\":");
+        write(sb); // виртуальный payload — законченный JSON-объект
+    }
+
+    // Читает элемент "files" (без "type" — по нему уже диспетчеризовались).
+    // Хвост повторяет operator>>: splash, createGi, transform, visibility.
+    void fromJson(Json::Reader& fileObj) {
+        bool visible{};
+        {
+            Json::Reader base;
+            if(!fileObj["base"].get_object().get(base))
+                Json::read(base,
+                    "id", id_,
+                    "date", date_,
+                    "groupedCurves", groupedCurves_,
+                    "itemsType", itemsType_,
+                    "lines", lines_,
+                    "mergedCurves", mergedCurves_,
+                    "name", name_,
+                    "side", side_,
+                    "transform", transform_,
+                    "visible", visible,
+                    "color", color_,
+                    "colorFlag", colorFlag_);
+        }
+        {
+            Json::Reader data;
+            if(!fileObj["data"].get_object().get(data))
+                read(data);
+        }
+        if(App::splashScreenPtr())
+            App::splashScreen().showMessage(QObject::tr("Preparing: ") + shortName() + u"\n\n\n"_s, Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
+        createGi();
+        setTransform(transform_);
+        setVisible(visible);
+    }
+
     AbstractFile() = default;
 
     virtual ~AbstractFile();
@@ -171,6 +237,10 @@ public:
 protected:
     virtual void write(QDataStream& stream) const = 0;
     virtual void read(QDataStream& stream)        = 0;
+    // JSON-payload подкласса ("data"): write пишет законченный объект,
+    // read получает его же.
+    virtual void write([[maybe_unused]] Json::Writer& sb) const { sb.append_raw("{}"); }
+    virtual void read([[maybe_unused]] Json::Reader& data) { }
     virtual Geo::Polygons merge() const { return {}; };
 
     LayerTypes layerTypes_;

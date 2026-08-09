@@ -38,7 +38,7 @@ target_include_directories(
   PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
 
 # Qt6::Gui, а не Widgets: из Qt здесь только QPointF/QRectF и QPainterPath.
-target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads)
+target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads simdjson)
 
 # Обработчик нарушений контрактов (pre()/post()) живёт в libstdc++exp, и без
 # него не слинкуется НИЧТО, что тянет заголовки Geo: контракты инстанцируются

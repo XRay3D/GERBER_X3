@@ -341,6 +341,32 @@ void File::read(QDataStream& stream) {
     }
 }
 
+void File::write(Json::Writer& sb) const {
+    Json::write(sb,
+        "graphicObjects", graphicObjects_,
+        "apertures", apertures_,
+        "format", format_,
+        "rawIndex", rawIndex,
+        "itemsType", itemsType_,
+        "components", components_);
+}
+
+void File::read(Json::Reader& data) {
+    crutch = this; // NOTE: апертуры при чтении цепляются к текущему файлу
+    Json::read(data,
+        "graphicObjects", graphicObjects_,
+        "apertures", apertures_,
+        "format", format_,
+        "rawIndex", rawIndex,
+        "itemsType", itemsType_,
+        "components", components_);
+
+    for(GrObject& go: graphicObjects_) {
+        go.gFile       = this;
+        go.state.file_ = this;
+    }
+}
+
 void File::createGi() {
 
     if constexpr(1) { // fill copper

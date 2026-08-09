@@ -11,7 +11,9 @@
 #pragma once
 
 #include "datastream.h"
+#include "geo/geo_json.h"
 #include "geo/polygon.h"
+#include "json_io.h"
 #include "md5.h"
 
 #include "tool.h"
@@ -126,6 +128,53 @@ struct Variant : V {
         stream << uint8_t(v.index());
         std::visit([&stream](auto&& val) { stream << val; }, v);
         return stream;
+    }
+
+    // JSON: объект с одним ключом-дискриминатором — {"i": целое} | {"f": число}
+    // | {"u": UsedItems массивом пар}. Явный тег вместо угадывания по виду
+    // значения: JSON размывает int и double (1 против 1.0).
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const Variant& var) {
+        sb.start_object();
+        switch(var.index()) {
+        case 0:
+            sb.append_raw("\"i\":");
+            sb.append(static_cast<int64_t>(std::get<0>(var)));
+            break;
+        case 1:
+            sb.append_raw("\"f\":");
+            Json::append(sb, std::get<1>(var)); // NaN → null
+            break;
+        case 2:
+            sb.append_raw("\"u\":");
+            Json::append(sb, std::get<2>(var));
+            break;
+        }
+        sb.end_object();
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, Variant& var) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        for(auto field: obj) {
+            std::string_view key;
+            if(auto err = field.unescaped_key().get(key); err) return err;
+            simdjson::ondemand::value v;
+            if(auto err = field.value().get(v); err) return err;
+            if(key == "i") {
+                int64_t i{};
+                if(auto err = v.get_int64().get(i); err) return err;
+                var.emplace<0>(static_cast<qsizetype>(i));
+            } else if(key == "f") {
+                double d{};
+                if(auto err = v.get_double().get(d); err) return err;
+                var.emplace<1>(d);
+            } else if(key == "u") {
+                UsedItems u;
+                if(auto err = v.get<UsedItems>().get(u); err) return err;
+                var.emplace<2>(std::move(u));
+            }
+        }
+        return simdjson::SUCCESS;
     }
 
     qsizetype toInt() const {
@@ -263,6 +312,29 @@ public:
                       << par.supportCurvess
                       << par.toolPathss
                       << par.openCurves;
+    }
+
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const Params& par) {
+        Json::write(sb,
+            "tools", par.tools,
+            "params", par.params,
+            "closedCurves", par.closedCurves,
+            "supportCurvess", par.supportCurvess,
+            "toolPathss", par.toolPathss,
+            "openCurves", par.openCurves);
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, Params& par) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        Json::read(obj,
+            "tools", par.tools,
+            "params", par.params,
+            "closedCurves", par.closedCurves,
+            "supportCurvess", par.supportCurvess,
+            "toolPathss", par.toolPathss,
+            "openCurves", par.openCurves);
+        return simdjson::SUCCESS;
     }
 
     explicit operator bool() const {

@@ -40,6 +40,36 @@ QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& 
     return stream;
 }
 
+// Зеркало ApertureType — стабильные имена типов апертур в JSON.
+static constexpr std::string_view apertureTypeNames[]{
+    "Circle", "Rectangle", "Obround", "Polygon", "Macro", "Block"};
+
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const std::shared_ptr<AbstractAperture>& aperture) {
+    sb.start_object();
+    sb.append_raw("\"type\":");
+    sb.escape_and_append_with_quotes(apertureTypeNames[aperture->type()]);
+    sb.append_raw(",\"data\":");
+    aperture->write(sb);
+    sb.end_object();
+}
+
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, std::shared_ptr<AbstractAperture>& aperture) {
+    simdjson::ondemand::object obj;
+    if(auto err = val.get_object().get(obj); err) return err;
+    std::string_view type;
+    if(auto err = obj["type"].get_string().get(type); err) return err;
+    Json::Reader data;
+    if(auto err = obj["data"].get_object().get(data); err) return err;
+    if(type == "Circle") aperture = std::make_shared<ApCircle>(data, File::crutch);
+    else if(type == "Rectangle") aperture = std::make_shared<ApRectangle>(data, File::crutch);
+    else if(type == "Obround") aperture = std::make_shared<ApObround>(data, File::crutch);
+    else if(type == "Polygon") aperture = std::make_shared<ApPolygon>(data, File::crutch);
+    else if(type == "Macro") aperture = std::make_shared<ApMacro>(data, File::crutch);
+    else if(type == "Block") aperture = std::make_shared<ApBlock>(data, File::crutch);
+    else return simdjson::INCORRECT_TYPE;
+    return simdjson::SUCCESS;
+}
+
 AbstractAperture::AbstractAperture(const File* file)
     : file_{file} { }
 
@@ -132,6 +162,15 @@ void ApCircle::write(QDataStream& stream) const {
         size_);
 }
 
+void ApCircle::read(Json::Reader& data) {
+    Json::read(data, "diam", diam_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+    draw();
+}
+
+void ApCircle::write(Json::Writer& sb) const {
+    Json::write(sb, "diam", diam_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+}
+
 void ApCircle::draw() {
     paths_   = Geo::Polygons{Geo::Polylines{Geo::circle(diam_)}};
     minSize_ = size_ = diam_;
@@ -182,6 +221,15 @@ void ApRectangle::write(QDataStream& stream) const {
         size_);
 }
 
+void ApRectangle::read(Json::Reader& data) {
+    Json::read(data, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+    draw();
+}
+
+void ApRectangle::write(Json::Writer& sb) const {
+    Json::write(sb, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+}
+
 void ApRectangle::draw() {
     paths_   = Geo::Polygons{Geo::Polylines{Geo::rectangle(width_, height_)}};
     size_    = std::sqrt(width_ * width_ + height_ * height_);
@@ -225,6 +273,15 @@ void ApObround::write(QDataStream& stream) const {
         drillDiam_,
         isFlashed_,
         size_);
+}
+
+void ApObround::read(Json::Reader& data) {
+    Json::read(data, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+    draw();
+}
+
+void ApObround::write(Json::Writer& sb) const {
+    Json::write(sb, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
 }
 
 void ApObround::draw() {
@@ -284,6 +341,17 @@ void ApPolygon::write(QDataStream& stream) const {
         size_);
 }
 
+void ApPolygon::read(Json::Reader& data) {
+    Json::read(data, "diam", diam_, "rotation", rotation_, "verticesCount", verticesCount_,
+        "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+    draw();
+}
+
+void ApPolygon::write(Json::Writer& sb) const {
+    Json::write(sb, "diam", diam_, "rotation", rotation_, "verticesCount", verticesCount_,
+        "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
+}
+
 void ApPolygon::draw() {
     Geo::Polyline polygon;
     const double step = 360.0 / verticesCount_;
@@ -339,6 +407,17 @@ void ApMacro::write(QDataStream& stream) const {
         macro_,
         isFlashed_,
         size_);
+}
+
+void ApMacro::read(Json::Reader& data) {
+    Json::read(data, "modifiers", modifiers_, "coefficients", coefficients_, "macro", macro_,
+        "isFlashed", isFlashed_, "size", size_);
+    draw();
+}
+
+void ApMacro::write(Json::Writer& sb) const {
+    Json::write(sb, "modifiers", modifiers_, "coefficients", coefficients_, "macro", macro_,
+        "isFlashed", isFlashed_, "size", size_);
 }
 
 void ApMacro::draw() {
@@ -692,6 +771,15 @@ void ApBlock::read(QDataStream& stream) {
 
 void ApBlock::write(QDataStream& stream) const {
     ::Block{stream}.rw(*this, isFlashed_, size_);
+}
+
+void ApBlock::read(Json::Reader& data) {
+    Json::read(data, "items", static_cast<V&>(*this), "isFlashed", isFlashed_, "size", size_);
+    draw();
+}
+
+void ApBlock::write(Json::Writer& sb) const {
+    Json::write(sb, "items", static_cast<const V&>(*this), "isFlashed", isFlashed_, "size", size_);
 }
 
 void ApBlock::draw() {

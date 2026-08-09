@@ -37,10 +37,17 @@ class ApObround;
 class ApPolygon;
 class ApRectangle;
 
+// Полиморфная диспетчеризация апертур в JSON: {"type":"Circle","data":{...}},
+// имя — из таблицы-зеркала ApertureType (см. gbr_aperture.cpp).
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const std::shared_ptr<AbstractAperture>& aperture);
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, std::shared_ptr<AbstractAperture>& aperture);
+
 class AbstractAperture {
     Q_DISABLE_COPY(AbstractAperture)
     friend QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture);
     friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture);
+    friend void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const std::shared_ptr<AbstractAperture>& aperture);
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, std::shared_ptr<AbstractAperture>& aperture);
 
 public:
     AbstractAperture(const File* file);
@@ -75,6 +82,8 @@ protected:
     virtual void draw()                           = 0;
     virtual void read(QDataStream& stream)        = 0;
     virtual void write(QDataStream& stream) const = 0;
+    virtual void read(Json::Reader& data)         = 0;
+    virtual void write(Json::Writer& sb) const    = 0;
 };
 
 /////////////////////////////////////////////////////
@@ -87,6 +96,10 @@ public:
         : AbstractAperture{file} {
         read(stream);
     }
+    ApCircle(Json::Reader& data, const File* file)
+        : AbstractAperture{file} {
+        read(data);
+    }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double toolDiam) const override;
@@ -95,6 +108,8 @@ protected:
     void draw() override;
     void read(QDataStream& stream) override;
     void write(QDataStream& stream) const override;
+    void read(Json::Reader& data) override;
+    void write(Json::Writer& sb) const override;
 
 private:
     double diam_{};
@@ -112,6 +127,10 @@ public:
         : AbstractAperture{file} {
         read(stream);
     }
+    ApRectangle(Json::Reader& data, const File* file)
+        : AbstractAperture{file} {
+        read(data);
+    }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double toolDiam) const override;
@@ -120,6 +139,8 @@ protected:
     void draw() override;
     void read(QDataStream& stream) override;
     void write(QDataStream& stream) const override;
+    void read(Json::Reader& data) override;
+    void write(Json::Writer& sb) const override;
 
 private:
     double height_{};
@@ -136,6 +157,10 @@ public:
         : AbstractAperture{file} {
         read(stream);
     }
+    ApObround(Json::Reader& data, const File* file)
+        : AbstractAperture{file} {
+        read(data);
+    }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double toolDiam) const override;
@@ -144,6 +169,8 @@ protected:
     void draw() override;
     void read(QDataStream& stream) override;
     void write(QDataStream& stream) const override;
+    void read(Json::Reader& data) override;
+    void write(Json::Writer& sb) const override;
 
 private:
     double height_{};
@@ -160,6 +187,10 @@ public:
         : AbstractAperture{file} {
         read(stream);
     }
+    ApPolygon(Json::Reader& data, const File* file)
+        : AbstractAperture{file} {
+        read(data);
+    }
     double rotation() const;
     int verticesCount() const;
 
@@ -171,6 +202,8 @@ protected:
     void draw() override;
     void read(QDataStream& stream) override;
     void write(QDataStream& stream) const override;
+    void read(Json::Reader& data) override;
+    void write(Json::Writer& sb) const override;
 
 private:
     double diam_{};
@@ -189,6 +222,10 @@ public:
         : AbstractAperture{file} {
         read(stream);
     }
+    ApMacro(Json::Reader& data, const File* file)
+        : AbstractAperture{file} {
+        read(data);
+    }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double) const override;
@@ -197,6 +234,8 @@ protected:
     void draw() override;
     void read(QDataStream& stream) override;
     void write(QDataStream& stream) const override;
+    void read(Json::Reader& data) override;
+    void write(Json::Writer& sb) const override;
 
 private:
     QString macro_;
@@ -232,6 +271,10 @@ public:
         : AbstractAperture{file} {
         read(stream);
     }
+    ApBlock(Json::Reader& data, const File* file)
+        : AbstractAperture{file} {
+        read(data);
+    }
     ApertureType type() const override;
     QString name() const override;
     bool fit(double) const override;
@@ -240,6 +283,8 @@ protected:
     void draw() override;
     void read(QDataStream& stream) override;
     void write(QDataStream& stream) const override;
+    void read(Json::Reader& data) override;
+    void write(Json::Writer& sb) const override;
 };
 
 using ApertureV = std::variant<ApCircle, ApRectangle, ApObround, ApPolygon, ApMacro, ApBlock>;

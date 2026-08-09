@@ -29,16 +29,19 @@ struct Library {
     QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
     SERIALIZE_POD(Library)
+    JSON_POD(Library)
 };
 struct Manufacturer {
     QString name;       /* <field> Manufacturer. */
     QString partNumber; /* <field> Manufacturer part number. */
     SERIALIZE_POD(Manufacturer)
+    JSON_POD(Manufacturer)
 };
 struct Package {
     QString name;        /* <field> Package name. It is strongly recommended to comply with the JEDEC JEP95 standard. */
     QString description; /* <field> Package description. */
     SERIALIZE_POD(Package)
+    JSON_POD(Package)
 };
 struct Pin {
     /*
@@ -49,11 +52,13 @@ struct Pin {
     QString description;
     QPointF pos;
     SERIALIZE_POD(Pin)
+    JSON_POD(Pin)
 };
 struct Supplier {
     QString name;        /* <field> Library name. */
     QString description; /* <field> Library description. */
     SERIALIZE_POD(Supplier)
+    JSON_POD(Supplier)
 };
 
 class Component {
@@ -61,6 +66,43 @@ class Component {
     // friend Item;
     friend QDataStream& operator<<(QDataStream& stream, const Component& c);
     friend QDataStream& operator>>(QDataStream& stream, Component& c);
+
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const Component& c) {
+        Json::write(sb,
+            "rotation", c.rotation_,
+            "height", c.height_,
+            "mount", c.mount_,
+            "footprintName", c.footprintName_,
+            "refdes", c.refdes_,
+            "value", c.value_,
+            "referencePoint", c.referencePoint_,
+            "footprint", c.footprint_,
+            "library", c.library_,
+            "manufacturer", c.manufacturer_,
+            "package", c.package_,
+            "suppliers", c.suppliers_,
+            "pins", c.pins_);
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, Component& c) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        Json::read(obj,
+            "rotation", c.rotation_,
+            "height", c.height_,
+            "mount", c.mount_,
+            "footprintName", c.footprintName_,
+            "refdes", c.refdes_,
+            "value", c.value_,
+            "referencePoint", c.referencePoint_,
+            "footprint", c.footprint_,
+            "library", c.library_,
+            "manufacturer", c.manufacturer_,
+            "package", c.package_,
+            "suppliers", c.suppliers_,
+            "pins", c.pins_);
+        return simdjson::SUCCESS;
+    }
 
 public:
     enum MountType {

@@ -11,7 +11,6 @@
 #pragma once
 
 #include "abstract_shape.h"
-#include "datastream.h"
 
 #include "utils.h"
 
@@ -23,19 +22,6 @@
 #include <QRectF>
 #include <memory>
 // #include <shape.h>
-
-enum FileVersion {
-    ProVer_1 = 1,
-    ProVer_2,
-    ProVer_3,
-    ProVer_4,
-    ProVer_5,
-    ProVer_6,
-    ProVer_7,
-    ProVer_8, // Geo::Polyline: точка + прогиб вместо центра дуги, замкнутость -- флагом
-    ProVer_9, // УП: имя программы и снимок видимости, траектория и открытые контуры
-    CurrentVer = ProVer_9,
-};
 
 namespace GCode {
 class File;
@@ -60,7 +46,6 @@ using ItemMap = std::map<int, Gi::Item*>;
 
 class Project : public QObject {
     Q_OBJECT
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractFile>& file);
 
 public:
     explicit Project(QObject* parent = nullptr);
@@ -138,7 +123,6 @@ public:
     bool open(const QString& fileName);
     void close();
 
-    int ver() const;
 
     int size();
 
@@ -220,7 +204,6 @@ private:
     // File Watcher
     QFileSystemWatcher watcher;
 
-    int ver_;
 
     FilesMap files_;
     ShapesMap shapes_;
@@ -252,6 +235,6 @@ private:
         double spacingY{};
         uint stepsX{1};
         uint stepsY{1};
-        SERIALIZE_POD(Tailing)
+        JSON_POD(Tailing)
     } tailing;
 };

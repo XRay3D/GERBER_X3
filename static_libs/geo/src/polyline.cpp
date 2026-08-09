@@ -1,4 +1,5 @@
 #include "geo/polyline.h"
+#include "geo/geo_json.h"
 
 #include <QDataStream>
 #include <QPainterPath>
@@ -325,6 +326,112 @@ QDataStream& operator>>(QDataStream& stream, Polylines& polylines) {
         polylines.push_back(std::move(polyline));
     }
     return stream;
+}
+
+// ---------------------------------------------------------------------------
+// JSON (см. кодировку в geo_json.h)
+// ---------------------------------------------------------------------------
+
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Vertex& vertex) {
+    sb.start_array();
+    sb.append(vertex.x());
+    sb.append_comma();
+    sb.append(vertex.y());
+    if(vertex.bulge != 0.0) {
+        sb.append_comma();
+        sb.append(vertex.bulge);
+    }
+    sb.end_array();
+}
+
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Vertex& vertex) {
+    simdjson::ondemand::array arr;
+    if(auto err = val.get_array().get(arr); err) return err;
+    double xyb[3]{};
+    size_t i{};
+    for(auto elem: arr) {
+        if(i == 3) return simdjson::CAPACITY;
+        if(auto err = elem.get_double().get(xyb[i]); err) return err;
+        ++i;
+    }
+    if(i < 2) return simdjson::INCORRECT_TYPE;
+    vertex = Vertex{xyb[0], xyb[1], xyb[2]};
+    return simdjson::SUCCESS;
+}
+
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polyline& polyline) {
+    sb.start_object();
+    if(polyline.closed) sb.append_raw("\"c\":true,");
+    if(polyline.width != 0.0) {
+        sb.append_raw("\"w\":");
+        sb.append(polyline.width);
+        sb.append_comma();
+    }
+    sb.append_raw("\"v\":[");
+    bool first = true;
+    for(const Vertex& vertex: polyline) {
+        if(!first) sb.append_comma();
+        first = false;
+        tag_invoke(simdjson::serialize_tag{}, sb, vertex);
+    }
+    sb.append_raw("]");
+    sb.end_object();
+}
+
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polyline& polyline) {
+    simdjson::ondemand::object obj;
+    if(auto err = val.get_object().get(obj); err) return err;
+    polyline.clear();
+    polyline.closed = false;
+    polyline.width  = 0.0;
+    for(auto field: obj) { // один проход, порядок записи известен: c, w, v
+        std::string_view key;
+        if(auto err = field.unescaped_key().get(key); err) return err;
+        if(key == "c") {
+            if(auto err = field.value().get_bool().get(polyline.closed); err) return err;
+        } else if(key == "w") {
+            if(auto err = field.value().get_double().get(polyline.width); err) return err;
+        } else if(key == "v") {
+            simdjson::ondemand::array arr;
+            if(auto err = field.value().get_array().get(arr); err) return err;
+            // Не resize: Vertex по умолчанию не создаётся вовсе (см. QDataStream выше).
+            for(auto elem: arr) {
+                simdjson::ondemand::value v;
+                if(auto err = elem.get(v); err) return err;
+                Vertex vertex{0.0, 0.0};
+                if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, vertex); err)
+                    return polyline.clear(), err;
+                polyline.push_back(vertex);
+            }
+        }
+    }
+    return simdjson::SUCCESS;
+}
+
+void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polylines& polylines) {
+    sb.start_array();
+    bool first = true;
+    for(const Polyline& polyline: polylines) {
+        if(!first) sb.append_comma();
+        first = false;
+        tag_invoke(simdjson::serialize_tag{}, sb, polyline);
+    }
+    sb.end_array();
+}
+
+simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polylines& polylines) {
+    simdjson::ondemand::array arr;
+    if(auto err = val.get_array().get(arr); err) return err;
+    polylines.clear();
+    for(auto elem: arr) {
+        simdjson::ondemand::value v;
+        if(auto err = elem.get(v); err) return err;
+        Polyline polyline;
+        if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, polyline); err)
+            return polylines.clear(), err;
+        polylines.push_back(std::move(polyline));
+    }
+    return simdjson::SUCCESS;
 }
 
 } // namespace Geo

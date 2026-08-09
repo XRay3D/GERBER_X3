@@ -10,6 +10,7 @@
  ********************************************************************************/
 #pragma once
 
+#include "json_io.h"
 #include "utils.h"
 #include <QObject>
 #include <QPainterPath>
@@ -22,6 +23,19 @@ class Tool {
     friend QDataStream& operator<<(QDataStream& stream, const Tool& tool);
     friend QDataStream& operator>>(QDataStream& stream, Tool& tool);
     friend QDebug operator<<(QDebug debug, const Tool& t);
+
+    // JSON: по именам полей data — тот же принцип, что Tool::read/write(QJsonObject).
+    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const Tool& tool) {
+        Json::writeFields(sb, tool.data);
+    }
+
+    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, Tool& tool) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        Json::readFields(obj, tool.data);
+        tool.hash_ = {};
+        return simdjson::SUCCESS;
+    }
 
 public:
     enum class ID : int32_t {

@@ -34,6 +34,7 @@ target_link_libraries(
          filetree
          gi
          shape
+         simdjson
          $<$<PLATFORM_ID:Linux>:tbb>
          tooldatabase
          Qt6::Qml

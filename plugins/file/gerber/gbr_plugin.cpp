@@ -91,6 +91,8 @@ bool Plugin::thisIsIt(const QString& fileName) {
 
 AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
 
+AbstractFile* Plugin::loadFile(std::string_view json) const { return File::load<File>(json); }
+
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'G'); }
 
 AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
