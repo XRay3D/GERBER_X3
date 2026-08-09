@@ -44,6 +44,37 @@ else()
   endif()
 endif()
 
+# Проект собирают компилятором посвежее системного, и его libstdc++ требует
+# версий символов (GLIBCXX_3.4.35 и далее), которых в /lib64/libstdc++.so.6
+# ещё нет: слинкованное не запускается вовсе.
+#
+# Лечится это RPATH на каталог libstdc++ САМОГО компилятора, а не статической
+# линковкой. -static-libstdc++ здесь не годится: Qt6 собран системным
+# компилятором и свою libstdc++.so.6 тянет всё равно, так что в процессе
+# оказываются ДВЕ копии рантайма. Они перебивают символы друг друга, и первым
+# же падает инициализатор потоков ввода-вывода -- ios_base_library_init()
+# уходит по нулевому адресу ещё до main().
+#
+# RPATH оставляет в процессе одну копию, и притом новую: она содержит и все
+# старые версии символов, которые нужны Qt.
+if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  execute_process(
+    COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libstdc++.so
+    OUTPUT_VARIABLE CXX_RUNTIME_LIB
+    OUTPUT_STRIP_TRAILING_WHITESPACE
+    ERROR_QUIET)
+  if(CXX_RUNTIME_LIB AND IS_ABSOLUTE "${CXX_RUNTIME_LIB}")
+    cmake_path(SET CXX_RUNTIME_LIB NORMALIZE "${CXX_RUNTIME_LIB}")
+    cmake_path(GET CXX_RUNTIME_LIB PARENT_PATH CXX_RUNTIME_DIR)
+    # Системный каталог прописывать незачем -- он и так в путях загрузчика.
+    if(NOT CXX_RUNTIME_DIR MATCHES "^/(usr/)?lib(64)?$")
+      message(STATUS "libstdc++ компилятора не системная, RPATH: ${CXX_RUNTIME_DIR}")
+      list(APPEND CMAKE_BUILD_RPATH "${CXX_RUNTIME_DIR}")
+      list(APPEND CMAKE_INSTALL_RPATH "${CXX_RUNTIME_DIR}")
+    endif()
+  endif()
+endif()
+
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 
 # ##############################################################################
@@ -55,19 +86,19 @@ set(CLIPPER2_EXAMPLES OFF)
 set(CLIPPER2_TESTS OFF)
 set(CLIPPER2_USINGZ "ONLY")
 
-FetchContent_Declare(
+fetchcontent_declare(
   ctre
   GIT_REPOSITORY
     "https://github.com/hanickadot/compile-time-regular-expressions.git"
   GIT_TAG main
   GIT_SHALLOW ON)
-FetchContent_Declare(
+fetchcontent_declare(
   clipper2
   GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
   GIT_TAG main
   GIT_SHALLOW ON
   SOURCE_SUBDIR CPP)
-FetchContent_MakeAvailable(ctre clipper2)
+fetchcontent_makeavailable(ctre clipper2)
 
 # ##############################################################################
 
