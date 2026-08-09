@@ -20,56 +20,6 @@ using namespace std::numbers;
 
 namespace Gerber {
 
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<AbstractAperture>& aperture) {
-    stream << aperture->type();
-    aperture->write(stream);
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<AbstractAperture>& aperture) {
-    int type;
-    stream >> type;
-    switch(type) {
-    case Circle   : aperture = std::make_shared<ApCircle>(stream, File::crutch); break;
-    case Rectangle: aperture = std::make_shared<ApRectangle>(stream, File::crutch); break;
-    case Obround  : aperture = std::make_shared<ApObround>(stream, File::crutch); break;
-    case Polygon  : aperture = std::make_shared<ApPolygon>(stream, File::crutch); break;
-    case Macro    : aperture = std::make_shared<ApMacro>(stream, File::crutch); break;
-    case Block    : aperture = std::make_shared<ApBlock>(stream, File::crutch); break;
-    }
-    return stream;
-}
-
-// Зеркало ApertureType — стабильные имена типов апертур в JSON.
-static constexpr std::string_view apertureTypeNames[]{
-    "Circle", "Rectangle", "Obround", "Polygon", "Macro", "Block"};
-
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const std::shared_ptr<AbstractAperture>& aperture) {
-    sb.start_object();
-    sb.append_raw("\"type\":");
-    sb.escape_and_append_with_quotes(apertureTypeNames[aperture->type()]);
-    sb.append_raw(",\"data\":");
-    aperture->write(sb);
-    sb.end_object();
-}
-
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, std::shared_ptr<AbstractAperture>& aperture) {
-    simdjson::ondemand::object obj;
-    if(auto err = val.get_object().get(obj); err) return err;
-    std::string_view type;
-    if(auto err = obj["type"].get_string().get(type); err) return err;
-    Json::Reader data;
-    if(auto err = obj["data"].get_object().get(data); err) return err;
-    if(type == "Circle") aperture = std::make_shared<ApCircle>(data, File::crutch);
-    else if(type == "Rectangle") aperture = std::make_shared<ApRectangle>(data, File::crutch);
-    else if(type == "Obround") aperture = std::make_shared<ApObround>(data, File::crutch);
-    else if(type == "Polygon") aperture = std::make_shared<ApPolygon>(data, File::crutch);
-    else if(type == "Macro") aperture = std::make_shared<ApMacro>(data, File::crutch);
-    else if(type == "Block") aperture = std::make_shared<ApBlock>(data, File::crutch);
-    else return simdjson::INCORRECT_TYPE;
-    return simdjson::SUCCESS;
-}
-
 AbstractAperture::AbstractAperture(const File* file)
     : file_{file} { }
 
@@ -134,7 +84,7 @@ Geo::Polyline AbstractAperture::drawDrill(const State& state) {
 ///
 ApCircle::ApCircle(double diam, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    diam_      = diam;
+    diam_ = diam;
     drillDiam_ = drillDiam;
     // GerberAperture interface
 }
@@ -145,34 +95,8 @@ ApertureType ApCircle::type() const { return Circle; }
 
 bool ApCircle::fit(double toolDiam) const { return diam_ > toolDiam; }
 
-void ApCircle::read(QDataStream& stream) {
-    ::Block{stream}.rw(
-        diam_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-    draw();
-}
-
-void ApCircle::write(QDataStream& stream) const {
-    ::Block{stream}.rw(
-        diam_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-}
-
-void ApCircle::read(Json::Reader& data) {
-    Json::read(data, "diam", diam_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-    draw();
-}
-
-void ApCircle::write(Json::Writer& sb) const {
-    Json::write(sb, "diam", diam_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-}
-
 void ApCircle::draw() {
-    paths_   = Geo::Polygons{Geo::Polylines{Geo::circle(diam_)}};
+    paths_ = Geo::Polygons{Geo::Polylines{Geo::circle(diam_)}};
     minSize_ = size_ = diam_;
 }
 
@@ -185,8 +109,8 @@ void ApCircle::draw() {
 ///
 ApRectangle::ApRectangle(double width, double height, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    width_     = width;
-    height_    = height;
+    width_ = width;
+    height_ = height;
     drillDiam_ = drillDiam;
 }
 
@@ -202,37 +126,9 @@ ApertureType ApRectangle::type() const { return Rectangle; }
 
 bool ApRectangle::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
-void ApRectangle::read(QDataStream& stream) {
-    ::Block{stream}.rw(
-        height_,
-        width_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-    draw();
-}
-
-void ApRectangle::write(QDataStream& stream) const {
-    ::Block{stream}.rw(
-        height_,
-        width_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-}
-
-void ApRectangle::read(Json::Reader& data) {
-    Json::read(data, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-    draw();
-}
-
-void ApRectangle::write(Json::Writer& sb) const {
-    Json::write(sb, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-}
-
 void ApRectangle::draw() {
-    paths_   = Geo::Polygons{Geo::Polylines{Geo::rectangle(width_, height_)}};
-    size_    = std::sqrt(width_ * width_ + height_ * height_);
+    paths_ = Geo::Polygons{Geo::Polylines{Geo::rectangle(width_, height_)}};
+    size_ = std::sqrt(width_ * width_ + height_ * height_);
     minSize_ = std::min(width_, height_);
 }
 
@@ -245,8 +141,8 @@ void ApRectangle::draw() {
 ///
 ApObround::ApObround(double width, double height, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    width_     = width;
-    height_    = height;
+    width_ = width;
+    height_ = height;
     drillDiam_ = drillDiam;
 }
 
@@ -256,41 +152,13 @@ ApertureType ApObround::type() const { return Obround; }
 
 bool ApObround::fit(double toolDiam) const { return qMin(height_, width_) > toolDiam; }
 
-void ApObround::read(QDataStream& stream) {
-    ::Block{stream}.rw(
-        height_,
-        width_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-    draw();
-}
-
-void ApObround::write(QDataStream& stream) const {
-    ::Block{stream}.rw(
-        height_,
-        width_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-}
-
-void ApObround::read(Json::Reader& data) {
-    Json::read(data, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-    draw();
-}
-
-void ApObround::write(Json::Writer& sb) const {
-    Json::write(sb, "height", height_, "width", width_, "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-}
-
 void ApObround::draw() {
     if(qFuzzyCompare(width_, height_)) {
         paths_ = Geo::Polygons{Geo::Polylines{Geo::circle(width_)}};
     } else {
         paths_ = Geo::Polygons{Geo::Polylines{Geo::obround(width_, height_)}};
     }
-    size_    = std::max(height_, width_);
+    size_ = std::max(height_, width_);
     minSize_ = std::min(width_, height_);
 }
 
@@ -304,10 +172,10 @@ void ApObround::draw() {
 ///
 ApPolygon::ApPolygon(double diam, int nVertices, double rotation, double drillDiam, const File* format)
     : AbstractAperture{format} {
-    diam_          = diam;
+    diam_ = diam;
     verticesCount_ = nVertices;
-    rotation_      = rotation;
-    drillDiam_     = drillDiam;
+    rotation_ = rotation;
+    drillDiam_ = drillDiam;
 }
 
 double ApPolygon::rotation() const { return rotation_; }
@@ -319,38 +187,6 @@ QString ApPolygon::name() const { return u"P(Ø%1, N%2)"_s.arg(diam_).arg(vertic
 ApertureType ApPolygon::type() const { return Polygon; }
 
 bool ApPolygon::fit(double toolDiam) const { return diam_ * cos(pi / verticesCount_) > toolDiam; }
-
-void ApPolygon::read(QDataStream& stream) {
-    ::Block{stream}.rw(
-        diam_,
-        rotation_,
-        verticesCount_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-    draw();
-}
-
-void ApPolygon::write(QDataStream& stream) const {
-    ::Block{stream}.rw(
-        diam_,
-        rotation_,
-        verticesCount_,
-        drillDiam_,
-        isFlashed_,
-        size_);
-}
-
-void ApPolygon::read(Json::Reader& data) {
-    Json::read(data, "diam", diam_, "rotation", rotation_, "verticesCount", verticesCount_,
-        "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-    draw();
-}
-
-void ApPolygon::write(Json::Writer& sb) const {
-    Json::write(sb, "diam", diam_, "rotation", rotation_, "verticesCount", verticesCount_,
-        "drillDiam", drillDiam_, "isFlashed", isFlashed_, "size", size_);
-}
 
 void ApPolygon::draw() {
     Geo::Polyline polygon;
@@ -364,7 +200,7 @@ void ApPolygon::draw() {
     // Замкнутость -- ФЛАГ, и без него точный домен контур просто не возьмёт
     // (Polygons отбрасывает незамкнутые), а апертура пропадёт из слоя.
     polygon.close();
-    paths_   = Geo::Polygons{Geo::Polylines{polygon}};
+    paths_ = Geo::Polygons{Geo::Polylines{polygon}};
     minSize_ = size_ = diam_;
 }
 
@@ -390,46 +226,16 @@ ApertureType ApMacro::type() const { return Macro; }
 
 bool ApMacro::fit(double) const { return true; }
 
-void ApMacro::read(QDataStream& stream) {
-    ::Block{stream}.rw(
-        modifiers_,
-        coefficients_,
-        macro_,
-        isFlashed_,
-        size_);
-    draw();
-}
-
-void ApMacro::write(QDataStream& stream) const {
-    ::Block{stream}.rw(
-        modifiers_,
-        coefficients_,
-        macro_,
-        isFlashed_,
-        size_);
-}
-
-void ApMacro::read(Json::Reader& data) {
-    Json::read(data, "modifiers", modifiers_, "coefficients", coefficients_, "macro", macro_,
-        "isFlashed", isFlashed_, "size", size_);
-    draw();
-}
-
-void ApMacro::write(Json::Writer& sb) const {
-    Json::write(sb, "modifiers", modifiers_, "coefficients", coefficients_, "macro", macro_,
-        "isFlashed", isFlashed_, "size", size_);
-}
-
 void ApMacro::draw() {
     enum {
-        Comment               = 0,
-        Circle                = 1,
-        OutlineCustomPolygon  = 4, // MAXIMUM 5000 POINTS
+        Comment = 0,
+        Circle = 1,
+        OutlineCustomPolygon = 4,  // MAXIMUM 5000 POINTS
         OutlineRegularPolygon = 5, // 3-12 POINTS
-        Moire                 = 6,
-        Thermal               = 7,
-        VectorLine            = 20,
-        CenterLine            = 21,
+        Moire = 6,
+        Thermal = 7,
+        VectorLine = 20,
+        CenterLine = 21,
     };
 
     VarMap macroCoefficients{coefficients_};
@@ -519,11 +325,11 @@ void ApMacro::draw() {
     }
 
     {
-        auto rect      = paths_.boundingRect();
+        auto rect = paths_.boundingRect();
         const double x = rect.width();
         const double y = rect.height();
-        size_          = std::sqrt(x * x + y * y);
-        minSize_       = std::min(x, y);
+        size_ = std::sqrt(x * x + y * y);
+        minSize_ = std::min(x, y);
     }
 }
 
@@ -579,11 +385,11 @@ void ApMacro::drawMoire(const std::vector<double>& mod) {
         RotationAngle,
     };
 
-    double diameter        = mod[Diameter];
+    double diameter = mod[Diameter];
     const double thickness = mod[Thickness];
-    const double gap       = mod[Gap];
-    const double ct        = mod[CrossThickness];
-    const double cl        = mod[CrossLength];
+    const double gap = mod[Gap];
+    const double ct = mod[CrossThickness];
+    const double cl = mod[CrossLength];
 
     const QPointF center(
         mod[CenterX],
@@ -605,7 +411,9 @@ void ApMacro::drawMoire(const std::vector<double>& mod) {
         }
 
     if(cl > 0.0 && ct > 0.0) // перекрестье -- два прямоугольника внахлёст
-        moire |= Geo::Polygons{Geo::Polylines{Geo::rectangle(cl, ct), Geo::rectangle(ct, cl)}};
+        moire |= Geo::Polygons{
+            Geo::Polylines{Geo::rectangle(cl, ct), Geo::rectangle(ct, cl)}
+        };
 
     // Поворот -- вокруг начала координат макроса, уже ПОСЛЕ сдвига в центр
     // примитива. QTransform домножает справа, так что записывается наоборот.
@@ -694,7 +502,7 @@ void ApMacro::drawThermal(const std::vector<double>& mod) {
     // оставшийся от uScale, обращал термал в 1 мм на любом реальном размере.
     const double outer = mod[OuterDiameter];
     const double inner = mod[InnerDiameter];
-    const double gap   = mod[GapThickness];
+    const double gap = mod[GapThickness];
 
     const QPointF center(
         mod[CenterX],
@@ -704,7 +512,9 @@ void ApMacro::drawThermal(const std::vector<double>& mod) {
     // окружности вычитается внутренняя и две полосы перекрестья.
     Geo::Polygons thermal{Geo::Polylines{Geo::circle(outer)}};
     thermal -= Geo::Polygons{Geo::Polylines{Geo::circle(inner)}};
-    thermal -= Geo::Polygons{Geo::Polylines{Geo::rectangle(gap, outer), Geo::rectangle(outer, gap)}};
+    thermal -= Geo::Polygons{
+        Geo::Polylines{Geo::rectangle(gap, outer), Geo::rectangle(outer, gap)}
+    };
 
     // Как и у moire: сдвиг в центр примитива, затем поворот вокруг начала
     // координат макроса -- в записи QTransform обратным порядком.
@@ -737,7 +547,7 @@ Geo::Polyline ApMacro::drawVectorLine(const std::vector<double>& mod) {
         0.5 * start.y() + 0.5 * end.y());
 
     Geo::Polyline polygon = Geo::rectangle(Geo::distance(start, end), mod[Width]);
-    double angle          = 180 - (Geo::angleTo(start, end) - 360); // FIXME ???
+    double angle = 180 - (Geo::angleTo(start, end) - 360); // FIXME ???
     Geo::rotate(polygon, angle);
     Geo::translate(polygon, center);
 
@@ -764,24 +574,6 @@ ApertureType ApBlock::type() const { return Block; }
 
 bool ApBlock::fit(double) const { return true; }
 
-void ApBlock::read(QDataStream& stream) {
-    ::Block{stream}.rw(*this, isFlashed_, size_);
-    draw();
-}
-
-void ApBlock::write(QDataStream& stream) const {
-    ::Block{stream}.rw(*this, isFlashed_, size_);
-}
-
-void ApBlock::read(Json::Reader& data) {
-    Json::read(data, "items", static_cast<V&>(*this), "isFlashed", isFlashed_, "size", size_);
-    draw();
-}
-
-void ApBlock::write(Json::Writer& sb) const {
-    Json::write(sb, "items", static_cast<const V&>(*this), "isFlashed", isFlashed_, "size", size_);
-}
-
 void ApBlock::draw() {
 
     paths_ = {};
@@ -803,8 +595,53 @@ void ApBlock::draw() {
     }
 
     const QRectF rect = paths_.boundingRect();
-    size_             = std::hypot(rect.width(), rect.height());
-    minSize_          = std::min(rect.width(), rect.height());
+    size_ = std::hypot(rect.width(), rect.height());
+    minSize_ = std::min(rect.width(), rect.height());
 }
 
 } // namespace Gerber
+
+void Serial::Adapter<std::shared_ptr<Gerber::AbstractAperture>>::write(
+    Writer& sb, const std::shared_ptr<Gerber::AbstractAperture>& aperture) {
+    using namespace Gerber;
+    sb.start_object();
+    sb.append_raw("\"type\":");
+    auto dispatch = [&sb]<typename T>(const T& ap) {
+        sb.escape_and_append_with_quotes(Serial::typeNameOf<T>());
+        Serial::writeInto(sb, ap);
+    };
+    switch(aperture->type()) {
+    case Gerber::Circle   : dispatch(static_cast<const ApCircle&>(*aperture)); break;
+    case Gerber::Rectangle: dispatch(static_cast<const ApRectangle&>(*aperture)); break;
+    case Gerber::Obround  : dispatch(static_cast<const ApObround&>(*aperture)); break;
+    case Gerber::Polygon  : dispatch(static_cast<const ApPolygon&>(*aperture)); break;
+    case Gerber::Macro    : dispatch(static_cast<const ApMacro&>(*aperture)); break;
+    case Gerber::Block    : dispatch(static_cast<const ApBlock&>(*aperture)); break;
+    }
+    sb.end_object();
+}
+
+simdjson::error_code Serial::Adapter<std::shared_ptr<Gerber::AbstractAperture>>::read(
+    simdjson::ondemand::value& val, std::shared_ptr<Gerber::AbstractAperture>& aperture) {
+    using namespace Gerber;
+    std::string_view slice; // сырой текст элемента: тип подсмотреть + поля прочесть
+    if(auto err = simdjson::to_json_string(val).get(slice); err) return err;
+    Serial::Parsed peek{slice};
+    simdjson::ondemand::object obj;
+    if(peek.error || peek.doc.get_object().get(obj)) return simdjson::INCORRECT_TYPE;
+    std::string_view type;
+    if(auto err = obj["type"].get_string().get(type); err) return err;
+    auto make = [&]<typename T>() {
+        auto ap = std::make_shared<T>(File::crutch);
+        Serial::loadInto(slice, *ap);
+        aperture = std::move(ap);
+    };
+    if(type == Serial::typeNameOf<ApCircle>()) make.template operator()<ApCircle>();
+    else if(type == Serial::typeNameOf<ApRectangle>()) make.template operator()<ApRectangle>();
+    else if(type == Serial::typeNameOf<ApObround>()) make.template operator()<ApObround>();
+    else if(type == Serial::typeNameOf<ApPolygon>()) make.template operator()<ApPolygon>();
+    else if(type == Serial::typeNameOf<ApMacro>()) make.template operator()<ApMacro>();
+    else if(type == Serial::typeNameOf<ApBlock>()) make.template operator()<ApBlock>();
+    else return simdjson::INCORRECT_TYPE;
+    return simdjson::SUCCESS;
+}

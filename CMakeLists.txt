@@ -105,12 +105,13 @@ fetchcontent_declare(
   GIT_TAG main
   GIT_SHALLOW ON
   SOURCE_SUBDIR CPP)
-# Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
-# v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
-fetchcontent_declare(
-  simdjson
-  GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
-  GIT_TAG 20b28712ffce8320237b75a587d35a2e89140577)
+  # Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
+  # v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
+  fetchcontent_declare(
+    simdjson
+    GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
+    GIT_TAG 20b28712ffce8320237b75a587d35a2e89140577
+    GIT_SHALLOW ON)
 fetchcontent_makeavailable(ctre clipper2 simdjson)
 
 # Статический libsimdjson.a влинковывается в плагины (.so) — без PIC не

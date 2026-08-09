@@ -1,7 +1,6 @@
 #include "geo/polyline.h"
 #include "geo/geo_json.h"
 
-#include <QDataStream>
 #include <QPainterPath>
 
 #include <algorithm>
@@ -28,7 +27,7 @@ std::optional<std::pair<double, double>> bulgeRadiusAndTheta(const Vertex& from,
     if(from.bulge == 0.0) return std::nullopt;
     const double chord = std::hypot(to.x() - from.x(), to.y() - from.y());
     if(chord <= 0.0) return std::nullopt;
-    const double theta  = 4.0 * std::atan(from.bulge);
+    const double theta = 4.0 * std::atan(from.bulge);
     const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
     return std::pair{radius, theta};
 }
@@ -75,17 +74,17 @@ void appendBulgeArc(QPainterPath& path, QPointF from, QPointF to, double bulge)
     pre(bulge != 0.0) {
     constexpr double pi = std::numbers::pi;
 
-    const double dx    = to.x() - from.x();
-    const double dy    = to.y() - from.y();
+    const double dx = to.x() - from.x();
+    const double dy = to.y() - from.y();
     const double chord = std::hypot(dx, dy);
     if(chord <= 0.0) {
         path.lineTo(to);
         return;
     }
 
-    const double theta   = 4.0 * std::atan(bulge);
+    const double theta = 4.0 * std::atan(bulge);
     const double sagitta = bulge * chord / 2.0;
-    const double radius  = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
+    const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
 
     const QPointF n(dy / chord, -dx / chord); // chord rotated -90 degrees
     const QPointF mid((from.x() + to.x()) / 2.0, (from.y() + to.y()) / 2.0);
@@ -99,7 +98,7 @@ void appendBulgeArc(QPainterPath& path, QPointF from, QPointF to, double bulge)
     const double a2 = a1 + theta;
 
     const int segments = std::max(1, static_cast<int>(std::ceil(std::abs(theta) / (pi / 2.0))));
-    const double step  = theta / segments;
+    const double step = theta / segments;
     for(int i = 0; i < segments; ++i)
         appendArcSegment2(path, center, radius, a1 + i * step, a1 + (i + 1) * step);
 }
@@ -280,59 +279,16 @@ QPainterPath Polylines::toPath() const {
 // Сериализация
 // ---------------------------------------------------------------------------
 
-QDataStream& operator<<(QDataStream& stream, const Vertex& vertex) {
-    return stream << static_cast<const QPointF&>(vertex) << vertex.bulge;
-}
-
-QDataStream& operator>>(QDataStream& stream, Vertex& vertex) {
-    return stream >> static_cast<QPointF&>(vertex) >> vertex.bulge;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Polyline& polyline) {
-    stream << quint32(polyline.size()) << polyline.closed << polyline.width;
-    for(const Vertex& vertex: polyline) stream << vertex;
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Polyline& polyline) {
-    quint32 count{};
-    stream >> count >> polyline.closed >> polyline.width;
-    // Не resize: Vertex по умолчанию не создаётся вовсе -- прогиб без точки
-    // ничего не значит, и «пустая» вершина типу не нужна.
-    polyline.clear();
-    while(count--) {
-        Vertex vertex{0.0, 0.0};
-        stream >> vertex;
-        if(stream.status() != QDataStream::Ok) return polyline.clear(), stream;
-        polyline.push_back(vertex);
-    }
-    return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Polylines& polylines) {
-    stream << quint32(polylines.size());
-    for(const Polyline& polyline: polylines) stream << polyline;
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Polylines& polylines) {
-    quint32 count{};
-    stream >> count;
-    polylines.clear();
-    while(count--) {
-        Polyline polyline;
-        stream >> polyline;
-        if(stream.status() != QDataStream::Ok) return polylines.clear(), stream;
-        polylines.push_back(std::move(polyline));
-    }
-    return stream;
-}
-
 // ---------------------------------------------------------------------------
 // JSON (см. кодировку в geo_json.h)
 // ---------------------------------------------------------------------------
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Vertex& vertex) {
+} // namespace Geo
+
+using namespace Serial;
+using Geo::Vertex, Geo::Polyline, Geo::Polylines;
+
+void Serial::Adapter<Geo::Vertex>::write(simdjson::builder::string_builder& sb, const Geo::Vertex& vertex) {
     sb.start_array();
     sb.append(vertex.x());
     sb.append_comma();
@@ -344,7 +300,7 @@ void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, 
     sb.end_array();
 }
 
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Vertex& vertex) {
+simdjson::error_code Serial::Adapter<Geo::Vertex>::read(simdjson::ondemand::value& val, Geo::Vertex& vertex) {
     simdjson::ondemand::array arr;
     if(auto err = val.get_array().get(arr); err) return err;
     double xyb[3]{};
@@ -359,7 +315,7 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
     return simdjson::SUCCESS;
 }
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polyline& polyline) {
+void Serial::Adapter<Geo::Polyline>::write(simdjson::builder::string_builder& sb, const Geo::Polyline& polyline) {
     sb.start_object();
     if(polyline.closed) sb.append_raw("\"c\":true,");
     if(polyline.width != 0.0) {
@@ -372,18 +328,18 @@ void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, 
     for(const Vertex& vertex: polyline) {
         if(!first) sb.append_comma();
         first = false;
-        tag_invoke(simdjson::serialize_tag{}, sb, vertex);
+        Adapter<Geo::Vertex>::write(sb, vertex);
     }
     sb.append_raw("]");
     sb.end_object();
 }
 
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polyline& polyline) {
+simdjson::error_code Serial::Adapter<Geo::Polyline>::read(simdjson::ondemand::value& val, Geo::Polyline& polyline) {
     simdjson::ondemand::object obj;
     if(auto err = val.get_object().get(obj); err) return err;
     polyline.clear();
     polyline.closed = false;
-    polyline.width  = 0.0;
+    polyline.width = 0.0;
     for(auto field: obj) { // один проход, порядок записи известен: c, w, v
         std::string_view key;
         if(auto err = field.unescaped_key().get(key); err) return err;
@@ -394,12 +350,13 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
         } else if(key == "v") {
             simdjson::ondemand::array arr;
             if(auto err = field.value().get_array().get(arr); err) return err;
-            // Не resize: Vertex по умолчанию не создаётся вовсе (см. QDataStream выше).
+            // Не resize: Vertex по умолчанию не создаётся вовсе -- прогиб без
+            // точки ничего не значит, и «пустая» вершина типу не нужна.
             for(auto elem: arr) {
                 simdjson::ondemand::value v;
                 if(auto err = elem.get(v); err) return err;
                 Vertex vertex{0.0, 0.0};
-                if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, vertex); err)
+                if(auto err = Adapter<Geo::Vertex>::read(v, vertex); err)
                     return polyline.clear(), err;
                 polyline.push_back(vertex);
             }
@@ -408,18 +365,18 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
     return simdjson::SUCCESS;
 }
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polylines& polylines) {
+void Serial::Adapter<Geo::Polylines>::write(simdjson::builder::string_builder& sb, const Geo::Polylines& polylines) {
     sb.start_array();
     bool first = true;
     for(const Polyline& polyline: polylines) {
         if(!first) sb.append_comma();
         first = false;
-        tag_invoke(simdjson::serialize_tag{}, sb, polyline);
+        Adapter<Geo::Polyline>::write(sb, polyline);
     }
     sb.end_array();
 }
 
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polylines& polylines) {
+simdjson::error_code Serial::Adapter<Geo::Polylines>::read(simdjson::ondemand::value& val, Geo::Polylines& polylines) {
     simdjson::ondemand::array arr;
     if(auto err = val.get_array().get(arr); err) return err;
     polylines.clear();
@@ -427,11 +384,9 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
         simdjson::ondemand::value v;
         if(auto err = elem.get(v); err) return err;
         Polyline polyline;
-        if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, polyline); err)
+        if(auto err = Adapter<Geo::Polyline>::read(v, polyline); err)
             return polylines.clear(), err;
         polylines.push_back(std::move(polyline));
     }
     return simdjson::SUCCESS;
 }
-
-} // namespace Geo

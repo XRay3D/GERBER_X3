@@ -10,7 +10,6 @@
  *******************************************************************************/
 #pragma once
 
-#include "datastream.h"
 #include "md5.h"
 #include "plugintypes.h"
 
@@ -59,8 +58,8 @@ enum CoordinateValuesNotation : bool {
 };
 
 enum InterpolationMode {
-    Linear                   = 1,
-    ClockwiseCircular        = 2,
+    Linear = 1,
+    ClockwiseCircular = 2,
     CounterClockwiseCircular = 3
 };
 
@@ -151,103 +150,23 @@ struct Format {
     int xDecimal = DecimalDefVal;
     int yInteger = IntegerDefVal;
     int yDecimal = DecimalDefVal;
-
-    friend QDataStream& operator<<(QDataStream& stream, const Format& format) {
-        return ::Block{stream}.write(format);
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Format& format) {
-        return ::Block{stream}.read(format);
-    }
-
-    JSON_POD(Format)
 };
 
 class State {
     friend class File;
-    friend QDataStream& operator<<(QDataStream& stream, const State& state) {
-        return ::Block{stream}.write(
-            state.dCode_,
-            state.gCode_,
-            state.imgPolarity_,
-            state.interpolation_,
-            state.type_,
-            state.quadrant_,
-            state.region_,
-            state.aperture_,
-            state.lineNum_,
-            state.curPos_,
-            state.mirroring_,
-            state.scaling_,
-            state.rotating_);
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, State& state) {
-        return ::Block{stream}.read(
-            state.dCode_,
-            state.gCode_,
-            state.imgPolarity_,
-            state.interpolation_,
-            state.type_,
-            state.quadrant_,
-            state.region_,
-            state.aperture_,
-            state.lineNum_,
-            state.curPos_,
-            state.mirroring_,
-            state.scaling_,
-            state.rotating_);
-    }
-
-    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const State& state) {
-        Json::write(sb,
-            "dCode", state.dCode_,
-            "gCode", state.gCode_,
-            "imgPolarity", state.imgPolarity_,
-            "interpolation", state.interpolation_,
-            "type", state.type_,
-            "quadrant", state.quadrant_,
-            "region", state.region_,
-            "aperture", state.aperture_,
-            "lineNum", state.lineNum_,
-            "curPos", state.curPos_,
-            "mirroring", state.mirroring_,
-            "scaling", state.scaling_,
-            "rotating", state.rotating_);
-    }
-
-    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, State& state) {
-        simdjson::ondemand::object obj;
-        if(auto err = val.get_object().get(obj); err) return err;
-        Json::read(obj,
-            "dCode", state.dCode_,
-            "gCode", state.gCode_,
-            "imgPolarity", state.imgPolarity_,
-            "interpolation", state.interpolation_,
-            "type", state.type_,
-            "quadrant", state.quadrant_,
-            "region", state.region_,
-            "aperture", state.aperture_,
-            "lineNum", state.lineNum_,
-            "curPos", state.curPos_,
-            "mirroring", state.mirroring_,
-            "scaling", state.scaling_,
-            "rotating", state.rotating_);
-        return simdjson::SUCCESS;
-    }
-
-    File* file_                      = nullptr;
-    Operation dCode_                 = D02;
-    GCode gCode_                     = G01;
-    ImagePolarity imgPolarity_       = Positive;
+    [[= Serial::skip]] File* file_ = nullptr; // восстанавливает File::postLoad
+    Operation dCode_ = D02;
+    GCode gCode_ = G01;
+    ImagePolarity imgPolarity_ = Positive;
     InterpolationMode interpolation_ = Linear;
-    PrimitiveType type_              = Aperture;
-    QuadrantMode quadrant_           = Undef;
-    RegionMode region_               = Off;
+    PrimitiveType type_ = Aperture;
+    QuadrantMode quadrant_ = Undef;
+    RegionMode region_ = Off;
     int aperture_{};
     int lineNum_{};
     QPointF curPos_;
     Mirroring mirroring_ = NoMirroring;
-    double scaling_      = 1.0;
+    double scaling_ = 1.0;
     double rotating_{};
 
 public:
@@ -296,33 +215,7 @@ public:
 
 struct GrObject : GraphicObject {
 
-    friend QDataStream& operator<<(QDataStream& stream, const GrObject& go) {
-        stream << static_cast<GraphicObject>(go);
-        return ::Block{stream}.write(go.state);
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, GrObject& go) {
-        stream >> static_cast<GraphicObject&>(go);
-        return ::Block{stream}.read(go.state);
-    }
-
-    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const GrObject& go) {
-        sb.start_object();
-        sb.append_raw("\"go\":");
-        Json::append(sb, static_cast<const GraphicObject&>(go));
-        sb.append_raw(",\"state\":");
-        Json::append(sb, go.state);
-        sb.end_object();
-    }
-
-    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, GrObject& go) {
-        simdjson::ondemand::object obj;
-        if(auto err = val.get_object().get(obj); err) return err;
-        Json::read(obj, "go", static_cast<GraphicObject&>(go), "state", go.state);
-        return simdjson::SUCCESS;
-    }
-
-    File* gFile{nullptr};
+    [[= Serial::skip]] File* gFile{nullptr}; // восстанавливает File::postLoad
     State state;
 
     // public:
@@ -330,7 +223,7 @@ struct GrObject : GraphicObject {
     GrObject(int32_t id, const State& state, Geo::Polygons&& paths, File* gFile, Type type, Geo::Polyline&& path = {})
         : gFile{gFile}
         , state{state} {
-        GraphicObject::id   = id;
+        GraphicObject::id = id;
         GraphicObject::fill = std::move(paths);
         GraphicObject::path = std::move(path);
         GraphicObject::type = type;

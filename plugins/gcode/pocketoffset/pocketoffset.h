@@ -17,8 +17,9 @@ namespace PocketOffset {
 
 constexpr auto POCKET_OFFSET = "PocketOffset"_hash32;
 
-class File final : public GCode::File {
+class[[= Serial::name("PocketOffset")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();
     explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"pocket-path"_s); }

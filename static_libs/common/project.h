@@ -11,6 +11,7 @@
 #pragma once
 
 #include "abstract_shape.h"
+#include "serial.h"
 
 #include "utils.h"
 
@@ -123,7 +124,6 @@ public:
     bool open(const QString& fileName);
     void close();
 
-
     int size();
 
     bool isModified();
@@ -204,7 +204,6 @@ private:
     // File Watcher
     QFileSystemWatcher watcher;
 
-
     FilesMap files_;
     ShapesMap shapes_;
     ItemMap items_;
@@ -235,6 +234,27 @@ private:
         double spacingY{};
         uint stepsX{1};
         uint stepsY{1};
-        JSON_POD(Tailing)
     } tailing;
+
+    // Снимок шапки проекта для сериализации: поля Project раскиданы по классу
+    // (и сам он QObject), а движку Serial нужен простой агрегат — объект
+    // "ggeasy" пишется/читается рефлексией по этой структуре.
+    struct Header {
+        bool pinsPlaced{};
+        Tailing tailing{};
+        QPointF home;
+        QPointF zero;
+        QPointF pins[4];
+        bool pinsUsed[4]{true, true, true, true};
+        QRectF workRect;
+        double safeZ{};
+        double boardThickness{};
+        double copperThickness{};
+        double clearence{};
+        double plunge{};
+        double glue{};
+        QRectF viewRect;
+    };
+    Header header() const;           // снимок (viewRect — из graphicsview)
+    void applyHeader(const Header&); // применить всё, кроме viewRect
 };

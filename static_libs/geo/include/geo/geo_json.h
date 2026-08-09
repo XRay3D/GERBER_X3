@@ -10,14 +10,12 @@
  ********************************************************************************/
 #pragma once
 
-// JSON-сериализация типов Geo (tag_invoke для simdjson). Объявления здесь,
-// тела — в polyline.cpp и polygon.cpp: Polygon::Impl виден только там.
+// JSON-адаптеры типов Geo для движка Serial (см. common/serial.h): PIMPL и
+// Qt-базы рефлексией не взять, поэтому — специализации Serial::Adapter.
+// Тела — в polyline.cpp и polygon.cpp: Polygon::Impl виден только там.
 //
-// ВАЖНО: этот заголовок обязан быть виден всюду, где Geo-типы уходят в
-// Json::append — иначе диспетчер не увидит tag_invoke и молча запишет
-// полилинию как «массив объектов с одним полем bulge» (рефлексия не видит
-// базу QPointF). Включается из plugintypes.h, так что прикладной код
-// получает его автоматически.
+// Geo не зависит от common, поэтому здесь лишь повторное объявление
+// первичного шаблона Adapter (сигнатуры обязаны совпадать с serial.h).
 //
 // Кодировка (короткие ключи — полилинии доминируют в размере файла;
 // чтение толерантно, отсутствие ключа = дефолт):
@@ -31,21 +29,39 @@
 
 #include <simdjson.h>
 
-namespace Geo {
+namespace Serial {
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Vertex& vertex);
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Vertex& vertex);
+template <typename T>
+struct Adapter;
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polyline& polyline);
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polyline& polyline);
+template <>
+struct Adapter<Geo::Vertex> {
+    static void write(simdjson::builder::string_builder& sb, const Geo::Vertex& vertex);
+    static simdjson::error_code read(simdjson::ondemand::value& val, Geo::Vertex& vertex);
+};
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polylines& polylines);
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polylines& polylines);
+template <>
+struct Adapter<Geo::Polyline> {
+    static void write(simdjson::builder::string_builder& sb, const Geo::Polyline& polyline);
+    static simdjson::error_code read(simdjson::ondemand::value& val, Geo::Polyline& polyline);
+};
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polygon& polygon);
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polygon& polygon);
+template <>
+struct Adapter<Geo::Polylines> {
+    static void write(simdjson::builder::string_builder& sb, const Geo::Polylines& polylines);
+    static simdjson::error_code read(simdjson::ondemand::value& val, Geo::Polylines& polylines);
+};
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polygons& polygons);
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polygons& polygons);
+template <>
+struct Adapter<Geo::Polygon> {
+    static void write(simdjson::builder::string_builder& sb, const Geo::Polygon& polygon);
+    static simdjson::error_code read(simdjson::ondemand::value& val, Geo::Polygon& polygon);
+};
 
-} // namespace Geo
+template <>
+struct Adapter<Geo::Polygons> {
+    static void write(simdjson::builder::string_builder& sb, const Geo::Polygons& polygons);
+    static simdjson::error_code read(simdjson::ondemand::value& val, Geo::Polygons& polygons);
+};
+
+} // namespace Serial

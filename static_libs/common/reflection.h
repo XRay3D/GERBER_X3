@@ -11,8 +11,7 @@
 #pragma once
 
 // Обход полей агрегатов через статическую рефлексию C++26 (P2996).
-// Вынесено из datastream.h: этим пользуется и JSON-сериализация (json_io.h),
-// и Tool::read/write, а datastream.h остался только запаркованным плагинам.
+// Основа JSON-сериализации (common/serial.h): обход полей, их имена и счёт.
 
 #include <meta>
 #include <ranges>

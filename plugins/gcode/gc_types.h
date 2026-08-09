@@ -10,11 +10,10 @@
  ********************************************************************************/
 #pragma once
 
-#include "datastream.h"
 #include "geo/geo_json.h"
 #include "geo/polygon.h"
-#include "json_io.h"
 #include "md5.h"
+#include "serial.h"
 
 #include "tool.h"
 
@@ -27,7 +26,7 @@
 #include <limits>
 #include <variant>
 
-constexpr auto G_CODE      = "GCode"_hash32;
+constexpr auto G_CODE = "GCode"_hash32;
 constexpr auto GC_DBG_FILE = "GCDbgFile"_hash32;
 
 namespace GCode {
@@ -84,10 +83,10 @@ inline bool fitsOutput(const QRectF& rect) {
 
 enum Code {
     GNull = -1,
-    G00   = 0,
-    G01   = 1,
-    G02   = 2, // cw
-    G03   = 3, // ccw
+    G00 = 0,
+    G01 = 1,
+    G02 = 2, // cw
+    G03 = 3, // ccw
 };
 
 enum SideOfMilling {
@@ -112,70 +111,6 @@ using V = std::variant<qsizetype, double, UsedItems>;
 
 struct Variant : V {
     using V::V;
-
-    friend QDataStream& operator>>(QDataStream& stream, V& v) {
-        uint8_t index;
-        stream >> index;
-        switch(index) {
-        case 0: stream >> v.emplace<0>(); break;
-        case 1: stream >> v.emplace<1>(); break;
-        case 2: stream >> v.emplace<2>(); break;
-        }
-        return stream;
-    }
-
-    friend QDataStream& operator<<(QDataStream& stream, const V& v) {
-        stream << uint8_t(v.index());
-        std::visit([&stream](auto&& val) { stream << val; }, v);
-        return stream;
-    }
-
-    // JSON: объект с одним ключом-дискриминатором — {"i": целое} | {"f": число}
-    // | {"u": UsedItems массивом пар}. Явный тег вместо угадывания по виду
-    // значения: JSON размывает int и double (1 против 1.0).
-    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const Variant& var) {
-        sb.start_object();
-        switch(var.index()) {
-        case 0:
-            sb.append_raw("\"i\":");
-            sb.append(static_cast<int64_t>(std::get<0>(var)));
-            break;
-        case 1:
-            sb.append_raw("\"f\":");
-            Json::append(sb, std::get<1>(var)); // NaN → null
-            break;
-        case 2:
-            sb.append_raw("\"u\":");
-            Json::append(sb, std::get<2>(var));
-            break;
-        }
-        sb.end_object();
-    }
-
-    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, Variant& var) {
-        simdjson::ondemand::object obj;
-        if(auto err = val.get_object().get(obj); err) return err;
-        for(auto field: obj) {
-            std::string_view key;
-            if(auto err = field.unescaped_key().get(key); err) return err;
-            simdjson::ondemand::value v;
-            if(auto err = field.value().get(v); err) return err;
-            if(key == "i") {
-                int64_t i{};
-                if(auto err = v.get_int64().get(i); err) return err;
-                var.emplace<0>(static_cast<qsizetype>(i));
-            } else if(key == "f") {
-                double d{};
-                if(auto err = v.get_double().get(d); err) return err;
-                var.emplace<1>(d);
-            } else if(key == "u") {
-                UsedItems u;
-                if(auto err = v.get<UsedItems>().get(u); err) return err;
-                var.emplace<2>(std::move(u));
-            }
-        }
-        return simdjson::SUCCESS;
-    }
 
     qsizetype toInt() const {
         return std::visit([](auto&& val) -> int {
@@ -249,17 +184,17 @@ public:
     // Parameter keys are names, not an enum: each plugin can add its own
     // (see e.g. Profile::Creator::BridgeLen) without needing a shared numeric
     // range to avoid collisions, and a serialized/dumped Params reads as text.
-    static inline const QString Convent        = u"Convent"_s;
-    static inline const QString Depth          = u"Depth"_s;
-    static inline const QString GrItems        = u"GrItems"_s;
+    static inline const QString Convent = u"Convent"_s;
+    static inline const QString Depth = u"Depth"_s;
+    static inline const QString GrItems = u"GrItems"_s;
     static inline const QString MultiToolIndex = u"MultiToolIndex"_s; // need for Pocket
-    static inline const QString NotTile        = u"NotTile"_s;        // не раскладывать если даже раскладка включена
-    static inline const QString Side           = u"Side"_s;
-    static inline const QString FileSide       = u"FileSide"_s;
-    static inline const QString LeftHand       = u"LeftHand"_s; // need for Threading
-    static inline const QString Circle         = u"Circle"_s;   // need for Threading
-    static inline const QString Chamfer        = u"Chamfer"_s;  // need for Threading
-    static inline const QString Starts         = u"Starts"_s;   // need for Threading
+    static inline const QString NotTile = u"NotTile"_s;               // не раскладывать если даже раскладка включена
+    static inline const QString Side = u"Side"_s;
+    static inline const QString FileSide = u"FileSide"_s;
+    static inline const QString LeftHand = u"LeftHand"_s; // need for Threading
+    static inline const QString Circle = u"Circle"_s;     // need for Threading
+    static inline const QString Chamfer = u"Chamfer"_s;   // need for Threading
+    static inline const QString Starts = u"Starts"_s;     // need for Threading
     // Спиральное врезание. Ключ общий, а не плагинный: читает его
     // File::saveMillingProfile, который живёт здесь же, в общем слое.
     static inline const QString SpiralRamp = u"SpiralRamp"_s;
@@ -288,7 +223,7 @@ public:
     std::map<QString, Variant> params;
 
     // GCodeType gcType = Null;
-    mutable int fileId = -1;
+    [[= Serial::skip]] mutable int fileId = -1;
     // QColor color;
 
     // toolPathss и openCurves сохраняются наравне с исходной геометрией. Без них
@@ -296,47 +231,6 @@ public:
     // концовкой: генератор берёт траекторию именно из toolPathss. А regenerate()
     // зовётся не только из save(), но и при смене стороны платы в дереве -- то
     // есть УП молча превращалась в пустую от одного щелчка по «Сторона».
-    friend QDataStream& operator>>(QDataStream& stream, Params& par) {
-        return stream >> par.tools
-            >> par.params
-            >> par.closedCurves
-            >> par.supportCurvess
-            >> par.toolPathss
-            >> par.openCurves;
-    }
-
-    friend QDataStream& operator<<(QDataStream& stream, const Params& par) {
-        return stream << par.tools
-                      << par.params
-                      << par.closedCurves
-                      << par.supportCurvess
-                      << par.toolPathss
-                      << par.openCurves;
-    }
-
-    friend void tag_invoke(simdjson::serialize_tag, auto& sb, const Params& par) {
-        Json::write(sb,
-            "tools", par.tools,
-            "params", par.params,
-            "closedCurves", par.closedCurves,
-            "supportCurvess", par.supportCurvess,
-            "toolPathss", par.toolPathss,
-            "openCurves", par.openCurves);
-    }
-
-    friend simdjson::error_code tag_invoke(simdjson::deserialize_tag, auto& val, Params& par) {
-        simdjson::ondemand::object obj;
-        if(auto err = val.get_object().get(obj); err) return err;
-        Json::read(obj,
-            "tools", par.tools,
-            "params", par.params,
-            "closedCurves", par.closedCurves,
-            "supportCurvess", par.supportCurvess,
-            "toolPathss", par.toolPathss,
-            "openCurves", par.openCurves);
-        return simdjson::SUCCESS;
-    }
-
     explicit operator bool() const {
         return !openCurves.empty() || !closedCurves.empty();
     }
@@ -446,5 +340,56 @@ public:
 };
 
 } // namespace GCode
+
+// Variant — наследник std::variant: рефлексией не взять, поэтому Adapter.
+// Объект с одним ключом-дискриминатором: {"i": целое} | {"f": число} |
+// {"u": UsedItems массивом пар}. Явный тег вместо угадывания по виду
+// значения — JSON размывает int и double (1 против 1.0).
+template <>
+struct Serial::Adapter<GCode::Variant> {
+    static void write(Writer& sb, const GCode::Variant& var) {
+        sb.start_object();
+        switch(var.index()) {
+        case 0:
+            sb.append_raw("\"i\":");
+            sb.append(static_cast<int64_t>(std::get<0>(var)));
+            break;
+        case 1:
+            sb.append_raw("\"f\":");
+            Serial::write(sb, std::get<1>(var)); // NaN → null
+            break;
+        case 2:
+            sb.append_raw("\"u\":");
+            Serial::write(sb, std::get<2>(var));
+            break;
+        }
+        sb.end_object();
+    }
+
+    static simdjson::error_code read(simdjson::ondemand::value& val, GCode::Variant& var) {
+        simdjson::ondemand::object obj;
+        if(auto err = val.get_object().get(obj); err) return err;
+        for(auto field: obj) {
+            std::string_view key;
+            if(auto err = field.unescaped_key().get(key); err) return err;
+            simdjson::ondemand::value v;
+            if(auto err = field.value().get(v); err) return err;
+            if(key == "i") {
+                int64_t i{};
+                if(auto err = v.get_int64().get(i); err) return err;
+                var.emplace<0>(static_cast<qsizetype>(i));
+            } else if(key == "f") {
+                double d{};
+                if(auto err = Serial::read(v, d); err) return err;
+                var.emplace<1>(d);
+            } else if(key == "u") {
+                GCode::UsedItems u;
+                if(auto err = Serial::read(v, u); err) return err;
+                var.emplace<2>(std::move(u));
+            }
+        }
+        return simdjson::SUCCESS;
+    }
+};
 
 Q_DECLARE_METATYPE(GCode::Params*)

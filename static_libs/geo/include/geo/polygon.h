@@ -31,7 +31,6 @@
 #include <vector>
 
 class QPainterPath;
-class QDataStream;
 
 namespace Geo {
 
@@ -253,10 +252,4 @@ Polygons translated(const Polygons& polygons, QPointF offset);
 // Полигоны пишутся поштучно (граница + свои дырки), а не плоским списком
 // контуров: в плоском виде вложенность выражена одной ориентацией, и остров
 // внутри дырки при чтении вычелся бы вместе с ней.
-QDataStream& operator<<(QDataStream& stream, const Polygon& polygon);
-QDataStream& operator>>(QDataStream& stream, Polygon& polygon);
-QDataStream& operator<<(QDataStream& stream, const Polygons& polygons);
-QDataStream& operator>>(QDataStream& stream, Polygons& polygons);
-
-
 } // namespace Geo

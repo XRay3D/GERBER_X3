@@ -56,8 +56,10 @@ public:
         };
     };
 
-protected:
-    void readAndInit(QDataStream& stream) override; // FIXME init()
+public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    void deserialize(std::string_view json) override { Serial::loadInto(json, *this); }
+    void postLoad(); // радиус — производная от ручек, восстанавливаем после чтения
 
 private:
     double radius_;

@@ -47,8 +47,7 @@ public:
         genGcodeAndTile();
         endFile();
     }
-    void write(QDataStream& stream [[maybe_unused]]) const override { }
-    void read(QDataStream& stream [[maybe_unused]]) override { }
+    void serialize(Serial::Writer& /*sb*/) const override { } // отладочный, не сохраняется
     void initFrom(AbstractFile* file [[maybe_unused]]) override { qWarning(__FUNCTION__); }
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
     uint32_t type() const override { return GC_DBG_FILE; }
@@ -310,7 +309,6 @@ void Creator::stacking(Geo::Polylines& paths) {
 
     sortByProximity(returnPss, App::home().pos() + App::zero().pos());
 }
-
 
 void Creator::isContinueCalc() {
     {

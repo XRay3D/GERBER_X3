@@ -11,7 +11,7 @@
 #pragma once
 
 #include "gi.h"
-#include "json_io.h"
+#include "serial.h"
 #include "shapepluginin.h"
 #include <QModelIndex>
 #include <ft_node.h>
@@ -60,10 +60,6 @@ struct Handle final : QPointF {
     bool operator==(Type type) const noexcept { return type_ == type; }
 };
 
-// JSON: Handle ↔ [x, y, type]
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Handle& handle);
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Handle& handle);
-
 using UndoPair = std::pair<AbstractShape*, std::vector<Handle>>;
 using UndoHandles = std::vector<UndoPair>;
 
@@ -71,9 +67,7 @@ class AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend class Node;
     friend struct UndoMove;
 
-    friend QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape);
-    friend QDataStream& operator>>(QDataStream& stream, AbstractShape& shape);
-    QPainterPath pPathHandle;
+    [[= Serial::skip]] QPainterPath pPathHandle;
 
 public:
     AbstractShape(Plugin* plugin);
@@ -109,9 +103,9 @@ protected:
     double scale(bool* hasUpdate = nullptr) const;
     bool inHandle(const QPointF& point);
 
-    Plugin* const plugin;
+    [[= Serial::skip]] Plugin* const plugin;
     mutable std::vector<Handle> handles;
-    Handle* curHandle{};
+    [[= Serial::skip]] Handle* curHandle{};
     using HIt = std::vector<Handle>::const_iterator;
     bool closed{};
 
@@ -129,25 +123,40 @@ protected:
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 
     // AbstractShape interface
-    virtual void write(QDataStream& stream [[maybe_unused]]) const { };                          // write to project
-    virtual void readAndInit(QDataStream& stream [[maybe_unused]]) { AbstractShape::redraw(); }; // read from project
-    // JSON-payload подкласса ("data"): write пишет законченный объект.
-    virtual void write(Json::Writer& sb) const { sb.append_raw("{}"); };
-    virtual void readAndInit(Json::Reader& data [[maybe_unused]]) { AbstractShape::redraw(); };
-
 public:
-    // Своя часть элемента "shapes" (без "type" — его пишет Project::save).
-    void toJson(Json::Writer& sb) const;
-    // Элемент "shapes" после диспетчеризации по "type".
-    void fromJson(Json::Reader& shapeObj);
+    // Поля в открытый элемент "shapes" (после "type"); наследник при
+    // реанимации переопределяет однострочником на свой тип, чтобы движок
+    // увидел и его поля.
+    virtual void serialize(Serial::Writer& sb) const { Serial::writeInto(sb, *this); }
+    virtual void deserialize(std::string_view json) { Serial::loadInto(json, *this); }
+
+    // Зеркала не-полевого состояния для движка: id живёт в Gi::Item,
+    // видимость/редактируемость — в QGraphicsItem, а GUI-базы движок не
+    // обходит. preSave наполняет зеркала, postLoad применяет.
+    void preSave() const {
+        serialId_ = id();
+        serialVisible_ = isVisible();
+        serialEditable_ = isEditable();
+    }
+    void postLoad() {
+        setId(serialId_);
+        setVisible(serialVisible_);
+        setEditable(serialEditable_);
+        setToolTip(name() % QString::number(serialId_));
+        setZValue(serialId_);
+        redraw();
+    }
 
 protected:
+    [[= Serial::rename("id")]] mutable int32_t serialId_{-1};
+    [[= Serial::rename("visible")]] mutable bool serialVisible_{true};
+    [[= Serial::rename("editable")]] mutable bool serialEditable_{true};
 
     // групповое перемещение
-    int moveFlag{};
+    [[= Serial::skip]] int moveFlag{};
     static UndoPair toPair(AbstractShape* sh) { return {sh, sh->handles}; }
     static constexpr auto toPairs = v::transform(toPair);
-    std::vector<Handle> undoHandles;
+    [[= Serial::skip]] std::vector<Handle> undoHandles;
 };
 
 } // namespace Shapes

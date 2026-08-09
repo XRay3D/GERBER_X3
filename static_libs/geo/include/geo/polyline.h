@@ -5,7 +5,6 @@
 #include <vector>
 
 class QPainterPath; // forward-declared at global scope: Qt puts it there, not in namespace Geo
-class QDataStream;
 class QPolygonF;
 
 using std::numbers::pi;
@@ -43,9 +42,9 @@ struct Vertex : QPointF {
     // знаковые: направление -- это знак прогиба (и знак угла дуги), а не
     // произвольная метка, поэтому им можно домножать.
     enum Dir {
-        Cw   = -1, // по часовой стрелке
-        Line = 0,  // прямой сегмент
-        Ccw  = 1   // против часовой стрелки
+        Cw = -1,  // по часовой стрелке
+        Line = 0, // прямой сегмент
+        Ccw = 1   // против часовой стрелки
     };
 
     Vertex(double x, double y, double b = {}): QPointF{x, y}, bulge{b} { }
@@ -65,10 +64,10 @@ struct Polyline : std::vector<Vertex> {
     using vector::operator=;
     Polyline(const QPolygonF& pgn);
 
-    Polyline()                           = default;
-    Polyline(Polyline&&)                 = default;
-    Polyline(const Polyline&)            = default;
-    Polyline& operator=(Polyline&&)      = default;
+    Polyline() = default;
+    Polyline(Polyline&&) = default;
+    Polyline(const Polyline&) = default;
+    Polyline& operator=(Polyline&&) = default;
     Polyline& operator=(const Polyline&) = default;
 
     bool closed{};
@@ -127,11 +126,4 @@ struct Polylines : std::vector<Polyline> {
 // Сериализация. Формат -- ровно хранимое состояние: вершина это точка плюс
 // прогиб, полилиния -- счётчик, флаги и вершины. Ни габарит, ни площадь не
 // пишутся: они целиком выводятся из вершин.
-QDataStream& operator<<(QDataStream& stream, const Vertex& vertex);
-QDataStream& operator>>(QDataStream& stream, Vertex& vertex);
-QDataStream& operator<<(QDataStream& stream, const Polyline& polyline);
-QDataStream& operator>>(QDataStream& stream, Polyline& polyline);
-QDataStream& operator<<(QDataStream& stream, const Polylines& polylines);
-QDataStream& operator>>(QDataStream& stream, Polylines& polylines);
-
 } // namespace Geo

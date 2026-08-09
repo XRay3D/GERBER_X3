@@ -1,9 +1,8 @@
 #include "geo/polygon.h"
-#include "geo/geo_json.h"
 #include "cgal.h"
 #include "geo/cancel.h"
+#include "geo/geo_json.h"
 
-#include <QDataStream>
 #include <QPainterPath>
 
 namespace Geo {
@@ -230,7 +229,7 @@ struct Polygons::Impl {
             // Единственное место, где неограниченность БЕРЁТСЯ ИЗ CGAL: только
             // разбиение региона и может отдать кусок без внешней границы.
             impl.unbounded = part.is_unbounded();
-            impl.exact     = std::move(part);
+            impl.exact = std::move(part);
             polygons.push_back(Polygon{std::move(impl)});
         }
         view = std::move(polygons);
@@ -310,7 +309,7 @@ Polygons::Polygons(const Polylines& contours) {
         const Polyline& contour = contours[i];
         if(!contour.closed || contour.size() < 2) return;
         isVoid[i] = contour.signedArea() < 0.0;
-        exact[i]  = toGPoly(contour);
+        exact[i] = toGPoly(contour);
     });
 
     std::vector<GPoly> solids, voids;
@@ -440,8 +439,8 @@ bool Polygons::isUnbounded() const {
 
 Polygon translated(const Polygon& polygon, QPointF offset) {
     Polygon::Impl impl;
-    impl.exact     = Cgal::translate(polygon.impl().exact, offset.x(), offset.y());
-    impl.inverted  = polygon.isInverted();
+    impl.exact = Cgal::translate(polygon.impl().exact, offset.x(), offset.y());
+    impl.inverted = polygon.isInverted();
     impl.unbounded = polygon.isUnbounded();
     return Polygon{std::move(impl)};
 }
@@ -457,71 +456,34 @@ Polygons translated(const Polygons& polygons, QPointF offset) {
 // Сериализация
 // ---------------------------------------------------------------------------
 
-QDataStream& operator<<(QDataStream& stream, const Polygon& polygon) {
-    // Пишется КАНОНИЧЕСКОЕ тело плюс флаг, а не то, что отдают outer()/holes():
-    // у помеченного пустотой они уже развёрнуты, и запись их вместе с флагом
-    // развернула бы контуры вторично.
-    const Polylines contours = polygon.impl().canonicalContours();
-    const Polyline outer = contours.empty() ? Polyline{} : contours.front();
-    const Polylines holes{contours.empty() ? contours.begin() : contours.begin() + 1, contours.end()};
-    return stream << quint8(polygon.isInverted()) << outer << holes;
-}
-
-QDataStream& operator>>(QDataStream& stream, Polygon& polygon) {
-    quint8 inverted{};
-    Polyline outer;
-    Polylines holes;
-    stream >> inverted >> outer >> holes;
-    polygon = Polygon{outer, holes};
-    if(inverted) polygon.invert();
-    return stream;
-}
-
-QDataStream& operator<<(QDataStream& stream, const Polygons& polygons) {
-    const std::vector<Polygon>& all = polygons.all();
-    stream << quint32(all.size());
-    for(const Polygon& polygon: all) stream << polygon;
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, Polygons& polygons) {
-    quint32 count{};
-    stream >> count;
-    Polygons result;
-    while(count--) {
-        Polygon polygon;
-        stream >> polygon;
-        if(stream.status() != QDataStream::Ok) return polygons = Polygons{}, stream;
-        // Сразу в точный домен, минуя разбор по ориентациям: структура
-        // полигона известна точно, объединять их между собой -- вся работа.
-        if(!polygon.empty()) result.impl().exact.join(polygon.impl().exact);
-    }
-    polygons = std::move(result);
-    return stream;
-}
-
 // ---------------------------------------------------------------------------
 // JSON (см. кодировку в geo_json.h)
 // ---------------------------------------------------------------------------
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polygon& polygon) {
-    // Как и в QDataStream выше: КАНОНИЧЕСКОЕ тело плюс флаг, а не то, что
-    // отдают outer()/holes() — у помеченного пустотой они уже развёрнуты.
+} // namespace Geo
+
+using namespace Serial;
+using Geo::Polygon, Geo::Polygons, Geo::Polyline, Geo::Polylines;
+
+void Serial::Adapter<Geo::Polygon>::write(simdjson::builder::string_builder& sb, const Geo::Polygon& polygon) {
+    // Пишется КАНОНИЧЕСКОЕ тело плюс флаг, а не то, что отдают
+    // outer()/holes(): у помеченного пустотой они уже развёрнуты, и запись их
+    // вместе с флагом развернула бы контуры вторично.
     const Polylines contours = polygon.impl().canonicalContours();
-    const Polyline outer     = contours.empty() ? Polyline{} : contours.front();
+    const Polyline outer = contours.empty() ? Polyline{} : contours.front();
     const Polylines holes{contours.empty() ? contours.begin() : contours.begin() + 1, contours.end()};
     sb.start_object();
     sb.append_raw("\"o\":");
-    tag_invoke(simdjson::serialize_tag{}, sb, outer);
+    Adapter<Geo::Polyline>::write(sb, outer);
     if(!holes.empty()) {
         sb.append_raw(",\"h\":");
-        tag_invoke(simdjson::serialize_tag{}, sb, holes);
+        Adapter<Geo::Polylines>::write(sb, holes);
     }
     if(polygon.isInverted()) sb.append_raw(",\"i\":true");
     sb.end_object();
 }
 
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polygon& polygon) {
+simdjson::error_code Serial::Adapter<Geo::Polygon>::read(simdjson::ondemand::value& val, Geo::Polygon& polygon) {
     simdjson::ondemand::object obj;
     if(auto err = val.get_object().get(obj); err) return err;
     Polyline outer;
@@ -533,9 +495,9 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
         simdjson::ondemand::value v;
         if(auto err = field.value().get(v); err) return err;
         if(key == "o") {
-            if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, outer); err) return err;
+            if(auto err = Adapter<Geo::Polyline>::read(v, outer); err) return err;
         } else if(key == "h") {
-            if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, holes); err) return err;
+            if(auto err = Adapter<Geo::Polylines>::read(v, holes); err) return err;
         } else if(key == "i") {
             if(auto err = v.get_bool().get(inverted); err) return err;
         }
@@ -545,18 +507,18 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
     return simdjson::SUCCESS;
 }
 
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Polygons& polygons) {
+void Serial::Adapter<Geo::Polygons>::write(simdjson::builder::string_builder& sb, const Geo::Polygons& polygons) {
     sb.start_array();
     bool first = true;
     for(const Polygon& polygon: polygons.all()) {
         if(!first) sb.append_comma();
         first = false;
-        tag_invoke(simdjson::serialize_tag{}, sb, polygon);
+        Adapter<Geo::Polygon>::write(sb, polygon);
     }
     sb.end_array();
 }
 
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Polygons& polygons) {
+simdjson::error_code Serial::Adapter<Geo::Polygons>::read(simdjson::ondemand::value& val, Geo::Polygons& polygons) {
     simdjson::ondemand::array arr;
     if(auto err = val.get_array().get(arr); err) return err;
     Polygons result;
@@ -564,13 +526,12 @@ simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::v
         simdjson::ondemand::value v;
         if(auto err = elem.get(v); err) return err;
         Polygon polygon;
-        if(auto err = tag_invoke(simdjson::deserialize_tag{}, v, polygon); err)
+        if(auto err = Adapter<Geo::Polygon>::read(v, polygon); err)
             return polygons = Polygons{}, err;
-        // Сразу в точный домен, минуя разбор по ориентациям (см. QDataStream выше).
+        // Сразу в точный домен, минуя разбор по ориентациям: структура
+        // полигона известна точно, объединять их между собой -- вся работа.
         if(!polygon.empty()) result.impl().exact.join(polygon.impl().exact);
     }
     polygons = std::move(result);
     return simdjson::SUCCESS;
 }
-
-} // namespace Geo

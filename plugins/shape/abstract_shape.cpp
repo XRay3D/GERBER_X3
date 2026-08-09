@@ -22,90 +22,6 @@ namespace Shapes {
 
 static constexpr int HandleSize = 20;
 
-QDataStream& operator<<(QDataStream& stream, const Handle& handle) {
-    return stream << BlockWrite{static_cast<const QPointF&>(handle), handle.type_};
-}
-
-QDataStream& operator>>(QDataStream& stream, Handle& handle) {
-    return stream >> BlockRead{static_cast<QPointF&>(handle), handle.type_};
-}
-
-QDataStream& operator<<(QDataStream& stream, const AbstractShape& shape) {
-    BlockWrite write{shape.id_, shape.isVisible(), shape.isEditable(), shape.handles};
-    shape.write(write);
-    return stream << write;
-}
-
-QDataStream& operator>>(QDataStream& stream, AbstractShape& shape) {
-    bool bFlag[2];
-    shape.readAndInit(stream >> BlockRead{shape.id_, bFlag[0], bFlag[1], shape.handles});
-    assert(shape.handles.size());
-    shape.setVisible(bFlag[0]);
-    shape.setEditable(bFlag[1]);
-    shape.setToolTip(shape.name() % QString::number(shape.id_));
-    shape.setZValue(shape.id_);
-    return stream;
-}
-
-// ---------------------------------------------------------------------------
-// JSON
-// ---------------------------------------------------------------------------
-
-void tag_invoke(simdjson::serialize_tag, simdjson::builder::string_builder& sb, const Handle& handle) {
-    sb.start_array();
-    sb.append(handle.x());
-    sb.append_comma();
-    sb.append(handle.y());
-    sb.append_comma();
-    sb.append(std::to_underlying(handle.type_));
-    sb.end_array();
-}
-
-simdjson::error_code tag_invoke(simdjson::deserialize_tag, simdjson::ondemand::value& val, Handle& handle) {
-    simdjson::ondemand::array arr;
-    if(auto err = val.get_array().get(arr); err) return err;
-    double xy[2]{};
-    int64_t type{Handle::Corner};
-    size_t i{};
-    for(auto elem: arr) {
-        if(i == 3) return simdjson::CAPACITY;
-        if(i < 2) {
-            if(auto err = elem.get_double().get(xy[i]); err) return err;
-        } else if(auto err = elem.get_int64().get(type); err)
-            return err;
-        ++i;
-    }
-    if(i < 3) return simdjson::INCORRECT_TYPE;
-    handle = Handle{{xy[0], xy[1]}, static_cast<Handle::Type>(type)};
-    return simdjson::SUCCESS;
-}
-
-void AbstractShape::toJson(Json::Writer& sb) const {
-    sb.append_raw("\"base\":");
-    Json::write(sb, "id", id_, "visible", isVisible(), "editable", isEditable(), "handles", handles);
-    sb.append_raw(",\"data\":");
-    write(sb); // виртуальный payload — законченный JSON-объект
-}
-
-void AbstractShape::fromJson(Json::Reader& shapeObj) {
-    bool visible{}, editable{};
-    {
-        Json::Reader base;
-        if(!shapeObj["base"].get_object().get(base))
-            Json::read(base, "id", id_, "visible", visible, "editable", editable, "handles", handles);
-    }
-    {
-        Json::Reader data;
-        if(!shapeObj["data"].get_object().get(data))
-            readAndInit(data);
-    }
-    assert(handles.size());
-    setVisible(visible);
-    setEditable(editable);
-    setToolTip(name() % QString::number(id_));
-    setZValue(id_);
-}
-
 enum Move : bool {
     SimgleMove,
     MultipleMove,
@@ -407,7 +323,7 @@ double AbstractShape::scale(bool* hasUpdate) const {
 }
 
 bool AbstractShape::inHandle(const QPointF& point) {
-    curHandle        = {};
+    curHandle = {};
     const auto hSize = HandleSize * 0.5 * scale();
     for(auto& var: handles)
         // TODO if(Geo::distance(point, var) <= hSize)

@@ -51,6 +51,42 @@ Project::~Project() {
     App::setProject(nullptr);
 }
 
+Project::Header Project::header() const {
+    Header h{
+        .pinsPlaced = isPinsPlaced_,
+        .tailing = tailing,
+        .home = home_,
+        .zero = zero_,
+        .workRect = worckRect_,
+        .safeZ = safeZ_,
+        .boardThickness = boardThickness_,
+        .copperThickness = copperThickness_,
+        .clearence = clearence_,
+        .plunge = plunge_,
+        .glue = glue_,
+        .viewRect = App::grView().getViewRect(),
+    };
+    std::ranges::copy(pins_, h.pins);
+    std::ranges::copy(pinsUsed_, h.pinsUsed);
+    return h;
+}
+
+void Project::applyHeader(const Header& h) {
+    isPinsPlaced_ = h.pinsPlaced;
+    tailing = h.tailing;
+    home_ = h.home;
+    zero_ = h.zero;
+    worckRect_ = h.workRect;
+    safeZ_ = h.safeZ;
+    boardThickness_ = h.boardThickness;
+    copperThickness_ = h.copperThickness;
+    clearence_ = h.clearence;
+    plunge_ = h.plunge;
+    glue_ = h.glue;
+    std::ranges::copy(h.pins, pins_);
+    std::ranges::copy(h.pinsUsed, pinsUsed_);
+}
+
 bool Project::save(const QString& fileName) {
     QFile file{fileName};
     if(!file.open(QFile::WriteOnly)) {
@@ -58,24 +94,11 @@ bool Project::save(const QString& fileName) {
         return false;
     }
     try {
-        Json::Writer sb;
+        // Шапка — рефлексией по срезу полей проекта (см. Header в project.h).
+        Serial::Writer sb;
         sb.start_object();
         sb.append_raw("\"ggeasy\":");
-        Json::write(sb,
-            "pinsPlaced", isPinsPlaced_,
-            "tailing", tailing,
-            "home", home_,
-            "zero", zero_,
-            "pins", pins_,
-            "pinsUsed", pinsUsed_,
-            "workRect", worckRect_,
-            "safeZ", safeZ_,
-            "boardThickness", boardThickness_,
-            "copperThickness", copperThickness_,
-            "clearence", clearence_,
-            "plunge", plunge_,
-            "glue", glue_,
-            "viewRect", App::grView().getViewRect());
+        Serial::write(sb, header());
 
         sb.append_raw(",\"files\":[");
         bool first = true;
@@ -96,8 +119,7 @@ bool Project::save(const QString& fileName) {
             sb.start_object();
             sb.append_raw("\"type\":");
             sb.escape_and_append_with_quotes(typeName);
-            sb.append_comma();
-            filePtr->toJson(sb);
+            filePtr->serialize(sb); // поля конкретного класса, flatten
             sb.end_object();
         }
 
@@ -117,8 +139,7 @@ bool Project::save(const QString& fileName) {
             sb.start_object();
             sb.append_raw("\"type\":");
             sb.escape_and_append_with_quotes(typeName);
-            sb.append_comma();
-            shape->toJson(sb);
+            shape->serialize(sb);
             sb.end_object();
         }
         sb.append_raw("]");
@@ -152,8 +173,10 @@ bool Project::open(const QString& fileName) {
     }
     const QByteArray raw = file.readAll();
     try {
-        Json::Parsed parsed{std::string_view{raw.constData(), size_t(raw.size())}};
-        Json::Reader root;
+        Serial::Parsed parsed{
+            std::string_view{raw.constData(), size_t(raw.size())}
+        };
+        simdjson::ondemand::object root;
         if(parsed.error || parsed.doc.get_object().get(root)) {
             const auto message = tr("The file is not a JSON project\n"
                                     "(the old binary format is not supported)\n"
@@ -166,23 +189,13 @@ bool Project::open(const QString& fileName) {
 
         QRectF sceneRect;
         {
-            Json::Reader header;
-            if(!root["ggeasy"].get_object().get(header))
-                Json::read(header,
-                    "pinsPlaced", isPinsPlaced_,
-                    "tailing", tailing,
-                    "home", home_,
-                    "zero", zero_,
-                    "pins", pins_,
-                    "pinsUsed", pinsUsed_,
-                    "workRect", worckRect_,
-                    "safeZ", safeZ_,
-                    "boardThickness", boardThickness_,
-                    "copperThickness", copperThickness_,
-                    "clearence", clearence_,
-                    "plunge", plunge_,
-                    "glue", glue_,
-                    "viewRect", sceneRect);
+            simdjson::ondemand::object headerObj;
+            if(!root["ggeasy"].get_object().get(headerObj)) {
+                Header h;
+                Serial::readFields(headerObj, h);
+                applyHeader(h);
+                sceneRect = h.viewRect;
+            }
         }
 
         {
@@ -193,8 +206,8 @@ bool Project::open(const QString& fileName) {
                     if(elem.get(v)) continue;
                     std::string_view slice; // сырой текст элемента — им же кормится плагин
                     if(simdjson::to_json_string(v).get(slice)) continue;
-                    Json::Parsed peek{slice};
-                    Json::Reader obj;
+                    Serial::Parsed peek{slice};
+                    simdjson::ondemand::object obj;
                     if(peek.error || peek.doc.get_object().get(obj)) continue;
                     std::string_view typeName;
                     if(obj["type"].get_string().get(typeName)) continue;
@@ -229,8 +242,8 @@ bool Project::open(const QString& fileName) {
                     if(elem.get(v)) continue;
                     std::string_view slice;
                     if(simdjson::to_json_string(v).get(slice)) continue;
-                    Json::Parsed peek{slice};
-                    Json::Reader obj;
+                    Serial::Parsed peek{slice};
+                    simdjson::ondemand::object obj;
                     if(peek.error || peek.doc.get_object().get(obj)) continue;
                     std::string_view typeName;
                     if(obj["type"].get_string().get(typeName)) continue;
@@ -248,7 +261,7 @@ bool Project::open(const QString& fileName) {
                     }
                     try {
                         auto* shape = plugin->createShape({std::nan(""), std::nan("")});
-                        shape->fromJson(obj);
+                        shape->deserialize(slice);
                         shapes_.emplace(shape->id(), shape);
                     } catch(const std::exception& ex) {
                         qCritical() << QLatin1StringView{typeName} << ex.what();

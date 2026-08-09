@@ -48,7 +48,6 @@ public:
     [[nodiscard]] virtual AbstractFileSettings* createSettingsTab([[maybe_unused]] QWidget* parent) { return nullptr; };
     [[nodiscard]] virtual QString folderName() const = 0;
     [[nodiscard]] virtual QIcon icon() const = 0;
-    [[nodiscard]] virtual AbstractFile* loadFile(QDataStream& stream) const = 0;
     // Загрузка из JSON-проекта: json — сырой текст одного элемента "files"
     // ({"type":...,"base":{...},"data":{...}}); плагин парсит свой срез сам,
     // simdjson-типы через границу .so не гуляют.

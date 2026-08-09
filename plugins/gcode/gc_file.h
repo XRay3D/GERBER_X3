@@ -33,13 +33,15 @@ class File : public AbstractFile {
     friend class GcFileProxy;
 
 protected:
-    double feedRate{};
-    double plungeRate{};
-    int spindleSpeed{};
-    int toolType{};
-    QString strFeed;
-    QString strPlungeFeed;
-    QString strSpindle;
+    // Производные от gcp (заполняет конструктор от Params) — не сериализуются,
+    // как и раньше: после загрузки их восстанавливает regenerate().
+    [[= Serial::skip]] double feedRate{};
+    [[= Serial::skip]] double plungeRate{};
+    [[= Serial::skip]] int spindleSpeed{};
+    [[= Serial::skip]] int toolType{};
+    [[= Serial::skip]] QString strFeed;
+    [[= Serial::skip]] QString strPlungeFeed;
+    [[= Serial::skip]] QString strSpindle;
     Params gcp; ////
 
     // Имя, которое дал программе пользователь (текст поля Name в форме), без
@@ -114,7 +116,7 @@ protected:
     std::vector<Geo::Polylines> mirrorAndOffsetCurves(const QPointF& offset);
     Geo::Polylines mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines paths_);
 
-    std::vector<QSharedPointer<QColor>> debugColor;
+    [[= Serial::skip]] std::vector<QSharedPointer<QColor>> debugColor;
 
     enum {
         AlwaysG,
@@ -138,8 +140,10 @@ protected:
         Size
     };
 
-    Geo::Polylines g0path_;
-    double z_{};
+    // Рабочее состояние генератора текста УП: пересобирается regenerate(),
+    // в проект не пишется.
+    [[= Serial::skip]] Geo::Polylines g0path_;
+    [[= Serial::skip]] double z_{};
 
     static inline QString lastDir;
     static inline bool redirected;
@@ -149,8 +153,8 @@ protected:
 
     std::vector<double> getDepths();
 
-    bool formatFlags[Size]{};
-    Code gCode_ = GNull;
+    [[= Serial::skip]] bool formatFlags[Size]{};
+    [[= Serial::skip]] Code gCode_ = GNull;
 
     // Слово УП: буква и то, что за ней. Координатные несут с собой своё ЧИСЛО
     // в единицах вывода -- повтор подавляется по нему, а не по тексту: текст
@@ -170,9 +174,9 @@ protected:
 
     // Последнее НАПИСАННОЕ значение каждого слова: у координатных числом, у
     // прочих (G, S, F -- там значение и есть текст) текстом.
-    Units lastUnits[SpaceG /*6*/]{};
-    bool lastWritten[SpaceG]{};
-    QString lastValues[SpaceG];
+    [[= Serial::skip]] Units lastUnits[SpaceG /*6*/]{};
+    [[= Serial::skip]] bool lastWritten[SpaceG]{};
+    [[= Serial::skip]] QString lastValues[SpaceG];
 
     std::vector<QString> savePath(const Geo::Polyline& srcCurve, double perimeter = {}, double depth = {});
 
@@ -221,14 +225,6 @@ protected:
     bool runJsScript(const QString& scriptPath);
 
     // AbstractFile interfaces
-    void write(QDataStream& stream) const override { stream << gcp << programName_ << visibility_; }
-    void read(QDataStream& stream) override { stream >> gcp >> programName_ >> visibility_; }
-    void write(Json::Writer& sb) const override {
-        Json::write(sb, "gcp", gcp, "programName", programName_, "visibility", visibility_);
-    }
-    void read(Json::Reader& data) override {
-        Json::read(data, "gcp", gcp, "programName", programName_, "visibility", visibility_);
-    }
     // initFrom не переопределяется: базовая реализация переносит ровно то, что
     // нужно при замене УП на месте (id, узел дерева, сторону, цвет, тип, трансформ),
     // а programName_ и visibility_ переносить как раз НЕЛЬЗЯ -- у нового файла они
