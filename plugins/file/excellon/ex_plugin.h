@@ -27,14 +27,15 @@ class Plugin : public AbstractFilePlugin, Parser {
 public:
     Plugin(QObject* parent = nullptr);
 
-    bool thisIsIt(const QString& fileName) override;
+    [[nodiscard]] bool thisIsIt(const QString& fileName) override;
 
-    uint32_t type() const override;
-    QString folderName() const override;
+    [[nodiscard]] uint32_t type() const override;
+    [[nodiscard]] QString folderName() const override;
 
-    AbstractFile* loadFile(QDataStream& stream) const override;
-    QIcon icon() const override;
-    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
+    [[nodiscard]] AbstractFile* loadFile(std::string_view json) const override;
+    [[nodiscard]] std::string_view typeName() const override;
+    [[nodiscard]] QIcon icon() const override;
+    [[nodiscard]] AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     [[nodiscard]] virtual QString extension() const override { return tr("Excellon (*.exc *.drl)"); }
 
     // public slots:

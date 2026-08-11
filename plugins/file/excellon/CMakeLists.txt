@@ -40,7 +40,6 @@ target_link_libraries(
             common
             filetree
             gi
-            gcode
             graphicsview
             tooldatabase
             file_plugins

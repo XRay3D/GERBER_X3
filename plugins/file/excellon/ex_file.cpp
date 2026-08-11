@@ -14,32 +14,10 @@
 
 #include "ex_node.h"
 
+#include "geo/boolean.h"
+#include "geo/util.h"
+
 namespace Excellon {
-
-QDataStream& operator>>(QDataStream& s, Tools& c) {
-    c.clear();
-    quint32 n;
-    s >> n;
-    for(quint32 i{}; i < n; ++i) {
-        Tools::key_type key;
-        Tools::mapped_type val;
-        s >> key;
-        s >> val;
-        if(s.status() != QDataStream::Ok) {
-            c.clear();
-            break;
-        }
-        c.try_emplace(key, val);
-    }
-    return s;
-}
-
-QDataStream& operator<<(QDataStream& s, const Tools& c) {
-    s << quint32(c.size());
-    for(auto& [key, val]: c)
-        s << key << val;
-    return s;
-}
 
 File::File()
     : AbstractFile()
@@ -75,27 +53,16 @@ Tools File::tools() const {
     return tools;
 }
 
-Geo::Polygon Excellon::File::merge() const {
-    for(auto&& item: *itemGroups_.back())
-        mergedCurves_.append_range(item->curves());
+// Сверления и пазы -- независимые тела, лежащие поодиночке; регион слоя это
+// просто их объединение. Контуры берутся у самих элементов сцены: Gi::Drill
+// строит их точно (окружность у сверла, полоса Geo::Inflate у паза), и второй
+// раз считать то же самое здесь незачем.
+Geo::Polygons File::merge() const {
+    Geo::Polylines contours;
+    for(auto&& item: *itemGroup())
+        contours.append_range(item->curves());
+    mergedCurves_ = Geo::Polygons{contours};
     return mergedCurves_;
-}
-
-void File::write(QDataStream& stream) const {
-    stream << *static_cast<const QList<Hole>*>(this);
-    stream << tools_;
-    stream << format_;
-}
-
-void File::read(QDataStream& stream) {
-    stream >> *static_cast<QList<Hole>*>(this);
-    stream >> tools_;
-    stream >> format_;
-    format_.file = this;
-    for(Hole& hole: *this) {
-        hole.file = this;
-        hole.state.format = &format_;
-    }
 }
 
 void File::createGi() {
@@ -119,34 +86,33 @@ FileTree::Node* File::node() {
     return node_ ? node_ : node_ = new Excellon::Node{this};
 }
 
-std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> /*criterias*/, GCType /*gcType*/, bool /*test*/) const {
+std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCType /*gcType*/, bool test) const {
     std::vector<GraphicObject> retData;
-    // QTransform t = transform_;
+    const QTransform t = transform_.toQTransform();
     for(const Excellon::Hole& hole: *this) {
-        double diam = tools_.at(hole.state.toolId);
+        // Диаметр -- уже в миллиметрах: у дюймового файла tool() пересчитывает
+        // сам, а сырой tools_ отдал бы дюймы, и сверло уехало бы в 25.4 раза.
+        const double diam = tool(hole.state.toolId);
         GraphicObject go;
-        // go.fill;
-        if(bool slot = hole.state.path.size(); !slot) {
+        if(hole.state.path.size() < 2) { // сверление
             go.pos = hole.state.pos;
-            go.path.emplace_back(go.pos = hole.state.pos);
-            go.fill.emplace_back(CircleCurve(diam, go.pos));
-        } else {
-            go.path = Geo::Polyline{std::from_range, hole.state.path | v::transform([](const QPointF& pt) { return Geo::Vertex{pt}; })};
-            // go.pos = go.path.front();
-            go.fill = toCurves(Inflate64({~hole.state.path}, diam * uScale, cl::JoinType::Round, cl::EndType::Round, uScale));
+            go.path = Geo::Polyline{Geo::Vertex{go.pos}};
+            go.fill = Geo::Polygons{Geo::Polylines{Geo::circle(diam, go.pos)}};
+        } else { // паз: полоса вдоль прохода шириной ровно в диаметр сверла
+            go.path = Geo::Polyline{hole.state.path};
+            go.fill = Geo::Inflate(Geo::Polylines{go.path}, diam);
         }
-        go.name = u"T%1|Ø%2"_s
-                      .arg(+hole.state.toolId)
-                      .arg(tools_.at(hole.state.toolId)); // name;
-        go.type = GraphicObject::FlStamp;                 // type{},//{Null};
-                                                          // go.id = int32_t {};                                                                             // id {-1};
-        go.raw = tools_.at(hole.state.toolId);            // raw;
-        retData.emplace_back(go * transform_);
+        go.name = u"T%1|Ø%2"_s.arg(+hole.state.toolId).arg(diam);
+        go.type = GraphicObject::FlStamp;
+        go.raw = diam;
 
-        // if (bool slot = hole.state.path.size(); slot)
-        // retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.path));
-        // else
-        // retData[{hole.state.toolId, tools()[hole.state.toolId], slot, name}].posOrPath.emplace_back(t.map(hole.state.pos));
+        auto transformedGo = go * t;
+        for(auto&& criterion: criterias)
+            if(criterion.test(transformedGo)) {
+                retData.emplace_back(std::move(transformedGo));
+                if(test) return retData;
+                break;
+            }
     }
     return retData;
 }

@@ -73,8 +73,14 @@ void Drill::updatePath(const QPolygonF& path, double diameter) {
 
 void Drill::setToolId(Tool::ID newToolId) {
     toolId_ = newToolId;
+    // Идентификатор приходит из файла (номер инструмента в Excellon), а не из
+    // базы инструментов: одноимённого инструмента там может не быть вовсе, а
+    // ToolHolder::tool() -- это .at(), и он бросал out_of_range прямо из
+    // конструктора элемента, роняя загрузку сверловки на пустой базе.
+    const auto& tools = App::toolHolder().tools();
+    const auto it = tools.find(toolId_);
     setToolTip(QObject::tr("Tool %1, Ø%2mm")
-            .arg(App::toolHolder().tool(toolId_).name())
+            .arg(it != tools.end() ? it->second.name() : QString::number(std::to_underlying(toolId_)))
             .arg(diameter_));
 }
 

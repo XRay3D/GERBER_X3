@@ -16,7 +16,7 @@
 
 namespace Excellon {
 
-class File : public AbstractFile, public QList<Hole> {
+class[[= Serial::name("Excellon")]] File : public AbstractFile, public QList<Hole> {
     Tools tools_;
     friend class Parser;
     Format format_;
@@ -34,6 +34,19 @@ public:
     void setFormat(const Format& value);
 
     // AbstractFile interface
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    // Отверстия приходят из JSON без обратных связей: указатели на файл и на
+    // формат движок не пишет (см. ex_types.h), а createGi ниже по цепочке уже
+    // спрашивает у них диаметр текущего инструмента.
+    void postLoad() {
+        format_.file = this;
+        for(Hole& hole: *this) {
+            hole.file = this;
+            hole.state.format = &format_;
+        }
+        AbstractFile::postLoad();
+    }
+
     void createGi() override;
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
@@ -42,8 +55,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"drill-path"_s); }
 
 protected:
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
     Geo::Polygons merge() const override;
 };
 

@@ -4,9 +4,14 @@
 <context>
     <name>Excellon::Plugin</name>
     <message>
-        <location filename="ex_plugin.cpp" line="93"/>
+        <location filename="ex_plugin.cpp" line="65"/>
         <source>Excellon</source>
-        <translation type="unfinished"></translation>
+        <translation>Файлы Excellon</translation>
+    </message>
+    <message>
+        <location filename="ex_plugin.h" line="39"/>
+        <source>Excellon (*.exc *.drl)</source>
+        <translation>Excellon (*.exc *.drl)</translation>
     </message>
 </context>
 <context>
@@ -14,141 +19,141 @@
     <message>
         <location filename="excellondialog.ui" line="14"/>
         <source>Excellon Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Формат Excellon</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="35"/>
-        <location filename="ex_settingstab.cpp" line="31"/>
+        <location filename="ex_settingstab.cpp" line="29"/>
         <source>Units</source>
-        <translation type="unfinished"></translation>
+        <translation>Единицы</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="53"/>
-        <location filename="ex_settingstab.cpp" line="217"/>
+        <location filename="ex_settingstab.cpp" line="212"/>
         <source>Inches</source>
-        <translation type="unfinished"></translation>
+        <translation>Дюймы</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="60"/>
-        <location filename="ex_settingstab.cpp" line="219"/>
+        <location filename="ex_settingstab.cpp" line="214"/>
         <source>Millimeters</source>
-        <translation type="unfinished"></translation>
+        <translation>Миллиметры</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="70"/>
-        <location filename="ex_settingstab.cpp" line="45"/>
+        <location filename="ex_settingstab.cpp" line="43"/>
         <source>Zeroes</source>
-        <translation type="unfinished"></translation>
+        <translation>Нули</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="88"/>
-        <location filename="ex_settingstab.cpp" line="218"/>
+        <location filename="ex_settingstab.cpp" line="213"/>
         <source>Leading</source>
-        <translation type="unfinished"></translation>
+        <translation>Ведущие</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="95"/>
-        <location filename="ex_settingstab.cpp" line="220"/>
+        <location filename="ex_settingstab.cpp" line="215"/>
         <source>Trailing</source>
-        <translation type="unfinished"></translation>
+        <translation>Хвостовые</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="105"/>
-        <location filename="ex_settingstab.cpp" line="60"/>
+        <location filename="ex_settingstab.cpp" line="58"/>
         <source>Format</source>
-        <translation type="unfinished"></translation>
+        <translation>Формат</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="142"/>
-        <location filename="ex_settingstab.cpp" line="79"/>
+        <location filename="ex_settingstab.cpp" line="77"/>
         <source>:</source>
-        <translation type="unfinished"></translation>
+        <translation>:</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="165"/>
-        <location filename="ex_settingstab.cpp" line="88"/>
+        <location filename="ex_settingstab.cpp" line="86"/>
         <source>Offset</source>
-        <translation type="unfinished"></translation>
+        <translation>Смещение</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="183"/>
         <source>Flatten by selected</source>
-        <translation type="unfinished"></translation>
+        <translation>Выровнять по выделенному</translation>
     </message>
     <message>
         <location filename="excellondialog.ui" line="193"/>
         <source>Set as default</source>
-        <translation type="unfinished"></translation>
+        <translation>Установить по умолчанию</translation>
     </message>
     <message>
-        <location filename="ex_settingstab.cpp" line="28"/>
+        <location filename="ex_settingstab.cpp" line="26"/>
         <source>Default values</source>
-        <translation type="unfinished"></translation>
+        <translation>Значения по умолчанию</translation>
     </message>
     <message>
-        <location filename="ex_settingstab.cpp" line="106"/>
+        <location filename="ex_settingstab.cpp" line="104"/>
         <source>X:</source>
-        <translation type="unfinished"></translation>
+        <translation>X:</translation>
     </message>
     <message>
-        <location filename="ex_settingstab.cpp" line="107"/>
+        <location filename="ex_settingstab.cpp" line="105"/>
         <source>Y:</source>
-        <translation type="unfinished"></translation>
+        <translation>Y:</translation>
     </message>
     <message>
-        <location filename="ex_settingstab.cpp" line="121"/>
+        <location filename="ex_settingstab.cpp" line="119"/>
         <source>Parse Reg.Expr.</source>
-        <translation type="unfinished"></translation>
+        <translation>Рег. выражения разбора</translation>
+    </message>
+    <message>
+        <location filename="ex_settingstab.cpp" line="192"/>
+        <source>Parse Zero:</source>
+        <translation>Разбор нулей:</translation>
+    </message>
+    <message>
+        <location filename="ex_settingstab.cpp" line="193"/>
+        <location filename="ex_settingstab.cpp" line="198"/>
+        <location filename="ex_settingstab.cpp" line="203"/>
+        <source>Test String:</source>
+        <translation>Тестовая строка:</translation>
     </message>
     <message>
         <location filename="ex_settingstab.cpp" line="197"/>
-        <source>Parse Zero:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ex_settingstab.cpp" line="198"/>
-        <location filename="ex_settingstab.cpp" line="203"/>
-        <location filename="ex_settingstab.cpp" line="208"/>
-        <source>Test String:</source>
-        <translation type="unfinished"></translation>
+        <source>Parse Unit:</source>
+        <translation>Разбор единиц:</translation>
     </message>
     <message>
         <location filename="ex_settingstab.cpp" line="202"/>
-        <source>Parse Unit:</source>
-        <translation type="unfinished"></translation>
+        <source>Parse Decimal And Integer:</source>
+        <translation>Разбор дробной и целой части:</translation>
     </message>
     <message>
         <location filename="ex_settingstab.cpp" line="207"/>
-        <source>Parse Decimal And Integer:</source>
-        <translation type="unfinished"></translation>
-    </message>
-    <message>
-        <location filename="ex_settingstab.cpp" line="212"/>
         <source>Test Output:</source>
-        <translation type="unfinished"></translation>
+        <translation>Результат теста:</translation>
     </message>
 </context>
 <context>
     <name>QObject</name>
     <message>
-        <location filename="ex_node.cpp" line="101"/>
+        <location filename="ex_node.cpp" line="87"/>
         <source>&amp;Hide other</source>
-        <translation type="unfinished"></translation>
+        <translation>С&amp;крыть остальные</translation>
     </message>
     <message>
-        <location filename="ex_node.cpp" line="102"/>
+        <location filename="ex_node.cpp" line="88"/>
         <source>&amp;Show source</source>
-        <translation type="unfinished"></translation>
+        <translation>Показать &amp;исходный текст</translation>
     </message>
     <message>
-        <location filename="ex_node.cpp" line="121"/>
+        <location filename="ex_node.cpp" line="107"/>
         <source>&amp;Edit Format</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Изменить формат</translation>
     </message>
     <message>
-        <location filename="ex_node.cpp" line="126"/>
+        <location filename="ex_node.cpp" line="111"/>
         <source>&amp;Close</source>
-        <translation type="unfinished"></translation>
+        <translation>&amp;Закрыть</translation>
     </message>
 </context>
 </TS>

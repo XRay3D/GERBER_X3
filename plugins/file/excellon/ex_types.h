@@ -9,8 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "datastream.h"
 #include "md5.h"
+#include "plugintypes.h"
 #include "tool.h"
 #include <QPolygonF>
 #include <numbers>
@@ -169,8 +169,8 @@ M30
 
 class File;
 
-#pragma pack(push, 1)
-
+// Указатель на файл движок сериализации пропускает сам (Serial::detail::
+// isSkipped) -- связь рантаймовая, её восстанавливает File::postLoad.
 struct Format {
     Format(File* file = nullptr)
         : file{file} { }
@@ -179,24 +179,7 @@ struct Format {
     int decimal{};
     int integer{};
     File* /*const*/ file = nullptr;
-
-    friend QDataStream& operator<<(QDataStream& stream, const Format& fmt) {
-        stream << fmt.zeroMode;
-        stream << fmt.unitMode;
-        stream << fmt.decimal;
-        stream << fmt.integer;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, Format& fmt) {
-        stream >> fmt.zeroMode;
-        stream >> fmt.unitMode;
-        stream >> fmt.decimal;
-        stream >> fmt.integer;
-        return stream;
-    }
 };
-
-#pragma pack(pop)
 
 struct State {
     double currentToolDiameter() const;
@@ -217,18 +200,6 @@ struct State {
         QString a;
         QString x;
         QString y;
-        friend QDataStream& operator<<(QDataStream& stream, const Pos& p) {
-            stream << p.a;
-            stream << p.x;
-            stream << p.y;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Pos& p) {
-            stream >> p.a;
-            stream >> p.x;
-            stream >> p.y;
-            return stream;
-        }
         void clear() {
             a.clear();
             x.clear();
@@ -245,29 +216,6 @@ struct State {
     unsigned toolId{};
     QPointF pos;
     QPolygonF path;
-
-    friend QDataStream& operator<<(QDataStream& stream, const State& stt) {
-        stream << stt.rawPos;
-        stream << stt.rawPosList;
-        stream << stt.gCode;
-        stream << stt.mCode;
-        stream << stt.wm;
-        stream << stt.toolId;
-        stream << stt.pos;
-        stream << stt.path;
-        return stream;
-    }
-    friend QDataStream& operator>>(QDataStream& stream, State& stt) {
-        stream >> stt.rawPos;
-        stream >> stt.rawPosList;
-        stream >> stt.gCode;
-        stream >> stt.mCode;
-        stream >> stt.wm;
-        stream >> stt.toolId;
-        stream >> stt.pos;
-        stream >> stt.path;
-        return stream;
-    }
 };
 
 class Hole {
@@ -282,20 +230,11 @@ public:
     // but it's deleted, because field u"file"_s is u"const"_s,
     // so, remove u"const"_s
     // const File* const file = nullptr;
+    // Оба указателя движок сериализации пропускает сам: файл и элемент сцены --
+    // рантаймовая связь, её восстанавливают File::postLoad и File::createGi.
     File* file = nullptr;
     State state;
     Gi::Drill* item = nullptr;
-
-    friend QDataStream& operator<<(QDataStream& stream, const Hole& hole) {
-        stream << hole.state;
-        return stream;
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, Hole& hole) {
-        stream >> hole.state;
-        return stream;
-    }
-    // friend QDataStream& readArrayBasedContainer(QDataStream& s, Hole& c);
 };
 
 class Settings {
