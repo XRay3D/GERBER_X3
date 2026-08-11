@@ -9,43 +9,150 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "hatching.h"
+#include "gc_pathutils.h"
 #include "gi_point.h"
 #include "project.h"
 
-#include <QElapsedTimer>
+#include "geo/boolean.h"
+#include "geo/cancel.h"
+#include "geo/util.h"
+
 #include <algorithm>
-#include <forward_list>
-#include <ranges>
-
-// struct sort_fn {
-// template <std::randoaccess_iterator_ I, std::sentinel_for<I> S, class Comp = r::less, class Proj = std::identity>
-// requires std::sortable<I, Comp, Proj> constexpr I
-// operator()(I first, S last, Comp comp = {}, Proj proj = {}) const
-// {
-// if (first == last)
-// return { first };
-
-// const auto pivot = *r::next(first, r::distance(first, last) / 2, last);
-
-// auto tail1 = r::partition(first, last, [&pivot, &comp, &proj](const auto& em) { return std::invoke(comp, std::invoke(proj, em), std::invoke(proj, pivot)); });
-// auto tail2 = r::partition(tail1, [&pivot, &comp, &proj](const auto& em) { return !std::invoke(comp, std::invoke(proj, pivot), std::invoke(proj, em)); });
-
-// (*this)(first, tail1.begin(), std::ref(comp), std::ref(proj));
-// (*this)(tail2, std::ref(comp), std::ref(proj));
-
-// return { r::next(first, last) };
-// }
-
-// template <r::randoaccess_range_ R, class Comp = r::less, class Proj = std::identity>
-// requires std::sortable<r::iterator_t<R>, Comp, Proj> constexpr r::borrowed_iterator_t<R>
-// operator()(R&& r, Comp comp = {}, Proj proj = {}) const
-// {
-// return (*this)(r::begin(r), r::end(r), std::move(comp), std::move(proj));
-// }
-//};
-// inline constexpr sort_fn sort {};
+#include <list>
+#include <optional>
 
 namespace CrossHatch {
+
+namespace {
+
+// Штриховка -- та же гребёнка, что и у растровой выборки, только в два
+// прохода со сдвигом на 90°. Вся резка -- Geo::clipOpen: змейка (открытый
+// путь) режется КАРМАНОМ, а граница кармана -- ГРЕБЁНКОЙ (замкнутая змейка
+// как площадь), и куски сшиваются в один боустрофедон.
+
+// Змейка по габариту: строки через step, соединители за левым/правым краем
+// (запас 1 мм), чтобы в карман попадали только горизонтальные куски.
+std::optional<Geo::Polyline> calcZigzag(QRectF rect, double step) {
+    const double o = 1.0 - std::fmod(rect.height(), step) * 0.5; // центровка строк
+    rect.adjust(-1.0, -o, +1.0, +o);
+    Geo::Polyline zigzag;
+    bool fl{};
+    for(double y = rect.top(); y <= rect.bottom() || fl; fl = !fl, y += step) {
+        if(!fl) {
+            zigzag.emplace_back(rect.left(), y);
+            zigzag.emplace_back(rect.right(), y);
+        } else {
+            zigzag.emplace_back(rect.right(), y);
+            zigzag.emplace_back(rect.left(), y);
+        }
+    }
+    if(zigzag.empty()) return std::nullopt;
+    // Замыкающее ребро гребёнки должно пройти ещё левее соединителей.
+    zigzag.front().rx() -= step;
+    zigzag.back().rx() -= step;
+    return zigzag;
+}
+
+// Строки штриховки: змейка ∩ карман. Куски одной строки наследуют y своего
+// сегмента змейки ТОЧНО (интерполяция горизонтали не трогает y), поэтому
+// группировка строк по равенству y законна и в double.
+Geo::Polylines calcScanLines(const Geo::Polygons& pocket, const Geo::Polyline& zigzag) {
+    Geo::Polylines sl = Geo::clipOpen(Geo::ClipType_::Intersection, {zigzag}, pocket);
+    if(sl.empty()) return sl;
+
+    r::sort(sl, {}, [](const Geo::Polyline& p) { return p.front().y(); }); // vertical sort
+
+    double start = sl.front().front().y();
+    bool fl = {};
+    for(size_t i{}, last{}; i < sl.size(); ++i) {
+        if(auto y = sl[i].front().y(); y != start || i - 1 == sl.size()) {
+
+            fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Geo::Polyline& p) { return p.front().x(); }) :           // horizontal sort
+                r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Geo::Polyline& p) { return p.front().x(); }); // horizontal sort
+
+            for(size_t k = last; k < i; ++k) // fix direction
+                if(fl ^ (sl[k].front().x() < sl[k].back().x()))
+                    sl[k].reverse();
+
+            start = y;
+            fl = !fl;
+            last = i;
+        }
+    }
+    return sl;
+}
+
+// Куски границы кармана между соседними строками: контуры, разрезанные
+// гребёнкой с ОБЕИХ сторон (внутри неё и вне) -- то есть на каждом
+// пересечении со строкой.
+Geo::Polylines calcFrames(const Geo::Polylines& contours, const Geo::Polygons& comb) {
+    Geo::Polylines frames = Geo::clipOpen(Geo::ClipType_::Intersection, contours, comb);
+    frames.append_range(Geo::clipOpen(Geo::ClipType_::Difference, contours, comb));
+
+    r::sort(frames, {}, [](const Geo::Polyline& p) { return p.front().y(); }); // vertical sort
+    for(auto& path: frames)
+        if(path.front().y() > path.back().y())
+            path.reverse(); // fix vertical direction
+    return frames;
+}
+
+// Точки совпадают в пределах сварочного допуска: точки разреза считаются в
+// double, и куски строки и границы сходятся не бит-в-бит, как это было на
+// целочисленной сетке клиппера, а с погрешностью ~1e-12.
+bool joined(const QPointF& a, const QPointF& b) {
+    return Geo::distance(a, b) <= Geo::exitWeldTolerance;
+}
+
+Geo::Polylines merge(const Geo::Polylines& scanLines, const Geo::Polylines& frames) {
+    Geo::Polylines merged;
+    merged.reserve(scanLines.size() / 10);
+    std::list<Geo::Polyline> bList;
+    for(auto&& path: scanLines)
+        bList.emplace_back(std::move(path));
+
+    std::list<Geo::Polyline> fList;
+    for(auto&& path: frames)
+        fList.emplace_back(std::move(path));
+
+    Progress::setMax(bList.size());
+    while(bList.begin() != bList.end()) {
+        Progress::setCurrent(bList.size());
+
+        merged.resize(merged.size() + 1);
+        auto& path = merged.back();
+        for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
+            Geo::checkCancelled();
+            if(path.empty() || joined(path.back(), bit->front())) {
+                path.empty() ? path.append_range(*bit)
+                             : path.append_range(*bit | v::drop(1));
+                bList.erase(bit);
+                for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+                    if(joined(path.back(), fit->front()) && fit->front().y() < fit->at(1).y()) {
+                        path.append_range(*fit | v::drop(1));
+                        fList.erase(fit);
+                        bit = bList.begin();
+                        break;
+                    }
+                }
+                bit = bList.begin();
+            }
+            if(bList.begin() == bList.end())
+                break;
+        }
+        for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
+            if(joined(path.front(), fit->back()) && fit->front().y() > fit->at(1).y()) {
+                fit->append_range(path | v::drop(1));
+                std::swap(*fit, path);
+                fList.erase(fit);
+                break;
+            }
+        }
+    }
+    merged.shrink_to_fit();
+    return merged;
+}
+
+} // namespace
 
 void Creator::create() {
     createRaster(
@@ -57,229 +164,79 @@ void Creator::create() {
 }
 
 void Creator::createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass) {
-    QElapsedTimer t;
-    t.start();
-
     switch(gcp.side()) {
-    case GCode::Outer:
-        groupedPaths(GCode::Grouping::Cutoff, uScale); // toolDiameter_ + 5
-        break;
+    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, 1.0); break;
     case GCode::Inner: groupedPaths(GCode::Grouping::Copper); break;
-    case GCode::On:
-        emit fileReady(nullptr);
-        return;
+    case GCode::On   : return;
     }
 
-    toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset = toolDiameter / 2;
-    stepOver = tool.stepover() * uScale;
+    toolDiameter = tool.getDiameter(depth);
+    dOffset = toolDiameter * 0.5;
+    stepOver = tool.stepover();
 
-    Paths64 profilePaths;
+    Geo::Polylines profilePaths;
 
-    auto calcScanLines = [](const Paths64& src, const Geo::Polyline& frame) {
-        Paths64 sl; // Scan Lines
+    for(const Geo::Polygon& group: groupedPss) {
+        // Карман -- группа, сжатая на радиус (delta у Inflate -- полная ширина).
+        const Geo::Polygons pocket = Geo::Inflate(Geo::Polygons{group}, -toolDiameter);
+        if(pocket.empty()) continue;
 
-        cl::Clipper64 clipper;
-        clipper.AddClip(src);
-        clipper.AddOpenSubject({frame});
-        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, sl, sl);
-        if(!sl.size())
-            return sl;
+        if(prPass) profilePaths.append_range(pocket.contours());
 
-        r::sort(sl, {}, [](const Geo::Polyline& p) { return p.front().y; }); // vertical sort
+        // Два прохода штриховки: угол и угол + 90°. Карман поворачивается ПОД
+        // горизонтальную змейку, результат -- обратно.
+        auto hatchPass = [&](double passAngle) {
+            Geo::Polylines contours = pocket.contours();
+            Geo::rotate(contours, passAngle);
+            const Geo::Polygons region{contours};
 
-        /*PType*/ int32_t start = sl.front().front().y;
-        bool fl = {};
-        for(size_t i{}, last{}; i < sl.size(); ++i) {
-            if(auto y = sl[i].front().y; y != start || i - 1 == sl.size()) {
+            auto zigzag = calcZigzag(region.boundingRect(), hatchStep);
+            if(!zigzag) return;
 
-                fl ? r::sort(sl.begin() + last, sl.begin() + i, {}, [](const Geo::Polyline& p) { return p.front().x; }) :           // horizontal sort
-                    r::sort(sl.begin() + last, sl.begin() + i, std::greater(), [](const Geo::Polyline& p) { return p.front().x; }); // horizontal sort
+            Geo::Polyline combContour{*zigzag};
+            combContour.closed = true;
+            if(combContour.signedArea() < 0) combContour.reverse();
+            const Geo::Polygons comb{Geo::Polylines{std::move(combContour)}};
 
-                for(size_t k = last; k < i; ++k) // fix direction
-                    if(fl ^ (sl[k].front().x < sl[k].back().x))
-                        std::swap(sl[k].front().x, sl[k].back().x);
-
-                start = y;
-                fl = !fl;
-                last = i;
+            auto scanLines = calcScanLines(region, *zigzag);
+            auto frames = calcFrames(contours, comb);
+            if(scanLines.size() && frames.size()) {
+                auto merged = merge(scanLines, frames);
+                Geo::rotate(merged, -passAngle);
+                returnPs.append_range(std::move(merged));
             }
-        }
-        return sl;
-    };
-    auto calcFrames = [](const Paths64& src, const Geo::Polyline& frame) {
-        Paths64 frames;
-        {
-            Paths64 tmp;
-            cl::Clipper64 clipper;
-            clipper.AddOpenSubject(src);
-            clipper.AddClip({frame});
-            clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, tmp, tmp); // FillRule::NonZero
-            // dbgPaths(tmp, u"ClipType::Intersection"_s);
-            frames.append_range(std::move(tmp));
-            clipper.Execute(cl::ClipType::Difference, cl::FillRule::NonZero, tmp, tmp); // FillRule::NonZero //-V1030
-            // dbgPaths(tmp, u"ClipType::Difference"_s);
-            frames.append_range(std::move(tmp));
-
-            r::sort(frames, {}, [](const Geo::Polyline& p) { return p.front().y; }); // vertical sort
-
-            std::sort(frames.begin(), frames.end(), [](const Geo::Polyline& l, const Geo::Polyline& r) { return l.front().y < r.front().y; }); // vertical sort
-            for(auto& path: frames)
-                if(path.front().y > path.back().y)
-                    ReversePath(path); // fix vertical direction
-        }
-        return frames;
-    };
-    auto calcZigzag = [hatchStep](const Paths64& src) -> std::optional<Geo::Polyline> {
-        cl::Clipper64 clipper;
-        clipper.AddClip(src);
-        Rect rect(GetBounds(src));
-        /*PType*/ int32_t o = uScale - (rect.Height() % static_cast</*PType*/ int32_t>(hatchStep * uScale)) / 2;
-        rect.top -= o;
-        rect.bottom += o;
-        rect.left -= uScale;
-        rect.right += uScale;
-        Geo::Polyline zigzag;
-        auto step = hatchStep * uScale;
-        auto start = rect.top;
-        bool fl{};
-
-        for(; start <= rect.bottom || fl; fl = !fl, start += step) {
-            if(!fl) {
-                zigzag.emplace_back(rect.left, start);
-                zigzag.emplace_back(rect.right, start);
-            } else {
-                zigzag.emplace_back(rect.right, start);
-                zigzag.emplace_back(rect.left, start);
-            }
-        }
-        if(zigzag.empty()) return std::nullopt;
-        zigzag.front().x -= step;
-        zigzag.back().x -= step;
-        return zigzag;
-    };
-
-    auto merge = [](const Paths64& scanLines, const Paths64& frames) {
-        Paths64 merged;
-        merged.reserve(scanLines.size() / 10);
-        std::list<Geo::Polyline> bList;
-        for(auto&& path: scanLines)
-            bList.emplace_back(std::move(path));
-
-        std::list<Geo::Polyline> fList;
-        for(auto&& path: frames)
-            fList.emplace_back(std::move(path));
-
-        setMax(bList.size());
-        while(bList.begin() != bList.end()) {
-            setCurrent(bList.size());
-
-            merged.resize(merged.size() + 1);
-            auto& path = merged.back();
-            for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
-                Geo::checkCancelled();
-                if(path.empty() || path.back() == bit->front()) {
-                    path.empty() ? path.append_range(*bit)
-                                 : path.append_range(*bit | skipFront);
-                    bList.erase(bit);
-                    for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                        if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
-                            path.append_range(*fit | skipFront);
-                            fList.erase(fit);
-                            bit = bList.begin();
-                            break;
-                        }
-                    }
-                    bit = bList.begin();
-                }
-                if(bList.begin() == bList.end())
-                    break;
-            }
-            for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
-                    fit->append_range(path | skipFront);
-                    std::swap(*fit, path);
-                    fList.erase(fit);
-                    break;
-                }
-            }
-        }
-        merged.shrink_to_fit();
-        return merged;
-    };
-
-    for(Paths64 src: groupedPss) {
-        {
-            src = InflateRoundPolygon(src, -dOffset * 2);
-            for(auto& path: src)
-                path.push_back(path.front());
-            if(prPass)
-                profilePaths.append_range(src);
-        }
-
-        QElapsedTimer t;
-        t.start();
-        if(src.size()) {
-            {
-                for(auto& path: src)
-                    RotatePath(path, angle);
-                if(auto zigzag{calcZigzag(src)}; zigzag) { // NOTE C++23 -> and_then
-                    auto scanLines{calcScanLines(src, *zigzag)};
-                    auto frames{calcFrames(src, *zigzag)};
-                    if(scanLines.size() && frames.size()) {
-                        auto merged{merge(scanLines, frames)};
-                        for(auto& path: merged)
-                            RotatePath(path, -angle);
-                        returnPs.append_range(std::move(merged));
-                    }
-                }
-            }
-            {
-                for(auto& path: src)
-                    RotatePath(path, 90);
-                if(auto zigzag{calcZigzag(src)}; zigzag) { // NOTE C++23 -> and_then
-                    auto scanLines{calcScanLines(src, *zigzag)};
-                    auto frames{calcFrames(src, *zigzag)};
-                    if(scanLines.size() && frames.size()) {
-                        auto merged{merge(scanLines, frames)};
-                        for(auto& path: merged)
-                            RotatePath(path, -(angle + 90));
-                        returnPs.append_range(std::move(merged));
-                    }
-                }
-            }
-        }
+        };
+        hatchPass(angle);
+        hatchPass(angle + 90);
     }
 
-    mergePaths(returnPs);
-    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
+    GCode::mergePolylines(returnPs, Geo::exitWeldTolerance);
+    GCode::sortByProximity(returnPs, App::home().pos() + App::zero().pos());
 
     if(!profilePaths.empty() && prPass) {
-        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
+        GCode::sortByProximity(profilePaths, App::home().pos() + App::zero().pos());
         if(gcp.convent())
-            ReversePaths(profilePaths);
-        for(Geo::Polyline& path: profilePaths)
-            path.push_back(path.front());
+            r::for_each(profilePaths, &Geo::Polyline::reverse);
     }
 
     returnPss.clear();
     switch(prPass) {
     case NoProfilePass:
-        if(!returnPs.empty()) returnPss.push_back(returnPs);
+        if(!returnPs.empty()) returnPss.push_back(std::move(returnPs));
         break;
     case First:
-        if(!profilePaths.empty()) returnPss.push_back(profilePaths);
-        if(!returnPs.empty()) returnPss.push_back(returnPs);
+        if(!profilePaths.empty()) returnPss.push_back(std::move(profilePaths));
+        if(!returnPs.empty()) returnPss.push_back(std::move(returnPs));
         break;
     case Last:
-        if(!returnPs.empty()) returnPss.push_back(returnPs);
-        if(!profilePaths.empty()) returnPss.push_back(profilePaths);
+        if(!returnPs.empty()) returnPss.push_back(std::move(returnPs));
+        if(!profilePaths.empty()) returnPss.push_back(std::move(profilePaths));
         break;
     default: break;
     }
 
     if(returnPss.size()) {
-        gcp.toolPathss = toCurvess(returnPss);
+        gcp.toolPathss = std::move(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }

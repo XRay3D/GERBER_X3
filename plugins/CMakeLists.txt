@@ -18,13 +18,13 @@ set(FILE_PLUGINS gerber dxf excellon #gerber2 svg
 add_subdirectory(file)
 
 #Переведены на Geo(точная геометрия на CGAL) и собираются всегда.
-set(GCODE_PLUGINS profile pocketoffset drill thermal)
+set(GCODE_PLUGINS profile pocketoffset drill thermal hatching pocketraster)
 
-#Ещё на Clipper2 и на прежнем виде GCode::Creator : их геометрия(растровая
-#выборка, диаграмма Вороного, штриховка) в точный домен так просто не
-#переносится, поэтому они отложены до отдельного захода.Код лежит в дереве
-#нетронутым; чтобы он не гнил незаметно, список печатается при конфигурации.
-set(GCODE_PLUGINS_LEGACY hatching pocketraster voroni thread)
+#Ещё на Clipper2 и на прежнем виде GCode::Creator : их геометрия(диаграмма
+#Вороного, резьба) в точный домен так просто не переносится, поэтому они
+#отложены до отдельного захода.Код лежит в дереве нетронутым; чтобы он не гнил
+#незаметно, список печатается при конфигурации.
+set(GCODE_PLUGINS_LEGACY voroni thread)
 option(GGEASY_GCODE_LEGACY "Собирать gcode-плагины, ещё не переведённые на Geo"
        OFF)
 if(GGEASY_GCODE_LEGACY)

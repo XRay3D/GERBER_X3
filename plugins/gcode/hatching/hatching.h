@@ -17,8 +17,9 @@ namespace CrossHatch {
 
 constexpr auto CROSS_HATCH = "CrossHatch"_hash32;
 
-class File final : public GCode::File {
+class [[= Serial::name("CrossHatch")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();
     explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"crosshatch-path"_s); }
@@ -49,7 +50,6 @@ protected:
 
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const double hatchStep, const int prPass);
-    Rect rect;
 };
 
 } // namespace CrossHatch

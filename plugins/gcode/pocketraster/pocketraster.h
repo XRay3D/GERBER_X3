@@ -13,6 +13,8 @@
 #include "gc_creator.h"
 #include "gc_file.h"
 
+#include <optional>
+
 namespace PocketRaster {
 
 constexpr auto POCKET_RASTER = "PocketRaster"_hash32;
@@ -41,20 +43,18 @@ protected:
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths64& src, const /*PType*/ int32_t accDistance);
+    void addAcc(Geo::Polylines& src, const double accDistance);
 
-    Paths64 calcScanLines(const Paths64& src, const Geo::Polyline& frame);
-    Paths64 calcFrames(const Paths64& src, const Geo::Polyline& frame);
-    Geo::Polyline calcZigzag(const Paths64& src);
+    Geo::Polylines calcScanLines(const Geo::Polygons& pocket, const Geo::Polyline& zigzag);
+    Geo::Polylines calcFrames(const Geo::Polylines& contours, const Geo::Polygons& comb);
+    std::optional<Geo::Polyline> calcZigzag(QRectF rect);
 
-    Paths64 merge(const Paths64& scanLines, const Paths64& frames);
-
-    Rect rect;
+    Geo::Polylines merge(const Geo::Polylines& scanLines, const Geo::Polylines& frames);
 };
 
-class File final : public GCode::File {
-
+class [[= Serial::name("PocketRaster")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();
     explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"raster-path"_s); }
