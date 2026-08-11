@@ -13,8 +13,6 @@
 #include "gc_creator.h"
 #include "gc_file.h"
 
-#include <optional>
-
 namespace PocketRaster {
 
 constexpr auto POCKET_RASTER = "PocketRaster"_hash32;
@@ -44,12 +42,6 @@ private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
     void addAcc(Geo::Polylines& src, const double accDistance);
-
-    Geo::Polylines calcScanLines(const Geo::Polygons& pocket, const Geo::Polyline& zigzag);
-    Geo::Polylines calcFrames(const Geo::Polylines& contours, const Geo::Polygons& comb);
-    std::optional<Geo::Polyline> calcZigzag(QRectF rect);
-
-    Geo::Polylines merge(const Geo::Polylines& scanLines, const Geo::Polylines& frames);
 };
 
 class [[= Serial::name("PocketRaster")]] File final : public GCode::File {
