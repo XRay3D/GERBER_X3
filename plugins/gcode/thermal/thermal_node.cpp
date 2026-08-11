@@ -13,7 +13,7 @@
 
 namespace Thermal {
 
-Node::Node(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, AbstractThermPrGi* item, Model* model)
+Node::Node(const QIcon& icon, const QString& name, const ThParam& par, QPointF pos, AbstractThermPrGi* item, Model* model)
     : container{false}
     , icon(icon)
     , name(name)
@@ -60,7 +60,7 @@ void Node::append(Node* item) {
     childs.emplace_back(std::shared_ptr<Node>(item));
 }
 
-void Node::remove(int row) { childs.remove(row); }
+void Node::remove(int row) { childs.erase(childs.begin() + row); }
 
 bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     if(role == Qt::CheckStateRole && !index.column()) {
@@ -69,7 +69,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         if(container) {
             auto childItems(this->childs);
             if(container && childItems.empty())
-                childItems = parent_->childs.mid(1);
+                childItems.assign(parent_->childs.begin() + 1, parent_->childs.end());
             updateGuard = true;
             for(auto node: std::as_const(childItems))
                 node->setData(index, value, role);
@@ -86,7 +86,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         if(container) {
             auto childItems(this->childs);
             if(container && childItems.empty())
-                childItems = parent_->childs.mid(1);
+                childItems.assign(parent_->childs.begin() + 1, parent_->childs.end());
             switch(index.column()) {
             case Model::Name:
                 // case Model::Position:
@@ -137,7 +137,7 @@ QVariant Node::data(const QModelIndex& index, int role) const {
     case Qt::DisplayRole:
         switch(index.column()) {
         case Model::Name:
-            return name.size() ? name : u"{%1,%2}"_s.arg((~pos_).x()).arg((~pos_).y()); // FIXME naming
+            return name.size() ? name : u"{%1,%2}"_s.arg(pos_.x()).arg(pos_.y()); // FIXME naming
 
             // case Model::Position:
             // return QVariant::fromValue(pos_); // u"%1 : %2"_s.arg(pos_.x * dScale).arg(pos_.y * dScale).replace('.', ',');
@@ -197,11 +197,9 @@ int Node::count() const { return par.count; }
 
 ThParam Node::getParam() const { return par; }
 
-Point64 Node::pos() const { return pos_; }
+QPointF Node::pos() const { return pos_; }
 
 AbstractThermPrGi* Node::item() const { return item_; }
-
-bool Node::loadFile(QDataStream& /*stream*/) const { return checked_ && item_; }
 
 void Node::disable() {
     checked_ = false;

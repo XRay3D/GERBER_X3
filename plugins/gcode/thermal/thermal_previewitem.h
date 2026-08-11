@@ -12,11 +12,12 @@
 
 #include "gi.h"
 
+#include "geo/polygon.h"
+#include "geo/polyline.h"
+
 #include <QParallelAnimationGroup>
 #include <QPropertyAnimation>
 #include <QVector>
-
-#include <gerber/gbr_types.h>
 
 class Tool;
 
@@ -58,12 +59,11 @@ public:
     //////////////////////////////////////////
     int type() const override;
 
-    Paths64 bridge() const { return bridge_; }
+    const Geo::Polygons& bridge() const { return bridge_; }
     virtual bool isValid() const;
 
-    virtual Point64 pos() const = 0;
-    virtual Paths64 paths() const = 0;
-    virtual Curves curves() const = 0;
+    virtual QPointF pos() const = 0;
+    virtual const Geo::Polygons& fill() const = 0;
     virtual void redraw() = 0;
 
 protected:
@@ -104,7 +104,7 @@ private:
 
     int colorState = Default;
 
-    inline static mvector<AbstractThermPrGi*> thpi;
+    inline static std::vector<AbstractThermPrGi*> thpi;
 
     // QGraphicsItem interface
 protected:
@@ -119,10 +119,10 @@ protected:
     QPainterPath sourcePath;
     QPainterPath painterPath;
 
-    Paths64 bridge_;
-    Paths64 previewPaths;
-    Paths64 cashedPath;
-    Paths64 cashedFrame;
+    Geo::Polygons bridge_;      // спицы в пределах рамки -- то, что кольцо НЕ режет
+    Geo::Polylines previewPaths;
+    Geo::Polylines cashedPath;  // изоляционное кольцо -- путь фрезы
+    Geo::Polygons cashedFrame;  // полоса вдоль кольца, ограничивающая спицы
 
     Node* node_{nullptr};
 
@@ -131,22 +131,18 @@ protected:
 };
 
 class PreviewItem final : public AbstractThermPrGi {
-    const Curves& paths_;
+    const Geo::Polygons& fill_;
     const QPointF pos_;
 
 public:
-    PreviewItem(const Curves& paths, const QPointF pos, Tool& tool);
-    Point64 pos() const override;
-    Paths64 paths() const override;
+    PreviewItem(const Geo::Polygons& fill, const QPointF pos, Tool& tool);
+    QPointF pos() const override;
+    const Geo::Polygons& fill() const override;
     void redraw() override;
 
     // QGraphicsItem interface
 public:
     QRectF boundingRect() const override;
-
-    // AbstractThermPrGi interface
-public:
-    Curves curves() const override;
 };
 
 } // namespace Thermal

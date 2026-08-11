@@ -24,6 +24,7 @@ add_library(
   src/cancel.cpp
   src/cgal.cpp
   src/cgal.h
+  src/clipopen.cpp
   src/offsetcapsules.h
   src/polygon.cpp
   src/polyline.cpp

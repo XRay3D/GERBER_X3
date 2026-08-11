@@ -135,9 +135,9 @@ void Form::computePaths() {
 
     for(auto& item: items_) {
         if(item->isValid()) {
-            gcp.closedCurves.assign_range(item->curves());
-            if(Paths64 bridge = item->bridge(); bridge.size())
-                gcp.supportCurvess.emplace_back(toCurves(item->bridge()));
+            gcp.closedCurves |= item->fill();
+            if(const Geo::Polygons& bridge = item->bridge(); !bridge.empty())
+                gcp.supportCurvess.emplace_back(bridge.contours());
         }
     }
 
@@ -200,7 +200,7 @@ void Form::updateThermalGi() {
                 auto tprItem = items_.emplace_back(std::make_shared<PreviewItem>(paths, pos, tool));
                 tprItem->setVisible(true);
                 tprItem->setOpacity(1.0);
-                node->append(new Node{drawIcon(paths), {}, par, ~pos, tprItem.get(), model});
+                node->append(new Node{drawIcon(paths), {}, par, pos, tprItem.get(), model});
             }
             qApp->processEvents();
             pd.setValue(++count);
@@ -252,15 +252,17 @@ void Form::updateCriterias() {
         criterias.emplace_back(
             std::vector{GraphicObject::FlStamp} //
         );
+    // Площади -- в мм²: Criteria::test сверяет их с go.fill.area(), прежний
+    // множитель uScale² ушёл вместе с целочисленным клиппером.
     if(ui->chbxPath->isChecked())
         criterias.emplace_back(
             std::vector{GraphicObject::Line, GraphicObject::PolyLine},
-            Range{ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
+            Range{ui->dsbxAreaMin->value(), ui->dsbxAreaMax->value()} //
         );
     if(ui->chbxPour->isChecked())
         criterias.emplace_back(
             std::vector{GraphicObject::Polygon, GraphicObject::Composite},
-            Range{ui->dsbxAreaMin->value() * uScale * uScale, ui->dsbxAreaMax->value() * uScale * uScale} //
+            Range{ui->dsbxAreaMin->value(), ui->dsbxAreaMax->value()} //
         );
 }
 

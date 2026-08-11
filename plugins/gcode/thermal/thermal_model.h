@@ -13,7 +13,6 @@
 #include "thermal_vars.h"
 
 #include <QAbstractItemModel>
-#include <mvector.h>
 
 namespace Thermal {
 
@@ -27,7 +26,7 @@ class Model : public QAbstractItemModel {
     QIcon repaint(QColor color, const QIcon& icon) const;
 
     Node* const rootItem = nullptr;
-    mvector<Node*> data_;
+    std::vector<Node*> data_;
 
 public:
     enum {

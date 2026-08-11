@@ -34,9 +34,9 @@ protected:
     uint32_t type() override { return THERMAL; }
 };
 
-class File final : public GCode::File {
-
+class [[= Serial::name("Thermal")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();
     explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"thermal-path"_s); }

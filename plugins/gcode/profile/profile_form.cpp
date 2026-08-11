@@ -38,10 +38,10 @@ Form::Form(GCode::Plugin* plugin)
 
     ui->pbAddBridge->setIcon(QIcon::fromTheme(u"edit-cut"_s));
 
-    // Мосты отключены до отдельного захода: Creator::makeBridges режет ОТКРЫТЫЙ
-    // путь замкнутой областью, а такого примитива в Geo нет (у Clipper2 он был
-    // -- Clipper64::AddOpenSubject + Difference). Ставить мосты, которые потом
-    // никак не попадут в траекторию, хуже, чем не давать их ставить вовсе.
+    // Мосты отключены до отдельного захода: примитив «резать открытый путь
+    // замкнутой областью» в Geo уже есть (Geo::clipOpen, см. geo/boolean.h),
+    // но Creator::makeBridges на него ещё не собран. Ставить мосты, которые
+    // потом никак не попадут в траекторию, хуже, чем не давать их ставить вовсе.
     ui->groupBox_3->setEnabled(false); // группа «Bridges»
 
     ui->cbxBridgeAlignType->addItems({

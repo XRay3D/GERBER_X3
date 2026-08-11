@@ -23,28 +23,13 @@ namespace Thermal {
 class Model;
 class Node;
 
-// class NodeI {
-// public:
-// virtual ~NodeI() { }
-// virtual bool isChecked() const = 0;
-// virtual void disable() = 0;
-// virtual void enable() = 0;
-// virtual QModelIndex index(int column = 0) const = 0;
-
-// virtual double angle() const = 0;
-// virtual double tickness() const = 0;
-// virtual int count() const = 0;
-//};
-
-#define override /**/
-
-class Node final /*: public NodeI*/ {
+class Node final {
 public:
-    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, const Point64& pos, AbstractThermPrGi* item, Model* model);
+    explicit Node(const QIcon& icon, const QString& name, const ThParam& par, QPointF pos, AbstractThermPrGi* item, Model* model);
     explicit Node(const QIcon& icon, const QString& name, const ThParam& par, Model* model);
     explicit Node(Model* model);
 
-    ~Node() override;
+    ~Node();
 
     Node* child(int row) const;
 
@@ -62,22 +47,21 @@ public:
 
     Qt::ItemFlags flags(const QModelIndex& index) const;
 
-    double angle() const override;
-    double tickness() const override;
-    int count() const override;
+    double angle() const;
+    double tickness() const;
+    int count() const;
     ThParam getParam() const;
 
-    Point64 pos() const;
+    QPointF pos() const;
     AbstractThermPrGi* item() const;
-    bool loadFile(QDataStream& stream) const;
-    void disable() override;
-    void enable() override;
+    void disable();
+    void enable();
 
     Node(const Node&) = delete;
     Node& operator=(const Node&) = delete;
 
-    bool isChecked() const override;
-    QModelIndex index(int column = 0) const override;
+    bool isChecked() const;
+    QModelIndex index(int column = 0) const;
 
     ThParam getPar() const;
 
@@ -85,14 +69,14 @@ private:
     const bool container{};
     const QIcon icon;
     const QString name;
-    const Point64 pos_;
+    const QPointF pos_;
 
     ThParam par;
 
     AbstractThermPrGi* const item_;
 
     Node* parent_ = nullptr;
-    mvector<std::shared_ptr<Node>> childs;
+    std::vector<std::shared_ptr<Node>> childs;
     bool checked_{};
 
     Model* const model; // static wrong from anotherr dll
@@ -103,7 +87,5 @@ private:
         Qt::PartiallyChecked // index 3
     };
 };
-
-#undef override
 
 } // namespace Thermal

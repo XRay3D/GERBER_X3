@@ -258,12 +258,10 @@ void Creator::createProfile(const Tool& tool, const double depth) {
         returnPss.append_range(openSrcPaths | v::as_rvalue | v::transform(intoOwnGroup));
     }
 
-    // TODO makeBridges(): мосты режут ОТКРЫТЫЙ путь замкнутой областью, а это
-    // единственная операция, которой в Geo нет вовсе (у Clipper2 она была --
-    // Clipper64::AddOpenSubject + Difference). Нужен примитив «вычесть регион
-    // из открытой полилинии»: резать сегмент (отрезок или дугу) границей
-    // региона и оставлять куски, чья середина вне его. Всё прочее для мостов
-    // уже на Geo -- Gi::Bridge::curves() и Bridge::test(const Geo::Polyline&).
+    // TODO makeBridges(): недостающий примитив «вычесть регион из открытой
+    // полилинии» теперь есть -- Geo::clipOpen (Difference, см. geo/boolean.h),
+    // терморазгрузка им уже режет свои кольца. Осталось собрать сами мосты:
+    // Gi::Bridge::curves() и Bridge::test(const Geo::Polyline&) давно на Geo.
     // До тех пор группа виджетов «Bridges» в форме отключена.
 
     if(gcp.params.contains(TrimmingCorners) && gcp.params[TrimmingCorners].toInt())
