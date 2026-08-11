@@ -47,16 +47,38 @@ Marker::Marker(Type type)
     setAcceptHoverEvents(true);
     if(type_ == Home) {
         App::setHome(this);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
         setToolTip(QObject::tr("G-Code Home Point"));
     } else {
         App::setZero(this);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
         setToolTip(QObject::tr("G-Code Zero Point"));
     }
-    shape_.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
+    baseShape_.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
+    applyScaleMode();
+}
+
+// Постоянный экранный размер -- штатным флагом Qt, а не painter->scale() в
+// paint(). Прежний вариант рисовал в 10*sf раз крупнее, чем объявляли
+// boundingRect() и shape(): за пределами габарита оставались следы
+// перерисовки, мышь промахивалась мимо видимого глифа, а сама трансформация
+// утекала в следующий элемент -- вид выставляет DontSavePainterState, и
+// save()/restore() здесь не было.
+//
+// Масштаб 10 и отражение по Y повторяют прежний вид: сцена перевёрнута по Y
+// (scale(1,-1) в конструкторе вида), а untransformable-элемент рисуется в
+// ориентации устройства.
+static const QTransform kScreenUnits = QTransform::fromScale(10, -10);
+
+void Marker::applyScaleMode() {
+    prepareGeometryChange();
+    const bool screenSize = App::settings().scaleHZMarkers();
+    setFlag(ItemIgnoresTransformations, screenSize);
+    path_ = screenSize ? kScreenUnits.map(basePath_) : basePath_;
+    shape_ = screenSize ? kScreenUnits.map(baseShape_) : baseShape_;
+    dotRadius_ = screenSize ? 20 : 2;
     rect_ = path_.boundingRect();
 }
 
@@ -79,18 +101,16 @@ void Marker::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QW
         c.setAlpha(200);
     if(!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
-    if(App::settings().scaleHZMarkers()) {
-        auto sf = App::grView().scaleFactor() * 10;
-        painter->scale(sf, sf);
-    }
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
     painter->drawPath(path_);
     painter->setPen(c);
     painter->setBrush(Qt::NoBrush);
-    painter->drawEllipse(QPoint(0, 0), 2, 2);
+    painter->drawEllipse(QPointF{}, dotRadius_, dotRadius_);
 }
 
+// Именно path_, а не shape_: попадание всегда считалось по самому глифу
+// (shape_ у Marker не использовался).
 QPainterPath Marker::shape() const { return App::drawPdf() ? QPainterPath() : path_; }
 
 int Marker::type() const { return static_cast<int>(type_ ? Gi::Type::MarkHome : Gi::Type::MarkZero); }
@@ -211,16 +231,33 @@ Pin::Pin()
     setAcceptHoverEvents(true);
 
     if(index_ % 2) {
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
     } else {
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
-        path_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
+        basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
     }
-    shape_.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
-    rect_ = path_.boundingRect();
+    baseShape_.addEllipse(QRectF(QPointF(-3, -3), QSizeF(6, 6)));
+    applyScaleMode();
 
     setZValue(std::numeric_limits<double>::max() - index_);
+}
+
+void applyMarkersScaleMode() {
+    if(auto* p = App::homePtr()) p->applyScaleMode();
+    if(auto* p = App::zeroPtr()) p->applyScaleMode();
+    for(auto&& get: {&App::pin0Ptr, &App::pin1Ptr, &App::pin2Ptr, &App::pin3Ptr})
+        if(auto* p = get()) p->applyScaleMode();
+}
+
+void Pin::applyScaleMode() { // см. Marker::applyScaleMode
+    prepareGeometryChange();
+    const bool screenSize = App::settings().scalePinMarkers();
+    setFlag(ItemIgnoresTransformations, screenSize);
+    path_ = screenSize ? kScreenUnits.map(basePath_) : basePath_;
+    shape_ = screenSize ? kScreenUnits.map(baseShape_) : baseShape_;
+    dotRadius_ = screenSize ? 20 : 2;
+    rect_ = path_.boundingRect();
 }
 
 Pin::~Pin() { }
@@ -241,16 +278,12 @@ void Pin::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidg
     if(!(flags() & QGraphicsItem::ItemIsMovable))
         c.setAlpha(static_cast<int>(c.alpha() * 0.5));
     // c.setAlpha(50);
-    if(App::settings().scalePinMarkers()) {
-        auto sf = App::grView().scaleFactor() * 10;
-        painter->scale(sf, sf);
-    }
     painter->setPen(Qt::NoPen);
     painter->setBrush(c);
     painter->drawPath(path_);
     painter->setPen(c);
     painter->setBrush(Qt::NoBrush);
-    painter->drawEllipse(QPoint(0, 0), 2, 2);
+    painter->drawEllipse(QPointF{}, dotRadius_, dotRadius_);
 }
 
 QPainterPath Pin::shape() const {
@@ -493,9 +526,11 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
 
+    const double sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(
+                                painter->worldTransform());
     QPen pen{
         QColor{255, 0, 255},
-        2.0 * App::grView().scaleFactor()
+        2.0 * sf
     };
     pen.setJoinStyle(Qt::MiterJoin);
     painter->setPen(pen);

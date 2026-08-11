@@ -41,10 +41,21 @@ void Group::setSelected(const std::vector<int>& ids) {
 }
 
 void Group::addToScene(QGraphicsScene* scene) {
-    if(!scene)
-        scene = App::grView().scene();
+    auto* view = App::grViewPtr();
+    if(!scene) {
+        if(!view) return;
+        scene = view->scene();
+    }
+    // Пакетная вставка: на каждый addItem индекс BSP делает поддержку, а так
+    // он перестраивается один раз.
+    const auto old = scene->itemIndexMethod();
+    scene->setItemIndexMethod(QGraphicsScene::NoIndex);
     for(auto&& item: *this)
         scene->addItem(item.get());
+    scene->setItemIndexMethod(old);
+    // sceneRect должен покрывать новые данные -- отложенно, чтобы загрузка
+    // десяти слоёв не пересчитывала габарит всей сцены десять раз.
+    if(view) view->scheduleSceneRectUpdate();
 }
 
 void Group::setBrushColor(const QColor& color) {

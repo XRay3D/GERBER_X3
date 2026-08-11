@@ -330,6 +330,8 @@ void Project::deleteFile(int32_t id) {
         watcher.removePath(files_[id]->name());
         files_.erase(id);
         setChanged();
+        // Данных стало меньше -- корневой прямоугольник BSP пора ужать.
+        if(auto* view = App::grViewPtr()) view->scheduleSceneRectUpdate();
     } else
         qWarning() << u"Error id"_s << id << u"File not found"_s;
     isPinsPlaced_ = false;

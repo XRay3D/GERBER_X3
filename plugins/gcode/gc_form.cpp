@@ -679,14 +679,15 @@ void Form::errorHandler(int) {
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    App::grView().startUpdateTimer(32);
+    // Таймер анимации больше не общий: Gi::Error регистрируется в реестре вида
+    // сам, когда его выделяют. Прежние startUpdateTimer/stopUpdateTimer здесь
+    // ещё и убивали таймер, заведённый конструктором вида, -- насовсем.
 }
 
 void Form::errContinue() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::grView().stopUpdateTimer();
 
     delete errTable->model();
 
@@ -701,7 +702,6 @@ void Form::errBreak() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::grView().stopUpdateTimer();
 
     delete errTable->model();
 

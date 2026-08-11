@@ -31,7 +31,7 @@ class Debug_ final : public Item {
 public:
     ~Debug_() override;
     QRectF boundingRect() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void paintGeometry(QPainter* painter, const RenderState& st) override;
     int type() const override;
     // Paths paths(int alternate = {}) const override;
     bool arrows{true};

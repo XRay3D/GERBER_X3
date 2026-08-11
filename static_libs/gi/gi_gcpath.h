@@ -24,7 +24,7 @@ public:
     GcPath(Geo::Polylines curves, AbstractFile* file = nullptr);
     ~GcPath() override = default;
     QRectF boundingRect() const override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void paintGeometry(QPainter* painter, const RenderState& st) override;
     int type() const override;
     Geo::Polylines curves(int alternate = {}) const override;
 

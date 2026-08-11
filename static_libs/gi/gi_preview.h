@@ -62,6 +62,12 @@ protected:
     QPainterPath sourcePath_;
     QPainterPath toolPath_;
 
+    // Кэш пути инструмента для ветки toolPath_.isEmpty(): Tool::path() строит
+    // QPainterPath целиком, а от кадра к кадру меняются только id и позиция.
+    QPainterPath toolPathCache_;
+    Tool::ID toolPathCacheId_{Tool::ID::Null};
+    QPointF toolPathCachePos_;
+
     double sourceDiameter_{};
 
     QColor bodyColor_;

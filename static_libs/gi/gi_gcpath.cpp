@@ -42,19 +42,20 @@ GcPath::GcPath(Geo::Polylines curves, AbstractFile* file)
 
 QRectF GcPath::boundingRect() const { return boundingRect_; }
 
-void GcPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
-    if(pnColorPrt_) pen_.setColor(*pnColorPrt_);
-    if(colorPtr_) color_ = *colorPtr_;
-
+void GcPath::paintGeometry(QPainter* painter, const RenderState& st) {
+    // Цвета из указателей разрешает базовый Item::paint.
     painter->setBrush(Qt::NoBrush);
     painter->setPen(Qt::NoPen);
 
-    QPen pen{pen_};
-    if(qFuzzyIsNull(pen_.widthF())) {
-        pen.setWidthF(1.5 * scaleFactor());
-        if(auto ar = updateArrows()) arrows_ = std::move(*ar); // for direction
-        painter->strokePath(arrows_, pen);
+    if(!qFuzzyIsNull(pen_.widthF())) { // перо задано явно -- ни стрелок, ни копии
+        painter->strokePath(shape_, pen_);
+        return;
     }
+
+    QPen pen{pen_};
+    pen.setWidthF(1.5 * st.sf);
+    if(auto ar = updateArrows()) arrows_ = std::move(*ar); // for direction
+    painter->strokePath(arrows_, pen);
     painter->strokePath(shape_, pen);
 }
 

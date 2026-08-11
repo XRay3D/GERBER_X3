@@ -80,19 +80,22 @@ public:
     void setViewRect(const QRectF& r);
     QRectF getViewRect();
     QRectF getSelectedBoundingRect();
-    bool boundingRectFl() const { return boundingRect_; }
 
-    void startUpdateTimer(int timeMs) {
-        if(timerId)
-            killTimer(timerId);
-        timerId = startTimer(timeMs);
-    }
+    // Реестр анимируемых item'ов. Раньше вид безусловно дёргал
+    // scene()->update() каждые 20 мс -- полная перерисовка сцены 50 раз в
+    // секунду даже на простое. Анимация нужна только «бегущим муравьям» на
+    // выделенных DataPath и пульсации Gi::Error, поэтому item регистрируется
+    // сам, а таймер крутится, только пока реестр непуст.
+    void addAnimated(QGraphicsItem* item);
+    void removeAnimated(QGraphicsItem* item);
 
-    void stopUpdateTimer() {
-        if(timerId)
-            killTimer(timerId);
-        timerId = 0;
-    }
+    // Пересчитать sceneRect по фактическим данным. Звать при добавлении и
+    // удалении файла, но НЕ покадрово: setSceneRect перестраивает индекс BSP
+    // целиком.
+    void updateSceneRectToContents();
+    // То же, но с откладыванием на конец такта событий: при загрузке проекта
+    // файлы добавляются по одному, а itemsBoundingRect() обходит всю сцену.
+    void scheduleSceneRectUpdate();
 
     /////////////////////////////////
     template <typename T = QGraphicsItem, typename... Ts>
@@ -151,14 +154,30 @@ private:
     // Scene* scene_;
     bool ruler_{};
     int rulerCtr{};
-    bool boundingRect_{};
     void updateRuler();
+    // Единая точка на смену трансформации: публикует масштаб в App и
+    // подтягивает линейки.
+    void onTransformChanged();
     template <class T>
     void animate(QObject* target, const QByteArray& propertyName, T begin, T end);
     QPointF scenePos, rulPt1, rulPt2, pressPos;
 
-    void drawRuller(QPainter* painter, const QRectF& rect) const;
-    int timerId{};
+    // Экранные украшения (перекрестье под курсором и мерная линейка) рисуются
+    // поверх вьюпорта в его собственных координатах, а не в слое сцены: плечи
+    // у них заданы в пикселях, и сцене незачем перерисовываться ради них.
+    void drawOverlay(QPainter* painter);
+    void drawRuller(QPainter* painter) const;
+    QRegion overlayRegion() const;
+    // Перерисовать только полосы перекрестья (старые и новые), не весь вид.
+    void updateOverlay();
+    QPoint cursorViewPos_;
+
+    std::vector<QGraphicsItem*> animated_;
+    int animTimerId_{};
+    void updateAnimationTimer();
+
+    bool sceneRectUpdatePending_{};
+
     void GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item);
     // QWidget interface
 protected:
@@ -167,14 +186,15 @@ protected:
     void dropEvent(QDropEvent* event) override;
     void resizeEvent(QResizeEvent* event) override;
     void wheelEvent(QWheelEvent* event) override;
+    void scrollContentsBy(int dx, int dy) override;
 
     void mousePressEvent(QMouseEvent* event) override;
     void mouseReleaseEvent(QMouseEvent* event) override;
     void mouseMoveEvent(QMouseEvent* event) override;
     void mouseDoubleClickEvent(QMouseEvent* event) override;
 
+    // Фон рисует сам QGraphicsView кистью из setBackgroundBrush.
     void drawForeground(QPainter* painter, const QRectF& rect) override;
-    void drawBackground(QPainter* painter, const QRectF& rect) override;
 
     // QObject interface
 protected:

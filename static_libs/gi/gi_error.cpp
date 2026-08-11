@@ -10,8 +10,11 @@
  ********************************************************************************/
 #include "gi_error.h"
 #include "gi.h"
+#include "graphicsview.h"
 
+#include <QGraphicsScene>
 #include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include <QTime>
 #include <QtMath>
 
@@ -20,28 +23,45 @@
 namespace Gi {
 
 Error::Error(const Geo::Polylines& curves, double area)
-    : area_{area} {
-    shape_ = Geo::toPath(curves);
+    : shape_{Geo::toPath(curves)}
+    , boundingRect_{shape_.boundingRect()}
+    , area_{area} {
     setFlag(ItemIsSelectable);
     setZValue(std::numeric_limits<double>::max());
 }
 
+Error::~Error() {
+    if(isSelected())
+        if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+}
+
 double Error::area() const { return area_; }
 
-QRectF Error::boundingRect() const { return shape_.boundingRect(); }
+// Габарит считается один раз: boundingRect() -- самая горячая виртуальная
+// функция сцены, вызывать в ней QPainterPath::boundingRect() незачем.
+QRectF Error::boundingRect() const { return boundingRect_; }
 
-void Error::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, QWidget* /*widget*/) {
+QVariant Error::itemChange(GraphicsItemChange change, const QVariant& value) {
+    if(change == ItemSelectedChange) {
+        if(auto* view = App::grViewPtr())
+            value.toBool() ? view->addAnimated(this) : view->removeAnimated(this);
+    } else if(change == ItemSceneChange && !value.value<QGraphicsScene*>()) {
+        if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+    }
+    return QGraphicsItem::itemChange(change, value);
+}
+
+static const QBrush errorBrush{
+    QColor{255, 0, 255}
+};
+
+void Error::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
     painter->setPen(Qt::NoPen);
-    if(isSelected()) {
+    if(option->state & QStyle::State_Selected) {
         static QTime t(QTime::currentTime());
         painter->setBrush(QColor::fromHsv(cos(t.msecsTo(QTime::currentTime()) / (2 * std::numbers::pi * 8)) * 30 + 30, 255, 255, 255));
     } else {
-        QBrush br(QColor(255, 0, 255));
-        // br.setStyle(Qt::Dense4Pattern);
-        // QMatrix matrix;
-        // matrix.scale(scaleFactor() * 3, scaleFactor() * 3);
-        // br.setMatrix(matrix);
-        painter->setBrush(br);
+        painter->setBrush(errorBrush);
     }
 
     painter->drawPath(shape_);

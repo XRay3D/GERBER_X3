@@ -25,7 +25,7 @@ public:
     ~DataFill() override = default;
 
     // QGraphicsItem interface
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void paintGeometry(QPainter* painter, const RenderState& st) override;
     int type() const override;
     // Item interface
     void redraw() override;

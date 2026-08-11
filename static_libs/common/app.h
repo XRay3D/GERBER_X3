@@ -118,7 +118,14 @@ class App {
     // QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
-    int dashOffset_{};
+    // Смещение штриха «бегущих муравьёв» на выделении. double, а не int:
+    // GraphicsView держит его в пределах периода узора через fmod, иначе
+    // счётчик за долгую сессию уходил в переполнение.
+    double dashOffset_{};
+    // 1.0 / |m11| вида. Публикуется GraphicsView при каждой смене
+    // трансформации, чтобы item'ы не ходили за масштабом через
+    // scene()->views().front()->transform() на каждый вызов.
+    double viewScaleFactor_{1.0};
 
     QSharedMemory sharedMemory{u"AppSettings"_s};
 
@@ -136,6 +143,7 @@ public:
             qDebug() << u"App"_s << app << sharedMemory.errorString();
     }
     static auto& dashOffset() { return app->dashOffset_; }
+    static auto& viewScaleFactor() { return app->viewScaleFactor_; }
 
     static auto pins() {
         static std::vector pins{&App::pin0(), &App::pin1(), &App::pin2(), &App::pin3()};
