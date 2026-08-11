@@ -22,6 +22,7 @@
 //////////////////////
 
 #include "dxf_node.h"
+#include "geo/boolean.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "utils.h"
@@ -163,17 +164,26 @@ void File::createGi() {
             }
 
             // Слой, пришедший из проекта, уже разобран; при разборе файла его
-            // заливку надо собрать из заливок объектов. Пачка объединяется
-            // ГОТОВЫМИ полигонами: у каждого его дырки известны точно, а в
-            // плоском списке контуров вложенность выражена одной ориентацией --
-            // и дырка одного тела вычла бы чужое тело внутри неё.
+            // заливку надо собрать из объектов -- и ВСЕМ слоем разом, а не
+            // пообъектно. Замкнутый контур объекта -- это ещё не тело: телом
+            // или дыркой его делает ВЛОЖЕННОСТЬ в соседние контуры слоя
+            // (even-odd, как у HATCH), и объединение готовых пообъектных тел
+            // её теряло -- рамка платы проглатывала отверстия и внутреннюю
+            // рамку, нарисованные отдельными сущностями внутри неё.
+            //
+            // Объекты без своего замкнутого контура (текст, штриховка, штрих
+            // ненулевой ширины, силуэт проекции) в чередование не входят: их
+            // заливка -- готовый регион, дырки у него известны точно, и он
+            // объединяется поверх.
             if(layer->groupedCurves_.empty()) {
-                std::vector parts{std::from_range,
-                    layer->graphicObjects_
-                        | v::transform(&DxfGo::fill)
-                        | v::transform(&Geo::Polygons::all)
-                        | v::join};
-                layer->groupedCurves_ = Geo::Polygons{std::span<const Geo::Polygon>{parts}};
+                Geo::Polylines contours;
+                std::vector<Geo::Polygon> parts;
+                for(const auto& go: layer->graphicObjects_)
+                    if(go.path.isClosed()) contours.push_back(go.path);
+                    else parts.append_range(go.fill.all());
+                layer->groupedCurves_ = Geo::evenOdd(contours);
+                if(!parts.empty())
+                    layer->groupedCurves_ |= Geo::Polygons{std::span<const Geo::Polygon>{parts}};
             }
             mergedCurves_ |= layer->groupedCurves_;
 

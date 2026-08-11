@@ -154,10 +154,15 @@ DxfGo LwPolyline::toGo() const {
 
     if(polylineFlag == Closed) curve.close();
 
-    // constantWidth -- ПОЛНАЯ ширина линии, ровно то, что ждёт Geo::Inflate:
-    // контур уезжает на её половину в каждую сторону. Нулевая ширина даёт
-    // пустой регион -- у такой полилинии есть только контур.
-    Geo::Polygons curves = Geo::Inflate(Geo::Polylines{curve}, constantWidth);
+    // Замкнутая полилиния -- это ТЕЛО, которое она ограничивает, а не штрих
+    // вдоль неё: у чертежа ширина линии (код 43) чаще всего нулевая, и
+    // раздувание на неё давало пустой регион -- контур не доходил ни до
+    // заливки на экране, ни до g-кода. Even-odd потому, что ориентация обхода
+    // в DXF произвольна: по канону Geo::Polygons контур, обойдённый по
+    // часовой, читался бы как пустота.
+    Geo::Polygons curves = curve.isClosed()
+        ? Geo::evenOdd(Geo::Polylines{curve})
+        : Geo::Inflate(Geo::Polylines{curve}, constantWidth);
 
     DxfGo go{id, std::move(curve), std::move(curves)}; // return {id, ~p.value(0), paths};
 

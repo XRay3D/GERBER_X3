@@ -10,6 +10,8 @@
  *******************************************************************************/
 #include "gc_pathutils.h"
 
+#include "geo/boolean.h"
+
 #include "geo/polygon.h"
 #include "geo/util.h"
 
@@ -77,48 +79,7 @@ NestingForest nestingForest(const Geo::Polylines& contours) {
     return forest;
 }
 
-void mergePolylines(Geo::Polylines& polylines, double maxDist) {
-    auto joinable = [maxDist](QPointF a, QPointF b) { return Geo::distance(a, b) <= maxDist; };
-
-    // Приклеивает `src` к хвосту `dst`, не дублируя общую точку стыка.
-    auto append = [](Geo::Polyline& dst, const Geo::Polyline& src) {
-        dst.insert(dst.end(), src.begin() + 1, src.end());
-    };
-
-    bool merged;
-    do {
-        merged = false;
-        for(std::size_t i{}; i < polylines.size() && !merged; ++i) {
-            if(polylines[i].closed || polylines[i].size() < 2) continue;
-            for(std::size_t j{}; j < polylines.size(); ++j) {
-                if(i == j || polylines[j].closed || polylines[j].size() < 2) continue;
-
-                Geo::Polyline& a = polylines[i];
-                Geo::Polyline b = polylines[j];
-
-                if(joinable(a.back(), b.front())) {
-                } else if(joinable(a.back(), b.back())) {
-                    b.reverse();
-                } else if(joinable(a.front(), b.back())) {
-                    a.reverse(), b.reverse();
-                } else if(joinable(a.front(), b.front())) {
-                    a.reverse();
-                } else
-                    continue;
-
-                append(a, b);
-                polylines.erase(polylines.begin() + j);
-                merged = true;
-                break;
-            }
-        }
-    } while(merged);
-
-    // Замкнувшийся сам на себя обрывок -- это контур, а не линия.
-    for(Geo::Polyline& polyline: polylines)
-        if(polyline.size() > 3 && joinable(polyline.front(), polyline.back()))
-            polyline.close();
-}
+void mergePolylines(Geo::Polylines& polylines, double maxDist) { Geo::stitch(polylines, maxDist); }
 
 void sortByProximity(Geo::Polyline& points, QPointF start) {
     for(std::size_t first{}; first < points.size(); ++first) {

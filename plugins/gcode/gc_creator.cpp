@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_creator.h"
+
+#include "geo/boolean.h"
 // #include "gc_file.h"
 #include "gc_file.h"
 #include "gc_types.h"
@@ -139,35 +141,14 @@ QRectF Creator::sourceExtent() const {
 void Creator::addRawPaths(Geo::Polylines&& rawPaths) {
     if(rawPaths.empty()) return;
 
-    std::erase_if(rawPaths, [](const Geo::Polyline& path) { return path.size() < 2; });
+    // Чертёж приходит без канона: ориентация обхода произвольна, а контур
+    // разрезан на сущности. Geo::normalize склеивает обрывки по клею проекта и
+    // собирает замкнутое по EVEN-ODD -- прежний Geo::Polygons{closed} читал
+    // контур, обойдённый по часовой, как пустоту, и тот пропадал вовсе.
+    auto [region, open] = Geo::normalize(std::move(rawPaths), App::project().glue());
 
-    const double mergDist = App::project().glue();
-
-    auto isClosed = [mergDist](const Geo::Polyline& path) {
-        return path.closed
-            || (path.size() > 3 && Geo::distance(path.front(), path.back()) < mergDist);
-    };
-
-    // Сперва отбираем уже замкнутое, потом пробуем склеить обрывки -- склейка
-    // дорогая, и гонять её по тому, что и так замкнуто, незачем.
-    Geo::Polylines closed;
-    for(std::size_t i{}; i < rawPaths.size();)
-        if(isClosed(rawPaths[i])) {
-            closed.emplace_back(std::move(rawPaths[i])).close();
-            rawPaths.erase(rawPaths.begin() + i);
-        } else
-            ++i;
-
-    mergePolylines(rawPaths, mergDist);
-
-    for(Geo::Polyline& path: rawPaths)
-        if(isClosed(path))
-            closed.emplace_back(std::move(path)).close();
-        else
-            openSrcPaths.emplace_back(std::move(path));
-
-    if(!closed.empty())
-        closedSrc |= Geo::Polygons{closed};
+    openSrcPaths.append_range(std::move(open));
+    if(!region.empty()) closedSrc |= region;
 }
 
 void Creator::createGc(Params&& newGcp, std::stop_token token) {
