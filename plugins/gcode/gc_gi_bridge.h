@@ -28,7 +28,7 @@ public:
     int type() const override;
     // Item interface
     Geo::Polylines curves(int alternate = {}) const override;
-    void changeColor() override { }
+    void updateColors() override { }
 
     bool ok() const;
     void update();

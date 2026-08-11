@@ -34,7 +34,7 @@ public:
     void setCurves(Geo::Polylines paths, int alternate = {}) override;
     Geo::Polygons region() const override;
     // Item interface
-    void changeColor() override;
+    void updateColors() override;
 
 private:
     // Заливка -- единственный элемент, у которого вложенность известна точно:

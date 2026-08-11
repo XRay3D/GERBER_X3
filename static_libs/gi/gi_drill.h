@@ -28,7 +28,7 @@ public:
 
     // Item interface
     // Paths paths(int alternate = {}) const override;
-    void changeColor() override;
+    void updateColors() override;
 
     bool isSlot();
     double diameter() const { return diameter_; }

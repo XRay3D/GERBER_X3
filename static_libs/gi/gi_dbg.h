@@ -58,7 +58,7 @@ private:
     QPainterPath arrows_;
 
 protected:
-    void changeColor() override { }
+    void updateColors() override { }
 };
 
 #if DEBUG

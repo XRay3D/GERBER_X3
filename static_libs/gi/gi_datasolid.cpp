@@ -27,8 +27,8 @@ DataFill::DataFill(Geo::Polygons curves, AbstractFile* file)
     shape_ = curves.toPath();
     // Контуры -- для базового curves(), сам регион -- для region(): собрать
     // его обратно из плоского списка нельзя, острова в дырках теряются.
-    curves_       = curves.contours();
-    region_       = std::move(curves);
+    curves_ = curves.contours();
+    region_ = std::move(curves);
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
@@ -98,7 +98,7 @@ Geo::Polygons DataFill::region() const {
 //     redraw();
 // }
 
-void DataFill::changeColor() {
+void DataFill::updateColors() {
     //    auto animation = new QPropertyAnimation{this, "bodyColor"};
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);

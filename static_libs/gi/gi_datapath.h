@@ -30,7 +30,7 @@ class DataPath final : public Item {
     const QPainterPath& selectionShape(double sf) const;
 
     void redraw() override { update(); }
-    void changeColor() override { }
+    void updateColors() override { }
     void geometryChanged() override;
     friend class ::MainWindow;
 

@@ -66,7 +66,7 @@ void Drill::setDiameter(double diameter) {
 
 void Drill::updatePath(const QPolygonF& path, double diameter) {
     diameter_ = diameter;
-    path_     = path;
+    path_ = path;
     create();
     update();
 }
@@ -84,7 +84,7 @@ void Drill::setToolId(Tool::ID newToolId) {
 //     return {~transform().map(path)};
 // }
 
-void Drill::changeColor() {
+void Drill::updateColors() {
     // animation.setStartValue(bodyColor_);
 
     switch(colorState) {

@@ -55,7 +55,7 @@ enum /*class*/ Type : int {
     Error = QGraphicsItem::UserType + 400, // Form
 
     ShapeBegin = QGraphicsItem::UserType + 500,
-    ShCircle   = ShapeBegin,
+    ShCircle = ShapeBegin,
     ShRectangle,
     ShPolyLine,
     ShCirArc,
@@ -146,11 +146,26 @@ public:
 
     int32_t id() const;
     void setId(int32_t id);
-    virtual void changeColor() = 0;
+
+    // Пересчитать кэш цветов И ПОКАЗАТЬ результат. Невиртуальная обёртка
+    // именно ради второй половины: цвет слоя или файла живёт снаружи, элементы
+    // смотрят на него по указателю, и правка сама по себе экран не трогает.
+    // Пока вид перерисовывал сцену 50 раз в секунду, это сходило с рук --
+    // ближайший кадр всё показывал; теперь перерисовку надо просить, и просить
+    // её здесь, а не в каждом из вызывающих (дерево слоёв, меню файла,
+    // раскраска, наведение, выделение).
+    void changeColor() {
+        updateColors();
+        update();
+    }
 
     virtual Side side() const;
 
 protected:
+    // Собственно пересчёт кэша (brushColor_/penColor_) по colorState и
+    // указателям на внешний цвет. Звать напрямую нельзя -- только changeColor().
+    virtual void updateColors() = 0;
+
     // QPropertyAnimation animation;
     // QPropertyAnimation visibleAnim;
 
@@ -170,7 +185,7 @@ protected:
     QPen pen_;
 
     const QColor* pnColorPrt_ = nullptr;
-    const QColor* colorPtr_   = nullptr;
+    const QColor* colorPtr_ = nullptr;
 
     QColor color_;
     QColor brushColor_;
@@ -180,7 +195,7 @@ protected:
     double scaleFactor() const;
     enum ColorState {
         Default,
-        Hovered  = 1,
+        Hovered = 1,
         Selected = 2,
     };
 
