@@ -107,11 +107,11 @@ struct ApTransform {
 // Отверстие (hole) хранится отдельно — оно не «стирает» объекты под собой
 // (4.4.6), поэтому вычитается только из тела самой апертуры.
 struct Aperture {
-    QString source;   // исходный текст AD для повторного сохранения
-    Geo::Polygon body;      // тело апертуры с уже вычтенным отверстием
-    double holeDia{}; // диаметр отверстия, мм (0 — сплошная)
-    bool isBlock{};   // апертура-блок (AB)
-    Objects block;    // содержимое блока
+    QString source;    // исходный текст AD для повторного сохранения
+    Geo::Polygon body; // тело апертуры с уже вычтенным отверстием
+    double holeDia{};  // диаметр отверстия, мм (0 — сплошная)
+    bool isBlock{};    // апертура-блок (AB)
+    Objects block;     // содержимое блока
 };
 
 using ApertureMap = std::map<int, std::shared_ptr<Aperture>>;

@@ -207,7 +207,7 @@ std::optional<QPainterPath> Item::updateArrows() {
     QPainterPath arrows;
 
     using QPP = QPainterPath;
-    using El  = QPP::Element;
+    using El = QPP::Element;
 
     const double length = std::clamp(30 * scar, 0.0, 0.5);
 

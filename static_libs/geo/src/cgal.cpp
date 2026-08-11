@@ -34,17 +34,17 @@ namespace {
 // окружность (все верны с точностью до double-эпсилона), и на практике
 // достаточно взять НЕ середину, чтобы обойти эту конкретную неудачу.
 QPointF arcPointAt(QPointF from, QPointF to, double bulge, double t) {
-    const double dx      = to.x() - from.x();
-    const double dy      = to.y() - from.y();
-    const double chord   = std::hypot(dx, dy);
-    const double theta   = 4.0 * std::atan(bulge);
+    const double dx = to.x() - from.x();
+    const double dy = to.y() - from.y();
+    const double chord = std::hypot(dx, dy);
+    const double theta = 4.0 * std::atan(bulge);
     const double sagitta = bulge * chord / 2.0;
-    const double radius  = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
+    const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
     const QPointF n(dy / chord, -dx / chord);
     const QPointF mid((from + to) / 2.0);
     const QPointF center = mid + n * (sagitta - std::copysign(radius, bulge));
-    const double a0      = std::atan2(from.y() - center.y(), from.x() - center.x());
-    const double am      = a0 + theta * t;
+    const double a0 = std::atan2(from.y() - center.y(), from.x() - center.x());
+    const double am = a0 + theta * t;
     return QPointF(center.x() + radius * std::cos(am), center.y() + radius * std::sin(am));
 }
 
@@ -55,8 +55,8 @@ QPointF arcPointAt(QPointF from, QPointF to, double bulge, double t) {
 struct CurveGeometry {
     QPointF from, to, center;
     double radius = 0.0;
-    double sweep  = 0.0;
-    bool linear   = true;
+    double sweep = 0.0;
+    bool linear = true;
 };
 
 CurveGeometry geometryOf(const XCurve& xc) {
@@ -65,8 +65,8 @@ CurveGeometry geometryOf(const XCurve& xc) {
     };
 
     CurveGeometry out;
-    out.from   = at(xc.source());
-    out.to     = at(xc.target());
+    out.from = at(xc.source());
+    out.to = at(xc.target());
     out.linear = xc.is_linear();
     if(out.linear) return out;
 
@@ -74,12 +74,12 @@ CurveGeometry geometryOf(const XCurve& xc) {
     // и |bulge| <= 1 у потребителей DXF, и одна ветвь окружности в тесте на
     // принадлежность.
     const auto& circle = xc.supporting_circle();
-    out.center         = at(circle.center());
-    out.radius         = std::sqrt(CGAL::to_double(circle.squared_radius()));
+    out.center = at(circle.center());
+    out.radius = std::sqrt(CGAL::to_double(circle.squared_radius()));
 
     const double a0 = std::atan2(out.from.y() - out.center.y(), out.from.x() - out.center.x());
     const double a1 = std::atan2(out.to.y() - out.center.y(), out.to.x() - out.center.x());
-    out.sweep       = std::remainder(a1 - a0, 2.0 * std::numbers::pi);
+    out.sweep = std::remainder(a1 - a0, 2.0 * std::numbers::pi);
     if(xc.orientation() == CGAL::COUNTERCLOCKWISE && out.sweep < 0.0)
         out.sweep += 2.0 * std::numbers::pi;
     if(xc.orientation() == CGAL::CLOCKWISE && out.sweep > 0.0)
@@ -92,7 +92,7 @@ CurveGeometry geometryOf(const XCurve& xc) {
 // полуоткрытый по x интервал не даёт посчитать общую вершину двух кривых
 // дважды.
 bool crossesRayUp(const CurveGeometry& curve, QPointF point) {
-    const double left  = std::min(curve.from.x(), curve.to.x());
+    const double left = std::min(curve.from.x(), curve.to.x());
     const double right = std::max(curve.from.x(), curve.to.x());
     if(point.x() < left || point.x() >= right) return false;
 
@@ -104,9 +104,9 @@ bool crossesRayUp(const CurveGeometry& curve, QPointF point) {
     // Какая из двух ветвей окружности -- видно по ходу: против часовой
     // стрелки вправо идёт только нижняя половина, влево -- только верхняя
     // (по часовой всё наоборот).
-    const double dx     = point.x() - curve.center.x();
+    const double dx = point.x() - curve.center.x();
     const double height = std::sqrt(std::max(0.0, curve.radius * curve.radius - dx * dx));
-    const bool upper    = (curve.sweep > 0.0) == (curve.to.x() < curve.from.x());
+    const bool upper = (curve.sweep > 0.0) == (curve.to.x() < curve.from.x());
     return curve.center.y() + (upper ? height : -height) > point.y();
 }
 
@@ -157,26 +157,26 @@ void sortSpatially(std::vector<Part>& parts) {
     // Центры ложатся на целочисленную сетку: ключ Мортона строится из битов
     // координат, а не из самих double.
     constexpr double gridMax = 0xFFFF;
-    const double sx          = total.xmax() > total.xmin() ? gridMax / (total.xmax() - total.xmin()) : 0.0;
-    const double sy          = total.ymax() > total.ymin() ? gridMax / (total.ymax() - total.ymin()) : 0.0;
+    const double sx = total.xmax() > total.xmin() ? gridMax / (total.xmax() - total.xmin()) : 0.0;
+    const double sy = total.ymax() > total.ymin() ? gridMax / (total.ymax() - total.ymin()) : 0.0;
 
     // Биты числа, растянутые через один: 0b1011 -> 0b01000101.
     auto spread = [](std::uint32_t value) {
         std::uint64_t bits = value;
-        bits               = (bits | (bits << 16)) & 0x0000FFFF0000FFFFull;
-        bits               = (bits | (bits << 8)) & 0x00FF00FF00FF00FFull;
-        bits               = (bits | (bits << 4)) & 0x0F0F0F0F0F0F0F0Full;
-        bits               = (bits | (bits << 2)) & 0x3333333333333333ull;
-        bits               = (bits | (bits << 1)) & 0x5555555555555555ull;
+        bits = (bits | (bits << 16)) & 0x0000FFFF0000FFFFull;
+        bits = (bits | (bits << 8)) & 0x00FF00FF00FF00FFull;
+        bits = (bits | (bits << 4)) & 0x0F0F0F0F0F0F0F0Full;
+        bits = (bits | (bits << 2)) & 0x3333333333333333ull;
+        bits = (bits | (bits << 1)) & 0x5555555555555555ull;
         return bits;
     };
 
     std::vector<std::pair<std::uint64_t, std::size_t>> order(parts.size());
     for(std::size_t i = 0; i < parts.size(); ++i) {
         const CGAL::Bbox_2& box = boxes[i];
-        const auto x            = static_cast<std::uint32_t>(((box.xmin() + box.xmax()) / 2 - total.xmin()) * sx);
-        const auto y            = static_cast<std::uint32_t>(((box.ymin() + box.ymax()) / 2 - total.ymin()) * sy);
-        order[i]                = {spread(x) | (spread(y) << 1), i};
+        const auto x = static_cast<std::uint32_t>(((box.xmin() + box.xmax()) / 2 - total.xmin()) * sx);
+        const auto y = static_cast<std::uint32_t>(((box.ymin() + box.ymax()) / 2 - total.ymin()) * sy);
+        order[i] = {spread(x) | (spread(y) << 1), i};
     }
     std::ranges::sort(order);
 
@@ -221,7 +221,7 @@ Polyline weldClosedDuplicates(const Polyline& poly) {
 
     Polyline out;
     out.closed = poly.closed;
-    out.width  = poly.width;
+    out.width = poly.width;
     out.reserve(poly.size());
     for(const Vertex& v: poly) {
         if(!out.empty() && static_cast<QPointF>(out.back()) == static_cast<QPointF>(v)) {
@@ -275,7 +275,7 @@ std::optional<GPoly> buildGPoly(const Polyline& poly, double t) {
     const std::size_t n = poly.size();
     for(std::size_t i = 0; i < n; ++i) {
         const Vertex& from = poly[i];
-        const Vertex& to   = poly[(i + 1) % n];
+        const Vertex& to = poly[(i + 1) % n];
         const K::Point_2 src(from.x(), from.y());
         const K::Point_2 tgt(to.x(), to.y());
         if(src == tgt) continue; // вырожденное ребро
@@ -416,8 +416,8 @@ Polyline toPolyline(const GPoly& pgn) {
 
     for(auto it = pgn.curves_begin(); it != pgn.curves_end(); ++it) {
         const CurveGeometry curve = geometryOf(*it);
-        const QPointF src         = curve.from;
-        const double bulge        = curve.linear ? 0.0 : std::tan(curve.sweep / 4.0);
+        const QPointF src = curve.from;
+        const double bulge = curve.linear ? 0.0 : std::tan(curve.sweep / 4.0);
 
         // Продолжение той же дуги: своей вершины ему не нужно, у предыдущей
         // просто растёт размах. Прогиб больше единицы -- законная дуга больше
@@ -498,8 +498,8 @@ template <typename Part>
 void joinAllImpl(PolySet& region, std::vector<Part> parts) {
     if(parts.empty()) return;
 
-    const std::size_t n      = parts.size();
-    const unsigned workers   = workerCount();
+    const std::size_t n = parts.size();
+    const unsigned workers = workerCount();
     const std::size_t chunks = std::min(chunksPerWorker * workers, n / minChunkSize);
     if(chunks < 2) {
         region.join(parts.begin(), parts.end());
@@ -652,7 +652,7 @@ void appendToPath(QPainterPath& path, const GPoly& pgn) {
         // Углы у arcTo отсчитываются в другую сторону -- отсюда минусы (та
         // же договорённость, что и в Polyline::toPath()).
         constexpr double toDeg = 180.0 / std::numbers::pi;
-        const double start     = std::atan2(curve.from.y() - curve.center.y(), curve.from.x() - curve.center.x());
+        const double start = std::atan2(curve.from.y() - curve.center.y(), curve.from.x() - curve.center.x());
         const QRectF box(curve.center.x() - curve.radius, curve.center.y() - curve.radius,
             2.0 * curve.radius, 2.0 * curve.radius);
         path.arcTo(box, -start * toDeg, -curve.sweep * toDeg);
@@ -687,7 +687,7 @@ QRectF boundingRect(const GPoly& pgn) {
         grow(curve.from);
         grow(curve.to);
         if(curve.linear) continue;
-        const double left  = std::min(curve.from.x(), curve.to.x());
+        const double left = std::min(curve.from.x(), curve.to.x());
         const double right = std::max(curve.from.x(), curve.to.x());
         if(curve.center.x() <= left || curve.center.x() >= right) continue;
         // Какая из ветвей -- тем же признаком, что и в crossesRayUp.

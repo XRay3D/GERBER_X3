@@ -51,8 +51,7 @@ void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem* o
     // draw tool
     const auto id = toolId(); // чисто виртуальный вызов -- ровно один на кадр
     if(id > Tool::ID{}) {
-        const double sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(
-                                    painter->worldTransform());
+        const double sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(painter->worldTransform());
         painter->setPen(QPen{pathColor_, 2 * sf});
         painter->setBrush(Qt::NoBrush);
         if(!toolPath_.isEmpty())

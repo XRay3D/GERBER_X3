@@ -43,9 +43,9 @@ private:
     int32_t fileId_{-1};
     QTextEdit* tbLine;
     QTextBrowser* tbCode;
-    Viewer3d* viewer{};       // nullptr, если OpenGL недоступен
-    int centeredLine_{-1};    // строка, на которую уже наведена камера
-    bool centeringArmed_{};   // слежение выключено на время смены программы
+    Viewer3d* viewer{};     // nullptr, если OpenGL недоступен
+    int centeredLine_{-1};  // строка, на которую уже наведена камера
+    bool centeringArmed_{}; // слежение выключено на время смены программы
 
     void syncViewerFromText();
     void syncTextFromViewer(int lineNo);

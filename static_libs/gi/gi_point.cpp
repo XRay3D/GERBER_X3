@@ -308,7 +308,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     case 0:
         if(pt[0].x() > center.x()) pt[0].rx() = center.x();
         if(pt[0].y() > center.y()) pt[0].ry() = center.y();
-        pt[2]      = App::pin2().lastPos_ - (pt[0] - lastPos_);
+        pt[2] = App::pin2().lastPos_ - (pt[0] - lastPos_);
         pt[1].rx() = pt[2].x();
         pt[1].ry() = pt[0].y();
         pt[3].rx() = pt[0].x();
@@ -317,7 +317,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     case 1:
         if(pt[1].x() < center.x()) pt[1].rx() = center.x();
         if(pt[1].y() > center.y()) pt[1].ry() = center.y();
-        pt[3]      = App::pin3().lastPos_ - (pt[1] - lastPos_);
+        pt[3] = App::pin3().lastPos_ - (pt[1] - lastPos_);
         pt[0].rx() = pt[3].x();
         pt[0].ry() = pt[1].y();
         pt[2].rx() = pt[1].x();
@@ -326,7 +326,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     case 2:
         if(pt[2].x() < center.x()) pt[2].rx() = center.x();
         if(pt[2].y() < center.y()) pt[2].ry() = center.y();
-        pt[0]      = App::pin0().lastPos_ - (pt[2] - lastPos_);
+        pt[0] = App::pin0().lastPos_ - (pt[2] - lastPos_);
         pt[1].rx() = pt[2].x();
         pt[1].ry() = pt[0].y();
         pt[3].rx() = pt[0].x();
@@ -335,7 +335,7 @@ void Pin::mouseMoveEvent(QGraphicsSceneMouseEvent* event) {
     case 3:
         if(pt[3].x() > center.x()) pt[3].rx() = center.x();
         if(pt[3].y() < center.y()) pt[3].ry() = center.y();
-        pt[1]      = App::pin1().lastPos_ - (pt[3] - lastPos_);
+        pt[1] = App::pin1().lastPos_ - (pt[3] - lastPos_);
         pt[0].rx() = pt[3].x();
         pt[0].ry() = pt[1].y();
         pt[2].rx() = pt[1].x();
@@ -526,8 +526,7 @@ void LayoutFrames::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*op
     painter->setRenderHint(QPainter::Antialiasing, false);
     painter->setBrush(Qt::NoBrush);
 
-    const double sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(
-                                painter->worldTransform());
+    const double sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(painter->worldTransform());
     QPen pen{
         QColor{255, 0, 255},
         2.0 * sf

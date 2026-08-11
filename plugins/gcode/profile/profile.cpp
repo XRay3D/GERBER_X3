@@ -58,18 +58,18 @@ bool trimFront(Geo::Polyline& path, double length) {
     if(drop + 1 >= path.size()) return false; // съели весь путь
 
     const Geo::Vertex from = path[drop];
-    const Geo::Vertex to   = path[drop + 1];
-    const double len       = Geo::segmentLength(from, to);
-    const double t         = len > 0.0 ? rest / len : 0.0;
+    const Geo::Vertex to = path[drop + 1];
+    const double len = Geo::segmentLength(from, to);
+    const double t = len > 0.0 ? rest / len : 0.0;
 
     Geo::Vertex cut{from};
     if(auto arc = Geo::arcOf(from, to, from.bulge)) {
         // У оставшегося куска дуги свой прогиб: угол сократился в (1 - t) раз.
         static_cast<QPointF&>(cut) = arc->pointAt(t);
-        cut.bulge                  = Geo::bulgeOf(arc->theta * (1.0 - t));
+        cut.bulge = Geo::bulgeOf(arc->theta * (1.0 - t));
     } else {
         static_cast<QPointF&>(cut) = from + (to - from) * t;
-        cut.bulge                  = 0.0;
+        cut.bulge = 0.0;
     }
 
     path.erase(path.begin(), path.begin() + drop);
@@ -229,7 +229,7 @@ void Creator::createProfile(const Tool& tool, const double depth) {
         // С припуском черновой уходит ещё на allowance: его кромка встаёт не на
         // целевой контур, а на allowance дальше от детали, оставляя этот слой
         // чистовому проходу.
-        const double sign  = gcp.side() == GCode::Outer ? +1.0 : -1.0;
+        const double sign = gcp.side() == GCode::Outer ? +1.0 : -1.0;
         const double delta = sign * (toolDiameter + 2.0 * (finishing ? allowance : 0.0));
 
         // Разбор на тела с отверстиями (groupedPaths) больше не нужен:
@@ -339,13 +339,13 @@ void Creator::cornerTrimming() {
 
         Geo::Polyline out;
         out.closed = path.closed;
-        out.width  = path.width;
+        out.width = path.width;
         out.reserve(count * 3);
 
         // У разомкнутого пути крайние вершины углами не бывают: соседа с
         // одной стороны просто нет.
         const std::size_t first = path.closed ? 0 : 1;
-        const std::size_t last  = path.closed ? count : count - 1;
+        const std::size_t last = path.closed ? count : count - 1;
 
         // Индексами, а не рэнджами: соседей у замкнутого пути надо брать по
         // кругу, и v::pairwise/adjacent последнюю пару (back -> front) не дают.
@@ -389,7 +389,7 @@ Geo::Polylines Creator::orderContours(Geo::Polylines contours) {
         }
     } else { // Grouping by nesting depth
         QPointF from = App::settings().mkrZeroOffset();
-        auto walk    = [&](this auto&& walk, std::size_t idx) -> void {
+        auto walk = [&](this auto&& walk, std::size_t idx) -> void {
             Geo::Polyline path = std::move(contours[idx]);
             // Врезаться дешевле там, где инструмент уже оказался.
             GCode::rotateToNearest(path, from);
@@ -425,7 +425,7 @@ void Creator::makeFinishing() {
     // Целевой контур -- тот самый, что раньше был единственным: офсет ровно на
     // радиус фрезы. Порядок и направление те же, что у чернового, иначе проходы
     // не будут соответствовать друг другу.
-    const double sign     = gcp.side() == GCode::Outer ? +1.0 : -1.0;
+    const double sign = gcp.side() == GCode::Outer ? +1.0 : -1.0;
     Geo::Polylines target = orderContours(Geo::Inflate(closedSrc, sign * toolDiameter).contours());
     if(target.empty()) return;
 

@@ -12,10 +12,10 @@
 
 #include "app.h"
 #include "geo/cancel.h"
-#include "progress.h"
 #include "geo/polygon.h"
 #include "gi_dbg.h"
 #include "graphicsview.h"
+#include "progress.h"
 
 #include "qmath.h"
 #include <QElapsedTimer>

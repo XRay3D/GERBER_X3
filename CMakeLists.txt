@@ -63,14 +63,14 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
   execute_process(
     COMMAND ${CMAKE_CXX_COMPILER} -print-file-name=libstdc++.so
     OUTPUT_VARIABLE CXX_RUNTIME_LIB
-    OUTPUT_STRIP_TRAILING_WHITESPACE
-    ERROR_QUIET)
+    OUTPUT_STRIP_TRAILING_WHITESPACE ERROR_QUIET)
   if(CXX_RUNTIME_LIB AND IS_ABSOLUTE "${CXX_RUNTIME_LIB}")
     cmake_path(SET CXX_RUNTIME_LIB NORMALIZE "${CXX_RUNTIME_LIB}")
     cmake_path(GET CXX_RUNTIME_LIB PARENT_PATH CXX_RUNTIME_DIR)
     # Системный каталог прописывать незачем -- он и так в путях загрузчика.
     if(NOT CXX_RUNTIME_DIR MATCHES "^/(usr/)?lib(64)?$")
-      message(STATUS "libstdc++ компилятора не системная, RPATH: ${CXX_RUNTIME_DIR}")
+      message(
+        STATUS "libstdc++ компилятора не системная, RPATH: ${CXX_RUNTIME_DIR}")
       list(APPEND CMAKE_BUILD_RPATH "${CXX_RUNTIME_DIR}")
       list(APPEND CMAKE_INSTALL_RPATH "${CXX_RUNTIME_DIR}")
     endif()
@@ -92,7 +92,9 @@ set(CLIPPER2_USINGZ "ONLY")
 # Именно CACHE: у simdjson cmake_minimum_required 3.14 (CMP0126 OLD), его
 # собственный set(... CACHE STRING) снёс бы обычную переменную и оставил AUTO,
 # а AUTO-детект гоняет try_compile без нашего directory-флага -freflection.
-set(SIMDJSON_STATIC_REFLECTION_MODE ON CACHE STRING "" FORCE)
+set(SIMDJSON_STATIC_REFLECTION_MODE
+    ON
+    CACHE STRING "" FORCE)
 set(SIMDJSON_DEVELOPER_MODE OFF)
 
 fetchcontent_declare(
@@ -107,13 +109,13 @@ fetchcontent_declare(
   GIT_TAG main
   GIT_SHALLOW ON
   SOURCE_SUBDIR CPP)
-  # Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
-  # v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
-  fetchcontent_declare(
-    simdjson
-    GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
-    GIT_TAG 20b28712ffce8320237b75a587d35a2e89140577
-    GIT_SHALLOW ON)
+# Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
+# v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
+fetchcontent_declare(
+  simdjson
+  GIT_REPOSITORY "https://github.com/simdjson/simdjson.git"
+  GIT_TAG v4.6.6
+  GIT_SHALLOW ON)
 # Сторонние цели собираются БЕЗ LTO под mingw. Наш код идёт с -Wa,-mbig-obj
 # (у COFF предел в 65535 секций, см. ниже), и объектные файлы получают иную
 # разновидность контейнера COFF. Сторонние цели наших флагов не наследуют --

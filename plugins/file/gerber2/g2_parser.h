@@ -22,7 +22,7 @@ struct ParseResult {
     ApertureMap apertures;
     std::map<QString, Macro> macros;
     Objects objects;      // изображение в порядке наложения
-    Geo::Polygon strokes;       // осевые линии draw/arc — для отображения «путей»
+    Geo::Polygon strokes; // осевые линии draw/arc — для отображения «путей»
     QStringList warnings; // нереализованные/подозрительные команды
     QString error;        // фатальная ошибка (пусто — всё хорошо)
     bool valid() const { return error.isEmpty(); }

@@ -15,8 +15,8 @@
 #include "gi_point.h"
 #include "gridtick.h"
 
-#include "project.h"
 #include "openglcheck.h"
+#include "project.h"
 #include "ruler.h"
 #include "utils.h"
 
@@ -328,7 +328,7 @@ void GraphicsView::updateSceneRectToContents() {
     // именно sceneRect, и при таком перекосе почти все элементы падают в одну
     // горсть листьев: поиск вырождается в линейный перебор.
     QRectF r = scene()->itemsBoundingRect();
-    if(r.isEmpty()) r = {-100, -100, 200, 200}; // пустой проект, мм
+    if(r.isEmpty()) r = {-100, -100, 200, 200};             // пустой проект, мм
     const auto pad = std::max(r.width(), r.height()) * 0.5; // запас на панорамирование
     scene()->setSceneRect(r.adjusted(-pad, -pad, pad, pad));
 }
@@ -920,7 +920,7 @@ void GraphicsView::drawOverlay(QPainter* painter) {
         const auto& p = cursorViewPos_;
         painter->setPen({Qt::red, 1.0});
         QLine lines[2]{
-            {p.x() - kCrossArmPx, p.y(),                p.x() + kCrossArmPx, p.y()               },
+            {p.x() - kCrossArmPx, p.y(),               p.x() + kCrossArmPx, p.y()              },
             {p.x(),               p.y() - kCrossArmPx, p.x(),               p.y() + kCrossArmPx}
         };
         painter->drawLines(lines, 2);

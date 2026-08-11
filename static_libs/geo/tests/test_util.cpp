@@ -101,7 +101,12 @@ void UtilTest::bulgeMathRoundTrips() {
     const auto a = arcOf(p1, p2, bulge);
     QVERIFY(a.has_value());
     QVERIFY(near(a->theta, 4.0 * std::atan(bulge)));
-    QVERIFY(near(a->radius * std::abs(a->theta), Polyline{Vertex{p1, bulge}, Vertex{p2}}.perimeter(), 1e-9));
+    QVERIFY(near(a->radius * std::abs(a->theta), Polyline{
+                                                     Vertex{p1, bulge},
+                                                     Vertex{p2}
+    }
+                                                     .perimeter(),
+        1e-9));
     // Концы дуги лежат на ней самой.
     QVERIFY(near(a->pointAt(0.0).x(), p1.x(), 1e-9) && near(a->pointAt(0.0).y(), p1.y(), 1e-9));
     QVERIFY(near(a->pointAt(1.0).x(), p2.x(), 1e-9) && near(a->pointAt(1.0).y(), p2.y(), 1e-9));
@@ -109,7 +114,7 @@ void UtilTest::bulgeMathRoundTrips() {
     // Обратная задача: по центру и направлению получается тот же прогиб.
     QVERIFY(near(bulgeOf(p1, p2, a->center, a->dir()), bulge, 1e-9));
 
-    QVERIFY(!arcOf(p1, p2, 0.0).has_value());  // прямая
+    QVERIFY(!arcOf(p1, p2, 0.0).has_value());   // прямая
     QVERIFY(!arcOf(p1, p1, bulge).has_value()); // вырожденная хорда
 }
 
@@ -146,10 +151,10 @@ void UtilTest::transformKeepsShapeAndFlipsOnMirror() {
 void UtilTest::similarityRejectsNonUniformScale() {
     QVERIFY(isSimilarity(QTransform{}));
     QVERIFY(isSimilarity(QTransform::fromScale(2.0, 2.0)));
-    QVERIFY(isSimilarity(QTransform::fromScale(-1.0, 1.0)));   // зеркало -- тоже подобие
+    QVERIFY(isSimilarity(QTransform::fromScale(-1.0, 1.0))); // зеркало -- тоже подобие
     QVERIFY(isSimilarity(QTransform{}.rotate(30.0)));
     QVERIFY(isSimilarity(QTransform::fromTranslate(5.0, 5.0)));
-    QVERIFY(!isSimilarity(QTransform::fromScale(2.0, 3.0)));   // дуга стала бы эллипсом
+    QVERIFY(!isSimilarity(QTransform::fromScale(2.0, 3.0))); // дуга стала бы эллипсом
     QVERIFY(!isSimilarity(QTransform{}.shear(0.5, 0.0)));
 
     QVERIFY(hasArcs(circle(4.0)));
@@ -158,7 +163,12 @@ void UtilTest::similarityRejectsNonUniformScale() {
 
 void UtilTest::closeAndReversedKeepArcs() {
     // Контур с повторённой замыкающей точкой -- ровно то, что приносят парсеры.
-    Polyline poly{Vertex{0.0, 0.0}, Vertex{10.0, 0.0}, Vertex{10.0, 10.0, 1.0}, Vertex{0.0, 0.0}};
+    Polyline poly{
+        Vertex{0.0, 0.0},
+        Vertex{10.0, 0.0},
+        Vertex{10.0, 10.0, 1.0},
+        Vertex{0.0, 0.0}
+    };
     poly.close();
     QVERIFY(poly.isClosed());
     QCOMPARE(poly.size(), std::size_t(3));

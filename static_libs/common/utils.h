@@ -37,15 +37,15 @@ struct Finaly final {
     ~Finaly() { func(); }
 };
 
-using nS   = std::nano;
-using uS   = std::micro;
-using mS   = std::milli;
-using Sec  = std::ratio<1>;
-using Min  = std::ratio<60>;
+using nS = std::nano;
+using uS = std::micro;
+using mS = std::milli;
+using Sec = std::ratio<1>;
+using Min = std::ratio<60>;
 using Hour = std::ratio<3600>;
 
 template <typename T, typename... Ts>
-constexpr bool contains_v                              = std::disjunction_v<std::is_same<T, Ts>...>; // Or
+constexpr bool contains_v = std::disjunction_v<std::is_same<T, Ts>...>; // Or
 template <typename T, typename... Ts> concept Contains = contains_v<T, Ts...>;
 
 namespace chr = std::chrono;
@@ -87,11 +87,11 @@ struct Timer {
     ~Timer() { now(); }
 };
 
-using Timer_nS  = Timer<nS>;
-using Timer_uS  = Timer<uS>;
-using Timer_mS  = Timer<mS>;
-using TimerSec  = Timer<Sec>;
-using TimerMin  = Timer<Min>;
+using Timer_nS = Timer<nS>;
+using Timer_uS = Timer<uS>;
+using Timer_mS = Timer<mS>;
+using TimerSec = Timer<Sec>;
+using TimerMin = Timer<Min>;
 using TimerHour = Timer<Hour>;
 
 //------------------------------------------------------------------------------
@@ -242,18 +242,18 @@ inline constexpr auto utf8toUtf16(char const (&utf8)[Len]) {
         unsigned char ch = utf8[i++];
 
         if(ch <= 0x7F) { // 0b01111111
-            uni  = ch;
+            uni = ch;
             todo = 0;
         } else if(ch <= 0xBF) // 0b10111111
             throw error;
         else if(ch <= 0xDF) { // 0b11011111
-            uni  = ch & 0x1F; // 0b00011111
+            uni = ch & 0x1F;  // 0b00011111
             todo = 1;
         } else if(ch <= 0xEF) { // 0b11101111
-            uni  = ch & 0x0F;   // 0b00001111
+            uni = ch & 0x0F;    // 0b00001111
             todo = 2;
         } else if(ch <= 0xF7) { // 0b11110111
-            uni  = ch & 0x07;   // 0b00000111
+            uni = ch & 0x07;    // 0b00000111
             todo = 3;
         } else
             throw error;
@@ -342,7 +342,7 @@ template <class Ty>
 inline constexpr Ty Max = Ty{};
 template <class Ty>
 inline constexpr Ty Tokens = Ty{};
-using sv                   = std::string_view;
+using sv = std::string_view;
 consteval auto trim(sv str) {
     auto isSpaceOrSep = [](auto ch) {
         return ch == ' ' || ch == ','; // || ch == '\f' || ch == '\n' || ch == '\r' || ch == '\t' || ch == '\v';
@@ -680,8 +680,8 @@ namespace rfl {
 
 struct options {
     bool pretty = false; // многострочный вывод с отступами
-    int indent  = 2;     // ширина одного уровня отступа
-    bool deref  = false; // разыменовывать ненулевые указатели и
+    int indent = 2;      // ширина одного уровня отступа
+    bool deref = false;  // разыменовывать ненулевые указатели и
                          // печатать поля: "0x... -> Type{...}"
     int max_depth = 32;  // предохранитель: глубже этого указатели
                          // печатаются адресом (защита от циклов)
@@ -783,9 +783,9 @@ std::string class_to_string(const T& value, options opt, int depth) {
     std::string out{std::meta::display_string_of(^^T)};
     out += '{';
     bool first = true;
-    auto sep   = [&]() -> std::string {
+    auto sep = [&]() -> std::string {
         std::string s = first ? "" : (opt.pretty ? "," : ", ");
-        first         = false;
+        first = false;
         return s + ind(opt, depth + 1);
     };
 
@@ -866,7 +866,7 @@ std::string to_string(const T& value, options opt, int depth) {
             typename T::mapped_type;
         };
         std::string out = is_map ? "{" : "[";
-        bool first      = true;
+        bool first = true;
         for(const auto& e: value) {
             if(!first) out += ", ";
             first = false;

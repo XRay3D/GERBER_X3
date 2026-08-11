@@ -211,8 +211,8 @@ Polylines fromPath(const QPainterPath& path, double tolerance = 5e-3);
 QPainterPath toPath(const Polylines& polylines);
 
 constexpr double angleTo(const QPointF& pt1, const QPointF& pt2) noexcept {
-    const QPointF d               = pt2 - pt1;
-    const double theta            = atan2(-d.y(), d.x()) * 360.0 / (pi * 2);
+    const QPointF d = pt2 - pt1;
+    const double theta = atan2(-d.y(), d.x()) * 360.0 / (pi * 2);
     const double theta_normalized = theta < 0 ? theta + 360 : theta;
     if(qFuzzyCompare(theta_normalized, double(360)))
         return 0.0;
@@ -221,7 +221,7 @@ constexpr double angleTo(const QPointF& pt1, const QPointF& pt2) noexcept {
 }
 
 constexpr double angleRadTo(const QPointF& pt1, const QPointF& pt2) noexcept {
-    const QPointF d    = pt2 - pt1;
+    const QPointF d = pt2 - pt1;
     const double theta = atan2(-d.y(), d.x());
     return theta;
     const double theta_normalized = theta < 0 ? theta + (pi * 2) : theta; // NOTE theta_normalized

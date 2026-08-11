@@ -10,7 +10,6 @@
  *******************************************************************************/
 #pragma once
 
-
 #include "tool.h"
 #include <QAbstractTableModel>
 #include <QIcon>

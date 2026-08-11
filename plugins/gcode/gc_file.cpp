@@ -9,10 +9,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #include "gc_file.h"
-#include "gc_programdialog.h"
 #include "gc_jsproxy.h"
 #include "gc_node.h"
 #include "gc_plugin.h"
+#include "gc_programdialog.h"
 
 #include "app.h"
 #include "gi.h"
@@ -337,7 +337,7 @@ Geo::Polylines File::mirrorAndOffsetCurves(const QPointF& offset, Geo::Polylines
         const double k = Gi::Pin::minX() + Gi::Pin::maxX();
         if(toolType != Tool::Laser) r::for_each(curves, &Geo::Polyline::reverse);
         for(Geo::Vertex& v: v::join(curves)) {
-            v.rx()  = -v.x() + k;
+            v.rx() = -v.x() + k;
             v.bulge = -v.bulge; // зеркало разворачивает обход дуги
         }
     }
@@ -353,7 +353,7 @@ std::vector<double> File::getDepths() {
     if(gDepth < tool.passDepth() || qFuzzyCompare(gDepth, tool.passDepth()))
         return {-gDepth - tool.getDepth()};
 
-    const int count    = static_cast<int>(ceil(gDepth / tool.passDepth()));
+    const int count = static_cast<int>(ceil(gDepth / tool.passDepth()));
     const double depth = gDepth / count;
     std::vector<double> depths(count);
     for(int i{}; i < count; ++i)
@@ -582,7 +582,7 @@ void File::saveMillingPocket(const QPointF& offset) {
     // lines_.emplace_back(App::gcSettings().spindleOn());
 
     const std::vector<double> depths = getDepths();
-    double diameter                  = tool().diameter();
+    double diameter = tool().diameter();
 
     std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
 
@@ -626,7 +626,7 @@ void File::saveMillingProfile(const QPointF& offset) {
     for(const Geo::Polylines& paths: pathss) {
         if(paths.size() == 1) {
             const Geo::Polyline& path = paths.front();
-            double perimeter          = path.perimeter();
+            double perimeter = path.perimeter();
             if(paths.front().isClosed()) { // Spiral
                 startPath(path.front());
                 for(double depth: depths)
@@ -702,7 +702,9 @@ namespace {
 // -- кривизна сегмента, начинающегося в вершине), и, скопированный в переезд,
 // рисует холостой ход дугой. Отсюда QPointF: до полилинии он доезжает уже
 // голой точкой.
-Geo::Polyline travel(QPointF from, QPointF to) { return Geo::Polyline{QPolygonF{from, to}}; }
+Geo::Polyline travel(QPointF from, QPointF to) { return Geo::Polyline{
+    QPolygonF{from, to}
+ }; }
 
 } // namespace
 

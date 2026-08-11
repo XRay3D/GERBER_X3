@@ -12,7 +12,6 @@
 
 #include "graphicsview.h"
 
-
 #include <span>
 
 bool updateRect();

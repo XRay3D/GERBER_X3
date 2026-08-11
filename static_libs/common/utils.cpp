@@ -23,7 +23,7 @@ QString toQString(std::string_view cp1251Str) {
 }
 
 std::string toCp1251(const QString& utf16Str) {
-    UErrorCode error       = U_ZERO_ERROR;
+    UErrorCode error = U_ZERO_ERROR;
     const UChar* utf16Data = reinterpret_cast<const UChar*>(utf16Str.utf16());
     std::string cp1251Buf(utf16Str.size() * 2, '\0');
     auto ucnv = ucnv_open("windows-1251", &error);
@@ -101,7 +101,7 @@ bool hasBom(std::string_view data) {
 }
 
 bool isValidUtf8(std::string_view data) noexcept {
-    std::size_t i       = 0;
+    std::size_t i = 0;
     const std::size_t n = std::size(data);
 
     while(i < n) {
@@ -159,10 +159,10 @@ bool isValidUtf8(std::string_view data) noexcept {
 }
 
 QIcon drawIcon(const QPainterPath& pPath, QColor color, bool stroke) {
-    auto rect    = pPath.boundingRect();
+    auto rect = pPath.boundingRect();
     double scale = static_cast<double>(IconSize) / std::max(rect.width(), rect.height());
-    double ky    = rect.bottom() * scale;
-    double kx    = rect.left() * scale;
+    double ky = rect.bottom() * scale;
+    double kx = rect.left() * scale;
     QPixmap pixmap{IconSize, IconSize};
     pixmap.fill(Qt::transparent);
     QPainter painter;

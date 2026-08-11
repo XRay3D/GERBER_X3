@@ -375,12 +375,12 @@ std::vector<QString> Parser::cleanAndFormatFile(QString data) {
             continue;
         } else if(line.startsWith(u"%AM"_s)) {
             lastLineClose(state, lastLine);
-            state    = Macro;
+            state = Macro;
             lastLine = line;
             continue;
         } else if(line.startsWith(u'%')) {
             lastLineClose(state, lastLine);
-            state    = Param;
+            state = Param;
             lastLine = line;
             continue;
         } else if(line.endsWith(u'*') && line.length() > 1) {
@@ -433,7 +433,7 @@ bool Parser::parseNumber(QString Str, /*PType*/ double& val, FormatDir dir) {
                                                  : file->format().yDecimal;
         const auto integer = dir == FormatDir::X ? file->format().xInteger
                                                  : file->format().yInteger;
-        const auto maxLen  = integer + decimal;
+        const auto maxLen = integer + decimal;
 
         if(Str.indexOf(u"+"_s) == 0) {
             Str.remove(0, 1);
@@ -495,7 +495,7 @@ void Parser::addPath() {
                 GrObject::Type(type),
                 std::move(path_),
             });
-            go.name  = u"D%1|Polygon"_s.arg(state_.aperture());
+            go.name = u"D%1|Polygon"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject{
@@ -532,7 +532,7 @@ void Parser::addPath() {
                 GrObject::Type(type),
                 std::move(path_),
             });
-            go.name  = u"D%1|PolyLine"_s.arg(state_.aperture());
+            go.name = u"D%1|PolyLine"_s.arg(state_.aperture());
         } break;
         case WorkingType::StepRepeat:
             stepRepeat_.storage.append(GrObject{
@@ -605,7 +605,7 @@ void Parser::addFlash() {
                 GrObject::Type(type),
             });
         go.name = u"D%1|%2"_s.arg(state_.aperture()).arg(ap->name());
-        go.pos  = state_.curPos();
+        go.pos = state_.curPos();
     } break;
     case WorkingType::StepRepeat:
         stepRepeat_.storage.append(
@@ -706,9 +706,9 @@ Geo::Polygons Parser::createLine() {
 
     AbstractAperture* ap = file->apertures_[state_.aperture()].get();
     if(ap->type() == Rectangle) {
-        auto rect       = static_cast<ApRectangle*>(ap);
+        auto rect = static_cast<ApRectangle*>(ap);
         const double sc = state_.scaling();
-        solution        = sweepRectangle(path_, rect->width_ * sc, rect->height_ * sc);
+        solution = sweepRectangle(path_, rect->width_ * sc, rect->height_ * sc);
     } else {
         // Круглая апертура: след -- сумма Минковского контура с диском, а это
         // ровно раздувание. delta у Geo::Inflate -- ПОЛНАЯ ширина, как и у
@@ -1141,8 +1141,8 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
     switch(state_.quadrant()) {
     case Multi: { // G75
         const double radius1 = sqrt(pow(i, 2.0) + pow(j, 2.0));
-        const double start   = atan2(-j, -i); // Start angle
-        const auto& center   = centerPos.front();
+        const double start = atan2(-j, -i); // Start angle
+        const auto& center = centerPos.front();
         // Численные ошибки могут помешать, start == stop, поэтому мы проверяем заблаговременно.
         // Ч­то должно привести к образованию дуги в 360 градусов.
         const double stop = (arcStartPos == QPointF{x, y})
@@ -1162,11 +1162,11 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
             j = center.y() - arcStartPos.y();
             // Углы
             const double start = atan2(-j, -i);
-            const double stop  = atan2(-center.y() + y, -center.x() + x);
+            const double stop = atan2(-center.y() + y, -center.x() + x);
             const double angle = arcAngle(start, stop);
             if(angle < (pi + 1e-5) * 0.5) {
                 arcPath = constructArc(center, radius1, start, stop);
-                valid   = true;
+                valid = true;
                 break;
             }
         }

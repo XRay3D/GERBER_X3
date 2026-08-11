@@ -41,8 +41,8 @@ std::optional<Arc> arcOf(QPointF p1, QPointF p2, double bulge) {
     // Знаковая стрела прогиба -- точное тождество sagitta = (хорда/2) * bulge,
     // из него же знаковый радиус по прямоугольному треугольнику
     // (хорда/2, sagitta, radius - sagitta).
-    const double halfChord    = chord / 2.0;
-    const double sagitta      = bulge * halfChord;
+    const double halfChord = chord / 2.0;
+    const double sagitta = bulge * halfChord;
     const double radiusSigned = (halfChord * halfChord + sagitta * sagitta) / (2.0 * sagitta);
 
     // Левая нормаль к хорде: центр лежит на ней, на знаковом расстоянии
@@ -52,10 +52,10 @@ std::optional<Arc> arcOf(QPointF p1, QPointF p2, double bulge) {
     const QPointF mid{(p1.x() + p2.x()) / 2.0, (p1.y() + p2.y()) / 2.0};
 
     Arc arc;
-    arc.center     = mid + n * (radiusSigned - sagitta);
-    arc.radius     = std::abs(radiusSigned);
+    arc.center = mid + n * (radiusSigned - sagitta);
+    arc.radius = std::abs(radiusSigned);
     arc.startAngle = std::atan2(p1.y() - arc.center.y(), p1.x() - arc.center.x());
-    arc.theta      = 4.0 * std::atan(bulge);
+    arc.theta = 4.0 * std::atan(bulge);
     return arc;
 }
 
@@ -63,7 +63,7 @@ double arcSweep(QPointF p1, QPointF p2, QPointF center, Vertex::Dir dir) {
     if(dir == Vertex::Line) return 0.0;
     const double a1 = std::atan2(p1.y() - center.y(), p1.x() - center.x());
     const double a2 = std::atan2(p2.y() - center.y(), p2.x() - center.x());
-    double theta    = a2 - a1;
+    double theta = a2 - a1;
     if(dir == Vertex::Ccw)
         while(theta <= 0.0) theta += 2.0 * pi;
     else
@@ -104,7 +104,7 @@ void stitchArcs(Polyline& poly, double tolerance) {
 
     for(std::size_t i{}; i < poly.size(); ++i) {
         const Vertex& vertex = poly[i];
-        const Vertex& next   = poly[(i + 1) % poly.size()];
+        const Vertex& next = poly[(i + 1) % poly.size()];
 
         if(!out.empty() && out.back().isArc() && vertex.isArc()) {
             const auto prev = arcOf(out.back(), vertex, out.back().bulge);
@@ -116,21 +116,20 @@ void stitchArcs(Polyline& poly, double tolerance) {
                 && distance(prev->center, curr->center) <= tolerance
                 && std::abs(prev->radius - curr->radius) <= tolerance) {
                 out.back().bulge = bulgeOf(sweep);
-                keptSweep        = sweep;
+                keptSweep = sweep;
                 continue; // вершина между двумя кусками одной дуги не нужна
             }
         }
 
         out.push_back(vertex);
         const auto arc = vertex.isArc() ? arcOf(vertex, next, vertex.bulge) : std::nullopt;
-        keptSweep      = arc ? arc->theta : 0.0;
+        keptSweep = arc ? arc->theta : 0.0;
     }
 
     out.closed = poly.closed;
-    out.width  = poly.width;
-    poly       = std::move(out);
+    out.width = poly.width;
+    poly = std::move(out);
 }
-
 
 //------------------------------------------------------------------------------
 
@@ -195,7 +194,7 @@ Polyline arc(QPointF center, double radius, double startAngle, double sweep) {
         // подменять его точкой на оси незачем.
         const double half = sweep < 0.0 ? -pi : pi;
         Polyline polyline{
-            Vertex{at(startAngle), bulgeOf(half)},
+            Vertex{at(startAngle),        bulgeOf(half)},
             Vertex{at(startAngle + half), bulgeOf(half)},
         };
         polyline.closed = true;
@@ -203,8 +202,8 @@ Polyline arc(QPointF center, double radius, double startAngle, double sweep) {
     }
 
     const int segments = std::max(1, static_cast<int>(std::ceil(std::abs(sweep) / pi)));
-    const double step  = sweep / segments;
-    const double b     = bulgeOf(step);
+    const double step = sweep / segments;
+    const double b = bulgeOf(step);
 
     Polyline polyline;
     polyline.reserve(segments + 1);
@@ -363,17 +362,17 @@ std::optional<Arc> arcOfCubic(QPointF start, QPointF ctrl1, QPointF ctrl2, QPoin
     constexpr int samples = 5;
     for(int i = 1; i <= samples; ++i) {
         const QPointF pt = at(i / static_cast<double>(samples + 1));
-        const double d   = std::hypot(pt.x() - center.x(), pt.y() - center.y());
+        const double d = std::hypot(pt.x() - center.x(), pt.y() - center.y());
         if(std::abs(d - radius) > tolerance * radius) return {};
     }
 
     // Направление -- по знаку поворота от радиуса к касательной в начале.
     const auto dir = cross(start - center, t0) > 0.0 ? Vertex::Ccw : Vertex::Cw;
     Arc result;
-    result.center     = center;
-    result.radius     = radius;
+    result.center = center;
+    result.radius = radius;
     result.startAngle = std::atan2(start.y() - center.y(), start.x() - center.x());
-    result.theta      = arcSweep(start, end, center, dir);
+    result.theta = arcSweep(start, end, center, dir);
     return result;
 }
 
@@ -381,8 +380,8 @@ std::optional<Arc> arcOfCubic(QPointF start, QPointF ctrl1, QPointF ctrl2, QPoin
 // контрольной ломаной: она мажорирует длину самой кривой.
 void flattenCubic(Polyline& polyline, QPointF start, QPointF ctrl1, QPointF ctrl2, QPointF end,
     double tolerance) {
-    auto dist          = [](QPointF a, QPointF b) { return std::hypot(b.x() - a.x(), b.y() - a.y()); };
-    const double hull  = dist(start, ctrl1) + dist(ctrl1, ctrl2) + dist(ctrl2, end);
+    auto dist = [](QPointF a, QPointF b) { return std::hypot(b.x() - a.x(), b.y() - a.y()); };
+    const double hull = dist(start, ctrl1) + dist(ctrl1, ctrl2) + dist(ctrl2, end);
     const int segments = std::clamp(static_cast<int>(std::ceil(hull / std::max(tolerance, eps))), 1, 64);
     for(int i = 1; i <= segments; ++i) {
         const double t = i / static_cast<double>(segments), u = 1.0 - t;

@@ -270,9 +270,9 @@ void Form::onAddBridgeClicked() {
 }
 
 void Form::updateBridges() {
-    Gi::Bridge::lenght   = ui->dsbxBridgeLenght->value();
+    Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
     Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    Gi::Bridge::side     = side;
+    Gi::Bridge::side = side;
     for(Gi::Bridge* item: App::grView().items<Gi::Bridge>())
         item->update();
 }

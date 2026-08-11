@@ -349,7 +349,7 @@ File::File(GCode::Params&& newGcp)
 }
 
 void File::genGcodeAndTile() {
-    auto& proj        = App::project();
+    auto& proj = App::project();
     const QRectF rect = proj.worckRect();
     for(size_t x{}; x < proj.stepsX(); ++x) {
         for(size_t y{}; y < proj.stepsY(); ++y) {

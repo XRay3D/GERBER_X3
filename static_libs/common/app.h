@@ -15,7 +15,6 @@
 #include <QObject>
 #include <QSharedMemory>
 
-
 #include "settings.h"
 #include "tool.h"
 #include "utils.h" //using namespace Qt::Literals;
@@ -61,26 +60,26 @@ using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
 using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
-#define SINGLETON(TYPE, SET, NAME)                \
-private:                                          \
-    class TYPE* NAME##_ = nullptr;                \
-                                                  \
-public:                                           \
-    static TYPE& NAME() {                         \
-        assert(app->NAME##_);                     \
-        return *app->NAME##_;                     \
-    }                                             \
+#define SINGLETON(TYPE, SET, NAME)                                                                               \
+private:                                                                                                         \
+    class TYPE* NAME##_ = nullptr;                                                                               \
+                                                                                                                 \
+public:                                                                                                          \
+    static TYPE& NAME() {                                                                                        \
+        assert(app->NAME##_);                                                                                    \
+        return *app->NAME##_;                                                                                    \
+    }                                                                                                            \
     /* Проверка app обязательна: указатели спрашивают и до создания App        \
-     * (выбор режима OpenGL в main), и после её разрушения -- туда ходит       \
-     * обработчик сообщений Qt, и на нулевом app он ронял процесс. */          \
-    static TYPE* NAME##Ptr() {                    \
-        return app ? app->NAME##_ : nullptr;      \
-    }                                             \
-    static void SET(TYPE* NAME) {                 \
-        if(app->NAME##_ && NAME)                  \
-            throw std::logic_error(__FUNCTION__); \
-        /*qInfo() << #NAME << NAME;*/             \
-        app->NAME##_ = NAME;                      \
+     * (выбор режима OpenGL в main), и после её разрушения -- туда ходит  \
+     * обработчик сообщений Qt, и на нулевом app он ронял процесс. */ \
+    static TYPE* NAME##Ptr() {                                                                                   \
+        return app ? app->NAME##_ : nullptr;                                                                     \
+    }                                                                                                            \
+    static void SET(TYPE* NAME) {                                                                                \
+        if(app->NAME##_ && NAME)                                                                                 \
+            throw std::logic_error(__FUNCTION__);                                                                \
+        /*qInfo() << #NAME << NAME;*/                                                                            \
+        app->NAME##_ = NAME;                                                                                     \
     }
 
 class App {

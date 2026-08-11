@@ -75,7 +75,7 @@ void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*option*/, 
 
     painter->setBrush(Qt::NoBrush);
     double min = std::min(shape_.boundingRect().width(), shape_.boundingRect().height());
-    double k   = std::min(min, scale_ * s);
+    double k = std::min(min, scale_ * s);
     painter->drawLine(
         component_.referencePoint() + QPointF{k, k},
         component_.referencePoint() - QPointF{k, k});
