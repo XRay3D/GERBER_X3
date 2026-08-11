@@ -93,8 +93,8 @@ MainWindow::MainWindow(QWidget* parent)
 
     connect(ui.grView, &GraphicsView::mouseMove, [this](const QPointF& point) {
         auto gpoint = point - App::project().zeroPos();
-        auto str    = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
-               point.x(), point.y(), gpoint.x(), gpoint.y());
+        auto str = std::format("Origin: X{:8.3f}, Y{:8.3f} | Zeroed: X{:8.3f},Y{:8.3f}",
+            point.x(), point.y(), gpoint.x(), gpoint.y());
         ui.statusbar->showMessage(QString::fromStdString(str));
         // ui.statusbar->showMessage(u"Origin: X = %1, Y = %2\tZeroed: X = %3, Y = %4"_s
         // .arg(point.x(), 8, 'f', 3)
@@ -287,6 +287,9 @@ void MainWindow::fileCanceled(const QString& fileName) {
     qInfo() << "загрузка отменена:" << fileName;
     loadingBy_.remove(fileName);
     if(loadProgress_) loadProgress_->removeTask(fileName);
+    // Отменяли перезагрузку -- снять пометку «этот файл уже перезагружается»,
+    // её ставит watcher и снимает только успешный Project::reload.
+    project_->reloadAborted(fileName);
 }
 
 void MainWindow::addFileToPro(AbstractFile* file) {
@@ -903,7 +906,7 @@ void MainWindow::saveSelectedGCodeFiles() {
         if(!gcFiles[i]->itemGroup()->isVisible())
             gcFiles.erase(gcFiles.begin() + i--);
 
-    using Key     = std::pair<size_t, Side>;
+    using Key = std::pair<size_t, Side>;
     using GcFiles = QList<GCode::File*>;
 
     std::map<Key, GcFiles> gcFilesMap;

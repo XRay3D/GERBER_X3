@@ -105,6 +105,12 @@ public:
     // QString fileNames();
     int contains(const QString& name);
 
+    // Перезагрузка не состоялась -- отменили или разбор упал. Путь надо забыть:
+    // в reloadPaths он держится ровно до успешного Project::reload и гасит
+    // повторные срабатывания watcher'а, так что иначе о СЛЕДУЮЩЕМ изменении
+    // этого файла не спросят уже никогда.
+    void reloadAborted(const QString& path);
+
     // AbstractShape
     int addShape(Shapes::AbstractShape* const shape);
     Shapes::AbstractShape* shape(int32_t id);

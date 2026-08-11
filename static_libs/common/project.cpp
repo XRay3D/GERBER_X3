@@ -468,6 +468,8 @@ int Project::contains(const QString& name) {
     return -1;
 }
 
+void Project::reloadAborted(const QString& path) { reloadPaths.erase(path); }
+
 bool Project::reload(int32_t id, AbstractFile* file) {
     reloadPaths.erase(file->name());
     if(files_.contains(id)) {
