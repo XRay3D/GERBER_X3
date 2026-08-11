@@ -9,7 +9,9 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "dxf_hatch.h"
+
 #include "dxf_file.h"
+#include "geo/boolean.h"
 
 #include <QPolygonF>
 
@@ -146,44 +148,19 @@ void Hatch::parse(CodeData& code) {
 Entity::Type Hatch::type() const { return Type::HATCH; }
 
 DxfGo Hatch::toGo() const {
-    qInfo("Hatch");              // TODO Hatch
-    Paths64 paths(edges.size()); // FIXME
+    qInfo("Hatch"); // TODO Hatch
+    // Каждая петля контура (boundary path) склеивается из своих рёбер в один
+    // замкнутый контур; вложенность петель задаёт правило EvenOdd, как её и
+    // задаёт сам DXF.
+    Geo::Polylines contours(edges.size());
     for(size_t i{}; i < edges.size(); ++i)
         for(auto&& edge: edges[i])
-            paths[i].append_range(~edge->toPolygon());
-    cl::Clipper64 clipper;
-    clipper.AddOpenSubject(paths); // FIXME AddSubject???
-    clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, paths);
-    r::for_each(paths | v::join, SetCSelf);
+            contours[i].append_range(Geo::Polyline{edge->toPolygon()});
+    for(Geo::Polyline& contour: contours) contour.close();
+    std::erase_if(contours, [](const Geo::Polyline& c) { return c.size() < 3; });
+    if(contours.empty()) return {};
 
-    // dbgPaths(paths, referencesToSourceBoundaryObject.front(), true);
-    return {id, {} /*edges.size() == 1 ? paths[0] : Path()*/, toCurves(paths)};
-
-    return {};
-}
-
-void Hatch::write(QDataStream& stream) const {
-    // stream << edges;
-
-    stream << referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
-
-    stream << centerPoint;
-    stream << pathTypeFlags;
-    stream << edgeType;
-    stream << thickness;
-    stream << radius;
-}
-
-void Hatch::read(QDataStream& stream) {
-    // stream >> edges;
-
-    stream >> referencesToSourceBoundaryObject; // Ссылка на исходные объекты контура (несколько записей)
-
-    stream >> centerPoint;
-    stream >> pathTypeFlags;
-    stream >> edgeType;
-    stream >> thickness;
-    stream >> radius;
+    return {id, {}, Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::EvenOdd, contours)};
 }
 
 } // namespace Dxf

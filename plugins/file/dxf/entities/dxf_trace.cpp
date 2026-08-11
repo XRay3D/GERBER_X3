@@ -62,31 +62,9 @@ DxfGo Trace::toGo() const {
     if(!poly.isPositive())
         poly.reverse();
 
-    DxfGo go{id, Geo::Polyline{poly}, {std::move(poly)}};
+    DxfGo go{id, Geo::Polyline{poly}, Geo::Polygons{Geo::Polylines{std::move(poly)}}};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Rect);
     return go;
-}
-
-void Trace::write(QDataStream& stream) const {
-    stream << firstCorner;
-    stream << secondCorner;
-    stream << thirdCorner;
-    stream << fourthCorner;
-
-    stream << corners;
-
-    stream << thickness;
-}
-
-void Trace::read(QDataStream& stream) {
-    stream >> firstCorner;
-    stream >> secondCorner;
-    stream >> thirdCorner;
-    stream >> fourthCorner;
-
-    stream >> corners;
-
-    stream >> thickness;
 }
 
 } // namespace Dxf

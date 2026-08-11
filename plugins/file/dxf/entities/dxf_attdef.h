@@ -21,8 +21,6 @@ struct AttDef final : Entity {
     Type type() const override;
 
     DxfGo toGo() const override;
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
 
     enum DataEnum {
         SubclassMarkerAcDbText = 100, // Маркер подкласса (AcDbText)

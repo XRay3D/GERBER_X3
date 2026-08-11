@@ -140,41 +140,9 @@ DxfGo Text::toGo() const {
     m.rotate(rotation > 360 ? rotation * 0.01 : rotation);
     m.scale(scaleX, -scaleY);
 
-    DxfGo go{id, {} /*toCurve(m.map(path).toFillPolygon())*/, toCurves(m.map(path))};
+    DxfGo go{id, {}, Geo::Polygons{Geo::fromPath(m.map(path))}};
     return go;
     return {};
-}
-
-void Text::write(QDataStream& stream) const {
-    stream << text;
-    stream << textStyleName;
-
-    stream << pt1;
-    stream << pt2;
-
-    stream << textGenerationFlag;
-    stream << horizontalJustType;
-    stream << verticalJustType;
-
-    stream << thickness;
-    stream << textHeight;
-    stream << rotation;
-}
-
-void Text::read(QDataStream& stream) {
-    stream >> text;
-    stream >> textStyleName;
-
-    stream >> pt1;
-    stream >> pt2;
-
-    stream >> textGenerationFlag;
-    stream >> horizontalJustType;
-    stream >> verticalJustType;
-
-    stream >> thickness;
-    stream >> textHeight;
-    stream >> rotation;
 }
 
 } // namespace Dxf

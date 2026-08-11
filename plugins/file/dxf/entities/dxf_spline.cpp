@@ -232,8 +232,13 @@ void appendArcChain(Geo::Polyline& curve, const std::function<QPointF(double)>& 
                 (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
                 (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
             };
+            // Направление обхода -- знак векторного произведения радиус-векторов:
+            // участок здесь заведомо меньше полуокружности, так что знака довольно.
+            const double cross = (p0.x() - center.x()) * (p1.y() - center.y())
+                - (p0.y() - center.y()) * (p1.x() - center.x());
             // прогиб пишется на НАЧАЛЬНОЙ вершине дуги -- она уже в кривой
-            curve.back().bulge = geo::bulgeOf(p0, p1, center, geo::DIR(p0, center, p1));
+            curve.back().bulge = Geo::bulgeOf(p0, p1, center,
+                cross > 0 ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
             curve.emplace_back(p1);
         }
         prev = p1;
@@ -278,7 +283,7 @@ DxfGo Spline::toGo() const {
 
     if(closed) {
         curve.close();
-        DxfGo go{id, Geo::Polyline{curve}, {std::move(curve)}};
+        DxfGo go{id, Geo::Polyline{curve}, Geo::Polygons{Geo::Polylines{std::move(curve)}}};
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::PolyLine);
         return go;
     }
@@ -286,46 +291,6 @@ DxfGo Spline::toGo() const {
     DxfGo go{id, std::move(curve)};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
     return go;
-}
-
-void Spline::write(QDataStream& stream) const {
-    stream << FitPoints;
-    stream << ControlPoints;
-    stream << StartTangent;
-    stream << EndTangent;
-
-    stream << KnotValues;
-    stream << Weights;
-
-    stream << knotTolerance;
-    stream << controlPointTolerance;
-    stream << fitTolerance;
-
-    stream << degreeOfTheSplineCurve;
-    stream << numberOfControlPoints;
-    stream << numberOfFitPoints;
-    stream << numberOfKnots;
-    stream << splineFlag;
-}
-
-void Spline::read(QDataStream& stream) {
-    stream >> FitPoints;
-    stream >> ControlPoints;
-    stream >> StartTangent;
-    stream >> EndTangent;
-
-    stream >> KnotValues;
-    stream >> Weights;
-
-    stream >> knotTolerance;
-    stream >> controlPointTolerance;
-    stream >> fitTolerance;
-
-    stream >> degreeOfTheSplineCurve;
-    stream >> numberOfControlPoints;
-    stream >> numberOfFitPoints;
-    stream >> numberOfKnots;
-    stream >> splineFlag;
 }
 
 ////////////////////////////////////

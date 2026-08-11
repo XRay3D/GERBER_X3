@@ -90,10 +90,7 @@ public:
             size_t ctr{};
             for(auto& [name, color]: colors) {
                 const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * ctr++ : 0);
-                auto layer = file->layers().at(name);
-                layer->setColor(QColor::fromHsv(k, 255, 255));
-                for(auto&& gi: *layer->itemGroup())
-                    gi->changeColor();
+                file->layers().at(name)->setColor(QColor::fromHsv(k, 255, 255));
             }
             tableView->reset();
         });
@@ -246,10 +243,7 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
         const int count = childCount();
         for(int row{}; row < count; ++row) {
             const int k = static_cast<int>((count > 1) ? (200.0 / (count - 1)) * row : 0);
-            NodeLayer* nl = reinterpret_cast<NodeLayer*>(child(row));
-            nl->layer->setColor(QColor::fromHsv(k, 255, 255));
-            for(auto&& gi: *nl->layer->itemGroup())
-                gi->changeColor();
+            static_cast<NodeLayer*>(child(row))->layer->setColor(QColor::fromHsv(k, 255, 255));
         }
     });
 
@@ -341,11 +335,7 @@ void NodeLayer::menu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme(u"color-management"_s), DxfObj::tr("Change color"), [tv, this] {
         QColorDialog cd{tv};
         cd.setCurrentColor(layer->color());
-        if(cd.exec()) {
-            layer->setColor(cd.currentColor());
-            for(auto&& gi: *layer->itemGroup())
-                gi->changeColor();
-        }
+        if(cd.exec()) layer->setColor(cd.currentColor());
     });
 }
 

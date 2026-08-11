@@ -14,27 +14,9 @@
 
 namespace Dxf {
 
-QDataStream& operator<<(QDataStream& stream, const DxfGo& go) {
-    stream << (GraphicObject&)go;
-    stream << go.entityId_;
-    stream << go.rotationAngle_;
-    stream << go.scaleX_;
-    stream << go.scaleY_;
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, DxfGo& go) {
-    stream >> (GraphicObject&)go;
-    stream >> go.entityId_;
-    stream >> go.rotationAngle_;
-    stream >> go.scaleX_;
-    stream >> go.scaleY_;
-    return stream;
-}
-
 size_t DxfGo::entityId() const { return entityId_; }
 
-DxfGo::DxfGo(int entityId, Geo::Polyline&& curve, Geo::Polygon&& curves)
+DxfGo::DxfGo(int entityId, Geo::Polyline&& curve, Geo::Polygons&& curves)
     : entityId_{entityId} {
     fill = std::move(curves);
     ::GraphicObject::path = std::move(curve);

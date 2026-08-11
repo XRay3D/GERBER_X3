@@ -189,30 +189,8 @@ DxfGo MText::toGo() const {
     m.rotate(qRadiansToDegrees(rotation));
     m.scale(scaleX, -scaleY);
 
-    DxfGo go{id, {}, toCurves(m.map(path))};
+    DxfGo go{id, {}, Geo::Polygons{Geo::fromPath(m.map(path))}};
     return go;
-}
-
-void MText::write(QDataStream& stream) const {
-    stream << textString;
-    stream << textStyleName;
-    stream << insertionPoint;
-    stream << rotation;
-    stream << nominalTextHeight;
-    stream << referenceRectangleWidth;
-    stream << attachmentPoint;
-    stream << drawingDirection;
-}
-
-void MText::read(QDataStream& stream) {
-    stream >> textString;
-    stream >> textStyleName;
-    stream >> insertionPoint;
-    stream >> rotation;
-    stream >> nominalTextHeight;
-    stream >> referenceRectangleWidth;
-    stream >> attachmentPoint;
-    stream >> drawingDirection;
 }
 
 } // namespace Dxf

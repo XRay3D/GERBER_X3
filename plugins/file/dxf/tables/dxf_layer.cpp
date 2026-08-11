@@ -11,6 +11,7 @@
 #include "dxf_layer.h"
 #include "dxf_file.h"
 #include "dxf_types.h"
+#include "gi_group.h"
 
 namespace Dxf {
 
@@ -66,28 +67,47 @@ void Layer::setColor(const QColor& color) {
     colorNorm_ = color;
     colorNorm_.setAlpha(150);
     colorPath_ = color;
+    // Цвет хранится здесь, а элементы смотрят на него по указателю, так что
+    // разослать правку -- забота слоя, а не каждого вызывающего.
+    //
+    // Обе группы, а не itemGroup(): та отдаёт лишь ту, что отвечает текущему
+    // ItemsType, а при ItemsType::Both видны обе -- вторая осталась бы на
+    // экране со старым цветом.
+    for(Gi::Group* group: {itemGroupNorm, itemGroupPath})
+        if(group)
+            for(auto&& gi: *group) gi->changeColor();
 }
 
 bool Layer::isVisible() const { return visible_; }
 
 void Layer::setVisible(bool visible) {
     visible_ = visible;
-    if(itemGroupNorm && itemGroupPath) {
-        switch(itemsType_) {
-        case ItemsType::Null:
-        case ItemsType::Normal:
-            itemGroupNorm->setVisible(visible_);
-            itemGroupPath->setVisible(false);
-            break;
-        case ItemsType::Paths:
-            itemGroupNorm->setVisible(false);
-            itemGroupPath->setVisible(visible_);
-            break;
-        case ItemsType::Both:
-            itemGroupNorm->setVisible(visible_);
-            itemGroupPath->setVisible(visible_);
-            break;
-        }
+    applyItemsType();
+}
+
+void Layer::applyItemsType() {
+    if(!(itemGroupNorm && itemGroupPath))
+        return;
+    // Тип, для которого нужной группы нет, сводим к той, что есть: слой из
+    // одних контуров в режиме Normal не показал бы ничего.
+    if(itemGroupNorm->empty())
+        itemsType_ = ItemsType::Paths;
+    else if(itemGroupPath->empty())
+        itemsType_ = ItemsType::Normal;
+    switch(itemsType_) {
+    case ItemsType::Null:
+    case ItemsType::Normal:
+        itemGroupNorm->setVisible(visible_);
+        itemGroupPath->setVisible(false);
+        break;
+    case ItemsType::Paths:
+        itemGroupNorm->setVisible(false);
+        itemGroupPath->setVisible(visible_);
+        break;
+    case ItemsType::Both:
+        itemGroupNorm->setVisible(visible_);
+        itemGroupPath->setVisible(visible_);
+        break;
     }
 }
 
@@ -103,27 +123,23 @@ void Layer::setItemsType(ItemsType itemsType) {
     if(itemsType_ == itemsType)
         return;
     itemsType_ = itemsType;
-    if(itemGroupNorm && itemGroupPath) {
-        if(itemGroupNorm->empty())
-            itemsType_ = ItemsType::Paths;
-        else if(itemGroupPath->empty())
-            itemsType_ = ItemsType::Normal;
-        switch(itemsType_) {
-        case ItemsType::Null:
-        case ItemsType::Normal:
-            itemGroupNorm->setVisible(visible_);
-            itemGroupPath->setVisible(false);
-            break;
-        case ItemsType::Paths:
-            itemGroupNorm->setVisible(false);
-            itemGroupPath->setVisible(visible_);
-            break;
-        case ItemsType::Both:
-            itemGroupNorm->setVisible(visible_);
-            itemGroupPath->setVisible(visible_);
-            break;
-        }
-    }
+    applyItemsType();
 }
 
 } // namespace Dxf
+
+void Serial::Adapter<Dxf::Layer*>::write(Writer& sb, Dxf::Layer* const& layer) {
+    sb.start_object();
+    bool first = true;
+    Serial::detail::writeMembers(sb, *layer, first);
+    sb.end_object();
+}
+
+simdjson::error_code Serial::Adapter<Dxf::Layer*>::read(
+    simdjson::ondemand::value& val, Dxf::Layer*& layer) {
+    simdjson::ondemand::object obj;
+    if(auto err = val.get_object().get(obj); err) return err;
+    layer = new Dxf::Layer{Dxf::File::crutch};
+    Serial::readFields(obj, *layer);
+    return simdjson::SUCCESS;
+}

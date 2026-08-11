@@ -33,12 +33,13 @@ class LayerModel;
 class NodeLayer;
 struct SectionParser;
 
-class File : public AbstractFile {
+class[[= Serial::name("Dxf")]] File : public AbstractFile {
     friend class LayerModel;
     friend class NodeLayer;
     friend class Plugin;
     friend struct SectionENTITIES;
-    friend QDataStream& operator>>(QDataStream& stream, SectionParser*& sp);
+    // NOTE use private crutch
+    friend struct Serial::Adapter<Dxf::Layer*>;
 
 public:
     explicit File();
@@ -63,25 +64,37 @@ public:
     void createProjectionLayers();
 
 private:
-    Sections sections_;
-    Model3D mesh_;
-    Blocks blocks_;
+    // Разбор владеет секциями, блоками и стилями лишь пока идёт сам разбор:
+    // всё, что нужно дальше, уже разложено по слоям. Сетка 3D тоже транзиент --
+    // createProjectionLayers превращает её в слои и очищает.
+    [[= Serial::skip]] Sections sections_;
+    [[= Serial::skip]] Model3D mesh_;
+    [[= Serial::skip]] Blocks blocks_;
+    [[= Serial::skip]] Styles styles_;
+
     HeaderData header_;
     Layers layers_;
-    Styles styles_;
     EntitiesUP entities_;
 
     mutable std::map<QString, bool> layersVisible_;
+
+    // Слой при чтении цепляется к текущему файлу — крюк ДО чтения полей.
+    static inline File* crutch;
 
     enum Group {
         CopperGroup,
         CutoffGroup,
     };
     Geo::Polygons& groupedPaths(Group group = CopperGroup, bool fl = false);
-    void grouping(PolyTree& node, Group group);
 
     // AbstractFile interface
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    // Свёрнутый файл держит видимость слоёв в layersVisible_; у развёрнутого она
+    // живёт в самих слоях, и снять её надо до записи.
+    void preSave() const;
+    void preLoad() { crutch = this; }
+
     void initFrom(AbstractFile* file) override;
     FileTree::Node* node() override;
     uint32_t type() const override;
@@ -92,8 +105,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"crosshairs"_s); }
 
 protected:
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
     Geo::Polygons merge() const override;
 };
 

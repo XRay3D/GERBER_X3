@@ -74,7 +74,7 @@ DxfGo PolyLine::toGo() const {
     // auto polygon(path2.toSubpathPolygons(m2));
 
     if(polylineFlags & ClosedPolyline) // FIXME
-        return DxfGo{id, Geo::Polyline{path}, {std::move(path)}};
+        return DxfGo{id, Geo::Polyline{path}, Geo::Polygons{Geo::Polylines{std::move(path)}}};
     else
         return DxfGo{id, std::move(path)};
 #else // TODO direct construct path
@@ -193,18 +193,6 @@ center=QPointF{cx, cy};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
     return go;
 #endif
-}
-
-void PolyLine::write(QDataStream& stream) const {
-    stream << polylineFlags;
-    stream << startWidth;
-    stream << endWidth;
-}
-
-void PolyLine::read(QDataStream& stream) {
-    stream >> polylineFlags;
-    stream >> startWidth;
-    stream >> endWidth;
 }
 
 } // namespace Dxf

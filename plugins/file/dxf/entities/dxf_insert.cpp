@@ -10,6 +10,8 @@
  *******************************************************************************/
 #include "dxf_insert.h"
 
+#include "geo/util.h"
+
 #include "dxf_block.h"
 #include "dxf_types.h"
 
@@ -94,8 +96,8 @@ void InsertEntity::transform(DxfGo& item, QPointF tr) const {
     transform.rotate(rotationAngle);
     transform.translate(-basePoint.x(), -basePoint.y());
 
-    TransformCurve(item.path, transform);
-    TransformCurves(item.fill, transform);
+    item.path *= transform;
+    item.fill *= transform;
 }
 
 } // namespace Dxf

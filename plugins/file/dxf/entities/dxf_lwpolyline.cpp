@@ -10,6 +10,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "dxf_lwpolyline.h"
+
+#include "geo/boolean.h"
 #include "gi_dbg.h"
 
 // #include <QPainterPath>
@@ -129,14 +131,12 @@ DxfGo LwPolyline::toGo() const {
         && qFuzzyCompare(poly.front().bulge, 1.)
         && qFuzzyCompare(poly.back().bulge, 1.)) {
         QPointF center = (poly.front() + poly.back()) / 2;
-        Geo::Polyline circle = CircleCurve((geo::Length(poly.front(), poly.back()) + constantWidth), center);
-
-        // if(auto arc = geo::arcOf(poly.front(), poly.back(), poly.front().bulge); arc && arc->theta < 0) circle.reverse();
+        Geo::Polyline circle = Geo::circle(Geo::distance(poly.front(), poly.back()) + constantWidth, center);
 
         DxfGo go{
             id,
             Geo::Polyline{circle},
-            {std::move(circle)},
+            Geo::Polygons{Geo::Polylines{std::move(circle)}},
         };
         go.GraphicObject::pos = center;
         go.type = DxfGo::Type{DxfGo::FlStamp | DxfGo::Circle};
@@ -154,10 +154,10 @@ DxfGo LwPolyline::toGo() const {
 
     if(polylineFlag == Closed) curve.close();
 
-    Geo::Polygon curves = Inflate({curve}, // TODO
-        constantWidth,
-        JoinType::Round,
-        EndType::Round, 2.0, 1000);
+    // constantWidth -- ПОЛНАЯ ширина линии, ровно то, что ждёт Geo::Inflate:
+    // контур уезжает на её половину в каждую сторону. Нулевая ширина даёт
+    // пустой регион -- у такой полилинии есть только контур.
+    Geo::Polygons curves = Geo::Inflate(Geo::Polylines{curve}, constantWidth);
 
     DxfGo go{id, std::move(curve), std::move(curves)}; // return {id, ~p.value(0), paths};
 
@@ -166,27 +166,4 @@ DxfGo LwPolyline::toGo() const {
     return go;
 }
 
-void LwPolyline::write(QDataStream& stream) const {
-    stream << poly;
-    stream << counter;
-    stream << polylineFlag;
-    stream << numberOfVertices;
-    stream << startWidth;
-    stream << endWidth;
-    stream << constantWidth;
-    stream << elevation;
-    stream << thickness;
-}
-
-void LwPolyline::read(QDataStream& stream) {
-    stream >> poly;
-    stream >> counter;
-    stream >> polylineFlag;
-    stream >> numberOfVertices;
-    stream >> startWidth;
-    stream >> endWidth;
-    stream >> constantWidth;
-    stream >> elevation;
-    stream >> thickness;
-}
 } // namespace Dxf

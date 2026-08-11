@@ -83,8 +83,6 @@ struct PolyLine final : Entity {
     bool is3D() const;
 
     DxfGo toGo() const override;
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
 
     int polylineFlags{};
     double startWidth{};

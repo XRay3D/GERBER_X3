@@ -105,8 +105,4 @@ DxfGo AttDef::toGo() const {
     return {};
 }
 
-void AttDef::write(QDataStream& /*stream*/) const { }
-
-void AttDef::read(QDataStream& /*stream*/) { }
-
 } // namespace Dxf

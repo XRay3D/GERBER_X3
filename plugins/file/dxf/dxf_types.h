@@ -13,6 +13,8 @@
 #include "dxf_model3d.h"
 #include "entities/dxf_graphicobject.h"
 #include "md5.h"
+#include "serial.h"
+#include "utils.h" // using namespace Qt::Literals
 
 #include <QColor>
 #include <QVariant>
@@ -85,3 +87,43 @@ public:
 };
 
 } // namespace Dxf
+
+// Адаптеры полиморфных членов File объявлены ЗДЕСЬ, а не рядом со своими
+// классами: File::serialize инстанцирует движок прямо в dxf_file.h, и к тому
+// месту специализация должна быть уже видна, иначе Serial::write уходит в общую
+// ветку и падает static_assert'ом на указателе.
+
+// Слои живут в File по указателю (Dxf::Layers -- map<QString, Layer*>): писать
+// разыменованный объект, а при чтении заводить новый слой, привязанный к
+// текущему файлу (крюк File::crutch, как у апертур Gerber).
+// Тела в dxf_layer.cpp.
+template <>
+struct Serial::Adapter<Dxf::Layer*> {
+    static void write(Writer& sb, Dxf::Layer* const& layer);
+    static simdjson::error_code read(simdjson::ondemand::value& val, Dxf::Layer*& layer);
+};
+
+// Полиморфные сущности: {"type":<Entity::Type>, <поля flatten>}. Тип числовой --
+// именно значение и есть ключ фабрики createEntity; поля пишет рефлексия по
+// КОНКРЕТНОМУ классу, отсюда switch-диспетчер в dxf_entity.cpp -- двойник
+// createEntity. Тела там же.
+template <>
+struct Serial::Adapter<std::shared_ptr<Dxf::Entity>> {
+    static void write(Writer& sb, const std::shared_ptr<Dxf::Entity>& entity);
+    static simdjson::error_code read(simdjson::ondemand::value& val, std::shared_ptr<Dxf::Entity>& entity);
+};
+
+// Значения секции HEADER после загрузки нужны только окну просмотра, а оно
+// показывает их строкой (см. TreeWidget в dxf_node.cpp), -- строкой они и
+// хранятся, без исходного типа кода группы.
+template <>
+struct Serial::Adapter<QVariant> {
+    static void write(Writer& sb, const QVariant& v) {
+        Serial::Adapter<QString>::write(sb, v.toString());
+    }
+    static simdjson::error_code read(simdjson::ondemand::value& val, QVariant& v) {
+        QString s;
+        if(auto err = Serial::Adapter<QString>::read(val, s); err) return err;
+        return v = s, simdjson::SUCCESS;
+    }
+};

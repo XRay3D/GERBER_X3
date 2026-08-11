@@ -17,74 +17,64 @@
 
 namespace Dxf {
 
-std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks, SectionParser* sp) {
+// Соответствие Entity::Type -> конкретный класс и аргументы его конструктора.
+// Список ОДИН на обе стороны -- фабрику createEntity и диспетчер записи в
+// Serial::Adapter: два независимых switch'а на 44 ветки разъезжались бы молча,
+// и сущность нового типа сохранялась бы как чужая.
+#define DXF_ENTITIES(X)                   \
+    X(ACAD_PROXY_ENTITY, Dummy, (sp))     \
+    X(ARC, Arc, (sp))                     \
+    X(ATTDEF, AttDef, (sp))               \
+    X(ATTRIB, Attrib, (sp))               \
+    X(BODY, Body, (sp))                   \
+    X(CIRCLE, Circle, (sp))               \
+    X(DIMENSION, Dimension, (sp))         \
+    X(ELLIPSE, Ellipse, (sp))             \
+    X(FACE3D, Face3D, (sp))               \
+    X(HATCH, Hatch, (sp))                 \
+    X(HELIX, Helix, (sp))                 \
+    X(IMAGE, Image, (sp))                 \
+    X(INSERT, InsertEntity, (blocks, sp)) \
+    X(LEADER, Leader, (sp))               \
+    X(LIGHT, Light, (sp))                 \
+    X(LINE, Line, (sp))                   \
+    X(LWPOLYLINE, LwPolyline, (sp))       \
+    X(MESH, Mesh, (sp))                   \
+    X(MLEADER, MLeader, (sp))             \
+    X(MLEADERSTYLE, MLeaderStyle, (sp))   \
+    X(MLINE, MLine, (sp))                 \
+    X(MTEXT, MText, (sp))                 \
+    X(OLE2FRAME, Ole2Frame, (sp))         \
+    X(OLEFRAME, OleFrame, (sp))           \
+    X(POINT, Point, (sp))                 \
+    X(POLYLINE, PolyLine, (sp))           \
+    X(RAY, Ray, (sp))                     \
+    X(REGION, Region, (sp))               \
+    X(SECTION, Section, (sp))             \
+    X(SEQEND, SeqEnd, (sp))               \
+    X(SHAPE, AbstractShape, (sp))         \
+    X(SOLID, Solid, (sp))                 \
+    X(SPLINE, Spline, (sp))               \
+    X(SUN, Sun, (sp))                     \
+    X(SURFACE, Surface, (sp))             \
+    X(TABLE, Table, (sp))                 \
+    X(TEXT, Text, (sp))                   \
+    X(TOLERANCE, Tolerance, (sp))         \
+    X(TRACE, Trace, (sp))                 \
+    X(UNDERLAY, Underlay, (sp))           \
+    X(VERTEX, Vertex, (sp))               \
+    X(VIEWPORT, Viewport, (sp))           \
+    X(WIPEOUT, Wipeout, (sp))             \
+    X(XLINE, XLine, (sp))
+
+std::shared_ptr<Entity> createEntity(Entity::Type key, Blocks& blocks [[maybe_unused]], SectionParser* sp) {
     switch(key) {
-    case Entity::ACAD_PROXY_ENTITY: return std::make_shared<Dummy /*Dimension*/>(sp);
-    case Entity::ARC              : return std::make_shared<Arc>(sp);
-    case Entity::ATTDEF           : return std::make_shared<AttDef>(sp);
-    case Entity::ATTRIB           : return std::make_shared<Attrib>(sp);
-    case Entity::BODY             : return std::make_shared<Body>(sp);
-    case Entity::CIRCLE           : return std::make_shared<Circle>(sp);
-    case Entity::DIMENSION        : return std::make_shared<Dimension>(sp);
-    case Entity::ELLIPSE          : return std::make_shared<Ellipse>(sp);
-    case Entity::FACE3D           : return std::make_shared<Face3D>(sp);
-    case Entity::HATCH            : return std::make_shared<Hatch>(sp);
-    case Entity::HELIX            : return std::make_shared<Helix>(sp);
-    case Entity::IMAGE            : return std::make_shared<Image>(sp);
-    case Entity::INSERT           : return std::make_shared<InsertEntity>(blocks, sp);
-    case Entity::LEADER           : return std::make_shared<Leader>(sp);
-    case Entity::LIGHT            : return std::make_shared<Light>(sp);
-    case Entity::LINE             : return std::make_shared<Line>(sp);
-    case Entity::LWPOLYLINE       : return std::make_shared<LwPolyline>(sp);
-    case Entity::MESH             : return std::make_shared<Mesh>(sp);
-    case Entity::MLEADER          : return std::make_shared<MLeader>(sp);
-    case Entity::MLEADERSTYLE     : return std::make_shared<MLeaderStyle>(sp);
-    case Entity::MLINE            : return std::make_shared<MLine>(sp);
-    case Entity::MTEXT            : return std::make_shared<MText>(sp);
-    case Entity::OLE2FRAME        : return std::make_shared<Ole2Frame>(sp);
-    case Entity::OLEFRAME         : return std::make_shared<OleFrame>(sp);
-    case Entity::POINT            : return std::make_shared<Point>(sp);
-    case Entity::POLYLINE         : return std::make_shared<PolyLine>(sp);
-    case Entity::RAY              : return std::make_shared<Ray>(sp);
-    case Entity::REGION           : return std::make_shared<Region>(sp);
-    case Entity::SECTION          : return std::make_shared<Section>(sp);
-    case Entity::SEQEND           : return std::make_shared<SeqEnd>(sp);
-    case Entity::SHAPE            : return std::make_shared<AbstractShape>(sp);
-    case Entity::SOLID            : return std::make_shared<Solid>(sp);
-    case Entity::SPLINE           : return std::make_shared<Spline>(sp);
-    case Entity::SUN              : return std::make_shared<Sun>(sp);
-    case Entity::SURFACE          : return std::make_shared<Surface>(sp);
-    case Entity::TABLE            : return std::make_shared<Table>(sp);
-    case Entity::TEXT             : return std::make_shared<Text>(sp);
-    case Entity::TOLERANCE        : return std::make_shared<Tolerance>(sp);
-    case Entity::TRACE            : return std::make_shared<Trace>(sp);
-    case Entity::UNDERLAY         : return std::make_shared<Underlay>(sp);
-    case Entity::VERTEX           : return std::make_shared<Vertex>(sp);
-    case Entity::VIEWPORT         : return std::make_shared<Viewport>(sp);
-    case Entity::WIPEOUT          : return std::make_shared<Wipeout>(sp);
-    case Entity::XLINE            : return std::make_shared<XLine>(sp);
-    default:
-        return std::make_shared<Dummy /*Dimension*/>(sp);
-        // throw std::logic_error(std::format("{}:{}",__FUNCTION__,+key)); // throw DxfObj::tr("Unknown Entity: %1, %2").arg(key).arg(code.operator QString());
+#define X(TYPE, CLASS, ARGS) \
+    case Entity::TYPE: return std::make_shared<CLASS> ARGS;
+        DXF_ENTITIES(X)
+#undef X
+    default: return std::make_shared<Dummy>(sp);
     }
-    // throw DxfObj::tr("Not implemented: %1, %2").arg(key).arg(code.operator QString());
-}
-
-QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& entity) {
-    stream << static_cast<int>(entity->type());
-    entity->Entity::write(stream);
-    entity->write(stream);
-    return stream;
-}
-
-QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& entity) {
-    static Blocks blocks;
-    Entity::Type type;
-    stream >> type;
-    entity = createEntity(type, blocks, nullptr);
-    entity->Entity::read(stream);
-    entity->read(stream);
-    return stream;
 }
 
 Entity::Entity(SectionParser* sp)
@@ -152,24 +142,6 @@ void Entity::parse(CodeData& code) {
     }
 }
 
-void Entity::write(QDataStream& stream) const {
-    stream << layerName;
-    stream << lineWeight;
-    stream << handle;
-    stream << softPointerID;
-    stream << colorNumber;
-    stream << id;
-}
-
-void Entity::read(QDataStream& stream) {
-    stream >> layerName;
-    stream >> lineWeight;
-    stream >> handle;
-    stream >> softPointerID;
-    stream >> colorNumber;
-    stream >> id;
-}
-
 Entity::Type Entity::toType(const QString& key) {
     if(key.compare(u"3DFACE"_s, Qt::CaseInsensitive) == 0) // "3DFACE" не может быть ключом Q_ENUM, т.к. начинается с цифры
         return Type::FACE3D;
@@ -206,5 +178,47 @@ Entity::DataEnum Entity::toDataEnum(const QString& key) {
 }
 
 } // namespace Dxf
+
+void Serial::Adapter<std::shared_ptr<Dxf::Entity>>::write(
+    Writer& sb, const std::shared_ptr<Dxf::Entity>& entity) {
+    using namespace Dxf;
+    sb.start_object();
+    sb.append_raw("\"type\":");
+    sb.append(std::to_underlying(entity->type()));
+    auto dispatch = [&sb]<typename T>(const T& e) { Serial::writeInto(sb, e); };
+    switch(entity->type()) {
+#define X(TYPE, CLASS, ARGS) \
+    case Entity::TYPE: dispatch(static_cast<const CLASS&>(*entity)); break;
+        DXF_ENTITIES(X)
+#undef X
+    default: dispatch(static_cast<const Dummy&>(*entity)); break;
+    }
+    sb.end_object();
+}
+
+simdjson::error_code Serial::Adapter<std::shared_ptr<Dxf::Entity>>::read(
+    simdjson::ondemand::value& val, std::shared_ptr<Dxf::Entity>& entity) {
+    using namespace Dxf;
+    std::string_view slice; // сырой текст элемента: тип подсмотреть + поля прочесть
+    if(auto err = simdjson::to_json_string(val).get(slice); err) return err;
+    Serial::Parsed peek{slice};
+    simdjson::ondemand::object obj;
+    if(peek.error || peek.doc.get_object().get(obj)) return simdjson::INCORRECT_TYPE;
+    int64_t type{};
+    if(auto err = obj["type"].get_int64().get(type); err) return err;
+    // Блоки нужны конструктору INSERT, но после загрузки проекта повторного
+    // разбора нет -- сущности живут только как подписи к готовой геометрии.
+    static Blocks blocks;
+    entity = createEntity(Entity::Type(type), blocks, nullptr);
+    auto dispatch = [&slice]<typename T>(T& e) { Serial::loadInto(slice, e); };
+    switch(entity->type()) {
+#define X(TYPE, CLASS, ARGS) \
+    case Entity::TYPE: dispatch(static_cast<CLASS&>(*entity)); break;
+        DXF_ENTITIES(X)
+#undef X
+    default: dispatch(static_cast<Dummy&>(*entity)); break;
+    }
+    return simdjson::SUCCESS;
+}
 
 #include "moc_dxf_entity.cpp"

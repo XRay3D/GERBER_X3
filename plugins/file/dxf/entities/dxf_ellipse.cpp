@@ -10,6 +10,8 @@
  *******************************************************************************/
 #include "dxf_ellipse.h"
 
+#include "geo/util.h"
+
 #include "dxf_insert.h"
 #include <QGraphicsEllipseItem>
 
@@ -71,14 +73,14 @@ DxfGo Ellipse::toGo() const {
     };
 
     double span = endParameter - startParameter;
-    const bool closed = qFuzzyIsNull(span) || span >= two_pi - 1.0e-9;
+    const bool closed = qFuzzyIsNull(span) || span >= 2.0 * pi - 1.0e-9;
     if(qFuzzyIsNull(span))
-        span = two_pi;
+        span = 2.0 * pi;
 
     // Эллипс представляется цепочкой круговых дуг: на каждом малом участке подбирается
     // окружность, проходящая через начало, середину и конец участка (как и Circle/Arc,
     // Geo::Polyline хранит именно круговые дуги, а не плотную ломаную).
-    const int segments = std::clamp(int(std::round(std::abs(span) / two_pi * 36.0)), 4, 72);
+    const int segments = std::clamp(int(std::round(std::abs(span) / (2.0 * pi) * 36.0)), 4, 72);
 
     Geo::Polyline curve;
     QPointF prev = pointAt(startParameter);
@@ -104,8 +106,13 @@ DxfGo Ellipse::toGo() const {
                 (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
                 (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
             };
+            // Направление обхода -- знак векторного произведения радиус-векторов:
+            // участок здесь заведомо меньше полуокружности, так что знака довольно.
+            const double cross = (p0.x() - center.x()) * (p1.y() - center.y())
+                - (p0.y() - center.y()) * (p1.x() - center.x());
             // прогиб пишется на НАЧАЛЬНОЙ вершине дуги -- она уже в кривой
-            curve.back().bulge = geo::bulgeOf(p0, p1, center, geo::DIR(p0, center, p1));
+            curve.back().bulge = Geo::bulgeOf(p0, p1, center,
+                cross > 0 ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
             curve.emplace_back(p1);
         }
         prev = p1;
@@ -113,7 +120,7 @@ DxfGo Ellipse::toGo() const {
 
     if(closed) {
         curve.close();
-        DxfGo go{id, Geo::Polyline{curve}, {std::move(curve)}};
+        DxfGo go{id, Geo::Polyline{curve}, Geo::Polygons{Geo::Polylines{std::move(curve)}}};
         go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Elipse);
         go.GraphicObject::pos = CenterPoint;
         return go;
@@ -122,22 +129,6 @@ DxfGo Ellipse::toGo() const {
     DxfGo go{id, std::move(curve)};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::Elipse);
     return go;
-}
-
-void Ellipse::write(QDataStream& stream) const {
-    stream << startParameter;
-    stream << endParameter;
-    stream << ratioOfMinorAxisToMajorAxis;
-    stream << CenterPoint;
-    stream << EndpointOfMajorAxis;
-}
-
-void Ellipse::read(QDataStream& stream) {
-    stream >> startParameter;
-    stream >> endParameter;
-    stream >> ratioOfMinorAxisToMajorAxis;
-    stream >> CenterPoint;
-    stream >> EndpointOfMajorAxis;
 }
 
 } // namespace Dxf

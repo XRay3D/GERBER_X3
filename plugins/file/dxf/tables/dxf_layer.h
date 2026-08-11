@@ -15,7 +15,6 @@
 #include "dxf_types.h"
 #include "entities/dxf_graphicobject.h"
 
-#include "datastream.h"
 namespace Gi {
 class Group;
 }
@@ -24,35 +23,8 @@ namespace Dxf {
 
 class Layer : public AbstractTable {
     friend class File;
-    friend QDataStream& operator<<(QDataStream& stream, const Layer& l) {
-        stream << l.groupedCurves_;
-        stream << l.colorNorm_;
-        stream << l.colorPath_;
-        stream << l.name_;
-        stream << l.lineTypeName;
-        stream << l.colorNumber_;
-        stream << l.flags;
-        stream << l.lineWeightEnum;
-        stream << l.plottingFlag;
-        stream << l.graphicObjects_;
-        stream << l.itemsType_;
-        return stream;
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, Layer& l) {
-        stream >> l.groupedCurves_;
-        stream >> l.colorNorm_;
-        stream >> l.colorPath_;
-        stream >> l.name_;
-        stream >> l.lineTypeName;
-        stream >> l.colorNumber_;
-        stream >> l.flags;
-        stream >> l.lineWeightEnum;
-        stream >> l.plottingFlag;
-        stream >> l.graphicObjects_;
-        stream >> l.itemsType_;
-        return stream;
-    }
+    // NOTE use private crutch
+    friend struct Serial::Adapter<Dxf::Layer*>;
 
 public:
     Layer(File* sp);
@@ -76,6 +48,10 @@ public:
 
     ItemsType itemsType() const;
     void setItemsType(ItemsType itemsType);
+    // Показать группы согласно ТЕКУЩЕМУ типу. Отдельно от setItemsType, у
+    // которого есть отсечка «тип не менялся»: после createGi группы новые, и
+    // применить к ним прежний тип надо именно тогда, когда он не менялся.
+    void applyItemsType();
 
     QColor color() const;
     void setColor(const QColor& color);

@@ -37,8 +37,6 @@ struct Line final : Entity {
     };
 
     DxfGo toGo() const override;
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
 
     QPointF startPoint;
     QPointF endPoint;

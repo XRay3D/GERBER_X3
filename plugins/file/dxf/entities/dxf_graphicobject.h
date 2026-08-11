@@ -10,7 +10,6 @@
  *******************************************************************************/
 #pragma once
 
-#include "datastream.h"
 // #include "dxf_entity.h"
 #include "plugintypes.h"
 
@@ -23,12 +22,9 @@ class DxfGo final : public ::GraphicObject {
     friend class File;
     friend class Plugin;
 
-    friend QDataStream& operator<<(QDataStream& stream, const DxfGo& go);
-    friend QDataStream& operator>>(QDataStream& stream, DxfGo& go);
-
     int entityId_{};
     // Path path_;
-    File* file_ = nullptr;
+    File* file_ = nullptr; // восстанавливает File::createGi
     double rotationAngle_{};
     double scaleX_{1.0};
     double scaleY_{1.0};
@@ -36,7 +32,7 @@ class DxfGo final : public ::GraphicObject {
 
 public:
     DxfGo() = default;
-    DxfGo(int entityId, Geo::Polyline&& path, Geo::Polygon&& paths = {});
+    DxfGo(int entityId, Geo::Polyline&& path, Geo::Polygons&& paths = {});
 
     void setRotation(double rotationAngle);
     double rotationAngle() const;

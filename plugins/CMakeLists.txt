@@ -10,20 +10,20 @@ http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 4.0)
 
-# set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
+#set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
 add_subdirectory(shape)
 
-set(FILE_PLUGINS gerber #gerber2 excellon svg dxf
+set(FILE_PLUGINS gerber dxf #gerber2 excellon svg
 )
 add_subdirectory(file)
 
-# Переведены на Geo (точная геометрия на CGAL) и собираются всегда.
+#Переведены на Geo(точная геометрия на CGAL) и собираются всегда.
 set(GCODE_PLUGINS profile pocketoffset drill)
 
-# Ещё на Clipper2 и на прежнем виде GCode::Creator: их геометрия (растровая
-# выборка, диаграмма Вороного, штриховка) в точный домен так просто не
-# переносится, поэтому они отложены до отдельного захода. Код лежит в дереве
-# нетронутым; чтобы он не гнил незаметно, список печатается при конфигурации.
+#Ещё на Clipper2 и на прежнем виде GCode::Creator : их геометрия(растровая
+#выборка, диаграмма Вороного, штриховка) в точный домен так просто не
+#переносится, поэтому они отложены до отдельного захода.Код лежит в дереве
+#нетронутым; чтобы он не гнил незаметно, список печатается при конфигурации.
 set(GCODE_PLUGINS_LEGACY hatching pocketraster voroni thermal thread)
 option(GGEASY_GCODE_LEGACY "Собирать gcode-плагины, ещё не переведённые на Geo"
        OFF)

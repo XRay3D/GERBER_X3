@@ -21,8 +21,6 @@ public:
     void parse(CodeData& code) override;
     Type type() const override;
     DxfGo toGo() const override;
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
 
     enum DataEnum {
         SubclassMarker = 100,   // Маркер подкласса (AcDbText)
