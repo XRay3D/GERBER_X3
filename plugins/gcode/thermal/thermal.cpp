@@ -48,13 +48,23 @@ void Creator::createThermal(AbstractFile* file, const Tool& tool, const double d
       // кольцо у соседней меди не задевало её, плюс спицы-мосты из превью.
       // Офсет ОДИН на объединение: сумма Минковского дистрибутивна, прежний
       // пообъектный офсет со сборкой давал то же самое, только за N вызовов.
+      //
+      // Медь собирается ОДНИМ конструктором (параллельное дерево слияний в
+      // joinAll), а не цепочкой |=: пообъектное объединение -- квадратичное
+      // число точных свипов, на плотном гербере это зависание.
         const auto graphicObjects(file->graphicObjects());
         const bool allCopper = !gcp.params[IgnoreCopper].toInt();
+        std::vector<Geo::Polygon> copper;
         for(auto go: graphicObjects | v::filter([allCopper](auto* go) { return allCopper || go->positive(); }))
-            frame |= go->fill;
-        frame = Geo::Inflate(frame, toolDiameter - 0.01);
+            copper.append_range(go->fill.all());
+        frame = Geo::Inflate(Geo::Polygons{std::span<const Geo::Polygon>{copper}}, toolDiameter - 0.01);
+
+        // Спицы уже в своём размере -- их не раздувать; и тоже одним слиянием.
+        std::vector<Geo::Polygon> spokes;
         for(const Geo::Polylines& bridges: supportPss)
-            frame |= Geo::Polygons{bridges};
+            spokes.append_range(Geo::Polygons{bridges}.all());
+        if(!spokes.empty())
+            frame |= Geo::Polygons{std::span<const Geo::Polygon>{spokes}};
     }
 
     { // Execute: кольца режутся рамкой КАК ПУТИ (Clipper2::AddOpenSubject) --

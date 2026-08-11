@@ -194,6 +194,85 @@ std::vector<double> cutsFor(const Seg& s, const std::vector<BoundaryContour>& bo
     return out;
 }
 
+// Сторона точки относительно региона.
+//
+// Точный Polygons::contains -- обход ВСЕЙ точной арранжементы региона
+// рациональной арифметикой на каждый вызов; на плотной меди (десятки тысяч
+// дуг границы) классификация каждого куска им превращала резку в зависание.
+// Поэтому чёт/нечет пересечений луча (направо из точки) считается в double
+// по тем же сегментам границы, что и разрезы, а точный оракул остаётся
+// ОТКАТОМ для сомнительных лучей: прошедших ближе допуска к вершине,
+// касанию или к самой границе. Сомнение всегда уходит в точный домен --
+// ошибиться СТОРОНОЙ по-прежнему нельзя, см. шапку файла.
+class Side {
+public:
+    Side(const Polygons& region, const std::vector<BoundaryContour>& boundary)
+        : region_{region}
+        , boundary_{boundary} { }
+
+    bool inside(QPointF p) const {
+        int crossings{};
+        for(const BoundaryContour& contour: boundary_) {
+            if(p.y() < contour.box.top() || p.y() > contour.box.bottom()
+                || p.x() > contour.box.right()) continue;
+            for(const Seg& seg: contour.segs) {
+                if(p.y() < seg.box.top() || p.y() > seg.box.bottom()
+                    || p.x() > seg.box.right()) continue;
+                const int n = seg.arc ? crossArc(*seg.arc, seg, p) : crossLine(seg, p);
+                if(n < 0) return region_.contains(p); // сомнение -- к точному
+                crossings += n;
+            }
+        }
+        return crossings & 1;
+    }
+
+private:
+    // Вершина ближе этого к лучу -- не доказательство: у почти
+    // горизонтального ребра деление ay / (ay - by) раздувает погрешность.
+    static constexpr double vertexEps = 1e-6;
+    // Пересечение ближе этого к самой точке -- «граница под точкой»: та же
+    // величина, что и сварочный допуск, туда же попадают куски ВДОЛЬ границы.
+    static constexpr double xEps = exitWeldTolerance;
+
+    // Пересечения ребра с лучом: 0/1/2 или -1 -- «луч не доказывает».
+    static int crossLine(const Seg& s, QPointF p) {
+        const double ay = s.a.y() - p.y(), by = s.b.y() - p.y();
+        if(std::abs(ay) < vertexEps || std::abs(by) < vertexEps) return -1; // вершина на луче
+        if((ay > 0.0) == (by > 0.0)) return 0;
+        const double x = s.a.x() + (s.b.x() - s.a.x()) * ay / (ay - by);
+        if(x > p.x() + xEps) return 1;
+        if(x < p.x() - xEps) return 0;
+        return -1;
+    }
+
+    static int crossArc(const Arc& arc, const Seg& s, QPointF p) {
+        const double dy = p.y() - arc.center.y();
+        const double disc = arc.radius * arc.radius - dy * dy;
+        const double tangentBand = vertexEps * std::max(arc.radius, 1.0);
+        if(disc <= tangentBand) {
+            if(disc < -tangentBand) return 0; // мимо окружности
+            // Горизонтальная касательная на уровне луча.
+            return arc.center.x() > p.x() - xEps ? -1 : 0;
+        }
+        const double sq = std::sqrt(disc);
+        // Близость параметра к концам дуги -- та же «вершина на луче».
+        const double slack = exitWeldTolerance / std::max(s.length, exitWeldTolerance);
+        int n{};
+        for(const double x: {arc.center.x() - sq, arc.center.x() + sq}) {
+            if(x < p.x() - xEps) continue;
+            if(x < p.x() + xEps) return -1;
+            const double t = arcParam(arc, {x, p.y()});
+            if(t < -slack || t > 1.0 + slack) continue; // на окружности, но мимо дуги
+            if(t < slack || t > 1.0 - slack) return -1; // конец дуги на луче
+            ++n;
+        }
+        return n;
+    }
+
+    const Polygons& region_;
+    const std::vector<BoundaryContour>& boundary_;
+};
+
 // Кусок сегмента между соседними параметрами разреза.
 struct Atom {
     Vertex start; // с прогибом куска
@@ -202,9 +281,9 @@ struct Atom {
     bool keep{};
 };
 
-Polylines clipPath(const Polyline& path, const Polygons& region,
+Polylines clipPath(const Polyline& path, const Side& side,
     const std::vector<BoundaryContour>& boundary, bool keepInside) {
-    auto keeps = [&region, keepInside](QPointF p) { return region.contains(p) == keepInside; };
+    auto keeps = [&side, keepInside](QPointF p) { return side.inside(p) == keepInside; };
 
     if(path.size() < 2) // одинокой вершине резать нечего: судьба решается ей самой
         return path.empty() || !keeps(path.front()) ? Polylines{} : Polylines{path};
@@ -285,9 +364,11 @@ Polylines clipOpen(ClipType_ clipType, const Polylines& paths, const Polygons& r
         for(const auto& [from, to]: segments(contour)) bc.segs.push_back(makeSeg(from, to));
     }
 
+    const Side side{region, boundary};
+
     Polylines result;
     for(const Polyline& path: paths)
-        for(Polyline& piece: clipPath(path, region, boundary, keepInside))
+        for(Polyline& piece: clipPath(path, side, boundary, keepInside))
             result.push_back(std::move(piece));
     return result;
 }
