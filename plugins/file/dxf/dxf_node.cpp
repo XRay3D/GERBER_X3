@@ -161,6 +161,10 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
     switch(role) {
     case Qt::CheckStateRole:
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
+        // У файла без непустых слоёв строк-детей нет вовсе (см. Plugin::
+        // updateFileModel), и front()/back() смотрели бы в пустой вектор.
+        // Соседняя ветка ItemsType такую проверку уже делает.
+        if(childs.empty()) return true;
         emit App::fileModel().dataChanged(
             childs.front() -> index(index.column()),
             childs.back()->index(index.column()), {role});

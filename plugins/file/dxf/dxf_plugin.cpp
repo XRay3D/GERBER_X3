@@ -232,12 +232,17 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
 void Plugin::updateFileModel(AbstractFile* file) {
     const auto fm = App::fileModelPtr();
-    const QModelIndex& fileIndex(file->node()->index());
-    const QModelIndex index = fm->createIndex(0, 0, fileIndex.internalId());
+    // Индекс САМОГО узла файла, а не собранный вручную. Прежде здесь стояло
+    // fm->createIndex(0, 0, fileIndex.internalId()): указатель настоящий, а
+    // строка всегда 0. У первого файла это совпадало со строкой узла, у второго
+    // и дальше -- нет, и begin/endInsertRows получали родителя, чья строка
+    // врёт. По этому индексу модель правит постоянные индексы и уведомляет вид,
+    // так что дерево оставалось с испорченным соответствием строк и узлов.
+    const QModelIndex fileIndex = file->node()->index();
+    auto* item = fm->getItem(fileIndex);
     // clean before insert new layers
-    if(int count = fm->getItem(fileIndex)->childCount(); count) {
-        fm->beginRemoveRows(index, 0, count - 1);
-        auto item = fm->getItem(index);
+    if(int count = item->childCount(); count) {
+        fm->beginRemoveRows(fileIndex, 0, count - 1);
         do {
             item->remove(--count);
         } while(count);
@@ -250,10 +255,10 @@ void Plugin::updateFileModel(AbstractFile* file) {
     // Пустой файл (секции есть, рисовать нечего) даёт size() - 1 == -1, и
     // beginInsertRows на таком диапазоне -- обращение к модели с мусором.
     if(layers.empty()) return;
-    fm->beginInsertRows(index, 0, int(layers.size()) - 1);
+    fm->beginInsertRows(fileIndex, 0, int(layers.size()) - 1);
 
     for(auto& [name, layer]: layers)
-        fm->getItem(index)->addChild(new Dxf::NodeLayer{name, layer});
+        item->addChild(new Dxf::NodeLayer{name, layer});
     fm->endInsertRows();
 }
 
