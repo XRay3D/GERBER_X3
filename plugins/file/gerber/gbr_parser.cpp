@@ -11,6 +11,7 @@
 #include "gbr_parser.h"
 
 #include "geo/boolean.h"
+#include "geo/cancel.h"
 #include "geo/util.h"
 
 #include "abstract_fileplugin.h"
@@ -166,7 +167,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         if(file->lines().empty())
             emit afp->fileError({}, file->shortName() + u'\n' + u"Incorrect File!");
 
-        emit afp->fileProgress(file->shortName(), static_cast<int>(file->lines().size()), 0);
+        // Ключ прогресса -- ПОЛНЫЙ путь: по нему окно находит свою строку, а
+        // короткое имя не уникально (два Top.gbr из разных папок).
+        emit afp->fileProgress(file->name(), static_cast<int>(file->lines().size()), 0);
 
         lineNum_ = 0;
 
@@ -176,8 +179,12 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         for(const QString& gerberLine: file->lines()) {
             currentGerbLine_ = gerberLine;
             ++lineNum_;
-            if(!(lineNum_ % 1000))
-                emit afp->fileProgress(file->shortName(), 0, lineNum_);
+            if(!(lineNum_ % 1000)) {
+                emit afp->fileProgress(file->name(), 0, lineNum_);
+                // Отклик на кнопку отмены -- та же тысяча строк, что и у
+                // прогресса: чаще незачем, а проверка не бесплатна.
+                Geo::checkCancelled();
+            }
             auto dummy = [](const QString& gLine) -> bool {
                 static constexpr ctll::fixed_string ptrnDummy{R"(^%(.{2})(.+)\*%$)"};
                 if(auto [whole, id, par] = ctre::match<ptrnDummy>(std::u16string_view{gLine}); whole) ///*regexp.match(gLine)); match.hasMatch()*/) {
@@ -243,17 +250,25 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             file->groupedPaths();
             file->graphicObjects_.shrink_to_fit();
             emit afp->fileReady(file);
-            emit afp->fileProgress(file->shortName(), 1, 1);
+            emit afp->fileProgress(file->name(), 1, 1);
         }
+    } catch(const Geo::Cancelled&) {
+        // Отмена пользователем -- не ошибка: ни в лог, ни в диалог ошибок.
+        // Сигналы шлёт AbstractFilePlugin::parseFileTask, туда и пробрасываем.
+        // Ловим ДО std::exception: Cancelled от него наследуется и иначе уехал
+        // бы в общий обработчик ошибок.
+        delete file;
+        reset();
+        throw;
     } catch(const QString& errStr) {
         qWarning() << u"exeption Q:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
-        emit afp->fileProgress(file->shortName(), 1, 1);
+        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     } catch(const char* errStr) {
         qWarning() << u"exeption Q:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + QString::fromUtf8(errStr));
-        emit afp->fileProgress(file->shortName(), 1, 1);
+        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     } catch(const std::exception& e) {
         std::stringstream ss;
@@ -263,13 +278,13 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         qWarning() << ss.str().c_str();
         qWarning() << u"exeption E:"_s << e.what();
         emit afp->fileError({}, file->shortName() + u'\n' + QString::fromUtf8(e.what()));
-        emit afp->fileProgress(file->shortName(), 1, 1);
+        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     } catch(...) {
         QString errStr(u"%1: %2"_s.arg(errno).arg(strerror(errno)));
         qWarning() << u"exeption S:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
-        emit afp->fileProgress(file->shortName(), 1, 1);
+        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     }
     reset(); // clear parser data

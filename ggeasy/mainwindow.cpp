@@ -23,6 +23,7 @@
 #include "gi_datasolid.h"
 #include "gi_point.h"
 #include "graphicsview.h"
+#include "loadprogressdialog.h"
 #include "plugindialog.h"
 #include "project.h"
 #include "settingsdialog.h"
@@ -125,10 +126,23 @@ void MainWindow::init() {
         ptr->moveToThread(&parserThread);
         connect(ptr, &AbstractFilePlugin::fileError, this, &MainWindow::fileError, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
+        connect(ptr, &AbstractFilePlugin::fileCanceled, this, &MainWindow::fileCanceled, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
-        connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
-        connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFile, Qt::QueuedConnection);
+        // Именно parseFileTask, а не parseFile: обёртка заводит область отмены,
+        // без неё кнопка отмены у строки ничего не остановит.
+        connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFileTask, Qt::QueuedConnection);
+        connect(project_, &Project::reloadFile, ptr, &AbstractFilePlugin::parseFileTask, Qt::QueuedConnection);
     }
+
+    // Перезагрузку по изменению файла на диске инициирует Project, минуя
+    // loadFile, -- строку в окне заводим здесь, иначе у неё не было бы ни
+    // прогресса, ни кнопки отмены.
+    connect(project_, &Project::reloadFile, this, [this](const QString& fileName, int type) {
+        if(auto* plugin = App::filePlugin(static_cast<uint32_t>(type))) {
+            loadingBy_[fileName] = plugin;
+            loadProgress()->addTask(fileName);
+        }
+    });
 
     initWidgets();
 
@@ -202,12 +216,36 @@ void MainWindow::loadFile(const QString& fileName) {
             return;
         for(auto& [type, ptr]: App::filePlugins()) {
             if(ptr->thisIsIt(fileName)) {
+                // Строка в окне заводится СРАЗУ, а не по первому fileProgress:
+                // разбор идёт в очереди одного parserThread, и до своего
+                // прогресса файл может ждать сколько угодно -- всё это время
+                // его надо и показывать, и давать отменить. Плюс прогресс
+                // шлёт не всякий плагин.
+                loadingBy_[fileName] = ptr;
+                loadProgress()->addTask(fileName);
                 emit parseFile(fileName, int(type));
                 return;
             }
         }
     }
     qDebug() << fileName;
+}
+
+LoadProgressDialog* MainWindow::loadProgress() {
+    if(!loadProgress_) {
+        loadProgress_ = new LoadProgressDialog{this};
+        connect(loadProgress_, &LoadProgressDialog::cancelRequested,
+            this, &MainWindow::cancelLoading);
+    }
+    return loadProgress_;
+}
+
+void MainWindow::cancelLoading(const QString& fileName) {
+    // Собственно остановкой занимается плагин: у него стоп-токен, который
+    // видит парсер. Строку отсюда не убираем -- она исчезнет, когда плагин
+    // отчитается (fileCanceled/fileProgress(1,1)), иначе окно врало бы об
+    // остановке ещё не остановленного разбора.
+    if(auto* plugin = loadingBy_.value(fileName)) plugin->requestCancel(fileName);
 }
 
 void MainWindow::logMessage2(QtMsgType type, const QMessageLogContext& context, const QString& message) {
@@ -232,21 +270,23 @@ void MainWindow::fileError(const QString& fileName, const QString& error) {
 }
 
 void MainWindow::fileProgress(const QString& fileName, int max, int value) {
-    if(max && !value) {
-        QProgressDialog* pd = new QProgressDialog{this};
-        pd->setCancelButton(nullptr);
-        pd->setLabelText(fileName);
-        pd->setMaximum(max);
-        // pd->setModal(true);
-        // pd->setWindowFlag(Qt::WindowCloseButtonHint, false);
-        pd->show();
-        progressDialogs_[fileName] = pd;
-    } else if(max == 1 && value == 1) {
-        progressDialogs_[fileName]->hide();
-        progressDialogs_[fileName]->deleteLater();
-        progressDialogs_.remove(fileName);
-    } else
-        progressDialogs_[fileName]->setValue(value);
+    // Протокол плагинов: (max>0, value==0) -- старт, (1,1) -- конец, иначе шаг.
+    // Строка уже заведена в loadFile, поэтому старт только уточняет максимум.
+    //
+    // Прежний код обращался к QMap::operator[] и на «конце»/«шаге» без старта
+    // вставлял туда nullptr, который тут же разыменовывал. Путь был реальный:
+    // пустой gerber шлёт fileProgress(name, 0, 0) сразу после fileError.
+    if(max == 1 && value == 1) {
+        loadingBy_.remove(fileName);
+        if(loadProgress_) loadProgress_->removeTask(fileName);
+    } else if(loadProgress_)
+        loadProgress_->setTaskProgress(fileName, max, value);
+}
+
+void MainWindow::fileCanceled(const QString& fileName) {
+    qInfo() << "загрузка отменена:" << fileName;
+    loadingBy_.remove(fileName);
+    if(loadProgress_) loadProgress_->removeTask(fileName);
 }
 
 void MainWindow::addFileToPro(AbstractFile* file) {

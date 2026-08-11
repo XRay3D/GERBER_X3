@@ -17,6 +17,7 @@
 #include "gc_plugin.h"
 #include "gi.h"
 #include "graphicsview.h"
+#include "reloadrequestdialog.h"
 #include "shapepluginin.h"
 
 #include <QElapsedTimer>
@@ -32,14 +33,16 @@ Project::Project(QObject* parent)
     , watcher(this) {
     connect(&watcher, &QFileSystemWatcher::fileChanged, this, [this](const QString& path) {
         if(!reloadPaths.emplace(path).second) return;
-        const int32_t id = files_[contains(path)]->id();
-        if(id > -1
-            && QFileInfo::exists(path)
-            && QMessageBox::question(nullptr, {}, tr("External file \"%1\" has changed.\nReload it into the project?").arg(QFileInfo(path).fileName()),
-                   QMessageBox::Ok, QMessageBox::Cancel)
-                == QMessageBox::Ok)
-            emit reloadFile(path, static_cast<int>(files_[id]->type()));
-        else reloadPaths.erase(path);
+        // Проверка id ДО обращения к files_: contains() отдаёт -1 для файла не
+        // из проекта, а files_[-1] у std::map вставляет пустой shared_ptr,
+        // который прежний код тут же разыменовывал.
+        if(contains(path) < 0 || !QFileInfo::exists(path)) {
+            reloadPaths.erase(path);
+            return;
+        }
+        // Не модальный вопрос на каждый файл, а строка в общем окне:
+        // пересборка платы в САПР переписывает все слои разом.
+        reloadDialog()->addRequest(path);
     });
 
     connect(this, &Project::addFileDbg, this, qOverload<GCode::File*>(&Project::addFile), Qt::QueuedConnection);
@@ -49,6 +52,34 @@ Project::Project(QObject* parent)
 
 Project::~Project() {
     App::setProject(nullptr);
+}
+
+ReloadRequestDialog* Project::reloadDialog() {
+    if(!reloadDialog_) {
+        // Родитель -- главное окно, чтобы диалог не терялся за ним и уходил
+        // вместе с приложением. Берём его через вид: MainWindow объявлен в
+        // ggeasy, куда common не смотрит, а GraphicsView -- обычный QWidget,
+        // и его window() и есть главное окно.
+        auto* view = App::grViewPtr();
+        reloadDialog_ = new ReloadRequestDialog{view ? view->window() : nullptr};
+        connect(reloadDialog_, &ReloadRequestDialog::reloadRequested, this, [this](const QString& path) {
+            const int id = contains(path);
+            if(id < 0) { // файл успели закрыть, пока висел вопрос
+                reloadPaths.erase(path);
+                return;
+            }
+            // reloadPaths чистит Project::reload, когда разобранный файл придёт
+            // обратно: до тех пор повторные срабатывания watcher'а по этому
+            // пути гасятся, иначе САПР, дописывающий файл кусками, наплодил бы
+            // строк.
+            emit reloadFile(path, static_cast<int>(files_[id]->type()));
+        });
+        connect(reloadDialog_, &ReloadRequestDialog::skipRequested, this, [this](const QString& path) {
+            // Забыли про этот файл -- о следующем его изменении спросим снова.
+            reloadPaths.erase(path);
+        });
+    }
+    return reloadDialog_;
 }
 
 Project::Header Project::header() const {

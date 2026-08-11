@@ -203,6 +203,10 @@ private:
 
     // File Watcher
     QFileSystemWatcher watcher;
+    // Одно окно на все изменившиеся файлы вместо модального вопроса на каждый.
+    // Создаётся при первом изменении и дальше только прячется.
+    class ReloadRequestDialog* reloadDialog_ = nullptr;
+    ReloadRequestDialog* reloadDialog();
 
     FilesMap files_;
     ShapesMap shapes_;
