@@ -69,7 +69,7 @@ public:                                                                         
         assert(app->NAME##_);                                                                                    \
         return *app->NAME##_;                                                                                    \
     }                                                                                                            \
-    /* Проверка app обязательна: указатели спрашивают и до создания App        \
+    /* Проверка app обязательна: указатели спрашивают и до создания App                                 \
      * (выбор режима OpenGL в main), и после её разрушения -- туда ходит  \
      * обработчик сообщений Qt, и на нулевом app он ронял процесс. */ \
     static TYPE* NAME##Ptr() {                                                                                   \
@@ -126,13 +126,28 @@ class App {
     // scene()->views().front()->transform() на каждый вызов.
     double viewScaleFactor_{1.0};
 
-    QSharedMemory sharedMemory{u"AppSettings"_s};
+    QSharedMemory sharedMemory{sharedKey()};
 
     const bool isDebug_{QCoreApplication::applicationDirPath().contains(u"GERBER_X3/bin"_s)};
 
     bool drawPdf_{};
 
 public:
+    // Имя сегмента -- СВОЁ У КАЖДОГО ПРОЦЕССА. Сегмент нужен ровно затем, чтобы
+    // указатель на App видели плагины: common -- статическая библиотека, и у
+    // каждого .so своя копия inline static app. Делить его между РАЗНЫМИ копиями
+    // программы не нужно и нельзя, а QSharedMemory общесистемна: со старым
+    // именем "AppSettings" вторая запущенная копия не создавала сегмент, а
+    // прицеплялась к чужому и забирала указатель на App первой -- адрес чужого
+    // адресного пространства. Падало на первом же App::...(), то есть сразу на
+    // старте, ещё до открытия файлов.
+    //
+    // Заодно перестаёт мешать сегмент, оставшийся от аварийно завершившейся
+    // копии: у новой копии другой pid, а значит и другое имя.
+    static QString sharedKey() {
+        return u"AppSettings-"_s + QString::number(QCoreApplication::applicationPid());
+    }
+
     explicit App() {
         if(sharedMemory.create(sizeof(void*), QSharedMemory::ReadWrite))
             app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
