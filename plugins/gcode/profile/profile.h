@@ -35,6 +35,12 @@ public:
     uint32_t type() const override { return PROFILE; }
     void createGi() override;
     void genGcodeAndTile() override;
+
+private:
+    // Тот же профиль, но с мостиками (табами): контур остаётся одним
+    // непрерывным проходом, а над мостами фреза приподнимается горбом до
+    // верха таба -- см. подробный комментарий у реализации в profile.cpp.
+    void saveMillingProfileBridges(const QPointF& offset);
 }; // File
 
 class Creator : public GCode::Creator {
@@ -43,12 +49,12 @@ public:
     Creator() = default;
     ~Creator() override = default;
 
+    // Мостики: длина перемычки и её высота от дна реза. Сами мосты приезжают
+    // центрами в gcp.supportCurvess -- см. Form::computePaths.
     static inline const QString BridgeLen = u"BridgeLen"_s;
+    static inline const QString BridgeHeight = u"BridgeHeight"_s;
     static inline const QString TrimmingCorners = u"TrimmingCorners"_s;
     static inline const QString TrimmingOpenPaths = u"TrimmingOpenPaths"_s;
-    static inline const QString BridgeAlignType = u"BridgeAlignType"_s;
-    static inline const QString BridgeValue = u"BridgeValue"_s;
-    static inline const QString BridgeValue2 = u"BridgeValue2"_s;
     static inline const QString Allowance = u"Allowance"_s;
 
 private:

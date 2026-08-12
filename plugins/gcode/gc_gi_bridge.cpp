@@ -13,29 +13,12 @@
 #include "gcode.h"
 #include "graphicsview.h"
 
+#include "geo/util.h"
+
 #include <QPainter>
-#include <algorithm>
 #include <cmath>
-#include <iostream>
-#include <list>
-#include <vector>
 
 namespace Gi {
-
-namespace {
-
-// Расстояние от точки до БЕСКОНЕЧНОЙ прямой, заданной отрезком, -- прежний
-// LineABC из myclipper.h в виде одной формулы: |a*x + b*y + c| / sqrt(a^2+b^2).
-double distanceToLine(const QLineF& line, QPointF point) {
-    const double a = line.p1().y() - line.p2().y();
-    const double b = line.p2().x() - line.p1().x();
-    const double c = line.p1().x() * line.p2().y() - line.p2().x() * line.p1().y();
-    const double norm = std::hypot(a, b);
-    return norm > 0.0 ? std::abs(a * point.x() + b * point.y() + c) / norm
-                      : std::numeric_limits<double>::max();
-}
-
-} // namespace
 
 Bridge::Bridge() {
     pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
@@ -71,69 +54,74 @@ void Bridge::mousePressEvent(QGraphicsSceneMouseEvent* event) {
     lastPos = pos();
 }
 
+// Прилипание к контуру: проекция на ближайший СЕГМЕНТ выделенной геометрии --
+// хорду или дугу. Прежний перебор мерил расстояние до бесконечной прямой по
+// одним хордам: в bulge-домене дуга -- один сегмент, у полуокружности хорда --
+// диаметр, и мост лип не к дуге, а к диаметру.
 QPointF Bridge::snapedPos(const QPointF& pos) {
     auto col = scene()->collidingItems(this);
-    if(col.isEmpty())
+    if(col.isEmpty()) {
+        ok_ = false;
+        update();
         return pos;
-
-    auto retPos{pos};
-    auto minLenght = std::numeric_limits<double>::max();
-
-    QLineF line;
-    ok_ = false;
+    }
 
     auto filter = [](auto* item) {
         auto ty = item->type();
-        // using enum Type;
         return item->isSelected() && (ty >= Type::ShCircle || ty == Type::Drill || ty == Type::DataSolid || ty == Type::DataPath);
     };
 
     auto transform = [](auto* item) { return static_cast<Item*>(item); };
 
+    QPointF retPos{pos};
+    double minDist{lenght}; // дальше длины моста не прилипаем
+    double angle{};
+    ok_ = false;
+
+    auto accept = [&](double dist, QPointF proj, double tangentAngle) {
+        if(dist >= minDist) return;
+        minDist = dist;
+        retPos = proj;
+        angle = tangentAngle;
+        ok_ = true;
+    };
+
     for(Item* gi: col | v::filter(filter) | v::transform(transform)) {
         auto curves = gi->curves();
         if(gi->type() == Type::DataPath
             && curves.size() == 1
-            && curves.front().front() == curves.front().back()
+            && curves.front().closed
             && curves.front().isPositive()) // fix direction for drawing
             curves.front().reverse();
-        for(Geo::Polyline& curve: curves) {
-            // for(size_t i{}, s = curve.size(); i < s; ++i) {
-            //     QLineF tmpLine{curve[i], curve[(i + 1) % s]};
-            //     double tmp = LineABC(tmpLine).distance(pos);
-            //     if(minLenght > tmp && tmp < lenght)
-            //         minLenght = tmp, line = tmpLine;
-            // }
-            for(auto [fr, to]: curve | v::pairwise) {
-                QLineF tmpLine{fr, to};
-                double tmp = distanceToLine(tmpLine, pos);
-                if(minLenght > tmp && tmp < lenght)
-                    minLenght = tmp, line = tmpLine;
+        for(const Geo::Polyline& curve: curves) {
+            for(auto&& [fr, to]: Geo::segments(curve)) {
+                if(auto arc = Geo::arcOf(fr, to, fr.bulge)) {
+                    const QPointF v = pos - arc->center;
+                    const double len = std::hypot(v.x(), v.y());
+                    if(len <= 0.0) continue;
+                    const QPointF proj = arc->center + v * (arc->radius / len);
+                    // Укладывается ли проекция в размах дуги: arcSweep отдаёт
+                    // угол от начала сегмента до проекции в направлении обхода.
+                    if(std::abs(Geo::arcSweep(fr, proj, arc->center, arc->dir())) > std::abs(arc->theta)) continue;
+                    // Касательная -- перпендикуляр к радиусу по ходу обхода.
+                    const QPointF tangent = arc->theta > 0.0 ? QPointF{-v.y(), v.x()} : QPointF{v.y(), -v.x()};
+                    accept(std::abs(len - arc->radius), proj, QLineF{proj, proj + tangent}.angle());
+                } else {
+                    const QPointF dir = to - fr;
+                    const double len2 = QPointF::dotProduct(dir, dir);
+                    if(len2 <= 0.0) continue;
+                    const double t = QPointF::dotProduct(pos - fr, dir) / len2;
+                    if(t < 0.0 || t > 1.0) continue;
+                    const QPointF proj = fr + dir * t;
+                    accept(Geo::distance(pos, proj), proj, QLineF{fr, to}.angle());
+                }
             }
         }
     }
 
-    if(!line.isNull()) {
-        minLenght = line.length() - lenght / 2;
-        angle_ = line.angle();
-        if(Geo::distance(line.center(), pos) < lenght / 2 && line.length() < lenght) {
-            // точка центра прямой
-            retPos = line.center();
-            ok_ = true;
-            update(); // Cutoff
-        } else if(Geo::distance(line.p1(), pos) < minLenght && Geo::distance(line.p2(), pos) < minLenght) {
-            // точка пересечения на прямой перпендикуляра из 3 точки
-            auto k1 = (line.p2().x() - line.p1().x());
-            auto k2 = (line.p2().y() - line.p1().y());
-            auto k = ((pos.x() - line.p1().x()) * k1 + (pos.y() - line.p1().y()) * k2) / (pow(k1, 2) + pow(k2, 2));
-            auto x = line.p1().x() + k * k1;
-            auto y = line.p1().y() + k * k2;
-            retPos = {x, y};
-            ok_ = true;
-            update(); // Cutoff
-        }
-    }
-
+    if(ok_)
+        angle_ = angle;
+    update();
     return retPos;
 }
 
@@ -143,8 +131,10 @@ void Bridge::update() {
 
     cutoff.clear();
 
-    if(!ok_)
+    if(!ok_) {
+        QGraphicsItem::update();
         return;
+    }
 
     QLineF lTool, lCenter = QLineF::fromPolar(toolDiam + lenght, angle_);
     double start{}, span = 180;
@@ -164,13 +154,6 @@ void Bridge::update() {
         break;
     }
 
-    if(0) { // test
-        QLineF lTool2 = testLine();
-        lTool2.translate(pos() - lTool2.center());
-        cutoff.moveTo(lTool2.p1());
-        cutoff.lineTo(lTool2.p2());
-    }
-
     const QPointF offset{toolDiam / 2., toolDiam / 2};
     const QSizeF size{toolDiam, toolDiam};
 
@@ -184,32 +167,6 @@ void Bridge::update() {
     cutoff.lineTo(lTool.p2());
 
     QGraphicsItem::update();
-}
-
-// Пересекает ли пробная линия контур, и если да -- где. Прежний pointOnPolygon
-// из myclipper.h к этому моменту был уже мёртв (qFatal с закомментированным
-// телом), так что здесь восстановлено то, что он собирался делать.
-bool Bridge::test(const Geo::Polyline& curve) {
-    if(curve.size() < 2) return false;
-
-    const QLineF probe = testLine();
-    const std::size_t count = curve.size();
-    const std::size_t last = curve.closed ? count : count - 1;
-
-    QPointF point;
-    for(std::size_t i{}; i < last; ++i) {
-        const QLineF edge{curve[i], curve[(i + 1) % count]};
-        if(edge.intersects(probe, &point) == QLineF::BoundedIntersection) {
-            intersectPoint = point;
-            return true;
-        }
-    }
-    return false;
-}
-
-QLineF Bridge::testLine() const {
-    QLineF lTool2 = QLineF::fromPolar(toolDiam * 1.2, angle_ - 90);
-    return lTool2.translated(pos() - lTool2.center());
 }
 
 bool Bridge::ok() const { return ok_; }
@@ -229,6 +186,8 @@ void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
 
 int Bridge::type() const { return Type::Bridge; }
 
-Geo::Polylines Bridge::curves(int /*alternate*/) const { return {Geo::circle(lenght + toolDiam, intersectPoint)}; }
+// След моста на плане -- круг длиной моста плюс диаметр фрезы вокруг позиции.
+// В расчёт УП мосты уходят не отсюда, а центрами (см. комментарий к классу).
+Geo::Polylines Bridge::curves(int /*alternate*/) const { return {Geo::circle(lenght + toolDiam, pos())}; }
 
 } // namespace Gi
