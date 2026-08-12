@@ -15,8 +15,8 @@
 #include "gi_point.h"
 #include "gridtick.h"
 
-#include "project.h"
 #include "openglcheck.h"
+#include "project.h"
 #include "ruler.h"
 #include "utils.h"
 
@@ -34,8 +34,10 @@
 #include <QScrollBar>
 #include <QUndoCommand>
 
+#include <algorithm>
 #include <cmath>
 #include <format>
+#include <numbers>
 
 constexpr double zoomFactor = 1.5;
 constexpr double zoomFactorAnim = 1.7;
@@ -62,10 +64,9 @@ GraphicsView::GraphicsView(QWidget* parent)
     vRuler{new Ruler{Qt::Vertical, this}},
     gridLayout{new QGridLayout{this}} {
 
-    // setCacheMode(CacheBackground);
+    // Режим обновления и кэш ставятся в setOpenGL(): setViewport() сбрасывает
+    // атрибуты вьюпорта, поэтому задавать их до него бессмысленно.
     setOptimizationFlag(DontSavePainterState);
-    // setOptimizationFlag(DontAdjustForAntialiasing);
-    // setViewportUpdateMode(SmartViewportUpdate);
     setDragMode(RubberBandDrag);
 
     // setContextMenuPolicy(Qt::DefaultContextMenu);
@@ -98,7 +99,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     setScene(new Scene{this});
     App::setGraphicsView(this);
 
-    scene()->setSceneRect(-1000, -1000, +2000, +2000); // 2x2 meters
+    updateSceneRectToContents(); // пустой проект -- запасной прямоугольник
 
     // add two rulers on top and left.
     setViewportMargins(Ruler::Breadth, 0, 0, Ruler::Breadth);
@@ -116,7 +117,7 @@ GraphicsView::GraphicsView(QWidget* parent)
         corner->setText(fl ? u"I"_s : u"M"_s);
         corner->setToolTip(fl ? u"Banana"_s : u"Metric"_s);
         App::settings().setBanana(fl);
-        scene()->update();
+        viewport()->update(); // сменился шаг сетки -- она в drawForeground
         hRuler->update();
         vRuler->update();
     });
@@ -145,16 +146,21 @@ GraphicsView::GraphicsView(QWidget* parent)
         QSettings settings;
         settings.beginGroup(u"Viewer"_s);
         setOpenGL(settings.value(u"chbxOpenGl"_s).toBool());
-        setRenderHint(QPainter::Antialiasing, settings.value(u"chbxAntialiasing"_s, false).toBool());
+        const bool aa = settings.value(u"chbxAntialiasing"_s, false).toBool();
+        setRenderHint(QPainter::Antialiasing, aa);
+        // Флаг убирает запас в 2 device-px, который Qt добавляет к области
+        // обновления каждого item'а под сглаживание. При включённом AA это
+        // оставляет следы на диагональных трассах, при выключенном -- бесплатно
+        // и корректно.
+        setOptimizationFlag(DontAdjustForAntialiasing, !aa);
         viewport()->setObjectName(u"viewport"_s);
         settings.endGroup();
     }
 
-    setStyleSheet(u"QGraphicsView { background: "_s
-        % App::settings().guiColor(GuiColors::Background).name(QColor::HexRgb)
-        % u" }"_s);
-
-    startUpdateTimer(20);
+    // Фон -- штатной кистью, а не таблицей стилей: drawBackground заливал
+    // жёсткий Qt::black, из-за чего настройка GuiColors::Background до сцены
+    // не доходила, а QStyleSheetStyle рисовал лишний примитив на каждый paint.
+    setBackgroundBrush(App::settings().guiColor(GuiColors::Background));
 
     scale(1.0, -1.0); // flip vertical
 }
@@ -232,14 +238,14 @@ void GraphicsView::fitInView(QRectF dstRect, bool withBorders) {
         animate(this, "viewRect", getViewRect(), dstRect);
     } else {
         QGraphicsView::fitInView(dstRect, Qt::KeepAspectRatio);
-        updateRuler();
+        onTransformChanged();
     }
 }
 
 void GraphicsView::setRuler(bool ruller) {
     rulerCtr = 0;
     ruler_ = ruller;
-    scene()->update();
+    viewport()->update(); // мерная линейка -- оверлей вьюпорта, не слой сцены
 }
 
 QPointF GraphicsView::toScenePos(QMouseEvent* event) {
@@ -267,11 +273,12 @@ void GraphicsView::setScale(double s) noexcept {
     setTransform({+s /*11*/, trf.m12(), trf.m13(),
         /*      */ trf.m21(), -s /*22*/, trf.m23(),
         /*      */ trf.m31(), trf.m32(), trf.m33()});
+    App::viewScaleFactor() = 1.0 / std::abs(s);
 }
 
 void GraphicsView::scale(double sx, double sy) {
     QGraphicsView::scale(sx, sy);
-    updateRuler();
+    onTransformChanged();
 }
 
 void GraphicsView::setOpenGL(bool useOpenGL) {
@@ -287,20 +294,73 @@ void GraphicsView::setOpenGL(bool useOpenGL) {
         // if(dynamic_cast<QOpenGLWidget*>(viewport())) break;
         auto oglWidget = new QOpenGLWidget{this};
         QSurfaceFormat format;
-        format.setSamples(8);
+        // 4x, а не 8x: MSAA умножает память FBO и полосу resolve'а на число
+        // сэмплов при полном разрешении вьюпорта, а на тонких линиях разница
+        // между 4x и 8x почти незаметна -- пути Qt сглаживает своим движком.
+        format.setSamples(4);
         oglWidget->setFormat(format);
         setViewport(oglWidget);
+        // QOpenGLWidget всё равно перерисовывает весь FBO; при частичных
+        // обновлениях в невосстановленных областях остаётся мусор.
+        setViewportUpdateMode(FullViewportUpdate);
+        qInfo() << "GL: сэмплов запрошено" << format.samples()
+                << "выдано" << oglWidget->format().samples();
     } else {
         // if(dynamic_cast<QWidget*>(viewport())) break;
         setViewport(new QWidget{this});
+        // Минимальный режим верен именно для платы: элементы разбросаны, и
+        // BoundingRectViewportUpdate склеил бы два выделенных проводника в
+        // противоположных углах в весь вьюпорт. От вырождения Qt страхуется
+        // сам -- после порога по числу прямоугольников переходит на полное
+        // обновление.
+        setViewportUpdateMode(MinimalViewportUpdate);
     }
     // } while(false);
+    // Сетка остаётся в drawForeground, кэшировать нечего.
+    setCacheMode(CacheNone);
     ::setCursor(viewport());
     gridLayout->addWidget(viewport(), 0, 1);
 }
 
+void GraphicsView::updateSceneRectToContents() {
+    // Было -1000..+1000 мм -- 4 м² корня дерева BSP под плату в 80 см².
+    // Глубину дерева Qt берёт от числа item'ов, но корневой прямоугольник --
+    // именно sceneRect, и при таком перекосе почти все элементы падают в одну
+    // горсть листьев: поиск вырождается в линейный перебор.
+    QRectF r = scene()->itemsBoundingRect();
+    if(r.isEmpty()) r = {-100, -100, 200, 200};             // пустой проект, мм
+    const auto pad = std::max(r.width(), r.height()) * 0.5; // запас на панорамирование
+    scene()->setSceneRect(r.adjusted(-pad, -pad, pad, pad));
+}
+
+void GraphicsView::scheduleSceneRectUpdate() {
+    if(std::exchange(sceneRectUpdatePending_, true)) return;
+    QTimer::singleShot(0, this, [this] {
+        sceneRectUpdatePending_ = false;
+        updateSceneRectToContents();
+    });
+}
+
+void GraphicsView::addAnimated(QGraphicsItem* item) {
+    if(!r::contains(animated_, item)) animated_.push_back(item);
+    updateAnimationTimer();
+}
+
+void GraphicsView::removeAnimated(QGraphicsItem* item) {
+    if(std::erase(animated_, item)) updateAnimationTimer();
+}
+
+void GraphicsView::updateAnimationTimer() {
+    const bool need = !animated_.empty() && App::settings().animSelection();
+    if(need && !animTimerId_)
+        animTimerId_ = startTimer(40, Qt::CoarseTimer); // 25 Гц
+    else if(!need && animTimerId_)
+        killTimer(std::exchange(animTimerId_, 0));
+}
+
 void GraphicsView::setViewRect(const QRectF& r) {
     QGraphicsView::fitInView(r, Qt::KeepAspectRatio);
+    App::viewScaleFactor() = 1.0 / std::abs(transform().m11());
 }
 
 QRectF GraphicsView::getViewRect() {
@@ -314,11 +374,26 @@ QRectF GraphicsView::getViewRect() {
 QRectF GraphicsView::getSelectedBoundingRect() {
     auto selectedItems{scene()->selectedItems()};
     if(selectedItems.isEmpty()) return {};
-    ScopedTrue sTrue{boundingRect_};
-    QRectF rect = selectedItems.front()->boundingRect();
-    for(auto* gi: selectedItems) rect = rect.united(gi->boundingRect());
+    // Точный габарит по залитому контуру нужен только здесь. Раньше он
+    // включался флагом прямо в Item::boundingRect() -- самой горячей
+    // виртуальной функции сцены; теперь это отдельный метод.
+    auto rectOf = [](QGraphicsItem* gi) {
+        auto* item = dynamic_cast<Gi::Item*>(gi);
+        return item ? item->fillBoundingRect() : gi->boundingRect();
+    };
+    QRectF rect = rectOf(selectedItems.front());
+    for(auto* gi: selectedItems) rect = rect.united(rectOf(gi));
     if(!rect.isEmpty()) App::project().setWorckRect(rect);
     return rect;
+}
+
+void GraphicsView::onTransformChanged() {
+    App::viewScaleFactor() = 1.0 / std::abs(transform().m11());
+    // Экранное положение перекрестья задано точкой СЦЕНЫ -- после смены
+    // трансформации его надо пересчитать, иначе крест останется на старом
+    // месте вьюпорта.
+    cursorViewPos_ = QGraphicsView::mapFromScene(scenePos);
+    updateRuler();
 }
 
 void GraphicsView::updateRuler() {
@@ -336,9 +411,10 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
     auto* animation = new QPropertyAnimation{target, propertyName};
     connect(animation, &QPropertyAnimation::finished, [propertyName, end, this] {
         setProperty(propertyName.data(), end);
-        updateRuler();
+        onTransformChanged();
+        // Финальный setProperty уже сменил трансформацию -- сцена
+        // инвалидирована, звать scene()->update() поверх незачем.
         scenePos = mapToScene(viewport()->mapFromGlobal(QCursor::pos()));
-        scene()->update();
     });
     if constexpr(std::is_same_v<T, QRectF>) {
         animation->setEasingCurve(QEasingCurve(QEasingCurve::InOutSine));
@@ -355,9 +431,12 @@ void GraphicsView::animate(QObject* target, const QByteArray& propertyName, T be
     animation->start(QAbstractAnimation::DeleteWhenStopped);
 }
 
-void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
+void GraphicsView::drawRuller(QPainter* painter) const {
     if(rulPt2 == rulPt1) return;
 
+    // Геометрия и подписи считаются по координатам СЦЕНЫ (миллиметры), а
+    // рисуется всё в координатах вьюпорта -- поэтому длины перьев, крестов и
+    // текста больше не надо делить на масштаб.
     QLineF line{rulPt2, rulPt1};
 
     const QRectF rect{rulPt1, rulPt2};
@@ -378,17 +457,15 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
             App::settings().isBanana() ? "in" : "mm" // 5
             ));
 
-    const double scaleFactor = App::grView().scaleFactor();
-    const double crossLength = 20.0 * scaleFactor;
-    const double penWidth = 1.0 / getScale();
+    // Дальше -- только пиксели вьюпорта.
+    const QPointF vp1 = QGraphicsView::mapFromScene(rulPt1);
+    const QPointF vp2 = QGraphicsView::mapFromScene(rulPt2);
+    QLineF vpLine{vp2, vp1};
+    const double vpAngle = vpLine.angle();
 
-    painter->setPen({Qt::green, penWidth});
-#if 0
-    // draw rect
-    painter->setBrush(QColor(127, 127, 127, 100));
-    painter->drawRect(rect);
-#endif
-    auto drawCross = [&crossLength, painter](QPointF pt) { // draw cross
+    constexpr double crossLength = 20.0; // px
+    painter->setPen({Qt::green, 1.0});
+    auto drawCross = [painter](QPointF pt) {
         painter->drawLine(QLineF{
             {pt.x(), pt.y() - crossLength},
             {pt.x(), pt.y() + crossLength}
@@ -398,34 +475,32 @@ void GraphicsView::drawRuller(QPainter* painter, const QRectF& rect_) const {
             {pt.x() + crossLength, pt.y()}
         });
     };
-    drawCross(rulPt1);
-    drawCross(rulPt2);
+    drawCross(vp1);
+    drawCross(vp2);
 
     // draw arrow
     painter->setRenderHint(QPainter::Antialiasing, true);
-    painter->setPen({Qt::white, penWidth});
-    painter->drawLine(line);
-    line.setLength(20.0 * scaleFactor);
-    line.setAngle(angle + 10);
-    painter->drawLine(line);
-    line.setAngle(angle - 10);
-    painter->drawLine(line);
+    painter->setPen({Qt::white, 1.0});
+    painter->drawLine(vpLine);
+    vpLine.setLength(crossLength);
+    vpLine.setAngle(vpAngle + 10);
+    painter->drawLine(vpLine);
+    vpLine.setAngle(vpAngle - 10);
+    painter->drawLine(vpLine);
 
     // draw text
     const auto size{QFontMetrics{font()}.size(Qt::AlignLeft | Qt::AlignJustify | Qt::TextDontClip, text)};
-    auto pt{rect.center()};
-    pt.rx() -= size.width() * 0.5 * scaleFactor;
-    pt.ry() += size.height() * 0.5 * scaleFactor;
-    pt.rx() = std::clamp(pt.x(), rect_.left(), rect_.right() - size.width() * scaleFactor);
-    pt.ry() = std::clamp(pt.y(), rect_.top() + size.height() * scaleFactor, rect_.bottom());
-    painter->translate(pt);
-    painter->scale(scaleFactor, -scaleFactor);
+    const QRect vpRect = viewport()->rect();
+    QPoint pt = QRectF{vp1, vp2}.center().toPoint();
+    pt.rx() = std::clamp(pt.x() - size.width() / 2, vpRect.left(), vpRect.right() - size.width());
+    pt.ry() = std::clamp(pt.y() - size.height() / 2, vpRect.top(), vpRect.bottom() - size.height());
     painter->setFont(font());
 
     painter->setRenderHint(QPainter::TextAntialiasing);
-    painter->fillRect(QRect{{}, size}, QColor{0, 0, 0, 127});
-    painter->setBrush(Qt::white);
-    painter->drawText(QRect{{}, size}, Qt::AlignLeft, text);
+    const QRect textRect{pt, size};
+    painter->fillRect(textRect, QColor{0, 0, 0, 127});
+    painter->setPen(Qt::white);
+    painter->drawText(textRect, Qt::AlignLeft, text);
 }
 
 namespace Gi {
@@ -516,7 +591,7 @@ void GraphicsView::GiToShapeEvent(QMouseEvent* event, QGraphicsItem* item) {
         App::project().makeShapeRectangle(center - rect, center + rect);
     });
     menu.exec(event->globalPosition().toPoint());
-    scene()->update();
+    viewport()->update();
 }
 
 void GraphicsView::dragEnterEvent(QDragEnterEvent* event) {
@@ -569,17 +644,16 @@ void GraphicsView::applyPendingViewRect() {
     // Без анимации: восстановление -- не переход из осмысленного вида, а
     // установка нужного, и анимировать её не от чего.
     QGraphicsView::fitInView(std::exchange(pendingViewRect_, {}), Qt::KeepAspectRatio);
-    updateRuler();
+    onTransformChanged();
 }
 
 void GraphicsView::resizeEvent(QResizeEvent* event) {
     QGraphicsView::resizeEvent(event);
-    updateRuler();
+    onTransformChanged();
 }
 
 void GraphicsView::wheelEvent(QWheelEvent* event) {
     const auto delta = event->angleDelta();
-    const auto pos = event->position().toPoint();
     if(event->buttons() & Qt::RightButton) {
         if(abs(delta.y()) == 120) (delta.y() > 0) ? zoomIn() : zoomOut();
     } else {
@@ -603,9 +677,29 @@ void GraphicsView::wheelEvent(QWheelEvent* event) {
             return;
         }
     }
-    mouseMove(mapToScene(pos));
+    // После зума и прокрутки под курсором ДРУГАЯ точка сцены, поэтому scenePos
+    // надо пересчитать -- как это делает mouseMoveEvent. Раньше здесь только
+    // испускался сигнал, а scenePos оставался прежним, и вторая точка мерной
+    // линейки при зуме стояла на месте вместо того, чтобы ехать за курсором.
+    scenePos = App::settings().getSnappedPos(mapToScene(event->position()), event->modifiers());
+    if(ruler_ && rulerCtr & 0x1) rulPt2 = scenePos;
+    emit mouseMove(scenePos);
+
     event->accept();
-    update();
+    // Без update(): при зуме смена трансформации инвалидирует вид сама, а при
+    // прокрутке принудительная перерисовка глушила блиттинг Qt. Перекрестье
+    // обновляется через оверлей.
+    updateOverlay();
+}
+
+void GraphicsView::scrollContentsBy(int dx, int dy) {
+    QGraphicsView::scrollContentsBy(dx, dy);
+    // Оверлей рисуется в ЭКРАННЫХ координатах, но внутри прохода сцены,
+    // поэтому при прокрутке уезжает вместе с блиттингом содержимого: на старом
+    // месте оставался след перекрестья. Стираем и то место, куда его сдвинуло,
+    // и то, где оно должно быть.
+    const QRegion region = overlayRegion();
+    viewport()->update(region | region.translated(dx, dy));
 }
 
 auto mouseDragEvent(QMouseEvent* event, QEvent::Type type, Qt::MouseButton button, bool add) {
@@ -721,7 +815,7 @@ void GraphicsView::mouseMoveEvent(QMouseEvent* event) {
 
     if(ruler_ && rulerCtr & 0x1) rulPt2 = scenePos;
 
-    // scene()->update();
+    updateOverlay();
 }
 
 void GraphicsView::mouseDoubleClickEvent(QMouseEvent* event) {
@@ -775,29 +869,76 @@ void GraphicsView::drawForeground(QPainter* painter, const QRectF& rect) {
         painter->drawLines(lines, 2);
     }
 
-    { // draw mouse cross
-        const double k = 100 /*px*/ / getScale();
-        painter->setPen({Qt::red, penWidth});
-        QLineF lines[2]{
-            {scenePos.x() - k, scenePos.y(),     scenePos.x() + k, scenePos.y()    },
-            {scenePos.x(),     scenePos.y() - k, scenePos.x(),     scenePos.y() + k}
-        };
-        painter->drawLines(lines, 2);
-    }
-
-    if(ruler_) drawRuller(painter, rect);
+    // Перекрестье и мерная линейка -- в ЭКРАННЫХ координатах: плечи у них
+    // заданы в пикселях, и делить их на масштаб больше не надо.
+    //
+    // Рисуются здесь же, а не отдельным QPainter поверх вьюпорта в paintEvent:
+    // при включённом OpenGL вьюпорт -- это QOpenGLWidget, второй QPainter по
+    // нему обнуляет кадр (сцены и сетки не видно вовсе). Выигрыш всё равно
+    // остаётся: инвалидируются только полосы перекрестья (updateOverlay), а не
+    // весь вид.
+    painter->resetTransform();
+    drawOverlay(painter);
 
     painter->restore();
 }
 
-void GraphicsView::drawBackground(QPainter* painter, const QRectF& rect) {
-    painter->fillRect(rect, Qt::black);
+// Экранные украшения поверх вьюпорта, в его собственных координатах.
+constexpr int kCrossArmPx = 100;
+
+QRegion GraphicsView::overlayRegion() const {
+    const auto& p = cursorViewPos_;
+    // QRect{x, y, w, h} покрывает [x, x+w-1], а плечо креста рисуется
+    // ВКЛЮЧИТЕЛЬНО до p+kCrossArmPx. Без +1 крайний пиксель нижнего и правого
+    // плеча не попадал в область стирания и оставался на экране при движении
+    // вверх и вправо. Ещё +1 с каждой стороны -- запас на округление.
+    constexpr int arm = kCrossArmPx + 1;
+    QRegion region{
+        QRect{p.x() - arm, p.y() - 1, arm * 2 + 1, 3}
+    };
+    region += QRect{p.x() - 1, p.y() - arm, 3, arm * 2 + 1};
+    // В режиме измерения оверлей -- это ещё стрелка и подпись, размер которой
+    // зависит от шрифта и текста, а положение вдобавок прижимается к краям
+    // вида. Предсказывать её прямоугольник здесь значило бы дублировать всю
+    // раскладку из drawRuller и снова разъезжаться с ней; режим кратковременный
+    // и интерактивный, поэтому проще обновить вьюпорт целиком.
+    if(ruler_) region += viewport()->rect();
+    return region;
 }
 
-void GraphicsView::timerEvent(QTimerEvent* /*event*/) {
-    // if (event->timerId() == timerId)
-    ++App::dashOffset();
-    scene()->update();
+void GraphicsView::updateOverlay() {
+    const QRegion old = overlayRegion();
+    // Перекрестье стоит в СНАПНУТОЙ точке, а не под сырым курсором: scenePos
+    // прогнан через getSnappedPos, и при включённом прилипании крест должен
+    // держаться сетки. (Раньше он рисовался прямо по позиции курсора.)
+    cursorViewPos_ = QGraphicsView::mapFromScene(scenePos);
+    viewport()->update(old | overlayRegion());
+}
+
+void GraphicsView::drawOverlay(QPainter* painter) {
+    if(viewport()->underMouse()) { // перекрестье под курсором
+        const auto& p = cursorViewPos_;
+        painter->setPen({Qt::red, 1.0});
+        QLine lines[2]{
+            {p.x() - kCrossArmPx, p.y(),               p.x() + kCrossArmPx, p.y()              },
+            {p.x(),               p.y() - kCrossArmPx, p.x(),               p.y() + kCrossArmPx}
+        };
+        painter->drawLines(lines, 2);
+    }
+    if(ruler_) drawRuller(painter);
+}
+
+void GraphicsView::timerEvent(QTimerEvent* event) {
+    if(event->timerId() != animTimerId_) return QGraphicsView::timerEvent(event);
+    // Период узора -- 4pi-1. Держим смещение внутри периода: прежний счётчик
+    // int за долгую сессию уходил в переполнение.
+    App::dashOffset() = std::fmod(App::dashOffset() + 1.0, 4 * std::numbers::pi - 1);
+    if(animated_.size() > 256) { // много выделено -- один регион дешевле
+        QRectF r;
+        for(auto* i: animated_) r |= i->sceneBoundingRect();
+        scene()->invalidate(r, QGraphicsScene::ItemLayer);
+    } else
+        r::for_each(animated_, [](QGraphicsItem* i) { i->update(); });
 }
 
 #include "moc_graphicsview.cpp"

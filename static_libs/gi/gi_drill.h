@@ -23,12 +23,12 @@ public:
     ~Drill() override { }
 
     // QGraphicsItem interface
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void paintGeometry(QPainter* painter, const RenderState& st) override;
     int type() const override { return int(Type::Drill); }
 
     // Item interface
     // Paths paths(int alternate = {}) const override;
-    void changeColor() override;
+    void updateColors() override;
 
     bool isSlot();
     double diameter() const { return diameter_; }

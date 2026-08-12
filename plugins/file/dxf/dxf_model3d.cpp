@@ -95,7 +95,7 @@ void Model3D::addFace3D(const Face3D& face) {
     faces.push_back({base, base + 1, base + 2, tri ? -1 : base + 3});
 }
 
-Paths64 Model3D::project(View v) const {
+Geo::Polygons Model3D::project(View v) const {
     if(faces.empty()) return {};
 
     // Проекция вершины на плоскость вида. Оси подобраны так, чтобы вид читался
@@ -112,7 +112,7 @@ Paths64 Model3D::project(View v) const {
         }
     };
 
-    Paths64 projected;
+    std::vector<Geo::Polygon> projected;
     projected.reserve(faces.size());
 
     for(const auto& face: faces) {
@@ -120,35 +120,29 @@ Paths64 Model3D::project(View v) const {
         path.reserve(4);
         for(int idx: face) {
             if(idx < 0) continue;
-            Point64 pt = ~flat(verts[size_t(idx)]);
-            if(path.empty() || path.back() != pt) path.push_back(pt);
+            QPointF pt = flat(verts[size_t(idx)]);
+            if(path.empty() || QPointF{path.back()} != pt) path.emplace_back(pt);
         }
-        if(path.size() > 2 && path.back() == path.front()) path.pop_back();
         if(path.size() < 3) continue; // грань видна с ребра
-        // Union по NonZero складывает намотки, поэтому ориентацию нормализуем:
-        // иначе встречно ориентированные грани взаимно уничтожаются.
-        double area = Area(path);
+        path.close();                 // снимет и повтор первой точки в конце
+        if(path.size() < 3) continue;
+        // Внешняя граница полигона обходится против часовой стрелки; грань,
+        // повёрнутая к нам изнанкой, приходит по часовой -- разворачиваем,
+        // иначе она вычтется из соседних вместо объединения с ними.
+        const double area = path.signedArea();
         if(qFuzzyIsNull(area)) continue;
-        if(area < 0) r::reverse(path);
-        projected.push_back(std::move(path));
+        if(area < 0) path.reverse();
+        // Вырожденные и самокасающиеся грани точный домен не берёт -- отсев
+        // здесь, а не внутри, чтобы не терять остальные молча.
+        if(!Geo::isExactContour(path)) continue;
+        projected.emplace_back(path);
     }
 
     if(projected.empty()) return {};
 
-    Paths64 silhouette;
-    cl::Clipper64 clipper;
-    clipper.AddSubject(projected);
-    clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, silhouette);
-
-    CleanPaths(silhouette, uScale * 0.0005);
-    // Слой ждёт замкнутые контуры (как в File::createGi).
-    for(Geo::Polyline& path: silhouette)
-        if(path.size() && path.back() != path.front())
-            path.push_back(path.front());
-
-    std::erase_if(silhouette, [](const Geo::Polyline& p) { return p.size() < 4; });
-
-    return silhouette;
+    // Объединение деревом слияний и в несколько потоков: граней в сети бывают
+    // десятки тысяч, и цепочка из стольких же точных операций не поднялась бы.
+    return Geo::Polygons{std::span<const Geo::Polygon>{projected}};
 }
 
 } // namespace Dxf

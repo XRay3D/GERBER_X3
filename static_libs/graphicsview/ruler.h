@@ -60,6 +60,8 @@ private:
     double tickKoef{1.0};
 
     QPoint cursorPos;
+    // Последняя отрисованная позиция курсора ПО СВОЕЙ оси -- см. setCursorPos.
+    int lastTick_{std::numeric_limits<int>::min()};
 
     // QPen meterPen;
 

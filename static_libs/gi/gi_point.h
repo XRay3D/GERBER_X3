@@ -12,7 +12,6 @@
 
 #include "graphicsview.h"
 
-
 #include <span>
 
 bool updateRect();
@@ -40,10 +39,19 @@ public:
     void setPosY(double y);
     inline void setPos(const QPointF& pos) { QGraphicsItem::setPos(pos); }
 
+    // Пересобрать геометрию под текущую настройку scaleHZMarkers. Звать после
+    // её смены.
+    void applyScaleMode();
+
 private:
     QRectF rect_;
     QPainterPath path_;
     QPainterPath shape_;
+    // Исходная геометрия в миллиметрах. При «постоянном экранном размере»
+    // path_/shape_ пересобираются из неё сразу в ПИКСЕЛЯХ.
+    QPainterPath basePath_;
+    QPainterPath baseShape_;
+    double dotRadius_{2};
     const Type type_;
     void updateGCPForm();
     bool moved{};
@@ -77,9 +85,15 @@ public:
     void updateToolTip();
     void setPos(const QPointF& pos);
 
+    // См. Marker::applyScaleMode.
+    void applyScaleMode();
+
 private:
     QPainterPath path_;
     QPainterPath shape_;
+    QPainterPath basePath_;
+    QPainterPath baseShape_;
+    double dotRadius_{2};
     QRectF rect_;
     QPointF lastPos_;
     const uint index_;
@@ -93,6 +107,12 @@ protected:
     void mousePressEvent(QGraphicsSceneMouseEvent* event) override;
     void contextMenuEvent(QGraphicsSceneContextMenuEvent* event) override;
 };
+
+// Применить настройки «постоянного экранного размера» ко всем маркерам.
+// Звать И при чтении настроек, и при сохранении: маркеры создаются в
+// конструкторе MainWindow, а QSettings читаются позже (main.cpp), поэтому на
+// момент их создания настройка ещё в значении по умолчанию.
+void applyMarkersScaleMode();
 
 } // namespace Gi
 

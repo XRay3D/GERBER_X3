@@ -19,13 +19,13 @@
 class QPainterPath;
 
 namespace Geo::Cgal {
-using K       = CGAL::Exact_predicates_exact_constructions_kernel;
-using Traits  = CGAL::Gps_circle_segment_traits_2<K>;
+using K = CGAL::Exact_predicates_exact_constructions_kernel;
+using Traits = CGAL::Gps_circle_segment_traits_2<K>;
 using PolySet = CGAL::General_polygon_set_2<Traits>;
-using GPoly   = Traits::Polygon_2;
+using GPoly = Traits::Polygon_2;
 using GPolyWH = Traits::Polygon_with_holes_2;
-using Curve   = Traits::Curve_2;
-using XCurve  = Traits::X_monotone_curve_2;
+using Curve = Traits::Curve_2;
+using XCurve = Traits::X_monotone_curve_2;
 
 // Расстояние, ниже которого две точки считаются одной: вход, прошедший
 // round-trip через double, несёт микрофрагменты в единицы ULP, и точный

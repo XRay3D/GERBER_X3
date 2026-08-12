@@ -20,8 +20,6 @@
 
 #include "utils.h"
 
-#include "drill/drill_form.h"
-
 #include <QComboBox>
 #include <QJsonObject>
 #include <variant>
@@ -35,15 +33,7 @@ Plugin::Plugin(QObject* parent)
 
 AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     if(type_ != type()) return nullptr;
-    QFile file{fileName};
-    if(!file.open(QFile::ReadOnly | QFile::Text)) {
-        qWarning() << file.errorString();
-        return nullptr;
-    }
-
-    QTextStream in{&file};
-    Parser::parseFile(fileName);
-    return Parser::file;
+    return Parser::parseFile(fileName);
 }
 
 bool Plugin::thisIsIt(const QString& fileName) {
@@ -74,7 +64,10 @@ uint32_t Plugin::type() const { return int(EXCELLON); }
 
 QString Plugin::folderName() const { return tr("Excellon"); }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
+AbstractFile* Plugin::loadFile(std::string_view json) const { return Serial::load<File>(json); }
+
+// Имя типа — из аннотации на классе File: один источник истины.
+std::string_view Plugin::typeName() const { return Serial::typeNameOf<File>(); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'E'); }
 

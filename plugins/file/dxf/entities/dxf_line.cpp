@@ -51,16 +51,4 @@ DxfGo Line::toGo() const {
     return go;
 }
 
-void Line::write(QDataStream& stream) const {
-    stream << startPoint;
-    stream << endPoint;
-    stream << thickness;
-}
-
-void Line::read(QDataStream& stream) {
-    stream >> startPoint;
-    stream >> endPoint;
-    stream >> thickness;
-}
-
 } // namespace Dxf

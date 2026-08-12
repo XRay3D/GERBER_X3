@@ -10,12 +10,16 @@
  ********************************************************************************/
 
 #include "gi.h"
+
 #include "abstract_file.h"
 #include "app.h"
+#include "geo/boolean.h"
 // #include "gi_group.h"
 #include "graphicsview.h"
 #include <QGraphicsScene>
 #include <QGraphicsView>
+#include <QPainter>
+#include <QStyleOptionGraphicsItem>
 #include <QTimer>
 #include <qbrush.h>
 #include <qpen.h>
@@ -47,6 +51,12 @@ Item::Item(AbstractFile* file)
     QGraphicsItem::setVisible(false);
     // connect(this, &QGraphicsObject::rotationChanged, [] {
     // qDebug(u"rotationChanged"_s); });
+}
+
+Item::~Item() {
+    // Реестр анимации держит сырые указатели -- выписываемся.
+    if(colorState & Selected)
+        if(auto* view = App::grViewPtr()) view->removeAnimated(this);
 }
 
 bool Item::isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }
@@ -89,10 +99,16 @@ Geo::Polylines Item::curves(int param) const {
 }
 
 Geo::Polygons Item::region() const {
-    // У элемента, который хранит только контуры, вложенность и правда выражена
-    // их ориентацией -- других сведений о ней просто нет. Тем, у кого регион
-    // есть (DataFill), метод переопределён и отдаёт его точно.
-    return Geo::Polygons{curves()};
+    // У элемента, который хранит только контуры, вложенность выводится из их
+    // ВЗАИМНОГО РАСПОЛОЖЕНИЯ (even-odd), а не из ориентации обхода: ориентация
+    // тут ничего не значит. В чертеже её задаёт рука рисовавшего, и замкнутый
+    // контур, обойдённый по часовой, читался бы как пустота -- вычитать её не
+    // из чего, и регион выходил пустым. Отсюда и брался «профиль игнорирует всё
+    // кроме окружностей»: Geo::circle строит их против часовой, а нарисованное
+    // вручную -- как придётся.
+    //
+    // Тем, у кого регион есть (DataFill), метод переопределён и отдаёт его точно.
+    return Geo::evenOdd(curves());
 }
 
 void Item::setCurves(Geo::Polylines curves, int /*param*/) {
@@ -107,8 +123,14 @@ void Item::setCurves(Geo::Polylines curves, int /*param*/) {
 
     shape_ = Geo::toPath(curves);
     curves_ = std::move(curves);
+    geometryChanged();
 
     redraw();
+}
+
+void Item::geometryChanged() {
+    prepareGeometryChange();
+    boundingRect_ = shape_.boundingRect();
 }
 
 // void Item::setPaths(Paths paths, int /*param*/) {
@@ -128,25 +150,44 @@ void Item::setCurves(Geo::Polylines curves, int /*param*/) {
 
 void Item::redraw() { }
 
-QRectF Item::boundingRect() const {
-    if(App::grView().boundingRectFl())
-        return shape_.toFillPolygon(transform()).boundingRect();
-    return boundingRect_;
-}
+QRectF Item::boundingRect() const { return boundingRect_; }
 
 QPainterPath Item::shape() const { return shape_; }
 
+void Item::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*) {
+    // Цвета живут в файле и меняются извне (дерево слоёв), поэтому указатели
+    // разыменовываем каждый кадр -- это два разыменования, а не аллокация.
+    if(pnColorPrt_) pen_.setColor(*pnColorPrt_);
+    if(colorPtr_) color_ = *colorPtr_;
+
+    // levelOfDetailFromTransform -- статический хелпер, флаг
+    // ItemUsesExtendedStyleOption для него не нужен. Мировая трансформация уже
+    // включает трансформацию самого элемента, то есть множитель
+    // file_->transform().scale, который scaleFactor() считает отдельно.
+    const RenderState st{
+        .sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(painter->worldTransform()),
+        .hovered = bool(option->state & QStyle::State_MouseOver),
+        .selected = bool(option->state & QStyle::State_Selected),
+        .dashOffset = App::dashOffset(),
+    };
+
+    if(!st.plain()) [[unlikely]]
+        paintHighlight(painter, st);
+    paintGeometry(painter, st);
+}
+
+void Item::paintGeometry(QPainter* painter, const RenderState&) {
+    painter->setBrush(Qt::NoBrush);
+    painter->setPen(pen_);
+    painter->drawPath(shape_);
+}
+
+void Item::paintHighlight(QPainter*, const RenderState&) { }
+
 void Item::setVisible(bool visible) {
-    // if (visible == isVisible() && (visible && opacity() < 1.0))
-    // return;
-    // visibleAnim.setStartValue(visible ? 0.0 : 1.0);
-    // visibleAnim.setEndValue(visible ? 1.0 : 0.0);
-    // visibleAnim.start();
-    // if (visible) {
-    // setOpacity(0.0);
-    setOpacity(1.0 * visible);
+    // Без setOpacity: он гнал лишний itemChange и update() на КАЖДЫЙ элемент
+    // (десятки тысяч на переключение слоя), а непрозрачность нигде не читается.
     QGraphicsItem /*QGraphicsObject*/ ::setVisible(visible);
-    // }
 }
 
 const AbstractFile* Item::file() const { return file_; }
@@ -158,11 +199,10 @@ void Item::setId(int32_t id) { id_ = id; }
 Side Item::side() const { return file_ ? file_->side() : Side::Top; }
 
 double Item::scaleFactor() const {
-    double scale = 1.0;
-    if(scene() && scene()->views().size()) {
-        scale /= scene()->views().front()->transform().m11();
-        if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
-    }
+    // Раньше здесь был обход scene() -> views() -> front() -> transform() на
+    // КАЖДЫЙ вызов. Вид публикует масштаб сам, при смене трансформации.
+    double scale = App::viewScaleFactor();
+    if(file_) scale /= std::min(file_->transform().scale.x(), file_->transform().scale.y());
     return scale;
 }
 
@@ -175,13 +215,14 @@ std::optional<QPainterPath> Item::updateArrows() {
     QPainterPath arrows;
 
     using QPP = QPainterPath;
-    using El  = QPP::Element;
+    using El = QPP::Element;
 
     const double length = std::clamp(30 * scar, 0.0, 0.5);
 
     for(auto&& elements:
         v::iota(0, shape_.elementCount())
-            | v::transform(std::bind(&QPP::elementAt, shape_, _1))          // to Element
+            // Лямбда, а не std::bind: bind КОПИРОВАЛ shape_ в свой объект.
+            | v::transform([this](int i) { return shape_.elementAt(i); })   // to Element
             | v::chunk_by([](const El&, const El& r) { return r.type; })) { // to Subpath Polygons
 
         constexpr auto splitCurve = +[](const El&, const El& r) {
@@ -225,11 +266,23 @@ void Item::hoverLeaveEvent(QGraphicsSceneHoverEvent* event) {
 
 QVariant Item::itemChange(QGraphicsItem::GraphicsItemChange change,
     const QVariant& value) {
-    if(change == ItemSelectedChange) {
+    switch(change) {
+    case ItemSelectedChange: {
         const bool fl = value.toInt();
         fl ? colorState |= Selected : colorState &= ~Selected;
         changeColor();
-    } else if(change == ItemSceneChange) {
+        // Регистрация в реестре анимации вида: таймер «бегущих муравьёв»
+        // крутится, только пока есть что анимировать.
+        if(auto* view = App::grViewPtr())
+            fl ? view->addAnimated(this) : view->removeAnimated(this);
+    } break;
+    case ItemSceneChange:
+        // Уходим со сцены -- выписываемся, иначе реестр останется с висячим
+        // указателем.
+        if(!value.value<QGraphicsScene*>())
+            if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+        break;
+    default: break;
     }
     return QGraphicsItem::itemChange(change, value);
 }

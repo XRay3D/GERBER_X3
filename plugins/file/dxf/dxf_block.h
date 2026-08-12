@@ -21,14 +21,6 @@ struct Entity;
 
 struct Block {
 
-    friend QDataStream& operator<<(QDataStream& stream, const Block*& /*b*/) {
-        return stream;
-    }
-
-    friend QDataStream& operator>>(QDataStream& stream, Block*& /*b*/) {
-        return stream;
-    }
-
     SectionParser* sp;
     Block(Blocks& blocks, SectionParser* sp = nullptr);
     ~Block() = default;

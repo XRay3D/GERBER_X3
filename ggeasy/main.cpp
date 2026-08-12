@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
     // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
     // поэтому необходимо избавиться от данного мусора
     {
-        QSharedMemory nixFixSharedMemory{u"AppSettings"_s};
+        QSharedMemory nixFixSharedMemory{App::sharedKey()};
         if(nixFixSharedMemory.attach())
             nixFixSharedMemory.detach();
     }

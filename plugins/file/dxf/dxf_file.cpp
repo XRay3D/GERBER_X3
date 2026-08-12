@@ -22,6 +22,7 @@
 //////////////////////
 
 #include "dxf_node.h"
+#include "geo/boolean.h"
 #include "gi_datapath.h"
 #include "gi_datasolid.h"
 #include "utils.h"
@@ -57,80 +58,29 @@ void File::setItemType(int type) {
 
 int File::itemsType() const { return itemsType_; }
 
-Geo::Polygons& File::groupedPaths(File::Group group, bool fl) {
-    // if(groupedCurves_.empty()) {
-    //     PolyTree polyTree;
-    //     cl::Clipper64 clipper;
-    //     clipper.AddSubject(toPaths(mergedCurves()));
-    //     auto r = BoundingRect(mergedCurves());
-    //     int k = /*uScale*/ 1;
-    //     Geo::Polyline outer{
-    //         Point64{uScale + r.left() - k,  uScale + r.bottom() + k},
-    //         Point64{uScale + r.right() + k, uScale + r.bottom() + k},
-    //         Point64{uScale + r.right() + k, uScale + r.top() - k   },
-    //         Point64{uScale + r.left() - k,  uScale + r.top() - k   }
-    //     };
-    //     if(!fl) ReversePath(outer);
-    //     clipper.AddSubject({outer});
-    //     clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, polyTree);
-    //     grouping(polyTree, group);
-    // }
-    // return groupedCurves_;
-    if(groupedCurves_.empty()) {
-        PolyTree polyTree;
-        cl::Clipper64 clipper;
-        auto paths = toPaths(mergedCurves());
-        clipper.AddSubject(paths);
-        Rect r = GetBounds(paths);
-        int k = /*uScale*/ 1;
-        Geo::Polyline outer{
-            Point64(r.left - k, r.bottom + k),
-            Point64(r.right + k, r.bottom + k),
-            Point64(r.right + k, r.top - k),
-            Point64(r.left - k, r.top - k)};
-        if(fl)
-            ReversePath(outer);
-        clipper.AddSubject({outer});
-        clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, polyTree);
-        grouping(polyTree, group);
-        // Gi::Debug(groupedCurves_ | v::join | r::to<std::vector>());
-    }
-    return groupedCurves_;
-}
+// Разбор вложенности вручную больше не нужен: Geo::Polygons и ЕСТЬ разобранный
+// регион -- его собственные полигоны это тело, а полигоны того, что осталось от
+// габаритной рамки после вычитания тела, -- вырезы. Прежде то же самое
+// получалось объединением с рамкой по NonZero и обходом PolyTree.
+Geo::Polygons& File::groupedPaths(File::Group group, bool /*fl*/) {
+    if(!groupedCurves_.empty())
+        return groupedCurves_;
 
-void File::grouping(PolyTree& node, File::Group group) {
-    Geo::Polyline path;
-    Paths64 paths;
-    switch(group) {
-    case CutoffGroup:
-        if(!node.IsHole()) {
-            path = node.Polygon();
-            paths.push_back(path);
-            for(size_t i{}; i < node.Count(); ++i) {
-                path = node[i]->Polygon();
-                paths.push_back(path);
-            }
-            groupedCurves_.push_back(toCurves(paths));
-            r::for_each(groupedCurves_ | v::join, &Geo::Polyline::close);
-        }
-        for(size_t i{}; i < node.Count(); ++i)
-            grouping(*node[i], group);
-        break;
-    case CopperGroup:
-        if(node.IsHole()) {
-            path = node.Polygon();
-            paths.push_back(path);
-            for(size_t i{}; i < node.Count(); ++i) {
-                path = node[i]->Polygon();
-                paths.push_back(path);
-            }
-            groupedCurves_.push_back(toCurves(paths));
-            r::for_each(groupedCurves_ | v::join, &Geo::Polyline::close);
-        }
-        for(size_t i{}; i < node.Count(); ++i)
-            grouping(*node[i], group);
-        break;
+    const Geo::Polygons region = mergedCurves();
+
+    if(group == CopperGroup) {
+        groupedCurves_ = region;
+    } else {
+        // Поле рамки вокруг детали: миллиметр с каждой стороны, лишь бы вырезы
+        // оказались внутри неё и отделились от бесконечности.
+        constexpr double margin = 1.0;
+        QRectF box = region.boundingRect();
+        box.adjust(-margin, -margin, margin, margin);
+        const Geo::Polygons frame{Geo::Polylines{Geo::rectangle(box.width(), box.height(), box.center())}};
+        groupedCurves_ = frame - region;
     }
+
+    return groupedCurves_;
 }
 
 void File::initFrom(AbstractFile* file) {
@@ -143,11 +93,17 @@ FileTree::Node* File::node() {
 }
 
 Layer* File::layer(const QString& name) {
-    if(layers_.contains(name))
-        return layers_[name];
-    else
-        return layers_[name] = new Layer{sections_.begin()->second, name};
-    return nullptr;
+    if(auto it = layers_.find(name); it != layers_.end())
+        return it->second;
+    // Секции может ещё не быть: ENTITIES без HEADER и TABLES разбирается раньше,
+    // чем в sections_ хоть что-то попадёт (правая часть присваивания
+    // sections_[type] = new Section... считается до вставки в карту), и
+    // sections_.begin() смотрел бы в end(). Такой слой цепляется прямо к файлу.
+    Layer* l = sections_.empty()
+        ? new Layer{this}
+        : new Layer{sections_.begin()->second, name};
+    l->name_ = name;
+    return layers_[name] = l;
 }
 
 uint32_t File::type() const { return DXF; }
@@ -161,20 +117,19 @@ void File::createProjectionLayers() {
         auto view = View(i);
         if(!(Settings::views() & viewBit(view))) continue;
 
-        Paths64 silhouette = mesh_.project(view);
+        Geo::Polygons silhouette = mesh_.project(view);
         if(silhouette.empty()) continue;
 
-        auto rect = GetBounds(silhouette);
+        const QRectF rect = silhouette.boundingRect();
         qInfo("Dxf: %s - %zu contours, %g x %g mm",
             qPrintable(viewName(view)), silhouette.size(),
-            std::abs(rect.right - rect.left) / double(uScale),
-            std::abs(rect.bottom - rect.top) / double(uScale));
+            rect.width(), rect.height());
 
         Layer* l = layer(viewName(view));
         l->setColor(viewColor(view));
         // Только заливка: силуэт — это замкнутый контур с дырками, отдельных
         // рёбер у него нет, поэтому path оставляем пустым.
-        l->addGraphicObject(DxfGo{-1, Geo::Polyline{}, toCurves(silhouette)});
+        l->addGraphicObject(DxfGo{-1, Geo::Polyline{}, std::move(silhouette)});
     }
 
     mesh_.clear();
@@ -199,6 +154,7 @@ void File::createGi() {
     itemGroups_.push_back(igPath);
 
     int i{};
+    mergedCurves_ = {}; // пересобирается из слоёв тут же, ниже
 
     for(auto& [name, layer]: layers_) {
         if(layer->graphicObjects_.size()) {
@@ -207,14 +163,31 @@ void File::createGi() {
                 itemGroups_.push_back(igPath = new Gi::Group);
             }
 
-            cl::Clipper64 clipper; // cl::Clipper64
-            const bool empty{layer->groupedCurves_.empty()};
-            for(auto& go: layer->graphicObjects_) {
-                if(empty && go.fill.size()) {
-                    // if(go.fill.area() < 0.) ReversePaths(go.fill); // FIXME add settings
-                    clipper.AddSubject(toPaths(go.fill));
-                }
+            // Слой, пришедший из проекта, уже разобран; при разборе файла его
+            // заливку надо собрать из объектов -- и ВСЕМ слоем разом, а не
+            // пообъектно. Замкнутый контур объекта -- это ещё не тело: телом
+            // или дыркой его делает ВЛОЖЕННОСТЬ в соседние контуры слоя
+            // (even-odd, как у HATCH), и объединение готовых пообъектных тел
+            // её теряло -- рамка платы проглатывала отверстия и внутреннюю
+            // рамку, нарисованные отдельными сущностями внутри неё.
+            //
+            // Объекты без своего замкнутого контура (текст, штриховка, штрих
+            // ненулевой ширины, силуэт проекции) в чередование не входят: их
+            // заливка -- готовый регион, дырки у него известны точно, и он
+            // объединяется поверх.
+            if(layer->groupedCurves_.empty()) {
+                Geo::Polylines contours;
+                std::vector<Geo::Polygon> parts;
+                for(const auto& go: layer->graphicObjects_)
+                    if(go.path.isClosed()) contours.push_back(go.path);
+                    else parts.append_range(go.fill.all());
+                layer->groupedCurves_ = Geo::evenOdd(contours);
+                if(!parts.empty())
+                    layer->groupedCurves_ |= Geo::Polygons{std::span<const Geo::Polygon>{parts}};
+            }
+            mergedCurves_ |= layer->groupedCurves_;
 
+            for(auto& go: layer->graphicObjects_) {
                 if(go.path.size() > 1) {
                     auto gItem = new Gi::DataPath{{go.path}, this};
                     if(go.entity()) {
@@ -228,20 +201,8 @@ void File::createGi() {
                 }
             }
 
-            if(empty) {
-                auto paths = toPaths(mergedCurves_);
-                clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths);
-                CleanPaths(paths, uScale * 0.0005);
-
-                for(Geo::Polyline& path: paths)
-                    if(path.back() != path.front())
-                        path.emplace_back(path.front());
-                mergedCurves_ = toCurves(paths);
-                layer->groupedCurves_ = std::move(groupedPaths());
-            }
-
-            for(auto& paths: layer->groupedCurves_) {
-                auto gItem = new Gi::DataFill{paths, this};
+            for(const Geo::Polygon& polygon: layer->groupedCurves_) {
+                auto gItem = new Gi::DataFill{Geo::Polygons{polygon}, this};
                 gItem->setColorPtr(&layer->colorNorm_);
                 igNorm->push_back(gItem);
             }
@@ -251,22 +212,31 @@ void File::createGi() {
             layer->itemGroupNorm = igNorm;
             layer->itemGroupPath = igPath;
 
-            if(layer->itemsType_ == ItemsType::Null) {
-                if(igNorm->size()) {
-                    igNorm->setVisible(true);
-                    igPath->setVisible(false);
-                    layer->setItemsType(ItemsType::Normal);
-                } else {
-                    igNorm->setVisible(false);
-                    igPath->setVisible(true);
-                    layer->setItemsType(ItemsType::Paths);
-                }
-                layer->setVisible(true);
-            } else
-                layer->setVisible(visible_);
-            layer->setItemsType(ItemsType::Both);
+            // Тип слоя -- что показывать: заливку, контуры или и то и другое.
+            // У свежего разбора он ещё не выбран (Null), и берётся по факту --
+            // какие группы непусты; у файла из проекта он прочитан вместе со
+            // слоем, и трогать его нельзя. Прежде здесь стояло безусловное
+            // setItemsType(Both): оно затирало и выбранное, и прочитанное, а
+            // следующее сохранение записывало Both -- отсюда «слои не помнят тип».
+            const bool fresh = layer->itemsType_ == ItemsType::Null;
+            if(fresh) layer->itemsType_ = igNorm->size() ? ItemsType::Normal : ItemsType::Paths;
+            // Видимость -- своя у каждого слоя и приходит из проекта вместе с
+            // ним. Файловый снимок layersVisible_ для этого не годится: он
+            // частичный (preSave обновляет его, лишь когда тот пуст, а
+            // NodeLayer::setData дописывает по одному слою) и нужен для другого
+            // -- вернуть видимость слоёв после того, как файл прятали целиком.
+            layer->setVisible(fresh ? true : layer->visible_);
+            // Применить тип к ТОЛЬКО ЧТО созданным группам. Через setItemsType
+            // нельзя: у него отсечка «тип не менялся», и по прочитанному из
+            // проекта типу она бы как раз и сработала.
+            layer->applyItemsType();
         }
     }
+
+    // Файловая группировка (её спрашивает gcode) считается по объединённой
+    // геометрии всех слоёв -- по одному слою вырезы не определить.
+    groupedCurves_ = {};
+    groupedPaths();
 }
 
 bool File::isVisible() const { return visible_; }
@@ -308,7 +278,7 @@ std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCT
                     switch(gcType) {
                     case GCType::Drill: {
                         double drillDiameter{};
-                        auto rect = BoundingRect(g.fill);
+                        const QRectF rect = g.fill.boundingRect();
                         // auto& ap = *apertures_.at(go.state.aperture());
 
                         // auto name {ap.name()};
@@ -316,7 +286,7 @@ std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCT
                         // drillDiameter = ap.drillDiameter();
                         // else
                         // drillDiameter = ap.minSize();
-                        drillDiameter = std::min(rect.bottom() - rect.top(), rect.right() - rect.left());
+                        drillDiameter = std::min(rect.width(), rect.height());
                         // name += QObject::tr(", drill Ø%1mm").arg(drillDiameter);
                         g.raw = drillDiameter /** go.scaleX()*/;
                         g.name = /*u"С Ø"_s +*/ QString::number(drillDiameter);
@@ -347,43 +317,13 @@ std::vector<GraphicObject> File::getDataForGC(std::span<Criteria> criterias, GCT
     // }
 }
 
-void File::write(QDataStream& stream) const {
-    stream << header_;
-    {
-        stream << int(layers_.size());
-        for(auto& [name, layer]: layers_) {
-            stream << name;
-            stream << *layer;
-        }
-    }
-    stream << itemsType_;
-    if(!layersVisible_.size() && visible_) {
+void File::preSave() const {
+    if(!layersVisible_.size() && visible_)
         for(const auto& [name, layer]: layers_)
-            if(!layer->isEmpty())
-                layersVisible_[name] = layer->isVisible();
-    }
-    stream << layersVisible_;
-    stream << entities_;
+            if(!layer->isEmpty()) layersVisible_[name] = layer->isVisible();
+    AbstractFile::preSave();
 }
 
-void File::read(QDataStream& stream) {
-    stream >> header_;
-    {
-        int size;
-        stream >> size;
-        while(size--) {
-            QString name;
-            Layer* layer = new Layer{this};
-            stream >> name;
-            stream >> *layer;
-            layers_[name] = layer;
-        }
-    }
-    stream >> itemsType_;
-    stream >> layersVisible_;
-    stream >> entities_;
-}
-
-Geo::Polygon File::merge() const { return mergedCurves_; }
+Geo::Polygons File::merge() const { return mergedCurves_; }
 
 } // namespace Dxf

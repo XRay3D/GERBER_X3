@@ -10,7 +10,6 @@
  *******************************************************************************/
 #pragma once
 
-#include "datastream.h"
 #include "dxf_codedata.h"
 #include <QDebug>
 #include <QObject>

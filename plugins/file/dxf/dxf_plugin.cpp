@@ -13,6 +13,8 @@
 #include "dxf_node.h"
 #include "dxf_settingstab.h"
 
+#include "geo/cancel.h"
+
 #include "entities/dxf_circle.h"
 #include "section/dxf_blocks.h"
 #include "section/dxf_entities.h"
@@ -36,6 +38,9 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     QFile file{fileName};
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << file.errorString();
+        // Строку в окне прогресса завели ещё в MainWindow::loadFile, и снять её
+        // может только сам плагин -- иначе она висит до конца сеанса.
+        emit fileProgress(fileName, 1, 1);
         return nullptr;
     }
 
@@ -57,6 +62,10 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     QTextStream in{data /*&file*/};
 
     in.setAutoDetectUnicode(true); // BOM  ???
+
+    // Ключ прогресса -- ПОЛНЫЙ путь: по нему окно находит свою строку, а
+    // короткое имя не уникально (два detail.dxf из разных папок делили бы одну).
+    emit fileProgress(fileName, int(data.count('\n')) + 1, 0);
 
     auto getCode = [&in, &codes, &line, this] {
         // Code
@@ -81,15 +90,20 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     };
 
     try {
-        int progress{};
-        // int progressCtr{};
+        int ctr{};
         do {
-            if(auto code = getCode(); code.code() == 0 && code == u"SECTION"_s)
-                ++progress;
+            getCode();
+            // Считаем ПАРЫ (код + значение), а меряем строками: line растёт на
+            // 2 и больше за пару, так что делить на порог надо счётчик пар.
+            if(!(++ctr % 500)) {
+                emit fileProgress(fileName, 0, line);
+                // Отклик на кнопку отмены -- та же порция, что и у прогресса:
+                // чаще незачем, а проверка не бесплатна.
+                Geo::checkCancelled();
+            }
         } while(!in.atEnd() || *(codes.end() - 1) != u"EOF"_s);
         codes.shrink_to_fit();
 
-        // emit fileProgress(file_->shortName(), progress, progressCtr);
         Timer t{"Section Parser"};
 
         for(auto it = codes.begin(), from = codes.begin(), to = codes.begin(); it != codes.end(); ++it) {
@@ -129,28 +143,44 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
         if(file_->sections_.size() == 0) {
             delete file_;
             file_ = nullptr;
+            emit fileError(QFileInfo(fileName).fileName(), tr("No sections found!"));
+            emit fileProgress(fileName, 1, 1);
         } else {
+            // Проекционные слои строятся точной геометрией и на крупной сети
+            // считаются долго -- отмена внутрь них уходит сама, областью
+            // Geo::CancelScope, заведённой в AbstractFilePlugin::parseFileTask.
             file_->createProjectionLayers();
-            // emit fileProgress(file_->shortName(), 1, 1);
             emit fileReady(file_);
+            emit fileProgress(fileName, 1, 1);
         }
+    } catch(const Geo::Cancelled&) {
+        // Отмена пользователем -- не ошибка: ни в лог, ни в диалог ошибок.
+        // Сигналы шлёт AbstractFilePlugin::parseFileTask, туда и пробрасываем.
+        // Ловим ДО std::exception: Cancelled от него наследуется и иначе уехал
+        // бы в общий обработчик ошибок.
+        delete file_;
+        file_ = nullptr;
+        throw;
     } catch(const QString& wath) {
         qWarning() << u"exeption QString:"_s << wath;
-        // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), wath);
+        emit fileProgress(fileName, 1, 1);
         delete file_;
+        file_ = nullptr;
         return nullptr;
     } catch(const std::exception& e) {
         qWarning() << u"exeption:"_s << e.what();
-        // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::fromUtf8(e.what()));
+        emit fileProgress(fileName, 1, 1);
         delete file_;
+        file_ = nullptr;
         return nullptr;
     } catch(...) {
         qWarning() << u"exeption:"_s << errno;
-        // emit fileProgress(file_->shortName(), 1, 1);
         emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::number(errno));
+        emit fileProgress(fileName, 1, 1);
         delete file_;
+        file_ = nullptr;
         return nullptr;
     }
     return file_;
@@ -187,7 +217,10 @@ bool Plugin::thisIsIt(const QString& fileName) {
 
 uint32_t Plugin::type() const { return DXF; }
 
-AbstractFile* Plugin::loadFile(QDataStream& stream) const { return File::load<File>(stream); }
+AbstractFile* Plugin::loadFile(std::string_view json) const { return Serial::load<File>(json); }
+
+// Имя типа — из аннотации на классе File: один источник истины.
+std::string_view Plugin::typeName() const { return Serial::typeNameOf<File>(); }
 
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'D'); }
 
@@ -199,12 +232,17 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 
 void Plugin::updateFileModel(AbstractFile* file) {
     const auto fm = App::fileModelPtr();
-    const QModelIndex& fileIndex(file->node()->index());
-    const QModelIndex index = fm->createIndex(0, 0, fileIndex.internalId());
+    // Индекс САМОГО узла файла, а не собранный вручную. Прежде здесь стояло
+    // fm->createIndex(0, 0, fileIndex.internalId()): указатель настоящий, а
+    // строка всегда 0. У первого файла это совпадало со строкой узла, у второго
+    // и дальше -- нет, и begin/endInsertRows получали родителя, чья строка
+    // врёт. По этому индексу модель правит постоянные индексы и уведомляет вид,
+    // так что дерево оставалось с испорченным соответствием строк и узлов.
+    const QModelIndex fileIndex = file->node()->index();
+    auto* item = fm->getItem(fileIndex);
     // clean before insert new layers
-    if(int count = fm->getItem(fileIndex)->childCount(); count) {
-        fm->beginRemoveRows(index, 0, count - 1);
-        auto item = fm->getItem(index);
+    if(int count = item->childCount(); count) {
+        fm->beginRemoveRows(fileIndex, 0, count - 1);
         do {
             item->remove(--count);
         } while(count);
@@ -212,12 +250,15 @@ void Plugin::updateFileModel(AbstractFile* file) {
     }
     Dxf::Layers layers;
 
-    for(auto& [name, layer]: reinterpret_cast<File*>(file)->layers())
+    for(auto& [name, layer]: static_cast<File*>(file)->layers())
         if(!layer->isEmpty()) layers[name] = layer;
-    fm->beginInsertRows(index, 0, int(layers.size() - 1));
+    // Пустой файл (секции есть, рисовать нечего) даёт size() - 1 == -1, и
+    // beginInsertRows на таком диапазоне -- обращение к модели с мусором.
+    if(layers.empty()) return;
+    fm->beginInsertRows(fileIndex, 0, int(layers.size()) - 1);
 
     for(auto& [name, layer]: layers)
-        fm->getItem(index)->addChild(new Dxf::NodeLayer{name, layer});
+        item->addChild(new Dxf::NodeLayer{name, layer});
     fm->endInsertRows();
 }
 

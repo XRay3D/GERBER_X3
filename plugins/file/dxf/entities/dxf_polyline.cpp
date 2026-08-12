@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "dxf_polyline.h"
+
+#include "geo/boolean.h"
 #include "gi_dbg.h"
 #include <QPainterPath>
 
@@ -73,8 +75,11 @@ DxfGo PolyLine::toGo() const {
     // m2.scale(d, d);
     // auto polygon(path2.toSubpathPolygons(m2));
 
+    // Even-odd, а не канон Geo::Polygons: ориентация обхода в DXF произвольна,
+    // и контур, обойдённый по часовой, читался бы как пустота -- заливка
+    // выходила пустой.
     if(polylineFlags & ClosedPolyline) // FIXME
-        return DxfGo{id, Geo::Polyline{path}, {std::move(path)}};
+        return DxfGo{id, Geo::Polyline{path}, Geo::evenOdd(Geo::Polylines{path})};
     else
         return DxfGo{id, std::move(path)};
 #else // TODO direct construct path
@@ -193,18 +198,6 @@ center=QPointF{cx, cy};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::PolyLine);
     return go;
 #endif
-}
-
-void PolyLine::write(QDataStream& stream) const {
-    stream << polylineFlags;
-    stream << startWidth;
-    stream << endWidth;
-}
-
-void PolyLine::read(QDataStream& stream) {
-    stream >> polylineFlags;
-    stream >> startWidth;
-    stream >> endWidth;
 }
 
 } // namespace Dxf

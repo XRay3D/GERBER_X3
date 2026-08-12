@@ -18,10 +18,12 @@ namespace Gi {
 
 class Error final : public QGraphicsItem {
     QPainterPath shape_;
+    const QRectF boundingRect_;
     const double area_;
 
 public:
     Error(const Geo::Polylines& curves, double area);
+    ~Error() override;
     double area() const;
 
     // QGraphicsItem interface
@@ -29,6 +31,11 @@ public:
     void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
     QPainterPath shape() const override;
     int type() const override;
+
+protected:
+    // Пульсация цвета на выделении -- единственное, ради чего элемент просит
+    // вид крутить таймер анимации.
+    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
 };
 
 } // namespace Gi

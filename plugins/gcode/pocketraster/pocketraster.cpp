@@ -9,16 +9,15 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "pocketraster.h"
+#include "gc_pathutils.h"
 #include "gi_point.h"
 #include "project.h"
-#include <QElapsedTimer>
-#include <gi_dbg.h>
 
-#ifdef Q_OS_UNIX
-    #undef emit
-    #include <execution>
-    #define emit
-#endif
+#include "geo/boolean.h"
+#include "geo/fill.h"
+#include "geo/util.h"
+
+#include <algorithm>
 
 namespace PocketRaster {
 
@@ -38,49 +37,36 @@ void Creator::create() {
 uint32_t Creator::type() { return POCKET_RASTER; }
 
 void Creator::createRaster(const Tool& tool, const double depth, const double angle, const int prPass) {
+    toolDiameter = tool.getDiameter(depth);
+    dOffset = toolDiameter / 2;
+    stepOver = tool.stepover();
+
     switch(gcp.side()) {
-    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale); break;
+    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, toolDiameter + 1.0); break;
     case GCode::Inner: groupedPaths(GCode::Grouping::Copper); break;
     case GCode::On   : return;
     }
 
-    toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset = toolDiameter / 2;
-    stepOver = tool.stepover() * uScale;
+    Geo::Polylines profilePaths;
 
-    Paths64 profilePaths;
-    Paths64 fillPaths;
+    for(const Geo::Polygon& group: groupedPss) {
+        // Карман -- группа, сжатая на радиус (delta у Inflate -- полная ширина).
+        const Geo::Polygons pocket = Geo::Inflate(Geo::Polygons{group}, -toolDiameter);
+        if(pocket.empty()) continue;
 
-    for(Paths64& src: groupedPss) {
-        src = Inflate64(src, -dOffset * 2, cl::JoinType::Round, cl::EndType::Polygon, uScale);
+        if(prPass) profilePaths.append_range(pocket.contours());
 
-        for(auto& path: src) path.push_back(path.front());
-
-        if(prPass) profilePaths.append_range(src);
-
-        if(src.size()) {
-            for(auto& path: src) RotatePath(path, angle);
-            auto zigzag{calcZigzag(src)};
-            auto scanLines{calcScanLines(src, zigzag)};
-            auto frames{calcFrames(src, zigzag)};
-            if(scanLines.size() && frames.size()) {
-                auto merged{merge(scanLines, frames)};
-                for(auto& path: merged) RotatePath(path, -angle);
-                returnPs.append_range(std::move(merged));
-            }
-        }
+        returnPs.append_range(Geo::zigzagFill(pocket, stepOver, angle));
     }
 
-    mergePaths(returnPs);
+    GCode::mergePolylines(returnPs, Geo::exitWeldTolerance);
 
-    sortB(returnPs, ~(App::home().pos() + App::zero().pos()));
+    GCode::sortByProximity(returnPs, App::home().pos() + App::zero().pos());
 
     if(!profilePaths.empty() && prPass) {
-        sortB(profilePaths, ~(App::home().pos() + App::zero().pos()));
+        GCode::sortByProximity(profilePaths, App::home().pos() + App::zero().pos());
         if(gcp.convent())
-            ReversePaths(profilePaths);
-        for(Geo::Polyline& path: profilePaths)
-            path.push_back(path.front());
+            r::for_each(profilePaths, &Geo::Polyline::reverse);
     }
 
     switch(prPass) {
@@ -100,166 +86,139 @@ void Creator::createRaster(const Tool& tool, const double depth, const double an
 
     for(auto&& paths: returnPss)
         std::erase_if(paths, [](auto&& path) { return path.size() < 2; });
+    std::erase_if(returnPss, [](auto&& paths) { return paths.empty(); });
 
-    constexpr auto empty = std::bind(&Paths64::empty, _1);
-    std::erase_if(returnPss, empty);
-    // Gi::Debug(returnPss | v::join | r::to<Paths64>(), Qt::magenta);
     if(returnPss.size()) {
-        gcp.toolPathss = toCurvess(returnPss);
-        gcp.setPocketAreaCurves(toCurves(fillPaths));
+        gcp.toolPathss = std::move(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }
 }
 
 void Creator::createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass) {
-
-    QElapsedTimer t;
-    t.start();
-
-    toolDiameter = tool.getDiameter(depth) * uScale;
+    toolDiameter = tool.getDiameter(depth);
     dOffset = toolDiameter / 2;
-    stepOver = static_cast</*PType*/ int32_t>(tool.stepover() * uScale);
+    stepOver = tool.stepover();
 
     switch(gcp.side()) {
-    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, toolDiameter + uScale); break;
+    case GCode::Outer: groupedPaths(GCode::Grouping::Cutoff, toolDiameter + 1.0); break;
     case GCode::Inner: groupedPaths(GCode::Grouping::Copper); break;
     case GCode::On   : return;
     }
 
-    Paths64 profilePaths;
+    // Кадры экспозиции: все группы разом, сжатые на пол-луча (луч тоньше
+    // фрезы, delta у Inflate -- полная ширина, граница уезжает на половину).
+    const Geo::Polygons frames = Geo::Inflate(
+        Geo::Polygons{std::span<const Geo::Polygon>{groupedPss}}, -dOffset);
+    Geo::Polylines profilePaths = frames.contours();
+    if(profilePaths.empty()) return;
 
-    { // create exposure frames
-      // ClipperOffset o;
-      // for(auto& p: groupedPss)
-      // o.AddPaths(p, cl::JoinType::Round, cl::EndType::Polygon);
-      // profilePaths = o.Execute(-tool.diameter() * uScale);
-        // auto it = v::join(groupedPss);
-        profilePaths = Inflate64(join(groupedPss), -tool.diameter() * uScale, cl::JoinType::Round, cl::EndType::Polygon);
-    }
-    auto pss = v::join(groupedPss);
-    profilePaths = Inflate64(Paths64{pss.begin(), pss.end()}, -dOffset, cl::JoinType::Round, cl::EndType::Polygon, uScale);
+    Geo::Polylines laserPath{profilePaths};
 
-    // get bounds of frames
-    rect = GetBounds(profilePaths);
+    QRectF rect = frames.boundingRect();
+    const QPointF center = rect.center();
 
-    const Point64 center{rect.left + (rect.right - rect.left) / 2, rect.top + (rect.bottom - rect.top) / 2};
-
-    Paths64 laserPath(profilePaths);
-
-    if(!qFuzzyIsNull(angle)) { // Rotate Paths64
-        for(Geo::Polyline& path: laserPath)
-            RotatePath(path, angle, center);
-        // get bounds of frames if angle > 0.0
-        rect = GetBounds(laserPath);
+    if(!qFuzzyIsNull(angle)) { // поворот ПОД горизонтальную змейку
+        Geo::rotate(laserPath, angle, center);
+        rect = laserPath.front().boundingRect();
+        for(const Geo::Polyline& path: laserPath)
+            rect |= path.boundingRect();
     }
 
-    rect.left -= uScale;
-    rect.right += uScale;
+    rect.adjust(-1.0, 0.0, +1.0, 0.0);
 
     Geo::Polyline zPath;
-    { // create u"snake"_s
-        auto y = rect.top;
-        while(y < rect.bottom) {
-            zPath.append_range(Geo::Polyline{
-                Point64{rect.left,  y},
-                Point64{rect.right, y},
-            });
+    { // create "snake"
+        auto y = rect.top();
+        while(y < rect.bottom()) {
+            zPath.emplace_back(rect.left(), y);
+            zPath.emplace_back(rect.right(), y);
             y += stepOver;
-            zPath.append_range(Geo::Polyline{
-                Point64{rect.right, y},
-                Point64{rect.left,  y},
-            });
+            zPath.emplace_back(rect.right(), y);
+            zPath.emplace_back(rect.left(), y);
             y += stepOver;
         }
     }
 
     { // calculate
-        cl::Clipper64 c;
-        c.AddOpenSubject({zPath});
-        c.AddClip(laserPath);
-        c.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, laserPath, laserPath); // laser on
-        addAcc(laserPath, gcp.params[AccDistance].toDouble() * uScale);                     // add laser off paths
+        const Geo::Polygons region{laserPath};
+        laserPath = Geo::clipOpen(Geo::ClipType_::Intersection, {zPath}, region); // laser on
+        if(laserPath.empty()) return;
+        addAcc(laserPath, gcp.params[AccDistance].toDouble()); // add laser off paths
     }
 
-    if(!qFuzzyIsNull(angle)) // Rotate Paths64
-        for(Geo::Polyline& path: laserPath)
-            RotatePath(path, -angle, center);
+    if(!qFuzzyIsNull(angle)) // поворот обратно
+        Geo::rotate(laserPath, -angle, center);
 
-    returnPss.push_back(laserPath);
+    returnPss.push_back(std::move(laserPath));
 
     if(!profilePaths.empty() && prPass != NoProfilePass) {
-        for(auto& p: profilePaths)
-            p.push_back(p.front());
-        returnPss.push_back(sortB(profilePaths, ~(App::home().pos() + App::zero().pos())));
+        GCode::sortByProximity(profilePaths, App::home().pos() + App::zero().pos());
+        returnPss.push_back(std::move(profilePaths));
     }
 
     if(returnPss.size()) {
         std::erase_if(returnPss, [](auto& paths) { return paths.empty(); });
         for(auto& paths: returnPss)
             std::erase_if(paths, [](auto& path) { return path.empty(); });
-        gcp.toolPathss = toCurvess(returnPss);
+        gcp.toolPathss = std::move(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }
 }
 
-void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
-
-    Paths64 pPath;
+void Creator::addAcc(Geo::Polylines& src, const double accDistance) {
+    Geo::Polylines pPath;
     pPath.reserve(src.size() * 2 + 1);
-    std::sort(
-#ifdef Q_OS_UNIX
-        std::execution::par,
-#endif
-        src.begin(), src.end(), [](const Geo::Polyline& p1, const Geo::Polyline& p2) -> bool { return p1.front().y > p2.front().y; });
+    std::sort(src.begin(), src.end(),
+        [](const Geo::Polyline& p1, const Geo::Polyline& p2) { return p1.front().y() > p2.front().y(); });
     bool reverse{};
 
     auto format = [&reverse](Geo::Polyline& src) -> Geo::Polyline& {
         if(reverse)
-            std::sort(src.begin(), src.end(), [](const Point64& p1, const Point64& p2) -> bool { return p1.x > p2.x; });
+            std::sort(src.begin(), src.end(), [](const QPointF& p1, const QPointF& p2) { return p1.x() > p2.x(); });
         else
-            std::sort(src.begin(), src.end(), [](const Point64& p1, const Point64& p2) -> bool { return p1.x < p2.x; });
+            std::sort(src.begin(), src.end(), [](const QPointF& p1, const QPointF& p2) { return p1.x() < p2.x(); });
         return src;
     };
 
-    auto adder = [&reverse, &pPath, accDistance](Paths64& paths) {
-        std::sort(paths.begin(), paths.end(), [reverse](const Geo::Polyline& p1, const Geo::Polyline& p2) -> bool {
+    auto adder = [&reverse, &pPath, accDistance](Geo::Polylines& paths) {
+        std::sort(paths.begin(), paths.end(), [reverse](const Geo::Polyline& p1, const Geo::Polyline& p2) {
             if(reverse)
-                return p1.front().x > p2.front().x;
+                return p1.front().x() > p2.front().x();
             else
-                return p1.front().x < p2.front().x;
+                return p1.front().x() < p2.front().x();
         });
         if(pPath.size()) { // acc
             Geo::Polyline acc;
             {
                 const Geo::Polyline& path = pPath.back();
-                if(path.front().x < path.back().x) // acc
+                if(path.front().x() < path.back().x()) // acc
                     acc.append_range(Geo::Polyline{
-                        path.back(), {path.back().x + accDistance, path.front().y}
+                        path.back(), {path.back().x() + accDistance, path.front().y()}
                     });
                 else
                     acc.append_range(Geo::Polyline{
-                        path.back(), {path.back().x - accDistance, path.front().y}
+                        path.back(), {path.back().x() - accDistance, path.front().y()}
                     });
             }
             {
                 const Geo::Polyline& path = paths.front();
-                if(path.front().x > path.back().x) // acc
+                if(path.front().x() > path.back().x()) // acc
                     acc.append_range(Geo::Polyline{
-                        {path.front().x + accDistance, path.front().y},
+                        {path.front().x() + accDistance, path.front().y()},
                         path.front()
                     });
                 else
                     acc.append_range(Geo::Polyline{
-                        {path.front().x - accDistance, path.front().y},
+                        {path.front().x() - accDistance, path.front().y()},
                         path.front()
                     });
             }
             pPath.push_back(acc);
         } else { // acc first
             pPath.emplace_back(Geo::Polyline{
-                {paths.front().front().x - accDistance, paths.front().front().y},
+                {paths.front().front().x() - accDistance, paths.front().front().y()},
                 paths.front().front()
             });
         }
@@ -271,16 +230,15 @@ void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
     };
 
     { // calculate
-        /*PType*/ int32_t yLast = src.front().front().y;
-        Paths64 paths;
+        double yLast = src.front().front().y();
+        Geo::Polylines paths;
 
         for(size_t i{}; i < src.size(); ++i) {
-
-            if(yLast != src[i].front().y) {
+            if(yLast != src[i].front().y()) {
                 adder(paths);
                 reverse = !reverse;
-                yLast = src[i].front().y;
-                paths = Paths64{format(src[i])};
+                yLast = src[i].front().y();
+                paths = Geo::Polylines{format(src[i])};
             } else {
                 paths.push_back(format(src[i]));
             }
@@ -291,144 +249,19 @@ void Creator::addAcc(Paths64& src, const /*PType*/ int32_t accDistance) {
 
     { // acc last
         Geo::Polyline& path = pPath.back();
-        if(path.front().x < path.back().x)
+        if(path.front().x() < path.back().x())
             pPath.emplace_back(Geo::Polyline{
-                path.back(), {path.back().x + accDistance, path.front().y}
+                path.back(), {path.back().x() + accDistance, path.front().y()}
             });
         else
             pPath.emplace_back(Geo::Polyline{
-                path.back(), {path.back().x - accDistance, path.front().y}
+                path.back(), {path.back().x() - accDistance, path.front().y()}
             });
     }
 
     src = std::move(pPath);
 }
 
-Paths64 Creator::calcScanLines(const Paths64& src, const Geo::Polyline& frame) {
-    Paths64 scanLines;
-    cl::Clipper64 clipper;
-    // clipper.AddOpenSubject(src);
-    // clipper.AddClip({frame});
-    clipper.AddClip(src);
-    clipper.AddOpenSubject({frame});
-    clipper.Execute(cl::ClipType::Intersection, cl::FillRule::Positive, scanLines, scanLines);
-    if(!scanLines.size()) return scanLines;
-    std::sort(scanLines.begin(), scanLines.end(), [](const Geo::Polyline& l, const Geo::Polyline& r) { return l.front().y < r.front().y; }); // vertical sort
-    /*PType*/ int32_t start = scanLines.front().front().y;
-    bool fl = {};
-    for(size_t i{}, last{}; i < scanLines.size(); ++i) {
-        if(auto y = scanLines[i].front().y; y != start || i - 1 == scanLines.size()) {
-            std::sort(scanLines.begin() + last, scanLines.begin() + i, [&fl](const Geo::Polyline& l, const Geo::Polyline& r) { // horizontal sort
-                return fl ? l.front().x < r.front().x : l.front().x > r.front().x;
-            });
-            for(size_t k = last; k < i; ++k) // fix direction
-                if(fl ^ (scanLines[k].front().x < scanLines[k].back().x))
-                    std::swap(scanLines[k].front().x, scanLines[k].back().x);
-            start = y;
-            fl = !fl;
-            last = i;
-        }
-    }
-    return scanLines;
-}
-
-Paths64 Creator::calcFrames(const Paths64& src, const Geo::Polyline& frame) {
-    Paths64 frames;
-
-    Paths64 tmp;
-    cl::Clipper64 clipper;
-    clipper.AddOpenSubject(src);
-    clipper.AddClip({frame});
-    clipper.Execute(cl::ClipType::Intersection, cl::FillRule::Positive, tmp, tmp); // FillRule::Positive
-    // dbgPaths(tmp, u"ClipType::Intersection"_s);
-    frames.append_range(std::move(tmp));
-    clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, tmp, tmp); // FillRule::Positive
-    // dbgPaths(tmp, u"ClipType::Difference"_s);
-    frames.append_range(std::move(tmp));
-    std::sort(frames.begin(), frames.end(), [](const Geo::Polyline& l, const Geo::Polyline& r) { return l.front().y < r.front().y; }); // vertical sort
-    for(auto& path: frames)
-        if(path.front().y > path.back().y)
-            ReversePath(path); // fix vertical direction
-
-    return frames;
-}
-
-Geo::Polyline Creator::calcZigzag(const Paths64& src) {
-    cl::Clipper64 clipper;
-    clipper.AddClip(src);
-    Rect rect(GetBounds(src));
-    /*PType*/ int32_t o = uScale - (rect.Height() % stepOver) / 2;
-    rect.top -= o;
-    rect.bottom += o;
-    rect.left -= uScale;
-    rect.right += uScale;
-    Geo::Polyline zigzag;
-    auto start = rect.top;
-    bool fl{};
-
-    for(; start <= rect.bottom || fl; fl = !fl, start += stepOver) {
-        if(!fl) {
-            zigzag.emplace_back(rect.left, start);
-            zigzag.emplace_back(rect.right, start);
-        } else {
-            zigzag.emplace_back(rect.right, start);
-            zigzag.emplace_back(rect.left, start);
-        }
-    }
-
-    zigzag.front().x -= stepOver;
-    zigzag.back().x -= stepOver;
-    return zigzag;
-}
-
-Paths64 Creator::merge(const Paths64& scanLines, const Paths64& frames) {
-    Paths64 merged;
-    merged.reserve(scanLines.size() / 10);
-    std::list<Geo::Polyline> bList;
-    for(auto&& path: scanLines)
-        bList.emplace_back(std::move(path));
-
-    std::list<Geo::Polyline> fList;
-    for(auto&& path: frames)
-        fList.emplace_back(std::move(path));
-
-    setMax(bList.size());
-    while(bList.begin() != bList.end()) {
-        setCurrent(bList.size());
-
-        merged.resize(merged.size() + 1);
-        auto& path = merged.back();
-        for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
-            Geo::checkCancelled();
-            if(path.empty() || path.back() == bit->front()) {
-                path.empty() ? path.append_range(*bit)
-                             : path.append_range(*bit | skipFront);
-                bList.erase(bit);
-                for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
-                    if(path.back() == fit->front() && fit->front().y < fit->at(1).y) {
-                        path.append_range(*fit | skipFront);
-                        fList.erase(fit);
-                        bit = bList.begin();
-                        break;
-                    }
-                }
-                bit = bList.begin();
-            }
-            if(bList.begin() == bList.end())
-                break;
-        }
-        for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
-            if(path.front() == fit->back() && fit->front().y > fit->at(1).y) {
-                fit->append_range(path | skipFront);
-                std::swap(*fit, path);
-                fList.erase(fit);
-                break;
-            }
-        }
-    }
-    merged.shrink_to_fit();
-    return merged;
-}
 //////////////////////////////////////
 
 File::File()

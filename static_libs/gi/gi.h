@@ -55,7 +55,7 @@ enum /*class*/ Type : int {
     Error = QGraphicsItem::UserType + 400, // Form
 
     ShapeBegin = QGraphicsItem::UserType + 500,
-    ShCircle   = ShapeBegin,
+    ShCircle = ShapeBegin,
     ShRectangle,
     ShPolyLine,
     ShCirArc,
@@ -66,6 +66,17 @@ enum /*class*/ Type : int {
 }; // namespace Type
 
 class Group;
+
+// Всё, что отрисовке нужно знать о кадре. Считается ОДИН раз в Item::paint и
+// раздаётся наследникам: раньше каждый paint() сам лез за масштабом через
+// scene()->views().front()->transform() и сам разбирал option->state.
+struct RenderState {
+    double sf;         // 1/масштаб вида, с учётом трансформации самого элемента
+    bool hovered;      //
+    bool selected;     //
+    double dashOffset; // смещение «бегущих муравьёв»
+    bool plain() const { return !hovered && !selected; }
+};
 
 class Item : public /*QGraphicsObject*/ QGraphicsItem {
 
@@ -85,7 +96,7 @@ public:
     void colorChanged();
 
     explicit Item(AbstractFile* file = nullptr);
-    ~Item() override = default;
+    ~Item() override;
 
     bool isEditable() const;
     void setEditable(bool fl);
@@ -116,17 +127,45 @@ public:
     QPainterPath shape() const override;
     Q_INVOKABLE void setVisible(bool visible);
 
+    // Точный габарит по ЗАЛИТОМУ контуру. Нужен ровно одному потребителю --
+    // GraphicsView::getSelectedBoundingRect. Раньше это была ветка внутри
+    // boundingRect(), то есть полный toFillPolygon в самой горячей виртуальной
+    // функции сцены.
+    QRectF fillBoundingRect() const { return shape_.toFillPolygon(transform()).boundingRect(); }
+
+    // Общий каркас отрисовки. Наследники из static_libs/gi реализуют
+    // paintGeometry()/paintHighlight() и не трогают paint().
+    //
+    // Элементы плагинов (Shapes::AbstractShape, Comp::Item, Gi::Bridge) пока
+    // переопределяют paint() напрямую и каркас обходят -- их перевод отложен.
+    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+
     const AbstractFile* file() const;
     template <typename T>
     const T* typedFile() const { return dynamic_cast<const T* const>(file_); }
 
     int32_t id() const;
     void setId(int32_t id);
-    virtual void changeColor() = 0;
+
+    // Пересчитать кэш цветов И ПОКАЗАТЬ результат. Невиртуальная обёртка
+    // именно ради второй половины: цвет слоя или файла живёт снаружи, элементы
+    // смотрят на него по указателю, и правка сама по себе экран не трогает.
+    // Пока вид перерисовывал сцену 50 раз в секунду, это сходило с рук --
+    // ближайший кадр всё показывал; теперь перерисовку надо просить, и просить
+    // её здесь, а не в каждом из вызывающих (дерево слоёв, меню файла,
+    // раскраска, наведение, выделение).
+    void changeColor() {
+        updateColors();
+        update();
+    }
 
     virtual Side side() const;
 
 protected:
+    // Собственно пересчёт кэша (brushColor_/penColor_) по colorState и
+    // указателям на внешний цвет. Звать напрямую нельзя -- только changeColor().
+    virtual void updateColors() = 0;
+
     // QPropertyAnimation animation;
     // QPropertyAnimation visibleAnim;
 
@@ -146,7 +185,7 @@ protected:
     QPen pen_;
 
     const QColor* pnColorPrt_ = nullptr;
-    const QColor* colorPtr_   = nullptr;
+    const QColor* colorPtr_ = nullptr;
 
     QColor color_;
     QColor brushColor_;
@@ -156,13 +195,26 @@ protected:
     double scaleFactor() const;
     enum ColorState {
         Default,
-        Hovered  = 1,
+        Hovered = 1,
         Selected = 2,
     };
 
     int colorState = Default;
     double scar;
     std::optional<QPainterPath> updateArrows();
+
+    // Пересчитать габарит после перестройки shape_ и сбросить зависящие от
+    // геометрии кэши. Единственное место в проекте, где нужен
+    // prepareGeometryChange(): без него индекс BSP остаётся со старым
+    // прямоугольником.
+    virtual void geometryChanged();
+
+    // Собственно геометрия элемента. Обычное состояние -- никаких временных
+    // QPen/QBrush/QColor: перо и цвета уже готовы в pen_/brushColor_, их
+    // обновляет changeColor() по событию, а не покадрово.
+    virtual void paintGeometry(QPainter* painter, const RenderState& st);
+    // Подсветка наведения и выделения. Рисуется ДО геометрии.
+    virtual void paintHighlight(QPainter* painter, const RenderState& st);
 
     // QGraphicsItem interface
     void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;

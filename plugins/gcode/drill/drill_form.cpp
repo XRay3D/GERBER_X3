@@ -717,7 +717,6 @@ void Form::hideEvent(QHideEvent* event) { // NOTE clean and hide pr gi
     event->accept();
 }
 
-
 } // namespace Drilling
 
 #include "moc_drill_form.cpp"

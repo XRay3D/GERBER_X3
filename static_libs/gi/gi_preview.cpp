@@ -13,6 +13,7 @@
 #include "graphicsview.h"
 #include <QPainter>
 #include <QPropertyAnimation>
+#include <QStyleOptionGraphicsItem>
 
 namespace Gi {
 
@@ -43,18 +44,28 @@ AbstractPreview::AbstractPreview()
     App::grView().addItem(this);
 }
 
-void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void AbstractPreview::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget*) {
     painter->setPen({bodyColor_, 0.0});
     painter->setBrush(bodyColor_);
     painter->drawPath(sourcePath_);
     // draw tool
-    if(toolId() > Tool::ID{}) {
-        painter->setPen(QPen(pathColor_, 2 * App::grView().scaleFactor()));
+    const auto id = toolId(); // чисто виртуальный вызов -- ровно один на кадр
+    if(id > Tool::ID{}) {
+        const double sf = 1.0 / QStyleOptionGraphicsItem::levelOfDetailFromTransform(painter->worldTransform());
+        painter->setPen(QPen{pathColor_, 2 * sf});
         painter->setBrush(Qt::NoBrush);
-        if(toolPath_.isEmpty())
-            painter->drawPath(App::toolHolder().tool(toolId()).path(pos()));
-        else
+        if(!toolPath_.isEmpty())
             painter->drawPath(toolPath_);
+        else {
+            // Tool::path() строит целый QPainterPath -- раньше это делалось на
+            // каждый кадр каждого превью (одно превью на отверстие).
+            if(toolPathCacheId_ != id || toolPathCachePos_ != pos()) {
+                toolPathCacheId_ = id;
+                toolPathCachePos_ = pos();
+                toolPathCache_ = App::toolHolder().tool(id).path(pos());
+            }
+            painter->drawPath(toolPathCache_);
+        }
     }
 }
 

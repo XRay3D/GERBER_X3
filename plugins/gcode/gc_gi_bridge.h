@@ -15,6 +15,11 @@
 
 namespace Gi {
 
+// Мост (таб): маркер на исходном контуре, где деталь остаётся прихваченной к
+// заготовке. Элемент живёт только на сцене: в расчёт УП мосты уходят своими
+// центрами (Profile::Form::computePaths -> gcp.supportCurvess), а круги реза
+// по ним строит Profile::File сам -- их радиус зависит от припуска чистового
+// прохода, известного лишь там.
 class Bridge final : public Item {
 
 public:
@@ -28,11 +33,10 @@ public:
     int type() const override;
     // Item interface
     Geo::Polylines curves(int alternate = {}) const override;
-    void changeColor() override { }
+    void updateColors() override { }
 
     bool ok() const;
     void update();
-    bool test(const Geo::Polyline& curve);
     QPointF snapedPos(const QPointF& pos);
 
     static inline Bridge* moveBrPtr;           // NOTE приватизировать в будущем??
@@ -46,9 +50,6 @@ protected:
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
 
 private:
-    QLineF testLine() const;
-    QPointF intersectPoint;
-
     double angle_{};
 
     QPainterPath pPath;

@@ -32,7 +32,7 @@ Drill::Drill(const QPolygonF& path, double diameter, AbstractFile* file, Tool::I
     changeColor();
 }
 
-void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) {
+void Drill::paintGeometry(QPainter* painter, const RenderState& st) {
 
     // FIXME   if (App::drawPdf()) {
     // painter->setBrush(Qt::black);
@@ -40,14 +40,17 @@ void Drill::paint(QPainter* painter, const QStyleOptionGraphicsItem*, QWidget*) 
     // painter->drawPath(shape_);
     // return;
     // }
-    // pen_.setWidth(penWidth());
 
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
     painter->drawPath(shape_);
 
-    pen_.setColor(penColor_);
-    painter->strokePath(shape_, pen_);
+    // Раньше обводка рисовалась БЕЗУСЛОВНО, а changeColor() в состоянии Default
+    // кладёт penColor_ = brushColor_ -- то есть каждый кадр каждое отверстие
+    // обводилось цветом собственной заливки. Белым перо становится только на
+    // наведении и выделении, там обводка и нужна.
+    if(!st.plain()) [[unlikely]]
+        painter->strokePath(shape_, QPen{penColor_, 0.0});
 }
 
 bool Drill::isSlot() { return path_.size() > 1; }
@@ -63,15 +66,21 @@ void Drill::setDiameter(double diameter) {
 
 void Drill::updatePath(const QPolygonF& path, double diameter) {
     diameter_ = diameter;
-    path_     = path;
+    path_ = path;
     create();
     update();
 }
 
 void Drill::setToolId(Tool::ID newToolId) {
     toolId_ = newToolId;
+    // Идентификатор приходит из файла (номер инструмента в Excellon), а не из
+    // базы инструментов: одноимённого инструмента там может не быть вовсе, а
+    // ToolHolder::tool() -- это .at(), и он бросал out_of_range прямо из
+    // конструктора элемента, роняя загрузку сверловки на пустой базе.
+    const auto& tools = App::toolHolder().tools();
+    const auto it = tools.find(toolId_);
     setToolTip(QObject::tr("Tool %1, Ø%2mm")
-            .arg(App::toolHolder().tool(toolId_).name())
+            .arg(it != tools.end() ? it->second.name() : QString::number(std::to_underlying(toolId_)))
             .arg(diameter_));
 }
 
@@ -81,7 +90,7 @@ void Drill::setToolId(Tool::ID newToolId) {
 //     return {~transform().map(path)};
 // }
 
-void Drill::changeColor() {
+void Drill::updateColors() {
     // animation.setStartValue(bodyColor_);
 
     switch(colorState) {
@@ -119,7 +128,7 @@ void Drill::create() {
         shape_ = Geo::toPath(curves_);
     }
 
-    boundingRect_ = shape_.boundingRect();
+    geometryChanged();
 }
 
 } // namespace Gi

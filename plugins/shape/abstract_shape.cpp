@@ -95,7 +95,7 @@ AbstractShape::AbstractShape(Plugin* plugin)
     : FileTree::Node{FileTree::AbstractShape}
     , plugin{plugin} {
     // paths_.resize(1);
-    AbstractShape::changeColor();
+    AbstractShape::updateColors(); // в конструкторе -- без update(): сцены ещё нет
     setFlag(ItemIsSelectable);
     setFlag(ItemIsMovable, false);
     setAcceptHoverEvents(true);
@@ -205,7 +205,7 @@ QPainterPath AbstractShape::shape() const {
 
 // Paths AbstractShape::paths(int) const { return paths_; }
 
-void AbstractShape::changeColor() {
+void AbstractShape::updateColors() {
     // animation.setStartValue(bodyColor_);
     switch(colorState) {
     case Default           : (brushColor_ = App::settings().guiColor(GuiColors::Background).rgb() ^ 0xFFFFFF).setAlpha(50); break;

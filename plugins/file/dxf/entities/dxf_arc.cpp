@@ -52,29 +52,13 @@ DxfGo Arc::toGo() const {
     double sweep = qDegreesToRadians(endAngle) - a1;
     while(sweep <= 0.0) sweep += 2.0 * pi;
 
-    // ArcCurve режет размах на куски не длиннее полуокружности: прогиб
+    // Geo::arc режет размах на куски не длиннее полуокружности: прогиб
     // почти полного оборота уходит в бесконечность.
-    Geo::Polyline curve = ArcCurve(centerPoint, radius, a1, sweep);
+    Geo::Polyline curve = Geo::arc(centerPoint, radius, a1, sweep);
 
     DxfGo go{id, std::move(curve)};
     return go;
     return {};
-}
-
-void Arc::write(QDataStream& stream) const {
-    stream << centerPoint;
-    stream << thickness;
-    stream << radius;
-    stream << startAngle;
-    stream << endAngle;
-}
-
-void Arc::read(QDataStream& stream) {
-    stream >> centerPoint;
-    stream >> thickness;
-    stream >> radius;
-    stream >> startAngle;
-    stream >> endAngle;
 }
 
 } // namespace Dxf

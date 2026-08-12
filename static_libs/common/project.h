@@ -105,6 +105,12 @@ public:
     // QString fileNames();
     int contains(const QString& name);
 
+    // Перезагрузка не состоялась -- отменили или разбор упал. Путь надо забыть:
+    // в reloadPaths он держится ровно до успешного Project::reload и гасит
+    // повторные срабатывания watcher'а, так что иначе о СЛЕДУЮЩЕМ изменении
+    // этого файла не спросят уже никогда.
+    void reloadAborted(const QString& path);
+
     // AbstractShape
     int addShape(Shapes::AbstractShape* const shape);
     Shapes::AbstractShape* shape(int32_t id);
@@ -203,6 +209,10 @@ private:
 
     // File Watcher
     QFileSystemWatcher watcher;
+    // Одно окно на все изменившиеся файлы вместо модального вопроса на каждый.
+    // Создаётся при первом изменении и дальше только прячется.
+    class ReloadRequestDialog* reloadDialog_ = nullptr;
+    ReloadRequestDialog* reloadDialog();
 
     FilesMap files_;
     ShapesMap shapes_;

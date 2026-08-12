@@ -29,9 +29,6 @@ class File;
 struct Entity {
     Q_GADGET
 
-    friend QDataStream& operator<<(QDataStream& stream, const std::shared_ptr<Entity>& e);
-    friend QDataStream& operator>>(QDataStream& stream, std::shared_ptr<Entity>& e);
-
 public:
     enum Type : int {
         NULL_ENT = -1,
@@ -84,7 +81,8 @@ public:
     Q_ENUM(Type)
     static Type toType(const QString& key);
 
-    Codes data;
+    // Сырые коды нужны только разбору; в проект уезжают уже разобранные поля.
+    [[= Serial::skip]] Codes data;
     SectionParser* sp = nullptr;
     Entity(SectionParser* sp);
     virtual ~Entity();
@@ -93,9 +91,6 @@ public:
     virtual void parse(CodeData& code);
     virtual Type type() const = 0;
     virtual DxfGo toGo() const = 0;
-
-    virtual void write(QDataStream& stream) const;
-    virtual void read(QDataStream& stream);
 
     static QString typeName(int key);
     QString name() const;

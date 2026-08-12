@@ -22,7 +22,10 @@
 #include <QMenu>
 #include <QMessageBox>
 #include <any>
+#include <map>
 #include <memory>
+#include <mutex>
+#include <stop_token>
 #include <string_view>
 
 class AbstractFile;
@@ -70,14 +73,31 @@ public:
 
     virtual void updateFileModel([[maybe_unused]] AbstractFile* file) { };
 
+    // Запросить отмену разбора. Зовётся из GUI-потока, разбор идёт в
+    // parserThread -- отсюда мьютекс. Файл, ещё не дошедший до parseFileTask,
+    // тоже отменяется: токен кладётся в реестр заранее и слот, добравшись до
+    // очереди, сразу видит запрос и выходит, ничего не разбирая.
+    void requestCancel(const QString& fileName);
+
 signals:
     void fileError(const QString& fileName, const QString& error);
     void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning);
+    // fileName -- ПОЛНЫЙ путь: по нему окно прогресса находит свою строку, а
+    // короткое имя не уникально (два Top.gbr из разных папок делили бы одну).
     void fileProgress(const QString& fileName, int max, int value);
     void fileReady(AbstractFile* file);
+    void fileCanceled(const QString& fileName);
 
 public slots:
     virtual AbstractFile* parseFile(const QString& fileName, uint32_t type) = 0;
+    // Точка входа для загрузки: заводит область отмены вокруг parseFile и
+    // ловит Geo::Cancelled. Разбор всегда запускать через неё, а не через
+    // parseFile напрямую -- иначе отмены у файла не будет.
+    void parseFileTask(const QString& fileName, uint32_t type);
+
+private:
+    std::map<QString, std::stop_source> tasks_;
+    std::mutex tasksMutex_;
 };
 
 #define ParserInterface_iid "ru.xray3d.XrSoft.GGEasy.AbstractFilePlugin"

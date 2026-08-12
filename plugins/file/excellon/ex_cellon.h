@@ -9,8 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
-#include "ex_cellondialog.h"
 #include "ex_file.h"
+#include "ex_formatdialog.h"
 #include "ex_node.h"
 #include "ex_parser.h"
 #include "ex_types.h"

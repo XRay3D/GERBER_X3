@@ -15,7 +15,6 @@
 #include <QObject>
 #include <QSharedMemory>
 
-
 #include "settings.h"
 #include "tool.h"
 #include "utils.h" //using namespace Qt::Literals;
@@ -61,26 +60,26 @@ using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
 using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
-#define SINGLETON(TYPE, SET, NAME)                \
-private:                                          \
-    class TYPE* NAME##_ = nullptr;                \
-                                                  \
-public:                                           \
-    static TYPE& NAME() {                         \
-        assert(app->NAME##_);                     \
-        return *app->NAME##_;                     \
-    }                                             \
-    /* Проверка app обязательна: указатели спрашивают и до создания App        \
-     * (выбор режима OpenGL в main), и после её разрушения -- туда ходит       \
-     * обработчик сообщений Qt, и на нулевом app он ронял процесс. */          \
-    static TYPE* NAME##Ptr() {                    \
-        return app ? app->NAME##_ : nullptr;      \
-    }                                             \
-    static void SET(TYPE* NAME) {                 \
-        if(app->NAME##_ && NAME)                  \
-            throw std::logic_error(__FUNCTION__); \
-        /*qInfo() << #NAME << NAME;*/             \
-        app->NAME##_ = NAME;                      \
+#define SINGLETON(TYPE, SET, NAME)                                                                               \
+private:                                                                                                         \
+    class TYPE* NAME##_ = nullptr;                                                                               \
+                                                                                                                 \
+public:                                                                                                          \
+    static TYPE& NAME() {                                                                                        \
+        assert(app->NAME##_);                                                                                    \
+        return *app->NAME##_;                                                                                    \
+    }                                                                                                            \
+    /* Проверка app обязательна: указатели спрашивают и до создания App                                 \
+     * (выбор режима OpenGL в main), и после её разрушения -- туда ходит  \
+     * обработчик сообщений Qt, и на нулевом app он ронял процесс. */ \
+    static TYPE* NAME##Ptr() {                                                                                   \
+        return app ? app->NAME##_ : nullptr;                                                                     \
+    }                                                                                                            \
+    static void SET(TYPE* NAME) {                                                                                \
+        if(app->NAME##_ && NAME)                                                                                 \
+            throw std::logic_error(__FUNCTION__);                                                                \
+        /*qInfo() << #NAME << NAME;*/                                                                            \
+        app->NAME##_ = NAME;                                                                                     \
     }
 
 class App {
@@ -118,15 +117,37 @@ class App {
     // QSettings settings_;
     QString settingsPath_;
     ToolHolder toolHolder_;
-    int dashOffset_{};
+    // Смещение штриха «бегущих муравьёв» на выделении. double, а не int:
+    // GraphicsView держит его в пределах периода узора через fmod, иначе
+    // счётчик за долгую сессию уходил в переполнение.
+    double dashOffset_{};
+    // 1.0 / |m11| вида. Публикуется GraphicsView при каждой смене
+    // трансформации, чтобы item'ы не ходили за масштабом через
+    // scene()->views().front()->transform() на каждый вызов.
+    double viewScaleFactor_{1.0};
 
-    QSharedMemory sharedMemory{u"AppSettings"_s};
+    QSharedMemory sharedMemory{sharedKey()};
 
     const bool isDebug_{QCoreApplication::applicationDirPath().contains(u"GERBER_X3/bin"_s)};
 
     bool drawPdf_{};
 
 public:
+    // Имя сегмента -- СВОЁ У КАЖДОГО ПРОЦЕССА. Сегмент нужен ровно затем, чтобы
+    // указатель на App видели плагины: common -- статическая библиотека, и у
+    // каждого .so своя копия inline static app. Делить его между РАЗНЫМИ копиями
+    // программы не нужно и нельзя, а QSharedMemory общесистемна: со старым
+    // именем "AppSettings" вторая запущенная копия не создавала сегмент, а
+    // прицеплялась к чужому и забирала указатель на App первой -- адрес чужого
+    // адресного пространства. Падало на первом же App::...(), то есть сразу на
+    // старте, ещё до открытия файлов.
+    //
+    // Заодно перестаёт мешать сегмент, оставшийся от аварийно завершившейся
+    // копии: у новой копии другой pid, а значит и другое имя.
+    static QString sharedKey() {
+        return u"AppSettings-"_s + QString::number(QCoreApplication::applicationPid());
+    }
+
     explicit App() {
         if(sharedMemory.create(sizeof(void*), QSharedMemory::ReadWrite))
             app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
@@ -136,6 +157,7 @@ public:
             qDebug() << u"App"_s << app << sharedMemory.errorString();
     }
     static auto& dashOffset() { return app->dashOffset_; }
+    static auto& viewScaleFactor() { return app->viewScaleFactor_; }
 
     static auto pins() {
         static std::vector pins{&App::pin0(), &App::pin1(), &App::pin2(), &App::pin3()};

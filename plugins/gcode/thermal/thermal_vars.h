@@ -15,6 +15,7 @@
 #include <QString>
 #include <map>
 #include <utility>
+#include <vector>
 
 namespace Thermal {
 
@@ -26,7 +27,7 @@ struct ThParam {
 
 class Model;
 
-using PreviewGiMapValVec = mvector<std::pair<Curves, QPointF>>;
+using PreviewGiMapValVec = std::vector<std::pair<Geo::Polygons, QPointF>>;
 using PreviewGiMap = std::map<QString, PreviewGiMapValVec>;
 
 } // namespace Thermal

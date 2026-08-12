@@ -11,6 +11,8 @@
 #include "ex_parser.h"
 #include "ex_file.h"
 
+#include "geo/cancel.h"
+
 #include <ctre.hpp>
 
 #include <QFile>
@@ -38,10 +40,24 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
     QTextStream in{&file_};
     in.setAutoDetectUnicode(true);
 
+    // Строки вычитываются целиком заранее: окну прогресса нужен их общий счёт,
+    // а по одной, как раньше, он неизвестен до самого конца разбора.
     QString line;
-    while(in.readLineInto(&line)) {
+    while(in.readLineInto(&line))
         file->lines().push_back(line);
-        try {
+
+    // Ключ прогресса -- ПОЛНЫЙ путь: по нему окно находит свою строку, а
+    // короткое имя не уникально (два pth.drl из разных папок делили бы одну).
+    emit afp->fileProgress(file->name(), static_cast<int>(file->lines().size()), 0);
+
+    try {
+        for(int lineNum{}; const QString& line: file->lines()) {
+            if(!(++lineNum % 1000)) {
+                emit afp->fileProgress(file->name(), 0, lineNum);
+                // Отклик на кнопку отмены -- та же тысяча строк, что и у
+                // прогресса: чаще незачем, а проверка не бесплатна.
+                Geo::checkCancelled();
+            }
             if(line == u"%"_s) continue;
             if(parseComment(line)) continue;
             if(parseFormat(line)) continue;
@@ -52,23 +68,43 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
             if(parseSlot(line)) continue;
             if(parsePos(line)) continue;
             qWarning() << u"Excellon unparsed:"_s << line;
-        } catch(const QString& errStr) {
-            qWarning() << u"exeption Q:"_s << errStr;
-            emit afp->fileError({}, QFileInfo(fileName).fileName() + u'\n' + errStr);
-            delete file;
-            return nullptr;
-        } catch(...) {
-            qWarning() << u"exeption S:"_s << errno;
-            emit afp->fileError({}, QFileInfo(fileName).fileName() + u'\n' + u"Unknown Error!");
-            delete file;
-            return nullptr;
         }
+    } catch(const Geo::Cancelled&) {
+        // Отмена пользователем -- не ошибка: ни в лог, ни в диалог ошибок.
+        // Сигналы шлёт AbstractFilePlugin::parseFileTask, туда и пробрасываем.
+        // Ловим ДО std::exception: Cancelled от него наследуется и иначе уехал
+        // бы в общий обработчик ошибок.
+        delete file;
+        file = nullptr;
+        throw;
+    } catch(const QString& errStr) {
+        qWarning() << u"exeption Q:"_s << errStr;
+        emit afp->fileError({}, file->shortName() + u'\n' + errStr);
+        emit afp->fileProgress(file->name(), 1, 1);
+        delete file;
+        return file = nullptr;
+    } catch(const std::exception& e) {
+        qWarning() << u"exeption E:"_s << e.what();
+        emit afp->fileError({}, file->shortName() + u'\n' + QString::fromUtf8(e.what()));
+        emit afp->fileProgress(file->name(), 1, 1);
+        delete file;
+        return file = nullptr;
+    } catch(...) {
+        QString errStr{u"%1: %2"_s.arg(errno).arg(QString::fromLocal8Bit(strerror(errno)))};
+        qWarning() << u"exeption S:"_s << errStr;
+        emit afp->fileError({}, file->shortName() + u'\n' + errStr);
+        emit afp->fileProgress(file->name(), 1, 1);
+        delete file;
+        return file = nullptr;
     }
-    if(this->file->isEmpty()) {
+
+    if(file->isEmpty()) {
+        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
         file = nullptr;
     } else {
-        emit afp->fileReady(this->file);
+        emit afp->fileReady(file);
+        emit afp->fileProgress(file->name(), 1, 1);
     }
     return file;
 }
@@ -435,7 +471,9 @@ QPolygonF Parser::arc(QPointF p1, QPointF p2, QPointF center) {
         const double da_sign[4]{0, 0, -1.0, +1.0};
         QPolygonF points;
 
-        const int intSteps = App::settings().clpCircleSegments(radius * dScale); // MinStepsPerCircle;
+        // Радиус здесь уже в миллиметрах: dScale в этом месте остался от
+        // времён, когда дуга считалась в целых единицах Clipper.
+        const int intSteps = App::settings().clpCircleSegments(radius); // MinStepsPerCircle;
 
         if(state_.gCode == G02 && stop >= start)
             stop -= 2.0 * pi;

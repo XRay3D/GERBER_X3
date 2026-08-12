@@ -62,29 +62,9 @@ DxfGo Face3D::toGo() const {
     if(!poly.isPositive())
         poly.reverse();
 
-    DxfGo go{id, Geo::Polyline{poly}, {std::move(poly)}};
+    DxfGo go{id, Geo::Polyline{poly}, Geo::Polygons{Geo::Polylines{std::move(poly)}}};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Rect);
     return go;
-}
-
-void Face3D::write(QDataStream& stream) const {
-    stream << firstCorner;
-    stream << secondCorner;
-    stream << thirdCorner;
-    stream << fourthCorner;
-
-    stream << corners;
-    stream << invisibleEdgeFlags;
-}
-
-void Face3D::read(QDataStream& stream) {
-    stream >> firstCorner;
-    stream >> secondCorner;
-    stream >> thirdCorner;
-    stream >> fourthCorner;
-
-    stream >> corners;
-    stream >> invisibleEdgeFlags;
 }
 
 } // namespace Dxf

@@ -42,14 +42,4 @@ DxfGo Point::toGo() const {
     return go;
 }
 
-void Point::write(QDataStream& stream) const {
-    stream << point;
-    stream << thickness;
-}
-
-void Point::read(QDataStream& stream) {
-    stream >> point;
-    stream >> thickness;
-}
-
 } // namespace Dxf

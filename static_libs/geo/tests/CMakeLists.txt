@@ -3,7 +3,7 @@
 
 find_package(Qt6 REQUIRED COMPONENTS Test)
 
-foreach(name polyline util polygon inflate cancel)
+foreach(name polyline util polygon inflate cancel normalize clipopen fill)
   add_executable(geo_test_${name} test_${name}.cpp)
   target_link_libraries(geo_test_${name} PRIVATE Geo::Geo Qt6::Test)
   add_test(NAME geo_${name} COMMAND geo_test_${name})

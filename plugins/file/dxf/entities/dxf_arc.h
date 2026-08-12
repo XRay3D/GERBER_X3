@@ -23,9 +23,6 @@ struct Arc final : Entity {
 
     DxfGo toGo() const override;
 
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
-
     enum DataEnum {
         SubclassMarker = 100, // Маркер подкласса (AcDbCircle)
         Thickness = 39,       // Толщина (необязательно; значение по умолчанию = 0)

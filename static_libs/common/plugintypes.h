@@ -109,7 +109,11 @@ struct GraphicObject {
     inline bool isFlags(uint32_t f) const { return (f & ~0xFF) ? (type & ~0xFF) & f : true; }
     inline bool test(uint32_t t) const { return isType(t) && isFlags(t); }
     inline bool closed() const { return path.isClosed(); }
-    bool positive() const { return path.isPositive(); }
+    // Полярность несёт ориентация обхода, а она есть только у ЗАМКНУТОГО
+    // контура. У открытого пути (осевая трассы) ориентации нет вовсе --
+    // штрих читается телом, то есть тёмным; спрашивать у него signedArea
+    // нельзя (контракт pre(closed) валит программу).
+    bool positive() const { return !path.isClosed() || path.isPositive(); }
 };
 
 // Перенос графического объекта преобразованием: заливка пересобирается в

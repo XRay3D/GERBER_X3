@@ -81,7 +81,7 @@ public:
     QPainterPath shape() const override;
 
     // Gi::Item interface
-    void changeColor() override;
+    void updateColors() override;
     void redraw() override;
     // AbstractShape interface
     virtual QString name() const = 0;

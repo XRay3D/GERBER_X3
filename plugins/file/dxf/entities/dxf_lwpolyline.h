@@ -50,21 +50,9 @@ struct LwPolyline final : Entity {
     Type type() const override;
     struct Segment : QPointF {
         double bulge{};
-        friend QDataStream& operator<<(QDataStream& stream, const Segment& e) {
-            stream << static_cast<QPointF>(e);
-            stream << e.bulge;
-            return stream;
-        }
-        friend QDataStream& operator>>(QDataStream& stream, Segment& e) {
-            stream >> static_cast<QPointF&>(e);
-            stream >> e.bulge;
-            return stream;
-        }
     };
 
     DxfGo toGo() const override;
-    void write(QDataStream& stream) const override;
-    void read(QDataStream& stream) override;
 
     std::vector<Segment> poly;
     int16_t counter{};

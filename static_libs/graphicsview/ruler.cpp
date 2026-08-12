@@ -44,6 +44,12 @@ Ruler::Ruler(Qt::Orientation rulerType, QWidget* parent)
 }
 
 void Ruler::setCursorPos(const QPoint& newCursorPos) {
+    // Вид дёргает обе линейки на каждое движение мыши. Движение вдоль ЧУЖОЙ
+    // оси эту линейку не меняет -- а перерисовка у неё не дешёвая: три прохода
+    // DrawAScaleMeter плюс текст.
+    const int tick = orientation_ == Qt::Horizontal ? newCursorPos.x() : newCursorPos.y();
+    if(tick == lastTick_) return;
+    lastTick_ = tick;
     cursorPos = newCursorPos;
     update();
 }

@@ -107,15 +107,9 @@ Debug_::~Debug_() {
 
 QRectF Debug_::boundingRect() const { return boundingRect_; }
 
-void Debug_::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    Q_UNUSED(option)
-
-    if(pnColorPrt_)
-        pen_.setColor(*pnColorPrt_);
-    if(colorPtr_)
-        color_ = *colorPtr_;
-
-    double scale = scaleFactor();
+void Debug_::paintGeometry(QPainter* painter, const RenderState& st) {
+    // Цвета из указателей разрешает базовый Item::paint.
+    const double scale = st.sf;
 
     QPen pen{pen_};
     if(pen_.widthF() == 0) {

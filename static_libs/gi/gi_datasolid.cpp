@@ -27,39 +27,28 @@ DataFill::DataFill(Geo::Polygons curves, AbstractFile* file)
     shape_ = curves.toPath();
     // Контуры -- для базового curves(), сам регион -- для region(): собрать
     // его обратно из плоского списка нельзя, острова в дырках теряются.
-    curves_       = curves.contours();
-    region_       = std::move(curves);
+    curves_ = curves.contours();
+    region_ = std::move(curves);
     boundingRect_ = shape_.boundingRect();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
 }
 
-void DataFill::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
+void DataFill::paintGeometry(QPainter* painter, const RenderState& st) {
     // FIXME   if (App::drawPdf()) {
     //        painter->setBrush(Qt::black);
     //        painter->setPen(Qt::NoPen);
     //        painter->drawPath(shape_);
     //        return;
     //    }
-    // pen_.setWidth(penWidth());
-#if 0
-    painter->strokePath(shape_, pen_);
-#else
-    #if DEBUG
-    // brushColor_.setRgb(64, 64, 64, brushColor_.alpha());
-    #endif
     painter->setBrush(brushColor_);
     painter->setPen(Qt::NoPen);
-    //    for (auto&& poly : shape_.toFillPolygons())
-    //        painter->drawPolygon(poly);
     painter->drawPath(shape_);
-    bool fl = option->state & (QStyle::State_Selected | QStyle::State_MouseOver);
-    if(fl) {
-        pen_.setWidthF(1.0 * scaleFactor());
-        pen_.setColor(penColor_);
-        painter->strokePath(shape_, pen_);
-    }
-#endif
+    // Обводка -- ПОВЕРХ заливки, поэтому здесь, а не в paintHighlight.
+    // Перо локальное: член pen_ принадлежит базе, мутировать его в отрисовке
+    // нельзя.
+    if(!st.plain()) [[unlikely]]
+        painter->strokePath(shape_, QPen{penColor_, 1.0 * st.sf});
 }
 
 int DataFill::type() const { return Type::DataSolid; }
@@ -109,7 +98,7 @@ Geo::Polygons DataFill::region() const {
 //     redraw();
 // }
 
-void DataFill::changeColor() {
+void DataFill::updateColors() {
     //    auto animation = new QPropertyAnimation{this, "bodyColor"};
     //    animation->setEasingCurve(QEasingCurve(QEasingCurve::Linear));
     //    animation.setDuration(100);

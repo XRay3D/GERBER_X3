@@ -90,9 +90,6 @@ bool LayerModel::setData(const QModelIndex& index, const QVariant& value, int ro
             return true;
         case Qt::DecorationRole:
             layers[names[index.row()]]->setColor(value.value<QColor>());
-            if(layers.at(names[index.row()])->itemGroup())
-                for(auto&& gi: *layers[names[index.row()]]->itemGroup())
-                    gi->changeColor();
             return true;
         default: return false;
         }

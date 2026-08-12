@@ -25,7 +25,7 @@ public:
     ~DataFill() override = default;
 
     // QGraphicsItem interface
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void paintGeometry(QPainter* painter, const RenderState& st) override;
     int type() const override;
     // Item interface
     void redraw() override;
@@ -34,7 +34,7 @@ public:
     void setCurves(Geo::Polylines paths, int alternate = {}) override;
     Geo::Polygons region() const override;
     // Item interface
-    void changeColor() override;
+    void updateColors() override;
 
 private:
     // Заливка -- единственный элемент, у которого вложенность известна точно:

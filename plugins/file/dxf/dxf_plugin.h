@@ -32,7 +32,8 @@ public:
     bool thisIsIt(const QString& fileName) override;
     uint32_t type() const override;
     QString folderName() const override { return tr("Dxf Files"); }
-    AbstractFile* loadFile(QDataStream& stream) const override;
+    AbstractFile* loadFile(std::string_view json) const override;
+    std::string_view typeName() const override;
     QIcon icon() const override;
     AbstractFileSettings* createSettingsTab(QWidget* parent) override;
     void updateFileModel(AbstractFile* file) override;

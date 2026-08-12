@@ -14,6 +14,7 @@
 #include "abstract_fileplugin.h"
 #include "colorselector.h"
 #include "gc_settings.h"
+#include "gi_point.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
 #include "openglcheck.h"
@@ -190,6 +191,10 @@ void SettingsDialog::readSettings() {
         = settings.getValue(ui.cbxTheme, App::settings().theme_);
     settings.endGroup();
 
+    // Маркеры уже созданы (конструктор MainWindow), а настройку прочитали
+    // только сейчас -- применяем её к ним.
+    Gi::applyMarkersScaleMode();
+
     settings.beginGroup(u"Color"_s);
     for(int i{}; i < GuiColors::Count; ++i)
         App::settings().guiColor_[i]
@@ -245,13 +250,19 @@ void SettingsDialog::saveSettings() {
         settings.setValue(ui.chbxOpenGl);
     }
     if(settings.value(u"chbxAntialiasing"_s).toBool() != ui.chbxAntialiasing->isChecked()) {
-        App::grView().setRenderHint(QPainter::Antialiasing, ui.chbxAntialiasing->isChecked());
+        const bool aa = ui.chbxAntialiasing->isChecked();
+        App::grView().setRenderHint(QPainter::Antialiasing, aa);
+        // Запас в 2 device-px под сглаживание нужен только при включённом AA.
+        App::grView().setOptimizationFlag(QGraphicsView::DontAdjustForAntialiasing, !aa);
         settings.setValue(ui.chbxAntialiasing);
     }
     App::settings().animSelection_ = settings.setValue(ui.chbxAnimSelection);
     App::settings().guiSmoothScSh_ = settings.setValue(ui.chbxSmoothScSh);
     App::settings().scaleHZMarkers_ = settings.setValue(ui.chbxScaleHZMarkers);
     App::settings().scalePinMarkers_ = settings.setValue(ui.chbxScalePinMarkers);
+    // Маркеры держат экранный размер флагом ItemIgnoresTransformations, а не
+    // масштабированием в paint(), поэтому смену настройки надо применить.
+    Gi::applyMarkersScaleMode();
     App::settings().theme_ = settings.setValue(ui.cbxTheme);
     settings.endGroup();
 

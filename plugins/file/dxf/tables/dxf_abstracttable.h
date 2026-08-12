@@ -12,11 +12,14 @@
 
 #include "dxf_codedata.h"
 #include "section/dxf_sectionparser.h"
+#include "serial.h"
 #include <QObject>
 
 namespace Dxf {
 
-struct AbstractTable {
+// Служебная база: сырые коды разбора и связи с парсером. В проект не уезжает
+// ничего -- у Layer сериализуются только его собственные поля.
+struct[[= Serial::skip]] AbstractTable {
     Q_GADGET
 
 public:

@@ -18,12 +18,20 @@ class MainWindow;
 namespace Gi {
 
 class DataPath final : public Item {
+    // Обводка «прицела» шириной 5 экранных пикселей. Она же -- геометрия
+    // попадания: shape() отдаёт именно её, а не сам контур.
+    //
+    // Строится ЛЕНИВО. Раньше updateSelection() звался из конструктора (обводка
+    // каждого пути на загрузке) и из paint() (обводка каждого видимого пути на
+    // каждом шаге зума), причём правил boundingRect_ без
+    // prepareGeometryChange() -- индекс BSP протухал.
     mutable QPainterPath selectionShape_;
-    mutable double scale_ = std::numeric_limits<double>::max();
-    void updateSelection() const;
+    mutable double strokeScale_ = std::numeric_limits<double>::quiet_NaN();
+    const QPainterPath& selectionShape(double sf) const;
 
     void redraw() override { update(); }
-    void changeColor() override { }
+    void updateColors() override { }
+    void geometryChanged() override;
     friend class ::MainWindow;
 
 public:
@@ -36,11 +44,10 @@ public:
 protected:
     // QGraphicsItem interface
     QPainterPath shape() const override;
-    QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;
     int type() const override;
-    void hoverEnterEvent(QGraphicsSceneHoverEvent* event) override;
     void mouseReleaseEvent(QGraphicsSceneMouseEvent* event) override;
-    void paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* widget) override;
+    void paintGeometry(QPainter* painter, const RenderState& st) override;
+    void paintHighlight(QPainter* painter, const RenderState& st) override;
 };
 
 } // namespace Gi

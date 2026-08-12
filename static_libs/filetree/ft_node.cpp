@@ -68,7 +68,7 @@ int Node::row() const {
 }
 
 void Node::addChild(Node* item, Deleter::Polycy delPolycy) {
-    item->parent_                               = this;
+    item->parent_ = this;
     childs.emplace_back(item).get_deleter().del = delPolycy;
 
     // childs.resize(childs.size() + 1);

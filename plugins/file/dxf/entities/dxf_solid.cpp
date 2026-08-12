@@ -65,33 +65,9 @@ DxfGo Solid::toGo() const {
     if(!poly.isPositive())
         poly.reverse();
 
-    DxfGo go{id, Geo::Polyline{poly}, {std::move(poly)}}; // return {id, path, {path}};
+    DxfGo go{id, Geo::Polyline{poly}, Geo::Polygons{Geo::Polylines{std::move(poly)}}}; // return {id, path, {path}};
     go.type = DxfGo::Type(DxfGo::FlDrawn | DxfGo::FlStamp | DxfGo::Rect);
     return go;
-}
-
-void Solid::write(QDataStream& stream) const {
-    stream << firstCorner;
-    stream << secondCorner;
-    stream << thirdCorner;
-    stream << fourthCorner;
-
-    stream << corners;
-
-    stream << thickness;
-    stream << radius;
-}
-
-void Solid::read(QDataStream& stream) {
-    stream >> firstCorner;
-    stream >> secondCorner;
-    stream >> thirdCorner;
-    stream >> fourthCorner;
-
-    stream >> corners;
-
-    stream >> thickness;
-    stream >> radius;
 }
 
 } // namespace Dxf

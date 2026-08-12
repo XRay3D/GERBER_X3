@@ -41,20 +41,12 @@ protected:
 private:
     void createRaster(const Tool& tool, const double depth, const double angle, const int prPass);
     void createRasterAccLaser(const Tool& tool, const double depth, const double angle, const int prPass);
-    void addAcc(Paths64& src, const /*PType*/ int32_t accDistance);
-
-    Paths64 calcScanLines(const Paths64& src, const Geo::Polyline& frame);
-    Paths64 calcFrames(const Paths64& src, const Geo::Polyline& frame);
-    Geo::Polyline calcZigzag(const Paths64& src);
-
-    Paths64 merge(const Paths64& scanLines, const Paths64& frames);
-
-    Rect rect;
+    void addAcc(Geo::Polylines& src, const double accDistance);
 };
 
-class File final : public GCode::File {
-
+class [[= Serial::name("PocketRaster")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();
     explicit File(GCode::Params&& gcp);
     QIcon icon() const override { return QIcon::fromTheme(u"raster-path"_s); }

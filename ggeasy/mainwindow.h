@@ -303,6 +303,7 @@ signals:
 private slots:
     void fileError(const QString& fileName, const QString& error);
     void fileProgress(const QString& fileName, int max, int value);
+    void fileCanceled(const QString& fileName);
     void addFileToPro(class AbstractFile* file);
     // void setDockWidget(QWidget* dwContent);
 
@@ -333,7 +334,14 @@ private:
     std::map<uint32_t, QAction*> toolpathActions;
     QActionGroup actionGroup;
 
-    QMap<QString, class QProgressDialog*> progressDialogs_;
+    // Одно окно на все загрузки: строка на файл, своя отмена у каждой,
+    // общая внизу. Создаётся при первом файле и дальше только прячется.
+    class LoadProgressDialog* loadProgress_ = nullptr;
+    // Какой плагин разбирает какой файл -- ему и адресуется отмена.
+    QMap<QString, class AbstractFilePlugin*> loadingBy_;
+    LoadProgressDialog* loadProgress();
+    void cancelLoading(const QString& fileName);
+
     QMessageBox reloadQuestion;
 
     void open();

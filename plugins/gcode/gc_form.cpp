@@ -13,6 +13,7 @@
 #include "abstract_file.h"
 #include "app.h"
 #include "ft_model.h"
+#include "geo/boolean.h"
 #include "gi_error.h"
 #include "graphicsview.h"
 #include "project.h"
@@ -470,13 +471,19 @@ const Params& Form::getNewGcpWithGi() {
     // bool skip{true};
 
     int side{};
-    // Замкнутое копится ПОЛИГОНАМИ, а не контурами. Плоский список выражает
-    // вложенность одной ориентацией, и Geo::Polygons{контуры} теряет тело,
-    // лежащее внутри чужой дырки: на реальной плате это срезало 52 тела до 8 и
-    // раздувало площадь на 18%. Собранные полигоны отдаются точному домену
-    // одним вызовом -- конструктор из span сохраняет вложенность и сливает
-    // куски деревом слияния, попутно объединяя пересечения разных элементов.
+    // Выделенное делится по тому, ОТКУДА известна вложенность:
+    //
+    //   * у заливки (DataSolid) регион точный -- дырки каждого полигона
+    //     известны, и такие куски объединяются готовыми полигонами. Плоский
+    //     список контуров здесь терял тело, лежащее внутри чужой дырки: на
+    //     реальной плате это срезало 52 тела до 8 и раздувало площадь на 18%;
+    //
+    //   * у остальных есть только контуры, и вложенность МЕЖДУ элементами
+    //     разбирается even-odd по их взаимному расположению -- всем выделением
+    //     разом. Пообъектно (каждый контур своим телом, потом union) рамка
+    //     проглатывала выделенные вместе с ней отверстия внутри неё.
     std::vector<Geo::Polygon> closedParts;
+    Geo::Polylines closedContours;
     for(auto* gi: App::grView().selectedItems<Gi::Item>()) {
         qDebug() << gi << gi->file();
         // switch(gi->type()) {
@@ -485,11 +492,14 @@ const Params& Form::getNewGcpWithGi() {
         // break;
         // case Gi::Type::DataPath: {
         // dbgPaths(gi->curves(), __FUNCTION__);
+        const bool exact = gi->type() == Gi::Type::DataSolid;
         // Разомкнутое -- отдельно: площади у линии нет, в регион ей не попасть.
         for(auto&& curve: gi->curves())
             if(!curve.isClosed())
                 gcp.openCurves.emplace_back(std::move(curve));
-        closedParts.append_range(gi->region().all());
+            else if(!exact)
+                closedContours.emplace_back(std::move(curve));
+        if(exact) closedParts.append_range(gi->region().all());
         gi->side() == Side::Bottom ? --side : ++side;
 
         // } break;
@@ -520,8 +530,9 @@ const Params& Form::getNewGcpWithGi() {
         // }
         addUsedGi(gi);
     }
+    gcp.closedCurves = Geo::evenOdd(closedContours);
     if(!closedParts.empty())
-        gcp.closedCurves = Geo::Polygons{std::span<const Geo::Polygon>{closedParts}};
+        gcp.closedCurves |= Geo::Polygons{std::span<const Geo::Polygon>{closedParts}};
 
     qCritical() << "side" << side;
     gcp.params[Params::FileSide].setValue(side < 0 ? Side::Bottom : Side::Top);
@@ -679,14 +690,15 @@ void Form::errorHandler(int) {
     errTable->horizontalHeader()->setSectionResizeMode(1, QHeaderView::ResizeToContents);
     errTable->verticalHeader()->setSectionResizeMode(QHeaderView::ResizeToContents);
 
-    App::grView().startUpdateTimer(32);
+    // Таймер анимации больше не общий: Gi::Error регистрируется в реестре вида
+    // сам, когда его выделяют. Прежние startUpdateTimer/stopUpdateTimer здесь
+    // ещё и убивали таймер, заведённый конструктором вида, -- насовсем.
 }
 
 void Form::errContinue() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::grView().stopUpdateTimer();
 
     delete errTable->model();
 
@@ -701,7 +713,6 @@ void Form::errBreak() {
     if(creator_ == nullptr)
         return;
     qDebug(__FUNCTION__);
-    App::grView().stopUpdateTimer();
 
     delete errTable->model();
 

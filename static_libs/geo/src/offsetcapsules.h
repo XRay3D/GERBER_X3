@@ -67,8 +67,8 @@ inline std::optional<std::pair<QPointF, double>> fullCircleOf(const Polyline& po
 // прямые; скругления концов дают диски вершин, см. capsulesFor(poly, d).
 inline Polylines capsulesFor(const Vertex& from, QPointF to, double d) {
     Polylines out;
-    const double dx    = to.x() - from.x();
-    const double dy    = to.y() - from.y();
+    const double dx = to.x() - from.x();
+    const double dy = to.y() - from.y();
     const double chord = std::hypot(dx, dy);
 
     if(chord < 1e-12) return out; // вырожденное ребро: хватит дисков вершин
@@ -88,16 +88,16 @@ inline Polylines capsulesFor(const Vertex& from, QPointF to, double d) {
     }
 
     // Дуговое ребро -- кольцевой сектор между R0 - d и R0 + d.
-    const double theta   = 4.0 * std::atan(from.bulge);
+    const double theta = 4.0 * std::atan(from.bulge);
     const double sagitta = from.bulge * chord / 2.0;
-    const double radius  = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
+    const double radius = chord / (2.0 * std::abs(std::sin(theta / 2.0)));
     const QPointF n(dy / chord, -dx / chord);
     const QPointF mid((QPointF(from) + to) / 2.0);
     const QPointF center = mid + n * (sagitta - std::copysign(radius, from.bulge));
 
     const double a0 = std::atan2(from.y() - center.y(), from.x() - center.x());
     const double a1 = a0 + theta;
-    auto at         = [&](double a, double r) {
+    auto at = [&](double a, double r) {
         return QPointF(center.x() + r * std::cos(a), center.y() + r * std::sin(a));
     };
 
@@ -135,9 +135,9 @@ inline Polylines capsulesFor(const Vertex& from, QPointF to, double d) {
     Polyline sector;
     sector.closed = true;
     sector.emplace_back(at(a0, radius + d), from.bulge);  // внешняя дуга (тот же размах)
-    sector.emplace_back(at(a1, radius + d), 0.0);        // торец у to
+    sector.emplace_back(at(a1, radius + d), 0.0);         // торец у to
     sector.emplace_back(at(a1, radius - d), -from.bulge); // внутренняя дуга (обратно)
-    sector.emplace_back(at(a0, radius - d), 0.0);                    // торец у from
+    sector.emplace_back(at(a0, radius - d), 0.0);         // торец у from
     out.push_back(ccw(std::move(sector)));
     return out;
 }

@@ -39,26 +39,14 @@ void Circle::parse(CodeData& code) {
 Entity::Type Circle::type() const { return Type::CIRCLE; }
 
 DxfGo Circle::toGo() const {
-    Geo::Polyline path = CircleCurve(radius * 2 + thickness, centerPoint);
+    Geo::Polyline path = Geo::circle(radius * 2 + thickness, centerPoint);
     assert(thickness == 0);
-    DxfGo go{id, Geo::Polyline{path}, {std::move(path)}};
+    DxfGo go{id, Geo::Polyline{path}, Geo::Polygons{Geo::Polylines{std::move(path)}}};
     go.raw = radius * 2;
     go.name = layerName; // u"T%1|Ø%2"_s.arg(hole.state.toolId).arg(tools_.at(hole.state.toolId)).toUtf8(); // name;
     go.type = DxfGo::Type(DxfGo::FlStamp /*| DxfGo::FlDrawn*/ | DxfGo::Circle);
     go.GraphicObject::pos = centerPoint;
     return go;
-}
-
-void Circle::write(QDataStream& stream) const {
-    stream << centerPoint;
-    stream << thickness;
-    stream << radius;
-}
-
-void Circle::read(QDataStream& stream) {
-    stream >> centerPoint;
-    stream >> thickness;
-    stream >> radius;
 }
 
 } // namespace Dxf

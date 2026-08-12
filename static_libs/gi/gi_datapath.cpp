@@ -20,66 +20,51 @@
 
 namespace Gi {
 
-static QPainterPathStroker str{
-    {Qt::transparent, 1., Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin}
-};
+// Ширина «прицела» -- 5 экранных пикселей. zoomOut() ограничен
+// getScale() >= 1.0 (graphicsview.cpp), значит sf <= 1 мм/px и обводка ни при
+// каком масштабе не уходит дальше 2.5 мм от геометрии. Берём 3 мм с запасом на
+// скруглённые стыки -- и получаем boundingRect, НЕ зависящий от масштаба.
+//
+// Плата за это -- раздутый габарит: трасса 0.2x5 мм получает 6.2x11 мм, куллинг
+// грубее. Альтернатива (пересчёт запаса на каждом шаге зума с
+// prepareGeometryChange) всё равно O(N) на шаг, и каждый вызов вынимает элемент
+// из BSP и вставляет обратно -- строго дороже.
+inline constexpr double kSelWidthPx = 5.0;
+inline constexpr double kSelMarginMm = 3.0;
 
-void DataPath::updateSelection() const {
-    const double scale = scaleFactor();
-    if(qFuzzyCompare(scale_, scale)) return;
-    constexpr auto width{5}; // screen pixels
-    scale_ = scale;
-#if 1
-    str.setWidth(width * scale);
-    selectionShape_ = str.createStroke(shape_);
-    boundingRect_   = selectionShape_.boundingRect();
-#else
-    auto tmpPpath = Inflate(toPaths(curves_), width * scale * uScale, cl::JoinType::Miter, cl::EndType::Square);
-    selectionShape_.clear();
-    for(Path& path: tmpPpath) selectionShape_.addPolygon(~path);
-    boundingRect_ = selectionShape_.boundingRect();
-    assert(tmpPpath.size());
-    assert(tmpPpath.front().size());
-#endif
-    // qWarning() << shape_;
-    // qWarning() << selectionShape_;
-    // FIXME dont create empty assert(shape_.elementCount());
-    // FIXME dont create empty assert(selectionShape_.elementCount() > 1);
+const QPainterPath& DataPath::selectionShape(double sf) const {
+    if(!qFuzzyCompare(strokeScale_, sf)) {
+        strokeScale_ = sf;
+        // Штрихователь локальный: прежний был общим static'ом, который каждый
+        // элемент мутировал под себя -- гонка, если DataPath создадут в
+        // рабочем потоке.
+        QPainterPathStroker str{
+            {Qt::transparent, kSelWidthPx * sf, Qt::SolidLine, Qt::SquareCap, Qt::BevelJoin}
+        };
+        selectionShape_ = str.createStroke(shape_);
+    }
+    return selectionShape_;
+}
+
+void DataPath::geometryChanged() {
+    prepareGeometryChange();
+    boundingRect_ = shape_.boundingRect()
+                        .adjusted(-kSelMarginMm, -kSelMarginMm, kSelMarginMm, kSelMarginMm);
+    strokeScale_ = std::numeric_limits<double>::quiet_NaN();
 }
 
 DataPath::DataPath(Geo::Polylines curves, AbstractFile* file)
     : Item{file} {
     curves_ = std::move(curves);
-    shape_  = Geo::toPath(curves_);
-    updateSelection();
+    shape_ = Geo::toPath(curves_);
+    geometryChanged();
     setAcceptHoverEvents(true);
     setFlag(ItemIsSelectable, true);
-    setSelected(false);
 }
 
-QPainterPath DataPath::shape() const { return selectionShape_; }
-
-QVariant DataPath::itemChange(QGraphicsItem::GraphicsItemChange change, const QVariant& value) {
-    if(change == ItemVisibleChange && value.toBool()) {
-        updateSelection();
-    } else if(change == ItemSelectedChange && App::settings().animSelection()) {
-        if(value.toBool()) {
-            updateSelection();
-            // FIXME          timer.connect(&timer, &QTimer::timeout, this, &DataPath::redraw);
-        } else {
-            // FIXME         timer.disconnect(&timer, &QTimer::timeout, this, &DataPath::redraw);
-            update();
-        }
-    }
-    return value;
-}
+QPainterPath DataPath::shape() const { return selectionShape(scaleFactor()); }
 
 int DataPath::type() const { return Type::DataPath; }
-
-void DataPath::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
-    QGraphicsItem::hoverEnterEvent(event);
-    updateSelection();
-}
 
 void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     Item::mouseReleaseEvent(event);
@@ -126,36 +111,43 @@ void DataPath::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
         selector(this);
 }
 
-void DataPath::paint(QPainter* painter, const QStyleOptionGraphicsItem* option, QWidget* /*widget*/) {
-    if(pnColorPrt_)
-        pen_.setColor(*pnColorPrt_);
-    if(colorPtr_)
-        color_ = *colorPtr_;
-    // pen_.setWidth(penWidth());
-    updateSelection();
+// Узор «бегущих муравьёв». Файловая константа, а не литерал в paint():
+// QList неявно разделяемый, копия в перо не аллоцирует -- прежний вариант
+// строил новый QList<qreal> на каждый кадр каждого выделенного элемента.
+static const QList<qreal> dashPattern{std::numbers::pi * 2, std::numbers::pi * 2 - 1};
+// Полупрозрачная подсветка под курсором.
+static const QBrush hoverBrush{
+    QColor{255, 255, 255, 128}
+};
 
-    QColor color{pen_.color()};
-    QPen pen{pen_};
+void DataPath::paintHighlight(QPainter* painter, const RenderState& st) {
+    if(!st.hovered) return;
+    painter->setPen(Qt::NoPen);
+    painter->setBrush(hoverBrush);
+    painter->drawPath(selectionShape(st.sf));
+}
 
-    if(option->state & (QStyle::State_MouseOver | QStyle::State_Selected)) {
-        if(option->state & QStyle::State_Selected) {
-            color.setAlpha(255);
-            pen.setColor(color);
-            pen.setDashOffset(App::dashOffset());
-        }
-        pen.setWidthF(2 * scaleFactor());
-        pen.setStyle(Qt::CustomDashLine);
-        pen.setCapStyle(Qt::FlatCap);
-        pen.setDashPattern({std::numbers::pi * 2, std::numbers::pi * 2 - 1});
-    }
-    if(option->state & QStyle::State_MouseOver) {
-        painter->setPen(Qt::NoPen);
-        painter->setBrush(QColor{255, 255, 255, 128});
-        painter->drawPath(selectionShape_);
-    }
-
-    painter->setPen(pen);
+void DataPath::paintGeometry(QPainter* painter, const RenderState& st) {
     painter->setBrush(Qt::NoBrush);
+
+    if(st.plain()) [[likely]] { // быстрый путь: ни одного временного объекта
+        painter->setPen(pen_);
+        painter->drawPath(shape_);
+        return;
+    }
+
+    QPen pen{pen_};
+    pen.setWidthF(2 * st.sf);
+    pen.setStyle(Qt::CustomDashLine);
+    pen.setCapStyle(Qt::FlatCap);
+    pen.setDashPattern(dashPattern);
+    if(st.selected) {
+        QColor color{pen_.color()};
+        color.setAlpha(255);
+        pen.setColor(color);
+        pen.setDashOffset(st.dashOffset);
+    }
+    painter->setPen(pen);
     painter->drawPath(shape_);
 }
 

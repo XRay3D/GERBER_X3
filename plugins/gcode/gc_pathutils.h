@@ -47,6 +47,9 @@ NestingForest nestingForest(const Geo::Polylines& contours);
 
 // Склеивает контуры, у которых концы совпадают или отстоят не дальше maxDist.
 // Открытые обрывки, пришедшие из файла, обычно и есть один разрезанный контур.
+//
+// Сама склейка живёт в Geo (Geo::stitch): она нужна и там, где регион
+// собирается по even-odd (Geo::normalize), а не только маршруту инструмента.
 void mergePolylines(Geo::Polylines& polylines, double maxDist);
 
 // Жадный обход «от ближайшего к ближайшему»: каждый следующий путь тот, чьё

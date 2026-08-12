@@ -9,15 +9,17 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "thermal.h"
+#include "gc_pathutils.h"
 #include "gi_point.h"
 #include "project.h"
+
+#include "geo/boolean.h"
 
 namespace Thermal {
 
 Creator::Creator() { }
 
 void Creator::create() {
-    qDebug(__FUNCTION__);
     createThermal(
         App::project().file(gcp.params[FileId].toInt()),
         gcp.tools.front(),
@@ -26,80 +28,57 @@ void Creator::create() {
 
 void Creator::createThermal(AbstractFile* file, const Tool& tool, const double depth) {
     toolDiameter = tool.getDiameter(depth);
-    const double dOffset = toolDiameter * uScale * 0.5;
 
-    dbgPaths(closedSrcPaths, u"closedSrcPaths"_s);
-
-    {     // create tool path
-        { // execute offset
-            // ClipperOffset offset;
-            // offset.AddPaths(closedSrcPaths, cl::JoinType::Round, cl::EndType::Polygon);
-            // returnPs = offset.Execute(dOffset);
-            returnPs = InflateRoundPolygon(closedSrcPaths, dOffset * 2);
-        }
-        dbgPaths(returnPs, u"returnPs"_s);
+    { // create tool path: изоляционное кольцо -- офсет пада на радиус фрезы
+      // (delta у Geo::Inflate -- ПОЛНАЯ ширина, контур уезжает на половину).
+        returnPs = Geo::Inflate(closedSrc, toolDiameter).contours();
 
         // fix direction
         if(gcp.side() == GCode::Outer && !gcp.convent())
-            ReversePaths(returnPs);
+            r::for_each(returnPs, &Geo::Polyline::reverse);
         else if(gcp.side() == GCode::Inner && gcp.convent())
-            ReversePaths(returnPs);
+            r::for_each(returnPs, &Geo::Polyline::reverse);
 
-        for(Geo::Polyline& path: returnPs)
-            path.push_back(path.front());
-
-        if(returnPs.empty()) {
-            emit fileReady(nullptr);
-            return;
-        }
+        if(returnPs.empty()) return;
     }
 
-    Paths64 framePaths;
-    { // create frame
+    Geo::Polygons frame;
+    { // create frame: то, где резать НЕЛЬЗЯ, -- позитивы файла (а без
+      // IgnoreCopper -- вся медь), раздутые чуть меньше чем на радиус, чтобы
+      // кольцо у соседней меди не задевало её, плюс спицы-мосты из превью.
+      // Офсет ОДИН на объединение: сумма Минковского дистрибутивна, прежний
+      // пообъектный офсет со сборкой давал то же самое, только за N вызовов.
+      //
+      // Медь собирается ОДНИМ конструктором (параллельное дерево слияний в
+      // joinAll), а не цепочкой |=: пообъектное объединение -- квадратичное
+      // число точных свипов, на плотном гербере это зависание.
         const auto graphicObjects(file->graphicObjects());
-        cl::Clipper64 clipper;
-        {
-            cl::ClipperOffset offset;
-            for(auto go: graphicObjects | v::filter([](auto* go) { return go->positive(); }))
-                offset.AddPaths(toPaths(go->fill) /*polyLineW()*/, cl::JoinType::Round, cl::EndType::Polygon);
-            offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
-            clipper.AddSubject(framePaths);
-        }
-        if(!gcp.params[IgnoreCopper].toInt()) {
-            cl::ClipperOffset offset;
-            for(auto go: graphicObjects) {
-                // if (go->closed()) {
-                // if (go->positive())
-                offset.AddPaths(toPaths(go->fill) /*polygonWholes()*/, cl::JoinType::Round, cl::EndType::Polygon);
-                // else {
-                // Paths64 paths(go->polygonWholes());
-                // ReversePaths(paths);
-                // offset.AddPaths(paths, cl::JoinType::Miter, cl::EndType::Polygon);
-                // }
-                // }
-            }
-            offset.Execute(dOffset - 0.005 * uScale, framePaths); // FIXME
-            clipper.AddClip(framePaths);
-        }
-        for(const Paths64& paths: supportPss)
-            clipper.AddClip(paths);
-        clipper.Execute(cl::ClipType::Union, cl::FillRule::EvenOdd, framePaths);
+        const bool allCopper = !gcp.params[IgnoreCopper].toInt();
+        std::vector<Geo::Polygon> copper;
+        for(auto go: graphicObjects | v::filter([allCopper](auto* go) { return allCopper || go->positive(); }))
+            copper.append_range(go->fill.all());
+        frame = Geo::Inflate(Geo::Polygons{std::span<const Geo::Polygon>{copper}}, toolDiameter - 0.01);
+
+        // Спицы уже в своём размере -- их не раздувать; и тоже одним слиянием.
+        std::vector<Geo::Polygon> spokes;
+        for(const Geo::Polylines& bridges: supportPss)
+            spokes.append_range(Geo::Polygons{bridges}.all());
+        if(!spokes.empty())
+            frame |= Geo::Polygons{std::span<const Geo::Polygon>{spokes}};
     }
 
-    { // Execute
-        cl::Clipper64 clipper;
-        clipper.AddOpenSubject(returnPs);
-        clipper.AddClip(framePaths);
-        clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, framePaths, returnPs);
-        sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()));
+    { // Execute: кольца режутся рамкой КАК ПУТИ (Clipper2::AddOpenSubject) --
+      // разрезанное кольцо возвращается открытыми дугами, целое остаётся
+      // замкнутым как есть.
+        returnPs = Geo::clipOpen(Geo::ClipType_::Difference, returnPs, frame);
+        GCode::sortByProximity(returnPs, App::home().pos() + App::zero().pos());
     }
 
     if(returnPs.size())
-        returnPss.push_back(sortB(returnPs, ~(App::home().pos() + App::zero().pos())));
+        returnPss.push_back(std::move(returnPs));
 
     if(returnPss.size()) {
-        sortB(returnPss, ~(App::home().pos() + App::zero().pos()));
-        gcp.toolPathss = toCurvess(returnPss);
+        gcp.toolPathss = std::move(returnPss);
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }

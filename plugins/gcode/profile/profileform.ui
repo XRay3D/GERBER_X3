@@ -7,7 +7,7 @@
     <x>0</x>
     <y>0</y>
     <width>250</width>
-    <height>502</height>
+    <height>490</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -19,7 +19,7 @@
   <property name="windowTitle">
    <string>Form</string>
   </property>
-  <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,1,0">
+  <layout class="QGridLayout" name="gridLayout" rowstretch="0,0,0,0,0,1,0,0,0">
    <property name="leftMargin">
     <number>0</number>
    </property>
@@ -32,125 +32,6 @@
    <property name="bottomMargin">
     <number>0</number>
    </property>
-   <item row="0" column="0" colspan="2">
-    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
-   </item>
-   <item row="1" column="0" colspan="2">
-    <widget class="QFrame" name="frame">
-     <property name="frameShape">
-      <enum>QFrame::Shape::HLine</enum>
-     </property>
-     <property name="frameShadow">
-      <enum>QFrame::Shadow::Plain</enum>
-     </property>
-    </widget>
-   </item>
-   <item row="2" column="1">
-    <widget class="QGroupBox" name="groupBox_3">
-     <property name="title">
-      <string>Bridges</string>
-     </property>
-     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0,0,0,0">
-      <property name="leftMargin">
-       <number>6</number>
-      </property>
-      <property name="topMargin">
-       <number>6</number>
-      </property>
-      <property name="rightMargin">
-       <number>6</number>
-      </property>
-      <property name="bottomMargin">
-       <number>6</number>
-      </property>
-      <item>
-       <widget class="QComboBox" name="cbxBridgeAlignType"/>
-      </item>
-      <item>
-       <widget class="QLabel" name="label_4">
-        <property name="text">
-         <string>Lenght:</string>
-        </property>
-        <property name="alignment">
-         <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="DoubleSpinBox" name="dsbxBridgeLenght">
-        <property name="suffix">
-         <string> mm</string>
-        </property>
-        <property name="decimals">
-         <number>2</number>
-        </property>
-        <property name="minimum">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>10.000000000000000</double>
-        </property>
-        <property name="singleStep">
-         <double>0.100000000000000</double>
-        </property>
-        <property name="value">
-         <double>1.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QLabel" name="lblBridgeVal">
-        <property name="text">
-         <string>Value:</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="DoubleSpinBox" name="dsbxBridgeValue">
-        <property name="minimum">
-         <double>1.000000000000000</double>
-        </property>
-        <property name="maximum">
-         <double>10000.000000000000000</double>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbAddBridge">
-        <property name="text">
-         <string>Add Bridge</string>
-        </property>
-       </widget>
-      </item>
-      <item>
-       <widget class="QPushButton" name="pbClearBridges">
-        <property name="text">
-         <string>Clear</string>
-        </property>
-       </widget>
-      </item>
-     </layout>
-    </widget>
-   </item>
-   <item row="5" column="0" colspan="2">
-    <widget class="QLabel" name="lblPixmap">
-     <property name="minimumSize">
-      <size>
-       <width>75</width>
-       <height>75</height>
-      </size>
-     </property>
-     <property name="text">
-      <string/>
-     </property>
-     <property name="pixmap">
-      <pixmap>:/toolpath/outside_climb.png</pixmap>
-     </property>
-     <property name="alignment">
-      <set>Qt::AlignmentFlag::AlignCenter</set>
-     </property>
-    </widget>
-   </item>
    <item row="2" column="0">
     <layout class="QVBoxLayout" name="verticalLayout_2">
      <item>
@@ -238,7 +119,7 @@
      </item>
     </layout>
    </item>
-   <item row="3" column="0">
+   <item row="5" column="0">
     <widget class="QLabel" name="label">
      <property name="text">
       <string>Allowance:</string>
@@ -248,7 +129,184 @@
      </property>
     </widget>
    </item>
-   <item row="3" column="1">
+   <item row="3" column="0">
+    <widget class="QCheckBox" name="cbxTrimming">
+     <property name="enabled">
+      <bool>true</bool>
+     </property>
+     <property name="text">
+      <string>Trimming??? Corner Trimming</string>
+     </property>
+    </widget>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <widget class="QFrame" name="frame">
+     <property name="frameShape">
+      <enum>QFrame::Shape::HLine</enum>
+     </property>
+     <property name="frameShadow">
+      <enum>QFrame::Shadow::Plain</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="ToolSelectorForm" name="toolHolder" native="true"/>
+   </item>
+   <item row="8" column="0" colspan="2">
+    <widget class="QLabel" name="lblPixmap">
+     <property name="minimumSize">
+      <size>
+       <width>75</width>
+       <height>75</height>
+      </size>
+     </property>
+     <property name="text">
+      <string/>
+     </property>
+     <property name="pixmap">
+      <pixmap>:/toolpath/outside_climb.png</pixmap>
+     </property>
+     <property name="alignment">
+      <set>Qt::AlignmentFlag::AlignCenter</set>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <widget class="QCheckBox" name="cbxSpiral">
+     <property name="toolTip">
+      <string>Ramp down along the contour. When off, the tool plunges straight down at each depth step.</string>
+     </property>
+     <property name="text">
+      <string>Spiral ramp</string>
+     </property>
+     <property name="checked">
+      <bool>true</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="1" rowspan="3">
+    <widget class="QGroupBox" name="groupBox_3">
+     <property name="title">
+      <string>Bridges</string>
+     </property>
+     <layout class="QVBoxLayout" name="verticalLayout" stretch="0,1,0,0,0,0,0,0,0">
+      <property name="leftMargin">
+       <number>6</number>
+      </property>
+      <property name="topMargin">
+       <number>6</number>
+      </property>
+      <property name="rightMargin">
+       <number>6</number>
+      </property>
+      <property name="bottomMargin">
+       <number>6</number>
+      </property>
+      <item>
+       <widget class="QComboBox" name="cbxBridgeAlignType"/>
+      </item>
+      <item>
+       <widget class="QLabel" name="label_4">
+        <property name="text">
+         <string>Lenght:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="DoubleSpinBox" name="dsbxBridgeLenght">
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="minimum">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>10.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>1.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblBridgeHeight">
+        <property name="text">
+         <string>Height:</string>
+        </property>
+        <property name="alignment">
+         <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignLeading|Qt::AlignmentFlag::AlignLeft</set>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="DoubleSpinBox" name="dsbxBridgeHeight">
+        <property name="toolTip">
+         <string>Tab height above the cut bottom. Over each bridge the cutter ramps up and back down without stopping: short bridges leave a triangular tab, long ones a trapezoid.</string>
+        </property>
+        <property name="suffix">
+         <string> mm</string>
+        </property>
+        <property name="decimals">
+         <number>2</number>
+        </property>
+        <property name="minimum">
+         <double>0.010000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>100.000000000000000</double>
+        </property>
+        <property name="singleStep">
+         <double>0.100000000000000</double>
+        </property>
+        <property name="value">
+         <double>0.500000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QLabel" name="lblBridgeVal">
+        <property name="text">
+         <string>Value:</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="DoubleSpinBox" name="dsbxBridgeValue">
+        <property name="minimum">
+         <double>1.000000000000000</double>
+        </property>
+        <property name="maximum">
+         <double>10000.000000000000000</double>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbAddBridge">
+        <property name="text">
+         <string>Add Bridge</string>
+        </property>
+       </widget>
+      </item>
+      <item>
+       <widget class="QPushButton" name="pbClearBridges">
+        <property name="text">
+         <string>Clear</string>
+        </property>
+       </widget>
+      </item>
+     </layout>
+    </widget>
+   </item>
+   <item row="5" column="1">
     <widget class="DoubleSpinBox" name="dsbxAllowance">
      <property name="toolTip">
       <string>Stock left by the roughing pass for the finishing pass. 0 disables the finishing pass.</string>
@@ -261,29 +319,6 @@
      </property>
      <property name="singleStep">
       <double>0.010000000000000</double>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="0">
-    <widget class="QCheckBox" name="cbxTrimming">
-     <property name="enabled">
-      <bool>true</bool>
-     </property>
-     <property name="text">
-      <string>Trimming??? Corner Trimming</string>
-     </property>
-    </widget>
-   </item>
-   <item row="6" column="1">
-    <widget class="QCheckBox" name="cbxSpiral">
-     <property name="toolTip">
-      <string>Ramp down along the contour. When off, the tool plunges straight down at each depth step.</string>
-     </property>
-     <property name="text">
-      <string>Spiral ramp</string>
-     </property>
-     <property name="checked">
-      <bool>true</bool>
      </property>
     </widget>
    </item>

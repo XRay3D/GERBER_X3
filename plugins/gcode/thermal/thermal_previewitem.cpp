@@ -10,6 +10,7 @@
  *******************************************************************************/
 #include "thermal_previewitem.h"
 #include "app.h"
+#include "geo/boolean.h"
 #include "graphicsview.h"
 #include "thermal_node.h"
 #include "tool_pch.h"
@@ -188,69 +189,57 @@ QVariant AbstractThermPrGi::itemChange(QGraphicsItem::GraphicsItemChange change,
     return QGraphicsItem::itemChange(change, value);
 }
 
-PreviewItem::PreviewItem(const Curves& paths, const QPointF pos, Tool& tool)
+PreviewItem::PreviewItem(const Geo::Polygons& fill, const QPointF pos, Tool& tool)
     : AbstractThermPrGi{tool}
-    , paths_{paths}
+    , fill_{fill}
     , pos_{pos} {
-    sourcePath = toPPath(paths_);
+    sourcePath = fill_.toPath();
 }
 
-Point64 PreviewItem::pos() const { return ~pos_; }
+QPointF PreviewItem::pos() const { return pos_; }
 
-Paths64 PreviewItem::paths() const { return toPaths(paths_); }
+const Geo::Polygons& PreviewItem::fill() const { return fill_; }
 
 void PreviewItem::redraw() {
     if(double d = tool.getDiameter(tool.depth()); cashedPath.empty() || !qFuzzyCompare(diameter, d)) {
         diameter = d;
-        // ClipperOffset offset;
-        // offset.AddPaths(paths_, cl::JoinType::Round, cl::EndType::Polygon);
-        // cashedPath = offset.Execute(diameter * uScale * 0.5); // toolpath
-        cashedPath = InflateRoundPolygon(toPaths(paths_), diameter * uScale /** 0.5*/);
-        // offset.Clear();
-        // offset.AddPaths(cashedPath, cl::JoinType::Miter, cl::EndType::Round);
-        // cashedFrame = offset.Execute(diameter * uScale * 0.1); // frame
-        cashedFrame = Inflate64(cashedPath, diameter * uScale * 0.1, cl::JoinType::Miter, cl::EndType::Round);
-        for(Geo::Polyline& path: cashedPath)
-            path.push_back(path.front());
+        // Кольцо -- офсет пада на радиус (delta у Inflate -- полная ширина);
+        // рамка -- полоса вдоль кольца, прежний Inflate64(Miter, Round).
+        const Geo::Polygons ring = Geo::Inflate(fill_, diameter);
+        cashedPath = ring.contours();
+        cashedFrame = ring.boundaryBand(diameter * 0.1);
     }
     if(qFuzzyIsNull(node_->tickness()) && node_->count()) {
-        bridge_.clear();
+        bridge_ = {};
     } else {
-        cl::Clipper64 clipper;
-        clipper.AddSubject(cashedFrame);
+        // Спица -- прямоугольник от центра пада наружу (прежний Inflate64 с
+        // EndType::Butt), собранный руками. Спицы у центра НАКЛАДЫВАЮТСЯ, так
+        // что складываются объединением (прежний FillRule::Positive), а не
+        // even-odd -- тот выгрыз бы их общую середину.
         const auto rect{sourcePath.boundingRect()};
-        const Point64 center{~rect.center()};
-        const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter)) * uScale;
-        const auto fp(sourcePath.toFillPolygons()); // FIXME not used
-        for(int i{}; i < node_->count(); ++i) {     // Gaps
-            // ClipperOffset offset;
-            double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
-            // offset.AddPath({center,
-            // Point64(
-            // static_cast</*PType*/ int32_t>((cos(angle) * radius) + center.x),
-            // static_cast</*PType*/ int32_t>((sin(angle) * radius) + center.y))},
-            // cl::JoinType::Square, cl::EndType::Butt);
-            // Paths64 paths = offset.Execute((node_->tickness() + diameter) * uScale * 0.5);
-            Paths64 paths = Inflate64({
-                                          {center, Point64{cos(angle) * radius + center.x, sin(angle) * radius + center.y}}
-            },
-                (node_->tickness() + diameter) * uScale * 0.5, cl::JoinType::Square, cl::EndType::Butt);
-            clipper.AddClip({paths.front()});
+        const QPointF center{rect.center()};
+        const double radius = sqrt((rect.width() + diameter) * (rect.height() + diameter));
+        const double half = (node_->tickness() + diameter) * 0.5;
+        Geo::Polygons spokes;
+        for(int i{}; i < node_->count(); ++i) { // Gaps
+            const double angle = i * 2 * pi / node_->count() + qDegreesToRadians(node_->angle());
+            const QPointF dir{cos(angle), sin(angle)};
+            const QPointF normal{-dir.y() * half, dir.x() * half};
+            const QPointF end = center + dir * radius;
+            Geo::Polyline spoke{
+                Geo::Vertex{center - normal},
+                Geo::Vertex{end - normal},
+                Geo::Vertex{end + normal},
+                Geo::Vertex{center + normal},
+            };
+            spoke.closed = true;
+            spokes |= Geo::Polygons{Geo::Polylines{std::move(spoke)}};
         }
-        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::Positive, bridge_);
+        bridge_ = cashedFrame & spokes;
     }
-    { // cut
-        cl::Clipper64 clipper;
-        clipper.AddOpenSubject(cashedPath);
-        clipper.AddClip(bridge_);
-        clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, previewPaths, previewPaths);
-    }
-    painterPath = QPainterPath();
-    for(QPolygonF polygon: ~previewPaths) {
-        painterPath.moveTo(polygon.first());
-        for(QPointF& pt: polygon)
-            painterPath.lineTo(pt);
-    }
+    // cut: кольцо режется спицами КАК ПУТЬ -- прежний AddOpenSubject.
+    previewPaths = Geo::clipOpen(Geo::ClipType_::Difference, cashedPath, bridge_);
+    painterPath = previewPaths.toPath();
     if(isEmpty == -1)
         isEmpty = previewPaths.empty();
     if(static_cast<bool>(isEmpty) != previewPaths.empty()) {
@@ -263,8 +252,6 @@ void PreviewItem::redraw() {
 QRectF PreviewItem::boundingRect() const {
     return painterPath.boundingRect().united(sourcePath.boundingRect());
 }
-
-Curves PreviewItem::curves() const { return paths_; }
 
 } // namespace Thermal
 
