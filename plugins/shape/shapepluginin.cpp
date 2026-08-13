@@ -27,7 +27,7 @@ void Plugin::finalizeShape() {
     emit actionUncheck();
 }
 
-Shapes::Plugin::Plugin() { App app; }
+Shapes::Plugin::Plugin() = default;
 
 void Plugin::createMainMenu(QMenu& menu, FileTree::View* tv) {
     menu.addAction(QIcon::fromTheme(u"edit-delete"_s), QObject::tr("&Delete All Shapes"), [tv] {

@@ -35,6 +35,17 @@ function(target_setup_translations TARGET)
                   QM_FILES)
 endfunction()
 
+# Helper: линковка плагина с общим ядром. -z,defs запрещает неразрешённые
+# символы в .so: без него нехватка символа (например, объект статлибы, не
+# попавший в libggcore) всплыла бы только на dlopen при старте GGEasy.
+# На MinGW неразрешённые символы в DLL — ошибка и так.
+function(target_link_ggcore TARGET)
+  target_link_libraries(${TARGET} PRIVATE ggcore)
+  if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+    target_link_options(${TARGET} PRIVATE LINKER:-z,defs)
+  endif()
+endfunction()
+
 # Shared precompiled header (Qt + common STL) compiled once for the whole
 # project. Every other target reuses this binary via REUSE_FROM instead of
 # reparsing <QtCore>/<QtGui>/<QtWidgets> for itself.

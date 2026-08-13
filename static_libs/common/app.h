@@ -13,7 +13,6 @@
 #include <QCoreApplication>
 #include <QDebug>
 #include <QObject>
-#include <QSharedMemory>
 
 #include "settings.h"
 #include "tool.h"
@@ -84,7 +83,11 @@ public:                                                                         
 
 class App {
     Q_DISABLE_COPY_MOVE(App)
-    inline static App* app{};
+    // Определение -- в app.cpp: единственная копия живёт в libggcore, и все
+    // модули (exe и плагины) биндятся на неё через динамический линкер.
+    // Раньше common влинковывался в каждый .so статически, у каждого была
+    // своя копия inline static, и указатель разносился через QSharedMemory.
+    static App* app;
 
     // clang-format off
     SINGLETON(GCode::PropertiesForm, setGCodePropertiesForm, gcPropertiesForm)
@@ -126,35 +129,13 @@ class App {
     // scene()->views().front()->transform() на каждый вызов.
     double viewScaleFactor_{1.0};
 
-    QSharedMemory sharedMemory{sharedKey()};
-
     const bool isDebug_{QCoreApplication::applicationDirPath().contains(u"GERBER_X3/bin"_s)};
 
     bool drawPdf_{};
 
 public:
-    // Имя сегмента -- СВОЁ У КАЖДОГО ПРОЦЕССА. Сегмент нужен ровно затем, чтобы
-    // указатель на App видели плагины: common -- статическая библиотека, и у
-    // каждого .so своя копия inline static app. Делить его между РАЗНЫМИ копиями
-    // программы не нужно и нельзя, а QSharedMemory общесистемна: со старым
-    // именем "AppSettings" вторая запущенная копия не создавала сегмент, а
-    // прицеплялась к чужому и забирала указатель на App первой -- адрес чужого
-    // адресного пространства. Падало на первом же App::...(), то есть сразу на
-    // старте, ещё до открытия файлов.
-    //
-    // Заодно перестаёт мешать сегмент, оставшийся от аварийно завершившейся
-    // копии: у новой копии другой pid, а значит и другое имя.
-    static QString sharedKey() {
-        return u"AppSettings-"_s + QString::number(QCoreApplication::applicationPid());
-    }
-
     explicit App() {
-        if(sharedMemory.create(sizeof(void*), QSharedMemory::ReadWrite))
-            app = *reinterpret_cast<App**>(sharedMemory.data()) = this;
-        else if(sharedMemory.attach(QSharedMemory::ReadOnly))
-            app = *reinterpret_cast<App**>(sharedMemory.data());
-        else
-            qDebug() << u"App"_s << app << sharedMemory.errorString();
+        if(!app) app = this;
     }
     static auto& dashOffset() { return app->dashOffset_; }
     static auto& viewScaleFactor() { return app->viewScaleFactor_; }

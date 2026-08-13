@@ -76,15 +76,7 @@ target_include_directories(${PROJECT_NAME} PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
 target_link_libraries(
     ${PROJECT_NAME}
-    PRIVATE geometry
-            common
-            filetree
-            gcode
-            gi
-            graphicsview
-            shape
-            tooldatabase
-            stdc++exp
+    PRIVATE ggcore
             Qt6::PrintSupport
             Qt6::Widgets
             Qt6::OpenGLWidgets)
@@ -127,24 +119,60 @@ if(WIN32) # windeployqt
             \"$<TARGET_FILE:${PROJECT_NAME}>\"
         COMMENT "Deploying Qt...")
 elseif(UNIX) # LINUX
-    find_program(CQT_EXE cqtdeployer)
+    # Голый бинарь, НЕ обёртка CQtDeployer.sh: обёртка экспортирует QTDIR и
+    # QT_PLUGIN_PATH на каталоги самого CQtDeployer, и анализ Qt деплоящегося
+    # приложения ломается ("Major version: 0" — в дистрибутив не попадает ни
+    # одна Qt-библиотека). Бинарю нужен только LD_LIBRARY_PATH на его lib/ —
+    # задаётся в COMMAND ниже.
+    find_program(CQT_EXE NAMES cqtdeployer CQtDeployer
+                 HINTS "$ENV{HOME}/CQtDeployer/1.6/bin")
     if(NOT CQT_EXE)
         message(STATUS
             "cqtdeployer not found — install it and re-run cmake for the deploy target.")
         return()
     endif()
+
+    # Qt-интроспекция старого CQtDeployer с qmake 6.10 не работает ("Major
+    # version: 0"), поэтому каталоги задаются явно: -libDir на выходной каталог
+    # (там libggcore.so) и системный lib64, -extraPlugin на платформенные
+    # плагины Qt (offscreen/xcb) -- иначе дистрибутив без них не стартует.
+    execute_process(
+        COMMAND ${QT_QMAKE_EXECUTABLE} -query QT_INSTALL_PLUGINS
+        OUTPUT_VARIABLE QT_PLUGINS_DIR OUTPUT_STRIP_TRAILING_WHITESPACE)
+
+    # CQtDeployer кладёт в lib/ СИСТЕМНЫЙ libstdc++ независимо от порядка
+    # -libDir, а собранное gcc-16 требует GLIBCXX_3.4.35+ -- дистрибутив не
+    # стартует. Поверх кладётся рантайм самого компилятора (CXX_RUNTIME_DIR
+    # вычислен в корневом CMakeLists).
+    set(DEPLOY_FIX_RUNTIME)
+    if(CXX_RUNTIME_DIR)
+        set(DEPLOY_FIX_RUNTIME
+            COMMAND ${CMAKE_COMMAND} -E copy_if_different
+                    "${CXX_RUNTIME_DIR}/libstdc++.so.6"
+                    "${CXX_RUNTIME_DIR}/libgcc_s.so.1"
+                    "${OUTPUT_DIRECTORY}/../cqt-deploy/lib/")
+    endif()
+
     add_custom_target(
         deploy
         COMMAND
-            cqtdeployer clear
+            ${CMAKE_COMMAND} -E env
+            "LD_LIBRARY_PATH=$<PATH:GET_PARENT_PATH,$<PATH:GET_PARENT_PATH,${CQT_EXE}>>/lib"
+            ${CQT_EXE} clear
             -bin "${OUTPUT_DIRECTORY}/${PROJECT_NAME}"
             -extraData "${OUTPUT_DIRECTORY}/plugins"
             -extraDataOut /bin
             -qmake "${QT_QMAKE_EXECUTABLE}"
-            -libDir "${PROJECT_SOURCE_DIR}"
+            -libDir "${OUTPUT_DIRECTORY},${CXX_RUNTIME_DIR},/usr/lib64"
+            -extraPlugin "${QT_PLUGINS_DIR}/platforms"
+            # GL-библиотеки -- драйверные, их таскать нельзя: забандленный
+            # libOpenGL падал на _glapi_tls_Current, на целевой машине они
+            # берутся из системы.
+            -ignore "libOpenGL,libGLX,libGLdispatch,libEGL,libGL,libdrm"
             -qmlDir "${PROJECT_SOURCE_DIR}"
             -recursiveDepth 5
             -targetDir "${OUTPUT_DIRECTORY}/../cqt-deploy"
+        ${DEPLOY_FIX_RUNTIME}
         COMMENT "Deploy app with cqtdeployer"
         WORKING_DIRECTORY ${PROJECT_SOURCE_DIR})
 endif()

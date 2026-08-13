@@ -34,15 +34,8 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(
-    ${PROJECT_NAME}
-    PRIVATE geometry
-            common
-            filetree
-            gi
-            graphicsview
-            shape
-            tooldatabase
-            Qt6::Widgets)
+target_link_libraries(${PROJECT_NAME} PRIVATE Qt6::Widgets)
+
+target_link_ggcore(${PROJECT_NAME})
 
 target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})

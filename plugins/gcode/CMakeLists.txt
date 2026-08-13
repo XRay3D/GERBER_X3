@@ -51,11 +51,9 @@ add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_scripts)
 
 target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})
 
+# Ядро приезжает в .so-плагин динамически через ggcore; gc_<name>-прослойки
+# (код самих плагинов) остаются статическими внутри своих .so.
 foreach(SUBDIRECTORY ${GCODE_PLUGINS})
   add_subdirectory(${SUBDIRECTORY})
-  if(TARGET gc_${SUBDIRECTORY})
-    target_link_libraries(gc_${SUBDIRECTORY} PUBLIC gcode file_plugins)
-  else()
-    target_link_libraries(gc${SUBDIRECTORY} PUBLIC gcode file_plugins)
-  endif()
+  target_link_ggcore(gc${SUBDIRECTORY})
 endforeach()

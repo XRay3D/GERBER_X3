@@ -30,5 +30,5 @@ target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})
 
 foreach(SUBDIRECTORY ${FILE_PLUGINS})
   add_subdirectory(${SUBDIRECTORY})
-  target_link_libraries(file_${SUBDIRECTORY} PUBLIC file_plugins)
+  target_link_ggcore(file_${SUBDIRECTORY})
 endforeach()
