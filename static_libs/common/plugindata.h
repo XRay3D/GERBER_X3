@@ -6,7 +6,7 @@
 class PluginData {
 
 public:
-    PluginData() { App app; }
+    PluginData() = default;
     const QJsonObject& info() const { return info_; }
     void setInfo(const QJsonObject& info) { info_ = info; }
 

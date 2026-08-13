@@ -23,7 +23,7 @@ configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
 add_library(gc_hatching STATIC hatching.cpp hatching.h)
 # Clipper2 (geometry) плагину больше не нужен: карман и гребёнка считаются в
 # точном домене, резка змейки -- Geo::clipOpen, маршрут -- gc_pathutils.
-target_link_libraries(gc_hatching PUBLIC gcode)
+target_link_libraries(gc_hatching PUBLIC ggcore)
 
 file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
 file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)

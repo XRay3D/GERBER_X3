@@ -80,9 +80,11 @@ void Shape::rebuild() {
 
     // Контуры глифов объединяются в точном домене: перекрытия букв уходят,
     // дырки («B», «о») выражаются вложенностью полигонов.
-    Geo::Polylines contours;
-    for(auto&& polygon: painterPath.toSubpathPolygons(transform))
-        contours.emplace_back(polygon).close();
+    // for(auto&& polygon: painterPath.toSubpathPolygons(transform))
+    //     contours.emplace_back(polygon).close();
+    shape_                  = transform.map(painterPath) /*polygons.toPath()*/;
+    Geo::Polylines contours = Geo::fromPath(shape_ /*transform.map(painterPath)*/, 0.01);
+
     // В каноне Geo знак площади — тело/пустота: тела положительные. У глифов
     // абсолютная ориентация зависит от формата шрифта и Y-флипа трансформа
     // (зеркало нижней стороны флипает её ещё раз) — выравниваем по сумме:
@@ -92,8 +94,7 @@ void Shape::rebuild() {
     if(totalArea < 0)
         for(auto& contour: contours) contour.reverse();
     const auto polygons = Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::NonZero, contours);
-    curves_ = polygons.contours();
-    shape_ = polygons.toPath();
+    curves_             = polygons.contours();
 
     assert(handles.size() == 1);
 }

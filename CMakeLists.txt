@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 4.0 FATAL_ERROR)
 
 # Единственное место, где задаётся версия продукта: отсюда её берут
 # подпроект GGEasy, ресурсы Windows (versioninfo.rc) и version.h.
-project(GERBER_X3 VERSION 0.9.5.2)
+project(GERBER_X3 VERSION 0.9.6.0)
 
 set(CMAKE_CXX_STANDARD 26)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
@@ -75,6 +75,13 @@ if(CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
       list(APPEND CMAKE_INSTALL_RPATH "${CXX_RUNTIME_DIR}")
     endif()
   endif()
+endif()
+
+# libggcore.so лежит рядом с GGEasy, а плагины — в подкаталоге plugins/:
+# $ORIGIN покрывает поиск ядра из exe, $ORIGIN/.. — из плагинов.
+if(CMAKE_SYSTEM_NAME STREQUAL Linux)
+  list(APPEND CMAKE_BUILD_RPATH "$ORIGIN" "$ORIGIN/..")
+  list(APPEND CMAKE_INSTALL_RPATH "$ORIGIN" "$ORIGIN/..")
 endif()
 
 set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
@@ -220,6 +227,21 @@ elseif(CMAKE_CXX_COMPILER_ID STREQUAL "MSVC")
   add_link_options(/DYNAMICBASE /NXCOMPAT /GUARD:CF)
 endif()
 
+if(CMAKE_SYSTEM_NAME STREQUAL Linux AND CMAKE_CXX_COMPILER_ID MATCHES "GNU|Clang")
+  # Release: полный strip на линковке — symtab+strtab занимали ~28% каждого
+  # .so; плюс отсев несослатых секций.
+  add_compile_options("$<$<CONFIG:Release>:-ffunction-sections>"
+                      "$<$<CONFIG:Release>:-fdata-sections>")
+  add_link_options("$<$<CONFIG:Release>:LINKER:--strip-all>"
+                   "$<$<CONFIG:Release>:LINKER:--gc-sections>")
+  # Debug/RelWithDebInfo: DWARF уезжает в .dwo рядом с объектниками, сами
+  # .so/exe не тащат отладку в себе (плагин был ~90-110 МБ). Отладка локальная:
+  # gdb находит .dwo по путям build-каталога; переносить бинарь с отладкой на
+  # другую машину так нельзя — но Debug-сборки здесь и не переносятся.
+  add_compile_options("$<$<CONFIG:Debug,RelWithDebInfo>:-gsplit-dwarf>")
+  add_link_options("$<$<CONFIG:Debug,RelWithDebInfo>:LINKER:--gdb-index>")
+endif()
+
 # FIND BOOST — version check is handled by find_package directly
 find_package(Boost 1.85 REQUIRED)
 message(STATUS "==> Boost ${Boost_VERSION} found")
@@ -242,6 +264,9 @@ add_subdirectory(static_libs)
 
 # PLUGINS
 add_subdirectory(plugins)
+
+# SHARED CORE: ядро одной библиотекой для GGEasy и плагинов
+add_subdirectory(ggcore)
 
 # MAIN APP
 add_subdirectory(ggeasy)

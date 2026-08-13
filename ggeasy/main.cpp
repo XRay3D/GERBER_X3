@@ -56,15 +56,6 @@ int main(int argc, char* argv[]) {
     // }
     // #endif
 
-#ifdef Q_OS_UNIX
-    // в linux/unix разделяемая память не освобождается при аварийном завершении приложения,
-    // поэтому необходимо избавиться от данного мусора
-    {
-        QSharedMemory nixFixSharedMemory{App::sharedKey()};
-        if(nixFixSharedMemory.attach())
-            nixFixSharedMemory.detach();
-    }
-#endif
     [[maybe_unused]] App appSingleton;
     [[maybe_unused]] GCode::Settings gcSingleton;
     App::setGcSettings(&gcSingleton);
