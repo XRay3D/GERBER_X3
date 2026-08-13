@@ -34,31 +34,39 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
 
 void Shape::rebuild() {
     if(handles.empty()) return;
+    // Раскладка: [0] — маркер центра, углы на нечётных индексах, средние
+    // ручки сегментов между ними; у замкнутой полилинии в хвосте лежит
+    // средняя ручка замыкающего сегмента (последний угол -> первый).
     if(curHandle && QGraphicsItem::flags() & ItemIsMovable) {
         if(curHandle->type() == Handle::Adder) {
+            // потащили среднюю ручку — сегмент делится новым углом
+            const bool tail = curHandle == &handles.back(); // замыкающий сегмент
+            const QPointF next = tail ? handles[1] : curHandle[+1];
             *curHandle = (curHandle[-1] + *curHandle) / 2;
             std::initializer_list<Handle> pts{
-                // (curHandle[-1] + *curHandle) / 2,
-                {*curHandle,                       Handle::Corner},
-                {(curHandle[+1] + *curHandle) / 2, Handle::Adder },
+                {*curHandle,              Handle::Corner},
+                {(next + *curHandle) / 2, Handle::Adder },
             };
             HIt it{++curHandle};
             curHandle = handles.insert(it, pts).base();
         } else if(curHandle->type() == Handle::Corner) {
+            const size_t minSize = closed ? 7 : 4; // замкнутой оставляем минимум треугольник
             if(curHandle != handles.data() + 1) {
-                if(handles.size() > 4 && *curHandle == curHandle[-2]) {
+                if(handles.size() > minSize && *curHandle == curHandle[-2]) {
                     curHandle = handles.erase(HIt{curHandle - 2}, HIt{curHandle}).base();
                 } else { // update adder
                     curHandle[-1] = (*curHandle + curHandle[-2]) / 2;
                 }
             }
-            if(curHandle != (--handles.end()).base()) {
-                if(handles.size() > 4 && *curHandle == curHandle[+2]) {
+            if(curHandle != lastCorner()) {
+                if(handles.size() > minSize && *curHandle == curHandle[+2]) {
                     curHandle = handles.erase(HIt{curHandle}, HIt{curHandle + 2}).base();
                 } else { // update adder
                     curHandle[+1] = (*curHandle + curHandle[+2]) / 2;
                 }
             }
+            if(closed) // замыкающая средняя ручка следует за крайними углами
+                handles.back() = (handles[1] + *lastCorner()) / 2;
         }
     }
 
@@ -95,13 +103,34 @@ void Shape::setPt(const QPointF& pt) {
 
 bool Shape::addPt(const QPointF& pt) {
     if(std::isnan(pt.x())) return false;
+    if(handles.size() > 4 && pt == handles[1]) {
+        setClosed(true); // клик в первую точку замыкает контур
+        return false;
+    }
     handles.emplace_back((handles.back() + pt) / 2, Handle::Adder);
     handles.emplace_back(pt);
     redraw();
     return !isClosed();
 }
 
-bool Shape::isClosed() const { return closed || handles[1] == handles.back(); }
+bool Shape::isClosed() const { return closed; }
+
+void Shape::setClosed(bool fl) {
+    if(closed == fl) return;
+    closed = fl;
+    if(handles.size() > 2) {
+        if(closed) // средняя ручка замыкающего сегмента
+            handles.emplace_back((handles[1] + handles.back()) / 2, Handle::Adder);
+        else if(handles.back().type() != Handle::Corner)
+            handles.pop_back();
+    }
+    curHandle = {};
+    redraw();
+}
+
+Shapes::Handle* Shape::lastCorner() const {
+    return handles.data() + handles.size() - (closed ? 2 : 1);
+}
 
 QPointF Shape::centroid() {
     return {};

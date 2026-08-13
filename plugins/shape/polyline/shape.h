@@ -34,11 +34,13 @@ public:
     bool addPt(const QPointF& pt) override;
 
     bool isClosed() const;
+    void setClosed(bool fl);
 
 protected:
     void rebuild() override;
 
 private:
+    Shapes::Handle* lastCorner() const; // последний угол (у замкнутой хвост — средняя ручка)
     QPointF centroid();
     QPointF centroidFast(); //??????
 };

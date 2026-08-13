@@ -43,13 +43,15 @@ class Editor : public Shapes::Editor {
 
     QTableView* view;
     QActionGroup actionGroup{this};
+    QAction* closedAction{};
+    bool resetFl{}; // подавление обратной связи при синхронизации кнопок
 
 public:
     Editor(Shapes::Plugin* plugin);
 
     void add(Shapes::AbstractShape* shape) override;
     void remove(Shapes::AbstractShape* shape) override;
-    void updateData() override { view->reset(); }
+    void updateData() override;
 
     ~Editor() override = default;
     Model* model;

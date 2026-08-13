@@ -100,8 +100,10 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
         for(auto* shape: sh) {
             if(shape->handles.size() <= size_t(index.row())) continue;
             (shape->handles[index.row()].*setter[index.column()])(val);
-            // shape->curHandle = shape->handles.data() + index.row();
+            // курсорная ручка — чтобы rebuild подтянул соседние средние ручки
+            shape->curHandle = shape->handles.data() + index.row();
             shape->redraw();
+            shape->curHandle = {};
         }
 
         return true;
@@ -157,19 +159,22 @@ Editor::Editor(Shapes::Plugin* plugin)
         auto hLayout = new QHBoxLayout;
         hLayout->setContentsMargins(0, 0, 0, 0);
         hLayout->setSpacing(6);
-        for(int i{}; i < 6; ++i) {
-            auto action = new QAction{this};
-            action->setIcon(plugin->icon());
-            action->setCheckable(true);
-            auto toolButton = new QToolButton{this};
-            toolButton->setIconSize({24, 24});
-            toolButton->setDefaultAction(action);
-            actionGroup.addAction(action);
-            hLayout->addWidget(toolButton);
-        }
 
+        closedAction = new QAction{QIcon::fromTheme(u"draw-polygon"_s), tr("Closed"), this};
+        closedAction->setCheckable(true);
+        closedAction->setToolTip(tr("Close the polyline"));
+        connect(closedAction, &QAction::toggled, this, [this](bool checked) {
+            if(resetFl) return;
+            for(auto* shape: model->shapes)
+                if(shape->isSelected()) shape->setClosed(checked);
+        });
+        auto toolButton = new QToolButton{this};
+        toolButton->setIconSize({24, 24});
+        toolButton->setDefaultAction(closedAction);
+        hLayout->addWidget(toolButton);
+
+        hLayout->addStretch();
         vLayout->addLayout(hLayout);
-        hLayout->stretch(5);
     }
     vLayout->addWidget(view);
 
@@ -213,6 +218,17 @@ void Editor::add(Shapes::AbstractShape* shape) {
 void Editor::remove(Shapes::AbstractShape* shape) {
     std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
+}
+
+void Editor::updateData() {
+    view->reset();
+    for(auto* shape: model->shapes)
+        if(shape->isSelected()) {
+            resetFl = true;
+            closedAction->setChecked(shape->isClosed());
+            resetFl = false;
+            break;
+        }
 }
 
 } // namespace ShPoly
