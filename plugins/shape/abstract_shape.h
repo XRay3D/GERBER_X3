@@ -64,7 +64,9 @@ struct Handle final : QPointF {
 using UndoPair = std::pair<AbstractShape*, std::vector<Handle>>;
 using UndoHandles = std::vector<UndoPair>;
 
-class AbstractShape : public Gi::Item, public ::FileTree::Node {
+// keep: наследование от Gi::Item (QGraphicsItem) иначе выводит базу из
+// сериализации целиком — вместе с handles/closed/id.
+class [[= Serial::keep]] AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend class Node;
     friend struct UndoMove;
 

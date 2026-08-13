@@ -72,6 +72,7 @@ using Writer = simdjson::builder::string_builder;
 namespace ann {
 
 struct Skip { };
+struct Keep { };
 
 // Структурная consteval-строка (char[] вместо указателя — иначе
 // reflect_constant для NTTP не проходит; тот же приём, что у simdjson).
@@ -98,6 +99,10 @@ Name(const char (&)[N]) -> Name<N>;
 } // namespace ann
 
 inline constexpr ann::Skip skip{};
+// На КЛАССЕ: сериализовать базу, несмотря на GUI-предков. Автопропуск баз
+// (QObject/QGraphicsItem/QPaintDevice в предках) хоронил бы и её данные:
+// Shapes::AbstractShape наследует Gi::Item, но несёт handles/closed.
+inline constexpr ann::Keep keep{};
 
 template <unsigned N>
 consteval auto rename(const char (&str)[N]) { return ann::Rename<N>{str}; }
@@ -128,6 +133,12 @@ consteval bool isSkipped(std::meta::info member) {
 template <typename T>
 consteval bool isSkippedType() {
     return !std::meta::annotations_of_with_type(^^T, ^^ann::Skip).empty();
+}
+
+/// Класс, сериализуемый вопреки GUI-предкам: [[=Serial::keep]] на классе.
+template <typename T>
+consteval bool isKeptType() {
+    return !std::meta::annotations_of_with_type(^^T, ^^ann::Keep).empty();
 }
 
 // Ключ члена: rename-аннотация либо имя поля с обрезанным хвостовым '_'.
@@ -187,11 +198,14 @@ template <typename T> concept Map = requires {
 };
 
 /// База, которую движок не обходит вовсе: GUI-кишки (их сериализуемая часть —
-/// забота preSave/postLoad) или класс, помеченный skip.
-template <typename T> concept SkippedBase = std::is_base_of_v<QObject, T>
-    || std::is_base_of_v<QPaintDevice, T>
-    || std::is_base_of_v<QGraphicsItem, T>
-    || isSkippedType<T>();
+/// забота preSave/postLoad) или класс, помеченный skip. Класс с данными,
+/// наследующий GUI (Shapes::AbstractShape : Gi::Item), помечается
+/// [[=Serial::keep]] — иначе вместе с предками пропали бы и его поля.
+template <typename T> concept SkippedBase = isSkippedType<T>()
+    || ((std::is_base_of_v<QObject, T>
+            || std::is_base_of_v<QPaintDevice, T>
+            || std::is_base_of_v<QGraphicsItem, T>)
+        && !isKeptType<T>());
 
 // База, которую пишем значением под ключом "base", а не флаттим:
 // свой Adapter или контейнер (ApBlock : QVector<GrObject>).
