@@ -9,10 +9,10 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "shape.h"
+#include "geo/boolean.h"
 #include "graphicsview.h"
 #include "math.h"
-
-// #include <boost/pfr.hpp>
+#include "reflection.h"
 
 using Shapes::Handle;
 
@@ -30,7 +30,8 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1)
     App::grView().addItem(this);
 }
 
-void Shape::redraw() {
+void Shape::rebuild() {
+    if(handles.empty()) return;
 
     txtData.font.setPixelSize(100);
 
@@ -74,39 +75,14 @@ void Shape::redraw() {
         transform.scale(+scale * (txtData.xy / 100.), -scale);
     }
 
-    shape_ = transform.map(painterPath);
-
-    // {
-    //     // text to polygons
-    //     shape_.clear();
-    //     for(auto& polygon: painterPath.toSubpathPolygons())
-    //         shape_.addPolygon(polygon);
-    //     painterPath.clear();
-    //     for(auto& polygon: shape_.toSubpathPolygons(transform)) // transform polygons with matrix
-    //         painterPath.addPolygon(polygon);
-    // }
-
-    // reverse
-    // transform.reset();
-    // transform.translate(handles.front().x(), handles.front().y());
-    // transform.rotate(txtData.angle - 360);
-
-#if 0
-    shape_ = transform.map(painterPath);
-#else
-    shape_.clear();
-    Paths64 paths;
-    cl::Clipper64 clipper;
-    clipper.AddClip(~painterPath.toSubpathPolygons(transform));
-    clipper.Execute(cl::ClipType::Union, cl::FillRule::NonZero, paths);
-    for(auto& sp: paths) {
-        sp.emplace_back(sp.front());
-        shape_.addPolygon(~sp);
-    }
-#endif
-    curves_ = toCurves(shape_);
-
-    setPos(1, 1), setPos(0, 0);
+    // Контуры глифов объединяются в точном домене: перекрытия букв уходят,
+    // дырки («B», «о») выражаются вложенностью полигонов.
+    Geo::Polylines contours;
+    for(auto&& polygon: painterPath.toSubpathPolygons(transform))
+        contours.emplace_back(polygon).close();
+    const auto polygons = Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::NonZero, contours);
+    curves_ = polygons.contours();
+    shape_ = polygons.toPath();
 
     assert(handles.size() == 1);
 }
@@ -180,16 +156,6 @@ QVariant Shape::data(const QModelIndex& index, int role) const {
     }
 }
 
-void Shape::write(QDataStream& stream) const {
-    Block{stream}.write(txtData);
-    // AbstractShape::write(stream);
-}
-
-void Shape::readAndInit(QDataStream& stream) {
-    Block{stream}.read(txtData);
-    AbstractShape::redraw();
-}
-
 void Shape::saveData() {
     QSettings settings;
     settings.beginGroup(u"ShapeText"_s);
@@ -217,7 +183,7 @@ void Shape::save() { iDataCopy = txtData; }
 
 void Shape::restore() {
     txtData = std::move(iDataCopy);
-    AbstractShape::redraw();
+    redraw();
 }
 
 void Shape::ok() { saveData(); }

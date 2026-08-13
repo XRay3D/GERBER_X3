@@ -48,6 +48,7 @@
 
 #include <QColor>
 #include <QDateTime>
+#include <QFont>
 #include <QPointF>
 #include <QRectF>
 #include <QString>
@@ -541,6 +542,19 @@ struct Adapter<QColor> {
         QString name;
         if(auto err = Adapter<QString>::read(val, name); err) return err;
         c = QColor{name};
+        return simdjson::SUCCESS;
+    }
+};
+
+template <>
+struct Adapter<QFont> {
+    static void write(Writer& sb, const QFont& f) {
+        Adapter<QString>::write(sb, f.toString());
+    }
+    static simdjson::error_code read(simdjson::ondemand::value& val, QFont& f) {
+        QString s;
+        if(auto err = Adapter<QString>::read(val, s); err) return err;
+        f.fromString(s);
         return simdjson::SUCCESS;
     }
 };

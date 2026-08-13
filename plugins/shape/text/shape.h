@@ -58,7 +58,6 @@ public:
     int type() const override { return Gi::Type::ShText; }
 
     // AbstractShape interface
-    void redraw() override;
     QString name() const override;
     QIcon icon() const override;
     void setPt(const QPointF& point) override;
@@ -74,14 +73,16 @@ public:
     Qt::ItemFlags flags(const QModelIndex& index) const override;
     QVariant data(const QModelIndex& index, int role) const override;
 
+public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    void deserialize(std::string_view json) override { Serial::loadInto(json, *this); }
+
 protected:
-    // AbstractShape interface
-    void write(QDataStream& stream) const override;
-    void readAndInit(QDataStream& stream) override;
+    void rebuild() override;
 
 private:
     ShapeData txtData;
-    ShapeData iDataCopy;
+    [[= Serial::skip]] ShapeData iDataCopy;
     void saveData();
     ShapeData loadData();
 
@@ -99,6 +100,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShText; }
+    std::string_view typeName() const override { return "Text"; }
     QIcon icon() const override { return QIcon::fromTheme(u"draw-text"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{this, point};
