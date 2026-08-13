@@ -164,7 +164,7 @@ void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     for(auto& handle: handles) {
         auto color = handle.color();
         if(&handle == curHandle) {
-            color = Qt::magenta;
+            color = Qt::cyan; // не magenta: она занята ручкой-центром дуги
             drawPos(painter, handle, scale());
         }
         color.setAlpha(100);

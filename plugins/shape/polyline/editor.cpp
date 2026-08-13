@@ -173,6 +173,20 @@ Editor::Editor(Shapes::Plugin* plugin)
         toolButton->setDefaultAction(closedAction);
         hLayout->addWidget(toolButton);
 
+        auto modeButton = [&](const QString& icon, const QString& text, bool checked) {
+            auto action = new QAction{QIcon::fromTheme(icon), text, this};
+            action->setCheckable(true);
+            action->setChecked(checked);
+            actionGroup.addAction(action);
+            auto tb = new QToolButton{this};
+            tb->setIconSize({24, 24});
+            tb->setDefaultAction(action);
+            hLayout->addWidget(tb);
+            return action;
+        };
+        modeButton(u"draw-line"_s, tr("Drag middle handle: split segment"), true);
+        arcAction = modeButton(u"draw-ellipse-arc"_s, tr("Drag middle handle: bend segment into arc"), false);
+
         hLayout->addStretch();
         vLayout->addLayout(hLayout);
     }

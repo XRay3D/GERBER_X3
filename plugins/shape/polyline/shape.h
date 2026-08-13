@@ -41,6 +41,10 @@ protected:
 
 private:
     Shapes::Handle* lastCorner() const; // последний угол (у замкнутой хвост — средняя ручка)
+    QPointF nextCorner(size_t midIdx) const; // угол после средней ручки (с заворотом)
+    QPointF arcCenter(size_t midIdx) const;  // проекция ручки на серединный перпендикуляр хорды
+    double segBulge(size_t midIdx) const;    // прогиб сегмента по его средней ручке
+    void updMiddle(size_t midIdx);           // средняя ручка следует за углами
     QPointF centroid();
     QPointF centroidFast(); //??????
 };
