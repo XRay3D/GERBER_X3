@@ -174,6 +174,73 @@ void Shape::updMiddle(size_t midIdx) {
     else h = (handles[midIdx - 1] + nextCorner(midIdx)) / 2;
 }
 
+namespace {
+
+constexpr double cross(QPointF a, QPointF b) { return a.x() * b.y() - a.y() * b.x(); }
+
+// Знаковый угол поворота from -> to, (-pi, pi]
+double signedAngle(QPointF from, QPointF to) {
+    return std::atan2(cross(from, to), QPointF::dotProduct(from, to));
+}
+
+// Касательная сегмента p1 -> p2 с прогибом bulge в его точке at (p1 или p2):
+// у прямой — направление сегмента, у дуги — перпендикуляр к радиусу в
+// сторону обхода.
+QPointF tangentAt(QPointF p1, QPointF p2, double bulge, QPointF at) {
+    if(auto arc = Geo::arcOf(p1, p2, bulge)) {
+        const QPointF radial = at - arc->center;
+        return arc->theta > 0 ? QPointF{-radial.y(), radial.x()}
+                              : QPointF{radial.y(), -radial.x()};
+    }
+    return p2 - p1;
+}
+
+} // namespace
+
+bool Shape::handleDoubleClick(Shapes::Handle& handle) {
+    if(handle.type() != Handle::Center2) return false;
+
+    const size_t idx = size_t(&handle - handles.data());
+    const size_t size = handles.size();
+    const QPointF a = handles[idx - 1], b = nextCorner(idx);
+    if(a == b) return true;
+    const QPointF chord = b - a;
+
+    // Касательный угол дуги: theta = 2 * (угол между касательной соседа и
+    // хордой). Точное касание обоих соседей разом недостижимо — концы дуги
+    // пришиты к углам, свободен один прогиб, — поэтому при двух соседях
+    // берётся среднее двух углов.
+    double theta{};
+    int cnt{};
+    if(idx - 1 > 1 || closed) { // у угла a есть входящий сегмент
+        const size_t mIn = idx - 1 > 1 ? idx - 2 : size - 1;
+        const QPointF p = mIn > 1 ? QPointF{handles[mIn - 1]} : QPointF{*lastCorner()};
+        theta += 2.0 * signedAngle(tangentAt(p, a, segBulge(mIn), a), chord);
+        ++cnt;
+    }
+    const size_t bIdx = idx + 1 < size ? idx + 1 : 1;
+    if(bIdx + 1 < size || closed) { // у угла b есть исходящий сегмент
+        const size_t mOut = bIdx + 1 < size ? bIdx + 1 : 2;
+        if(mOut != idx) { // не сам редактируемый сегмент (две вершины по кругу)
+            theta += 2.0 * signedAngle(chord, tangentAt(b, nextCorner(mOut), segBulge(mOut), b));
+            ++cnt;
+        }
+    }
+    if(!cnt) return true; // соседей нет — не к чему касаться
+
+    theta /= cnt;
+    if(std::abs(theta) < 1e-3) { // почти прямая — сегмент выпрямляется
+        handle.setType(Handle::Adder);
+        handle = (a + b) / 2;
+    } else {
+        // модель «центр на биссектрисе» выражает дугу до полуокружности
+        theta = std::clamp(theta, -std::numbers::pi + 1e-6, std::numbers::pi - 1e-6);
+        handle = Geo::arcOf(a, b, Geo::bulgeOf(theta))->center;
+    }
+    redraw();
+    return true;
+}
+
 QPointF Shape::centroid() {
     return {};
     QPointF centroid;

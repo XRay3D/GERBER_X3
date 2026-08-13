@@ -38,6 +38,9 @@ public:
 
 protected:
     void rebuild() override;
+    // Двойной клик по ручке-центру: дуга перестраивается касательной к
+    // соседним сегментам (с обеих сторон — среднее двух касательных углов).
+    bool handleDoubleClick(Shapes::Handle& handle) override;
 
 private:
     Shapes::Handle* lastCorner() const; // последний угол (у замкнутой хвост — средняя ручка)
