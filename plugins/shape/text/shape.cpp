@@ -80,6 +80,14 @@ void Shape::rebuild() {
     Geo::Polylines contours;
     for(auto&& polygon: painterPath.toSubpathPolygons(transform))
         contours.emplace_back(polygon).close();
+    // В каноне Geo знак площади — тело/пустота: тела положительные. У глифов
+    // абсолютная ориентация зависит от формата шрифта и Y-флипа трансформа
+    // (зеркало нижней стороны флипает её ещё раз) — выравниваем по сумме:
+    // тела в ней всегда перевешивают собственные дырки.
+    double totalArea{};
+    for(const auto& contour: contours) totalArea += contour.signedArea();
+    if(totalArea < 0)
+        for(auto& contour: contours) contour.reverse();
     const auto polygons = Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::NonZero, contours);
     curves_ = polygons.contours();
     shape_ = polygons.toPath();
