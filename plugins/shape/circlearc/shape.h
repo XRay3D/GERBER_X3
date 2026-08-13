@@ -26,9 +26,6 @@ public:
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShCirArc; }
 
-    // Gi::Item interface
-    void redraw() override;
-
     // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
@@ -53,11 +50,16 @@ public:
         Angle2,           // model
     };
 
+public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    void deserialize(std::string_view json) override { Serial::loadInto(json, *this); }
+    void postLoad(); // радиус — производная от ручек, восстанавливаем после чтения
+
 protected:
-    void readAndInit(QDataStream& stream) override;
+    void rebuild() override;
 
 private:
-    mutable double radius_{};
+    [[= Serial::skip]] mutable double radius_{};
 };
 
 class Plugin : public Shapes::Plugin {
@@ -70,6 +72,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShCirArc; }
+    std::string_view typeName() const override { return "CircleArc"; }
     QIcon icon() const override { return QIcon::fromTheme(u"draw-ellipse-arc"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{

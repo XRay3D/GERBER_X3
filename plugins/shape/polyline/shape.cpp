@@ -32,7 +32,8 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
     App::grView().addItem(this);
 }
 
-void Shape::redraw() {
+void Shape::rebuild() {
+    if(handles.empty()) return;
     if(curHandle && QGraphicsItem::flags() & ItemIsMovable) {
         if(curHandle->type() == Handle::Adder) {
             *curHandle = (curHandle[-1] + *curHandle) / 2;

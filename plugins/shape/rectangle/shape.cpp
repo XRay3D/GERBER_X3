@@ -31,7 +31,8 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
     App::grView().addItem(this);
 }
 
-void Shape::redraw() {
+void Shape::rebuild() {
+    if(handles.empty()) return;
     auto updCenter = [this] {
         handles[Center] = QLineF{handles[Point1], handles[Point3]}.center();
     };
@@ -41,7 +42,7 @@ void Shape::redraw() {
         handles[p2] = {curHandle->x(), handles[src].y()};
     };
 
-    switch(std::distance(handles.data(), curHandle)) {
+    switch(curHandle ? std::distance(handles.data(), curHandle) : PtCount) {
     case Center: {
         QRectF rect{handles[Point1], handles[Point3]};
         rect.moveCenter(handles[Center]);

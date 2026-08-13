@@ -27,9 +27,6 @@ public:
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShRectangle; }
 
-    // Gi::Item interface
-    void redraw() override;
-
     // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
@@ -47,7 +44,7 @@ public:
     };
 
 protected:
-    void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
+    void rebuild() override;
 };
 
 class Plugin final : public Shapes::Plugin {
@@ -60,6 +57,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface *
     uint32_t type() const override { return Gi::Type::ShRectangle; }
+    std::string_view typeName() const override { return "Rectangle"; }
     QIcon icon() const override { return QIcon::fromTheme(u"draw-rectangle"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{

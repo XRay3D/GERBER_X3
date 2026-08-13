@@ -52,7 +52,8 @@ constexpr double distancePointToLine(const QPointF& pt, const QLineF& line) {
     return d(pt, Pb);
 }
 
-void Shape::redraw() {
+void Shape::rebuild() {
+    if(handles.empty()) return;
     if(curHandle) {
         Timer_uS t{"redraw"};
         auto updateCenter = [this](bool isCenter = {}) {
@@ -86,10 +87,15 @@ void Shape::redraw() {
         radius_ = Geo::distance(handles[Center], handles[Point1]);
     }
 
+    // Направление обхода — знак векторного произведения радиус-векторов:
+    // из двух дуг между Point1 и Point2 берётся меньшая (< pi).
+    const double cross
+        = (handles[Point1].x() - handles[Center].x()) * (handles[Point2].y() - handles[Center].y())
+        - (handles[Point1].y() - handles[Center].y()) * (handles[Point2].x() - handles[Center].x());
     Geo::Polyline curve{
         {handles[Point1],
          Geo::bulgeOf(handles[Point1], handles[Point2], handles[Center],
-         geo::DIR(handles[Point1], handles[Center], handles[Point2]))},
+         cross > 0 ? Geo::Vertex::Ccw : Geo::Vertex::Cw)},
         {handles[Point2]},
     };
     if(closed) curve.close(); // замыкает хордой
@@ -166,10 +172,9 @@ void Shape::setAngle(int i, double radius) {
     redraw();
 }
 
-void Shape::readAndInit(QDataStream& stream [[maybe_unused]]) {
-    curHandle = handles.data() + Center;
+void Shape::postLoad() {
     radius_ = Geo::distance(handles[Center], handles[Point1]);
-    redraw();
+    AbstractShape::postLoad();
 }
 
 } // namespace ShArc
