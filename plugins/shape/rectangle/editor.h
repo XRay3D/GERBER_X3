@@ -12,7 +12,7 @@
 
 #include "shapepluginin.h"
 #include <QAbstractTableModel>
-#include <QActionGroup>
+#include <QRadioButton>
 #include <QTableView>
 
 namespace ShRect {
@@ -51,14 +51,21 @@ class Editor : public Shapes::Editor {
     Q_OBJECT
 
     QTableView* view;
-    QActionGroup actionGroup{this};
+    // сетка якоря 3x3 (как выравнивание у текстового плагина)
+    QRadioButton *rb_tl{}, *rb_tc{}, *rb_tr{};
+    QRadioButton *rb_lc{}, *rb_cc{}, *rb_rc{};
+    QRadioButton *rb_bl{}, *rb_bc{}, *rb_br{};
+    bool resetFl{}; // подавление обратной связи при синхронизации кнопок
+
+    int anchor() const;
+    void updateAnchor();
 
 public:
     Editor(Shapes::Plugin* plugin);
 
     void add(Shapes::AbstractShape* shape) override;
     void remove(Shapes::AbstractShape* shape) override;
-    void updateData() override { view->reset(); }
+    void updateData() override;
 
     ~Editor() override = default;
     Model* model;

@@ -44,10 +44,11 @@ struct Handle final : QPointF {
 
     QColor color() const noexcept {
         static const QColor colors[]{
-            Qt::yellow,
-            Qt::red,
-            Qt::green,
-            Qt::magenta,
+            Qt::yellow,  // Adder
+            Qt::red,     // Center
+            Qt::green,   // Corner
+            Qt::magenta, // Center2
+            Qt::gray,    // Null
         };
         return colors[type_];
     };
@@ -63,7 +64,9 @@ struct Handle final : QPointF {
 using UndoPair = std::pair<AbstractShape*, std::vector<Handle>>;
 using UndoHandles = std::vector<UndoPair>;
 
-class AbstractShape : public Gi::Item, public ::FileTree::Node {
+// keep: наследование от Gi::Item (QGraphicsItem) иначе выводит базу из
+// сериализации целиком — вместе с handles/closed/id.
+class [[= Serial::keep]] AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend class Node;
     friend struct UndoMove;
 
@@ -82,7 +85,10 @@ public:
 
     // Gi::Item interface
     void updateColors() override;
-    void redraw() override;
+    // Единственная воронка обновления: prepareGeometryChange (иначе BSP-индекс
+    // сцены хранит старый rect и фигура перестаёт выделяться) → rebuild()
+    // наследника → форма ручек. Наследники переопределяют rebuild(), не redraw().
+    void redraw() final;
     // AbstractShape interface
     virtual QString name() const = 0;
     virtual QIcon icon() const = 0;
@@ -102,6 +108,10 @@ public:
 protected:
     double scale(bool* hasUpdate = nullptr) const;
     bool inHandle(const QPointF& point);
+
+    virtual void rebuild() = 0;
+    // Двойной клик по ручке; true — обработано, иначе откроется док-редактор.
+    virtual bool handleDoubleClick(Handle& handle [[maybe_unused]]) { return false; }
 
     [[= Serial::skip]] Plugin* const plugin;
     mutable std::vector<Handle> handles;

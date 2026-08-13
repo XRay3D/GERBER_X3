@@ -521,17 +521,17 @@ void Serial::Adapter<Geo::Polygons>::write(simdjson::builder::string_builder& sb
 simdjson::error_code Serial::Adapter<Geo::Polygons>::read(simdjson::ondemand::value& val, Geo::Polygons& polygons) {
     simdjson::ondemand::array arr;
     if(auto err = val.get_array().get(arr); err) return err;
-    Polygons result;
+    // Не join по одному: последовательное объединение дорожает с каждым
+    // полигоном, и открытие проекта с плотной медью растягивается на минуты.
+    // Конструктор от span собирает регион деревом слияний в несколько потоков
+    // и сам разводит тела и пустоты (инверсные куски).
+    std::vector<Polygon> parsed;
     for(auto elem: arr) {
         simdjson::ondemand::value v;
         if(auto err = elem.get(v); err) return err;
-        Polygon polygon;
-        if(auto err = Adapter<Geo::Polygon>::read(v, polygon); err)
+        if(auto err = Adapter<Geo::Polygon>::read(v, parsed.emplace_back()); err)
             return polygons = Polygons{}, err;
-        // Сразу в точный домен, минуя разбор по ориентациям: структура
-        // полигона известна точно, объединять их между собой -- вся работа.
-        if(!polygon.empty()) result.impl().exact.join(polygon.impl().exact);
     }
-    polygons = std::move(result);
+    polygons = Polygons{std::span<const Polygon>{parsed}};
     return simdjson::SUCCESS;
 }

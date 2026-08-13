@@ -32,40 +32,59 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
     App::grView().addItem(this);
 }
 
-void Shape::redraw() {
+void Shape::rebuild() {
+    if(handles.empty()) return;
+    // Раскладка: [0] — маркер центра, углы на нечётных индексах, средние
+    // ручки сегментов между ними; у замкнутой полилинии в хвосте лежит
+    // средняя ручка замыкающего сегмента (последний угол -> первый).
     if(curHandle && QGraphicsItem::flags() & ItemIsMovable) {
         if(curHandle->type() == Handle::Adder) {
-            *curHandle = (curHandle[-1] + *curHandle) / 2;
-            std::initializer_list<Handle> pts{
-                // (curHandle[-1] + *curHandle) / 2,
-                {*curHandle,                       Handle::Corner},
-                {(curHandle[+1] + *curHandle) / 2, Handle::Adder },
-            };
-            HIt it{++curHandle};
-            curHandle = handles.insert(it, pts).base();
+            if(static_cast<Editor*>(plugin->editor())->arcAddMode()) {
+                // в режиме дуг средняя ручка не делит сегмент, а гнёт его
+                curHandle->setType(Handle::Center2);
+            } else {
+                // потащили среднюю ручку — сегмент делится новым углом
+                const bool tail = curHandle == &handles.back(); // замыкающий сегмент
+                const QPointF next = tail ? handles[1] : curHandle[+1];
+                *curHandle = (curHandle[-1] + *curHandle) / 2;
+                std::initializer_list<Handle> pts{
+                    {*curHandle,              Handle::Corner},
+                    {(next + *curHandle) / 2, Handle::Adder },
+                };
+                HIt it{++curHandle};
+                curHandle = handles.insert(it, pts).base();
+            }
+        }
+        if(curHandle->type() == Handle::Center2) {
+            // центр дуги живёт на серединном перпендикуляре хорды
+            *curHandle = arcCenter(size_t(curHandle - handles.data()));
         } else if(curHandle->type() == Handle::Corner) {
+            const size_t minSize = closed ? 7 : 4; // замкнутой оставляем минимум треугольник
             if(curHandle != handles.data() + 1) {
-                if(handles.size() > 4 && *curHandle == curHandle[-2]) {
+                if(handles.size() > minSize && *curHandle == curHandle[-2]) {
                     curHandle = handles.erase(HIt{curHandle - 2}, HIt{curHandle}).base();
-                } else { // update adder
-                    curHandle[-1] = (*curHandle + curHandle[-2]) / 2;
+                } else {
+                    updMiddle(size_t(curHandle - handles.data()) - 1);
                 }
             }
-            if(curHandle != (--handles.end()).base()) {
-                if(handles.size() > 4 && *curHandle == curHandle[+2]) {
+            if(curHandle != lastCorner()) {
+                if(handles.size() > minSize && *curHandle == curHandle[+2]) {
                     curHandle = handles.erase(HIt{curHandle}, HIt{curHandle + 2}).base();
-                } else { // update adder
-                    curHandle[+1] = (*curHandle + curHandle[+2]) / 2;
+                } else {
+                    updMiddle(size_t(curHandle - handles.data()) + 1);
                 }
             }
+            if(closed) // замыкающая средняя ручка следует за крайними углами
+                updMiddle(handles.size() - 1);
         }
     }
 
-    Geo::Polyline curve{
-        std::from_range,
-        v::filter(handles, std::bind(std::equal_to{}, Handle::Corner, _1))
-            | v::transform([](QPointF& pt) { return Geo::Vertex{pt}; }),
-    };
+    Geo::Polyline curve;
+    curve.reserve(handles.size() / 2);
+    // прогиб сегмента пишется на его начальной вершине; последняя средняя
+    // ручка есть только у замкнутой — у открытой последний угол без прогиба
+    for(size_t i = 1; i < handles.size(); i += 2)
+        curve.emplace_back(handles[i], i + 1 < handles.size() ? segBulge(i + 1) : 0.0);
 
     if(closed) curve.close();
     curves_ = {std::move(curve)};
@@ -94,13 +113,133 @@ void Shape::setPt(const QPointF& pt) {
 
 bool Shape::addPt(const QPointF& pt) {
     if(std::isnan(pt.x())) return false;
+    if(handles.size() > 4 && pt == handles[1]) {
+        setClosed(true); // клик в первую точку замыкает контур
+        return false;
+    }
     handles.emplace_back((handles.back() + pt) / 2, Handle::Adder);
     handles.emplace_back(pt);
     redraw();
     return !isClosed();
 }
 
-bool Shape::isClosed() const { return closed || handles[1] == handles.back(); }
+bool Shape::isClosed() const { return closed; }
+
+void Shape::setClosed(bool fl) {
+    if(closed == fl) return;
+    closed = fl;
+    if(handles.size() > 2) {
+        if(closed) // средняя ручка замыкающего сегмента
+            handles.emplace_back((handles[1] + handles.back()) / 2, Handle::Adder);
+        else if(handles.back().type() != Handle::Corner)
+            handles.pop_back();
+    }
+    curHandle = {};
+    redraw();
+}
+
+Shapes::Handle* Shape::lastCorner() const {
+    return handles.data() + handles.size() - (closed ? 2 : 1);
+}
+
+QPointF Shape::nextCorner(size_t midIdx) const {
+    return midIdx + 1 < handles.size() ? handles[midIdx + 1] : handles[1];
+}
+
+QPointF Shape::arcCenter(size_t midIdx) const {
+    const QPointF a = handles[midIdx - 1], b = nextCorner(midIdx);
+    const QPointF mid = (a + b) / 2;
+    const QPointF n{a.y() - b.y(), b.x() - a.x()}; // левая нормаль хорды
+    const double nn = QPointF::dotProduct(n, n);
+    if(qFuzzyIsNull(nn)) return mid; // вырожденный сегмент
+    const double t = QPointF::dotProduct(handles[midIdx] - mid, n) / nn;
+    return mid + n * t;
+}
+
+double Shape::segBulge(size_t midIdx) const {
+    const Handle& h = handles[midIdx];
+    if(h.type() != Handle::Center2) return 0.0;
+    const QPointF a = handles[midIdx - 1], b = nextCorner(midIdx);
+    if(a == b) return 0.0;
+    const QPointF n{a.y() - b.y(), b.x() - a.x()};
+    const double t = QPointF::dotProduct(QPointF{h} - (a + b) / 2, n);
+    // центр слева от хорды — обход Ccw: из двух дуг между углами берётся
+    // меньшая (до полуокружности), выгнутая от центра
+    return Geo::bulgeOf(a, b, h, t > 0 ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
+}
+
+void Shape::updMiddle(size_t midIdx) {
+    Handle& h = handles[midIdx];
+    if(h.type() == Handle::Center2) h = arcCenter(midIdx);
+    else h = (handles[midIdx - 1] + nextCorner(midIdx)) / 2;
+}
+
+namespace {
+
+constexpr double cross(QPointF a, QPointF b) { return a.x() * b.y() - a.y() * b.x(); }
+
+// Знаковый угол поворота from -> to, (-pi, pi]
+double signedAngle(QPointF from, QPointF to) {
+    return std::atan2(cross(from, to), QPointF::dotProduct(from, to));
+}
+
+// Касательная сегмента p1 -> p2 с прогибом bulge в его точке at (p1 или p2):
+// у прямой — направление сегмента, у дуги — перпендикуляр к радиусу в
+// сторону обхода.
+QPointF tangentAt(QPointF p1, QPointF p2, double bulge, QPointF at) {
+    if(auto arc = Geo::arcOf(p1, p2, bulge)) {
+        const QPointF radial = at - arc->center;
+        return arc->theta > 0 ? QPointF{-radial.y(), radial.x()}
+                              : QPointF{radial.y(), -radial.x()};
+    }
+    return p2 - p1;
+}
+
+} // namespace
+
+bool Shape::handleDoubleClick(Shapes::Handle& handle) {
+    if(handle.type() != Handle::Center2) return false;
+
+    const size_t idx = size_t(&handle - handles.data());
+    const size_t size = handles.size();
+    const QPointF a = handles[idx - 1], b = nextCorner(idx);
+    if(a == b) return true;
+    const QPointF chord = b - a;
+
+    // Касательный угол дуги: theta = 2 * (угол между касательной соседа и
+    // хордой). Точное касание обоих соседей разом недостижимо — концы дуги
+    // пришиты к углам, свободен один прогиб, — поэтому при двух соседях
+    // берётся среднее двух углов.
+    double theta{};
+    int cnt{};
+    if(idx - 1 > 1 || closed) { // у угла a есть входящий сегмент
+        const size_t mIn = idx - 1 > 1 ? idx - 2 : size - 1;
+        const QPointF p = mIn > 1 ? QPointF{handles[mIn - 1]} : QPointF{*lastCorner()};
+        theta += 2.0 * signedAngle(tangentAt(p, a, segBulge(mIn), a), chord);
+        ++cnt;
+    }
+    const size_t bIdx = idx + 1 < size ? idx + 1 : 1;
+    if(bIdx + 1 < size || closed) { // у угла b есть исходящий сегмент
+        const size_t mOut = bIdx + 1 < size ? bIdx + 1 : 2;
+        if(mOut != idx) { // не сам редактируемый сегмент (две вершины по кругу)
+            theta += 2.0 * signedAngle(chord, tangentAt(b, nextCorner(mOut), segBulge(mOut), b));
+            ++cnt;
+        }
+    }
+    if(!cnt) return true; // соседей нет — не к чему касаться
+
+    theta /= cnt;
+    if(std::abs(theta) < 1e-3) { // почти прямая — сегмент выпрямляется
+        handle.setType(Handle::Adder);
+        handle = (a + b) / 2;
+    } else {
+        // модель «центр на биссектрисе» выражает дугу до полуокружности
+        theta = std::clamp(theta, -std::numbers::pi + 1e-6, std::numbers::pi - 1e-6);
+        handle = Geo::arcOf(a, b, Geo::bulgeOf(theta))->center;
+    }
+    redraw();
+    return true;
+}
 
 QPointF Shape::centroid() {
     return {};

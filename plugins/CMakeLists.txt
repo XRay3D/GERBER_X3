@@ -10,7 +10,7 @@ http://www.boost.org/LICENSE_1_0.txt
 ]]
 cmake_minimum_required(VERSION 4.0)
 
-#set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
+set(SHAPE_PLUGINS circle circlearc polyline rectangle text)
 add_subdirectory(shape)
 
 set(FILE_PLUGINS gerber dxf excellon #gerber2 svg

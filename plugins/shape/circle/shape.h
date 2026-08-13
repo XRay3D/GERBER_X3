@@ -27,9 +27,6 @@ public:
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShCircle; }
 
-    // Gi::Item interface
-    void redraw() override;
-
     // AbstractShape interface
     QIcon icon() const override;
     QString name() const override;
@@ -61,6 +58,9 @@ public:
     void deserialize(std::string_view json) override { Serial::loadInto(json, *this); }
     void postLoad(); // радиус — производная от ручек, восстанавливаем после чтения
 
+protected:
+    void rebuild() override;
+
 private:
     double radius_;
 };
@@ -75,6 +75,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShCircle; }
+    std::string_view typeName() const override { return "Circle"; }
     QIcon icon() const override { return QIcon::fromTheme(u"draw-ellipse"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{

@@ -80,10 +80,18 @@ CurveGeometry geometryOf(const XCurve& xc) {
     const double a0 = std::atan2(out.from.y() - out.center.y(), out.from.x() - out.center.x());
     const double a1 = std::atan2(out.to.y() - out.center.y(), out.to.x() - out.center.x());
     out.sweep = std::remainder(a1 - a0, 2.0 * std::numbers::pi);
+    // Знак разности atan2 может выпасть против хода куска в двух местах:
+    // у ровно-полуокружности (граница ±pi, поправка на 2*pi законна) и у
+    // МИКРОКУСКА, чьи концы слились в double, -- там разность целиком шум,
+    // и поправка на 2*pi раздувала кусок до полного оборота: площадь
+    // signedArea уезжала ровно на pi*r^2, и контур браковался проверкой
+    // в toGPoly. Разводим случаи по величине: настоящая полуокружность
+    // не бывает короче четверти оборота, шум -- длиннее.
+    constexpr double quarter = std::numbers::pi / 2.0;
     if(xc.orientation() == CGAL::COUNTERCLOCKWISE && out.sweep < 0.0)
-        out.sweep += 2.0 * std::numbers::pi;
+        out.sweep = out.sweep < -quarter ? out.sweep + 2.0 * std::numbers::pi : -out.sweep;
     if(xc.orientation() == CGAL::CLOCKWISE && out.sweep > 0.0)
-        out.sweep -= 2.0 * std::numbers::pi;
+        out.sweep = out.sweep > +quarter ? out.sweep - 2.0 * std::numbers::pi : -out.sweep;
     return out;
 }
 
@@ -287,8 +295,28 @@ std::optional<GPoly> buildGPoly(const Polyline& poly, double t) {
             || std::hypot(to.x() - from.x(), to.y() - from.y()) < weldTolerance) {
             addCurve(Curve(K::Segment_2(src, tgt)));
         } else {
-            const QPointF m = arcPointAt(from, to, from.bulge, t);
-            addCurve(Curve(src, K::Point_2(m.x(), m.y()), tgt));
+            // Дуга больше четверти оборота строится КУСКАМИ: по тройке точек
+            // на большой дуге CGAL изредка стабильно собирает её ДОПОЛНЕНИЕ
+            // (точная площадь уезжает ровно на pi*r^2 против bulge-вида), и
+            // выбор третьей точки внутри целой дуги это не лечит -- см.
+            // историю с перебором t в toGPoly. У куска не длиннее 90°
+            // неоднозначности нет; стыки кусков -- одни и те же double-точки,
+            // контур остаётся замкнутым точно.
+            const double theta = 4.0 * std::atan(from.bulge);
+            const int pieces = std::max(1, int(std::ceil(std::abs(theta) / (pi / 2.0))));
+            K::Point_2 a = src;
+            for(int k = 1; k <= pieces; ++k) {
+                const QPointF m = arcPointAt(from, to, from.bulge, (k - 1 + t) / pieces);
+                const K::Point_2 mid(m.x(), m.y());
+                if(k == pieces) {
+                    addCurve(Curve(a, mid, tgt));
+                } else {
+                    const QPointF e = arcPointAt(from, to, from.bulge, double(k) / pieces);
+                    const K::Point_2 b(e.x(), e.y());
+                    addCurve(Curve(a, mid, b));
+                    a = b;
+                }
+            }
         }
     }
     if(xcurves.empty()) return std::nullopt;
@@ -303,6 +331,15 @@ std::optional<GPoly> buildGPoly(const Polyline& poly, double t) {
 std::optional<GPoly> toGPoly(const Polyline& rawPoly) {
     const Polyline poly = weldClosedDuplicates(rawPoly);
     if(!poly.closed || poly.size() < 2) return std::nullopt;
+
+    // NaN/inf до точного домена не допускаются: GMP на NaN не бросает
+    // исключение, а абортит процесс изнутри mpq_set_d.
+    for(const Vertex& v: poly)
+        if(!std::isfinite(v.x()) || !std::isfinite(v.y()) || !std::isfinite(v.bulge)) {
+            qWarning("toGPoly: контур с нечисловой координатой отброшен (вершин %zu)",
+                poly.size());
+            return std::nullopt;
+        }
 
     // Двумя вершинами замкнутый контур задают только дуги: у окружности
     // это два полукруга, у линзы -- две дуги навстречу. Те же две вершины
@@ -342,6 +379,8 @@ std::optional<GPoly> toGPoly(const Polyline& rawPoly) {
     // справляется. Перебор из пяти точек на gerber1.gbr вытащил все контуры
     // до единого; если и он не помог, контур бракуется тем же путём, что и
     // невалидный -- лучше потерять деталь, чем залить чужую дырку медью.
+    int invalid{}, mismatch{};
+    double lastExactArea{};
     for(const double t: {0.5, 0.35, 0.65, 0.2, 0.8}) {
         std::optional<GPoly> pgn = buildGPoly(poly, t);
         if(!pgn) return std::nullopt; // вырожден -- другая точка дуги тут не поможет
@@ -354,14 +393,26 @@ std::optional<GPoly> toGPoly(const Polyline& rawPoly) {
         // точном домене -- обёртки Polygon/Polygons (DxfPolygon.h)
         // существуют ради него.
         const Traits traits;
-        if(!CGAL::is_valid_unknown_polygon(*pgn, traits)) continue;
+        if(!CGAL::is_valid_unknown_polygon(*pgn, traits)) {
+            ++invalid;
+            continue;
+        }
 
         const double exactArea = std::abs(Cgal::signedArea(*pgn));
         const double areaScale = std::max(exactArea, bulgeArea);
-        if(areaScale > 0.0 && std::abs(exactArea - bulgeArea) > 1e-6 * areaScale) continue;
+        if(areaScale > 0.0 && std::abs(exactArea - bulgeArea) > 1e-6 * areaScale) {
+            ++mismatch;
+            lastExactArea = exactArea;
+            continue;
+        }
 
         return pgn;
     }
+    // Потеря детали -- не повод молчать: контур виден в логе, а не «куда-то
+    // делась медь» через полгода.
+    qWarning("toGPoly: контур отброшен (вершин %zu, площадь %.9g/точная %.9g; invalid %d, "
+             "расхождение площади %d из 5 попыток)",
+        poly.size(), bulgeArea, lastExactArea, invalid, mismatch);
     return std::nullopt;
 }
 

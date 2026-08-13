@@ -94,16 +94,7 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
 
         double val = value.toDouble();
 
-        auto widthHeight = [&sh, val](auto get, auto set) {
-            for(auto* shape: sh) {
-                (((shape->handles[Shape::Point1].*get)() - (shape->handles[Shape::Point3].*get)()) < 0
-                        ? (shape->handles[Shape::Point3].*set)((shape->handles[Shape::Point1].*get)() + val)
-                        : (shape->handles[Shape::Point3].*set)((shape->handles[Shape::Point1].*get)() - val));
-                shape->curHandle = shape->handles.data() + Shape::Point3;
-                shape->redraw();
-            }
-        };
-
+        constexpr double nan = std::numeric_limits<double>::quiet_NaN();
         switch(index.row()) {
         case Shape::Center:
         case Shape::Point1:
@@ -116,8 +107,13 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
                 shape->redraw();
             }
             break;
-        case Shape::Width : widthHeight(&Shapes::Handle::x, &Shapes::Handle::setX); break;
-        case Shape::Height: widthHeight(&Shapes::Handle::y, &Shapes::Handle::setY); break;
+        // размер меняется от якоря, выбранного сеткой 3x3
+        case Shape::Width:
+            for(auto* shape: sh) shape->setSize(val, nan);
+            break;
+        case Shape::Height:
+            for(auto* shape: sh) shape->setSize(nan, val);
+            break;
         }
         return true;
     }
@@ -221,23 +217,33 @@ Editor::Editor(Shapes::Plugin* plugin)
     auto vLayout = new QVBoxLayout{this};
     vLayout->setContentsMargins(6, 6, 6, 6);
     vLayout->setSpacing(6);
-    {
+    { // якорь изменения ширины/высоты — сетка 3x3, как выравнивание у текста
         auto hLayout = new QHBoxLayout;
         hLayout->setContentsMargins(0, 0, 0, 0);
         hLayout->setSpacing(6);
-        for(int i{}; i < 6; ++i) {
-            auto action = new QAction{this};
-            action->setIcon(plugin->icon());
-            action->setCheckable(true);
-            auto toolButton = new QToolButton{this};
-            toolButton->setIconSize({24, 24});
-            toolButton->setDefaultAction(action);
-            actionGroup.addAction(action);
-            hLayout->addWidget(toolButton);
-        }
+        hLayout->addWidget(new QLabel{tr("Anchor:"), this});
+
+        auto groupBox = new QWidget{this};
+        auto gridLayout = new QGridLayout{groupBox};
+        gridLayout->setContentsMargins(6, 6, 6, 6);
+        gridLayout->addWidget(rb_tl = new QRadioButton{groupBox}, 0, 1);
+        gridLayout->addWidget(rb_tc = new QRadioButton{groupBox}, 0, 2);
+        gridLayout->addWidget(rb_tr = new QRadioButton{groupBox}, 0, 3);
+        gridLayout->addWidget(rb_lc = new QRadioButton{groupBox}, 1, 1);
+        gridLayout->addWidget(rb_cc = new QRadioButton{groupBox}, 1, 2);
+        gridLayout->addWidget(rb_rc = new QRadioButton{groupBox}, 1, 3);
+        gridLayout->addWidget(rb_bl = new QRadioButton{groupBox}, 2, 1);
+        gridLayout->addWidget(rb_bc = new QRadioButton{groupBox}, 2, 2);
+        gridLayout->addWidget(rb_br = new QRadioButton{groupBox}, 2, 3);
+        gridLayout->setColumnStretch(0, 1);
+        gridLayout->setColumnStretch(4, 1);
+        rb_bl->setChecked(true);
+        hLayout->addWidget(groupBox);
+
+        for(auto* rb: {rb_tl, rb_tc, rb_tr, rb_lc, rb_cc, rb_rc, rb_bl, rb_bc, rb_br})
+            connect(rb, &QRadioButton::toggled, this, &Editor::updateAnchor);
 
         vLayout->addLayout(hLayout);
-        hLayout->stretch(5);
     }
     vLayout->addWidget(view);
 
@@ -284,6 +290,50 @@ void Editor::add(Shapes::AbstractShape* shape) {
 void Editor::remove(Shapes::AbstractShape* shape) {
     std::erase(model->shapes, static_cast<Shape*>(shape));
     view->reset();
+}
+
+int Editor::anchor() const {
+    // clang-format off
+    if(rb_tl->isChecked()) return Shape::TopLeft;
+    if(rb_tc->isChecked()) return Shape::TopCenter;
+    if(rb_tr->isChecked()) return Shape::TopRight;
+    if(rb_lc->isChecked()) return Shape::CenterLeft;
+    if(rb_cc->isChecked()) return Shape::CenterCenter;
+    if(rb_rc->isChecked()) return Shape::CenterRight;
+    if(rb_bc->isChecked()) return Shape::BotCenter;
+    if(rb_br->isChecked()) return Shape::BotRight;
+    // clang-format on
+    return Shape::BotLeft;
+}
+
+void Editor::updateAnchor() {
+    if(resetFl) return;
+    const int a = anchor();
+    for(auto* shape: model->shapes)
+        if(shape->isSelected()) shape->anchor = a;
+}
+
+void Editor::updateData() {
+    view->reset();
+    for(auto* shape: model->shapes)
+        if(shape->isSelected()) {
+            resetFl = true;
+            // clang-format off
+            switch(shape->anchor) {
+            case Shape::TopLeft:      rb_tl->setChecked(true); break;
+            case Shape::TopCenter:    rb_tc->setChecked(true); break;
+            case Shape::TopRight:     rb_tr->setChecked(true); break;
+            case Shape::CenterLeft:   rb_lc->setChecked(true); break;
+            case Shape::CenterCenter: rb_cc->setChecked(true); break;
+            case Shape::CenterRight:  rb_rc->setChecked(true); break;
+            case Shape::BotLeft:      rb_bl->setChecked(true); break;
+            case Shape::BotCenter:    rb_bc->setChecked(true); break;
+            case Shape::BotRight:     rb_br->setChecked(true); break;
+            }
+            // clang-format on
+            resetFl = false;
+            break;
+        }
 }
 
 } // namespace ShRect

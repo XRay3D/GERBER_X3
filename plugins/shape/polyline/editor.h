@@ -43,13 +43,20 @@ class Editor : public Shapes::Editor {
 
     QTableView* view;
     QActionGroup actionGroup{this};
+    QAction* closedAction{};
+    QAction* arcAction{};
+    bool resetFl{}; // подавление обратной связи при синхронизации кнопок
 
 public:
     Editor(Shapes::Plugin* plugin);
 
+    // Режим средних ручек: false — деление сегмента новым углом,
+    // true — ручка становится центром дуги сегмента.
+    bool arcAddMode() const { return arcAction && arcAction->isChecked(); }
+
     void add(Shapes::AbstractShape* shape) override;
     void remove(Shapes::AbstractShape* shape) override;
-    void updateData() override { view->reset(); }
+    void updateData() override;
 
     ~Editor() override = default;
     Model* model;

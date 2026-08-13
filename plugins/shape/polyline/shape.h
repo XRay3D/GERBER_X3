@@ -27,9 +27,6 @@ public:
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShPolyLine; }
 
-    // Gi::Item interface
-    void redraw() override;
-
     // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
@@ -37,11 +34,20 @@ public:
     bool addPt(const QPointF& pt) override;
 
     bool isClosed() const;
+    void setClosed(bool fl);
 
 protected:
-    void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
+    void rebuild() override;
+    // Двойной клик по ручке-центру: дуга перестраивается касательной к
+    // соседним сегментам (с обеих сторон — среднее двух касательных углов).
+    bool handleDoubleClick(Shapes::Handle& handle) override;
 
 private:
+    Shapes::Handle* lastCorner() const; // последний угол (у замкнутой хвост — средняя ручка)
+    QPointF nextCorner(size_t midIdx) const; // угол после средней ручки (с заворотом)
+    QPointF arcCenter(size_t midIdx) const;  // проекция ручки на серединный перпендикуляр хорды
+    double segBulge(size_t midIdx) const;    // прогиб сегмента по его средней ручке
+    void updMiddle(size_t midIdx);           // средняя ручка следует за углами
     QPointF centroid();
     QPointF centroidFast(); //??????
 };
@@ -55,6 +61,7 @@ class Plugin : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface
     uint32_t type() const override { return Gi::Type::ShPolyLine; }
+    std::string_view typeName() const override { return "Polyline"; }
     QIcon icon() const override { return QIcon::fromTheme(u"draw-line"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{

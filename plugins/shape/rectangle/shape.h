@@ -27,9 +27,6 @@ public:
     // QGraphicsItem interface
     int type() const override { return Gi::Type::ShRectangle; }
 
-    // Gi::Item interface
-    void redraw() override;
-
     // AbstractShape interface
     QString name() const override;
     QIcon icon() const override;
@@ -46,8 +43,32 @@ public:
         Height,          // model
     };
 
+    enum { // якорь изменения размера, комбинации Qt::Alignment (как у ShTxt)
+        // clang-format off
+        BotCenter   = Qt::AlignBottom | Qt::AlignHCenter,
+        BotLeft     = Qt::AlignBottom | Qt::AlignLeft,
+        BotRight    = Qt::AlignBottom | Qt::AlignRight,
+
+        CenterCenter = Qt::AlignHCenter | Qt::AlignVCenter,
+        CenterLeft   = Qt::AlignVCenter | Qt::AlignLeft,
+        CenterRight  = Qt::AlignVCenter | Qt::AlignRight,
+
+        TopCenter   = Qt::AlignTop | Qt::AlignHCenter,
+        TopLeft     = Qt::AlignTop | Qt::AlignLeft,
+        TopRight    = Qt::AlignTop | Qt::AlignRight,
+        // clang-format on
+    };
+
+    int anchor{BotLeft};
+
+    // Новый размер (NaN — не менять) с якорной точкой/кромкой на месте.
+    void setSize(double w, double h);
+
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
+    void deserialize(std::string_view json) override { Serial::loadInto(json, *this); }
+
 protected:
-    void readAndInit(QDataStream& stream [[maybe_unused]]) override { redraw(); } // FIXME init()
+    void rebuild() override;
 };
 
 class Plugin final : public Shapes::Plugin {
@@ -60,6 +81,7 @@ class Plugin final : public Shapes::Plugin {
 public:
     // Shapes::Plugin interface *
     uint32_t type() const override { return Gi::Type::ShRectangle; }
+    std::string_view typeName() const override { return "Rectangle"; }
     QIcon icon() const override { return QIcon::fromTheme(u"draw-rectangle"_s); }
     Shapes::AbstractShape* createShape(const QPointF& point = {}) override {
         auto shape = new Shape{

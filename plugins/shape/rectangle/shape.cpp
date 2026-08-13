@@ -31,7 +31,8 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
     App::grView().addItem(this);
 }
 
-void Shape::redraw() {
+void Shape::rebuild() {
+    if(handles.size() < PtCount) return;
     auto updCenter = [this] {
         handles[Center] = QLineF{handles[Point1], handles[Point3]}.center();
     };
@@ -41,7 +42,7 @@ void Shape::redraw() {
         handles[p2] = {curHandle->x(), handles[src].y()};
     };
 
-    switch(std::distance(handles.data(), curHandle)) {
+    switch(curHandle ? std::distance(handles.data(), curHandle) : PtCount) {
     case Center: {
         QRectF rect{handles[Point1], handles[Point3]};
         rect.moveCenter(handles[Center]);
@@ -86,6 +87,29 @@ QIcon Shape::icon() const { return QIcon::fromTheme(u"draw-rectangle"_s); }
 
 void Shape::setPt(const QPointF& pt) {
     *curHandle = pt;
+    redraw();
+}
+
+void Shape::setSize(double w, double h) {
+    const QRectF r = QRectF{handles[Point1], handles[Point3]}.normalized();
+    double x1 = r.left(), x2 = r.right(), y1 = r.top(), y2 = r.bottom();
+    if(!std::isnan(w) && w > 0) {
+        if(anchor & Qt::AlignLeft) x2 = x1 + w;
+        else if(anchor & Qt::AlignRight) x1 = x2 - w;
+        else x1 = r.center().x() - w / 2, x2 = r.center().x() + w / 2;
+    }
+    if(!std::isnan(h) && h > 0) {
+        // сцена растёт по Y вверх: низ на экране — меньший Y
+        if(anchor & Qt::AlignBottom) y2 = y1 + h;
+        else if(anchor & Qt::AlignTop) y1 = y2 - h;
+        else y1 = r.center().y() - h / 2, y2 = r.center().y() + h / 2;
+    }
+    handles[Point1] = {x1, y1};
+    handles[Point2] = {x2, y1};
+    handles[Point3] = {x2, y2};
+    handles[Point4] = {x1, y2};
+    handles[Center] = {(x1 + x2) / 2, (y1 + y2) / 2};
+    curHandle = {};
     redraw();
 }
 

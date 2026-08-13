@@ -147,7 +147,8 @@ void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
             QLineF{p + QPointF{0, +k}, p + QPointF{0, -k}}
         });
     };
-    test(*r::find(handles, Handle::Center, &Handle::type));
+    if(auto it = r::find(handles, Handle::Center, &Handle::type); it != handles.end())
+        test(*it);
 
     if(!isSelected()) return;
 #if 0
@@ -163,7 +164,7 @@ void AbstractShape::paint(QPainter* painter, const QStyleOptionGraphicsItem* /*o
     for(auto& handle: handles) {
         auto color = handle.color();
         if(&handle == curHandle) {
-            color = Qt::magenta;
+            color = Qt::cyan; // не magenta: она занята ручкой-центром дуги
             drawPos(painter, handle, scale());
         }
         color.setAlpha(100);
@@ -218,11 +219,10 @@ void AbstractShape::updateColors() {
 }
 
 void AbstractShape::redraw() {
-    if(static int fl; !fl) ++fl, redraw(), --fl; // call child overload once
-    if(!isEditable()) return;
+    prepareGeometryChange(); // индекс сцены инвалидируется по СТАРОМУ rect
+    rebuild();
     updateHandleShape();
-    setPos(1, 1), setPos(0, 0); // NOTE needed to update internal data (BSP etc),
-    // calling update() has no effect.
+    update();
 }
 
 QVariant AbstractShape::data(const QModelIndex& index, int role) const {
@@ -326,9 +326,9 @@ bool AbstractShape::inHandle(const QPointF& point) {
     curHandle = {};
     const auto hSize = HandleSize * 0.5 * scale();
     for(auto& var: handles)
-        // TODO if(Geo::distance(point, var) <= hSize)
-        //     return curHandle = &var, true;
-        return false;
+        if(Geo::distance(point, var) <= hSize)
+            return curHandle = &var, true;
+    return false;
 }
 
 void AbstractShape::updateHandleShape() {
@@ -345,6 +345,7 @@ void AbstractShape::updateHandleShape() {
 
 void AbstractShape::mouseDoubleClickEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseDoubleClickEvent(event);
+    if(isEditable() && inHandle(event->pos()) && handleDoubleClick(*curHandle)) return;
     App::shapePlugin(type())->requestEditor();
 }
 
@@ -397,9 +398,11 @@ void AbstractShape::hoverEnterEvent(QGraphicsSceneHoverEvent* event) {
 
 QVariant AbstractShape::itemChange(GraphicsItemChange change, const QVariant& value) {
     auto value_ = Gi::Item::itemChange(change, value);
-    if(change == ItemSelectedHasChanged && value.toBool()) {
-        plugin->editor()->updateData();
-        // if(bool fl{}; scale(&fl) && fl) AbstractShape::redraw();
+    if(change == ItemSelectedHasChanged) {
+        // boundingRect()/shape() зависят от isSelected() (объединение с ручками)
+        prepareGeometryChange();
+        updateHandleShape();
+        if(value.toBool()) plugin->editor()->updateData();
     }
     return value_;
 }
@@ -407,10 +410,13 @@ QVariant AbstractShape::itemChange(GraphicsItemChange change, const QVariant& va
 void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
     class Dialog final : public QDialog {
         AbstractShape* as;
+        // redraw() может вставлять/удалять ручки и переехать вектор,
+        // сырой curHandle к этому моменту повиснет — держим индекс.
+        size_t idx;
 
     public:
         Dialog(AbstractShape* as_, const QPoint& screenPos)
-            : as{as_} {
+            : as{as_}, idx(as_->curHandle - as_->handles.data()) {
             move(screenPos);
             setWindowFlags(Qt::Popup);
             setModal(false);
@@ -419,11 +425,12 @@ void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
                 ds->setDecimals(3);
                 ds->setRange(-1000, +1000);
                 ds->setSuffix(QObject::tr(" mm"));
-                // ds->setValue((*as->curHandle.*get)());
-                ds->setValue((*as->curHandle.*get)());
+                ds->setValue((as->handles[idx].*get)());
                 connect(ds, &QDoubleSpinBox::valueChanged, [this, set](auto val) {
-                    (*as->curHandle.*set)(val);
-                    as->AbstractShape::redraw();
+                    if(idx >= as->handles.size()) return;
+                    (as->handles[idx].*set)(val);
+                    as->curHandle = as->handles.data() + idx;
+                    as->redraw();
                 });
                 return ds;
             };
