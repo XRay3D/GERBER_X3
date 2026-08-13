@@ -8,6 +8,7 @@ CompileFlags:
     - -fmodule-only
     - -fdeps-*                  # p1689-сканирование от CMake/GCC
     - -fconcepts-diagnostics-depth*
+    - -fhardened                # GCC 16; у clang такого нет -- ошибка в каждом файле
     - -flto*
     - -mcpu=*                   # если тянутся embedded-флаги, чужие для clang
   Add:
@@ -29,3 +30,9 @@ CompileFlags:
 
 Diagnostics:
   UnusedIncludes: None          # <contracts> будет казаться «неиспользуемым» из-за макросов
+  Suppress:
+    # <meta> из GCC 16: std::meta::exception::what() -- consteval поверх
+    # обычного виртуального std::exception::what() (bits/exception.h). Это
+    # законный C++26 (P2996), но clang его ещё не умеет и роняет ошибку в
+    # каждом файле, включающем serial.h. Семантику проверяет g++-16.
+    - consteval_override
