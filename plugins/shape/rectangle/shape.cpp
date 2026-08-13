@@ -32,7 +32,7 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF pt1, QPointF pt2)
 }
 
 void Shape::rebuild() {
-    if(handles.empty()) return;
+    if(handles.size() < PtCount) return;
     auto updCenter = [this] {
         handles[Center] = QLineF{handles[Point1], handles[Point3]}.center();
     };

@@ -34,7 +34,7 @@ Shape::Shape(Shapes::Plugin* plugin, QPointF center, QPointF pt)
 }
 
 void Shape::rebuild() {
-    if(handles.empty()) return;
+    if(handles.size() < PtCount) return;
     switch(curHandle ? std::distance(handles.data(), curHandle) : PtCount) {
     case Center: {
         auto radLine = QLineF::fromPolar(radius_, 0);

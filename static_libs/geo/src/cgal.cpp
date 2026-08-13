@@ -332,6 +332,15 @@ std::optional<GPoly> toGPoly(const Polyline& rawPoly) {
     const Polyline poly = weldClosedDuplicates(rawPoly);
     if(!poly.closed || poly.size() < 2) return std::nullopt;
 
+    // NaN/inf до точного домена не допускаются: GMP на NaN не бросает
+    // исключение, а абортит процесс изнутри mpq_set_d.
+    for(const Vertex& v: poly)
+        if(!std::isfinite(v.x()) || !std::isfinite(v.y()) || !std::isfinite(v.bulge)) {
+            qWarning("toGPoly: контур с нечисловой координатой отброшен (вершин %zu)",
+                poly.size());
+            return std::nullopt;
+        }
+
     // Двумя вершинами замкнутый контур задают только дуги: у окружности
     // это два полукруга, у линзы -- две дуги навстречу. Те же две вершины
     // без прогибов -- отрезок, пройденный туда и обратно; площади у него

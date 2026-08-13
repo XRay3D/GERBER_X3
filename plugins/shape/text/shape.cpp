@@ -37,6 +37,9 @@ void Shape::rebuild() {
 
     QFontMetrics fm{txtData.font};
     const double capHeight = fm.capHeight();
+    // У шрифта без метрики capHeight масштаб уходит в inf, контуры — в
+    // NaN, а NaN в точном домене роняет GMP (mpq_set_d абортится).
+    if(capHeight <= 0.0) return;
     const double scale = txtData.height / capHeight;
 
     QPainterPath painterPath; // TODO align multiline text

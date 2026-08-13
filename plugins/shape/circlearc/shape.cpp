@@ -53,7 +53,7 @@ constexpr double distancePointToLine(const QPointF& pt, const QLineF& line) {
 }
 
 void Shape::rebuild() {
-    if(handles.empty()) return;
+    if(handles.size() < PtCount) return;
     if(curHandle) {
         Timer_uS t{"redraw"};
         auto updateCenter = [this](bool isCenter = {}) {
