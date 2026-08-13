@@ -34,6 +34,21 @@ set(GGCORE_LIBS
 
 add_library(${PROJECT_NAME} SHARED ggcore_dummy.cpp)
 
+if(MINGW)
+  # Тот же класс проблем, что и у сторонних целей под LTO на MinGW (см.
+  # комментарий в корневом CMakeLists про FetchContent и "COFF object format
+  # mismatch"): здесь mingw-ld на этапе auto-export падает на десятках
+  # шаблонных weak-символов (std::ranges::zip_view, std::variant,
+  # Geo::Polyline...) с "cannot export ...: symbol wrong type (4 vs 3)".
+  # LTO мержит девять WHOLE_ARCHIVE-архивов через параллельные LTRANS-
+  # партиции, и один и тот же weak-символ получает в разных партициях
+  # разный тип (функция/данные) -- auto-export эту рассинхронизацию не
+  # переживает. Отключаем LTO только для ggcore: остальной Release (в т.ч.
+  # Linux) LTO не теряет.
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+      INTERPROCEDURAL_OPTIMIZATION FALSE)
+endif()
+
 # WHOLE_ARCHIVE: в .so нужны ВСЕ объекты статлиб (включая moc- и rcc-объекты
 # с Q_CONSTRUCTOR_FUNCTION, например gc_scripts.qrc), а не только те, на
 # которые ссылается сам ggcore — на остальные ссылаются плагины, и обычная
