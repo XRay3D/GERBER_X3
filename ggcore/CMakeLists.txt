@@ -45,8 +45,16 @@ if(MINGW)
   # разный тип (функция/данные) -- auto-export эту рассинхронизацию не
   # переживает. Отключаем LTO только для ggcore: остальной Release (в т.ч.
   # Linux) LTO не теряет.
+  #
+  # ВАЖНО: LTO для Release включается корневым CMakeLists через ПЕРЕМЕННУЮ
+  # CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE, а не через общее свойство --
+  # она инициализирует именно config-специфичное свойство цели
+  # INTERPROCEDURAL_OPTIMIZATION_RELEASE, и CMake проверяет его РАНЬШЕ
+  # config-независимого INTERPROCEDURAL_OPTIMIZATION. Гасить нужно
+  # именно _RELEASE, иначе LTO остаётся включённым (что и произошло).
   set_target_properties(${PROJECT_NAME} PROPERTIES
-      INTERPROCEDURAL_OPTIMIZATION FALSE)
+      INTERPROCEDURAL_OPTIMIZATION FALSE
+      INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
 endif()
 
 # WHOLE_ARCHIVE: в .so нужны ВСЕ объекты статлиб (включая moc- и rcc-объекты
