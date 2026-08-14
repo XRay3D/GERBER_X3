@@ -35,26 +35,36 @@ set(GGCORE_LIBS
 add_library(${PROJECT_NAME} SHARED ggcore_dummy.cpp)
 
 if(MINGW)
-  # Тот же класс проблем, что и у сторонних целей под LTO на MinGW (см.
-  # комментарий в корневом CMakeLists про FetchContent и "COFF object format
-  # mismatch"): здесь mingw-ld на этапе auto-export падает на десятках
+  # mingw-ld падает на этапе auto-export (безусловный экспорт ВСЕХ глобальных
+  # символов, когда в линковке нет ни одного явного dllexport) на десятках
   # шаблонных weak-символов (std::ranges::zip_view, std::variant,
   # Geo::Polyline...) с "cannot export ...: symbol wrong type (4 vs 3)".
-  # LTO мержит девять WHOLE_ARCHIVE-архивов через параллельные LTRANS-
-  # партиции, и один и тот же weak-символ получает в разных партициях
-  # разный тип (функция/данные) -- auto-export эту рассинхронизацию не
-  # переживает. Отключаем LTO только для ggcore: остальной Release (в т.ч.
-  # Linux) LTO не теряет.
+  # Похоже на известный баг binutils в собственном коде auto-export: когда
+  # --whole-archive силой затягивает ВСЕ члены девяти архивов разом (а не
+  # только реально нужные, как при обычной линковке), один и тот же weak-
+  # шаблонный символ оказывается продублирован между архивами, и внутренняя
+  # проверка типа символа в auto-export с этим не справляется.
   #
-  # ВАЖНО: LTO для Release включается корневым CMakeLists через ПЕРЕМЕННУЮ
-  # CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE, а не через общее свойство --
-  # она инициализирует именно config-специфичное свойство цели
-  # INTERPROCEDURAL_OPTIMIZATION_RELEASE, и CMake проверяет его РАНЬШЕ
-  # config-независимого INTERPROCEDURAL_OPTIMIZATION. Гасить нужно
-  # именно _RELEASE, иначе LTO остаётся включённым (что и произошло).
+  # Отключение LTO для самого ggcore (единственный TU -- ggcore_dummy.cpp)
+  # проверено и НЕ помогает: девять статлиб сами всё ещё собраны с LTO
+  # (их IPO не трогаем), и GCC автоматически подключает LTO-плагин на
+  # линковке, как только видит LTO-объекты во входных .a, вне зависимости
+  # от IPO-настройки самого ggcore -- лог показывает одинаковые 44 LTRANS
+  # job'а что с этим свойством, что без. Оставлено как есть -- вреда нет,
+  # пользы, скорее всего, тоже, реальная причина не в LTO.
   set_target_properties(${PROJECT_NAME} PROPERTIES
       INTERPROCEDURAL_OPTIMIZATION FALSE
       INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
+
+  # Основная попытка фикса: явный .def-файл вместо auto-export. CMake сам
+  # извлекает список экспортируемых имён через nm (в т.ч. из линкуемых
+  # статических архивов) и передаёт линкеру готовый .def -- это ДРУГОЙ,
+  # более простой путь построения экспортной таблицы (сопоставление имён
+  # уже слинкованным адресам), который, по всей видимости, не проходит
+  # через тот же баговый код auto-export, что и упал выше. Непроверено на
+  # реальной сборке -- следующая точка наблюдения в CI.
+  set_target_properties(${PROJECT_NAME} PROPERTIES
+      WINDOWS_EXPORT_ALL_SYMBOLS ON)
 endif()
 
 # WHOLE_ARCHIVE: в .so нужны ВСЕ объекты статлиб (включая moc- и rcc-объекты
