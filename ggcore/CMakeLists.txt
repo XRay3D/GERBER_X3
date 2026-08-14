@@ -34,38 +34,13 @@ set(GGCORE_LIBS
 
 add_library(${PROJECT_NAME} SHARED ggcore_dummy.cpp)
 
-if(MINGW)
-  # mingw-ld падает на этапе auto-export (безусловный экспорт ВСЕХ глобальных
-  # символов, когда в линковке нет ни одного явного dllexport) на десятках
-  # шаблонных weak-символов (std::ranges::zip_view, std::variant,
-  # Geo::Polyline...) с "cannot export ...: symbol wrong type (4 vs 3)".
-  # Похоже на известный баг binutils в собственном коде auto-export: когда
-  # --whole-archive силой затягивает ВСЕ члены девяти архивов разом (а не
-  # только реально нужные, как при обычной линковке), один и тот же weak-
-  # шаблонный символ оказывается продублирован между архивами, и внутренняя
-  # проверка типа символа в auto-export с этим не справляется.
-  #
-  # Отключение LTO для самого ggcore (единственный TU -- ggcore_dummy.cpp)
-  # проверено и НЕ помогает: девять статлиб сами всё ещё собраны с LTO
-  # (их IPO не трогаем), и GCC автоматически подключает LTO-плагин на
-  # линковке, как только видит LTO-объекты во входных .a, вне зависимости
-  # от IPO-настройки самого ggcore -- лог показывает одинаковые 44 LTRANS
-  # job'а что с этим свойством, что без. Оставлено как есть -- вреда нет,
-  # пользы, скорее всего, тоже, реальная причина не в LTO.
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-      INTERPROCEDURAL_OPTIMIZATION FALSE
-      INTERPROCEDURAL_OPTIMIZATION_RELEASE FALSE)
-
-  # Основная попытка фикса: явный .def-файл вместо auto-export. CMake сам
-  # извлекает список экспортируемых имён через nm (в т.ч. из линкуемых
-  # статических архивов) и передаёт линкеру готовый .def -- это ДРУГОЙ,
-  # более простой путь построения экспортной таблицы (сопоставление имён
-  # уже слинкованным адресам), который, по всей видимости, не проходит
-  # через тот же баговый код auto-export, что и упал выше. Непроверено на
-  # реальной сборке -- следующая точка наблюдения в CI.
-  set_target_properties(${PROJECT_NAME} PROPERTIES
-      WINDOWS_EXPORT_ALL_SYMBOLS ON)
-endif()
+# На MinGW экспортная таблица DLL строится авто-экспортом mingw-ld; он
+# совместим с whole-archive только без LTO-объектов в архивах (иначе
+# "cannot export ...: symbol wrong type (4 vs 3)"), поэтому LTO под MinGW
+# выключен глобально -- см. корневой CMakeLists у fetchcontent_makeavailable.
+# WINDOWS_EXPORT_ALL_SYMBOLS здесь не работает: nm гоняется только по
+# собственным объектникам цели (у ggcore -- одна пустышка), символы из
+# линкуемых архивов в .def не попадают.
 
 # WHOLE_ARCHIVE: в .so нужны ВСЕ объекты статлиб (включая moc- и rcc-объекты
 # с Q_CONSTRUCTOR_FUNCTION, например gc_scripts.qrc), а не только те, на
