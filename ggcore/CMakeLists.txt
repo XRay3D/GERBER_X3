@@ -39,10 +39,11 @@ add_library(${PROJECT_NAME} SHARED ggcore_dummy.cpp)
 # взятый в exe/плагине, указывает на локальный thunk импортной библиотеки,
 # и connect() через границу DLL не находит сигнал. Внутри самого ядра макрос
 # обязан быть пуст (dllexport выключил бы auto-export mingw-ld), поэтому
-# GGCORE_BUILD ставится всем статлибам, попадающим в ggcore, включая
-# транзитивную geometry (её TU включают заголовки ядра).
+# GGCORE_BUILD ставится всем статлибам, попадающим в ggcore. Транзитивная
+# geometry -- алиас Geo (static_libs/CMakeLists.txt), она уже в списке;
+# на алиас target_compile_definitions звать нельзя.
 if(WIN32)
-  foreach(lib IN LISTS GGCORE_LIBS ITEMS geometry)
+  foreach(lib IN LISTS GGCORE_LIBS)
     target_compile_definitions(${lib} PRIVATE GGCORE_BUILD)
   endforeach()
 endif()
