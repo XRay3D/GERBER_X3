@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "abstract_file.h"
 #include "project.h"
 
@@ -35,7 +37,7 @@ namespace FileTree {
 
 class Node;
 
-class Model : public QAbstractItemModel {
+class GGCORE_EXPORT Model : public QAbstractItemModel {
     Q_OBJECT
     Node* rootItem;
     std::map<int, Node*> fileFolders;

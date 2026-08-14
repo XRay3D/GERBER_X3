@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "ggcore_export.h"
 #include <QGraphicsItem>
 #include <QGraphicsView>
 #include <QScreen>
@@ -38,7 +40,7 @@ struct EnumHelper2 : std::integral_constant<bool, N != 0> {
 template <typename... Es>
 EnumHelper2(Es...) -> EnumHelper2<sizeof...(Es)>;
 
-class GraphicsView : public QGraphicsView {
+class GGCORE_EXPORT GraphicsView : public QGraphicsView {
     Q_OBJECT
 
     Q_PROPERTY(double scale READ getScale WRITE setScale)

@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "gc_pathutils.h"
 #include "gc_types.h"
 #include "gi_error.h"
@@ -52,7 +54,7 @@ namespace GCode {
 
 class File;
 
-class Creator : public QObject, public Progress {
+class GGCORE_EXPORT Creator : public QObject, public Progress {
     Q_OBJECT
 
 public:

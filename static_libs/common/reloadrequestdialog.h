@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include <QDialog>
 #include <QHash>
 
@@ -28,7 +30,7 @@ class QScrollArea;
 //
 // Немодальное намеренно: ответы не срочные, а файлы могут меняться и дальше --
 // новая строка должна лечь в то же окно.
-class ReloadRequestDialog : public QDialog {
+class GGCORE_EXPORT ReloadRequestDialog : public QDialog {
     Q_OBJECT
 
 public:

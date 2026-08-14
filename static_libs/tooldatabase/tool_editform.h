@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "doublespinbox.h"
 
 #include "tool.h"
@@ -23,7 +25,7 @@ class ToolEditForm;
 
 class ToolItem;
 
-class ToolEditForm : public QWidget {
+class GGCORE_EXPORT ToolEditForm : public QWidget {
     Q_OBJECT
     friend class ToolEditDialog;
 

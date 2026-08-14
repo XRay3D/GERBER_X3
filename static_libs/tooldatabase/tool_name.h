@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "ggcore_export.h"
 #ifndef TOOLNAME_H
     #define TOOLNAME_H
 
@@ -18,7 +20,7 @@
 
 class QLabel;
 
-class ToolName : public QWidget {
+class GGCORE_EXPORT ToolName : public QWidget {
     Q_OBJECT
     QLabel* lblPixmap;
     QLabel* lblName;

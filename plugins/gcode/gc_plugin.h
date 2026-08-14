@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "abstract_fileplugin.h"
 
 class QAction;
@@ -20,7 +22,7 @@ class AbstractFile;
 
 namespace GCode {
 
-class Plugin : public AbstractFilePlugin {
+class GGCORE_EXPORT Plugin : public AbstractFilePlugin {
     Q_OBJECT
 
 public:

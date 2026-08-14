@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "depthform.h"
 #include "gcode.h"
 
@@ -21,7 +23,7 @@ namespace GCode {
 
 class File;
 
-class Form : public QWidget {
+class GGCORE_EXPORT Form : public QWidget {
     Q_OBJECT
 
 public:
