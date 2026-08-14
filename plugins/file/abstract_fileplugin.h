@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "ft_view.h"
 #include "plugindata.h"
 // #include "settings.h"
@@ -40,7 +42,7 @@ public:
     virtual void writeSettings(MySettings& settings) = 0;
 };
 
-class AbstractFilePlugin : public QObject, public PluginData {
+class GGCORE_EXPORT AbstractFilePlugin : public QObject, public PluginData {
     Q_OBJECT
 
 public:

@@ -10,12 +10,14 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "tool_model.h"
 #include <QTreeView>
 
 class QPushButton;
 
-class ToolTreeView : public QTreeView {
+class GGCORE_EXPORT ToolTreeView : public QTreeView {
     Q_OBJECT
 public:
     explicit ToolTreeView(QWidget* parent = nullptr);

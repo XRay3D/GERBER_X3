@@ -9,13 +9,15 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "ggcore_export.h"
 #include <QWidget>
 
 class DoubleSpinBox;
 class QLabel;
 class QRadioButton;
 
-class DepthForm : public QWidget {
+class GGCORE_EXPORT DepthForm : public QWidget {
     Q_OBJECT
 public:
     explicit DepthForm(QString&& groupName, QWidget* parent = nullptr);

@@ -34,6 +34,19 @@ set(GGCORE_LIBS
 
 add_library(${PROJECT_NAME} SHARED ggcore_dummy.cpp)
 
+# Классы ядра с сигналами помечены GGCORE_EXPORT (ggcore_export.h): для
+# потребителей на Windows это dllimport — иначе PMF-указатель на сигнал,
+# взятый в exe/плагине, указывает на локальный thunk импортной библиотеки,
+# и connect() через границу DLL не находит сигнал. Внутри самого ядра макрос
+# обязан быть пуст (dllexport выключил бы auto-export mingw-ld), поэтому
+# GGCORE_BUILD ставится всем статлибам, попадающим в ggcore, включая
+# транзитивную geometry (её TU включают заголовки ядра).
+if(WIN32)
+  foreach(lib IN LISTS GGCORE_LIBS ITEMS geometry)
+    target_compile_definitions(${lib} PRIVATE GGCORE_BUILD)
+  endforeach()
+endif()
+
 # На MinGW экспортная таблица DLL строится авто-экспортом mingw-ld; он
 # совместим с whole-archive только без LTO-объектов в архивах (иначе
 # "cannot export ...: symbol wrong type (4 vs 3)"), поэтому LTO под MinGW

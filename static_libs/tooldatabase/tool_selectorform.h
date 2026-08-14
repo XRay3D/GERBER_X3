@@ -9,6 +9,8 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  ********************************************************************************/
 #pragma once
+
+#include "ggcore_export.h"
 #include "tool.h"
 #include <QWidget>
 
@@ -17,7 +19,7 @@ class QHBoxLayout;
 class QLabel;
 class QPushButton;
 
-class ToolSelectorForm : public QWidget {
+class GGCORE_EXPORT ToolSelectorForm : public QWidget {
     Q_OBJECT
 
 public:

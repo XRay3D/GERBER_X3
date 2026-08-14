@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "abstract_shape.h"
 #include "serial.h"
 
@@ -45,7 +47,7 @@ using FilesMap = std::map<int, std::shared_ptr<AbstractFile>>;
 using ShapesMap = std::map<int, Shapes::AbstractShape*>;
 using ItemMap = std::map<int, Gi::Item*>;
 
-class Project : public QObject {
+class GGCORE_EXPORT Project : public QObject {
     Q_OBJECT
 
 public:

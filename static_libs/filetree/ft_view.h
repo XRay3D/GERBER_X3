@@ -10,13 +10,15 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "ft_model.h"
 
 #include <QTreeView>
 
 namespace FileTree {
 
-class View : public QTreeView {
+class GGCORE_EXPORT View : public QTreeView {
     Q_OBJECT
     friend class ::MainWindow;
 

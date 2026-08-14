@@ -10,6 +10,8 @@
  ********************************************************************************/
 #pragma once
 
+#include "ggcore_export.h"
+
 #include "abstract_shape.h"
 #include "ft_view.h"
 #include "plugindata.h"
@@ -23,7 +25,7 @@ struct Editor : QWidget {
     virtual void updateData() = 0;
 };
 
-class Plugin : public QObject, public PluginData {
+class GGCORE_EXPORT Plugin : public QObject, public PluginData {
     Q_OBJECT
 
     // std::atomic<AbstractShape*> item {};
