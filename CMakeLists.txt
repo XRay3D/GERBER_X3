@@ -136,9 +136,17 @@ endif()
 
 fetchcontent_makeavailable(ctre clipper2 simdjson)
 
-if(MINGW)
-  set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
-endif()
+# LTO под MinGW выключен НАСОВСЕМ (раньше здесь возвращалось ON после
+# FetchContent). С появлением shared-ядра libggcore линковка DLL идёт через
+# --whole-archive по девяти статлибам, и mingw-ld падает в auto-export на
+# дублирующихся weak-шаблонных символах: "cannot export ...: symbol wrong
+# type (4 vs 3)". Проверено тремя прогонами CI: гасить IPO у самой цели
+# ggcore бесполезно (GCC подключает LTO-плагин, увидев LTO-объекты во
+# входных архивах, независимо от настроек потребителя), а
+# WINDOWS_EXPORT_ALL_SYMBOLS не покрывает символы из линкуемых архивов
+# (nm гоняется только по собственным объектникам цели, у ggcore это одна
+# пустышка). Единственный рабочий вариант -- собирать статлибы без LTO,
+# т.е. выключить его на весь MinGW-конфиг.
 
 # Статический libsimdjson.a влинковывается в плагины (.so) — без PIC не
 # слинкуется.
