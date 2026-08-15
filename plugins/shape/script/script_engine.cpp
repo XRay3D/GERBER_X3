@@ -281,7 +281,7 @@ void ScriptRegistry::load(Script& script) {
         QJSValueIterator it{paramsObj};
         while(it.hasNext()) {
             it.next();
-            ParamDef def{.name = it.name()};
+            ParamDef def{.name = it.name(), .description = {}};
             const QJSValue v = it.value();
             if(v.isNumber() || v.isBool()) {
                 def.value = v.toNumber();

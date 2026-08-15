@@ -12,6 +12,7 @@
 #include "geo/util.h"
 #include "graphicsview.h"
 
+#include <QFileInfo>
 #include <QIcon>
 
 using Shapes::Handle;
@@ -60,7 +61,11 @@ void Shape::rebuild() {
     closed = std::ranges::any_of(curves_, &Geo::Polyline::closed);
 }
 
-QString Shape::name() const { return QObject::tr("Script"); }
+QString Shape::name() const {
+    // В дереве -- по имени файла скрипта (без .js), пока скрипт не выбран -- «Script».
+    if(script_.isEmpty()) return QObject::tr("Script");
+    return QFileInfo{script_}.completeBaseName();
+}
 
 QIcon Shape::icon() const { return QIcon::fromTheme(u"text-x-script"_s); }
 
@@ -79,6 +84,10 @@ void Shape::setScript(const QString& name) {
         params_ = script->merge(same ? params_ : Params{}, registry.lastParams(name));
     curHandle = {};
     redraw();
+    // Имя в дереве и подсказка зависят от скрипта.
+    setToolTip(this->name() + QString::number(id()));
+    if(row() >= 0 && App::fileModelPtr())
+        emit App::fileModel().dataChanged(index(), index());
 }
 
 void Shape::setParam(const QString& name, double value) {
