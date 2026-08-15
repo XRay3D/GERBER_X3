@@ -795,12 +795,29 @@ void MainWindow::createActionsShape() {
         if(auto* editor = shPlugin->editor()) editor->setWindowTitle(shPlugin->name());
         actionGroup.addAction(action);
         connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
-        connect(shPlugin, &Shapes::Plugin::showEditor, this, &MainWindow::setDockWidget);
-        connect(action, &QAction::toggled, [shPlugin = shPlugin, this](bool checked) {
+        // Двойной клик по фигуре: показать редактор и подсветить его кнопку в
+        // тулбаре (exclusive-группа сама снимет выделение с прежнего типа).
+        // Свойство -- одноразовый флаг для toggled ниже: highlight существующей
+        // фигуры не должен включать режим вставки НОВОЙ (коннект мыши на
+        // addPoint) -- иначе двойной клик по фигуре тут же начинал бы лепить
+        // вторую поверх неё. setChecked() эмитит toggled() синхронно, так что
+        // к setProperty(false) после него флаг уже прочитан (если вообще
+        // менялся: если кнопка и так была активна, toggled не сработает --
+        // тогда очистка ниже подчищает свойство, чтобы не осталось «залипшим»
+        // до следующего настоящего клика).
+        connect(shPlugin, &Shapes::Plugin::showEditor, this, [this, action](QWidget* editor) {
+            setDockWidget(editor);
+            action->setProperty("ggSkipInsert", true);
+            action->setChecked(true);
+            action->setProperty("ggSkipInsert", QVariant{});
+        });
+        connect(action, &QAction::toggled, [shPlugin = shPlugin, this, action](bool checked) {
             if(checked) {
-                connect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
-                connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
-                connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                if(!action->property("ggSkipInsert").toBool()) {
+                    connect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+                    connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                    connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                }
                 setDockWidget(shPlugin->editor());
             } else {
                 shPlugin->finalizeShape();

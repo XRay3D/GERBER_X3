@@ -15,7 +15,7 @@ project(shpolyline LANGUAGES CXX)
 set(PLUG_NAME "Poly Line")
 set(PLUG_INFO "Poly Line")
 set(PLUG_AUTHOR "X-Ray aka Bakiev Damir")
-set(PLUG_LOCAL_VERSION "3")
+set(PLUG_LOCAL_VERSION "4")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
