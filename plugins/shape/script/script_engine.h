@@ -41,6 +41,10 @@ public:
     Q_INVOKABLE QJSValue arcTo(double x, double y, double bulge);
     /// Дуга к точке по центру и направлению обхода.
     Q_INVOKABLE QJSValue arcToC(double x, double y, double cx, double cy, bool ccw = true);
+    /// Дуга к точке по радиусу: знак радиуса -- направление (+ против часовой,
+    /// - по часовой), large -- взять большую дугу (> 180°). |r| < полухорды
+    /// поднимается до полухорды (полуокружность).
+    Q_INVOKABLE QJSValue arcToR(double x, double y, double radius, bool large = false);
     Q_INVOKABLE void close();
     Q_INVOKABLE void end();
 };
