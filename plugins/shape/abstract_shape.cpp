@@ -221,6 +221,9 @@ void AbstractShape::updateColors() {
 void AbstractShape::redraw() {
     prepareGeometryChange(); // индекс сцены инвалидируется по СТАРОМУ rect
     rebuild();
+    // Групповое перемещение двигает pos() item'а, а UndoMove потом вносит
+    // этот сдвиг в ручки -- сам pos() надо обнулить, иначе сдвиг удвоится.
+    if(!pos().isNull()) setPos({});
     updateHandleShape();
     update();
 }
