@@ -108,11 +108,46 @@
 // ============================================================================
 
 var params = {
-    module:        { value: 2,  min: 0.1, max: 50,   step: 0.5,  decimals: 2, description: "Module, mm" },
-    teeth:         { value: 20, min: 4,   max: 500,  step: 1,    decimals: 0, description: "Teeth" },
-    pressureAngle: { value: 20, min: 10,  max: 30,   step: 0.5,  decimals: 1, description: "Pressure angle, deg" },
-    bore:          { value: 6,  min: 0,   max: 1000, step: 0.5,  decimals: 2, description: "Bore diameter, mm" },
-    involuteSteps: { value: 8,  min: 2,   max: 64,   step: 1,    decimals: 0, description: "Involute segments" },
+    module: {
+        value: 2,
+        min: 0.1,
+        max: 50,
+        step: 0.5,
+        decimals: 2,
+        description: "Module, mm"
+    },
+    teeth: {
+        value: 20,
+        min: 4,
+        max: 500,
+        step: 1,
+        decimals: 0,
+        description: "Teeth"
+    },
+    pressureAngle: {
+        value: 20,
+        min: 10,
+        max: 30,
+        step: 0.5,
+        decimals: 1,
+        description: "Pressure angle, deg"
+    },
+    bore: {
+        value: 6,
+        min: 0,
+        max: 1000,
+        step: 0.5,
+        decimals: 2,
+        description: "Bore diameter, mm"
+    },
+    involuteSteps: {
+        value: 8,
+        min: 2,
+        max: 64,
+        step: 1,
+        decimals: 0,
+        description: "Involute segments"
+    }
 };
 
 function build(p, sh) {
@@ -121,24 +156,54 @@ function build(p, sh) {
     var alpha = sh.deg2rad(p.pressureAngle);
     var steps = Math.max(2, Math.round(p.involuteSteps));
 
-    var rp = m * z / 2;              // делительный радиус
-    var rb = rp * Math.cos(alpha);   // основной радиус
-    var ra = rp + m;                 // радиус вершин
-    var rf = rp - 1.25 * m;          // радиус впадин
+    var rp = m * z / 2;            // делительный радиус
+    var rb = rp * Math.cos(alpha); // основной радиус
+    var ra = rp + m;               // радиус вершин
+    var rf = rp - 1.25 * m;        // радиус впадин
 
     // Эвольвента: t -- параметр развёртки, r(t) = rb*sqrt(1+t^2), полярный угол inv(t) = t - atan(t).
     var tPitch = Math.tan(alpha);
     var invPitch = tPitch - Math.atan(tPitch);
     var tTip = Math.sqrt((ra / rb) * (ra / rb) - 1);
     var tStart = rf > rb ? Math.sqrt((rf / rb) * (rf / rb) - 1) : 0;
-    var halfPitch = Math.PI / (2 * z);           // половина углового шага
-    var delta = -(halfPitch + invPitch);         // поворот эвольвенты: на делительном радиусе угол = -halfPitch
+    var halfPitch = Math.PI / (2 * z);       // половина углового шага
+    var delta = -(halfPitch + invPitch); // поворот эвольвенты: на делительном радиусе угол = -halfPitch
 
     // Точка фланга по параметру t; side = +1 (сторона зуба по часовой, угол растёт с радиусом) / -1 (зеркало)
     function flank(t, side, rot) {
         var r = rb * Math.sqrt(1 + t * t);
         var ang = side * (t - Math.atan(t) + delta) + rot;
-        return { x: r * Math.cos(ang), y: r * Math.sin(ang), r: r, ang: ang };
+        return {
+            x: r * Math.cos(ang),
+            y: r * Math.sin(ang),
+            r: r,
+            ang: ang
+        };
+    }
+
+    // Эволюта эвольвенты окружности -- сама базовая окружность: центр кривизны
+    // в параметре t лежит на ней под углом side*(t + delta) + rot (без члена
+    // -atan(t) из угла самой точки -- тот отвечает только за угол давления),
+    // радиус кривизны rho(t) = rb*t -- длина размотанной нити. Дуга фланга от
+    // t0 до t1 берёт центр на середине интервала: сходится к истинной
+    // эвольвенте на порядок точнее хорды той же длины.
+    function curvatureCenter(t, side, rot) {
+        var a = side * (t + delta) + rot;
+        return {
+            x: rb * Math.cos(a),
+            y: rb * Math.sin(a)
+        };
+    }
+    function ccwOf(a, b, c) {
+        return (a.x - c.x) * (b.y - c.y) - (a.y - c.y) * (b.x - c.x) > 0;
+    }
+    // p0 -- уже построенная точка (начало дуги, параметр t0); строит дугу до
+    // параметра t1 и возвращает { p: конечная точка, t: t1 } для следующего шага.
+    function evolventArc(pl, p0, t0, t1, side, rot) {
+        var c = curvatureCenter((t0 + t1) / 2, side, rot);
+        var p1 = flank(t1, side, rot);
+        pl.arcToC(p1.x, p1.y, c.x, c.y, ccwOf(p0, p1, c));
+        return p1;
     }
 
     var pitchAng = 2 * Math.PI / z;
@@ -151,34 +216,43 @@ function build(p, sh) {
         var start = flank(tStart, +1, rot);
         if (k === 0) {
             if (rf < rb) {
-                var s0 = { x: rf * Math.cos(start.ang), y: rf * Math.sin(start.ang) };
+                var s0 = {
+                    x: rf * Math.cos(start.ang),
+                    y: rf * Math.sin(start.ang)
+                };
                 pl = sh.begin(s0.x, s0.y);
                 pl.lineTo(start.x, start.y);
             } else
                 pl = sh.begin(start.x, start.y);
         } else {
             if (rf < rb) {
-                var s1 = { x: rf * Math.cos(start.ang), y: rf * Math.sin(start.ang) };
-                pl.arcToC(s1.x, s1.y, 0, 0, true);   // дуга по впадине к началу зуба
+                var s1 = {
+                    x: rf * Math.cos(start.ang),
+                    y: rf * Math.sin(start.ang)
+                };
+                pl.arcToC(s1.x, s1.y, 0, 0, true); // дуга по впадине к началу зуба
                 pl.lineTo(start.x, start.y);
             } else
                 pl.arcToC(start.x, start.y, 0, 0, true);
         }
 
-        // Восходящий фланг
+        // Восходящий фланг -- дугами по эволюте (см. evolventArc выше)
+        var pPrev = start, tPrev = tStart;
         for (var i = 1; i <= steps; i++) {
             var t = tStart + (tTip - tStart) * i / steps;
-            var q = flank(t, +1, rot);
-            pl.lineTo(q.x, q.y);
+            pPrev = evolventArc(pl, pPrev, tPrev, t, +1, rot);
+            tPrev = t;
         }
         // Вершина: дуга по окружности вершин
         var tip2 = flank(tTip, -1, rot);
         pl.arcToC(tip2.x, tip2.y, 0, 0, true);
         // Нисходящий фланг
+        pPrev = tip2;
+        tPrev = tTip;
         for (var j = steps - 1; j >= 0; j--) {
             var t2 = tStart + (tTip - tStart) * j / steps;
-            var q2 = flank(t2, -1, rot);
-            pl.lineTo(q2.x, q2.y);
+            pPrev = evolventArc(pl, pPrev, tPrev, t2, -1, rot);
+            tPrev = t2;
         }
         if (rf < rb) {
             var e = flank(tStart, -1, rot);
