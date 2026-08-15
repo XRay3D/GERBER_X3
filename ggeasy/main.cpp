@@ -131,6 +131,21 @@ int main(int argc, char* argv[]) {
 
     if(0) return ToolDatabase{}.exec();
 
+    // Инстансы плагинов удаляются ЗДЕСЬ, а не статическим деструктором Qt
+    // (QLibraryStore::cleanup при __cxa_finalize): тот срабатывает уже после
+    // разрушения QApplication, и деструкторы форм/редакторов плагинов
+    // (QSettings, QWidget) падают. Объявлено до mainWin, чтобы разрушиться
+    // после неё: сцена и модели ещё держат объекты плагинов и ходят в них.
+    // Сами .so при этом не выгружаются (см. комментарий после app.exec()).
+    struct PluginHolder {
+        std::vector<std::unique_ptr<QPluginLoader>> loaders;
+        ~PluginHolder() {
+            for(auto& loader: loaders)
+                if(loader->isLoaded()) delete loader->instance();
+        }
+    } pluginHolder;
+    auto& loaders = pluginHolder.loaders;
+
     MainWindow mainWin;
     mainWin.setObjectName(u"MainWindow"_s);
 
@@ -153,8 +168,6 @@ int main(int argc, char* argv[]) {
 #else
     static_assert(false, u"Select OS"_s);
 #endif
-
-    std::vector<std::unique_ptr<QPluginLoader>> loaders;
 
     // load plugins
     QDir dir(QApplication::applicationDirPath() + u"/plugins"_s);

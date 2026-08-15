@@ -788,8 +788,11 @@ void MainWindow::createActionsShape() {
     // }
 
     for(auto& [type, shPlugin]: App::shapePlugins()) {
-        auto action = toolBar->addAction(shPlugin->icon(), shPlugin->info().value(u"Name"_s).toString());
+        auto action = toolBar->addAction(shPlugin->icon(), shPlugin->name());
         action->setCheckable(true);
+        // Заголовок док-панели берётся из windowTitle редактора, а редактор
+        // создаётся раньше, чем плагину подложат description.json -- ставим здесь.
+        if(auto* editor = shPlugin->editor()) editor->setWindowTitle(shPlugin->name());
         actionGroup.addAction(action);
         connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
         connect(shPlugin, &Shapes::Plugin::showEditor, this, &MainWindow::setDockWidget);
