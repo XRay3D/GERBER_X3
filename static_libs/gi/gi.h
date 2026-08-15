@@ -60,7 +60,7 @@ enum /*class*/ Type : int {
     ShPolyLine,
     ShCirArc,
     ShText,
-    ShHandler,
+    ShScript,
     ShapeEnd
 };
 }; // namespace Type

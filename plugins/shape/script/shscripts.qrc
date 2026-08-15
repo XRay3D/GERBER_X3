@@ -1,0 +1,6 @@
+<RCC>
+    <qresource prefix="/shape/scripts">
+        <file>scripts/gear.js</file>
+        <file>scripts/sprocket.js</file>
+    </qresource>
+</RCC>
