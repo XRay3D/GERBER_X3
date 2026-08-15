@@ -112,9 +112,11 @@ Form::~Form() {
     settings.setValue(varName(trimming_));
     settings.endGroup();
 
-    for(QGraphicsItem* giItem: App::grView().items())
-        if(giItem->type() == Gi::Type::Bridge)
-            delete giItem;
+    // На выходе из приложения вью уже разрушено вместе с мостиками.
+    if(auto* view = App::grViewPtr())
+        for(QGraphicsItem* giItem: view->items())
+            if(giItem->type() == Gi::Type::Bridge)
+                delete giItem;
     delete ui;
 }
 
