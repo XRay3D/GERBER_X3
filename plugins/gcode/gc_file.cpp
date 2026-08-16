@@ -30,6 +30,7 @@
 #include <QFile>
 #include <QFileInfo>
 #include <QJSEngine>
+#include <QJsonObject>
 #include <QRegularExpression>
 #include <algorithm>
 
@@ -60,17 +61,23 @@ QString File::getLastDir() {
     return lastDir += u'/';
 }
 
-static bool jsEvalFile(QJSEngine& engine, const QString& path) {
+// Текст ошибки: и в журнал, и в саму УП (regenerate пишет его комментарием).
+static QString jsErrorText(const QJSValue& err, const QString& path) {
+    return QFileInfo{path}.fileName() + u':' + QString::number(err.property(u"lineNumber"_s).toInt())
+        + u": "_s + err.toString();
+}
+
+static bool jsEvalFile(QJSEngine& engine, const QString& path, QString& error) {
     QFile f{path};
     if(!f.open(QIODevice::ReadOnly | QIODevice::Text)) {
-        qWarning() << "GCode JS: cannot open" << path;
+        error = u"cannot open "_s + path;
+        qWarning() << "GCode JS:" << error;
         return false;
     }
     auto result = engine.evaluate(QString::fromUtf8(f.readAll()), path);
     if(result.isError()) {
-        qWarning() << "GCode JS error in" << path
-                   << "line" << result.property(u"lineNumber"_s).toInt()
-                   << ":" << result.toString();
+        error = jsErrorText(result, path);
+        qWarning() << "GCode JS error:" << error;
         return false;
     }
     return true;
@@ -80,30 +87,39 @@ bool File::runJsScript(const QString& scriptPath) {
     QJSEngine engine;
     engine.installExtensions(QJSEngine::ConsoleExtension);
     GcFileProxy proxy{this, &engine};
+    // Объекты живут на стеке C++: сборщику движка их не отдавать.
+    QJSEngine::setObjectOwnership(&proxy, QJSEngine::CppOwnership);
     auto proxyVal = engine.newQObject(&proxy);
 
     // Load common_gcode.js from the same directory before the plugin script
     const QString commonPath = QFileInfo{scriptPath}.dir().filePath(u"common_gcode.js"_s);
-    if(QFile::exists(commonPath) && !jsEvalFile(engine, commonPath))
+    if(QFile::exists(commonPath) && !jsEvalFile(engine, commonPath, jsError_))
         return false;
 
-    if(!jsEvalFile(engine, scriptPath))
+    if(!jsEvalFile(engine, scriptPath, jsError_))
         return false;
 
     auto generateFn = engine.globalObject().property(u"generate"_s);
     if(!generateFn.isCallable()) {
-        qWarning() << "GCode JS:" << scriptPath << "has no generate() function";
+        jsError_ = QFileInfo{scriptPath}.fileName() + u": has no generate() function"_s;
+        qWarning() << "GCode JS:" << jsError_;
         return false;
+    }
+
+    std::unique_ptr<QObject> ext{createJsExtension(proxy, engine)};
+    if(ext) {
+        QJSEngine::setObjectOwnership(ext.get(), QJSEngine::CppOwnership);
+        proxyVal.setProperty(u"ext"_s, engine.newQObject(ext.get()));
     }
 
     auto callResult = generateFn.call({proxyVal});
     if(callResult.isError()) {
-        qWarning() << "GCode JS generate() error in" << scriptPath
-                   << "line" << callResult.property(u"lineNumber"_s).toInt()
-                   << ":" << callResult.toString();
+        jsError_ = jsErrorText(callResult, scriptPath);
+        qWarning() << "GCode JS generate() error:" << jsError_;
         return false;
     }
 
+    jsError_.clear();
     return true;
 }
 
@@ -116,16 +132,22 @@ void File::ensureDefaultScripts() {
     QDir{}.mkpath(scriptsDirPath);
 
     // Extract all embedded script resources to disk if they are missing
-    const QDir resDir{u":/gcode/scripts"_s};
-    for(const QString& fileName: resDir.entryList(QDir::Files)) {
-        const QString destPath = scriptsDirPath + u'/' + fileName;
-        if(!QFile::exists(destPath)) {
-            QFile src{u":/gcode/scripts/"_s + fileName};
-            QFile dst{destPath};
-            if(src.open(QIODevice::ReadOnly) && dst.open(QIODevice::WriteOnly | QIODevice::Truncate))
-                dst.write(src.readAll());
+    // (скрипты плагинов -- в scripts/, посты -- в scripts/posts/).
+    auto extract = [](const QString& resPrefix, const QString& dirPath) {
+        QDir{}.mkpath(dirPath);
+        const QDir resDir{resPrefix};
+        for(const QString& fileName: resDir.entryList(QDir::Files)) {
+            const QString destPath = dirPath + u'/' + fileName;
+            if(!QFile::exists(destPath)) {
+                QFile src{resPrefix + u'/' + fileName};
+                QFile dst{destPath};
+                if(src.open(QIODevice::ReadOnly) && dst.open(QIODevice::WriteOnly | QIODevice::Truncate))
+                    dst.write(src.readAll());
+            }
         }
-    }
+    };
+    extract(u":/gcode/scripts"_s, scriptsDirPath);
+    extract(u":/gcode/scripts/posts"_s, Post::postsDir());
 
     // Set default script path for plugins that have no configured script
     for(auto& [type, ptr]: App::gCodePlugins()) {
@@ -158,25 +180,35 @@ void File::setSide(Side side) {
     gcp.params[Params::FileSide].setValue(side);
 }
 
-void File::regenerate() {
+void File::regenerate(unsigned sections) {
     initSave();
+    if(sections & Header) writeHeader();
     addInfo();
-    statFile();
 
-    bool jsRan = false;
-    if(auto* plugin = App::gCodePlugin(type())) {
-        const QString scriptPath = App::gcSettings().scriptPath(plugin->gcName());
-        if(!scriptPath.isEmpty() && QFile::exists(scriptPath))
-            jsRan = runJsScript(scriptPath);
-    }
-    // assert(jsRan);
-    if(!jsRan)
-        try {
-            genGcodeAndTile();
-        } catch(...) {
+    if(sections & Body) {
+        auto* plugin = App::gCodePlugin(type());
+        const QString scriptPath = plugin ? App::gcSettings().scriptPath(plugin->gcName()) : QString{};
+        // Генерация -- только скриптом. Фолбэка нет: ошибка видна в самой УП
+        // и в журнале, а не маскируется другим генератором.
+        if(!plugin) {
+            // файл без плагина (отладочный) -- текста не имеет
+        } else if(scriptPath.isEmpty() || !QFile::exists(scriptPath)) {
+            qCritical() << "GCode: no script for" << plugin->gcName() << scriptPath;
+            lines_.emplace_back(comment(u"ERROR: no G-code script for "_s + plugin->gcName()));
+        } else if(!runJsScript(scriptPath)) {
+            qCritical() << "GCode: script failed" << scriptPath << jsError_;
+            lines_.emplace_back(comment(u"ERROR: G-code script failed: "_s + jsError_));
         }
+    }
 
-    endFile();
+    if(sections & Footer) writeFooter();
+
+    std::erase_if(lines_, std::bind(&QString::isEmpty, _1)); // remove epty lines
+    if(sections == All)
+        qApp->clipboard()->setText(lines_
+            | v::filter([post = &App::gcSettings().post()](QString& str) { return !post->isComment(str); })
+            | v::join_with(u'\n')
+            | r::to<QString>());
 }
 
 bool File::save(const QString& name) {
@@ -190,58 +222,70 @@ bool File::save(const QString& name) {
     if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
         QTextStream out{&file};
         out.setEncoding(QStringConverter::Utf8);
-        QString str;
-        for(QString& s: lines_) {
-            if(!s.isEmpty())
-                str.push_back(s);
-            if(!str.endsWith(u'\n'))
-                str.push_back(u'\n');
-        }
-        out << str;
+        out << renderText(lines_);
     } else
         return false;
     file.close();
     return true;
 }
 
-void File::initSave() {
-    lines_.clear();
+QString File::comment(const QString& text) { return App::gcSettings().post().comment(text); }
 
-    for(bool& fl: formatFlags)
-        fl = false;
+QString File::renderText(const std::vector<QString>& lines) { return App::gcSettings().post().renderText(lines); }
 
-    const QString format(gcp.tool().type() == Tool::Laser ? App::gcSettings().formatLaser() : App::gcSettings().formatMilling());
+Post::Context File::postContext() {
+    Post& post = App::gcSettings().post();
+    Post::Context ctx;
+    ctx.laser = toolType == Tool::Laser;
+    ctx.name = shortName();
+    ctx.programName = programName_;
+    ctx.spindleSpeed = spindleSpeed;
+    ctx.feedRate = feedRate;
+    ctx.plungeRate = plungeRate;
+    QJsonObject json;
+    gcp.tool().write(json);
+    ctx.tool = post.engine().toScriptValue(json.toVariantMap());
+    ctx.properties = GcFileProxy::propertiesValue(post.engine());
+    return ctx;
+}
+
+void File::parseFormat(const QString& format, bool (&flags)[Size]) {
     for(size_t i{}; i < CMD_LIST.size(); ++i) {
         const int index = format.indexOf(CMD_LIST[i], 0, Qt::CaseInsensitive);
         if(index != -1) {
-            formatFlags[i + AlwaysG] = format[index + 1] == u'+';
+            flags[i + AlwaysG] = format[index + 1] == u'+';
             if((index + 2) < format.size())
-                formatFlags[i + SpaceG] = format[index + 2] == u' ';
+                flags[i + SpaceG] = format[index + 2] == u' ';
         }
     }
+}
+
+void File::initSave() {
+    lines_.clear();
+
+    for(auto& kind: formatFlags)
+        for(bool& fl: kind)
+            fl = false;
+
+    Post& post = App::gcSettings().post();
+    const bool laser = gcp.tool().type() == Tool::Laser;
+    parseFormat(post.formatLinear(laser), formatFlags[Linear]);
+    parseFormat(post.formatArc(laser), formatFlags[Arc]);
 
     for(QString& str: lastValues)
         str.clear();
     for(bool& written: lastWritten)
         written = false;
-
-    // setFeedRate(gcp.getTool().feedRate);
-    // setPlungeRate(gcp.getTool().plungeRate());
-    // setSpindleSpeed(gcp.getTool().spindleSpeed);
-    // setToolType(gcp.getTool().type());
+    gCode_ = GNull;
 }
 
-void File::statFile() {
-    if(toolType == Tool::Laser) {
-        QString str(App::gcSettings().laserStart()); // u"G21 G17 G90"_s); //G17 XY plane
-        lines_.emplace_back(str);
+void File::writeHeader() {
+    Post& post = App::gcSettings().post();
+    lines_.append_range(post.header(postContext()));
+    if(toolType == Tool::Laser)
         lines_.emplace_back(formated({g0(), z(0)})); // Z0 for visible in Candle
-    } else {
-        QString str(App::gcSettings().start()); // u"G21 G17 G90"_s); //G17 XY plane
-        str.replace(QRegularExpression(u"S\\?"_s), formated({strSpindle}));
-        lines_.emplace_back(str);
+    else
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
-    }
 }
 
 // Из чего посчитана программа: по строке на исходный файл с числом взятых из
@@ -256,46 +300,41 @@ void File::addSourceInfo() {
         // Файл мог быть удалён уже после расчёта: addInfo() зовётся при каждом
         // regenerate(), в том числе после перезагрузки проекта.
         auto* source = App::project().file(key.front());
-        lines_.emplace_back(QObject::tr(";\t         Source: %1 [%2]")
+        lines_.emplace_back(comment(QObject::tr("\t         Source: %1 [%2]")
                 .arg(source ? source->shortName() : QObject::tr("#%1 (deleted)").arg(key.front()))
-                .arg(ids.size()));
+                .arg(ids.size())));
     }
 }
 
 void File::addInfo() {
     const static auto side_{QObject::tr("Top|Bottom").split(u'|')};
     if(App::gcSettings().info()) {
-        lines_.emplace_back(QObject::tr(";\t           Name: %1").arg(shortName()));
+        lines_.emplace_back(comment(QObject::tr("\t           Name: %1").arg(shortName())));
         if(!programName_.isEmpty())
-            lines_.emplace_back(QObject::tr(";\t        Program: %1").arg(programName_));
+            lines_.emplace_back(comment(QObject::tr("\t        Program: %1").arg(programName_)));
         addSourceInfo();
-        lines_.emplace_back(QObject::tr(";\t           Tool: %1").arg(gcp.tool().name()));
-        lines_.emplace_back(QObject::tr(";\t  Tool Stepover: %1").arg(gcp.tool().stepover()));
-        lines_.emplace_back(QObject::tr(";\t Feed Rate mm/s: %1").arg(gcp.tool().feedRate_mmPerSec()));
-        lines_.emplace_back(QObject::tr(";\tTool Pass Depth: %1").arg(gcp.tool().passDepth()));
-        lines_.emplace_back(QObject::tr(";\t          Depth: %1").arg(gcp.getDepth()));
-        lines_.emplace_back(QObject::tr(";\t           Side: %1").arg(side_[side()]));
+        lines_.emplace_back(comment(QObject::tr("\t           Tool: %1").arg(gcp.tool().name())));
+        lines_.emplace_back(comment(QObject::tr("\t  Tool Stepover: %1").arg(gcp.tool().stepover())));
+        lines_.emplace_back(comment(QObject::tr("\t Feed Rate mm/s: %1").arg(gcp.tool().feedRate_mmPerSec())));
+        lines_.emplace_back(comment(QObject::tr("\tTool Pass Depth: %1").arg(gcp.tool().passDepth())));
+        lines_.emplace_back(comment(QObject::tr("\t          Depth: %1").arg(gcp.getDepth())));
+        lines_.emplace_back(comment(QObject::tr("\t           Side: %1").arg(side_[side()])));
     }
 }
 
-void File::endFile() {
+void File::writeFooter() {
+    Post& post = App::gcSettings().post();
+    const Post::Context ctx = postContext();
     if(toolType == Tool::Laser) {
-        lines_.emplace_back(App::gcSettings().spindleLaserOff());
+        lines_.emplace_back(post.laserOff(ctx));
         QPointF home(App::home().pos() - App::zero().pos());
         lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
-        lines_.emplace_back(App::gcSettings().laserEnd());
     } else {
         lines_.emplace_back(formated({g0(), z(App::project().safeZ())})); // HomeZ
         // QPointF home(App::home().pos() - App::zero().pos()); // FIXME
         // lines_.emplace_back(formated({g0(), x(home.x()), y(home.y())})); // HomeXY
-        lines_.emplace_back(App::gcSettings().end());
     }
-
-    std::erase_if(lines_, std::bind(&QString::isEmpty, _1)); // remove epty lines
-    qApp->clipboard()->setText(lines_
-        | v::filter([](QString& str) { return !str.startsWith(u';'); })
-        | v::join_with(u'\n')
-        | r::to<QString>());
+    lines_.append_range(post.footer(ctx));
 }
 
 FileTree::Node* File::node() { return node_ ? node_ : node_ = new Node{this}; }
@@ -377,12 +416,11 @@ std::vector<QString> File::savePath(const Geo::Polyline& srcCurve, double perime
     // Дуга -- свойство пары вершин: центр (а с ним I/J и выбор G2/G3) считается
     // по прогибу НАЧАЛЬНОЙ вершины сегмента, отдельно взятая вершина о дуге
     // ничего не знает.
-    auto getLine = [this](const Geo::Vertex& fr, const Geo::Vertex& to) -> QString {
-        if(auto arc = Geo::arcOf(fr, to, fr.bulge)) {
-            auto [I, J] = arc->center - static_cast<const QPointF&>(fr);
-            return formated({g(fr), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle});
-        } else
-            return formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle});
+    auto emitSegment = [this, &lines](const Geo::Vertex& fr, const Geo::Vertex& to) {
+        if(auto arc = Geo::arcOf(fr, to, fr.bulge))
+            arcLines(lines, fr, to, *arc);
+        else
+            lines.emplace_back(formated({g1(), x(to.x()), y(to.y()), z(z_), strFeed, strSpindle}));
     };
     // Ход, не выражающийся в выводе, ПРОПУСКАЕТСЯ, а не пишется как есть.
     // Сегмент короче единицы вывода (точный домен, переведённый в прогибы,
@@ -411,7 +449,12 @@ std::vector<QString> File::savePath(const Geo::Polyline& srcCurve, double perime
     //
     // На спуске по спирали (zk) круг остаётся двумя половинами: одной командой
     // Z по дуге не набрать.
+    //
+    // Одной командой окружность выражается только словами I/J: у R полный
+    // оборот неоднозначен, а хордами он и так идёт по точкам, -- в этих
+    // диалектах она остаётся двумя половинами.
     if(!zk && curve.closed && curve.size() == 2
+        && App::gcSettings().post().arcs() == Post::Arcs::IJ
         && curve.front().bulge == curve.back().bulge
         && std::abs(std::abs(curve.front().bulge) - 1.0) < 1e-9) {
         const Geo::Vertex& start = curve.front();
@@ -425,10 +468,49 @@ std::vector<QString> File::savePath(const Geo::Polyline& srcCurve, double perime
     for(auto&& [fr, to]: Geo::segments(curve)) {
         if(zk) z_ += Geo::segmentLength(fr, to) / len * zk;
         if(!representable(to)) continue;
-        lines.emplace_back(getLine(fr, to));
+        emitSegment(fr, to);
         last = to;
     }
     return lines;
+}
+
+// Дуга fr -> to в диалекте поста. Z на входе уже набран для конца сегмента
+// (спираль), так что и хорды получают конечный z_: точнее по каждой хорде
+// набирать нечего -- разница в тысячные на длине одной хорды.
+void File::arcLines(std::vector<QString>& lines, const Geo::Vertex& fr, const Geo::Vertex& to, const Geo::Arc& arc) {
+    switch(App::gcSettings().post().arcs()) {
+    case Post::Arcs::IJ: {
+        auto [I, J] = arc.center - static_cast<const QPointF&>(fr);
+        lines.emplace_back(formated({g(fr), x(to.x()), y(to.y()), z(z_), i(I), j(J), strFeed, strSpindle}));
+        break;
+    }
+    case Post::Arcs::R: {
+        // Знак R: отрицательный -- дуга больше полуоборота. Ровно полуоборот
+        // и больше -- пополам: у станков R на 180° неустойчив по стороне.
+        const double sweep = std::abs(arc.theta);
+        if(sweep >= std::numbers::pi - 1e-9) {
+            const Geo::Vertex mid{arc.pointAt(0.5), Geo::bulgeOf(arc.theta * 0.5)};
+            Geo::Vertex head{fr};
+            head.bulge = mid.bulge;
+            if(auto a = Geo::arcOf(head, mid, head.bulge)) arcLines(lines, head, mid, *a);
+            if(auto a = Geo::arcOf(mid, to, mid.bulge)) arcLines(lines, mid, to, *a);
+            break;
+        }
+        lines.emplace_back(formated({g(fr), x(to.x()), y(to.y()), z(z_), rad(arc.radius), strFeed, strSpindle}));
+        break;
+    }
+    case Post::Arcs::Linear: {
+        // Шаг по стрелке прогиба: хорда с отклонением от дуги не больше допуска.
+        const double tol = std::min(App::gcSettings().post().arcTolerance(), arc.radius);
+        const double step = 2.0 * std::acos(std::max(0.0, 1.0 - tol / arc.radius));
+        const int n = std::max(1, static_cast<int>(std::ceil(std::abs(arc.theta) / std::max(step, 1e-6))));
+        for(int k = 1; k <= n; ++k) {
+            const QPointF pt = k == n ? static_cast<const QPointF&>(to) : arc.pointAt(double(k) / n);
+            lines.emplace_back(formated({g1(), x(pt.x()), y(pt.y()), z(z_), strFeed, strSpindle}));
+        }
+        break;
+    }
+    }
 }
 
 QString File::formatedText(const std::vector<QString>& data) {
@@ -451,6 +533,17 @@ QString File::formatedText(const std::vector<QString>& data) {
 }
 
 QString File::formated(const std::vector<Word>& data) {
+    // Диалект строки -- по её слову G: дуги пишутся своим набором флагов.
+    // Строка без G наследует последний записанный код.
+    FormatKind kind = (gCode_ == G02 || gCode_ == G03) ? Arc : Linear;
+    for(const Word& word: data)
+        if(!word.text.isEmpty() && (word.text.front() == u'G' || word.text.front() == u'g')) {
+            const QStringView num = QStringView{word.text}.sliced(1);
+            kind = (num == u"2" || num == u"02" || num == u"3" || num == u"03") ? Arc : Linear;
+            break;
+        }
+    const bool (&flags)[Size] = formatFlags[kind];
+
     QString ret;
     for(const Word& word: data) {
         if(word.text.isEmpty()) continue;
@@ -463,11 +556,11 @@ QString File::formated(const std::vector<Word>& data) {
         const bool same = word.numeric
             ? lastWritten[index] && lastUnits[index] == word.units
             : lastValues[index] == word.text;
-        if(formatFlags[AlwaysG + index] || !same) {
+        if(flags[AlwaysG + index] || !same) {
             lastUnits[index] = word.units;
             lastWritten[index] = true;
             lastValues[index] = word.text;
-            ret += word.text + (formatFlags[SpaceG + index] ? u" " : u"");
+            ret += word.text + (flags[SpaceG + index] ? u" " : u"");
         }
     }
     return ret.trimmed();
@@ -511,188 +604,6 @@ QString File::formatValue(double val) {
         if(str.endsWith(u'.')) str.chop(1);
     }
     return str;
-}
-
-/////////////////////////////////////////////////////////////
-void File::saveDrill(const QPointF& offset) {
-    if(gcp.toolPathss.empty()) return;
-    Geo::Polyline path = mirrorAndOffsetCurves(offset, gcp.toolPathss.front()).front();
-    const std::vector<double> depths(getDepths());
-    for(auto&& point: path) {
-        startPath(point);
-        size_t i{};
-        while(true) {
-            lines_.emplace_back(formated({g1(), z(depths[i]), strPlungeFeed}));
-            if(++i == depths.size()) break;
-            if(gcp.tool().lenght() > depths[i])
-                lines_.emplace_back(formated({g0(), z(depths[i] - gcp.tool().oneTurnCut() * 4)}));
-            else
-                lines_.emplace_back(formated({g0(), z(0)}));
-        }
-        endPath();
-    }
-}
-
-void File::saveLaserHLDI(const QPointF& offset) {
-    lines_.emplace_back(App::gcSettings().laserConstOn());
-
-    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
-
-    int i{};
-
-    lines_.emplace_back(formated({g0(), x(pathss.front().front().front().x()), y(pathss.front().front().front().y()), z(0.0)}));
-
-    for(Geo::Polyline& path: pathss.front()) {
-        if(i++ % 2) {
-            lines_.append_range(savePath(path, spindleSpeed));
-        } else {
-            lines_.append_range(savePath(path, 0));
-        }
-    }
-    if(pathss.size() > 1) {
-        lines_.emplace_back(App::gcSettings().laserDynamOn());
-        for(Geo::Polyline& path: pathss.back()) {
-            startPath(path.front());
-            lines_.append_range(savePath(path, spindleSpeed));
-            endPath();
-        }
-    }
-}
-
-void File::saveLaserPocket(const QPointF& offset) {
-    saveLaserProfile(offset);
-}
-
-void File::saveLaserProfile(const QPointF& offset) {
-    lines_.emplace_back(App::gcSettings().laserDynamOn());
-
-    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
-
-    for(Geo::Polylines& paths: pathss) {
-        for(Geo::Polyline& path: paths) {
-            startPath(path.front());
-            auto sp(savePath(path, spindleSpeed));
-            lines_.append_range(sp);
-            endPath();
-        }
-    }
-}
-
-void File::saveMillingPocket(const QPointF& offset) {
-    // lines_.emplace_back(App::gcSettings().spindleOn());
-
-    const std::vector<double> depths = getDepths();
-    double diameter = tool().diameter();
-
-    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
-
-    QPointF point = pathss.front().front().front();
-
-    startPath(point);
-    for(const Geo::Polylines& paths: pathss) {
-        for(double zd: depths) {
-            for(const Geo::Polyline& path: paths) {
-                // Прежний критерий: |расстояние - diameter| <= 2*diameter, то есть
-                // переезд длиннее трёх диаметров -- разрыв, нужен подъём.
-                bool first = Geo::distance(std::exchange(point, path.front()), path.front()) > diameter * 3.0;
-                if(first) {
-                    endPath();
-                    startPath(point);
-                }
-                // if(first || (paths.front().front() == path.front())) {
-                //     lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
-                //     lines_.append_range(savePath(path, path.perimeter(), zd));
-                //     // lines_.append_range(savePath(path));
-                // } else {
-                lines_.emplace_back(formated({g1(), x(point.x()), y(point.y())})); // start xy
-                lines_.emplace_back(formated({g1(), z(z_ = zd), strPlungeFeed}));  // start z0 surface
-                lines_.append_range(savePath(path));
-                // }
-            }
-        }
-    }
-    endPath();
-}
-
-void File::saveMillingProfile(const QPointF& offset) {
-    const std::vector<double> depths(getDepths());
-    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
-
-    // Спиральное врезание можно выключить: тогда на каждый уровень идёт
-    // вертикальный плунж, а финальной подчистки дна не нужно вовсе -- уступа от
-    // спирали не остаётся.
-    const bool spiral = gcp.spiralRamp();
-
-    for(const Geo::Polylines& paths: pathss) {
-        if(paths.size() == 1) {
-            const Geo::Polyline& path = paths.front();
-            double perimeter = path.perimeter();
-            if(paths.front().isClosed()) { // Spiral
-                startPath(path.front());
-                for(double depth: depths)
-                    if(spiral)
-                        lines_.append_range(savePath(path, perimeter, depth));
-                    else {
-                        lines_.emplace_back(formated({g1(), z(z_ = depth), strPlungeFeed}));
-                        lines_.append_range(savePath(path));
-                    }
-                if(spiral)
-                    lines_.append_range(savePath(path)); // Проход без спирали.
-                endPath();
-            } else { // Zigzag
-                startPath(path.front());
-                const Geo::Polyline reversed = paths.front().reversed();
-                uint i{};
-                for(double depth: depths)
-                    if(spiral)
-                        lines_.append_range(savePath(i++ & 1u ? reversed : path, perimeter, depth));
-                    else {
-                        // Направление всё равно чередуем: врезаться дешевле там,
-                        // где инструмент уже стоит.
-                        lines_.emplace_back(formated({g1(), z(z_ = depth), strPlungeFeed}));
-                        lines_.append_range(savePath(i++ & 1u ? reversed : path));
-                    }
-                if(spiral)
-                    lines_.append_range(savePath(i & 1u ? reversed : path)); // Проход без спирали.
-                endPath();
-            }
-        } else {
-            // tool().diameter();
-            // double perimeter = r::fold_left(
-            //     v::transform(paths, std::bind(&Geo::Polyline::perimeter, _1)),
-            //     0.0, std::plus<double>{});
-            startPath(paths.front().front());
-            for(double zd: depths) {
-                for(const Geo::Polyline& path: paths) {
-                    QPointF point = path.front();
-                    lines_.emplace_back(formated({g0(), x(point.x()), y(point.y())})); // start xy
-                    lines_.emplace_back(formated({g1(), z(z_ = zd), strPlungeFeed}));  // start z0 surface
-                    lines_.append_range(savePath(path));
-                    lines_.emplace_back(formated({g0(), z(0)}));
-                }
-            }
-            endPath();
-        }
-    }
-}
-
-void File::saveMillingRaster(const QPointF& offset) {
-    lines_.emplace_back(App::gcSettings().spindleOn());
-
-    std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
-    const std::vector<double> depths(getDepths());
-
-    for(Geo::Polylines& paths: pathss) {
-        for(size_t i{}; i < depths.size(); ++i) {
-            for(auto& path: paths) {
-                startPath(path.front());
-                lines_.emplace_back(formated({g1(), z(depths[i]), strPlungeFeed}));
-                auto sp(savePath(path, spindleSpeed));
-                lines_.append_range(sp);
-                endPath();
-            }
-        }
-    }
 }
 
 namespace {

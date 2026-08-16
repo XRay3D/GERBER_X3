@@ -964,32 +964,24 @@ void MainWindow::saveSelectedGCodeFiles() {
                 return;
             std::vector<QString> sl;
 
-            sl.emplace_back(tr(";\tContains files:"));
+            sl.emplace_back(GCode::File::comment(tr("\tContains files:")));
             for(auto file: files)
-                sl.push_back(u";\t"_s + file->shortName());
+                sl.push_back(GCode::File::comment(u"\t"_s + file->shortName()));
+            // Шапка -- только у первого файла, концовка -- только у последнего:
+            // один станочный файл, а не склейка нескольких.
             for(auto file: files) {
                 file->itemGroup()->setVisible(false);
-                file->initSave();
-                if(file == files.front())
-                    file->statFile();
-                file->addInfo();
-                file->genGcodeAndTile();
-                if(file == files.back())
-                    file->endFile();
+                unsigned sections = GCode::File::Body;
+                if(file == files.front()) sections |= GCode::File::Header;
+                if(file == files.back()) sections |= GCode::File::Footer;
+                file->regenerate(sections);
                 sl.append_range(file->gCodeText());
             }
             QFile file{name};
             if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 QTextStream out{&file};
                 out.setEncoding(QStringConverter::Utf8);
-                QString str;
-                for(QString& s: sl) {
-                    if(!s.isEmpty())
-                        str.push_back(s);
-                    if(!str.endsWith(u'\n'))
-                        str.push_back(u'\n');
-                }
-                out << str;
+                out << GCode::File::renderText(sl);
             }
             file.close();
         }

@@ -13,27 +13,40 @@
 #include "abstract_fileplugin.h"
 
 #include <QMap>
+#include <vector>
+
+class QComboBox;
+class QLabel;
 
 namespace GCode {
+
+class Plugin;
+
+// Вкладка одного gcode-плагина: его скрипт генерации (по умолчанию
+// scripts/<gcname>.js рядом с приложением) и, ниже, собственные настройки
+// плагина, если он их даёт (Plugin::createSettingsTab).
+class PluginTab final : public AbstractFileSettings {
+    QString gcName_;
+    QLineEdit* leScript_;
+    AbstractFileSettings* inner_{};
+
+public:
+    PluginTab(Plugin* plugin, QWidget* parent);
+    static QString defaultScriptPath(const QString& gcName);
+    void readSettings(MySettings& settings) override;
+    void writeSettings(MySettings& settings) override;
+};
 
 class Tab : public AbstractFileSettings {
     QCheckBox* chbxInfo;
     QCheckBox* chbxSameGFolder;
-    // QCheckBox* chbxSimplifyHldi;
-    // QComboBox* cbxProfileSort;
-    QLineEdit* leFileExtension;
-    QLineEdit* leFormatMilling;
-    QLineEdit* leFormatLaser;
-    QLineEdit* leLaserCPC;
-    QLineEdit* leLaserDPC;
-    QLineEdit* leSpindleCC;
-    QLineEdit* leSpindleLaserOff;
-    QPlainTextEdit* pteEnd;
-    QPlainTextEdit* pteLaserEnd;
-    QPlainTextEdit* pteLaserStart;
-    QPlainTextEdit* pteStart;
+    QComboBox* cbxPost;
+    QLabel* lblPostDescription;
     QTabWidget* tabWidget;
-    QMap<QString, QLineEdit*> scriptLineEdits_; // gcName -> path line edit
+    std::vector<PluginTab*> pluginTabs_;
+
+    void fillPosts();
+    void showPostDescription();
 
 public:
     Tab(QWidget* parent);

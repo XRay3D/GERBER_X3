@@ -32,13 +32,8 @@ public:
     using GCode::File::File;
     explicit File(GCode::Params&& newGcp)
         : GCode::File{std::move(newGcp)} {
-        if(gcp.tools.front().diameter()) {
-            initSave();
-            addInfo();
-            statFile();
-            genGcodeAndTile();
-            endFile();
-        }
+        if(gcp.tools.front().diameter())
+            regenerate();
     }
     // Чем заполнить таблицу при открытии УП на правку. Хранится в самой УП, а
     // не в Params: Variant умеет только числа и UsedItems, строки в него не лягут.
@@ -53,17 +48,6 @@ public:
     uint32_t type() const override { return DRILLING; }
     void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
 
-    void genGcodeAndTile() override {
-        const QRectF rect = App::project().worckRect();
-        for(size_t x{}; x < App::project().stepsX(); ++x) {
-            for(size_t y{}; y < App::project().stepsY(); ++y) {
-                const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
-                saveDrill(offset);
-                if(gcp.params.contains(GCode::Params::NotTile))
-                    return;
-            }
-        }
-    }
 
 private:
     std::vector<RowRef> rows_;

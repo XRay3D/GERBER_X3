@@ -30,7 +30,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"voronoi-path"_s); }
     uint32_t type() const override { return VORONOI; }
     void createGi() override;
-    void genGcodeAndTile() override;
 };
 
 } // namespace Voronoi

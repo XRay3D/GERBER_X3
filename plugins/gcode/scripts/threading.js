@@ -123,7 +123,7 @@ function cutExternal(file, cx, cy, nomD, toolR, steps, stepReal, starts, turns, 
             var ax = cx + approachR * Math.cos(a0), ay = cy + approachR * Math.sin(a0);
             var sx = cx + r * Math.cos(a0), sy = cy + r * Math.sin(a0);
 
-            file.addLine(file.formatted([file.g0(), file.fmtZ(file.clearance)]));
+            file.addLine(file.formatted([file.g0(), file.fmtZ(file.properties.clearence)]));
             file.addLine(file.formatted([file.g0(), file.fmtX(ax), file.fmtY(ay)]));
             file.addLine(file.formatted([file.g1(), file.fmtZ(-totalH), file.strPlungeFeed]));
             file.addLine(file.formatted([file.g1(), file.fmtX(sx), file.fmtY(sy), file.fmtF(file.feedRate / 10)]));
@@ -139,12 +139,12 @@ function cutExternal(file, cx, cy, nomD, toolR, steps, stepReal, starts, turns, 
             file.addLine(file.formatted([file.g0(), file.fmtX(ax), file.fmtY(ay)]));
         }
     }
-    file.addLine(file.formatted([file.g0(), file.fmtZ(file.clearance)]));
+    file.addLine(file.formatted([file.g0(), file.fmtZ(file.properties.clearence)]));
 
     if (file.chamfer) {
         var zChamfer = -0.45 * pitch;
         var r1       = nomD / 2 + toolR - stepReal;
-        file.addLine(file.formatted([file.g0(), file.fmtZ(file.clearance)]));
+        file.addLine(file.formatted([file.g0(), file.fmtZ(file.properties.clearence)]));
         file.addLine(file.formatted([file.g1(), file.fmtX(cx + r1), file.fmtY(cy), file.fmtF(file.feedRate / 10)]));
         file.addLine(file.formatted([file.g1(), file.fmtZ(zChamfer), file.strPlungeFeed]));
         for (var i = 1; i <= steps; i++) {
@@ -155,5 +155,5 @@ function cutExternal(file, cx, cy, nomD, toolR, steps, stepReal, starts, turns, 
         file.addLine(file.formatted([file.g0(), file.fmtX(cx + approachR), file.fmtY(cy)]));
     }
 
-    file.addLine(file.formatted([file.g0(), file.fmtZ(file.clearance)]));
+    file.addLine(file.formatted([file.g0(), file.fmtZ(file.properties.clearence)]));
 }

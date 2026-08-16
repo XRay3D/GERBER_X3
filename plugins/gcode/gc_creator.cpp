@@ -43,11 +43,7 @@ public:
     explicit GCDbgFile(GCode::Params&& gcp, QColor color)
         : GCode::File{std::move(gcp)}
         , color{color} {
-        initSave();
-        addInfo();
-        statFile();
-        genGcodeAndTile();
-        endFile();
+        regenerate();
     }
     void serialize(Serial::Writer& /*sb*/) const override { } // отладочный, не сохраняется
     void initFrom(AbstractFile* file [[maybe_unused]]) override { qWarning(__FUNCTION__); }
@@ -65,11 +61,10 @@ public:
         // itemGroup()->push_back(item);
         itemGroup()->setVisible(true);
     }
-    void genGcodeAndTile() override { } // saveLaserProfile({});
     // AbstractFile interface
 };
 
-void dbgPaths(Geo::Polylines ps, const QString& fileName, QColor color, bool close, const Tool& tool) {
+void dbgPaths(Geo::Polylines ps, QAnyStringView fileName, QColor color, bool close, const Tool& tool) {
     std::erase_if(ps, [](const Geo::Polyline& path) { return path.size() < 2; });
     if(ps.empty())
         return;
@@ -77,7 +72,7 @@ void dbgPaths(Geo::Polylines ps, const QString& fileName, QColor color, bool clo
         r::for_each(ps, [](Geo::Polyline& p) { p.close(); });
     GCode::Params gcp{tool, 0.0, std::move(ps)};
     auto file = new GCDbgFile{std::move(gcp), color};
-    file->setFileName(fileName);
+    file->setFileName(fileName.toString());
     emit App::project().addFileDbg(file);
 };
 

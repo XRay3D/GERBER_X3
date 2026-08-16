@@ -25,7 +25,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"crosshatch-path"_s); }
     uint32_t type() const override { return CROSS_HATCH; }
     void createGi() override;
-    void genGcodeAndTile() override;
 };
 
 class Creator : public GCode::Creator {

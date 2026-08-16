@@ -11,7 +11,9 @@
 #pragma once
 
 #include "abstract_file.h"
+#include "gc_post.h"
 #include "gc_types.h"
+#include "geo/util.h"
 
 #include <QList>
 #include <QString>
@@ -90,16 +92,26 @@ public:
     // безопасной высоты, зазора, глубины подвода и т.п. Нужно вызывать сразу же,
     // как только один из этих параметров меняется у уже созданного файла —
     // иначе lines_ останется устаревшим до следующего явного "Save Toolpath".
-    void regenerate();
+    // Части текста: «сохранить всё в один файл» пишет шапку только у первого
+    // файла, а концовку -- только у последнего.
+    enum Section : unsigned {
+        Header = 1,
+        Body = 2,
+        Footer = 4,
+        All = Header | Body | Footer,
+    };
+    void regenerate(unsigned sections = All);
 
     static void ensureDefaultScripts();
 
-    void initSave();
-    void statFile();
-    void addSourceInfo();
-    void addInfo();
-    virtual void genGcodeAndTile() = 0;
-    void endFile();
+    // Расширение прокси для скрипта: объект, доступный как file.ext. Плагин
+    // отдаёт сюда то, чего в общем прокси нет (Profile -- геометрию мостов).
+    virtual QObject* createJsExtension(GcFileProxy& /*proxy*/, QJSEngine& /*engine*/) { return nullptr; }
+
+    // Комментарий в диалекте текущего поста.
+    static QString comment(const QString& text);
+    // Итоговый текст файла (склейка строк, нумерация N по посту).
+    static QString renderText(const std::vector<QString>& lines);
 
     FileTree::Node* node() override;
 
@@ -125,6 +137,7 @@ protected:
         AlwaysZ,
         AlwaysI,
         AlwaysJ,
+        AlwaysR,
         AlwaysS,
         AlwaysF,
 
@@ -134,10 +147,19 @@ protected:
         SpaceZ,
         SpaceI,
         SpaceJ,
+        SpaceR,
         SpaceS,
         SpaceF,
 
         Size
+    };
+
+    // У линейных строк (G0/G1) и у дуг (G2/G3) свой диалект: пост задаёт два
+    // формата слов, formated() выбирает набор по слову G строки.
+    enum FormatKind {
+        Linear,
+        Arc,
+        KindCount
     };
 
     // Рабочее состояние генератора текста УП: пересобирается regenerate(),
@@ -147,14 +169,16 @@ protected:
 
     static inline QString lastDir;
     static inline bool redirected;
-    static inline constexpr auto CMD_LIST = u"GXYZIJSF"_sv;
+    static inline constexpr auto CMD_LIST = u"GXYZIJRSF"_sv;
     // Из них координатные -- те, что живут на сетке вывода (GCode::Units).
-    static inline constexpr auto COORD_LIST = u"XYZIJ"_sv;
+    static inline constexpr auto COORD_LIST = u"XYZIJR"_sv;
 
     std::vector<double> getDepths();
 
-    [[= Serial::skip]] bool formatFlags[Size]{};
+    [[= Serial::skip]] bool formatFlags[KindCount][Size]{};
     [[= Serial::skip]] Code gCode_ = GNull;
+    [[= Serial::skip]] QString jsError_; // последняя ошибка скрипта, для комментария в УП
+    static void parseFormat(const QString& format, bool (&flags)[Size]);
 
     // Слово УП: буква и то, что за ней. Координатные несут с собой своё ЧИСЛО
     // в единицах вывода -- повтор подавляется по нему, а не по тексту: текст
@@ -174,7 +198,7 @@ protected:
 
     // Последнее НАПИСАННОЕ значение каждого слова: у координатных числом, у
     // прочих (G, S, F -- там значение и есть текст) текстом.
-    [[= Serial::skip]] Units lastUnits[SpaceG /*6*/]{};
+    [[= Serial::skip]] Units lastUnits[SpaceG]{};
     [[= Serial::skip]] bool lastWritten[SpaceG]{};
     [[= Serial::skip]] QString lastValues[SpaceG];
 
@@ -190,7 +214,7 @@ protected:
         QChar c;
         Word operator()(double mm) const { return {c, toUnits(mm)}; }
         operator Word() const { return {c, Units{}}; }
-    } static constexpr i{u'I'}, j{u'J'}, x{u'X'}, y{u'Y'}, z{u'Z'};
+    } static constexpr i{u'I'}, j{u'J'}, rad{u'R'}, x{u'X'}, y{u'Y'}, z{u'Z'};
 
     // Обороты шпинделя длиной не являются -- своя запись, не по сетке вывода.
     struct {
@@ -222,7 +246,16 @@ protected:
     // имеет -- у них своя запись, до трёх знаков без хвостовых нулей.
     static QString formatValue(double val);
 
+    void initSave();
+    void writeHeader();
+    void addSourceInfo();
+    void addInfo();
+    void writeFooter();
     bool runJsScript(const QString& scriptPath);
+    // Контекст для функций поста.
+    Post::Context postContext();
+    // Одна дуга в текущем диалекте (I/J, R или хордами).
+    void arcLines(std::vector<QString>& lines, const Geo::Vertex& fr, const Geo::Vertex& to, const Geo::Arc& arc);
 
     // AbstractFile interfaces
     // initFrom не переопределяется: базовая реализация переносит ровно то, что
@@ -230,16 +263,6 @@ protected:
     // а programName_ и visibility_ переносить как раз НЕЛЬЗЯ -- у нового файла они
     // уже свои, выставленные формой до замены.
     // FileTree::Node* node() override;
-
-    /////////////////////////////////////////////////////////////
-
-    void saveDrill(const QPointF& offset);
-    void saveLaserHLDI(const QPointF& offset);
-    void saveLaserPocket(const QPointF& offset);
-    void saveLaserProfile(const QPointF& offset);
-    void saveMillingPocket(const QPointF& offset);
-    void saveMillingProfile(const QPointF& offset);
-    void saveMillingRaster(const QPointF& offset);
 
     /////////////////////////////////////////////////////////////
 

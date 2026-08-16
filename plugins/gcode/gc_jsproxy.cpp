@@ -14,7 +14,9 @@
 #include "app.h"
 #include "project.h"
 
+#include "serial.h"
 #include <QJSEngine>
+#include <QJsonDocument>
 #include <QJsonObject>
 
 namespace GCode {
@@ -52,20 +54,62 @@ double GcFileProxy::threadHoleDiam() const { return file_->gcp.tool().holeDiam()
 bool GcFileProxy::circle() const { return file_->gcp.circle(); }
 bool GcFileProxy::chamfer() const { return file_->gcp.chamfer(); }
 int GcFileProxy::starts() const { return file_->gcp.starts(); }
-double GcFileProxy::safeZ() const { return App::project().safeZ(); }
-double GcFileProxy::plunge() const { return App::project().plunge(); }
-double GcFileProxy::clearance() const { return App::project().clearence(); }
-int GcFileProxy::stepsX() const { return static_cast<int>(App::project().stepsX()); }
-int GcFileProxy::stepsY() const { return static_cast<int>(App::project().stepsY()); }
-double GcFileProxy::workWidth() const { return App::project().worckRect().width(); }
-double GcFileProxy::workHeight() const { return App::project().worckRect().height(); }
-double GcFileProxy::spaceX() const { return App::project().spaceX(); }
-double GcFileProxy::spaceY() const { return App::project().spaceY(); }
+QJSValue GcFileProxy::properties() const { return propertiesValue(*engine_); }
+bool GcFileProxy::notTile() const { return file_->gcp.params.contains(Params::NotTile); }
+QString GcFileProxy::name() const { return file_->shortName(); }
+QString GcFileProxy::programName() const { return file_->programName_; }
+
+namespace {
+
+// Serial пишет QPointF массивом [x, y], QRectF -- [x, y, w, h]. Скрипту
+// удобнее объекты с именованными полями.
+QVariant asPoint(const QVariant& v) {
+    const auto list = v.toList();
+    if(list.size() != 2) return v;
+    return QVariantMap{
+        {u"x"_s, list[0]},
+        {u"y"_s, list[1]}
+    };
+}
+QVariant asRect(const QVariant& v) {
+    const auto list = v.toList();
+    if(list.size() != 4) return v;
+    return QVariantMap{
+        {u"x"_s,      list[0]},
+        {u"y"_s,      list[1]},
+        {u"width"_s,  list[2]},
+        {u"height"_s, list[3]}
+    };
+}
+
+} // namespace
+
+QJSValue GcFileProxy::propertiesValue(QJSEngine& engine) {
+    Serial::Writer sb;
+    Serial::write(sb, App::project().header());
+    std::string_view view;
+    if(auto err = sb.view().get(view); err) {
+        qWarning() << "GCode JS: project header:" << simdjson::error_message(err);
+        return engine.newObject();
+    }
+    QVariantMap map = QJsonDocument::fromJson(QByteArray{view.data(), static_cast<qsizetype>(view.size())}).object().toVariantMap();
+    for(const QString& key: {u"home"_s, u"zero"_s})
+        if(map.contains(key)) map[key] = asPoint(map[key]);
+    for(const QString& key: {u"workRect"_s, u"viewRect"_s})
+        if(map.contains(key)) map[key] = asRect(map[key]);
+    if(map.contains(u"pins"_s)) {
+        QVariantList pins = map[u"pins"_s].toList();
+        for(QVariant& pin: pins) pin = asPoint(pin);
+        map[u"pins"_s] = pins;
+    }
+    return engine.toScriptValue(map);
+}
 double GcFileProxy::zVal() const { return file_->z_; }
 void GcFileProxy::setZ(double z) { file_->z_ = z; }
 
 QJSValue GcFileProxy::getToolPaths(double ox, double oy) {
-    cachedPathss_ = file_->mirrorAndOffsetCurves({ox, oy});
+    offset_ = {ox, oy};
+    cachedPathss_ = file_->mirrorAndOffsetCurves(offset_);
 
     QJSValue outerArr = engine_->newArray(static_cast<uint>(cachedPathss_.size()));
     for(uint i{}; i < cachedPathss_.size(); ++i) {
@@ -118,14 +162,23 @@ void GcFileProxy::addLine(const QString& line) {
     file_->lines_.emplace_back(line);
 }
 
+QString GcFileProxy::comment(const QString& text) { return File::comment(text); }
+QString GcFileProxy::spindleOn() { return App::gcSettings().post().spindleOn(file_->postContext()); }
+QString GcFileProxy::spindleOff() { return App::gcSettings().post().spindleOff(file_->postContext()); }
+QString GcFileProxy::laserOn(bool dynamic) { return App::gcSettings().post().laserOn(file_->postContext(), dynamic); }
+QString GcFileProxy::laserOff() { return App::gcSettings().post().laserOff(file_->postContext()); }
+
 QJSValue GcFileProxy::savePathLines(int pi, int ci, bool rev, double perimeter, double depth) {
     if(pi < 0 || pi >= static_cast<int>(cachedPathss_.size())) return {};
     const Geo::Polylines& paths = cachedPathss_[static_cast<size_t>(pi)];
     if(ci < 0 || ci >= static_cast<int>(paths.size())) return {};
 
     const Geo::Polyline& orig = paths[static_cast<size_t>(ci)];
-    auto lines = file_->savePath(rev ? orig.reversed() : orig, perimeter, depth);
+    return linesFor(rev ? orig.reversed() : orig, perimeter, depth);
+}
 
+QJSValue GcFileProxy::linesFor(const Geo::Polyline& curve, double perimeter, double depth) {
+    auto lines = file_->savePath(curve, perimeter, depth);
     QJSValue arr = engine_->newArray(static_cast<uint>(lines.size()));
     for(uint i{}; i < lines.size(); ++i)
         arr.setProperty(i, lines[i]);

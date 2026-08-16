@@ -267,6 +267,10 @@ private:
         double glue{};
         QRectF viewRect;
     };
-    Header header() const;           // снимок (viewRect — из graphicsview)
     void applyHeader(const Header&); // применить всё, кроме viewRect
+
+public:
+    // Снимок шапки нужен и снаружи: gcode отдаёт его скрипту как
+    // file.properties -- одним объектом, рефлексией по этой же структуре.
+    Header header() const; // снимок (viewRect — из graphicsview)
 };
