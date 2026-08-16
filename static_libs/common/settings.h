@@ -158,10 +158,8 @@ enum HomePosition : int {
 
 enum Theme : int {
     System,
-    LightBlue,
-    LightRed,
-    DarkBlue,
-    DarkRed,
+    LightTheme,
+    DarkTheme,
 };
 
 class SettingsDialog;
@@ -187,6 +185,7 @@ public:
     bool scaleHZMarkers();
     bool scalePinMarkers();
     int theme();
+    QColor accentColor();
 
     /*cl::Clipper64*/
     int clpCircleSegments(double radius);
@@ -232,6 +231,7 @@ private:
     bool scaleHZMarkers_{};
     bool scalePinMarkers_{};
     int theme_{};
+    QColor accentColor_{61, 174, 233};
 
     /*cl::Clipper64*/
     double clpMinCircleSegmentLength_{0.5};

@@ -234,7 +234,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
         model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
-        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() == DarkTheme ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
@@ -267,7 +267,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
         model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
-        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() == DarkTheme ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, shapes]: map) {
             auto& row = data[i++];

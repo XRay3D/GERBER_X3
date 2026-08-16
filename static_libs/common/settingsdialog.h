@@ -18,6 +18,7 @@
 #include <QtWidgets>
 
 class AbstractFileSettings;
+class ColorSelector;
 
 class SettingsDialog : public QDialog {
     Q_OBJECT
@@ -70,6 +71,8 @@ private:
         QLabel* fontSizeLabel;
         QComboBox* cbxTheme;
         QLabel* label;
+        ColorSelector* accentColorSelector;
+        QLabel* labelAccentColor;
         QGroupBox* gbViewer;
         QVBoxLayout* verticalLayout_2;
         QCheckBox* chbxOpenGl;
