@@ -259,18 +259,19 @@ void Creator::stacking(Geo::Polylines& paths) {
         } else {
             // Вложенная петля идёт тем же проходом, только если до неё не
             // дальше диаметра инструмента: иначе переезд всё равно подъёмом.
+            // Мерится расстояние от вершин вложенной до КОНТУРА объемлющей:
+            // у офсетных петель это ровно шаг, где бы ни стояли вершины.
+            // Прежняя мерка вершина-вершина рвала заливку круглой дырки на
+            // несколько проходов -- две вершины окружности после каждого
+            // офсета оказываются где придётся.
             const Geo::Polyline& prev = returnPss.back().back();
             double best = std::numeric_limits<double>::max();
-            QPointF link;
-            for(const Geo::Vertex& a: prev)
-                for(const Geo::Vertex& b: path)
-                    if(const double d = Geo::distance(a, b); d < best)
-                        best = d, link = a;
+            for(const Geo::Vertex& b: path)
+                best = std::min(best, closestPoint(prev, b).distance);
 
-            if(best <= toolDiameter) {
-                rotateToNearest(path, link);
+            if(best <= toolDiameter)
                 returnPss.back().emplace_back(std::move(path));
-            } else
+            else
                 returnPss.push_back({std::move(path)});
         }
 
@@ -285,8 +286,19 @@ void Creator::stacking(Geo::Polylines& paths) {
 
     // Изнутри наружу: обход строился от объемлющих петель к вложенным, а
     // снимать материал начинают с внутренних.
-    for(Geo::Polylines& group: returnPss)
+    //
+    // Начало каждой следующей петли -- в ближайшей к концу предыдущей ТОЧКЕ
+    // контура (замкнутая петля кончается там, где началась). Переезд между
+    // витками тогда ровно шаг офсета, по нерасчищенному ещё телу кармана,
+    // и скрипт ведёт его подачей, не поднимая фрезу. Крутить надо именно в
+    // порядке фрезерования: сдвиг, сделанный при обходе от объемлющей к
+    // вложенной, для обратного хода бесполезен -- он ставил начало
+    // ВЛОЖЕННОЙ, а ехать предстоит от неё к объемлющей.
+    for(Geo::Polylines& group: returnPss) {
         r::reverse(group);
+        for(std::size_t i = 1; i < group.size(); ++i)
+            rotateToClosest(group[i], group[i - 1].front());
+    }
 
     sortByProximity(returnPss, App::home().pos() + App::zero().pos());
 }
