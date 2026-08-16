@@ -84,7 +84,11 @@ void ToolTreeView::copyTool() {
 
     ToolItem* itemDst = static_cast<ToolItem*>(index.internalPointer());
     itemDst->setIsTool();
+    const Tool::ID newId = itemDst->toolId();
     itemDst->tool() = itemSrc->tool();
+    // Присваивание Tool целиком тащит и id источника -- вернуть только что
+    // выданный свежий id, иначе копия дублирует id оригинала.
+    itemDst->tool().setId(newId);
     selectionModel()->setCurrentIndex(index, QItemSelectionModel::ClearAndSelect | QItemSelectionModel::Rows);
 }
 
