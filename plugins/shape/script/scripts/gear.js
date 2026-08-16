@@ -164,9 +164,30 @@ function build(p, sh) {
     // Эвольвента: t -- параметр развёртки, r(t) = rb*sqrt(1+t^2), полярный угол inv(t) = t - atan(t).
     var tPitch = Math.tan(alpha);
     var invPitch = tPitch - Math.atan(tPitch);
-    var tTip = Math.sqrt((ra / rb) * (ra / rb) - 1);
-    var tStart = rf > rb ? Math.sqrt((rf / rb) * (rf / rb) - 1) : 0;
     var halfPitch = Math.PI / (2 * z);       // половина углового шага
+    // Обратная эвольвентная функция: t, при котором inv(t) = t - atan(t) = v (Ньютон).
+    function solveInv(v) {
+        var t = Math.cbrt(3 * v);
+        for (var n = 0; n < 30; n++) {
+            var f = t - Math.atan(t) - v;
+            var d = t * t / (1 + t * t);
+            if (d < 1e-12) break;
+            var dt = f / d;
+            t -= dt;
+            if (Math.abs(dt) < 1e-14) break;
+        }
+        return t;
+    }
+    // При малом z и большом угле давления зуб на радиусе вершин ra = rp+m
+    // уже заострён (фланги сошлись раньше: inv(t)-invPitch = halfPitch), и
+    // дуга вершины между «перехлестнувшимися» точками ушла бы на полный круг.
+    // Поэтому вершину обрываем на меньшем из ra и радиуса острия.
+    var tTipGeom = Math.sqrt((ra / rb) * (ra / rb) - 1);
+    var tTipPointed = solveInv(halfPitch + invPitch);
+    var tipPointed = tTipPointed < tTipGeom + 1e-6;
+    var tTip = tipPointed ? tTipPointed : tTipGeom;
+    if (tipPointed) ra = rb * Math.sqrt(1 + tTip * tTip);
+    var tStart = rf > rb ? Math.sqrt((rf / rb) * (rf / rb) - 1) : 0;
     var delta = -(halfPitch + invPitch); // поворот эвольвенты: на делительном радиусе угол = -halfPitch
 
     // Точка фланга по параметру t; side = +1 (сторона зуба по часовой, угол растёт с радиусом) / -1 (зеркало)
@@ -243,9 +264,11 @@ function build(p, sh) {
             pPrev = evolventArc(pl, pPrev, tPrev, t, +1, rot);
             tPrev = t;
         }
-        // Вершина: дуга по окружности вершин
+        // Вершина: дуга по окружности вершин (при остром зубе фланги уже
+        // сошлись в одну точку -- дуги нет)
         var tip2 = flank(tTip, -1, rot);
-        pl.arcToC(tip2.x, tip2.y, 0, 0, true);
+        if (!tipPointed)
+            pl.arcToC(tip2.x, tip2.y, 0, 0, true);
         // Нисходящий фланг
         pPrev = tip2;
         tPrev = tTip;
