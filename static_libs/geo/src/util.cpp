@@ -115,6 +115,24 @@ void stitchArcs(Polyline& poly, double tolerance) {
                 && std::abs(sweep) < maxBulgeSweep
                 && distance(prev->center, curr->center) <= tolerance
                 && std::abs(prev->radius - curr->radius) <= tolerance) {
+                // Дуга, кончающаяся в собственном начале, -- окружность: её
+                // прогибом не выразить, вершин у неё должно остаться две, и
+                // держится она ДВУМЯ ПОЛОВИНАМИ -- такой её пишет одной командой
+                // вывод УП. Иначе куски одной окружности из разных построений
+                // (свип режет по вертикальным касательным, капсулы -- по своим
+                // швам) сшивались бы в четверть и три четверти. Размах больше
+                // полуоборота отсекает микродугу, у которой конец тоже у самого
+                // начала. См. Cgal::toPolyline о том же.
+                if(std::abs(sweep) > pi && distance(next, out.back()) <= tolerance) {
+                    // Недобор до оборота -- шум, половины ровно по pi:
+                    // прогиб +-1, как у Geo::circle.
+                    const double half = std::copysign(pi, sweep);
+                    const QPointF start = out.back();
+                    out.back().bulge = std::copysign(1.0, half);
+                    out.emplace_back(prev->center * 2.0 - start, std::copysign(1.0, half));
+                    keptSweep = half;
+                    continue;
+                }
                 out.back().bulge = bulgeOf(sweep);
                 keptSweep = sweep;
                 continue; // вершина между двумя кусками одной дуги не нужна

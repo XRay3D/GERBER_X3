@@ -6,6 +6,7 @@
 // заметила бы.
 
 #include "geo/boolean.h"
+#include "geo/util.h"
 
 #include <QImage>
 #include <QPainter>
@@ -15,6 +16,8 @@
 #include <algorithm>
 #include <cmath>
 #include <numbers>
+
+using namespace Qt::StringLiterals;
 
 using namespace Geo;
 
@@ -72,6 +75,7 @@ private slots:
     void zeroDeltaIsIdentity();
     void erosionThickerThanBodyEmptiesIt();
     void arcSmallerThanOffsetStaysOneArc();
+    void shrunkDiscKeepsTwoVertices();
 };
 
 // Дуга РАДИУСОМ МЕНЬШЕ офсета -- случай, на котором внутренняя окружность
@@ -170,6 +174,40 @@ void InflateTest::erosionThickerThanBodyEmptiesIt() {
     const Polygons eroded = Inflate(strip, -6.0);
     QCOMPARE(rasterArea(eroded), 0.0);
     QCOMPARE(eroded.all().size(), std::size_t(0));
+}
+
+// Круглая дырка, которую заливает pocket концентрическими витками: каждый
+// виток -- Inflate ИСХОДНОГО диска внутрь на свою глубину. Свип режет
+// окружность на несколько x-монотонных кусков, и при материализации они
+// сшиваются обратно в одну дугу; размах кусков считается по округлённым
+// концам и в сумме недобирает до 2*pi на ~1e-8 -- порог полного оборота это
+// пропускало, и окружность схлопывалась в ОДНУ вершину с прогибом ~1e8, а
+// contours() её потом браковал как вырожденную. В pocket так пропадали все
+// витки заливки, кроме первого. Окружность обязана оставаться двумя вершинами.
+void InflateTest::shrunkDiscKeepsTwoVertices() {
+    // Диск с дыркой -- как приходит из чертежа; дырка -- как её отдаёт
+    // разность «граница минус медь» (Polygon без дырок).
+    const Polygons disc{Polylines{circle(6.0)}};
+    const Polygons ring = Polygons{Polylines{circle(30.0)}} - disc;
+    const Polygons hole = Polygons{Polylines{circle(30.0)}} - ring;
+    QCOMPARE(hole.all().size(), 1u);
+
+    const Polygons region = Inflate(hole, -0.5); // r = 2.75
+    for(int i = 1; i <= 10; ++i) {
+        const Polygons loop = Inflate(region, -0.5 * i);
+        const double r = 2.75 - 0.25 * i;
+        QVERIFY2(!loop.empty(), qPrintable(u"виток %1 пуст"_s.arg(i)));
+        QVERIFY(std::abs(loop.area() - std::numbers::pi * r * r) < 1e-6);
+        const Polylines contours = loop.contours();
+        QCOMPARE(contours.size(), 1u);
+        // Канон окружности -- две половины (прогиб +-1): такой её пишет
+        // одной командой вывод УП, и такой её пересобирает поворот начала.
+        const Polyline& loop0 = contours.front();
+        QVERIFY2(loop0.size() == 2, qPrintable(u"виток %1: вершин %2"_s.arg(i).arg(loop0.size())));
+        QVERIFY(std::abs(std::abs(loop0.front().bulge) - 1.0) < 1e-9);
+        QVERIFY(std::abs(std::abs(loop0.back().bulge) - 1.0) < 1e-9);
+        QVERIFY(std::abs(loop0.perimeter() - 2.0 * std::numbers::pi * r) < 1e-6);
+    }
 }
 
 QTEST_APPLESS_MAIN(InflateTest)
