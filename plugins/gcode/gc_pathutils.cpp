@@ -57,12 +57,22 @@ NestingForest nestingForest(const Geo::Polylines& contours) {
     for(const Geo::Polyline& contour: contours)
         bodies.emplace_back(contour);
 
+    // Габариты -- один раз и заранее: у Polygon::boundingRect() кэша нет, он
+    // всякий раз обходит точные кривые, а contains() зовёт его первым делом.
+    // Перебор пар квадратичен, и на тысячах витков (карман по всей плате)
+    // без этого отсева он уходил в минуты. Контур внутри другого лежит и
+    // габаритом внутри его габарита -- проверка дешёвая и ничего не теряет.
+    std::vector<QRectF> boxes;
+    boxes.reserve(count);
+    for(const Geo::Polyline& contour: contours)
+        boxes.push_back(contour.boundingRect());
+
     // Родитель -- самый глубокий из объемлющих, поэтому сперва считаем
     // глубины, а уже потом выбираем по ним родителя.
     std::vector<std::vector<std::size_t>> parents(count);
     for(std::size_t i{}; i < count; ++i)
         for(std::size_t j{}; j < count; ++j)
-            if(i != j && isInside(contours[i], bodies[j])) {
+            if(i != j && boxes[j].contains(boxes[i]) && isInside(contours[i], bodies[j])) {
                 parents[i].push_back(j);
                 ++forest.depth[i];
             }

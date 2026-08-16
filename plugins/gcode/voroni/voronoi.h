@@ -12,21 +12,11 @@
 
 #include "types.h"
 #include "voronoi_boost.h"
-#include "voronoi_cgal.h"
 #include "voronoi_jc.h"
 
 namespace Voronoi {
 
-class Creator :
-#if __has_include(<CGAL/Algebraic_structure_traits_.h>)
-    public VoronoiCgal,
-#endif
-    public VoronoiJc
-    // #if __has_include(<boost/polygon/voronoi.hpp>)
-    ,
-    public VoronoiBoost
-// #endif
-{
+class Creator : public VoronoiJc, public VoronoiBoost {
 
 public:
     Creator() { }

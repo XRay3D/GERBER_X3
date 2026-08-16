@@ -9,20 +9,31 @@
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #include "voronoi.h"
+#include "gc_pathutils.h"
 #include "gi_gcpath.h"
 #include "gi_point.h"
-#include "jc_voronoi.h"
 #include "project.h"
-
-// namespace ClipperLib {
-// inline size_t qHash(const Point64& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point64))); }
-// } // namespace ClipperLib
 
 namespace Voronoi {
 
-// inline size_t qHash(const Creator::Pair& tag, uint = 0) {
-// return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
-// }
+namespace {
+
+// Концентрические петли заливки от region с шагом step: первая -- сам
+// region, каждая следующая смещена на step (см. то же в pocketoffset.cpp;
+// не вынесено в общий gc_pathutils, чтобы не трогать уже отлаженный код
+// соседнего плагина ради единственного второго вызова).
+Geo::Polylines concentricLoops(const Geo::Polygons& region, double step) {
+    Geo::Polylines loops;
+    for(int i{};; ++i) {
+        Geo::checkCancelled();
+        const Geo::Polygons loop = i ? Geo::Inflate(region, 2.0 * step * i) : region;
+        if(loop.empty()) break;
+        loops.append_range(loop.contours());
+    }
+    return loops;
+}
+
+} // namespace
 
 void Creator::create() {
     const auto& tool = gcp.tools.front();
@@ -35,41 +46,55 @@ void Creator::create() {
     case 1: jcVoronoi(); break;
     }
 
+    if(returnPs.empty()) {
+        emit fileReady(nullptr);
+        return;
+    }
+
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-        gcp.toolPathss = toCurvess(std::array{sortBeginEnd(returnPs, ~(App::home().pos() + App::zero().pos()))});
+        if(returnPs.empty()) { // ничего, кроме рамки, -- скелетить не между чем
+            emit fileReady(nullptr);
+            return;
+        }
+        GCode::sortByProximity(returnPs, App::home().pos() + App::zero().pos());
+        gcp.toolPathss = {returnPs};
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     } else {
-        Paths64 copy{returnPs};
+        Geo::Polylines copy{returnPs};
         copy.resize(copy.size() - 1); // remove frame
         createOffset(tool, depth, width);
 
-        { // создание пермычек.
-            cl::Clipper64 clipper;
-            clipper.AddClip(openSrcPaths);
-            clipper.AddOpenSubject(copy);
-            clipper.Execute(cl::ClipType::Difference, cl::FillRule::NonZero, copy, copy);
-            sortBeginEnd(copy, ~(App::home().pos() + App::zero().pos()));
-            for(auto&& p: copy)
-                returnPss.emplace_back(Paths64{p});
+        Geo::Polygons milledArea;
+        { // создание перемычек: куски скелета Вороного, до которых карман не
+          // дотянулся (слишком узкое место для полного прохода фрезой),
+          // остаются одиночными проходами по самой линии.
+            Geo::Polylines bridges = Geo::clipOpen(Geo::ClipType_::Difference, copy, Geo::Polygons{openSrcPaths});
+            GCode::sortByProximity(bridges, App::home().pos() + App::zero().pos());
+            for(auto&& p: bridges)
+                returnPss.push_back(Geo::Polylines{std::move(p)});
+
+            { // заметённая площадь -- для setPocketAreaCurves: первый виток
+              // кармана (openSrcPaths -- он отстоит от края полосы на радиус)
+              // и перемычки, раздутые на диаметр фрезы. Прежние «dOffset + 10»
+              // -- это радиус плюс 10 ЕДИНИЦ uScale (0.1 мкм), не 10 мм.
+                milledArea = Geo::Inflate(Geo::Polygons{openSrcPaths}, toolDiameter);
+                if(!bridges.empty())
+                    milledArea |= Geo::Inflate(bridges, toolDiameter);
+            }
         }
-        dbgPaths(returnPs, u"создание пермычек"_s);
-        { // создание заливки.
-            cl::ClipperOffset offset(uScale);
-            offset.AddPaths(openSrcPaths, cl::JoinType::Round, cl::EndType::Polygon);
-            offset.AddPaths(copy, cl::JoinType::Round, cl::EndType::Round);
-            offset.Execute(dOffset + 10, openSrcPaths); // FIXME maybe dOffset * 0.5
+
+        // erase empty groups
+        std::erase_if(returnPss, [](const Geo::Polylines& p) { return p.empty(); });
+
+        if(returnPss.empty()) {
+            emit fileReady(nullptr);
+            return;
         }
-        // erase empty paths
-        auto begin = returnPss.begin();
-        while(begin != returnPss.end())
-            if(begin->empty())
-                returnPss.erase(begin);
-            else
-                ++begin;
-        gcp.toolPathss = toCurvess(returnPss);
-        gcp.setPocketAreaCurves(toCurves(openSrcPaths));
+
+        gcp.toolPathss = std::move(returnPss);
+        gcp.setPocketAreaCurves(std::move(milledArea));
         file_ = new File{std::move(gcp)};
         file_->setFileName(tool.nameEnc());
     }
@@ -77,55 +102,41 @@ void Creator::create() {
 
 void Creator::createOffset(const Tool& tool, double depth, const double width) {
     setMsg(tr("Create Offset"));
-    toolDiameter = tool.getDiameter(depth) * uScale;
-    dOffset = toolDiameter / 2;
-    stepOver = tool.stepover() * uScale;
-    const Geo::Polyline frame{returnPs.back()};
-    // returnPs.pop_back();
-    { // create offset
-      // ClipperOffset offset;
-      // offset.AddPaths(returnPs, cl::JoinType::Round /*cl::JoinType::Miter*/, cl::EndType::Round);
-      // returnPs = offset.Execute(width * uScale * 0.5);
-        returnPs = Inflate64(returnPs, width * uScale * 0.5, cl::JoinType::Round /*cl::JoinType::Miter*/, cl::EndType::Round);
+    toolDiameter = tool.getDiameter(depth);
+    dOffset = toolDiameter * 0.5;
+    stepOver = tool.stepover();
+
+    // create offset: раздуть скелет Вороного (вместе с рамкой) в полосу
+    // шириной width -- delta у Geo::Inflate уже ПОЛНАЯ ширина.
+    //
+    // Рамка -- ЛИНИЯ, а не тело: замкнутый контур Geo::Inflate раздувает как
+    // площадь, и вместо полосы вдоль рамки получалась бы вся плата целиком,
+    // минус медь -- «карман на всё свободное место». Clipper2 (EndType::Round)
+    // рамку как раз вёл линией; здесь для того же снимаем флаг замкнутости и
+    // замыкаем путь повтором первой точки.
+    Geo::Polylines lines = returnPs;
+    if(!lines.empty() && lines.back().closed) {
+        Geo::Polyline& frame = lines.back();
+        frame.closed = false;
+        frame.push_back(frame.front());
     }
-    { // fit offset to copper
-        cl::Clipper64 clipper;
-        clipper.AddSubject(returnPs);
-        for(const Paths64& paths: groupedPss)
-            clipper.AddClip(paths);
-        // clipper.Execute(ClipType::Difference, returnPs, FillRule::Positive, FillRule::Negative);
-        clipper.Execute(cl::ClipType::Difference, cl::FillRule::Positive, returnPs);
-    }
-    if(0) { // cut to copper rect
-        cl::Clipper64 clipper;
-        clipper.AddSubject(returnPs);
-        clipper.AddClip({frame});
-        clipper.Execute(cl::ClipType::Intersection, cl::FillRule::NonZero, returnPs);
-        CleanPaths(returnPs, 0.001 * uScale);
-    }
-    { // create pocket
-        // ClipperOffset offset(uScale);
-        // offset.AddPaths(returnPs, cl::JoinType::Round, cl::EndType::Polygon);
-        // Paths64 tmpPaths1;
-        // tmpPaths1 = offset.Execute(-dOffset);
-        Paths64 tmpPaths1 = InflateRoundPolygon(returnPs, -dOffset);
-        openSrcPaths = tmpPaths1;
-        Paths64 tmpPaths;
-        do {
-            tmpPaths.append_range(tmpPaths1);
-            // offset.Clear();
-            // offset.AddPaths(tmpPaths1, cl::JoinType::Miter, cl::EndType::Polygon);
-            // tmpPaths1 = offset.Execute(-stepOver);
-            tmpPaths1 = InflateMiterPolygon(tmpPaths1, -stepOver);
-        } while(tmpPaths1.size());
-        returnPs = tmpPaths;
-    }
+    Geo::Polygons band = Geo::Inflate(lines, width);
+
+    // fit offset to copper: не резать медь.
+    if(!groupedPss.empty())
+        band -= Geo::Polygons{std::span<const Geo::Polygon>{groupedPss}};
+
+    // create pocket: концентрическая заливка получившейся области, первая
+    // петля -- сама область, отступившая от границы на радиус фрезы.
+    const Geo::Polygons region = Geo::Inflate(band, -toolDiameter);
+    openSrcPaths = region.contours();
+    returnPs = concentricLoops(region, -stepOver);
+
     if(returnPs.empty()) {
         emit fileReady(nullptr);
         return;
     }
     stacking(returnPs);
-    // returnPss_.push_back({frame});
 }
 
 /////////////////////////////////////////////////////////////
@@ -144,8 +155,6 @@ void File::createGi() {
     if(gcp.toolPathss.size() > 1) {
         Gi::Item* item;
         item = new Gi::GcPath{{gcp.toolPathss.back().back()}, this};
-        // item->setPen(QPen(Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin));
-        // item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
         itemGroup()->push_back(item);
         createGiPocket();
     } else

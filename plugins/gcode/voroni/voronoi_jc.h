@@ -12,50 +12,30 @@
 
 #include "gc_creator.h"
 
+#include <set>
+#include <tuple>
+
 namespace Voronoi {
 
 class VoronoiJc : public virtual GCode::Creator {
 
 protected:
+    // Ключ ребра диаграммы -- по КООРДИНАТАМ концов, не по указателям: одно и
+    // то же ребро приходит от диаграммы дважды, каждый раз с новыми jcv_point.
     struct Pair {
-        Point64 first;
-        Point64 second;
-        int32_t id;
-        bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
-        friend size_t qHash(const Pair& tag, uint = 0) {
-            return ::qHash(tag.first.x ^ tag.second.x) ^ ::qHash(tag.first.y ^ tag.second.y);
+        QPointF first;
+        QPointF second;
+        int32_t id{};
+        auto operator<=>(const Pair& b) const {
+            return std::make_tuple(first.x(), first.y(), second.x(), second.y()) <=> std::make_tuple(b.first.x(), b.first.y(), b.second.x(), b.second.y());
         }
+        bool operator==(const Pair& b) const { return first == b.first && second == b.second; }
     };
 
-    using Pairs = QSet<Pair>;
-    using Pairss = mvector<Pairs>;
-    struct OrdPath {
-        int count = 1;
-        Point64 Pt;
-        OrdPath* Next = nullptr;
-        OrdPath* Prev = nullptr;
-        OrdPath* Last = nullptr;
-        inline void push_back(OrdPath* opt) {
-            ++count;
-            Last->Next = opt;
-            Last = opt->Prev->Last;
-            opt->Prev = this;
-        }
-        Geo::Polyline toPath() {
-            Geo::Polyline rp;
-            rp.reserve(count);
-            rp.push_back(Pt);
-            OrdPath* next = Next;
-            while(next) {
-                rp.push_back(next->Pt);
-                next = next->Next;
-            }
-            return rp;
-        }
-    };
+    using Pairs = std::set<Pair>;
 
     void jcVoronoi();
-    Paths64 toPath(const Pairs& pairs);
+    Geo::Polylines toPath(const Pairs& pairs);
 };
 
 } // namespace Voronoi

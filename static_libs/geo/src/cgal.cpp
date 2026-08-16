@@ -247,6 +247,67 @@ Polyline weldClosedDuplicates(const Polyline& poly) {
     return out;
 }
 
+// Убирает лишние вершины на ПРЯМЫХ участках контура (обе смежные стороны --
+// отрезки, не дуги). Две причины, один проход:
+//
+//   * коллинеарные соседние отрезки схлопываются в один: свип режет прямую
+//     сторону на куски по вертикальным касательным и точкам касания, и
+//     наружу уходят три-четыре отрезка вместо одного. Порог -- допуск
+//     сварки: точка отстоит от прямой между соседями меньше, чем домен
+//     вообще различает точки;
+//   * швы объединения: точка в единицах микрон от прямой, а сторона до неё
+//     или после -- сама в единицы микрон. Для формы ничего не меняет, а
+//     потребителей, рассчитанных на вход без вырожденно коротких сторон
+//     (Boost.Polygon voronoi_builder), такой шов ломает. Порог 10 мкм --
+//     заведомо мельче любой настоящей черты платы.
+//
+// Ни в одном случае форма не меняется больше чем на порог, дуги не трогаются.
+Polyline removeCollinearSlivers(const Polyline& poly) {
+    if(poly.size() < 3) return poly;
+    constexpr double sliverLen = 1e-2; // 10 мкм
+
+    Polyline out = poly;
+    out.closed = poly.closed;
+    out.width = poly.width;
+
+    // Есть ли что убирать -- в вершине i, между соседями a и c. Замыкающая
+    // пара незамкнутой полилинии не рассматривается: у её концов соседа с
+    // одной стороны нет.
+    auto redundant = [&](std::size_t i) {
+        const std::size_t n = out.size();
+        if(!out.closed && (i == 0 || i + 1 == n)) return false;
+        const std::size_t prev = (i + n - 1) % n;
+        const std::size_t next = (i + 1) % n;
+        if(out[i].isArc() || out[prev].isArc()) return false; // трогаем только прямые стороны
+
+        const QPointF a = out[prev], b = out[i], c = out[next];
+        const double baseLen = std::hypot(c.x() - a.x(), c.y() - a.y());
+        if(baseLen < 1e-12) return false; // a и c сами почти совпали -- отдельный случай, не наш
+        const double dist = std::abs((b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x())) / baseLen;
+
+        if(dist < exitWeldTolerance) { // коллинеарно -- но только если b МЕЖДУ a и c, а не шип назад
+            const double dot = (b.x() - a.x()) * (c.x() - a.x()) + (b.y() - a.y()) * (c.y() - a.y());
+            return dot > 0.0 && dot < baseLen * baseLen;
+        }
+        const double sideLen = std::hypot(c.x() - b.x(), c.y() - b.y());
+        const double prevLen = std::hypot(b.x() - a.x(), b.y() - a.y());
+        return std::min(sideLen, prevLen) < sliverLen && dist < sliverLen;
+    };
+
+    for(std::size_t i{}; i < out.size() && out.size() >= 3;) {
+        if(redundant(i)) {
+            out.erase(out.begin() + static_cast<std::ptrdiff_t>(i));
+            if(i) --i; // сосед слева мог стать лишним
+        } else
+            ++i;
+    }
+    // Стык через начало: первая вершина проверяется последней, когда её
+    // соседи уже окончательны.
+    while(out.closed && out.size() >= 3 && redundant(0))
+        out.erase(out.begin());
+    return out;
+}
+
 } // namespace
 
 namespace {
@@ -540,6 +601,7 @@ Polyline toPolyline(const GPoly& pgn) {
             < exitWeldTolerance)
         out.pop_back();
 
+    out = removeCollinearSlivers(out);
     stitchArcs(out);
     return out;
 }

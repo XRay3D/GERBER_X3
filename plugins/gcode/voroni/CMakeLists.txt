@@ -19,10 +19,20 @@ set(PLUG_LOCAL_VERSION "0")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
+add_library(gc_voroni STATIC voronoi.cpp voronoi.h)
+# Clipper2 (geometry) плагину больше не нужен: скелет Вороного и карман
+# считаются в точном домене, маршрут -- gc_pathutils.
+target_link_libraries(gc_voroni PUBLIC ggcore)
+
 file(GLOB HEADERS CONFIGURE_DEPENDS *.h)
 file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 file(GLOB UIS CONFIGURE_DEPENDS *.ui)
 file(GLOB JSONS CONFIGURE_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/*.json)
+
+# Якорь обязателен: без него «voronoi.h» как regex (точка -- любой символ)
+# выел бы и voronoi_form.h/voronoi_boost.h/voronoi_jc.h/voronoi_visual_utils.h.
+list(FILTER HEADERS EXCLUDE REGEX "/voronoi\\.h$")
+list(FILTER SOURCES EXCLUDE REGEX "/voronoi\\.cpp$")
 
 set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 
@@ -34,6 +44,6 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE geometry)
+target_link_libraries(${PROJECT_NAME} PRIVATE gc_voroni)
 
 target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})

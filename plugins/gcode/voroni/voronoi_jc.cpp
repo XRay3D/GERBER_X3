@@ -12,70 +12,89 @@
 #include "jc_voronoi.h"
 #include "types.h"
 
-size_t qHash(const Point64& key, uint /*seed*/ = 0) { return qHash(QByteArray(reinterpret_cast<const char*>(&key), sizeof(Point64))); }
+#include <QLineF>
+#include <map>
 
 namespace Voronoi {
 
 void VoronoiJc::jcVoronoi() {
     const auto tolerance = gcp.params[Tolerance].toDouble();
 
-    mvector<jcv_point> points;
+    std::vector<jcv_point> points;
     points.reserve(100000);
-    CleanPaths(closedSrcPaths, tolerance * 0.1 * uScale);
     groupedPaths(GCode::Grouping::Copper);
     int32_t id{};
-    auto condei = [&points, tolerance, &id](Point64 tmp, Point64 point) { // split long segments
-        QLineF line{~tmp, ~point};
+
+    // Дробит длинный отрезок на точки не реже tolerance: jc_voronoi строит
+    // диаграмму по точкам, а не по отрезкам, и без дробления длинная прямая
+    // грань меди осталась бы одним-единственным сайтом.
+    auto condei = [&points, tolerance, &id](QPointF tmp, QPointF point) {
+        QLineF line{tmp, point};
         if(line.length() > tolerance) {
-            for(size_t i = 1, total = static_cast<int>(line.length() / tolerance); i < total; ++i) {
-                line.setLength(i * tolerance);
-                Point64 pt{~line.p2()};
-                points.push_back({static_cast<jcv_real>(pt.x), static_cast<jcv_real>(pt.y), id});
+            const auto total = static_cast<size_t>(line.length() / tolerance);
+            for(size_t i = 1; i < total; ++i) {
+                line.setLength(static_cast<double>(i) * tolerance);
+                const QPointF pt = line.p2();
+                points.push_back({static_cast<jcv_real>(pt.x()), static_cast<jcv_real>(pt.y()), id});
             }
         }
     };
 
-    for(const Paths64& paths: groupedPss) {
-        for(const Geo::Polyline& path: paths) {
-            Point64 tmp(path.front());
-            for(const Point64& point: path) {
-                condei(tmp, point);
-                points.push_back({static_cast<jcv_real>(point.x), static_cast<jcv_real>(point.y), id});
-                tmp = point;
+    // Полилиния -- точками. Дуга крошится хордами по стреле прогиба, чтобы
+    // круглый пад остался круглым; прямые куски дробит condei.
+    auto addPolyline = [&](const Geo::Polyline& path) {
+        if(path.empty()) return;
+        const QPointF first = path.front();
+        auto addPoint = [&](QPointF pt) {
+            if(pt == first) return; // замыкающий сегмент приводит к началу -- оно уже добавлено
+            points.push_back({static_cast<jcv_real>(pt.x()), static_cast<jcv_real>(pt.y()), id});
+        };
+        points.push_back({static_cast<jcv_real>(first.x()), static_cast<jcv_real>(first.y()), id});
+        QPointF tmp = first;
+        for(auto&& [from, to]: Geo::segments(path)) {
+            if(const auto arc = Geo::arcOf(from, to, from.bulge)) {
+                const int steps = arcChordSteps(*arc);
+                for(int i = 1; i <= steps; ++i) {
+                    const QPointF pt = i == steps ? QPointF{to} : arc->pointAt(static_cast<double>(i) / steps);
+                    condei(tmp, pt);
+                    addPoint(pt);
+                    tmp = pt;
+                }
+            } else {
+                condei(tmp, to);
+                addPoint(to);
+                tmp = to;
             }
-            condei(tmp, path.front());
         }
-        ++id;
+    };
+
+    for(const Geo::Polygon& body: groupedPss) {
+        ++id; // тег -- тело целиком: между внешним контуром и его же дыркой резать нечего
+        for(const Geo::Polyline& contour: body.contours())
+            addPolyline(contour);
     }
 
     for(const Geo::Polyline& path: openSrcPaths) {
-        Point64 tmp(path.front());
-        for(const Point64& point: path) {
-            condei(tmp, point);
-            points.push_back({static_cast<jcv_real>(point.x), static_cast<jcv_real>(point.y), id});
-            tmp = point;
-        }
-        condei(tmp, path.front());
         ++id;
+        addPolyline(path);
     }
 
-    cl::Clipper64 clipper;
-    for(const Paths64& paths: groupedPss)
-        clipper.AddClip(paths);
-    clipper.AddClip(openSrcPaths);
-    const Rect r(/*GetBounds(groupedPss) +*/ GetBounds(openSrcPaths)); // FIXME
+    QRectF bounds = Geo::Polygons{std::span<const Geo::Polygon>{groupedPss}}.boundingRect();
+    if(!openSrcPaths.empty())
+        bounds |= Geo::Polygons{openSrcPaths}.boundingRect();
+
     std::map<int, Pairs> edges;
     Pairs frame;
     {
-        const /*PType*/ int32_t fo = gcp.params[FrameOffset].toDouble() * uScale;
+        const double fo = gcp.params[FrameOffset].toDouble();
         jcv_rect bounding_box = {
-            {static_cast<jcv_real>(r.left - fo),  static_cast<jcv_real>(r.top - fo)   },
-            {static_cast<jcv_real>(r.right + fo), static_cast<jcv_real>(r.bottom + fo)}
+            {static_cast<jcv_real>(bounds.left() - fo),  static_cast<jcv_real>(bounds.top() - fo)   },
+            {static_cast<jcv_real>(bounds.right() + fo), static_cast<jcv_real>(bounds.bottom() + fo)}
         };
         jcv_diagram diagram;
-        jcv_diagragenerate_(points.size(), points.data(), &bounding_box, nullptr, &diagram);
-        auto toPoint = [](const jcv_edge* edge, int num) -> const Point64 {
-            return {static_cast</*PType*/ int32_t>(edge->pos[num].x), static_cast</*PType*/ int32_t>(edge->pos[num].y)};
+        jcv_diagragenerate_(static_cast<int>(points.size()), points.data(), &bounding_box, nullptr, &diagram);
+        auto toPoint = [](const jcv_edge* edge, int num) -> QPointF {
+            return {edge->pos[num].x, edge->pos[num].y};
         };
         const jcv_site* sites = jcv_diagraget_sites_(&diagram);
         for(int i{}; i < diagram.numsites; i++) {
@@ -95,79 +114,45 @@ void VoronoiJc::jcVoronoi() {
 
     for(const auto& [key, edge]: edges)
         returnPs.append_range(toPath(edge));
-    mergePaths(returnPs, 0.005 * uScale);
+    // Сшивка групп между собой -- тем же O(n)-склеем по точному совпадению
+    // концов, а не Geo::stitch: тот кубичен по числу обрывков.
+    returnPs = chainDiagramEdges(std::move(returnPs));
     returnPs.append_range(toPath(frame));
-    for(size_t i{}; i < returnPs.size(); ++i) // remove verry short paths
-        if(returnPs[i].size() < 4 && distTo(returnPs[i].front(), returnPs[i].back()) < tolerance * 0.5 * uScale)
-            returnPs -= i--;
+    for(size_t i{}; i < returnPs.size();) // remove very short paths
+        if(returnPs[i].size() < 4 && Geo::distance(returnPs[i].front(), returnPs[i].back()) < tolerance * 0.5)
+            returnPs.erase(returnPs.begin() + static_cast<std::ptrdiff_t>(i));
+        else
+            ++i;
 }
 
-Paths64 VoronoiJc::toPath(const Pairs& pairs) {
+Geo::Polylines VoronoiJc::toPath(const Pairs& pairs) {
     setMsg(QObject::tr("Merge Segments"));
 
-    mvector<Pair> pairsVec;
-    pairsVec.reserve(pairs.size());
-    for(auto&& pair: pairs)
-        pairsVec.push_back(pair);
-
-    r::sort(pairsVec, {}, [](const Pair& a) { return (a.first.y + a.second.y) / 2; });
-
-    mvector<OrdPath> holder(pairsVec.size() * 2);
-    QList<OrdPath*> merge;
-    OrdPath* it = holder.data();
-    for(auto&& [p1, p2, id]: pairsVec) {
+    Geo::Polylines segments;
+    segments.reserve(pairs.size());
+    for(auto&& [p1, p2, id]: pairs) {
         Q_UNUSED(id)
-        OrdPath* ordPath1 = it++;
-        OrdPath* ordPath2 = it++;
-        ordPath1->Pt = p1;
-        ordPath1->Next = ordPath2;
-        ordPath1->Last = ordPath2;
-        ordPath2->Pt = p2;
-        ordPath2->Prev = ordPath1;
-        merge.push_back(ordPath1);
+        segments.push_back(Geo::Polyline{Geo::Vertex{p1}, Geo::Vertex{p2}});
     }
 
-    const int max = merge.size();
-    for(int i{}; i < merge.size(); ++i) {
-        setMax(max);
-        setCurrent(max - merge.size());
-        Geo::checkCancelled();
-        for(int j{}; j < merge.size(); ++j) {
-            if(i == j)
-                continue;
-            if(merge[i]->Last->Pt == merge[j]->Pt) {
-                merge[i]->push_back(merge[j]->Next);
-                merge.removeAt(j--);
-                continue;
-            } else if(merge[i]->Pt == merge[j]->Last->Pt) {
-                merge[j]->push_back(merge[i]->Next);
-                merge.removeAt(i--);
-                break;
-            }
-        }
-    }
-
-    Paths64 paths;
-    paths.reserve(merge.size());
-    for(auto&& path: merge)
-        paths.emplace_back(path->toPath());
-
-    mergePaths(paths, 0.005 * uScale);
+    Geo::Polylines paths = chainDiagramEdges(std::move(segments));
 
     auto clean = [this, kAngle = 2.0](Geo::Polyline& path) {
-        for(size_t i = 1; i < path.size() - 2; ++i) {
-            QLineF line{~path[i], ~path[i + 1]};
+        for(size_t i = 1; i + 2 < path.size(); ++i) {
+            QLineF line{path[i], path[i + 1]};
             if(line.length() < gcp.params[Tolerance].toDouble()) {
-                path[i] = ~line.center();
-                path -= i + 1;
+                path[i] = Geo::Vertex{line.center()};
+                path.erase(path.begin() + static_cast<std::ptrdiff_t>(i + 1));
                 --i;
             }
         }
-        for(size_t i = 1; i < path.size() - 1; ++i) {
-            const double a1 = angleTo(path[i - 1], path[i]);
-            const double a2 = angleTo(path[i], path[i + 1]);
-            if(abs(a1 - a2) < kAngle)
-                path -= i--;
+        for(size_t i = 1; i + 1 < path.size(); ++i) {
+            const double a1 = Geo::angleTo(path[i - 1], path[i]);
+            const double a2 = Geo::angleTo(path[i], path[i + 1]);
+            if(std::abs(a1 - a2) < kAngle) {
+                path.erase(path.begin() + static_cast<std::ptrdiff_t>(i));
+                --i;
+            }
         }
     };
     r::for_each(paths, clean);
