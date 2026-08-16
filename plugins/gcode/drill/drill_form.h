@@ -51,6 +51,14 @@ private:
     class QCheckBox* checkBox;
     GCType worckType = GCType::Drill;
     GCode::SideOfMilling side = GCode::Inner;
+    // УП, пересчитанные за текущий показ формы: id проекта по toolId, чтобы
+    // повторный Create ЗАМЕНЯЛ их, а не плодил дубли. Две карты, а не одна --
+    // ветка пазов (worckType == Drill) и ветка простых отверстий ("other",
+    // тот же worckType) считают НЕЗАВИСИМЫЕ pathsMap и могут за один клик дать
+    // по файлу на один toolId из каждой; смешивать их id в одном ключе нельзя.
+    // Сбрасываются в showEvent() -- после закрытия/переоткрытия формы снова add-new.
+    std::map<Tool::ID, int32_t> createdSlotFileIds_;
+    std::map<Tool::ID, int32_t> createdDrillFileIds_;
 
     void initToolTable();
 
@@ -86,6 +94,8 @@ protected:
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
+        createdSlotFileIds_.clear();
+        createdDrillFileIds_.clear();
         // Базовая, а не event->accept(): в GCode::Form::showEvent сбрасывается
         // режим правки, иначе форма молча перепишет УП из прошлого сеанса.
         GCode::Form::showEvent(event);
