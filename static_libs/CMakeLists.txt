@@ -12,9 +12,10 @@ cmake_minimum_required(VERSION 4.0)
 
 # static lib
 #
-# geo -- точная геометрия на CGAL, новая. geometry -- старая, на Clipper2:
-# myclipper.h/geometry.h/circle.h/span.h ещё держат на себе полпроекта, так
-# что до конца переезда живут обе, и geometry зависит от Geo, а не наоборот.
+# geo -- точная геометрия на CGAL. static_libs/geometry (старая, на Clipper2)
+# снесена; алиас оставлен -- на имя "geometry" всё ещё линкуются некоторые
+# CMakeLists.txt (в т.ч. у отключённых plugins/file/gerber2 и
+# plugins/gcode/thread).
 add_subdirectory(geo)
 add_library(geometry ALIAS Geo)
 

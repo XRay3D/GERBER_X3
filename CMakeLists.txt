@@ -90,11 +90,6 @@ set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE ON)
 include(FetchContent)
 set(FETCHCONTENT_BASE_DIR ${CMAKE_CURRENT_LIST_DIR}/third_party)
 
-set(CLIPPER2_UTILS OFF)
-set(CLIPPER2_EXAMPLES OFF)
-set(CLIPPER2_TESTS OFF)
-set(CLIPPER2_USINGZ "ONLY")
-
 # Сериализация проекта (.g2g) — JSON через статическую рефлексию C++26.
 # Именно CACHE: у simdjson cmake_minimum_required 3.14 (CMP0126 OLD), его
 # собственный set(... CACHE STRING) снёс бы обычную переменную и оставил AUTO,
@@ -110,12 +105,6 @@ fetchcontent_declare(
     "https://github.com/hanickadot/compile-time-regular-expressions.git"
   GIT_TAG main
   GIT_SHALLOW ON)
-fetchcontent_declare(
-  clipper2
-  GIT_REPOSITORY "https://github.com/XRay3D/Clipper2.git"
-  GIT_TAG main
-  GIT_SHALLOW ON
-  SOURCE_SUBDIR CPP)
 # Пин на master: поддержка рефлексии GCC 16 (-freflection) появилась после
 # v4.6.6, как и опция SIMDJSON_STATIC_REFLECTION_MODE.
 fetchcontent_declare(
@@ -134,7 +123,7 @@ if(MINGW)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE OFF)
 endif()
 
-fetchcontent_makeavailable(ctre clipper2 simdjson)
+fetchcontent_makeavailable(ctre simdjson)
 
 # LTO под MinGW выключен НАСОВСЕМ (раньше здесь возвращалось ON после
 # FetchContent). С появлением shared-ядра libggcore линковка DLL идёт через
@@ -173,12 +162,10 @@ add_compile_definitions(
   QT_USE_QSTRINGBUILDER
   QT_USE_FAST_OPERATOR_PLUS
   QT_DISABLE_DEPRECATED_BEFORE=0x070000
-  saturate_cast=saturating_cast
-  USINGZ=1)
+  saturate_cast=saturating_cast)
 
 # Compile options for our own code only — заданы после FetchContent, чтобы
-# сторонние цели (Clipper2, ctre) их не наследовали. Clipper2 собирается со
-# своим -Werror и ломался на диагностике _FORTIFY_SOURCE, протекавшей отсюда.
+# сторонние цели (ctre, simdjson) их не наследовали.
 set(COMMON_COMPILE_OPTIONS
     -fPIC
     -Wall
