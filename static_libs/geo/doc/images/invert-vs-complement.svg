@@ -1,0 +1,39 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .frame   { fill:none; stroke:#bbb; stroke-width:1.5; stroke-dasharray:4 4; }
+    .void    { fill:#f6e2df; stroke:#c0392b; stroke-width:2.5; stroke-dasharray:7 5; }
+    .hatch   { fill:url(#h); stroke:#1a1a1a; stroke-width:2.5; }
+    .lbl-sm  { font-size:12.5px; fill:#5a5a5a; }
+    .title   { font-size:13.5px; fill:#1a1a1a; font-weight:bold; }
+  </style>
+  <defs>
+    <pattern id="h" width="10" height="10" patternTransform="rotate(45)" patternUnits="userSpaceOnUse">
+      <rect width="10" height="10" fill="#eef2f7"/>
+      <line x1="0" y1="0" x2="0" y2="10" stroke="#9fb3c8" stroke-width="2"/>
+    </pattern>
+  </defs>
+
+  <!-- Left: Polygon::invert() -->
+  <text class="title" x="30" y="26">Polygon::invert() — ленивый флаг</text>
+  <rect class="frame" x="30" y="45" width="290" height="270"/>
+  <rect class="void" x="75" y="85" width="200" height="190"/>
+  <text class="lbl-sm" x="90" y="120">isInverted() == true</text>
+  <text class="lbl-sm" x="90" y="140">та же граница,</text>
+  <text class="lbl-sm" x="90" y="160">contains() — наоборот,</text>
+  <text class="lbl-sm" x="90" y="180">area()/perimeter() —</text>
+  <text class="lbl-sm" x="90" y="200">не изменились,</text>
+  <text class="lbl-sm" x="90" y="220">граница ОГРАНИЧЕНА.</text>
+  <text class="lbl-sm" x="45" y="345">Не считает ничего — обратимо, бесплатно.</text>
+
+  <!-- Right: Polygons::complement()/invert() -->
+  <text class="title" x="380" y="26">Polygons::complement() — честный расчёт</text>
+  <rect class="hatch" x="380" y="45" width="290" height="270"/>
+  <rect x="425" y="85" width="200" height="190" fill="#f6e2df" stroke="#1a1a1a" stroke-width="2.5"/>
+  <text class="lbl-sm" x="440" y="120" fill="#1a1a1a">бывшее тело —</text>
+  <text class="lbl-sm" x="440" y="140" fill="#1a1a1a">теперь дырка</text>
+  <text class="lbl-sm" x="393" y="235" fill="#2166ac">штриховка = регион,</text>
+  <text class="lbl-sm" x="393" y="253" fill="#2166ac">простирается за край —</text>
+  <text class="lbl-sm" x="393" y="271" fill="#2166ac">isUnbounded() == true</text>
+  <text class="lbl-sm" x="393" y="330">boundingRect()/toPath()</text>
+  <text class="lbl-sm" x="393" y="348">покажут только бывшие тела.</text>
+</svg>

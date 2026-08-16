@@ -1,0 +1,34 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 440" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .region  { fill:#eef2f7; stroke:#1a1a1a; stroke-width:2; }
+    .out     { fill:none; stroke:#c0392b; stroke-width:4; }
+    .in      { fill:none; stroke:#1e8449; stroke-width:4; }
+    .dim     { fill:none; stroke:#bbb; stroke-width:2; stroke-dasharray:4 4; }
+    .pt      { fill:#1a1a1a; }
+    .title   { font-size:14.5px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12.5px; fill:#5a5a5a; }
+  </style>
+
+  <text class="title" x="30" y="28">clipOpen — резка ПУТИ регионом (не площадей)</text>
+
+  <!-- Difference: путь снаружи, строка выше региона -->
+  <text class="lbl-sm" x="90" y="72" fill="#c0392b" font-weight="bold">Difference — 2 куска, вне region</text>
+  <line class="dim" x1="60" y1="95" x2="600" y2="95"/>
+  <line class="out" x1="60" y1="95" x2="220" y2="95"/>
+  <line class="out" x1="360" y1="95" x2="600" y2="95"/>
+  <circle class="pt" cx="60" cy="95" r="4"/>
+  <circle class="pt" cx="600" cy="95" r="4"/>
+
+  <rect class="region" x="220" y="130" width="140" height="140"/>
+  <text class="lbl-sm" x="255" y="205">region</text>
+
+  <!-- Intersection: путь внутри, строка ниже региона -->
+  <line class="dim" x1="60" y1="305" x2="600" y2="305"/>
+  <line class="in" x1="220" y1="305" x2="360" y2="305"/>
+  <text class="lbl-sm" x="240" y="330" fill="#1e8449" font-weight="bold">Intersection — 1 кусок, внутри region</text>
+
+  <text class="lbl-sm" x="30" y="358">Исходный путь — один открытый отрезок от точки слева до точки справа (пунктир).</text>
+  <text class="lbl-sm" x="30" y="378">Difference и Intersection дополняют друг друга: суммарная длина кусков равна</text>
+  <text class="lbl-sm" x="30" y="396">длине исходного пути.</text>
+  <text class="lbl-sm" x="30" y="416">Кусок строго на границе: у Difference остаётся, у Intersection выпадает (граница — снаружи).</text>
+</svg>

@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .poly    { fill:none; stroke:#2166ac; stroke-width:2; }
+    .pt      { fill:#2166ac; r:3; }
+    .arc     { fill:none; stroke:#1e8449; stroke-width:3.5; }
+    .center  { fill:#1a1a1a; }
+    .radius  { fill:none; stroke:#8a8a8a; stroke-width:1.3; stroke-dasharray:3 4; }
+    .lbl     { font-size:14.5px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12px; fill:#5a5a5a; }
+    .hexpoly { fill:none; stroke:#c0392b; stroke-width:2; }
+  </style>
+
+  <!-- Слева: дискретизация -->
+  <text class="lbl" x="20" y="26">До: цепочка отрезков равной длины и угла</text>
+  <g transform="translate(150,150)">
+    <polygon class="poly" points="
+      100,0 86.6,50 50,86.6 0,100 -50,86.6 -86.6,50
+      -100,0 -86.6,-50 -50,-86.6 0,-100 50,-86.6 86.6,-50"/>
+    <circle class="pt" cx="100" cy="0" r="3.5"/>
+    <circle class="pt" cx="86.6" cy="50" r="3.5"/>
+    <circle class="pt" cx="50" cy="86.6" r="3.5"/>
+    <circle class="pt" cx="0" cy="100" r="3.5"/>
+    <circle class="pt" cx="-50" cy="86.6" r="3.5"/>
+    <circle class="pt" cx="-86.6" cy="50" r="3.5"/>
+    <circle class="pt" cx="-100" cy="0" r="3.5"/>
+    <circle class="pt" cx="-86.6" cy="-50" r="3.5"/>
+    <circle class="pt" cx="-50" cy="-86.6" r="3.5"/>
+    <circle class="pt" cx="0" cy="-100" r="3.5"/>
+    <circle class="pt" cx="50" cy="-86.6" r="3.5"/>
+    <circle class="pt" cx="86.6" cy="-50" r="3.5"/>
+  </g>
+  <text class="lbl-sm" x="30" y="290">Δlength ≈ const (lengthTolerance),</text>
+  <text class="lbl-sm" x="30" y="308">Δangle ≈ const (angleTolerance) →</text>
+  <text class="lbl-sm" x="30" y="326">R = L / (2 sin(поворот/2))</text>
+  <text class="lbl-sm" x="30" y="344">проверяется прилегание к R (radialTolerance)</text>
+
+  <!-- Стрелка -->
+  <line x1="310" y1="150" x2="360" y2="150" stroke="#1a1a1a" stroke-width="2" marker-end="url(#a)"/>
+  <text class="lbl-sm" x="300" y="135">recover()</text>
+  <defs><marker id="a" markerWidth="9" markerHeight="9" refX="6" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#1a1a1a"/></marker></defs>
+
+  <!-- Справа: одна дуга -->
+  <text class="lbl" x="400" y="26">После: одна дуга (bulge)</text>
+  <g transform="translate(500,150)">
+    <circle class="arc" cx="0" cy="0" r="100"/>
+    <circle class="center" cx="0" cy="0" r="3"/>
+    <path class="radius" d="M0,0 L100,0"/>
+    <text class="lbl-sm" x="10" y="-10">R</text>
+  </g>
+
+  <!-- Что НЕ трогается -->
+  <text class="lbl-sm" x="20" y="378" font-weight="bold">keepAngles = {60°, 90°, 120°, 135°}: правильные фигуры (шестигранник,</text>
+  <text class="lbl-sm" x="20" y="396" font-weight="bold">квадрат, фаска) — не трогаются, регулярность там означает саму фигуру.</text>
+</svg>

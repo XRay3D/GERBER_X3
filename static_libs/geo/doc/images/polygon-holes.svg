@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 620 360" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .body    { fill-rule:evenodd; fill:#dde5ee; stroke:#1a1a1a; stroke-width:2.5; }
+    .pt      { fill:#1a1a1a; }
+    .lbl     { font-size:15px; fill:#1a1a1a; }
+    .lbl-sm  { font-size:13px; fill:#5a5a5a; }
+    .arrow   { fill:#1a1a1a; }
+    .lbl-green { font-size:14px; fill:#1e8449; font-weight:bold; }
+    .lbl-red   { font-size:14px; fill:#c0392b; font-weight:bold; }
+  </style>
+  <defs>
+    <marker id="a1" markerWidth="9" markerHeight="9" refX="5" refY="2.5" orient="auto"><path d="M0,0 L5,2.5 L0,5 Z" class="arrow"/></marker>
+  </defs>
+
+  <path class="body" d="M90,60 L390,60 L390,300 L90,300 Z
+                         M160,120 A40,40 0 1,0 160,120.1 Z
+                         M280,140 L340,140 L340,200 L280,200 Z"/>
+
+  <!-- обход внешней границы: против часовой -->
+  <path fill="none" stroke="none" d="M90,180 L90,60" marker-end="url(#a1)"/>
+  <text class="lbl-green" x="30" y="185" transform="rotate(-90 30 185)">внешняя: CCW</text>
+  <path fill="none" stroke="#1e8449" stroke-width="2" d="M110,300 A20,20 0 0,1 90,280" marker-end="url(#a1)"/>
+
+  <!-- обход дырки-круга: по часовой -->
+  <path fill="none" stroke="#c0392b" stroke-width="2" d="M160,80 A40,40 0 0,1 200,120" marker-end="url(#a1)"/>
+  <text class="lbl-red" x="130" y="105">дырка: CW</text>
+
+  <!-- обход дырки-прямоугольника: по часовой -->
+  <path fill="none" stroke="#c0392b" stroke-width="2" d="M280,170 L280,140 L310,140" marker-end="url(#a1)"/>
+  <text class="lbl-red" x="345" y="175">дырка: CW</text>
+
+  <text class="lbl" x="420" y="90">Канон Polygon:</text>
+  <text class="lbl-sm" x="420" y="118">outer() — против часовой</text>
+  <text class="lbl-sm" x="420" y="136">(signedArea() &gt; 0),</text>
+  <text class="lbl-sm" x="420" y="164">holes() — по часовой</text>
+  <text class="lbl-sm" x="420" y="182">(signedArea() &lt; 0).</text>
+  <text class="lbl-sm" x="420" y="220">При этом каноне</text>
+  <text class="lbl-sm" x="420" y="238">toPath() с WindingFill</text>
+  <text class="lbl-sm" x="420" y="256">заливает ровно тело —</text>
+  <text class="lbl-sm" x="420" y="274">дырки идут навстречу</text>
+  <text class="lbl-sm" x="420" y="292">внешней границе и</text>
+  <text class="lbl-sm" x="420" y="310">вычитаются сами.</text>
+</svg>

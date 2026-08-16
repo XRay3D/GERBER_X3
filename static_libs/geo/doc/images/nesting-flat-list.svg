@@ -1,0 +1,36 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 450" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .frame  { fill:none; stroke:#bbb; stroke-width:1.5; stroke-dasharray:4 4; }
+    .outer  { fill:#dde5ee; stroke:#1a1a1a; stroke-width:2.5; }
+    .hole   { fill:#ffffff; stroke:#1a1a1a; stroke-width:2.5; }
+    .dotok  { fill:#1e8449; stroke:#1a1a1a; stroke-width:2; }
+    .dotbad { fill:#eee; stroke:#c0392b; stroke-width:2; stroke-dasharray:4 3; }
+    .title  { font-size:14px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm { font-size:12.5px; fill:#5a5a5a; }
+    .verdict-bad  { font-size:15px; fill:#c0392b; font-weight:bold; }
+    .verdict-good { font-size:15px; fill:#1e8449; font-weight:bold; }
+  </style>
+
+  <!-- Left: плоский список контуров -->
+  <text class="title" x="30" y="26">Polygons(Polylines) — плоский список</text>
+  <rect class="frame" x="40" y="45" width="280" height="290"/>
+  <!-- тело-кольцо: внешняя окружность, дырка полностью внутри неё -->
+  <circle class="outer" cx="170" cy="190" r="95"/>
+  <circle class="hole" cx="192" cy="190" r="42"/>
+  <circle class="dotbad" cx="192" cy="190" r="14"/>
+  <text x="130" y="365" class="verdict-bad">остров пропал</text>
+  <text x="55" y="392" class="lbl-sm">Дырка кольца по ориентации ничем</text>
+  <text x="55" y="408" class="lbl-sm">не отличается от чужого тела внутри</text>
+  <text x="55" y="424" class="lbl-sm">неё — вычитается вместе с ним.</text>
+
+  <!-- Right: span<Polygon> -->
+  <text class="title" x="370" y="26">Polygons(span&lt;Polygon&gt;) — готовые</text>
+  <rect class="frame" x="380" y="45" width="280" height="290"/>
+  <circle class="outer" cx="510" cy="190" r="95"/>
+  <circle class="hole" cx="532" cy="190" r="42"/>
+  <circle class="dotok" cx="532" cy="190" r="14"/>
+  <text x="470" y="365" class="verdict-good">остров цел</text>
+  <text x="395" y="392" class="lbl-sm">Вложенность каждого полигона</text>
+  <text x="395" y="408" class="lbl-sm">известна точно (его собственные</text>
+  <text x="395" y="424" class="lbl-sm">holes()) — вычитать нечего.</text>
+</svg>

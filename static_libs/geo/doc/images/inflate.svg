@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 420" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .orig    { fill:none; stroke:#1a1a1a; stroke-width:2; stroke-dasharray:6 5; }
+    .grown   { fill:#eaf3ea; stroke:#1e8449; stroke-width:2.5; }
+    .shrunk  { fill:#e9eef8; stroke:#2166ac; stroke-width:2.5; }
+    .title   { font-size:13.5px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12.5px; fill:#5a5a5a; }
+    .lbl-g   { font-size:13px; fill:#1e8449; }
+    .lbl-b   { font-size:13px; fill:#2166ac; }
+  </style>
+
+  <!-- outward: rounded corners -->
+  <text class="title" x="30" y="26">Inflate(region, +delta) — раздутие</text>
+  <path class="grown" d="M105,80
+     a25,25 0 0 1 25,-25
+     h100
+     a25,25 0 0 1 25,25
+     v100
+     a25,25 0 0 1 -25,25
+     h-100
+     a25,25 0 0 1 -25,-25
+     z"/>
+  <rect class="orig" x="105" y="80" width="150" height="150"/>
+  <text class="lbl-g" x="55" y="275">углы скругляются радиусом delta/2</text>
+
+  <!-- inward: sharp corners -->
+  <text class="title" x="380" y="26">Inflate(region, -delta) — сжатие</text>
+  <rect class="orig" x="405" y="80" width="150" height="150"/>
+  <rect class="shrunk" x="435" y="110" width="90" height="90"/>
+  <text class="lbl-b" x="365" y="275">эрозия не скругляет — углы острые</text>
+
+  <text class="lbl-sm" x="30" y="320">delta — ПОЛНАЯ ширина: контур уезжает на delta/2, совпадает с шириной линии в DXF.</text>
+  <text class="lbl-sm" x="30" y="342">Отверстия ведут себя зеркально телу: раздутие тела дырку СЖИМАЕТ (тоньше delta —</text>
+  <text class="lbl-sm" x="30" y="360">исчезает целиком), сжатие тела дырку РАСТИТ.</text>
+  <text class="lbl-sm" x="30" y="382">Inflate(Inflate(r,+d),-d) — морфологическое замыкание: скругляет внутренние углы,</text>
+  <text class="lbl-sm" x="30" y="400">затягивает щели тоньше d.</text>
+</svg>
