@@ -50,6 +50,10 @@ private:
     class Header* header;
     class QCheckBox* checkBox;
     GCode::SideOfMilling side = GCode::Inner;
+    // УП, пересчитанные за текущий показ формы: id проекта по toolId, чтобы
+    // повторный "Create" ЗАМЕНЯЛ их, а не плодил дубли. Сбрасывается в
+    // showEvent() -- после закрытия/переоткрытия формы снова add-new.
+    std::map<Tool::ID, int32_t> createdFileIds_;
 
     void initToolTable();
 
@@ -75,6 +79,7 @@ protected:
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
+        createdFileIds_.clear();
         // Базовая, а не event->accept(): в GCode::Form::showEvent сбрасывается
         // режим правки, иначе форма молча перепишет УП из прошлого сеанса.
         GCode::Form::showEvent(event);
@@ -105,7 +110,8 @@ public:
     QString gcName() const override { return u"Threading"_s; }
     bool canToShow() const override { return Form::canToShow(); }
     uint32_t type() const override { return THREAD; }
-    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+    AbstractFile* loadFile(std::string_view json) const override { return Serial::load<File>(json); }
+    std::string_view typeName() const override { return Serial::typeNameOf<File>(); }
 };
 
 } // namespace Threading

@@ -11,6 +11,7 @@
 #include "thr_form.h"
 #include "circle/shape.h"
 #include "gi_point.h"
+#include "thr_delegate.h"
 #include "thr_gi_preview.h"
 #include "thr_header.h"
 #include "thr_model.h"
@@ -25,9 +26,6 @@
 // #include "project.h"
 // #include "settings.h"
 // #include "tool_pch.h"
-
-#include "pocketoffset/pocketoffset.h"
-#include "profile/profile.h"
 
 #include <QHeaderView>
 #include <QMenu>
@@ -89,8 +87,6 @@ Form::Form(GCode::Plugin* plugin)
 }
 
 Form::~Form() {
-    App::setDrillForm(nullptr);
-
     MySettings settings;
     settings.beginGroup(u"ThreadForm"_s);
     settings.setValue(ui->rbClimb);
@@ -168,6 +164,7 @@ void Form::initToolTable() {
         exit(-67);
     header = new Header{Qt::Vertical, ui->toolTable};
     ui->toolTable->setVerticalHeader(header);
+    ui->toolTable->setItemDelegateForColumn(Model::Correction, new Delegate{this});
     checkBox = new QCheckBox{cornerButton};
     checkBox->setFocusPolicy(Qt::NoFocus);
     checkBox->setGeometry(Header::getRect(cornerButton->rect()) /*.translated(1, -4)*/);
@@ -211,10 +208,10 @@ void Form::on_cbxFileCurrentIndexChanged() {
         // qDebug() << var->name << var->pos;
 
         using Key = QString;
-        using Val = mvector<const GraphicObject*>;
+        using Val = std::vector<const GraphicObject*>;
         std::map<Key, Val> map;
 
-        static mvector<GraphicObject> gos;
+        static std::vector<GraphicObject> gos;
         gos = file->getDataForGC(criterias, GCType::Drill);
 
         for(auto& var: gos) {
@@ -236,11 +233,11 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.diameter = std::any_cast<double>(val.front()->raw);
             for(auto* go: val)
                 new Gi::Preview{
-                    (go->path.size() > 1 ? toPath(go->path) : Geo::Polyline{~go->pos}),
+                    (go->path.size() > 1 ? Geo::Polyline{go->path} : Geo::Polyline{Geo::Vertex{go->pos}}),
                     row.diameter,
                     data.back().toolId,
                     row,
-                    toPaths(go->fill)};
+                    go->fill.contours()};
         }
     };
     auto execShapes = [this] {
@@ -268,11 +265,11 @@ void Form::on_cbxFileCurrentIndexChanged() {
             row.name.back() += u": Ø%1"_s.arg(row.diameter);
             for(auto* shape: shapes)
                 new Gi::Preview{
-                    {~std::any_cast<QPointF>(shape->getVal(ShCirc::Shape::Center))},
+                    Geo::Polyline{Geo::Vertex{std::any_cast<QPointF>(shape->getVal(ShCirc::Shape::Center))}},
                     row.diameter,
                     data.back().toolId,
                     row,
-                    toPaths(toCurves(shape->shape()))};
+                    Geo::fromPath(shape->shape())};
         }
     };
 
@@ -299,6 +296,8 @@ void Form::on_cbxFileCurrentIndexChanged() {
     ui->toolTable->verticalHeader()->setSectionResizeMode(QHeaderView::Fixed);
     ui->toolTable->horizontalHeader()->setSectionResizeMode(QHeaderView::Stretch);
     ui->toolTable->horizontalHeader()->setSectionResizeMode(0, QHeaderView::ResizeToContents);
+    ui->toolTable->horizontalHeader()->setSectionResizeMode(Model::Correction, QHeaderView::ResizeToContents);
+    ui->toolTable->horizontalHeader()->setSectionResizeMode(Model::HoleDiameter, QHeaderView::ResizeToContents);
     connect(ui->toolTable->selectionModel(), &QItemSelectionModel::selectionChanged, this, &Form::on_selectionChanged);
 
     header->onChecked();
@@ -306,8 +305,8 @@ void Form::on_cbxFileCurrentIndexChanged() {
 
 void Form::on_doubleClicked(const QModelIndex& current) {
     if(current.column() == 1) {
-        mvector<Tool::Type> tools;
-        // FIXME       tools = model->isSlot(current.row()) ? mvector<Tool::Type> {Tool::EndMill} : ((worckType == GCType::Profile || worckType == GCType::Pocket) ? mvector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : mvector<Tool::Type> {Tool::Drill, Tool::EndMill});
+        std::vector<Tool::Type> tools;
+        // FIXME       tools = model->isSlot(current.row()) ? std::vector<Tool::Type> {Tool::EndMill} : ((worckType == GCType::Profile || worckType == GCType::Pocket) ? std::vector<Tool::Type> {Tool::Drill, Tool::EndMill, Tool::Engraver, Tool::Laser} : std::vector<Tool::Type> {Tool::Drill, Tool::EndMill});
         ToolDatabase tdb(this, tools);
         if(tdb.exec()) {
             const Tool tool(tdb.tool());
@@ -433,24 +432,28 @@ void Form::computePaths() {
     };
 
     struct Data {
-        Paths64 paths;
-        mvector<int> toolsApertures;
+        Geo::Polylines paths;
+        std::vector<int> toolsApertures;
     };
 
     std::map<Tool::ID, Data> pathsMap;
 
-    // Each thread mark is encoded as a 2-point path: {center, center + (M/2, 0)}.
-    // The threading.js script derives the hole/rod center and its nominal thread
-    // diameter M from that pair; M isn't otherwise available per-point.
+    // Each thread mark is encoded as a 3-point path: {center, center + (M/2, 0),
+    // center + (0, holeD/2)}. The threading.js script derives the hole/rod
+    // center, its nominal thread diameter M and its pre-drilled hole diameter
+    // from that triple; none of it is otherwise available per-point.
     for(int i{}; auto&& row: *model) {
         if(row.toolId > Tool::ID{} && row.useForCalc) {
             pathsMap[row.toolId].toolsApertures.push_back(i);
             for(auto& item: row.items) {
                 if(!item->isUsed()) continue;
                 const QPointF center{item->pos()};
-                const double radius{item->sourceDiameter() * 0.5};
+                const double radius{item->sourceDiameter() * 0.5 + row.correction};
+                const double holeRadius{row.holeDiameter * 0.5};
                 pathsMap[row.toolId].paths.push_back(Geo::Polyline{
-                    ~center, ~QPointF{center.x() + radius, center.y()}
+                    Geo::Vertex{center},
+                    Geo::Vertex{QPointF{center.x() + radius, center.y()}},
+                    Geo::Vertex{QPointF{center.x(), center.y() + holeRadius}}
                 });
             }
             model->setCreate(i++, !pathsMap.contains(row.toolId));
@@ -459,7 +462,7 @@ void Form::computePaths() {
 
     for(auto [usedToolId, data]: pathsMap) {
         if(data.paths.size()) {
-            GCode::Params gcp{App::toolHolder().tool(usedToolId), dsbxDepth->value(), toCurves(data.paths)};
+            GCode::Params gcp{App::toolHolder().tool(usedToolId), dsbxDepth->value(), std::move(data.paths)};
             gcp.setSide(ui->rbInside->isChecked() ? GCode::Inner : GCode::Outer);
             gcp.setConvent(!ui->rbClimb->isChecked());
             gcp.setLeftHand(ui->rbLeft->isChecked());
@@ -472,7 +475,16 @@ void Form::computePaths() {
                 App::toolHolder().tool(usedToolId).nameEnc()
                 + u"_T"_s + indexes(pathsMap[usedToolId].toolsApertures));
             if(file) gcode->setSide(file->side());
-            App::project().addFile(gcode);
+
+            // Повторный Create для уже пересчитанного в этом показе формы
+            // инструмента -- заменить его УП на месте (тот же id/узел дерева),
+            // а не плодить дубли; при первом Create или после переоткрытия
+            // формы (createdFileIds_ сброшен в showEvent) -- завести новую.
+            auto it = createdFileIds_.find(usedToolId);
+            if(it != createdFileIds_.end() && App::project().file(it->second))
+                App::project().replaceFile(it->second, gcode);
+            else
+                createdFileIds_[usedToolId] = App::project().addFile(gcode);
         }
     }
 

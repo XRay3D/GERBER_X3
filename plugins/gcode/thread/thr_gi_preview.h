@@ -10,15 +10,16 @@ namespace Gi {
 
 class Preview final : public ::Gi::AbstractPreview {
     Geo::Polyline path_;
+    Geo::Polylines source_;
     Row& row;
     Tool::ID toolId_{};
 
 public:
-    explicit Preview(Geo::Polyline&& hv, double diameter, Tool::ID toolId, Row& row, const Paths64& draw_ = {}); // FIXME to Curve
+    explicit Preview(Geo::Polyline&& hv, double diameter, Tool::ID toolId, Row& row, const Geo::Polylines& draw_ = {});
 
     // AbstractPreview interface
     void updateTool() override;
-    Paths64 paths() const;
+    Geo::Polylines paths() const;
     bool fit(double depth) const override;
 
     // AbstractDrillPrGI interface
@@ -28,8 +29,8 @@ public:
     int type() const override;
     bool isSlot() const;
 
-    Paths64 offset() const;
-    QPointF pos() const { return ~path_.front(); }; // NOTE shadow base class pos func
+    Geo::Polylines offset() const;
+    QPointF pos() const { return path_.front(); }; // NOTE shadow base class pos func
     Geo::Polyline hv() const { return path_; };     // NOTE shadow base class pos func
 
 protected:

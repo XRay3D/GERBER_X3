@@ -3,15 +3,15 @@
 //   Internal threads (holes) - calc3.php
 //   External threads (rods)  - calc4.php
 //
-// Each thread mark is a 2-vertex curve: {center, center + (M/2, 0)}, so both the
-// hole/rod center and the nominal thread diameter M travel together per point
-// (see Threading::Form::computePaths in thr_form.cpp).
+// Each thread mark is a 3-vertex curve: {center, center + (M/2, 0), center + (0,
+// holeD/2)}, so the hole/rod center, the nominal thread diameter M and the
+// pre-drilled hole diameter all travel together per point (see
+// Threading::Form::computePaths in thr_form.cpp).
 //
 // Requires: common_gcode.js
 
 function generate(file) {
     var pitch   = file.threadPitch > 0 ? file.threadPitch : 1;        // P (single start)
-    var holeD   = file.threadHoleDiam;                                 // m
     var toolR   = file.toolDiameter / 2;                               // R
     var stepMax = file.toolOneTurnCut > 0 ? file.toolOneTurnCut : 0.1; // mh
     var inside  = file.inside;
@@ -38,8 +38,11 @@ function generate(file) {
                 var curve = curves[ci];
                 if (curve.length < 2) continue;
 
-                var cx   = curve[0].x, cy = curve[0].y;
-                var nomD = 2 * Math.hypot(curve[1].x - cx, curve[1].y - cy); // M
+                var cx    = curve[0].x, cy = curve[0].y;
+                var nomD  = 2 * Math.hypot(curve[1].x - cx, curve[1].y - cy); // M
+                var holeD = curve.length > 2
+                    ? 2 * Math.hypot(curve[2].x - cx, curve[2].y - cy)        // m
+                    : file.threadHoleDiam;
 
                 var half     = Math.max(0, (nomD - holeD) / 2);
                 var steps    = Math.max(1, Math.ceil(half / stepMax));

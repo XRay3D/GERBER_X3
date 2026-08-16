@@ -17,6 +17,6 @@ set(FILE_PLUGINS gerber dxf excellon #gerber2 svg
 )
 add_subdirectory(file)
 
-set(GCODE_PLUGINS profile pocketoffset drill thermal hatching pocketraster voroni)
+set(GCODE_PLUGINS profile pocketoffset drill thermal hatching pocketraster voroni thread)
 
 add_subdirectory(gcode)
