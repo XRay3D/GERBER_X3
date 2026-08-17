@@ -35,6 +35,12 @@ target_include_directories(${PROJECT_NAME}
     PUBLIC ${CMAKE_CURRENT_LIST_DIR}
     PRIVATE ${CMAKE_CURRENT_BINARY_DIR})
 
-target_link_libraries(${PROJECT_NAME} PRIVATE gcode)
+# Ничего из статлиб ядра тут линковать НЕЛЬЗЯ: они целиком лежат в
+# libggcore, который прилетает через target_link_ggcore(gcthread) в
+# plugins/gcode/CMakeLists.txt. Заголовки gcode приезжают оттуда же --
+# ggcore отдаёт их потребителям через $<COMPILE_ONLY:gcode>. Прямой
+# `PRIVATE gcode` тянул бы в .so ещё и libgcode.a с транзитивными
+# libGeo.a/libcommon.a: на ELF это молча дублирует код, а mingw-ld падает
+# на "multiple definition" -- символы уже экспортированы из libggcore.dll.
 
 target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})
