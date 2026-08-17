@@ -112,7 +112,7 @@
      <item>
       <widget class="QGroupBox" name="groupBox_2">
        <property name="title">
-        <string>Direction</string>
+        <string>Start from</string>
        </property>
        <layout class="QVBoxLayout" name="verticalLayout_5">
         <property name="leftMargin">
@@ -128,9 +128,9 @@
          <number>3</number>
         </property>
         <item>
-         <widget class="QRadioButton" name="rbClimb">
+         <widget class="QRadioButton" name="rbTop">
           <property name="text">
-           <string>Climb</string>
+           <string>Top</string>
           </property>
           <property name="checked">
            <bool>true</bool>
@@ -138,9 +138,9 @@
          </widget>
         </item>
         <item>
-         <widget class="QRadioButton" name="rbConventional">
+         <widget class="QRadioButton" name="rbBottom">
           <property name="text">
-           <string>Conventional</string>
+           <string>Bottom</string>
           </property>
          </widget>
         </item>

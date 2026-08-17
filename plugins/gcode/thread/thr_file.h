@@ -13,45 +13,43 @@
 #include "app.h"
 #include "gc_file.h"
 #include "gc_plugin.h"
+#include "gi_drill.h"
 #include "project.h"
 
 #include <QFile>
+#include <cmath>
 
 namespace Threading {
 
 constexpr auto THREAD = "THREAD"_hash32;
 
-class File final : public GCode::File {
+class[[= Serial::name("Threading")]] File final : public GCode::File {
 public:
+    void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     using GCode::File::File;
     explicit File(GCode::Params&& newGcp)
         : GCode::File{std::move(newGcp)} {
-        if(gcp.tools.front().diameter()) {
-            initSave();
-            addInfo();
-            statFile();
-            genGcodeAndTile();
-            endFile();
-        }
+        if(gcp.tools.front().diameter())
+            regenerate();
     }
     QIcon icon() const override { return QIcon::fromTheme(u"thread-path"_s); }
     uint32_t type() const override { return THREAD; }
-    void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
-    // Thread milling has no C++ implementation - the actual toolpath math
-    // (helical interpolation, multi-start, inside/outside, chamfer...) lives
-    // entirely in scripts/threading.js. saveDrill() here was a leftover from
-    // this file being copied from Drill and produced wrong (drill-style)
-    // g-code instead of thread milling. Run the plugin's script directly
-    // instead of going through GCode::File::regenerate(), since this override
-    // is also invoked directly (bypassing regenerate()) from this class's own
-    // constructor above and from MainWindow's "save all to one file" path.
-    void genGcodeAndTile() override {
-        if(auto* plugin = App::gCodePlugin(type())) {
-            const QString scriptPath = u"/home/x-ray/projects/qt/GERBER_X3/bin/Qt6._GNU_Debug_x64/bin/scripts/threading.js"_s; // u"/scripts/" + plugin->gcName() + u".js"; // App::gcSettings().scriptPath(plugin->gcName());
-            if(!scriptPath.isEmpty() && QFile::exists(scriptPath) && runJsScript(scriptPath))
-                return;
+    // Не createGiDrill(): та берёт только gcp.toolPathss.front().front() (первую
+    // из N 2/3-точечных меток резьбы) и рисует её диаметром фрезы, а не
+    // отверстия. Здесь -- по Gi::Drill на каждую метку, диаметром именно
+    // отверстия (3-я точка кривой, см. Form::computePaths).
+    void createGi() override {
+        if(!gcp.toolPathss.size()) return;
+        for(const Geo::Polyline& curve: gcp.toolPathss.front()) {
+            if(curve.size() < 3) continue;
+            const QPointF center{curve.front()};
+            const double holeDiameter{2.0 * std::hypot(curve[2].x() - center.x(), curve[2].y() - center.y())};
+            auto* item = new ::Gi::Drill{{center}, holeDiameter, this, gcp.tool().id()};
+            item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+            item->setColorPtr(&App::settings().guiColor(GuiColors::CutArea));
+            itemGroup()->push_back(item);
         }
-        qWarning("Threading: no G-code script configured, thread milling not generated");
+        itemGroup()->setVisible(true);
     }
 };
 

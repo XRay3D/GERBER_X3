@@ -17,6 +17,7 @@
 
 #include <QRectF>
 #include <algorithm>
+#include <cmath>
 #include <limits>
 
 namespace GCode {
@@ -56,12 +57,22 @@ NestingForest nestingForest(const Geo::Polylines& contours) {
     for(const Geo::Polyline& contour: contours)
         bodies.emplace_back(contour);
 
+    // Габариты -- один раз и заранее: у Polygon::boundingRect() кэша нет, он
+    // всякий раз обходит точные кривые, а contains() зовёт его первым делом.
+    // Перебор пар квадратичен, и на тысячах витков (карман по всей плате)
+    // без этого отсева он уходил в минуты. Контур внутри другого лежит и
+    // габаритом внутри его габарита -- проверка дешёвая и ничего не теряет.
+    std::vector<QRectF> boxes;
+    boxes.reserve(count);
+    for(const Geo::Polyline& contour: contours)
+        boxes.push_back(contour.boundingRect());
+
     // Родитель -- самый глубокий из объемлющих, поэтому сперва считаем
     // глубины, а уже потом выбираем по ним родителя.
     std::vector<std::vector<std::size_t>> parents(count);
     for(std::size_t i{}; i < count; ++i)
         for(std::size_t j{}; j < count; ++j)
-            if(i != j && isInside(contours[i], bodies[j])) {
+            if(i != j && boxes[j].contains(boxes[i]) && isInside(contours[i], bodies[j])) {
                 parents[i].push_back(j);
                 ++forest.depth[i];
             }
@@ -129,6 +140,90 @@ void rotateToNearest(Geo::Polyline& polyline, QPointF point) {
     const auto nearest = std::ranges::min_element(polyline,
         {}, [point](const Geo::Vertex& v) { return Geo::distance(point, v); });
     std::rotate(polyline.begin(), nearest, polyline.end());
+}
+
+namespace {
+
+// Ближайшая к point точка сегмента from -> to (с прогибом from.bulge):
+// параметр t и сама точка.
+std::pair<double, QPointF> closestOnSegment(const Geo::Vertex& from, const Geo::Vertex& to, QPointF point) {
+    if(const auto arc = Geo::arcOf(from, to, from.bulge)) {
+        // Угол точки от центра, отсчитанный от начала дуги ПО ХОДУ дуги: попал
+        // в размах -- ближайшая точка на самой окружности, нет -- один из концов.
+        const double a = std::atan2(point.y() - arc->center.y(), point.x() - arc->center.x());
+        const double sweep = std::abs(arc->theta);
+        double rel = std::fmod((a - arc->startAngle) * (arc->theta < 0.0 ? -1.0 : 1.0), 2.0 * pi);
+        if(rel < 0.0) rel += 2.0 * pi;
+        if(rel <= sweep) {
+            const double t = rel / sweep;
+            return {t, arc->pointAt(t)};
+        }
+        return Geo::distance(point, from) <= Geo::distance(point, to)
+            ? std::pair{0.0, QPointF{from}}
+            : std::pair{1.0, QPointF{to}};
+    }
+    const QPointF d = to - from;
+    const double len2 = QPointF::dotProduct(d, d);
+    const double t = len2 > 0.0 ? std::clamp(QPointF::dotProduct(point - from, d) / len2, 0.0, 1.0) : 0.0;
+    return {t, from + d * t};
+}
+
+} // namespace
+
+ClosestPoint closestPoint(const Geo::Polyline& polyline, QPointF point) {
+    ClosestPoint best;
+    std::size_t i{};
+    for(const auto& [from, to]: Geo::segments(polyline)) {
+        const auto [t, pt] = closestOnSegment(from, to, point);
+        if(const double d = Geo::distance(point, pt); d < best.distance)
+            best = {i, t, pt, d};
+        ++i;
+    }
+    // Одинокая вершина сегментов не даёт, но точкой всё же является.
+    if(polyline.size() == 1)
+        best = {0, 0.0, polyline.front(), Geo::distance(point, polyline.front())};
+    return best;
+}
+
+void rotateToClosest(Geo::Polyline& polyline, QPointF point) {
+    if(!polyline.closed || polyline.size() < 2) return;
+    const ClosestPoint cp = closestPoint(polyline, point);
+    const std::size_t n = polyline.size();
+
+    // Окружность -- две половины с прогибом +-1, и такой её пишет одной
+    // командой «G2/G3 I J» вывод УП (GCode::File::savePath). Резать её на
+    // четверть и три четверти незачем: половины просто пересобираются от новой
+    // точки, вторая вершина -- диаметрально противоположная.
+    if(n == 2 && polyline.front().bulge == polyline.back().bulge
+        && std::abs(std::abs(polyline.front().bulge) - 1.0) < 1e-9) {
+        if(const auto arc = Geo::arcOf(polyline.front(), polyline.back(), polyline.front().bulge)) {
+            const double bulge = polyline.front().bulge;
+            const QPointF opposite = arc->center * 2.0 - cp.point;
+            polyline[0] = Geo::Vertex{cp.point, bulge};
+            polyline[1] = Geo::Vertex{opposite, bulge};
+            return;
+        }
+    }
+
+    // Разрез у самого конца сегмента -- это его вершина, вставлять нечего:
+    // вершина в допуске сварки на выводе всё равно схлопнется в предыдущую.
+    const Geo::Vertex& from = polyline[cp.segment];
+    const Geo::Vertex& to = polyline[(cp.segment + 1) % n];
+    const double len = Geo::segmentLength(from, to);
+    std::size_t start = cp.segment;
+    if(cp.t * len >= Geo::exitWeldTolerance && (1.0 - cp.t) * len >= Geo::exitWeldTolerance) {
+        // Вершина реза: у головы прогиб её доли дуги, у хвоста -- остатка.
+        Geo::Vertex cut{cp.point};
+        if(const auto arc = Geo::arcOf(from, to, from.bulge)) {
+            polyline[cp.segment].bulge = Geo::bulgeOf(arc->theta * cp.t);
+            cut.bulge = Geo::bulgeOf(arc->theta * (1.0 - cp.t));
+        }
+        polyline.insert(polyline.begin() + static_cast<std::ptrdiff_t>(cp.segment) + 1, cut);
+        start = cp.segment + 1;
+    } else if((1.0 - cp.t) * len < Geo::exitWeldTolerance) {
+        start = (cp.segment + 1) % n;
+    }
+    std::rotate(polyline.begin(), polyline.begin() + static_cast<std::ptrdiff_t>(start), polyline.end());
 }
 
 } // namespace GCode

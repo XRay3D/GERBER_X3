@@ -71,7 +71,7 @@ Geo::Polylines concentricLoops(const Geo::Polygons& region, double step, int lim
 // Мелочь, которую фреза всё равно не выберет: обрывок, у которого и площадь, и
 // периметр меньше самой фрезы, -- это не карман, а шум офсета.
 void removeSmall(Geo::Polygons& region, double dOffset) {
-    const double minArea = dOffset * dOffset * std::numbers::pi;
+    const double minArea      = dOffset * dOffset * std::numbers::pi;
     const double minPerimeter = dOffset * 4.0;
     std::vector<Geo::Polygon> kept;
     for(const Geo::Polygon& polygon: region.all())
@@ -197,8 +197,8 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     if(gcp.side() == GCode::On) return;
 
     toolDiameter = tool.getDiameter(depth);
-    dOffset = toolDiameter * 0.5;
-    stepOver = tool.stepover();
+    dOffset      = toolDiameter * 0.5;
+    stepOver     = tool.stepover();
 
     if(gcp.side() == GCode::Inner) {
         const std::vector<Geo::Polygon>& bodies = groupedPaths(GCode::Grouping::Copper);
@@ -228,15 +228,17 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     if(gcp.side() == GCode::On) return;
 
     toolDiameter = tool.getDiameter(depth);
-    dOffset = toolDiameter * 0.5;
-    stepOver = tool.stepover();
+    dOffset      = toolDiameter * 0.5;
+    stepOver     = tool.stepover();
 
     // Снаружи первым идёт обход детали по контуру, и заливка начинается уже за
     // заметённой им полосой.
-    Geo::Polygons cutArea = outerContourPass();
+    Geo::Polygons cutArea         = outerContourPass();
     const Geo::Polygons forbidden = cutArea.empty()
         ? Geo::Polygons{}
         : Geo::Inflate(cutArea, -toolDiameter);
+
+    // dbgPaths(cutArea.contours(), {});
 
     // Первая петля заливки отстоит от границы на РАДИУС: центр круглой фрезы
     // ближе не подойдёт. delta -- полная ширина, отсюда целый диаметр.
@@ -256,6 +258,8 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
         cutArea |= Geo::Inflate(fill, toolDiameter);
         returnPs.append_range(std::move(fill));
     }
+
+    // dbgPaths(returnPs, {});
 
     if(returnPs.empty()) return; // пустой файл отправит createGc
     finishPocket(tool, std::move(cutArea));
@@ -281,10 +285,10 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
         // Файл прошлой фрезы больше не наш: не обнулив его, пустая последняя
         // итерация отправила бы его вторично -- createGc в конце шлёт file_
         // как есть.
-        file_ = nullptr;
+        file_        = nullptr;
         toolDiameter = tool.getDiameter(depth);
-        dOffset = toolDiameter * 0.5;
-        stepOver = tool.stepover();
+        dOffset      = toolDiameter * 0.5;
+        stepOver     = tool.stepover();
 
         // Обход детали по контуру достаётся САМОЙ ШИРОКОЙ фрезе -- она идёт
         // первой, и поле у самой детали её же и ждёт. Прочим там делать
@@ -319,9 +323,9 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
                 // File{std::move(gcp)} прямо в цикле, и второму инструменту
                 // доставался уже выпотрошенный gcp -- ни инструментов, ни
                 // исходной геометрии.
-                GCode::Params toolGcp = gcp;
+                GCode::Params toolGcp                         = gcp;
                 toolGcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
-                toolGcp.toolPathss = std::move(returnPss);
+                toolGcp.toolPathss                            = std::move(returnPss);
                 toolGcp.setPocketAreaCurves(std::move(cutArea));
                 file_ = new File{std::move(toolGcp)};
                 file_->setFileName(tool.nameEnc());
@@ -340,28 +344,7 @@ File::File()
 File::File(GCode::Params&& newGcp)
     : GCode::File{std::move(newGcp)} {
     if(gcp.tools.front().diameter()) {
-        initSave();
-        addInfo();
-        statFile();
-        genGcodeAndTile();
-        endFile();
-    }
-}
-
-void File::genGcodeAndTile() {
-    auto& proj = App::project();
-    const QRectF rect = proj.worckRect();
-    for(size_t x{}; x < proj.stepsX(); ++x) {
-        for(size_t y{}; y < proj.stepsY(); ++y) {
-            const QPointF offset{(rect.width() + proj.spaceX()) * x, (rect.height() + proj.spaceY()) * y};
-            if(toolType == Tool::Laser)
-                saveLaserPocket(offset);
-            else
-                saveMillingPocket(offset);
-
-            if(gcp.params.contains(GCode::Params::NotTile))
-                return;
-        }
+        regenerate();
     }
 }
 

@@ -18,10 +18,6 @@ class VoronoiBoost : public virtual GCode::Creator {
 
 protected:
     void boostVoronoi();
-
-private:
-    void outside();
-    void inside();
 };
 
 } // namespace Voronoi

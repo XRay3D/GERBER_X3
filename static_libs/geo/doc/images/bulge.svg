@@ -1,0 +1,50 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 600 380" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .stroke  { fill:none; stroke:#1a1a1a; stroke-width:2.5; }
+    .chord   { fill:none; stroke:#1a1a1a; stroke-width:2; stroke-dasharray:6 5; }
+    .radius  { fill:none; stroke:#8a8a8a; stroke-width:1.5; stroke-dasharray:3 4; }
+    .sagitta { fill:none; stroke:#c0392b; stroke-width:2; }
+    .halfchord { fill:none; stroke:#2166ac; stroke-width:2; }
+    .pt      { fill:#1a1a1a; }
+    .lbl     { font-size:16px; fill:#1a1a1a; }
+    .lbl-red { font-size:15px; fill:#c0392b; }
+    .lbl-blue{ font-size:15px; fill:#2166ac; }
+    .lbl-sm  { font-size:13px; fill:#5a5a5a; }
+    .formula { font-size:20px; fill:#1a1a1a; font-weight:bold; }
+  </style>
+
+  <!-- геометрия: P1=(50,150) P2=(250,150) apex=(150,100) center=(150,225) R=125 -->
+  <path class="stroke" d="M50,150 Q150,55 250,150"/>
+  <path class="chord" d="M50,150 L250,150"/>
+
+  <!-- центр и радиусы -->
+  <circle class="pt" cx="150" cy="225" r="3.5"/>
+  <path class="radius" d="M150,225 L50,150"/>
+  <path class="radius" d="M150,225 L250,150"/>
+  <path class="radius" d="M150,225 L150,100"/>
+  <text class="lbl-sm" x="158" y="228">C (центр дуги)</text>
+
+  <!-- сагитта -->
+  <path class="sagitta" d="M150,150 L150,100"/>
+  <text class="lbl-red" x="158" y="128">s (стрела)</text>
+
+  <!-- полухорда -->
+  <path class="halfchord" d="M150,150 L250,150"/>
+  <text class="lbl-blue" x="180" y="172">l (полухорда)</text>
+
+  <!-- точки -->
+  <circle class="pt" cx="50" cy="150" r="4"/>
+  <circle class="pt" cx="250" cy="150" r="4"/>
+  <circle class="pt" cx="150" cy="100" r="3.5"/>
+  <text class="lbl" x="18" y="145">P1</text>
+  <text class="lbl" x="258" y="145">P2</text>
+
+  <!-- угол theta/4 у P1 между хордой и полу-хордой из центра -->
+  <path class="stroke" d="M85,150 A35,35 0 0,0 76,127" fill="none" stroke-width="1.5"/>
+  <text class="lbl-sm" x="90" y="132">θ/4</text>
+
+  <text class="formula" x="60" y="280">bulge = tan(θ/4) = s / l</text>
+  <text class="lbl-sm" x="60" y="305">Vertex::bulge хранится в НАЧАЛЬНОЙ вершине сегмента P1→P2.</text>
+  <text class="lbl-sm" x="60" y="325">Знак bulge = знак θ = направление обхода дуги (Vertex::Dir).</text>
+  <text class="lbl-sm" x="60" y="345">bulge = 0 — сегмент прямой, дуги нет вовсе (Vertex::isArc() == false).</text>
+</svg>

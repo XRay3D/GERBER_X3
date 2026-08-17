@@ -270,26 +270,7 @@ File::File()
 File::File(GCode::Params&& newGcp)
     : GCode::File{std::move(newGcp)} {
     if(gcp.tools.front().diameter()) {
-        initSave();
-        addInfo();
-        statFile();
-        genGcodeAndTile();
-        endFile();
-    }
-}
-
-void File::genGcodeAndTile() {
-    const QRectF rect = App::project().worckRect();
-    for(size_t x{}; x < App::project().stepsX(); ++x) {
-        for(size_t y{}; y < App::project().stepsY(); ++y) {
-            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
-            if(toolType == Tool::Laser)
-                saveLaserProfile(offset);
-            else
-                saveMillingProfile(offset);
-            if(gcp.params.contains(GCode::Params::NotTile))
-                return;
-        }
+        regenerate();
     }
 }
 

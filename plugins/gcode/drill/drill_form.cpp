@@ -234,7 +234,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
         model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
-        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() == DarkTheme ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, val]: map) {
             auto& row = data[i++];
@@ -267,7 +267,7 @@ void Form::on_cbxFileCurrentIndexChanged() {
         model = new Model{map.size(), ui->toolTable};
         auto& data = model->data();
 
-        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() == DarkTheme ? Qt::white : Qt::black};
 
         for(int i{}; auto& [key, shapes]: map) {
             auto& row = data[i++];
@@ -524,7 +524,12 @@ void Form::computePaths() {
                     App::toolHolder().tool(usedToolId).nameEnc()
                     + u"_T"_s + indexes(pathsMap[usedToolId].toolsApertures));
                 if(file) gcode->setSide(file->side());
-                App::project().addFile(gcode);
+
+                auto it = createdSlotFileIds_.find(usedToolId);
+                if(it != createdSlotFileIds_.end() && App::project().file(it->second))
+                    App::project().replaceFile(it->second, gcode);
+                else
+                    createdSlotFileIds_[usedToolId] = App::project().addFile(gcode);
             }
         }
     }
@@ -609,7 +614,12 @@ void Form::computePaths() {
                 gcode->setSrcFileId(file ? file->id() : -1);
                 gcode->setFileName(App::toolHolder().tool(toolId).nameEnc() + /*type_ +*/ indexes(val.toolsApertures));
                 if(file) gcode->setSide(file->side());
-                App::project().addFile(gcode);
+
+                auto it = createdDrillFileIds_.find(toolId);
+                if(it != createdDrillFileIds_.end() && App::project().file(it->second))
+                    App::project().replaceFile(it->second, gcode);
+                else
+                    createdDrillFileIds_[toolId] = App::project().addFile(gcode);
             }
             if(val.paths.size()) {
                 switch(worckType) {

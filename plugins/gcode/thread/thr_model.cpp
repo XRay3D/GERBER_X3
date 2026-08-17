@@ -29,6 +29,12 @@ void Model::setToolId(int row, Tool::ID id) {
     if(data_[row].toolId != id)
         data_[row].useForCalc = id > Tool::ID::Null;
     data_[row].toolId = id;
+    if(id > Tool::ID::Null) {
+        // Диаметр под резьбу — ISO-формула 75% зацепления: D = M − 1.0825·P,
+        // где M — номинал резьбы (апертура), P — шаг выбранного инструмента.
+        const double pitch = App::toolHolder().tool(id).passDepth();
+        data_[row].holeDiameter = data_[row].diameter - 1.0825 * pitch;
+    }
     for(auto item: data_[row].items) {
         // Флаг должен быть выставлен ДО updateTool(), т.к. тот в конце вызывает
         // changeColor(), которая читает ItemIsSelectable как признак "Used" —
@@ -37,7 +43,7 @@ void Model::setToolId(int row, Tool::ID id) {
         item->updateTool();
     }
     emit set(row, id > Tool::ID::Null);
-    emit dataChanged(createIndex(row, 0), createIndex(row, 1));
+    emit dataChanged(createIndex(row, 0), createIndex(row, ColumnCount - 1));
 }
 
 void Model::setCreate(int row, bool create) {
@@ -58,13 +64,24 @@ void Model::setCreate(bool create) {
     emit dataChanged(createIndex(0, 0), createIndex(rowCount() - 1, 1));
 }
 
+void Model::setCorrection(int row, double value) {
+    data_[row].correction = value;
+    emit dataChanged(createIndex(row, Correction), createIndex(row, Correction), {Qt::EditRole, Qt::DisplayRole});
+}
+
+void Model::setHoleDiameter(int row, double value) {
+    data_[row].holeDiameter = value;
+    emit dataChanged(createIndex(row, HoleDiameter), createIndex(row, HoleDiameter), {Qt::EditRole, Qt::DisplayRole});
+}
+
 int Model::rowCount(const QModelIndex& /*parent*/) const { return static_cast<int>(data_.size()); }
 
 int Model::columnCount(const QModelIndex& /*parent*/) const { return ColumnCount; }
 
 QVariant Model::data(const QModelIndex& index, int role) const {
     int row = index.row();
-    if(index.column() == Name) {
+    switch(index.column()) {
+    case Name:
         switch(role) {
         case Qt::DisplayRole:
             return data_[row].name.back();
@@ -82,7 +99,26 @@ QVariant Model::data(const QModelIndex& index, int role) const {
         case Qt::UserRole: return row;
         default          : break;
         }
-    } else {
+        break;
+    case Correction:
+        switch(role) {
+        case Qt::DisplayRole:
+        case Qt::EditRole         : return data_[row].correction;
+        case Qt::TextAlignmentRole: return Qt::AlignCenter;
+        case Qt::ToolTipRole      : return tr("Diameter correction, mm (+ oversize, - undersize)");
+        default                   : break;
+        }
+        break;
+    case HoleDiameter:
+        switch(role) {
+        case Qt::DisplayRole:
+        case Qt::EditRole         : return data_[row].holeDiameter;
+        case Qt::TextAlignmentRole: return Qt::AlignCenter;
+        case Qt::ToolTipRole      : return tr("Pre-drilled hole diameter, mm (auto-filled on tool pick, editable)");
+        default                   : break;
+        }
+        break;
+    case Tool:
         if(data_[row].toolId == Tool::ID::Null)
             switch(role) {
             case Qt::DisplayRole      : return tr("Select Tool");
@@ -97,8 +133,19 @@ QVariant Model::data(const QModelIndex& index, int role) const {
             case Qt::UserRole      : return +data_[row].toolId;
             default                : break;
             }
+        break;
     }
     return {};
+}
+
+bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
+    if(role != Qt::EditRole)
+        return false;
+    switch(index.column()) {
+    case Correction   : setCorrection(index.row(), value.toDouble()); return true;
+    case HoleDiameter  : setHoleDiameter(index.row(), value.toDouble()); return true;
+    default            : return false;
+    }
 }
 
 QVariant Model::headerData(int section, Qt::Orientation orientation, int role) const {
@@ -109,6 +156,10 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
             case Name: return {tr("Aperture") + u" / "_s + tr("Tool")};
             case Tool:;
                 return tr("Tool");
+            case Correction:
+                return tr("Correction");
+            case HoleDiameter:
+                return tr("Ø hole");
             }
         }
         return data_[section].name.value(0);
@@ -127,6 +178,8 @@ QVariant Model::headerData(int section, Qt::Orientation orientation, int role) c
 Qt::ItemFlags Model::flags(const QModelIndex& index) const {
     if(index.column() == Name)
         return Qt::ItemIsEnabled | Qt::ItemIsUserCheckable;
+    if(index.column() == Correction || index.column() == HoleDiameter)
+        return Qt::ItemIsSelectable | Qt::ItemIsEnabled | Qt::ItemIsEditable;
     return Qt::ItemIsSelectable | Qt::ItemIsEnabled;
 }
 

@@ -247,6 +247,67 @@ Polyline weldClosedDuplicates(const Polyline& poly) {
     return out;
 }
 
+// Убирает лишние вершины на ПРЯМЫХ участках контура (обе смежные стороны --
+// отрезки, не дуги). Две причины, один проход:
+//
+//   * коллинеарные соседние отрезки схлопываются в один: свип режет прямую
+//     сторону на куски по вертикальным касательным и точкам касания, и
+//     наружу уходят три-четыре отрезка вместо одного. Порог -- допуск
+//     сварки: точка отстоит от прямой между соседями меньше, чем домен
+//     вообще различает точки;
+//   * швы объединения: точка в единицах микрон от прямой, а сторона до неё
+//     или после -- сама в единицы микрон. Для формы ничего не меняет, а
+//     потребителей, рассчитанных на вход без вырожденно коротких сторон
+//     (Boost.Polygon voronoi_builder), такой шов ломает. Порог 10 мкм --
+//     заведомо мельче любой настоящей черты платы.
+//
+// Ни в одном случае форма не меняется больше чем на порог, дуги не трогаются.
+Polyline removeCollinearSlivers(const Polyline& poly) {
+    if(poly.size() < 3) return poly;
+    constexpr double sliverLen = 1e-2; // 10 мкм
+
+    Polyline out = poly;
+    out.closed = poly.closed;
+    out.width = poly.width;
+
+    // Есть ли что убирать -- в вершине i, между соседями a и c. Замыкающая
+    // пара незамкнутой полилинии не рассматривается: у её концов соседа с
+    // одной стороны нет.
+    auto redundant = [&](std::size_t i) {
+        const std::size_t n = out.size();
+        if(!out.closed && (i == 0 || i + 1 == n)) return false;
+        const std::size_t prev = (i + n - 1) % n;
+        const std::size_t next = (i + 1) % n;
+        if(out[i].isArc() || out[prev].isArc()) return false; // трогаем только прямые стороны
+
+        const QPointF a = out[prev], b = out[i], c = out[next];
+        const double baseLen = std::hypot(c.x() - a.x(), c.y() - a.y());
+        if(baseLen < 1e-12) return false; // a и c сами почти совпали -- отдельный случай, не наш
+        const double dist = std::abs((b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x())) / baseLen;
+
+        if(dist < exitWeldTolerance) { // коллинеарно -- но только если b МЕЖДУ a и c, а не шип назад
+            const double dot = (b.x() - a.x()) * (c.x() - a.x()) + (b.y() - a.y()) * (c.y() - a.y());
+            return dot > 0.0 && dot < baseLen * baseLen;
+        }
+        const double sideLen = std::hypot(c.x() - b.x(), c.y() - b.y());
+        const double prevLen = std::hypot(b.x() - a.x(), b.y() - a.y());
+        return std::min(sideLen, prevLen) < sliverLen && dist < sliverLen;
+    };
+
+    for(std::size_t i{}; i < out.size() && out.size() >= 3;) {
+        if(redundant(i)) {
+            out.erase(out.begin() + static_cast<std::ptrdiff_t>(i));
+            if(i) --i; // сосед слева мог стать лишним
+        } else
+            ++i;
+    }
+    // Стык через начало: первая вершина проверяется последней, когда её
+    // соседи уже окончательны.
+    while(out.closed && out.size() >= 3 && redundant(0))
+        out.erase(out.begin());
+    return out;
+}
+
 } // namespace
 
 namespace {
@@ -473,10 +534,47 @@ Polyline toPolyline(const GPoly& pgn) {
         // Продолжение той же дуги: своей вершины ему не нужно, у предыдущей
         // просто растёт размах. Прогиб больше единицы -- законная дуга больше
         // полуокружности, центр у неё берётся ровно так же (Geo::arcOf).
-        if(lastCurve && sameSupport(*lastCurve, lastGeom, *it, curve)
+        //
+        // Кусок, которым дуга замыкается на собственное начало, -- это уже
+        // ОКРУЖНОСТЬ, а она прогибом не выражается и держится двумя
+        // половинами. Ловить её по размаху нельзя: размах куска считается по
+        // округлённым концам, и у окружности, нарезанной свипом на несколько
+        // кусков, сумма недобирает до 2*pi на ~1e-8 -- порог maxBulgeSweep
+        // такой «оборот» пропускал, контур схлопывался в одну вершину с
+        // прогибом ~1e8, и contours() браковал её как вырожденную: в pocket
+        // так пропадали все витки заливки круглой дырки, кроме первого.
+        // Замыкание -- признак геометрический (конец куска у начала
+        // накопленной дуги, допуск сварки), и размах при этом больше
+        // полуоборота: конец у самого начала бывает и у МИКРОдуги в пару
+        // нанометров, а та никакая не окружность.
+        //
+        // Замыкающий микрокусок (короче допуска) принимается и без общей
+        // опорной окружности: у капсул из разных построений центры сходятся
+        // не всегда, и иначе он ложился бы отдельной вершиной впритык к
+        // началу -- контур из дуги в почти полный оборот и микродуги, который
+        // на выводе схлопывается в «G2 I J» без X и Y.
+        const bool closes = lastCurve && !out.empty() && std::abs(lastSweep) > pi
+            && std::hypot(curve.to.x() - QPointF(out.back()).x(), curve.to.y() - QPointF(out.back()).y())
+                < exitWeldTolerance;
+        const bool micro = std::hypot(curve.to.x() - src.x(), curve.to.y() - src.y()) < exitWeldTolerance;
+        if(lastCurve && (sameSupport(*lastCurve, lastGeom, *it, curve) || (closes && micro))
             && std::abs(lastSweep + curve.sweep) < maxBulgeSweep) {
+            const QPointF start = out.back();
             lastSweep += curve.sweep;
-            out.back().bulge = std::tan(lastSweep / 4.0);
+            if(closes) {
+                // Накопленная дуга делится пополам: вторая вершина --
+                // диаметрально противоположная точка. Отдельно отбрасывать
+                // замыкающий кусок нельзя -- микрокусок ниже сварился бы с
+                // началом и унёс прогиб всей окружности.
+                // Недобор до полного оборота -- шум округления концов, и
+                // половины берутся ровно по pi: прогиб +-1, как у Geo::circle,
+                // -- по нему окружность узнаёт и вывод УП.
+                const double half = std::copysign(pi, lastSweep);
+                out.back().bulge = std::copysign(1.0, half);
+                out.emplace_back(lastGeom.center * 2.0 - start, std::copysign(1.0, half));
+                lastSweep = half;
+            } else
+                out.back().bulge = std::tan(lastSweep / 4.0);
             lastCurve = *it, lastGeom = curve;
             continue;
         }
@@ -503,6 +601,7 @@ Polyline toPolyline(const GPoly& pgn) {
             < exitWeldTolerance)
         out.pop_back();
 
+    out = removeCollinearSlivers(out);
     stitchArcs(out);
     return out;
 }

@@ -25,6 +25,7 @@
 
 #include <QPointF>
 #include <cstddef>
+#include <limits>
 #include <vector>
 
 namespace GCode {
@@ -65,5 +66,22 @@ void sortByProximity(std::vector<Geo::Polylines>& groups, QPointF start);
 // ближайшей к `point`. Врезаться в деталь дешевле там, где инструмент уже
 // оказался.
 void rotateToNearest(Geo::Polyline& polyline, QPointF point);
+
+// Ближайшая к `point` ТОЧКА КОНТУРА -- не вершина, а точка на сегменте, дуги
+// включительно: у офсетной петли из двух дуг вершины могут стоять где угодно,
+// а ближе всего к соседу почти всегда середина дуги.
+struct ClosestPoint {
+    std::size_t segment{}; // индекс начальной вершины сегмента
+    double t{};            // параметр на сегменте: 0 -- начало, 1 -- конец
+    QPointF point;
+    double distance{std::numeric_limits<double>::max()};
+};
+ClosestPoint closestPoint(const Geo::Polyline& polyline, QPointF point);
+
+// То же, что rotateToNearest, но начало ставится в ближайшую ТОЧКУ контура:
+// сегмент режется по ней, в разрез встаёт вершина, и обход поворачивается на
+// неё. Так у концентрических петель кармана переезд к следующему витку -- ровно
+// шаг офсета, а не расстояние между случайно попавшими вершинами.
+void rotateToClosest(Geo::Polyline& polyline, QPointF point);
 
 } // namespace GCode

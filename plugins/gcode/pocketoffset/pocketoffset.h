@@ -25,7 +25,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"pocket-path"_s); }
     uint32_t type() const override { return POCKET_OFFSET; }
     void createGi() override;
-    void genGcodeAndTile() override;
 };
 
 class Creator : public GCode::Creator {

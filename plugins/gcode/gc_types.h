@@ -15,6 +15,7 @@
 #include "md5.h"
 #include "serial.h"
 
+#include "gc_post.h"
 #include "tool.h"
 
 #include <QColor>
@@ -24,6 +25,7 @@
 #include <algorithm>
 #include <cmath>
 #include <limits>
+#include <memory>
 #include <variant>
 
 constexpr auto G_CODE = "GCode"_hash32;
@@ -295,48 +297,26 @@ public:
 };
 
 class Settings {
-    // protected:
 public:
-    /*static inline*/ QString fileExtension_{u"tap"_s};
-    /*static inline*/ QString formatMilling_{u"G?X?Y?I+J+Z?F?S?"_s};
-    /*static inline*/ QString formatLaser_{u"G?X?Y?I+J+Z?F?S?"_s};
-    /*static inline*/ QString laserConstOn_{u"M3"_s};
-    /*static inline*/ QString laserDynamOn_{u"M4"_s};
-    /*static inline*/ QString spindleLaserOff_{u"M5"_s};
-    /*static inline*/ QString spindleOn_{u"M3"_s};
+    bool info_{true};
+    bool sameFolder_{true};
 
-    /*static inline*/ QString start_{u"G21 G17 G90\nM3 S?"_s};
-    /*static inline*/ QString end_{u"M5\nM30"_s};
-
-    /*static inline*/ QString laserStart_{u"G21 G17 G90"_s};
-    /*static inline*/ QString laserEnd_{u"M30"_s};
-
-    /*static inline*/ bool info_{true};
-    /*static inline*/ bool sameFolder_{true};
-
+    // Диалект станка -- пост scripts/posts/<postId_>.js; см. gc_post.h.
+    QString postId_{u"generic"_s};
     QMap<QString, QString> scriptPaths_; // gcName -> JS script file path
 
-public:
-    /*static*/ QString fileExtension() { return fileExtension_; }
-    /*static*/ QString formatMilling() { return formatMilling_; }
-    /*static*/ QString formatLaser() { return formatLaser_; }
-    /*static*/ QString laserConstOn() { return laserConstOn_; }
-    /*static*/ QString laserDynamOn() { return laserDynamOn_; }
+    bool info() { return info_; }
+    bool sameFolder() { return sameFolder_; }
 
-    /*static*/ QString spindleLaserOff() { return spindleLaserOff_; }
-    /*static*/ QString spindleOn() { return spindleOn_; }
-
-    /*static*/ QString laserStart() { return laserStart_; }
-    /*static*/ QString laserEnd() { return laserEnd_; }
-
-    /*static*/ QString start() { return start_; }
-    /*static*/ QString end() { return end_; }
-
-    /*static*/ bool info() { return info_; }
-    /*static*/ bool sameFolder() { return sameFolder_; }
+    // Пост загружается лениво и перечитывается, если сменился id или файл.
+    Post& post();
+    QString fileExtension() { return post().extension(); }
 
     QString scriptPath(const QString& gcName) const { return scriptPaths_.value(gcName); }
     void setScriptPath(const QString& gcName, const QString& path) { scriptPaths_[gcName] = path; }
+
+private:
+    std::unique_ptr<Post> post_;
 };
 
 } // namespace GCode

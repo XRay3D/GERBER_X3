@@ -1,0 +1,33 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 700 400" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .arc     { fill:none; stroke:#1a1a1a; stroke-width:3; }
+    .arc2    { fill:none; stroke:#1e8449; stroke-width:3; }
+    .bad     { fill:none; stroke:#c0392b; stroke-width:3; stroke-dasharray:6 5; }
+    .title   { font-size:13.5px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12.5px; fill:#5a5a5a; }
+    .cross   { stroke:#c0392b; stroke-width:4; }
+  </style>
+
+  <!-- Left: rotation + uniform scale -->
+  <text class="title" x="20" y="24">Поворот + равномерный масштаб</text>
+  <text class="lbl-sm" x="20" y="42">дуга остаётся дугой</text>
+  <path class="arc" d="M60,150 A90,90 0 0,1 240,150"/>
+  <path class="arc2" d="M60,150 A90,90 0 0,1 240,150" transform="rotate(-25 150 150) scale(1.15) translate(-25,-15)"/>
+  <text class="lbl-sm" x="20" y="280">isSimilarity(tr) == true</text>
+  <text class="lbl-sm" x="20" y="298">центр и радиус пересчитаны точно,</text>
+  <text class="lbl-sm" x="20" y="316">bulge не меняется (безразмерный)</text>
+
+  <!-- Right: non-uniform scale -->
+  <text class="title" x="380" y="24">Неравномерный масштаб</text>
+  <text class="lbl-sm" x="380" y="42">дуга стала бы эллипсом — запрещено</text>
+  <path class="arc" d="M410,150 A90,90 0 0,1 590,150"/>
+  <path class="bad" d="M410,150 A170,60 0 0,1 590,150"/>
+  <line class="cross" x1="475" y1="90" x2="525" y2="130"/>
+  <line class="cross" x1="525" y1="90" x2="475" y2="130"/>
+  <text class="lbl-sm" x="380" y="280">isSimilarity(tr) == false</text>
+  <text class="lbl-sm" x="380" y="298">Polyline::transform() требует</text>
+  <text class="lbl-sm" x="380" y="316">pre(isSimilarity(tr) || !hasArcs(polyline))</text>
+
+  <text class="lbl-sm" x="20" y="360">Прогиб безразмерен: сдвиг, поворот и равномерный масштаб (в т.ч. зеркало) его не трогают;</text>
+  <text class="lbl-sm" x="20" y="378">неравномерный масштаб для контуров с дугами не определён.</text>
+</svg>

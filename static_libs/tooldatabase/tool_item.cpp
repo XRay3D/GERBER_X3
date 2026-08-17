@@ -136,7 +136,10 @@ bool ToolItem::isTool() const { return id > Tool::ID{}; }
 
 void ToolItem::setIsTool() {
     if(App::toolHolder().tools_.size())
-        id = App::toolHolder().tools_.begin()->first + Tool::ID::Tool;
+        // NOTE: Tool::ID + Tool::ID через общий Enum-оператор -- побитовое ИЛИ
+        // (utils.h, для флаговых енумов), не арифметика: id | 1 не меняется,
+        // если id уже нечётный. Инкремент считаем в int напрямую.
+        id = static_cast<Tool::ID>(+App::toolHolder().tools_.begin()->first + 1);
     else
         id = Tool::ID::Tool;
     App::toolHolder().tools_[id].setId(id);

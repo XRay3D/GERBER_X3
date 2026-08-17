@@ -1,0 +1,37 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 740 340" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .body    { fill:#eef2f7; stroke:#1a1a1a; stroke-width:2.5; }
+    .wrap    { fill:none; stroke:#c0392b; stroke-width:3; stroke-dasharray:8 6; }
+    .pt      { fill:#1a1a1a; }
+    .lbl     { font-size:16px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:13px; fill:#5a5a5a; }
+    .lbl-red { font-size:14px; fill:#c0392b; }
+    .idx     { font-size:14px; fill:#1a1a1a; }
+  </style>
+
+  <!-- квадрат-полилиния V0..V3 -->
+  <polygon class="body" points="120,80 340,80 340,260 120,260"/>
+  <path class="wrap" d="M120,260 L120,80"/>
+
+  <circle class="pt" cx="120" cy="80" r="5"/>
+  <circle class="pt" cx="340" cy="80" r="5"/>
+  <circle class="pt" cx="340" cy="260" r="5"/>
+  <circle class="pt" cx="120" cy="260" r="5"/>
+
+  <text class="idx" x="95" y="65">V0</text>
+  <text class="idx" x="345" y="65">V1</text>
+  <text class="idx" x="345" y="280">V2</text>
+  <text class="idx" x="80" y="280">V3</text>
+
+  <text class="lbl-red" x="55" y="170" transform="rotate(-90 55 170)">wrap: V3→V0</text>
+
+  <text class="lbl" x="400" y="100">segments(polyline):</text>
+  <text class="lbl-sm" x="400" y="130">(V0,V1) (V1,V2) (V2,V3)</text>
+  <text class="lbl-sm" x="400" y="155" fill="#c0392b">(V3,V0)  — только если closed</text>
+  <text class="lbl-sm" x="400" y="190">zip(vertices, concat(drop(1), take(wrap)))</text>
+  <text class="lbl-sm" x="400" y="215">Прогиб сегмента лежит на его</text>
+  <text class="lbl-sm" x="400" y="233">НАЧАЛЬНОЙ вершине: V3.bulge</text>
+  <text class="lbl-sm" x="400" y="251">описывает дугу сегмента V3→V0.</text>
+  <text class="lbl-sm" x="400" y="285">closed — ФЛАГ, а не повтор точки:</text>
+  <text class="lbl-sm" x="400" y="303">в списке вершин V0 не хранится дважды.</text>
+</svg>

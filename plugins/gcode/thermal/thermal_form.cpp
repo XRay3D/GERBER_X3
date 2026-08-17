@@ -193,7 +193,7 @@ void Form::updateThermalGi() {
     pd.setCancelButton(nullptr);
     count = 0;
     { // create Preview Items
-        QColor color{App::settings().theme() > LightRed ? Qt::white : Qt::black};
+        QColor color{App::settings().theme() == DarkTheme ? Qt::white : Qt::black};
 
         items_.clear();
         for(const auto& [keyId, valVec]: thPaths) {

@@ -52,7 +52,6 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"raster-path"_s); }
     uint32_t type() const override { return POCKET_RASTER; }
     void createGi() override;
-    void genGcodeAndTile() override;
 };
 
 } // namespace PocketRaster

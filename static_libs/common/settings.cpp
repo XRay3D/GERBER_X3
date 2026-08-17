@@ -78,6 +78,7 @@ bool AppSettings::guiSmoothScSh() { return guiSmoothScSh_; }
 bool AppSettings::scaleHZMarkers() { return scaleHZMarkers_; }
 bool AppSettings::scalePinMarkers() { return scalePinMarkers_; }
 int AppSettings::theme() { return theme_; }
+QColor AppSettings::accentColor() { return accentColor_; }
 
 /*cl::Clipper64*/
 int AppSettings::clpCircleSegments(double radius) {

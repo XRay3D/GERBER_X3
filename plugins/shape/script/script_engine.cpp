@@ -59,6 +59,21 @@ QJSValue PathBuilder::arcToC(double x, double y, double cx, double cy, bool ccw)
     return api_ ? api_->engine_->newQObject(this) : QJSValue{};
 }
 
+QJSValue PathBuilder::arcToR(double x, double y, double radius, bool large) {
+    if(auto* p = poly(); p && !p->empty() && !qFuzzyIsNull(radius)) {
+        const QPointF a{p->back()}, b{x, y};
+        const double half = Geo::distance(a, b) / 2;
+        if(half > 0) {
+            const double r = std::max(std::abs(radius), half);
+            double theta = 2 * std::asin(std::min(1.0, half / r));
+            if(large) theta = 2 * std::numbers::pi - theta;
+            p->back().bulge = std::copysign(Geo::bulgeOf(theta), radius);
+            p->emplace_back(b);
+        }
+    }
+    return api_ ? api_->engine_->newQObject(this) : QJSValue{};
+}
+
 void PathBuilder::close() {
     if(auto* p = poly()) {
         // Замыкание -- прямым отрезком: если конец совпал с началом, дубль не нужен.
@@ -266,7 +281,7 @@ void ScriptRegistry::load(Script& script) {
         QJSValueIterator it{paramsObj};
         while(it.hasNext()) {
             it.next();
-            ParamDef def{.name = it.name()};
+            ParamDef def{.name = it.name(), .description = {}};
             const QJSValue v = it.value();
             if(v.isNumber() || v.isBool()) {
                 def.value = v.toNumber();

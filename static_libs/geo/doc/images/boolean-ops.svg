@@ -1,0 +1,67 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 480" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .a       { fill:none; stroke:#c0392b; stroke-width:2; }
+    .b       { fill:none; stroke:#2166ac; stroke-width:2; }
+    .res     { fill:#dde5ee; }
+    .title   { font-size:14.5px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12px; fill:#5a5a5a; }
+  </style>
+  <defs>
+    <clipPath id="clipA"><circle cx="0" cy="0" r="55"/></clipPath>
+    <clipPath id="clipB"><circle cx="45" cy="0" r="55"/></clipPath>
+  </defs>
+
+  <!-- Union -->
+  <g transform="translate(120,110)">
+    <text class="title" x="-80" y="-90">Union (A | B)</text>
+    <circle class="res" cx="0" cy="0" r="55"/>
+    <circle class="res" cx="45" cy="0" r="55"/>
+    <circle class="a" cx="0" cy="0" r="55"/>
+    <circle class="b" cx="45" cy="0" r="55"/>
+    <text class="lbl-sm" x="-80" y="90">объединяет площади A и B</text>
+  </g>
+
+  <!-- Intersection -->
+  <g transform="translate(470,110)">
+    <text class="title" x="-80" y="-90">Intersection (A &amp; B)</text>
+    <clipPath id="ix"><circle cx="0" cy="0" r="55"/></clipPath>
+    <circle class="res" cx="45" cy="0" r="55" clip-path="url(#ix)"/>
+    <circle class="a" cx="0" cy="0" r="55"/>
+    <circle class="b" cx="45" cy="0" r="55"/>
+    <text class="lbl-sm" x="-80" y="90">только общая часть A и B</text>
+  </g>
+
+  <!-- Difference -->
+  <g transform="translate(120,320)">
+    <text class="title" x="-80" y="-90">Difference (A - B)</text>
+    <clipPath id="dx"><circle cx="0" cy="0" r="55"/></clipPath>
+    <g clip-path="url(#dx)">
+      <rect x="-60" y="-60" width="200" height="120" fill="#dde5ee"/>
+      <circle cx="45" cy="0" r="55" fill="#fff"/>
+    </g>
+    <circle class="a" cx="0" cy="0" r="55"/>
+    <circle class="b" cx="45" cy="0" r="55"/>
+    <text class="lbl-sm" x="-80" y="90">A без части, накрытой B</text>
+  </g>
+
+  <!-- Xor -->
+  <g transform="translate(470,320)">
+    <text class="title" x="-80" y="-90">Xor (A ^ B)</text>
+    <clipPath id="xa"><circle cx="0" cy="0" r="55"/></clipPath>
+    <clipPath id="xb"><circle cx="45" cy="0" r="55"/></clipPath>
+    <g clip-path="url(#xa)">
+      <rect x="-60" y="-60" width="200" height="120" fill="#dde5ee"/>
+      <circle cx="45" cy="0" r="55" fill="#fff"/>
+    </g>
+    <g clip-path="url(#xb)">
+      <rect x="-60" y="-60" width="200" height="120" fill="#dde5ee"/>
+      <circle cx="0" cy="0" r="55" fill="#fff"/>
+    </g>
+    <circle class="a" cx="0" cy="0" r="55"/>
+    <circle class="b" cx="45" cy="0" r="55"/>
+    <text class="lbl-sm" x="-80" y="90">симметрическая разность —</text>
+    <text class="lbl-sm" x="-80" y="106">везде, кроме пересечения</text>
+  </g>
+
+  <text x="30" y="465" font-size="12.5" fill="#5a5a5a">BooleanOp(ClipType, FillRule, subjects, clips) — A = subjects (красный), B = clips (синий)</text>
+</svg>

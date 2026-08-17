@@ -795,12 +795,29 @@ void MainWindow::createActionsShape() {
         if(auto* editor = shPlugin->editor()) editor->setWindowTitle(shPlugin->name());
         actionGroup.addAction(action);
         connect(shPlugin, &Shapes::Plugin::actionUncheck, action, &QAction::setChecked);
-        connect(shPlugin, &Shapes::Plugin::showEditor, this, &MainWindow::setDockWidget);
-        connect(action, &QAction::toggled, [shPlugin = shPlugin, this](bool checked) {
+        // Двойной клик по фигуре: показать редактор и подсветить его кнопку в
+        // тулбаре (exclusive-группа сама снимет выделение с прежнего типа).
+        // Свойство -- одноразовый флаг для toggled ниже: highlight существующей
+        // фигуры не должен включать режим вставки НОВОЙ (коннект мыши на
+        // addPoint) -- иначе двойной клик по фигуре тут же начинал бы лепить
+        // вторую поверх неё. setChecked() эмитит toggled() синхронно, так что
+        // к setProperty(false) после него флаг уже прочитан (если вообще
+        // менялся: если кнопка и так была активна, toggled не сработает --
+        // тогда очистка ниже подчищает свойство, чтобы не осталось «залипшим»
+        // до следующего настоящего клика).
+        connect(shPlugin, &Shapes::Plugin::showEditor, this, [this, action](QWidget* editor) {
+            setDockWidget(editor);
+            action->setProperty("ggSkipInsert", true);
+            action->setChecked(true);
+            action->setProperty("ggSkipInsert", QVariant{});
+        });
+        connect(action, &QAction::toggled, [shPlugin = shPlugin, this, action](bool checked) {
             if(checked) {
-                connect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
-                connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
-                connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                if(!action->property("ggSkipInsert").toBool()) {
+                    connect(ui.grView, &GraphicsView::mouseClickL, shPlugin, &Shapes::Plugin::addPoint);
+                    connect(ui.grView, &GraphicsView::mouseClickR, shPlugin, &Shapes::Plugin::finalizeShape);
+                    connect(ui.grView, &GraphicsView::mouseMove, shPlugin, &Shapes::Plugin::updPoint);
+                }
                 setDockWidget(shPlugin->editor());
             } else {
                 shPlugin->finalizeShape();
@@ -947,32 +964,24 @@ void MainWindow::saveSelectedGCodeFiles() {
                 return;
             std::vector<QString> sl;
 
-            sl.emplace_back(tr(";\tContains files:"));
+            sl.emplace_back(GCode::File::comment(tr("\tContains files:")));
             for(auto file: files)
-                sl.push_back(u";\t"_s + file->shortName());
+                sl.push_back(GCode::File::comment(u"\t"_s + file->shortName()));
+            // Шапка -- только у первого файла, концовка -- только у последнего:
+            // один станочный файл, а не склейка нескольких.
             for(auto file: files) {
                 file->itemGroup()->setVisible(false);
-                file->initSave();
-                if(file == files.front())
-                    file->statFile();
-                file->addInfo();
-                file->genGcodeAndTile();
-                if(file == files.back())
-                    file->endFile();
+                unsigned sections = GCode::File::Body;
+                if(file == files.front()) sections |= GCode::File::Header;
+                if(file == files.back()) sections |= GCode::File::Footer;
+                file->regenerate(sections);
                 sl.append_range(file->gCodeText());
             }
             QFile file{name};
             if(file.open(QIODevice::WriteOnly | QIODevice::Text)) {
                 QTextStream out{&file};
                 out.setEncoding(QStringConverter::Utf8);
-                QString str;
-                for(QString& s: sl) {
-                    if(!s.isEmpty())
-                        str.push_back(s);
-                    if(!str.endsWith(u'\n'))
-                        str.push_back(u'\n');
-                }
-                out << str;
+                out << GCode::File::renderText(sl);
             }
             file.close();
         }

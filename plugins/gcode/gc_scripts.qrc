@@ -1,10 +1,32 @@
 <RCC>
     <qresource prefix="/gcode/scripts">
         <file>scripts/common_gcode.js</file>
-        <file>scripts/profile.js</file>
+        <file>scripts/crosshatch.js</file>
         <file>scripts/drilling.js</file>
         <file>scripts/pocketoffset.js</file>
         <file>scripts/pocketraster.js</file>
+        <file>scripts/profile.js</file>
+        <file>scripts/thermal.js</file>
         <file>scripts/threading.js</file>
+        <file>scripts/voronoi.js</file>
+    </qresource>
+    <qresource prefix="/gcode/scripts/posts">
+        <file alias="fanuc.js">scripts/posts/fanuc.js</file>
+        <file alias="fluidnc.js">scripts/posts/fluidnc.js</file>
+        <file alias="generic.js">scripts/posts/generic.js</file>
+        <file alias="grblhal.js">scripts/posts/grblhal.js</file>
+        <file alias="grbl.js">scripts/posts/grbl.js</file>
+        <file alias="haas.js">scripts/posts/haas.js</file>
+        <file alias="heidenhain_iso.js">scripts/posts/heidenhain_iso.js</file>
+        <file alias="klipper.js">scripts/posts/klipper.js</file>
+        <file alias="linuxcnc.js">scripts/posts/linuxcnc.js</file>
+        <file alias="mach3.js">scripts/posts/mach3.js</file>
+        <file alias="mach4.js">scripts/posts/mach4.js</file>
+        <file alias="marlin.js">scripts/posts/marlin.js</file>
+        <file alias="planetcnc.js">scripts/posts/planetcnc.js</file>
+        <file alias="reprapfirmware.js">scripts/posts/reprapfirmware.js</file>
+        <file alias="sinumerik.js">scripts/posts/sinumerik.js</file>
+        <file alias="smoothieware.js">scripts/posts/smoothieware.js</file>
+        <file alias="uccnc.js">scripts/posts/uccnc.js</file>
     </qresource>
 </RCC>

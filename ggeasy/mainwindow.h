@@ -203,32 +203,18 @@ public:
                 QColor windowText;
             } const color = []() noexcept -> Color {
             switch(App::settings().theme()) {
-            case LightBlue: return {
+            case LightTheme: return {
                     .base       {230, 230, 230},
                     .disabled   {127, 127, 127},
-                    .highlight  { 61, 174, 233},
-                    .link       { 61, 174, 233},
+                    .highlight  {App::settings().accentColor()},
+                    .link       {App::settings().accentColor()},
                     .window     {200, 200, 200},
                     .windowText {  0,   0,   0}};
-            case LightRed: return {
-                    .base       {230, 230, 230},
-                    .disabled   {127, 127, 127},
-                    .highlight  {218,  68,  83},
-                    .link       { 61, 174, 233},
-                    .window     {200, 200, 200},
-                    .windowText {  0,   0,   0}};
-            case DarkBlue: return {
+            case DarkTheme: default: return {
                     .base       { 20,  20,  20},
                     .disabled   { 80,  80,  80},
-                    .highlight  { 61, 174, 233},
-                    .link       { 61, 174, 233},
-                    .window     { 30,  30,  30},
-                    .windowText {220, 220, 220}};
-            case DarkRed: default: return {
-                    .base       { 20,  20,  20},
-                    .disabled   { 80,  80,  80},
-                    .highlight  {218,  68,  83},
-                    .link       { 61, 174, 233},
+                    .highlight  {App::settings().accentColor()},
+                    .link       {App::settings().accentColor()},
                     .window     { 30,  30,  30},
                     .windowText {220, 220, 220}};
             } }();
@@ -273,7 +259,7 @@ public:
         }
 
         QIcon::setThemeName(
-            App::settings().theme() > LightRed
+            App::settings().theme() == DarkTheme
                     || palette.text().color().red() > 128
                 ? u"ggeasy-light"_s
                 : u"ggeasy-dark"_s);

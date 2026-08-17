@@ -1,0 +1,51 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 720 360" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .seg     { fill:none; stroke:#2166ac; stroke-width:3; }
+    .closed  { fill:none; stroke:#1a1a1a; stroke-width:2.5; }
+    .region  { fill-rule:evenodd; fill:#dde5ee; stroke:#1a1a1a; stroke-width:2.5; }
+    .arrow   { fill:#1a1a1a; }
+    .lbl     { font-size:13.5px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12px; fill:#5a5a5a; }
+    .step    { font-size:12.5px; fill:#c0392b; font-weight:bold; }
+  </style>
+  <defs>
+    <marker id="ar" markerWidth="10" markerHeight="10" refX="7" refY="3" orient="auto"><path d="M0,0 L7,3 L0,6 Z" class="arrow"/></marker>
+  </defs>
+
+  <!-- Step 1: разрозненные LINE/ARC -->
+  <text class="lbl" x="20" y="30">1. LINE/ARC вразнобой</text>
+  <g stroke-linecap="round">
+    <line class="seg" x1="30"  y1="70"  x2="30"  y2="150"/>
+    <line class="seg" x1="170" y1="150" x2="170" y2="70"/>
+    <line class="seg" x1="30"  y1="150" x2="170" y2="150"/>
+    <line class="seg" x1="170" y1="70"  x2="30"  y2="70"/>
+  </g>
+  <text class="lbl-sm" x="10" y="180">4 отдельные Polyline,</text>
+  <text class="lbl-sm" x="10" y="196">порядок и направление</text>
+  <text class="lbl-sm" x="10" y="212">случайные, closed==false</text>
+
+  <line x1="205" y1="110" x2="255" y2="110" stroke="#1a1a1a" stroke-width="2" marker-end="url(#ar)"/>
+  <text class="step" x="185" y="95">stitch(glue)</text>
+
+  <!-- Step 2: закрытый контур -->
+  <text class="lbl" x="270" y="30">2. Один закрытый контур</text>
+  <rect class="closed" x="280" y="70" width="140" height="80"/>
+  <text class="lbl-sm" x="260" y="180">концы состыкованы</text>
+  <text class="lbl-sm" x="260" y="196">в пределах glue,</text>
+  <text class="lbl-sm" x="260" y="212">closed==true</text>
+
+  <line x1="450" y1="110" x2="500" y2="110" stroke="#1a1a1a" stroke-width="2" marker-end="url(#ar)"/>
+  <text class="step" x="440" y="95">evenOdd</text>
+
+  <!-- Step 3: регион -->
+  <text class="lbl" x="520" y="30">3. Polygons (регион)</text>
+  <path class="region" d="M520,70 h160 v130 h-160 Z M560,110 h40 v40 h-40 Z"/>
+  <text class="lbl-sm" x="500" y="230">вложенность — из</text>
+  <text class="lbl-sm" x="500" y="246">взаимного расположения,</text>
+  <text class="lbl-sm" x="500" y="262">не из ориентации обхода</text>
+
+  <text class="lbl-sm" x="20" y="290">normalize(polylines, glue) = stitch + evenOdd разом: Normalized{ region, open }.</text>
+  <text class="lbl-sm" x="20" y="308">Дубликаты (тот же контур дважды, пусть с другого узла или встречным обходом)</text>
+  <text class="lbl-sm" x="20" y="326">схлопываются в один при подсчёте чётности.</text>
+  <text class="lbl-sm" x="20" y="344">То, что замкнуть не вышло, уходит в Normalized::open как есть — профиль по разомкнутой линии.</text>
+</svg>

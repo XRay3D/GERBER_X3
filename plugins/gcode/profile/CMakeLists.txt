@@ -20,7 +20,8 @@ set(PLUG_LOCAL_VERSION "0")
 configure_file(${CMAKE_CURRENT_SOURCE_DIR}/../../description.json.in
                ${CMAKE_CURRENT_BINARY_DIR}/description.json NEWLINE_STYLE UNIX)
 
-add_library(gc_profile STATIC profile.cpp profile.h)
+add_library(gc_profile STATIC profile.cpp profile.h profile_bridges.cpp
+                              profile_bridges.h profile_jsapi.cpp profile_jsapi.h)
 # Clipper2 (geometry) плагину больше не нужен: вся геометрия профиля считается
 # в точном домене, а маршрут -- в gc_pathutils, оба живут в gcode.
 target_link_libraries(gc_profile PUBLIC ggcore)
@@ -30,8 +31,8 @@ file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 file(GLOB UIS CONFIGURE_DEPENDS *.ui)
 file(GLOB JSONS CONFIGURE_DEPENDS ${CMAKE_CURRENT_BINARY_DIR}/*.json)
 
-list(FILTER HEADERS EXCLUDE REGEX profile.h)
-list(FILTER SOURCES EXCLUDE REGEX profile.cpp)
+list(FILTER HEADERS EXCLUDE REGEX "profile(_bridges|_jsapi)?[.]h$")
+list(FILTER SOURCES EXCLUDE REGEX "profile(_bridges|_jsapi)?[.]cpp$")
 
 set(PROJECT_SOURCES ${HEADERS} ${JSONS} ${SOURCES} ${UIS})
 

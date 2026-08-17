@@ -37,12 +37,12 @@ namespace v = r::views;
 // }
 
 void dbgPaths(Geo::Polylines ps,
-    const QString& fileName,
+    QAnyStringView fileName,
     QColor color = Qt::red,
     bool closed = false,
     const Tool& tool = {0.});
 
-inline void dbgPaths(std::vector<Geo::Polylines> pss, const QString& fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
+inline void dbgPaths(std::vector<Geo::Polylines> pss, QAnyStringView fileName, QColor color = Qt::red, bool closed = false, const Tool& tool = {0.}) {
     if(pss.empty())
         return;
     for(auto&& paths: pss | v::drop(1))

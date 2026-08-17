@@ -58,7 +58,8 @@ public:
     QString gcName() const override { return u"Voronoi"_s; };
     QKeySequence keySequence() const override { return {u"Ctrl+Shift+V"_s}; }
     QIcon icon() const override { return QIcon::fromTheme(u"voronoi-path"_s); }
-    AbstractFile* loadFile(QDataStream& stream) const override { return File::load<File>(stream); }
+    AbstractFile* loadFile(std::string_view json) const override { return Serial::load<File>(json); }
+    std::string_view typeName() const override { return Serial::typeNameOf<File>(); }
 };
 
 } // namespace Voronoi

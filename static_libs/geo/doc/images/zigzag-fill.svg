@@ -1,0 +1,40 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 780 420" font-family="Verdana, Arial, sans-serif">
+  <style>
+    .region  { fill:#eef2f7; stroke:#1a1a1a; stroke-width:2.5; }
+    .path    { fill:none; stroke:#c0392b; stroke-width:2.5; stroke-linejoin:round; stroke-linecap:round; }
+    .start   { fill:#1e8449; }
+    .end     { fill:#c0392b; }
+    .lbl     { font-size:15px; fill:#1a1a1a; font-weight:bold; }
+    .lbl-sm  { font-size:12.5px; fill:#5a5a5a; }
+  </style>
+
+  <text class="lbl" x="30" y="28">zigzagFill(region, step, angle) — боустрофедон</text>
+
+  <path class="region" d="M100,70
+     C60,120 60,220 110,260
+     C140,285 260,300 320,260
+     C400,205 420,120 360,80
+     C300,40 150,40 100,70 Z"/>
+
+  <!-- зигзаг: горизонтальные строки, сшитые кусками границы у краёв -->
+  <path class="path" d="
+    M78,95  L392,95
+    L 388,120 L 90,120
+    L 82,145 L 400,145
+    L 405,170 L 78,170
+    L 92,195 L 402,195
+    L 398,220 L 100,220
+    L 118,245 L 380,245
+    L 352,270 L 150,270
+  "/>
+
+  <circle class="start" cx="78" cy="95" r="5"/>
+  <circle class="end" cx="150" cy="270" r="5"/>
+  <text class="lbl-sm" x="55" y="80" fill="#1e8449">старт</text>
+  <text class="lbl-sm" x="155" y="290" fill="#c0392b">финиш</text>
+
+  <text class="lbl-sm" x="30" y="335">Регион покрывается горизонтальными строками через step; там, где строка упирается в границу,</text>
+  <text class="lbl-sm" x="30" y="353">путь продолжается КУСКОМ ГРАНИЦЫ до соседней строки (использует Geo::clipOpen) и идёт по ней обратно.</text>
+  <text class="lbl-sm" x="30" y="375">angle (градусы) поворачивает штриховку: регион подставляется под горизонтальную змейку, результат</text>
+  <text class="lbl-sm" x="30" y="393">поворачивается обратно; центр поворота — начало координат.</text>
+</svg>

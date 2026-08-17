@@ -60,7 +60,7 @@ inline QIcon errorIcon(const QPainterPath& path) {
     painter.begin(&pixmap);
     painter.setRenderHint(QPainter::Antialiasing);
     painter.setPen(Qt::NoPen);
-    painter.setBrush(App::settings().theme() > LightRed ? Qt::white : Qt::black);
+    painter.setBrush(App::settings().theme() == DarkTheme ? Qt::white : Qt::black);
     // painter.translate(tr);
     painter.translate(-kx, ky);
     painter.scale(scale, -scale);

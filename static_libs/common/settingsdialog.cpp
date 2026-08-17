@@ -189,6 +189,8 @@ void SettingsDialog::readSettings() {
         = settings.getValue(ui.chbxAnimSelection, App::settings().animSelection_);
     App::settings().theme_
         = settings.getValue(ui.cbxTheme, App::settings().theme_);
+    App::settings().accentColor_
+        = QColor{settings.value(u"AccentColor"_s, App::settings().accentColor_.name(QColor::HexArgb)).toString()};
     settings.endGroup();
 
     // Маркеры уже созданы (конструктор MainWindow), а настройку прочитали
@@ -264,6 +266,7 @@ void SettingsDialog::saveSettings() {
     // масштабированием в paint(), поэтому смену настройки надо применить.
     Gi::applyMarkersScaleMode();
     App::settings().theme_ = settings.setValue(ui.cbxTheme);
+    settings.setValue(u"AccentColor"_s, App::settings().accentColor_.name(QColor::HexArgb));
     settings.endGroup();
 
     settings.beginGroup(u"Color"_s);
@@ -425,6 +428,17 @@ void SettingsDialog::Ui::setupUi(QDialog* SettingsDialog) {
     label->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
 
     gridLayout->addWidget(label, 2, 0, 1, 1);
+
+    accentColorSelector = new ColorSelector{App::settings().accentColor_, QColor(61, 174, 233), groupBox};
+    accentColorSelector->setObjectName(u"accentColorSelector"_s);
+
+    gridLayout->addWidget(accentColorSelector, 3, 1, 1, 1);
+
+    labelAccentColor = new QLabel{groupBox};
+    labelAccentColor->setObjectName(u"labelAccentColor"_s);
+    labelAccentColor->setAlignment(Qt::AlignRight | Qt::AlignTrailing | Qt::AlignVCenter);
+
+    gridLayout->addWidget(labelAccentColor, 3, 0, 1, 1);
 
     verticalLayout_8->addWidget(groupBox);
 
@@ -656,12 +670,11 @@ void SettingsDialog::Ui::retranslateUi(QDialog* SettingsDialog) {
     cbxTheme->clear();
     cbxTheme->addItems({
         QCoreApplication::translate("SettingsDialog", "System", nullptr),
-        QCoreApplication::translate("SettingsDialog", "Light Blue", nullptr),
-        QCoreApplication::translate("SettingsDialog", "Light Red", nullptr),
-        QCoreApplication::translate("SettingsDialog", "Dark Blue", nullptr),
-        QCoreApplication::translate("SettingsDialog", "Dark Red", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Light", nullptr),
+        QCoreApplication::translate("SettingsDialog", "Dark", nullptr),
     });
     label->setText(QCoreApplication::translate("SettingsDialog", "Theme:", nullptr));
+    labelAccentColor->setText(QCoreApplication::translate("SettingsDialog", "Accent color:", nullptr));
     gbViewer->setTitle(QCoreApplication::translate("SettingsDialog", "Viewer", nullptr));
     chbxOpenGl->setText(QCoreApplication::translate("SettingsDialog", "Open GL", nullptr));
     chbxAntialiasing->setText(QCoreApplication::translate("SettingsDialog", "Anti aliasing", nullptr));

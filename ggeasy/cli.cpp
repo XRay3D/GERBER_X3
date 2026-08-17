@@ -1,6 +1,7 @@
 // #include "a_pch.h"
 
 #include "app.h"
+#include "gc_file.h"
 #include "gi.h"
 #include "graphicsview.h"
 #include "mainwindow.h"
@@ -43,8 +44,8 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 bool MainWindow::cli(std::span<std::string_view> commands) {
 
     struct {
-        int time  = 100;
-        int delay = 5000;
+        int time  = 500;
+        int delay = 500;
         operator int() { return time += delay; }
     } static time;
 
@@ -201,6 +202,19 @@ bool MainWindow::cli(std::span<std::string_view> commands) {
         } else if(cmd.starts_with(OPEN)) {
             const auto path = QString::fromUtf8(cmd.data() + OPEN.size(), qsizetype(cmd.size() - OPEN.size()));
             QTimer::singleShot(time, this, [path] { qInfo() << "cli: open" << path << App::project().open(path); });
+        } else if(cmd.starts_with("Post="sv)) {
+            // Пост для headless-прогона: выставляется сразу, до генерации УП.
+            App::gcSettings().postId_ = QString::fromUtf8(cmd.data() + 5, qsizetype(cmd.size() - 5));
+        } else if(cmd.starts_with("SaveGCode="sv)) {
+            // Все УП проекта -- в каталог, файлами <имя>.<расширение поста>.
+            const auto dir = QString::fromUtf8(cmd.data() + 10, qsizetype(cmd.size() - 10));
+            QTimer::singleShot(time, this, [dir] {
+                QDir{}.mkpath(dir);
+                for(auto* file: App::project().files<GCode::File>()) {
+                    const QString path = dir + u'/' + file->shortName() + u'.' + App::gcSettings().fileExtension();
+                    qInfo() << "cli: save gcode" << path << file->save(path);
+                }
+            });
         } else if(cmd == "Quit"sv)
             QTimer::singleShot(time, this, [] { QApplication::quit(); });
     }

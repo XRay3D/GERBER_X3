@@ -13,6 +13,7 @@
 #include "gc_pathutils.h"
 #include "gi_gcpath.h"
 #include "gi_point.h"
+#include "profile_jsapi.h"
 #include "project.h"
 #include "settings.h"
 
@@ -76,144 +77,6 @@ bool trimFront(Geo::Polyline& path, double length) {
     path.erase(path.begin(), path.begin() + drop);
     path.front() = cut;
     return path.size() >= 2;
-}
-
-//------------------------------------------------------------------------------
-// Мостики (табы).
-
-// Кусок траектории между кругами мостов. bridge == true -- кусок ПОД мостом:
-// на проходах ниже верха таба фреза идёт по нему горбом, не опускаясь до
-// глубины прохода.
-struct Piece {
-    Geo::Polyline path;
-    bool bridge{};
-};
-
-// Режет разомкнутый кусок в точке на расстоянии `length` вдоль дуги от начала.
-// Логика вершины реза та же, что в trimFront: у остатка дуги свой прогиб.
-// `length` вне (0, периметр) отдаёт весь кусок одной половиной.
-std::pair<Geo::Polyline, Geo::Polyline> splitAt(const Geo::Polyline& path, double length) {
-    std::pair<Geo::Polyline, Geo::Polyline> halves;
-    auto& [head, tail] = halves;
-
-    if(length <= 0.0) {
-        tail = path;
-        return halves;
-    }
-
-    double rest = length;
-    std::size_t i{};
-    for(; i + 1 < path.size(); ++i) {
-        const double len = Geo::segmentLength(path[i], path[i + 1]);
-        if(rest < len) break;
-        rest -= len;
-        head.push_back(path[i]);
-    }
-    if(i + 1 >= path.size()) { // длины не хватило -- всё в голову
-        head = path;
-        tail.clear();
-        return halves;
-    }
-
-    const Geo::Vertex from = path[i];
-    const Geo::Vertex to = path[i + 1];
-    const double len = Geo::segmentLength(from, to);
-    const double t = len > 0.0 ? rest / len : 0.0;
-
-    // Вершина реза: голове достаётся без прогиба (она замыкающая), хвосту --
-    // с прогибом остатка дуги.
-    Geo::Vertex cut{from};
-    if(auto arc = Geo::arcOf(from, to, from.bulge)) {
-        static_cast<QPointF&>(cut) = arc->pointAt(t);
-        cut.bulge = Geo::bulgeOf(arc->theta * (1.0 - t));
-        head.emplace_back(static_cast<const QPointF&>(from), Geo::bulgeOf(arc->theta * t));
-    } else {
-        static_cast<QPointF&>(cut) = from + (to - from) * t;
-        cut.bulge = 0.0;
-        head.push_back(from);
-    }
-    head.emplace_back(static_cast<const QPointF&>(cut));
-    tail.push_back(cut);
-    tail.insert(tail.end(), path.begin() + i + 1, path.end());
-    return halves;
-}
-
-// Горб над мостом: подъём / полка / спуск. Короткий мост (периметр не длиннее
-// двух скосов) -- треугольник с вершиной посередине, полка пустая; длинный --
-// трапеция со скосами по rampLen с каждого конца.
-struct Hump {
-    Geo::Polyline up, flat, down;
-};
-
-Hump splitBridge(const Geo::Polyline& piece, double rampLen) {
-    Hump hump;
-    const double perimeter = piece.perimeter();
-    if(perimeter <= rampLen * 2.0) { // треугольник
-        std::tie(hump.up, hump.down) = splitAt(piece, perimeter * 0.5);
-    } else { // трапеция
-        std::tie(hump.up, hump.flat) = splitAt(piece, rampLen);
-        std::tie(hump.flat, hump.down) = splitAt(hump.flat, perimeter - rampLen * 2.0);
-    }
-    return hump;
-}
-
-// Куски пути по кругам мостов, сцепленные в порядке обхода. clipOpen отдаёт
-// куски без порядка, а фрезеровать их надо подряд, поэтому цепь собирается по
-// совпадению концов. Пустой не бывает: путь, не задетый мостами (или не
-// собравшийся в цепь -- с предупреждением), возвращается одним небриджевым
-// куском; путь целиком под мостом -- одним бриджевым.
-std::vector<Piece> chainPieces(const Geo::Polyline& path, const Geo::Polygons& region) {
-    auto whole = [&path](bool bridge) {
-        std::vector<Piece> chain;
-        chain.push_back({path, bridge});
-        return chain;
-    };
-
-    Geo::Polylines inside = Geo::clipOpen(Geo::ClipType_::Intersection, {path}, region);
-    if(inside.empty()) return whole(false);
-    Geo::Polylines outside = Geo::clipOpen(Geo::ClipType_::Difference, {path}, region);
-    if(outside.empty()) return whole(true); // целиком под мостом
-
-    std::vector<Piece> pieces;
-    pieces.reserve(inside.size() + outside.size());
-    for(Geo::Polyline& p: outside) pieces.push_back({std::move(p), false});
-    for(Geo::Polyline& p: inside) pieces.push_back({std::move(p), true});
-
-    auto nearest = [&pieces](QPointF to, bool skipBridges) {
-        std::size_t found{};
-        double best = std::numeric_limits<double>::max();
-        for(std::size_t i{}; i < pieces.size(); ++i) {
-            if(skipBridges && pieces[i].bridge) continue;
-            if(const double dist = Geo::distance(pieces[i].path.front(), to); dist < best)
-                best = dist, found = i;
-        }
-        return std::pair{found, best};
-    };
-    auto take = [&pieces](std::size_t i) {
-        Piece piece = std::move(pieces[i]);
-        pieces.erase(pieces.begin() + ptrdiff_t(i));
-        return piece;
-    };
-
-    std::vector<Piece> chain;
-    chain.reserve(pieces.size());
-    // Старт: у замкнутого пути -- небриджевый кусок (врезаться на мосту
-    // незачем), ближайший к прежнему началу; у разомкнутого выбора нет --
-    // кусок, с которого путь начинается.
-    chain.push_back(take(nearest(path.front(), path.closed).first));
-    while(!pieces.empty()) {
-        // clipOpen выбрасывает обрывки короче допуска сварки, так что стык
-        // соседних кусков может отстоять на такой огрызок. Дальше десятка
-        // допусков -- это уже не стык, цепь порвана.
-        auto [next, dist] = nearest(chain.back().path.back(), false);
-        if(dist > Geo::exitWeldTolerance * 10) break;
-        chain.push_back(take(next));
-    }
-    if(!pieces.empty()) { // не собралось -- фрезеруем без мостов, но не молча
-        qWarning() << "bridges: pieces did not chain, path milled without tabs";
-        return whole(false);
-    }
-    return chain;
 }
 
 #if 0 // TODO касательный подвод/отвод чистового прохода
@@ -580,60 +443,33 @@ File::File()
 File::File(GCode::Params&& newGcp)
     : GCode::File{std::move(newGcp)} {
     if(gcp.tools.front().diameter()) {
-        initSave();
-        addInfo();
-        statFile();
-        genGcodeAndTile();
-        endFile();
+        regenerate();
     }
 }
 
-void File::genGcodeAndTile() {
-    // Мостам нужен свой вывод: тот же контур, но над ними фреза приподнимается.
-    // Лазеру мосты не нужны -- у его «траектории» нет глубины.
-    const bool bridges = toolType != Tool::Laser
+//------------------------------------------------------------------------------
+// Мостики (табы): в отмеченных мостами местах деталь остаётся прихваченной к
+// заготовке перемычкой высотой BridgeHeight от дна реза. Контур остаётся ОДНИМ
+// непрерывным проходом: на проходах ниже верха таба фреза над мостом
+// приподнимается до него и тут же спускается -- XY-подача не прерывается,
+// вертикальных врезаний нет. Горб короткого моста -- треугольник, длинного --
+// трапеция со скосами в диаметр фрезы (см. splitBridge). Сам порядок проходов
+// пишет profile.js через BridgesApi; здесь -- то, что требует C++: круги реза
+// (радиус зависит от припуска чистового прохода) и верх таба.
+
+QObject* File::createJsExtension(GCode::GcFileProxy& proxy, QJSEngine& /*engine*/) {
+    return new BridgesApi{this, &proxy};
+}
+
+bool File::hasBridges() const {
+    return toolType != Tool::Laser
         && !gcp.supportCurvess.empty()
         && gcp.params.contains(Creator::BridgeLen)
         && gcp.params.contains(Creator::BridgeHeight);
-
-    const QRectF rect = App::project().worckRect();
-    for(size_t x{}; x < App::project().stepsX(); ++x) {
-        for(size_t y{}; y < App::project().stepsY(); ++y) {
-            const QPointF offset((rect.width() + App::project().spaceX()) * x, (rect.height() + App::project().spaceY()) * y);
-
-            if(toolType == Tool::Laser)
-                saveLaserProfile(offset);
-            else if(bridges)
-                saveMillingProfileBridges(offset);
-            else
-                saveMillingProfile(offset);
-
-            if(gcp.params.contains(GCode::Params::NotTile))
-                return;
-        }
-    }
 }
 
-// Профиль с мостиками (табами): в отмеченных мостами местах деталь остаётся
-// прихваченной к заготовке перемычкой высотой BridgeHeight от дна реза.
-//
-// Прежние мосты вырезали куски из траектории целиком: перемычка выходила на
-// всю глубину, фреза над ней останавливалась, поднималась в воздух и
-// вертикально врезалась заново. Теперь контур остаётся ОДНИМ непрерывным
-// проходом: на проходах ниже верха таба фреза над мостом приподнимается до
-// него и тут же спускается -- XY-подача не прерывается ни на такт,
-// вертикальных врезаний нет вовсе. Горб короткого моста -- треугольник
-// (срезается при съёме детали одним движением ножа), длинного -- трапеция со
-// скосами в диаметр фрезы: скос не круче, перемычка не тоньше задуманного.
-//
-// Мосты приезжают центрами (supportCurvess) и длиной (BridgeLen): круги реза
-// строятся здесь, потому что их радиус зависит от припуска чистового прохода,
-// а зеркало нижней стороны и раскладка применяются к центрам той же
-// машинерией, что и к траекториям.
-void File::saveMillingProfileBridges(const QPointF& offset) {
-    const std::vector<double> depths = getDepths();
-    const std::vector<Geo::Polylines> pathss = mirrorAndOffsetCurves(offset);
-
+Geo::Polygons File::bridgeRegion(const QPointF& offset) {
+    if(!hasBridges()) return {};
     const double toolDiam = gcp.getToolDiameter();
 
     // Припуск, если чистовой проход вообще был, -- условие то же, что в
@@ -654,6 +490,8 @@ void File::saveMillingProfileBridges(const QPointF& offset) {
     const double radius = std::hypot((len + toolDiam) * 0.5, dist);
 
     // Круги реза -- одним объединением: соседние мосты могут пересекаться.
+    // Зеркало нижней стороны и раскладка применяются к центрам той же
+    // машинерией, что и к траекториям.
     Geo::Polylines centers;
     for(const Geo::Polylines& group: gcp.supportCurvess)
         centers.append_range(group);
@@ -661,73 +499,17 @@ void File::saveMillingProfileBridges(const QPointF& offset) {
     for(const Geo::Polyline& pts: mirrorAndOffsetCurves(offset, std::move(centers)))
         for(const Geo::Vertex& pt: pts)
             discs.emplace_back(Geo::circle(radius * 2.0, pt));
-    const Geo::Polygons region{std::span<const Geo::Polygon>{discs}};
+    return Geo::Polygons{std::span<const Geo::Polygon>{discs}};
+}
 
+double File::bridgeTabTop() {
+    if(!hasBridges()) return 0.0;
     // Верх таба отсчитывается от дна реза. К поверхности не прижимается
     // вплотную: ровно ноль для savePath -- «глубины нет», рампа не построится.
-    const double tabTop = std::min(
+    const std::vector<double> depths = getDepths();
+    return std::min(
         depths.back() + gcp.params.at(Creator::BridgeHeight).toDouble(),
         -Geo::exitWeldTolerance);
-
-    const bool spiral = gcp.spiralRamp();
-
-    for(const Geo::Polylines& paths: pathss)
-        for(const Geo::Polyline& path: paths) {
-            std::vector<Piece> chain = chainPieces(path, region);
-
-            // Путь целиком под мостом (контур мельче круга реза): глубже
-            // верха таба не опускаемся вовсе, дальше он -- обычный кусок.
-            std::span<const double> passes{depths};
-            std::vector<double> clamped;
-            if(chain.size() == 1 && chain.front().bridge) {
-                chain.front().bridge = false;
-                for(double depth: depths)
-                    clamped.push_back(std::max(depth, tabTop));
-                clamped.erase(r::unique(clamped).begin(), clamped.end());
-                passes = clamped;
-            }
-
-            // Разомкнутый путь ходят туда-сюда, как в saveMillingProfile:
-            // врезаться дешевле там, где инструмент уже стоит.
-            const bool zigzag = !path.closed;
-            std::vector<Piece> reversedChain;
-            if(zigzag) {
-                reversedChain.reserve(chain.size());
-                for(const Piece& piece: chain | v::reverse)
-                    reversedChain.push_back({piece.path.reversed(), piece.bridge});
-            }
-
-            // Один проход: небриджевые куски -- обычный ход на глубине, мост
-            // -- горб до верха таба. На уровень спускаемся вдоль первого
-            // куска (рампа, как спираль) либо вертикальным плунжем.
-            auto millPass = [&, this](const std::vector<Piece>& chain, double depth, bool ramp) {
-                bool first = true;
-                for(const auto& [piece, bridge]: chain) {
-                    if(bridge && depth < tabTop) {
-                        const auto [up, flat, down] = splitBridge(piece, toolDiam);
-                        lines_.append_range(savePath(up, up.perimeter(), tabTop));
-                        if(!flat.empty())
-                            lines_.append_range(savePath(flat));
-                        lines_.append_range(savePath(down, down.perimeter(), depth));
-                    } else if(first && ramp) {
-                        lines_.append_range(savePath(piece, piece.perimeter(), depth));
-                    } else {
-                        if(first && !ramp)
-                            lines_.emplace_back(formated({g1(), z(z_ = depth), strPlungeFeed}));
-                        lines_.append_range(savePath(piece));
-                    }
-                    first = false;
-                }
-            };
-
-            startPath(chain.front().path.front());
-            uint pass{};
-            for(double depth: passes)
-                millPass(zigzag && (pass++ & 1u) ? reversedChain : chain, depth, spiral);
-            if(spiral) // подчистка уступа врезания -- как в saveMillingProfile
-                millPass(zigzag && (pass & 1u) ? reversedChain : chain, passes.back(), false);
-            endPath();
-        }
 }
 
 void File::createGi() {

@@ -22,6 +22,9 @@ file(GLOB SOURCES CONFIGURE_DEPENDS *.cpp)
 file(GLOB UIS CONFIGURE_DEPENDS *.ui)
 file(GLOB JS_SCRIPTS CONFIGURE_DEPENDS
      "${CMAKE_CURRENT_SOURCE_DIR}/scripts/*.js")
+file(GLOB JS_POSTS CONFIGURE_DEPENDS
+     "${CMAKE_CURRENT_SOURCE_DIR}/scripts/posts/*.js"
+     "${CMAKE_CURRENT_SOURCE_DIR}/scripts/posts/*.md")
 
 qt_add_resources(QRC_SOURCES gc_scripts.qrc)
 
@@ -45,8 +48,10 @@ add_custom_target(
   ${PROJECT_NAME}_scripts ALL
   COMMAND ${CMAKE_COMMAND} -E make_directory "${SCRIPTS_DIR}"
   COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JS_SCRIPTS} "${SCRIPTS_DIR}/"
-  DEPENDS ${JS_SCRIPTS}
-  COMMENT "Copying GCode scripts to ${SCRIPTS_DIR}/")
+  COMMAND ${CMAKE_COMMAND} -E make_directory "${SCRIPTS_DIR}/posts"
+  COMMAND ${CMAKE_COMMAND} -E copy_if_different ${JS_POSTS} "${SCRIPTS_DIR}/posts/"
+  DEPENDS ${JS_SCRIPTS} ${JS_POSTS}
+  COMMENT "Copying GCode scripts and posts to ${SCRIPTS_DIR}/")
 add_dependencies(${PROJECT_NAME} ${PROJECT_NAME}_scripts)
 
 target_setup_translations(${PROJECT_NAME} ${HEADERS} ${SOURCES} ${UIS})

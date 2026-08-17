@@ -56,16 +56,17 @@ class GcFileProxy : public QObject {
     Q_PROPERTY(bool chamfer READ chamfer CONSTANT)                 // cut a chamfer with the thread mill after threading
     Q_PROPERTY(int starts READ starts CONSTANT)                    // number of thread starts N (multi-start thread)
 
-    // Project settings
-    Q_PROPERTY(double safeZ READ safeZ CONSTANT)
-    Q_PROPERTY(double plunge READ plunge CONSTANT)
-    Q_PROPERTY(double clearance READ clearance CONSTANT)
-    Q_PROPERTY(int stepsX READ stepsX CONSTANT)
-    Q_PROPERTY(int stepsY READ stepsY CONSTANT)
-    Q_PROPERTY(double workWidth READ workWidth CONSTANT)
-    Q_PROPERTY(double workHeight READ workHeight CONSTANT)
-    Q_PROPERTY(double spaceX READ spaceX CONSTANT)
-    Q_PROPERTY(double spaceY READ spaceY CONSTANT)
+    // Свойства проекта (форма GCode::Properties) одним объектом -- снимок
+    // Project::Header рефлексией: safeZ, clearence, plunge, boardThickness,
+    // copperThickness, glue, tailing{spacingX, spacingY, stepsX, stepsY},
+    // workRect{x, y, width, height}, home{x, y}, zero{x, y}, pins[], pinsUsed[].
+    // Новое поле шапки проекта появляется здесь само.
+    Q_PROPERTY(QJSValue properties READ properties CONSTANT)
+
+    // Не раскладывать по тайлам, даже если раскладка включена (Params::NotTile).
+    Q_PROPERTY(bool notTile READ notTile CONSTANT)
+    Q_PROPERTY(QString name READ name CONSTANT)
+    Q_PROPERTY(QString programName READ programName CONSTANT)
 
     // Current depth (updated by savePath spiral logic)
     Q_PROPERTY(double z READ zVal WRITE setZ)
@@ -93,15 +94,10 @@ public:
     bool circle() const;
     bool chamfer() const;
     int starts() const;
-    double safeZ() const;
-    double plunge() const;
-    double clearance() const;
-    int stepsX() const;
-    int stepsY() const;
-    double workWidth() const;
-    double workHeight() const;
-    double spaceX() const;
-    double spaceY() const;
+    QJSValue properties() const;
+    bool notTile() const;
+    QString name() const;
+    QString programName() const;
     double zVal() const;
     void setZ(double z);
 
@@ -121,6 +117,13 @@ public:
 
     // Append a raw gcode line to the output.
     Q_INVOKABLE void addLine(const QString& line);
+
+    // Диалект поста: комментарий и коды шпинделя/лазера.
+    Q_INVOKABLE QString comment(const QString& text);
+    Q_INVOKABLE QString spindleOn();
+    Q_INVOKABLE QString spindleOff();
+    Q_INVOKABLE QString laserOn(bool dynamic);
+    Q_INVOKABLE QString laserOff();
 
     // Generate gcode lines for one curve from the last getToolPaths() result.
     // pathssIdx / pathIdx select the Geo::Polygons[i][j] curve.
@@ -145,9 +148,21 @@ public:
     Q_INVOKABLE QString fmtS(int v);
     Q_INVOKABLE QString fmtF(double v);
 
+    // Для расширений (file.ext): траектории последнего getToolPaths(), его
+    // смещение тайла и вывод произвольной полилинии тем же savePath.
+    const std::vector<Geo::Polylines>& cachedPathss() const { return cachedPathss_; }
+    QPointF offset() const { return offset_; }
+    QJSValue linesFor(const Geo::Polyline& curve, double perimeter, double depth);
+    File* file() const { return file_; }
+    QJSEngine* engine() const { return engine_; }
+
+    // Снимок Project::Header как JS-объект на заданном движке.
+    static QJSValue propertiesValue(QJSEngine& engine);
+
 private:
     File* file_;
     QJSEngine* engine_;
+    QPointF offset_;
     std::vector<Geo::Polylines> cachedPathss_;
 };
 

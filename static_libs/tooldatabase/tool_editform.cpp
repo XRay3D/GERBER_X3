@@ -27,7 +27,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     update = {
         {ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle            },
         {ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter         },
-        {ui->dsbxHoleDiam,          &ToolEditForm::updateDsbxHoleDiam         },
+        {ui->dsbxMDiam,          &ToolEditForm::updateDsbxHoleDiam         },
         {ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate         },
         {ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght           },
         {ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut       },
@@ -45,7 +45,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     get = {
         std::pair{ui->dsbxAngle,        &Tool::angle       },
-        std::pair{ui->dsbxHoleDiam,     &Tool::angle       },
+        std::pair{ui->dsbxMDiam,     &Tool::angle       },
         std::pair{ui->dsbxDepth,        &Tool::passDepth   },
         std::pair{ui->dsbxDiameter,     &Tool::diameter    },
         std::pair{ui->dsbxFeedRate,     &Tool::feedRate    },
@@ -60,7 +60,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     set = {
         std::pair{ui->dsbxAngle,        &Tool::setAngle       },
-        std::pair{ui->dsbxHoleDiam,     &Tool::setAngle       },
+        std::pair{ui->dsbxMDiam,     &Tool::setAngle       },
         std::pair{ui->dsbxDepth,        &Tool::setPassDepth   },
         std::pair{ui->dsbxDiameter,     &Tool::setDiameter    },
         std::pair{ui->dsbxFeedRate,     &Tool::setFeedRate    },
@@ -219,7 +219,7 @@ void ToolEditForm::setupToolWidgets(int) {
         ui->dsbxDepth,
         ui->dsbxPlungeRate,
         ui->dsbxStepover,
-        ui->dsbxHoleDiam,
+        ui->dsbxMDiam,
     };
 
     // перед скрытием запоминаем значения ещё видимых полей, чтобы восстановить их при возврате к этому типу
@@ -274,7 +274,7 @@ void ToolEditForm::setupToolWidgets(int) {
         showPair(ui->formCutParam, ui->hlayStepover, ui->dsbxStepover, diameter);
         break;
     case Tool::ThreadMill:
-        show(ui->formGeometry, ui->dsbxHoleDiam, 10.);
+        show(ui->formGeometry, ui->dsbxMDiam, 10.);
         show(ui->formCutParam, ui->dsbxThreadPitch, 10.);
         show(ui->formFeedSpeeds, ui->dsbxFeedRate, 100000.);
         show(ui->formGeometry, ui->dsbxLenght, 100000.);

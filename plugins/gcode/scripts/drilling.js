@@ -2,8 +2,8 @@
 // Requires: common_gcode.js
 
 function generate(file) {
-    var depths        = file.getDepths();
-    var toolLength    = file.toolLength;
+    var depths         = file.getDepths();
+    var toolLength     = file.toolLength;
     var toolOneTurnCut = file.toolOneTurnCut;
 
     forEachTile(file, function(file, pathss) {

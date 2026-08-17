@@ -34,13 +34,17 @@ public:
     QIcon icon() const override { return QIcon::fromTheme(u"profile-path"_s); }
     uint32_t type() const override { return PROFILE; }
     void createGi() override;
-    void genGcodeAndTile() override;
+    // Мосты: геометрия кусков/горбов отдаётся скрипту объектом file.ext
+    // (Profile::BridgesApi), порядок проходов пишет profile.js.
+    QObject* createJsExtension(GCode::GcFileProxy& proxy, QJSEngine& engine) override;
 
-private:
-    // Тот же профиль, но с мостиками (табами): контур остаётся одним
-    // непрерывным проходом, а над мостами фреза приподнимается горбом до
-    // верха таба -- см. подробный комментарий у реализации в profile.cpp.
-    void saveMillingProfileBridges(const QPointF& offset);
+    // Есть ли у УП мосты: не лазер, центры приехали (supportCurvess), длина и
+    // высота заданы.
+    bool hasBridges() const;
+    // Круги реза вокруг центров мостов на смещение тайла, одним объединением.
+    Geo::Polygons bridgeRegion(const QPointF& offset);
+    // Верх таба от поверхности (отрицательный).
+    double bridgeTabTop();
 }; // File
 
 class Creator : public GCode::Creator {
