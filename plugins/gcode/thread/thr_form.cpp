@@ -35,7 +35,7 @@
 #include <QTimer>
 #include <QToolBar>
 #include <QWidget>
-#include <set>
+#include <cmath>
 
 namespace Threading {
 
@@ -57,8 +57,8 @@ Form::Form(GCode::Plugin* plugin)
     {
         MySettings settings;
         settings.beginGroup(u"ThreadForm"_s);
-        settings.getValue(ui->rbClimb, true);
-        settings.getValue(ui->rbConventional);
+        settings.getValue(ui->rbTop, true);
+        settings.getValue(ui->rbBottom);
         settings.getValue(ui->rbInside, true);
         settings.getValue(ui->rbOutside);
         settings.getValue(ui->rbLeft);
@@ -74,8 +74,8 @@ Form::Form(GCode::Plugin* plugin)
     connect(ui->pbPickUpTools, &QPushButton::clicked, this, &Form::pickUpTool);
     connect(ui->rbRight, &QRadioButton::clicked, this, &Form::updateState);
     connect(ui->rbLeft, &QRadioButton::clicked, this, &Form::updateState);
-    connect(ui->rbClimb, &QRadioButton::clicked, this, &Form::updateState);
-    connect(ui->rbConventional, &QRadioButton::clicked, this, &Form::updateState);
+    connect(ui->rbTop, &QRadioButton::clicked, this, &Form::updateState);
+    connect(ui->rbBottom, &QRadioButton::clicked, this, &Form::updateState);
     connect(ui->rbOutside, &QRadioButton::clicked, this, &Form::updateState);
     connect(ui->rbInside, &QRadioButton::clicked, this, &Form::updateState);
 
@@ -89,8 +89,8 @@ Form::Form(GCode::Plugin* plugin)
 Form::~Form() {
     MySettings settings;
     settings.beginGroup(u"ThreadForm"_s);
-    settings.setValue(ui->rbClimb);
-    settings.setValue(ui->rbConventional);
+    settings.setValue(ui->rbTop);
+    settings.setValue(ui->rbBottom);
     settings.setValue(ui->rbInside);
     settings.setValue(ui->rbOutside);
     settings.setValue(ui->rbLeft);
@@ -375,28 +375,19 @@ void Form::customContextMenuRequested(const QPoint& pos) {
 void Form::pickUpTool() {
     if(!model) return;
 
-    const double k = 0.05; // 5%
+    // Резьбофреза подбирается по полю «M» инструмента (Tool::holeDiam()) --
+    // номиналу резьбы, на который она рассчитана, -- а не по своему диаметру:
+    // одной фрезой Ø2.35 режут и M3, и M4, диаметр тут ни о чём не говорит.
+    // Апертура приходит из float-геометрии, отсюда допуск, а не строгое ==.
     int ctr{};
     for(const auto& row: model->data()) {
-        // model->setToolId(ctr++, 3);
-        // continue;
-        const double drillDiameterMin = row.diameter * (1.0 - k);
-        const double drillDiameterMax = row.diameter * (1.0 + k);
-
-        auto isFit = [&, this](auto& tool) -> bool {
-            const auto diameter = tool.getDiameter(dsbxDepth->value());
-            return drillDiameterMin <= diameter && drillDiameterMax >= diameter;
-        };
-        std::set set{Tool::ThreadMill};
-        auto filter = v::filter([&set](auto& t) { return set.contains(t.second.type()); });
-        for(auto& [id, tool]: App::toolHolder().tools() | filter) {
-            qWarning() << tool;
-            if(model->toolId(ctr) < Tool::ID::Tool && isFit(tool)) {
-                model->setToolId(ctr, id);
-                break;
-            }
-        }
-
+        if(model->toolId(ctr) < Tool::ID::Tool)
+            for(auto& [id, tool]: App::toolHolder().tools())
+                if(tool.type() == Tool::ThreadMill
+                    && std::abs(tool.holeDiam() - row.diameter) < 1e-3) {
+                    model->setToolId(ctr, id);
+                    break;
+                }
         ++ctr;
     }
 }
@@ -464,7 +455,11 @@ void Form::computePaths() {
         if(data.paths.size()) {
             GCode::Params gcp{App::toolHolder().tool(usedToolId), dsbxDepth->value(), std::move(data.paths)};
             gcp.setSide(ui->rbInside->isChecked() ? GCode::Inner : GCode::Outer);
-            gcp.setConvent(!ui->rbClimb->isChecked());
+            // Для резьбы Convent -- это не попутный/встречный (тот однозначно
+            // задан геометрией винтовой линии), а сторона старта: rbTop ->
+            // climb -> идём сверху вниз, rbBottom -> convent -> снизу вверх.
+            // См. threading.js.
+            gcp.setConvent(!ui->rbTop->isChecked());
             gcp.setLeftHand(ui->rbLeft->isChecked());
             gcp.setCircle(ui->chbxCircle->isChecked());
             gcp.setChamfer(ui->chbxChamfer->isChecked());
