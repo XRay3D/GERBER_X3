@@ -24,6 +24,10 @@ namespace PocketOffset {
 void Creator::create() {
     assert(gcp.side() != GCode::On);
 
+    // Силуэт кэшируется на прогон, а closedSrc к этому моменту уже новый:
+    // Creator::reset() не виртуален и о нашем кэше не знает.
+    solidCache_.reset();
+
     const double depth = gcp.params[GCode::Params::Depth].toDouble();
 
     // Число шагов офсета берётся только у одной фрезы: с несколькими create()
@@ -43,6 +47,21 @@ namespace {
 // уезжает на её половину, отсюда удвоение. Отрицательный шаг идёт внутрь и
 // кончается сам, когда сжимать нечего; положительный не кончится никогда, там
 // limit обязателен.
+//
+// Витки считаются ПО ОЧЕРЕДИ -- и это не упущение.
+//
+// Формально они независимы: виток i -- офсет исходной области на 2*step*i, и
+// от витка i-1 не зависит ничем. Считать их пачкой по числу ядер, однако,
+// нельзя, и попытка была: Geo::Polygons материализует bulge-вид ЛЕНИВО и
+// кэширует его в себе (Polygons::Impl::view), а точный PolySet достраивает
+// свои структуры поиска при первом же обращении. Одновременное чтение одной
+// и той же области из нескольких потоков -- гонка на этих самых кэшах:
+// прогон переставал быть воспроизводимым (1145 петель, потом 1269, потом
+// 1825 на тех же входных данных).
+//
+// Копия области на поток гонку снимает, но не окупается: замер показал рост
+// загрузки лишь до 317% при 12 ядрах и 710 МБ памяти -- цепочка упирается в
+// аллокатор точных чисел (GMP), а не в счёт. Быстрее от этого не стало вовсе.
 //
 // Каждая петля считается офсетом ИСХОДНОЙ области на суммарную глубину, а НЕ
 // офсетом предыдущей петли. Результат тот же -- офсеты диском складываются,
@@ -109,7 +128,7 @@ const std::vector<Geo::Polygon>& Creator::pocketBodies(const double depth) {
     groupedPss.clear();
     if(closedSrc.empty()) return groupedPss;
 
-    const Geo::Polygons solid = solidBodies();
+    const Geo::Polygons& solid = solidBodies();
 
     Geo::Polylines bound;
     if(solid.all().size() == 1)
@@ -128,11 +147,19 @@ const std::vector<Geo::Polygon>& Creator::pocketBodies(const double depth) {
 // Деталь снаружи -- это её силуэт: дырка границей детали не является, а остров
 // в дырке -- не наружный контур. Объединение сплошных границ разбирает и то, и
 // другое разом: контуры острова и его носителя сливаются в один.
-Geo::Polygons Creator::solidBodies() const {
-    Geo::Polylines outers;
-    for(const Geo::Polygon& body: closedSrc.all())
-        outers.push_back(body.outer());
-    return Geo::Polygons{outers};
+//
+// Считается ОДИН раз на прогон и запоминается: силуэт нужен и pocketBodies, и
+// outerContourPass, а сборка региона из полутысячи контуров -- полноценное
+// объединение в точном домене, и звалось оно дважды подряд с одним и тем же
+// результатом. Кэш сбрасывает Creator::reset() вместе с closedSrc.
+const Geo::Polygons& Creator::solidBodies() const {
+    if(!solidCache_) {
+        Geo::Polylines outers;
+        for(const Geo::Polygon& body: closedSrc.all())
+            outers.push_back(body.outer());
+        solidCache_.emplace(outers);
+    }
+    return *solidCache_;
 }
 
 // Явный проход вокруг детали -- ровно на радиус от её внешнего контура.
@@ -220,7 +247,7 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     }
 
     if(returnPs.empty()) return; // пустой файл отправит createGc
-    finishPocket(tool, Geo::Inflate(returnPs, toolDiameter));
+    finishPocket(tool, {});      // заливку рисует createGiPocket -- см. createStdFull
 }
 
 void Creator::createStdFull(const Tool& tool, const double depth) {
@@ -254,15 +281,21 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
         incCurrent();
     }
 
-    if(!fill.empty()) {
-        cutArea |= Geo::Inflate(fill, toolDiameter);
-        returnPs.append_range(std::move(fill));
-    }
+    // Заметённая заливка НЕ считается: раздувание всей траектории в точном
+    // домене -- самая дорогая одиночная операция прогона (диск на вершину и
+    // капсула на ребро по КАЖДОМУ витку, затем объединение всех), а нужна
+    // она была лишь для картинки. Рисует её теперь File::createGiPocket --
+    // обводкой траектории пером в диаметр фрезы, ровно как Profile и Raster
+    // (см. gc_file.cpp).
+    //
+    // cutArea при этом остаётся полосой контурного прохода: она уходит в
+    // returnPs как настоящая траектория, а не как заливка.
+    if(!fill.empty()) returnPs.append_range(std::move(fill));
 
     // dbgPaths(returnPs, {});
 
     if(returnPs.empty()) return; // пустой файл отправит createGc
-    finishPocket(tool, std::move(cutArea));
+    finishPocket(tool, {});
 }
 
 void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
@@ -310,15 +343,20 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
             incCurrent();
         }
 
+        // Здесь заметённая заливка нужна ПО СУЩЕСТВУ, а не для картинки: из
+        // неё складывается cleared, а из него -- forbidden следующей фрезы.
+        // Кроме последней: после неё дочищать уже некому, и считать её
+        // заливку незачем -- нарисуется обводкой, как в createStdFull.
+        const bool lastTool = tIdx + 1 == size;
         if(!fill.empty()) {
-            cutArea |= Geo::Inflate(fill, toolDiameter);
+            if(!lastTool) cutArea |= Geo::Inflate(fill, toolDiameter);
             returnPs.append_range(std::move(fill));
         }
 
         if(!returnPs.empty()) {
             stacking(returnPs);
             if(!returnPss.empty()) {
-                cleared |= cutArea;
+                if(!lastTool) cleared |= cutArea;
                 // Параметры КОПИРУЮТСЯ, а не переносятся: прежний код делал
                 // File{std::move(gcp)} прямо в цикле, и второму инструменту
                 // доставался уже выпотрошенный gcp -- ни инструментов, ни
@@ -326,7 +364,8 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
                 GCode::Params toolGcp                         = gcp;
                 toolGcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
                 toolGcp.toolPathss                            = std::move(returnPss);
-                toolGcp.setPocketAreaCurves(std::move(cutArea));
+                // Показывать заливку и здесь незачем: рисуется обводкой.
+                toolGcp.setPocketAreaCurves({});
                 file_ = new File{std::move(toolGcp)};
                 file_->setFileName(tool.nameEnc());
             }

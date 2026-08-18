@@ -261,8 +261,13 @@ void Creator::stacking(Geo::Polylines& paths) {
             // офсета оказываются где придётся.
             const Geo::Polyline& prev = returnPss.back().back();
             double best = std::numeric_limits<double>::max();
-            for(const Geo::Vertex& b: path)
+            for(const Geo::Vertex& b: path) {
                 best = std::min(best, closestPoint(prev, b).distance);
+                // Спрашивают одно: ближе ли диаметра. Как только ответ «да»,
+                // остаток вершин ничего не меняет -- а обход у этой проверки
+                // O(вершин петли * вершин предыдущей).
+                if(best <= toolDiameter) break;
+            }
 
             if(best <= toolDiameter)
                 returnPss.back().emplace_back(std::move(path));
