@@ -198,20 +198,89 @@ void sortSpatially(std::vector<Part>& parts) {
     parts = std::move(sorted);
 }
 
-// Куски Минковского ОДНОЙ кривой точного контура с кругом радиуса d.
-void appendCapsules(Polylines& out, const XCurve& xc, double d) {
-    const CurveGeometry curve = geometryOf(xc);
+// Куски Минковского ОДНОГО контура точной границы с кругом радиуса d.
+//
+// Тела рёбер собираются отдельно от дисков потому, что перед выдачей соседи
+// сводят торцы гладких стыков (Offset::weldJoint): у стыка, где дуга
+// переходит в отрезок по касательной, торцевой отрезок один и тот же, но
+// посчитан он у соседей разными путями и расходится в последних битах, а
+// объединение видит в этом микрогрань.
+void appendContourCapsules(Polylines& out, const GPoly& contour, double d) {
+    std::vector<CurveGeometry> curves;
+    for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it)
+        curves.push_back(geometryOf(*it));
+    if(curves.empty()) return;
 
-    // Диск в начале кривой -- скругление стыка. Конец каждой кривой
-    // замкнутого контура совпадает с началом следующей, так что по одному
-    // диску на кривую покрывает все стыки ровно по разу.
-    out.push_back(Offset::disc(curve.from, d));
+    // Тело дуги радиусом меньше d -- не кольцевой сектор, а СЕКТОР от центра
+    // (см. Offset::capsulesFor), и он покрывает не всю сумму Минковского
+    // своей дуги: то, что вне углового размаха, держится на дисках концов.
+    // Такому соседу диск нужен всегда.
+    auto pie = [d](const CurveGeometry& c) { return !c.linear && c.radius - d < 1e-9; };
 
-    // x-монотонная дуга не длиннее полуокружности, поэтому |bulge| <= 1 --
-    // ровно то, что bulge-вид и умеет выразить.
-    const double bulge = curve.linear ? 0.0 : std::tan(curve.sweep / 4.0);
-    for(Polyline& capsule: Offset::capsulesFor(Vertex(curve.from, bulge), curve.to, d))
-        out.push_back(std::move(capsule));
+    // Касательные концов -- по ходу кривой. У дуги это радиус, повёрнутый на
+    // четверть оборота в сторону обхода.
+    auto tangent = [](const CurveGeometry& c, QPointF at) {
+        if(c.linear) {
+            const double len = std::hypot(c.to.x() - c.from.x(), c.to.y() - c.from.y());
+            return len > 0.0 ? QPointF{(c.to.x() - c.from.x()) / len, (c.to.y() - c.from.y()) / len} : QPointF{};
+        }
+        const double s = c.sweep > 0.0 ? 1.0 : -1.0;
+        return QPointF{-s * (at.y() - c.center.y()) / c.radius, s * (at.x() - c.center.x()) / c.radius};
+    };
+
+    Polylines bodies;
+    std::vector<char> fromArc;
+
+    for(std::size_t i{}; i < curves.size(); ++i) {
+        const CurveGeometry& curve = curves[i];
+        const CurveGeometry& prev = curves[(i + curves.size() - 1) % curves.size()];
+
+        // Диск в начале кривой -- скругление стыка: он заполняет клин, который
+        // тела соседей на изломе оставляют между собой. Конец каждой кривой
+        // замкнутого контура совпадает с началом следующей, так что по одному
+        // диску на кривую покрывает все стыки ровно по разу.
+        //
+        // На ГЛАДКОМ стыке (касательные соседей совпали -- дуга переходит в
+        // отрезок или в свою же дугу, разрезанную свипом по вертикали) клина
+        // нет вовсе, и диск там геометрически лишний: полоса вдоль границы уже
+        // накрыта телами соседей, а диск вписан в неё. Пользы от него ноль, а
+        // вред прямой -- его окружность КАСАЕТСЯ рельсов обоих соседей, а
+        // касание есть худший вход для свипа: вместо честного пересечения он
+        // получает пару почти совпавших точек и плодит на них микрограни.
+        // Свип и режет-то дуги по вертикальным касательным, так что гладких
+        // стыков в точном контуре большинство.
+        const QPointF t0 = tangent(prev, prev.to);
+        const QPointF t1 = tangent(curve, curve.from);
+        const double turn = std::abs(t0.x() * t1.y() - t0.y() * t1.x());
+        const bool smooth = turn < 1e-9 && (t0.x() * t1.x() + t0.y() * t1.y()) > 0.0;
+        if(!smooth || pie(prev) || pie(curve))
+            out.push_back(Offset::disc(curve.from, d));
+
+        // x-монотонная дуга не длиннее полуокружности, поэтому |bulge| <= 1 --
+        // ровно то, что bulge-вид и умеет выразить.
+        const double bulge = curve.linear ? 0.0 : std::tan(curve.sweep / 4.0);
+        for(Polyline& capsule: Offset::capsulesFor(Vertex(curve.from, bulge), curve.to, d)) {
+            bodies.push_back(std::move(capsule));
+            fromArc.push_back(!curve.linear);
+        }
+    }
+
+    // Точку стыка отдаёт та капсула, что построена от ДУГИ: её координата
+    // выведена из центра, радиуса и угла -- из той самой геометрии, которой
+    // стык и задан, -- а у отрезка из сложения с нормалью.
+    for(std::size_t i = 0; i + 1 < bodies.size(); ++i)
+        if(fromArc[i] && !fromArc[i + 1])
+            Offset::weldJoint(bodies[i], bodies[i + 1]);
+        else
+            Offset::weldJoint(bodies[i + 1], bodies[i]);
+    if(bodies.size() > 2) { // замыкающий стык -- последнее ребро с первым
+        if(fromArc.back() && !fromArc.front())
+            Offset::weldJoint(bodies.back(), bodies.front());
+        else
+            Offset::weldJoint(bodies.front(), bodies.back());
+    }
+
+    for(Polyline& capsule: bodies) out.push_back(std::move(capsule));
 }
 
 // Соседние вершины ЗАМКНУТОГО контура, легшие в одну точку (в том числе
@@ -940,10 +1009,7 @@ std::vector<GPoly> boundaryCapsules(const PolySet& region, double d) {
     region.polygons_with_holes(std::back_inserter(parts));
 
     Polylines capsules;
-    auto addContour = [&](const GPoly& contour) {
-        for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it)
-            appendCapsules(capsules, *it, d);
-    };
+    auto addContour = [&](const GPoly& contour) { appendContourCapsules(capsules, contour, d); };
     for(const GPolyWH& part: parts) {
         if(!part.is_unbounded()) addContour(part.outer_boundary());
         for(auto it = part.holes_begin(); it != part.holes_end(); ++it) addContour(*it);

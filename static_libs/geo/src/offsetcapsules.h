@@ -142,16 +142,84 @@ inline Polylines capsulesFor(const Vertex& from, QPointF to, double d) {
     return out;
 }
 
+// Торцевые точки соседних капсул, сошедшиеся на ГЛАДКОМ стыке, сводятся в
+// одну побитно.
+//
+// На таком стыке (дуга переходит в отрезок по касательной) торец одной
+// капсулы и торец другой -- это математически один и тот же отрезок поперёк
+// границы. Считаются же они разными путями: у дуги -- из центра, радиуса и
+// угла, у отрезка -- сложением с нормалью, -- и расходятся в последних битах.
+// Для объединения это не «почти одно и то же», а два разных места: у стыка
+// заводится микрогрань, и наружу она выходит вырожденной кривой. На меди
+// такие микрокривые составляли пятую часть всего, что материализовалось из
+// точного домена.
+//
+// Порог здесь НЕ станочный и НЕ выходной (exitWeldTolerance, 1e-4 мм, шаг
+// сетки G-кода), хотя соблазн взять его велик: мол, точнее пятого знака
+// механика всё равно не отработает. Сводятся тут не «достаточно близкие»
+// точки, а ОДНА И ТА ЖЕ точка, посчитанная дважды разными формулами, и
+// расходятся её копии на единицы ULP. Порог обязан накрыть этот разброс и
+// больше ничего.
+//
+// Замерено на меди (микрокривых на выходе из точного домена, меньше --
+// лучше): 1e-15 -- 2076, 1e-12 -- 1413, 1e-9 -- 1401, 1e-8 -- 1403,
+// 1e-7 -- 1610, от 1e-6 до 1e-4 -- 1660. Слева от плато порог не дотягивается
+// до собственного разброса копий, справа начинает слеплять РАЗНЫЕ точки:
+// короткое ребро схлопывается торцами, и объединение получает новый мусор
+// вместо убранного. Взято 1e-9 -- середина плато, оно же с запасом накрывает
+// ULP координат размером с любую плату.
+//
+// Сводится БЛИЖАЙШАЯ точка, а не первая подошедшая: у стыка сходятся два
+// торца, и промах отправил бы точку на чужой.
+//
+// Точку даёт та капсула, что построена от ДУГИ: её координата выведена из той
+// самой геометрии, которой стык и задан.
+inline void weldJoint(const Polyline& donor, Polyline& taker) {
+    constexpr double coincident = 1e-9;
+    for(Vertex& t: taker) {
+        const Vertex* best{};
+        double bestDist = coincident;
+        for(const Vertex& s: donor)
+            if(const double d = std::hypot(s.x() - t.x(), s.y() - t.y()); d < bestDist)
+                best = &s, bestDist = d;
+        if(best) t.rx() = best->x(), t.ry() = best->y();
+    }
+}
+
 // Все куски офсета одной полилинии: тела рёбер плюс диск вокруг КАЖДОЙ
 // вершины. Сам полигон замкнутой полилинии вызывающий добавляет отдельно.
 inline Polylines capsulesFor(const Polyline& poly, double d) {
     Polylines out;
     if(poly.empty()) return out;
     for(const Vertex& v: poly) out.push_back(disc(v, d));
-    for(std::size_t i = 0; i + 1 < poly.size(); ++i)
-        for(auto& c: capsulesFor(poly[i], poly[i + 1], d)) out.push_back(std::move(c));
-    if(poly.closed && poly.size() > 1)
-        for(auto& c: capsulesFor(poly.back(), poly.front(), d)) out.push_back(std::move(c));
+
+    // Тела рёбер собираются отдельно: прежде чем уйти в общий список, соседи
+    // сводят торцы гладких стыков.
+    Polylines bodies;
+    std::vector<bool> fromArc;
+    auto add = [&](const Vertex& from, QPointF to) {
+        for(Polyline& c: capsulesFor(from, to, d)) {
+            bodies.push_back(std::move(c));
+            fromArc.push_back(from.isArc());
+        }
+    };
+    for(std::size_t i = 0; i + 1 < poly.size(); ++i) add(poly[i], poly[i + 1]);
+    if(poly.closed && poly.size() > 1) add(poly.back(), poly.front());
+
+    for(std::size_t i = 0; i + 1 < bodies.size(); ++i)
+        if(fromArc[i] && !fromArc[i + 1])
+            weldJoint(bodies[i], bodies[i + 1]);
+        else
+            weldJoint(bodies[i + 1], bodies[i]);
+    // Замыкающий стык -- последнее ребро с первым.
+    if(poly.closed && bodies.size() > 2) {
+        if(fromArc.back() && !fromArc.front())
+            weldJoint(bodies.back(), bodies.front());
+        else
+            weldJoint(bodies.front(), bodies.back());
+    }
+
+    for(Polyline& c: bodies) out.push_back(std::move(c));
     return out;
 }
 
