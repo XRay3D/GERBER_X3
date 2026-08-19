@@ -48,8 +48,9 @@ private:
     // Петли кладёт в returnPs, возвращает заметённую ими полосу.
     Geo::Polygons outerContourPass();
 
-    // Заливка одного тела концентрическими петлями.
-    Geo::Polylines fillBody(const Geo::Polygon& body, const Geo::Polygons& forbidden, double minFeature);
+    // Общая область заливки: врезка по телам в несколько потоков, вычет
+    // выбранного одной разностью.
+    Geo::Polygons fillRegion(const std::vector<Geo::Polygon>& bodies, const Geo::Polygons& forbidden, double minFeature);
 
     void createFixedSteps(const Tool& tool, const double depth, int steps);
     void createStdFull(const Tool& tool, const double depth);

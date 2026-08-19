@@ -17,6 +17,7 @@ add_library(
   include/geo/boolean.h
   include/geo/cancel.h
   include/geo/fill.h
+  include/geo/parallel.h
   include/geo/polygon.h
   include/geo/polyline.h
   include/geo/util.h

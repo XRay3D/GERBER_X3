@@ -7,6 +7,7 @@
 // (geo/src/offsetcapsules.h).
 
 #include "geo/boolean.h"
+#include "cgal.h" // parallelFor
 #include "geo/cancel.h"
 #include "geo/util.h"
 #include "offsetcapsules.h"
@@ -84,6 +85,24 @@ Polygons Inflate_::operator()(const Polygons& region, double delta) const {
     // эрозия без всякого приближения.
     const Polygons band = region.boundaryBand(d);
     return delta > 0.0 ? region | band : region - band;
+}
+
+std::vector<Polygons> InflateSeries_::operator()(const Polygons& region, std::span<const double> deltas) const {
+    // Каждому потоку -- СВОЙ экземпляр области, и копии делаются ДО потоков.
+    // Разделить один нельзя: у General_polygon_set_2 даже разложение на
+    // полигоны (polygons_with_holes, оно внутри boundaryBand) только снаружи
+    // const -- BFS-обходчик CGAL метит грани общего арранжемента флагом
+    // visited, и два одновременных обхода портят друг друга; результат
+    // плывёт от прогона к прогону. Копия глубокая на уровне структуры, но
+    // сами точные числа остаются общими ссылками -- у CGAL они
+    // потокобезопасны (атомарные счётчики, call_once у ленивых вычислений),
+    // поэтому стоит она единицы миллисекунд даже на плотной меди.
+    std::vector<Polygons> out(deltas.size());
+    for(Polygons& mine: out) mine = region;
+    // По одному офсету на поток: элемент здесь -- целая операция над
+    // регионом, ей не нужен нижний порог пачки, как у перевода контуров.
+    Cgal::parallelFor(deltas.size(), [&](std::size_t i) { out[i] = Inflate(out[i], deltas[i]); }, 1);
+    return out;
 }
 
 Polygons BooleanOp_::operator()(

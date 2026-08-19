@@ -305,7 +305,7 @@ Polygons::Polygons(const Polylines& contours) {
     // не зависел от того, какой поток успел раньше.
     std::vector<std::optional<GPoly>> exact(contours.size());
     std::vector<char> isVoid(contours.size(), 0);
-    parallelFor(contours.size(), [&](std::size_t i) {
+    Cgal::parallelFor(contours.size(), [&](std::size_t i) {
         const Polyline& contour = contours[i];
         if(!contour.closed || contour.size() < 2) return;
         isVoid[i] = contour.signedArea() < 0.0;

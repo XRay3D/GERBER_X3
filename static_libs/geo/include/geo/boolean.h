@@ -3,6 +3,8 @@
 #include "geo/polygon.h"
 #include "geo/polyline.h"
 
+#include <span>
+
 namespace Geo {
 
 // Офсет геометрии на delta/2 -- НАРУЖУ при delta > 0 и ВНУТРЬ при
@@ -43,6 +45,21 @@ struct Inflate_ {
     // углы и затягивающее щели тоньше d.
     Polygons operator()(const Polygons& region, double delta) const;
 } inline Inflate;
+
+// Серия офсетов ОДНОЙ области: результат i равен Inflate(region, deltas[i]).
+//
+// Дельты друг от друга не зависят -- каждый офсет считается от исходной
+// области, -- поэтому серия идёт В НЕСКОЛЬКО ПОТОКОВ по одному офсету на
+// поток. Ради этого функция и существует: одиночный Inflate распараллелен
+// лишь частично (объединение капсул), а его хвост -- разность и вершина
+// дерева слияний -- последователен, и цикл офсетов (концентрические витки
+// кармана) упирается именно в него.
+//
+// Отмена (Geo::cancel.h) действует и внутри серии: до недосчитанных
+// офсетов она доходит исключением, как у прочих операций.
+struct InflateSeries_ {
+    std::vector<Polygons> operator()(const Polygons& region, std::span<const double> deltas) const;
+} inline InflateSeries;
 
 struct BooleanOp_ {
     enum FillRule {

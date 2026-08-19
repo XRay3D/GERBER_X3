@@ -1,5 +1,6 @@
 #include "cgal.h"
 #include "geo/cancel.h"
+#include "geo/parallel.h"
 #include "geo/util.h"
 #include "offsetcapsules.h"
 
@@ -128,15 +129,18 @@ constexpr std::size_t chunksPerWorker = 2;
 // таким пучком само, а потоки на нём стоят дороже самой работы.
 constexpr std::size_t minChunkSize = 16;
 
-// Столько же элементов на поток -- нижняя граница, ниже которой parallelFor
-// работает на месте: запуск потока стоит десятки микросекунд, и на горстке
-// коротких контуров он их не отобьёт.
-constexpr std::size_t minParallelBatch = 8;
-
 unsigned workerCount() {
     const unsigned hardware = std::thread::hardware_concurrency();
     return hardware ? hardware : 1;
 }
+
+// Поток уже работает внутри parallelFor или joinAll. Вложенный parallelFor
+// по этому флагу идёт на месте, без собственных потоков: его элементы
+// мелкие (перевод контура, капсула), и второй ярус потоков там ничего не
+// ускоряет -- только оверподписывает планировщик. Дерево слияний joinAll,
+// напротив, флаг не гасит -- см. joinAllImpl. Флаг -- thread_local: новый
+// рабочий поток начинает с false, и взводит его сам в своём теле.
+thread_local bool insideParallel = false;
 
 // Пространственный порядок кусков -- кривая Мортона (Z-порядок) по центру
 // габарита. На результат он не влияет вовсе (объединение коммутативно), а
@@ -606,8 +610,23 @@ Polyline toPolyline(const GPoly& pgn) {
     return out;
 }
 
-void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body) {
-    const unsigned workers = std::min<std::size_t>(workerCount(), count / minParallelBatch);
+// Публичная обёртка (geo/parallel.h): реализация живёт здесь, рядом с
+// рабочими потоками точной геометрии, чтобы вложенность и отмена были
+// общими для внутренних и внешних вызовов.
+} // namespace Geo::Cgal
+
+void Geo::parallelFor(std::size_t count, const std::function<void(std::size_t)>& body,
+    std::size_t minBatch) {
+    Cgal::parallelFor(count, body, minBatch);
+}
+
+namespace Geo::Cgal {
+
+void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body,
+    std::size_t minBatch) {
+    const unsigned workers = insideParallel
+        ? 1
+        : std::min<std::size_t>(workerCount(), count / std::max<std::size_t>(minBatch, 1));
     if(workers < 2) {
         for(std::size_t i = 0; i < count; ++i) body(i);
         return;
@@ -628,6 +647,7 @@ void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body
         for(unsigned w = 0; w < workers; ++w)
             pool.emplace_back([&, w] {
                 CancelScope scope{token};
+                insideParallel = true;
                 for(std::size_t i = next++; i < count; i = next++) try {
                         checkCancelled();
                         body(i);
@@ -655,6 +675,12 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
         region.join(parts.begin(), parts.end());
         return;
     }
+    // Вложенность (вызов из тела parallelFor) дерево слияний НЕ гасит,
+    // и это взвешенно: задачи внешнего уровня бывают несравнимы -- одно
+    // огромное тело и десятки мелких, -- и погашенное дерево оставляло бы
+    // всю громаду одному потоку, пока остальные простаивают. Лишние потоки
+    // при ровных задачах стоят дешевле (замерено: в пределах шума), чем
+    // одинокая громада при кривых.
 
     sortSpatially(parts);
 
@@ -675,6 +701,7 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
     std::atomic<std::size_t> next{0};
     auto buildChunks = [&] {
         CancelScope scope{token};
+        insideParallel = true;
         for(std::size_t i = next++; i < chunks; i = next++) {
             const std::size_t from = n * i / chunks, to = n * (i + 1) / chunks;
             try {
@@ -700,6 +727,7 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
         for(std::size_t i = 0; i + step < chunks; i += 2 * step)
             level.emplace_back([&, i, step] {
                 CancelScope scope{token};
+                insideParallel = true;
                 if(failures[i] || failures[i + step]) return;
                 try {
                     checkCancelled();
