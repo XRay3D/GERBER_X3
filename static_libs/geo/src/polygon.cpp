@@ -368,9 +368,9 @@ QPainterPath Polygons::toPath() const {
     return path;
 }
 
-Polygons Polygons::boundaryBand(double radius) const {
+Polygons Polygons::boundaryBand(double radius, double coarse) const {
     Polygons band;
-    if(radius > 0.0) joinAll(band.impl_->exact, boundaryCapsules(impl_->exact, radius));
+    if(radius > 0.0) joinAll(band.impl_->exact, boundaryCapsules(impl_->exact, radius, coarse));
     return band;
 }
 

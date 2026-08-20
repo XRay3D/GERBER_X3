@@ -74,15 +74,16 @@ Polygons Inflate_::operator()(const Polylines& polylines) const {
     return parts.empty() ? region : region | Polygons{parts};
 }
 
-Polygons Inflate_::operator()(const Polygons& region, double delta) const {
+Polygons Inflate_::operator()(const Polygons& region, double delta, double coarse) const {
     const double d = std::abs(delta) * 0.5;
     if(d <= 0.0) return region;
 
     // Одна и та же полоса вдоль границы -- и наружу, и внутрь: снаружи она
     // прирастает к региону, изнутри съедается из него. Во втором случае
     // остаются ровно те точки региона, что дальше d от его границы, --
-    // эрозия без всякого приближения.
-    const Polygons band = region.boundaryBand(d);
+    // эрозия без всякого приближения (при coarse == 0; недобор черновой
+    // полосы в обоих случаях сдвигает контур К границе, не от неё).
+    const Polygons band = region.boundaryBand(d, coarse);
     return delta > 0.0 ? region | band : region - band;
 }
 

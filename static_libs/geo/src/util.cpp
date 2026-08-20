@@ -149,6 +149,109 @@ void stitchArcs(Polyline& poly, double tolerance) {
     poly = std::move(out);
 }
 
+namespace {
+
+// Расстояние от точки до ОТРЕЗКА (с зажимом проекции на концы): Дугласу-Пекеру
+// на замкнутых пробегах хорда может оказаться короче размаха точек, и
+// расстояние до бесконечной прямой занизило бы отклонение шипа за её концом.
+double distanceToSegment(QPointF p, QPointF a, QPointF b) {
+    const QPointF ab = b - a;
+    const double len2 = dot(ab, ab);
+    if(len2 < eps) return distance(p, a);
+    const double t = std::clamp(dot(p - a, ab) / len2, 0.0, 1.0);
+    return distance(p, a + ab * t);
+}
+
+} // namespace
+
+Polyline decimated(const Polyline& contour, double tolerance) {
+    if(tolerance <= 0.0 || contour.size() < 3) return contour;
+
+    const std::size_t n = contour.size();
+    Polyline work = contour;
+
+    // Спрямление мелких дуг: стрела -- точное тождество |bulge| * хорда / 2
+    // (см. arcOf). Замыкающий сегмент незамкнутого контура не существует, его
+    // прогиб не значит ничего.
+    const std::size_t lastSegment = work.closed ? n : n - 1;
+    for(std::size_t i{}; i < lastSegment; ++i) {
+        Vertex& v = work[i];
+        if(!v.isArc()) continue;
+        const double chord = distance(v, work[(i + 1) % n]);
+        if(std::abs(v.bulge) * chord / 2.0 <= tolerance / 2.0) v.bulge = 0.0;
+    }
+
+    // Якоря -- вершины, которые Дуглас-Пекер не трогает: смежные с дугами
+    // (прогиб описывает исходящий сегмент, а конец дуги -- следующая вершина),
+    // у незамкнутого контура -- оба конца.
+    std::vector<char> keep(n, 0);
+    bool hasAnchor = false;
+    for(std::size_t i{}; i < lastSegment; ++i)
+        if(work[i].isArc()) {
+            keep[i] = keep[(i + 1) % n] = 1;
+            hasAnchor = true;
+        }
+    if(!work.closed) {
+        keep.front() = keep.back() = 1;
+        hasAnchor = true;
+    }
+    // Целиком прямое кольцо: якорей нет, а без двух опор прореживать не от
+    // чего. Опоры -- произвольная вершина и самая далёкая от неё: дальше
+    // диаметра кольцо от такой хорды не отклонится.
+    if(!hasAnchor) {
+        std::size_t far{1};
+        for(std::size_t i{2}; i < n; ++i)
+            if(distance(work[0], work[i]) > distance(work[0], work[far])) far = i;
+        keep[0] = keep[far] = 1;
+    }
+
+    // Дуглас-Пекер на пробеге ПРЯМЫХ сегментов между якорями a и b (индексы по
+    // кольцу, между ними только прогиб 0). Итеративно со стеком -- пробеги на
+    // плате бывают в тысячи вершин, рекурсия здесь ни к чему.
+    auto at = [&](std::size_t i) -> const Vertex& { return work[i % n]; };
+    std::vector<std::pair<std::size_t, std::size_t>> stack;
+    auto douglasPeucker = [&](std::size_t a, std::size_t b) { // b > a, индексы без свёртки
+        stack.assign(1, {a, b});
+        while(!stack.empty()) {
+            const auto [from, to] = stack.back();
+            stack.pop_back();
+            if(to - from < 2) continue;
+            std::size_t worst = from;
+            double worstDist = 0.0;
+            for(std::size_t i = from + 1; i < to; ++i)
+                if(const double d = distanceToSegment(at(i), at(from), at(to)); d > worstDist)
+                    worstDist = d, worst = i;
+            if(worstDist <= tolerance / 2.0) continue; // весь пролёт в допуске -- вершины лишние
+            keep[worst % n] = 1;
+            stack.emplace_back(from, worst);
+            stack.emplace_back(worst, to);
+        }
+    };
+
+    // Пробеги между соседними якорями; у замкнутого контура последний идёт
+    // через начало (индексы поверх n, at сворачивает).
+    std::vector<std::size_t> anchors;
+    for(std::size_t i{}; i < n; ++i)
+        if(keep[i]) anchors.push_back(i);
+    for(std::size_t k{}; k + 1 < anchors.size(); ++k)
+        douglasPeucker(anchors[k], anchors[k + 1]);
+    if(work.closed && !anchors.empty())
+        douglasPeucker(anchors.back(), anchors.front() + n);
+
+    Polyline out;
+    out.closed = work.closed;
+    out.width = work.width;
+    out.reserve(n);
+    for(std::size_t i{}; i < n; ++i)
+        if(keep[i]) out.push_back(work[i]);
+
+    // Прореживание -- оптимизация, терять контур ей нельзя: выродившийся или
+    // самокоснувшийся (шея тоньше допуска) регион молча выбросил бы.
+    if(out.size() < (out.closed ? 3u : 2u)) return contour;
+    if(out.closed && !isExactContour(out)) return contour;
+    return out;
+}
+
 //------------------------------------------------------------------------------
 
 Polyline circle(double diameter, QPointF center) {

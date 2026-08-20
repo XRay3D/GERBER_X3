@@ -13,6 +13,7 @@
 
 #include <gi_dbg.h>
 
+#include <algorithm>
 #include <numbers>
 #include <span>
 // #include <QStringBuilder>
@@ -63,28 +64,95 @@ namespace {
 // загрузки лишь до 317% при 12 ядрах и 710 МБ памяти -- цепочка упирается в
 // аллокатор точных чисел (GMP), а не в счёт. Быстрее от этого не стало вовсе.
 //
-// Каждая петля считается офсетом ИСХОДНОЙ области на суммарную глубину, а НЕ
-// офсетом предыдущей петли. Результат тот же -- офсеты диском складываются,
-// (X ⊖ D(a)) ⊖ D(b) = X ⊖ D(a+b), -- а цена разная, и разная катастрофически:
-// цепочка каждый раз подаёт на вход результат прошлого офсета, у которого дуг
-// уже вдвое больше, и растёт это геометрически. На меди gerber1.gbr фрезой
-// 0.5 мм седьмой виток занимал 8.8 с и 2.6 ГБ (первый -- 0.4 с), а восьмой
-// падал с bad_alloc; от исходной области все 22 витка идут по 80-130 мс при
-// ровных 150 МБ.
-Geo::Polylines concentricLoops(const Geo::Polygons& region, double step, int limit = {}) {
+// Каждая петля считается офсетом БАЗЫ на суммарную от неё глубину, а НЕ
+// офсетом предыдущей петли В ТОЧНОМ ДОМЕНЕ. Цепочка точных результатов --
+// катастрофа, и попытка была: у результата офсета дуг уже вдвое больше
+// (нарезка свипа плюс диски стыков), и растёт это геометрически. На меди
+// gerber1.gbr фрезой 0.5 мм седьмой виток занимал 8.8 с и 2.6 ГБ (первый --
+// 0.4 с), а восьмой падал с bad_alloc; от исходной области все 22 витка шли
+// по 80-130 мс при ровных 150 МБ.
+//
+// База при этом НЕ обязана всю дорогу оставаться исходной областью: витки
+// сами стремительно упрощаются (изнутри область тает, снаружи мелочь границы
+// зарастает), и считать сороковой виток от границы во все её 3000 кривых --
+// выброшенная работа. Когда МАТЕРИАЛИЗОВАННАЯ петля (bulge-вид после сварки,
+// чистки коллинеарного и сшивки дуг -- см. Cgal::toPolyline) оказывается
+// проще базы, регион пересобирается из её контуров и становится новой базой
+// -- дальше витки идут уже от неё. Это цепочка, но НЕ та: точный домен
+// покидается через полную чистку, геометрический рост дуг обнуляется, а цена
+// перехода -- одно округление в double, сдвиг границы в пределах сварочного
+// допуска; суммарно и на полсотне переходов это на порядок мельче шага витка.
+//
+// Пересборка обязана СОХРАНИТЬ все контуры: контур, ставший после округления
+// самокасающимся или вырожденным, конструктор региона молча выбросил бы
+// (потерянная дырка -- зарез по островку меди). Несовпадение числа контуров
+// -- переход просто не состоялся, витки продолжаются от прежней базы. Ровно
+// это и происходит на ранних витках: пока область полна обмылков на грани
+// вырождения, цепочка не цепляется, и первые витки честно идут от исходной
+// области -- замер на coldfire-плате: переходы начинаются с 12-го витка из
+// полусотни, и хвост дешевеет с сотен миллисекунд до единиц.
+//
+// ПЕРВЫЙ виток точный, последующие -- черновые. Чистовую поверхность задаёт
+// только виток 0 (он и есть сам region), витки дальше выбирают припуск, и
+// точнее допуска coarse им быть незачем: Inflate с допуском недобора coarse
+// прореживает капсулы границы тем сильнее, чем дальше виток от базы (см.
+// Geo::boundaryBand). Ошибка чернового офсета направлена всегда К детали
+// (недобор, не перебор) и не копится: виток i -- офсет базы, а не витка i-1.
+Geo::Polylines concentricLoops(const Geo::Polygons& region, double step, double coarse, int limit = {}) {
+    Timer t{"concentricLoops"};
     Geo::Polylines loops;
+
+    Geo::Polygons adopted;                    // владение принятой базой
+    const Geo::Polygons* base = &region;      // текущая база витков
+    int basePass{};                           // номер витка, где база принята
+    std::size_t baseVertices{};               // её сложность; 0 -- ещё не мерена
+    auto verticesOf = [](const Geo::Polylines& contours) {
+        std::size_t total{};
+        for(const Geo::Polyline& contour: contours) total += contour.size();
+        return total;
+    };
+
     for(int i{}; !limit || i < limit; ++i) {
         // Точка отмены: витков заранее не знает никто, и один Inflate большой
         // области -- уже заметное время. Прогресс здесь не двигают, его шаг --
         // тело целиком.
         Geo::checkCancelled();
-        const Geo::Polygons loop = i ? Geo::Inflate(region, 2.0 * step * i) : region;
+        const Geo::Polygons loop = i
+            ? Geo::Inflate(*base, 2.0 * step * (i - basePass), coarse)
+            : region;
         if(loop.empty()) break;
         // contours() отдаёт уже без вырожденного: схлопнувшиеся в точку
         // куски офсета Geo отсеивает при материализации сама.
-        loops.append_range(loop.contours());
+        Geo::Polylines contours = loop.contours();
+
+        if(i) {
+            if(!baseVertices) baseVertices = verticesOf(base->contours());
+            const std::size_t loopVertices = verticesOf(contours);
+            if(loopVertices < baseVertices) {
+                Geo::Polygons candidate{contours};
+                if(candidate.contours().size() == contours.size()) {
+                    adopted = std::move(candidate);
+                    base = &adopted;
+                    basePass = i;
+                    baseVertices = loopVertices;
+                }
+            }
+        }
+
+        loops.append_range(std::move(contours));
     }
     return loops;
+}
+
+// Допуск прореживания области для витков после первого. Бюджет ошибки задают
+// два отказа: зарез (виток ушёл к детали ближе своего отступа i*step, минимум
+// на первом -- step) и гребешок (соседние витки разошлись дальше диаметра:
+// step + 2*допуск > toolDiameter). Четверть меньшего из бюджетов оставляет
+// четырёхкратный запас; допуск мельче сварочного порога выхода не имеет
+// смысла -- такой шум материализация снимает и так, прореживание выключается.
+double coarseTolerance(double stepOver, double toolDiameter) {
+    const double tolerance = 0.25 * std::min(stepOver, toolDiameter - stepOver);
+    return tolerance < Geo::exitWeldTolerance * 2.0 ? 0.0 : tolerance;
 }
 
 // Мелочь, которую фреза всё равно не выберет: обрывок, у которого и площадь, и
@@ -204,7 +272,7 @@ Geo::Polylines Creator::fillBody(const Geo::Polygon& body, const Geo::Polygons& 
     if(!forbidden.empty()) region -= forbidden;
     if(minFeature > 0.0) removeSmall(region, minFeature);
     if(region.empty()) return {};
-    return concentricLoops(region, -stepOver);
+    return concentricLoops(region, -stepOver, coarseTolerance(stepOver, toolDiameter));
 }
 
 // Область, которую фреза заметает вдоль траектории. Прежде она собиралась
@@ -233,7 +301,8 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
         setCurrent();
         for(const Geo::Polygon& body: bodies) {
             returnPs.append_range(concentricLoops(
-                Geo::Inflate(Geo::Polygons{body}, -toolDiameter), -stepOver, steps));
+                Geo::Inflate(Geo::Polygons{body}, -toolDiameter), -stepOver,
+                coarseTolerance(stepOver, toolDiameter), steps));
             incCurrent();
         }
     } else {
@@ -242,7 +311,8 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
         // Снаружи петли идут ОТ детали наружу и сами кончиться не могут:
         // ограничение по числу шагов здесь единственное.
         returnPs.append_range(concentricLoops(
-            Geo::Inflate(closedSrc, +toolDiameter), +stepOver, steps));
+            Geo::Inflate(closedSrc, +toolDiameter), +stepOver,
+            coarseTolerance(stepOver, toolDiameter), steps));
         incCurrent();
     }
 

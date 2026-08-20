@@ -8,7 +8,9 @@
 #include <QPainterPath>
 #include <QTest>
 
+#include <algorithm>
 #include <cmath>
+#include <limits>
 #include <numbers>
 
 using namespace Geo;
@@ -31,6 +33,7 @@ private slots:
     void closeAndReversedKeepArcs();
     void fromPathRecognisesArcsOfEllipse();
     void transformedPolygonKeepsOrientationCanon();
+    void decimatedKeepsShapeWithinTolerance();
 };
 
 void UtilTest::primitivesMatchAnalyticShapes() {
@@ -226,6 +229,81 @@ void UtilTest::transformedPolygonKeepsOrientationCanon() {
 
     const Polygons region = transformed(Polygons{polygon}, QTransform::fromScale(-1.0, 1.0));
     QVERIFY(near(region.area(), area, 1e-6));
+}
+
+void UtilTest::decimatedKeepsShapeWithinTolerance() {
+    constexpr double tolerance = 0.1;
+
+    // Дрожащий квадрат: каждая сторона порезана на полсотни сегментов с
+    // поперечным шумом мельче половины допуска. Прореживание обязано снять
+    // весь шум, не сдвинув границу дальше допуска.
+    Polyline noisy;
+    noisy.closed = true;
+    const QPointF corners[]{{0.0, 0.0}, {20.0, 0.0}, {20.0, 20.0}, {0.0, 20.0}};
+    for(int side{}; side < 4; ++side) {
+        const QPointF from = corners[side], to = corners[(side + 1) % 4];
+        const QPointF dir = (to - from) / 50.0;
+        const QPointF normal{-dir.y() / 0.4, dir.x() / 0.4}; // единичная поперечная
+        for(int k{}; k < 50; ++k)
+            noisy.emplace_back(from + dir * k + normal * (0.02 * std::sin(k * 12.9898)), 0.0);
+    }
+    const Polyline thinned = decimated(noisy, tolerance);
+    QVERIFY(thinned.closed);
+    QVERIFY(thinned.size() < noisy.size() / 10); // шум снят, осталась горстка вершин
+    QVERIFY(near(thinned.area(), 400.0, tolerance * noisy.perimeter()));
+    // Каждая исходная вершина лежит не дальше допуска от прореженной границы
+    // (все сегменты прямые -- расстояние до хорды считается напрямую).
+    for(const Vertex& v: noisy) {
+        double best = std::numeric_limits<double>::max();
+        for(const auto& [a, b]: segments(thinned)) {
+            const QPointF ab = QPointF(b) - QPointF(a);
+            const double len2 = ab.x() * ab.x() + ab.y() * ab.y();
+            const double t = std::clamp(
+                ((v.x() - a.x()) * ab.x() + (v.y() - a.y()) * ab.y()) / len2, 0.0, 1.0);
+            best = std::min(best, distance(v, QPointF(a) + ab * t));
+        }
+        QVERIFY(best <= tolerance + eps);
+    }
+
+    // Мелкие дуги спрямляются: скругление углов с сагиттой мельче половины
+    // допуска (четверть окружности r = 0.05: сагитта ~0.015) теряет прогиб,
+    // форма остаётся в допуске.
+    constexpr double r = 0.05;
+    const double b = std::tan(pi / 8.0); // четверть окружности против часовой
+    Polyline rounded{
+        Vertex{r, 0.0},               // низ
+        Vertex{20.0 - r, 0.0, b},     // скругление (20, 0)
+        Vertex{20.0, r},              // правая сторона
+        Vertex{20.0, 20.0 - r, b},    // скругление (20, 20)
+        Vertex{20.0 - r, 20.0},       // верх
+        Vertex{r, 20.0, b},           // скругление (0, 20)
+        Vertex{0.0, 20.0 - r},        // левая сторона
+        Vertex{0.0, r, b},            // скругление (0, 0), замыкает в (r, 0)
+    };
+    rounded.closed = true;
+    const Polyline straightened = decimated(rounded, tolerance);
+    QVERIFY(!hasArcs(straightened));
+    QVERIFY(near(straightened.area(), rounded.area(), tolerance * rounded.perimeter()));
+
+    // Крупные дуги неприкосновенны: у стадиона сагитта полукругов -- целый
+    // радиус, прореживанию там делать нечего.
+    const Polyline stadium = obround(10.0, 4.0);
+    const Polyline kept = decimated(stadium, tolerance);
+    QCOMPARE(kept.size(), stadium.size());
+    QVERIFY(near(kept.area(), stadium.area(), eps));
+
+    // Полная окружность (две вершины) возвращается как есть.
+    const Polyline full = circle(8.0);
+    QCOMPARE(decimated(full, tolerance).size(), full.size());
+
+    // Вырождающийся результат откатывается к исходному: треугольник мельче
+    // допуска прореживание схлопнуло бы в отрезок.
+    Polyline tiny{Vertex{0.0, 0.0}, Vertex{0.03, 0.0}, Vertex{0.0, 0.03}};
+    tiny.closed = true;
+    QCOMPARE(decimated(tiny, 1.0).size(), tiny.size());
+
+    // Нулевой допуск -- прореживание выключено.
+    QCOMPARE(decimated(noisy, 0.0).size(), noisy.size());
 }
 
 QTEST_APPLESS_MAIN(UtilTest)

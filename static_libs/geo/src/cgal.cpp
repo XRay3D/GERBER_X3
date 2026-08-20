@@ -907,14 +907,86 @@ bool contains(const GPolyWH& pwh, QPointF point) {
     return true;
 }
 
-std::vector<GPoly> boundaryCapsules(const PolySet& region, double d) {
+std::vector<GPoly> boundaryCapsules(const PolySet& region, double d, double coarse) {
     std::vector<GPolyWH> parts;
     region.polygons_with_holes(std::back_inserter(parts));
 
+    // Прореживание: диск радиуса d, стоящий НА границе, накрывает трубку
+    // радиуса d вокруг её окрестности с недобором (s/2)^2/(2d) на пролёте s
+    // до соседнего диска -- ближайшая точка границы для точки трубки лежит
+    // перпендикулярно ей, и гипотенуза sqrt(d^2 + (s/2)^2) длиннее d лишь
+    // квадратично. Отсюда шаг дисков L = sqrt(4*d*coarse): половина допуска
+    // на пролёты. Вторая половина -- на УГЛЫ между кривыми: у стыка с
+    // изломом ближайшая точка -- сама вершина, недобор к нему линеен по
+    // повороту, и стык круче turnBudget получает свой диск всегда. Гладкие
+    // стыки (нарезка свипа по касательным, шов капсулы с диском) не стоят
+    // ничего -- ровно их на границе региона и большинство.
+    //
+    // Тела кривых короче L не нужны вовсе: их трубки внутри дисковых. Чем
+    // дальше офсет (больше d), тем длиннее пролёты и тем меньше кусков,
+    // а мелочь границы (скругления пятачков, термобарьеры) исчезает из
+    // объединения первой -- при цене, почти линейной по числу кусков, это
+    // и есть главный выигрыш черновых витков кармана.
+    const double L = coarse > 0.0 ? std::sqrt(4.0 * d * coarse) : 0.0;
+    const double turnBudget = L > 0.0 ? coarse / L : 0.0; // sin(поворот/2)
+
     Polylines capsules;
     auto addContour = [&](const GPoly& contour) {
-        for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it)
-            appendCapsules(capsules, *it, d);
+        if(L <= 0.0) {
+            for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it)
+                appendCapsules(capsules, *it, d);
+            return;
+        }
+
+        // Касательная кривой в конце или в начале -- единичная, по ходу.
+        auto tangent = [](const CurveGeometry& curve, bool atEnd) -> QPointF {
+            const QPointF at = atEnd ? curve.to : curve.from;
+            if(curve.linear) {
+                const double len = std::hypot(curve.to.x() - curve.from.x(),
+                    curve.to.y() - curve.from.y());
+                if(len < 1e-12) return {};
+                return (curve.to - curve.from) / len;
+            }
+            const double len = std::hypot(at.x() - curve.center.x(), at.y() - curve.center.y());
+            if(len < 1e-12) return {};
+            const QPointF radial = (at - curve.center) / len;
+            return curve.sweep > 0.0 ? QPointF{-radial.y(), radial.x()}
+                                     : QPointF{radial.y(), -radial.x()};
+        };
+
+        bool needDisc = true;   // старт контура и торец каждого тела без колпачка
+        double sinceDisc = 0.0; // путь вдоль границы от последнего диска
+        QPointF prevTangent;    // касательная на конце предыдущей кривой
+        for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it) {
+            const CurveGeometry curve = geometryOf(*it);
+            const double length = curve.linear
+                ? std::hypot(curve.to.x() - curve.from.x(), curve.to.y() - curve.from.y())
+                : curve.radius * std::abs(curve.sweep);
+
+            if(length >= L) {
+                appendCapsules(capsules, *it, d); // диск на стыке плюс тело
+                needDisc = true;
+                sinceDisc = 0.0;
+                prevTangent = tangent(curve, true);
+                continue;
+            }
+
+            // Излом стыка: sin(поворот/2) через векторную алгебру, без углов.
+            // Вырожденная касательная (микрокривая) -- стык считается гладким:
+            // нарезка точного свипа изломов не делает.
+            const QPointF in = prevTangent, out = tangent(curve, false);
+            const double cosTurn = in.x() * out.x() + in.y() * out.y();
+            const bool sharp = !in.isNull() && !out.isNull()
+                && std::sqrt(std::max(0.0, (1.0 - cosTurn) / 2.0)) > turnBudget;
+
+            if(needDisc || sharp || sinceDisc + length > L) {
+                capsules.push_back(Offset::disc(curve.from, d));
+                sinceDisc = 0.0;
+                needDisc = false;
+            }
+            sinceDisc += length;
+            prevTangent = tangent(curve, true);
+        }
     };
     for(const GPolyWH& part: parts) {
         if(!part.is_unbounded()) addContour(part.outer_boundary());

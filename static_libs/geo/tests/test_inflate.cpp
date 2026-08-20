@@ -76,7 +76,41 @@ private slots:
     void erosionThickerThanBodyEmptiesIt();
     void arcSmallerThanOffsetStaysOneArc();
     void shrunkDiscKeepsTwoVertices();
+    void coarseOffsetUndershootsWithinTolerance();
 };
+
+// Черновой офсет (coarse > 0): контур результата лежит НЕ ДАЛЬШЕ от границы,
+// чем честный, и не ближе к ней, чем честный минус coarse. Проверяются оба
+// края контракта разностями регионов -- они точные, растр здесь не нужен:
+// перебор ловится пустотой (coarse - exact), недобор -- накрытием честного
+// черновым, раздутым на 2*coarse.
+void InflateTest::coarseOffsetUndershootsWithinTolerance() {
+    // Кольцо с мелкой зубчаткой: сегменты по ~0.7 -- на большом офсете
+    // прореживание выбрасывает их тела и почти все диски.
+    Polyline ring;
+    ring.closed = true;
+    constexpr int teeth = 90;
+    for(int k = 0; k < teeth; ++k) {
+        const double a = 2.0 * std::numbers::pi * k / teeth;
+        const double r = 10.0 + (k % 2 ? 0.15 : -0.15);
+        ring.emplace_back(QPointF{r * std::cos(a), r * std::sin(a)}, 0.0);
+    }
+    const Polygons region{Polylines{ring}};
+
+    constexpr double delta = 8.0; // d = 4: шаг дисков sqrt(4*4*0.2) = 1.8 > зуба
+    constexpr double tol = 0.2;
+    for(const double sign: {+1.0, -1.0}) {
+        const Polygons exact = Inflate(region, sign * delta);
+        const Polygons coarse = Inflate(region, sign * delta, tol);
+        // Недобор полосы двигает контур к границе: наружу черновой регион
+        // лежит ВНУТРИ честного, внутрь -- наоборот, честный внутри чернового.
+        const Polygons& inner = sign > 0 ? coarse : exact;
+        const Polygons& outer = sign > 0 ? exact : coarse;
+        QVERIFY((inner - outer).area() < 1e-9);
+        // И не дальше tol: внешний накрывается внутренним, раздутым на 2*tol.
+        QVERIFY((outer - Inflate(inner, 2.0 * tol)).area() < 1e-9);
+    }
+}
 
 // Дуга РАДИУСОМ МЕНЬШЕ офсета -- случай, на котором внутренняя окружность
 // вырождается. Прежде её резали на хорды и раздували каждую отдельно: вместо
