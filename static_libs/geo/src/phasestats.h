@@ -10,7 +10,7 @@
 
 namespace Geo {
 
-enum class Phase : std::uint8_t { Capsules, JoinAll, RegionOp, Materialize, Count_ };
+enum class Phase : std::uint8_t { Capsules, JoinAll, RegionOp, Materialize, Adopt, Count_ };
 
 void phaseAdd(Phase phase, std::uint64_t ns) noexcept;
 

@@ -17,7 +17,7 @@ constexpr std::size_t phaseCount = static_cast<std::size_t>(Phase::Count_);
 std::array<Acc, phaseCount> accs;
 
 constexpr std::array<const char*, phaseCount> names{
-    "capsules", "joinAll", "regionOp", "materialize"};
+    "capsules", "joinAll", "regionOp", "materialize", "adopt"};
 
 } // namespace
 

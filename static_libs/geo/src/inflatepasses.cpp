@@ -3,6 +3,7 @@
 #include "cgal.h"
 #include "geo/boolean.h"
 #include "geo/cancel.h"
+#include "phasestats.h"
 
 #include <QRectF>
 
@@ -67,6 +68,7 @@ struct InflatePasses::Source {
         const std::size_t vertices = verticesOf(contours);
         if(!baseVertices) baseVertices = verticesOf(base.contours());
         if(vertices < baseVertices) {
+            PhaseScope stat{Phase::Adopt};
             Polygons candidate{contours};
             if(candidate.contours().size() == contours.size()) {
                 base = std::move(candidate);
