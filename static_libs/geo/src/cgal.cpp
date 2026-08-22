@@ -148,8 +148,26 @@ constexpr std::size_t minChunkSize = 16;
 constexpr std::size_t minParallelBatch = 8;
 
 unsigned workerCount() {
+    // GEO_WORKERS -- диагностический потолок ширины: кривая масштабирования
+    // снимается без пересборки (GEO_WORKERS=1 -- честный однопоточный счёт).
+    static const unsigned override_ = qEnvironmentVariableIntValue("GEO_WORKERS");
+    if(override_) return override_;
+#ifdef _WIN32
+    // На Windows тонкозернистая параллель точного домена ОТРИЦАТЕЛЬНА при
+    // любой ширине: на 32-поточной машине кривая бенча geo_bench_pocket --
+    // 1 поток 5.7 с, 2 потока 10.7 с, 32 потока 32.8 с, и сериализация
+    // одного лишь joinAll картину не меняет (32 воркера parallelFor дают
+    // 20 с против 7 с у одного). Подозреваемые -- атомарные счётчики ссылок
+    // общих ленивых чисел (CGAL_HAS_THREADS) и цена thread_local (emutls
+    // MinGW) в свежих потоках; аллокатор исключён (GMP и контейнеры CGAL
+    // уже на mimalloc). Пока причина не побеждена -- счёт на месте;
+    // пофигурная параллель InflatePasses (bigPool) живёт отдельно от этого
+    // порога. На Linux ширина по ядрам выигрывает и остаётся как была.
+    return 1;
+#else
     const unsigned hardware = std::thread::hardware_concurrency();
     return hardware ? hardware : 1;
+#endif
 }
 
 // Поток, уже работающий внутри parallelFor/joinAll, свой пул не заводит --
