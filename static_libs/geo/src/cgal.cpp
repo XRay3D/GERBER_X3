@@ -138,6 +138,14 @@ unsigned workerCount() {
     return hardware ? hardware : 1;
 }
 
+// Поток, уже работающий внутри parallelFor/joinAll, свой пул не заводит --
+// считает на месте. Пул создаётся на каждый вызов, и без этого флага N
+// воркеров, позвавших, скажем, Inflate мелкого источника (InflatePasses),
+// умножили бы потоки квадратично: у каждого свой boundaryBand со своим
+// parallelFor и своим joinAll. Верхний уровень уже параллелен -- вложенному
+// достаточно последовательного счёта.
+thread_local bool insideParallelWorker = false;
+
 // Пространственный порядок кусков -- кривая Мортона (Z-порядок) по центру
 // габарита. На результат он не влияет вовсе (объединение коммутативно), а
 // на цене сказывается сильнее самих потоков: соседние в списке куски
@@ -266,21 +274,26 @@ Polyline removeCollinearSlivers(const Polyline& poly) {
     if(poly.size() < 3) return poly;
     constexpr double sliverLen = 1e-2; // 10 мкм
 
-    Polyline out = poly;
-    out.closed = poly.closed;
-    out.width = poly.width;
+    // Вершины -- кольцевым списком индексов: удаление за O(1), тогда как
+    // erase из вектора на длинном контуре (тысячи вершин у объединения
+    // кармана) делало чистку квадратичной.
+    const std::size_t n = poly.size();
+    std::vector<std::size_t> prev(n), next(n);
+    for(std::size_t i = 0; i < n; ++i) {
+        prev[i] = (i + n - 1) % n;
+        next[i] = (i + 1) % n;
+    }
+    std::size_t alive = n, first = 0;
 
     // Есть ли что убирать -- в вершине i, между соседями a и c. Замыкающая
     // пара незамкнутой полилинии не рассматривается: у её концов соседа с
     // одной стороны нет.
     auto redundant = [&](std::size_t i) {
-        const std::size_t n = out.size();
-        if(!out.closed && (i == 0 || i + 1 == n)) return false;
-        const std::size_t prev = (i + n - 1) % n;
-        const std::size_t next = (i + 1) % n;
-        if(out[i].isArc() || out[prev].isArc()) return false; // трогаем только прямые стороны
+        if(!poly.closed && (i == first || next[i] == first)) return false;
+        const std::size_t p = prev[i], q = next[i];
+        if(poly[i].isArc() || poly[p].isArc()) return false; // трогаем только прямые стороны
 
-        const QPointF a = out[prev], b = out[i], c = out[next];
+        const QPointF a = poly[p], b = poly[i], c = poly[q];
         const double baseLen = std::hypot(c.x() - a.x(), c.y() - a.y());
         if(baseLen < 1e-12) return false; // a и c сами почти совпали -- отдельный случай, не наш
         const double dist = std::abs((b.x() - a.x()) * (c.y() - a.y()) - (b.y() - a.y()) * (c.x() - a.x())) / baseLen;
@@ -293,18 +306,36 @@ Polyline removeCollinearSlivers(const Polyline& poly) {
         const double prevLen = std::hypot(b.x() - a.x(), b.y() - a.y());
         return std::min(sideLen, prevLen) < sliverLen && dist < sliverLen;
     };
+    auto unlink = [&](std::size_t i) {
+        next[prev[i]] = next[i];
+        prev[next[i]] = prev[i];
+        if(i == first) first = next[i];
+        --alive;
+    };
 
-    for(std::size_t i{}; i < out.size() && out.size() >= 3;) {
+    // Проход по кольцу от первой вершины до последней; после удаления --
+    // шаг назад: сосед слева мог стать лишним.
+    for(std::size_t i = first; alive >= 3;) {
         if(redundant(i)) {
-            out.erase(out.begin() + static_cast<std::ptrdiff_t>(i));
-            if(i) --i; // сосед слева мог стать лишним
-        } else
-            ++i;
+            const bool wasFirst = i == first;
+            const std::size_t back = prev[i], forward = next[i];
+            unlink(i);
+            i = wasFirst ? forward : back;
+        } else {
+            i = next[i];
+            if(i == first) break;
+        }
     }
     // Стык через начало: первая вершина проверяется последней, когда её
     // соседи уже окончательны.
-    while(out.closed && out.size() >= 3 && redundant(0))
-        out.erase(out.begin());
+    while(poly.closed && alive >= 3 && redundant(first)) unlink(first);
+
+    Polyline out;
+    out.reserve(alive);
+    out.closed = poly.closed;
+    out.width = poly.width;
+    std::size_t i = first;
+    for(std::size_t k = 0; k < alive; ++k, i = next[i]) out.push_back(poly[i]);
     return out;
 }
 
@@ -607,7 +638,9 @@ Polyline toPolyline(const GPoly& pgn) {
 }
 
 void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body) {
-    const unsigned workers = std::min<std::size_t>(workerCount(), count / minParallelBatch);
+    const unsigned workers = insideParallelWorker
+        ? 1
+        : std::min<std::size_t>(workerCount(), count / minParallelBatch);
     if(workers < 2) {
         for(std::size_t i = 0; i < count; ++i) body(i);
         return;
@@ -628,6 +661,7 @@ void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body
         for(unsigned w = 0; w < workers; ++w)
             pool.emplace_back([&, w] {
                 CancelScope scope{token};
+                insideParallelWorker = true;
                 for(std::size_t i = next++; i < count; i = next++) try {
                         checkCancelled();
                         body(i);
@@ -650,7 +684,9 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
 
     const std::size_t n = parts.size();
     const unsigned workers = workerCount();
-    const std::size_t chunks = std::min(chunksPerWorker * workers, n / minChunkSize);
+    const std::size_t chunks = insideParallelWorker
+        ? 1
+        : std::min(chunksPerWorker * workers, n / minChunkSize);
     if(chunks < 2) {
         region.join(parts.begin(), parts.end());
         return;
@@ -675,6 +711,7 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
     std::atomic<std::size_t> next{0};
     auto buildChunks = [&] {
         CancelScope scope{token};
+        insideParallelWorker = true;
         for(std::size_t i = next++; i < chunks; i = next++) {
             const std::size_t from = n * i / chunks, to = n * (i + 1) / chunks;
             try {
@@ -686,9 +723,12 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
         }
     };
     {
+        // Потоков -- не больше, чем кусков: на горстке кусков полный пул лишь
+        // платил бы за запуск простаивающих потоков.
+        const std::size_t spawn = std::min<std::size_t>(workers, chunks);
         std::vector<std::jthread> pool;
-        pool.reserve(workers);
-        for(unsigned w = 0; w < workers; ++w) pool.emplace_back(buildChunks);
+        pool.reserve(spawn);
+        for(std::size_t w = 0; w < spawn; ++w) pool.emplace_back(buildChunks);
     }
 
     // Дерево слияний: на каждом уровне пары независимы и идут параллельно,
@@ -700,6 +740,7 @@ void joinAllImpl(PolySet& region, std::vector<Part> parts) {
         for(std::size_t i = 0; i + step < chunks; i += 2 * step)
             level.emplace_back([&, i, step] {
                 CancelScope scope{token};
+                insideParallelWorker = true;
                 if(failures[i] || failures[i + step]) return;
                 try {
                     checkCancelled();
@@ -922,13 +963,25 @@ std::vector<GPoly> boundaryCapsules(const PolySet& region, double d, double coar
     // стыки (нарезка свипа по касательным, шов капсулы с диском) не стоят
     // ничего -- ровно их на границе региона и большинство.
     //
-    // Тела кривых короче L не нужны вовсе: их трубки внутри дисковых. Чем
-    // дальше офсет (больше d), тем длиннее пролёты и тем меньше кусков,
-    // а мелочь границы (скругления пятачков, термобарьеры) исчезает из
-    // объединения первой -- при цене, почти линейной по числу кусков, это
-    // и есть главный выигрыш черновых витков кармана.
+    // Тела кривых короче L не нужны: их трубки внутри дисковых. Чем дальше
+    // офсет (больше d), тем длиннее пролёты и тем меньше кусков, а мелочь
+    // границы (скругления пятачков, термобарьеры) исчезает из объединения
+    // первой -- при цене, почти линейной по числу кусков, это и есть
+    // главный выигрыш черновых витков кармана.
+    //
+    // Поворот считается не только на стыках: ДУГА поворачивает сама, и
+    // короткая дуга с большим размахом (окружность виа -- две полуокружности
+    // длиной меньше L) без учёта этого теряла тело и получала один диск на
+    // весь контур -- недобор до диаметра контура вместо coarse. Поэтому
+    // дуга с собственным поворотом сверх бюджета тело сохраняет, а поворот
+    // пролёта КОПИТСЯ по стыкам и дугам: набрал бюджет -- диск, как на
+    // изломе. Отсюда недобор пролёта на кривой границе тот же coarse/2, что
+    // и на прямой: прогиб хорды пролёта не больше (L/2)*sin(поворот/2).
     const double L = coarse > 0.0 ? std::sqrt(4.0 * d * coarse) : 0.0;
     const double turnBudget = L > 0.0 ? coarse / L : 0.0; // sin(поворот/2)
+    auto overBudget = [turnBudget](double turn) {
+        return turn >= std::numbers::pi || std::sin(turn / 2.0) > turnBudget;
+    };
 
     Polylines capsules;
     auto addContour = [&](const GPoly& contour) {
@@ -954,36 +1007,43 @@ std::vector<GPoly> boundaryCapsules(const PolySet& region, double d, double coar
                                      : QPointF{radial.y(), -radial.x()};
         };
 
-        bool needDisc = true;   // старт контура и торец каждого тела без колпачка
-        double sinceDisc = 0.0; // путь вдоль границы от последнего диска
-        QPointF prevTangent;    // касательная на конце предыдущей кривой
+        bool needDisc = true;    // старт контура и торец каждого тела без колпачка
+        double sinceDisc = 0.0;  // путь вдоль границы от последнего диска
+        double turnSince = 0.0;  // поворот границы от последнего диска, рад
+        QPointF prevTangent;     // касательная на конце предыдущей кривой
         for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it) {
             const CurveGeometry curve = geometryOf(*it);
             const double length = curve.linear
                 ? std::hypot(curve.to.x() - curve.from.x(), curve.to.y() - curve.from.y())
                 : curve.radius * std::abs(curve.sweep);
+            const double ownTurn = curve.linear ? 0.0 : std::abs(curve.sweep);
 
-            if(length >= L) {
+            if(length >= L || overBudget(ownTurn)) {
                 appendCapsules(capsules, *it, d); // диск на стыке плюс тело
                 needDisc = true;
                 sinceDisc = 0.0;
+                turnSince = 0.0;
                 prevTangent = tangent(curve, true);
                 continue;
             }
 
-            // Излом стыка: sin(поворот/2) через векторную алгебру, без углов.
-            // Вырожденная касательная (микрокривая) -- стык считается гладким:
-            // нарезка точного свипа изломов не делает.
+            // Излом стыка -- угол между касательными. Вырожденная касательная
+            // (микрокривая) -- стык считается гладким: нарезка точного свипа
+            // изломов не делает.
             const QPointF in = prevTangent, out = tangent(curve, false);
-            const double cosTurn = in.x() * out.x() + in.y() * out.y();
-            const bool sharp = !in.isNull() && !out.isNull()
-                && std::sqrt(std::max(0.0, (1.0 - cosTurn) / 2.0)) > turnBudget;
+            const double jointTurn = in.isNull() || out.isNull()
+                ? 0.0
+                : std::acos(std::clamp(in.x() * out.x() + in.y() * out.y(), -1.0, 1.0));
 
-            if(needDisc || sharp || sinceDisc + length > L) {
+            if(needDisc || sinceDisc + length > L || overBudget(turnSince + jointTurn + ownTurn)) {
+                // Диск стоит в точке стыка и накрывает его излом; поворот
+                // копится заново -- с собственного поворота этой кривой.
                 capsules.push_back(Offset::disc(curve.from, d));
                 sinceDisc = 0.0;
+                turnSince = ownTurn;
                 needDisc = false;
-            }
+            } else
+                turnSince += jointTurn + ownTurn;
             sinceDisc += length;
             prevTangent = tangent(curve, true);
         }

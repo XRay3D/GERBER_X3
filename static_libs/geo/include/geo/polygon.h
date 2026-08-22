@@ -164,6 +164,12 @@ public:
     // её и выражает DXF.
     explicit Polygons(const Polylines& contours);
 
+    // Регион из РАЗНЕСЁННЫХ регионов -- без объединения: тела вставляются в
+    // разбиение как есть, без свипа наложения. ПРЕДУСЛОВИЕ: регионы не
+    // пересекаются и не касаются -- как компоненты одной области, усаженные
+    // порознь (Geo::InflatePasses). Нарушение ломает разбиение молча.
+    static Polygons fromSeparated(std::vector<Polygons> regions);
+
     bool empty() const;
     std::size_t size() const;
 
