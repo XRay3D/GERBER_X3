@@ -2,6 +2,7 @@
 #include "geo/cancel.h"
 #include "geo/util.h"
 #include "offsetcapsules.h"
+#include "phasestats.h"
 
 #include <QDebug>
 #include <QPainterPath>
@@ -681,6 +682,7 @@ void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body
 template <typename Part>
 void joinAllImpl(PolySet& region, std::vector<Part> parts) {
     if(parts.empty()) return;
+    PhaseScope stat{Phase::JoinAll};
 
     const std::size_t n = parts.size();
     const unsigned workers = workerCount();
@@ -949,6 +951,7 @@ bool contains(const GPolyWH& pwh, QPointF point) {
 }
 
 std::vector<GPoly> boundaryCapsules(const PolySet& region, double d, double coarse) {
+    PhaseScope stat{Phase::Capsules};
     std::vector<GPolyWH> parts;
     region.polygons_with_holes(std::back_inserter(parts));
 

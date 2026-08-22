@@ -18,6 +18,7 @@ add_library(
   include/geo/cancel.h
   include/geo/fill.h
   include/geo/inflatepasses.h
+  include/geo/phasestats.h
   include/geo/polygon.h
   include/geo/polyline.h
   include/geo/util.h
@@ -30,6 +31,8 @@ add_library(
   src/fill.cpp
   src/inflatepasses.cpp
   src/offsetcapsules.h
+  src/phasestats.cpp
+  src/phasestats.h
   src/polygon.cpp
   src/polyline.cpp
   src/util.cpp)
@@ -128,5 +131,9 @@ endif()
 # а не приложение поверх него.
 option(GEO_BUILD_TESTS "Собирать тесты библиотеки Geo" OFF #[[ON]])
 if(GEO_BUILD_TESTS)
+  # enable_testing() зовётся здесь, а не в корне: тесты у проекта только
+  # свои, и ctest запускается из этого подкаталога сборки
+  # (ctest --test-dir <build>/static_libs/geo).
+  enable_testing()
   add_subdirectory(tests)
 endif()

@@ -12,3 +12,8 @@ endforeach()
 # Отмена меряет себя относительно полного счёта, поэтому идёт дольше
 # прочих; на медленной машине запас лишним не будет.
 set_tests_properties(geo_cancel PROPERTIES TIMEOUT 300)
+
+# Бенчмарк кармана «снаружи» -- не тест: запускается руками для A/B-замеров
+# (см. комментарий в bench_pocket.cpp), в ctest не регистрируется.
+add_executable(geo_bench_pocket bench_pocket.cpp)
+target_link_libraries(geo_bench_pocket PRIVATE Geo::Geo)
