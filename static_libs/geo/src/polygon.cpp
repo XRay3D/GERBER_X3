@@ -64,9 +64,14 @@ struct Polygon::Impl {
     void materialize() const {
         if(outerView) return;
         outerView = exact.is_unbounded() ? Polyline{} : toPolyline(exact.outer_boundary());
-        Polylines holes;
+        // Дырки -- по одной на поток: у каждой свой toPolyline (чистка
+        // коллинеарного, сшивка дуг), и друг о друге они ничего не знают.
+        // У поля кармана дырок сотни -- по числу медных островов платы.
+        std::vector<const GPoly*> holePtrs;
         for(auto it = exact.holes_begin(); it != exact.holes_end(); ++it)
-            holes.push_back(toPolyline(*it));
+            holePtrs.push_back(&*it);
+        Polylines holes(holePtrs.size());
+        parallelFor(holePtrs.size(), [&](std::size_t i) { holes[i] = toPolyline(*holePtrs[i]); });
         holesView = std::move(holes);
 
         // Пустота выражается обратным обходом: внешняя граница по часовой,
@@ -323,6 +328,28 @@ Polygons::Polygons(const Polylines& contours) {
     }
 }
 
+Polygons Polygons::fromSeparated(std::vector<Polygons> regions) {
+    std::erase_if(regions, [](const Polygons& region) { return region.empty(); });
+    if(regions.empty()) return {};
+    // Базой -- самый крупный регион: вставка остальных дешевле, чем его
+    // собственная перевставка куда бы то ни было.
+    auto largest = std::ranges::max_element(regions, {}, &Polygons::size);
+    Polygons result = std::move(*largest);
+    result.impl_->invalidate();
+    // Все куски -- одной вставкой: обход граней разбиения после вставки
+    // делается раз на вызов, а не на кусок.
+    std::vector<GPolyWH> parts;
+    for(Polygons& region: regions) {
+        if(&region == &*largest) continue;
+        region.impl_->exact.polygons_with_holes(std::back_inserter(parts));
+    }
+    if(!parts.empty()) {
+        checkCancelled();
+        result.impl_->exact.insert(parts.begin(), parts.end());
+    }
+    return result;
+}
+
 bool Polygons::empty() const { return impl_->exact.is_empty(); }
 
 std::size_t Polygons::size() const { return impl_->exact.number_of_polygons_with_holes(); }
@@ -333,8 +360,13 @@ const std::vector<Polygon>& Polygons::all() const {
 }
 
 Polylines Polygons::contours() const {
+    // Материализация -- по полигону на поток: bulge-вид каждого строится
+    // независимо и пишется только в СВОЙ Polygon::Impl. Сшивка общего
+    // списка идёт следом уже по готовым кэшам.
+    const std::vector<Polygon>& polygons = this->all();
+    parallelFor(polygons.size(), [&](std::size_t i) { polygons[i].impl().materialize(); });
     Polylines all;
-    for(const Polygon& polygon: *this)
+    for(const Polygon& polygon: polygons)
         all.append_range(polygon.contours());
     return all;
 }
@@ -368,9 +400,9 @@ QPainterPath Polygons::toPath() const {
     return path;
 }
 
-Polygons Polygons::boundaryBand(double radius) const {
+Polygons Polygons::boundaryBand(double radius, double coarse) const {
     Polygons band;
-    if(radius > 0.0) joinAll(band.impl_->exact, boundaryCapsules(impl_->exact, radius));
+    if(radius > 0.0) joinAll(band.impl_->exact, boundaryCapsules(impl_->exact, radius, coarse));
     return band;
 }
 

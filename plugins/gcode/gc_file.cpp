@@ -691,17 +691,29 @@ void File::createGiPocket() {
         item->setAcceptHoverEvents(false);
         item->setFlag(QGraphicsItem::ItemIsSelectable, false);
         itemGroup()->push_back(item);
+    } else {
+        // Заливки нет -- рисуем её обводкой самой траектории пером в диаметр
+        // фрезы, ровно как createGiProfile и вторая ветка createGiRaster.
+        // Картинка та же, а точная область (раздувание ВСЕЙ траектории в
+        // домене CGAL) не считается вовсе -- см. PocketOffset::createStdFull.
+        for(const Geo::Polylines& paths: gcp.toolPathss) {
+            item = new Gi::GcPath{paths, this};
+            item->setPen({Qt::black, gcp.getToolDiameter(), Qt::SolidLine, Qt::RoundCap, Qt::RoundJoin});
+            item->setPenColorPtr(&App::settings().guiColor(GuiColors::CutArea));
+            itemGroup()->push_back(item);
+        }
     }
 
     for(size_t i{}; const Geo::Polylines& paths: gcp.toolPathss) {
         int k = static_cast<int>((gcp.toolPathss.size() > 1) ? (300.0 / (gcp.toolPathss.size() - 1)) * i : 0);
         debugColor.emplace_back(QSharedPointer<QColor>(new QColor{QColor::fromHsv(k, 255, 255, 255)}));
 
-        for(const Geo::Polyline& path: paths) {
-            item = new Gi::GcPath{{path}, this};
-            item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
-            itemGroup()->push_back(item);
-        }
+        // Одним элементом на всю группу, а не по элементу на виток: у кармана
+        // по целой плате витков тысячи, и каждый лишний QGraphicsItem
+        // перестраивает индекс сцены -- окно замирало уже ПОСЛЕ расчёта.
+        item = new Gi::GcPath{paths, this};
+        item->setPenColorPtr(&App::settings().guiColor(GuiColors::ToolPath));
+        itemGroup()->push_back(item);
 
         // перебежки между соседними путями -- каждая отдельным отрезком
         Geo::Polylines g1path;

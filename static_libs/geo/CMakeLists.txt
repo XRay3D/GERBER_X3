@@ -17,6 +17,7 @@ add_library(
   include/geo/boolean.h
   include/geo/cancel.h
   include/geo/fill.h
+  include/geo/inflatepasses.h
   include/geo/polygon.h
   include/geo/polyline.h
   include/geo/util.h
@@ -27,6 +28,7 @@ add_library(
   src/cgal.h
   src/clipopen.cpp
   src/fill.cpp
+  src/inflatepasses.cpp
   src/offsetcapsules.h
   src/polygon.cpp
   src/polyline.cpp

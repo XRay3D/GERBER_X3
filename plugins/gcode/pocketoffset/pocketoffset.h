@@ -13,6 +13,8 @@
 #include "gc_creator.h"
 #include "gc_file.h"
 
+#include <optional>
+
 namespace PocketOffset {
 
 constexpr auto POCKET_OFFSET = "PocketOffset"_hash32;
@@ -41,8 +43,9 @@ private:
     // Тела, внутри которых и ходит фреза. Результат живёт в groupedPss.
     const std::vector<Geo::Polygon>& pocketBodies(const double depth);
 
-    // Силуэт детали -- медь без дырок.
-    Geo::Polygons solidBodies() const;
+    // Силуэт детали -- медь без дырок. Считается один раз за прогон.
+    const Geo::Polygons& solidBodies() const;
+    mutable std::optional<Geo::Polygons> solidCache_;
 
     // Обход детали по внешнему контуру -- снаружи и не фиксированными шагами.
     // Петли кладёт в returnPs, возвращает заметённую ими полосу.

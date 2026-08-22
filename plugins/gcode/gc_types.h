@@ -233,8 +233,12 @@ public:
     // концовкой: генератор берёт траекторию именно из toolPathss. А regenerate()
     // зовётся не только из save(), но и при смене стороны платы в дереве -- то
     // есть УП молча превращалась в пустую от одного щелчка по «Сторона».
+    // toolPathss -- наравне с исходной геометрией: у кармана closedCurves
+    // теперь пуст (заливку рисует обводкой File::createGiPocket, считать её
+    // точным раздуванием незачем), и по одной лишь исходной геометрии
+    // загруженная из проекта УП читалась бы как пустая.
     explicit operator bool() const {
-        return !openCurves.empty() || !closedCurves.empty();
+        return !openCurves.empty() || !closedCurves.empty() || !toolPathss.empty();
     }
 
     const Tool& tool() const { return tools[params.at(MultiToolIndex).toInt()]; }

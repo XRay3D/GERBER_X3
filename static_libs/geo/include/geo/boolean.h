@@ -41,7 +41,14 @@ struct Inflate_ {
     // можно сколь угодно длинной; в частности, Inflate(Inflate(r, +d), -d)
     // -- это честное морфологическое замыкание, скругляющее внутренние
     // углы и затягивающее щели тоньше d.
-    Polygons operator()(const Polygons& region, double delta) const;
+    //
+    // coarse > 0 -- ЧЕРНОВОЙ офсет: контур результата может лечь ближе к
+    // исходной границе, но не дальше coarse от честного положения и никогда
+    // не дальше от границы, чем честный (полоса недобирает -- см.
+    // Polygons::boundaryBand). Взамен цена падает тем сильнее, чем больше
+    // |delta|: мелочь границы уходит из точного объединения. Для чистового
+    // контура coarse не годится.
+    Polygons operator()(const Polygons& region, double delta, double coarse = 0.0) const;
 } inline Inflate;
 
 struct BooleanOp_ {
