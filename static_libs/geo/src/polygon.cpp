@@ -2,6 +2,7 @@
 #include "cgal.h"
 #include "geo/cancel.h"
 #include "geo/geo_json.h"
+#include "phasestats.h"
 
 #include <QPainterPath>
 
@@ -363,6 +364,7 @@ Polylines Polygons::contours() const {
     // Материализация -- по полигону на поток: bulge-вид каждого строится
     // независимо и пишется только в СВОЙ Polygon::Impl. Сшивка общего
     // списка идёт следом уже по готовым кэшам.
+    PhaseScope stat{Phase::Materialize};
     const std::vector<Polygon>& polygons = this->all();
     parallelFor(polygons.size(), [&](std::size_t i) { polygons[i].impl().materialize(); });
     Polylines all;

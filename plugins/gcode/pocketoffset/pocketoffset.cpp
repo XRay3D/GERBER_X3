@@ -69,6 +69,11 @@ public:
         if(!file_.isOpen()) return;
         qDebug("pocket pass %3d: %8.2f ms, %4zu loops, %7zu pts", pass, elapsed, contours.size(), vertices);
         QTextStream out{&file_};
+        // Время -- отдельной #-строкой: на Windows журнал GUI-приложения
+        // уходит в OutputDebugString, и файл -- единственный надёжный канал;
+        // сверка же геометрии остаётся байтовой после grep -v '^#'.
+        out << "# pass " << pass << ": " << QString::number(elapsed, 'f', 2) << " ms, "
+            << vertices << " pts\n";
         out << "pass " << pass << " loops " << contours.size() << '\n';
         for(const Geo::Polyline& contour: contours) {
             const QRectF r = contour.boundingRect();

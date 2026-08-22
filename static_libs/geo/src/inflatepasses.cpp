@@ -3,8 +3,10 @@
 #include "cgal.h"
 #include "geo/boolean.h"
 #include "geo/cancel.h"
+#include "phasestats.h"
 
 #include <QRectF>
+#include <QtGlobal>
 
 #include <algorithm>
 #include <atomic>
@@ -22,7 +24,16 @@ namespace {
 // Источник от стольких вершин -- крупный: считается с внутренним
 // параллелизмом Inflate, в пуле на bigPool потоков.
 constexpr std::size_t bigSource = 64;
-constexpr std::size_t bigPool = 6;
+
+// GEO_BIG_POOL -- диагностический размер пула крупных источников: снять
+// кривую пофигурного масштабирования без пересборки (1 -- последовательно).
+// После починки call_once в Lazy_rep (теневая CGAL/Lazy.h) пофигурная
+// параллель в плюсе и на Windows: 6 тел-полос -- пул 1 даёт 1.49 с,
+// пул 4-6 -- 1.27 с, а вместе с восьмёркой воркеров -- 0.62 с.
+std::size_t bigPoolSize() {
+    static const std::size_t override_ = qEnvironmentVariableIntValue("GEO_BIG_POOL");
+    return override_ ? override_ : 6;
+}
 
 std::size_t verticesOf(const Polylines& contours) {
     std::size_t total{};
@@ -67,6 +78,7 @@ struct InflatePasses::Source {
         const std::size_t vertices = verticesOf(contours);
         if(!baseVertices) baseVertices = verticesOf(base.contours());
         if(vertices < baseVertices) {
+            PhaseScope stat{Phase::Adopt};
             Polygons candidate{contours};
             if(candidate.contours().size() == contours.size()) {
                 base = std::move(candidate);
@@ -173,7 +185,7 @@ std::vector<Polygons> InflatePasses::passParts(double d, double coarse) {
     for(std::size_t i = 0; i < tasks.size(); ++i)
         (tasks[i]->baseVertices >= bigSource ? big : small).push_back(i);
     if(!big.empty()) {
-        const std::size_t spawn = std::min<std::size_t>(bigPool, big.size());
+        const std::size_t spawn = std::min<std::size_t>(bigPoolSize(), big.size());
         std::atomic<std::size_t> next{0};
         std::vector<std::exception_ptr> failures(spawn);
         const std::stop_token token = cancelToken();
@@ -236,7 +248,10 @@ std::vector<Polygons> InflatePasses::passParts(double d, double coarse) {
         if(!source.dead) ++liveSolids[keyOf(source)];
     std::vector<char> collapsed(groups, 0);
     auto collapseGroup = [&](std::size_t k, const Polygons& body, double at) {
-        if(liveSolids[k] == 0 || liveSolids[k] > bigPool) return;
+        // Порог схлопывания -- ГЕОМЕТРИЧЕСКАЯ эвристика, не размер пула: от
+        // машины и диагностики (GEO_BIG_POOL) он зависеть не должен.
+        constexpr std::size_t collapseThreshold = 6;
+        if(liveSolids[k] == 0 || liveSolids[k] > collapseThreshold) return;
         const Polylines contours = body.contours();
         Polygons rebuilt{contours};
         if(rebuilt.contours().size() != contours.size()) return;

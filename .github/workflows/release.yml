@@ -15,6 +15,17 @@ name: Build & Release
 # пакетов он обязателен: без него find_package(CGAL) молча не находит ничего
 # (он QUIET), конфигурация проходит, а сборка падает уже на <CGAL/...>.
 # Пакет тянет за собой boost, eigen3, gmp и mpfr.
+#
+# mimalloc в списке тоже не случаен: без него GEO_USE_MIMALLOC молча
+# откатывается на системный malloc (find_library-фолбэк), и релиз теряет
+# аллокатор точной арифметики. libmimalloc.dll попадает в архив общим
+# ldd-обходом рантайма ниже.
+#
+# Версия CGAL не пинуется (pacman ставит текущую из MSYS2). Теневая копия
+# CGAL/Lazy.h (static_libs/geo/src/cgal_shadow) написана поверх CGAL 6.2 и
+# несёт страж версии: когда MSYS2 обновит пакет, сборка НАРОЧНО упадёт с
+# #error -- надо пересравнить копию с новой Lazy.h и обновить её. Это не
+# поломка CI, а напоминание.
 
 on:
   push:
@@ -43,9 +54,9 @@ jobs:
             mingw-w64-ucrt-x86_64-gcc
             mingw-w64-ucrt-x86_64-cmake
             mingw-w64-ucrt-x86_64-ninja
-            mingw-w64-ucrt-x86_64-mold
             mingw-w64-ucrt-x86_64-boost
             mingw-w64-ucrt-x86_64-cgal
+            mingw-w64-ucrt-x86_64-mimalloc
             mingw-w64-ucrt-x86_64-qt6-base
             mingw-w64-ucrt-x86_64-qt6-declarative
             mingw-w64-ucrt-x86_64-qt6-svg

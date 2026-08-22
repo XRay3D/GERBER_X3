@@ -2,6 +2,7 @@
 #include "geo/cancel.h"
 #include "geo/util.h"
 #include "offsetcapsules.h"
+#include "phasestats.h"
 
 #include <QDebug>
 #include <QPainterPath>
@@ -16,6 +17,19 @@
 #include <thread>
 #include <variant>
 #include <vector>
+
+#ifdef GEO_USE_MIMALLOC
+namespace Geo {
+// Переключение аллокатора GMP на mimalloc (src/gmpalloc.cpp). Ссылка из
+// статического инициализатора ЗДЕСЬ: cgal.cpp есть в каждом образе, где
+// живут точные числа, и линкер не выбросит объектник из статической
+// библиотеки, пока на него ссылаются.
+bool installGmpMiAlloc();
+namespace {
+    const bool gmpMiAllocInstalled = installGmpMiAlloc();
+} // namespace
+} // namespace Geo
+#endif
 
 namespace Geo::Cgal {
 
@@ -134,8 +148,25 @@ constexpr std::size_t minChunkSize = 16;
 constexpr std::size_t minParallelBatch = 8;
 
 unsigned workerCount() {
+    // GEO_WORKERS -- диагностический потолок ширины: кривая масштабирования
+    // снимается без пересборки (GEO_WORKERS=1 -- честный однопоточный счёт).
+    static const unsigned override_ = qEnvironmentVariableIntValue("GEO_WORKERS");
+    if(override_) return override_;
     const unsigned hardware = std::thread::hardware_concurrency();
+#ifdef _WIN32
+    // Ширина на Windows -- восемь, а не все ядра. После починки
+    // std::call_once в Lazy_rep (теневая CGAL/Lazy.h, см. cgal_shadow)
+    // параллель точного домена снова в плюсе, но кривая насыщается:
+    // 1 поток 2.29 с, 2 -- 1.64, 4 -- 1.32, 8 -- 1.21, 16 -- 1.28,
+    // 32 -- 1.31 (geo_bench_pocket, 32-поточная машина). Сверх восьми --
+    // лёгкий минус: атомарные счётчики общих ленивых чисел и пропускная
+    // способность памяти. До починки параллель была ОТРИЦАТЕЛЬНА при
+    // любой ширине -- виноват был глобальный мьютекс generic-call_once
+    // libstdc++ без futex, а не планировщик и не аллокатор.
+    return std::min(hardware ? hardware : 1u, 8u);
+#else
     return hardware ? hardware : 1;
+#endif
 }
 
 // Поток, уже работающий внутри parallelFor/joinAll, свой пул не заводит --
@@ -681,6 +712,7 @@ void parallelFor(std::size_t count, const std::function<void(std::size_t)>& body
 template <typename Part>
 void joinAllImpl(PolySet& region, std::vector<Part> parts) {
     if(parts.empty()) return;
+    PhaseScope stat{Phase::JoinAll};
 
     const std::size_t n = parts.size();
     const unsigned workers = workerCount();
@@ -949,6 +981,7 @@ bool contains(const GPolyWH& pwh, QPointF point) {
 }
 
 std::vector<GPoly> boundaryCapsules(const PolySet& region, double d, double coarse) {
+    PhaseScope stat{Phase::Capsules};
     std::vector<GPolyWH> parts;
     region.polygons_with_holes(std::back_inserter(parts));
 

@@ -10,6 +10,7 @@
 #include "geo/cancel.h"
 #include "geo/util.h"
 #include "offsetcapsules.h"
+#include "phasestats.h"
 
 #include <QtGlobal>
 
@@ -84,6 +85,7 @@ Polygons Inflate_::operator()(const Polygons& region, double delta, double coars
     // эрозия без всякого приближения (при coarse == 0; недобор черновой
     // полосы в обоих случаях сдвигает контур К границе, не от неё).
     const Polygons band = region.boundaryBand(d, coarse);
+    PhaseScope stat{Phase::RegionOp};
     return delta > 0.0 ? region | band : region - band;
 }
 
