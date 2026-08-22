@@ -4,8 +4,11 @@
 // нацело (никакого рандома), поэтому годится для A/B: одна и та же
 // геометрия до вершины, меняется только время.
 //
-// Аргументы: [падов-на-сторону = 12] [прогонов = 5]. Первый прогон греет
-// кэши и в медиану не входит, если прогонов больше двух.
+// Аргументы: [падов-на-сторону = 12] [прогонов = 5] [полос = 1]. Первый
+// прогон греет кэши и в медиану не входит, если прогонов больше двух.
+// Полосы > 1 режут рамку сквозными перемычками на столько отдельных тел
+// поля -- сценарий многих крупных источников (пул bigPool в InflatePasses),
+// у платы с разнесёнными кластерами он основной.
 
 #include "geo/boolean.h"
 #include "geo/inflatepasses.h"
@@ -60,7 +63,7 @@ std::size_t verticesOf(const Polylines& contours) {
 // Поле платы: рамка минус чередующиеся пады (кольца и квадраты) с редкими
 // перемычками, чтобы после вычитания оставались и большие связные кляксы,
 // и одиночные мелкие тела -- оба пути passParts (bigPool и parallelFor).
-Polygons makeField(int padsPerSide) {
+Polygons makeField(int padsPerSide, int strips) {
     const double pitch = 4.0;
     // Рамка с широкими полями вокруг сетки: узкие каналы между падами
     // заполняются за два-три витка, а внешняя площадь даёт длинный хвост
@@ -81,6 +84,13 @@ Polygons makeField(int padsPerSide) {
             if(i + 1 < padsPerSide && j % 3 == 0)
                 copper.push_back(rectangle(cx, cy - 0.25, cx + pitch, cy + 0.25));
         }
+
+    // Сквозные горизонтальные перемычки от края до края режут поле на
+    // отдельные тела -- по телу на полосу.
+    for(int s = 1; s < strips; ++s) {
+        const double y = -size / 2 + size * s / strips;
+        copper.push_back(rectangle(-size / 2 - 1.0, y - 0.4, size / 2 + 1.0, y + 0.4));
+    }
 
     return Polygons{Polylines{frame}} - Polygons{copper};
 }
@@ -117,13 +127,14 @@ std::vector<PassRow> runPocket(const Polygons& field, double start, double step,
 int main(int argc, char* argv[]) {
     const int padsPerSide = argc > 1 ? std::atoi(argv[1]) : 12;
     const int runs = std::max(argc > 2 ? std::atoi(argv[2]) : 5, 1);
+    const int strips = std::max(argc > 3 ? std::atoi(argv[3]) : 1, 1);
 
     const double toolDiameter = 1.0;
     const double start = toolDiameter / 2;       // dOffset
     const double step = toolDiameter * 0.45;     // stepOver
     const double coarse = coarseTolerance(step, toolDiameter);
 
-    const Polygons field = makeField(padsPerSide);
+    const Polygons field = makeField(padsPerSide, strips);
     std::printf("field: %zu bodies, pads %dx%d, tool %.2f, step %.3f, coarse %.3f\n",
         field.all().size(), padsPerSide, padsPerSide, toolDiameter, step, coarse);
 

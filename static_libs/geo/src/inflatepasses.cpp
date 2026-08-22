@@ -6,6 +6,7 @@
 #include "phasestats.h"
 
 #include <QRectF>
+#include <QtGlobal>
 
 #include <algorithm>
 #include <atomic>
@@ -23,7 +24,24 @@ namespace {
 // Источник от стольких вершин -- крупный: считается с внутренним
 // параллелизмом Inflate, в пуле на bigPool потоков.
 constexpr std::size_t bigSource = 64;
-constexpr std::size_t bigPool = 6;
+
+// GEO_BIG_POOL -- диагностический размер пула крупных источников: снять
+// кривую пофигурного масштабирования без пересборки (1 -- последовательно).
+//
+// На Windows пул по умолчанию единичный: даже ПОЛНОСТЬЮ независимые крупные
+// источники душат друг друга (bench_pocket, 6 тел-полос: пул 1 -- 3.3 с,
+// пул 2 -- 5.7 с, пул 6 -- 7.6 с) -- та же аномалия, что у parallelFor и
+// joinAll (см. workerCount в cgal.cpp): под подозрением атомарные счётчики
+// ссылок ленивых чисел и emutls MinGW. Linux не затронут.
+std::size_t bigPoolSize() {
+    static const std::size_t override_ = qEnvironmentVariableIntValue("GEO_BIG_POOL");
+    if(override_) return override_;
+#ifdef _WIN32
+    return 1;
+#else
+    return 6;
+#endif
+}
 
 std::size_t verticesOf(const Polylines& contours) {
     std::size_t total{};
@@ -175,7 +193,7 @@ std::vector<Polygons> InflatePasses::passParts(double d, double coarse) {
     for(std::size_t i = 0; i < tasks.size(); ++i)
         (tasks[i]->baseVertices >= bigSource ? big : small).push_back(i);
     if(!big.empty()) {
-        const std::size_t spawn = std::min<std::size_t>(bigPool, big.size());
+        const std::size_t spawn = std::min<std::size_t>(bigPoolSize(), big.size());
         std::atomic<std::size_t> next{0};
         std::vector<std::exception_ptr> failures(spawn);
         const std::stop_token token = cancelToken();
@@ -238,7 +256,10 @@ std::vector<Polygons> InflatePasses::passParts(double d, double coarse) {
         if(!source.dead) ++liveSolids[keyOf(source)];
     std::vector<char> collapsed(groups, 0);
     auto collapseGroup = [&](std::size_t k, const Polygons& body, double at) {
-        if(liveSolids[k] == 0 || liveSolids[k] > bigPool) return;
+        // Порог схлопывания -- ГЕОМЕТРИЧЕСКАЯ эвристика, не размер пула: от
+        // машины и диагностики (GEO_BIG_POOL) он зависеть не должен.
+        constexpr std::size_t collapseThreshold = 6;
+        if(liveSolids[k] == 0 || liveSolids[k] > collapseThreshold) return;
         const Polylines contours = body.contours();
         Polygons rebuilt{contours};
         if(rebuilt.contours().size() != contours.size()) return;
