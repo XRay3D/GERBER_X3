@@ -18,6 +18,19 @@
 #include <variant>
 #include <vector>
 
+#ifdef GEO_USE_MIMALLOC
+namespace Geo {
+// Переключение аллокатора GMP на mimalloc (src/gmpalloc.cpp). Ссылка из
+// статического инициализатора ЗДЕСЬ: cgal.cpp есть в каждом образе, где
+// живут точные числа, и линкер не выбросит объектник из статической
+// библиотеки, пока на него ссылаются.
+bool installGmpMiAlloc();
+namespace {
+    const bool gmpMiAllocInstalled = installGmpMiAlloc();
+} // namespace
+} // namespace Geo
+#endif
+
 namespace Geo::Cgal {
 
 namespace {

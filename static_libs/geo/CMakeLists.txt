@@ -99,6 +99,31 @@ if(CMAKE_LINKER_TYPE STREQUAL "MOLD")
   target_compile_definitions(Geo PRIVATE CGAL_NO_GDB_AUTOLOAD)
 endif()
 
+# Лимбы GMP -- через mimalloc (см. src/gmpalloc.cpp): ucrt malloc не
+# масштабируется под конкуренцией потоков точной арифметики. Опция с
+# find_library-фолбэком: где mimalloc не стоит (Linux-CI, дистрибутивы без
+# пакета), сборка идёт как раньше -- на системном malloc.
+option(GEO_USE_MIMALLOC "Гонять лимбы GMP через mimalloc" ON)
+if(GEO_USE_MIMALLOC)
+  find_library(MIMALLOC_LIBRARY mimalloc)
+  if(MIMALLOC_LIBRARY)
+    target_sources(Geo PRIVATE src/gmpalloc.cpp)
+    target_compile_definitions(Geo PRIVATE GEO_USE_MIMALLOC)
+    target_link_libraries(Geo PRIVATE ${MIMALLOC_LIBRARY})
+    # Внутренние контейнеры CGAL (DCEL разбиения, Compact_container, узлы
+    # ленивой арифметики) молотят операторную кучу не меньше лимбов GMP --
+    # CGAL_ALLOCATOR штатно подменяет им аллокатор. mimalloc.h приходится
+    # вставлять принудительно: макрос разворачивается в заголовках CGAL,
+    # которые про mi_stl_allocator сами не знают. Область та же, что у
+    # точных чисел: CGAL компилируется только внутри Geo.
+    target_compile_options(Geo PRIVATE -include mimalloc.h)
+    target_compile_definitions(Geo PRIVATE "CGAL_ALLOCATOR(t)=mi_stl_allocator<t>")
+    message(STATUS "Geo: GMP и контейнеры CGAL через mimalloc (${MIMALLOC_LIBRARY})")
+  else()
+    message(STATUS "Geo: mimalloc не найден, GMP на системном malloc")
+  endif()
+endif()
+
 # Объединение регионов идёт в несколько потоков (joinAll в src/cgal.cpp).
 # Без CGAL_HAS_THREADS CGAL считает себя однопоточным и правит счётчики
 # ссылок точных чисел без атомарности -- гонка на ровном месте. Boost обычно
