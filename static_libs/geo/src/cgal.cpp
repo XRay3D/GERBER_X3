@@ -152,20 +152,19 @@ unsigned workerCount() {
     // снимается без пересборки (GEO_WORKERS=1 -- честный однопоточный счёт).
     static const unsigned override_ = qEnvironmentVariableIntValue("GEO_WORKERS");
     if(override_) return override_;
-#ifdef _WIN32
-    // На Windows тонкозернистая параллель точного домена ОТРИЦАТЕЛЬНА при
-    // любой ширине: на 32-поточной машине кривая бенча geo_bench_pocket --
-    // 1 поток 5.7 с, 2 потока 10.7 с, 32 потока 32.8 с, и сериализация
-    // одного лишь joinAll картину не меняет (32 воркера parallelFor дают
-    // 20 с против 7 с у одного). Подозреваемые -- атомарные счётчики ссылок
-    // общих ленивых чисел (CGAL_HAS_THREADS) и цена thread_local (emutls
-    // MinGW) в свежих потоках; аллокатор исключён (GMP и контейнеры CGAL
-    // уже на mimalloc). Пока причина не побеждена -- счёт на месте;
-    // пофигурная параллель InflatePasses (bigPool) живёт отдельно от этого
-    // порога. На Linux ширина по ядрам выигрывает и остаётся как была.
-    return 1;
-#else
     const unsigned hardware = std::thread::hardware_concurrency();
+#ifdef _WIN32
+    // Ширина на Windows -- восемь, а не все ядра. После починки
+    // std::call_once в Lazy_rep (теневая CGAL/Lazy.h, см. cgal_shadow)
+    // параллель точного домена снова в плюсе, но кривая насыщается:
+    // 1 поток 2.29 с, 2 -- 1.64, 4 -- 1.32, 8 -- 1.21, 16 -- 1.28,
+    // 32 -- 1.31 (geo_bench_pocket, 32-поточная машина). Сверх восьми --
+    // лёгкий минус: атомарные счётчики общих ленивых чисел и пропускная
+    // способность памяти. До починки параллель была ОТРИЦАТЕЛЬНА при
+    // любой ширине -- виноват был глобальный мьютекс generic-call_once
+    // libstdc++ без futex, а не планировщик и не аллокатор.
+    return std::min(hardware ? hardware : 1u, 8u);
+#else
     return hardware ? hardware : 1;
 #endif
 }

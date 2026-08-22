@@ -40,10 +40,16 @@ add_library(Geo::Geo ALIAS Geo)
 
 # include/ -- наружу, src/ -- только своим: cgal.h и offsetcapsules.h
 # тянут за собой EPECK, и вызывающему они не нужны.
+#
+# src/cgal_shadow затеняет CGAL/Lazy.h исправленной копией (std::call_once
+# на MinGW -- глобальный мьютекс с SetEvent на каждую эксактификацию, см.
+# шапку копии). Наши -I каталоги стоят раньше -isystem путей CGAL, поэтому
+# копия выигрывает у системной во всех единицах трансляции Geo -- а CGAL
+# нигде, кроме Geo, и не компилируется.
 target_include_directories(
   Geo
   PUBLIC ${CMAKE_CURRENT_SOURCE_DIR}/include
-  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src)
+  PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/src ${CMAKE_CURRENT_SOURCE_DIR}/src/cgal_shadow)
 
 # Qt6::Gui, а не Widgets: из Qt здесь только QPointF/QRectF и QPainterPath.
 target_link_libraries(Geo PUBLIC Qt6::Gui Threads::Threads simdjson)

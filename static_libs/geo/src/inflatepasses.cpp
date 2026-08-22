@@ -27,20 +27,12 @@ constexpr std::size_t bigSource = 64;
 
 // GEO_BIG_POOL -- диагностический размер пула крупных источников: снять
 // кривую пофигурного масштабирования без пересборки (1 -- последовательно).
-//
-// На Windows пул по умолчанию единичный: даже ПОЛНОСТЬЮ независимые крупные
-// источники душат друг друга (bench_pocket, 6 тел-полос: пул 1 -- 3.3 с,
-// пул 2 -- 5.7 с, пул 6 -- 7.6 с) -- та же аномалия, что у parallelFor и
-// joinAll (см. workerCount в cgal.cpp): под подозрением атомарные счётчики
-// ссылок ленивых чисел и emutls MinGW. Linux не затронут.
+// После починки call_once в Lazy_rep (теневая CGAL/Lazy.h) пофигурная
+// параллель в плюсе и на Windows: 6 тел-полос -- пул 1 даёт 1.49 с,
+// пул 4-6 -- 1.27 с, а вместе с восьмёркой воркеров -- 0.62 с.
 std::size_t bigPoolSize() {
     static const std::size_t override_ = qEnvironmentVariableIntValue("GEO_BIG_POOL");
-    if(override_) return override_;
-#ifdef _WIN32
-    return 1;
-#else
-    return 6;
-#endif
+    return override_ ? override_ : 6;
 }
 
 std::size_t verticesOf(const Polylines& contours) {
