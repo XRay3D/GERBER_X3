@@ -363,8 +363,8 @@ void Form::on_customContextMenuRequested(const QPoint& pos) {
                 } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, {}, u"\""_s + tool.name() + tr("\" not suitable for Tu") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + u"_s-u"_s + model->data(current.sibling(current.row(), 0)).toString() + u"_s-"_s);
                 } else if(!model->isSlot(current.row())) {
-                    if(model->toolId(current.row()) > Tool::ID::Null && !model->useForCalc(current.row()))
-                        continue;
+                    // Новый выбор заменяет старый инструмент независимо от текущей
+                    // галки -- setToolId сам взводит её обратно.
                     model->setToolId(current.row(), tool.id());
                 }
             }
@@ -408,8 +408,8 @@ void Form::customContextMenuRequested(const QPoint& pos) {
                 } else if(model->isSlot(current.row()) && tool.type() != Tool::EndMill) {
                     QMessageBox::information(this, {}, u"\""_s + tool.name() + tr("\" not suitable for Tu") + model->data(current.sibling(current.row(), 0), Qt::UserRole).toString() + u"_s-u"_s + model->data(current.sibling(current.row(), 0)).toString() + u"_s-"_s);
                 } else if(!model->isSlot(current.row())) {
-                    if(model->toolId(current.row()) > Tool::ID::Null && !model->useForCalc(current.row()))
-                        continue;
+                    // Новый выбор заменяет старый инструмент независимо от текущей
+                    // галки -- setToolId сам взводит её обратно.
                     model->setToolId(current.row(), tool.id());
                 }
             }
@@ -504,8 +504,8 @@ void Form::computePaths() {
                     else
                         pathsMap[row.toolId].paths.push_back(item->paths().front());
                 }
-                model->setCreate(i++, !pathsMap.contains(row.toolId));
             }
+            ++i;
         }
 
         for(auto [usedToolId, data]: pathsMap) {
@@ -530,6 +530,10 @@ void Form::computePaths() {
                     App::project().replaceFile(it->second, gcode);
                 else
                     createdSlotFileIds_[usedToolId] = App::project().addFile(gcode);
+
+                // УП по этим строкам реально получилась -- только теперь снимаем галки.
+                for(int row: data.toolsApertures)
+                    model->setCreate(row, false);
             }
         }
     }
@@ -544,7 +548,6 @@ void Form::computePaths() {
         std::map<Tool::ID, Data> pathsMap;
 
         for(int i{}; auto&& row: *model) {
-            bool created{};
             if(row.toolId > Tool::ID::Null && row.useForCalc) {
                 pathsMap[row.toolId].toolsApertures.push_back(i);
                 for(auto& item: row.items) {
@@ -557,16 +560,13 @@ void Form::computePaths() {
                             switch(side) {
                             case GCode::On:
                                 pathsMap[row.toolId].paths.append_range(item->paths());
-                                created = true;
                                 break;
                             case GCode::Outer:
                                 pathsMap[row.toolId].paths.append_range(item->offset());
-                                created = true;
                                 break;
                             case GCode::Inner:
                                 // if (item->fit(dsbxDepth->value())) {
                                 pathsMap[row.toolId].paths.append_range(item->offset());
-                                created = true;
                                 // }
                                 break;
                             }
@@ -576,22 +576,18 @@ void Form::computePaths() {
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Drill) {
                             // if (App::toolHolder().tool(row.toolId).type() != Tool::Drill && item->fit(dsbxDepth->value())) {
                             pathsMap[row.toolId].paths.append_range(item->offset());
-                            created = true;
                             // }
                         }
                         break;
                     case GCType::Drill:
                         if(App::toolHolder().tool(row.toolId).type() != Tool::Engraver || App::toolHolder().tool(row.toolId).type() != Tool::Laser) {
                             pathsMap[row.toolId].drillPath.emplace_back(item->pos());
-                            created = true;
                         }
                         break;
                     default:;
                     }
                 }
             }
-            if(created)
-                model->setCreate(i, false);
             ++i;
         }
 
@@ -620,6 +616,10 @@ void Form::computePaths() {
                     App::project().replaceFile(it->second, gcode);
                 else
                     createdDrillFileIds_[toolId] = App::project().addFile(gcode);
+
+                // УП по этим строкам реально получилась -- только теперь снимаем галки.
+                for(int row: val.toolsApertures)
+                    model->setCreate(row, false);
             }
             if(val.paths.size()) {
                 switch(worckType) {
@@ -666,8 +666,23 @@ std::vector<RowRef> Form::rowRefs(const std::vector<int>& indexes) const {
     return refs;
 }
 
+void Form::uncheckRows(const std::vector<RowRef>& rows) {
+    if(!model) return;
+    auto& data = model->data();
+    for(const RowRef& ref: rows)
+        for(size_t i{}; i < data.size(); ++i)
+            if(data[i].name.join(u'|') == ref.name) {
+                model->setCreate(static_cast<int>(i), false);
+                break;
+            }
+}
+
 void Form::fileHandler(GCode::File* file_) {
-    // Профиль и карман считает чужой Creator, а строки таблицы -- наши.
+    // Профиль и карман считает чужой Creator, а результат приходит асинхронно:
+    // галки снимаем только теперь, когда успех (file_ != nullptr) уже известен.
+    if(file_)
+        uncheckRows(pendingRows_);
+
     if(auto* drillFile = dynamic_cast<File*>(file_); drillFile) {
         drillFile->setRows(std::move(pendingRows_));
         drillFile->setWorckType(static_cast<int>(worckType));

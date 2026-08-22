@@ -88,6 +88,9 @@ protected:
     // Строки таблицы с данными индексами -- в том виде, в каком их надо будет
     // восстановить при правке.
     std::vector<RowRef> rowRefs(const std::vector<int>& indexes) const;
+    // Снимает галку "Create" только у перечисленных строк -- зовётся ПОСЛЕ
+    // подтверждения, что УП по ним реально получилась, не раньше.
+    void uncheckRows(const std::vector<RowRef>& rows);
     // Строки текущего прогона: их нечем передать через Creator, поэтому лежат
     // здесь между emit createToolpath и приходом файла.
     std::vector<RowRef> pendingRows_;
