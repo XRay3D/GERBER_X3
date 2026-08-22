@@ -121,6 +121,16 @@ fetchcontent_declare(
 # заглядывает, а линкер спокойно сливает оба формата.
 if(MINGW)
   set(CMAKE_INTERPROCEDURAL_OPTIMIZATION_RELEASE OFF)
+
+  # Встроенная раскладка WHOLE_ARCHIVE у CMake для GNU-фронтенда --
+  # --push-state/--pop-state, а lld в MinGW-режиме (COFF) этих опций не
+  # знает и валит линковку libggcore. Простая пара
+  # --whole-archive/--no-whole-archive делает то же самое и понятна обоим
+  # линкерам -- и bfd, и lld. Переменная именно ЯЗЫКОВАЯ: у CMake фича
+  # задана per-language, и generic-вариант ею перекрывается.
+  set(CMAKE_CXX_LINK_LIBRARY_USING_WHOLE_ARCHIVE
+      "LINKER:--whole-archive" "<LINK_ITEM>" "LINKER:--no-whole-archive")
+  set(CMAKE_CXX_LINK_LIBRARY_USING_WHOLE_ARCHIVE_SUPPORTED TRUE)
 endif()
 
 fetchcontent_makeavailable(ctre simdjson)
