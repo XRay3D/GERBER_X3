@@ -121,11 +121,17 @@ function millingProfileTile(file, pathss, depths) {
     }
 }
 
-// Milling pocket (offset loops): consecutive loops are linked at depth; a jump
-// longer than three tool diameters is a break -- lift and re-enter.
+// Milling pocket (offset loops): consecutive loops of the SAME pocket (i
+// unchanged) are linked at depth, a jump longer than three tool diameters is
+// a break -- lift and re-enter. Crossing to a different pathss[i] always
+// lifts, even when its start point lands close by: separate i's are
+// independently computed regions (e.g. two nearby drilled pads) with no
+// guarantee their boundaries actually touch -- dragging the tool through
+// whatever solid stock sits between them at full depth breaks it.
 function millingPocketTile(file, pathss, depths) {
     var toolDiameter = file.toolDiameter;
     var prevPt = pathss[0][0][0];
+    var prevI = 0;
     file.startPath(prevPt.x, prevPt.y);
 
     for (var i = 0; i < pathss.length; i++) {
@@ -135,11 +141,12 @@ function millingPocketTile(file, pathss, depths) {
                 var pt = paths[j][0];
                 var dx = pt.x - prevPt.x;
                 var dy = pt.y - prevPt.y;
-                if (Math.sqrt(dx * dx + dy * dy) > toolDiameter * 3) {
+                if (i !== prevI || Math.sqrt(dx * dx + dy * dy) > toolDiameter * 3) {
                     file.endPath();
                     file.startPath(pt.x, pt.y);
                 }
                 prevPt = pt;
+                prevI = i;
                 file.addLine(file.formatted([file.g1(), file.fmtX(pt.x), file.fmtY(pt.y)]));
                 plungeTo(file, depths[d]);
                 appendLines(file, file.savePathLines(i, j, false, 0, 0));
