@@ -14,6 +14,8 @@
 #include "gc_form.h"
 #include "gc_plugin.h"
 
+#include <deque>
+
 namespace Ui {
 class DrillForm;
 }
@@ -52,13 +54,16 @@ private:
     GCType worckType = GCType::Drill;
     GCode::SideOfMilling side = GCode::Inner;
     // УП, пересчитанные за текущий показ формы: id проекта по toolId, чтобы
-    // повторный Create ЗАМЕНЯЛ их, а не плодил дубли. Две карты, а не одна --
-    // ветка пазов (worckType == Drill) и ветка простых отверстий ("other",
-    // тот же worckType) считают НЕЗАВИСИМЫЕ pathsMap и могут за один клик дать
-    // по файлу на один toolId из каждой; смешивать их id в одном ключе нельзя.
+    // повторный Create ЗАМЕНЯЛ их, а не плодил дубли. Четыре карты, а не одна --
+    // ветка пазов (worckType == Drill), ветка простых отверстий ("other", тот
+    // же worckType) и асинхронные ветки Profile/Pocket по отверстиям считают
+    // НЕЗАВИСИМЫЕ pathsMap и могут за один клик дать по файлу на один toolId
+    // из каждой; смешивать их id в одном ключе нельзя.
     // Сбрасываются в showEvent() -- после закрытия/переоткрытия формы снова add-new.
     std::map<Tool::ID, int32_t> createdSlotFileIds_;
     std::map<Tool::ID, int32_t> createdDrillFileIds_;
+    std::map<Tool::ID, int32_t> createdProfileFileIds_;
+    std::map<Tool::ID, int32_t> createdPocketFileIds_;
 
     void initToolTable();
 
@@ -91,14 +96,34 @@ protected:
     // Снимает галку "Create" только у перечисленных строк -- зовётся ПОСЛЕ
     // подтверждения, что УП по ним реально получилась, не раньше.
     void uncheckRows(const std::vector<RowRef>& rows);
-    // Строки текущего прогона: их нечем передать через Creator, поэтому лежат
-    // здесь между emit createToolpath и приходом файла.
-    std::vector<RowRef> pendingRows_;
+    // Профиль/карман по отверстиям считает чужой Creator и результат приходит
+    // асинхронно; при этом computePaths() может за один клик прогнать НЕСКОЛЬКО
+    // независимых по toolId прогонов подряд -- каждый следующий стартует, только
+    // дождавшись предыдущего worker'а (startCompute -> stopWorker блокирует), но
+    // их fileReady доставляются позже, все разом, уже после выхода из
+    // computePaths(). Раз состояние одно на форму, а прогонов может быть N,
+    // контекст каждого -- в очереди, а не в одиночных полях; FIFO гарантирован
+    // тем же ожиданием предыдущего worker'а.
+    struct PendingRun {
+        std::vector<RowRef> rows;
+        GCType worckType{};
+        Tool::ID toolId{};
+        QString programName;
+    };
+    std::deque<PendingRun> pendingRuns_;
+    // Плагины с собственной независимой моделью "что сейчас правится" (свои
+    // карты toolId->fileId на каждую ветку) не пользуются единым fileId/
+    // editMode_ базового класса -- он бы не различил несколько программ,
+    // получившихся за один клик.
+    bool autoEnterEditMode() const override { return false; }
     // QWidget interface
     void showEvent(QShowEvent* event) override {
         updateFiles();
         createdSlotFileIds_.clear();
         createdDrillFileIds_.clear();
+        createdProfileFileIds_.clear();
+        createdPocketFileIds_.clear();
+        pendingRuns_.clear();
         // Базовая, а не event->accept(): в GCode::Form::showEvent сбрасывается
         // режим правки, иначе форма молча перепишет УП из прошлого сеанса.
         GCode::Form::showEvent(event);

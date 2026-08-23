@@ -46,6 +46,12 @@ signals:
 
 protected:
     virtual void fileHandler(File* file);
+    // Плагины с собственной независимой моделью "что сейчас правится" (Drilling:
+    // свои карты toolId->fileId по каждой ветке вместо единого fileId/editMode_ --
+    // один клик там может провернуть несколько независимых программ, а fileId в
+    // базе один) переопределяют это в false, чтобы fileHandler() не совал туда
+    // чужой fileId после свежего прогона.
+    virtual bool autoEnterEditMode() const { return true; }
     void updateButtonIconSize() {
         for(auto* button: findChildren<QPushButton*>())
             button->setIconSize({16, 16});

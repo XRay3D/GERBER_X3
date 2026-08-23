@@ -340,6 +340,14 @@ void Form::fileHandler(File* file) {
     } else
         App::project().addFile(file);
 
+    // Свежий прогон (fileId ещё не назначен): запоминаем id ПЕРВОГО пришедшего
+    // файла, не последнего. files_ в Project -- std::map<int,...>, id раздаются
+    // по возрастанию в порядке добавления (Project::addFile), а подчистка
+    // "лишних" ниже съедает replacedIds_ front-first в том же порядке -- значит
+    // именно САМЫЙ ПЕРВЫЙ id переживёт любое будущее сокращение числа файлов
+    // программы (PocketOffset: было 3 инструмента, стало 2), а не последний.
+    if(fileId < 0 && autoEnterEditMode()) fileId = file->id();
+
     // Прогон окончен (fileCount обнулился выше). Прежних файлов под этим именем
     // могло быть больше, чем новых -- скажем, у PocketOffset убрали инструмент.
     // Лишние убираем вместе с их строками в дереве: файл живёт ровно столько,
@@ -357,9 +365,12 @@ void Form::fileHandler(File* file) {
         for(int32_t id: programIds(fileName_))
             if(auto* f = App::project().file(id); f) nodes.push_back(f->node());
         App::fileModel().groupProgram(fileName_, nodes);
-        // Форма остаётся в режиме правки: повторный расчёт под тем же именем
-        // снова перезапишет ту же УП, не задавая вопросов.
-        if(fileId < 0) setEditMode(false);
+        // Форма остаётся в режиме правки: следующий клик Create в этой же
+        // сессии показа формы под тем же именем тихо перепишет ту же УП (см.
+        // ветку editMode_ && origName == target в resolveFileName), а не
+        // спросит. На явное открытие существующей УП через дерево это не
+        // влияет -- там fileId уже был >-1 до начала прогона.
+        if(fileId > -1) setEditMode(true);
     }
 }
 

@@ -624,7 +624,13 @@ void Form::computePaths() {
             if(val.paths.size()) {
                 switch(worckType) {
                 case GCType::Profile: {
-                    pendingRows_ = rowRefs(val.toolsApertures);
+                    const QString programName = App::toolHolder().tool(toolId).nameEnc();
+                    pendingRuns_.push_back({rowRefs(val.toolsApertures), GCType::Profile, toolId, programName});
+                    fileName_ = programName;
+                    replacedIds_.clear();
+                    if(auto it = createdProfileFileIds_.find(toolId);
+                        it != createdProfileFileIds_.end() && App::project().file(it->second))
+                        replacedIds_ = {it->second};
                     gcp = {};
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(side);
@@ -636,7 +642,13 @@ void Form::computePaths() {
                     emit createToolpath(&gcp);
                 } break;
                 case GCType::Pocket: {
-                    pendingRows_ = rowRefs(val.toolsApertures);
+                    const QString programName = App::toolHolder().tool(toolId).nameEnc();
+                    pendingRuns_.push_back({rowRefs(val.toolsApertures), GCType::Pocket, toolId, programName});
+                    fileName_ = programName;
+                    replacedIds_.clear();
+                    if(auto it = createdPocketFileIds_.find(toolId);
+                        it != createdPocketFileIds_.end() && App::project().file(it->second))
+                        replacedIds_ = {it->second};
                     gcp = {};
                     gcp.setConvent(ui->rbConventional->isChecked());
                     gcp.setSide(GCode::Inner);
@@ -678,18 +690,37 @@ void Form::uncheckRows(const std::vector<RowRef>& rows) {
 }
 
 void Form::fileHandler(GCode::File* file_) {
+    // Асинхронная ветка Profile/Pocket по отверстиям кладёт свой контекст в
+    // pendingRuns_ FIFO; синхронные ветки (пазы, простые точки) сюда не
+    // попадают вовсе -- pendingRuns_ для их файлов пуст.
+    PendingRun run;
+    const bool isAsyncRun = !pendingRuns_.empty();
+    if(isAsyncRun) {
+        run = std::move(pendingRuns_.front());
+        pendingRuns_.pop_front();
+        fileName_ = run.programName;
+    }
+
     // Профиль и карман считает чужой Creator, а результат приходит асинхронно:
     // галки снимаем только теперь, когда успех (file_ != nullptr) уже известен.
     if(file_)
-        uncheckRows(pendingRows_);
+        uncheckRows(run.rows);
 
     if(auto* drillFile = dynamic_cast<File*>(file_); drillFile) {
-        drillFile->setRows(std::move(pendingRows_));
+        drillFile->setRows(std::move(run.rows));
         drillFile->setWorckType(static_cast<int>(worckType));
         drillFile->setSrcFileId(file ? file->id() : -1);
     }
-    pendingRows_.clear();
+
     GCode::Form::fileHandler(file_);
+
+    // file_ после вызова базы трогать нельзя (canceled_ его удаляет) -- берём
+    // итоговый id по имени программы, оно уникально на toolId (tool.nameEnc()).
+    if(isAsyncRun && file_) {
+        auto& map = run.worckType == GCType::Profile ? createdProfileFileIds_ : createdPocketFileIds_;
+        if(auto ids = programIds(run.programName); !ids.empty())
+            map[run.toolId] = ids.front();
+    }
 }
 
 void Form::editFile(GCode::File* file_) {
