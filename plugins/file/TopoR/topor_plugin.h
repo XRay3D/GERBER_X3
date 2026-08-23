@@ -3,46 +3,40 @@
  * Version   :  na                                                              *
  * Date      :  March 25, 2023                                                  *
  * Website   :  na                                                              *
- * Copyright :  Damir Bakiev 2016-2023                                          *
+ * Copyright :  Damir Bakiev 2016-2026                                          *
  * License   :                                                                  *
  * Use, modification & distribution is subject to Boost Software License Ver 1. *
  * http://www.boost.org/LICENSE_1_0.txt                                         *
  *******************************************************************************/
 #pragma once
 
-#include "topor_parser.h"
-
 #include "abstract_fileplugin.h"
+#include "topor_types.h"
 
 #include <QObject>
-#include <QStack>
 
 namespace TopoR {
 
-class Plugin : public AbstractFilePlugin, Parser {
+class Plugin : public AbstractFilePlugin {
     Q_OBJECT
-    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "topor.json")
+    Q_PLUGIN_METADATA(IID ParserInterface_iid FILE "description.json")
     Q_INTERFACES(AbstractFilePlugin)
 
 public:
-    Plugin(QObject* parent = nullptr);
-
-    bool thisIsIt(const QString& fileName) override;
-
-    uint32_t type() const override;
-    QString folderName() const override;
-
-    AbstractFile* loadFile(QDataStream& stream) constoverride;
-    QIcon icon() const override;
-    AbstractFileSettings* createSettingsTab(QWidget* parent) override;
-    void addToGcForm(AbstractFile* file, QComboBox* cbx) override;
-    // DrillPreviewGiMap createDrillPreviewGi(AbstractFile* file, std::vector<Row>& data) override;
-
-    // public slots:
-    AbstractFile* parseFile(const QString& fileName, int type) override;
+    explicit Plugin(QObject* parent = nullptr);
 
     // AbstractFilePlugin interface
-    std::any getDataForGC(AbstractFile* file, GCode::Plugin* plugin, std::any param = {}) override;
+    bool thisIsIt(const QString& fileName) override;
+    uint32_t type() const override { return TOPOR; }
+    QString folderName() const override { return tr("TopoR"); }
+    AbstractFile* loadFile(std::string_view json) const override;
+    std::string_view typeName() const override;
+    QIcon icon() const override;
+    void updateFileModel(AbstractFile* file) override;
+    QString extension() const override { return tr("TopoR (*.fst)"); }
+
+    // public slots:
+    AbstractFile* parseFile(const QString& fileName, uint32_t type) override;
 };
 
 } // namespace TopoR

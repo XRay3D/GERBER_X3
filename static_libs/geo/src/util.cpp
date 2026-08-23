@@ -77,6 +77,34 @@ double bulgeOf(QPointF p1, QPointF p2, QPointF center, Vertex::Dir dir) {
     return bulgeOf(arcSweep(p1, p2, center, dir));
 }
 
+double bulgeOf(QPointF p1, QPointF p2, QPointF p3) {
+    // Центр -- пересечение серединных перпендикуляров p1p2/p2p3, тем же
+    // способом, что и circumcenter треугольника.
+    const double ax = p1.x(), ay = p1.y();
+    const double bx = p2.x(), by = p2.y();
+    const double cx = p3.x(), cy = p3.y();
+    const double d = 2.0 * (ax * (by - cy) + bx * (cy - ay) + cx * (ay - by));
+    if(std::abs(d) < eps) return 0.0; // p1/p2/p3 на одной прямой -- отрезок
+
+    const double a2 = ax * ax + ay * ay, b2 = bx * bx + by * by, c2 = cx * cx + cy * cy;
+    const QPointF center{
+        (a2 * (by - cy) + b2 * (cy - ay) + c2 * (ay - by)) / d,
+        (a2 * (cx - bx) + b2 * (ax - cx) + c2 * (bx - ax)) / d,
+    };
+
+    // Направление -- та из двух дуг p1->p3, что проходит через p2: сравниваем,
+    // какой угол (до p2 или до p3) короче при обходе против часовой от p1.
+    const auto angleOf = [center](QPointF p) { return std::atan2(p.y() - center.y(), p.x() - center.x()); };
+    const double a1 = angleOf(p1), aMid = angleOf(p2), a3 = angleOf(p3);
+    auto normCcw = [](double from, double to) {
+        double d = to - from;
+        while(d < 0.0) d += 2.0 * pi;
+        return d;
+    };
+    const Vertex::Dir dir = normCcw(a1, aMid) < normCcw(a1, a3) ? Vertex::Ccw : Vertex::Cw;
+    return bulgeOf(p1, p3, center, dir);
+}
+
 double distance(QPointF a, QPointF b) { return std::hypot(b.x() - a.x(), b.y() - a.y()); }
 
 double segmentLength(const Vertex& from, const Vertex& to) {

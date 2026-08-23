@@ -73,6 +73,13 @@ inline constexpr double maxBulgeSweep = 2.0 * pi - 1e-9;
 double bulgeOf(double theta);
 double bulgeOf(QPointF p1, QPointF p2, QPointF center, Vertex::Dir dir);
 
+// Прогиб дуги p1 -> p3, проходящей через p2 (задание "начало-середина-конец",
+// TopoR ArcByMiddle/SegmentArcByMiddle). Центр -- пересечение серединных
+// перпендикуляров p1p2 и p2p3; направление -- та из двух дуг p1->p3, что
+// проходит через p2. 0.0, если p1/p2/p3 лежат на одной прямой (вырождено --
+// сегмент прямой).
+double bulgeOf(QPointF p1, QPointF p2, QPointF p3);
+
 // Расстояние между точками. Мелочь, но своя: geometry.h с его Length ушёл, а
 // считать hypot по разностям координат приходится всюду.
 double distance(QPointF a, QPointF b);
