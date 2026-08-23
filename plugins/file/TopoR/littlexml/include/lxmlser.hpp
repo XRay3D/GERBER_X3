@@ -177,11 +177,20 @@ inline constexpr auto logRed = Log<Red>{};
 inline constexpr auto logWhite = Log<White>{};
 inline constexpr auto logYellow = Log<Yellow>{};
 
+// Голое имя сущности: display_string_of с GCC 16.1.1 (июль 2026) стал давать
+// полностью квалифицированное имя ("TopoR::Layers::Layer"), а XML-теги --
+// неквалифицированные, поэтому везде, где имя сверяется с документом,
+// нужен identifier_of.
+inline consteval auto identOf(meta::info info) -> string_view {
+    return meta::has_identifier(info) ? meta::identifier_of(info)
+                                      : meta::display_string_of(info);
+}
+
 template <IsEnum Enum>
 inline constexpr auto toEnum(string_view name) -> Enum {
     template for(constexpr meta::info ENUM:
         std::define_static_array(enumerators_of(^^Enum))) {
-        if(std::meta::display_string_of(ENUM) == name) return [:ENUM:];
+        if(identOf(ENUM) == name) return [:ENUM:];
     }
     return Enum{};
 }
@@ -194,7 +203,7 @@ inline constexpr auto toString(Enum e) -> string_view {
     // выше (if вместо case), компилируется и на GCC, и на Clang.
     template for(constexpr meta::info ENUM:
         std::define_static_array(enumerators_of(^^Enum))) {
-        if(e == [:ENUM:]) return display_string_of(ENUM);
+        if(e == [:ENUM:]) return identOf(ENUM);
     }
     return ""sv;
 }
@@ -251,11 +260,11 @@ private:
             return string_view{};
         }()};
         string_view T_NAME{is_type(info)
-                ? display_string_of(info)
-                : display_string_of(type_of(info))};
+                ? identOf(info)
+                : identOf(type_of(info))};
         string_view F_NAME{is_type(info)
                 ? ""
-                : display_string_of(info)};
+                : identOf(info)};
         // logYellow("nameOf -> A: {}, T: {}, F: {}", A_NAME, T_NAME, F_NAME);
         return A_NAME.size() ? A_NAME : (F_NAME.size() ? F_NAME : T_NAME);
     }
