@@ -33,3 +33,11 @@ else()
 endif()
 
 add_library(lxml::lxml ALIAS lxml)
+
+# Тесты: по умолчанию только при сборке littlexml отдельным проектом;
+# в составе GERBER_X3 включаются через -DLXML_BUILD_TESTS=ON.
+option(LXML_BUILD_TESTS "Build littlexml tests" ${PROJECT_IS_TOP_LEVEL})
+if(LXML_BUILD_TESTS)
+  enable_testing()
+  add_subdirectory(tests)
+endif()

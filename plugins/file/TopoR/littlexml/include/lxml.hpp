@@ -2,10 +2,13 @@
 
 #include <algorithm>
 #include <cassert>
+#include <expected>
+#include <format>
 #include <memory>
 #include <meta>
 #include <print>
 #include <ranges>
+#include <string>
 #include <vector>
 
 // #include <boost/property_tree/ptree.hpp>
@@ -109,7 +112,7 @@ struct Document {
 struct Data {
     string_view key;
     std::variant<string_view, std::string> value_;
-    string_view value() const {
+    constexpr string_view value() const {
         return value_.visit([](auto&& arg) -> string_view { return arg; });
     }
 };
@@ -123,7 +126,7 @@ struct NodeTag : Data, std::vector<std::unique_ptr<NodeTag>> {
     struct NodeTag* parent{};
     AttributeList attributes{};
 
-    explicit NodeTag(NodeTag* parent = nullptr);
+    constexpr explicit NodeTag(NodeTag* parent = nullptr);
 
     explicit NodeTag(NodeTag* parent, string_view key, string_view val = {})
         : Data{key, val}, parent{parent} {
@@ -135,21 +138,63 @@ struct NodeTag : Data, std::vector<std::unique_ptr<NodeTag>> {
         if(parent) parent->emplace_back(this);
     }
 
-    ~NodeTag() = default;
+    constexpr ~NodeTag() = default;
     NodeList children(string_view tag);
-    string_view attrVal(string_view key);
+    constexpr string_view attrVal(string_view key);
     Attribute* attr(string_view key);
 
-    NodeTag* firstChild(string_view tag) {
+    constexpr NodeTag* firstChild(string_view tag) {
         auto it = r::find(*this, tag, &Data::key);
         return it != end() ? it->get() : nullptr;
     }
 
-    string_view tag() const noexcept { return key; }
-    string_view text() const noexcept { return value(); }
+    constexpr string_view tag() const noexcept { return key; }
+    constexpr string_view text() const noexcept { return value(); }
 
-    void setTag(string_view newTag) noexcept;
-    void setText(string_view newText) noexcept { value_ = newText; }
+    constexpr void setTag(string_view newTag) noexcept;
+    constexpr void setText(string_view newText) noexcept { value_ = newText; }
+};
+
+// Ошибка разбора: где (offset/line/column от начала документа) и что именно.
+// Вьюхи expected/found смотрят в разбираемый буфер -- живы, пока жив он.
+struct ParseError {
+    enum class Code {
+        UnexpectedEof,         // документ оборвался посреди разметки
+        UnterminatedTag,       // '<' без соответствующего '>'
+        UnterminatedAttrValue, // значение атрибута без закрывающей кавычки
+        AttrValueWithoutKey,   // кавычка без имени атрибута перед ней
+        UnterminatedComment,   // '<!--' без '-->'
+        UnsupportedMarkup,     // '<!DOCTYPE', '<![CDATA[' и прочее
+        EmptyTagName,          // '<>' -- тег без имени
+        TagMismatch,           // закрывающий тег не совпал с открытым элементом
+        ExtraClosingTag,       // закрывающий тег, когда всё уже закрыто
+        UnclosedElement,       // конец документа внутри незакрытого элемента
+    };
+    Code code{};
+    size_t offset{};             // байтов от начала документа
+    size_t line{1}, column{1};   // 1-based
+    string_view expected{};      // TagMismatch/UnclosedElement: имя открытого элемента
+    string_view found{};         // имя встреченного тега либо фрагмент документа у ошибки
+
+    std::string message() const {
+        using enum Code;
+        std::string what;
+        switch(code) {
+        case UnexpectedEof: what = "unexpected end of document"; break;
+        case UnterminatedTag: what = "tag is never closed ('>' not found)"; break;
+        case UnterminatedAttrValue: what = "attribute value is missing its closing quote"; break;
+        case AttrValueWithoutKey: what = "attribute value has no name"; break;
+        case UnterminatedComment: what = "comment is never closed ('-->' not found)"; break;
+        case UnsupportedMarkup: what = "unsupported '<!' markup (only comments are supported)"; break;
+        case EmptyTagName: what = "tag has no name"; break;
+        case TagMismatch: what = std::format("closing tag </{}> does not match open element <{}>", found, expected); break;
+        case ExtraClosingTag: what = std::format("closing tag </{}>, but no element is open", found); break;
+        case UnclosedElement: what = std::format("end of document, but element <{}> is still open", expected); break;
+        }
+        const bool tagCtx = code == TagMismatch || code == ExtraClosingTag || code == UnclosedElement;
+        if(!tagCtx && found.size()) what += std::format(", near '{}'", found);
+        return std::format("{}:{}: {}", line, column, what);
+    }
 };
 
 struct Document {
@@ -158,14 +203,14 @@ struct Document {
     string_view version;
     string_view encoding;
     bool load(string_view path);
-    constexpr bool parse(string_view path);
+    constexpr std::expected<void, ParseError> parse(string_view buf);
     bool write(string_view path, int indent);
 };
 
 // =============== Implementation ===============
 
 // =============== Node ===============
-inline void NodeTag::setTag(string_view newTag) noexcept {
+inline constexpr void NodeTag::setTag(string_view newTag) noexcept {
     if(key.size()) return;
     if(newTag.starts_with('<'))
         newTag = newTag.substr(1);
@@ -174,7 +219,7 @@ inline void NodeTag::setTag(string_view newTag) noexcept {
     key = newTag;
 }
 
-inline NodeTag::NodeTag(NodeTag* parent)
+inline constexpr NodeTag::NodeTag(NodeTag* parent)
     : parent{parent} {
     if(parent) parent->emplace_back(this);
 }
@@ -186,7 +231,7 @@ inline NodeList NodeTag::children(string_view tag) {
     return list;
 }
 
-inline string_view NodeTag::attrVal(string_view key) {
+inline constexpr string_view NodeTag::attrVal(string_view key) {
     for(int i = 0; i < attributes.size(); i++) {
         Attribute attr = attributes /*.data*/[i];
         if(attr.key == key)
@@ -217,12 +262,38 @@ inline bool Document::load(string_view path) {
     buf.resize(size);
     fread(buf.data(), 1, size, file.get());
 
-    return parse(buf);
+    if(auto parsed = parse(buf); !parsed) {
+        println(stderr, "{}:{}", path, parsed.error().message());
+        return false;
+    }
+    return true;
 }
 
-inline constexpr bool Document::parse(string_view buf) {
-    string_view lex;
-    size_t i;
+// Никакого вывода внутри -- все ошибки через std::expected, поэтому parse
+// пригоден и для constexpr (тесты в littlexml/tests проверяют это static_assert'ом).
+inline constexpr std::expected<void, ParseError> Document::parse(string_view buf) {
+    const string_view doc = buf; // весь документ -- для позиций ошибок
+    using Code = ParseError::Code;
+
+    auto fail = [doc](Code code, string_view at,
+                    string_view expected = {}, string_view found = {}) {
+        const size_t offset = size_t(at.data() - doc.data());
+        const size_t prevNl = offset ? doc.rfind('\n', offset - 1) : doc.npos;
+        if(found.empty()) { // нет явного контекста -- фрагмент документа у ошибки
+            found = at.substr(0, std::min<size_t>(at.size(), 40u));
+            if(size_t nl = found.find_first_of("\r\n"sv); nl < found.size())
+                found = found.substr(0, nl);
+        }
+        return std::unexpected{
+            ParseError{
+                       .code = code,
+                       .offset = offset,
+                       .line = 1 + size_t(r::count(doc.substr(0, offset), '\n')),
+                       .column = offset - (prevNl == doc.npos ? 0 : prevNl + 1) + 1,
+                       .expected = expected,
+                       .found = found}
+        };
+    };
 
     NodeTag* currNode = &root;
     // Remove bom
@@ -234,121 +305,118 @@ inline constexpr bool Document::parse(string_view buf) {
         INLINE
     };
 
-    static constexpr auto parseAttrs = +[](string_view& buf, NodeTag& node) -> TagType {
+    // Один тег от '<' до '>': имя + атрибуты. При ошибке оставляет buf на
+    // проблемном месте и возвращает только код -- позицию и контекст
+    // достраивает вызывающая сторона через fail.
+    static constexpr auto parseAttrs = +[](string_view& buf, NodeTag& node) -> std::expected<TagType, Code> {
         Attribute attr;
-        TagType tt;
-        size_t i{};
-        while(i < buf.size()) {
-            i = buf.find_first_of(attr.key.empty() ? " '\"=>"sv : "'\""sv);
+        char quote{}; // кавычка, открывшая значение: другая внутри него -- часть значения
+        for(;;) {
+            const size_t i = quote
+                ? buf.find_first_of(quote)
+                : buf.find_first_of(attr.key.empty() ? " \t\r\n'\"=>"sv : "'\""sv);
+            if(i >= buf.size())
+                return std::unexpected{quote ? Code::UnterminatedAttrValue : Code::UnterminatedTag};
             switch(buf[i]) {
-            case ' ': {
+            case ' ':
+            case '\t':
+            case '\r':
+            case '\n':
                 node.setTag(buf.substr(1, i));
-                buf = buf.substr(++i);
+                buf = buf.substr(i + 1);
                 continue;
-            } break;
             case '\'':
-            case '"': {
-                if(attr.key.empty()) {
-                    println(stderr, "Value has no key");
-                    return TagType::START;
-                }
-                i = buf.find_first_of("'\"");
-                attr.value_ = buf.substr(0, i);
-                buf = buf.substr(++i);
-                node.attributes.emplace_back(attr);
-                attr.key = {};
-                attr.value_ = {};
+            case '"':
+                if(quote) { // закрывающая
+                    attr.value_ = buf.substr(0, i);
+                    node.attributes.emplace_back(attr);
+                    attr = {};
+                    quote = {};
+                } else if(attr.key.empty()) {
+                    buf = buf.substr(i);
+                    return std::unexpected{Code::AttrValueWithoutKey};
+                } else
+                    quote = buf[i];
+                buf = buf.substr(i + 1);
                 continue;
-            } break;
-            case '=': {
-                attr.key = buf.substr(0, i++);
-                buf = buf.substr(++i);
+            case '=':
+                attr.key = buf.substr(0, i);
+                buf = buf.substr(i + 1);
                 continue;
-            } break;
-            case '>': {
-                if(buf.data()[i - 1] == '/') {
+            case '>':
+                if(i && buf[i - 1] == '/') {
                     node.setTag(buf.substr(0, i));
-                    tt = TagType::INLINE;
-                } else {
-                    node.setTag(buf.substr(1, i - 1));
-                    tt = TagType::START;
+                    buf = buf.substr(i);
+                    return TagType::INLINE;
                 }
+                node.setTag(buf.substr(1, i - 1));
                 buf = buf.substr(i);
-                return tt;
-            } break;
-            default: break;
+                return TagType::START;
             }
         }
-        std::unreachable();
-        // return TagType::START;
     };
 
+    size_t i;
     while((i = buf.find_first_of('<')) < buf.size()) {
+        string_view lex;
         if(buf.front() == '>') lex = buf.substr(1, i - 1);
-        if(size_t i = lex.find_first_not_of("\r\n\t "sv); i > lex.size()) lex = {};
+        if(size_t ws = lex.find_first_not_of("\r\n\t "sv); ws > lex.size()) lex = {};
         buf = buf.substr(i);
         // Inner text
-        if(lex.size()) {
-            if(!currNode) {
-                println(stderr, "Text outside of document");
-                return false;
-            }
-            currNode->setText(lex);
-            lex = {};
-        }
+        if(lex.size()) currNode->setText(lex);
+
+        if(buf.size() < 2)
+            return fail(Code::UnexpectedEof, buf);
 
         switch(buf[1]) {
-        case '/': // End of nodelex
+        case '/': { // End of node
             i = buf.find_first_of('>');
-            lex = buf.substr(2, i - 2);
-            if(!currNode) {
-                println(stderr, "Already at the root");
-                return false;
-            }
-            if(size_t i = lex.find(' '); i < lex.size())
-                lex = lex.substr(0, i);
-            if(currNode->tag() != lex) {
-                println(stderr, "Mismatched tags ({} != {})", currNode->tag(), lex);
-                return false;
-            }
+            if(i == buf.npos)
+                return fail(Code::UnterminatedTag, buf);
+            string_view tag = buf.substr(2, i - 2);
+            if(size_t ws = tag.find_first_of(" \t\r\n"sv); ws < tag.size())
+                tag = tag.substr(0, ws);
+            if(currNode == &root)
+                return fail(Code::ExtraClosingTag, buf, {}, tag);
+            if(currNode->tag() != tag)
+                return fail(Code::TagMismatch, buf, currNode->tag(), tag);
             currNode = currNode->parent;
             buf = buf.substr(i);
             continue;
-        case '!': // Special nodes
-                  // Comments
+        }
+        case '!': // Comments
             if(buf.starts_with("<!--"sv)) {
-                while(!lex.ends_with("-->"sv))
-                    if(i = buf.find_first_of('>'); i == ""sv.npos) {
-                        println(stderr, "Mismatched end of comment at {}", buf.data() - this->buf.data());
-                        return false;
-                    } else lex = buf.substr(0, ++i);
-                (new NodeTag{currNode})->setText(lex);
-                buf = buf.substr(i);
+                const size_t end = buf.find("-->"sv);
+                if(end == buf.npos)
+                    return fail(Code::UnterminatedComment, buf);
+                (new NodeTag{currNode})->setText(buf.substr(0, end + 3));
+                buf = buf.substr(end + 2); // остаться на '>' -- как после обычного тега
                 continue;
             }
-            std::unreachable();
+            return fail(Code::UnsupportedMarkup, buf);
         case '?': { // Declaration tags
             NodeTag desc;
-            parseAttrs(buf, desc);
+            if(auto tt = parseAttrs(buf, desc); !tt)
+                return fail(tt.error(), buf);
             version = desc.attrVal("version"sv);
             encoding = desc.attrVal("encoding"sv);
             continue;
         }
-        default: // New node
+        default: { // New node
             currNode = new NodeTag{currNode};
-            // Start tag
-            if(parseAttrs(buf, *currNode) == TagType::INLINE) {
+            const auto tt = parseAttrs(buf, *currNode);
+            if(!tt) return fail(tt.error(), buf);
+            if(currNode->tag().empty())
+                return fail(Code::EmptyTagName, buf);
+            if(*tt == TagType::INLINE)
                 currNode = currNode->parent;
-                continue;
-            }
-            // Is tag name if none
-            assert(currNode->tag().size());
-            // Reset lexer
-            lex = {};
             continue;
         }
+        }
     }
-    return true;
+    if(currNode != &root)
+        return fail(Code::UnclosedElement, doc.substr(doc.size()), currNode->tag());
+    return {};
 }
 
 inline bool Document::write(string_view path, int indent) {
