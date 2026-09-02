@@ -28,6 +28,9 @@ set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${PLUGINS_DIR})
 # <target>_ru.ts and <target>_en.ts must exist in CMAKE_CURRENT_SOURCE_DIR.
 function(target_setup_translations TARGET)
   set(TS_FILES ${TARGET}_ru.ts ${TARGET}_en.ts)
+  if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/${TARGET}_zh.ts")
+    list(APPEND TS_FILES ${TARGET}_zh.ts)
+  endif()
   set_source_files_properties(
     ${TS_FILES} PROPERTIES OUTPUT_LOCATION "${OUTPUT_DIRECTORY}/translations")
   qt_add_lupdate(${TARGET} TS_FILES ${TS_FILES} SOURCES ${ARGN})

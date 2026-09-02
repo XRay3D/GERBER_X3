@@ -104,6 +104,7 @@ SettingsDialog::SettingsDialog(QWidget* parent, int tab)
     // Language
     ui.cbxLanguage->addItem(u"English"_s, u"en"_s);
     ui.cbxLanguage->addItem(u"Русский"_s, u"ru"_s);
+    ui.cbxLanguage->addItem(u"中文"_s, u"zh"_s);
 
     settings.beginGroup(u"MainWindow"_s);
     QString locale(settings.value(u"locale"_s).toString());
