@@ -20,8 +20,13 @@
 
 namespace Gi {
 
+Bridge*& Bridge::moveBrPtr() { static Bridge* p; return p; }
+double& Bridge::lenght() { static double v; return v; }
+double& Bridge::toolDiam() { static double v; return v; }
+GCode::SideOfMilling& Bridge::millingSide() { static GCode::SideOfMilling v; return v; }
+
 Bridge::Bridge() {
-    pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
+    pPath.addEllipse(QPointF(), lenght() / 2, lenght() / 2);
     setFlags(QGraphicsItem::ItemIsMovable | QGraphicsItem::ItemSendsGeometryChanges);
     setZValue(std::numeric_limits<double>::max());
 }
@@ -74,7 +79,7 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
     auto transform = [](auto* item) { return static_cast<Item*>(item); };
 
     QPointF retPos{pos};
-    double minDist{lenght}; // дальше длины моста не прилипаем
+    double minDist{lenght()}; // дальше длины моста не прилипаем
     double angle{};
     ok_ = false;
 
@@ -127,7 +132,7 @@ QPointF Bridge::snapedPos(const QPointF& pos) {
 
 void Bridge::update() {
     pPath = QPainterPath();
-    pPath.addEllipse(QPointF(), lenght / 2, lenght / 2);
+    pPath.addEllipse(QPointF(), lenght() / 2, lenght() / 2);
 
     cutoff.clear();
 
@@ -136,26 +141,26 @@ void Bridge::update() {
         return;
     }
 
-    QLineF lTool, lCenter = QLineF::fromPolar(toolDiam + lenght, angle_);
+    QLineF lTool, lCenter = QLineF::fromPolar(toolDiam() + lenght(), angle_);
     double start{}, span = 180;
-    switch(side) {
+    switch(millingSide()) {
     case GCode::On:
         lCenter.translate(-lCenter.center());
-        lTool = QLineF::fromPolar(toolDiam, start = angle_ - 90);
+        lTool = QLineF::fromPolar(toolDiam(), start = angle_ - 90);
         break;
     case GCode::Outer:
-        lTool = QLineF::fromPolar(toolDiam, start = angle_ - 90);
+        lTool = QLineF::fromPolar(toolDiam(), start = angle_ - 90);
         lCenter.translate(lTool.center() - lCenter.center());
         break;
     case GCode::Inner:
-        lTool = QLineF::fromPolar(toolDiam, start = angle_ + 90);
+        lTool = QLineF::fromPolar(toolDiam(), start = angle_ + 90);
         lCenter.translate(lTool.center() - lCenter.center());
         span = -180;
         break;
     }
 
-    const QPointF offset{toolDiam / 2., toolDiam / 2};
-    const QSizeF size{toolDiam, toolDiam};
+    const QPointF offset{toolDiam() / 2., toolDiam() / 2};
+    const QSizeF size{toolDiam(), toolDiam()};
 
     lTool.translate(lCenter.p1() - lTool.center());
     cutoff.moveTo(lTool.p2());
@@ -174,10 +179,10 @@ bool Bridge::ok() const { return ok_; }
 void Bridge::mouseReleaseEvent(QGraphicsSceneMouseEvent* event) {
     QGraphicsItem::mouseReleaseEvent(event);
     if(ok_ && pos() == lastPos) {
-        moveBrPtr = new Bridge;
-        scene()->addItem(moveBrPtr);
-        moveBrPtr->setPos(pos());
-        moveBrPtr->setVisible(true);
+        moveBrPtr() = new Bridge;
+        scene()->addItem(moveBrPtr());
+        moveBrPtr()->setPos(pos());
+        moveBrPtr()->setVisible(true);
     } else if(!ok_) {
         scene()->removeItem(this);
         delete this;
@@ -188,6 +193,6 @@ int Bridge::type() const { return Type::Bridge; }
 
 // След моста на плане -- круг длиной моста плюс диаметр фрезы вокруг позиции.
 // В расчёт УП мосты уходят не отсюда, а центрами (см. комментарий к классу).
-Geo::Polylines Bridge::curves(int /*alternate*/) const { return {Geo::circle(lenght + toolDiam, pos())}; }
+Geo::Polylines Bridge::curves(int /*alternate*/) const { return {Geo::circle(lenght() + toolDiam(), pos())}; }
 
 } // namespace Gi
