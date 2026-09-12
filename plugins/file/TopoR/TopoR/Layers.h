@@ -17,13 +17,13 @@ struct Layers {
         // Параметр слоя: слой содержит очертания компонентов.
         // ! Для сигнальных, опорных, диэлектрических и документирующих слоёв параметр compsOutline отсутствует.
         [[= XML::Attr]] Bool compsOutline{};
-        // public bool compsOutlineSpecified
-        bool getCompsOutlineSpecified() const;
+        // public bool compsOutlineSpecified type == layertype::Assy;
+
         // Параметр слоя: толщина.
         // ! Для документирующих слоёв и слоёв с типом Assy параметр thickness отсутствует.
         [[= XML::Attr]] double thickness{};
-        // public bool thicknessSpecified
-        bool getThicknessSpecified() const;
+        // public bool thicknessSpecified type != layertype::Assy;
+
         /*****************************************************************
          * Здесь находятся функции для работы с элементами класса Layer. *
          * Они не являются частью формата TopoR PCB.                     *

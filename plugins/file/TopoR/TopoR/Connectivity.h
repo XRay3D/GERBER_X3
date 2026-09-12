@@ -16,13 +16,13 @@ struct Connectivity {
         // Признак фиксации.
         [[= XML::Attr]] Bool fixed{};
         // public bool fixedSpecified
-        bool getFixedSpecified() const;
+
         // Ссылка на тип переходного отверстия.
-        /*[[= XML::Elem]]*/ ViastackRef ViastackRef;
+        ViastackRef ViastackRef;
         // Ссылка на цепь.
-        /*[[= XML::Elem]]*/ NetRef NetRef;
+        NetRef NetRef;
         // Точка привязки объекта.
-        /*[[= XML::Elem]]*/ Org Org;
+        Org Org;
     };
     // Описание змейки.
     // ! Проводники, реализующие змейку, описываются в секции Wires (см. описание раздела Connectivity)
@@ -50,13 +50,13 @@ struct Connectivity {
         // Признак фиксации.
         [[= XML::Attr]] Bool fixed{};
         // public bool fixedSpecified
-        bool getFixedSpecified() const;
+
         // Ссылка на слой.
-        /*[[= XML::Elem]]*/ LayerRef LayerRef;
+        LayerRef LayerRef;
         // Ссылка на дифференциальный сигнал.
-        /*[[= XML::Elem]]*/ DiffSignalRef DiffSignalRef;
+        DiffSignalRef DiffSignalRef;
         // Начальная точка линии, дуги.
-        /*[[= XML::Elem]]*/ Start Start;
+        Start Start;
         // Описание(я) сегмента проводника.
         // ! В случае отсутствия - предупреждение. Весь ZippedWire будет проигнорирован.
         // public List<Object> Tracks;
@@ -79,7 +79,7 @@ struct Connectivity {
             // Признак фиксации.
             [[= XML::Attr]] Bool fixed{};
             // public bool fixedSpecified
-            bool getFixedSpecified() const;
+
             // Ширина проводника.
             [[= XML::Attr]] double width{};
             // Ссылка на застёгнутую пару проводников. Строка должна содержать идентификатор описанной застёгнутой пары проводников ZippedWire.
@@ -90,7 +90,7 @@ struct Connectivity {
             [[= XML::Array]] std::vector<Teardrop> Teardrops;
             // bool ShouldSerialize_Teardrops();
             // Начальная точка линии, дуги.
-            /*[[= XML::Elem]]*/ Start Start;
+            Start Start;
             // Описание(я) сегмента проводника.
             // ! В случае отсутствия - предупреждение. Весь проводник будет проигнорирован.
             // public List<Object> Tracks;
@@ -99,13 +99,13 @@ struct Connectivity {
             QGraphicsItem* graphicsItem(const QColor& color) const;
         };
         // Ссылка на слой.
-        /*[[= XML::Elem]]*/ LayerRef LayerRef;
+        LayerRef LayerRef;
         // Ссылка на цепь.
-        /*[[= XML::Elem]]*/ NetRef NetRef;
+        NetRef NetRef;
         // Части проводника (последовательность сегментов с одной шириной и одинаковым признаком фиксации).
         ///*[[= XML::Elem]]*/ // public List<Subwire> Subwires;
         [[= XML::Elem]] std::vector<Subwire> Subwires; // FIXME
-        // /*[[= XML::Elem]]*/ Subwire Subwire;
+        // Subwire Subwire;
         bool ShouldSerialize_Subwires();
     };
     // Описание заливаемой области металлизации (полигона).
@@ -114,18 +114,18 @@ struct Connectivity {
         // Описание термобарьера для подключения контактных площадок к области металлизации.
         struct ThermalPad {
             // Описание термобарьера.
-            /*[[= XML::Elem]]*/ Thermal Thermal;
+            Thermal Thermal;
         };
         // Описание термобарьера для подключения площадок переходных отверстий к области металлизации.
         struct ThermalVia {
             // Описание термобарьера.
-            /*[[= XML::Elem]]*/ Thermal Thermal;
+            Thermal Thermal;
         };
         // Описание контура заливаемой области металлизации.
         struct Shape {
             // Описание залитой фигуры.
             // public Object FilledFigure;
-            /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ FilledCircle, FilledRect, Polygon, FilledContour> FilledFigure;
+            std::variant</*XML::Null,*/ FilledCircle, FilledRect, Polygon, FilledContour> FilledFigure;
         };
         // Описание островка области металлизации.
         struct Island {
@@ -156,7 +156,7 @@ struct Connectivity {
         // Параметр области металлизации (полигона): использовать указанный зазор.
         [[= XML::Attr]] Bool useBackoff{};
         // public bool useBackoffSpecified
-        bool getUseBackoffSpecified() const;
+
         // Параметр области металлизации (полигона): зазор до области металлизации.
         [[= XML::Attr]] double backoff{};
         // Параметр области металлизации (полигона) стека: подключение контактных площадок.
@@ -174,24 +174,24 @@ struct Connectivity {
         // Параметр области металлизации (полигона): удалять неподключенные островки.
         [[= XML::Attr]] Bool deleteUnconnected{};
         // public bool deleteUnconnectedSpecified
-        bool getDeleteUnconnectedSpecified() const;
+
         // Параметр области металлизации (полигона): состояние.
         [[= XML::Attr]] state state{};
         // Параметр области металлизации (полигона): тип заливки.
         [[= XML::Attr]] fillType fillType{};
         // Ссылка на слой.
-        /*[[= XML::Elem]]*/ LayerRef LayerRef;
+        LayerRef LayerRef;
         // Ссылка на цепь.
-        /*[[= XML::Elem]]*/ NetRef NetRef;
+        NetRef NetRef;
         // Описание термобарьера для подключения контактных площадок к области металлизации.
         // ! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.
-        /*[[= XML::Elem]]*/ ThermalPad ThermalPad;
+        ThermalPad ThermalPad;
         // Описание термобарьера для подключения площадок переходных отверстий к области металлизации.
         // ! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.
-        /*[[= XML::Elem]]*/ ThermalVia ThermalVia;
+        ThermalVia ThermalVia;
         // Описание контура заливаемой области металлизации..
         // ! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.
-        /*[[= XML::Elem]]*/ Shape Shape;
+        Shape Shape;
         // Вырезы в областях металлизации (полигонах) заданные пользователем.
         // ! В случае отсутствия - критическая ошибка. Обязан быть пустой тэг.
         //[XmlArrayItem/*("FilledCircle")*/, XmlArrayItem/*("FilledRect")*/, XmlArrayItem/*("Polygon")*/, XmlArrayItem/*("FilledContour")*/] public List<Object> Voids;
@@ -212,16 +212,16 @@ struct Connectivity {
         struct Shape_NonfilledCopper {
             // Описание фигуры.
             // public Object FigureContPoliline;
-            /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Circle, Line, Polyline, Rect, Contour> FigureContPoliline;
+            std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Circle, Line, Polyline, Rect, Contour> FigureContPoliline;
         };
         // Толщина линии.
         [[= XML::Attr]] double lineWidth{};
         // Ссылка на слой.
-        /*[[= XML::Elem]]*/ LayerRef LayerRef;
+        LayerRef LayerRef;
         // Ссылка на цепь.
-        /*[[= XML::Elem]]*/ NetRef NetRef;
+        NetRef NetRef;
         // Описание контура незаливаемой области металлизации.
-        /*[[= XML::Elem]]*/ Shape_NonfilledCopper Shape;
+        Shape_NonfilledCopper Shape;
     };
     // Версия раздела.
     [[= XML::Attr]] std::string version;

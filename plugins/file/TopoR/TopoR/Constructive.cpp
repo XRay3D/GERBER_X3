@@ -20,8 +20,6 @@ void Constructive::BoardOutline::Voids::UnitsConvert(dist in_units, dist out_uni
     //    if((std::dynamic_pointer_cast<IBaseFigure>(FilledFigure)) != nullptr)
     //        (std::dynamic_pointer_cast<IBaseFigure>(FilledFigure)).UnitsConvert(in_units, out_units);
 }
-bool Constructive::BoardOutline::ShouldSerialize_Contours() { return Contour.size(); }
-bool Constructive::BoardOutline::ShouldSerialize_Voids() { return Voids.size(); }
 
 void Constructive::MntholeInstance::Shift(double x, double y) {
     //    Org.Shift(x, y);
@@ -29,7 +27,7 @@ void Constructive::MntholeInstance::Shift(double x, double y) {
 void Constructive::MntholeInstance::UnitsConvert(dist in_units, dist out_units) {
     //    Org.UnitsConvert(in_units, out_units);
 }
-bool Constructive::Keepout::Role::Trace::ShouldSerialize_LayersRefs() { return LayersRefs.size(); }
+
 void Constructive::Keepout::Shift(double x, double y) {
     //    if((std::dynamic_pointer_cast<IBaseFigure>(FigureContPolyline)) != nullptr)
     //        (std::dynamic_pointer_cast<IBaseFigure>(FigureContPolyline)).Shift(x, y);
@@ -38,10 +36,7 @@ void Constructive::Keepout::UnitsConvert(dist in_units, dist out_units) {
     //    if((std::dynamic_pointer_cast<IBaseFigure>(FigureContPolyline)) != nullptr)
     //        (std::dynamic_pointer_cast<IBaseFigure>(FigureContPolyline)).UnitsConvert(in_units, out_units);
 }
-bool Constructive::ShouldSerialize_Mntholes() { return Mntholes.size(); }
-bool Constructive::ShouldSerialize_MechLayerObjects() { return MechLayerObjects.size(); }
-bool Constructive::ShouldSerialize_Texts() { return Texts.size(); }
-bool Constructive::ShouldSerialize_Keepouts() { return Keepouts.size(); }
+
 void Constructive::Shift(double x, double y) {
     //    {
     //        if((BoardOutline == nullptr ? nullptr : BoardOutline->Contours.size()) > 0)

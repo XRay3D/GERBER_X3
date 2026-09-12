@@ -2,12 +2,7 @@
 // PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Layers.h"
 namespace TopoR {
-bool Layers::Layer::getCompsOutlineSpecified() const {
-    return {}; //    return type == layertype::Assy;
-}
-bool Layers::Layer::getThicknessSpecified() const {
-    return {}; //    return type != layertype::Assy;
-}
+
 Layers::Layer::Layer() { }
 Layers::Layer::Layer(const std::string& name, layertype type, Bool compsOutline, double thickness) {
     //    name = name;
@@ -18,12 +13,7 @@ Layers::Layer::Layer(const std::string& name, layertype type, Bool compsOutline,
 std::string Layers::Layer::ToString() {
     return {}; //    return name;
 }
-bool Layers::ShouldSerialize_StackUpLayers() {
-    return {}; //    return StackUpLayers.size();
-}
-bool Layers::ShouldSerialize_UnStackLayers() {
-    return {}; //    return UnStackLayers.size();
-}
+
 bool Layers::LayerStackUpContains(LayerRef lref) {
     return {}; //    return (StackUpLayers.empty() ? nullptr : StackUpLayers.Where([&](std::variant</*XML::Null,*/ > r) {
     //                                                                 return r->name == lref->ReferenceName;

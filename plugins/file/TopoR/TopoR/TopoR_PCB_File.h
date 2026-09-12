@@ -22,35 +22,34 @@ namespace TopoR {
 // Корневой тег. Включает все разделы файла.
 struct[[= XML::Root]] TopoR_PCB_File {
     // Раздел «Заголовок файла».
-    /*[[= XML::Elem]]*/ Header Header;
+    Header Header;
     // Раздел «Слои». (Обязательный раздел)
-    /*[[= XML::Elem]]*/ Layers Layers;
+    Layers Layers;
     // Раздел «Стили надписей».
-    /*[[= XML::Elem]]*/ TextStyles TextStyles;
+    TextStyles TextStyles;
     // Раздел «Библиотечные элементы». (Обязательный раздел)
-    /*[[= XML::Elem]]*/ LocalLibrary LocalLibrary;
+    LocalLibrary LocalLibrary;
     // Раздел «Конструктив платы».
-    /*[[= XML::Elem]]*/ Constructive Constructive;
+    Constructive Constructive;
     // Раздел «Компоненты на плате». (Обязательный раздел).
-    /*[[= XML::Elem]]*/ ComponentsOnBoard ComponentsOnBoard;
+    ComponentsOnBoard ComponentsOnBoard;
     // Раздел «Текущий список соединений».
-    /*[[= XML::Elem]]*/ NetList NetList;
+    NetList NetList;
     // Раздел «Группировка объектов».
-    /*[[= XML::Elem]]*/ Groups Groups;
+    Groups Groups;
     // Раздел «Правила для высокоскоростных устройств».
-    /*[[= XML::Elem]]*/ HiSpeedRules HiSpeedRules;
+    HiSpeedRules HiSpeedRules;
     // Раздел «Правила».
     // ! Порядок следования правил в каждой секции определяет приоритет правил. Чем выше приоритет у правила, тем ниже оно описано.
-    /*[[= XML::Elem]]*/ Rules Rules;
+    Rules Rules;
     // Раздел «Соединения на плате».
     // В этом разделе описывается конкретная реализация соединений: печатные проводники, межслойные переходы и области металлизации.
-    /*[[= XML::Elem]]*/ Connectivity Connectivity;
+    Connectivity Connectivity;
     // Раздел «Настройки дизайна».
-    /*[[= XML::Elem]]*/ Settings Settings;
+    Settings Settings;
     // Раздел «Настройки отображения».
-    /*[[= XML::Elem]]*/ DisplayControl DisplayControl;
+    DisplayControl DisplayControl;
     // Раздел «Настройки диалогов».
-    /*[[= XML::Elem]]*/ DialogSettings DialogSettings;
-
+    DialogSettings DialogSettings;
 };
 } // namespace TopoR

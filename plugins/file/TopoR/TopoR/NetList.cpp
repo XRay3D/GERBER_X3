@@ -3,12 +3,7 @@
 #include "NetList.h"
 #include "Commons.h"
 namespace TopoR {
-bool NetList::Net::ShouldSerialize_refs() {
-    return {}; //    return refs.size();
-}
-bool NetList::ShouldSerialize_Nets() {
-    return {}; //    return Nets.size();
-}
+
 void NetList::Rename_compName(const std::string& oldname, const std::string& newname) {
     // for(auto a: Nets.Where([&](std::variant</*XML::Null,*/ > aa) {
     //         return aa::refs != nullptr;

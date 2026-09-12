@@ -14,7 +14,7 @@ struct Rules {
         // Флаг применения правила.
         [[= XML::Attr]] Bool enabled{};
         // public bool enabledSpecified
-        bool getEnabledSpecified() const;
+
         // Параметр правила ширины проводников: минимальная ширина проводника.
         [[= XML::Attr]] double widthMin{};
         // Параметр правила ширины проводников: номинальная ширина проводника.
@@ -22,7 +22,7 @@ struct Rules {
         // Ссылка на слои. См. также LayersRefs
         // ! При null необходимо смотреть LayersRefs - там описан список ссылок типа LayerRef.
         // public Object LayersRef;
-        /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
+        std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
         // Ссылка на слои. См. также LayersRef
         // ! При null необходимо смотреть LayersRef - там описаны ссылки остальных типов.
         //[[= XML::Elem("LayerRef")]] // public List<LayerRef> LayersRefs;
@@ -38,7 +38,7 @@ struct Rules {
         // Флаг применения правила.
         [[= XML::Attr]] Bool enabled{};
         // public bool enabledSpecified
-        bool getEnabledSpecified() const;
+
         // Параметр правила зазоров между цепями: минимальный зазор.
         [[= XML::Attr]] double clrnMin{};
         // Параметр правила зазоров между цепями: номинальный зазор.
@@ -46,7 +46,7 @@ struct Rules {
         // Ссылка на слои. См. также LayersRefs
         // ! При null необходимо смотреть LayersRefs - там описан список ссылок типа LayerRef.
         // public Object LayersRef;
-        /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
+        std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
         // Ссылка на слои. См. также LayersRef
         // ! При null необходимо смотреть LayersRef - там описаны ссылки остальных типов.
         //[[= XML::Elem("LayerRef")]] // public List<LayerRef> LayersRefs;
@@ -62,7 +62,7 @@ struct Rules {
         // Флаг применения правила.
         [[= XML::Attr]] Bool enabled{};
         // public bool enabledSpecified
-        bool getEnabledSpecified() const;
+
         // Параметр правила зазоров между цепями: минимальный зазор.
         [[= XML::Attr]] double clrn{};
         // Объекты воздействия правила.
@@ -83,7 +83,7 @@ struct Rules {
         // Флаг применения правила.
         [[= XML::Attr]] Bool enabled{};
         // public bool enabledSpecified
-        bool getEnabledSpecified() const;
+
         // Объекты воздействия правила.
         //[XmlArrayItem("NetRef"), XmlArrayItem("NetGroupRef"), XmlArrayItem("AllNets"), XmlArrayItem("SignalRef"), XmlArrayItem("DiffSignalRef"), XmlArrayItem("SignalGroupRef")] public List<Object> ObjectsAffected;
         [[= XML::Array]] std::vector<std::variant</*XML::Null,*/ NetRef, NetGroupRef, AllNets, SignalRef, DiffSignalRef, SignalGroupRef>> ObjectsAffected;
@@ -98,11 +98,11 @@ struct Rules {
         // Флаг применения правила.
         [[= XML::Attr]] Bool enabled{};
         // public bool enabledSpecified
-        bool getEnabledSpecified() const;
+
         // Ссылка на слои. См. также LayersRefs
         // ! При null необходимо смотреть LayersRefs - там описан список ссылок типа LayerRef.
         // public Object LayersRef;
-        /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
+        std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
         // Ссылка на слои. См. также LayersRef
         // ! При null необходимо смотреть LayersRef - там описаны ссылки остальных типов.
         //[[= XML::Elem("LayerRef")]] // public List<LayerRef> LayersRefs;
@@ -118,11 +118,11 @@ struct Rules {
         // Флаг применения правила.
         [[= XML::Attr]] Bool enabled{};
         // public bool enabledSpecified
-        bool getEnabledSpecified() const;
+
         // Ссылка на слои. См. также LayersRefs
         // ! При null необходимо смотреть LayersRefs - там описан список ссылок типа LayerRef.
         // public Object LayersRef;
-        /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
+        std::variant</*XML::Null,*/ AllLayers, AllLayersInner, AllLayersInnerSignal, AllLayersSignal, AllLayersOuter, LayerGroupRef> LayersRef;
         // Ссылка на слои. См. также LayersRef
         // ! При null необходимо смотреть LayersRef - там описаны ссылки остальных типов.
         //[[= XML::Elem("LayerRef")]] // public List<LayerRef> LayersRefs;
@@ -138,11 +138,11 @@ struct Rules {
         // Свойство цепи: гибкая фиксация.
         [[= XML::Attr]] Bool flexfix{};
         // public bool flexfixSpecified
-        bool getFlexfixSpecified() const;
+
         // Свойство цепи: флаг трассировки для автоматического трассировщика.
         [[= XML::Attr]] Bool route{};
         // public bool routeSpecified
-        bool getRouteSpecified() const;
+
         // Ссылка на цепь.
         //[[= XML::Elem("NetRef")]] // public List<NetRef> NetRefs;
         [[= XML::Elem("NetRef")]] std::vector<NetRef> NetRefs;

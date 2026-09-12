@@ -117,9 +117,7 @@ void Detail::UnitsConvert(dist in_units, dist out_units) {
     // if((std::dynamic_pointer_cast<IBaseFigure>(Figure)) != nullptr)
     //     (std::dynamic_pointer_cast<IBaseFigure>(Figur)).UnitsConvert(in_units, out_units);
 }
-bool Text::getMirrorSpecified() const {
-    return mirror != Bool::off;
-}
+
 void Text::Shift(double x, double y) {
     Org.Shift(x, y);
 }
@@ -129,24 +127,24 @@ void Text::UnitsConvert(dist in_units, dist out_units) {
 double Ut::UnitsConvert(double value, dist in_units, dist out_units) {
     double k;
     switch(in_units) {
-    case dist::mkm: k = 0.001; break;
-    case dist::cm: k = 10; break;
-    case dist::dm: k = 100; break;
-    case dist::m: k = 1000; break;
-    case dist::mil: k = 0.0254000000000000002032; break;
+    case dist::mkm : k = 0.001; break;
+    case dist::cm  : k = 10; break;
+    case dist::dm  : k = 100; break;
+    case dist::m   : k = 1000; break;
+    case dist::mil : k = 0.0254000000000000002032; break;
     case dist::inch: k = 25.4000000000000002032; break;
-    case dist::mm:
-    default: k = 1; break;
+    case dist::mm  :
+    default        : k = 1; break;
     }
     switch(out_units) {
-    case dist::mkm: return static_cast<double>(value * k * 1000);
-    case dist::cm: return static_cast<double>(value * k * 0.1);
-    case dist::dm: return static_cast<double>(value * k * 0.01);
-    case dist::m: return static_cast<double>(value * k * 0.001);
-    case dist::mil: return static_cast<double>(value * k * 39.37007874015748);
+    case dist::mkm : return static_cast<double>(value * k * 1000);
+    case dist::cm  : return static_cast<double>(value * k * 0.1);
+    case dist::dm  : return static_cast<double>(value * k * 0.01);
+    case dist::m   : return static_cast<double>(value * k * 0.001);
+    case dist::mil : return static_cast<double>(value * k * 39.37007874015748);
     case dist::inch: return static_cast<double>(value * k * 0.03937007874015748);
-    case dist::mm: return static_cast<double>(value * k);
-    default: return value;
+    case dist::mm  : return static_cast<double>(value * k);
+    default        : return value;
     }
 }
 

@@ -18,11 +18,11 @@ struct ComponentsOnBoard {
             [[= XML::Attr]] int padNum{};
             // Ссылка на стек контактных площадок.
             // public PadstackRef PadstackRef;
-            /*[[= XML::Elem]]*/ PadstackRef PadstackRef; /*("PadstackRef")*/
+            PadstackRef PadstackRef; /*("PadstackRef")*/
             bool ShouldSerializePadstackRef();
             // Точка привязки объекта.
             // public Org Org;
-            /*[[= XML::Elem]]*/ Org Org; /*("Org")*/
+            Org Org; /*("Org")*/
         };
         // Описание монтажного отверстия в компоненте на плате.
         struct Mnthole {
@@ -33,10 +33,10 @@ struct ComponentsOnBoard {
             [[= XML::Attr]] double angle{};
             // Ссылка на стек контактных площадок.
             // public PadstackRef PadstackRef;
-            /*[[= XML::Elem]]*/ PadstackRef PadstackRef; /*("PadstackRef")*/
-                                                         // Cсылка на цепь.
-                                                         // public NetRef NetRef;
-            /*[[= XML::Elem]]*/ NetRef NetRef;           /*("NetRef")*/
+            PadstackRef PadstackRef; /*("PadstackRef")*/
+                                     // Cсылка на цепь.
+                                     // public NetRef NetRef;
+            NetRef NetRef;           /*("NetRef")*/
         };
         // Описание атрибута компонента на плате.
         struct Attribute {
@@ -48,7 +48,7 @@ struct ComponentsOnBoard {
                 // public Bool mirror;
                 [[= XML::Attr]] Bool mirror{};
                 // public bool mirrorSpecified
-                bool getMirrorSpecified() const;
+
                 // Параметр надписей (ярлыков): способ выравнивания текста.
                 // public align align;
                 [[= XML::Attr]] align align{}; /*("align")*/
@@ -56,16 +56,16 @@ struct ComponentsOnBoard {
                 // public Bool visible;
                 [[= XML::Attr]] Bool visible{};
                 // public bool visibleSpecified
-                bool getVisibleSpecified() const;
+
                 // Ссылка на слой.
                 // public LayerRef LayerRef;
-                /*[[= XML::Elem]]*/ LayerRef LayerRef;         /*("LayerRef")*/
-                                                               // Ссылка на стиль надписей.
-                                                               // public TextStyleRef TextStyleRef;
-                /*[[= XML::Elem]]*/ TextStyleRef TextStyleRef; /*("TextStyleRef")*/
-                                                               // Точка привязки объекта.
-                                                               // public Org Org;
-                /*[[= XML::Elem]]*/ Org Org;                   /*("Org")*/
+                LayerRef LayerRef;         /*("LayerRef")*/
+                                           // Ссылка на стиль надписей.
+                                           // public TextStyleRef TextStyleRef;
+                TextStyleRef TextStyleRef; /*("TextStyleRef")*/
+                                           // Точка привязки объекта.
+                                           // public Org Org;
+                Org Org;                   /*("Org")*/
             };
             // Тип предопределённого атрибута компонента.
             // public type type;
@@ -99,16 +99,16 @@ struct ComponentsOnBoard {
         // public Bool fixed;
         [[= XML::Attr]] Bool fixed{};
         // public bool fixedSpecified
-        bool getFixedSpecified() const;
+
         // Ссылка на схемный компонент.
         // public ComponentRef ComponentRef;
-        /*[[= XML::Elem]]*/ ComponentRef ComponentRef; /*("ComponentRef")*/
-                                                       // Ссылка на посадочное место.
-                                                       // public FootprintRef FootprintRef;
-        /*[[= XML::Elem]]*/ FootprintRef FootprintRef; /*("FootprintRef")*/
-                                                       // Точка привязки объекта.
-                                                       // public Org Org;
-        /*[[= XML::Elem]]*/ Org Org;                   /*("Org")*/
+        ComponentRef ComponentRef; /*("ComponentRef")*/
+                                   // Ссылка на посадочное место.
+                                   // public FootprintRef FootprintRef;
+        FootprintRef FootprintRef; /*("FootprintRef")*/
+                                   // Точка привязки объекта.
+                                   // public Org Org;
+        Org Org;                   /*("Org")*/
         // Контакты компонента на плате.
         //[XmlArrayItem/*("Pin")*/] public List<Pin> Pins;
         [[= XML::Array]] std::vector<Pin> Pins;
@@ -148,13 +148,13 @@ struct ComponentsOnBoard {
         // Признак фиксации.
         // public Bool fixed;
         [[= XML::Attr]] Bool fixed{};
-        bool getFixedSpecified() const;
+
         // Ссылка на стек контактных площадок.
         // public PadstackRef PadstackRef;
-        /*[[= XML::Elem]]*/ PadstackRef PadstackRef;      /*("PadstackRef")*/
-                                                          // Cсылка на цепь.
-                                                          // public NetRef NetRef;
-        /*[[= XML::Elem]]*/ std::optional<NetRef> NetRef; /*("NetRef")*/
+        PadstackRef PadstackRef;      /*("PadstackRef")*/
+                                      // Cсылка на цепь.
+                                      // public NetRef NetRef;
+        std::optional<NetRef> NetRef; /*("NetRef")*/
         // Точка привязки объекта.
         // public Org Org;
         [[= XML::ElemF]] Org Org; /*("Org")*/

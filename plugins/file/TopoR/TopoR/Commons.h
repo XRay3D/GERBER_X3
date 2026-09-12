@@ -321,7 +321,7 @@ struct SegmentLine : public IBaseSegment {
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
     void drawTo(QPainterPath& path) const;
-    /*[[= XML::Elem]]*/ End End; /*("End")*/
+    End End; /*("End")*/
     void Shift(double x, double y) override;
     void UnitsConvert(dist in_units, dist out_units) override;
 };
@@ -358,7 +358,7 @@ struct SegmentArcByAngle : public SegmentLine {
 // Дуга, задаётся тремя точками: начало, середина и конец.
 struct SegmentArcByMiddle : public SegmentLine {
     // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ Middle Middle; /*("Middle")*/
+    Middle Middle; /*("Middle")*/
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
@@ -376,11 +376,11 @@ struct IBaseFigure {
 // Дуга, заданная центром. Обход против часовой стрелки.
 struct ArcCCW : public IBaseFigure {
     // Центр круга (окружности), овала.
-    [[= XML::ElemF]] Center Center;  /*("Center")*/
-                                     // Начальная точка линии, дуги.
-    /*[[= XML::Elem]]*/ Start Start; /*("Start")*/
-                                     // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ End End;     /*("End")*/
+    [[= XML::ElemF]] Center Center; /*("Center")*/
+                                    // Начальная точка линии, дуги.
+    Start Start;                    /*("Start")*/
+                                    // Конечная точка линии, дуги.
+    End End;                        /*("End")*/
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
@@ -400,9 +400,9 @@ struct ArcByAngle : public IBaseFigure {
     // Задаёт угол в градусах c точностью до тысячных долей.
     [[= XML::Attr]] double angle{};
     // Начальная точка линии, дуги.
-    /*[[= XML::Elem]]*/ Start Start; /*("Start")*/
-                                     // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ End End;     /*("End")*/
+    Start Start; /*("Start")*/
+                 // Конечная точка линии, дуги.
+    End End;     /*("End")*/
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
@@ -414,11 +414,11 @@ struct ArcByAngle : public IBaseFigure {
 // Дуга, заданная тремя точками: начало, середина и конец.
 struct ArcByMiddle : public IBaseFigure {
     // Начальная точка линии, дуги.
-    /*[[= XML::Elem]]*/ Start Start;   /*("Start")*/
-                                       // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ Middle Middle; /*("Middle")*/
-                                       // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ End End;       /*("End")*/
+    Start Start;   /*("Start")*/
+                   // Конечная точка линии, дуги.
+    Middle Middle; /*("Middle")*/
+                   // Конечная точка линии, дуги.
+    End End;       /*("End")*/
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
@@ -457,7 +457,7 @@ struct Line : public IBaseFigure {
 // Описание полилинии.
 struct Polyline : public IBaseFigure {
     // Начальная точка линии, дуги.
-    /*[[= XML::Elem]]*/ Start Start; /*("Start")*/
+    Start Start; /*("Start")*/
     // Сегменты.
     // public List<Object> Segments;
     [[= XML::Elem]] std::vector<std::variant</*XML::Null,*/ SegmentLine, SegmentArcByAngle, SegmentArcCCW, SegmentArcCW, SegmentArcByMiddle>> Segments;
@@ -515,7 +515,7 @@ struct TrackArcCW : public IBaseFigure {
     // Центр круга (окружности), овала.
     [[= XML::ElemF]] Center Center; /*("Center")*/
                                     // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ End End;    /*("End")*/
+    End End;                        /*("End")*/
     // Ссылка на змейку. Строка должна содержать идентификатор описанной змейки Serpent.
     [[= XML::Attr]] std::string serpRef;
 
@@ -537,7 +537,7 @@ struct TrackArc : public TrackArcCW {
 // Начальная точка сегмента определяется по предыдущему сегменту или по тегу Start, заданному в SubWire. ! Если сегмент принадлежит змейке, указывается ссылка на змейку serpRef.
 struct TrackLine : public IBaseFigure {
     // Конечная точка линии, дуги.
-    /*[[= XML::Elem]]*/ End End; /*("End")*/
+    End End; /*("End")*/
     // Ссылка на змейку. Строка должна содержать идентификатор описанной змейки Serpent.
     [[= XML::Attr]] std::string serpRef;
 
@@ -611,10 +611,10 @@ struct Detail {
     // Толщина линии.
     [[= XML::Attr]] double lineWidth{};
     // Ссылка на слой.
-    /*[[= XML::Elem]]*/ LayerRef LayerRef; /*("LayerRef")*/
-                                           // Описание фигуры.
-                                           // public Object figure;
-    /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon, Polyline, FilledContour> Figure;
+    LayerRef LayerRef; /*("LayerRef")*/
+                       // Описание фигуры.
+                       // public Object figure;
+    std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon, Polyline, FilledContour> Figure;
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
@@ -632,13 +632,13 @@ struct Text {
     [[= XML::Attr]] double angle{};
     // Параметр надписей и ярлыков: зеркальность отображения.
     [[= XML::Attr]] Bool mirror{};
-    bool getMirrorSpecified() const;
+
     // Ссылка на слой.
-    /*[[= XML::Elem]]*/ LayerRef LayerRef;         /*("LayerRef")*/
-                                                   // Ссылка на стиль надписей.
-    /*[[= XML::Elem]]*/ TextStyleRef TextStyleRef; /*("TextStyleRef")*/
-                                                   // Точка привязки объекта.
-    /*[[= XML::Elem]]*/ Org Org;                   /*("Org")*/
+    LayerRef LayerRef;         /*("LayerRef")*/
+                               // Ссылка на стиль надписей.
+    TextStyleRef TextStyleRef; /*("TextStyleRef")*/
+                               // Точка привязки объекта.
+    Org Org;                   /*("Org")*/
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };
@@ -650,7 +650,7 @@ struct Text {
 // Сигналы воздействия правила
 struct ObjectSignal {
     // public Object refs;
-    /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ SignalRef, DiffSignalRef, SignalGroupRef> Refs;
+    std::variant</*XML::Null,*/ SignalRef, DiffSignalRef, SignalGroupRef> Refs;
 };
 } // namespace ThermalDetailTextObjectSignal
 // Различные сервисные функции

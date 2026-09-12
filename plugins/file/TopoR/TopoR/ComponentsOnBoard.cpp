@@ -4,15 +4,8 @@
 namespace TopoR {
 bool ComponentsOnBoard::CompInstance::Pin::ShouldSerializePadstackRef() { return PadstackRef != TopoR::PadstackRef{}; }
 
-bool ComponentsOnBoard::CompInstance::Attribute::ShouldSerialize_Labels() { return Labels.size(); }
-
-bool ComponentsOnBoard::CompInstance::ShouldSerialize_Pins() { return Pins.size(); }
-bool ComponentsOnBoard::CompInstance::ShouldSerialize_Mntholes() { return Mntholes.size(); }
-bool ComponentsOnBoard::CompInstance::ShouldSerialize_Attributes() { return Attributes.size(); }
 std::string ComponentsOnBoard::CompInstance::ToString() { return name; }
 
-bool ComponentsOnBoard::ShouldSerialize_Components() { return Components.size(); }
-bool ComponentsOnBoard::ShouldSerialize_FreePads() { return FreePads.size(); }
 std::string ComponentsOnBoard::AddComponent(const std::string& name, units units, const std::string& componentRef, const std::string& footprintRef) {
     //    double x = 0, y{}; // координаты нового компонента
     //    if(Components.empty())

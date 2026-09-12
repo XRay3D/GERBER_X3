@@ -11,7 +11,7 @@ struct LocalLibrary {
     struct BasePad {
         // Ссылка на слой или тип слоя.
         // public Object Reference;
-        /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ LayerTypeRef, LayerRef> Reference;
+        std::variant</*XML::Null,*/ LayerTypeRef, LayerRef> Reference;
     };
     // Описание круглой контактной площадки.
     struct PadCircle : public BasePad {
@@ -24,9 +24,9 @@ struct LocalLibrary {
         // Диаметр окружности, круга, овала.
         [[= XML::Attr]] double diameter{};
         // Параметр овальной контактной площадки: вытягивание по осям x и y.
-        /*[[= XML::Elem]]*/ Stretch Stretch;
+        Stretch Stretch;
         // Параметр контактной площадки: смещение точки привязки по осям x и y.
-        /*[[= XML::Elem]]*/ Shift Shift;
+        Shift Shift;
         operator QPainterPath() const;
     };
     // Описание прямоугольной контактной площадки.
@@ -48,33 +48,33 @@ struct LocalLibrary {
         // Тип обработки углов прямоугольной контактной площадки.
         [[= XML::Attr]] Handling handling{};
         // public bool handlingSpecified
-        bool getHandlingSpecified() const;
+
         // Величина обработки углов прямоугольной контактной площадки. Значение зависит от типа обработки. Для скругления это радиус. Для среза это высота среза.
         [[= XML::Attr]] double handlingValue{};
         // public bool handlingValueSpecified
-        bool getHandlingValueSpecified() const;
+
         // Флаг выборочной обработки углов прямоугольной контактной площадки. Если не установлен, то все углы обрабатываются одинаковым образом.
         [[= XML::Attr]] Bool custom{};
         // public bool customSpecified
-        bool getCustomSpecified() const;
+
         // Флаг обработки левого нижнего угла прямоугольной контактной площадки.
         [[= XML::Attr]] Bool cornerLB{};
         // public bool cornerLBSpecified
-        bool getCornerLBSpecified() const;
+
         // Флаг обработки правого нижнего угла прямоугольной контактной площадки.
         [[= XML::Attr]] Bool cornerRB{};
         // public bool cornerRBSpecified
-        bool getCornerRBSpecified() const;
+
         // Флаг обработки правого нижнего угла прямоугольной контактной площадки.
         [[= XML::Attr]] Bool cornerRT{};
         // public bool cornerRTSpecified
-        bool getCornerRTSpecified() const;
+
         // Флаг обработки левого верхнего угла прямоугольной контактной площадки.
         [[= XML::Attr]] Bool cornerLT{};
         // public bool cornerLTSpecified
-        bool getCornerLTSpecified() const;
+
         // Параметр контактной площадки: смещение точки привязки по осям x и y.
-        /*[[= XML::Elem]]*/ Shift Shift;
+        Shift Shift;
         operator QPainterPath() const;
     };
     // Описание полигональной контактной площадки.
@@ -98,11 +98,11 @@ struct LocalLibrary {
         // Параметр стека контактной площадки: металлизация отверстия.
         [[= XML::Attr]] Bool metallized{};
         // public bool metallizedSpecified
-        bool getMetallizedSpecified() const;
+
         // Параметр стека контактной площадки: подключение к области металлизации (полигону).
         [[= XML::Attr]] ConnectToCopper connectToCopper{};
         // Описание термобарьера.
-        /*[[= XML::Elem]]*/ Thermal Thermal;
+        Thermal Thermal;
         // Контактные площадки стека.
         // <value>PadCircle, PadOval, PadRect, PadPoly</value>
         //[XmlArrayItem("PadCircle", typeof(PadCircle)), XmlArrayItem("PadOval", typeof(PadOval)), XmlArrayItem("PadRect", typeof(PadRect)), XmlArrayItem("PadPoly", typeof(PadPoly))] public List<Object> Pads;
@@ -131,7 +131,7 @@ struct LocalLibrary {
         // Параметр типа переходного отверстия: возможность установить переходное отверстие на контактной площадке.
         [[= XML::Attr]] Bool viaOnPin{};
         // public bool viaOnPinSpecified
-        bool getViaOnPinSpecified() const;
+
         // Диапазон слоев.
         // <value>AllLayers | [LayerRef]</value>
         // ORIGINAL LINE XmlElement: [LayerRange] public LayerRange LayerRange;
@@ -148,29 +148,29 @@ struct LocalLibrary {
             // Толщина линии.
             [[= XML::Attr]] double lineWidth{};
             // Ссылка на слой.
-            /*[[= XML::Elem]]*/ LayerRef LayerRef;
+            LayerRef LayerRef;
             // Описание фигуры.
             // <value>ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon</value>
             // public Object Figure;
-            /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon, FilledContour> Figure;
+            std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon, FilledContour> Figure;
         };
         // Описание запрета в посадочном месте Footprint. Для запрета размещения должен быть указан слой с типом Assy.
         struct Keepout {
             // Ссылка на слой.
-            /*[[= XML::Elem]]*/ LayerRef LayerRef;
+            LayerRef LayerRef;
             // Описание фигуры.
             // <value>ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon</value>
             // public Object Figure;
-            /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon, FilledContour> Figure;
+            std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Line, Circle, Rect, FilledCircle, FilledRect, Polygon, FilledContour> Figure;
         };
         // Описание монтажного отверстия в посадочном месте.
         struct Mnthole {
             // Идентификатор неименованных объектов.
             [[= XML::Attr]] std::string id;
             // Ссылка на стек контактных площадок.
-            /*[[= XML::Elem]]*/ PadstackRef PadstackRef;
+            PadstackRef PadstackRef;
             // Точка привязки объекта.
-            /*[[= XML::Elem]]*/ Org Org;
+            Org Org;
         };
         // Описание ярлыка в посадочном месте.
         struct Label {
@@ -183,13 +183,13 @@ struct LocalLibrary {
             // Параметр надписей и ярлыков: зеркальность отображения.
             [[= XML::Attr]] Bool mirror{};
             // public bool mirrorSpecified
-            bool getMirrorSpecified() const;
+
             // Ссылка на слой.
-            /*[[= XML::Elem]]*/ LayerRef LayerRef;
+            LayerRef LayerRef;
             // Ссылка на стиль надписей.
-            /*[[= XML::Elem]]*/ TextStyleRef TextStyleRef;
+            TextStyleRef TextStyleRef;
             // Точка привязки объекта.
-            /*[[= XML::Elem]]*/ Org Org;
+            Org Org;
             QTransform transform() const {
                 QTransform transform;
                 if(Org) transform.translate(Org.x, Org.y);
@@ -217,7 +217,7 @@ struct LocalLibrary {
             // иначе площадка будет расположена на противоположной стороне.
             [[= XML::Attr]] Bool flipped{};
             // public bool flippedSpecified
-            bool getFlippedSpecified() const;
+
             // Ссылка на стек контактных площадок.
             [[= XML::ElemF]] PadstackRef PadstackRef; //("PadstackRef")
             // Точка привязки объекта.
@@ -315,9 +315,9 @@ struct LocalLibrary {
             [[= XML::Attr]] double delay{};
         };
         // Ссылка на схемный компонент.
-        /*[[= XML::Elem]]*/ ComponentRef ComponentRef; //("ComponentRef")
-                                                       // Ссылка на посадочное место.
-        /*[[= XML::Elem]]*/ FootprintRef FootprintRef; //("FootprintRef")
+        ComponentRef ComponentRef; //("ComponentRef")
+                                   // Ссылка на посадочное место.
+        FootprintRef FootprintRef; //("FootprintRef")
         // Соответствие контакта схемного компонента и вывода посадочного места.
         ///*[[= XML::Elem]]*/ // public List<Pinpack> Pinpacks;//("Pinpack")
         [[= XML::Elem]] std::vector<Pinpack> Pinpacks; //("Pinpack")
