@@ -88,7 +88,7 @@ void Shape::setScript(const QString& name) {
     redraw();
     // Имя в дереве и подсказка зависят от скрипта.
     setToolTip(this->name() + QString::number(id()));
-    if(row() >= 0 && App::fileModelPtr())
+    if(row() >= 0 && App::fileModel.ptr())
         emit App::fileModel().dataChanged(index(), index());
 }
 

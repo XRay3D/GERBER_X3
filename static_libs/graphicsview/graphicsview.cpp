@@ -99,7 +99,7 @@ GraphicsView::GraphicsView(QWidget* parent)
         }
     };
     setScene(new Scene{this});
-    App::setGraphicsView(this);
+    App::grView.set(this);
 
     updateSceneRectToContents(); // пустой проект -- запасной прямоугольник
 
@@ -167,7 +167,7 @@ GraphicsView::GraphicsView(QWidget* parent)
     scale(1.0, -1.0); // flip vertical
 }
 
-GraphicsView::~GraphicsView() { App::setGraphicsView(nullptr); }
+GraphicsView::~GraphicsView() { App::grView.set(nullptr); }
 
 void GraphicsView::zoom100() {
     double x = 1.0, y = 1.0;

@@ -48,12 +48,12 @@ Marker::Marker(Type type)
     , type_{type} {
     setAcceptHoverEvents(true);
     if(type_ == Home) {
-        App::setHome(this);
+        App::home.set(this);
         basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 0, 90);
         basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 270, -90);
         setToolTip(QObject::tr("G-Code Home Point"));
     } else {
-        App::setZero(this);
+        App::zero.set(this);
         basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 90, 90);
         basePath_.arcTo(QRectF(QPointF(-3, -3), QSizeF(6, 6)), 360, -90);
         setToolTip(QObject::tr("G-Code Zero Point"));
@@ -85,7 +85,7 @@ void Marker::applyScaleMode() {
 }
 
 Marker::~Marker() {
-    (type_ == Home) ? App::setHome(nullptr) : App::setZero(nullptr);
+    (type_ == Home) ? App::home.set(nullptr) : App::zero.set(nullptr);
 }
 
 QRectF Marker::boundingRect() const {
@@ -171,7 +171,7 @@ void Marker::setPosY(double y) {
 }
 
 void Marker::updateGCPForm() {
-    if(App::gcPropertiesFormPtr())
+    if(App::gcPropertiesForm.ptr())
         App::gcPropertiesForm().updatePosDsbxs();
 
     if(type_ == Zero) {
@@ -246,10 +246,10 @@ Pin::Pin()
 }
 
 void applyMarkersScaleMode() {
-    if(auto* p = App::homePtr()) p->applyScaleMode();
-    if(auto* p = App::zeroPtr()) p->applyScaleMode();
-    for(auto&& get: {&App::pin0Ptr, &App::pin1Ptr, &App::pin2Ptr, &App::pin3Ptr})
-        if(auto* p = get()) p->applyScaleMode();
+    if(auto* p = App::home.ptr()) p->applyScaleMode();
+    if(auto* p = App::zero.ptr()) p->applyScaleMode();
+    for(auto* p: {App::pin0.ptr(), App::pin1.ptr(), App::pin2.ptr(), App::pin3.ptr()})
+        if(p) p->applyScaleMode();
 }
 
 void Pin::applyScaleMode() { // см. Marker::applyScaleMode
@@ -373,7 +373,7 @@ void Pin::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
 
     auto action = menu.addAction(QIcon::fromTheme(u"drill-path"_s), tr("&Create path for Pins"), [] {
         ToolDatabase tdb{
-            App::grViewPtr(), std::array{Tool::Drill, Tool::EndMill}
+            App::grView.ptr(), std::array{Tool::Drill, Tool::EndMill}
         };
         if(tdb.exec()) {
             Tool tool(tdb.tool());
@@ -506,11 +506,11 @@ LayoutFrames::LayoutFrames()
     : QGraphicsObject{nullptr} {
     setZValue(-std::numeric_limits<double>::max());
     setFlag(ItemIsSelectable, false);
-    App::setLayoutFrames(this);
+    App::layoutFrames.set(this);
 }
 
 LayoutFrames::~LayoutFrames() {
-    App::setLayoutFrames(nullptr);
+    App::layoutFrames.set(nullptr);
 }
 
 int LayoutFrames::type() const {

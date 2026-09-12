@@ -58,7 +58,7 @@ Item::Item(AbstractFile* file)
 Item::~Item() {
     // Реестр анимации держит сырые указатели -- выписываемся.
     if(colorState & Selected)
-        if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+        if(auto* view = App::grView.ptr()) view->removeAnimated(this);
 }
 
 bool Item::isEditable() const { return QGraphicsItem::flags() & ItemIsMovable; }
@@ -275,14 +275,14 @@ QVariant Item::itemChange(QGraphicsItem::GraphicsItemChange change,
         changeColor();
         // Регистрация в реестре анимации вида: таймер «бегущих муравьёв»
         // крутится, только пока есть что анимировать.
-        if(auto* view = App::grViewPtr())
+        if(auto* view = App::grView.ptr())
             fl ? view->addAnimated(this) : view->removeAnimated(this);
     } break;
     case ItemSceneChange:
         // Уходим со сцены -- выписываемся, иначе реестр останется с висячим
         // указателем.
         if(!value.value<QGraphicsScene*>())
-            if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+            if(auto* view = App::grView.ptr()) view->removeAnimated(this);
         break;
     default: break;
     }

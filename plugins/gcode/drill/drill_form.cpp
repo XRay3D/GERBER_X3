@@ -93,11 +93,11 @@ Form::Form(GCode::Plugin* plugin)
     updateState();
     updateFiles();
     setWindowTitle(tr("GCType::Drill Toolpath"));
-    App::setDrillForm(this);
+    App::drillForm.set(this);
 }
 
 Form::~Form() {
-    App::setDrillForm(nullptr);
+    App::drillForm.set(nullptr);
 
     MySettings settings;
     settings.beginGroup(u"DrillForm"_s);

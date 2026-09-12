@@ -49,11 +49,11 @@ Project::Project(QObject* parent)
 
     connect(this, &Project::addFileDbg, this, qOverload<GCode::File*>(&Project::addFile), Qt::QueuedConnection);
 
-    App::setProject(this);
+    App::project.set(this);
 }
 
 Project::~Project() {
-    App::setProject(nullptr);
+    App::project.set(nullptr);
 }
 
 ReloadRequestDialog* Project::reloadDialog() {
@@ -62,7 +62,7 @@ ReloadRequestDialog* Project::reloadDialog() {
         // вместе с приложением. Берём его через вид: MainWindow объявлен в
         // ggeasy, куда common не смотрит, а GraphicsView -- обычный QWidget,
         // и его window() и есть главное окно.
-        auto* view = App::grViewPtr();
+        auto* view = App::grView.ptr();
         reloadDialog_ = new ReloadRequestDialog{view ? view->window() : nullptr};
         connect(reloadDialog_, &ReloadRequestDialog::reloadRequested, this, [this](const QString& path) {
             const int id = contains(path);
@@ -364,7 +364,7 @@ void Project::deleteFile(int32_t id) {
         files_.erase(id);
         setChanged();
         // Данных стало меньше -- корневой прямоугольник BSP пора ужать.
-        if(auto* view = App::grViewPtr()) view->scheduleSceneRectUpdate();
+        if(auto* view = App::grView.ptr()) view->scheduleSceneRectUpdate();
     } else
         qWarning() << u"Error id"_s << id << u"File not found"_s;
     isPinsPlaced_ = false;

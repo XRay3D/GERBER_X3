@@ -13,11 +13,23 @@
 // Обход полей агрегатов через статическую рефлексию C++26 (P2996).
 // Основа JSON-сериализации (common/serial.h): обход полей, их имена и счёт.
 
+#include <algorithm>
 #include <meta>
 #include <ranges>
+#include <string_view>
 #include <type_traits>
 
 static constexpr auto CTX = std::meta::access_context::current();
+
+// Строка как параметр шаблона: App::get<"project">() и подобные. Массив, а
+// не указатель -- reflect_constant для NTTP указатель не примет (та же
+// причина, что у ann::Name в serial.h).
+template <size_t N>
+struct fixed_string {
+    char s[N]{};
+    constexpr fixed_string(const char (&a)[N]) { std::copy_n(a, N, s); }
+    constexpr std::string_view sv() const { return {s, N - 1}; }
+};
 
 template <typename T>
 consteval auto fields_count() {

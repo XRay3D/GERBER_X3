@@ -34,7 +34,7 @@ Error::Error(const Geo::Polylines& curves, double area)
 
 Error::~Error() {
     if(isSelected())
-        if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+        if(auto* view = App::grView.ptr()) view->removeAnimated(this);
 }
 
 double Error::area() const { return area_; }
@@ -45,10 +45,10 @@ QRectF Error::boundingRect() const { return boundingRect_; }
 
 QVariant Error::itemChange(GraphicsItemChange change, const QVariant& value) {
     if(change == ItemSelectedChange) {
-        if(auto* view = App::grViewPtr())
+        if(auto* view = App::grView.ptr())
             value.toBool() ? view->addAnimated(this) : view->removeAnimated(this);
     } else if(change == ItemSceneChange && !value.value<QGraphicsScene*>()) {
-        if(auto* view = App::grViewPtr()) view->removeAnimated(this);
+        if(auto* view = App::grView.ptr()) view->removeAnimated(this);
     }
     return QGraphicsItem::itemChange(change, value);
 }

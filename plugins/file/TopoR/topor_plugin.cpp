@@ -68,7 +68,7 @@ std::string_view Plugin::typeName() const { return Serial::typeNameOf<File>(); }
 QIcon Plugin::icon() const { return decoration(Qt::lightGray, u'T'); }
 
 void Plugin::updateFileModel(AbstractFile* file) {
-    const auto fm = App::fileModelPtr();
+    const auto fm = App::fileModel.ptr();
     const QModelIndex fileIndex = file->node()->index();
     auto* item = fm->getItem(fileIndex);
     if(int count = item->childCount(); count) {

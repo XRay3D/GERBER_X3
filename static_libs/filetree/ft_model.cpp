@@ -30,12 +30,12 @@ Model::Model(QObject* parent)
     : QAbstractItemModel{parent}
     , rootItem(new FolderNode{u"rootItem"_s})
     , mimeType(u"application/GCodeItem"_s) {
-    App::setFileModel(this);
+    App::fileModel.set(this);
 }
 
 Model::~Model() {
     delete rootItem;
-    App::setFileModel(nullptr);
+    App::fileModel.set(nullptr);
 }
 
 QModelIndex Model::nodeIndex(Node* node) const {

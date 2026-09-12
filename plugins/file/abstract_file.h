@@ -66,7 +66,7 @@ public:
     // Восстановление после чтения (зовёт движок Serial): хвост прежнего
     // operator>> — splash, createGi, transform, видимость.
     void postLoad() {
-        if(App::splashScreenPtr())
+        if(App::splashScreen.ptr())
             App::splashScreen().showMessage(QObject::tr("Preparing: ") + shortName() + u"\n\n\n"_s, Qt::AlignBottom | Qt::AlignHCenter, Qt::white);
         createGi();
         setTransform(transform_);

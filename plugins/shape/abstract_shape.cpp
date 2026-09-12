@@ -106,7 +106,7 @@ AbstractShape::AbstractShape(Plugin* plugin)
 }
 
 AbstractShape::~AbstractShape() {
-    if(App::projectPtr()) App::project().deleteShape(id_);
+    if(App::project.ptr()) App::project().deleteShape(id_);
     plugin->editor()->remove(this);
 }
 
@@ -454,7 +454,7 @@ void AbstractShape::contextMenuEvent(QGraphicsSceneContextMenuEvent* event) {
         Dialog{this, event->screenPos()}.exec();
     } else {
         QMenu menu;
-        AbstractShape::menu(menu, App::fileTreeViewPtr());
+        AbstractShape::menu(menu, App::fileTreeView.ptr());
         menu.exec(event->screenPos());
     }
 }

@@ -44,11 +44,11 @@ View::View(QWidget* parent)
     setAnimated(true);
     setUniformRowHeights(true);
 
-    App::setFileTreeView(this);
+    App::fileTreeView.set(this);
 }
 
 View::~View() {
-    App::setFileTreeView(nullptr);
+    App::fileTreeView.set(nullptr);
 }
 
 void View::updateTree() {

@@ -202,7 +202,7 @@ Form::Form(GCode::Plugin* plugin)
     // rb_clicked();
 
     // // clang-format off
-    // connect(App::grViewPtr(), &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
+    // connect(App::grView.ptr(), &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
     // connect(dsbxDepth,              &DepthForm::valueChanged,      this, &Form::updateBridges);
     // connect(leName,                 &QLineEdit::textChanged,       this, &Form::onNameTextChanged);
     // connect(ui->dsbxBridgeLenght,   &QDoubleSpinBox::valueChanged, this, &Form::updateBridges);

@@ -85,7 +85,7 @@ Form::Form(GCode::Plugin* plugin)
     updateState();
     updateFiles();
     setWindowTitle(tr("Thread"));
-    // FIXME App::setDrillForm(this);
+    // FIXME App::drillForm.set(this);
 }
 
 Form::~Form() {

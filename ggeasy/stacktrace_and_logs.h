@@ -67,7 +67,7 @@ inline void myMessageHandler(QtMsgType type, const QMessageLogContext& context, 
                 context_.file = file.data() + last;
     }
 
-    if(App::mainWindowPtr())
+    if(App::mainWindow.ptr())
         App::mainWindow().logMessage2(type, context, message);
     defaultMessageHandler(type, context, message);
 }

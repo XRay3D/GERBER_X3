@@ -60,7 +60,7 @@ int main(int argc, char* argv[]) {
 
     [[maybe_unused]] App appSingleton;
     [[maybe_unused]] GCode::Settings gcSingleton;
-    App::setGcSettings(&gcSingleton);
+    App::gcSettings.set(&gcSingleton);
     App::settingsPath() = QStandardPaths::standardLocations(QStandardPaths::AppDataLocation).constFirst();
     App::toolHolder().readTools();
 
@@ -116,8 +116,8 @@ int main(int argc, char* argv[]) {
         auto splash = new QSplashScreen{QPixmap{u":/256.png"_s}};
         splash->setAttribute(Qt::WA_DeleteOnClose);
         splash->show();
-        splash->connect(splash, &QObject::destroyed, splash, [] { App::setSplashScreen(nullptr); });
-        App::setSplashScreen(splash);
+        splash->connect(splash, &QObject::destroyed, splash, [] { App::splashScreen.set(nullptr); });
+        App::splashScreen.set(splash);
     }
 
     { // Translate

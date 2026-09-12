@@ -56,8 +56,8 @@ MainWindow::MainWindow(QWidget* parent)
     , project_{new Project{this}}
     , actionGroup{this}
     , reloadQuestion{this} {
-    App::setMainWindow(this);
-    App::setUndoStack(&undoStack_);
+    App::mainWindow.set(this);
+    App::undoStack.set(&undoStack_);
     setIconSize({24, 24});
 
     ui.setupUi(this);
@@ -69,10 +69,10 @@ MainWindow::MainWindow(QWidget* parent)
     ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Home});
     ui.grView->scene()->addItem(new Gi::Marker{Gi::Marker::Zero});
 
-    App::setPin0(new Gi::Pin);
-    App::setPin1(new Gi::Pin);
-    App::setPin2(new Gi::Pin);
-    App::setPin3(new Gi::Pin);
+    App::pin0.set(new Gi::Pin);
+    App::pin1.set(new Gi::Pin);
+    App::pin2.set(new Gi::Pin);
+    App::pin3.set(new Gi::Pin);
 
     ui.grView->scene()->addItem(&App::pin0());
     ui.grView->scene()->addItem(&App::pin1());
@@ -85,8 +85,8 @@ MainWindow::MainWindow(QWidget* parent)
         ui.statusbar->showMessage(u"X = %1, Y = %2"_s.arg(point.x()).arg(point.y()));
     });
 
-    connect(project_, &Project::homePosChanged, App::homePtr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
-    connect(project_, &Project::zeroPosChanged, App::zeroPtr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
+    connect(project_, &Project::homePosChanged, App::home.ptr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
+    connect(project_, &Project::zeroPosChanged, App::zero.ptr(), qOverload<const QPointF&>(&Gi::Marker::setPos));
     connect(project_, &Project::pinsPosChanged, qOverload<const QPointF[4]>(&Gi::Pin::setPos));
     connect(project_, &Project::layoutFrameUpdate, lfp, &LayoutFrames::updateRect);
     connect(project_, &Project::changed, this, &MainWindow::documentWasModified);
@@ -119,7 +119,7 @@ MainWindow::~MainWindow() {
     parserThread.quit();
     parserThread.wait();
     // App::project().close();
-    App::setMainWindow(nullptr);
+    App::mainWindow.set(nullptr);
     qDebug(__FUNCTION__);
 }
 

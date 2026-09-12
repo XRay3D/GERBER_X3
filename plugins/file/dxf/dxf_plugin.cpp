@@ -233,7 +233,7 @@ AbstractFileSettings* Plugin::createSettingsTab(QWidget* parent) {
 }
 
 void Plugin::updateFileModel(AbstractFile* file) {
-    const auto fm = App::fileModelPtr();
+    const auto fm = App::fileModel.ptr();
     // Индекс САМОГО узла файла, а не собранный вручную. Прежде здесь стояло
     // fm->createIndex(0, 0, fileIndex.internalId()): указатель настоящий, а
     // строка всегда 0. У первого файла это совпадало со строкой узла, у второго

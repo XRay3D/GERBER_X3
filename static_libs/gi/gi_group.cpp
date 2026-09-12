@@ -43,7 +43,7 @@ void Group::setSelected(const std::vector<int>& ids) {
 }
 
 void Group::addToScene(QGraphicsScene* scene) {
-    auto* view = App::grViewPtr();
+    auto* view = App::grView.ptr();
     if(!scene) {
         if(!view) return;
         scene = view->scene();

@@ -73,7 +73,7 @@ Form::Form(GCode::Plugin* plugin)
     rb_clicked();
 
     // clang-format off
-    connect(App::grViewPtr(),     &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
+    connect(App::grView.ptr(),     &GraphicsView::mouseMove,      this, &Form::updateBridgePos);
     connect(dsbxDepth,            &DepthForm::valueChanged,      this, &Form::updateBridges);
     connect(dsbxDepth,            &DepthForm::valueChanged,      this, &Form::updateAllowanceLimits);
     connect(ui->toolHolder,       &ToolSelectorForm::updateName, this, &Form::updateAllowanceLimits);
@@ -115,7 +115,7 @@ Form::~Form() {
     settings.endGroup();
 
     // На выходе из приложения вью уже разрушено вместе с мостиками.
-    if(auto* view = App::grViewPtr())
+    if(auto* view = App::grView.ptr())
         for(QGraphicsItem* giItem: view->items())
             if(giItem->type() == Gi::Type::Bridge)
                 delete giItem;

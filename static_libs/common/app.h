@@ -14,14 +14,24 @@
 #include <QDebug>
 #include <QObject>
 
+#include "reflection.h" // fixed_string
 #include "settings.h"
 #include "tool.h"
 #include "utils.h" //using namespace Qt::Literals;
 
 #include <assert.h>
 #include <map>
+#include <meta>
+#include <stdexcept>
+#include <vector>
 
 class AbstractFilePlugin;
+class GraphicsView;
+class LayoutFrames;
+class MainWindow;
+class Project;
+class QSplashScreen;
+class QUndoStack;
 
 namespace Drilling {
 class Form;
@@ -59,29 +69,57 @@ using FilePluginMap = std::map<uint32_t, AbstractFilePlugin*, std::less<>>;
 using GCodePluginMap = std::map<uint32_t, GCode::Plugin*>;
 using ShapePluginMap = std::map<int, Shapes::Plugin*>;
 
-#define SINGLETON(TYPE, SET, NAME)                                                                               \
-private:                                                                                                         \
-    class TYPE* NAME##_ = nullptr;                                                                               \
-                                                                                                                 \
-public:                                                                                                          \
-    static TYPE& NAME() {                                                                                        \
-        assert(app->NAME##_);                                                                                    \
-        return *app->NAME##_;                                                                                    \
-    }                                                                                                            \
-    /* Проверка app обязательна: указатели спрашивают и до создания App        \
-     * (выбор режима OpenGL в main), и после её разрушения -- туда ходит  \
-     * обработчик сообщений Qt, и на нулевом app он ронял процесс. */ \
-    static TYPE* NAME##Ptr() {                                                                                   \
-        return app ? app->NAME##_ : nullptr;                                                                     \
-    }                                                                                                            \
-    static void SET(TYPE* NAME) {                                                                                \
-        if(app->NAME##_ && NAME)                                                                                 \
-            throw std::logic_error(__FUNCTION__);                                                                \
-        /*qInfo() << #NAME << NAME;*/                                                                            \
-        app->NAME##_ = NAME;                                                                                     \
-    }
+// Синглтоны приложения. Единственный список «тип + имя»: из него рефлексией
+// (P2996, define_aggregate) собирается хранилище AppBase -- по одному T* на
+// слот, все nullptr. Порядок слотов = порядок полей AppBase.
+namespace detail {
+struct AppSlot {
+    std::meta::info type;
+    std::string_view name;
+};
+consteval std::vector<AppSlot> appSlots() {
+    // clang-format off
+    return {
+        {^^GCode::PropertiesForm, "gcPropertiesForm"},
+        {^^Drilling::Form,        "drillForm"       },
+        {^^FileTree::Model,       "fileModel"       },
+        {^^FileTree::View,        "fileTreeView"    },
+        {^^GCode::Settings,       "gcSettings"      },
+        {^^GraphicsView,          "grView"          },
+        {^^LayoutFrames,          "layoutFrames"    },
+        {^^MainWindow,            "mainWindow"      },
+        {^^Project,               "project"         },
+        {^^QSplashScreen,         "splashScreen"    },
+        {^^QUndoStack,            "undoStack"       },
+        {^^Gi::Marker,            "home"            },
+        {^^Gi::Marker,            "zero"            },
+        {^^Gi::Pin,               "pin0"            },
+        {^^Gi::Pin,               "pin1"            },
+        {^^Gi::Pin,               "pin2"            },
+        {^^Gi::Pin,               "pin3"            },
+    };
+    // clang-format on
+}
+} // namespace detail
 
-class App {
+struct AppBase;
+consteval {
+    std::vector<std::meta::info> members;
+    for(auto slot: detail::appSlots())
+        members.push_back(std::meta::data_member_spec(std::meta::add_pointer(slot.type), {.name = slot.name}));
+    std::meta::define_aggregate(^^AppBase, members);
+}
+
+// Поле AppBase по имени. Свободная функция, а не член App: внутри тела App
+// она ещё не определена в момент использования в static constexpr членах.
+template <fixed_string Name>
+consteval std::meta::info appMember() {
+    for(auto m: std::meta::nonstatic_data_members_of(^^AppBase, std::meta::access_context::unchecked()))
+        if(std::meta::identifier_of(m) == Name.sv()) return m;
+    throw "App: no such singleton";
+}
+
+class App : AppBase {
     Q_DISABLE_COPY_MOVE(App)
     // Определение -- в app.cpp: единственная копия живёт в libggcore, и все
     // модули (exe и плагины) биндятся на неё через динамический линкер.
@@ -89,27 +127,58 @@ class App {
     // своя копия inline static, и указатель разносился через QSharedMemory.
     static App* app;
 
-    // clang-format off
-    SINGLETON(GCode::PropertiesForm, setGCodePropertiesForm, gcPropertiesForm)
-    SINGLETON(Drilling::Form,  setDrillForm,    drillForm    )
-    SINGLETON(FileTree::Model, setFileModel,    fileModel    )
-    SINGLETON(FileTree::View,  setFileTreeView, fileTreeView )
-    SINGLETON(GCode::Settings, setGcSettings,   gcSettings   )
-    SINGLETON(GraphicsView,    setGraphicsView, grView       )
-    SINGLETON(LayoutFrames,    setLayoutFrames, layoutFrames )
-    SINGLETON(MainWindow,      setMainWindow,   mainWindow   )
-    SINGLETON(Project,         setProject,      project      )
-    SINGLETON(QSplashScreen,   setSplashScreen, splashScreen )
-    SINGLETON(QUndoStack,      setUndoStack,    undoStack    )
+    // Доступ к слоту. data_member_spec порождает только нестатические поля
+    // данных (ни статических членов, ни функций), поэтому именованные
+    // аксессоры -- static constexpr объекты: App::project() через operator(),
+    // App::project.ptr(), App::project.set(p).
+    template <std::meta::info M>
+    struct Accessor {
+        using T = std::remove_pointer_t<typename[:std::meta::type_of(M):]>;
+        T& operator()() const {
+            assert(app->[:M:]);
+            return *app->[:M:];
+        }
+        // Проверка app обязательна: указатели спрашивают и до создания App
+        // (выбор режима OpenGL в main), и после её разрушения -- туда ходит
+        // обработчик сообщений Qt, и на нулевом app он ронял процесс.
+        T* ptr() const { return app ? app->[:M:] : nullptr; }
+        void set(T* p) const {
+            if(app->[:M:] && p)
+                throw std::logic_error(std::string{std::meta::identifier_of(M)});
+            app->[:M:] = p;
+        }
+    };
 
-    SINGLETON(Gi::Marker, setHome, home)
-    SINGLETON(Gi::Marker, setZero, zero)
-    SINGLETON(Gi::Pin,    setPin0, pin0)
-    SINGLETON(Gi::Pin,    setPin1, pin1)
-    SINGLETON(Gi::Pin,    setPin2, pin2)
-    SINGLETON(Gi::Pin,    setPin3, pin3)
+public:
+    // clang-format off
+    static constexpr Accessor<appMember<"gcPropertiesForm">()> gcPropertiesForm{};
+    static constexpr Accessor<appMember<"drillForm">()>        drillForm{};
+    static constexpr Accessor<appMember<"fileModel">()>        fileModel{};
+    static constexpr Accessor<appMember<"fileTreeView">()>     fileTreeView{};
+    static constexpr Accessor<appMember<"gcSettings">()>       gcSettings{};
+    static constexpr Accessor<appMember<"grView">()>           grView{};
+    static constexpr Accessor<appMember<"layoutFrames">()>     layoutFrames{};
+    static constexpr Accessor<appMember<"mainWindow">()>       mainWindow{};
+    static constexpr Accessor<appMember<"project">()>          project{};
+    static constexpr Accessor<appMember<"splashScreen">()>     splashScreen{};
+    static constexpr Accessor<appMember<"undoStack">()>        undoStack{};
+    static constexpr Accessor<appMember<"home">()>             home{};
+    static constexpr Accessor<appMember<"zero">()>             zero{};
+    static constexpr Accessor<appMember<"pin0">()>             pin0{};
+    static constexpr Accessor<appMember<"pin1">()>             pin1{};
+    static constexpr Accessor<appMember<"pin2">()>             pin2{};
+    static constexpr Accessor<appMember<"pin3">()>             pin3{};
     // clang-format on
 
+    // То же по строковому имени: App::get<"project">(), ptr<>, set<>.
+    template <fixed_string N>
+    static auto& get() { return Accessor<appMember<N>()>{}(); }
+    template <fixed_string N>
+    static auto* ptr() { return Accessor<appMember<N>()>{}.ptr(); }
+    template <fixed_string N>
+    static void set(auto* p) { Accessor<appMember<N>()>{}.set(p); }
+
+private:
     FilePluginMap filePlugins_;
     GCodePluginMap gCodePlugin_;
     ShapePluginMap shapePlugin_;
