@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "Constructive.h"
 namespace TopoR {
 void Constructive::BoardOutline::Shape::Shift(double x, double y) {

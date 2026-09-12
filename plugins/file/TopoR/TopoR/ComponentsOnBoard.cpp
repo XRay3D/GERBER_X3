@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 #include "ComponentsOnBoard.h"
 namespace TopoR {
 bool ComponentsOnBoard::CompInstance::Pin::ShouldSerializePadstackRef() { return PadstackRef != TopoR::PadstackRef{}; }

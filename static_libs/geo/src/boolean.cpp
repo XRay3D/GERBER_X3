@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // Раздувание и булевы операции поверх обёрток Geo::Polygon/Polygons
 // (geo/polygon.h) -- то есть поверх точного CGAL-домена: центры и радиусы
 // дуг проходят операции неизменными, дискретизации нет вовсе.

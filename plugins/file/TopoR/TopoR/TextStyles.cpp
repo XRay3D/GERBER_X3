@@ -1,4 +1,6 @@
-﻿#include "TextStyles.h"
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+#include "TextStyles.h"
 namespace TopoR {
 // bool TextStyles::ShouldSerialize_TextStyles() { return TextStyles.size(); }
 } // namespace TopoR

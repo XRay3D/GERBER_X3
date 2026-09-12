@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // Лимбы GMP -- через mimalloc. Каждая операция EPECK молотит выделениями
 // коротких лимбов из многих потоков разом, а malloc из ucrt под такой
 // конкуренцией складывается -- та самая «стена GMP-аллокатора», о которую

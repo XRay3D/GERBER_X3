@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // Точный домен: полигон с отверстиями, регион и булевы над ним. Отдельное
 // внимание -- инверсии: она единственная из булевых уводит регион в
 // неограниченный, и почти всё остальное ведёт себя на нём иначе.

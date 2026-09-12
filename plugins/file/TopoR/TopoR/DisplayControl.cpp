@@ -1,4 +1,6 @@
-﻿#include "DisplayControl.h"
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
+#include "DisplayControl.h"
 namespace TopoR {
 
 bool DisplayControl::ColorNets::ShouldSerialize_SetColors() {

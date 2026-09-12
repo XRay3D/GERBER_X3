@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // Тесты Document::parse: корректные документы, все коды ошибок с позициями и
 // работоспособность в constexpr (static_assert). Без внешних фреймворков.
 #include <lxml.hpp>

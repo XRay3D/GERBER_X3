@@ -1,3 +1,5 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++, C#, and Java: https://pvs-studio.com
 // Бенчмарк кармана «снаружи» без GUI: синтетическое поле «рамка минус
 // сетка падов» гоняется через Geo::InflatePasses в форме fieldLoops из
 // pocketoffset -- первый виток точный, последующие черновые. Детерминирован

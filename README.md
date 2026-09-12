@@ -30,3 +30,7 @@ Component placement from a Gerber X3 file (component attributes).
 Downloads are on the [Releases](https://github.com/XRay3D/GERBER_X3/releases) tab.
 
 Поддержать автора https://boosty.to/x-ray_3d
+
+## SAST Tools
+
+[PVS-Studio](https://pvs-studio.com/pvs-studio/?utm_source=website&utm_medium=github&utm_campaign=open_source) - static code analyzer for Enterprise (C, C++, C#, Go, and Java) and Web (JS and TS) development.
