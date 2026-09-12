@@ -86,8 +86,9 @@ Geo::Polyline sample_curved_edge(std::vector<segment_type>& segment_data_, const
     const segment_type isegment = edge.cell()->contains_point() ? retrieve_segment(segment_data_, *edge.twin()->cell()) : retrieve_segment(segment_data_, *edge.cell());
     const dpoint point{static_cast<double>(ipoint.x()), static_cast<double>(ipoint.y())};
     const boost::polygon::segment_data<double> segment{
-        dpoint{static_cast<double>(isegment.low().x()), static_cast<double>(isegment.low().y())},
-        dpoint{static_cast<double>(isegment.high().x()), static_cast<double>(isegment.high().y())}};
+        dpoint{static_cast<double>(isegment.low().x()),  static_cast<double>(isegment.low().y()) },
+        dpoint{static_cast<double>(isegment.high().x()), static_cast<double>(isegment.high().y())}
+    };
     boost::polygon::voronoi_visual_utils<double>::discretize(point, segment, maxDistMm * kScale, &sampled_edge);
 
     Geo::Polyline path;

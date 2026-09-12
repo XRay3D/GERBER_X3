@@ -51,11 +51,11 @@ struct InflatePasses::Source {
     std::size_t baseVertices{};
     double bias{};
     std::size_t group{InflatePasses::global}; // объемлющее, из которого вычитается тело
-    bool grow{};   // тело раздувается; объемлющее усаживается
-    bool dead{};   // объемлющее съедено усадкой -- витков больше не даст
-    bool shared{}; // база -- точная копия тела с ОБЩИМИ числами: только
-                   // последовательный счёт в вызывающем потоке
-    QRectF lastBox;  // габарит последнего результата -- для смерти по габариту
+    bool grow{};                              // тело раздувается; объемлющее усаживается
+    bool dead{};                              // объемлющее съедено усадкой -- витков больше не даст
+    bool shared{};                            // база -- точная копия тела с ОБЩИМИ числами: только
+                                              // последовательный счёт в вызывающем потоке
+    QRectF lastBox;                           // габарит последнего результата -- для смерти по габариту
 
     // Виток источника: офсет базы на остаток до полной полуширины плюс
     // принятие новой базы, когда материализованный результат проще. Пишет
@@ -362,9 +362,7 @@ std::vector<Polygons> InflatePasses::passParts(double d, double coarse) {
             // Снимок объединения на витке d: дальше он раздувается на d' - d,
             // и расписание каждого члена (d' + bias = d + bias + (d' - d))
             // в нём уже учтено -- единого bias группе не нужно.
-            next.push_back({.base = std::move(rebuilt), .baseDistance = d,
-                .baseVertices = verticesOf(contours),
-                .group = k == ambients_.size() ? global : k, .grow = true});
+            next.push_back({.base = std::move(rebuilt), .baseDistance = d, .baseVertices = verticesOf(contours), .group = k == ambients_.size() ? global : k, .grow = true});
         }
         if(!intact) continue;
         replaced[k] = 1;

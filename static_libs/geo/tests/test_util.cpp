@@ -241,7 +241,12 @@ void UtilTest::decimatedKeepsShapeWithinTolerance() {
     // весь шум, не сдвинув границу дальше допуска.
     Polyline noisy;
     noisy.closed = true;
-    const QPointF corners[]{{0.0, 0.0}, {20.0, 0.0}, {20.0, 20.0}, {0.0, 20.0}};
+    const QPointF corners[]{
+        {0.0,  0.0 },
+        {20.0, 0.0 },
+        {20.0, 20.0},
+        {0.0,  20.0}
+    };
     for(int side{}; side < 4; ++side) {
         const QPointF from = corners[side], to = corners[(side + 1) % 4];
         const QPointF dir = (to - from) / 50.0;
@@ -273,14 +278,14 @@ void UtilTest::decimatedKeepsShapeWithinTolerance() {
     constexpr double r = 0.05;
     const double b = std::tan(pi / 8.0); // четверть окружности против часовой
     Polyline rounded{
-        Vertex{r, 0.0},               // низ
-        Vertex{20.0 - r, 0.0, b},     // скругление (20, 0)
-        Vertex{20.0, r},              // правая сторона
-        Vertex{20.0, 20.0 - r, b},    // скругление (20, 20)
-        Vertex{20.0 - r, 20.0},       // верх
-        Vertex{r, 20.0, b},           // скругление (0, 20)
-        Vertex{0.0, 20.0 - r},        // левая сторона
-        Vertex{0.0, r, b},            // скругление (0, 0), замыкает в (r, 0)
+        Vertex{r, 0.0}, // низ
+        Vertex{20.0 - r, 0.0, b}, // скругление (20, 0)
+        Vertex{20.0, r}, // правая сторона
+        Vertex{20.0, 20.0 - r, b}, // скругление (20, 20)
+        Vertex{20.0 - r, 20.0}, // верх
+        Vertex{r, 20.0, b}, // скругление (0, 20)
+        Vertex{0.0, 20.0 - r}, // левая сторона
+        Vertex{0.0, r, b}, // скругление (0, 0), замыкает в (r, 0)
     };
     rounded.closed = true;
     const Polyline straightened = decimated(rounded, tolerance);
@@ -300,7 +305,11 @@ void UtilTest::decimatedKeepsShapeWithinTolerance() {
 
     // Вырождающийся результат откатывается к исходному: треугольник мельче
     // допуска прореживание схлопнуло бы в отрезок.
-    Polyline tiny{Vertex{0.0, 0.0}, Vertex{0.03, 0.0}, Vertex{0.0, 0.03}};
+    Polyline tiny{
+        Vertex{0.0,  0.0 },
+        Vertex{0.03, 0.0 },
+        Vertex{0.0,  0.03}
+    };
     tiny.closed = true;
     QCOMPARE(decimated(tiny, 1.0).size(), tiny.size());
 

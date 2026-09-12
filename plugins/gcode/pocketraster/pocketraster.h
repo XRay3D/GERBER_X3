@@ -44,7 +44,7 @@ private:
     void addAcc(Geo::Polylines& src, const double accDistance);
 };
 
-class [[= Serial::name("PocketRaster")]] File final : public GCode::File {
+class[[= Serial::name("PocketRaster")]] File final : public GCode::File {
 public:
     void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();

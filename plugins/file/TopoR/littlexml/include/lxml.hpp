@@ -16,13 +16,13 @@
 // #include <boost/pfr.hpp>
 
 #ifdef LXML_INTERFACE_UNIT
-#define LXML_BEGIN_MODULE_EXPORT export {
-#define LXML_END_MODULE_EXPORT   }
-#define LXML_EXPORT              export
+    #define LXML_BEGIN_MODULE_EXPORT export {
+    #define LXML_END_MODULE_EXPORT   }
+    #define LXML_EXPORT              export
 #else
-#define LXML_BEGIN_MODULE_EXPORT
-#define LXML_END_MODULE_EXPORT
-#define LXML_EXPORT
+    #define LXML_BEGIN_MODULE_EXPORT
+    #define LXML_END_MODULE_EXPORT
+    #define LXML_EXPORT
 #endif
 
 LXML_BEGIN_MODULE_EXPORT
@@ -171,25 +171,25 @@ struct ParseError {
         UnclosedElement,       // конец документа внутри незакрытого элемента
     };
     Code code{};
-    size_t offset{};             // байтов от начала документа
-    size_t line{1}, column{1};   // 1-based
-    string_view expected{};      // TagMismatch/UnclosedElement: имя открытого элемента
-    string_view found{};         // имя встреченного тега либо фрагмент документа у ошибки
+    size_t offset{};           // байтов от начала документа
+    size_t line{1}, column{1}; // 1-based
+    string_view expected{};    // TagMismatch/UnclosedElement: имя открытого элемента
+    string_view found{};       // имя встреченного тега либо фрагмент документа у ошибки
 
     std::string message() const {
         using enum Code;
         std::string what;
         switch(code) {
-        case UnexpectedEof: what = "unexpected end of document"; break;
-        case UnterminatedTag: what = "tag is never closed ('>' not found)"; break;
+        case UnexpectedEof        : what = "unexpected end of document"; break;
+        case UnterminatedTag      : what = "tag is never closed ('>' not found)"; break;
         case UnterminatedAttrValue: what = "attribute value is missing its closing quote"; break;
-        case AttrValueWithoutKey: what = "attribute value has no name"; break;
-        case UnterminatedComment: what = "comment is never closed ('-->' not found)"; break;
-        case UnsupportedMarkup: what = "unsupported '<!' markup (only comments are supported)"; break;
-        case EmptyTagName: what = "tag has no name"; break;
-        case TagMismatch: what = std::format("closing tag </{}> does not match open element <{}>", found, expected); break;
-        case ExtraClosingTag: what = std::format("closing tag </{}>, but no element is open", found); break;
-        case UnclosedElement: what = std::format("end of document, but element <{}> is still open", expected); break;
+        case AttrValueWithoutKey  : what = "attribute value has no name"; break;
+        case UnterminatedComment  : what = "comment is never closed ('-->' not found)"; break;
+        case UnsupportedMarkup    : what = "unsupported '<!' markup (only comments are supported)"; break;
+        case EmptyTagName         : what = "tag has no name"; break;
+        case TagMismatch          : what = std::format("closing tag </{}> does not match open element <{}>", found, expected); break;
+        case ExtraClosingTag      : what = std::format("closing tag </{}>, but no element is open", found); break;
+        case UnclosedElement      : what = std::format("end of document, but element <{}> is still open", expected); break;
         }
         const bool tagCtx = code == TagMismatch || code == ExtraClosingTag || code == UnclosedElement;
         if(!tagCtx && found.size()) what += std::format(", near '{}'", found);

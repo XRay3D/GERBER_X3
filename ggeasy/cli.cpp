@@ -46,7 +46,7 @@ inline QDebug printSequentialContainer(QDebug debug, const char* which, const QL
 bool MainWindow::cli(std::span<std::string_view> commands) {
 
     struct {
-        int time  = 500;
+        int time = 500;
         int delay = 500;
         operator int() { return time += delay; }
     } static time;

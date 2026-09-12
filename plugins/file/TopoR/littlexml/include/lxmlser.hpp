@@ -90,7 +90,7 @@ namespace meta = std ::meta;
 
 #if GR
 
-#define annotations_of annotations_of_with_type
+    #define annotations_of annotations_of_with_type
 
 template <typename T>
 consteval std::optional<T> annotation_of_type(meta::info r) {
@@ -336,7 +336,7 @@ private:
     template <meta::info INFO, typename T>
     static void save(const T& data, NodeTag* node) {
         static constexpr string_view NAME_OF{nameOf(INFO)};
-#if 0
+    #if 0
         // clang-format off
         Overload{
             [](const std::string& data, NodeTag* node) requires IsAttr<INFO> {
@@ -389,7 +389,7 @@ private:
             },
         }/*(data, node)*/;
         // clang-format on
-#else
+    #else
 
         if constexpr(IsAttr<INFO>) {
 
@@ -475,7 +475,7 @@ private:
                 node->parent->pop_back();
         } else
             logRed("data {} {}", NAME_OF, display_string_of(^^T));
-#endif
+    #endif
     }
 
     // ======================================================================

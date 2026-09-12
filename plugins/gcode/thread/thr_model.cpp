@@ -144,9 +144,9 @@ bool Model::setData(const QModelIndex& index, const QVariant& value, int role) {
     if(role != Qt::EditRole)
         return false;
     switch(index.column()) {
-    case Correction   : setCorrection(index.row(), value.toDouble()); return true;
-    case HoleDiameter  : setHoleDiameter(index.row(), value.toDouble()); return true;
-    default            : return false;
+    case Correction  : setCorrection(index.row(), value.toDouble()); return true;
+    case HoleDiameter: setHoleDiameter(index.row(), value.toDouble()); return true;
+    default          : return false;
     }
 }
 

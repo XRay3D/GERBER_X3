@@ -17,7 +17,7 @@ namespace CrossHatch {
 
 constexpr auto CROSS_HATCH = "CrossHatch"_hash32;
 
-class [[= Serial::name("CrossHatch")]] File final : public GCode::File {
+class[[= Serial::name("CrossHatch")]] File final : public GCode::File {
 public:
     void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }
     explicit File();

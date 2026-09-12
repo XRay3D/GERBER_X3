@@ -48,7 +48,6 @@ public:
     uint32_t type() const override { return DRILLING; }
     void createGi() override { createGiDrill(), itemGroup()->setVisible(true); }
 
-
 private:
     std::vector<RowRef> rows_;
     int worckType_{};

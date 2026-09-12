@@ -66,7 +66,7 @@ using UndoHandles = std::vector<UndoPair>;
 
 // keep: наследование от Gi::Item (QGraphicsItem) иначе выводит базу из
 // сериализации целиком — вместе с handles/closed/id.
-class [[= Serial::keep]] AbstractShape : public Gi::Item, public ::FileTree::Node {
+class[[= Serial::keep]] AbstractShape : public Gi::Item, public ::FileTree::Node {
     friend class Node;
     friend struct UndoMove;
 

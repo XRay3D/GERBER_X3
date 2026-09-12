@@ -29,7 +29,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     update = {
         {ui->dsbxAngle,             &ToolEditForm::updateDsbxAngle            },
         {ui->dsbxDiameter,          &ToolEditForm::updateDsbxDiameter         },
-        {ui->dsbxMDiam,          &ToolEditForm::updateDsbxHoleDiam         },
+        {ui->dsbxMDiam,             &ToolEditForm::updateDsbxHoleDiam         },
         {ui->dsbxFeedRate,          &ToolEditForm::updateDsbxFeedRate         },
         {ui->dsbxLenght,            &ToolEditForm::updateDsbxLenght           },
         {ui->dsbxOneTurnCut,        &ToolEditForm::updateDsbxOneTurnCut       },
@@ -47,7 +47,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     get = {
         std::pair{ui->dsbxAngle,        &Tool::angle       },
-        std::pair{ui->dsbxMDiam,     &Tool::angle       },
+        std::pair{ui->dsbxMDiam,        &Tool::angle       },
         std::pair{ui->dsbxDepth,        &Tool::passDepth   },
         std::pair{ui->dsbxDiameter,     &Tool::diameter    },
         std::pair{ui->dsbxFeedRate,     &Tool::feedRate    },
@@ -62,7 +62,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
 
     set = {
         std::pair{ui->dsbxAngle,        &Tool::setAngle       },
-        std::pair{ui->dsbxMDiam,     &Tool::setAngle       },
+        std::pair{ui->dsbxMDiam,        &Tool::setAngle       },
         std::pair{ui->dsbxDepth,        &Tool::setPassDepth   },
         std::pair{ui->dsbxDiameter,     &Tool::setDiameter    },
         std::pair{ui->dsbxFeedRate,     &Tool::setFeedRate    },

@@ -132,8 +132,8 @@ int main(int argc, char* argv[]) {
     const int strips = std::max(argc > 3 ? std::atoi(argv[3]) : 1, 1);
 
     const double toolDiameter = 1.0;
-    const double start = toolDiameter / 2;       // dOffset
-    const double step = toolDiameter * 0.45;     // stepOver
+    const double start = toolDiameter / 2;   // dOffset
+    const double step = toolDiameter * 0.45; // stepOver
     const double coarse = coarseTolerance(step, toolDiameter);
 
     const Polygons field = makeField(padsPerSide, strips);

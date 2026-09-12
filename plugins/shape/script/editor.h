@@ -34,7 +34,9 @@ public:
     Model(ScriptRegistry& registry, QObject* parent);
     ~Model() override = default;
 
-    enum Row : int { Center };
+    enum Row : int {
+        Center
+    };
 
     /// Перечитать список параметров с выделенных шейпов; вызывать перед reset().
     void sync();

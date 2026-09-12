@@ -147,10 +147,10 @@ void ShapeApi::polyline(const QJSValue& pts, bool closed) {
             y = v.property(1).toNumber();
             b = v.property(2).isNumber() ? v.property(2).toNumber() : 0.0;
         } else if(v.isObject()) {
-            x             = v.property(u"x"_s).toNumber();
-            y             = v.property(u"y"_s).toNumber();
+            x = v.property(u"x"_s).toNumber();
+            y = v.property(u"y"_s).toNumber();
             const auto bv = v.property(u"bulge"_s);
-            b             = bv.isNumber() ? bv.toNumber() : 0.0;
+            b = bv.isNumber() ? bv.toNumber() : 0.0;
         } else
             continue;
         poly.emplace_back(QPointF{x, y}, b);
@@ -174,7 +174,7 @@ double ShapeApi::rad2deg(double rad) const { return rad * 180.0 / std::numbers::
 
 QJSValue ShapeApi::polar(double radius, double deg) const {
     const double a = deg2rad(deg);
-    auto obj       = engine_->newObject();
+    auto obj = engine_->newObject();
     obj.setProperty(u"x"_s, radius * std::cos(a));
     obj.setProperty(u"y"_s, radius * std::sin(a));
     return obj;
@@ -272,7 +272,7 @@ void ScriptRegistry::load(Script& script) {
         script.error = u"line "_s + QString::number(result.property(u"lineNumber"_s).toInt()) + u": "_s + result.toString();
         return;
     }
-    auto global    = script.engine->globalObject();
+    auto global = script.engine->globalObject();
     script.buildFn = global.property(u"build"_s);
     if(!script.buildFn.isCallable()) {
         script.error = u"no build(p, sh) function"_s;
@@ -292,10 +292,10 @@ void ScriptRegistry::load(Script& script) {
                     const auto p = v.property(QLatin1StringView{key});
                     return p.isNumber() || p.isBool() ? p.toNumber() : fallback;
                 };
-                def.value    = num("value", 0.0);
-                def.min      = num("min", def.min);
-                def.max      = num("max", def.max);
-                def.step     = num("step", def.step);
+                def.value = num("value", 0.0);
+                def.min = num("min", def.min);
+                def.max = num("max", def.max);
+                def.step = num("step", def.step);
                 def.decimals = int(num("decimals", def.decimals));
                 if(const auto d = v.property(u"description"_s); d.isString()) def.description = d.toString();
             } else
@@ -309,7 +309,7 @@ Script* ScriptRegistry::get(const QString& name) {
     if(name.isEmpty()) return nullptr;
     auto it = scripts_.find(name);
     if(it == scripts_.end()) {
-        auto script  = std::make_unique<Script>();
+        auto script = std::make_unique<Script>();
         script->name = name;
         script->path = dirPath_ + u'/' + name;
         load(*script);
@@ -361,7 +361,7 @@ Geo::Polylines ScriptRegistry::run(Script& script, const Params& params, QString
     ShapeApi api{&engine};
     QJSEngine::setObjectOwnership(&api, QJSEngine::CppOwnership);
     auto apiVal = engine.newQObject(&api);
-    auto p      = engine.newObject();
+    auto p = engine.newObject();
     for(const auto& [name, value]: params) p.setProperty(name, value);
 
     auto result = script.buildFn.call({p, apiVal});

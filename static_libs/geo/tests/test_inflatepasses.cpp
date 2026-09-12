@@ -70,8 +70,10 @@ private slots:
 void InflatePassesTest::solidsAloneMatchMonolithicInflate() {
     // Кольцо у нуля цепляет оба квадрата -- и пусть: регион уже объединён,
     // а его тела заново разбирает сам конструктор.
-    const Polygons region{Polylines{rectangle(-8, -8, -2, -2), rectangle(2, 2, 8, 8),
-        toothedRing(3, 0.15)}};
+    const Polygons region{
+        Polylines{rectangle(-8, -8, -2, -2), rectangle(2, 2, 8, 8),
+                  toothedRing(3, 0.15)}
+    };
     InflatePasses passes;
     passes.addSolids(region);
     for(const double d: {0.5, 1.7, 3.0})
@@ -82,8 +84,10 @@ void InflatePassesTest::solidsAloneMatchMonolithicInflate() {
 // целиком -- морфологическое тождество erosion(A\B) = erosion(A) \ dilation(B).
 void InflatePassesTest::ambientMinusSolidsMatchesFieldErosion() {
     const Polyline frame = rectangle(-15, -15, 15, 15);
-    const Polygons copper{Polylines{rectangle(-10, -10, -4, -4), rectangle(4, -10, 10, -4),
-        rectangle(-10, 4, 10, 10), toothedRing(2, 0.15)}};
+    const Polygons copper{
+        Polylines{rectangle(-10, -10, -4, -4), rectangle(4, -10, 10, -4),
+                  rectangle(-10, 4, 10, 10), toothedRing(2, 0.15)}
+    };
     const Polygons field = Polygons{Polylines{frame}} - copper;
 
     InflatePasses passes;
@@ -99,7 +103,9 @@ void InflatePassesTest::ambientMinusSolidsMatchesFieldErosion() {
 // каждый d свой: история принятий здесь не участвует.
 void InflatePassesTest::coarsePassStaysWithinContract() {
     const Polyline frame = rectangle(-15, -15, 15, 15);
-    const Polygons copper{Polylines{toothedRing(6, 0.15), rectangle(9, 9, 13, 13)}};
+    const Polygons copper{
+        Polylines{toothedRing(6, 0.15), rectangle(9, 9, 13, 13)}
+    };
     const Polygons field = Polygons{Polylines{frame}} - copper;
 
     constexpr double tol = 0.2;
@@ -121,7 +127,9 @@ void InflatePassesTest::coarsePassStaysWithinContract() {
 // шаг ± tol, что бы ни принималось между ними.
 void InflatePassesTest::adoptionKeepsPassesWithinContract() {
     const Polyline frame = rectangle(-16, -16, 16, 16);
-    const Polygons copper{Polylines{toothedRing(5, 0.15), toothedRing(1.2, 0.1)}};
+    const Polygons copper{
+        Polylines{toothedRing(5, 0.15), toothedRing(1.2, 0.1)}
+    };
     const Polygons field = Polygons{Polylines{frame}} - copper;
 
     constexpr double tol = 0.15;
@@ -152,8 +160,10 @@ void InflatePassesTest::adoptionKeepsPassesWithinContract() {
 void InflatePassesTest::nestedFieldBodiesStayIndependent() {
     const Polyline frame = rectangle(-15, -15, 15, 15);
     Polyline ringHole = rectangle(-6, -6, 6, 6, false); // дырка кольца: по часовой
-    const Polygons copper{Polylines{rectangle(-10, -10, 10, 10), ringHole,
-        toothedRing(1.5, 0.1)}}; // кольцо с пятачком внутри -- три тела поля, два вложены
+    const Polygons copper{
+        Polylines{rectangle(-10, -10, 10, 10), ringHole,
+                  toothedRing(1.5, 0.1)}
+    }; // кольцо с пятачком внутри -- три тела поля, два вложены
     const Polygons field = Polygons{Polylines{frame}} - copper;
     QCOMPARE(field.all().size(), std::size_t(2)); // поле снаружи кольца и поле внутри него
 

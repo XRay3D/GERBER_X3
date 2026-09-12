@@ -1,7 +1,7 @@
 #!/bin/bash
 pathSelect=$(pwd)
 
-codeStyle=./code_style.txt
+codeStyle=./.clang-format
 
 for folder in ggeasy gte_win plugins static_libs; do
     for ext in h hpp c cpp ino; do

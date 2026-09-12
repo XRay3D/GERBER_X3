@@ -23,9 +23,9 @@ namespace TopoR {
 // а не разбор текстовых атрибутов Gerber X3 (см. план: свой тип вместо
 // Gerber::Comp::Component, чтобы не тянуть зависимость file_TopoR -> file_gerber).
 struct Component {
-    QString refDes;      // CompInstance::name
-    QString value;       // Attribute со значением type::PartName, если есть
-    QString footprint;   // FootprintRef::name
+    QString refDes;       // CompInstance::name
+    QString value;        // Attribute со значением type::PartName, если есть
+    QString footprint;    // FootprintRef::name
     QString componentRef; // ComponentRef::name
     Side side{Top};
     double angle{};

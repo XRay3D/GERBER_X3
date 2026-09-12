@@ -84,7 +84,7 @@ void Shape::rebuild() {
     // дырки («B», «о») выражаются вложенностью полигонов.
     // for(auto&& polygon: painterPath.toSubpathPolygons(transform))
     //     contours.emplace_back(polygon).close();
-    shape_                  = transform.map(painterPath) /*polygons.toPath()*/;
+    shape_ = transform.map(painterPath) /*polygons.toPath()*/;
     Geo::Polylines contours = Geo::fromPath(shape_ /*transform.map(painterPath)*/, 0.01);
 
     // В каноне Geo знак площади — тело/пустота: тела положительные. У глифов
@@ -96,7 +96,7 @@ void Shape::rebuild() {
     if(totalArea < 0)
         for(auto& contour: contours) contour.reverse();
     const auto polygons = Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::NonZero, contours);
-    curves_             = polygons.contours();
+    curves_ = polygons.contours();
 
     assert(handles.size() == 1);
 }

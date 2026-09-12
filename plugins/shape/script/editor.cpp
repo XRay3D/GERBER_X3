@@ -176,12 +176,14 @@ public:
 //////////////////////////////////////////
 /// \brief Editor::Editor
 Editor::Editor(Shapes::Plugin* plugin, ScriptRegistry& registry)
-    : registry_{registry}
+    : registry_{
+          registry
+}
     , scriptBox{new QComboBox{this}}
     , errorLabel{new QLabel{this}}
     , view{new QTableView{this}}
-    , model{new Model{registry, view}}
-    , plugin{plugin} {
+    , model{new Model{registry, view}},
+    plugin{plugin} {
     setWindowTitle(plugin->name());
 
     auto vLayout = new QVBoxLayout{this};

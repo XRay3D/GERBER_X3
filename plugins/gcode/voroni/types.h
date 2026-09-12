@@ -116,7 +116,7 @@ inline Geo::Polylines chainDiagramEdges(Geo::Polylines segments) {
     return result;
 }
 
-class [[= Serial::name("Voronoi")]] File final : public GCode::File {
+class[[= Serial::name("Voronoi")]] File final : public GCode::File {
 
 public:
     void serialize(Serial::Writer& sb) const override { Serial::writeInto(sb, *this); }

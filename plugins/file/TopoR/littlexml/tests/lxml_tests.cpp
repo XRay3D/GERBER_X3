@@ -14,12 +14,12 @@ using Code = XML::ParseError::Code;
 
 static int failures = 0;
 
-#define CHECK(cond) \
-    do { \
-        if(!(cond)) { \
-            ++failures; \
+#define CHECK(cond)                                                            \
+    do {                                                                       \
+        if(!(cond)) {                                                          \
+            ++failures;                                                        \
             std::println(stderr, "FAIL {}:{}: {}", __FILE__, __LINE__, #cond); \
-        } \
+        }                                                                      \
     } while(0)
 
 static ParseError errorOf(std::string_view xml) {

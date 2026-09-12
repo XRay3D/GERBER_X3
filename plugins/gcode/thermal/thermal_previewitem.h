@@ -119,10 +119,10 @@ protected:
     QPainterPath sourcePath;
     QPainterPath painterPath;
 
-    Geo::Polygons bridge_;      // спицы в пределах рамки -- то, что кольцо НЕ режет
+    Geo::Polygons bridge_; // спицы в пределах рамки -- то, что кольцо НЕ режет
     Geo::Polylines previewPaths;
-    Geo::Polylines cashedPath;  // изоляционное кольцо -- путь фрезы
-    Geo::Polygons cashedFrame;  // полоса вдоль кольца, ограничивающая спицы
+    Geo::Polylines cashedPath; // изоляционное кольцо -- путь фрезы
+    Geo::Polygons cashedFrame; // полоса вдоль кольца, ограничивающая спицы
 
     Node* node_{nullptr};
 

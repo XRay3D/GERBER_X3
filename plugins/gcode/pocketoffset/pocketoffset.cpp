@@ -84,6 +84,7 @@ public:
                 << QString::number(r.width(), 'f', 6) << ' ' << QString::number(r.height(), 'f', 6) << '\n';
         }
     }
+
 private:
     QFile file_;
 };
@@ -153,10 +154,10 @@ Geo::Polylines concentricLoops(const Geo::Polygons& region, double step, double 
     Timer t{"concentricLoops"};
     Geo::Polylines loops;
 
-    Geo::Polygons adopted;                    // владение принятой базой
-    const Geo::Polygons* base = &region;      // текущая база витков
-    int basePass{};                           // номер витка, где база принята
-    std::size_t baseVertices{};               // её сложность; 0 -- ещё не мерена
+    Geo::Polygons adopted;               // владение принятой базой
+    const Geo::Polygons* base = &region; // текущая база витков
+    int basePass{};                      // номер витка, где база принята
+    std::size_t baseVertices{};          // её сложность; 0 -- ещё не мерена
     auto verticesOf = [](const Geo::Polylines& contours) {
         std::size_t total{};
         for(const Geo::Polyline& contour: contours) total += contour.size();
@@ -212,7 +213,7 @@ double coarseTolerance(double stepOver, double toolDiameter) {
 // Мелочь, которую фреза всё равно не выберет: обрывок, у которого и площадь, и
 // периметр меньше самой фрезы, -- это не карман, а шум офсета.
 void removeSmall(Geo::Polygons& region, double dOffset) {
-    const double minArea      = dOffset * dOffset * std::numbers::pi;
+    const double minArea = dOffset * dOffset * std::numbers::pi;
     const double minPerimeter = dOffset * 4.0;
     std::vector<Geo::Polygon> kept;
     for(const Geo::Polygon& polygon: region.all())
@@ -225,7 +226,7 @@ void removeSmall(Geo::Polygons& region, double dOffset) {
 // витку нужны только контуры, а пересборка стоила бы объединения, в котором
 // гигантское тело поля проходит полный свип валидации CGAL заново.
 Geo::Polylines contoursWithoutSmall(const Geo::Polygons& region, double dOffset) {
-    const double minArea      = dOffset * dOffset * std::numbers::pi;
+    const double minArea = dOffset * dOffset * std::numbers::pi;
     const double minPerimeter = dOffset * 4.0;
     Geo::Polylines contours;
     for(const Geo::Polygon& polygon: region.all()) {
@@ -388,8 +389,8 @@ void Creator::createFixedSteps(const Tool& tool, const double depth, int steps) 
     if(gcp.side() == GCode::On) return;
 
     toolDiameter = tool.getDiameter(depth);
-    dOffset      = toolDiameter * 0.5;
-    stepOver     = tool.stepover();
+    dOffset = toolDiameter * 0.5;
+    stepOver = tool.stepover();
 
     if(gcp.side() == GCode::Inner) {
         const std::vector<Geo::Polygon>& bodies = groupedPaths(GCode::Grouping::Copper);
@@ -424,12 +425,12 @@ void Creator::createStdFull(const Tool& tool, const double depth) {
     if(gcp.side() == GCode::On) return;
 
     toolDiameter = tool.getDiameter(depth);
-    dOffset      = toolDiameter * 0.5;
-    stepOver     = tool.stepover();
+    dOffset = toolDiameter * 0.5;
+    stepOver = tool.stepover();
 
     // Снаружи первым идёт обход детали по контуру, и заливка начинается уже за
     // заметённой им полосой.
-    Geo::Polygons cutArea         = outerContourPass();
+    Geo::Polygons cutArea = outerContourPass();
     const Geo::Polygons forbidden = cutArea.empty()
         ? Geo::Polygons{}
         : Geo::Inflate(cutArea, -toolDiameter);
@@ -524,10 +525,10 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
         // Файл прошлой фрезы больше не наш: не обнулив его, пустая последняя
         // итерация отправила бы его вторично -- createGc в конце шлёт file_
         // как есть.
-        file_        = nullptr;
+        file_ = nullptr;
         toolDiameter = tool.getDiameter(depth);
-        dOffset      = toolDiameter * 0.5;
-        stepOver     = tool.stepover();
+        dOffset = toolDiameter * 0.5;
+        stepOver = tool.stepover();
 
         // Обход детали по контуру достаётся САМОЙ ШИРОКОЙ фрезе -- она идёт
         // первой, и поле у самой детали её же и ждёт. Прочим там делать
@@ -567,9 +568,9 @@ void Creator::createMultiTool(const std::vector<Tool>& tools, double depth) {
                 // File{std::move(gcp)} прямо в цикле, и второму инструменту
                 // доставался уже выпотрошенный gcp -- ни инструментов, ни
                 // исходной геометрии.
-                GCode::Params toolGcp                         = gcp;
+                GCode::Params toolGcp = gcp;
                 toolGcp.params[GCode::Params::MultiToolIndex] = static_cast<ssize_t>(tIdx);
-                toolGcp.toolPathss                            = std::move(returnPss);
+                toolGcp.toolPathss = std::move(returnPss);
                 // Показывать заливку и здесь незачем: рисуется обводкой.
                 toolGcp.setPocketAreaCurves({});
                 file_ = new File{std::move(toolGcp)};

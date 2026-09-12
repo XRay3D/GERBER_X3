@@ -55,7 +55,7 @@ void Creator::create() {
 
     if(width < tool.getDiameter(depth)) {
         returnPs.resize(returnPs.size() - 1); // remove frame
-        if(returnPs.empty()) { // ничего, кроме рамки, -- скелетить не между чем
+        if(returnPs.empty()) {                // ничего, кроме рамки, -- скелетить не между чем
             emit fileReady(nullptr);
             return;
         }

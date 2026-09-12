@@ -31,7 +31,7 @@ public:
 
     Geo::Polylines offset() const;
     QPointF pos() const { return path_.front(); }; // NOTE shadow base class pos func
-    Geo::Polyline hv() const { return path_; };     // NOTE shadow base class pos func
+    Geo::Polyline hv() const { return path_; };    // NOTE shadow base class pos func
 
 protected:
     // Двойной клик по превью переключает использование этого отверстия/паза

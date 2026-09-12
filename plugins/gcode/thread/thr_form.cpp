@@ -446,8 +446,7 @@ void Form::computePaths() {
                 pathsMap[row.toolId].paths.push_back(Geo::Polyline{
                     Geo::Vertex{center},
                     Geo::Vertex{QPointF{center.x() + radius, center.y()}},
-                    Geo::Vertex{QPointF{center.x(), center.y() + holeRadius}}
-                });
+                    Geo::Vertex{QPointF{center.x(), center.y() + holeRadius}}});
             }
             model->setCreate(i++, !pathsMap.contains(row.toolId));
         }

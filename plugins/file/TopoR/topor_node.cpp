@@ -104,7 +104,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
         file->setVisible(value.value<Qt::CheckState>() == Qt::Checked);
         if(childs.empty()) return true;
         emit App::fileModel().dataChanged(
-            childs.front()->index(index.column()),
+            childs.front() -> index(index.column()),
             childs.back()->index(index.column()), {role});
         return true;
     case Qt::EditRole:
@@ -116,7 +116,7 @@ bool Node::setData(const QModelIndex& index, const QVariant& value, int role) {
             file->setItemType(value.toInt());
             if(childs.empty()) return {};
             emit App::fileModel().dataChanged(
-                childs.front()->index(index.column()),
+                childs.front() -> index(index.column()),
                 childs.back()->index(index.column()), {role});
             return true;
         default: break;
@@ -212,7 +212,7 @@ bool NodeLayer::setData(const QModelIndex& index, const QVariant& value, int rol
             layer->file()->layersVisible_[name] = visible;
             if(visible) {
                 layer->file()->setVisible(true);
-                emit App::fileModel().dataChanged(parent_->index(index.column()), parent_->index(index.column()), {role});
+                emit App::fileModel().dataChanged(parent_ -> index(index.column()), parent_->index(index.column()), {role});
             }
         }
         return true;

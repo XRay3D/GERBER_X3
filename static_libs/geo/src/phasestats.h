@@ -10,7 +10,14 @@
 
 namespace Geo {
 
-enum class Phase : std::uint8_t { Capsules, JoinAll, RegionOp, Materialize, Adopt, Count_ };
+enum class Phase : std::uint8_t {
+    Capsules,
+    JoinAll,
+    RegionOp,
+    Materialize,
+    Adopt,
+    Count_
+};
 
 void phaseAdd(Phase phase, std::uint64_t ns) noexcept;
 
@@ -18,9 +25,7 @@ struct PhaseScope {
     explicit PhaseScope(Phase phase)
         : phase{phase} { }
     ~PhaseScope() {
-        phaseAdd(phase, std::chrono::duration_cast<std::chrono::nanoseconds>(
-                            std::chrono::steady_clock::now() - start)
-                            .count());
+        phaseAdd(phase, std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::steady_clock::now() - start).count());
     }
     PhaseScope(const PhaseScope&) = delete;
     PhaseScope& operator=(const PhaseScope&) = delete;

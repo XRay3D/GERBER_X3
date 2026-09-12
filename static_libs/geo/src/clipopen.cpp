@@ -56,7 +56,10 @@ Seg makeSeg(const Vertex& from, const Vertex& to) {
     if(s.arc) {
         // Дугу грубим до габарита её окружности: префильтру хватает.
         const double r = s.arc->radius;
-        s.box = {s.arc->center - QPointF{r, r}, s.arc->center + QPointF{r, r}};
+        s.box = {
+            s.arc->center - QPointF{r, r},
+            s.arc->center + QPointF{r, r}
+        };
     } else {
         s.box = QRectF{s.a, s.b}.normalized();
     }

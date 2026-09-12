@@ -32,13 +32,13 @@ QVariant ComponentModel::data(const QModelIndex& index, int role) const {
             : QVariant{Qt::AlignCenter};
     switch(index.column()) {
     case RefDes      : return c.refDes;
-    case Footprint    : return c.footprint;
-    case ComponentRef : return c.componentRef;
-    case Side         : return c.side == ::Top ? tr("Top") : tr("Bottom");
-    case Angle        : return QString::number(c.angle, 'f', 1);
-    case X            : return QString::number(c.pos.x(), 'f', 4);
-    case Y            : return QString::number(c.pos.y(), 'f', 4);
-    default           : return {};
+    case Footprint   : return c.footprint;
+    case ComponentRef: return c.componentRef;
+    case Side        : return c.side == ::Top ? tr("Top") : tr("Bottom");
+    case Angle       : return QString::number(c.angle, 'f', 1);
+    case X           : return QString::number(c.pos.x(), 'f', 4);
+    case Y           : return QString::number(c.pos.y(), 'f', 4);
+    default          : return {};
     }
 }
 
@@ -46,12 +46,12 @@ QVariant ComponentModel::headerData(int section, Qt::Orientation orientation, in
     if(role == Qt::DisplayRole && orientation == Qt::Horizontal) {
         switch(section) {
         case RefDes      : return tr("RefDes");
-        case Footprint    : return tr("Footprint");
-        case ComponentRef : return tr("Component");
-        case Side         : return tr("Side");
-        case Angle        : return tr("Angle");
-        case X            : return tr("X");
-        case Y            : return tr("Y");
+        case Footprint   : return tr("Footprint");
+        case ComponentRef: return tr("Component");
+        case Side        : return tr("Side");
+        case Angle       : return tr("Angle");
+        case X           : return tr("X");
+        case Y           : return tr("Y");
         }
     }
     return QAbstractTableModel::headerData(section, orientation, role);

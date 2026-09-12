@@ -187,7 +187,7 @@ private slots:
     // навстречу.
     void evenOddDropsDuplicates() {
         Polyline direct = rect(0, 0, 20, 10, true);
-        Polyline shifted = rect(0, 0, 20, 10, false); // встречный обход...
+        Polyline shifted = rect(0, 0, 20, 10, false);                     // встречный обход...
         std::rotate(shifted.begin(), shifted.begin() + 2, shifted.end()); // ...и другой старт
 
         const Polygons region = evenOdd(Polylines{direct, shifted, direct}); // тройная копия

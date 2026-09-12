@@ -28,7 +28,7 @@ namespace Geo {
 // библиотеки, пока на него ссылаются.
 bool installGmpMiAlloc();
 namespace {
-    const bool gmpMiAllocInstalled = installGmpMiAlloc();
+const bool gmpMiAllocInstalled = installGmpMiAlloc();
 } // namespace
 } // namespace Geo
 #endif
@@ -1042,10 +1042,10 @@ std::vector<GPoly> boundaryCapsules(const PolySet& region, double d, double coar
                                      : QPointF{radial.y(), -radial.x()};
         };
 
-        bool needDisc = true;    // старт контура и торец каждого тела без колпачка
-        double sinceDisc = 0.0;  // путь вдоль границы от последнего диска
-        double turnSince = 0.0;  // поворот границы от последнего диска, рад
-        QPointF prevTangent;     // касательная на конце предыдущей кривой
+        bool needDisc = true;   // старт контура и торец каждого тела без колпачка
+        double sinceDisc = 0.0; // путь вдоль границы от последнего диска
+        double turnSince = 0.0; // поворот границы от последнего диска, рад
+        QPointF prevTangent;    // касательная на конце предыдущей кривой
         for(auto it = contour.curves_begin(); it != contour.curves_end(); ++it) {
             const CurveGeometry curve = geometryOf(*it);
             const double length = curve.linear
