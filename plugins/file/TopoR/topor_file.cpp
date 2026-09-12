@@ -23,7 +23,7 @@ File::File()
     : AbstractFile() {
     itemsType_ = int(ItemsType::Normal);
     layerTypes_ = {
-        {int(ItemsType::Normal), TopoRObj::tr("Normal"), TopoRObj::tr("Displays filled pads/tracks.")   },
+        {int(ItemsType::Normal), TopoRObj::tr("Normal"), TopoRObj::tr("Displays filled pads/tracks.")  },
         {int(ItemsType::Paths),  TopoRObj::tr("Paths"),  TopoRObj::tr("Displays centerlines/outlines.")},
     };
 }
@@ -73,6 +73,11 @@ void File::createGi() {
             itemGroups_.push_back(igPath = new Gi::Group);
         }
 
+        // Контур платы -- обрезка, а не медь: показывается только путями,
+        // без заливки, и в объединённую медь не входит. Регион в
+        // GraphicObject::fill при этом остаётся -- он нужен getDataForGC.
+        const bool outline = layer->kind() == LayerKind::BoardOutline;
+
         Geo::Polygons fill;
         for(const GraphicObject& go: layer->graphicObjects()) {
             if(go.path.size() > 1) {
@@ -81,7 +86,7 @@ void File::createGi() {
                 gItem->setPenColorPtr(&layer->colorPath_);
                 igPath->push_back(gItem);
             }
-            if(!go.fill.empty()) fill |= go.fill;
+            if(!outline && !go.fill.empty()) fill |= go.fill;
         }
 
         for(const Geo::Polygon& polygon: fill) {

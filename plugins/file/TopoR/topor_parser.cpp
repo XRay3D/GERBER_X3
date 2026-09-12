@@ -28,172 +28,175 @@ namespace TopoR {
 
 namespace {
 
-    double unitScale(dist d) {
-        switch(d) {
-        case dist::mm : return 1.0;
-        case dist::mkm: return 0.001;
-        case dist::cm : return 10.0;
-        case dist::dm : return 100.0;
-        case dist::m  : return 1000.0;
-        case dist::mil: return 0.0254;
-        case dist::inch: return 25.4;
-        }
-        return 1.0;
+double unitScale(dist d) {
+    switch(d) {
+    case dist::mm  : return 1.0;
+    case dist::mkm : return 0.001;
+    case dist::cm  : return 10.0;
+    case dist::dm  : return 100.0;
+    case dist::m   : return 1000.0;
+    case dist::mil : return 0.0254;
+    case dist::inch: return 25.4;
     }
+    return 1.0;
+}
 
-    QPointF pt(const Coordinates::Coord& c, double k) { return {c.x * k, c.y * k}; }
+QPointF pt(const Coordinates::Coord& c, double k) { return {c.x * k, c.y * k}; }
 
-    // Сегменты полилинии (Polyline/Contour/FilledContour): Start + Segments.
-    template <typename P>
-    Geo::Polyline segmentsToPolyline(const P& p, double k) {
+// Сегменты полилинии (Polyline/Contour/FilledContour): Start + Segments.
+template <typename P>
+Geo::Polyline segmentsToPolyline(const P& p, double k) {
+    Geo::Polyline path;
+    path.emplace_back(pt(p.Start, k));
+    for(auto&& seg: p.Segments) {
+        std::visit([&](auto&& s) {
+            using T = std::decay_t<decltype(s)>;
+            const QPointF cur = path.back();
+            const QPointF end = pt(s.End, k);
+            if constexpr(std::same_as<T, SegmentLine>) {
+                path.back().bulge = 0.0;
+            } else if constexpr(std::same_as<T, SegmentArcCCW> || std::same_as<T, SegmentArcCW>) {
+                const QPointF center = pt(s.Center, k);
+                path.back().bulge = Geo::bulgeOf(cur, end, center,
+                    std::same_as<T, SegmentArcCCW> ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
+            } else if constexpr(std::same_as<T, SegmentArcByAngle>) {
+                path.back().bulge = Geo::bulgeOf(qDegreesToRadians(s.angle));
+            } else if constexpr(std::same_as<T, SegmentArcByMiddle>) {
+                path.back().bulge = Geo::bulgeOf(cur, pt(s.Middle, k), end);
+            }
+            path.emplace_back(end);
+        },
+            seg);
+    }
+    return path;
+}
+
+// Figure-варианты (BoardOutline.Contour/Voids, Footprint::Copper/Keepout,
+// Constructive::Keepout) -> Geo::Polyline. Не замкнута -- замыкает вызывающий.
+template <typename Variant>
+Geo::Polyline figureToPolyline(const Variant& figure, double k) {
+    return std::visit([&](auto&& f) -> Geo::Polyline {
+        using T = std::decay_t<decltype(f)>;
         Geo::Polyline path;
-        path.emplace_back(pt(p.Start, k));
-        for(auto&& seg: p.Segments) {
-            std::visit([&](auto&& s) {
-                using T = std::decay_t<decltype(s)>;
-                const QPointF cur = path.back();
-                const QPointF end = pt(s.End, k);
-                if constexpr(std::same_as<T, SegmentLine>) {
-                    path.back().bulge = 0.0;
-                } else if constexpr(std::same_as<T, SegmentArcCCW> || std::same_as<T, SegmentArcCW>) {
-                    const QPointF center = pt(s.Center, k);
-                    path.back().bulge = Geo::bulgeOf(cur, end, center,
-                        std::same_as<T, SegmentArcCCW> ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
-                } else if constexpr(std::same_as<T, SegmentArcByAngle>) {
-                    path.back().bulge = Geo::bulgeOf(qDegreesToRadians(s.angle));
-                } else if constexpr(std::same_as<T, SegmentArcByMiddle>) {
-                    path.back().bulge = Geo::bulgeOf(cur, pt(s.Middle, k), end);
-                }
-                path.emplace_back(end);
-            },
-                seg);
+        if constexpr(std::same_as<T, Rect> || std::same_as<T, FilledRect>) {
+            if(f.Dots.size() >= 2) {
+                const QPointF a = pt(f.Dots[0], k), b = pt(f.Dots[1], k);
+                path = Geo::rectangle(std::abs(b.x() - a.x()), std::abs(b.y() - a.y()), (a + b) * 0.5);
+            }
+        } else if constexpr(std::same_as<T, Line> || std::same_as<T, Polygon>) {
+            for(auto&& d: f.Dots) path.emplace_back(pt(d, k));
+        } else if constexpr(std::same_as<T, Circle> || std::same_as<T, FilledCircle>) {
+            path = Geo::circle(f.diameter * k, pt(f.Center, k));
+        } else if constexpr(std::same_as<T, Polyline>) {
+            path = segmentsToPolyline(f, k);
+        } else if constexpr(std::same_as<T, Contour> || std::same_as<T, FilledContour>) {
+            // По формату контур замыкается сам, даже если последний
+            // сегмент не вернулся в Start.
+            path = segmentsToPolyline(f, k);
+            if(path.size() > 2) path.close();
+        } else if constexpr(std::same_as<T, ArcCCW> || std::same_as<T, ArcCW>) {
+            path.emplace_back(pt(f.Start, k));
+            path.back().bulge = Geo::bulgeOf(pt(f.Start, k), pt(f.End, k), pt(f.Center, k),
+                std::same_as<T, ArcCCW> ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
+            path.emplace_back(pt(f.End, k));
+        } else if constexpr(std::same_as<T, ArcByAngle>) {
+            path.emplace_back(pt(f.Start, k));
+            path.back().bulge = Geo::bulgeOf(qDegreesToRadians(f.angle));
+            path.emplace_back(pt(f.End, k));
+        } else if constexpr(std::same_as<T, ArcByMiddle>) {
+            path.emplace_back(pt(f.Start, k));
+            path.back().bulge = Geo::bulgeOf(pt(f.Start, k), pt(f.Middle, k), pt(f.End, k));
+            path.emplace_back(pt(f.End, k));
         }
         return path;
-    }
+    },
+        figure);
+}
 
-    // Figure-варианты (BoardOutline.Contour/Voids, Footprint::Copper/Keepout,
-    // Constructive::Keepout) -> Geo::Polyline. Не замкнута -- замыкает вызывающий.
-    template <typename Variant>
-    Geo::Polyline figureToPolyline(const Variant& figure, double k) {
-        return std::visit([&](auto&& f) -> Geo::Polyline {
-            using T = std::decay_t<decltype(f)>;
-            Geo::Polyline path;
-            if constexpr(std::same_as<T, Rect> || std::same_as<T, FilledRect>) {
-                if(f.Dots.size() >= 2) {
-                    const QPointF a = pt(f.Dots[0], k), b = pt(f.Dots[1], k);
-                    path = Geo::rectangle(std::abs(b.x() - a.x()), std::abs(b.y() - a.y()), (a + b) * 0.5);
-                }
-            } else if constexpr(std::same_as<T, Line> || std::same_as<T, Polygon>) {
-                for(auto&& d: f.Dots) path.emplace_back(pt(d, k));
-            } else if constexpr(std::same_as<T, Circle> || std::same_as<T, FilledCircle>) {
-                path = Geo::circle(f.diameter * k, pt(f.Center, k));
-            } else if constexpr(std::same_as<T, Polyline>) {
-                path = segmentsToPolyline(f, k);
-            } else if constexpr(std::same_as<T, Contour> || std::same_as<T, FilledContour>) {
-                // По формату контур замыкается сам, даже если последний
-                // сегмент не вернулся в Start.
-                path = segmentsToPolyline(f, k);
-                if(path.size() > 2) path.close();
-            } else if constexpr(std::same_as<T, ArcCCW> || std::same_as<T, ArcCW>) {
-                path.emplace_back(pt(f.Start, k));
-                path.back().bulge = Geo::bulgeOf(pt(f.Start, k), pt(f.End, k), pt(f.Center, k),
-                    std::same_as<T, ArcCCW> ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
-                path.emplace_back(pt(f.End, k));
-            } else if constexpr(std::same_as<T, ArcByAngle>) {
-                path.emplace_back(pt(f.Start, k));
-                path.back().bulge = Geo::bulgeOf(qDegreesToRadians(f.angle));
-                path.emplace_back(pt(f.End, k));
-            } else if constexpr(std::same_as<T, ArcByMiddle>) {
-                path.emplace_back(pt(f.Start, k));
-                path.back().bulge = Geo::bulgeOf(pt(f.Start, k), pt(f.Middle, k), pt(f.End, k));
-                path.emplace_back(pt(f.End, k));
+// Трасса проводника (Wire::Subwire): Start + Tracks (TrackLine/TrackArc/TrackArcCW).
+Geo::Polyline trackToPolyline(const Start& start, const std::vector<std::variant<TrackLine, TrackArc, TrackArcCW>>& tracks, double k) {
+    Geo::Polyline path;
+    path.emplace_back(pt(start, k));
+    for(auto&& track: tracks) {
+        std::visit([&](auto&& t) {
+            using T = std::decay_t<decltype(t)>;
+            const QPointF cur = path.back();
+            const QPointF end = pt(t.End, k);
+            if constexpr(std::same_as<T, TrackLine>) {
+                path.back().bulge = 0.0;
+            } else {
+                const QPointF center = pt(t.Center, k);
+                path.back().bulge = Geo::bulgeOf(cur, end, center,
+                    std::same_as<T, TrackArc> ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
             }
-            return path;
+            path.emplace_back(end);
         },
-            figure);
+            track);
     }
+    return path;
+}
 
-    // Трасса проводника (Wire::Subwire): Start + Tracks (TrackLine/TrackArc/TrackArcCW).
-    Geo::Polyline trackToPolyline(const Start& start, const std::vector<std::variant<TrackLine, TrackArc, TrackArcCW>>& tracks, double k) {
-        Geo::Polyline path;
-        path.emplace_back(pt(start, k));
-        for(auto&& track: tracks) {
-            std::visit([&](auto&& t) {
-                using T = std::decay_t<decltype(t)>;
-                const QPointF cur = path.back();
-                const QPointF end = pt(t.End, k);
-                if constexpr(std::same_as<T, TrackLine>) {
-                    path.back().bulge = 0.0;
-                } else {
-                    const QPointF center = pt(t.Center, k);
-                    path.back().bulge = Geo::bulgeOf(cur, end, center,
-                        std::same_as<T, TrackArc> ? Geo::Vertex::Ccw : Geo::Vertex::Cw);
-                }
-                path.emplace_back(end);
-            },
-                track);
+// Контактная площадка (Pad*) -> Geo::Polygons в ЛОКАЛЬНЫХ координатах стека
+// (без учёта положения вывода/компонента -- см. вызывающих).
+Geo::Polygons padShapeToPolygons(const std::variant<LocalLibrary::PadCircle, LocalLibrary::PadOval, LocalLibrary::PadRect, LocalLibrary::PadPoly>& pad, double k) {
+    return std::visit([&](auto&& p) -> Geo::Polygons {
+        using T = std::decay_t<decltype(p)>;
+        if constexpr(std::same_as<T, LocalLibrary::PadCircle>) {
+            return Geo::Polygons{Geo::Polylines{Geo::circle(p.diameter * k)}};
+        } else if constexpr(std::same_as<T, LocalLibrary::PadOval>) {
+            // Капсула между двумя концами Stretch/2, раздутая на diameter --
+            // тот же приём, что offsetting.md документирует для штриха.
+            const QPointF half = pt(p.Stretch, k) * 0.5;
+            Geo::Polyline axis{
+                {-half, 0.0},
+                {half,  0.0}
+            };
+            auto region = Geo::Inflate(Geo::Polylines{axis}, p.diameter * k);
+            if(p.Shift) region = Geo::translated(region, pt(p.Shift, k));
+            return region;
+        } else if constexpr(std::same_as<T, LocalLibrary::PadRect>) {
+            const double w = p.width * k, h = p.height * k;
+            Geo::Polygons region;
+            if(p.handling == Handling::Rounding && p.handlingValue > 0) {
+                const double r = p.handlingValue * k;
+                region = Geo::Inflate(
+                    Geo::Polygons{Geo::Polygon{Geo::rectangle(std::max(w - 2 * r, 0.0), std::max(h - 2 * r, 0.0))}},
+                    2 * r);
+            } else {
+                region = Geo::Polygons{Geo::Polygon{Geo::rectangle(w, h)}};
+            }
+            if(p.Shift) region = Geo::translated(region, pt(p.Shift, k));
+            return region;
+        } else if constexpr(std::same_as<T, LocalLibrary::PadPoly>) {
+            Geo::Polyline poly;
+            for(auto&& d: p.Dots) poly.emplace_back(pt(d, k));
+            poly.close();
+            return Geo::Polygons{Geo::Polygon{poly}};
         }
-        return path;
-    }
+        return {};
+    },
+        pad);
+}
 
-    // Контактная площадка (Pad*) -> Geo::Polygons в ЛОКАЛЬНЫХ координатах стека
-    // (без учёта положения вывода/компонента -- см. вызывающих).
-    Geo::Polygons padShapeToPolygons(const std::variant<LocalLibrary::PadCircle, LocalLibrary::PadOval, LocalLibrary::PadRect, LocalLibrary::PadPoly>& pad, double k) {
-        return std::visit([&](auto&& p) -> Geo::Polygons {
-            using T = std::decay_t<decltype(p)>;
-            if constexpr(std::same_as<T, LocalLibrary::PadCircle>) {
-                return Geo::Polygons{Geo::Polylines{Geo::circle(p.diameter * k)}};
-            } else if constexpr(std::same_as<T, LocalLibrary::PadOval>) {
-                // Капсула между двумя концами Stretch/2, раздутая на diameter --
-                // тот же приём, что offsetting.md документирует для штриха.
-                const QPointF half = pt(p.Stretch, k) * 0.5;
-                Geo::Polyline axis{{-half, 0.0}, {half, 0.0}};
-                auto region = Geo::Inflate(Geo::Polylines{axis}, p.diameter * k);
-                if(p.Shift) region = Geo::translated(region, pt(p.Shift, k));
-                return region;
-            } else if constexpr(std::same_as<T, LocalLibrary::PadRect>) {
-                const double w = p.width * k, h = p.height * k;
-                Geo::Polygons region;
-                if(p.handling == Handling::Rounding && p.handlingValue > 0) {
-                    const double r = p.handlingValue * k;
-                    region = Geo::Inflate(
-                        Geo::Polygons{Geo::Polygon{Geo::rectangle(std::max(w - 2 * r, 0.0), std::max(h - 2 * r, 0.0))}},
-                        2 * r);
-                } else {
-                    region = Geo::Polygons{Geo::Polygon{Geo::rectangle(w, h)}};
-                }
-                if(p.Shift) region = Geo::translated(region, pt(p.Shift, k));
-                return region;
-            } else if constexpr(std::same_as<T, LocalLibrary::PadPoly>) {
-                Geo::Polyline poly;
-                for(auto&& d: p.Dots) poly.emplace_back(pt(d, k));
-                poly.close();
-                return Geo::Polygons{Geo::Polygon{poly}};
-            }
-            return {};
-        },
-            pad);
-    }
+// Объединение всех форм стека -- см. упрощение в плане: Reference (какому
+// слою принадлежит форма) для v1 не разбирается, площадка одинакова на
+// обеих внешних медных слоях.
+Geo::Polygons padstackToPolygons(const LocalLibrary::Padstack& ps, double k) {
+    Geo::Polygons region;
+    for(auto&& pad: ps.Pads) region |= padShapeToPolygons(pad, k);
+    return region;
+}
 
-    // Объединение всех форм стека -- см. упрощение в плане: Reference (какому
-    // слою принадлежит форма) для v1 не разбирается, площадка одинакова на
-    // обеих внешних медных слоях.
-    Geo::Polygons padstackToPolygons(const LocalLibrary::Padstack& ps, double k) {
-        Geo::Polygons region;
-        for(auto&& pad: ps.Pads) region |= padShapeToPolygons(pad, k);
-        return region;
-    }
-
-    // Позиционирование с учётом стороны: зеркало -- в ЛОКАЛЬНЫХ координатах
-    // посадочного места (до поворота и переноса в Org). QTransform слева
-    // применяется первым: mirror * own, а не own * mirror -- последнее
-    // отражало бы уже размещённый компонент относительно оси Y платы.
-    QTransform sideTransform(const QTransform& own, side s) {
-        if(s != side::Bottom) return own;
-        QTransform mirror;
-        mirror.scale(-1, 1);
-        return mirror * own;
-    }
+// Позиционирование с учётом стороны: зеркало -- в ЛОКАЛЬНЫХ координатах
+// посадочного места (до поворота и переноса в Org). QTransform слева
+// применяется первым: mirror * own, а не own * mirror -- последнее
+// отражало бы уже размещённый компонент относительно оси Y платы.
+QTransform sideTransform(const QTransform& own, side s) {
+    if(s != side::Bottom) return own;
+    QTransform mirror;
+    mirror.scale(-1, 1);
+    return mirror * own;
+}
 
 } // namespace
 
@@ -222,10 +225,10 @@ File* Parser::parseFile(const QString& fileName) {
         const bool top = firstSignal < 0 || index <= firstSignal;
         switch(type) {
         case layertype::Signal: return index == firstSignal ? LayerKind::CopperTop : index == lastSignal ? LayerKind::CopperBottom
-                                                                                                          : LayerKind::CopperInner;
-        case layertype::Silk  : return top ? LayerKind::SilkTop : LayerKind::SilkBottom;
-        case layertype::Mask  : return top ? LayerKind::MaskTop : LayerKind::MaskBottom;
-        default               : return {};
+                                                                                                         : LayerKind::CopperInner;
+        case layertype::Silk: return top ? LayerKind::SilkTop : LayerKind::SilkBottom;
+        case layertype::Mask: return top ? LayerKind::MaskTop : LayerKind::MaskBottom;
+        default             : return {};
         }
     };
 
@@ -390,6 +393,18 @@ File* Parser::parseFile(const QString& fileName) {
         const auto ps = pcb.LocalLibrary.getPadstack(fp.PadstackRef.name);
         if(!ps) continue;
         addPadstack(*ps, sideTransform(fp.transform(), fp.side) * toMm, QString::fromStdString(fp.name));
+    }
+
+    // --- Цвета слоёв -- из настроек отображения самого файла (details --
+    // основной цвет слоя). Запись «Board» -- цвет контура платы. В конце,
+    // когда все слои, включая синтетические, уже заведены.
+    for(auto&& opt: pcb.DisplayControl.LayersVisualOptions) {
+        const QColor color{QString::fromStdString(opt.Colors.details)};
+        if(!color.isValid()) continue;
+        const QString name = QString::fromStdString(opt.LayerRef.name);
+        for(Layer* l: file->layers())
+            if(l->name() == name || (name == QStringLiteral("Board") && l->kind() == LayerKind::BoardOutline))
+                l->setColor(color);
     }
 
     return file;
