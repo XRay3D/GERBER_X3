@@ -15,7 +15,10 @@ struct Constructive {
             [[= XML::Attr]] double lineWidth{};
             // Незалитая фигура.
             // public Object NonfilledFigure;
-            /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Circle, Line, Polyline, Rect, Contour> NonfilledFigure;
+            // FilledContour формально не «незалитая» фигура, но TopoR пишет им
+            // контур платы (Placement.fst, MinVia.fst) -- без него вариант
+            // остаётся по умолчанию и контур молча теряется.
+            /*[[= XML::Elem]]*/ std::variant</*XML::Null,*/ ArcCCW, ArcCW, ArcByAngle, ArcByMiddle, Circle, Line, Polyline, Rect, Contour, FilledContour> NonfilledFigure;
             /*************************************************************************
              * Здесь находятся функции для работы с элементами класса Shape. *
              * Они не являются частью формата TopoR PCB.                             *

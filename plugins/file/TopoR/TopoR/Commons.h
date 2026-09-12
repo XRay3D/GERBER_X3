@@ -281,7 +281,10 @@ struct Coord {
     [[= XML::AttrF]] double y{};
     QPointF toPoint() const { return {x, y}; }
     /*explicit*/ operator QPointF() const { return toPoint(); }
-    explicit operator bool() const { return x && y; }
+    // «Вектор ненулевой», а не «обе координаты ненулевые»: перенос на (0, y)
+    // -- обычное дело для выводов, лежащих колонкой в локальных координатах
+    // посадочного места, и пропускать его нельзя.
+    explicit operator bool() const { return x != 0.0 || y != 0.0; }
 
     QPainterPath toPPath() const;
     operator QPainterPath() const { return toPPath(); };

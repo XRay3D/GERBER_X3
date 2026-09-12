@@ -87,8 +87,13 @@ namespace {
                 for(auto&& d: f.Dots) path.emplace_back(pt(d, k));
             } else if constexpr(std::same_as<T, Circle> || std::same_as<T, FilledCircle>) {
                 path = Geo::circle(f.diameter * k, pt(f.Center, k));
-            } else if constexpr(std::same_as<T, Polyline> || std::same_as<T, Contour> || std::same_as<T, FilledContour>) {
+            } else if constexpr(std::same_as<T, Polyline>) {
                 path = segmentsToPolyline(f, k);
+            } else if constexpr(std::same_as<T, Contour> || std::same_as<T, FilledContour>) {
+                // По формату контур замыкается сам, даже если последний
+                // сегмент не вернулся в Start.
+                path = segmentsToPolyline(f, k);
+                if(path.size() > 2) path.close();
             } else if constexpr(std::same_as<T, ArcCCW> || std::same_as<T, ArcCW>) {
                 path.emplace_back(pt(f.Start, k));
                 path.back().bulge = Geo::bulgeOf(pt(f.Start, k), pt(f.End, k), pt(f.Center, k),
@@ -179,14 +184,15 @@ namespace {
         return region;
     }
 
-    QTransform compTransform(const ComponentsOnBoard::CompInstance& inst) {
-        QTransform t = inst.transform();
-        if(inst.side == side::Bottom) {
-            QTransform mirror;
-            mirror.scale(-1, 1);
-            t *= mirror;
-        }
-        return t;
+    // Позиционирование с учётом стороны: зеркало -- в ЛОКАЛЬНЫХ координатах
+    // посадочного места (до поворота и переноса в Org). QTransform слева
+    // применяется первым: mirror * own, а не own * mirror -- последнее
+    // отражало бы уже размещённый компонент относительно оси Y платы.
+    QTransform sideTransform(const QTransform& own, side s) {
+        if(s != side::Bottom) return own;
+        QTransform mirror;
+        mirror.scale(-1, 1);
+        return mirror * own;
     }
 
 } // namespace
@@ -239,24 +245,38 @@ File* Parser::parseFile(const QString& fileName) {
         ? nullptr
         : file->layer(copperBottomName, LayerKind::CopperBottom);
 
-    // --- Контур платы.
+    // --- Контур платы -- «чертёжный»: TopoR пишет его отдельными Shape по
+    // сегменту (четыре Polyline из одной SegmentLine на прямоугольную плату,
+    // см. Placement.fst), а не одним замкнутым контуром. Склейка и
+    // even-odd -- те же, что у слоя DXF.
     Layer* outline = file->layer(QObject::tr("Board Outline"), LayerKind::BoardOutline);
-    for(auto&& shape: pcb.Constructive.BoardOutline.Contour) {
-        Geo::Polyline pl = figureToPolyline(shape.NonfilledFigure, k);
-        if(pl.size() < 3) continue;
-        pl.close();
-        GraphicObject go;
-        go.type = GraphicObject::Polygon;
-        go.path = pl;
-        go.fill = Geo::Polygons{Geo::Polygon{pl}};
-        outline->addGraphicObject(std::move(go));
-    }
-    for(auto&& v: pcb.Constructive.BoardOutline.Voids) {
-        Geo::Polyline pl = figureToPolyline(v.FilledFigure, k);
-        if(pl.size() < 3) continue;
-        pl.close();
-        for(GraphicObject& go: outline->graphicObjects())
-            go.fill -= Geo::Polygons{Geo::Polygon{pl}};
+    {
+        Geo::Polylines pieces;
+        for(auto&& shape: pcb.Constructive.BoardOutline.Contour)
+            if(Geo::Polyline pl = figureToPolyline(shape.NonfilledFigure, k);
+                pl.size() > 1 && pl.perimeter() > Geo::exitWeldTolerance) // вырожденное -- не фигура
+                pieces.push_back(std::move(pl));
+        Geo::Normalized norm = Geo::normalize(std::move(pieces), Geo::exitWeldTolerance);
+        for(auto&& v: pcb.Constructive.BoardOutline.Voids) {
+            Geo::Polyline pl = figureToPolyline(v.FilledFigure, k);
+            if(pl.size() < 3) continue;
+            pl.close();
+            norm.region -= Geo::Polygons{Geo::Polygon{pl}};
+        }
+        for(const Geo::Polygon& polygon: norm.region) {
+            GraphicObject go;
+            go.type = GraphicObject::Polygon;
+            go.path = polygon.outer();
+            go.fill = Geo::Polygons{polygon};
+            outline->addGraphicObject(std::move(go));
+        }
+        // Что не замкнулось -- хотя бы как путь, чтобы не потерять молча.
+        for(Geo::Polyline& pl: norm.open) {
+            GraphicObject go;
+            go.type = GraphicObject::PolyLine;
+            go.path = std::move(pl);
+            outline->addGraphicObject(std::move(go));
+        }
     }
 
     // --- Проводники (аналог "путей апертуры" Gerber).
@@ -279,6 +299,39 @@ File* Parser::parseFile(const QString& fileName) {
     // --- Переходные отверстия: площадка на обеих внешних медных слоях +
     // отверстие в синтетическом слое "Vias" (аналог Excellon-разметки Gerber).
     Layer* vias = file->layer(QObject::tr("Vias"), LayerKind::Vias);
+    // Отверстие (via, вывод, монтажное) -- в один слой: Drill-критерии
+    // работают по name/raw, а не по типу источника. Диаметр уже в мм.
+    auto addHole = [vias](QPointF center, double diameter) {
+        if(diameter <= 0.0) return;
+        GraphicObject hole;
+        hole.type = GraphicObject::Circle;
+        hole.pos = center;
+        hole.fill = Geo::Polygons{Geo::Polylines{Geo::circle(diameter, center)}};
+        hole.name = QString::number(diameter);
+        vias->addGraphicObject(std::move(hole));
+    };
+    // Площадка стека на обоих внешних медных слоях + её отверстие. t --
+    // из локальных координат стека В ЕДИНИЦАХ ФАЙЛА в мм платы: Org
+    // выводов и компонентов приходят в единицах файла, так что масштаб
+    // -- последний множитель цепочки (toMm), а не формы стека.
+    auto addPadstack = [&](const LocalLibrary::Padstack& ps, const QTransform& t, const QString& name) {
+        Geo::Polygons region = Geo::transformed(padstackToPolygons(ps, 1.0), t);
+        const QPointF center = t.map(QPointF{});
+        for(Layer* l: {copperTop, copperBottom})
+            if(l) {
+                GraphicObject go;
+                go.type = GraphicObject::Circle;
+                go.name = name;
+                go.pos = center;
+                go.fill = region;
+                l->addGraphicObject(std::move(go));
+            }
+        addHole(center, ps.holeDiameter * k);
+    };
+
+    QTransform toMm;
+    toMm.scale(k, k);
+
     for(auto&& via: pcb.Connectivity.Vias) {
         const auto vs = pcb.LocalLibrary.getViastack(via.ViastackRef.name);
         if(!vs) continue;
@@ -294,12 +347,7 @@ File* Parser::parseFile(const QString& fileName) {
                 go.fill = pads;
                 l->addGraphicObject(std::move(go));
             }
-        GraphicObject hole;
-        hole.type = GraphicObject::Circle;
-        hole.pos = org;
-        hole.fill = Geo::Polygons{Geo::Polylines{Geo::circle(vs->holeDiameter * k, org)}};
-        hole.name = QString::number(vs->holeDiameter * k);
-        vias->addGraphicObject(std::move(hole));
+        addHole(org, vs->holeDiameter * k);
     }
 
     // --- Раскладка компонентов + площадки посадочных мест. Компоненты не
@@ -320,21 +368,20 @@ File* Parser::parseFile(const QString& fileName) {
 
         const auto fp = pcb.LocalLibrary.getFootprint(inst.FootprintRef.name);
         if(!fp) continue;
-        const QTransform t = compTransform(inst);
+        const QTransform t = sideTransform(inst.transform(), inst.side) * toMm;
+        const QString refDes = QString::fromStdString(inst.name);
 
         for(auto&& pad: fp->Pads) {
             const auto ps = pcb.LocalLibrary.getPadstack(pad.PadstackRef.name);
             if(!ps) continue;
-            Geo::Polygons region = padstackToPolygons(*ps, k);
-            region = Geo::transformed(region, pad.transform());
-            region = Geo::transformed(region, t);
-
-            GraphicObject go;
-            go.type = GraphicObject::Circle;
-            go.name = QString::fromStdString(inst.name) + u'.' + QString::number(pad.padNum);
-            go.fill = region;
-            for(Layer* l: {copperTop, copperBottom})
-                if(l) l->addGraphicObject(GraphicObject{go});
+            addPadstack(*ps, pad.transform() * t, refDes + u'.' + QString::number(pad.padNum));
+        }
+        for(auto&& mh: fp->Mntholes) {
+            const auto ps = pcb.LocalLibrary.getPadstack(mh.PadstackRef.name);
+            if(!ps) continue;
+            QTransform own;
+            own.translate(mh.Org.x, mh.Org.y);
+            addPadstack(*ps, own * t, refDes + u'.' + QString::fromStdString(mh.id));
         }
     }
 
@@ -342,22 +389,7 @@ File* Parser::parseFile(const QString& fileName) {
     for(auto&& fp: pcb.ComponentsOnBoard.FreePads) {
         const auto ps = pcb.LocalLibrary.getPadstack(fp.PadstackRef.name);
         if(!ps) continue;
-        Geo::Polygons region = padstackToPolygons(*ps, k);
-        QTransform t = fp.transform();
-        if(fp.side == side::Bottom) {
-            QTransform mirror;
-            mirror.scale(-1, 1);
-            t *= mirror;
-        }
-        region = Geo::transformed(region, t);
-        for(Layer* l: {copperTop, copperBottom})
-            if(l) {
-                GraphicObject go;
-                go.type = GraphicObject::Circle;
-                go.name = QString::fromStdString(fp.name);
-                go.fill = region;
-                l->addGraphicObject(std::move(go));
-            }
+        addPadstack(*ps, sideTransform(fp.transform(), fp.side) * toMm, QString::fromStdString(fp.name));
     }
 
     return file;
