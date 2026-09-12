@@ -23,6 +23,7 @@
 #include <ranges>
 #include <unordered_set>
 
+
 template <>
 struct std::hash<QPointF> {
     size_t operator()(QPointF const& p) const noexcept {
@@ -193,7 +194,7 @@ void Form::onAddBridgeClicked() {
 
     const double value = ui->dsbxBridgeValue->value();
     // Место, которое мост занимает на контуре: перемычка плюс след фрезы.
-    const double footprint = Gi::Bridge::lenght + Gi::Bridge::toolDiam;
+    const double footprint = Gi::Bridge::lenght() + Gi::Bridge::toolDiam();
 
     std::unordered_set<QPointF> used; // не сажать два моста в одну точку
 
@@ -323,7 +324,7 @@ void Form::onAddBridgeClicked() {
         App::grView().addItem(brItem);
         brItem->setVisible(true);
         brItem->setOpacity(1.0);
-        Gi::Bridge::moveBrPtr = brItem; // ездит за курсором до клика
+        Gi::Bridge::moveBrPtr() = brItem; // ездит за курсором до клика
     } break;
     case Horizontally:
     case Vertically:
@@ -348,9 +349,9 @@ void Form::onAddBridgeClicked() {
 }
 
 void Form::updateBridges() {
-    Gi::Bridge::lenght = ui->dsbxBridgeLenght->value();
-    Gi::Bridge::toolDiam = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
-    Gi::Bridge::side = side;
+    Gi::Bridge::lenght() = ui->dsbxBridgeLenght->value();
+    Gi::Bridge::toolDiam() = ui->toolHolder->tool().getDiameter(dsbxDepth->value());
+    Gi::Bridge::millingSide() = side;
     for(Gi::Bridge* item: App::grView().items<Gi::Bridge>())
         item->update();
 }
@@ -406,8 +407,8 @@ void Form::updateAllowanceLimits() {
 }
 
 void Form::updateBridgePos(QPointF pos) {
-    if(Gi::Bridge::moveBrPtr)
-        Gi::Bridge::moveBrPtr->setPos(pos);
+    if(Gi::Bridge::moveBrPtr())
+        Gi::Bridge::moveBrPtr()->setPos(pos);
 }
 
 void Form::onNameTextChanged(const QString& arg1) { fileName_ = arg1; }

@@ -24,7 +24,7 @@ class Bridge final : public Item {
 
 public:
     explicit Bridge();
-    ~Bridge() override { moveBrPtr = nullptr; }
+    ~Bridge() override { moveBrPtr() = nullptr; }
 
     // QGraphicsItem interface
     QRectF boundingRect() const override { return pPath.boundingRect(); }
@@ -39,10 +39,15 @@ public:
     void update();
     QPointF snapedPos(const QPointF& pos);
 
-    static inline Bridge* moveBrPtr;           // NOTE приватизировать в будущем??
-    static inline double lenght{};             //
-    static inline double toolDiam{};           //
-    static inline GCode::SideOfMilling side{}; //
+    // Inline-статические члены класса живут ОТДЕЛЬНОЙ копией в каждом
+    // модуле (плагин / ядро ggcore) на Windows: писать их из кода плагина --
+    // писать не в ту копию, что читает реализация в ядре. Поэтому наружу
+    // они отдаются ссылками через функции, определённые в gc_gi_bridge.cpp
+    // (одна копия в ggcore на весь процесс).
+    static Bridge*& moveBrPtr();
+    static double& lenght();
+    static double& toolDiam();
+    static GCode::SideOfMilling& millingSide();
 
 protected:
     QVariant itemChange(GraphicsItemChange change, const QVariant& value) override;

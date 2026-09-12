@@ -57,6 +57,9 @@ file(GLOB UIS CONFIGURE_DEPENDS *.ui)
 set(TS_FILES
     translations/${PROJECT_NAME}_ru.ts
     translations/${PROJECT_NAME}_en.ts)
+if(EXISTS "${CMAKE_CURRENT_SOURCE_DIR}/translations/${PROJECT_NAME}_zh.ts")
+  list(APPEND TS_FILES translations/${PROJECT_NAME}_zh.ts)
+endif()
 
 set(PROJECT_SOURCES ${APP_ICON_RESOURCE_WINDOWS} ${HEADERS} ${QRC_FILES}
                     ${RESOURCES} ${SOURCES} ${UIS})
