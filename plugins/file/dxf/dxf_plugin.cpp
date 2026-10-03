@@ -38,9 +38,6 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     QFile file{fileName};
     if(!file.open(QIODevice::ReadOnly | QIODevice::Text)) {
         qWarning() << file.errorString();
-        // Строку в окне прогресса завели ещё в MainWindow::loadFile, и снять её
-        // может только сам плагин -- иначе она висит до конца сеанса.
-        emit fileProgress(fileName, 1, 1);
         return nullptr;
     }
 
@@ -144,14 +141,12 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
             delete file_;
             file_ = nullptr;
             emit fileError(QFileInfo(fileName).fileName(), tr("No sections found!"));
-            emit fileProgress(fileName, 1, 1);
         } else {
             // Проекционные слои строятся точной геометрией и на крупной сети
             // считаются долго -- отмена внутрь них уходит сама, областью
             // Geo::CancelScope, заведённой в AbstractFilePlugin::parseFileTask.
             file_->createProjectionLayers();
             emit fileReady(file_);
-            emit fileProgress(fileName, 1, 1);
         }
     } catch(const Geo::Cancelled&) {
         // Отмена пользователем -- не ошибка: ни в лог, ни в диалог ошибок.
@@ -164,21 +159,18 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     } catch(const QString& wath) {
         qWarning() << u"exeption QString:"_s << wath;
         emit fileError(QFileInfo(fileName).fileName(), wath);
-        emit fileProgress(fileName, 1, 1);
         delete file_;
         file_ = nullptr;
         return nullptr;
     } catch(const std::exception& e) {
         qWarning() << u"exeption:"_s << e.what();
         emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::fromUtf8(e.what()));
-        emit fileProgress(fileName, 1, 1);
         delete file_;
         file_ = nullptr;
         return nullptr;
     } catch(...) {
         qWarning() << u"exeption:"_s << errno;
         emit fileError(QFileInfo(fileName).fileName(), u"Unknown Error! "_s + QString::number(errno));
-        emit fileProgress(fileName, 1, 1);
         delete file_;
         file_ = nullptr;
         return nullptr;

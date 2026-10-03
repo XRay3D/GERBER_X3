@@ -231,6 +231,9 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         // for (auto [key, val] : rel)
 
         if(file->graphicObjects_.empty()) {
+            // Слой без графики (KiCad выгружает пустые B_Paste/B_Silkscreen
+            // одним заголовком) -- не ошибка, в проект просто нечего класть.
+            qInfo() << file->shortName() << u"-- no graphic objects, skipped"_s;
             delete file;
         } else {
 
@@ -250,7 +253,6 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
             file->groupedPaths();
             file->graphicObjects_.shrink_to_fit();
             emit afp->fileReady(file);
-            emit afp->fileProgress(file->name(), 1, 1);
         }
     } catch(const Geo::Cancelled&) {
         // Отмена пользователем -- не ошибка: ни в лог, ни в диалог ошибок.
@@ -263,12 +265,10 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
     } catch(const QString& errStr) {
         qWarning() << u"exeption Q:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     } catch(const char* errStr) {
         qWarning() << u"exeption Q:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + QString::fromUtf8(errStr));
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     } catch(const std::exception& e) {
         std::stringstream ss;
@@ -278,13 +278,11 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
         qWarning() << ss.str().c_str();
         qWarning() << u"exeption E:"_s << e.what();
         emit afp->fileError({}, file->shortName() + u'\n' + QString::fromUtf8(e.what()));
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     } catch(...) {
         QString errStr(u"%1: %2"_s.arg(errno).arg(strerror(errno)));
         qWarning() << u"exeption S:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
     }
     reset(); // clear parser data

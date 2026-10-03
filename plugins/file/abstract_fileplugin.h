@@ -86,6 +86,8 @@ signals:
     void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning);
     // fileName -- ПОЛНЫЙ путь: по нему окно прогресса находит свою строку, а
     // короткое имя не уникально (два Top.gbr из разных папок делили бы одну).
+    // Плагин шлёт только старт (max, 0) и шаги (0, value); конец (1, 1) при
+    // любом исходе разбора шлёт parseFileTask.
     void fileProgress(const QString& fileName, int max, int value);
     void fileReady(AbstractFile* file);
     void fileCanceled(const QString& fileName);
@@ -93,8 +95,9 @@ signals:
 public slots:
     virtual AbstractFile* parseFile(const QString& fileName, uint32_t type) = 0;
     // Точка входа для загрузки: заводит область отмены вокруг parseFile и
-    // ловит Geo::Cancelled. Разбор всегда запускать через неё, а не через
-    // parseFile напрямую -- иначе отмены у файла не будет.
+    // ловит Geo::Cancelled и прочие исключения, а по выходе шлёт конец
+    // прогресса -- окно загрузки ждёт его от каждого файла. Разбор всегда запускать через неё, а не через
+    // parseFile напрямую -- иначе не будет ни отмены, ни конца прогресса.
     void parseFileTask(const QString& fileName, uint32_t type);
 
 private:
