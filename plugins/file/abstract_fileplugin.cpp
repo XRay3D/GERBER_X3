@@ -14,6 +14,8 @@
 
 #include "geo/cancel.h"
 
+#include <QDebug>
+
 // Отмена разбора устроена так же, как отмена вычислений в Geo: областной
 // стоп-токен плюс кооперативные проверки внутри парсера. Своего механизма
 // заводить незачем -- этот уже есть, покрыт тестами и умеет прерывать в том
@@ -58,7 +60,21 @@ void AbstractFilePlugin::parseFileTask(const QString& fileName, uint32_t type_) 
         // Штатный выход по кнопке отмены, а не ошибка: в лог не пишем.
         // Недостроенный файл парсер удаляет сам, в своём catch.
         emit fileCanceled(fileName);
-        emit fileProgress(fileName, 1, 1);
+    } catch(const std::exception& e) {
+        // Плагин своё исключение не поймал -- в цикл событий parserThread его
+        // не выпускаем, иначе вместе с ним пропал бы и «конец» ниже.
+        qWarning() << u"exeption E:"_s << e.what();
+        emit fileError(fileName, QString::fromUtf8(e.what()));
+    } catch(...) {
+        qWarning() << u"exeption: unknown"_s;
+        emit fileError(fileName, tr("Unknown Error!"));
     }
+    // «Конец» шлёт только эта обёртка и при любом исходе: строку в окне
+    // прогресса MainWindow::loadFile завёл заранее, и снимает её только он.
+    // Плагины раньше слали его сами и не на всех выходах -- пустой gerber,
+    // svg, gerber2, TopoR, hpgl оставляли окно висеть навсегда. Сигналы из
+    // одного потока по QueuedConnection приходят по порядку, так что
+    // fileReady/fileError доходят раньше.
+    emit fileProgress(fileName, 1, 1);
     forget();
 }

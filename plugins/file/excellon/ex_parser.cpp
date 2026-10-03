@@ -82,31 +82,26 @@ AbstractFile* Parser::parseFile(const QString& fileName) {
     } catch(const QString& errStr) {
         qWarning() << u"exeption Q:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
         return file = nullptr;
     } catch(const std::exception& e) {
         qWarning() << u"exeption E:"_s << e.what();
         emit afp->fileError({}, file->shortName() + u'\n' + QString::fromUtf8(e.what()));
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
         return file = nullptr;
     } catch(...) {
         QString errStr{u"%1: %2"_s.arg(errno).arg(QString::fromLocal8Bit(strerror(errno)))};
         qWarning() << u"exeption S:"_s << errStr;
         emit afp->fileError({}, file->shortName() + u'\n' + errStr);
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
         return file = nullptr;
     }
 
     if(file->isEmpty()) {
-        emit afp->fileProgress(file->name(), 1, 1);
         delete file;
         file = nullptr;
     } else {
         emit afp->fileReady(file);
-        emit afp->fileProgress(file->name(), 1, 1);
     }
     return file;
 }
