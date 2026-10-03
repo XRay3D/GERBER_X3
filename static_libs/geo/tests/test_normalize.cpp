@@ -251,6 +251,157 @@ private slots:
         QVERIFY(norm.region.empty());
         QCOMPARE(norm.open.size(), std::size_t{1});
     }
+
+    // Область Gerber с дыркой -- один контур с врезкой: перемычка пройдена
+    // туда и обратно.
+    void splitCutIn() {
+        Polyline contour{
+            {0, 0}, {90, 0}, {90, 65}, {0, 65},
+            {0, 30}, {25, 30}, // врезка к углу дырки
+            {45, 30}, {45, 50}, {25, 50}, {25, 30},
+            {0, 30}, {0, 0}, // обратно по перемычке и в старт
+        };
+        contour.close();
+        QVERIFY(!isExactContour(contour));
+
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{2});
+
+        const Polygons region = evenOdd(loops);
+        QCOMPARE(region.size(), std::size_t{1});
+        QCOMPARE(region.begin()->holes().size(), std::size_t{1});
+        QCOMPARE(region.area(), 90.0 * 65.0 - 20.0 * 20.0);
+    }
+
+    // Та же врезка в настоящем файле: область G36 из Proba-F_Cu.gbr (KiCad
+    // 10) вершина в вершину -- заливка зоны со срезанными углами и одним
+    // окном. Файл открывался одними «путями апертур».
+    void splitRealKiCadZone() {
+        Polyline contour{
+            {190.443039, -50.019685}, {190.488794, -50.072489}, {190.5, -50.124},
+            {190.5, -114.876}, {190.480315, -114.943039}, {190.427511, -114.988794},
+            {190.376, -115.0}, {99.624, -115.0}, {99.556961, -114.980315},
+            {99.511206, -114.927511}, {99.5, -114.876},
+            {99.5, -85.5}, {125.0, -85.5}, // врезка
+            {144.5, -85.5}, {144.5, -65.0}, {125.0, -65.0}, {125.0, -85.5}, // окно
+            {99.5, -85.5}, // обратно
+            {99.5, -50.124}, {99.519685, -50.056961}, {99.572489, -50.011206},
+            {99.624, -50.0}, {190.376, -50.0}, {190.443039, -50.019685},
+        };
+        contour.close();
+
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{2});
+        const double window = 19.5 * 20.5;
+        QVERIFY(qFuzzyCompare(loops[0].area(), window));
+
+        const Polygons region = evenOdd(loops);
+        QCOMPARE(region.size(), std::size_t{1});
+        QCOMPARE(region.begin()->holes().size(), std::size_t{1});
+        QVERIFY(qFuzzyCompare(region.area(), loops[1].area() - window));
+        QVERIFY(region.area() > 91.0 * 65.0 - window - 1.0); // срезы углов -- доли мм²
+    }
+
+    // Две дырки, каждая на своей врезке от внешнего контура.
+    void splitTwoCutIns() {
+        Polyline contour{
+            {0, 0}, {100, 0}, {100, 50},
+            {80, 50}, {80, 40}, {70, 40}, {70, 30}, {80, 30}, {80, 40}, {80, 50},
+            {20, 50}, {20, 40}, {10, 40}, {10, 30}, {20, 30}, {20, 40}, {20, 50},
+            {0, 50},
+        };
+        contour.close();
+        const Polygons region = evenOdd(splitSelfTouching(contour));
+        QCOMPARE(region.size(), std::size_t{1});
+        QCOMPARE(region.begin()->holes().size(), std::size_t{2});
+        QCOMPARE(region.area(), 5000.0 - 200.0);
+    }
+
+    // Цепочка: с середины обхода первой дырки -- ко второй и обратно.
+    void splitChainFromMiddle() {
+        Polyline contour{
+            {0, 0}, {100, 0}, {100, 50}, {0, 50},
+            {0, 20}, {10, 20}, // врезка к дырке 1
+            {30, 20}, {30, 30}, // часть дырки 1
+            {60, 30}, // перемычка к дырке 2
+            {80, 30}, {80, 40}, {60, 40}, {60, 30}, // дырка 2
+            {30, 30}, // обратно
+            {10, 30}, {10, 20}, // остаток дырки 1
+            {0, 20},
+        };
+        contour.close();
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{3});
+        const Polygons region = evenOdd(loops);
+        QCOMPARE(region.size(), std::size_t{1});
+        QCOMPARE(region.begin()->holes().size(), std::size_t{2});
+        QCOMPARE(region.area(), 5000.0 - 200.0 - 200.0);
+    }
+
+    // Цепочка: дырка обойдена целиком, и из той же вершины -- к следующей.
+    // Обратный ход по перемычке несёт лишнюю вершину.
+    void splitChainFromSameVertex() {
+        Polyline contour{
+            {0, 0}, {100, 0}, {100, 50}, {0, 50},
+            {0, 20}, {10, 20},
+            {30, 20}, {30, 30}, {10, 30}, {10, 20}, // дырка 1 целиком
+            {60, 5}, // перемычка к дырке 2 из той же вершины
+            {80, 5}, {80, 15}, {60, 15}, {60, 5}, // дырка 2
+            {10, 20},
+            {5, 20}, // лишняя вершина на обратном ходе
+            {0, 20},
+        };
+        contour.close();
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{3});
+        const Polygons region = evenOdd(loops);
+        QCOMPARE(region.size(), std::size_t{1});
+        QCOMPARE(region.begin()->holes().size(), std::size_t{2});
+        QCOMPARE(region.area(), 5000.0 - 200.0 - 200.0);
+    }
+
+    // Остров внутри дырки на собственной перемычке -- тело, а не пустота.
+    void splitIslandInHole() {
+        Polyline contour{
+            {0, 0}, {100, 0}, {100, 100}, {0, 100},
+            {0, 20}, {20, 20}, // врезка к дырке
+            {20, 80}, {80, 80}, {80, 20}, {20, 20}, // дырка 60x60, по часовой
+            {40, 40}, // перемычка к острову
+            {60, 40}, {60, 60}, {40, 60}, {40, 40}, // остров 20x20
+            {20, 20}, {0, 20},
+        };
+        contour.close();
+        const Polygons region = evenOdd(splitSelfTouching(contour));
+        QCOMPARE(region.size(), std::size_t{2});
+        QCOMPARE(region.area(), 10000.0 - 3600.0 + 400.0);
+    }
+
+    // Врезка к круглой дырке: прогибы петли проходят разбор нетронутыми.
+    void splitKeepsArcs() {
+        Polyline contour{
+            {0, 0}, {40, 0}, {40, 40}, {0, 40},
+            {0, 20}, {15, 20, 1.0}, {25, 20, 1.0}, {15, 20},
+            {0, 20},
+        };
+        contour.close();
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{2});
+        const Polygons region = evenOdd(loops);
+        QCOMPARE(region.size(), std::size_t{1});
+        QCOMPARE(region.begin()->holes().size(), std::size_t{1});
+        QVERIFY(qFuzzyCompare(region.area(), 1600.0 - pi * 25.0));
+    }
+
+    // Простой контур разбор не трогает; повтор стартовой вершины в конце
+    // (так область закрывает Gerber) петлёй не считается.
+    void splitLeavesSimpleAlone() {
+        Polyline contour = rect(0, 0, 20, 10, true);
+        contour.push_back(contour.front());
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{1});
+        QCOMPARE(loops.front().size(), std::size_t{4});
+        QCOMPARE(loops.front().signedArea(), 200.0);
+    }
 };
 
 QTEST_MAIN(TestNormalize)
