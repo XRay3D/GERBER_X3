@@ -737,9 +737,12 @@ Geo::Polygons Parser::createPolygon() {
     // Ориентацию контура приводит к канону сам конструктор Polygon, а
     // полярность применяет слой при слиянии -- разворачивать здесь нечего.
     path_.close();
-    Geo::Polygon polygon{path_};
-    // polygon.invert();
-    return {polygon};
+    // Дырки область выражает врезками -- контур касается сам себя, и целиком
+    // точная геометрия его не берёт. Разбираем на простые петли; вложенность
+    // по ним считает evenOdd -- обход петель у генераторов бывает любой.
+    Geo::Polylines loops = Geo::splitSelfTouching(path_);
+    if(loops.size() == 1) return {Geo::Polygon{loops.front()}};
+    return Geo::evenOdd(loops);
 }
 
 bool Parser::parseAperture(const QString& gLine) {

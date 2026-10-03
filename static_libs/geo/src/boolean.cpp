@@ -14,6 +14,8 @@
 
 #include <QtGlobal>
 
+#include <map>
+
 namespace Geo {
 
 namespace {
@@ -248,6 +250,47 @@ Polygons evenOdd(const Polylines& contours) {
         checkCancelled();
     }
     return region;
+}
+
+Polylines splitSelfTouching(const Polyline& contour) {
+    if(!contour.closed || contour.size() < 3) return {contour};
+
+    using Key = std::pair<double, double>;
+    auto keyOf = [](const Vertex& v) { return Key{v.x(), v.y()}; };
+
+    Polylines loops;
+    auto take = [&](Polyline&& loop) {
+        if(loop.size() < 2) return;
+        loop.closed = true;
+        loop.width = contour.width;
+        // Перемычка туда и обратно: площади нет, а с лишней вершиной на
+        // одном из ходов она выходит ниточкой -- отсюда порог, а не ноль.
+        if(std::abs(loop.signedArea()) <= loop.perimeter() * exitWeldTolerance) return;
+        loops.push_back(std::move(loop));
+    };
+
+    // Незамкнутый пока хвост обхода. Точки в нём попарно различны: всякий
+    // повтор тут же снимает петлю.
+    Polyline stack;
+    std::map<Key, std::size_t> seen; // точка -> её место в stack
+    for(const Vertex& v: contour) {
+        const auto it = seen.find(keyOf(v));
+        if(it == seen.end()) {
+            seen.emplace(keyOf(v), stack.size());
+            stack.push_back(v);
+            continue;
+        }
+        const auto from = stack.begin() + static_cast<std::ptrdiff_t>(it->second);
+        Polyline loop(from, stack.end());
+        for(auto gone = from + 1; gone != stack.end(); ++gone) seen.erase(keyOf(*gone));
+        stack.erase(from + 1, stack.end());
+        // Вершина стыка остаётся в хвосте, но ребро из неё теперь другое --
+        // то, что выходит из её ПОВТОРА.
+        stack.back().bulge = v.bulge;
+        take(std::move(loop));
+    }
+    take(std::move(stack));
+    return loops;
 }
 
 Normalized normalize(Polylines polylines, double glue) {
