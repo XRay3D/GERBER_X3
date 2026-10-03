@@ -34,13 +34,11 @@ AbstractFile* Plugin::parseFile(const QString& fileName, uint32_t type_) {
     File* file = parser.parseFile(fileName);
     if(!file) {
         emit fileError(QFileInfo(fileName).fileName(), tr("Failed to parse TopoR PCB file"));
-        emit fileProgress(fileName, 1, 1);
         return nullptr;
     }
 
     file->setFileName(fileName);
     emit fileReady(file);
-    emit fileProgress(fileName, 1, 1);
     return file;
 }
 
