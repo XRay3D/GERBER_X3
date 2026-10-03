@@ -22,10 +22,9 @@ CompileFlags:
     - "-Dpre(...)="
     - "-Dpost(...)="
     - "-Dcontract_assert(...)=[](bool){}(__VA_ARGS__)"
-    - -isystem/opt/gcc-16/include/c++/16.1.1
-    # - -isystem/opt/gcc-16/include/c++/16.1.0/x86_64-pc-linux-gnu
-    - -isystem/opt/gcc-16/include/c++/16.1.1/backward
-    - -isystem/opt/gcc-16/lib/gcc/x86_64-pc-linux-gnu/16.1.1/include/
+    - -isystem/opt/gcc-16/include/c++/16.2.1
+    - -isystem/opt/gcc-16/include/c++/16.2.1/x86_64-pc-linux-gnu
+    - -isystem/opt/gcc-16/include/c++/16.2.1/backward
   # BuiltinHeaders: QueryDriver   # clangd >= 21: брать системные заголовки из query-driver
 
 Diagnostics:
@@ -36,3 +35,15 @@ Diagnostics:
     # законный C++26 (P2996), но clang его ещё не умеет и роняет ошибку в
     # каждом файле, включающем serial.h. Семантику проверяет g++-16.
     - consteval_override
+    # Метафункции std::meta в libstdc++ (access_context::current, add_pointer,
+    # nonstatic_data_members_of, data_member_spec, define_aggregate...)
+    # объявлены БЕЗ ТЕЛА -- их вычисляет сам фронтенд g++. clang-p2996 делает
+    # рефлексию своей библиотекой и этих тел не видит, поэтому в
+    # consteval-контексте они для него "undefined function", а дальше идёт
+    # каскад: consteval-блок не константа -> AppBase остаётся неполным ->
+    # `class App : AppBase` -> все Accessor<appMember<"...">()>. Настоящую
+    # проверку делает только g++-16.
+    - constexpr_var_requires_const_init   # reflection.h: constexpr CTX = access_context::current()
+    - consteval_block_not_constexpr       # app.h: consteval { define_aggregate(^^AppBase, ...) }
+    - incomplete_base_class               # app.h: class App : AppBase
+    - expr_not_cce                        # app.h: NTTP appMember<"...">() в аксессорах App
