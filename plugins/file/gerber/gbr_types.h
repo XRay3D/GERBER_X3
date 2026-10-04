@@ -168,6 +168,7 @@ class State {
     Mirroring mirroring_ = NoMirroring;
     double scaling_ = 1.0;
     double rotating_{};
+    int32_t net_{-1}; // номер X2-цепи (%TO.N) в File::nets_, -1 -- вне цепи
 
 public:
     State(File* const file = nullptr)
@@ -198,6 +199,9 @@ public:
 
     inline auto aperture() const { return aperture_; }
     inline void setAperture(int aperture) { aperture_ = aperture; }
+
+    inline auto net() const { return net_; }
+    inline void setNet(int32_t net) { net_ = net; }
 
     inline auto& curPos() { return curPos_; }
     inline auto curPos() const { return curPos_; }

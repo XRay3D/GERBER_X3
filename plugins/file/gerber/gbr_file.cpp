@@ -317,12 +317,97 @@ void File::setItemType(int type) {
 
 int File::itemsType() const { return itemsType_; }
 
+// Слияние связь «объект -> полигон» теряет, поэтому цепь восстанавливается по
+// месту: положительный объект целиком лежит в одном слитом полигоне (или съеден
+// негативом), так что достаточно найти полигон, в котором лежит одна внутренняя
+// точка объекта. contains строг -- граница снаружи, -- поэтому точка берётся
+// заведомо внутри тела объекта, а не на его контуре.
+std::vector<std::vector<int32_t>> File::copperNets(const Geo::Polygons& copper) const {
+    if(nets_.empty()) return std::vector<std::vector<int32_t>>(copper.size());
+
+    // Слитые полигоны велики (заливки -- тысячи дуг), и QPainterPath::contains
+    // (кривые на каждый запрос) по ним стоит десятки секунд на плату. Отбор --
+    // по ломаной, сплющенной один раз, а решает точный contains: у самого края
+    // ломаная ошибается и записывала чужую цепь соседу, давая ложное
+    // замыкание. Масштаб -- в микроны: Qt сплющивает с допуском порядка
+    // единицы, в миллиметрах это полмиллиметра.
+    constexpr double um = 1000.0;
+    const QTransform toUm = QTransform::fromScale(um, um);
+    // Контуры порознь: toPath кладёт внешний первым, дальше дырки. Одной
+    // ломаной (toFillPolygon) нельзя -- швы между контурами сбивают счёт
+    // обходов, и остров чужой цепи в дырке считался бы своим.
+    std::vector<QList<QPolygonF>> paths{std::from_range,
+        copper | v::transform([&](const Geo::Polygon& p) { return p.toPath().toSubpathPolygons(toUm); })};
+    std::vector<QRectF> rects{std::from_range,
+        paths | v::transform([](const QList<QPolygonF>& c) { return c.empty() ? QRectF{} : c.front().boundingRect(); })};
+    const auto inside = [&](size_t k, QPointF pt) {
+        const auto& c = paths[k];
+        return rects[k].contains(pt) && c.front().containsPoint(pt, Qt::OddEvenFill)
+            && r::none_of(c | v::drop(1), [pt](const QPolygonF& hole) { return hole.containsPoint(pt, Qt::OddEvenFill); });
+    };
+    std::vector<std::vector<int32_t>> nets(paths.size());
+
+    auto interiorPoint = [](const GrObject& go) -> std::optional<QPointF> {
+        // Центр вспышки, точки осевой трассы и середины её звеньев; иначе
+        // (регион, кольцо) -- сетка по габариту тела.
+        std::vector<QPointF> pts;
+        if(!std::isnan(go.pos.x())) pts.push_back(go.pos);
+        if(!go.path.isClosed())
+            for(size_t i{}; i < go.path.size(); ++i) {
+                pts.push_back(go.path[i]);
+                if(i + 1 < go.path.size()) pts.push_back((go.path[i] + go.path[i + 1]) / 2);
+            }
+        // Polygons::contains локализует точку во всём точном множестве и на
+        // тысячах объектов стоит минуты -- спрашиваем тела по одному.
+        const auto& bodies = go.fill.all();
+        const auto inBody = [&](QPointF pt) { return r::any_of(bodies, [pt](const Geo::Polygon& p) { return p.contains(pt); }); };
+        for(const QPointF& pt: pts)
+            if(inBody(pt)) return pt;
+        for(const Geo::Polygon& body: bodies) {
+            const QRectF box = body.boundingRect();
+            constexpr int grid = 7;
+            for(int y = 1; y < grid; ++y)
+                for(int x = 1; x < grid; ++x)
+                    if(const QPointF pt{box.left() + box.width() * x / grid, box.top() + box.height() * y / grid}; body.contains(pt))
+                        return pt;
+        }
+        return std::nullopt;
+    };
+
+    for(const GrObject& go: graphicObjects_) {
+        if(go.state.net() < 0 || go.state.imgPolarity() != Positive) continue;
+        const auto pt = interiorPoint(go);
+        if(!pt) continue;
+        for(size_t k{}; k < paths.size(); ++k) {
+            if(!inside(k, *pt * um) || !copper[k].contains(*pt)) continue;
+            if(!r::contains(nets[k], go.state.net())) nets[k].push_back(go.state.net());
+            break;
+        }
+    }
+
+    return nets;
+}
+
+QString File::netsToolTip(std::span<const int32_t> nets) const {
+    QStringList names;
+    for(int32_t id: nets) names.push_back(netName(id));
+    names.sort();
+    if(names.size() > 1) names.prepend(u"⚠ "_s + GbrObj::tr("Short circuit:"));
+    return names.join(u'\n');
+}
+
 void File::createGi() {
+    netItems_.assign(nets_.size(), {});
 
     if constexpr(1) { // fill copper
-        for(const Geo::Polygon& paths: groupedPaths()) {
+        const Geo::Polygons& copper = groupedPaths();
+        const auto nets = copperNets(copper);
+        for(size_t k{}; const Geo::Polygon& paths: copper) {
             // Gi::Debug(paths);
             Gi::Item* item = new Gi::DataFill{Geo::Polygons{paths}, this};
+            item->setToolTip(netsToolTip(nets[k]));
+            for(int32_t net: nets[k]) netItems_[net].push_back(item);
+            ++k;
             itemGroups_[Normal]->push_back(item);
         }
         itemGroups_[Normal]->shrink_to_fit();
@@ -359,12 +444,14 @@ void File::createGi() {
         // терялись. Теперь они добавляются наравне с прочими.
         for(const GrObject& go: graphicObjects_) {
             if(go.path.empty()) continue;
-            if(!Settings::skipDuplicates()) {
-                itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
-            } else if(!contains(go.path)) {
-                itemGroups_[ApPaths]->push_back(new Gi::DataPath{{go.path}, this});
+            if(Settings::skipDuplicates()) {
+                if(contains(go.path)) continue;
                 checkList.push_front(go.path);
             }
+            Gi::Item* item = new Gi::DataPath{{go.path}, this};
+            item->setToolTip(netName(go.state.net()));
+            if(go.state.net() >= 0) netItems_[go.state.net()].push_back(item);
+            itemGroups_[ApPaths]->push_back(item);
         }
 
         itemGroups_[ApPaths]->shrink_to_fit();

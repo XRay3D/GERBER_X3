@@ -75,6 +75,8 @@ protected:
     QMap<QString, Comp::Component> components;
     QString refDes;
     QMap<int, Attr::Aperture> aperFunctionMap;
+    QHash<QString, int32_t> netIds_;
+    QStringList nets_;
 
     Attr::File attFile;
     Attr::Aperture attAper;

@@ -252,6 +252,7 @@ void Parser::parseLines(const QString& gerberLines, const QString& fileName) {
 
             file->mergedCurves();
             file->components_ = components.values();
+            file->nets_ = std::move(nets_);
             file->groupedPaths();
             file->graphicObjects_.shrink_to_fit();
             emit afp->fileReady(file);
@@ -640,6 +641,8 @@ void Parser::addFlash() {
 
 void Parser::reset() {
     aperFunctionMap.clear();
+    netIds_.clear();
+    nets_.clear();
     attAper = {};
     components.clear();
     abSrIdStack_.clear();
@@ -975,11 +978,32 @@ bool Parser::parseAttributes(const QString& gLine) {
             // //apertureAttributesStrings.append(matchAttr.cap(2));
             // }
         case Attr::Command::TO: {
+            // Трасса копится в path_ и становится объектом лишь на следующем
+            // D02, а %TO.N следующей цепи KiCad ставит ПЕРЕД ним -- без сброса
+            // хвост предыдущей трассы ушёл бы с чужой цепью (как и %LP).
+            auto setNet = [this](int32_t net) {
+                if(net == state_.net()) return;
+                if(state_.region() == Off) addPath();
+                state_.setNet(net);
+            };
             for(int i = cap[3].indexOf(u'"'); i > -1; i = cap[3].indexOf(u'"'))
                 cap[3].remove(i, 1);
             auto sl(cap[3].split(u',')); // remove symbol "
             switch(int index = Comp::Component::value1(sl.first()); index) {
-            case Comp::Component::N: break;                                                                 // The CAD net name of a conducting object, e.g. Clk13.
+            case Comp::Component::N: { // The CAD net name of a conducting object, e.g. Clk13.
+                // Имён может быть несколько (слитые цепи), пустое -- объект вне цепи.
+                const QString name = sl.mid(1).join(u", "_s);
+                if(name.isEmpty()) {
+                    setNet(-1);
+                } else {
+                    auto it = netIds_.constFind(name);
+                    if(it == netIds_.cend()) {
+                        it = netIds_.insert(name, static_cast<int32_t>(nets_.size()));
+                        nets_.push_back(name);
+                    }
+                    setNet(*it);
+                }
+            } break;
             case Comp::Component::P: components[sl.value(1)].addPin({sl.value(2), sl.value(3), {}}); break; // Pins
             case Comp::Component::C:
                 switch(int key = Comp::Component::value2(sl.first())) {
@@ -1012,6 +1036,12 @@ bool Parser::parseAttributes(const QString& gLine) {
             }
         } break;
         case Attr::Command::TD:
+            // Пока снимается только цепь: сброс refDes/attAper ниже заглушен
+            // давно, и включать его -- отдельная история (пины компонентов).
+            if((cap[3].isEmpty() || cap[3] == u"N"_s) && state_.net() != -1) {
+                if(state_.region() == Off) addPath(); // см. TO
+                state_.setNet(-1);
+            }
             break;
             {
                 enum {

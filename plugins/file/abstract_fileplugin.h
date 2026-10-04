@@ -81,7 +81,13 @@ public:
     // очереди, сразу видит запрос и выходит, ничего не разбирая.
     void requestCancel(const QString& fileName);
 
+    // Показать виджет плагина в общем доке главного окна (туда же, куда кладут
+    // формы плагины УП). Зовётся из GUI-потока, хоть сам плагин и живёт в
+    // parserThread: прямое соединение выбирается по потоку испускания.
+    void showDockWidget(QWidget* widget) { emit setDockWidget(widget); }
+
 signals:
+    void setDockWidget(QWidget* widget);
     void fileError(const QString& fileName, const QString& error);
     void fileWarning([[maybe_unused]] const QString& fileName, [[maybe_unused]] const QString& warning);
     // fileName -- ПОЛНЫЙ путь: по нему окно прогресса находит свою строку, а

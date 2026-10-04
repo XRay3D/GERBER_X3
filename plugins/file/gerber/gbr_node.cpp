@@ -13,6 +13,8 @@
 #include "gbr_node.h"
 #include "gbr_file.h"
 #include "gbr_highlighter.h"
+#include "gbr_netlist.h"
+#include "abstract_fileplugin.h"
 #include "graphicsview.h"
 
 #include "ft_view.h"
@@ -50,6 +52,7 @@ Node::Node(File* file)
 }
 
 Node::~Node() {
+    if(auto* netList = NetList::existing()) netList->fileClosed(file->id());
     App::project().deleteFile(file->id());
     QTimer::singleShot(500, [parent = parent(), this] { repaint(parent); });
 }
@@ -155,6 +158,12 @@ void Node::menu(QMenu& menu, FileTree::View* tv) {
             Comp::Dialog dialog(tv);
             dialog.setFile(id());
             dialog.exec();
+        });
+    if(!file->nets().empty())
+        menu.addAction(QIcon(), GbrObj::tr("Show &Netlist"), [this] {
+            auto* netList = NetList::instance();
+            netList->setFile(file);
+            App::filePlugin(file->type())->showDockWidget(netList);
         });
     menu.addSeparator();
     menu.addAction(QIcon::fromTheme(u"color-management"_s), GbrObj::tr("Change color"), [tv, this] {
