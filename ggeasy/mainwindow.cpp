@@ -128,6 +128,7 @@ void MainWindow::init() {
         connect(ptr, &AbstractFilePlugin::fileProgress, this, &MainWindow::fileProgress, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileCanceled, this, &MainWindow::fileCanceled, Qt::QueuedConnection);
         connect(ptr, &AbstractFilePlugin::fileReady, this, &MainWindow::addFileToPro, Qt::QueuedConnection);
+        connect(ptr, &AbstractFilePlugin::setDockWidget, this, &MainWindow::setDockWidget);
         // Именно parseFileTask, а не parseFile: обёртка заводит область отмены,
         // без неё кнопка отмены у строки ничего не остановит.
         connect(this, &MainWindow::parseFile, ptr, &AbstractFilePlugin::parseFileTask, Qt::QueuedConnection);

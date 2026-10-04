@@ -61,7 +61,16 @@ protected:
     Geo::Polygons merge() const override;
 
 private:
+    // На каждый слитый полигон меди -- номера цепей объектов, что в нём оказались.
+    std::vector<std::vector<int32_t>> copperNets(const Geo::Polygons& copper) const;
+    QString netsToolTip(std::span<const int32_t> nets) const;
+
+private:
     QList<Comp::Component> components_;
+    QStringList nets_; // имена X2-цепей (%TO.N), индекс -- State::net()
+    // Элементы сцены каждой цепи (обе группы, Normal и ApPaths), индекс -- номер
+    // цепи. Собирается в createGi вместе с элементами, в проект не пишется.
+    [[= Serial::skip]] std::vector<std::vector<Gi::Item*>> netItems_;
     std::vector<GrObject> graphicObjects_;
     ApertureMap apertures_;
 
@@ -91,6 +100,11 @@ public:
 public:
     void createGi() override;
     const QList<Comp::Component>& components() const;
+    QString netName(int32_t id) const { return nets_.value(id); }
+    const QStringList& nets() const { return nets_; }
+    std::span<Gi::Item* const> netItems(int32_t id) const {
+        return id >= 0 && size_t(id) < netItems_.size() ? std::span{netItems_[id]} : std::span<Gi::Item* const>{};
+    }
 };
 
 } // namespace Gerber
