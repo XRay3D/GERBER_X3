@@ -390,6 +390,45 @@ private slots:
         QVERIFY(qFuzzyCompare(region.area(), 1600.0 - pi * 25.0));
     }
 
+    // Микрошип KiCad: шаг на единицу файла (10 нм) назад по той же прямой.
+    // Петля -- тело термобарьера из korsakov_filter-F_Cu.gbr вершина в
+    // вершину; с шипом точная геометрия её не берёт.
+    void splitTrimsSpike() {
+        Polyline contour{
+            {24.303, -19.606}, {24.66864, -19.606}, {24.66863, -19.606}, // шип
+            {24.70549, -19.6031}, {24.8632, -19.55728}, {25.00455, -19.47368},
+            {25.00456, -19.47368}, {25.12068, -19.35756}, {25.12068, -19.35755},
+            {25.20428, -19.2162}, {25.2501, -19.05849}, {25.253, -19.02163},
+            {25.253, -18.856}, {24.303, -18.856},
+        };
+        contour.close();
+        QVERIFY(!isExactContour(contour));
+
+        const Polylines loops = splitSelfTouching(contour);
+        QCOMPARE(loops.size(), std::size_t{1});
+        QCOMPARE(loops.front().size(), std::size_t{13});
+        QVERIFY(isExactContour(loops.front()));
+        QVERIFY(qFuzzyCompare(loops.front().area(), contour.area()));
+    }
+
+    // Шип через стык замыкания и шип, чей срез открывает следующий.
+    void splitTrimsSpikeAtSeam() {
+        Polyline seam{{0, 0}, {10, 0}, {10, 10}, {0, 10}, {0, -2}};
+        seam.close();
+        const Polylines a = splitSelfTouching(seam);
+        QCOMPARE(a.size(), std::size_t{1});
+        QCOMPARE(a.front().area(), 100.0);
+        QVERIFY(isExactContour(a.front()));
+
+        // Срез {14,0} делает шипом {12,0}: дальше контур идёт в {11,0}.
+        Polyline nested{{0, 0}, {10, 0}, {14, 0}, {12, 0}, {11, 0}, {10, 10}, {0, 10}};
+        nested.close();
+        const Polylines b = splitSelfTouching(nested);
+        QCOMPARE(b.size(), std::size_t{1});
+        QVERIFY(isExactContour(b.front()));
+        QVERIFY(qFuzzyCompare(b.front().area(), 105.0));
+    }
+
     // Простой контур разбор не трогает; повтор стартовой вершины в конце
     // (так область закрывает Gerber) петлёй не считается.
     void splitLeavesSimpleAlone() {

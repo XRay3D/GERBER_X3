@@ -258,8 +258,34 @@ Polylines splitSelfTouching(const Polyline& contour) {
     using Key = std::pair<double, double>;
     auto keyOf = [](const Vertex& v) { return Key{v.x(), v.y()}; };
 
+    // Шип: в вершине b контур разворачивается и идёт назад по той же прямой
+    // -- конец короткого плеча лежит на длинном. Площади у шипа нет, а
+    // самокасание есть. KiCad оставляет такие в заливке зон: шаг в одну
+    // единицу файла (10 нм) назад на стыке прямой со скруглением.
+    auto isSpike = [](const Vertex& a, const Vertex& b, const Vertex& c) {
+        if(a.isArc() || b.isArc()) return false; // только прямые плечи
+        const QPointF ab = a - b, cb = c - b;
+        if(QPointF::dotProduct(ab, cb) <= 0.0) return false; // не разворот
+        const double longer = std::max(std::hypot(ab.x(), ab.y()), std::hypot(cb.x(), cb.y()));
+        return std::abs(ab.x() * cb.y() - ab.y() * cb.x()) <= longer * Cgal::weldTolerance;
+    };
+    auto trimSpikes = [&](Polyline& loop) {
+        for(std::size_t i{}; loop.size() >= 3 && i < loop.size();) {
+            const std::size_t n = loop.size();
+            if(isSpike(loop[(i + n - 1) % n], loop[i], loop[(i + 1) % n])) {
+                loop.erase(loop.begin() + static_cast<std::ptrdiff_t>(i));
+                i = i ? i - 1 : 0; // сосед слева мог сам стать шипом
+            } else
+                ++i;
+        }
+        // Стык через начало: срезанный в конце шип меняет соседа первой вершины.
+        while(loop.size() >= 3 && isSpike(loop.back(), loop.front(), loop[1]))
+            loop.erase(loop.begin());
+    };
+
     Polylines loops;
     auto take = [&](Polyline&& loop) {
+        trimSpikes(loop);
         if(loop.size() < 2) return;
         loop.closed = true;
         loop.width = contour.width;
