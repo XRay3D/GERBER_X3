@@ -115,6 +115,7 @@ ToolEditForm::ToolEditForm(QWidget* parent)
     ui->lblWarn->setToolTip(QApplication::translate("ToolEditForm",
         "If the offset value is more than 50%, unmilled areas are possible.\nThese errors do not appear in the visualization.",
         "При значении отступа более 50% возможны не отфрезерованные участки. Эти ошибки не отображаются в визуализации."));
+    ui->lblWarn->setVisible(false);
 
     QSettings settings;
     ui->cbxFeedSpeeds->setCurrentIndex(settings.value(u"cbxFeedSpeeds"_s).toInt());
@@ -183,6 +184,7 @@ void ToolEditForm::setTool(const Tool& tool) {
     ui->chbxAutoName->setChecked(tool.autoName());
     ui->leName->setText(tool.name());
     ui->teNote->setText(tool.note());
+    updateWarn();
 }
 
 void ToolEditForm::setChanged(bool fl) {
@@ -307,9 +309,16 @@ void ToolEditForm::setupToolWidgets(int) {
 void ToolEditForm::valueChanged(double val) {
     if(auto dsbx = qobject_cast<QDoubleSpinBox*>(sender()); dsbx)
         (this->*update[dsbx])(val);
-    ui->lblWarn->setVisible(ui->dsbxStepover->value() > (ui->dsbxDiameter->value() * 0.5)); // WARNING возможны 'непрорезы'
+    updateWarn(); // WARNING возможны 'непрорезы'
     updateName();
     setChanged();
+}
+
+void ToolEditForm::updateWarn() {
+    // qFuzzyCompare гасит всплеск на ровно 50% из-за погрешности double
+    const double stepover = ui->dsbxStepover->value();
+    const double halfDiam = ui->dsbxDiameter->value() * 0.5;
+    ui->lblWarn->setVisible(stepover > halfDiam && !qFuzzyCompare(stepover, halfDiam));
 }
 
 void ToolEditForm::on_pbApply_clicked() {
@@ -389,7 +398,7 @@ void ToolEditForm::updateDsbxFeedRate(double val) {
 void ToolEditForm::updateDsbxOneTurnCut(double val) {
     // qDebug() << __FUNCTION__ << val;
     tool_.setOneTurnCut(val);
-    ui->dsbxOneTurnCutPercent->setValue(tool_.diameter() > 0. ? val / (tool_.diameter() * 0.1) : 0.);
+    ui->dsbxOneTurnCutPercent->setValue(tool_.diameter() > 0. ? val / (tool_.diameter() * 0.01) : 0.);
     if(ui->chbxFeedRate->isChecked())
         ui->dsbxFeedRate->setValue(tool_.oneTurnCut() * tool_.spindleSpeed() * feed);
     if(ui->chbxPlungeRate->isChecked())
@@ -418,7 +427,7 @@ void ToolEditForm::updateDsbxSpindleSpeed(double val) {
 void ToolEditForm::updateDsbxStepover(double val) {
     // qDebug() << __FUNCTION__ << val;
     tool_.setStepover(val);
-    ui->dsbxStepoverPercent->setValue(tool_.diameter() > 0. ? val / (tool_.diameter() * 0.1) : 0.);
+    ui->dsbxStepoverPercent->setValue(tool_.diameter() > 0. ? val / (tool_.diameter() * 0.01) : 0.);
 }
 
 void ToolEditForm::updateDsbxLenght(double val) {
@@ -428,12 +437,12 @@ void ToolEditForm::updateDsbxLenght(double val) {
 
 void ToolEditForm::updateDsbxOneTurnCutPercent(double val) {
     // qDebug() << __FUNCTION__ << val;
-    ui->dsbxOneTurnCut->setValue(val * (tool_.diameter() * 0.1));
+    ui->dsbxOneTurnCut->setValue(val * (tool_.diameter() * 0.01));
 }
 
 void ToolEditForm::updateDsbxStepoverPercent(double val) {
     // qDebug() << __FUNCTION__ << val;
-    ui->dsbxStepover->setValue(val * (tool_.diameter() * 0.1));
+    ui->dsbxStepover->setValue(val * (tool_.diameter() * 0.01));
 }
 
 #include "moc_tool_editform.cpp"
