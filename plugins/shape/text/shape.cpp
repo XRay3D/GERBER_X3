@@ -18,6 +18,18 @@
 
 using Shapes::Handle;
 
+namespace {
+bool sameGeometry(const ShTxt::Shape::ShapeData& a, const ShTxt::Shape::ShapeData& b) {
+    return a.font == b.font
+        && a.text == b.text
+        && qFuzzyCompare(a.angle + 1, b.angle + 1)
+        && qFuzzyCompare(a.height + 1, b.height + 1)
+        && qFuzzyCompare(a.xy + 1, b.xy + 1)
+        && a.side == b.side
+        && a.handleAlign == b.handleAlign;
+}
+} // namespace
+
 namespace ShTxt {
 
 Shape::Shape(Shapes::Plugin* plugin, QPointF pt1)
@@ -44,15 +56,15 @@ void Shape::rebuild() {
     if(capHeight <= 0.0) return;
     const double scale = txtData.height / capHeight;
 
-    QPainterPath painterPath; // TODO align multiline text
-    for(double i{}; auto&& txt: txtData.text.split(u'\n'))
-        painterPath.addText({0.0, fm.height() * i++}, txtData.font, txt);
+    if(!cache_.valid || !sameGeometry(cache_.data, txtData)) {
+        QPainterPath painterPath; // TODO align multiline text
+        for(double i{}; auto&& txt: txtData.text.split(u'\n'))
+            painterPath.addText({0.0, fm.height() * i++}, txtData.font, txt);
 
-    auto bRect = painterPath.boundingRect();
-    // const double xyScale = 100.0 / txtData.xy;
+        auto bRect = painterPath.boundingRect();
 
-    QPointF handlePt = [width = bRect.width(), capHeight](auto handleAlign) -> QPointF {
-        // clang-format off
+        QPointF handlePt = [width = bRect.width(), capHeight](auto handleAlign) -> QPointF {
+            // clang-format off
         switch(handleAlign) {
         case BotCenter:   return {width / 2, 0            };
         case BotLeft:     return {                        };
@@ -65,38 +77,50 @@ void Shape::rebuild() {
         case TopRight:    return {width,     capHeight    };
         default:          return {                        };
         }
-        // clang-format on
-    }(txtData.handleAlign)
-        * -1;
+            // clang-format on
+        }(txtData.handleAlign)
+            * -1;
 
-    QTransform transform;
-    transform.translate(-bRect.left() * scale, 0);
-    transform.translate(handlePt.x() * scale, handlePt.y() * scale);
-    transform.translate(handles[0].x(), handles[0].y());
-    if(txtData.side == Bottom) {
-        transform.translate((bRect.right() + bRect.left()) * scale, 0);
-        transform.scale(-scale * (txtData.xy / 100.), -scale);
-    } else {
-        transform.scale(+scale * (txtData.xy / 100.), -scale);
+        // Указатель — в начале координат: его позиция добавляется позже
+        // простым сдвигом, чтобы кэш не инвалидировался при перемещении.
+        QTransform transform;
+        transform.translate(-bRect.left() * scale, 0);
+        transform.translate(handlePt.x() * scale, handlePt.y() * scale);
+        if(!qFuzzyIsNull(txtData.angle)) transform.rotate(txtData.angle);
+        if(txtData.side == Bottom) {
+            transform.translate((bRect.right() + bRect.left()) * scale, 0);
+            transform.scale(-scale * (txtData.xy / 100.), -scale);
+        } else {
+            transform.scale(+scale * (txtData.xy / 100.), -scale);
+        }
+
+        // Контуры глифов объединяются в точном домене: перекрытия букв уходят,
+        // дырки («B», «о») выражаются вложенностью полигонов.
+        Geo::Polylines contours = Geo::fromPath(transform.map(painterPath), 0.01);
+
+        // В каноне Geo знак площади — тело/пустота: тела положительные. У глифов
+        // абсолютная ориентация зависит от формата шрифта и Y-флипа трансформа
+        // (зеркало нижней стороны флипает её ещё раз) — выравниваем по сумме:
+        // тела в ней всегда перевешивают собственные дырки.
+        double totalArea{};
+        for(const auto& contour: contours) totalArea += contour.signedArea();
+        if(totalArea < 0)
+            for(auto& contour: contours) contour.reverse();
+
+        cache_.data = txtData;
+        cache_.shape = transform.map(painterPath);
+        cache_.curves = Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::NonZero, contours).contours();
+        cache_.valid = true;
     }
 
-    // Контуры глифов объединяются в точном домене: перекрытия букв уходят,
-    // дырки («B», «о») выражаются вложенностью полигонов.
-    // for(auto&& polygon: painterPath.toSubpathPolygons(transform))
-    //     contours.emplace_back(polygon).close();
-    shape_ = transform.map(painterPath) /*polygons.toPath()*/;
-    Geo::Polylines contours = Geo::fromPath(shape_ /*transform.map(painterPath)*/, 0.01);
-
-    // В каноне Geo знак площади — тело/пустота: тела положительные. У глифов
-    // абсолютная ориентация зависит от формата шрифта и Y-флипа трансформа
-    // (зеркало нижней стороны флипает её ещё раз) — выравниваем по сумме:
-    // тела в ней всегда перевешивают собственные дырки.
-    double totalArea{};
-    for(const auto& contour: contours) totalArea += contour.signedArea();
-    if(totalArea < 0)
-        for(auto& contour: contours) contour.reverse();
-    const auto polygons = Geo::BooleanOp(Geo::ClipType_::Union, Geo::FillRule_::NonZero, contours);
-    curves_ = polygons.contours();
+    // cache_.shape -- БАЗА с указателем в начале координат: каждый rebuild
+    // сдвигает её на полную текущую позицию указателя (не на дельту!).
+    const QPointF& pt = handles[0];
+    shape_ = QTransform::fromTranslate(pt.x(), pt.y()).map(cache_.shape);
+    curves_ = cache_.curves;
+    for(auto& contour: curves_)
+        for(auto& vertex: contour)
+            static_cast<QPointF&>(vertex) += pt;
 
     assert(handles.size() == 1);
 }

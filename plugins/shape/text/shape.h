@@ -83,6 +83,17 @@ protected:
 private:
     ShapeData txtData;
     [[= Serial::skip]] ShapeData iDataCopy;
+
+    // Построение контуров текста (addText + fromPath + булев union) дорого,
+    // а зависит только от данных текста — не от позиции указателя. Кэшируем
+    // результат с указателем в начале координат, перемещение даёт чистый сдвиг.
+    [[= Serial::skip]] struct {
+        ShapeData data;
+        QPainterPath shape;
+        Geo::Polylines curves;
+        bool valid{};
+    } cache_;
+
     void saveData();
     ShapeData loadData();
 

@@ -19,6 +19,7 @@
 #include <QMenu>
 #include <QPropertyAnimation>
 #include <QStyleOptionGraphicsItem>
+#include <QTimer>
 
 namespace Shapes {
 
@@ -292,7 +293,14 @@ void AbstractShape::menu(QMenu& menu, FileTree::View* /*tv*/) {
 
     addAction(
         u"edit-delete"_s, QObject::tr(R"(&Delete "%1")").arg(name()), {},
-        [this] { App::fileModel().removeRow(row(), index().parent()); });
+        [this] {
+            // menu.exec() крутится внутри contextMenuEvent самого айтема:
+            // удалить его здесь синхронно -- оставить сцену с висячим
+            // указателем. Откладываем в следующий проход цикла событий.
+            QTimer::singleShot(0, [this] {
+                App::fileModel().removeRow(row(), index().parent());
+            });
+        });
 
     addAction(
         u"hint"_s, QObject::tr(R"(&Visible "%1")").arg(name()), {},
