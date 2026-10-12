@@ -79,6 +79,8 @@ void ToolTreeView::deleteItem() {
 void ToolTreeView::copyTool() {
     QModelIndex index = selectionModel()->currentIndex();
     ToolItem* itemSrc = static_cast<ToolItem*>(index.internalPointer());
+    if(!itemSrc || !itemSrc->isTool())
+        return;
     if(!model_->insertRows(index.row() + 1, 1, index.parent()))
         return;
 
@@ -112,6 +114,7 @@ void ToolTreeView::setButtons(const std::vector<QPushButton*>& buttons) {
     connect(buttons_[Delete], &QPushButton::clicked, this, &ToolTreeView::deleteItem);
     connect(buttons_[New], &QPushButton::clicked, this, &ToolTreeView::newTool);
     connect(buttons_[NewGroup], &QPushButton::clicked, this, &ToolTreeView::newGroup);
+    updateActions();
 }
 
 void ToolTreeView::updateItem() {
