@@ -61,6 +61,7 @@ private:
     bool dialog_{true};
 
     void updateName();
+    void updateWarn();
     void setChanged(bool fl = true);
     void setVisibleToolWidgets(bool visible);
     void setupToolWidgets(int type);
