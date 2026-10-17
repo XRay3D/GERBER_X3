@@ -280,6 +280,61 @@ private slots:
         }
     }
 
+    // Отверстие гербер рисует двумя полуокружностями, каждая -- две вершины:
+    // сшитое кольцо это 2 вершины с прогибом 1 плюс хвост-дубль. Порог
+    // «больше трёх вершин» такую окружность не замыкал, и отверстия уходили
+    // в открытые пути (профиль обходил их с обеих сторон, карман терял).
+    void stitchClosesCircleFromHalves() {
+        constexpr double r = 2.3;
+        auto check = [](Polylines pieces, double glue) {
+            const Normalized norm = normalize(std::move(pieces), glue);
+            QVERIFY(norm.open.empty());
+            QCOMPARE(norm.region.size(), std::size_t{1});
+            const Polylines contours = norm.region.contours();
+            QCOMPARE(contours.size(), std::size_t{1});
+            QCOMPARE(contours.front().size(), std::size_t{2});
+            QVERIFY(std::abs(norm.region.area() - pi * r * r) < 1e-9);
+        };
+        const Polyline upper{
+            {r, 0, 1.0},
+            {-r, 0}
+        };
+        const Polyline lower{
+            {-r, 0, 1.0},
+            {r, 0}
+        };
+        check(Polylines{upper, lower}, exitWeldTolerance);
+        check(Polylines{upper, lower.reversed()}, exitWeldTolerance);
+        // Хвост сошёлся со стартом в допуске, а не побитово.
+        check(Polylines{
+                  upper, Polyline{{-r, 0, 1.0}, {r + 0.05, 0}}
+        },
+            0.1);
+    }
+
+    // Дуга на 360° -- один путь из двух полуокружностей и повтора старта.
+    void fullTurnArcPathIsClosed() {
+        constexpr double r = 2.3;
+        const Normalized norm = normalize(Polylines{
+                                              Polyline{{r, 0, 1.0}, {-r, 0, 1.0}, {r, 0}}
+        },
+            exitWeldTolerance);
+        QVERIFY(norm.open.empty());
+        QCOMPARE(norm.region.size(), std::size_t{1});
+        QCOMPARE(norm.region.contours().front().size(), std::size_t{2});
+        QVERIFY(std::abs(norm.region.area() - pi * r * r) < 1e-9);
+    }
+
+    // Две вершины без дуг -- линия туда-обратно, площади у неё нет.
+    void twoVertexLineIsNotRing() {
+        const Normalized norm = normalize(Polylines{
+                                              Polyline{{0, 0}, {10, 0}, {0, 0}}
+        },
+            exitWeldTolerance);
+        QVERIFY(norm.region.empty());
+        QCOMPARE(norm.open.size(), std::size_t{1});
+    }
+
     // Концы сошлись в пределах клея, но не побитово: хвост-дубль снимается,
     // шва-сегмента в доли микрона в контуре не остаётся.
     void stitchDropsNearDuplicateClosingVertex() {

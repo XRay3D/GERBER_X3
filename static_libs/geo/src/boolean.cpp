@@ -15,6 +15,9 @@
 #include "offsetcapsules.h"
 #include "phasestats.h"
 
+#include <algorithm>
+#include <ranges>
+
 #include <QtGlobal>
 
 #include <map>
@@ -127,6 +130,34 @@ Polygons BooleanOp_::operator()(
 //------------------------------------------------------------------------------
 // Нормализация чертёжной геометрии (см. geo/boolean.h).
 
+namespace {
+
+// Обрывок, вернувшийся в свою стартовую точку (в допуске glue), -- контур,
+// если тела из него хватает: без хвоста-дубля три вершины, либо две, но с
+// дугой: окружность в bulge-виде -- ровно две вершины с прогибом +-1, и
+// именно так её приносит гербер (две половинки или один оборот). Две вершины
+// без дуг -- линия туда-обратно, не контур. Порог «больше трёх вершин»
+// здесь оставлял отверстия открытыми путями: профиль обходил их с обеих
+// сторон, карман терял вовсе.
+bool returnsToStart(const Polyline& p, double glue) {
+    if(p.size() < 3 || distance(p.front(), p.back()) > glue) return false;
+    const std::size_t body = p.size() - 1;
+    return body >= 3 || std::ranges::any_of(p | std::views::take(body), &Vertex::isArc);
+}
+
+// Снимает хвост-дубль (и неточный -- в допуске он тот же старт; у KiCad стык
+// линии и дуги расходится на десятки нанометров, и close() сам такой дубль
+// не снимет -- остался бы шов-сегмент в доли микрона) и замыкает. Прогиб
+// замыкающего сегмента лежит на предпоследней вершине, у хвоста его нет --
+// терять нечего. У УЖЕ замкнутого контура хвост -- настоящая вершина, не
+// дубль: там только close().
+Polyline& closeRing(Polyline& p) {
+    if(!p.closed && static_cast<const QPointF&>(p.front()) != p.back()) p.pop_back();
+    return p.close();
+}
+
+} // namespace
+
 void stitch(Polylines& polylines, double glue) {
     auto joinable = [glue](QPointF a, QPointF b) { return distance(a, b) <= glue; };
 
@@ -164,16 +195,9 @@ void stitch(Polylines& polylines, double glue) {
         checkCancelled(); // склейка квадратична по числу обрывков
     } while(merged);
 
-    // Замкнувшийся сам на себя обрывок -- это контур, а не линия. Концы
-    // сошлись в пределах клея, а не побитово (у KiCad стык линии и дуги
-    // расходится на десятки нанометров), и close() сам такой дубль не снимет:
-    // остался бы шов-сегмент в доли микрона. Прогиб замыкающего сегмента
-    // лежит на предпоследней вершине, у хвоста его нет -- терять нечего.
+    // Замкнувшийся сам на себя обрывок -- это контур, а не линия.
     for(Polyline& polyline: polylines)
-        if(polyline.size() > 3 && joinable(polyline.front(), polyline.back())) {
-            if(static_cast<const QPointF&>(polyline.front()) != polyline.back()) polyline.pop_back();
-            polyline.close();
-        }
+        if(returnsToStart(polyline, glue)) closeRing(polyline);
 }
 
 namespace {
@@ -314,16 +338,14 @@ Polylines splitSelfTouching(const Polyline& contour) {
 Normalized normalize(Polylines polylines, double glue) {
     std::erase_if(polylines, [](const Polyline& p) { return p.size() < 2; });
 
-    auto isClosed = [glue](const Polyline& p) {
-        return p.closed || (p.size() > 3 && distance(p.front(), p.back()) <= glue);
-    };
+    auto isClosed = [glue](const Polyline& p) { return p.closed || returnsToStart(p, glue); };
 
     // Сперва отбираем уже замкнутое, потом склеиваем остальное: склейка
     // квадратична, и гонять её по тому, что и так замкнуто, незачем.
     Polylines closed;
     for(std::size_t i{}; i < polylines.size();)
         if(isClosed(polylines[i])) {
-            closed.emplace_back(std::move(polylines[i])).close();
+            closeRing(closed.emplace_back(std::move(polylines[i])));
             polylines.erase(polylines.begin() + i);
         } else
             ++i;
@@ -332,7 +354,7 @@ Normalized normalize(Polylines polylines, double glue) {
 
     Normalized result;
     for(Polyline& p: polylines)
-        if(isClosed(p)) closed.emplace_back(std::move(p)).close();
+        if(isClosed(p)) closeRing(closed.emplace_back(std::move(p)));
         else result.open.emplace_back(std::move(p));
 
     result.region = evenOdd(closed);
