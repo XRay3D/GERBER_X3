@@ -49,6 +49,7 @@ private slots:
     void squareCoverage();
     void holeSplitsRows();
     void angleRotatesRows();
+    void roundedRegionKeepsBoundaryArcs();
 };
 
 void FillTest::emptyInputs() {
@@ -82,6 +83,26 @@ void FillTest::holeSplitsRows() {
     // 400 - 36 = 364 площади: строки рвутся о дырку, но покрытие сходится.
     const double rows = directedLength(fill, 0.0);
     QVERIFY2(rows > 330.0 && rows < 440.0, qPrintable(QString::number(rows)));
+}
+
+void FillTest::roundedRegionKeepsBoundaryArcs() {
+    // Диск: вся граница -- дуги, и каждый кусок границы между строками
+    // начинается дугой. Склейка обязана сохранить прогиб первой вершины
+    // куска: в змейке любой НЕгоризонтальный сегмент -- это граница, и у
+    // диска он не может быть прямым.
+    Polyline circle{Vertex(9.0, 0.0, 1.0), Vertex(-9.0, 0.0, 1.0)};
+    circle.closed = true;
+    const Polylines fill = zigzagFill(Polygons{Polylines{circle}}, 3.0);
+    QVERIFY(!fill.empty());
+
+    std::size_t boundarySegments{};
+    for(const Polyline& p: fill)
+        for(size_t i{}; i + 1 < p.size(); ++i) {
+            if(std::abs(p[i + 1].y() - p[i].y()) < 1e-9) continue; // строка змейки
+            ++boundarySegments;
+            QVERIFY2(p[i].isArc(), qPrintable(QString(u"прямой кусок границы диска в точке (%1, %2)").arg(p[i].x()).arg(p[i].y())));
+        }
+    QVERIFY(boundarySegments > 0);
 }
 
 void FillTest::angleRotatesRows() {

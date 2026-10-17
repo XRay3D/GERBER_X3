@@ -116,12 +116,14 @@ Polylines merge(Polylines&& scanLines, Polylines&& frames) {
         for(auto bit = bList.begin(); bit != bList.end(); ++bit) {
             checkCancelled();
             if(path.empty() || joined(path.back(), bit->front())) {
-                path.empty() ? path.append_range(*bit)
-                             : path.append_range(*bit | std::views::drop(1));
+                // Polyline::append, не append_range(drop(1)): кусок границы
+                // скруглённого кармана начинается дугой, и её прогиб сидит на
+                // той самой первой вершине.
+                path.append(*bit);
                 bList.erase(bit);
                 for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
                     if(joined(path.back(), fit->front()) && fit->front().y() < fit->at(1).y()) {
-                        path.append_range(*fit | std::views::drop(1));
+                        path.append(*fit);
                         fList.erase(fit);
                         bit = bList.begin();
                         break;
@@ -134,7 +136,7 @@ Polylines merge(Polylines&& scanLines, Polylines&& frames) {
         }
         for(auto fit = fList.begin(); fit != fList.end(); ++fit) {
             if(joined(path.front(), fit->back()) && fit->front().y() > fit->at(1).y()) {
-                fit->append_range(path | std::views::drop(1));
+                fit->append(path);
                 std::swap(*fit, path);
                 fList.erase(fit);
                 break;

@@ -12,6 +12,9 @@
 
 #include <QTest>
 
+#include <algorithm>
+#include <cmath>
+
 using namespace Geo;
 
 namespace {
@@ -239,6 +242,57 @@ private slots:
         };
         QCOMPARE(normalize(pieces(0.05), 0.1).region.size(), std::size_t{1});
         QVERIFY(normalize(pieces(0.05), 0.001).region.empty());
+    }
+
+    // Скругление габарита -- отдельный кусок, и его прогиб сидит на ПЕРВОЙ
+    // вершине. Склейка обязана перенести прогиб на стыковую вершину, иначе
+    // угол уходит хордой -- так и было у платы с cnc3018.ru: какие углы
+    // срезаны, зависело от порядка кусков.
+    void stitchKeepsArcBulge() {
+        const double b = std::tan(pi / 8.0);                      // четверть окружности R5
+        const double expected = 200.0 - (25.0 - 25.0 * pi / 4.0); // 20x10 минус срез угла
+
+        // Дуга приклеивается ВТОРЫМ операндом (линии в списке первыми):
+        // стартовый кусок прогибы не теряет и ошибку не показал бы.
+        const Polylines dxfLike{
+            Polyline{{0, 0},     {20, 0} },
+            Polyline{{20, 0},    {20, 5} },
+            Polyline{{15, 10},   {0, 10} },
+            Polyline{{0, 10},    {0, 0}  },
+            Polyline{{20, 5, b}, {15, 10}}, // DXF ARC / шейп: [S(b), E]
+        };
+        // Гербер: дуга с дублем начала [S(0), S'(b), E(0)], а цепочка подходит
+        // к ней с конца E -- кусок приклеивается перевёрнутым.
+        const Polylines gerberLike{
+            Polyline{{0, 0},  {0, 10},    {15, 10}},
+            Polyline{{20, 5}, {20, 5, b}, {15, 10}},
+            Polyline{{20, 5}, {20, 0},    {0, 0}  },
+        };
+        for(const Polylines& pieces: {dxfLike, gerberLike}) {
+            const Normalized norm = normalize(pieces, exitWeldTolerance);
+            QVERIFY(norm.open.empty());
+            QCOMPARE(norm.region.size(), std::size_t{1});
+            const Polylines contours = norm.region.contours();
+            QCOMPARE(contours.size(), std::size_t{1});
+            QVERIFY(std::ranges::any_of(contours.front(), &Vertex::isArc));
+            QVERIFY2(std::abs(norm.region.area() - expected) < 1e-9,
+                qPrintable(QString::number(norm.region.area(), 'f', 12)));
+        }
+    }
+
+    // Концы сошлись в пределах клея, но не побитово: хвост-дубль снимается,
+    // шва-сегмента в доли микрона в контуре не остаётся.
+    void stitchDropsNearDuplicateClosingVertex() {
+        Polylines pieces{
+            Polyline{{0, 0},   {0, 10}  },
+            Polyline{{0, 10},  {20, 10} },
+            Polyline{{20, 10}, {20, 0}  },
+            Polyline{{20, 0},  {0.05, 0}},
+        };
+        stitch(pieces, 0.1);
+        QCOMPARE(pieces.size(), std::size_t{1});
+        QVERIFY(pieces.front().closed);
+        QCOMPARE(pieces.front().size(), std::size_t{4});
     }
 
     // Что замкнуть не вышло -- не теряется: профиль по разомкнутой линии такая

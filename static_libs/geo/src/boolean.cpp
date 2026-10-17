@@ -130,11 +130,6 @@ Polygons BooleanOp_::operator()(
 void stitch(Polylines& polylines, double glue) {
     auto joinable = [glue](QPointF a, QPointF b) { return distance(a, b) <= glue; };
 
-    // Приклеивает `src` к хвосту `dst`, не дублируя общую точку стыка.
-    auto append = [](Polyline& dst, const Polyline& src) {
-        dst.insert(dst.end(), src.begin() + 1, src.end());
-    };
-
     bool merged;
     do {
         merged = false;
@@ -156,7 +151,11 @@ void stitch(Polylines& polylines, double glue) {
                 } else
                     continue;
 
-                append(a, b);
+                // Только Polyline::append: прогиб стыка -- у первой вершины
+                // куска, и ручной insert(begin() + 1, …) его выбрасывал --
+                // дуга габарита уходила хордой, если кусок приклеивался
+                // перевёрнутым.
+                a.append(b);
                 polylines.erase(polylines.begin() + j);
                 merged = true;
                 break;
@@ -165,10 +164,16 @@ void stitch(Polylines& polylines, double glue) {
         checkCancelled(); // склейка квадратична по числу обрывков
     } while(merged);
 
-    // Замкнувшийся сам на себя обрывок -- это контур, а не линия.
+    // Замкнувшийся сам на себя обрывок -- это контур, а не линия. Концы
+    // сошлись в пределах клея, а не побитово (у KiCad стык линии и дуги
+    // расходится на десятки нанометров), и close() сам такой дубль не снимет:
+    // остался бы шов-сегмент в доли микрона. Прогиб замыкающего сегмента
+    // лежит на предпоследней вершине, у хвоста его нет -- терять нечего.
     for(Polyline& polyline: polylines)
-        if(polyline.size() > 3 && joinable(polyline.front(), polyline.back()))
+        if(polyline.size() > 3 && joinable(polyline.front(), polyline.back())) {
+            if(static_cast<const QPointF&>(polyline.front()) != polyline.back()) polyline.pop_back();
             polyline.close();
+        }
 }
 
 namespace {

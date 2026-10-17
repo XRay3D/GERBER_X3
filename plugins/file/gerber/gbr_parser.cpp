@@ -1213,7 +1213,12 @@ bool Parser::parseCircularInterpolation(const QString& gLine) {
         qWarning() << u"Invalid arc in line %1."_s.arg(lineNum_) << gLine;
     }
 
-    path_.append_range(std::move(arcPath));
+    // path_ уже стоит на начале дуги (resetStep/D01 кладут текущую точку), а
+    // Geo::arc приносит ту же точку своей первой вершиной, но уже с прогибом.
+    // append отдаёт прогиб вершине path_ и дубль не плодит: прежний
+    // append_range оставлял пару вершин в 1e-15 друг от друга, и какая из них
+    // несёт дугу, зависело от направления последующей склейки.
+    path_.append(arcPath);
 
     return true;
 }

@@ -339,8 +339,7 @@ Polylines clipPath(const Polyline& path, const Side& side,
     if(path.closed && out.size() > 1 && atoms.front().keep && atoms.back().keep) {
         Polyline& tail = out.back();
         Polyline& head = out.front();
-        tail.back().bulge = head.front().bulge;
-        tail.insert(tail.end(), head.begin() + 1, head.end());
+        tail.append(head);
         head = std::move(tail);
         out.pop_back();
     }

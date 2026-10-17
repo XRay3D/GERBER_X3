@@ -102,7 +102,7 @@ inline Geo::Polylines chainDiagramEdges(Geo::Polylines segments) {
             Geo::Polyline piece = std::move(segments[next]);
             if(Geo::distance(piece.front(), chain.back()) > Geo::distance(piece.back(), chain.back()))
                 piece.reverse();
-            chain.insert(chain.end(), piece.begin() + 1, piece.end());
+            chain.append(piece);
         }
         for(std::size_t prev; (prev = popNeighbor(chain.front())) != segments.size();) {
             used[prev] = true;

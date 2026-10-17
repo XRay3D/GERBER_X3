@@ -51,6 +51,8 @@ NestingForest nestingForest(const Geo::Polylines& contours);
 //
 // Сама склейка живёт в Geo (Geo::stitch): она нужна и там, где регион
 // собирается по even-odd (Geo::normalize), а не только маршруту инструмента.
+// Свою склейку в плагине не писать: сращивать куски -- только
+// Geo::Polyline::append, иначе теряется прогиб (дуга) первого сегмента куска.
 void mergePolylines(Geo::Polylines& polylines, double maxDist);
 
 // Жадный обход «от ближайшего к ближайшему»: каждый следующий путь тот, чьё

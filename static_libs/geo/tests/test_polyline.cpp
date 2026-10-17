@@ -19,6 +19,7 @@ private slots:
     void areaAndPerimeterMatchKnownCircle();
     void signedAreaTellsBodyFromHole();
     void boundingRectFollowsArcNotChord();
+    void appendCarriesJunctionBulge();
 };
 
 void PolylineTest::reversePreservesShapeAndFlipsBulgeSign() {
@@ -90,6 +91,40 @@ void PolylineTest::boundingRectFollowsArcNotChord() {
     QVERIFY(std::abs(box.right() - 5.0) < 1e-9);
     QVERIFY(std::abs(box.bottom() - 5.0) < 1e-9); // Y растёт вниз в QRectF, top/bottom здесь по значению
     QVERIFY(std::abs(box.top() - 0.0) < 1e-9);
+}
+
+void PolylineTest::appendCarriesJunctionBulge() {
+    constexpr double pi = std::numbers::pi;
+    const double b = std::tan(pi / 8.0); // четверть окружности R5: (10,0) -> (15,5)
+
+    // Прогиб первой вершины куска описывает его первый сегмент -- после склейки
+    // он обязан оказаться на стыковой вершине, а сама точка не дублируется.
+    Polyline line{Vertex(0.0, 0.0), Vertex(10.0, 0.0)};
+    const Polyline arc{Vertex(10.0, 0.0, b), Vertex(15.0, 5.0)};
+    line.append(arc);
+    QCOMPARE(line.size(), std::size_t(3));
+    QVERIFY(std::abs(line[1].bulge - b) < 1e-12);
+    QVERIFY(std::abs(line.back().bulge) < 1e-12);
+    QVERIFY(std::abs(line.perimeter() - (10.0 + 2.5 * pi)) < 1e-9);
+
+    // Кусок в форме гербера -- с дублем начала -- приклеенный перевёрнутым:
+    // именно так терялись скругления углов платы.
+    Polyline gerber{Vertex(10.0, 0.0), Vertex(10.0, 0.0, b), Vertex(15.0, 5.0)};
+    gerber.reverse(); // [E(-b), S'(0), S(0)]
+    Polyline other{Vertex(20.0, 5.0), Vertex(15.0, 5.0)};
+    other.append(gerber);
+    QCOMPARE(other.size(), std::size_t(4));
+    QVERIFY(std::abs(other[1].bulge + b) < 1e-12);
+    QVERIFY(std::abs(other.perimeter() - (5.0 + 2.5 * pi)) < 1e-9);
+
+    // Пустые: к пустой -- копия целиком (с прогибом первой вершины), пустой
+    // хвост ничего не меняет.
+    Polyline empty;
+    empty.append(arc);
+    QCOMPARE(empty.size(), std::size_t(2));
+    QVERIFY(std::abs(empty.front().bulge - b) < 1e-12);
+    empty.append(Polyline{});
+    QCOMPARE(empty.size(), std::size_t(2));
 }
 
 QTEST_APPLESS_MAIN(PolylineTest)

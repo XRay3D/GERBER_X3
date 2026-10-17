@@ -413,13 +413,8 @@ void stitch(Polylines& polylines, const Settings& settings) {
 
             if(chain.empty())
                 chain = piece;
-            else {
-                // Стыковая вершина уже в цепочке -- у неё меняется только
-                // прогиб: он описывает СЛЕДУЮЩИЙ сегмент, а тот пришёл с
-                // новым куском.
-                chain.back().bulge = piece.front().bulge;
-                chain.insert(chain.end(), piece.begin() + 1, piece.end());
-            }
+            else
+                chain.append(piece); // стыковой вершине достаётся прогиб куска
 
             const std::size_t exit = isTail(end) ? 2 * owner(end) : 2 * owner(end) + 1;
             const std::size_t next = partner[exit];

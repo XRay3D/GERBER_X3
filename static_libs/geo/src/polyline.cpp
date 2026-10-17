@@ -189,6 +189,23 @@ Polyline& Polyline::close() {
     return *this;
 }
 
+Polyline& Polyline::append(const Polyline& tail) pre(!closed) {
+    if(tail.empty()) return *this;
+    if(&tail == this) return append(Polyline{tail}); // insert из собственного диапазона -- UB
+    if(empty()) {
+        assign(tail.begin(), tail.end());
+        if(width == 0.0) width = tail.width;
+        return *this;
+    }
+    // Стыковая вершина уже есть -- у неё меняется только прогиб: он описывает
+    // СЛЕДУЮЩИЙ сегмент, а тот пришёл с tail. Размах дуги (bulge = tan(theta/4))
+    // от хорды не зависит, так что сдвиг стыка в пределах допуска форму не
+    // портит.
+    back().bulge = tail.front().bulge;
+    insert(end(), tail.begin() + 1, tail.end());
+    return *this;
+}
+
 double Polyline::signedArea() const pre(closed) {
     double area = 0.0;
 
