@@ -55,6 +55,8 @@ QJSValue BridgesApi::chain(int pathssIdx, int pathIdx) {
         QJSValue obj = engine.newObject();
         obj.setProperty(u"bridge"_s, pieces[i].bridge);
         obj.setProperty(u"perimeter"_s, pieces[i].path.perimeter());
+        obj.setProperty(u"x"_s, pieces[i].path.front().x());
+        obj.setProperty(u"y"_s, pieces[i].path.front().y());
         obj.setProperty(u"id"_s, add(std::move(pieces[i].path)));
         arr.setProperty(i, obj);
     }

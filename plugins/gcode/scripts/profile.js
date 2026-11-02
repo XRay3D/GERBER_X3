@@ -18,7 +18,7 @@ function generate(file) {
 // passes below the tab top the cutter climbs over each bridge to the tab top
 // and comes right back down -- XY feed never stops, no vertical plunges.
 // Geometry (pieces, humps, cut discs) comes from C++ via file.ext (Profile::BridgesApi):
-//   ext.chain(i, j)  -> [{id, bridge, perimeter}]
+//   ext.chain(i, j)  -> [{id, bridge, perimeter, x, y}]  (x, y: start of the piece)
 //   ext.split(id)    -> {up, flat, down}   (flat == -1 when the hump is a triangle)
 //   ext.reverse(id)  -> id
 //   ext.lines(id, perimeter, depth) -> gcode lines (perimeter > 0 && depth != 0: ramp)
@@ -81,7 +81,9 @@ function bridgesTile(file, pathss, depths) {
                 }
             };
 
-            file.startPath(path[0].x, path[0].y);
+            // Enter where the chain starts, not at path[0]: a closed path's seam
+            // is welded inside a piece, and the chain starts at a piece's front.
+            file.startPath(chain[0].x, chain[0].y);
             var pass = 0;
             for (var d = 0; d < passes.length; d++, pass++)
                 millPass(zigzag && (pass & 1) ? reversedChain : chain, passes[d], spiral);

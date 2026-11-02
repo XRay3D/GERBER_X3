@@ -46,7 +46,8 @@ public:
     double tabTop() const;
 
     // Куски пути pathss[pathssIdx][pathIdx] последнего getToolPaths() по
-    // кругам мостов, в порядке обхода: [{id, bridge, perimeter}].
+    // кругам мостов, в порядке обхода: [{id, bridge, perimeter, x, y}]. x, y --
+    // начало куска; у замкнутого пути цепь начинается не обязательно в path[0].
     Q_INVOKABLE QJSValue chain(int pathssIdx, int pathIdx);
     // Горб над мостом: {up, flat, down} -- id кусков (flat == -1, если полки нет).
     Q_INVOKABLE QJSValue split(int id);
